@@ -127,18 +127,23 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
   if ((unsigned int)outfd >= CONFIG_NFILE_DESCRIPTORS &&
       (unsigned int)infd < CONFIG_NFILE_DESCRIPTORS)
     {
-      FAR struct filelist *list;
+      FAR struct file *filep;
 
-      /* This appears to be a file-to-socket transfer.  Get the thread-
-       * specific file list.
+      /* This appears to be a file-to-socket transfer.  Get the file
+       * structure.
        */
 
-      list = sched_getfiles();
-      DEBUGASSERT(list);
+      filep = fs_getfilep(fd);
+      if (!filep)
+        {
+          /* The errno value has already been set */
+
+          return ERROR;
+        }
 
       /* Then let net_sendfile do the work. */
 
-      return net_sendfile(outfd, &list->fl_files[infd], offset, count);
+      return net_sendfile(outfd, filep, offset, count);
     }
   else
 #endif

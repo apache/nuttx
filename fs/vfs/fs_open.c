@@ -91,19 +91,14 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
 
 int open(const char *path, int oflags, ...)
 {
-  FAR struct filelist *list;
-  FAR struct inode    *inode;
-  FAR const char      *relpath = NULL;
+  FAR struct file *filep;
+  FAR struct inode *inode;
+  FAR const char *relpath = NULL;
 #if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
-  mode_t               mode = 0666;
+  mode_t mode = 0666;
 #endif
-  int                  ret;
-  int                  fd;
-
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  DEBUGASSERT(list);
+  int ret;
+  int fd;
 
 #ifdef CONFIG_FILE_MODE
 #  ifdef CONFIG_CPP_HAVE_WARNING
@@ -168,6 +163,16 @@ int open(const char *path, int oflags, ...)
       goto errout_with_inode;
     }
 
+  /* Get the file structure corresponding to the file descriptor. */
+
+  filep = fs_getfilep(fd);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return ERROR;
+    }
+
   /* Perform the driver open operation.  NOTE that the open method may be
    * called many times.  The driver/mountpoint logic should handled this
    * because it may also be closed that many times.
@@ -179,13 +184,12 @@ int open(const char *path, int oflags, ...)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
-          ret = inode->u.i_mops->open((FAR struct file*)&list->fl_files[fd],
-                                      relpath, oflags, mode);
+          ret = inode->u.i_mops->open(filep, relpath, oflags, mode);
         }
       else
 #endif
         {
-          ret = inode->u.i_ops->open((FAR struct file*)&list->fl_files[fd]);
+          ret = inode->u.i_ops->open(filep);
         }
     }
 

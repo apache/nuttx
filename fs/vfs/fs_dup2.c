@@ -87,7 +87,7 @@ int dup2(int fd1, int fd2)
         {
           /* Yes.. dup the socket descriptor */
 
-          return net_dup2(fd1, fd2);
+          return net_dupsd2(fd1, fd2);
         }
       else
         {
@@ -101,7 +101,7 @@ int dup2(int fd1, int fd2)
     {
       /* Its a valid file descriptor.. dup the file descriptor */
 
-      return file_dup2(fd1, fd2);
+      return fs_dupfd2(fd1, fd2);
     }
 }
 

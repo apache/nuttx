@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/vfs/fs_filedup.c
+ * fs/vfs/fs_dupfd.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,20 +53,57 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DUP_ISOPEN(fd, list) \
-  ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS && \
-   list->fl_files[fd].f_inode != NULL)
+#define DUP_ISOPEN(filep) (filep->f_inode != NULL)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_dup OR dup
+ * Name: file_dup
+ *
+ * Description:
+ *   Equivalent to the non-standard fs_dupfd() function except that it
+ *   accepts a struct file instance instead of a file descriptor.  Currently
+ *   used only by file_vfcntl();
+ *
+ ****************************************************************************/
+
+int file_dup(FAR struct file *filep, int minfd)
+{
+  int fd2;
+
+  /* Verify that fd is a valid, open file descriptor */
+
+  if (!DUP_ISOPEN(filep))
+    {
+      set_errno(EBADF);
+      return ERROR;
+    }
+
+  /* Increment the reference count on the contained inode */
+
+  inode_addref(filep->f_inode);
+
+  /* Then allocate a new file descriptor for the inode */
+
+  fd2 = files_allocate(filep->f_inode, filep->f_oflags, filep->f_pos, minfd);
+  if (fd2 < 0)
+    {
+      set_errno(EMFILE);
+      inode_release(filep->f_inode);
+      return ERROR;
+    }
+
+  return fd2;
+}
+
+/****************************************************************************
+ * Name: fs_dupfd OR dup
  *
  * Description:
  *   Clone a file descriptor 'fd' to an arbitray descriptor number (any value
@@ -77,42 +114,23 @@
  *
  ****************************************************************************/
 
-int file_dup(int fd, int minfd)
+int fs_dupfd(int fd, int minfd)
 {
-  FAR struct filelist *list;
-  int fd2;
+  FAR struct file *filep;
 
-  /* Get the thread-specific file list */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  list = sched_getfiles();
-  DEBUGASSERT(list);
-
-  /* Verify that fd is a valid, open file descriptor */
-
-  if (!DUP_ISOPEN(fd, list))
+  filep = fs_getfilep(fd);
+  if (!filep)
     {
-      set_errno(EBADF);
+      /* The errno value has already been set */
+
       return ERROR;
     }
 
-  /* Increment the reference count on the contained inode */
+  /* Let file_dup() do the real work */
 
-  inode_addref(list->fl_files[fd].f_inode);
-
-  /* Then allocate a new file descriptor for the inode */
-
-  fd2 = files_allocate(list->fl_files[fd].f_inode,
-                       list->fl_files[fd].f_oflags,
-                       list->fl_files[fd].f_pos,
-                       minfd);
-  if (fd2 < 0)
-    {
-      set_errno(EMFILE);
-      inode_release(list->fl_files[fd].f_inode);
-      return ERROR;
-    }
-
-  return fd2;
+  return file_dup(filep, minfd);
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

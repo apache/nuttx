@@ -108,7 +108,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          */
 
         {
-          ret = net_dup(sockfd, va_arg(ap, int));
+          ret = net_dupsd(sockfd, va_arg(ap, int));
         }
         break;
 

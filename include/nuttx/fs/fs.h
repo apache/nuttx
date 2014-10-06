@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <semaphore.h>
@@ -505,7 +506,7 @@ void files_releaselist(FAR struct filelist *list);
 #endif
 
 /****************************************************************************
- * Name: files_dup
+ * Name: file_dup2
  *
  * Description:
  *   Assign an inode to a specific files structure.  This is the heart of
@@ -514,12 +515,12 @@ void files_releaselist(FAR struct filelist *list);
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-int files_dup(FAR struct file *filep1, FAR struct file *filep2);
+int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 #endif
 
 /* fs_filedup.c *************************************************************/
 /****************************************************************************
- * Name: file_dup OR dup
+ * Name: fs_dupfd OR dup
  *
  * Description:
  *   Clone a file descriptor 'fd' to an arbitray descriptor number (any value
@@ -534,12 +535,24 @@ int files_dup(FAR struct file *filep1, FAR struct file *filep2);
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-int file_dup(int fd, int minfd);
+int fs_dupfd(int fd, int minfd);
 #endif
+
+/****************************************************************************
+ * Name: file_dup
+ *
+ * Description:
+ *   Equivalent to the non-standard fs_dupfd() function except that it
+ *   accepts a struct file instance instead of a file descriptor.  Currently
+ *   used only by file_vfcntl();
+ *
+ ****************************************************************************/
+
+int file_dup(FAR struct file *filep, int minfd);
 
 /* fs_filedup2.c ************************************************************/
 /****************************************************************************
- * Name: file_dup2 OR dup2
+ * Name: fs_dupfd2 OR dup2
  *
  * Description:
  *   Clone a file descriptor to a specific descriptor number. If socket
@@ -554,9 +567,9 @@ int file_dup(int fd, int minfd);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-int file_dup2(int fd1, int fd2);
+int fs_dupfd2(int fd1, int fd2);
 #else
-#  define file_dup2(fd1, fd2) dup2(fd1, fd2)
+#  define fs_dupfd2(fd1, fd2) dup2(fd1, fd2)
 #endif
 #endif
 
@@ -653,22 +666,92 @@ int lib_flushall(FAR struct streamlist *list);
 ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
 #endif
 
-/* fs/fs_fileread.c *********************************************************/
+/* fs/fs_getfilep.c *********************************************************/
+/****************************************************************************
+ * Name: fs_getfilep
+ *
+ * Description:
+ *   Given a file descriptor, return the corresponding instance of struct
+ *   file.  NOTE that this function will currently fail if it is provided
+ *   with a socket descriptor.
+ *
+ * Parameters:
+ *   fd - The file descriptor
+ *
+ * Return:
+ *   A point to the corresponding struct file instance is returned on
+ *   success.  On failure,  NULL is returned and the errno value is
+ *   set appropriately (EBADF).
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+FAR struct file *fs_getfilep(int fd);
+#endif
+
+/* fs/fs_read.c *************************************************************/
 /****************************************************************************
  * Name: file_read
  *
  * Description:
  *   Equivalent to the standard read() function except that is accepts a
  *   struct file instance instead of a file descriptor.  Currently used
- *   only by net_sendfile()
+ *   only by net_sendfile() and aio_read();
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET_SENDFILE)
+#if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
 #endif
 
-/* fs/fs_fileread.c *********************************************************/
+/* fs/fs_write.c ************************************************************/
+/****************************************************************************
+ * Name: file_write
+ *
+ * Description:
+ *   Equivalent to the standard write() function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_write();
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
+#endif
+
+/* fs/fs_pread.c ************************************************************/
+/****************************************************************************
+ * Name: file_pread
+ *
+ * Description:
+ *   Equivalent to the standard pread function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_read();
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
+                   off_t offset);
+#endif
+
+/* fs/fs_pwrite.c ***********************************************************/
+/****************************************************************************
+ * Name: file_pwrite
+ *
+ * Description:
+ *   Equivalent to the standard pwrite function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_write();
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
+                    size_t nbytes, off_t offset);
+#endif
+
+/* fs/fs_lseek.c ************************************************************/
 /****************************************************************************
  * Name: file_seek
  *
@@ -679,8 +762,38 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET_SENDFILE)
+#if CONFIG_NFILE_DESCRIPTORS > 0
 off_t file_seek(FAR struct file *filep, off_t offset, int whence);
+#endif
+
+/* fs/fs_fsync.c ************************************************************/
+/****************************************************************************
+ * Name: file_fsync
+ *
+ * Description:
+ *   Equivalent to the standard fsync() function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_fsync();
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_fsync(FAR struct file *filep);
+#endif
+
+/* fs/fs_fcntl.c ************************************************************/
+/****************************************************************************
+ * Name: file_vfcntl
+ *
+ * Description:
+ *   Similar to the standard vfcntl function except that is accepts a struct
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_fcntl();
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 #endif
 
 /* drivers/dev_null.c *******************************************************/

@@ -113,8 +113,8 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
     {
       /* Successfully opened /dev/console as stdin (fd == 0) */
 
-      (void)file_dup2(0, 1);
-      (void)file_dup2(0, 2);
+      (void)fs_dupfd2(0, 1);
+      (void)fs_dupfd2(0, 2);
     }
   else
     {

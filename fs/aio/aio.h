@@ -67,10 +67,12 @@
  * pre-allocated, the number pre-allocated controlled by CONFIG_FS_NAIOC.
  */
 
+struct file;
 struct aio_container_s
 {
   dq_entry_t aioc_link;          /* Supports a doubly linked list */
   FAR struct aiocb *aioc_aiocbp; /* The contained AIO control block */
+  FAR struct file *aioc_filep;   /* File structure to use with the I/O */
   struct work_s aioc_work;       /* Used to defer I/O to the work thread */
   pid_t aioc_pid;                /* ID of the waiting task */
   uint8_t aioc_prio;             /* Priority of the waiting task */
@@ -182,7 +184,8 @@ void aioc_free(FAR struct aio_container_s *aioc);
  * Returned Value:
  *   A reference to the new AIO control block container.   This function
  *   will not fail but will wait if necessary for the resources to perform
- *   this operation.
+ *   this operation.  NULL will be returned on certain errors with the
+ *   errno value already set appropriately.
  *
  ****************************************************************************/
 

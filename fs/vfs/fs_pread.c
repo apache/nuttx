@@ -43,6 +43,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -50,6 +52,65 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_pread
+ *
+ * Description:
+ *   Equivalent to the standard pread function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_read();
+ *
+ ****************************************************************************/
+
+ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
+                   off_t offset)
+{
+  off_t savepos;
+  off_t pos;
+  ssize_t ret;
+  int errcode;
+
+  /* Perform the seek to the current position.  This will not move the
+   * file pointer, but will return its current setting
+   */
+
+  savepos = file_seek(filep, 0, SEEK_CUR);
+  if (savepos == (off_t)-1)
+    {
+      /* file_seek might fail if this if the media is not seekable */
+
+      return ERROR;
+    }
+
+  /* Then seek to the correct position in the file */
+
+  pos = file_seek(filep, offset, SEEK_SET);
+  if (pos == (off_t)-1)
+    {
+      /* This might fail is the offset is beyond the end of file */
+
+      return ERROR;
+    }
+
+  /* Then perform the read operation */
+
+  ret = file_read(filep, buf, nbytes);
+  errcode = get_errno();
+
+  /* Restore the file position */
+
+  pos = file_seek(filep, savepos, SEEK_SET);
+  if (pos == (off_t)-1 && ret >= 0)
+    {
+      /* This really should not fail */
+
+      return ERROR;
+    }
+
+  set_errno(errcode);
+  return ret;
+}
 
 /****************************************************************************
  * Name: pread
@@ -82,48 +143,19 @@
 
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset)
 {
-  off_t savepos;
-  off_t pos;
-  ssize_t ret;
-  int errcode;
+  FAR struct file *filep;
 
-  /* Perform the lseek to the current position.  This will not move the
-   * file pointer, but will return its current setting
-   */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  savepos = lseek(fd, 0, SEEK_CUR);
-  if (savepos == (off_t)-1)
+  filep = fs_getfilep(fd);
+  if (!filep)
     {
-      /* lseek might fail if this if the media is not seekable */
+      /* The errno value has already been set */
 
-      return ERROR;
+      return (ssize_t)ERROR;
     }
 
-  /* Then seek to the correct position in the file */
+  /* Let file_pread do the real work */
 
-  pos = lseek(fd, offset, SEEK_SET);
-  if (pos == (off_t)-1)
-    {
-      /* This might fail is the offset is beyond the end of file */
-
-      return ERROR;
-    }
-
-  /* Then perform the read operation */
-
-  ret = read(fd, buf, nbytes);
-  errcode = get_errno();
-
-  /* Restore the file position */
-
-  pos = lseek(fd, savepos, SEEK_SET);
-  if (pos == (off_t)-1 && ret >= 0)
-    {
-      /* This really should not fail */
-
-      return ERROR;
-    }
-
-  set_errno(errcode);
-  return ret;
+  return file_pread(filep, buf, nbytes, offset);
 }

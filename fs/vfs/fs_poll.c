@@ -97,10 +97,9 @@ static void poll_semtake(FAR sem_t *sem)
 #if CONFIG_NFILE_DESCRIPTORS > 0
 static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 {
-  FAR struct filelist *list;
-  FAR struct file     *filep;
-  FAR struct inode    *inode;
-  int                  ret = -ENOSYS;
+  FAR struct file *filep;
+  FAR struct inode *inode;
+  int ret = -ENOSYS;
 
   /* Check for a valid file descriptor */
 
@@ -120,18 +119,21 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
         }
     }
 
-  /* Get the thread-specific file list */
+  /* Get the file pointer corresponding to this file descriptor */
 
-  list = sched_getfiles();
-  DEBUGASSERT(list);
+  filep = fs_getfilep(fd);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return ERROR;
+    }
 
   /* Is a driver registered? Does it support the poll method?
    * If not, return -ENOSYS
    */
 
-  filep = &list->fl_files[fd];
   inode = filep->f_inode;
-
   if (inode && inode->u.i_ops && inode->u.i_ops->poll)
     {
       /* Yes, then setup the poll */

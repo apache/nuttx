@@ -871,7 +871,7 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
- * Function: net_dup
+ * Function: net_dupsd
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -881,10 +881,10 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
  *
  ****************************************************************************/
 
-int net_dup(int sockfd, int minsd);
+int net_dupsd(int sockfd, int minsd);
 
 /****************************************************************************
- * Function: net_dup2
+ * Function: net_dupsd2
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -894,13 +894,13 @@ int net_dup(int sockfd, int minsd);
  *
  ****************************************************************************/
 
-int net_dup2(int sockfd1, int sockfd2);
+int net_dupsd2(int sockfd1, int sockfd2);
 
 /****************************************************************************
  * Function: net_clone
  *
  * Description:
- *   Performs the low level, common portion of net_dup() and net_dup2()
+ *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
  *
  ****************************************************************************/
 

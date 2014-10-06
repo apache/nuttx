@@ -120,7 +120,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
         {
           /* Yes... duplicate it for the child */
 
-          (void)files_dup(&parent[i], &child[i]);
+          (void)file_dup2(&parent[i], &child[i]);
         }
     }
 }

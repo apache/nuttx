@@ -60,7 +60,7 @@
  * Function: net_clone
  *
  * Description:
- *   Performs the low level, common portion of net_dup() and net_dup2()
+ *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
  *
  ****************************************************************************/
 

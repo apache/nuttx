@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fcntl.c
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,25 +59,27 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: file_vfcntl
+ *
+ * Description:
+ *   Similar to the standard vfcntl function except that is accepts a struct
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_fcntl();
+ *
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static inline int file_vfcntl(int fd, int cmd, va_list ap)
+int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 {
-  FAR struct filelist *list;
-  FAR struct file *filep;
   int err = 0;
   int ret = OK;
 
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  DEBUGASSERT(list);
-
   /* Was this file opened ? */
 
-  filep = &list->fl_files[fd];
   if (!filep->f_inode)
     {
       err = EBADF;
@@ -98,7 +100,7 @@ static inline int file_vfcntl(int fd, int cmd, va_list ap)
          */
 
         {
-          ret = file_dup(fd, va_arg(ap, int));
+          ret = file_dup(filep, va_arg(ap, int));
         }
         break;
 
@@ -217,15 +219,12 @@ errout:
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
 /****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: fcntl
  ****************************************************************************/
 
 int fcntl(int fd, int cmd, ...)
 {
+  FAR struct file *filep;
   va_list ap;
   int ret;
 
@@ -238,9 +237,19 @@ int fcntl(int fd, int cmd, ...)
 #if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
-       /* Yes.. defer file operations to file_vfcntl() */
+      /* Get the file structure corresponding to the file descriptor. */
 
-       ret = file_vfcntl(fd, cmd, ap);
+      filep = fs_getfilep(fd);
+      if (!filep)
+        {
+          /* The errno value has already been set */
+
+          return ERROR;
+        }
+
+      /* Let file_vfcntl() do the real work */
+
+      ret = file_vfcntl(filep, cmd, ap);
     }
   else
 #endif
@@ -266,4 +275,3 @@ int fcntl(int fd, int cmd, ...)
   va_end(ap);
   return ret;
 }
-

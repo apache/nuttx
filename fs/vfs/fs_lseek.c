@@ -50,7 +50,7 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,9 +71,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_SENDFILE
-static inline
-#endif
 off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode;
@@ -172,26 +169,21 @@ errout:
 
 off_t lseek(int fd, off_t offset, int whence)
 {
-  FAR struct filelist *list;
+  FAR struct file *filep;
 
-  /* Did we get a valid file descriptor? */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+  filep = fs_getfilep(fd);
+  if (!filep)
     {
-      set_errno(EBADF);
+      /* The errno value has already been set */
+
       return (off_t)ERROR;
     }
-  else
-    {
-      /* Get the thread-specific file list */
 
-      list = sched_getfiles();
-      DEBUGASSERT(list);
+  /* Then let file_seek do the real work */
 
-      /* Then let file_seek do the real work */
-
-      return file_seek(&list->fl_files[fd], offset, whence);
-    }
+   return file_seek(filep, offset, whence);
 }
 
 #endif

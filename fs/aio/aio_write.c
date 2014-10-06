@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdarg.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -72,6 +73,21 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_fcntl
+ ****************************************************************************/
+
+static inline int file_fcntl(FAR struct file *filep, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  va_start(ap, cmd);
+  ret = file_vfcntl(filep, cmd, ap);
+  va_end(ap);
+  return ret;
+}
 
 /****************************************************************************
  * Name: aio_write_worker
@@ -108,7 +124,7 @@ static void aio_write_worker(FAR void *arg)
 
   /* Call fcntl(F_GETFL) to get the file open mode. */
 
-  oflags = fcntl(aiocbp->aio_fildes, F_GETFL);
+  oflags = file_fcntl(aioc->aioc_filep, F_GETFL);
   if (oflags < 0)
     {
       int errcode = get_errno();
@@ -119,7 +135,7 @@ static void aio_write_worker(FAR void *arg)
     {
       /* Perform the write using:
        *
-       *   aio_fildes  - File descriptor
+       *   aioc_filep  - File descriptor
        *   aio_buf     - Location of buffer
        *   aio_nbytes  - Length of transfer
        *   aio_offset  - File offset
@@ -131,16 +147,16 @@ static void aio_write_worker(FAR void *arg)
         {
           /* Append to the current file position */
 
-          nwritten = write(aiocbp->aio_fildes,
-                           (FAR const void *)aiocbp->aio_buf,
-                           aiocbp->aio_nbytes);
+          nwritten = file_write(aioc->aioc_filep,
+                                (FAR const void *)aiocbp->aio_buf,
+                                aiocbp->aio_nbytes);
         }
       else
         {
-          nwritten = pwrite(aiocbp->aio_fildes,
-                            (FAR const void *)aiocbp->aio_buf,
-                            aiocbp->aio_nbytes,
-                            aiocbp->aio_offset);
+          nwritten = file_pwrite(aioc->aioc_filep,
+                                 (FAR const void *)aiocbp->aio_buf,
+                                 aiocbp->aio_nbytes,
+                                 aiocbp->aio_offset);
         }
 
       /* Set the result of the write */
@@ -297,12 +313,18 @@ int aio_write(FAR struct aiocb *aiocbp)
   aiocbp->aio_result = -EINPROGRESS;
   aiocbp->aio_priv   = NULL;
 
-  /* Create a container for the AIO control block.  This will not fail but
-   * may cause us to block if there are insufficient resources to satisfy
-   * the request.
+  /* Create a container for the AIO control block.  This may cause us to
+   * block if there are insufficient resources to satisfy the request.
    */
 
   aioc = aio_contain(aiocbp);
+  if (!aioc)
+    {
+      /* The errno has already been set (probably EBADF) */
+
+      aiocbp->aio_result = -get_errno();
+      return ERROR;
+    }
 
   /* Defer the work to the worker thread */
 

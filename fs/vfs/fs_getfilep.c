@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/socket/net_dup2.c
+ * fs/vfs/fs_getfilep.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,88 +38,75 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <sys/types.h>
 #include <sys/socket.h>
+
+#include <unistd.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
-#include <debug.h>
 
-#include "socket/socket.h"
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#include "inode/inode.h"
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dup2
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: fs_getfilep
  *
  * Description:
- *   Clone a socket descriptor to an arbitray descriptor number.  If file
- *   descriptors are implemented, then this is called by dup2() for the case
- *   of socket file descriptors.  If file descriptors are not implemented,
- *   then this function IS dup2().
+ *   Given a file descriptor, return the corresponding instance of struct
+ *   file.  NOTE that this function will currently fail if it is provided
+ *   with a socket descriptor.
+ *
+ * Parameters:
+ *   fd - The file descriptor
+ *
+ * Return:
+ *   A point to the corresponding struct file instance is returned on
+ *   success.  On failure,  NULL is returned and the errno value is
+ *   set appropriately (EBADF).
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-int net_dup2(int sockfd1, int sockfd2)
-#else
-int dup2(int sockfd1, int sockfd2)
-#endif
+FAR struct file *fs_getfilep(int fd)
 {
-  FAR struct socket *psock1;
-  FAR struct socket *psock2;
-  int err;
-  int ret;
+  FAR struct filelist *list;
+  int errcode;
 
-  /* Lock the scheduler throughout the following */
-
-  sched_lock();
-
-  /* Get the socket structures underly both descriptors */
-
-  psock1 = sockfd_socket(sockfd1);
-  psock2 = sockfd_socket(sockfd2);
-
-  /* Verify that the sockfd1 and sockfd2 both refer to valid socket
-   * descriptors and that sockfd2 corresponds to allocated socket
-   */
-
-  if (!psock1 || !psock2 || psock1->s_crefs <= 0)
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      err = EBADF;
+      errcode = EBADF;
       goto errout;
     }
 
-  /* If sockfd2 also valid, allocated socket, then we will have to
-   * close it!
+  /* The descriptor is in a valid range to file descriptor... Get the
+   * thread-specific file list.
    */
 
-  if (psock2->s_crefs > 0)
-    {
-      net_close(sockfd2);
-    }
+  list = sched_getfiles();
 
-  /* Duplicate the socket state */
+  /* The file list can be NULL under one obscure cornercase:  When memory
+   * management debug output is enabled.  Then there may be attempts to
+   * write to stdout from malloc before the group data has been allocated.
+   */
 
-  ret = net_clone(psock1, psock2);
-  if (ret < 0)
+  if (!list)
     {
-      err = -ret;
+      errcode = EAGAIN;
       goto errout;
     }
 
-  sched_unlock();
-  return OK;
+  /* And return the file pointer from the list */
+
+  return &list->fl_files[fd];
 
 errout:
-  sched_unlock();
-  errno = err;
-  return ERROR;
+  set_errno(errcode);
+  return NULL;
 }
-
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
-
-

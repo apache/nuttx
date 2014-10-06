@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_ioctl.c
  *
- *   Copyright (C) 2007-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,7 +89,6 @@ int ioctl(int fd, int req, unsigned long arg)
 {
   int err;
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct filelist *list;
   FAR struct file     *filep;
   FAR struct inode    *inode;
   int                  ret = OK;
@@ -115,16 +114,19 @@ int ioctl(int fd, int req, unsigned long arg)
     }
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Get the thread-specific file list */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  list = sched_getfiles();
-  DEBUGASSERT(list);
+  filep = fs_getfilep(fd);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return ERROR;
+    }
 
   /* Is a driver registered? Does it support the ioctl method? */
 
-  filep = &list->fl_files[fd];
   inode = filep->f_inode;
-
   if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
     {
       /* Yes, then let it perform the ioctl */

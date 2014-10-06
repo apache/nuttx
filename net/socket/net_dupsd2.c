@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/socket/net_dup.c
+ * net/socket/net_dupsd2.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,80 +49,57 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dup
+ * Function: net_dupsd2
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
- *   descriptors are implemented, then this is called by dup() for the case
+ *   descriptors are implemented, then this is called by dup2() for the case
  *   of socket file descriptors.  If file descriptors are not implemented,
- *   then this function IS dup().
+ *   then this function IS dup2().
  *
  ****************************************************************************/
 
-int net_dup(int sockfd, int minsd)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int net_dupsd2(int sockfd1, int sockfd2)
+#else
+int dup2(int sockfd1, int sockfd2)
+#endif
 {
-  FAR struct socket *psock1 = sockfd_socket(sockfd);
+  FAR struct socket *psock1;
   FAR struct socket *psock2;
-  int sockfd2;
   int err;
   int ret;
-
-  /* Make sure that the minimum socket descriptor is within the legal range.
-   * the minimum value we receive is relative to file descriptor 0;  we need
-   * map it relative of the first socket descriptor.
-   */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  if (minsd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      minsd -= CONFIG_NFILE_DESCRIPTORS;
-    }
-  else
-    {
-      minsd = 0;
-    }
-#endif
 
   /* Lock the scheduler throughout the following */
 
   sched_lock();
 
-  /* Get the socket structure underlying sockfd */
+  /* Get the socket structures underly both descriptors */
 
-  psock1 = sockfd_socket(sockfd);
+  psock1 = sockfd_socket(sockfd1);
+  psock2 = sockfd_socket(sockfd2);
 
- /* Verify that the sockfd corresponds to valid, allocated socket */
+  /* Verify that the sockfd1 and sockfd2 both refer to valid socket
+   * descriptors and that sockfd2 corresponds to allocated socket
+   */
 
-  if (!psock1 || psock1->s_crefs <= 0)
+  if (!psock1 || !psock2 || psock1->s_crefs <= 0)
     {
       err = EBADF;
       goto errout;
     }
 
-  /* Allocate a new socket descriptor */
+  /* If sockfd2 also valid, allocated socket, then we will have to
+   * close it!
+   */
 
-  sockfd2 = sockfd_allocate(minsd);
-  if (sockfd2 < 0)
+  if (psock2->s_crefs > 0)
     {
-      err = ENFILE;
-      goto errout;
-    }
-
-  /* Get the socket structure underlying the new descriptor */
-
-  psock2 = sockfd_socket(sockfd2);
-  if (!psock2)
-    {
-      err = ENOSYS; /* should not happen */
-      goto errout;
+      net_close(sockfd2);
     }
 
   /* Duplicate the socket state */
@@ -132,11 +109,10 @@ int net_dup(int sockfd, int minsd)
     {
       err = -ret;
       goto errout;
-
     }
 
   sched_unlock();
-  return sockfd2;
+  return OK;
 
 errout:
   sched_unlock();
@@ -144,6 +120,6 @@ errout:
   return ERROR;
 }
 
-#endif /* defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/vfs/fs_fsync.c
+ * fs/vfs/fs_dupfd2.c
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,109 +40,78 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <fcntl.h>
+#include <sched.h>
 #include <errno.h>
-#include <assert.h>
-
-#include <nuttx/fs/fs.h>
-#include <nuttx/sched.h>
 
 #include "inode/inode.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#define DUP_ISOPEN(filep) (filep->f_inode != NULL)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_fsync
+ * Name: fs_dupfd2 OR dup2
  *
  * Description:
- *   Equivalent to the standard fsync() function except that is accepts a
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by aio_fsync();
+ *   Clone a file descriptor to a specific descriptor number. If socket
+ *   descriptors are implemented, then this is called by dup2() for the
+ *   case of file descriptors.  If socket descriptors are not implemented,
+ *   then this function IS dup2().
  *
  ****************************************************************************/
 
-int file_fsync(FAR struct file *filep)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+int fs_dupfd2(int fd1, int fd2)
+#else
+int dup2(int fd1, int fd2)
+#endif
 {
-  struct inode *inode;
-  int ret;
+  FAR struct file *filep1;
+  FAR struct file *filep2;
 
-  /* Was this file opened for write access? */
+  /* Get the file structures corresponding to the file descriptors. */
 
-  if ((filep->f_oflags & O_WROK) == 0)
-    {
-      ret = EBADF;
-      goto errout;
-    }
+  filep1 = fs_getfilep(fd1);
+  filep2 = fs_getfilep(fd2);
 
-  /* Is this inode a registered mountpoint? Does it support the
-   * sync operations may be relevant to device drivers but only
-   * the mountpoint operations vtable contains a sync method.
-   */
-
-  inode = filep->f_inode;
-  if (!inode || !INODE_IS_MOUNTPT(inode) ||
-      !inode->u.i_mops || !inode->u.i_mops->sync)
-    {
-      ret = EINVAL;
-      goto errout;
-    }
-
-  /* Yes, then tell the mountpoint to sync this file */
-
-  ret = inode->u.i_mops->sync(filep);
-  if (ret >= 0)
-    {
-      return OK;
-    }
-
-  ret = -ret;
-
-errout:
-  set_errno(ret);
-  return ERROR;
-}
-
-/****************************************************************************
- * Name: fsync
- *
- * Description:
- *   This func simply binds inode sync methods to the sync system call.
- *
- ****************************************************************************/
-
-int fsync(int fd)
-{
-  FAR struct file *filep;
-
-  /* Get the file structure corresponding to the file descriptor. */
-
-  filep = fs_getfilep(fd);
-  if (!filep)
+  if (!filep1 || !filep2)
     {
       /* The errno value has already been set */
 
       return ERROR;
     }
 
-  /* Perform the fsync operation */
+  /* Verify that fd1 is a valid, open file descriptor */
 
-  return file_fsync(filep);
+  if (!DUP_ISOPEN(filep1))
+    {
+      set_errno(EBADF);
+      return ERROR;
+    }
+
+  /* Handle a special case */
+
+  if (fd1 == fd2)
+    {
+      return fd1;
+    }
+
+  /* Perform the dup2 operation */
+
+  return file_dup2(filep1, filep2);
 }
+
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+

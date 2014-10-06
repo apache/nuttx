@@ -65,22 +65,28 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 static inline int fs_checkfd(FAR struct tcb_s *tcb, int fd, int oflags)
 {
-  FAR struct filelist *flist;
-  FAR struct inode    *inode;
+  FAR struct file *filep;
+  FAR struct inode *inode;
 
   DEBUGASSERT(tcb && tcb->group);
 
-  /* Get the file list from the task group */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  flist = &tcb->group->tg_filelist;
+  filep = fs_getfilep(fd);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return ERROR;
+    }
 
   /* Get the inode associated with the file descriptor.  This should
    * normally be the case if fd >= 0.  But not in the case where the
-   * called attempts to explictly stdin with fdopen(0) but stdin has
+   * called attempts to explicitly stdin with fdopen(0) but stdin has
    * been closed.
    */
 
-  inode = flist->fl_files[fd].f_inode;
+  inode = filep->f_inode;
   if (!inode)
     {
       /* No inode -- descriptor does not correspond to an open file */

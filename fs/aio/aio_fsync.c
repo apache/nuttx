@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/fs/fs.h>
 
 #include "aio/aio.h"
 
@@ -103,9 +104,9 @@ static void aio_fsync_worker(FAR void *arg)
   pid    = aioc->aioc_pid;
   aiocbp = aioc_decant(aioc);
 
-  /* Perform the fsync using aio_fildes */
+  /* Perform the fsync using aioc_filep */
 
-  ret = fsync(aiocbp->aio_fildes);
+  ret = file_fsync(aioc->aioc_filep);
   if (ret < 0)
     {
       int errcode = get_errno();
@@ -218,12 +219,18 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   aiocbp->aio_result = -EINPROGRESS;
   aiocbp->aio_priv   = NULL;
 
-  /* Create a container for the AIO control block.  This will not fail but
-   * may cause us to block if there are insufficient resources to satisfy
-   * the request.
+  /* Create a container for the AIO control block.  This may cause us to
+   * block if there are insufficient resources to satisfy the request.
    */
 
   aioc = aio_contain(aiocbp);
+  if (!aioc)
+    {
+      /* The errno has already been set (probably EBADF) */
+
+      aiocbp->aio_result = -get_errno();
+      return ERROR;
+    }
 
   /* Defer the work to the worker thread */
 

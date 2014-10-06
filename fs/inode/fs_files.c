@@ -200,7 +200,7 @@ void files_releaselist(FAR struct filelist *list)
 }
 
 /****************************************************************************
- * Name: files_dup
+ * Name: file_dup2
  *
  * Description:
  *   Assign an inode to a specific files structure.  This is the heart of
@@ -208,7 +208,7 @@ void files_releaselist(FAR struct filelist *list)
  *
  ****************************************************************************/
 
-int files_dup(FAR struct file *filep1, FAR struct file *filep2)
+int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct filelist *list;
   FAR struct inode *inode;

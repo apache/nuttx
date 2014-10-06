@@ -68,7 +68,7 @@
 
 int dup(int fd)
 {
- int ret = OK;
+  int ret = OK;
 
   /* Check the range of the descriptor to see if we got a file or a socket
    * descriptor. */
@@ -79,19 +79,19 @@ int dup(int fd)
       /* Its a valid file descriptor.. dup the file descriptor using any
        * other file descriptor*/
 
-      ret = file_dup(fd, 0);
+      ret = fs_dupfd(fd, 0);
     }
   else
 #endif
     {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
+      /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor */
 
-          ret = net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
+          ret = net_dupsd(fd, CONFIG_NFILE_DESCRIPTORS);
         }
       else
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_read.c
  *
- *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,10 +73,6 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#ifndef CONFIG_NET_SENDFILE
-static inline
-#endif
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 {
   FAR struct inode *inode;
@@ -120,7 +116,6 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 
   return ret;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Name: read
@@ -141,10 +136,6 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 
 ssize_t read(int fd, FAR void *buf, size_t nbytes)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct filelist *list;
-#endif
-
   /* Did we get a valid file descriptor? */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -168,16 +159,23 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
 #if CONFIG_NFILE_DESCRIPTORS > 0
   else
     {
-      /* Thee descriptor is in a valid range to file descriptor... do the
-       * read. Get the thread-specific file list.
+      FAR struct file *filep;
+
+      /* The descriptor is in a valid range to file descriptor... do the
+       * read.  First, get the file structure.
        */
 
-      list = sched_getfiles();
-      DEBUGASSERT(list);
+      filep = fs_getfilep(fd);
+      if (!filep)
+        {
+          /* The errno value has already been set */
+
+          return ERROR;
+        }
 
       /* Then let file_read do all of the work */
 
-      return file_read(&list->fl_files[fd], buf, nbytes);
+      return file_read(filep, buf, nbytes);
     }
 #endif
 }

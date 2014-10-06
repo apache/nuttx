@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/vfs/fs_filedup2.c
+ * net/socket/net_dupsd.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,24 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
+#include <sys/socket.h>
 #include <sched.h>
 #include <errno.h>
+#include <debug.h>
 
-#include "inode/inode.h"
+#include "socket/socket.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-#define DUP_ISOPEN(fd, list) \
-  ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS && \
-   list->fl_files[fd].f_inode != NULL)
-
-/****************************************************************************
- * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,58 +57,93 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_dup2 OR dup2
+ * Function: net_dupsd
  *
  * Description:
- *   Clone a file descriptor to a specific descriptor number. If socket
- *   descriptors are implemented, then this is called by dup2() for the
- *   case of file descriptors.  If socket descriptors are not implemented,
- *   then this function IS dup2().
+ *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   descriptors are implemented, then this is called by dup() for the case
+ *   of socket file descriptors.  If file descriptors are not implemented,
+ *   then this function IS dup().
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-int file_dup2(int fd1, int fd2)
-#else
-int dup2(int fd1, int fd2)
-#endif
+int net_dupsd(int sockfd, int minsd)
 {
-  FAR struct filelist *list;
+  FAR struct socket *psock1 = sockfd_socket(sockfd);
+  FAR struct socket *psock2;
+  int sockfd2;
+  int err;
+  int ret;
 
-  /* Get the thread-specific file list */
+  /* Make sure that the minimum socket descriptor is within the legal range.
+   * the minimum value we receive is relative to file descriptor 0;  we need
+   * map it relative of the first socket descriptor.
+   */
 
-  list = sched_getfiles();
-  if (!list)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if (minsd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      set_errno(EMFILE);
-      return ERROR;
+      minsd -= CONFIG_NFILE_DESCRIPTORS;
+    }
+  else
+    {
+      minsd = 0;
+    }
+#endif
+
+  /* Lock the scheduler throughout the following */
+
+  sched_lock();
+
+  /* Get the socket structure underlying sockfd */
+
+  psock1 = sockfd_socket(sockfd);
+
+ /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock1 || psock1->s_crefs <= 0)
+    {
+      err = EBADF;
+      goto errout;
     }
 
-  /* Verify that fd is a valid, open file descriptor */
+  /* Allocate a new socket descriptor */
 
-  if (!DUP_ISOPEN(fd1, list))
+  sockfd2 = sockfd_allocate(minsd);
+  if (sockfd2 < 0)
     {
-      set_errno(EBADF);
-      return ERROR;
+      err = ENFILE;
+      goto errout;
     }
 
-  /* Handle a special case */
+  /* Get the socket structure underlying the new descriptor */
 
-  if (fd1 == fd2)
+  psock2 = sockfd_socket(sockfd2);
+  if (!psock2)
     {
-      return fd1;
+      err = ENOSYS; /* should not happen */
+      goto errout;
     }
 
-  /* Verify fd2 */
+  /* Duplicate the socket state */
 
-  if ((unsigned int)fd2 >= CONFIG_NFILE_DESCRIPTORS)
+  ret = net_clone(psock1, psock2);
+  if (ret < 0)
     {
-      set_errno(EBADF);
-      return ERROR;
+      err = -ret;
+      goto errout;
+
     }
 
-  return files_dup(&list->fl_files[fd1], &list->fl_files[fd2]);
+  sched_unlock();
+  return sockfd2;
+
+errout:
+  sched_unlock();
+  errno = err;
+  return ERROR;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 */
+
 

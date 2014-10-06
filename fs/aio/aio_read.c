@@ -106,14 +106,14 @@ static void aio_read_worker(FAR void *arg)
 
   /* Perform the read using:
    *
-   *   aio_fildes  - File descriptor
+   *   aioc_filep  - File structure pointer
    *   aio_buf     - Location of buffer
    *   aio_nbytes  - Length of transfer
    *   aio_offset  - File offset
    */
 
- nread = pread(aiocbp->aio_fildes, (FAR void *)aiocbp->aio_buf,
-               aiocbp->aio_nbytes, aiocbp->aio_offset);
+ nread = file_pread(aioc->aioc_filep, (FAR void *)aiocbp->aio_buf,
+                    aiocbp->aio_nbytes, aiocbp->aio_offset);
 
   /* Set the result of the read */
 
@@ -266,12 +266,18 @@ int aio_read(FAR struct aiocb *aiocbp)
   aiocbp->aio_result = -EINPROGRESS;
   aiocbp->aio_priv   = NULL;
 
-  /* Create a container for the AIO control block.  This will not fail but
-   * may cause us to block if there are insufficient resources to satisfy
-   * the request.
+  /* Create a container for the AIO control block.  This may cause us to
+   * block if there are insufficient resources to satisfy the request.
    */
 
   aioc = aio_contain(aiocbp);
+  if (!aioc)
+    {
+      /* The errno has already been set (probably EBADF) */
+
+      aiocbp->aio_result = -get_errno();
+      return ERROR;
+    }
 
   /* Defer the work to the worker thread */
 

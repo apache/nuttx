@@ -41,6 +41,8 @@
 
 #include <sched.h>
 
+#include <nuttx/fs.h>
+
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
@@ -80,14 +82,26 @@
  * Returned Value:
  *   A reference to the new AIO control block container.   This function
  *   will not fail but will wait if necessary for the resources to perform
- *   this operation.
+ *   this operation.  NULL will be returned on certain errors with the
+ *   errno value already set appropriately.
  *
  ****************************************************************************/
 
 FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
+  FAR struct file *filep;
   struct sched_param param;
+
+  /* Get the file structure corresponding to the file descriptor. */
+
+  filep = fs_getfilep(aiocbp->aio_fildes);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return NULL;
+    }
 
   /* Allocate the AIO control block container, waiting for one to become
    * available if necessary.  This should never fail.
@@ -100,6 +114,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 
   memset(aioc, 0, sizeof(struct aio_container_s));
   aioc->aioc_aiocbp = aiocbp;
+  aioc->aioc_filep = filep;
   aioc->aioc_pid = getpid();
 
   DEBUGVERIFY(sched_getparam (aioc->aioc_pid, &param));

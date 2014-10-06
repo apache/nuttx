@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_write.c
  *
- *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,33 +55,28 @@
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_write
+ *
+ * Description:
+ *   Equivalent to the standard write() function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by aio_write();
+ *
+ ****************************************************************************/
+
+ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
 {
-  FAR struct filelist *list;
-  FAR struct file *filep;
   FAR struct inode *inode;
   int ret;
   int err;
 
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-
-  /* The file list can be NULL under one obscure cornercase:  When memory
-   * management debug output is enabled.  Then there may be attempts to
-   * write to stdout from malloc before the group data has been allocated.
-   */
-
-  if (!list)
-    {
-      err = EAGAIN;
-      goto errout;
-    }
-
   /* Was this file opened for write access? */
 
-  filep = &list->fl_files[fd];
   if ((filep->f_oflags & O_WROK) == 0)
     {
       err = EBADF;
@@ -112,11 +107,6 @@ errout:
   set_errno(err);
   return ERROR;
 }
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /***************************************************************************
  * Name: write
@@ -170,6 +160,10 @@ errout:
 
 ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 {
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  FAR struct file *filep;
+#endif
+
   /* Did we get a valid file descriptor? */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -186,10 +180,21 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 #endif
     }
 
-  /* The descriptor is in the right range to be a file descriptor... write to the file */
-
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  return file_write(fd, buf, nbytes);
+  /* The descriptor is in the right range to be a file descriptor... write
+   * to the file.
+   */
+
+  filep = fs_getfilep(fd);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return ERROR;
+    }
+
+  /* Perform the write operation using the file descriptor as an index */
+
+  return file_write(filep, buf, nbytes);
 #endif
 }
-
