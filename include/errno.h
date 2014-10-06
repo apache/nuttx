@@ -375,6 +375,8 @@
 #define ENOMEDIUM_STR       "No medium found"
 #define EMEDIUMTYPE         124
 #define EMEDIUMTYPE_STR     "Wrong medium type"
+#define ECANCELED           125
+#define ECANCELED_STR       "Operation cancelled"
 
 /************************************************************************
  * Type Declarations
