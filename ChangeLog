@@ -8765,3 +8765,7 @@
 	* fs/fs_initialize.c, Makefile, fs/inode/fs_inode.c, and inode.h:
 	  Modify FS initialization logic to handle AIO container
 	  initialization (2014-10-6).
+	* Too many files to list:  Major structuring of file system functions
+	  to better support asynchronous I/O.  Respository should not be
+	  trusted until I have a chance to verify everything (2014-10-6).
+
