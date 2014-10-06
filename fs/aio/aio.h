@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <string.h>
 #include <aio.h>
 #include <queue.h>
 
@@ -153,7 +154,7 @@ void aio_unlock(void);
  *
  ****************************************************************************/
 
-FAR struct aio_container_s *aioc_lock(void);
+FAR struct aio_container_s *aioc_alloc(void);
 
 /****************************************************************************
  * Name: aioc_free

@@ -180,7 +180,7 @@ void aio_unlock(void)
  *
  ****************************************************************************/
 
-FAR struct aio_container_s *aioc_lock(void)
+FAR struct aio_container_s *aioc_alloc(void)
 {
   FAR struct aio_container_s *aioc;
 

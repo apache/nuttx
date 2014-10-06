@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/aio/aio_contain.c
+ * libc/aio/aioc_contain.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
 
 #include <sched.h>
 
-#include <nuttx/fs.h>
+#include <nuttx/fs/fs.h>
 
 #include "aio/aio.h"
 
@@ -157,7 +157,7 @@ FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
 
   /* De-cant the AIO control block and return the container to the free list */
 
-  aiocbp = aioc->acioc_aiocbp;
+  aiocbp = aioc->aioc_aiocbp;
   aioc_free(aioc);
   return aiocbp;
 }
