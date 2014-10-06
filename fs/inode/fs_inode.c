@@ -170,7 +170,7 @@ static int _inode_compare(FAR const char *fname,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fs_initialize
+ * Name: inode_initialize
  *
  * Description:
  *   This is called from the OS initialization logic to configure the file
@@ -178,10 +178,10 @@ static int _inode_compare(FAR const char *fname,
  *
  ****************************************************************************/
 
-void fs_initialize(void)
+void inode_initialize(void)
 {
-  /* Initialize the semaphore to one (to support one-at-
-   * a-time access to the inode tree).
+  /* Initialize the semaphore to one (to support one-at-a-time access to the
+   * inode tree).
    */
 
   (void)sem_init(&g_inode_sem.sem, 0, 1);
