@@ -8756,3 +8756,12 @@
 	  to fs/aio.  These will need to be kernel routines in order to
 	  handler issues with using file descriptors on worker thread
 	  (2014-10-5).
+	* fs/aio/aio.h, Kconfig, aio_initialize.c, aioc_contain.c, Make.defs,
+	  and include/aio.h: Add a AIO control container to increase the
+	  payload with OS internal stuff (2014-10-6).
+	* fs/aio/aio_cancel.c, aio_fsync.c, aio_read.c, aio_signal.c, and
+	  aio_write.c: Modify logic to use AIO control block container
+	  (2014-10-6).
+	* fs/fs_initialize.c, Makefile, fs/inode/fs_inode.c, and inode.h:
+	  Modify FS initialization logic to handle AIO container
+	  initialization (2014-10-6).
