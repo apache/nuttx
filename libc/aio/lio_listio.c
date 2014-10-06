@@ -603,7 +603,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
 
                     errcode = get_errno();
                     fdbg("ERROR: aio_read/write failed: %d\n", errcode);
-                    DEBUGASSERT(errocode > 0);
+                    DEBUGASSERT(errcode > 0);
                     aiocbp->aio_result = -errcode;
                     ret = ERROR;
                   }

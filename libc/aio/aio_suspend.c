@@ -124,7 +124,7 @@ int aio_suspend(FAR const struct aiocb *const list[], int nent,
   int ret;
   int i;
 
-  DEBUGASSERT(aiocbp);
+  DEBUGASSERT(list);
 
   /* Lock the scheduler so that no I/O events can complete on the worker
    * thread until we set our wait set up.  Pre-emption will, of course, be

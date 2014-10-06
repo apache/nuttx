@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
