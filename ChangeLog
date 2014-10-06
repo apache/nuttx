@@ -8768,4 +8768,7 @@
 	* Too many files to list:  Major structuring of file system functions
 	  to better support asynchronous I/O.  Respository should not be
 	  trusted until I have a chance to verify everything (2014-10-6).
-
+	* include/nuttx/mm/mm.h: Fix a place in the memory manager where it
+	  explicitly assumed that the size of a point is 4 bytes.  That is OK
+	  if the actually size is smaller but makes the heap unstable when
+	  used withthe x86_64 host simulation (2014-10-6).
