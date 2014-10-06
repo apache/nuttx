@@ -133,8 +133,6 @@ struct aiocb
    * application code should never reference these elements.
    */
 
-  struct work_s aio_work;        /* Used to defer I/O to the work thread */
-  pid_t aio_pid;                 /* ID of client to be notify at completion */
   volatile ssize_t aio_result;   /* Support for aio_error() and aio_return() */
   FAR void *aio_priv;            /* Used by signal handlers */
 };

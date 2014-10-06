@@ -12,4 +12,23 @@ config FS_AIO
 		interfaces declared in include/aio.h.
 
 if FS_AIO
+
+config FS_NAIOC
+	int "Pre-allocated AIO containers"
+	default 8
+	---help---
+		The AIO containers hold an AIO control block and appends information
+		needed by the logic running within the RTOS.  These structures are
+		pre-allocated, the number pre-allocated controlled by this setting.
+
+		This setting controls the number of asynchronous I/O operations that
+		can be queued at one time.  When this count is exhausted, the caller
+		of aio_read(), aio_write(), or aio_fsync() will be forced to wait
+		for an available container.  That wait is minimized because each
+		container is released prior to starting the next I/O.
+
+		The AIO logic includes priority inheritance logic to prevent
+		priority inversion problems:  The priority of the low-priority work
+		queue will be boosted, if necessary, to level of the waiting thread.
+
 endif

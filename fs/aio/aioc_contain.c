@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/aio/aio.h
+ * libc/aio/aio_contain.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,143 +33,41 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_AIO_AIO_H
-#define __FS_AIO_AIO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <aio.h>
-#include <queue.h>
+#include <sched.h>
 
-#include <nuttx/wqueue.h>
+#include "aio/aio.h"
+
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* Number of pre-allocated AIO Control block containers */
-
-#ifndef CONFIG_FS_NAIOC
-#  define CONFIG_FS_NAIOC 8
-#endif
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
-/* This structure contains one AIO control block and appends information
- * needed by the logic running on the worker thread.  These structures are
- * pre-allocated, the number pre-allocated controlled by CONFIG_FS_NAIOC.
- */
 
-struct aio_container_s
-{
-  dq_entry_t aioc_link;          /* Supports a doubly linked list */
-  FAR struct aiocb *aioc_aiocbp; /* The contained AIO control block */
-  struct work_s aioc_work;       /* Used to defer I/O to the work thread */
-  pid_t aioc_pid;                /* ID of the waiting task */
-  uint8_t aioc_prio;             /* Priority of the waiting task */
-};
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* This is a list of pending asynchronous I/O.  The user must hold the
- * lock on this list in order to access the list.
- */
-
-EXTERN dq_queue_t g_aio_pending;
-
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_initialize
- *
- * Description:
- *   Perform one-time initialization of the asynchronous I/O sub-system
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
+ * Public Functions
  ****************************************************************************/
-
-void aio_initialize(void);
-
-/****************************************************************************
- * Name: aio_lock/aio_unlock
- *
- * Description:
- *   Take/give the lock on the pending asynchronous I/O list
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void aio_lock(void);
-void aio_unlock(void);
-
-/****************************************************************************
- * Name: aioc_alloc
- *
- * Description:
- *   Allocate a new AIO container by taking the next, pre-allocated
- *   container from the free list.  This function will wait until
- *   aioc_free() is called in the event that there is no free container
- *   available in the free list.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   A reference to the allocated AIO container.  This allocation never
- *   fails because the logic will wait in the event that there is no free
- *   container.
- *
- ****************************************************************************/
-
-FAR struct aio_container_s *aioc_lock(void);
-
-/****************************************************************************
- * Name: aioc_free
- *
- * Description:
- *   Free an AIO container by returning it to the free list and, perhaps,
- *   awakening any threads waiting for that resource
- *
- * Input Parameters:
- *   aioc - The AIO container to be free
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void aioc_free(FAR struct aio_container_s *aioc);
-
 /****************************************************************************
  * Name: aio_contain
  *
@@ -186,7 +84,34 @@ void aioc_free(FAR struct aio_container_s *aioc);
  *
  ****************************************************************************/
 
-FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp);
+FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
+{
+  FAR struct aio_container_s *aioc;
+  struct sched_param param;
+
+  /* Allocate the AIO control block container, waiting for one to become
+   * available if necessary.  This should never fail.
+   */
+
+  aioc = aioc_alloc();
+  DEBUGASSERT(aioc);
+
+  /* Initialize the container */
+
+  memset(aioc, 0, sizeof(struct aio_container_s));
+  aioc->aioc_aiocbp = aiocbp;
+  aioc->aioc_pid = getpid();
+
+  DEBUGVERIFY(sched_getparam (aioc->aioc_pid, &param));
+  aioc->aioc_prio = param.sched_priority;
+
+  /* Add the container to the pending transfer list. */
+
+  aio_lock();
+  dq_addlast(&aioc->aioc_link, &g_aio_pending);
+  aio_unlock();
+  return aioc;
+}
 
 /****************************************************************************
  * Name: aioc_decant
@@ -203,25 +128,23 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp);
  *
  ****************************************************************************/
 
-FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc);
+FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
+{
+  FAR struct aiocb *aiocbp;
 
-/****************************************************************************
- * Name: aio_signal
- *
- * Description:
- *   Signal the client that an I/O has completed.
- *
- * Input Parameters:
- *   pid    - ID of the task to signal
- *   aiocbp - Pointer to the asynchronous I/O state structure that includes
- *            information about how to signal the client
- *
- * Returned Value:
- *   Zero (OK) if the client was successfully signalled.  Otherwise, a
- *   negated errno value is returned.
- *
- ****************************************************************************/
+  DEBUGASSERT(aioc);
 
-int aio_signal(pid_t pid, FAR struct aiocb *aiocbp);
+  /* Remove the container to the pending transfer list. */
 
-#endif /* __FS_AIO_AIO_H */
+  aio_lock();
+  dq_rem(&aioc->aioc_link, &g_aio_pending);
+  aio_unlock();
+
+  /* De-cant the AIO control block and return the container to the free list */
+
+  aiocbp = aioc->acioc_aiocbp;
+  aioc_free(aioc);
+  return aiocbp;
+}
+
+#endif /* CONFIG_FS_AIO */

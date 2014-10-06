@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/aio/aio.h
+ * fs/aio/aio_initialize.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,72 +33,67 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_AIO_AIO_H
-#define __FS_AIO_AIO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <aio.h>
+#include <semaphore.h>
+#include <assert.h>
+#include <errno.h>
 #include <queue.h>
 
-#include <nuttx/wqueue.h>
+#include "aio/aio.h"
+
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* Number of pre-allocated AIO Control block containers */
-
-#ifndef CONFIG_FS_NAIOC
-#  define CONFIG_FS_NAIOC 8
-#endif
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
-/* This structure contains one AIO control block and appends information
- * needed by the logic running on the worker thread.  These structures are
- * pre-allocated, the number pre-allocated controlled by CONFIG_FS_NAIOC.
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This is an array of pre-allocated AIO containers */
+
+static struct aio_container_s g_aioc_alloc[CONFIG_FS_NAIOC];
+
+/* This is a list of free AIO containers */
+
+static dq_queue_t g_aioc_free;
+
+/* This counting semaphore tracks the number of free AIO containers */
+
+static sem_t g_aioc_freesem;
+
+/* This binary semaphore supports exclusive access to the list of pending
+ * asynchronous I/O.
  */
 
-struct aio_container_s
-{
-  dq_entry_t aioc_link;          /* Supports a doubly linked list */
-  FAR struct aiocb *aioc_aiocbp; /* The contained AIO control block */
-  struct work_s aioc_work;       /* Used to defer I/O to the work thread */
-  pid_t aioc_pid;                /* ID of the waiting task */
-  uint8_t aioc_prio;             /* Priority of the waiting task */
-};
+static sem_t g_aio_exclsem;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /* This is a list of pending asynchronous I/O.  The user must hold the
  * lock on this list in order to access the list.
  */
 
-EXTERN dq_queue_t g_aio_pending;
+dq_queue_t g_aio_pending;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 /****************************************************************************
  * Name: aio_initialize
  *
@@ -113,7 +108,31 @@ EXTERN dq_queue_t g_aio_pending;
  *
  ****************************************************************************/
 
-void aio_initialize(void);
+void aio_initialize(void)
+{
+  int i;
+
+  /* Initialize counting semaphores */
+
+  (void)sem_init(&g_aioc_freesem, 0, 0);
+  (void)sem_init(&g_aio_exclsem, 0, 1);
+
+  /* Initialize the container queues */
+
+  dq_init(&g_aioc_free);
+  dq_init(&g_aio_pending);
+
+  /* Add all of the pre-allocated AIO containers to the free list */
+
+  for (i = 0; i < CONFIG_FS_NAIOC; i++)
+    {
+      /* "Free" the entry, adding it to the free list and bumping up the
+       * semaphore count.
+       */
+
+      aioc_free(&g_aioc_alloc[i]);
+    }
+}
 
 /****************************************************************************
  * Name: aio_lock/aio_unlock
@@ -129,8 +148,18 @@ void aio_initialize(void);
  *
  ****************************************************************************/
 
-void aio_lock(void);
-void aio_unlock(void);
+void aio_lock(void)
+{
+  while (sem_wait(&g_aio_exclsem) < 0)
+    {
+      DEBUGASSERT(get_errno() == EINTR);
+    }
+}
+
+void aio_unlock(void)
+{
+  sem_post(&g_aio_exclsem);
+}
 
 /****************************************************************************
  * Name: aioc_alloc
@@ -151,7 +180,28 @@ void aio_unlock(void);
  *
  ****************************************************************************/
 
-FAR struct aio_container_s *aioc_lock(void);
+FAR struct aio_container_s *aioc_lock(void)
+{
+  FAR struct aio_container_s *aioc;
+
+  /* Take a semaphore, thus guaranteeing that we have an AIO container
+   * set aside for us.
+   */
+
+  while (sem_wait(&g_aioc_freesem) < 0)
+    {
+      DEBUGASSERT(get_errno() == EINTR);
+    }
+
+  /* Get our AIO container */
+
+  aio_lock();
+  aioc = (FAR struct aio_container_s *)dq_remfirst(&g_aioc_free);
+  aio_unlock();
+
+  DEBUGASSERT(aioc);
+  return aioc;
+}
 
 /****************************************************************************
  * Name: aioc_free
@@ -168,60 +218,21 @@ FAR struct aio_container_s *aioc_lock(void);
  *
  ****************************************************************************/
 
-void aioc_free(FAR struct aio_container_s *aioc);
+void aioc_free(FAR struct aio_container_s *aioc)
+{
+  DEBUGASSERT(aioc);
 
-/****************************************************************************
- * Name: aio_contain
- *
- * Description:
- *   Create and initialize a container for the provided AIO control block
- *
- * Input Parameters:
- *   aiocbp - The AIO control block pointer
- *
- * Returned Value:
- *   A reference to the new AIO control block container.   This function
- *   will not fail but will wait if necessary for the resources to perform
- *   this operation.
- *
- ****************************************************************************/
+  /* Return the container to the free list */
 
-FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp);
+  aio_lock();
+  dq_addlast(&aioc->aioc_link, &g_aioc_free);
+  aio_unlock();
 
-/****************************************************************************
- * Name: aioc_decant
- *
- * Description:
- *   Remove the AIO control block from the container and free all resources
- *   used by the container.
- *
- * Input Parameters:
- *   aioc - Pointer to the AIO control block container
- *
- * Returned Value:
- *   A pointer to the no-longer contained AIO control block.
- *
- ****************************************************************************/
+  /* The post the counting semaphore, announcing the availability of the
+   * free AIO container.
+   */
 
-FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc);
+  sem_post(&g_aioc_freesem);
+}
 
-/****************************************************************************
- * Name: aio_signal
- *
- * Description:
- *   Signal the client that an I/O has completed.
- *
- * Input Parameters:
- *   pid    - ID of the task to signal
- *   aiocbp - Pointer to the asynchronous I/O state structure that includes
- *            information about how to signal the client
- *
- * Returned Value:
- *   Zero (OK) if the client was successfully signalled.  Otherwise, a
- *   negated errno value is returned.
- *
- ****************************************************************************/
-
-int aio_signal(pid_t pid, FAR struct aiocb *aiocbp);
-
-#endif /* __FS_AIO_AIO_H */
+#endif /* CONFIG_FS_AIO */
