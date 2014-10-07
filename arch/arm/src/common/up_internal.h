@@ -427,12 +427,16 @@ void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-void up_earlyserialinit(void);
+#if USE_SERIALDRIVER
 void up_serialinit(void);
 #else
-# define up_earlyserialinit()
-# define up_serialinit()
+#  define up_serialinit()
+#endif
+
+#if USE_EARLYSERIALINIT
+void up_earlyserialinit(void);
+#else
+#  define up_earlyserialinit()
 #endif
 
 /* Defined in drivers/lowconsole.c */
