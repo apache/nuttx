@@ -59,13 +59,6 @@
 #define OTGFS_PID_MDATA                 (3) /* Non-control */
 #define OTGFS_PID_SETUP                 (3) /* Control */
 
-/* If OTGFS2 is defined (FS mode of the HS module), then remap the OTGFS base address */
-
-#ifdef CONFIG_STM32_OTGFS2
-#  undef STM32_OTGFS_BASE
-#  define STM32_OTGFS_BASE  STM32_OTGHS_BASE
-#endif
-
 /* Register Offsets *********************************************************************************/
 /* Core global control and status registers */
 

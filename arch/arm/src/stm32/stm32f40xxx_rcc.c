@@ -201,11 +201,7 @@ static inline void rcc_enableahb1(void)
 #ifdef CONFIG_STM32_OTGHS
   /* USB OTG HS */
 
-#ifdef CONFIG_STM32_OTGFS2
   regval |= RCC_AHB1ENR_OTGHSEN;
-#else
-  regval |= RCC_AHB1ENR_OTGHSULPIEN;
-#endif
 
 #endif  /* CONFIG_STM32_OTGHS */
 

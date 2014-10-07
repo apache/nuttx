@@ -47,8 +47,9 @@
 
 #include "chip.h"
 #include "chip/stm32_otgfs.h"
+#include "chip/stm32_otghs.h"
 
-#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
+#if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_USBHOST)
 
 #ifdef HAVE_USBHOST_TRACE
 enum usbhost_trace1codes_e
@@ -88,6 +89,39 @@ enum usbhost_trace1codes_e
 #  endif
 #endif
 
+#ifdef CONFIG_STM32_OTGHS
+
+  OTGHS_TRACE1_DEVDISCONN,           /* OTGHS ERROR: Host Port Device disconnected */
+  OTGHS_TRACE1_IRQATTACH,            /* OTGHS ERROR: Failed to attach IRQ */
+  OTGHS_TRACE1_TRNSFRFAILED,         /* OTGHS ERROR: Host Port Transfer Failed */
+  OTGHS_TRACE1_SENDSETUP,            /* OTGHS ERROR: sendsetup() failed with: */
+  OTGHS_TRACE1_SENDDATA,             /* OTGHS ERROR: senddata() failed with: */
+  OTGHS_TRACE1_RECVDATA,             /* OTGHS ERROR: recvdata() failed with: */
+
+#  ifdef HAVE_USBHOST_TRACE_VERBOSE
+
+  OTGHS_VTRACE1_CONNECTED,           /* OTGHS Host Port connected */
+  OTGHS_VTRACE1_DISCONNECTED,        /* OTGHS Host Port disconnected */
+  OTGHS_VTRACE1_GINT,                /* OTGHS Handling Interrupt. Entry Point */
+  OTGHS_VTRACE1_GINT_SOF,            /* OTGHS Handle the start of frame interrupt */
+  OTGHS_VTRACE1_GINT_RXFLVL,         /* OTGHS Handle the RxFIFO non-empty interrupt */
+  OTGHS_VTRACE1_GINT_NPTXFE,         /* OTGHS Handle the non-periodic TxFIFO empty interrupt */
+  OTGHS_VTRACE1_GINT_PTXFE,          /* OTGHS Handle the periodic TxFIFO empty interrupt */
+  OTGHS_VTRACE1_GINT_HC,             /* OTGHS Handle the host channels interrupt */
+  OTGHS_VTRACE1_GINT_HPRT,           /* OTGHS Handle the host port interrupt */
+  OTGHS_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGHS  HPRT: Port Over-Current Change*/
+  OTGHS_VTRACE1_GINT_HPRT_PCDET,     /* OTGHS  HPRT: Port Connect Detect */
+  OTGHS_VTRACE1_GINT_HPRT_PENCHNG,   /* OTGHS  HPRT: Port Enable Changed */
+  OTGHS_VTRACE1_GINT_HPRT_LSDEV,     /* OTGHS  HPRT: Low Speed Device Connected */
+  OTGHS_VTRACE1_GINT_HPRT_FSDEV,     /* OTGHS  HPRT: Full Speed Device Connected */
+  OTGHS_VTRACE1_GINT_HPRT_LSFSSW,    /* OTGHS  HPRT: Host Switch: LS -> FS */
+  OTGHS_VTRACE1_GINT_HPRT_FSLSSW,    /* OTGHS  HPRT: Host Switch: FS -> LS */
+  OTGHS_VTRACE1_GINT_DISC,           /* OTGHS Handle the disconnect detected interrupt */
+  OTGHS_VTRACE1_GINT_IPXFR,          /* OTGHS Handle the incomplete periodic transfer */
+
+#  endif
+#endif
+
   __TRACE1_NSTRINGS,                 /* Separates the format 1 from the format 2 strings */
 
 #ifdef CONFIG_STM32_OTGFS
@@ -120,6 +154,36 @@ enum usbhost_trace1codes_e
 #  endif
 #endif
 
+#ifdef CONFIG_STM32_OTGHS
+
+  OTGHS_TRACE2_CLIP,                 /* OTGHS CLIP: chidx:  buflen: */
+
+#  ifdef HAVE_USBHOST_TRACE_VERBOSE
+
+  OTGHS_VTRACE2_CHANWAKEUP_IN,       /* OTGHS IN Channel wake up with result */
+  OTGHS_VTRACE2_CHANWAKEUP_OUT,      /* OTGHS OUT Channel wake up with result */
+  OTGHS_VTRACE2_CTRLIN,              /* OTGHS CTRLIN */
+  OTGHS_VTRACE2_CTRLOUT,             /* OTGHS CTRLOUT */
+  OTGHS_VTRACE2_INTRIN,              /* OTGHS INTRIN */
+  OTGHS_VTRACE2_INTROUT,             /* OTGHS INTROUT */
+  OTGHS_VTRACE2_BULKIN,              /* OTGHS BULKIN */
+  OTGHS_VTRACE2_BULKOUT,             /* OTGHS BULKOUT */
+  OTGHS_VTRACE2_ISOCIN,              /* OTGHS ISOCIN */
+  OTGHS_VTRACE2_ISOCOUT,             /* OTGHS ISOCOUT */
+  OTGHS_VTRACE2_STARTTRANSFER,       /* OTGHS EP buflen */
+  OTGHS_VTRACE2_CHANCONF_CTRL_IN,
+  OTGHS_VTRACE2_CHANCONF_CTRL_OUT,
+  OTGHS_VTRACE2_CHANCONF_INTR_IN,
+  OTGHS_VTRACE2_CHANCONF_INTR_OUT,
+  OTGHS_VTRACE2_CHANCONF_BULK_IN,
+  OTGHS_VTRACE2_CHANCONF_BULK_OUT,
+  OTGHS_VTRACE2_CHANCONF_ISOC_IN,
+  OTGHS_VTRACE2_CHANCONF_ISOC_OUT,
+  OTGHS_VTRACE2_CHANHALT,            /* Channel halted. chidx: , reason:  */
+
+#  endif
+#endif
+
   __TRACE2_NSTRINGS                  /* Total number of enumeration values */
 };
 
@@ -143,6 +207,8 @@ enum usbhost_trace1codes_e
  *
  *  CONFIG_USBHOST      - Enable general USB host support
  *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
+ *     or
+ *  CONFIG_STM32_OTGHS  - Enable the STM32 USB OTG HS block
  *  CONFIG_STM32_SYSCFG - Needed
  *
  * Options:
@@ -155,6 +221,16 @@ enum usbhost_trace1codes_e
  *    words.  Default 96 (384 bytes)
  *  CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
+ *
+ *  CONFIG_STM32_OTGHS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+ *    Default 128 (512 bytes)
+ *  CONFIG_STM32_OTGHS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+ *    in 32-bit words.  Default 96 (384 bytes)
+ *  CONFIG_STM32_OTGHS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
+ *    words.  Default 96 (384 bytes)
+ *  CONFIG_STM32_OTGHS_SOFINTR - Enable SOF interrupts.  Why would you ever
+ *    want to do that?
+ *
  *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
  *    debug.  Depends on CONFIG_DEBUG.
  */
