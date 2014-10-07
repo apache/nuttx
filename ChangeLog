@@ -8777,3 +8777,8 @@
 	  (2014-10-7).
 	* sched/Makefile and sched/*/Make.defs: Simplify how C source files are
 	  selected in the build (2014-10-7).
+	* fs/aio/aio_queue.c, Make.defs, aio.h, aio_fsync.c, aio_read.c, and
+	  aio_write.c: The asynch I/O implementation now satisfies POSIX
+	  priority requirements; it uses the new low priority worker thread
+	  interfaces to adjust the priority of the worker thread according to
+	  the priority of the client thread (2014-10-7).
