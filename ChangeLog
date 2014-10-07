@@ -8782,3 +8782,14 @@
 	  priority requirements; it uses the new low priority worker thread
 	  interfaces to adjust the priority of the worker thread according to
 	  the priority of the client thread (2014-10-7).
+	* arch/arm/src/stm32/chip/stm32_otghs.hstm32_otghs.c/h and
+	  chip/stm32_otghs.h: Add files that implement true high speed support
+	  for the STM32 OTGHS peripheral.  From Brennan Ashton (2014-10-7).
+	* arch/arm/src/stm32/ (serveral files):  Integrates OTGHS support into
+	  the STM32; Eliminates the older OTGHS in FS mode logic.  From Brennan
+	  Ashton (2014-10-7).
+	* arch/arm/src/stm32/Kconfig, stm32_otgfsdev.c, chip/stm32f40xxx_pinmap.h,
+	  configs/stm32f429i-disco/ (several files): Remove non-functional
+	  vestiges of OTGHS in FS mode (including OTGFS2); try to convert the
+	  stm32f429i-disco configuration to use OTGHS instead of OTFHS in F
+ 	  mode (OTGFS2).  But I don't have the boards and can't test (2014-10-7).
