@@ -96,6 +96,9 @@
 
 int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
 {
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  union sigval value;
+#endif
   int errcode;
   int status;
   int ret;
@@ -115,10 +118,10 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
       status = sigqueue(pid, aiocbp->aio_sigevent.sigev_sign,
                         aiocbp->aio_sigevent.sigev_value.sival_ptr);
 #endif
-      if (ret < 0)
+      if (status < 0)
         {
           errcode = get_errno();
-          fdbg("ERROR: sigqueue failed: %d\n", errcode);
+          fdbg("ERROR: sigqueue #1 failed: %d\n", errcode);
           ret = ERROR;
         }
     }
@@ -127,11 +130,16 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
    * on sig_suspend();
    */
 
-  status = kill(pid, SIGPOLL);
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  value.sival_ptr = aiocbp;
+  status = sigqueue(pid, SIGPOLL, value);
+#else
+  status = sigqueue(pid, SIGPOLL, aiocbp);
+#endif
   if (status && ret == OK)
     {
       errcode = get_errno();
-      fdbg("ERROR: kill failed: %d\n", errcode);
+      fdbg("ERROR: sigqueue #2 failed: %d\n", errcode);
       ret = ERROR;
     }
 
