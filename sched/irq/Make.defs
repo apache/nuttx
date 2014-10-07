@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
+CSRCS += irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 # Include irq build support
 

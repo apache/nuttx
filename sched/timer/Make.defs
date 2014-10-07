@@ -35,9 +35,9 @@
 
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
 
-TIMER_SRCS += timer_initialize.c timer_create.c timer_delete.c
-TIMER_SRCS += timer_getoverrun.c timer_gettime.c timer_settime.c
-TIMER_SRCS += timer_release.c
+CSRCS += timer_initialize.c timer_create.c timer_delete.c
+CSRCS += timer_getoverrun.c timer_gettime.c timer_settime.c
+CSRCS += timer_release.c
 
 # Include timer build support
 

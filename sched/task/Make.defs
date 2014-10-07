@@ -33,38 +33,38 @@
 #
 ############################################################################
 
-TSK_SRCS  = task_create.c task_init.c task_setup.c task_activate.c
-TSK_SRCS += task_start.c task_delete.c task_exit.c task_exithook.c
-TSK_SRCS += task_recover.c task_restart.c task_spawnparms.c
-TSK_SRCS += task_terminate.c task_getgroup.c task_prctl.c task_getpid.c
-TSK_SRCS += exit.c
+CSRCS += task_create.c task_init.c task_setup.c task_activate.c
+CSRCS += task_start.c task_delete.c task_exit.c task_exithook.c
+CSRCS += task_recover.c task_restart.c task_spawnparms.c
+CSRCS += task_terminate.c task_getgroup.c task_prctl.c task_getpid.c
+CSRCS += exit.c
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)
-TSK_SRCS += task_vfork.c
+CSRCS += task_vfork.c
 endif
 endif
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)
-TSK_SRCS += task_spawn.c
+CSRCS += task_spawn.c
 endif
 
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-TSK_SRCS += task_execv.c task_posixspawn.c
+CSRCS += task_execv.c task_posixspawn.c
 endif
 endif
 
 ifeq ($(CONFIG_SCHED_STARTHOOK),y)
-TSK_SRCS += task_starthook.c
+CSRCS += task_starthook.c
 endif
 
 ifeq ($(CONFIG_SCHED_ATEXIT),y)
-TSK_SRCS += task_atexit.c
+CSRCS += task_atexit.c
 endif
 
 ifeq ($(CONFIG_SCHED_ONEXIT),y)
-TSK_SRCS += task_onexit.c
+CSRCS += task_onexit.c
 endif
 
 # Include task build support

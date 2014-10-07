@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-INIT_SRCS = os_start.c os_bringup.c
+CSRCS += os_start.c os_bringup.c
 
 # Include init build support
 

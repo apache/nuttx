@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-ERRNO_SRCS = errno_getptr.c
+CSRCS += errno_getptr.c
 
 ifeq ($(CONFIG_LIB_SYSCALL),y)
-ERRNO_SRCS += errno_get.c errno_set.c
+CSRCS += errno_get.c errno_set.c
 endif
 
 # Include errno build support

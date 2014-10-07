@@ -33,30 +33,30 @@
 #
 ############################################################################
 
-GRP_SRCS  = group_create.c group_join.c group_leave.c group_find.c
-GRP_SRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
-GRP_SRCS += group_foreachchild.c group_killchildren.c
+CSRCS += group_create.c group_join.c group_leave.c group_find.c
+CSRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
+CSRCS += group_foreachchild.c group_killchildren.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
-GRP_SRCS += task_reparent.c
+CSRCS += task_reparent.c
 ifeq ($(CONFIG_SCHED_CHILD_STATUS),y)
-GRP_SRCS += group_childstatus.c
+CSRCS += group_childstatus.c
 endif
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
-GRP_SRCS += group_addrenv.c
+CSRCS += group_addrenv.c
 endif
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-GRP_SRCS += group_signal.c
+CSRCS += group_signal.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-GRP_SRCS += group_malloc.c group_zalloc.c group_free.c
+CSRCS += group_malloc.c group_zalloc.c group_free.c
 else
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-GRP_SRCS += group_malloc.c group_zalloc.c group_free.c
+CSRCS += group_malloc.c group_zalloc.c group_free.c
 endif
 endif
 

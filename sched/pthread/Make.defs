@@ -35,20 +35,20 @@
 
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 
-PTHREAD_SRCS  = pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
-PTHREAD_SRCS += pthread_yield.c pthread_getschedparam.c pthread_setschedparam.c
-PTHREAD_SRCS += pthread_mutexinit.c pthread_mutexdestroy.c
-PTHREAD_SRCS += pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c
-PTHREAD_SRCS += pthread_condinit.c pthread_conddestroy.c
-PTHREAD_SRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
-PTHREAD_SRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
-PTHREAD_SRCS += pthread_cancel.c pthread_setcancelstate.c
-PTHREAD_SRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c
-PTHREAD_SRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
-PTHREAD_SRCS += pthread_once.c pthread_release.c pthread_setschedprio.c
+CSRCS += pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
+CSRCS += pthread_yield.c pthread_getschedparam.c pthread_setschedparam.c
+CSRCS += pthread_mutexinit.c pthread_mutexdestroy.c
+CSRCS += pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c
+CSRCS += pthread_condinit.c pthread_conddestroy.c
+CSRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
+CSRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
+CSRCS += pthread_cancel.c pthread_setcancelstate.c
+CSRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c
+CSRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
+CSRCS += pthread_once.c pthread_release.c pthread_setschedprio.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-PTHREAD_SRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
+CSRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 
 # Include pthread build support

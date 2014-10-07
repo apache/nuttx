@@ -35,7 +35,7 @@
 
 ifneq ($(CONFIG_PAGING),y)
 
-PG_SRCS = pg_miss.c pg_worker.c
+CSRCS += pg_miss.c pg_worker.c
 
 # Include paging build support
 
