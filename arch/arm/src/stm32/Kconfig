@@ -1403,9 +1403,6 @@ config STM32_I2C
 config STM32_CAN
 	bool
 
-config STM32_OTGFS2
-	bool
-
 menu "Alternate Pin Mapping"
 
 choice

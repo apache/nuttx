@@ -5132,10 +5132,6 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTGFS_GAHBCFG_TXFELVL, STM32_OTGFS_GAHBCFG);
 
-  /* For OTGFS2 mode (FS mode of the HS module), we must select the FS PHY
-   * mode prior to issuing a soft reset.
-   */
-
   /* Common USB OTG core initialization */
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
    * IDLE state.
