@@ -158,6 +158,12 @@ static void aio_read_worker(FAR void *arg)
  *   has been initiated or queued to the file or device (even when the data
  *   cannot be delivered immediately).
  *
+ *   If prioritized I/O is supported for this file, then the asynchronous
+ *   operation will be submitted at a priority equal to a base scheduling
+ *   priority minus aiocbp->aio_reqprio. If Thread Execution Scheduling is
+ *   not supported, then the base scheduling priority is that of the calling
+ *   thread (the latter is implemented at present).
+ *
  *   The aiocbp value may be used as an argument to aio_error() and
  *   aio_return() in order to determine the error status and return status,
  *   respectively, of the asynchronous operation while it is proceeding. If
@@ -233,32 +239,6 @@ static void aio_read_worker(FAR void *arg)
  *     description associated with aiocbp->aio_fildes.
  *
  * POSIX Compliance:
- * - The POSIX specification of asynchronous I/O implies that a thread is
- *   created for each I/O operation.  The standard requires that if
- *   prioritized I/O is supported for this file, then the asynchronous
- *   operation will be submitted at a priority equal to a base scheduling
- *   priority minus aiocbp->aio_reqprio. If Thread Execution Scheduling is
- *   not supported, then the base scheduling priority is that of the calling
- *   thread.
- *
- *   My initial gut feeling is the creating a new thread on each asynchronous
- *   I/O operation would not be a good use of resources in a deeply embedded
- *   system.  So I decided to execute all asynchronous I/O on a low-priority
- *   or user-space worker thread.  There are two negative consequences of this
- *   decision that need to be revisited:
- *
- *     1) The worker thread runs at a fixed priority making it impossible to
- *        meet the POSIX requirement for asynchronous I/O.  That standard
- *        specifically requires varying priority.
- *     2) On the worker thread, each I/O will still be performed synchronously,
- *        one at a time.  This is not a violation of the POSIX requirement,
- *        but one would think there could be opportunities for concurrent I/O.
- *
- *   In reality, in a small embedded system, there will probably only be one
- *   real file system and, in this case, the I/O will be performed sequentially
- *   anyway.  Most simple embedded hardware will not support any concurrent
- *   accesses.
- *
  * - Most errors required in the standard are not detected at this point.
  *   There are no pre-queuing checks for the validity of the operation.
  *

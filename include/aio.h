@@ -126,7 +126,7 @@ struct aiocb
   off_t aio_offset;              /* File offset */
   size_t aio_nbytes;             /* Length of transfer */
   int aio_fildes;                /* File descriptor */
-  int8_t aio_reqprio;            /* Request priority offset */
+  int8_t aio_reqprio;            /* Request priority offset (not used) */
   uint8_t aio_lio_opcode;        /* Operation to be performed */
 
   /* Non-standard, implementation-dependent data.  For portability reasons,
