@@ -113,6 +113,39 @@ static const struct stm32_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
 #  endif
 #endif
 
+#ifdef CONFIG_STM32_OTGHS
+
+  TRENTRY(OTGHS_TRACE1_DEVDISCONN,         TR_FMT1, "OTGHS ERROR: Host Port %d. Device disconnected\n"),
+  TRENTRY(OTGHS_TRACE1_IRQATTACH,          TR_FMT1, "OTGHS ERROR: Failed to attach IRQ\n"),
+  TRENTRY(OTGHS_TRACE1_TRNSFRFAILED,       TR_FMT1, "OTGHS  ERROR: Transfer Failed. ret=%d\n"),
+  TRENTRY(OTGHS_TRACE1_SENDSETUP,          TR_FMT1, "OTGHS  ERROR: ctrl_sendsetup() failed with: %d\n"),
+  TRENTRY(OTGHS_TRACE1_SENDDATA,           TR_FMT1, "OTGHS  ERROR: ctrl_senddata() failed with: %d\n"),
+  TRENTRY(OTGHS_TRACE1_RECVDATA,           TR_FMT1, "OTGHS  ERROR: ctrl_recvdata() failed with: %d\n"),
+
+#  ifdef HAVE_USBHOST_TRACE_VERBOSE
+
+  TRENTRY(OTGHS_VTRACE1_CONNECTED,         TR_FMT1, "OTGHS Host Port %d connected.\n"),
+  TRENTRY(OTGHS_VTRACE1_DISCONNECTED,      TR_FMT1, "OTGHS Host Port %d disconnected.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT,              TR_FMT1, "OTGHS Handling Interrupt. Entry Point.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_SOF,          TR_FMT1, "OTGHS Handle the start of frame interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_RXFLVL,       TR_FMT1, "OTGHS Handle the RxFIFO non-empty interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_NPTXFE,       TR_FMT1, "OTGHS Handle the non-periodic TxFIFO empty interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_PTXFE,        TR_FMT1, "OTGHS Handle the periodic TxFIFO empty interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HC,           TR_FMT1, "OTGHS Handle the host channels interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT,         TR_FMT1, "OTGHS Handle the host port interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_POCCHNG, TR_FMT1, "OTGHS  HPRT: Port Over-Current Change.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_PCDET,   TR_FMT1, "OTGHS  HPRT: Port Connect Detect.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_PENCHNG, TR_FMT1, "OTGHS  HPRT: Port Enable Changed.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_LSDEV,   TR_FMT1, "OTGHS  HPRT: Low Speed Device Connected.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_HSDEV,   TR_FMT1, "OTGHS  HPRT: Full Speed Device Connected.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_LSHSSW,  TR_FMT1, "OTGHS  HPRT: Host Switch: LS -> HS.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_HPRT_HSLSSW,  TR_FMT1, "OTGHS  HPRT: Host Switch: HS -> LS.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_DISC,         TR_FMT1, "OTGHS Handle the disconnect detected interrupt.\n"),
+  TRENTRY(OTGHS_VTRACE1_GINT_IPXFR,        TR_FMT1, "OTGHS Handle the incomplete periodic transfer.\n"),
+
+#  endif
+#endif
+
 };
 
 static const struct stm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
@@ -143,6 +176,35 @@ static const struct stm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(OTGFS_VTRACE2_CHANCONF_ISOC_IN,   TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,IN ,ISOC)\n"),
   TRENTRY(OTGFS_VTRACE2_CHANCONF_ISOC_OUT,  TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,OUT,ISOC)\n"),
   TRENTRY(OTGFS_VTRACE2_CHANHALT,           TR_FMT2, "OTGFS Channel halted. chidx: %d, reason: %d\n"),
+
+#  endif
+#endif
+#ifdef CONFIG_STM32_OTGHS
+
+  TRENTRY(OTGHS_TRACE2_CLIP,                TR_FMT2, "OTGHS CLIP: chidx: %d buflen: %d\n"),
+
+#  ifdef HAVE_USBHOST_TRACE_VERBOSE
+
+  TRENTRY(OTGHS_VTRACE2_CHANWAKEUP_IN,      TR_FMT2, "OTGHS  EP%d(IN)  wake up with result: %d\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANWAKEUP_OUT,     TR_FMT2, "OTGHS  EP%d(OUT) wake up with result: %d\n"),
+  TRENTRY(OTGHS_VTRACE2_CTRLIN,             TR_FMT2, "OTGHS CTRL_IN  type: %02x req: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_CTRLOUT,            TR_FMT2, "OTGHS CTRL_OUT type: %02x req: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_INTRIN,             TR_FMT2, "OTGHS INTR_IN  chidx: %02x len: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_INTROUT,            TR_FMT2, "OTGHS INTR_OUT chidx: %02x len: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_BULKIN,             TR_FMT2, "OTGHS BULK_IN  chidx: %02x len: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_BULKOUT,            TR_FMT2, "OTGHS BULK_OUT chidx: %02x len: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_ISOCIN,             TR_FMT2, "OTGHS ISOC_IN  chidx: %02x len: %04d\n"),
+  TRENTRY(OTGHS_VTRACE2_ISOCOUT,            TR_FMT2, "OTGHS ISOC_OUT chidx: %02x req: %02x\n"),
+  TRENTRY(OTGHS_VTRACE2_STARTTRANSFER,      TR_FMT2, "OTGHS  Transfer chidx: %d buflen: %d\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_CTRL_IN,   TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,IN ,CTRL)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_CTRL_OUT,  TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,OUT,CTRL)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_INTR_IN,   TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,IN ,INTR)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_INTR_OUT,  TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,OUT,INTR)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_BULK_IN,   TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,IN ,BULK)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_BULK_OUT,  TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,OUT,BULK)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_ISOC_IN,   TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,IN ,ISOC)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANCONF_ISOC_OUT,  TR_FMT2, "OTGHS Channel configured. chidx: %d: (EP%d,OUT,ISOC)\n"),
+  TRENTRY(OTGHS_VTRACE2_CHANHALT,           TR_FMT2, "OTGHS Channel halted. chidx: %d, reason: %d\n"),
 
 #  endif
 #endif
