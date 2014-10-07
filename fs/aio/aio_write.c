@@ -48,8 +48,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/wqueue.h>
-
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
@@ -110,6 +108,9 @@ static void aio_write_worker(FAR void *arg)
   FAR struct aio_container_s *aioc = (FAR struct aio_container_s *)arg;
   FAR struct aiocb *aiocbp;
   pid_t pid;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t prio;
+#endif
   ssize_t nwritten;
   int oflags;
 
@@ -120,6 +121,9 @@ static void aio_write_worker(FAR void *arg)
 
   DEBUGASSERT(aioc && aioc->aioc_aiocbp);
   pid    = aioc->aioc_pid;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  prio   = aioc->aioc_prio;
+#endif
   aiocbp = aioc_decant(aioc);
 
   /* Call fcntl(F_GETFL) to get the file open mode. */
@@ -177,6 +181,12 @@ static void aio_write_worker(FAR void *arg)
   /* Signal the client */
 
   (void)aio_signal(pid, aiocbp);
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  /* Restore the low priority worker thread default priority */
+
+  lpwork_restorepriority(prio);
+#endif
 }
 
 /****************************************************************************
@@ -328,11 +338,11 @@ int aio_write(FAR struct aiocb *aiocbp)
 
   /* Defer the work to the worker thread */
 
-  ret = work_queue(LPWORK, &aioc->aioc_work, aio_write_worker, aioc, 0);
+  ret = aio_queue(aioc, aio_write_worker);
   if (ret < 0)
     {
-      aiocbp->aio_result = ret;
-      set_errno(ret);
+      /* The result and the errno have already been set */
+
       return ERROR;
     }
 

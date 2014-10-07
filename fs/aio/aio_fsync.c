@@ -46,7 +46,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 
 #include "aio/aio.h"
@@ -94,6 +93,9 @@ static void aio_fsync_worker(FAR void *arg)
   FAR struct aio_container_s *aioc = (FAR struct aio_container_s *)arg;
   FAR struct aiocb *aiocbp;
   pid_t pid;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t prio;
+#endif
   int ret;
 
   /* Get the information from the container, decant the AIO control block,
@@ -103,6 +105,9 @@ static void aio_fsync_worker(FAR void *arg)
 
   DEBUGASSERT(aioc && aioc->aioc_aiocbp);
   pid    = aioc->aioc_pid;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  prio   = aioc->aioc_prio;
+#endif
   aiocbp = aioc_decant(aioc);
 
   /* Perform the fsync using aioc_filep */
@@ -123,6 +128,12 @@ static void aio_fsync_worker(FAR void *arg)
   /* Signal the client */
 
   (void)aio_signal(pid, aiocbp);
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  /* Restore the low priority worker thread default priority */
+
+  lpwork_restorepriority(prio);
+#endif
 }
 
 /****************************************************************************
@@ -235,11 +246,11 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
 
   /* Defer the work to the worker thread */
 
-  ret = work_queue(LPWORK, &aioc->aioc_work, aio_fsync_worker, aioc, 0);
+  ret = aio_queue(aioc, aio_fsync_worker);
   if (ret < 0)
     {
-      aiocbp->aio_result = ret;
-      set_errno(ret);
+      /* The result and the errno have already been set */
+
       return ERROR;
     }
 

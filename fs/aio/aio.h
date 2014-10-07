@@ -76,7 +76,9 @@ struct aio_container_s
   FAR struct file *aioc_filep;   /* File structure to use with the I/O */
   struct work_s aioc_work;       /* Used to defer I/O to the work thread */
   pid_t aioc_pid;                /* ID of the waiting task */
+#ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t aioc_prio;             /* Priority of the waiting task */
+#endif
 };
 
 /****************************************************************************
@@ -210,6 +212,24 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp);
  ****************************************************************************/
 
 FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc);
+
+/****************************************************************************
+ * Name: aio_queue
+ *
+ * Description:
+ *   Schedule the asynchronous I/O on the low priority work queue
+ *
+ * Input Parameters:
+ *   arg - Worker argument.  In this case, a pointer to an instance of
+ *     struct aiocb cast to void *.
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  Otherwise, -1 is returned and the errno is set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+int aio_queue(FAR struct aio_container_s *aioc, worker_t worker);
 
 /****************************************************************************
  * Name: aio_signal
