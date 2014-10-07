@@ -68,7 +68,7 @@
 #endif
 #endif
 
-#ifdef CONFIG_STM32_OTGFS2
+#ifdef CONFIG_STM32_OTGHS
 #  include "stm32_usbhost.h"
 #endif
 
@@ -87,7 +87,7 @@
 
 /* Can't support USB host or device features if USB OTG HS is not enabled */
 
-#ifndef CONFIG_STM32_OTGFS2
+#ifndef CONFIG_STM32_OTGHS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
 #  undef HAVE_USBMONITOR

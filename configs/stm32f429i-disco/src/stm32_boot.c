@@ -88,7 +88,7 @@ void stm32_boardinitialize(void)
    * selected.
    */
 
-#ifdef CONFIG_STM32_OTGFS2
+#ifdef CONFIG_STM32_OTGHS
   if (stm32_usbinitialize)
     {
       stm32_usbinitialize();
