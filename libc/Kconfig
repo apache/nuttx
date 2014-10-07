@@ -452,9 +452,9 @@ if SCHED_LPWORK
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
-	default 100
+	default 50
 	---help---
-		The execution priority of the lopwer priority worker thread.  Default: 192
+		The execution priority of the lopwer priority worker thread.  Default: 50
 
 config SCHED_LPWORKPERIOD
 	int "Low priority worker thread period"

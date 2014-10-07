@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/wqueue.h
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -485,6 +485,48 @@ int work_signal(int qid);
  ****************************************************************************/
 
 #define work_available(work) ((work)->worker == NULL)
+
+/****************************************************************************
+ * Name: lpwork_boostpriority
+ *
+ * Description:
+ *   Called by the work queue client to assure that the priority of the low-
+ *   priority worker thread is at least at the requested level, reqprio. This
+ *   function would normally be called just before calling work_queue().
+ *
+ * Parameters:
+ *   reqprio - Requested minimum worker thread priority
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
+void lpwork_boostpriority(uint8_t reqprio);
+#endif
+
+/****************************************************************************
+ * Name: lpwork_restorepriority
+ *
+ * Description:
+ *   This function is called to restore the priority after it was previously
+ *   boosted.  This is often done by client logic on the worker thread when
+ *   the scheduled work completes.  It will check if we need to drop the
+ *   priority of the worker thread.
+ *
+ * Parameters:
+ *   reqprio - Previously requested minimum worker thread priority to be
+ *     "unboosted"
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
+void lpwork_restorepriority(uint8_t reqprio);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

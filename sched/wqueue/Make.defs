@@ -1,7 +1,7 @@
 ############################################################################
-# sched/Makefile
+# sched/wqueue/Make.defs
 #
-#   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,63 +33,22 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Add work queue files
 
-ASRCS =
-CSRCS =
+ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
-VPATH =
-DEPPATH = --dep-path .
+# Add low priority work queue files
 
-include init/Make.defs
-include irq/Make.defs
-include paging/Make.defs
-include group/Make.defs
-include sched/Make.defs
-include task/Make.defs
-include errno/Make.defs
-include wdog/Make.defs
-include semaphore/Make.defs
-include signal/Make.defs
-include pthread/Make.defs
-include mqueue/Make.defs
-include clock/Make.defs
-include timer/Make.defs
-include environ/Make.defs
-include wqueue/Make.defs
+ifeq ($(CONFIG_SCHED_LPWORK),y)
+ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-COBJS = $(CSRCS:.c=$(OBJEXT))
+CSRCS += work_inherit.c
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
+# Include wqueue build support
 
-BIN = libsched$(LIBEXT)
+DEPPATH += --dep-path wqueue
+VPATH += :wqueue
 
-all: $(BIN)
-.PHONY: context depend clean distclean
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-$(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, $(BIN))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+endif # CONFIG_PRIORITY_INHERITANCE
+endif # CONFIG_SCHED_LPWORK
+endif # CONFIG_SCHED_WORKQUEUE
