@@ -79,8 +79,10 @@
  *   then an additional, lower-priority work queue will also be created.  This
  *   lower priority work queue is better suited for more extended processing
  *   (such as file system clean-up operations)
- * CONFIG_SCHED_LPWORKPRIORITY - The execution priority of the lower priority
- *   worker thread.  Default: 50
+ * CONFIG_SCHED_LPWORKPRIORITY - The minimum execution priority of the lower
+ *   priority worker thread.  Default: 50
+ * CONFIG_SCHED_LPWORKPRIOMAX - The maximum execution priority of the lower
+ *   priority worker thread.  Default: 176
  * CONFIG_SCHED_LPWORKPERIOD - How often the lower priority worker thread
  *  checks for work in units of microseconds.  Default: 50*1000 (50 MS).
  * CONFIG_SCHED_LPWORKSTACKSIZE - The stack size allocated for the lower
@@ -173,6 +175,27 @@
 
 #  ifndef CONFIG_SCHED_LPWORKPRIORITY
 #    define CONFIG_SCHED_LPWORKPRIORITY 50
+#  endif
+
+#  ifndef CONFIG_SCHED_LPWORKPRIOMAX
+#    ifdef CONFIG_SCHED_HPWORK
+#      define CONFIG_SCHED_LPWORKPRIOMAX (CONFIG_SCHED_WORKPRIORITY-16)
+#    else
+#      define CONFIG_SCHED_LPWORKPRIOMAX 176
+#    endif
+#  endif
+
+#  ifdef CONFIG_SCHED_HPWORK
+#    if CONFIG_SCHED_LPWORKPRIORITY >= CONFIG_SCHED_WORKPRIORITY
+#      error CONFIG_SCHED_LPWORKPRIORITY >= CONFIG_SCHED_WORKPRIORITY
+#    endif
+#    if CONFIG_SCHED_LPWORKPRIOMAX >= CONFIG_SCHED_WORKPRIORITY
+#      error CONFIG_SCHED_LPWORKPRIOMAX >= CONFIG_SCHED_WORKPRIORITY
+#    endif
+#  endif
+
+#  if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_LPWORKPRIOMAX
+#    error CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_LPWORKPRIOMAX
 #  endif
 
 #  ifndef CONFIG_SCHED_LPWORKPERIOD

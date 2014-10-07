@@ -78,6 +78,13 @@ void lpwork_boostpriority(uint8_t reqprio)
   irqstate_t flags;
   pid_t wpid;
 
+  /* Clip to the configured maximum priority */
+
+  if (reqprio > CONFIG_SCHED_LPWORKPRIOMAX)
+    {
+      reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
+    }
+
   /* Get the process ID of the low priority worker thread from the low
    * priority work queue.  Then get the TCB of the low priority worker
    * thread from the process ID.
@@ -193,6 +200,13 @@ void lpwork_restorepriority(uint8_t reqprio)
   uint8_t wpriority;
   int index;
   int selected;
+
+  /* Clip to the configured maximum priority */
+
+  if (reqprio > CONFIG_SCHED_LPWORKPRIOMAX)
+    {
+      reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
+    }
 
   /* Get the process ID of the low priority worker thread from the low
    * priority work queue.  Then get the TCB of the low priority worker

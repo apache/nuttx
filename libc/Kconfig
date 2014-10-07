@@ -412,9 +412,10 @@ config SCHED_HPWORK
 	bool "High priority (kernel) worker thread"
 	default y
 	---help---
-		If SCHED_WORKQUEUE is defined, then a single, high priority work queue is
-		created by default.  This high priority worker thread is intended to serve
-		as the "bottom half" for driver interrupt handling.
+		If SCHED_WORKQUEUE is defined, then a single, high priority work
+		queue is created by default.  This high priority worker thread is
+		intended to serve as the "bottom half" for driver interrupt
+		handling.
 
 if SCHED_HPWORK
 
@@ -422,7 +423,20 @@ config SCHED_WORKPRIORITY
 	int "High priority worker thread priority"
 	default 192
 	---help---
-		The execution priority of the worker thread.  Default: 192
+		The execution priority of the higher priority worker thread.
+
+		The higher priority worker thread is intended to serve as the
+		"bottom" half for device drivers.  As a consequence it must run at
+		a very high, fixed priority.  Typically, it should be the highest
+		priority thread in your system.  Default: 192
+
+		For lower priority, application oriented worker thread support,
+		please consider enabling the lower priority work queue.  The lower
+		priority work queue runs at a lower priority, of course, but has
+		the added advantage that it supports "priority inheritance" (if
+		PRIORITY_INHERITANCE is also selected):  The priority of the lower
+		priority worker thread can then be adjusted to match the highest
+		priority client.
 
 config SCHED_WORKPERIOD
 	int "High priority worker thread period"
@@ -445,8 +459,9 @@ config SCHED_LPWORK
 		If SCHED_WORKQUEUE is defined, then a single work queue is created by
 		default.  If SCHED_LPWORK is also defined then an additional, lower-
 		priority work queue will also be created.  This lower priority work
-		queue is better suited for more extended processing (such as file system
-		clean-up operations)
+		queue is better suited for more extended, application oriented
+		processing (such as file system clean-up operations or asynchronous
+		I/O)
 
 if SCHED_LPWORK
 
@@ -454,7 +469,55 @@ config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
 	default 50
 	---help---
-		The execution priority of the lopwer priority worker thread.  Default: 50
+		The minimum execution priority of the lower priority worker thread.
+
+		The lower priority worker thread is intended support application-
+		oriented functions.  The lower priority work queue runs at a lower
+		priority, of course, but has the added advantage that it supports
+		"priority inheritance" (if PRIORITY_INHERITANCE is also selected):
+		The priority of the lower priority worker thread can then be
+		adjusted to match the highest priority client.  Default: 50
+
+		NOTE: This priority inheritance feature is not automatic.  The
+		lower priority worker thread will always a fixed priority unless
+		you implement logic that calls lpwork_boostpriority() to raise the
+		priority of the lower priority worker thread (typically called
+		before scheduling the work) and then call the matching
+		lpwork_restorepriority() when the work is completed (typically
+		called within the work handler at the completion of the work).
+		Currently, only the NuttX asynchronous I/O logic uses this dynamic
+		prioritization feature.
+
+		The higher priority worker thread, on the other hand, is intended
+		to serve as the "bottom" half for device drivers.  As a consequence
+		it must run at a very high, fixed priority.  Typically, it should
+		be the highest priority thread in your system.
+
+config SCHED_LPWORKPRIOMAX
+	int "Low priority worker thread maximum priority"
+	default 176
+	depends on PRIORITY_INHERITANCE
+	---help---
+		The maximum execution priority of the lower priority worker thread.
+
+		The lower priority worker thread is intended support application-
+		oriented functions.  The lower priority work queue runs at a lower
+		priority, of course, but has the added advantage that it supports
+		"priority inheritance" (if PRIORITY_INHERITANCE is also selected):
+		The priority of the lower priority worker thread can then be
+		adjusted to match the highest priority client.
+
+		The higher priority worker thread, on the other hand, is intended
+		to serve as the "bottom" half for device drivers.  As a consequence
+		it must run at a very high, fixed priority.  Typically, it should
+		be the highest priority thread in your system.
+
+		This function provides an upper limit on the priority of the lower
+		priority worker thread.  This would be necessary, for example, if
+		the higher priority worker thread were to defer work to the lower
+		priority thread.  Clearly, in such a case, you would want to limit
+		the maximum priority of the lower priority work thread.  Default:
+		176
 
 config SCHED_LPWORKPERIOD
 	int "Low priority worker thread period"
