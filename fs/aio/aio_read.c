@@ -124,7 +124,7 @@ static void aio_read_worker(FAR void *arg)
   if (nread < 0)
     {
       int errcode = get_errno();
-      fdbg("ERROR: pread failed: %d\n", errode);
+      fdbg("ERROR: pread failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       aiocbp->aio_result = -errcode;
     }

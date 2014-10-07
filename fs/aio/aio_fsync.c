@@ -116,7 +116,7 @@ static void aio_fsync_worker(FAR void *arg)
   if (ret < 0)
     {
       int errcode = get_errno();
-      fdbg("ERROR: fsync failed: %d\n", errode);
+      fdbg("ERROR: fsync failed: %d\n", errcode);
       DEBUGASSERT(errcode > 0);
       aiocbp->aio_result = -errcode;
     }

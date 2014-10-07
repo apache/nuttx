@@ -132,7 +132,7 @@ static void aio_write_worker(FAR void *arg)
   if (oflags < 0)
     {
       int errcode = get_errno();
-      fdbg("ERROR: fcntl failed: %d\n", errode);
+      fdbg("ERROR: fcntl failed: %d\n", errcode);
       aiocbp->aio_result = -errcode;
     }
   else
@@ -168,7 +168,7 @@ static void aio_write_worker(FAR void *arg)
       if (nwritten < 0)
         {
           int errcode = get_errno();
-          fdbg("ERROR: write/pwrite failed: %d\n", errode);
+          fdbg("ERROR: write/pwrite failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           aiocbp->aio_result = -errcode;
         }
