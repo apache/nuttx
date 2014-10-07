@@ -55,7 +55,7 @@
 #include "stm32_otgfs.h"
 #include "stm32f429i-disco.h"
 
-#ifdef CONFIG_STM32_OTGFS2
+#ifdef CONFIG_STM32_OTGHS
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -64,7 +64,7 @@
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32_OTGFS2 is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
+#  warning "CONFIG_STM32_OTGHS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
 #  undef HAVE_USB
 #endif
 
@@ -148,7 +148,7 @@ void stm32_usbinitialize(void)
 
   /* Configure the OTG HS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
 
-#ifdef CONFIG_STM32_OTGFS2
+#ifdef CONFIG_STM32_OTGHS
   stm32_configgpio(GPIO_OTGHS_VBUS);
   stm32_configgpio(GPIO_OTGHS_PWRON);
   stm32_configgpio(GPIO_OTGHS_OVER);
@@ -288,5 +288,5 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 }
 #endif
 
-#endif /* CONFIG_STM32_OTGFS2 */
+#endif /* CONFIG_STM32_OTGHS */
 

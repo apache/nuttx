@@ -149,7 +149,7 @@ void weak_function stm32_spiinitialize(void);
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_STM32_OTGFS2
+#ifdef CONFIG_STM32_OTGHS
 void weak_function stm32_usbinitialize(void);
 #endif
 
@@ -162,7 +162,7 @@ void weak_function stm32_usbinitialize(void);
  *
  ****************************************************************************************************/
 
-#if defined(CONFIG_STM32_OTGFS2) && defined(CONFIG_USBHOST)
+#if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
 #endif
 
