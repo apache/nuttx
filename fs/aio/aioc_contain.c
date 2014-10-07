@@ -91,7 +91,9 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
   FAR struct file *filep;
+#ifdef CONFIG_PRIORITY_INHERITANCE
   struct sched_param param;
+#endif
 
   /* Get the file structure corresponding to the file descriptor. */
 
@@ -117,8 +119,10 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
   aioc->aioc_filep = filep;
   aioc->aioc_pid = getpid();
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
   DEBUGVERIFY(sched_getparam (aioc->aioc_pid, &param));
   aioc->aioc_prio = param.sched_priority;
+#endif
 
   /* Add the container to the pending transfer list. */
 
