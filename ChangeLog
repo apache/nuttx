@@ -8785,7 +8785,7 @@
 	* arch/arm/src/stm32/chip/stm32_otghs.hstm32_otghs.c/h and
 	  chip/stm32_otghs.h: Add files that implement true high speed support
 	  for the STM32 OTGHS peripheral.  From Brennan Ashton (2014-10-7).
-	* arch/arm/src/stm32/ (serveral files):  Integrates OTGHS support into
+	* arch/arm/src/stm32/ (several files):  Integrates OTGHS support into
 	  the STM32; Eliminates the older OTGHS in FS mode logic.  From Brennan
 	  Ashton (2014-10-7).
 	* arch/arm/src/stm32/Kconfig, stm32_otgfsdev.c, chip/stm32f40xxx_pinmap.h,
@@ -8799,3 +8799,6 @@
 	  compliant (also modify non-standard syslog functions for
 	  compatibility).  This will break a lot of things until ALL usage of
 	  syslog is updated to use the modified interfaces (2014-10-8).
+	* drivers/: Correct everything under nuttx/drivers to use the corrected
+	  syslog interfaces (2014-10-8).
+
