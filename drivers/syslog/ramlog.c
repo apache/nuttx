@@ -725,10 +725,10 @@ int ramlog_sysloginit(void)
  * Description:
  *   This is the low-level system logging interface.  The debugging/syslogging
  *   interfaces are syslog() and lowsyslog().  The difference is that
- *   the syslog() internface writes to fd=1 (stdout) whereas lowsyslog() uses
- *   a lower level interface that works from interrupt handlers.  This
- *   function is a a low-level interface used to implement lowsyslog()
- *   when CONFIG_RAMLOG_SYSLOG=y and CONFIG_SYSLOG=y
+ *   the syslog() internface writes to syslog device (usually fd=1, stdout)
+ *   whereas lowsyslog() uses a lower level interface that works from
+ *   interrupt handlers.  This function is a a low-level interface used to
+ *   implement lowsyslog() when CONFIG_RAMLOG_SYSLOG=y and CONFIG_SYSLOG=y
  *
  ****************************************************************************/
 

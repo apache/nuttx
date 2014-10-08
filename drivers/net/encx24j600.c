@@ -184,12 +184,18 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_ENCX24J600_REGDEBUG
-#  define enc_wrdump(a,v)   lowsyslog("ENCX24J600: %02x<-%04x\n", a, v);
-#  define enc_rddump(a,v)   lowsyslog("ENCX24J600: %02x->%04x\n", a, v);
-#  define enc_bfsdump(a,m)  lowsyslog("ENCX24J600: %02x|=%04x\n", a, m);
-#  define enc_bfcdump(a,m)  lowsyslog("ENCX24J600: %02x&=~%04x\n", a, m);
-#  define enc_cmddump(c)    lowsyslog("ENCX24J600: CMD: %02x\n", c);
-#  define enc_bmdump(c,b,s) lowsyslog("ENCX24J600: CMD: %02x buffer: %p length: %d\n", c,b,s);
+#  define enc_wrdump(a,v) \
+   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x<-%04x\n", a, v);
+#  define enc_rddump(a,v) \
+   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x->%04x\n", a, v);
+#  define enc_bfsdump(a,m) \
+   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x|=%04x\n", a, m);
+#  define enc_bfcdump(a,m) \
+   lowsyslog(LOG_DEBUG, "ENCX24J600: %02x&=~%04x\n", a, m);
+#  define enc_cmddump(c) \
+   lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x\n", c);
+#  define enc_bmdump(c,b,s) \
+   lowsyslog(LOG_DEBUG, "ENCX24J600: CMD: %02x buffer: %p length: %d\n", c,b,s);
 #else
 #  define enc_wrdump(a,v)
 #  define enc_rddump(a,v)
@@ -803,25 +809,25 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 #if 0 /* Sometimes useful */
 static void enc_rxdump(FAR struct enc_driver_s *priv)
 {
-  lowsyslog("Rx Registers:\n");
-  lowsyslog("  EIE:      %02x EIR:      %02x\n",
+  lowsyslog(LOG_DEBUG, "Rx Registers:\n");
+  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x\n",
             enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR));
-  lowsyslog("  ESTAT:    %02x ECON1:    %02x ECON2:    %02x\n",
+  lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x ECON2:    %02x\n",
             enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1),
             enc_rdgreg(priv, ENC_ECON2));
-  lowsyslog("  ERXST:    %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  ERXST:    %02x %02x\n",
             enc_rdbreg(priv, ENC_ERXSTH), enc_rdbreg(priv, ENC_ERXSTL));
-  lowsyslog("  ERXND:    %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  ERXND:    %02x %02x\n",
             enc_rdbreg(priv, ENC_ERXNDH), enc_rdbreg(priv, ENC_ERXNDL));
-  lowsyslog("  ERXRDPT:  %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  ERXRDPT:  %02x %02x\n",
             enc_rdbreg(priv, ENC_ERXRDPTH), enc_rdbreg(priv, ENC_ERXRDPTL));
-  lowsyslog("  ERXFCON:  %02x EPKTCNT:  %02x\n",
+  lowsyslog(LOG_DEBUG, "  ERXFCON:  %02x EPKTCNT:  %02x\n",
             enc_rdbreg(priv, ENC_ERXFCON), enc_rdbreg(priv, ENC_EPKTCNT));
-  lowsyslog("  MACON1:   %02x MACON3:   %02x\n",
+  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x\n",
             enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3));
-  lowsyslog("  MAMXFL:   %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
             enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
-  lowsyslog("  MAADR:    %02x:%02x:%02x:%02x:%02x:%02x\n",
+  lowsyslog(LOG_DEBUG, "  MAADR:    %02x:%02x:%02x:%02x:%02x:%02x\n",
             enc_rdbreg(priv, ENC_MAADR1), enc_rdbreg(priv, ENC_MAADR2),
             enc_rdbreg(priv, ENC_MAADR3), enc_rdbreg(priv, ENC_MAADR4),
             enc_rdbreg(priv, ENC_MAADR5), enc_rdbreg(priv, ENC_MAADR6));
@@ -831,27 +837,27 @@ static void enc_rxdump(FAR struct enc_driver_s *priv)
 #if 0 /* Sometimes useful */
 static void enc_txdump(FAR struct enc_driver_s *priv)
 {
-  lowsyslog("Tx Registers:\n");
-  lowsyslog("  EIE:      %02x EIR:      %02x ESTAT:    %02x\n",
+  lowsyslog(LOG_DEBUG, "Tx Registers:\n");
+  lowsyslog(LOG_DEBUG, "  EIE:      %02x EIR:      %02x ESTAT:    %02x\n",
             enc_rdgreg(priv, ENC_EIE), enc_rdgreg(priv, ENC_EIR),);
-  lowsyslog("  ESTAT:    %02x ECON1:    %02x\n",
+  lowsyslog(LOG_DEBUG, "  ESTAT:    %02x ECON1:    %02x\n",
             enc_rdgreg(priv, ENC_ESTAT), enc_rdgreg(priv, ENC_ECON1));
-  lowsyslog("  ETXST:    %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  ETXST:    %02x %02x\n",
             enc_rdbreg(priv, ENC_ETXSTH), enc_rdbreg(priv, ENC_ETXSTL));
-  lowsyslog("  ETXND:    %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  ETXND:    %02x %02x\n",
             enc_rdbreg(priv, ENC_ETXNDH), enc_rdbreg(priv, ENC_ETXNDL));
-  lowsyslog("  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
+  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
             enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
             enc_rdbreg(priv, ENC_MACON4));
-  lowsyslog("  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
+  lowsyslog(LOG_DEBUG, "  MACON1:   %02x MACON3:   %02x MACON4:   %02x\n",
             enc_rdbreg(priv, ENC_MACON1), enc_rdbreg(priv, ENC_MACON3),
             enc_rdbreg(priv, ENC_MACON4));
-  lowsyslog("  MABBIPG:  %02x MAIPG %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  MABBIPG:  %02x MAIPG %02x %02x\n",
             enc_rdbreg(priv, ENC_MABBIPG), enc_rdbreg(priv, ENC_MAIPGH),
             enc_rdbreg(priv, ENC_MAIPGL));
-  lowsyslog("  MACLCON1: %02x MACLCON2:   %02x\n",
+  lowsyslog(LOG_DEBUG, "  MACLCON1: %02x MACLCON2:   %02x\n",
             enc_rdbreg(priv, ENC_MACLCON1), enc_rdbreg(priv, ENC_MACLCON2));
-  lowsyslog("  MAMXFL:   %02x %02x\n",
+  lowsyslog(LOG_DEBUG, "  MAMXFL:   %02x %02x\n",
             enc_rdbreg(priv, ENC_MAMXFLH), enc_rdbreg(priv, ENC_MAMXFLL));
 }
 #endif

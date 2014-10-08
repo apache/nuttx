@@ -497,14 +497,14 @@ static void ssd1289_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixe
 {
   int i, j;
 
-  syslog("\n%s:\n", msg);
+  syslog(LOG_INFO, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
     {
       up_putc(' ');
-      syslog(" ");
+      syslog(LOG_INFO, " ");
       for (j = 0; j < 16; j++)
         {
-          syslog(" %04x", *run++);
+          syslog(LOG_INFO, " %04x", *run++);
         }
       up_putc('\n');
     }

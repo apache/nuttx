@@ -53,14 +53,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* This needs to match the logic in include/debug.h */
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  define message(format, ...) syslog(format, ##__VA_ARGS__)
-#else
-#  define message syslog
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -101,6 +93,7 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
     {
       fvdbg("  MMC SPEC_VERS:           %d\n", MMC_CSD_SPECVERS(csd));
     }
+
   fvdbg("  TAAC:\n",
       sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
   fvdbg("    TIME_VALUE:            0x%02x\n",

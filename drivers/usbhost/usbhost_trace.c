@@ -108,7 +108,7 @@ static int usbhost_trsyslog(uint32_t event, FAR void *arg)
     {
       /* Just print the data using syslog() */
 
-      syslog(fmt, (unsigned int)TRACE_DECODE_U23(event));
+      syslog(LOG_INFO, fmt, (unsigned int)TRACE_DECODE_U23(event));
     }
 
   /* No, then it must the the two argument format first. */
@@ -121,7 +121,7 @@ static int usbhost_trsyslog(uint32_t event, FAR void *arg)
         {
           /* Just print the data using syslog() */
 
-          syslog(fmt, (unsigned int)TRACE_DECODE_U7(event),
+          syslog(LOG_INFO, fmt, (unsigned int)TRACE_DECODE_U7(event),
                  (unsigned int)TRACE_DECODE_U16(event));
         }
     }
@@ -206,7 +206,7 @@ void usbhost_trace1(uint16_t id, uint32_t u23)
 
   /* Just print the data using syslog() */
 
-  syslog(fmt, (unsigned int)u23);
+  syslog(LOG_INFO, fmt, (unsigned int)u23);
 #endif
 }
 
@@ -224,7 +224,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16)
 
   /* Just print the data using syslog() */
 
-  syslog(fmt, u7, u16);
+  syslog(LOG_INFO, fmt, u7, u16);
 #endif
 }
 

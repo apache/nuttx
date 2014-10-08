@@ -204,30 +204,6 @@
 #  define CONFIG_USBMSC_SCSI_STACKSIZE 2048
 #endif
 
-/* Debug -- must be consistent with include/debug.h */
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    ifdef CONFIG_ARCH_LOWPUTC
-#      define dbgprintf(format, ...) lowsyslog(format, ##__VA_ARGS__)
-#    else
-#      define dbgprintf(format, ...) syslog(format, ##__VA_ARGS__)
-#     endif
-#  else
-#      define dbgprintf(x...)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    ifdef CONFIG_ARCH_LOWPUTC
-#      define dbgprintf lowsyslog
-#    else
-#      define dbgprintf syslog
-#     endif
-#  else
-#      define dbgprintf (void)
-#  endif
-#endif
-
 /* Packet and request buffer sizes */
 
 #ifndef CONFIG_USBMSC_EP0MAXPACKET
