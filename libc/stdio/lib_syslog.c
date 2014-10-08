@@ -146,7 +146,7 @@ int syslog(int priority, FAR const char *fmt, ...)
 #endif
     {
       va_start(ap, fmt);
-      ret = vsyslog(fmt, ap);
+      ret = vsyslog(priority, fmt, ap);
       va_end(ap);
     }
 

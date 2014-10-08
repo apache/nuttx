@@ -119,7 +119,7 @@ int lowsyslog(int priority, FAR const char *fmt, ...)
 #endif
     {
       va_start(ap, fmt);
-      ret = lowvsyslog(fmt, ap);
+      ret = lowvsyslog(priority, fmt, ap);
       va_end(ap);
     }
 
