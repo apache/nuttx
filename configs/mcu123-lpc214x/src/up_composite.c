@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
@@ -69,26 +69,6 @@
 #else
    /* Add configuration for new LPC214x boards here */
 #  error "Unrecognized LPC214x board"
-#endif
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
 #endif
 
 /****************************************************************************
@@ -119,35 +99,36 @@ int composite_archinitialize(void)
 
   /* Get the SPI port */
 
-  message("composite_archinitialize: Initializing SPI port %d\n",
-          LPC214X_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Initializing SPI port %d\n", LPC214X_MMCSDSPIPORTNO);
 
   spi = up_spiinitialize(LPC214X_MMCSDSPIPORTNO);
   if (!spi)
     {
-      message("composite_archinitialize: Failed to initialize SPI port %d\n",
-              LPC214X_MMCSDSPIPORTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             LPC214X_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  message("composite_archinitialize: Successfully initialized SPI port %d\n",
-          LPC214X_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+         LPC214X_MMCSDSPIPORTNO);
 
   /* Bind the SPI port to the slot */
 
-  message("composite_archinitialize: Binding SPI port %d to MMC/SD slot %d\n",
-          LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
+         LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1, LPC214X_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1,
+                                LPC214X_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("composite_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-              LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO, ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+             LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  message("composite_archinitialize: Successfuly bound SPI port %d to MMC/SD slot %d\n",
-          LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
+         LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
 
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
