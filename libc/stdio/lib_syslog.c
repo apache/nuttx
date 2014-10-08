@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_syslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@
  * Name: vsyslog
  ****************************************************************************/
 
-int vsyslog(FAR const char *fmt, va_list ap)
+int vsyslog(int priority, FAR const char *fmt, va_list ap)
 {
 #if defined(CONFIG_SYSLOG)
 
@@ -135,7 +135,7 @@ int vsyslog(FAR const char *fmt, va_list ap)
  * Name: syslog
  ****************************************************************************/
 
-int syslog(FAR const char *fmt, ...)
+int syslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
   int     ret;

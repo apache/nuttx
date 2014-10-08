@@ -128,12 +128,12 @@ int setlogmask(int mask);
  * following.
  */
 
-int syslog(FAR const char *format, ...);
-int vsyslog(const char *src, va_list ap);
+int syslog(int priority, FAR const char *format, ...);
+int vsyslog(int priority, FAR const char *src, va_list ap);
 
 #ifdef CONFIG_ARCH_LOWPUTC /* Non-standard */
-int lowsyslog(FAR const char *format, ...);
-int lowvsyslog(FAR const char *src, va_list ap);
+int lowsyslog(int priority, FAR const char *format, ...);
+int lowvsyslog(int priority, FAR const char *src, va_list ap);
 #endif
 
 /* Enable or disable syslog output */

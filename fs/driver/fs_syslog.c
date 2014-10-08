@@ -360,9 +360,10 @@ int syslog_initialize(void)
  * Description:
  *   This is the low-level system logging interface.  The debugging/syslogging
  *   interfaces are syslog() and lowsyslog().  The difference is is that
- *   the syslog() function writes to fd=1 (stdout) whereas lowsyslog() uses
- *   a lower level interface that works from interrupt handlers.  This
- *   function is a a low-level interface used to implement lowsyslog().
+ *   the syslog() function writes to syslogging device (usually fd=1, stdout)
+ *   whereas lowsyslog() uses a lower level interface that works from
+ *   interrupt handlers.  This function is a a low-level interface used to
+ *   implement lowsyslog().
  *
  ****************************************************************************/
 

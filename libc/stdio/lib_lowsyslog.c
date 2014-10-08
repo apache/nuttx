@@ -49,7 +49,7 @@
 #if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -90,7 +90,7 @@
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
 
-int lowvsyslog(FAR const char *fmt, va_list ap)
+int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
 {
   struct lib_outstream_s stream;
 
@@ -108,7 +108,7 @@ int lowvsyslog(FAR const char *fmt, va_list ap)
  * Name: lowsyslog
  ****************************************************************************/
 
-int lowsyslog(FAR const char *fmt, ...)
+int lowsyslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
   int     ret;

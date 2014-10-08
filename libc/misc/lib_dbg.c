@@ -95,7 +95,7 @@ int dbg(const char *format, ...)
 #endif
     {
       va_start(ap, format);
-      ret = vsyslog(format, ap);
+      ret = vsyslog(LOG_DEBUG, format, ap);
       va_end(ap);
     }
 
@@ -114,7 +114,7 @@ int lldbg(const char *format, ...)
 #endif
     {
       va_start(ap, format);
-      ret = lowvsyslog(format, ap);
+      ret = lowvsyslog(LOG_DEBUG, format, ap);
       va_end(ap);
     }
 
@@ -134,7 +134,7 @@ int vdbg(const char *format, ...)
 #endif
     {
       va_start(ap, format);
-      ret = vsyslog(format, ap);
+      ret = vsyslog(LOG_DEBUG, format, ap);
       va_end(ap);
     }
 
@@ -153,7 +153,7 @@ int llvdbg(const char *format, ...)
 #endif
     {
       va_start(ap, format);
-      ret = lowvsyslog(format, ap);
+      ret = lowvsyslog(LOG_DEBUG, format, ap);
       va_end(ap);
     }
 

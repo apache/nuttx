@@ -104,22 +104,22 @@
 
 #ifdef CONFIG_DEBUG
 # define dbg(format, ...) \
-  syslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+  syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 # ifdef CONFIG_ARCH_LOWPUTC
 #  define lldbg(format, ...) \
-   lowsyslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
 #  define lldbg(x...)
 # endif
 
 # ifdef CONFIG_DEBUG_VERBOSE
 #  define vdbg(format, ...) \
-   syslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #  ifdef CONFIG_ARCH_LOWPUTC
 #    define llvdbg(format, ...) \
-     lowsyslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+     lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define llvdbg(x...)
 #  endif
