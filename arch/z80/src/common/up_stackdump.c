@@ -39,6 +39,13 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info -- even if debug is not selected. */
+
+#undef  CONFIG_DEBUG
+#undef  CONFIG_DEBUG_VERBOSE
+#define CONFIG_DEBUG 1
+#define CONFIG_DEBUG_VERBOSE 1
+
 #include <stdint.h>
 #include <debug.h>
 
@@ -46,18 +53,11 @@
 #include "sched/sched.h"
 #include "up_internal.h"
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/* Output debug info if stack dump is selected -- even if
- * debug is not selected.
- */
-
 #ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
-#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -76,7 +76,6 @@
  * Name: up_stackdump
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
 static void up_stackdump(void)
 {
   struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
@@ -106,4 +105,5 @@ static void up_stackdump(void)
         }
     }
 }
-#endif
+
+#endif /* CONFIG_ARCH_STACKDUMP */

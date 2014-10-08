@@ -119,7 +119,7 @@ void up_initialize(void)
    */
 
 #ifdef CONFIG_NET
-  syslog("SIM: Initializing");
+  syslog(LOG_INFO, "SIM: Initializing");
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

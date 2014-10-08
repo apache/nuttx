@@ -39,6 +39,17 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info if stack dump is selected -- even if debug is not
+ * selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  CONFIG_DEBUG
+# undef  CONFIG_DEBUG_VERBOSE
+# define CONFIG_DEBUG 1
+# define CONFIG_DEBUG_VERBOSE 1
+#endif
+
 #include <stdint.h>
 #include <string.h>
 #include <syscall.h>
@@ -63,15 +74,6 @@
 # define svcdbg(format, ...) lldbg(format, ##__VA_ARGS__)
 #else
 # define svcdbg(x...)
-#endif
-
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
 #endif
 
 /****************************************************************************

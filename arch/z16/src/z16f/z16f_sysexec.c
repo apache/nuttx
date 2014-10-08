@@ -48,14 +48,8 @@
 #include "up_internal.h"
 
 /***************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ***************************************************************************/
-
-#ifdef CONFIG_ARCH_LOWPUTC
-#  define SYSDBG lowsyslog
-#else
-#  define SYSDBG syslog
-#endif
 
 /***************************************************************************
  * Private Types
@@ -94,42 +88,42 @@ void z16f_sysexec(FAR chipreg_t *regs)
   excp = getreg16(Z16F_SYSEXCP);
   if ((excp & Z16F_SYSEXCP_SPOVF) != 0)
     {
-      SYSDBG("SP OVERFLOW\n");
+      lowsyslog(LOG_ERR, "SP OVERFLOW\n");
     }
 
   if ((excp & Z16F_SYSEXCP_PCOVF) != 0)
     {
-      SYSDBG("PC OVERFLOW\n");
+      lowsyslog(LOG_ERR, "PC OVERFLOW\n");
     }
 
   if ((excp & Z16F_SYSEXCP_DIV0) != 0)
     {
-      SYSDBG("Divide by zero\n");
+      lowsyslog(LOG_ERR, "Divide by zero\n");
     }
 
   if ((excp & Z16F_SYSEXCP_DIVOVF) != 0)
     {
-      SYSDBG("Divide overflow\n");
+      lowsyslog(LOG_ERR, "Divide overflow\n");
     }
 
   if ((excp & Z16F_SYSEXCP_ILL) != 0)
     {
-      SYSDBG("Illegal instruction\n");
+      lowsyslog(LOG_ERR, "Illegal instruction\n");
     }
 
   if ((excp & Z16F_SYSEXCP_WDTOSC) != 0)
     {
-      SYSDBG("WDT oscillator failure\n");
+      lowsyslog(LOG_ERR, "WDT oscillator failure\n");
     }
 
   if ((excp & Z16F_SYSEXCP_PRIOSC) != 0)
     {
-      SYSDBG("Primary Oscillator Failure\n");
+      lowsyslog(LOG_ERR, "Primary Oscillator Failure\n");
     }
 
   if ((excp & Z16F_SYSEXCP_WDT) != 0)
     {
-      SYSDBG("Watchdog timeout\n");
+      lowsyslog(LOG_ERR, "Watchdog timeout\n");
       z16f_reset();
     }
 
