@@ -132,8 +132,28 @@ int syslog(int priority, FAR const char *format, ...);
 int vsyslog(int priority, FAR const char *src, va_list ap);
 
 #ifdef CONFIG_ARCH_LOWPUTC /* Non-standard */
+/* These are non-standard, low-level system logging interface.  The
+ * difference between syslog() and lowsyslog() is that the syslog()
+ * interface writes to the syslog device (usually fd=1, stdout) whereas
+ * lowsyslog() uses a lower level interface that works even from interrupt
+ * handlers.
+ */
+
 int lowsyslog(int priority, FAR const char *format, ...);
-int lowvsyslog(int priority, FAR const char *src, va_list ap);
+int lowvsyslog(int priority, FAR const char *format, va_list ap);
+#else
+/* If the platform cannot support lowsyslog, then we will substitute the
+ * standard syslogging functions.  These will, however, probably cause
+ * problems if called from interrupt handlers, depending upon the nature of
+ * the underlying syslog device.
+ */
+
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define lowsyslog(p,f,...) syslog(p,f,##__VA_ARGS__)
+#  else
+#    define lowsyslog (void)
+#  endif
+#  define lowvsyslog(p,f,a) vsyslog(p,f,a)
 #endif
 
 /* Enable or disable syslog output */

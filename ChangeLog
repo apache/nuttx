@@ -8799,6 +8799,6 @@
 	  compliant (also modify non-standard syslog functions for
 	  compatibility).  This will break a lot of things until ALL usage of
 	  syslog is updated to use the modified interfaces (2014-10-8).
-	* drivers/: Correct everything under nuttx/drivers to use the corrected
-	  syslog interfaces (2014-10-8).
+	* drivers/: Correct everything under nuttx/drivers and nuttx/net to
+	  use the corrected syslog interfaces (2014-10-8).
 
