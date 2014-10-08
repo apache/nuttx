@@ -41,7 +41,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifdef CONFIG_SYSTEM_USBMONITOR
@@ -69,22 +69,6 @@
 #  endif
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -106,12 +90,12 @@ int nsh_archinitialize(void)
 #ifdef HAVE_MMCSD
   /* Create the SDIO-based MMC/SD device */
 
-  message("nsh_archinitialize: Create the MMC/SD device\n");
+  syslog(LOG_INFO, "Create the MMC/SD device\n");
   ret = lpc31_mmcsd_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDMINOR);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDMINOR);
       return -ENODEV;
     }
 #endif
@@ -121,11 +105,11 @@ int nsh_archinitialize(void)
    * will monitor for USB connection and disconnection events.
    */
 
-  message("nsh_archinitialize: Start USB host services\n");
+  syslog(LOG_INFO, "Start USB host services\n");
   ret = lpc31_usbhost_initialize();
   if (ret != OK)
     {
-      message("ERROR: Failed to start USB host services: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB host services: %d\n", ret);
       return ret;
     }
 #endif
@@ -133,11 +117,11 @@ int nsh_archinitialize(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  message("nsh_archinitialize: Start the USB monitor\n");
+  syslog(LOG_ERR, "ERROR: Failed to start the USB monitor\n");
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to start USB monitor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

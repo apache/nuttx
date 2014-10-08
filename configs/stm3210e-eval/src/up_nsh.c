@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifdef CONFIG_STM32_SPI1
@@ -104,22 +104,6 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -148,25 +132,27 @@ int nsh_archinitialize(void)
 #ifdef CONFIG_STM32_SPI1
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port 1\n");
+  syslog(LOG_INFO, "Initializing SPI port 1\n");
   spi = up_spiinitialize(1);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port 0\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 0\n");
       return -ENODEV;
     }
-  message("nsh_archinitialize: Successfully initialized SPI port 0\n");
+  syslog(LOG_INFO, "Successfully initialized SPI port 0\n");
 
   /* Now bind the SPI interface to the M25P64/128 SPI FLASH driver */
 
-  message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
+  syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
+
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
-  message("nsh_archinitialize: Successfully bound SPI port 0 to the SPI FLASH driver\n");
+
+  syslog(LOG_INFO, "Successfully bound SPI port 0 to the SPI FLASH driver\n");
 #warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
@@ -180,27 +166,29 @@ int nsh_archinitialize(void)
 #ifdef NSH_HAVEMMCSD
   /* First, get an instance of the SDIO interface */
 
-  message("nsh_archinitialize: Initializing SDIO slot %d\n",
-          CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDIO slot %d\n",
+         CONFIG_NSH_MMCSDSLOTNO);
+
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_NSH_MMCSDMINOR);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_NSH_MMCSDMINOR);
+
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
+  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the STM3210E-EVAL board supports a GPIO to detect if there is a card in

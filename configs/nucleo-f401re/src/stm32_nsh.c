@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -57,23 +57,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Private Data
@@ -127,8 +110,8 @@ int nsh_archinitialize(void)
   g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!g_sdio)
     {
-      message("[boot] Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
@@ -137,7 +120,9 @@ int nsh_archinitialize(void)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
   if (ret != OK)
     {
-      message("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
 
@@ -147,7 +132,7 @@ int nsh_archinitialize(void)
 
   sdio_mediachange(g_sdio, true);
 
-  message("[boot] Initialized SDIO\n");
+  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
 #endif
 
   return OK;

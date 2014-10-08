@@ -42,7 +42,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
@@ -149,22 +149,6 @@
 #  endif
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -191,7 +175,7 @@ static int nsh_waiter(int argc, char *argv[])
   bool connected = false;
   int ret;
 
-  message("nsh_waiter: Running\n");
+  syslog(LOG_INFO, "nsh_waiter: Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
@@ -200,7 +184,8 @@ static int nsh_waiter(int argc, char *argv[])
       DEBUGASSERT(ret == OK);
 
       connected = !connected;
-      message("nsh_waiter: %s\n", connected ? "connected" : "disconnected");
+      syslog(LOG_INFO, "nsh_waiter: %s\n",
+             connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -237,14 +222,14 @@ static int nsh_sdinitialize(void)
   spi = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
       ret = -ENODEV;
       goto errout;
     }
 
-  message("Successfully initialized SPI port %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* The SPI should be in 8-bit (default) and mode2: CKP=1, CKE=0.
    * The MMC/SD driver will control the SPI frequency.  WARNING:
@@ -261,16 +246,18 @@ static int nsh_sdinitialize(void)
                                CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("nsh_sdinitialize: "
-              "Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO,
-              CONFIG_NSH_MMCSDSLOTNO, ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO,
+             CONFIG_NSH_MMCSDSLOTNO, ret);
       goto errout;
     }
 
-  message("Successfuly bound SPI port %d to MMC/SD slot %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO,
-          CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO,
+         "Successfully bound SPI port %d to MMC/SD slot %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO,
+         CONFIG_NSH_MMCSDSLOTNO);
+
   return OK;
 
 errout:
@@ -298,22 +285,22 @@ static int nsh_usbhostinitialize(void)
    * that we care about:
    */
 
-  message("nsh_usbhostinitialize: Register class drivers\n");
+  syslog(LOG_INFO, "Register class drivers\n");
   ret = usbhost_storageinit();
   if (ret != OK)
     {
-      message("nsh_usbhostinitialize: Failed to register the mass storage class\n");
+      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class\n");
     }
 
   /* Then get an instance of the USB host interface */
 
-  message("nsh_usbhostinitialize: Initialize USB host\n");
+  syslog(LOG_INFO, "Initialize USB host\n");
   g_usbconn = pic32_usbhost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
 
-      message("nsh_usbhostinitialize: Start nsh_waiter\n");
+      syslog(LOG_INFO, "Start nsh_waiter\n");
 
       pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                         CONFIG_USBHOST_STACKSIZE,
@@ -381,5 +368,6 @@ int nsh_archinitialize(void)
 
       ret = nsh_usbdevinitialize();
     }
+
   return ret;
 }

@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -147,22 +147,6 @@
 #  endif
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -192,28 +176,29 @@ int nsh_archinitialize(void)
 #ifdef CONFIG_STM32_SPI3
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port 3\n");
+  syslog(LOG_INFO, "Initializing SPI port 3\n");
   spi = up_spiinitialize(3);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port 3\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 3\n");
       return -ENODEV;
     }
 
-  message("nsh_archinitialize: Successfully initialized SPI port 3\n");
+  syslog(LOG_INFO, "Successfully initialized SPI port 3\n");
 
   /* Now bind the SPI interface to the M25P8 SPI FLASH driver */
 
 #if defined(CONFIG_MTD) && defined(CONFIG_MIKROE_FLASH)
-  message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
+  syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
+
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port 3 to the SPI FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 3 to the SPI FLASH driver\n");
     }
   else
     {
-      message("nsh_archinitialize: Successfully bound SPI port 3 to the SPI FLASH driver\n");
+      syslog(LOG_INFO, "Successfully bound SPI port 3 to the SPI FLASH driver\n");
 
 #ifdef CONFIG_MIKROE_FLASH_PART
       {
@@ -317,16 +302,17 @@ int nsh_archinitialize(void)
 #ifdef NSH_HAVEMMCSD
   /* Bind the spi interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_NSH_MMCSDMINOR);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_NSH_MMCSDMINOR);
+
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SPI to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI to the MMC/SD driver: %d\n", ret);
     }
   else
     {
-      message("nsh_archinitialize: Successfully bound SPI to the MMC/SD driver\n");
+      syslog(LOG_INFO, "Successfully bound SPI to the MMC/SD driver\n");
     }
 #endif
 
@@ -338,7 +324,7 @@ int nsh_archinitialize(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize USB host: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif
@@ -349,19 +335,19 @@ int nsh_archinitialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 
 #if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
   /* Configure the TFT LCD module */
 
-  message("nsh_archinitialize: Initializing TFT LCD module\n");
+  syslog(LOG_INFO, "Initializing TFT LCD module\n");
 
   ret = up_lcdinitialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize TFT LCD module\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize TFT LCD module\n");
     }
 
 #endif

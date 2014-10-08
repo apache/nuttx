@@ -45,7 +45,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
-#include <debug.h>
+#include <syslog.h>
 
 #ifdef CONFIG_PIC32MX_SPI2
 #  include <nuttx/spi/spi.h>

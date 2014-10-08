@@ -44,7 +44,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
-#include <debug.h>
+#include <syslog.h>
 
 #ifdef CONFIG_SYSTEM_USBMONITOR
 #  include <apps/usbmonitor.h>
@@ -55,22 +55,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) syslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message syslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -96,7 +80,7 @@ int nsh_archinitialize(void)
   ret = sam_at25_automount(0);
   if (ret < 0)
     {
-      message("ERROR: sam_at25_automount() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_at25_automount() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -107,7 +91,7 @@ int nsh_archinitialize(void)
   ret = sam_hsmci_initialize(0);
   if (ret < 0)
     {
-      message("ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -118,7 +102,7 @@ int nsh_archinitialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
       return ret;
     }
 #endif

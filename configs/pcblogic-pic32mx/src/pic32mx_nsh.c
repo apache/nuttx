@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <syslog.h>
 
 #include <nuttx/lcd/hd4478ou.h>
 #include <arch/board/board.h>
@@ -54,22 +54,6 @@
 
 #ifndef OK
 #  define OK 0
-#endif
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
 #endif
 
 /****************************************************************************

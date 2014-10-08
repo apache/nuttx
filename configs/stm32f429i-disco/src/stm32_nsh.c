@@ -41,7 +41,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -112,22 +112,6 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -165,15 +149,16 @@ int nsh_archinitialize(void)
 #ifdef CONFIG_STM32_SPI4
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port 4\n");
+  syslog(LOG_INFO, "Initializing SPI port 4\n");
+
   spi = up_spiinitialize(4);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port 4\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 4\n");
       return -ENODEV;
     }
 
-  message("nsh_archinitialize: Successfully initialized SPI port 4\n");
+  syslog(LOG_INFO, "Successfully initialized SPI port 4\n");
 
   /* Now bind the SPI interface to the SST25F064 SPI FLASH driver.  This
    * is a FLASH device that has been added external to the board (i.e.
@@ -181,15 +166,16 @@ int nsh_archinitialize(void)
    */
 
 #if defined(CONFIG_MTD) && defined(CONFIG_MTD_SST25XX)
-  message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
+  syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
+
   mtd = sst25xx_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port 4 to the SPI FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 4 to the SPI FLASH driver\n");
     }
   else
     {
-      message("nsh_archinitialize: Successfully bound SPI port 4 to the SPI FLASH driver\n");
+      syslog(LOG_INFO, "Successfully bound SPI port 4 to the SPI FLASH driver\n");
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
       {
@@ -314,7 +300,7 @@ int nsh_archinitialize(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize USB host: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 
@@ -324,7 +310,7 @@ int nsh_archinitialize(void)
   ret = usbhost_storageinit();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize USB host storage: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host storage: %d\n", ret);
       return ret;
     }
 
@@ -338,7 +324,7 @@ int nsh_archinitialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

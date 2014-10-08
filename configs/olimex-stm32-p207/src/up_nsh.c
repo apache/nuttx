@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifdef CONFIG_SYSTEM_USBMONITOR
@@ -93,22 +93,6 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -140,7 +124,7 @@ int nsh_archinitialize(void)
   ret = stm32_can_initialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize CAN: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize CAN: %d\n", ret);
     }
 #endif
 
@@ -150,7 +134,7 @@ int nsh_archinitialize(void)
   ret = stm32_adc_initialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize ADC: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
     }
 #endif
 
@@ -162,7 +146,7 @@ int nsh_archinitialize(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize USB host: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif
@@ -173,7 +157,7 @@ int nsh_archinitialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

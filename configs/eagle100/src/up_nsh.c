@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
@@ -91,22 +91,6 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -126,34 +110,34 @@ int nsh_archinitialize(void)
 
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Initializing SPI port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
 
   spi = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  message("nsh_archinitialize: Successfully initialized SPI port %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SPI port to the slot */
 
-  message("nsh_archinitialize: Binding SPI port %d to MMC/SD slot %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("nsh_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  message("nsh_archinitialize: Successfuly bound SPI port %d to MMC/SD slot %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Successfuly bound SPI port %d to MMC/SD slot %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
   return OK;
 }

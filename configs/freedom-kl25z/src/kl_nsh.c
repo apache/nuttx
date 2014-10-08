@@ -41,29 +41,13 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <syslog.h>
 
 #ifdef CONFIG_NSH_LIBRARY
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
