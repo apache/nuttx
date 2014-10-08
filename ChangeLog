@@ -8802,4 +8802,6 @@
 	* drivers/: Correct everything under nuttx/drivers, nuttx/arch, nuttx/net,
 	  nuttx/binfmt, and nuttx/configs to use the corrected syslog interfaces
 	  (2014-10-8).
+	* libc/syslog: Move syslog logic from libc/misc and libc/stdio to
+	  libc/syslog (2014-10-8).
 
