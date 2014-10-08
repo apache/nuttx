@@ -8792,4 +8792,10 @@
 	  configs/stm32f429i-disco/ (several files): Remove non-functional
 	  vestiges of OTGHS in FS mode (including OTGFS2); try to convert the
 	  stm32f429i-disco configuration to use OTGHS instead of OTFHS in F
- 	  mode (OTGFS2).  But I don't have the boards and can't test (2014-10-7).
+	  mode (OTGFS2).  But I don't have the boards and can't test (2014-10-7).
+	* include/syslog.h, debug.h, libc/libc.csv, misc/lib_dbg.c,
+	  lib_dumpbuffer.c, stdio/lib_lowsyslog.c, lib_printf.c, lib_syslog.c,
+	  and fs/driver/fs_syslog.c: Make standard syslog and vsyslog POSIX
+	  compliant (also modify non-standard syslog functions for
+	  compatibility).  This will break a lot of things until ALL usage of
+	  syslog is updated to use the modified interfaces (2014-10-8).
