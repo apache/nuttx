@@ -712,6 +712,7 @@ static void stm3210e_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
         {
           syslog(LOG_DEBUG, " %04x", *run++);
         }
+
       up_putc('\n');
     }
 }
