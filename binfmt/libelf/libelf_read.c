@@ -54,8 +54,6 @@
  ****************************************************************************/
 
 #undef ELF_DUMP_READDATA       /* Define to dump all file data read */
-#define DUMPER syslog          /* If ELF_DUMP_READDATA is defined, this
-                                * is the API used to dump data */
 
 /****************************************************************************
  * Private Constant Data
@@ -78,12 +76,13 @@ static inline void elf_dumpreaddata(char *buffer, int buflen)
 
   for (i = 0; i < buflen; i += 32)
     {
-      DUMPER("%04x:", i);
+      syslog(LOG_DEBUG, "%04x:", i);
       for (j = 0; j < 32; j += sizeof(uint32_t))
         {
-          DUMPER("  %08x", *buf32++);
+          syslog(LOG_DEBUG, "  %08x", *buf32++);
         }
-      DUMPER("\n");
+
+      syslog(LOG_DEBUG, "\n");
     }
 }
 #else
