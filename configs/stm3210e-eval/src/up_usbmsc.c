@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/sdio.h>
@@ -74,27 +74,6 @@
 #  error "Unrecognized STM32 board"
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
-#endif
-
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -110,7 +89,7 @@
 int usbmsc_archinitialize(void)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * already have been initialized in nsh_archinitialize() (see up_nsh.c).  In
    * this case, there is nothing further to be done here.
    */
 
@@ -120,34 +99,31 @@ int usbmsc_archinitialize(void)
 
   /* First, get an instance of the SDIO interface */
 
-  message("usbmsc_archinitialize: "
-          "Initializing SDIO slot %d\n",
-          STM32_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDIO slot %d\n", STM32_MMCSDSLOTNO);
 
   sdio = sdio_initialize(STM32_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("usbmsc_archinitialize: Failed to initialize SDIO slot %d\n",
-              STM32_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             STM32_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  message("usbmsc_archinitialize: "
-          "Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_SYSTEM_USBMSC_DEVMINOR1);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_SYSTEM_USBMSC_DEVMINOR1);
 
   ret = mmcsd_slotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, sdio);
   if (ret != OK)
     {
-      message("usbmsc_archinitialize: "
-              "Failed to bind SDIO to the MMC/SD driver: %d\n",
-              ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
-  message("usbmsc_archinitialize: "
-          "Successfully bound SDIO to the MMC/SD driver\n");
+
+  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the STM3210E-EVAL board supports a GPIO to detect if there is a card in

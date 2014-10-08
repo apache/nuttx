@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
@@ -74,26 +74,6 @@
 #  error "Unrecognized AVR board"
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -113,23 +93,23 @@ int usbmsc_archinitialize(void)
 
   /* Get the SPI port */
 
-  message("Initializing SPI port\n");
+  syslog(LOG_INFO, "Initializing SPI port\n");
 
   spi = up_spiinitialize(AVR_MMCSDSPIPORTNO);
   if (!spi)
     {
-      message("up_spiinitialize failed\n");
+      syslog(LOG_ERR, "ERROR: up_spiinitialize failed\n");
       return -ENODEV;
     }
 
   /* Bind the SPI port to the slot */
 
-  message("Binding SPI port to MMC/SD slot\n");
+  syslog(LOG_INFO, "Binding SPI port to MMC/SD slot\n");
 
   ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, AVR_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("mmcsd_spislotinitialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: mmcsd_spislotinitialize failed: %d\n", ret);
       return ret;
     }
 
