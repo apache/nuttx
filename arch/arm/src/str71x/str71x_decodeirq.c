@@ -52,7 +52,7 @@
 #include "up_internal.h"
 
 /********************************************************************************
- * Pre-procesor Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /********************************************************************************
@@ -90,7 +90,7 @@ void up_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_led_on(LED_INIRQ);
-  lowsyslog("Unexpected IRQ\n");
+  lowsyslog(LOG_ERR, "Unexpected IRQ\n");
   current_regs = regs;
   PANIC();
 #else

@@ -949,11 +949,14 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
   struct stm32_trace_s *trace;
   int i;
 
-  syslog("Elapsed time: %d\n",  clock_systimer() - priv->start_time);
+  syslog(LOG_DEBUG, "Elapsed time: %d\n",
+         clock_systimer() - priv->start_time);
+
   for (i = 0; i <= priv->tndx; i++)
     {
       trace = &priv->trace[i];
-      syslog("%2d. STATUS: %08x COUNT: %4d EVENT: %4d PARM: %08x TIME: %d\n",
+      syslog(LOG_DEBUG,
+             "%2d. STATUS: %08x COUNT: %4d EVENT: %4d PARM: %08x TIME: %d\n",
              i+1, trace->status, trace->count,  trace->event, trace->parm,
              trace->time - priv->start_time);
     }

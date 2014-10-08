@@ -39,6 +39,17 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info if stack dump is selected -- even if debug is not
+ * selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  CONFIG_DEBUG
+# undef  CONFIG_DEBUG_VERBOSE
+# define CONFIG_DEBUG 1
+# define CONFIG_DEBUG_VERBOSE 1
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -56,19 +67,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* USB trace dumping */
 
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
-#endif
-
-/* Output debug info if stack dump is selected -- even if
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
 #endif
 
 /****************************************************************************
@@ -111,9 +114,22 @@ static void _up_assert(int errorcode) /* noreturn_function */
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
+static int usbtrace_syslog(FAR const char *fmt, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Let vsyslog do the real work */
+
+  va_start(ap, fmt);
+  ret = lowvsyslog(LOG_INFO, fmt, ap);
+  va_end(ap);
+  return ret;
+}
+
 static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
-  usbtrace_trprintf((trprintf_t)lowsyslog, trace->event, trace->value);
+  usbtrace_trprintf(FAR usbtrace_syslog, trace->event, FAR trace->value);
   return 0;
 }
 #endif

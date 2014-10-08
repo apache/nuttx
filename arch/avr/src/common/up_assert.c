@@ -39,6 +39,17 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info if stack dump is selected -- even if debug is not
+ * selected.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+# undef  CONFIG_DEBUG
+# undef  CONFIG_DEBUG_VERBOSE
+# define CONFIG_DEBUG 1
+# define CONFIG_DEBUG_VERBOSE 1
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -74,15 +85,6 @@
 #undef CONFIG_PRINT_TASKNAME
 #if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG) || defined(CONFIG_ARCH_STACKDUMP))
 #  define CONFIG_PRINT_TASKNAME 1
-#endif
-
-/* If there is going to be stackdump output, then we should turn on output
- * here unconditionally as well.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-#  undef  lldbg
-#  define lldbg lowsyslog
 #endif
 
 /****************************************************************************
@@ -126,9 +128,22 @@ static void _up_assert(int errorcode)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
+static int usbtrace_syslog(FAR const char *fmt, ...)
 {
-  usbtrace_trprintf((trprintf_t)lowsyslog, trace->event, trace->value);
+  va_list ap;
+  int ret;
+
+  /* Let vsyslog do the real work */
+
+  va_start(ap, fmt);
+  ret = lowvsyslog(LOG_INFO, fmt, ap);
+  va_end(ap);
+  return ret;
+}
+
+static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+{
+  usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
 }
 #endif

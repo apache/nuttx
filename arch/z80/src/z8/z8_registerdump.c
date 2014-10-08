@@ -39,6 +39,13 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info -- even if debug is not selected. */
+
+#undef  CONFIG_DEBUG
+#undef  CONFIG_DEBUG_VERBOSE
+#define CONFIG_DEBUG 1
+#define CONFIG_DEBUG_VERBOSE 1
+
 #include <stdint.h>
 #include <debug.h>
 
@@ -48,18 +55,11 @@
 #include "chip/switch.h"
 #include "up_internal.h"
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/* Output debug info if stack dump is selected -- even if
- * debug is not selected.
- */
-
 #ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
-#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -69,7 +69,6 @@
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
 static inline void z8_dumpregs(FAR chipret_t *regs)
 {
   lldbg("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
@@ -84,8 +83,6 @@ static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
         sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
 }
 
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -94,7 +91,6 @@ static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
  * Name: z8_registerdump
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
 void z8_registerdump(void)
 {
   FAR chipret_t *regs;
@@ -137,4 +133,5 @@ void z8_registerdump(void)
         break;
     }
 }
-#endif
+
+#endif /* CONFIG_ARCH_STACKDUMP */

@@ -39,6 +39,13 @@
 
 #include <nuttx/config.h>
 
+/* Output debug info -- even if debug is not selected. */
+
+#undef  CONFIG_DEBUG
+#undef  CONFIG_DEBUG_VERBOSE
+#define CONFIG_DEBUG 1
+#define CONFIG_DEBUG_VERBOSE 1
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -57,13 +64,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Output debug info if stack dump is selected -- even if debug is not
- * selected.
- */
-
-#undef  lldbg
-#define lldbg lowsyslog
 
 /****************************************************************************
  * Private Data

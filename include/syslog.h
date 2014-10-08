@@ -98,6 +98,11 @@
 #define LOG_INFO      1  /* Informational message */
 #define LOG_DEBUG     0  /* Debug-level message */
 
+/* Used with setlogmask() */
+
+#define LOG_MASK(p)   (1 << (p))
+#define LOG_UPTO(p)   ((1 << (p)) - 1)
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
