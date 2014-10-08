@@ -42,7 +42,6 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
 
 #include "shenzhou-internal.h"
 
@@ -54,26 +53,6 @@
 
 #ifndef CONFIG_SYSTEM_COMPOSITE_DEVMINOR1
 #  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
-#endif
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
 #endif
 
 /****************************************************************************
