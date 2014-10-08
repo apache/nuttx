@@ -52,22 +52,6 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-/* Select the lowest level debug interface available */
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_ARCH_LOWPUTC
-#    define message(format, ...) lowsyslog(format, ##__VA_ARGS__)
-#  else
-#    define message(format, ...) syslog(format, ##__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_ARCH_LOWPUTC
-#    define message lowsyslog
-#  else
-#    define message syslog
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -83,8 +67,8 @@
 void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset)
 {
-  message("%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
-          msg, wrb, WRB_SEQNO(wrb), WRB_SENT(wrb), WRB_NRTX(wrb));
+  lowsyslog(LOG_DEBUG, "%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
+            msg, wrb, WRB_SEQNO(wrb), WRB_SENT(wrb), WRB_NRTX(wrb));
   iob_dump("I/O Buffer Chain", WRB_IOB(wrb), len, offset);
 }
 
