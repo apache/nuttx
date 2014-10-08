@@ -83,22 +83,6 @@
 #define LED_BLUE       0
 #define LED_SAFETY     2
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -138,7 +122,7 @@ static void dma_alloc_init(void)
 
   if (dma_allocator == NULL)
     {
-      message("[boot] DMA allocator setup FAILED");
+      syslog(LOG_INFO, "[boot] DMA allocator setup FAILED");
     }
 }
 #else
@@ -239,7 +223,7 @@ int nsh_archinitialize(void)
   spi1 = up_spiinitialize(1);
   if (!spi1)
     {
-      message("[boot] FAILED to initialize SPI port 1\n");
+      syslog(LOG_ERR, "[boot] FAILED to initialize SPI port 1\n");
       board_led_on(LED_AMBER);
       return -ENODEV;
     }
@@ -255,14 +239,14 @@ int nsh_archinitialize(void)
   SPI_SELECT(spi1, PX4_SPIDEV_MPU, false);
   up_udelay(20);
 
-  message("[boot] Initialized SPI port 1 (SENSORS)\n");
+  syslog(LOG_INFO, "[boot] Initialized SPI port 1 (SENSORS)\n");
 
   /* Get the SPI port for the FRAM */
 
   spi2 = up_spiinitialize(2);
   if (!spi2)
     {
-      message("[boot] FAILED to initialize SPI port 2\n");
+      syslog(LOG_ERR, "[boot] FAILED to initialize SPI port 2\n");
       board_led_on(LED_AMBER);
       return -ENODEV;
     }
@@ -278,7 +262,7 @@ int nsh_archinitialize(void)
   SPI_SETMODE(spi2, SPIDEV_MODE3);
   SPI_SELECT(spi2, SPIDEV_FLASH, false);
 
-  message("[boot] Initialized SPI port 2 (RAMTRON FRAM)\n");
+  syslog(LOG_INFO, "[boot] Initialized SPI port 2 (RAMTRON FRAM)\n");
 
 #ifdef CONFIG_MMCSD
   /* First, get an instance of the SDIO interface */
@@ -286,8 +270,8 @@ int nsh_archinitialize(void)
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("[boot] Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "[boot] Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
@@ -296,7 +280,7 @@ int nsh_archinitialize(void)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("[boot] Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "[boot] Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
@@ -306,7 +290,7 @@ int nsh_archinitialize(void)
 
   sdio_mediachange(sdio, true);
 
-  message("[boot] Initialized SDIO\n");
+  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
 #endif
 
   return OK;

@@ -308,7 +308,7 @@ void up_pmbuttons(void)
 
       if (oldhandler != NULL)
         {
-          lowsyslog("WARNING: oldhandler:%p is not NULL!  "
+          lowsyslog(LOG_WARNING, "WARNING: oldhandler:%p is not NULL!  "
                     "Button events may be lost or aliased!\n",
                     oldhandler);
         }
