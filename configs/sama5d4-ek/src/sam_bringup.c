@@ -70,13 +70,9 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_BOARD_INITIALIZE
-#  define message lldbg
+#  define SYSLOG lldbg
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define message(...) syslog(__VA_ARGS__)
-#  else
-#    define message syslog
-#  endif
+#  define SYSLOG dbg
 #endif
 
 /****************************************************************************
@@ -105,7 +101,7 @@ int sam_bringup(void)
   ret = sam_nand_automount(NAND_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_nand_automount failed: %d\n", ret);
+      SYSLOG("ERROR: sam_nand_automount failed: %d\n", ret);
     }
 #endif
 
@@ -115,7 +111,7 @@ int sam_bringup(void)
   ret = sam_at25_automount(AT25_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_at25_automount failed: %d\n", ret);
+      SYSLOG("ERROR: sam_at25_automount failed: %d\n", ret);
     }
 #endif
 
@@ -126,8 +122,8 @@ int sam_bringup(void)
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-              HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
+      SYSLOG("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+             HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
@@ -143,8 +139,8 @@ int sam_bringup(void)
 
       if (ret < 0)
         {
-          message("ERROR: Failed to mount %s: %d\n",
-                  CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT, errno);
+          SYSLOG("ERROR: Failed to mount %s: %d\n",
+                 CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -156,8 +152,8 @@ int sam_bringup(void)
   ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-              HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
+      SYSLOG("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+             HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
     }
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
@@ -173,8 +169,8 @@ int sam_bringup(void)
 
       if (ret < 0)
         {
-          message("ERROR: Failed to mount %s: %d\n",
-                  CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT, errno);
+          SYSLOG("ERROR: Failed to mount %s: %d\n",
+                 CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -195,7 +191,7 @@ int sam_bringup(void)
                          CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE);
   if (ret < 0)
     {
-      message("ERROR: romdisk_register failed: %d\n", -ret);
+      SYSLOG("ERROR: romdisk_register failed: %d\n", -ret);
     }
   else
     {
@@ -206,9 +202,9 @@ int sam_bringup(void)
                   "romfs", MS_RDONLY, NULL);
       if (ret < 0)
         {
-          message("ERROR: mount(%s,%s,romfs) failed: %d\n",
-                  CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
-                  CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, errno);
+          SYSLOG("ERROR: mount(%s,%s,romfs) failed: %d\n",
+                 CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
+                 CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif
@@ -221,7 +217,7 @@ int sam_bringup(void)
   ret = sam_usbhost_initialize();
   if (ret != OK)
     {
-      message("ERROR: Failed to initialize USB host: %d\n", ret);
+      SYSLOG("ERROR: Failed to initialize USB host: %d\n", ret);
     }
 #endif
 
@@ -231,7 +227,7 @@ int sam_bringup(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("ERROR: Failed to start the USB monitor: %d\n", ret);
+      SYSLOG("ERROR: Failed to start the USB monitor: %d\n", ret);
     }
 #endif
 
@@ -241,7 +237,7 @@ int sam_bringup(void)
   ret = sam_wm8904_initialize(0);
   if (ret != OK)
     {
-      message("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
+      SYSLOG("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
     }
 #endif
 
@@ -251,18 +247,18 @@ int sam_bringup(void)
   ret = sam_audio_null_initialize(0);
   if (ret != OK)
     {
-      message("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
+      SYSLOG("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
     }
 #endif
 
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 
-  message("Initializing the ELF binary loader\n");
+  SYSLOG("Initializing the ELF binary loader\n");
   ret = elf_initialize();
   if (ret < 0)
     {
-      message("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+      SYSLOG("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 

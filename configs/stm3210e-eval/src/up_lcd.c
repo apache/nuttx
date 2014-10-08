@@ -703,14 +703,14 @@ static void stm3210e_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
 {
   int i, j;
 
-  syslog("\n%s:\n", msg);
+  syslog(LOG_DEBUG, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
     {
       up_putc(' ');
-      syslog(" ");
+      syslog(LOG_DEBUG, " ");
       for (j = 0; j < 16; j++)
         {
-          syslog(" %04x", *run++);
+          syslog(LOG_DEBUG, " %04x", *run++);
         }
       up_putc('\n');
     }
