@@ -104,11 +104,11 @@
 
 #ifdef CONFIG_DEBUG
 # define dbg(format, ...) \
-  syslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+  syslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 # ifdef CONFIG_ARCH_LOWPUTC
 #  define lldbg(format, ...) \
-   lowsyslog(LOG_DEBUG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   lowsyslog(LOG_ERR, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
 #  define lldbg(x...)
 # endif
