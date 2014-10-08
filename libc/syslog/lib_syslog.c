@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/stdio/lib_syslog.c
+ * libc/syslog/lib_syslog.c
  *
  *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,6 +43,7 @@
 #include <syslog.h>
 
 #include "lib_internal.h"
+#include "syslog/syslog.h"
 
 /****************************************************************************
  * Pre-processor Definitions

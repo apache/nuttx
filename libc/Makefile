@@ -65,6 +65,7 @@ include stdio/Make.defs
 include stdlib/Make.defs
 include unistd/Make.defs
 include sched/Make.defs
+include syslog/Make.defs
 include string/Make.defs
 include aio/Make.defs
 include pthread/Make.defs

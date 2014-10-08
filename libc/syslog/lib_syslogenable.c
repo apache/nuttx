@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/misc/lib_dbg.c
+ * libc/syslog/lib_syslogenable.c
  *
  *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,83 +39,35 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <debug.h>
+#include <stdbool.h>
 
 #include "lib_internal.h"
 
-#ifndef CONFIG_CPP_HAVE_VARARGS
+#ifdef CONFIG_SYSLOG_ENABLE
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* Debug output is initially disabled */
+
+bool g_syslogenable;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, lldbg, vdbg
+ * Name: syslog_enable
  *
  * Description:
- *  If the cross-compiler's pre-processor does not support variable
- * length arguments, then these additional APIs will be built.
+ *  Enable or disable debug output.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-int dbg(const char *format, ...)
+void syslog_enable(bool enable)
 {
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
+  g_syslogenable = enable;
 }
 
-#ifdef CONFIG_ARCH_LOWPUTC
-int lldbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-#endif
-
-#ifdef CONFIG_DEBUG_VERBOSE
-int vdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-
-#ifdef CONFIG_ARCH_LOWPUTC
-int llvdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-#endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG_VERBOSE */
-#endif /* CONFIG_DEBUG */
-#endif /* CONFIG_CPP_HAVE_VARARGS */
+#endif /* CONFIG_SYSLOG_ENABLE */

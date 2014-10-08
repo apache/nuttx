@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_syslogstream.c
+ * libc/syslog/syslog.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,89 +33,49 @@
  *
  ****************************************************************************/
 
+#ifndef __LIBC_SYSLOG_SYSLOG_H
+#define __LIBC_SYSLOG_SYSLOG_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
-#include <assert.h>
-#include <errno.h>
-
-#include <nuttx/syslog/syslog.h>
-
-#include "lib_internal.h"
-
-#ifdef CONFIG_SYSLOG
-
 /****************************************************************************
- * Pre-processor definition
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslogstream_putc
+ * Public Data
  ****************************************************************************/
 
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret;
-
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
-       */
-
-      ret = syslog_putc(ch);
-      if (ret != EOF)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The special errno value -EINTR means that syslog_putc() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
-    }
-  while (errno == -EINTR);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lib_syslogstream
- *
- * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *
- * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
- *
- ****************************************************************************/
-
-void lib_syslogstream(FAR struct lib_outstream_s *stream)
-{
-  stream->put   = syslogstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
-  stream->flush = lib_noflush;
+#else
+#define EXTERN extern
 #endif
-  stream->nput  = 0;
-}
 
-#endif /* CONFIG_SYSLOG */
+/* Debug output is initially disabled */
+
+#ifdef CONFIG_SYSLOG_ENABLE
+EXTERN bool g_syslogenable;
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __LIBC_SYSLOG_SYSLOG_H */

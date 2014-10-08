@@ -37,10 +37,9 @@
 # This first group of C files do not depend on having file descriptors or
 # C streams.
 
-CSRCS += lib_fileno.c lib_printf.c lib_syslog.c lib_lowsyslog.c
-CSRCS += lib_sprintf.c lib_asprintf.c lib_snprintf.c lib_libsprintf.c
-CSRCS += lib_vsprintf.c lib_avsprintf.c lib_vsnprintf.c lib_libvsprintf.c
-CSRCS += lib_dprintf.c lib_vdprintf.c
+CSRCS += lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
+CSRCS += lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_avsprintf.c
+CSRCS += lib_vsnprintf.c lib_libvsprintf.c lib_dprintf.c lib_vdprintf.c
 CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
 CSRCS += lib_memsostream.c lib_lowinstream.c lib_lowoutstream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
@@ -70,10 +69,6 @@ endif
 endif
 
 # Other support that depends on specific, configured features.
-
-ifeq ($(CONFIG_SYSLOG),y)
-CSRCS += lib_syslogstream.c
-endif
 
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa.c

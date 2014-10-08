@@ -137,12 +137,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Debug output is initially disabled */
-
-#ifdef CONFIG_SYSLOG_ENABLE
-EXTERN bool g_syslogenable;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/misc/lib_dbg.c
+ * libc/syslog/lib_lowsyslog.c
  *
  *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,15 +39,45 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
+#include <stdio.h>
 #include <debug.h>
 
 #include "lib_internal.h"
 
-#ifndef CONFIG_CPP_HAVE_VARARGS
+/* This interface can only be used from within the kernel */
+
+#if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__)
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -55,67 +85,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, lldbg, vdbg
- *
- * Description:
- *  If the cross-compiler's pre-processor does not support variable
- * length arguments, then these additional APIs will be built.
- *
+ * Name: lowvsyslog
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-int dbg(const char *format, ...)
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+
+int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
 {
-  va_list ap;
-  int     ret;
+  struct lib_outstream_s stream;
 
-  va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
+  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
 
-  return ret;
-}
-
-#ifdef CONFIG_ARCH_LOWPUTC
-int lldbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
+#ifdef CONFIG_SYSLOG
+  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
+#else
+  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
 #endif
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+}
 
-#ifdef CONFIG_DEBUG_VERBOSE
-int vdbg(const char *format, ...)
+/****************************************************************************
+ * Name: lowsyslog
+ ****************************************************************************/
+
+int lowsyslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
   int     ret;
 
-  va_start(ap, format);
-  ret = vsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
+#ifdef CONFIG_SYSLOG_ENABLE
+  ret = 0;
+  if (g_syslogenable)
+#endif
+    {
+      va_start(ap, fmt);
+      ret = lowvsyslog(priority, fmt, ap);
+      va_end(ap);
+    }
 
   return ret;
 }
 
-#ifdef CONFIG_ARCH_LOWPUTC
-int llvdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lowvsyslog(LOG_DEBUG, format, ap);
-  va_end(ap);
-
-  return ret;
-}
-#endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG_VERBOSE */
-#endif /* CONFIG_DEBUG */
-#endif /* CONFIG_CPP_HAVE_VARARGS */
+#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */
+#endif /* __KERNEL__ */

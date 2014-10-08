@@ -124,7 +124,6 @@ extern "C"
 #if 0 /* Not supported */
 void openlog(FAR const char *ident, int option, int facility);
 void closelog(void);
-int setlogmask(int mask);
 #endif
 
 /* These low-level debug APIs are provided by the NuttX library.  These are
@@ -161,6 +160,12 @@ int lowvsyslog(int priority, FAR const char *format, va_list ap);
 #  endif
 #  define lowvsyslog(p,f,a) vsyslog(p,f,a)
 #endif
+
+/* The setlogmask() function sets the logmask and returns the previous
+ * mask. If the mask argument is 0, the current logmask is not modified.
+ */
+
+int setlogmask(int mask);
 
 /* Enable or disable syslog output */
 
