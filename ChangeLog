@@ -8800,5 +8800,6 @@
 	  compatibility).  This will break a lot of things until ALL usage of
 	  syslog is updated to use the modified interfaces (2014-10-8).
 	* drivers/: Correct everything under nuttx/drivers, nuttx/arch, nuttx/net,
-	  and nuttx/configs to use the corrected syslog interfaces (2014-10-8).
+	  nuttx/binfmt, and nuttx/configs to use the corrected syslog interfaces
+	  (2014-10-8).
 
