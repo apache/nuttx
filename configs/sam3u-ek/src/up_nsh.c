@@ -41,7 +41,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/sdio.h>
@@ -96,22 +96,6 @@
 #  undef NSH_HAVE_USBDEV
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) syslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message syslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -133,27 +117,30 @@ int nsh_archinitialize(void)
   /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
-  message("nsh_archinitialize: Initializing SDIO slot %d\n",
-          CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDIO slot %d\n",
+         CONFIG_NSH_MMCSDSLOTNO);
+
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_NSH_MMCSDMINOR);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_NSH_MMCSDMINOR);
+
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
+
+  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 

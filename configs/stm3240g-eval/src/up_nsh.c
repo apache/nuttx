@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifdef CONFIG_STM32_SPI1
@@ -124,22 +124,6 @@
 #  undef HAVE_USBHOST
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -173,7 +157,7 @@ int nsh_archinitialize(void)
   spi = up_spiinitialize(1);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port 0\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 0\n");
       return -ENODEV;
     }
 
@@ -182,7 +166,7 @@ int nsh_archinitialize(void)
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
       return -ENODEV;
     }
 #warning "Now what are we going to do with this SPI FLASH driver?"
@@ -196,8 +180,8 @@ int nsh_archinitialize(void)
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
@@ -206,7 +190,7 @@ int nsh_archinitialize(void)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
@@ -226,7 +210,7 @@ int nsh_archinitialize(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to initialize USB host: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif

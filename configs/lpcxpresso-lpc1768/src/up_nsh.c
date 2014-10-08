@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
@@ -99,22 +99,6 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -146,26 +130,26 @@ int nsh_archinitialize(void)
   ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
-      message("nsh_archinitialize: Failed to initialize SSP port %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  message("Successfully initialized SSP port %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Successfully initialized SSP port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SSP port to the slot */
 
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
-      message("nsh_archinitialize: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
   return OK;
 }

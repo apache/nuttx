@@ -45,7 +45,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
-#include <debug.h>
+#include <syslog.h>
 #include <unistd.h>
 
 #include <nuttx/arch.h>
@@ -72,22 +72,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) syslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message syslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -108,11 +92,14 @@ int nsh_archinitialize(void)
 #endif
 
 #ifdef HAVE_USBDEV
-  message("Registering CDC/ACM serial driver\n");
+  syslog(LOG_INFO, "Registering CDC/ACM serial driver\n");
+
   ret = cdcacm_initialize(CONFIG_SAM4S_XPLAINED_PRO_CDCACM_DEVMINOR, NULL);
   if (ret < 0)
     {
-      message("ERROR: Failed to create the CDC/ACM serial device: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR,
+             "ERROR: Failed to create the CDC/ACM serial device: %d (%d)\n",
+             ret, errno);
       return ret;
     }
 #endif
@@ -120,11 +107,14 @@ int nsh_archinitialize(void)
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI driver */
 
-  message("initializing HSMCI\n");
+  syslog(LOG_INFO, "initializing HSMCI\n");
+
   ret = sam_hsmci_initialize();
   if (ret < 0)
     {
-      message("ERROR: sam_hsmci_initialize() failed: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR,
+             "ERROR: sam_hsmci_initialize() failed: %d (%d)\n",
+             ret, errno);
       return ret;
     }
 #endif
@@ -132,21 +122,27 @@ int nsh_archinitialize(void)
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
 
-  message("Mounting procfs to /proc\n");
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      message("ERROR: Failed to mount the PROC filesystem: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
+             ret, errno);
       return ret;
     }
 #endif
 
 #if HAVE_HSMCI
-  message("Mounting /dev/mmcsd0 to /fat\n");
+  syslog(LOG_INFO, "Mounting /dev/mmcsd0 to /fat\n");
+
   ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
   if (ret < 0)
     {
-      message("ERROR: Failed to mount the FAT filesystem: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the FAT filesystem: %d (%d)\n",
+             ret, errno);
       return ret;
     }
 #endif
@@ -154,11 +150,11 @@ int nsh_archinitialize(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  message("Starting USB Monitor\n");
+  syslog(LOG_INFO, "Starting USB Monitor\n");
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif

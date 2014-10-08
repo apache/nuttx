@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifdef CONFIG_KINETIS_SDHC
@@ -103,22 +103,6 @@
 
 #ifndef CONFIG_KINETIS_PORTEINTS
 #  error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
-#endif
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
 #endif
 
 /****************************************************************************
@@ -222,29 +206,30 @@ int nsh_archinitialize(void)
   /* Mount the SDHC-based MMC/SD block driver */
   /* First, get an instance of the SDHC interface */
 
-  message("nsh_archinitialize: Initializing SDHC slot %d\n",
-          CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDHC slot %d\n",
+         CONFIG_NSH_MMCSDSLOTNO);
 
   g_nsh.sdhc = sdhc_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!g_nsh.sdhc)
     {
-      message("nsh_archinitialize: Failed to initialize SDHC slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDHC slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SDHC interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Bind SDHC to the MMC/SD driver, minor=%d\n",
-          CONFIG_NSH_MMCSDMINOR);
+  syslog(LOG_INFO, "Bind SDHC to the MMC/SD driver, minor=%d\n",
+         CONFIG_NSH_MMCSDMINOR);
 
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_nsh.sdhc);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  message("nsh_archinitialize: Successfully bound SDHC to the MMC/SD driver\n");
+
+  syslog(LOG_INFO, "Successfully bound SDHC to the MMC/SD driver\n");
 
   /* Handle the initial card state */
 

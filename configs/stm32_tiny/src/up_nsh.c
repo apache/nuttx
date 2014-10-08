@@ -41,7 +41,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include "stm32.h"
@@ -50,22 +50,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -82,7 +66,7 @@
 int nsh_archinitialize(void)
 {
 #if defined(CONFIG_WL_NRF24L01)
-  message("Register the nRF24L01 module");
+  syslog(LOG_INFO, "Register the nRF24L01 module");
   up_wlinitialize();
 #endif
 

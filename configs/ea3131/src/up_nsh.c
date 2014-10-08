@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifdef CONFIG_LPC31_MCI
@@ -96,22 +96,6 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -132,27 +116,30 @@ int nsh_archinitialize(void)
 
   /* First, get an instance of the SDIO interface */
 
-  message("nsh_archinitialize: Initializing SDIO slot %d\n",
-          CONFIG_NSH_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDIO slot %d\n",
+         CONFIG_NSH_MMCSDSLOTNO);
+
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SPI interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_NSH_MMCSDMINOR);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_NSH_MMCSDMINOR);
+
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
+
+  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the LPC313X10E-EVAL board supports a GPIO to detect if there is a card in
