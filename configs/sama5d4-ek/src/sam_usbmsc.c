@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include "sama5d4-ek.h"
@@ -73,26 +73,6 @@
 #  undef HAVE_AT25
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -113,7 +93,7 @@ int usbmsc_archinitialize(void)
   int ret = sam_at25_automount(AT25_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_at25_automount failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_at25_automount failed: %d\n", ret);
     }
 
   return ret;

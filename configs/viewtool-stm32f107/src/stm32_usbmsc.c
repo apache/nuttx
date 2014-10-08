@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include "stm32.h"
@@ -55,26 +55,6 @@
 
 #ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
 #  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 VIEWTOOL_MMCSD_SLOTNO
-#endif
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
 #endif
 
 /****************************************************************************

@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include "sam4e-ek.h"
@@ -74,26 +74,6 @@
 #  undef CONFIG_SAM4EEK_HSMCI_BLOCKDEVICE
 #endif
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -114,7 +94,7 @@ int usbmsc_archinitialize(void)
   int ret = sam_at25_automount(0);
   if (ret < 0)
     {
-      message("ERROR: sam_at25_automount failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_at25_automount failed: %d\n", ret);
     }
 
   return ret;
@@ -122,10 +102,10 @@ int usbmsc_archinitialize(void)
 #elif defined(CONFIG_SAM4EEK_HSMCI_BLOCKDEVICE)
   /* Initialize the HSMCI driver */
 
-  ret = sam_hsmci_initialize(0);
+  int ret = sam_hsmci_initialize(0);
   if (ret < 0)
     {
-      message("ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
     }
 
   return ret;

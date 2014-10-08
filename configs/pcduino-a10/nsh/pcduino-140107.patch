@@ -6,14 +6,14 @@ index 3cc6323..ad42790 100644
     * for all IO regions (Including the vector region).
     */
  
-+lowsyslog("Calling a1x_setupmappings\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling a1x_setupmappings\n"); // REMOVE ME
    a1x_setupmappings();
  
    /* Provide a special mapping for the IRAM interrupt vector positioned in
     * high memory.
     */
  
-+lowsyslog("Calling a1x_vectormapping\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling a1x_vectormapping\n"); // REMOVE ME
    a1x_vectormapping();
  
  #endif /* CONFIG_ARCH_ROMPGTABLE */
@@ -21,19 +21,19 @@ index 3cc6323..ad42790 100644
     * arm_vector.S
     */
  
-+lowsyslog("Calling a1x_copyvectorblock\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling a1x_copyvectorblock\n"); // REMOVE ME
    a1x_copyvectorblock();
  
    /* Initialize the FPU */
  
  #ifdef CONFIG_ARCH_FPU
-+lowsyslog("Calling arm_fpuconfig\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling arm_fpuconfig\n"); // REMOVE ME
    arm_fpuconfig();
  #endif
  
    /* Perform common, low-level chip initialization (might do nothing) */
  
-+lowsyslog("Calling a1x_lowsetup\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling a1x_lowsetup\n"); // REMOVE ME
    a1x_lowsetup();
  
    /* Perform early serial initialization if we are going to use the serial
@@ -41,7 +41,7 @@ index 3cc6323..ad42790 100644
     */
  
  #ifdef USE_EARLYSERIALINIT
-+lowsyslog("Calling up_earlyserialinit\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling up_earlyserialinit\n"); // REMOVE ME
    up_earlyserialinit();
  #endif
  
@@ -49,7 +49,7 @@ index 3cc6323..ad42790 100644
     */
  
  #ifdef CONFIG_BUILD_PROTECTED
-+lowsyslog("Calling a1x_userspace\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling a1x_userspace\n"); // REMOVE ME
    a1x_userspace();
  #endif
  
@@ -57,9 +57,9 @@ index 3cc6323..ad42790 100644
     * - Configuration of board specific resources (PIOs, LEDs, etc).
     */
  
-+lowsyslog("Calling a1x_boardinitialize\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Calling a1x_boardinitialize\n"); // REMOVE ME
    a1x_boardinitialize();
-+lowsyslog("Returning\n"); // REMOVE ME
++lowsyslog(LOG_INFO, "Returning\n"); // REMOVE ME
  }
 diff --git a/nuttx/arch/arm/src/armv7-a/arm_head.S b/nuttx/arch/arm/src/armv7-a/arm_head.S
 index bce82d5..924bd24 100644

@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/sdio.h>
@@ -67,26 +67,6 @@
 #undef SAM_MMCSDSLOTNO
 #define SAM_MMCSDSLOTNO 0
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#    define msgflush()
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#    define msgflush() fflush(stdout)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#    define msgflush()
-#  else
-#    define message printf
-#    define msgflush() fflush(stdout)
-#  endif
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -106,34 +86,33 @@ int usbmsc_archinitialize(void)
 
   /* First, get an instance of the SDIO interface */
 
-  message("usbmsc_archinitialize: "
-          "Initializing SDIO slot %d\n",
+  syslg(LOG_INFO, "Initializing SDIO slot %d\n",
           SAM_MMCSDSLOTNO);
 
   sdio = sdio_initialize(SAM_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("usbmsc_archinitialize: Failed to initialize SDIO slot %d\n",
-              SAM_MMCSDSLOTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             SAM_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SPI interface to the MMC/SD driver */
 
-  message("usbmsc_archinitialize: "
-          "Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_SYSTEM_USBMSC_DEVMINOR1);
+  syslog(LOG_INFO, ""
+         "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_SYSTEM_USBMSC_DEVMINOR1);
 
   ret = mmcsd_slotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, sdio);
   if (ret != OK)
     {
-      message("usbmsc_archinitialize: "
-              "Failed to bind SDIO to the MMC/SD driver: %d\n",
-              ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
-  message("usbmsc_archinitialize: "
-          "Successfully bound SDIO to the MMC/SD driver\n");
+
+  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the SAM3U10E-EVAL board supports a GPIO to detect if there is a card in
