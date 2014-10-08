@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/syslog.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,54 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* The option argument to openlog() is an OR of any of these:
+ *
+ *   LOG_CONS     - Write directly to system console if there is an error
+ *                  while sending to system logger. 
+ *   LOG_NDELAY   - Open the connection immediately (normally, the connection
+ *                  is opened when the first message is logged). 
+ *   LOG_NOWAIT   - Don't wait for child processes that may have been created
+ *                  while logging the message.
+ *   LOG_ODELAY   - The converse of LOG_NDELAY; opening of the connection is
+ *                  delayed until syslog() is called. (This is the default,
+ *                  and need not be specified.) 
+ *   LOG_PERROR   - (Not in POSIX.1-2001 or POSIX.1-2008.) Print to stderr
+ *                  as well (Linux).
+ *   LOG_PID      - Include PID with each message. 
+ */
+
+/* The facility argument is used to specify what type of program is logging
+ * the message. This lets the configuration file specify that messages from
+ * different facilities will be handled differently.
+ *
+ *   LOG_AUTH     - Security/authorization messages 
+ *   LOG_AUTHPRIV - Security/authorization messages (private) 
+ *   LOG_CRON     - Clock daemon (cron and at) 
+ *   LOG_DAEMON   - System daemons without separate facility value 
+ *   LOG_FTP      - Ftp daemon 
+ *   LOG_KERN     - Lernel messages (these can't be generated from user
+ *                  processes) 
+ *   LOG_LOCAL0 through LOG_LOCAL7 - Reserved for local use 
+ *   LOG_LPR      - Line printer subsystem 
+ *   LOG_MAIL     - Mail subsystem 
+ *   LOG_NEWS     - USENET news subsystem 
+ *   LOG_SYSLOG   - Messages generated internally by syslogd(8) 
+ *   LOG_USER     - Generic user-level messages (default) 
+ *   LOG_UUCP     - UUCP subsystem 
+ */
+
+/* This determines the importance of the message. The levels are, in order
+ * of decreasing importance:
+ */
+
+#define LOG_EMERG     7  /* System is unusable */
+#define LOG_ALERT     6  /* Action must be taken immediately */
+#define LOG_CRIT      5  /* Critical conditions */
+#define LOG_ERR       4  /* Error conditions */
+#define LOG_WARNING   3  /* Warning conditions */
+#define LOG_NOTICE    2  /* Normal, but significant, condition */
+#define LOG_INFO      1  /* Informational message */
+#define LOG_DEBUG     0  /* Debug-level message */
 
 /****************************************************************************
  * Public Type Declarations
@@ -67,6 +115,12 @@ extern "C"
 {
 #endif
 
+#if 0 /* Not supported */
+void openlog(FAR const char *ident, int option, int facility);
+void closelog(void);
+int setlogmask(int mask);
+#endif
+
 /* These low-level debug APIs are provided by the NuttX library.  These are
  * normally accessed via the macros in debug.h.  If the cross-compiler's
  * C pre-processor supports a variable number of macro arguments, then those
@@ -77,14 +131,14 @@ extern "C"
 int syslog(FAR const char *format, ...);
 int vsyslog(const char *src, va_list ap);
 
-#ifdef CONFIG_ARCH_LOWPUTC
+#ifdef CONFIG_ARCH_LOWPUTC /* Non-standard */
 int lowsyslog(FAR const char *format, ...);
-int lowvsyslog(const char *src, va_list ap);
+int lowvsyslog(FAR const char *src, va_list ap);
 #endif
 
 /* Enable or disable syslog output */
 
-#ifdef CONFIG_SYSLOG_ENABLE
+#ifdef CONFIG_SYSLOG_ENABLE /* Non-standard */
 void syslog_enable(bool enable);
 #endif
 
