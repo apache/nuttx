@@ -65,6 +65,8 @@
  *   LOG_PID      - Include PID with each message. 
  */
 
+/* Note: openlog() is not currently supported */
+
 /* The facility argument is used to specify what type of program is logging
  * the message. This lets the configuration file specify that messages from
  * different facilities will be handled differently.
@@ -84,6 +86,27 @@
  *   LOG_USER     - Generic user-level messages (default) 
  *   LOG_UUCP     - UUCP subsystem 
  */
+
+#define LOG_AUTH      0
+#define LOG_AUTHPRIV  0
+#define LOG_CRON      0
+#define LOG_DAEMON    0
+#define LOG_FTP       0
+#define LOG_KERN      0
+#define LOG_LOCAL0    0
+#define LOG_LOCAL1    0
+#define LOG_LOCAL2    0
+#define LOG_LOCAL3    0
+#define LOG_LOCAL4    0
+#define LOG_LOCAL5    0
+#define LOG_LOCAL6    0
+#define LOG_LOCAL7    0
+#define LOG_LPR       0
+#define LOG_MAIL      0
+#define LOG_NEWS      0
+#define LOG_SYSLOG    0
+#define LOG_USER      0
+#define LOG_UUCP      0
 
 /* This determines the importance of the message. The levels are, in order
  * of decreasing importance:
@@ -126,39 +149,59 @@ void openlog(FAR const char *ident, int option, int facility);
 void closelog(void);
 #endif
 
-/* These low-level debug APIs are provided by the NuttX library.  These are
- * normally accessed via the macros in debug.h.  If the cross-compiler's
- * C pre-processor supports a variable number of macro arguments, then those
- * macros below will map all debug statements to one or the other of the
- * following.
+/****************************************************************************
+ * Name: syslog and vsyslog
  *
- * NOTE: In protected and kernel builds, there may be a limit to the number
- * of parameter that are supported in the variable parameter list.
- */
+ * Description:
+ *   syslog() generates a log message. The priority argument is formed by
+ *   ORing the facility and the level values (see include/syslog.h). The
+ *   remaining arguments are a format, as in printf and any arguments to the
+ *   format.
+ *
+ *   The NuttX implementation does not support any special formatting
+ *   characters beyond those supported by printf.
+ *
+ *   The function vsyslog() performs the same task as syslog() with the
+ *   difference that it takes a set of arguments which have been obtained
+ *   using the stdarg variable argument list macros.
+ *
+ ****************************************************************************/
 
 int syslog(int priority, FAR const char *format, ...);
 int vsyslog(int priority, FAR const char *src, va_list ap);
 
-#ifdef CONFIG_ARCH_LOWPUTC
-/* These are non-standard, low-level system logging interface.  The
- * difference between syslog() and lowsyslog() is that the syslog()
- * interface writes to the syslog device (usually fd=1, stdout) whereas
- * lowsyslog() uses a lower level interface that works even from interrupt
- * handlers.
+/****************************************************************************
+ * Name: lowsyslog and lowvsyslog
  *
- * NOTE: In protected and kernel builds, there may be a limit to the number
- * of parameters that are supported in the variable parameter list.
- */
+ * Description:
+ *   syslog() generates a log message. The priority argument is formed by
+ *   ORing the facility and the level values (see include/syslog.h). The
+ *   remaining arguments are a format, as in printf and any arguments to the
+ *   format.
+ *
+ *   This is a non-standard, low-level system logging interface.  The
+ *   difference between syslog() and lowsyslog() is that the syslog()
+ *   interface writes to the syslog device (usually fd=1, stdout) whereas
+ *   lowsyslog() uses a lower level interface that works even from interrupt
+ *   handlers.
+ *
+ *   If the platform cannot support lowsyslog, then we will substitute the
+ *   standard syslogging functions.  These will, however, probably cause
+ *   problems if called from interrupt handlers, depending upon the nature of
+ *   the underlying syslog device.
+ *
+ *   The function lowvsyslog() performs the same task as lowsyslog() with
+ *   the difference that it takes a set of arguments which have been
+ *   obtained using the stdarg variable argument list macros.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LOWPUTC
 
 int lowsyslog(int priority, FAR const char *format, ...);
 int lowvsyslog(int priority, FAR const char *format, va_list ap);
 
 #else
-/* If the platform cannot support lowsyslog, then we will substitute the
- * standard syslogging functions.  These will, however, probably cause
- * problems if called from interrupt handlers, depending upon the nature of
- * the underlying syslog device.
- */
 
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define lowsyslog(p,f,...) syslog(p,f,##__VA_ARGS__)
@@ -166,18 +209,34 @@ int lowvsyslog(int priority, FAR const char *format, va_list ap);
 #    define lowsyslog (void)
 #  endif
 #  define lowvsyslog(p,f,a) vsyslog(p,f,a)
+
 #endif
 
-/* The setlogmask() function sets the logmask and returns the previous
- * mask. If the mask argument is 0, the current logmask is not modified.
+/****************************************************************************
+ * Name: setlogmask
  *
- * REVISIT: In the current implementation, the syslog interfaces are not
- * part of libc, but are part of the kernel logic.  Per POSIX the syslog
- * mask should be a per-process value but in this implementation it is
- * a single, kernel value.  This could easily fixed (at least in the
- * kernel build) by simply moving all of the syslog logic back into libc
- * (where it once was).
- */
+ * Description:
+ *   The setlogmask() function sets the logmask and returns the previous
+ *   mask. If the mask argument is 0, the current logmask is not modified.
+ *
+ *   The SYSLOG priorities are: LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR,
+ *   LOG_WARNING, LOG_NOTICE, LOG_INFO, and LOG_DEBUG.  The bit corresponding
+ *   to a priority p is LOG_MASK(p); LOG_UPTO(p) provides the mask of all
+ *   priorities in the above list up to and including p.
+ *
+ *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
+ *   NuttX, the scope of the mask is dependent on the nature of the build.
+ *
+ *   Flat Build:  There is one, global SYSLOG mask that controls all output.
+ *   Protected Build:  There are two SYSLOG masks.  One within the kernel
+ *     that controls only kernel output.  And one in user-space that controls
+ *     only user SYSLOG output.
+ *   Kernel Build:  The kernel build is compliant with the POSIX requirement:
+ *     There will be one mask for for each user process, controlling the
+ *     SYSLOG output only form that process.  There will be a separate mask
+ *     accessable only in the kernel code to control kernel SYSLOG output.
+ *
+ ****************************************************************************/
 
 int setlogmask(int mask);
 

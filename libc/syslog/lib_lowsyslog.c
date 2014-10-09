@@ -86,6 +86,11 @@
 
 /****************************************************************************
  * Name: lowvsyslog_internal
+ *
+ * Description:
+ *   This is the internal implementation of lowvsyslog (see the description
+ *   of lowsyslog and lowvsyslog below)
+ *
  ****************************************************************************/
 
 static inline int lowvsyslog_internal(FAR const char *fmt, va_list ap)
@@ -108,6 +113,12 @@ static inline int lowvsyslog_internal(FAR const char *fmt, va_list ap)
 
 /****************************************************************************
  * Name: lowvsyslog
+ *
+ * Description:
+ *   The function lowvsyslog() performs the same task as lowsyslog() with
+ *   the difference that it takes a set of arguments which have been
+ *   obtained using the stdarg variable argument list macros.
+ *
  ****************************************************************************/
 
 int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
@@ -128,6 +139,19 @@ int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
 
 /****************************************************************************
  * Name: lowsyslog
+ *
+ * Description:
+ *   syslog() generates a log message. The priority argument is formed by
+ *   ORing the facility and the level values (see include/syslog.h). The
+ *   remaining arguments are a format, as in printf and any arguments to the
+ *   format.
+ *
+ *   This is a non-standard, low-level system logging interface.  The
+ *   difference between syslog() and lowsyslog() is that the syslog()
+ *   interface writes to the syslog device (usually fd=1, stdout) whereas
+ *   lowsyslog() uses a lower level interface that works even from interrupt
+ *   handlers.
+ *
  ****************************************************************************/
 
 int lowsyslog(int priority, FAR const char *fmt, ...)

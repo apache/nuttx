@@ -66,7 +66,25 @@ uint8_t g_syslog_mask = LOG_ALL;
  * Name: setlogmask
  *
  * Description:
- *  Enable or disable debug output.
+ *   The setlogmask() function sets the logmask and returns the previous
+ *   mask. If the mask argument is 0, the current logmask is not modified.
+ *
+ *   The SYSLOG priorities are: LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR,
+ *   LOG_WARNING, LOG_NOTICE, LOG_INFO, and LOG_DEBUG.  The bit corresponding
+ *   to a priority p is LOG_MASK(p); LOG_UPTO(p) provides the mask of all
+ *   priorities in the above list up to and including p.
+ *
+ *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
+ *   NuttX, the scope of the mask is dependent on the nature of the build.
+ *
+ *   Flat Build:  There is one, global SYSLOG mask that controls all output.
+ *   Protected Build:  There are two SYSLOG masks.  One within the kernel
+ *     that controls only kernel output.  And one in user-space that controls
+ *     only user SYSLOG output.
+ *   Kernel Build:  The kernel build is compliant with the POSIX requirement:
+ *     There will be one mask for for each user process, controlling the
+ *     SYSLOG output only form that process.  There will be a separate mask
+ *     accessable only in the kernel code to control kernel SYSLOG output.
  *
  ****************************************************************************/
 

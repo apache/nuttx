@@ -84,6 +84,11 @@
 
 /****************************************************************************
  * Name: vsyslog_internal
+ *
+ * Description:
+ *   This is the internal implementation of vsyslog (see the description of
+ *   syslog and vsyslog below)
+ *
  ****************************************************************************/
 
 static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
@@ -132,6 +137,12 @@ static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
 
 /****************************************************************************
  * Name: vsyslog
+ *
+ * Description:
+ *   The function vsyslog() performs the same task as syslog() with the
+ *   difference that it takes a set of arguments which have been obtained
+ *   using the stdarg variable argument list macros.
+ *
  ****************************************************************************/
 
 int vsyslog(int priority, FAR const char *fmt, va_list ap)
@@ -152,6 +163,16 @@ int vsyslog(int priority, FAR const char *fmt, va_list ap)
 
 /****************************************************************************
  * Name: syslog
+ *
+ * Description:
+ *   syslog() generates a log message. The priority argument is formed by
+ *   ORing the facility and the level values (see include/syslog.h). The
+ *   remaining arguments are a format, as in printf and any arguments to the
+ *   format.
+ *
+ *   The NuttX implementation does not support any special formatting
+ *   characters beyond those supported by printf.
+ *
  ****************************************************************************/
 
 int syslog(int priority, FAR const char *fmt, ...)
