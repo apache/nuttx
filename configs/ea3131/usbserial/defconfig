@@ -493,7 +493,7 @@ CONFIG_PL2303_PRODUCTSTR="USBdev Serial"
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

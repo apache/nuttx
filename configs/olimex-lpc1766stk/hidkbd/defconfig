@@ -509,7 +509,7 @@ CONFIG_HIDKBD_ENCODED=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

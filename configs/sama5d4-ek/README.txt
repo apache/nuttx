@@ -4040,7 +4040,6 @@ Configurations
        configuration settings are summarized below:
 
        File System:
-       CONFIG_SYSLOG_ENABLE=n      : (Output debug info unconditionally)
        CONFIG_SYSLOG=y             : Enables the System Logging feature.
 
        Device Drivers:

@@ -535,7 +535,7 @@ CONFIG_CDCACM_PRODUCTSTR="CDC/ACM Serial"
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

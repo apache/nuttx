@@ -636,7 +636,7 @@ CONFIG_FS_FATTIME=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

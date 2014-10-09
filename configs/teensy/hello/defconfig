@@ -310,7 +310,7 @@ CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

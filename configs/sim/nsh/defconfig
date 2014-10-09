@@ -362,7 +362,7 @@ CONFIG_FS_BINFS=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

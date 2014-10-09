@@ -449,7 +449,7 @@ CONFIG_WL_NRF24L01_RXFIFO_LEN=128
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #
