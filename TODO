@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 7, 2014)
+NuttX TODO List (Last updated October 9, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (12)  File system/Generic drivers (fs/, drivers/)
+ (13)  File system/Generic drivers (fs/, drivers/)
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1163,15 +1163,63 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium
 
-  Title:       ASYNCHRONOUX I/O DOES NOT WORK WITH SOCKETS
+  Title:       ASYNCHRONOUS I/O DOES NOT WORK WITH SOCKETS
   Description: The current asynchronous I/O logic will only work with
                file descriptions.  If given a socket descriptor, the
                AIO interfaces will fail with EBADF.  The existing logic
                should be extended to handle socket descriptors.
-  Status:      Open
-  Low:         Low unless you need the capability.
 
-o Graphics subystem (graphics/)
+               Some notes:
+               1. Reads that do not complete immediately will break the
+                  current (incorrect) AIO design.  See "SYNCHRONOUS I/O
+                  DOES NOT WORK WITH MANY DEVICES" for a detailed
+                  explanation.
+ 
+               2. Everything else is easy:  There could have to be a
+                  tagged union of a struct file and struct socket in the
+                  AIO container and the worker logic would have to select
+                  the correct low-level, internal interface.  There would
+                  be no lseek'ing on sockets.
+
+               One
+  Status:      Open
+  Priority:    Pretty high because this limits the usefulness of the
+               AIO implementation.
+
+  Title:       ASYNCHRONOUS I/O DOES NOT WORK WITH MANY DEVICES
+  Description: There is a problem using AIO reads with devices that may not
+               complete the read for an arbitrary amount of time.
+
+               The AIO implementation uses low priority worker thread to
+               implement the off-client-thread operations.  This works OK
+               for local files but would not work with sockets or with many
+               devices: The worker thread serializes the operations.  A
+               network or device read, however, can pend indefinitely and
+               would have to be performed on an separate thread.
+
+               The current implementation works okay with local files
+               because the reads are going to complete relatively quickly
+               (even NFS file reads).  But there is no upper limit to the
+               time to read from socket -- or any other device for that
+               matter.
+
+               One fix would be to create a new pthread for each read I/O.
+               But that could become very costly in stack space and could
+               cause bad performance.  An option might be to use a thread
+               pool to service the low priority work queue; a fixed number
+               of threads would be created at startup.  Each would wait for
+               input on the work queue.  Then, the work would be only
+               partially serialized and a few hanging reads might be
+               tolerable.
+
+               There is an issue now, however, with waiting on a semaphore
+               since the low priority work thread also needs to do garbage
+               collection.
+
+  Status:      Open
+  Priority:    High
+  
+o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   See also the NxWidgets TODO list file for related issues.
