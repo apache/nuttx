@@ -78,11 +78,11 @@ uintptr_t STUB_sched_yield(int nbr);
 
 /* SYSLOG */
 
-uintptr_t STUB_vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm2);
-uintptr_t STUB_lowvsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm2);
-uintptr_t STUB_setlogmask(iint nbr, uintptr_t parm1);
+uintptr_t STUB_syslog(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5, uintptr_t parm6);
+uintptr_t STUB_lowsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5, uintptr_t parm6);
+uintptr_t STUB_setlogmask(int nbr, uintptr_t parm1);
 
 /* Semaphores */
 

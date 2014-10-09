@@ -84,8 +84,8 @@
 
 /* SYSLOG */
 
-#define SYS_vsyslog                    (CONFIG_SYS_RESERVED+14)
-#define SYS_lowvsyslog                 (CONFIG_SYS_RESERVED+15)
+#define SYS_syslog                     (CONFIG_SYS_RESERVED+14)
+#define SYS_lowsyslog                  (CONFIG_SYS_RESERVED+15)
 #define SYS_setlogmask                 (CONFIG_SYS_RESERVED+16)
 
 /* Semaphores */

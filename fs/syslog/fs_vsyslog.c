@@ -149,3 +149,21 @@ int vsyslog(int priority, FAR const char *fmt, va_list ap)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: lowsyslog
+ ****************************************************************************/
+
+int lowsyslog(int priority, FAR const char *fmt, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Let lowvsyslog do the work */
+
+  va_start(ap, fmt);
+  ret = lowvsyslog(priority, fmt, ap);
+  va_end(ap);
+
+  return ret;
+}

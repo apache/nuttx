@@ -35,7 +35,7 @@
 
 # Add the internal C files to the build
 
-CSRCS += fs_vsyslog.c fs_lowvsyslog.c fs_setlogmask.c
+CSRCS += fs_vsyslog.c fs_lowsyslog.c fs_setlogmask.c
 
 ifeq ($(CONFIG_SYSLOG),y)
 CSRCS += fs_syslogstream.c
@@ -49,7 +49,7 @@ endif
 
 ifeq ($(CONFIG_SYSLOG),y)
 ifeq ($(CONFIG_SYSLOG_CHAR),y)
-CSRCS += fs_syslog.c
+CSRCS += fs_devsyslog.c
 endif
 endif
 

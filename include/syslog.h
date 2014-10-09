@@ -51,9 +51,15 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Some interfaces in this file are currently only available within the
- * kernel.  They could are available to applicaions in the flat build and
+ * kernel.  They could are available to applications in the flat build and
  * could be made available in the protected and kernel builds IF system
  * calls were added.
+ *
+ * REVISIT: For example, I don't yet know how to pass a va_list in a system
+ * call so none of those interfaces.
+ *
+ * NOTE: In protected and kernel builds, there may also be a limit to the
+ * number of parameters that are supported in the variable parameter list.
  */
 
 #if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
@@ -144,10 +150,15 @@ void closelog(void);
  * C pre-processor supports a variable number of macro arguments, then those
  * macros below will map all debug statements to one or the other of the
  * following.
+ *
+ * NOTE: In protected and kernel builds, there may be a limit to the number
+ * of parameter that are supported in the variable parameter list.
  */
 
 int syslog(int priority, FAR const char *format, ...);
+#ifdef __KERNEL__
 int vsyslog(int priority, FAR const char *src, va_list ap);
+#endif
 
 #ifdef CONFIG_ARCH_LOWPUTC
 /* These are non-standard, low-level system logging interface.  The
@@ -155,10 +166,16 @@ int vsyslog(int priority, FAR const char *src, va_list ap);
  * interface writes to the syslog device (usually fd=1, stdout) whereas
  * lowsyslog() uses a lower level interface that works even from interrupt
  * handlers.
+ *
+ * NOTE: In protected and kernel builds, there may be a limit to the number
+ * of parameters that are supported in the variable parameter list.
  */
 
 int lowsyslog(int priority, FAR const char *format, ...);
+#  ifdef __KERNEL__
 int lowvsyslog(int priority, FAR const char *format, va_list ap);
+#  endif
+
 #else
 /* If the platform cannot support lowsyslog, then we will substitute the
  * standard syslogging functions.  These will, however, probably cause
@@ -171,11 +188,20 @@ int lowvsyslog(int priority, FAR const char *format, va_list ap);
 #  else
 #    define lowsyslog (void)
 #  endif
-#  define lowvsyslog(p,f,a) vsyslog(p,f,a)
+#  ifdef __KERNEL__
+#   define lowvsyslog(p,f,a) vsyslog(p,f,a)
+#  endif
 #endif
 
 /* The setlogmask() function sets the logmask and returns the previous
  * mask. If the mask argument is 0, the current logmask is not modified.
+ *
+ * REVISIT: In the current implementation, the syslog interfaces are not
+ * part of libc, but are part of the kernel logic.  Per POSIX the syslog
+ * mask should be a per-process value but in this implementation it is
+ * a single, kernel value.  This could easily fixed (at least in the
+ * kernel build) by simply moving all of the syslog logic back into libc
+ * (where it once was).
  */
 
 int setlogmask(int mask);

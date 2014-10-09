@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/syslog/lib_syslog.c
+ * fs/syslog/fs_lowsyslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
+#include <stdio.h>
 #include <syslog.h>
+
+#include <nuttx/streams.h>
+
+#include "syslog/syslog.h"
+
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,23 +85,63 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: lowvsyslog_internal
+ ****************************************************************************/
+
+static inline int lowvsyslog_internal(FAR const char *fmt, va_list ap)
+{
+  struct lib_outstream_s stream;
+
+  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
+
+#ifdef CONFIG_SYSLOG
+  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
+#else
+  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
+#endif
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog
+ * Name: lowvsyslog
  ****************************************************************************/
 
-int syslog(int priority, FAR const char *fmt, ...)
+int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
+{
+  int ret = 0;
+
+  /* Check if this priority is enabled */
+
+  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+    {
+      /* Yes.. let vsylog_internal to the deed */
+
+      ret = lowvsyslog_internal(fmt, ap);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lowsyslog
+ ****************************************************************************/
+
+int lowsyslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
   int ret;
 
-  /* Let vsyslog do the work */
+  /* Let lowvsyslog do the work */
 
   va_start(ap, fmt);
-  ret = vsyslog(priority, fmt, ap);
+  ret = lowvsyslog(priority, fmt, ap);
   va_end(ap);
 
   return ret;
 }
+
+#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */

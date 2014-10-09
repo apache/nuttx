@@ -60,8 +60,8 @@ SYSCALL_LOOKUP(set_errno,                 1, STUB_set_errno)
 
 /* SYSLOG */
 
-SYSCALL_LOOKUP(vsyslog,                   3, SYS_vsyslog)
-SYSCALL_LOOKUP(lowvsyslog,                3, SYS_lowvsyslog)
+SYSCALL_LOOKUP(syslog,                    6, SYS_syslog)
+SYSCALL_LOOKUP(lowsyslog,                 6, SYS_lowsyslog)
 SYSCALL_LOOKUP(setlogmask,                1, SYS_setlogmask)
 
 /* Semaphores */
