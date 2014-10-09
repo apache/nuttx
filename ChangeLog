@@ -8813,4 +8813,7 @@
 	  required, standard setlogmask() (2014-10-9).
 	* arch/arm/src/stm32/chip/stm32_exti.h: Correct STM32 RTC EXTI bit
 	  definition.  From Lazlo (2014-10-9).
-
+	* include/syscall.h, syscall/, and libc/: Remove syslog interfaces
+	  from the set of system calls (2014-10-9).
+	* libc/syslog: Move syslog back out of the kernel into the C libary
+	  (2014-10-9).
