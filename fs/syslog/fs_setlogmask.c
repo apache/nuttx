@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/syslog/lib_syslogenable.c
+ * fs/syslog/fs_setlogmask.c
  *
  *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,35 +39,83 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <stdint.h>
+#include <syslog.h>
 
-#include "lib_internal.h"
+#include <arch/irq.h>
+
+#include "syslog/syslog.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_ENABLE
+/* The initial mask is all disabled */
+
+#  define INITIAL_SYSLOG_MASK 0
+#else
+/* The initial mask is all enabled */
+
+#  define INITIAL_SYSLOG_MASK LOG_ALL
+#endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* Debug output is initially disabled */
+/* The currently enabled set of syslog priorities */
 
-bool g_syslogenable;
+uint8_t g_syslog_mask = INITIAL_SYSLOG_MASK;
+
+#ifdef CONFIG_SYSLOG_ENABLE
+/* True if the syslog is enabled */
+
+bool g_syslog_enabled;
+
+/* The set of syslog priorities to use when the syslog is enabled */
+
+uint8_t g_syslog_enablemask = LOG_ALL;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_enable
+ * Name: setlogmask
  *
  * Description:
  *  Enable or disable debug output.
  *
  ****************************************************************************/
 
-void syslog_enable(bool enable)
+int setlogmask(int mask)
 {
-  g_syslogenable = enable;
-}
+  uint8_t oldmask;
+  irqstate_t flags;
 
-#endif /* CONFIG_SYSLOG_ENABLE */
+  /* These operations must be exclusive with respect to other threads as well
+   * as interrupts.
+   */
+
+  flags = irqsave();
+
+#ifdef CONFIG_SYSLOG_ENABLE
+  /* If the syslog is disabled, use the saved enable mask */
+
+  if (!g_syslog_enabled)
+    {
+      oldmask             = g_syslog_enablemask;
+      g_syslog_enablemask = (uint8_t)mask;
+    }
+  else
+#endif
+    {
+      oldmask             = g_syslog_mask;
+      g_syslog_mask       = (uint8_t)mask;
+    }
+
+  irqrestore(flags);
+  return oldmask;
+}

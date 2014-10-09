@@ -39,14 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
+#include <stdarg.h>
+#include <syslog.h>
 
-#include "lib_internal.h"
-
-/* This interface can only be used from within the kernel */
-
-#if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__)
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,32 +73,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lowvsyslog
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
-
-int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
-{
-  struct lib_outstream_s stream;
-
-  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
-
-#ifdef CONFIG_SYSLOG
-  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
-#else
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-#endif
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-}
 
 /****************************************************************************
  * Name: lowsyslog
@@ -111,20 +91,15 @@ int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
 int lowsyslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
-  int     ret;
+  int ret;
 
-#ifdef CONFIG_SYSLOG_ENABLE
-  ret = 0;
-  if (g_syslogenable)
-#endif
-    {
-      va_start(ap, fmt);
-      ret = lowvsyslog(priority, fmt, ap);
-      va_end(ap);
-    }
+  /* Let lowvsyslog do the work */
+
+  va_start(ap, fmt);
+  ret = lowvsyslog(priority, fmt, ap);
+  va_end(ap);
 
   return ret;
 }
 
 #endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */
-#endif /* __KERNEL__ */

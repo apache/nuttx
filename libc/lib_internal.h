@@ -148,28 +148,6 @@ void  stream_semtake(FAR struct streamlist *list);
 void  stream_semgive(FAR struct streamlist *list);
 #endif
 
-/* Defined in lib_libnoflush.c */
-
-#ifdef CONFIG_STDIO_LINEBUFFER
-int lib_noflush(FAR struct lib_outstream_s *this);
-#endif
-
-/* Defined in lib_libsnoflush.c */
-
-#ifdef CONFIG_STDIO_LINEBUFFER
-int lib_snoflush(FAR struct lib_sostream_s *this);
-#endif
-
-/* Defined in lib_libsprintf.c */
-
-int lib_sprintf(FAR struct lib_outstream_s *obj,
-                       const char *fmt, ...);
-
-/* Defined lib_libvsprintf.c */
-
-int lib_vsprintf(FAR struct lib_outstream_s *obj,
-                 FAR const char *src, va_list ap);
-
 /* Defined in lib_dtoa.c */
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT

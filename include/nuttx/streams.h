@@ -372,6 +372,51 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 void lib_syslogstream(FAR struct lib_outstream_s *stream);
 #endif
 
+/****************************************************************************
+ * Name: lib_noflush
+ *
+ * Description:
+ *  lib_noflush() provides a common, dummy flush method for output streams
+ *  that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER is selected.
+ *
+ * Return:
+ *  Always returns OK
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+int lib_noflush(FAR struct lib_outstream_s *stream);
+#endif
+
+/****************************************************************************
+ * Name: lib_snoflush
+ *
+ * Description:
+ *  lib_snoflush() provides a common, dummy flush method for seekable output
+ *  streams that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER
+ *  is selected.
+ *
+ * Return:
+ *  Always returns OK
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+int lib_snoflush(FAR struct lib_sostream_s *this);
+#endif
+
+/****************************************************************************
+ * Name: lib_sprintf and lib_vsprintf
+ *
+ * Description:
+ *  Stream-oriented versions of sprintf and vsprintf.
+ *
+ ****************************************************************************/
+
+int lib_sprintf(FAR struct lib_outstream_s *obj, FAR const char *fmt, ...);
+int lib_vsprintf(FAR struct lib_outstream_s *obj,
+                 FAR const char *src, va_list ap);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

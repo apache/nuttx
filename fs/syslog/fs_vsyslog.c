@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/syslog/lib_syslog.c
+ * libc/syslog/fs_vsyslog.c
  *
  *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
+#include <stdio.h>
 #include <syslog.h>
+
+#include <nuttx/streams.h>
+
+#include "syslog/syslog.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,23 +83,69 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: vsyslog_internal
+ ****************************************************************************/
+
+static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
+{
+#if defined(CONFIG_SYSLOG)
+
+  struct lib_outstream_s stream;
+
+  /* Wrap the low-level output in a stream object and let lib_vsprintf
+   * do the work.
+   */
+
+  lib_syslogstream((FAR struct lib_outstream_s *)&stream);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+
+#elif CONFIG_NFILE_DESCRIPTORS > 0
+
+  struct lib_rawoutstream_s rawoutstream;
+
+  /* Wrap the stdout in a stream object and let lib_vsprintf
+   * do the work.
+   */
+
+  lib_rawoutstream(&rawoutstream, 1);
+  return lib_vsprintf(&rawoutstream.public, fmt, ap);
+
+#elif defined(CONFIG_ARCH_LOWPUTC)
+
+  struct lib_outstream_s stream;
+
+  /* Wrap the low-level output in a stream object and let lib_vsprintf
+   * do the work.
+   */
+
+  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+
+#else
+  return 0;
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog
+ * Name: vsyslog
  ****************************************************************************/
 
-int syslog(int priority, FAR const char *fmt, ...)
+int vsyslog(int priority, FAR const char *fmt, va_list ap)
 {
-  va_list ap;
-  int ret;
+  int ret = 0;
 
-  /* Let vsyslog do the work */
+  /* Check if this priority is enabled */
 
-  va_start(ap, fmt);
-  ret = vsyslog(priority, fmt, ap);
-  va_end(ap);
+  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+    {
+      /* Yes.. let vsylog_internal to the deed */
+
+      ret = vsyslog_internal(fmt, ap);
+    }
 
   return ret;
 }

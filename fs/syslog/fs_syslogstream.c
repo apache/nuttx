@@ -39,13 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/streams.h>
 
-#include "lib_internal.h"
 #include "syslog/syslog.h"
 
 #ifdef CONFIG_SYSLOG

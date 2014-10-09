@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/syslog.c
+ * fs/syslog/syslog.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

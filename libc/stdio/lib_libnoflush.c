@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/streams.h>
 
 #include "lib_internal.h"
 

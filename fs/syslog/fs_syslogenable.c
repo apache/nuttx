@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/syslog/syslog.h
+ * fs/syslog/fs_syslogenable.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,49 +33,58 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_SYSLOG_SYSLOG_H
-#define __LIBC_SYSLOG_SYSLOG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <stdbool.h>
+#include <syslog.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <arch/irq.h>
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* Debug output is initially disabled */
+#include "syslog/syslog.h"
 
 #ifdef CONFIG_SYSLOG_ENABLE
-EXTERN bool g_syslogenable;
-#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+/****************************************************************************
+ * Name: syslog_enable
+ *
+ * Description:
+ *  Enable or disable debug output.
+ *
+ ****************************************************************************/
 
-#endif /* __LIBC_SYSLOG_SYSLOG_H */
+void syslog_enable(bool enable)
+{
+  irqstate_t flags;
+
+  /* These operations must be exclusive with respect to other threads as well
+   * as interrupts.
+   */
+
+  flags = irqsave();
+  if (enable && !g_syslog_enabled)
+    {
+      /* Transition from the disabled to the enabled state */
+
+      g_syslog_mask    = g_syslog_enablemask; /* Restore the enabled mask */
+      g_syslog_enabled = true;                /* Mark enabled */
+    }
+  else if (!enabled && g_syslog_enabled)
+    {
+      /* Transition from the enabled to the disabled state */
+
+      g_syslog_enablemask = g_syslog_mask;    /* Save the enabled mask */
+      g_syslog_mask       = 0;                /* Clear the current mask */
+      g_syslog_enabled    = false             /* Remember not enabled */
+    }
+  irqrestore(flags);
+}
+
+#endif /* CONFIG_SYSLOG_ENABLE */
