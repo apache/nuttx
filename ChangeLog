@@ -8808,3 +8808,7 @@
 	* fs/syslog/fs_syslogmask.c:  Implement syslogmask() (2014-10-8).
 	* include/sys/syscall.h, syscall/syscall.csv, syscall_lookup.h, and
 	  syscall_stublookup.c:  Add syslog system calls (2014-10-8).
+	* fs/Kconfig, syslog/fs_syslogenable, and include/syslog.h:  Remove
+	  non-standard, conditional syslog_enable(), instead only the
+	  required, standard setlogmask() (2014-10-9).
+
