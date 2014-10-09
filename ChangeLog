@@ -8817,3 +8817,6 @@
 	  from the set of system calls (2014-10-9).
 	* libc/syslog: Move syslog back out of the kernel into the C libary
 	  (2014-10-9).
+	* arch/mips/src/pic32mx/pic32mx-devcfg.h: For PIC32MX7, DEVCFG0 bit
+	  2 must be set.  Writing bit 2 as zero can brick the CPU on some
+	  versions.  From Cris Kvist (2014-10-9).
