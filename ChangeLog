@@ -8806,3 +8806,5 @@
 	  libc/stdio to libc/syslog and fs/syslog.  Also move some syslog logic
 	  from fs/driver to fs/syslog (2014-10-8).
 	* fs/syslog/fs_syslogmask.c:  Implement syslogmask() (2014-10-8).
+	* include/sys/syscall.h, syscall/syscall.csv, syscall_lookup.h, and
+	  syscall_stublookup.c:  Add syslog system calls (2014-10-8).
