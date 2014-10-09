@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/syslog/fs_devsyslog.c
+ * fs/driver/fs_devsyslog.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

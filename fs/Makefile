@@ -48,7 +48,6 @@ include vfs/Make.defs
 include driver/Make.defs
 include dirent/Make.defs
 include aio/Make.defs
-include syslog/Make.defs
 include mmap/Make.defs
 
 # OS resources

@@ -41,6 +41,14 @@ CSRCS += fs_registerdriver.c fs_unregisterdriver.c
 CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
 CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
 
+# System logging to a character device (or file)
+
+ifeq ($(CONFIG_SYSLOG),y)
+ifeq ($(CONFIG_SYSLOG_CHAR),y)
+CSRCS += fs_devsyslog.c
+endif
+endif
+
 # Include driver build support
 
 DEPPATH += --dep-path driver

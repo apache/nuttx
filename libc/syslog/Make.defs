@@ -35,18 +35,10 @@
 
 # Add the internal C files to the build
 
-CSRCS += fs_syslog.c fs_lowsyslog.c fs_setlogmask.c
+CSRCS += lib_syslog.c lib_lowsyslog.c lib_setlogmask.c
 
 ifeq ($(CONFIG_SYSLOG),y)
-CSRCS += fs_syslogstream.c
-endif
-
-# System logging to a character device (or file)
-
-ifeq ($(CONFIG_SYSLOG),y)
-ifeq ($(CONFIG_SYSLOG_CHAR),y)
-CSRCS += fs_devsyslog.c
-endif
+CSRCS += lib_syslogstream.c
 endif
 
 # Add the syslog directory to the build

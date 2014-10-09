@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/syslog/fs_syslog.c
+ * lib/syslog/lib_lowsyslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,8 @@
 
 #include "syslog/syslog.h"
 
+#if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -83,47 +85,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vsyslog_internal
+ * Name: lowvsyslog_internal
  ****************************************************************************/
 
-static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
+static inline int lowvsyslog_internal(FAR const char *fmt, va_list ap)
 {
-#if defined(CONFIG_SYSLOG)
-
   struct lib_outstream_s stream;
 
-  /* Wrap the low-level output in a stream object and let lib_vsprintf
-   * do the work.
-   */
+  /* Wrap the stdout in a stream object and let lib_vsprintf do the work. */
 
+#ifdef CONFIG_SYSLOG
   lib_syslogstream((FAR struct lib_outstream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-
-#elif CONFIG_NFILE_DESCRIPTORS > 0
-
-  struct lib_rawoutstream_s rawoutstream;
-
-  /* Wrap the stdout in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_rawoutstream(&rawoutstream, 1);
-  return lib_vsprintf(&rawoutstream.public, fmt, ap);
-
-#elif defined(CONFIG_ARCH_LOWPUTC)
-
-  struct lib_outstream_s stream;
-
-  /* Wrap the low-level output in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-
 #else
-  return 0;
+  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
 #endif
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
 }
 
 /****************************************************************************
@@ -131,10 +107,10 @@ static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vsyslog
+ * Name: lowvsyslog
  ****************************************************************************/
 
-int vsyslog(int priority, FAR const char *fmt, va_list ap)
+int lowvsyslog(int priority, FAR const char *fmt, va_list ap)
 {
   int ret = 0;
 
@@ -144,26 +120,28 @@ int vsyslog(int priority, FAR const char *fmt, va_list ap)
     {
       /* Yes.. let vsylog_internal to the deed */
 
-      ret = vsyslog_internal(fmt, ap);
+      ret = lowvsyslog_internal(fmt, ap);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: syslog
+ * Name: lowsyslog
  ****************************************************************************/
 
-int syslog(int priority, FAR const char *fmt, ...)
+int lowsyslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
   int ret;
 
-  /* Let vsyslog do the work */
+  /* Let lowvsyslog do the work */
 
   va_start(ap, fmt);
-  ret = vsyslog(priority, fmt, ap);
+  ret = lowvsyslog(priority, fmt, ap);
   va_end(ap);
 
   return ret;
 }
+
+#endif /* CONFIG_ARCH_LOWPUTC || CONFIG_SYSLOG */
