@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/syslog/fs_vsyslog.c
+ * libc/syslog/fs_syslog.c
  *
  *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -151,18 +151,18 @@ int vsyslog(int priority, FAR const char *fmt, va_list ap)
 }
 
 /****************************************************************************
- * Name: lowsyslog
+ * Name: syslog
  ****************************************************************************/
 
-int lowsyslog(int priority, FAR const char *fmt, ...)
+int syslog(int priority, FAR const char *fmt, ...)
 {
   va_list ap;
   int ret;
 
-  /* Let lowvsyslog do the work */
+  /* Let vsyslog do the work */
 
   va_start(ap, fmt);
-  ret = lowvsyslog(priority, fmt, ap);
+  ret = vsyslog(priority, fmt, ap);
   va_end(ap);
 
   return ret;
