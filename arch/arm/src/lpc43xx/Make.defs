@@ -154,7 +154,7 @@ endif
 
 ifeq ($(CONFIG_LPC43_USB0),y)
 ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS	+= lpc31_usb0dev.c
+CHIP_CSRCS += lpc43_usb0dev.c
 endif
 endif
 
