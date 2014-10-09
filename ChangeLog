@@ -8811,4 +8811,6 @@
 	* fs/Kconfig, syslog/fs_syslogenable, and include/syslog.h:  Remove
 	  non-standard, conditional syslog_enable(), instead only the
 	  required, standard setlogmask() (2014-10-9).
+	* arch/arm/src/stm32/chip/stm32_exti.h: Correct STM32 RTC EXTI bit
+	  definition.  From Lazlo (2014-10-9).
 
