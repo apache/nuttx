@@ -135,8 +135,8 @@
 #  define EXTI_ETH_WAKEUP        (1 << 19) /* EXTI line 19 is connected to the Ethernet Wakeup event */
 #  define EXTI_OTGHS_WAKEUP      (1 << 20) /* EXTI line 20 is connected to the USB OTG HS Wakeup event */
 #  define EXTI_RTC_TAMPER        (1 << 21) /* EXTI line 21 is connected to the RTC Tamper and TimeStamp events */
-#  define EXTI_RTC_TIMESTAMP     (1 << 22) /* EXTI line 21 is connected to the RTC Tamper and TimeStamp events */
-#  define EXTI_RTC_WAKEUP        (1 << 23) /* EXTI line 22 is connected to the RTC Wakeup event */
+#  define EXTI_RTC_TIMESTAMP     (1 << 21) /* EXTI line 21 is connected to the RTC Tamper and TimeStamp events */
+#  define EXTI_RTC_WAKEUP        (1 << 22) /* EXTI line 22 is connected to the RTC Wakeup event */
 #endif
 
 /* Interrupt mask register */
