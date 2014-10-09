@@ -156,7 +156,6 @@
 "strtoul","stdlib.h","","unsigned long","const char *","char **","int"
 "strtoull","stdlib.h","defined(CONFIG_HAVE_LONG_LONG)","unsigned long long","const char *","char **","int"
 "syslog","syslog.h","","int","int","FAR const char *","..."
-"syslog_enable","syslog.h","defined(CONFIG_SYSLOG_ENABLE)","void","bool"
 "tcflush","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","int","int","int"
 "tcgetattr","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","int","int","FAR struct termios *"
 "tcsetattr","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","int","int","int","FAR const struct termios *"

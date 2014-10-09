@@ -58,6 +58,12 @@ SYSCALL_LOOKUP(sched_unlock,              0, STUB_sched_unlock)
 SYSCALL_LOOKUP(sched_yield,               0, STUB_sched_yield)
 SYSCALL_LOOKUP(set_errno,                 1, STUB_set_errno)
 
+/* SYSLOG */
+
+SYSCALL_LOOKUP(vsyslog,                   3, SYS_vsyslog)
+SYSCALL_LOOKUP(lowvsyslog,                3, SYS_lowvsyslog)
+SYSCALL_LOOKUP(setlogmask,                1, SYS_setlogmask)
+
 /* Semaphores */
 
 SYSCALL_LOOKUP(sem_destroy,               2, STUB_sem_destroy)

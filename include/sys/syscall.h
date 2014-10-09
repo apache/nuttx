@@ -82,23 +82,29 @@
 #define SYS_sched_yield                (CONFIG_SYS_RESERVED+12)
 #define SYS_set_errno                  (CONFIG_SYS_RESERVED+13)
 
+/* SYSLOG */
+
+#define SYS_vsyslog                    (CONFIG_SYS_RESERVED+14)
+#define SYS_lowvsyslog                 (CONFIG_SYS_RESERVED+15)
+#define SYS_setlogmask                 (CONFIG_SYS_RESERVED+16)
+
 /* Semaphores */
 
-#define SYS_sem_destroy                (CONFIG_SYS_RESERVED+14)
-#define SYS_sem_post                   (CONFIG_SYS_RESERVED+15)
-#define SYS_sem_timedwait              (CONFIG_SYS_RESERVED+16)
-#define SYS_sem_trywait                (CONFIG_SYS_RESERVED+17)
-#define SYS_sem_wait                   (CONFIG_SYS_RESERVED+18)
+#define SYS_sem_destroy                (CONFIG_SYS_RESERVED+17)
+#define SYS_sem_post                   (CONFIG_SYS_RESERVED+18)
+#define SYS_sem_timedwait              (CONFIG_SYS_RESERVED+19)
+#define SYS_sem_trywait                (CONFIG_SYS_RESERVED+20)
+#define SYS_sem_wait                   (CONFIG_SYS_RESERVED+21)
 
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+19)
-#  define SYS_sem_close                (CONFIG_SYS_RESERVED+20)
-#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+21)
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+22)
+#  define SYS_sem_open                 (CONFIG_SYS_RESERVED+22)
+#  define SYS_sem_close                (CONFIG_SYS_RESERVED+23)
+#  define SYS_sem_unlink               (CONFIG_SYS_RESERVED+24)
+#  define __SYS_task_create            (CONFIG_SYS_RESERVED+25)
 #else
-#  define __SYS_task_create            (CONFIG_SYS_RESERVED+19)
+#  define __SYS_task_create            (CONFIG_SYS_RESERVED+22)
 #endif
 
 /* Task creation APIs based on global entry points cannot be use with

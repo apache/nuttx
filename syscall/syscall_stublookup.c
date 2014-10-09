@@ -75,6 +75,17 @@ uintptr_t STUB_sched_setscheduler(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_sched_unlock(int nbr);
 uintptr_t STUB_sched_yield(int nbr);
+
+/* SYSLOG */
+
+uintptr_t STUB_vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm2);
+uintptr_t STUB_lowvsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm2);
+uintptr_t STUB_setlogmask(iint nbr, uintptr_t parm1);
+
+/* Semaphores */
+
 uintptr_t STUB_sem_close(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_destroy(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_open(int nbr, uintptr_t parm1, uintptr_t parm2,

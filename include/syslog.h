@@ -49,6 +49,19 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Some interfaces in this file are currently only available within the
+ * kernel.  They could are available to applicaions in the flat build and
+ * could be made available in the protected and kernel builds IF system
+ * calls were added.
+ */
+
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
+#  undef __KERNEL__
+#  define __KERNEL__ 1
+#endif
+
+/* syslog interface *********************************************************/
 /* The option argument to openlog() is an OR of any of these:
  *
  *   LOG_CONS     - Write directly to system console if there is an error
@@ -136,7 +149,7 @@ void closelog(void);
 int syslog(int priority, FAR const char *format, ...);
 int vsyslog(int priority, FAR const char *src, va_list ap);
 
-#ifdef CONFIG_ARCH_LOWPUTC /* Non-standard */
+#ifdef CONFIG_ARCH_LOWPUTC
 /* These are non-standard, low-level system logging interface.  The
  * difference between syslog() and lowsyslog() is that the syslog()
  * interface writes to the syslog device (usually fd=1, stdout) whereas
@@ -167,9 +180,9 @@ int lowvsyslog(int priority, FAR const char *format, va_list ap);
 
 int setlogmask(int mask);
 
-/* Enable or disable syslog output */
+#if defined(CONFIG_SYSLOG_ENABLE) && defined(__KERNEL__)
+/* Non-standard interface to enable or disable syslog output */
 
-#ifdef CONFIG_SYSLOG_ENABLE /* Non-standard */
 void syslog_enable(bool enable);
 #endif
 

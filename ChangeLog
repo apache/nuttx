@@ -8802,6 +8802,7 @@
 	* drivers/: Correct everything under nuttx/drivers, nuttx/arch, nuttx/net,
 	  nuttx/binfmt, and nuttx/configs to use the corrected syslog interfaces
 	  (2014-10-8).
-	* libc/syslog: Move syslog logic from libc/misc and libc/stdio to
-	  libc/syslog (2014-10-8).
-
+	* libc/syslog and fs/syslog: Move syslog logic from libc/misc and
+	  libc/stdio to libc/syslog and fs/syslog.  Also move some syslog logic
+	  from fs/driver to fs/syslog (2014-10-8).
+	* fs/syslog/fs_syslogmask.c:  Implement syslogmask() (2014-10-8).
