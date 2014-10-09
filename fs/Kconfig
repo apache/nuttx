@@ -63,13 +63,6 @@ source fs/procfs/Kconfig
 
 comment "System Logging"
 
-config SYSLOG_ENABLE
-	bool "Enable SYSLOG Controls"
-	default n
-	---help---
-		Support an interface called syslog_enable to dynamically enable or
-		disable SYSLOG output.  Default:  SYSLOG output is always enabled.
-
 config SYSLOG
 	bool "Advanced SYSLOG features"
 	default n

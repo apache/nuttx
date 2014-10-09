@@ -206,12 +206,6 @@ int lowvsyslog(int priority, FAR const char *format, va_list ap);
 
 int setlogmask(int mask);
 
-#if defined(CONFIG_SYSLOG_ENABLE) && defined(__KERNEL__)
-/* Non-standard interface to enable or disable syslog output */
-
-void syslog_enable(bool enable);
-#endif
-
 #if defined(__cplusplus)
 }
 #endif

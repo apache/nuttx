@@ -68,16 +68,6 @@ extern "C"
 
 EXTERN uint8_t g_syslog_mask;
 
-#ifdef CONFIG_SYSLOG_ENABLE
-/* True if the syslog is enabled */
-
-EXTERN bool g_syslogenable;
-
-/* The set of syslog priorities to use when the syslog is enabled */
-
-EXTERN bool g_syslogenable;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

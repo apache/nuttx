@@ -432,7 +432,7 @@ CONFIG_UART2_2STOP=0
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #

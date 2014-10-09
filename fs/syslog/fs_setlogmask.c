@@ -50,33 +50,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_ENABLE
-/* The initial mask is all disabled */
-
-#  define INITIAL_SYSLOG_MASK 0
-#else
-/* The initial mask is all enabled */
-
-#  define INITIAL_SYSLOG_MASK LOG_ALL
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /* The currently enabled set of syslog priorities */
 
-uint8_t g_syslog_mask = INITIAL_SYSLOG_MASK;
-
-#ifdef CONFIG_SYSLOG_ENABLE
-/* True if the syslog is enabled */
-
-bool g_syslog_enabled;
-
-/* The set of syslog priorities to use when the syslog is enabled */
-
-uint8_t g_syslog_enablemask = LOG_ALL;
-#endif
+uint8_t g_syslog_mask = LOG_ALL;
 
 /****************************************************************************
  * Public Functions
@@ -101,20 +81,8 @@ int setlogmask(int mask)
 
   flags = irqsave();
 
-#ifdef CONFIG_SYSLOG_ENABLE
-  /* If the syslog is disabled, use the saved enable mask */
-
-  if (!g_syslog_enabled)
-    {
-      oldmask             = g_syslog_enablemask;
-      g_syslog_enablemask = (uint8_t)mask;
-    }
-  else
-#endif
-    {
-      oldmask             = g_syslog_mask;
-      g_syslog_mask       = (uint8_t)mask;
-    }
+  oldmask       = g_syslog_mask;
+  g_syslog_mask = (uint8_t)mask;
 
   irqrestore(flags);
   return oldmask;

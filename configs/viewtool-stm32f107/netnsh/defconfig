@@ -757,7 +757,7 @@ CONFIG_NET_ETHERNET=y
 #
 # System Logging
 #
-# CONFIG_SYSLOG_ENABLE is not set
+
 # CONFIG_SYSLOG is not set
 
 #
