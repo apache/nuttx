@@ -97,12 +97,13 @@
  *            is invoked. Zero means to perform the work immediately.
  *
  * Returned Value:
- *   Zero on success, a negated errno on failure
+ *   None
  *
  ****************************************************************************/
 
-static int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
-                       worker_t worker, FAR void *arg, uint32_t delay)
+static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
+                        FAR struct work_s *work, worker_t worker,
+                        FAR void *arg, uint32_t delay)
 {
   irqstate_t flags;
 
@@ -123,10 +124,8 @@ static int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
   work->qtime  = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
-  kill(wqueue->pid[0], SIGWORK);   /* Wake up the worker thread */
 
   irqrestore(flags);
-  return OK;
 }
 
 /****************************************************************************
@@ -170,7 +169,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     {
       /* Cancel high priority work */
 
-      return work_qqueue(&g_hpwork, work, worker, arg, delay);
+      work_qqueue((FAR struct kwork_wqueue_s *)&g_hpwork, work, worker, arg, delay);
+      return work_signal(HPWORK);
     }
   else
 #endif
@@ -179,7 +179,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     {
       /* Cancel low priority work */
 
-      return work_qqueue(&g_lpwork, work, worker, arg, delay);
+      work_qqueue((FAR struct kwork_wqueue_s *)&g_lpwork, work, worker, arg, delay);
+      return work_signal(LPWORK);
     }
   else
 #endif

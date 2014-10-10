@@ -48,6 +48,8 @@
 
 #include <arch/irq.h>
 
+#include "wqueue/wqueue.h"
+
 #ifdef CONFIG_SCHED_WORKQUEUE
 
 /****************************************************************************
@@ -105,7 +107,7 @@
  *
  ****************************************************************************/
 
-void work_process(FAR struct wqueue_s *wqueue)
+void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
@@ -239,7 +241,9 @@ void work_process(FAR struct wqueue_s *wqueue)
            * Interrupts will be re-enabled while we wait.
            */
 
+          wqueue->worker[wndx].busy = false;
           usleep(next * USEC_PER_TICK);
+          wqueue->worker[wndx].busy = true;
         }
     }
 

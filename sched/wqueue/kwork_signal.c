@@ -90,6 +90,7 @@
 int work_signal(int qid)
 {
   pid_t pid;
+  int wndx;
   int ret;
 
   /* Get the process ID of the worker thread */
@@ -97,14 +98,31 @@ int work_signal(int qid)
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
-      pid = g_hpwork.pid[0];
+      pid = g_hpwork.worker[0].pid;
     }
   else
 #endif
 #ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
-      pid = g_lpwork.pid[0];
+      int i;
+
+      /* Find an IDLE worker thread */
+
+      for (wndx = 0, i = 0; i < CONFIG_SCHED_LPNTHREADS; i++)
+        {
+          if (g_lpwork.worker[i].busy)
+            {
+              wndx = i;
+              break;
+            }
+        }
+
+      /* Use the process ID of the IDLE thread (or thread 0 is the are all
+       * busy)
+       */
+
+      pid = g_lpwork.worker[wndx].pid;
     }
   else
 #endif

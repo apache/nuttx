@@ -57,6 +57,15 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* This structure defines the state of one user-modework queue. */
+
+struct usr_wqueue_s
+{
+  uint32_t          delay;  /* Delay between polling cycles (ticks) */
+  struct dq_queue_s q;      /* The queue of pending work */
+  pid_t             pid;    /* The task ID of the worker thread(s) */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -64,7 +73,7 @@
 #if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 /* The state of the user mode work queue */
 
-extern struct wqueue_s g_usrwork;
+extern struct usr_wqueue_s g_usrwork;
 
 /* This semaphore/mutex supports exclusive access to the user-mode work queue */
 

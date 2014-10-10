@@ -82,6 +82,8 @@
  *   then an additional, lower-priority work queue will also be created.  This
  *   lower priority work queue is better suited for more extended processing
  *   (such as file system clean-up operations)
+ * CONFIG_SCHED_LPNTHREADS - The number of thread in the low-priority queue's
+ *   thread pool.  Default: 1
  * CONFIG_SCHED_LPWORKPRIORITY - The minimum execution priority of the lower
  *   priority worker thread.  Default: 50
  * CONFIG_SCHED_LPWORKPRIOMAX - The maximum execution priority of the lower
@@ -189,6 +191,10 @@
 
 #ifdef CONFIG_SCHED_LPWORK
 
+#  ifndef CONFIG_SCHED_LPNTHREADS
+#    define CONFIG_SCHED_LPNTHREADS 1
+#endif
+
 #  ifndef CONFIG_SCHED_LPWORKPRIORITY
 #    define CONFIG_SCHED_LPWORKPRIORITY 50
 #  endif
@@ -292,18 +298,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/* This structure defines the state on one work queue.  This structure is
- * used internally by the OS and worker queue logic and should not be
- * accessed by application logic.
- */
-
-struct wqueue_s
-{
-  uint32_t          delay;  /* Delay between polling cycles (ticks) */
-  struct dq_queue_s q;      /* The queue of pending work */
-  pid_t             pid[1]; /* The task ID of the worker thread(s) */
-};
 
 /* Defines the work callback */
 

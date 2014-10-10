@@ -66,7 +66,7 @@
 
 /* The state of the kernel mode, high priority work queue. */
 
-struct wqueue_s g_hpwork;
+struct hp_wqueue_s g_hpwork;
 
 /****************************************************************************
  * Private Data
@@ -123,7 +123,7 @@ static int work_hpthread(int argc, char *argv[])
        * we process items in the work list.
        */
 
-      work_process(&g_hpwork);
+      work_process((FAR struct kwork_wqueue_s *)&g_hpwork, 0);
     }
 
   return OK; /* To keep some compilers happy */
@@ -150,22 +150,24 @@ static int work_hpthread(int argc, char *argv[])
 
 int work_hpstart(void)
 {
+  pid_t pid;
+
   /* Initialize work queue data structures */
 
-  g_hpwork.delay = CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK;
+  g_hpwork.delay          = CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK;
   dq_init(&g_hpwork.q);
 
   /* Start the high-priority, kernel mode worker thread */
 
   svdbg("Starting high-priority kernel worker thread\n");
 
-  g_hpwork.pid[0] = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
-                                  CONFIG_SCHED_WORKSTACKSIZE,
-                                  (main_t)work_hpthread,
-                                  (FAR char * const *)NULL);
+  pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
+                      CONFIG_SCHED_WORKSTACKSIZE,
+                      (main_t)work_hpthread,
+                      (FAR char * const *)NULL);
 
-  DEBUGASSERT(g_hpwork.pid[0] > 0);
-  if (g_hpwork.pid[0] < 0)
+  DEBUGASSERT(pid > 0);
+  if (pid < 0)
     {
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
@@ -174,7 +176,9 @@ int work_hpstart(void)
       return -errcode;
     }
 
-  return g_hpwork.pid[0];
+  g_hpwork.worker[0].pid  = pid;
+  g_hpwork.worker[0].busy = true;
+  return pid;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_HPWORK*/

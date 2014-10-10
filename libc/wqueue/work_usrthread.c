@@ -83,7 +83,7 @@
 
 /* The state of the user mode work queue. */
 
-struct wqueue_s g_usrwork;
+struct usr_wqueue_s g_usrwork;
 
 /* This semaphore supports exclusive access to the user-mode work queue */
 
@@ -118,7 +118,7 @@ extern pthread_mutex_t g_usrmutex;
  *
  ****************************************************************************/
 
-void work_process(FAR struct wqueue_s *wqueue)
+void work_process(FAR struct usr_wqueue_s *wqueue)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
@@ -351,21 +351,21 @@ int work_usrstart(void)
 
     /* Start a user-mode worker thread for use by applications. */
 
-    g_usrwork.pid[0] = task_create("uwork",
-                                    CONFIG_SCHED_USRWORKPRIORITY,
-                                    CONFIG_SCHED_USRWORKSTACKSIZE,
-                                    (main_t)work_usrthread,
-                                    (FAR char * const *)NULL);
+    g_usrwork.pid = task_create("uwork",
+                                CONFIG_SCHED_USRWORKPRIORITY,
+                                CONFIG_SCHED_USRWORKSTACKSIZE,
+                                (main_t)work_usrthread,
+                                (FAR char * const *)NULL);
 
-    DEBUGASSERT(g_usrwork.pid[0] > 0);
-    if (g_usrwork.pid[0] < 0)
+    DEBUGASSERT(g_usrwork.pid > 0);
+    if (g_usrwork.pid < 0)
       {
         int errcode = errno;
         DEBUGASSERT(errcode > 0);
         return -errcode;
       }
 
-    return g_usrwork.pid[0];
+    return g_usrwork.pid;
   }
 #else
   {
@@ -398,8 +398,8 @@ int work_usrstart(void)
 
     (void)pthread_detach(usrwork);
 
-    g_usrwork.pid[0] = (pid_t)usrwork;
-    return g_usrwork.pid[0];
+    g_usrwork.pid = (pid_t)usrwork;
+    return g_usrwork.pid;
   }
 #endif
 }

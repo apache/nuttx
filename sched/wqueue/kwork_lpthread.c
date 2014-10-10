@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
+#include <sched.h>
+#include <string.h>
 #include <errno.h>
 #include <queue.h>
 #include <debug.h>
@@ -66,7 +69,7 @@
 
 /* The state of the kernel mode, low priority work queue(s). */
 
-struct wqueue_s g_lpwork;
+struct lp_wqueue_s g_lpwork;
 
 /****************************************************************************
  * Private Data
@@ -103,6 +106,28 @@ struct wqueue_s g_lpwork;
 
 static int work_lpthread(int argc, char *argv[])
 {
+  int wndx;
+
+  /* Find out thread index by search the workers in g_lpwork */
+
+  {
+    pid_t me = getpid();
+    int i;
+
+    /* Check each entry if we have to */
+
+    for (wndx = 0, i = 0; i < CONFIG_SCHED_LPNTHREADS; i++)
+      {
+        if (g_lpwork.worker[i].pid == me)
+          {
+            wndx = i;
+            break;
+          }
+      }
+
+    DEBUGASSERT(i < CONFIG_SCHED_LPNTHREADS);
+  }
+
   /* Loop forever */
 
   for (;;)
@@ -112,15 +137,21 @@ static int work_lpthread(int argc, char *argv[])
        * context (for example, if the memory was freed from an interrupt handler).
        * NOTE: If the work thread is disabled, this clean-up is performed by
        * the IDLE thread (at a very, very low priority).
+       *
+       * In the event of multiple low priority threads, on index == 0 will do
+       * the garbage collection.
        */
 
-      sched_garbagecollection();
+      if (wndx == 0)
+        {
+          sched_garbagecollection();
+        }
 
       /* Then process queued work.  We need to keep interrupts disabled while
        * we process items in the work list.
        */
 
-      work_process(&g_lpwork);
+      work_process((FAR struct kwork_wqueue_s *)&g_lpwork, wndx);
     }
 
   return OK; /* To keep some compilers happy */
@@ -147,31 +178,50 @@ static int work_lpthread(int argc, char *argv[])
 
 int work_lpstart(void)
 {
+  pid_t pid;
+  int wndx;
+
   /* Initialize work queue data structures */
+
+  memset(&g_lpwork, 0, sizeof(struct kwork_wqueue_s));
 
   g_lpwork.delay = CONFIG_SCHED_LPWORKPERIOD / USEC_PER_TICK;
   dq_init(&g_lpwork.q);
 
+  /* Don't permit any of the threads to run until we have fully initialized
+   * g_lpwork.
+   */
+
+  sched_lock();
+
   /* Start the low-priority, kernel mode worker thread(s) */
 
-  svdbg("Starting low-priority kernel worker thread\n");
+  svdbg("Starting low-priority kernel worker thread(s)\n");
 
-  g_lpwork.pid[0] = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                                  CONFIG_SCHED_LPWORKSTACKSIZE,
-                                  (main_t)work_lpthread,
-                                  (FAR char * const *)NULL);
-
-  DEBUGASSERT(g_lpwork.pid[0] > 0);
-  if (g_lpwork.pid[0] < 0)
+  for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode > 0);
+       pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+                           CONFIG_SCHED_LPWORKSTACKSIZE,
+                           (main_t)work_lpthread,
+                           (FAR char * const *)NULL);
 
-      slldbg("kernel_thread failed: %d\n", errcode);
-      return -errcode;
+      DEBUGASSERT(pid > 0);
+      if (pid < 0)
+        {
+          int errcode = errno;
+          DEBUGASSERT(errcode > 0);
+
+          slldbg("kernel_thread %d failed: %d\n", wndx, errcode);
+          sched_unlock();
+          return -errcode;
+        }
+
+      g_lpwork.worker[wndx].pid  = pid;
+      g_lpwork.worker[wndx].busy = true;
     }
 
-  return g_lpwork.pid[0];
+  sched_unlock();
+  return g_lpwork.worker[0].pid;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK */

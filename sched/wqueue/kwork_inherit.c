@@ -86,12 +86,11 @@ void lpwork_boostpriority(uint8_t reqprio)
       reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
     }
 
-  /* Get the process ID of the low priority worker thread from the low
-   * priority work queue.  Then get the TCB of the low priority worker
-   * thread from the process ID.
+  /* Get the process ID of one low priority worker thread.  Then get the TCB
+   * of the low priority worker thread from the process ID.
    */
 
-  wpid = g_lpwork.pid[0];
+  wpid = g_lpwork.worker[0].pid;
   wtcb = sched_gettcb(wpid);
 
   /* Prevent context switches until we get the priorities right */
@@ -214,7 +213,7 @@ void lpwork_restorepriority(uint8_t reqprio)
    * thread from the process ID.
    */
 
-  wpid = g_lpwork.pid[0];
+  wpid = g_lpwork.worker[0].pid;
   wtcb = sched_gettcb(wpid);
 
   /* Prevent context switches until we get the priorities right */

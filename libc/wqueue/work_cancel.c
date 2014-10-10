@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-static int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
+static int work_qcancel(FAR struct usr_wqueue_s *wqueue, FAR struct work_s *work)
 {
   int ret = -ENOENT;
 

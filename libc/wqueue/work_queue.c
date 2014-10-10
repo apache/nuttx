@@ -102,8 +102,9 @@
  *
  ****************************************************************************/
 
-static int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
-                       worker_t worker, FAR void *arg, uint32_t delay)
+static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
+                       FAR struct work_s *work, worker_t worker,
+                       FAR void *arg, uint32_t delay)
 {
   DEBUGASSERT(work != NULL);
 
@@ -122,7 +123,7 @@ static int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
   work->qtime  = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
-  kill(wqueue->pid[0], SIGWORK);   /* Wake up the worker thread */
+  kill(wqueue->pid, SIGWORK);   /* Wake up the worker thread */
 
   work_unlock();
   return OK;

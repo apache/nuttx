@@ -97,7 +97,7 @@ int work_signal(int qid)
     {
       /* Signal the worker thread */
 
-      ret = kill(g_usrwork.pid[0], SIGWORK);
+      ret = kill(g_usrwork.pid, SIGWORK);
       if (ret < 0)
         {
           int errcode = errno;

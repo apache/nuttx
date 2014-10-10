@@ -42,6 +42,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdbool.h>
+#include <queue.h>
+
 #ifdef CONFIG_SCHED_WORKQUEUE
 
 /****************************************************************************
@@ -64,6 +68,48 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+/* This represents one worker */
+
+struct kworker_s
+{
+  pid_t             pid;    /* The task ID of the worker thread */
+  volatile bool     busy;   /* True: Worker is not available */
+};
+
+/* This structure defines the state of one high-priority work queue */
+
+struct kwork_wqueue_s
+{
+  uint32_t          delay;     /* Delay between polling cycles (ticks) */
+  struct dq_queue_s q;         /* The queue of pending work */
+  struct kworker_s  worker[1]; /* Describes a worker thread */
+};
+
+
+/* This structure defines the state of one high-priority work queue.  This
+ * structure must be cast-compatible with kwork_wqueue_s.
+ */
+
+struct hp_wqueue_s
+{
+  uint32_t          delay;     /* Delay between polling cycles (ticks) */
+  struct dq_queue_s q;         /* The queue of pending work */
+  struct kworker_s  worker[1]; /* Describes the single high priority worker */
+};
+
+/* This structure defines the state of one high-priority work queue.  This
+ * structure must be cast compatible with kwork_wqueue_s
+ */
+
+struct lp_wqueue_s
+{
+  uint32_t          delay;  /* Delay between polling cycles (ticks) */
+  struct dq_queue_s q;      /* The queue of pending work */
+
+  /* Describes each thread in the low priority queue's thread pool */
+
+  struct kworker_s  worker[CONFIG_SCHED_LPNTHREADS];
+};
 
 /****************************************************************************
  * Public Data
@@ -72,13 +118,13 @@
 #ifdef CONFIG_SCHED_HPWORK
 /* The state of the kernel mode, high priority work queue. */
 
-extern struct wqueue_s g_hpwork;
+extern struct hp_wqueue_s g_hpwork;
 #endif
 
 #ifdef CONFIG_SCHED_LPWORK
 /* The state of the kernel mode, low priority work queue(s). */
 
-extern struct wqueue_s g_lpwork;
+extern struct lp_wqueue_s g_lpwork;
 #endif
 
 /****************************************************************************
@@ -140,7 +186,7 @@ int work_lpstart(void);
  *
  ****************************************************************************/
 
-void work_process(FAR struct wqueue_s *wqueue);
+void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __SCHED_WQUEUE_WQUEUE_H */

@@ -91,7 +91,8 @@
  *
  ****************************************************************************/
 
-static int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
+static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
+                        FAR struct work_s *work)
 {
   irqstate_t flags;
   int ret = -ENOENT;
@@ -156,7 +157,7 @@ int work_cancel(int qid, FAR struct work_s *work)
     {
       /* Cancel high priority work */
 
-      return work_qcancel(&g_hpwork, work);
+      return work_qcancel((FAR struct kwork_wqueue_s *)&g_hpwork, work);
     }
   else
 #endif
@@ -165,7 +166,7 @@ int work_cancel(int qid, FAR struct work_s *work)
     {
       /* Cancel low priority work */
 
-      return work_qcancel(&g_lpwork, work);
+      return work_qcancel((FAR struct kwork_wqueue_s *)&g_lpwork, work);
     }
   else
 #endif
