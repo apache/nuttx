@@ -421,7 +421,7 @@ if SCHED_HPWORK
 
 config SCHED_WORKPRIORITY
 	int "High priority worker thread priority"
-	default 192
+	default 224
 	---help---
 		The execution priority of the higher priority worker thread.
 
@@ -440,10 +440,14 @@ config SCHED_WORKPRIORITY
 
 config SCHED_WORKPERIOD
 	int "High priority worker thread period"
-	default 50000
+	default 100000 if SCHED_LPWORK
+	default 50000 if !SCHED_LPWORK
 	---help---
 		How often the worker thread checks for work in units of microseconds.
-		Default: 50*1000 (50 MS).
+		Default:  If the high priority worker thread is performing garbage
+		collection, then the default is 50*1000 (50 MS).  Otherwise, if the
+		lower priority worker thread is performing garbage collection, the
+		default is 100*1000.
 
 config SCHED_WORKSTACKSIZE
 	int "High priority worker thread stack size"
@@ -451,6 +455,8 @@ config SCHED_WORKSTACKSIZE
 	depends on SCHED_WORKQUEUE
 	---help---
 		The stack size allocated for the worker thread.  Default: 2K.
+
+endif # SCHED_HPWORK
 
 config SCHED_LPWORK
 	bool "Low priority (kernel) worker thread"
@@ -533,7 +539,6 @@ config SCHED_LPWORKSTACKSIZE
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
 endif # SCHED_LPWORK
-endif # SCHED_HPWORK
 
 if BUILD_PROTECTED
 
@@ -545,20 +550,20 @@ config SCHED_USRWORK
 
 if SCHED_USRWORK
 
-config SCHED_LPWORKPRIORITY
+config SCHED_USRWORKPRIORITY
 	int "User mode priority worker thread priority"
-	default 50
+	default 100
 	---help---
 		The execution priority of the lopwer priority worker thread.  Default: 192
 
-config SCHED_LPWORKPERIOD
+config SCHED_USRWORKPERIOD
 	int "User mode worker thread period"
-	default 50000
+	default 100000
 	---help---
 		How often the lower priority worker thread checks for work in units
-		of microseconds. Default: 50*1000 (50 MS).
+		of microseconds. Default: 100*1000 (100 MS).
 
-config SCHED_LPWORKSTACKSIZE
+config SCHED_USRWORKSTACKSIZE
 	int "User mode worker thread stack size"
 	default 2048
 	---help---

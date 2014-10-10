@@ -46,6 +46,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/clock.h>
 
 #include "wqueue/wqueue.h"
 
@@ -148,19 +149,20 @@ int work_lpstart(void)
 {
   /* Initialize work queue data structures */
 
+  g_lpwork.delay = CONFIG_SCHED_LPWORKPERIOD / USEC_PER_TICK;
   dq_init(&g_lpwork.q);
 
   /* Start the low-priority, kernel mode worker thread(s) */
 
   svdbg("Starting low-priority kernel worker thread\n");
 
-  g_lpwork.pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                               CONFIG_SCHED_LPWORKSTACKSIZE,
-                               (main_t)work_lpthread,
-                               (FAR char * const *)NULL);
+  g_lpwork.pid[0] = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+                                  CONFIG_SCHED_LPWORKSTACKSIZE,
+                                  (main_t)work_lpthread,
+                                  (FAR char * const *)NULL);
 
-  DEBUGASSERT(g_lpwork.pid > 0);
-  if (g_lpwork.pid < 0)
+  DEBUGASSERT(g_lpwork.pid[0] > 0);
+  if (g_lpwork.pid[0] < 0)
     {
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
@@ -169,7 +171,7 @@ int work_lpstart(void)
       return -errcode;
     }
 
-  return g_lpwork.pid;
+  return g_lpwork.pid[0];
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK */

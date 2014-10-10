@@ -127,7 +127,7 @@ int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
   work->qtime  = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
-  kill(wqueue->pid, SIGWORK);      /* Wake up the worker thread */
+  kill(wqueue->pid[0], SIGWORK);   /* Wake up the worker thread */
 
   irqrestore(flags);
   return OK;

@@ -46,6 +46,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/clock.h>
 
 #include "wqueue/wqueue.h"
 
@@ -151,19 +152,20 @@ int work_hpstart(void)
 {
   /* Initialize work queue data structures */
 
+  g_hpwork.delay = CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK;
   dq_init(&g_hpwork.q);
 
   /* Start the high-priority, kernel mode worker thread */
 
   svdbg("Starting high-priority kernel worker thread\n");
 
-  g_hpwork.pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
-                               CONFIG_SCHED_WORKSTACKSIZE,
-                               (main_t)work_hpthread,
-                               (FAR char * const *)NULL);
+  g_hpwork.pid[0] = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
+                                  CONFIG_SCHED_WORKSTACKSIZE,
+                                  (main_t)work_hpthread,
+                                  (FAR char * const *)NULL);
 
-  DEBUGASSERT(g_hpwork.pid > 0);
-  if (g_hpwork.pid < 0)
+  DEBUGASSERT(g_hpwork.pid[0] > 0);
+  if (g_hpwork.pid[0] < 0)
     {
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
@@ -172,7 +174,7 @@ int work_hpstart(void)
       return -errcode;
     }
 
-  return g_hpwork.pid;
+  return g_hpwork.pid[0];
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_HPWORK*/

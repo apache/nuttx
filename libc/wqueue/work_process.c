@@ -64,9 +64,9 @@
 #  define WORK_CLOCK CLOCK_REALTIME
 #endif
 
-/* The work poll period is in system ticks. */
-
-#define WORKPERIOD_TICKS  (CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK)
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -121,7 +121,7 @@ void work_process(FAR struct wqueue_s *wqueue)
    * we process items in the work list.
    */
 
-  next  = WORKPERIOD_TICKS;
+  next  = wqueue->delay;
   flags = irqsave();
 
   /* Get the time that we started this polling cycle in clock ticks. */
@@ -221,18 +221,28 @@ void work_process(FAR struct wqueue_s *wqueue)
         }
     }
 
-  /* There is no work to be performed now.  Check if we need to delay or if we have
-   * already exceed the duration of the polling period.
-   */
+  /* Get the delay (in clock ticks) since we started the sampling */
 
-  if (next < WORKPERIOD_TICKS)
+  elapsed = clock_systimer() - work->qtime;
+  if (elapsed <= wqueue->delay)
     {
-      /* Wait awhile to check the work list.  We will wait here until either
-       * the time elapses or until we are awakened by a signal.  Interrupts
-       * will be re-enabled while we wait.
+      /* How must time would we need to delay to get to the end of the 
+       * sampling period?  The amount of time we delay should be the smaller
+       * of the time to the end of the sampling period and the time to the
+       * next work expiry.
        */
 
-      usleep(next * USEC_PER_TICK);
+      remaining = wqueue->delay - elapsed;
+      next      = MIN(next, remaining);
+      if (next > 0)
+        {
+          /* Wait awhile to check the work list.  We will wait here until
+           * either the time elapses or until we are awakened by a signal.
+           * Interrupts will be re-enabled while we wait.
+           */
+
+          usleep(next * USEC_PER_TICK);
+        }
     }
 
   irqrestore(flags);

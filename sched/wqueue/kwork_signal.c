@@ -97,14 +97,14 @@ int work_signal(int qid)
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
-      pid = g_hpwork.pid;
+      pid = g_hpwork.pid[0];
     }
   else
 #endif
 #ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
-      pid = g_lpwork.pid;
+      pid = g_lpwork.pid[0];
     }
   else
 #endif

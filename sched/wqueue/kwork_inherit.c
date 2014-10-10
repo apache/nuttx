@@ -91,7 +91,7 @@ void lpwork_boostpriority(uint8_t reqprio)
    * thread from the process ID.
    */
 
-  wpid = g_lpwork.pid;
+  wpid = g_lpwork.pid[0];
   wtcb = sched_gettcb(wpid);
 
   /* Prevent context switches until we get the priorities right */
@@ -214,7 +214,7 @@ void lpwork_restorepriority(uint8_t reqprio)
    * thread from the process ID.
    */
 
-  wpid = g_lpwork.pid;
+  wpid = g_lpwork.pid[0];
   wtcb = sched_gettcb(wpid);
 
   /* Prevent context switches until we get the priorities right */

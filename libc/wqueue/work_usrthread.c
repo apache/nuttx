@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/clock.h>
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_USRWORK) && \
    !defined(__KERNEL__)
@@ -130,20 +131,21 @@ int work_usrstart(void)
 {
   /* Initialize work queue data structures */
 
+  g_usrwork.delay = CONFIG_SCHED_USRWORKPERIOD / USEC_PER_TICK;
   dq_init(&g_usrwork.q);
 
   /* Start a user-mode worker thread for use by applications. */
 
   svdbg("Starting user-mode worker thread\n");
 
-  g_usrwork.pid = task_create("uwork",
-                              CONFIG_SCHED_USRWORKPRIORITY,
-                              CONFIG_SCHED_USRWORKSTACKSIZE,
-                              (main_t)work_usrthread,
-                              (FAR char * const *)NULL);
+  g_usrwork.pid[0] = task_create("uwork",
+                                  CONFIG_SCHED_USRWORKPRIORITY,
+                                  CONFIG_SCHED_USRWORKSTACKSIZE,
+                                  (main_t)work_usrthread,
+                                  (FAR char * const *)NULL);
 
-  DEBUGASSERT(g_usrwork.pid > 0);
-  if (g_usrwork.pid < 0)
+  DEBUGASSERT(g_usrwork.pid[0] > 0);
+  if (g_usrwork.pid[0] < 0)
     {
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
@@ -152,7 +154,7 @@ int work_usrstart(void)
       return -errcode;
     }
 
-  return g_usrwork.pid;
+  return g_usrwork.pid[0];
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_USRWORK && !__KERNEL__*/

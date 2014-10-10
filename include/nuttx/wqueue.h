@@ -44,7 +44,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <signal.h>
+#include <semaphore.h>
 #include <queue.h>
 
 /****************************************************************************
@@ -66,11 +66,14 @@
  *   build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel mode
  *   in order to build the high priority work queue.
  * CONFIG_SCHED_WORKPRIORITY - The execution priority of the worker
- *   thread.  Default: 192
+ *   thread.  Default: 224
  * CONFIG_SCHED_WORKPERIOD - How often the worker thread checks for
- *   work in units of microseconds.  Default: 50*1000 (50 MS).
+ *   work in units of microseconds.  If the high priority worker thread is
+ *   performing garbage collection, then the default is 50*1000 (50 MS).
+ *   Otherwise, if the lower priority worker thread is performing garbage
+ *   collection, the default is 100*1000.
  * CONFIG_SCHED_WORKSTACKSIZE - The stack size allocated for the worker
- *   thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
+ *   thread.  Default: 2048.
  * CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
  *   the worker thread.  Default: 17
  *
@@ -86,7 +89,20 @@
  * CONFIG_SCHED_LPWORKPERIOD - How often the lower priority worker thread
  *  checks for work in units of microseconds.  Default: 50*1000 (50 MS).
  * CONFIG_SCHED_LPWORKSTACKSIZE - The stack size allocated for the lower
- *   priority worker thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
+ *   priority worker thread.  Default: 2048.
+ *
+ * The user-mode work queue is only available in the protected or kernel
+ * builds.  This those configurations, the user-mode work queue provides the
+ * same (non-standard) facility for use by applications.
+ *
+ * CONFIG_SCHED_USRWORK. If CONFIG_SCHED_USRWORK is also defined then the
+ *   user-mode work queue will be created.
+ * CONFIG_SCHED_USRWORKPRIORITY - The minimum execution priority of the lower
+ *   priority worker thread.  Default: 100
+ * CONFIG_SCHED_USRWORKPERIOD - How often the lower priority worker thread
+ *  checks for work in units of microseconds.  Default: 100*1000 (100 MS).
+ * CONFIG_SCHED_USRWORKSTACKSIZE - The stack size allocated for the lower
+ *   priority worker thread.  Default: 2048.
  */
 
 /* Is this a protected build (CONFIG_BUILD_PROTECTED=y) */
@@ -147,22 +163,20 @@
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
-/* We are building work queues... Work queues need signal support */
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  warning "Worker thread support requires signals"
-#endif
-
 /* High priority, kernel work queue configuration ***************************/
 
 #ifdef CONFIG_SCHED_HPWORK
 
 #  ifndef CONFIG_SCHED_WORKPRIORITY
-#    define CONFIG_SCHED_WORKPRIORITY 192
+#    define CONFIG_SCHED_WORKPRIORITY 224
 #  endif
 
 #  ifndef CONFIG_SCHED_WORKPERIOD
-#    define CONFIG_SCHED_WORKPERIOD (50*1000) /* 50 milliseconds */
+#    ifdef CONFIG_SCHED_LOWORK
+#      define CONFIG_SCHED_WORKPERIOD (100*1000) /* 100 milliseconds */
+#    else
+#      define CONFIG_SCHED_WORKPERIOD (50*1000)  /* 50 milliseconds */
+#    endif
 #  endif
 
 #  ifndef CONFIG_SCHED_WORKSTACKSIZE
@@ -223,11 +237,11 @@
 #ifdef CONFIG_SCHED_USRWORK
 
 #  ifndef CONFIG_SCHED_USRWORKPRIORITY
-#    define CONFIG_SCHED_USRWORKPRIORITY 50
+#    define CONFIG_SCHED_USRWORKPRIORITY 100
 #  endif
 
 #  ifndef CONFIG_SCHED_USRWORKPERIOD
-#    define CONFIG_SCHED_USRWORKPERIOD (50*1000) /* 50 milliseconds */
+#    define CONFIG_SCHED_USRWORKPERIOD (100*1000) /* 100 milliseconds */
 #  endif
 
 #  ifndef CONFIG_SCHED_USRWORKSTACKSIZE
@@ -286,8 +300,9 @@
 
 struct wqueue_s
 {
-  pid_t             pid; /* The task ID of the worker thread */
-  struct dq_queue_s q;   /* The queue of pending work */
+  uint32_t          delay;  /* Delay between polling cycles (ticks) */
+  struct dq_queue_s q;      /* The queue of pending work */
+  pid_t             pid[1]; /* The task ID of the worker thread(s) */
 };
 
 /* Defines the work callback */
