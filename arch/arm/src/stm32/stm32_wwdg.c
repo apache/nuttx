@@ -391,7 +391,7 @@ static int stm32_stop(FAR struct watchdog_lowerhalf_s *lower)
  * Description:
  *   Reset the watchdog timer to the current timeout value, prevent any
  *   imminent watchdog timeouts.  This is sometimes referred as "pinging"
- *   the atchdog timer or "petting the dog".
+ *   the watchdog timer or "petting the dog".
  *
  *   The application program must write in the WWDG_CR register at regular
  *   intervals during normal operation to prevent an MCU reset. This operation
@@ -430,9 +430,9 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
- *   stawtus - The location to return the watchdog status information.
+ *   lower  - A pointer the publicly visible representation of the "lower-half"
+ *            driver state structure.
+ *   status - The location to return the watchdog status information.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -486,9 +486,9 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
- *   timeout - The new timeout value in millisecnds.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
+ *   timeout - The new timeout value in milliseconds.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -565,7 +565,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 #endif
       if (reload <= WWDG_CR_T_MAX || wdgtb == 3)
         {
-          /* Note that we explicity break out of the loop rather than using
+          /* Note that we explicitly break out of the loop rather than using
            * the 'for' loop termination logic because we do not want the
            * value of wdgtb to be incremented.
            */
@@ -689,7 +689,7 @@ static xcpt_t stm32_capture(FAR struct watchdog_lowerhalf_s *lower,
  * Input Parameters:
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
- *   cmd   - The ioctol command value
+ *   cmd   - The ioctl command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular
  *           command.
