@@ -471,6 +471,21 @@ config SCHED_LPWORK
 
 if SCHED_LPWORK
 
+config SCHED_LPNTHREADS
+	int "Number of low-priority worker threads"
+	default 1 if !FS_AIO
+	default 4 if FS_AIO
+	---help---
+		This options selectes multiple, low-priority threads.  This is
+		essentially a "thread pool" that provides multi-threaded service
+		of the low-priority work thread.  This breaks the serialization
+		of the "queue" (hence, it is no longer a queue at all).
+
+		This options is required to support, for example, I/O operations
+		that stall waiting for input.  If there is only a single thread,
+		then the entire low-priority queue processing stalls in such cases.
+		Such behvior must be support for asynchronous I/O, AIO (for example).
+
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
 	default 50
