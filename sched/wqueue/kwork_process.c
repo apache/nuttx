@@ -136,8 +136,6 @@ void work_process(FAR struct wqueue_s *wqueue)
   work = (FAR struct work_s *)wqueue->q.head;
   while (work)
     {
-      DEBUGASSERT(wqueue->wq_sem.count > 0);
-
       /* Is this work ready?  It is ready if there is no delay or if
        * the delay has elapsed. qtime is the time that the work was added
        * to the work queue.  It will always be greater than or equal to
@@ -223,10 +221,10 @@ void work_process(FAR struct wqueue_s *wqueue)
 
   /* Get the delay (in clock ticks) since we started the sampling */
 
-  elapsed = clock_systimer() - work->qtime;
+  elapsed = clock_systimer() - stick;
   if (elapsed <= wqueue->delay)
     {
-      /* How must time would we need to delay to get to the end of the 
+      /* How much time would we need to delay to get to the end of the
        * sampling period?  The amount of time we delay should be the smaller
        * of the time to the end of the sampling period and the time to the
        * next work expiry.
