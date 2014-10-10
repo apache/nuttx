@@ -80,7 +80,7 @@
  *   by calling work_queue() again.
  *
  * Input parameters:
- *   qid    - The work queue ID (must be USRWORK)
+ *   qid    - The work queue ID (must be HPWORK or LPWORK)
  *   work   - The previously queue work structure to cancel
  *
  * Returned Value:

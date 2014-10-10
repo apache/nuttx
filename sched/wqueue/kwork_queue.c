@@ -101,8 +101,6 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
-
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, uint32_t delay)
 {
@@ -129,5 +127,4 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     }
 }
 
-#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
 #endif /* CONFIG_SCHED_WORKQUEUE */
