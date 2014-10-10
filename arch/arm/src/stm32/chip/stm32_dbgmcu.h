@@ -109,7 +109,7 @@
 #  define DBGMCU_APB1_TIM12STOP   (1 << 6)   /* Bit 6: TIM12 stopped when core is halted */
 #  define DBGMCU_APB1_TIM13STOP   (1 << 7)   /* Bit 7: TIM13 stopped when core is halted */
 #  define DBGMCU_APB1_TIM14STOP   (1 << 8)   /* Bit 7: TIM14 stopped when core is halted */
-#  define DBGMCU_APB1_RTCSTOP     (1 << 10)  /* Bit 11: RTC stopped when Core is halted */
+#  define DBGMCU_APB1_RTCSTOP     (1 << 10)  /* Bit 10: RTC stopped when Core is halted */
 #  define DBGMCU_APB1_WWDGSTOP    (1 << 11)  /* Bit 11: Window Watchdog stopped when core is halted */
 #  define DBGMCU_APB1_IWDGSTOP    (1 << 12)  /* Bit 12: Independent Watchdog stopped when core is halted */
 #  define DBGMCU_APB1_I2C1STOP    (1 << 21)  /* Bit 21: SMBUS timeout mode stopped when Core is halted */
@@ -123,7 +123,7 @@
 #  define DBGMCU_APB1_TIM4STOP    (1 << 2)   /* Bit 2: TIM4 stopped when core is halted */
 #  define DBGMCU_APB1_TIM6STOP    (1 << 4)   /* Bit 4: TIM6 stopped when core is halted */
 #  define DBGMCU_APB1_TIM7STOP    (1 << 5)   /* Bit 5: TIM7 stopped when core is halted */
-#  define DBGMCU_APB1_RTCSTOP     (1 << 10)  /* Bit 11: RTC stopped when Core is halted */
+#  define DBGMCU_APB1_RTCSTOP     (1 << 10)  /* Bit 10: RTC stopped when Core is halted */
 #  define DBGMCU_APB1_WWDGSTOP    (1 << 11)  /* Bit 11: Window Watchdog stopped when core is halted */
 #  define DBGMCU_APB1_IWDGSTOP    (1 << 12)  /* Bit 12: Independent Watchdog stopped when core is halted */
 #  define DBGMCU_APB1_I2C1STOP    (1 << 21)  /* Bit 21: SMBUS timeout mode stopped when Core is halted */
