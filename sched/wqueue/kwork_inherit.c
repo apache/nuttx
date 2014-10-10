@@ -54,11 +54,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpwork_boostpriority
+ * Name: lpwork_boostworker
  *
  * Description:
  *   Called by the work queue client to assure that the priority of the low-
@@ -73,30 +73,14 @@
  *
  ****************************************************************************/
 
-void lpwork_boostpriority(uint8_t reqprio)
+static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 {
   FAR struct tcb_s *wtcb;
-  irqstate_t flags;
-  pid_t wpid;
 
-  /* Clip to the configured maximum priority */
+  /* Get the TCB of the low priority worker thread from the process ID. */
 
-  if (reqprio > CONFIG_SCHED_LPWORKPRIOMAX)
-    {
-      reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
-    }
-
-  /* Get the process ID of one low priority worker thread.  Then get the TCB
-   * of the low priority worker thread from the process ID.
-   */
-
-  wpid = g_lpwork.worker[0].pid;
   wtcb = sched_gettcb(wpid);
-
-  /* Prevent context switches until we get the priorities right */
-
-  flags = irqsave();
-  sched_lock();
+  DEBUGASSERT(wtcb);
 
 #if CONFIG_SEM_NNESTPRIO > 0
   /* If the priority of the client thread that is greater than the base
@@ -169,13 +153,10 @@ void lpwork_boostpriority(uint8_t reqprio)
       (void)sched_setpriority(wtcb, reqprio);
     }
 #endif
-
-  sched_unlock();
-  irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: lpwork_restorepriority
+ * Name: lpwork_restoreworker
  *
  * Description:
  *   This function is called to restore the priority after it was previously
@@ -192,34 +173,17 @@ void lpwork_boostpriority(uint8_t reqprio)
  *
  ****************************************************************************/
 
-void lpwork_restorepriority(uint8_t reqprio)
+static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 {
   FAR struct tcb_s *wtcb;
-  irqstate_t flags;
-  pid_t wpid;
   uint8_t wpriority;
   int index;
   int selected;
 
-  /* Clip to the configured maximum priority */
+  /* Get the TCB of the low priority worker thread from the process ID. */
 
-  if (reqprio > CONFIG_SCHED_LPWORKPRIOMAX)
-    {
-      reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
-    }
-
-  /* Get the process ID of the low priority worker thread from the low
-   * priority work queue.  Then get the TCB of the low priority worker
-   * thread from the process ID.
-   */
-
-  wpid = g_lpwork.worker[0].pid;
   wtcb = sched_gettcb(wpid);
-
-  /* Prevent context switches until we get the priorities right */
-
-  flags = irqsave();
-  sched_lock();
+  DEBUGASSERT(wtcb);
 
   /* Was the priority of the worker thread boosted? If so, then drop its
    * priority back to the correct level.  What is the correct level?
@@ -330,6 +294,97 @@ void lpwork_restorepriority(uint8_t reqprio)
 
       sched_reprioritize(wtcb, wtcb->base_priority);
 #endif
+    }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpwork_boostpriority
+ *
+ * Description:
+ *   Called by the work queue client to assure that the priority of the low-
+ *   priority worker thread is at least at the requested level, reqprio. This
+ *   function would normally be called just before calling work_queue().
+ *
+ * Parameters:
+ *   reqprio - Requested minimum worker thread priority
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void lpwork_boostpriority(uint8_t reqprio)
+{
+  irqstate_t flags;
+  int wndx;
+
+  /* Clip to the configured maximum priority */
+
+  if (reqprio > CONFIG_SCHED_LPWORKPRIOMAX)
+    {
+      reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
+    }
+
+  /* Prevent context switches until we get the priorities right */
+
+  flags = irqsave();
+  sched_lock();
+
+  /* Adjust the priority of every worker thread */
+
+  for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++)
+    {
+      lpwork_boostworker(g_lpwork.worker[wndx].pid, reqprio);
+    }
+
+  sched_unlock();
+  irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: lpwork_restorepriority
+ *
+ * Description:
+ *   This function is called to restore the priority after it was previously
+ *   boosted.  This is often done by client logic on the worker thread when
+ *   the scheduled work completes.  It will check if we need to drop the
+ *   priority of the worker thread.
+ *
+ * Parameters:
+ *   reqprio - Previously requested minimum worker thread priority to be
+ *     "unboosted"
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void lpwork_restorepriority(uint8_t reqprio)
+{
+  irqstate_t flags;
+  int wndx;
+
+  /* Clip to the configured maximum priority */
+
+  if (reqprio > CONFIG_SCHED_LPWORKPRIOMAX)
+    {
+      reqprio = CONFIG_SCHED_LPWORKPRIOMAX;
+    }
+
+  /* Prevent context switches until we get the priorities right */
+
+  flags = irqsave();
+  sched_lock();
+
+  /* Adjust the priority of every worker thread */
+
+  for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++)
+    {
+      lpwork_restoreworker(g_lpwork.worker[wndx].pid, reqprio);
     }
 
   sched_unlock();
