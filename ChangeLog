@@ -8831,3 +8831,7 @@
 	  (2014-10-10).
 	* arch/arm/src/ stm32_iwdg.c, stm32_wwdg.c, and chip/stm32_dbgmcu.h:
 	  Fix watchdog stop bit usage.  From Lazlo (2014-10-10).
+	* sched/wqueue/, libc/wqueue, and include/nuttx/wqueue.h:  Add support
+	  for multiple low-priority worker threads.  This is a necessary
+	  piece of the support for asynchonous I/O (2014-10-10).
+
