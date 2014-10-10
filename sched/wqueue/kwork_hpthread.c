@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <debug.h>
+
 #include <nuttx/wqueue.h>
+#include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
 
 #include "wqueue/wqueue.h"
@@ -96,7 +100,7 @@ struct wqueue_s g_hpwork;
  *
  ****************************************************************************/
 
-int work_hpthread(int argc, char *argv[])
+static int work_hpthread(int argc, char *argv[])
 {
   /* Loop forever */
 
@@ -121,6 +125,49 @@ int work_hpthread(int argc, char *argv[])
     }
 
   return OK; /* To keep some compilers happy */
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_hpstart
+ *
+ * Description:
+ *   Start the high-priority, kernel-mode work queue.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The task ID of the worker thread is returned on success.  A negated
+ *   errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int work_hpstart(void)
+{
+  /* Start the high-priority, kernel mode worker thread */
+
+  svdbg("Starting high-priority kernel worker thread\n");
+
+  g_hpwork.pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
+                               CONFIG_SCHED_WORKSTACKSIZE,
+                               (main_t)work_hpthread,
+                               (FAR char * const *)NULL);
+
+  DEBUGASSERT(g_hpwork.pid > 0);
+  if (g_hpwork.pid < 0)
+    {
+      int errcode = errno;
+      DEBUGASSERT(errcode > 0);
+
+      slldbg("kernel_thread failed: %d\n", errcode);
+      return -errcode;
+    }
+
+  return g_hpwork.pid;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_HPWORK*/

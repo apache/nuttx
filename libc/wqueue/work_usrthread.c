@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/wqueue.h>
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_USRWORK) && \
@@ -87,7 +89,7 @@ extern struct wqueue_s g_usrwork;
  *
  ****************************************************************************/
 
-int work_usrthread(int argc, char *argv[])
+static int work_usrthread(int argc, char *argv[])
 {
   /* Loop forever */
 
@@ -101,6 +103,50 @@ int work_usrthread(int argc, char *argv[])
     }
 
   return OK; /* To keep some compilers happy */
+}
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_usrstart
+ *
+ * Description:
+ *   Start the user mode work queue.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The task ID of the worker thread is returned on success.  A negated
+ *   errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int work_usrstart(void)
+{
+  /* Start a user-mode worker thread for use by applications. */
+
+  svdbg("Starting user-mode worker thread\n");
+
+  g_usrwork.pid = task_create("uwork",
+                              CONFIG_SCHED_USRWORKPRIORITY,
+                              CONFIG_SCHED_USRWORKSTACKSIZE,
+                              (main_t)work_usrthread,
+                              (FAR char * const *)NULL);
+
+  DEBUGASSERT(g_usrwork.pid > 0);
+  if (g_usrwork.pid < 0)
+    {
+      int errcode = errno;
+      DEBUGASSERT(errcode > 0);
+
+      sdbg("task_create failed: %d\n", errcode);
+      return -errcode;
+    }
+
+  return g_usrwork.pid;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_USRWORK && !__KERNEL__*/

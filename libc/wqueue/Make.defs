@@ -40,10 +40,10 @@ ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 CSRCS += work_process.c work_queue.c work_cancel.c work_signal.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CSRCS += work_usrstart.c work_usrthread.c
+CSRCS += work_usrthread.c
 else
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += work_usrstart.c work_usrthread.c
+CSRCS += work_usrthread.c
 endif
 endif
 

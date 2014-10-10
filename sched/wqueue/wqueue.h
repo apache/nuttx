@@ -48,6 +48,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Customize kernel thread names */
+
+#ifdef CONFIG_SCHED_HPWORK
+#  if defined(CONFIG_SCHED_LPWORK)
+#    define HPWORKNAME "hpwork"
+#    define LPWORKNAME "lpwork"
+#  elif defined(CONFIG_SCHED_USRWORK)
+#    define HPWORKNAME "kwork"
+#  else
+#    define HPWORKNAME "work"
+#  endif
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -73,62 +86,41 @@ extern struct wqueue_s g_lpwork;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpthread
+ * Name: work_hpstart
  *
  * Description:
- *   This is the worker thread that performs the actions placed on the high
- *   priority work queue.
- *
- *   This, along with the lower priority worker thread(s) are the kernel
- *   mode work queues (also build in the flat build).  One of these threads
- *   also performs periodic garbage collection (that would otherwise be
- *   performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
- *   That will be the higher priority worker thread only if a lower priority
- *   worker thread is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
+ *   Start the high-priority, kernel-mode work queue.
  *
  * Input parameters:
- *   argc, argv (not used)
+ *   None
  *
  * Returned Value:
- *   Does not return
+ *   The task ID of the worker thread is returned on success.  A negated
+ *   errno value is returned on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_HPWORK
-int work_hpthread(int argc, char *argv[]);
+int work_hpstart(void);
 #endif
 
 /****************************************************************************
- * Name: work_lpthread
+ * Name: work_lpstart
  *
  * Description:
- *   These are the worker thread(s) that performs the actions placed on the
- *   low priority work queue.
- *
- *   These, along with the higher priority worker thread are the kernel mode
- *   work queues (also build in the flat build).  One of these threads also
- *   performs periodic garbage collection (that would otherwise be performed
- *   by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).  That will
- *   be the lower priority worker thread if it is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
+ *   Start the low-priority, kernel-mode worker thread(s)
  *
  * Input parameters:
- *   argc, argv (not used)
+ *   None
  *
  * Returned Value:
- *   Does not return
+ *   The task ID of the worker thread is returned on success.  A negated
+ *   errno value is returned on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_LPWORK
-int work_lpthread(int argc, char *argv[]);
+int work_lpstart(void);
 #endif
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

@@ -344,29 +344,6 @@ extern "C"
 void work_process(FAR struct wqueue_s *wqueue);
 
 /****************************************************************************
- * Name: work_usrthread
- *
- * Description:
- *   This is the worker thread that performs the actions placed on the user
- *   work queue.
- *
- *   This is a user mode work queue.  It must be used by applications for
- *   miscellaneous operations.  The user work thread must be started by
- *   application start-up logic by calling work_usrstart().
- *
- * Input parameters:
- *   argc, argv (not used)
- *
- * Returned Value:
- *   Does not return
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
-int work_usrthread(int argc, char *argv[]);
-#endif
-
-/****************************************************************************
  * Name: work_usrstart
  *
  * Description:

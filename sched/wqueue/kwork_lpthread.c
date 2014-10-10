@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <debug.h>
+
 #include <nuttx/wqueue.h>
+#include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
 
 #include "wqueue/wqueue.h"
@@ -95,7 +99,7 @@ struct wqueue_s g_lpwork;
  *
  ****************************************************************************/
 
-int work_lpthread(int argc, char *argv[])
+static int work_lpthread(int argc, char *argv[])
 {
   /* Loop forever */
 
@@ -118,6 +122,49 @@ int work_lpthread(int argc, char *argv[])
     }
 
   return OK; /* To keep some compilers happy */
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_lpstart
+ *
+ * Description:
+ *   Start the low-priority, kernel-mode worker thread(s)
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The task ID of the worker thread is returned on success.  A negated
+ *   errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int work_lpstart(void)
+{
+  /* Start the low-priority, kernel mode worker thread(s) */
+
+  svdbg("Starting low-priority kernel worker thread\n");
+
+  g_lpwork.pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+                               CONFIG_SCHED_LPWORKSTACKSIZE,
+                               (main_t)work_lpthread,
+                               (FAR char * const *)NULL);
+
+  DEBUGASSERT(g_lpwork.pid > 0);
+  if (g_lpwork.pid < 0)
+    {
+      int errcode = errno;
+      DEBUGASSERT(errcode > 0);
+
+      slldbg("kernel_thread failed: %d\n", errcode);
+      return -errcode;
+    }
+
+  return g_lpwork.pid;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK */

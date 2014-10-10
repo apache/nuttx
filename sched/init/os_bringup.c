@@ -117,24 +117,10 @@
 #  endif
 #endif
 
-/* If NuttX is built as a separately compiled module, then the config.h header
- * file should contain the address of the entry point (or path to the file)
- * that will perform the application-level initialization.
- */
+/* In the protected build (only) we also need to start the user work queue */
 
-/* Customize some strings */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-#  ifdef CONFIG_SCHED_HPWORK
-#    if defined(CONFIG_SCHED_LPWORK)
-#      define HPWORKNAME "hpwork"
-#      define LPWORKNAME "lpwork"
-#    elif defined(CONFIG_SCHED_USRWORK)
-#      define HPWORKNAME "knlwork"
-#    else
-#      define HPWORKNAME "work"
-#    endif
-#  endif
+#if !defined(CONFIG_BUILD_PROTECTED)
+#  undef CONFIG_SCHED_USRWORK
 #endif
 
 /****************************************************************************
@@ -211,47 +197,35 @@ static inline void os_pgworker(void)
 #ifdef CONFIG_SCHED_WORKQUEUE
 static inline void os_workqueues(void)
 {
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_SCHED_USRWORK)
-  int taskid;
+#ifdef CONFIG_SCHED_USRWORK
+  pid_t pid;
 #endif
 
 #ifdef CONFIG_SCHED_HPWORK
+  /* Start the high-priority worker thread to support device driver lower
+   * halves.
+   */
+
+  (void)work_hpstart();
+
+#endif /* CONFIG_SCHED_HPWORK */
+
 #ifdef CONFIG_SCHED_LPWORK
-  svdbg("Starting high-priority kernel worker thread\n");
-#else
-  svdbg("Starting kernel worker thread\n");
-#endif
-
-  g_hpwork.pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
-                               CONFIG_SCHED_WORKSTACKSIZE,
-                               (main_t)work_hpthread,
-                               (FAR char * const *)NULL);
-  DEBUGASSERT(g_hpwork.pid > 0);
-
-  /* Start a lower priority worker thread for other, non-critical continuation
+  /* Start the low-priority worker thread for other, non-critical continuation
    * tasks
    */
 
-#ifdef CONFIG_SCHED_LPWORK
-
-  svdbg("Starting low-priority kernel worker thread\n");
-
-  g_lpwork.pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                               CONFIG_SCHED_LPWORKSTACKSIZE,
-                               (main_t)work_lpthread,
-                               (FAR char * const *)NULL);
-  DEBUGASSERT(g_lpwork.pid > 0);
+  (void)work_lpstart();
 
 #endif /* CONFIG_SCHED_LPWORK */
-#endif /* CONFIG_SCHED_HPWORK */
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_SCHED_USRWORK)
+#ifdef CONFIG_SCHED_USRWORK
   /* Start the user-space work queue */
 
   DEBUGASSERT(USERSPACE->work_usrstart != NULL);
-  taskid = USERSPACE->work_usrstart();
-  DEBUGASSERT(taskid > 0);
-  UNUSED(taskid);
+  pid = USERSPACE->work_usrstart();
+  DEBUGASSERT(pid > 0);
+  UNUSED(pid);
 #endif
 }
 
@@ -278,7 +252,7 @@ static inline void os_workqueues(void)
 #if defined(CONFIG_INIT_ENTRYPOINT)
 static inline void os_do_appstart(void)
 {
-  int taskid;
+  int pid;
 
 #ifdef CONFIG_BOARD_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
@@ -298,16 +272,16 @@ static inline void os_do_appstart(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                       CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
-                       (FAR char * const *)NULL);
+  pid = task_create("init", SCHED_PRIORITY_DEFAULT,
+                    CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
+                    (FAR char * const *)NULL);
 #else
-  taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                       CONFIG_USERMAIN_STACKSIZE,
-                       (main_t)CONFIG_USER_ENTRYPOINT,
-                       (FAR char * const *)NULL);
+  pid = task_create("init", SCHED_PRIORITY_DEFAULT,
+                    CONFIG_USERMAIN_STACKSIZE,
+                    (main_t)CONFIG_USER_ENTRYPOINT,
+                    (FAR char * const *)NULL);
 #endif
-  ASSERT(taskid > 0);
+  ASSERT(pid > 0);
 }
 
 #elif defined(CONFIG_INIT_FILEPATH)
@@ -389,16 +363,16 @@ static int os_start_task(int argc, FAR char **argv)
 static inline void os_start_application(void)
 {
 #ifdef CONFIG_BOARD_INITTHREAD
-  int taskid;
+  int pid;
 
   /* Do the board/application initialization on a separate thread of
    * execution.
    */
 
-  taskid = kernel_thread("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
-                         CONFIG_BOARD_INITTHREAD_STACKSIZE,
-                         (main_t)os_start_task, (FAR char * const *)NULL);
-  ASSERT(taskid > 0);
+  pid = kernel_thread("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
+                      CONFIG_BOARD_INITTHREAD_STACKSIZE,
+                      (main_t)os_start_task, (FAR char * const *)NULL);
+  ASSERT(pid > 0);
 
 #else
   /* Do the board/application initialization on this thread of execution. */
