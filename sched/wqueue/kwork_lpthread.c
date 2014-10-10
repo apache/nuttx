@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wqueue/wqueue.h
+ * sched/wqueue/work_lpthread.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,74 +33,42 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_WQUEUE_WQUEUE_H
-#define __SCHED_WQUEUE_WQUEUE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_SCHED_WORKQUEUE
+#include <nuttx/wqueue.h>
+#include <nuttx/kmalloc.h>
+
+#include "wqueue/wqueue.h"
+
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_LPWORK)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Definitions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_HPWORK
-/* The state of the kernel mode, high priority work queue. */
-
-extern struct wqueue_s g_hpwork;
-#endif
-
-#ifdef CONFIG_SCHED_LPWORK
 /* The state of the kernel mode, low priority work queue(s). */
 
-extern struct wqueue_s g_lpwork;
-#endif
+struct wqueue_s g_lpwork;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpthread
- *
- * Description:
- *   This is the worker thread that performs the actions placed on the high
- *   priority work queue.
- *
- *   This, along with the lower priority worker thread(s) are the kernel
- *   mode work queues (also build in the flat build).  One of these threads
- *   also performs periodic garbage collection (that would otherwise be
- *   performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
- *   That will be the higher priority worker thread only if a lower priority
- *   worker thread is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
- *
- * Input parameters:
- *   argc, argv (not used)
- *
- * Returned Value:
- *   Does not return
- *
+ * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_SCHED_HPWORK
-int work_hpthread(int argc, char *argv[]);
-#endif
 
 /****************************************************************************
  * Name: work_lpthread
@@ -127,9 +95,29 @@ int work_hpthread(int argc, char *argv[]);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_LPWORK
-int work_lpthread(int argc, char *argv[]);
-#endif
+int work_lpthread(int argc, char *argv[])
+{
+  /* Loop forever */
 
-#endif /* CONFIG_SCHED_WORKQUEUE */
-#endif /* __SCHED_WQUEUE_WQUEUE_H */
+  for (;;)
+    {
+      /* First, perform garbage collection.  This cleans-up memory de-allocations
+       * that were queued because they could not be freed in that execution
+       * context (for example, if the memory was freed from an interrupt handler).
+       * NOTE: If the work thread is disabled, this clean-up is performed by
+       * the IDLE thread (at a very, very low priority).
+       */
+
+      sched_garbagecollection();
+
+      /* Then process queued work.  We need to keep interrupts disabled while
+       * we process items in the work list.
+       */
+
+      work_process(&g_lpwork);
+    }
+
+  return OK; /* To keep some compilers happy */
+}
+
+#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK */

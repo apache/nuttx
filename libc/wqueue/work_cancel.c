@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_cancel.c
  *
- *   Copyright (C) 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,10 +42,11 @@
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+
+#include "wqueue/wqueue.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -74,7 +75,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_cancel
+ * Name: work_qcancel
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
@@ -90,16 +91,16 @@
  *   reported:
  *
  *   -ENOENT - There is no such work queued.
+ *   -EINVAL - An invalid work queue was specified
  *
  ****************************************************************************/
 
-int work_cancel(int qid, FAR struct work_s *work)
+int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
 {
-  FAR struct wqueue_s *wqueue = &g_work[qid];
   irqstate_t flags;
   int ret = -ENOENT;
 
-  DEBUGASSERT(work != NULL && (unsigned)qid < NWORKERS);
+  DEBUGASSERT(work != NULL);
 
   /* Cancelling the work is simply a matter of removing the work structure
    * from the work queue.  This must be done with interrupts disabled because
@@ -115,7 +116,7 @@ int work_cancel(int qid, FAR struct work_s *work)
       DEBUGASSERT(work->dq.blink || (FAR dq_entry_t *)work == wqueue->q.head);
 
       /* Remove the entry from the work queue and make sure that it is
-       * mark as availalbe (i.e., the worker field is nullified).
+       * mark as available (i.e., the worker field is nullified).
        */
 
       dq_rem((FAR dq_entry_t *)work, &wqueue->q);
@@ -127,4 +128,39 @@ int work_cancel(int qid, FAR struct work_s *work)
   return ret;
 }
 
+/****************************************************************************
+ * Name: work_cancel
+ *
+ * Description:
+ *   Cancel previously queued user-mode work.  This removes work from the
+ *   user mode work queue.  After work has been cancelled, it may be re-queue
+ *   by calling work_queue() again.
+ *
+ * Input parameters:
+ *   qid    - The work queue ID (must be USRWORK)
+ *   work   - The previously queue work structure to cancel
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -ENOENT - There is no such work queued.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+
+int work_cancel(int qid, FAR struct work_s *work)
+{
+  if (qid == USRWORK)
+    {
+      return work_qcancel(&g_usrwork, work);
+    }
+  else
+    {
+      return -EINVAL;
+    }
+}
+
+#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
 #endif /* CONFIG_SCHED_WORKQUEUE */

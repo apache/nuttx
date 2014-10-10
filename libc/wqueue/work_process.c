@@ -62,30 +62,6 @@
  * Public Data
  ****************************************************************************/
 
-/* The state of each work queue. */
-
-#ifdef CONFIG_BUILD_PROTECTED
-
-  /* Play some games in the kernel mode build to assure that different
-   * naming is used for the global work queue data structures.  This may
-   * not be necessary but it safer.
-   *
-   * In this case g_work is #define'd to be either g_kernelwork or
-   * g_usrwork in include/nuttx/wqueue.h
-   */
-
-#  ifdef __KERNEL__
-struct wqueue_s g_kernelwork[NWORKERS];
-#  else
-struct wqueue_s g_usrwork[NWORKERS];
-#  endif
-
-#else /* CONFIG_BUILD_PROTECTED */
-
-struct wqueue_s g_work[NWORKERS];
-
-#endif /* CONFIG_BUILD_PROTECTED */
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/wqueue/work_signal.c
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,10 @@
 #include <nuttx/config.h>
 
 #include <signal.h>
-#include <assert.h>
 
 #include <nuttx/wqueue.h>
+
+#include "wqueue/wqueue.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -85,10 +86,28 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+
 int work_signal(int qid)
 {
-  DEBUGASSERT((unsigned)qid < NWORKERS);
-  return kill(g_work[qid].pid, SIGWORK);
+  int ret;
+
+  if (qid == USRWORK)
+    {
+      /* Signal the worker thread */
+
+      ret = kill(g_usrwork.pid, SIGWORK);
+      if (ret < 0)
+        {
+          int errcode = errno;
+          return -errcode;
+        }
+    }
+  else
+    {
+      return -EINVAL;
+    }
 }
 
+#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
 #endif /* CONFIG_SCHED_WORKQUEUE */

@@ -222,11 +222,11 @@ static inline void os_workqueues(void)
   svdbg("Starting kernel worker thread\n");
 #endif
 
-  g_work[HPWORK].pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
-                                     CONFIG_SCHED_WORKSTACKSIZE,
-                                     (main_t)work_hpthread,
-                                     (FAR char * const *)NULL);
-  DEBUGASSERT(g_work[HPWORK].pid > 0);
+  g_hpwork.pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
+                               CONFIG_SCHED_WORKSTACKSIZE,
+                               (main_t)work_hpthread,
+                               (FAR char * const *)NULL);
+  DEBUGASSERT(g_hpwork.pid > 0);
 
   /* Start a lower priority worker thread for other, non-critical continuation
    * tasks
@@ -236,11 +236,11 @@ static inline void os_workqueues(void)
 
   svdbg("Starting low-priority kernel worker thread\n");
 
-  g_work[LPWORK].pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                                     CONFIG_SCHED_LPWORKSTACKSIZE,
-                                     (main_t)work_lpthread,
-                                     (FAR char * const *)NULL);
-  DEBUGASSERT(g_work[LPWORK].pid > 0);
+  g_lpwork.pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+                               CONFIG_SCHED_LPWORKSTACKSIZE,
+                               (main_t)work_lpthread,
+                               (FAR char * const *)NULL);
+  DEBUGASSERT(g_lpwork.pid > 0);
 
 #endif /* CONFIG_SCHED_LPWORK */
 #endif /* CONFIG_SCHED_HPWORK */

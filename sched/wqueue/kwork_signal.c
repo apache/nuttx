@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wqueue/work_lpthread.c
+ * sched/wqueue/work_signal.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <signal.h>
+#include <errno.h>
+
 #include <nuttx/wqueue.h>
-#include <nuttx/kmalloc.h>
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_LPWORK)
+#ifdef CONFIG_SCHED_WORKQUEUE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -55,11 +57,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,53 +69,59 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_lpthread
+ * Public Functions
+ ****************************************************************************/
+/****************************************************************************
+ * Name: work_signal
  *
  * Description:
- *   These are the worker thread(s) that performs the actions placed on the
- *   low priority work queue.
- *
- *   These, along with the higher priority worker thread are the kernel mode
- *   work queues (also build in the flat build).  One of these threads also
- *   performs periodic garbage collection (that would otherwise be performed
- *   by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).  That will
- *   be the lower priority worker thread if it is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
+ *   Signal the worker thread to process the work queue now.  This function
+ *   is used internally by the work logic but could also be used by the
+ *   user to force an immediate re-assessment of pending work.
  *
  * Input parameters:
- *   argc, argv (not used)
+ *   qid    - The work queue ID
  *
  * Returned Value:
- *   Does not return
+ *   Zero on success, a negated errno on failure
  *
  ****************************************************************************/
 
-int work_lpthread(int argc, char *argv[])
+int work_signal(int qid)
 {
-  /* Loop forever */
+  pid_t pid;
+  int ret;
 
-  for (;;)
+  /* Get the process ID of the worker thread */
+
+#ifdef CONFIG_SCHED_HPWORK
+  if (qid == HPWORK)
     {
-      /* First, perform garbage collection.  This cleans-up memory de-allocations
-       * that were queued because they could not be freed in that execution
-       * context (for example, if the memory was freed from an interrupt handler).
-       * NOTE: If the work thread is disabled, this clean-up is performed by
-       * the IDLE thread (at a very, very low priority).
-       */
-
-      sched_garbagecollection();
-
-      /* Then process queued work.  We need to keep interrupts disabled while
-       * we process items in the work list.
-       */
-
-      work_process(&g_work[LPWORK]);
+      pid = g_hpwork.pid;
+    }
+  else
+#endif
+#ifdef CONFIG_SCHED_LPWORK
+  if (qid == LPWORK)
+    {
+      pid = g_lpwork.pid;
+    }
+  else
+#endif
+    {
+      return -EINVAL;
     }
 
-  return OK; /* To keep some compilers happy */
+  /* Signal the worker thread */
+
+  ret = kill(pid, SIGWORK);
+  if (ret < 0)
+    {
+      int errcode = errno;
+      return -errcode;
+    }
+
+  return OK;
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK */
+#endif /* CONFIG_SCHED_WORKQUEUE */

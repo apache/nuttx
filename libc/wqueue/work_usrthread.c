@@ -48,6 +48,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The state of the user mode work queue. */
+
+extern struct wqueue_s g_usrwork;
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -93,7 +97,7 @@ int work_usrthread(int argc, char *argv[])
        * we process items in the work list.
        */
 
-      work_process(&g_work[USRWORK]);
+      work_process(&g_usrwork);
     }
 
   return OK; /* To keep some compilers happy */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/wqueue/wqueue.h
+ * sched/wqueue/kwork_cancel.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_WQUEUE_WQUEUE_H
-#define __SCHED_WQUEUE_WQUEUE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <errno.h>
+
+#include <nuttx/wqueue.h>
+
+#include "wqueue/wqueue.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -49,87 +52,69 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Definitions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_HPWORK
-/* The state of the kernel mode, high priority work queue. */
-
-extern struct wqueue_s g_hpwork;
-#endif
-
-#ifdef CONFIG_SCHED_LPWORK
-/* The state of the kernel mode, low priority work queue(s). */
-
-extern struct wqueue_s g_lpwork;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpthread
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_cancel
  *
  * Description:
- *   This is the worker thread that performs the actions placed on the high
- *   priority work queue.
- *
- *   This, along with the lower priority worker thread(s) are the kernel
- *   mode work queues (also build in the flat build).  One of these threads
- *   also performs periodic garbage collection (that would otherwise be
- *   performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
- *   That will be the higher priority worker thread only if a lower priority
- *   worker thread is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
+ *   Cancel previously queued user-mode work.  This removes work from the
+ *   user mode work queue.  After work has been cancelled, it may be re-queue
+ *   by calling work_queue() again.
  *
  * Input parameters:
- *   argc, argv (not used)
+ *   qid    - The work queue ID (must be USRWORK)
+ *   work   - The previously queue work structure to cancel
  *
  * Returned Value:
- *   Does not return
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -ENOENT - There is no such work queued.
+ *   -EINVAL - An invalid work queue was specified
  *
  ****************************************************************************/
 
+int work_cancel(int qid, FAR struct work_s *work)
+{
 #ifdef CONFIG_SCHED_HPWORK
-int work_hpthread(int argc, char *argv[]);
+  if (qid == HPWORK)
+    {
+      /* Cancel high priority work */
+
+      return work_qcancel(&g_hpwork, work);
+    }
+  else
 #endif
-
-/****************************************************************************
- * Name: work_lpthread
- *
- * Description:
- *   These are the worker thread(s) that performs the actions placed on the
- *   low priority work queue.
- *
- *   These, along with the higher priority worker thread are the kernel mode
- *   work queues (also build in the flat build).  One of these threads also
- *   performs periodic garbage collection (that would otherwise be performed
- *   by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).  That will
- *   be the lower priority worker thread if it is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
- *
- * Input parameters:
- *   argc, argv (not used)
- *
- * Returned Value:
- *   Does not return
- *
- ****************************************************************************/
-
 #ifdef CONFIG_SCHED_LPWORK
-int work_lpthread(int argc, char *argv[]);
+  if (qid == LPWORK)
+    {
+      /* Cancel low priority work */
+
+      return work_qcancel(&g_lpwork, work);
+    }
+  else
 #endif
+    {
+      return -EINVAL;
+    }
+}
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
-#endif /* __SCHED_WQUEUE_WQUEUE_H */

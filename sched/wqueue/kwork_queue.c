@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wqueue/work_hothread.c
+ * sched/wqueue/kwork_queue.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <errno.h>
+
 #include <nuttx/wqueue.h>
-#include <nuttx/kmalloc.h>
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
+#ifdef CONFIG_SCHED_WORKQUEUE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -55,11 +57,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,56 +69,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpthread
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_queue
  *
  * Description:
- *   This is the worker thread that performs the actions placed on the high
- *   priority work queue.
+ *   Queue kernel-mode work to be performed at a later time.  All queued work
+ *   will be performed on the worker thread of of execution (not the caller's).
  *
- *   This, along with the lower priority worker thread(s) are the kernel
- *   mode work queues (also build in the flat build).  One of these threads
- *   also performs periodic garbage collection (that would otherwise be
- *   performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
- *   That will be the higher priority worker thread only if a lower priority
- *   worker thread is available.
- *
- *   All kernel mode worker threads are started by the OS during normal
- *   bring up.  This entry point is referenced by OS internally and should
- *   not be accessed by application logic.
+ *   The work structure is allocated by caller, but completely managed by
+ *   the work queue logic.  The caller should never modify the contents of
+ *   the work queue structure; the caller should not call work_queue()
+ *   again until either (1) the previous work has been performed and removed
+ *   from the queue, or (2) work_cancel() has been called to cancel the work
+ *   and remove it from the work queue.
  *
  * Input parameters:
- *   argc, argv (not used)
+ *   qid    - The work queue ID (index)
+ *   work   - The work structure to queue
+ *   worker - The worker callback to be invoked.  The callback will invoked
+ *            on the worker thread of execution.
+ *   arg    - The argument that will be passed to the workder callback when
+ *            int is invoked.
+ *   delay  - Delay (in clock ticks) from the time queue until the worker
+ *            is invoked. Zero means to perform the work immediately.
  *
  * Returned Value:
- *   Does not return
+ *   Zero on success, a negated errno on failure
  *
  ****************************************************************************/
 
-int work_hpthread(int argc, char *argv[])
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+
+int work_queue(int qid, FAR struct work_s *work, worker_t worker,
+               FAR void *arg, uint32_t delay)
 {
-  /* Loop forever */
-
-  for (;;)
+#ifdef CONFIG_SCHED_HPWORK
+  if (qid == HPWORK)
     {
-      /* First, perform garbage collection.  This cleans-up memory de-allocations
-       * that were queued because they could not be freed in that execution
-       * context (for example, if the memory was freed from an interrupt handler).
-       * NOTE: If the work thread is disabled, this clean-up is performed by
-       * the IDLE thread (at a very, very low priority).
-       */
+      /* Cancel high priority work */
 
-#ifndef CONFIG_SCHED_LPWORK
-      sched_garbagecollection();
-#endif
-
-      /* Then process queued work.  We need to keep interrupts disabled while
-       * we process items in the work list.
-       */
-
-      work_process(&g_work[HPWORK]);
+      return work_qqueue(&g_hpwork, work, worker, arg, delay);
     }
+  else
+#endif
+#ifdef CONFIG_SCHED_LPWORK
+  if (qid == LPWORK)
+    {
+      /* Cancel low priority work */
 
-  return OK; /* To keep some compilers happy */
+      return work_qqueue(&g_lpwork, work, worker, arg, delay);
+    }
+  else
+#endif
+    {
+      return -EINVAL;
+    }
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_HPWORK*/
+#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
+#endif /* CONFIG_SCHED_WORKQUEUE */

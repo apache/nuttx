@@ -169,6 +169,8 @@
 #    define CONFIG_SCHED_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #  endif
 
+#endif /* CONFIG_SCHED_HPWORK */
+
 /* Low priority kernel work queue configuration *****************************/
 
 #ifdef CONFIG_SCHED_LPWORK
@@ -215,7 +217,6 @@
 #endif
 
 #endif /* CONFIG_SCHED_LPWORK */
-#endif /* CONFIG_SCHED_HPWORK */
 
 /* User space work queue configuration **************************************/
 
@@ -235,58 +236,42 @@
 
 #endif /* CONFIG_SCHED_USRWORK */
 
-/* How many worker threads are there?  In the user-space phase of a kernel
- * build, there will be no more than one.
+/* Work queue IDs:
  *
- * Work queue IDs (indices):
+ * Kernel Work Queues:
+ *   HPWORK: This ID of the high priority work queue that should only be
+ *     used for hi-priority, time-critical, driver bottom-half functions.
  *
- *   Kernel Work Queues:  There are none and any attempts to use them
- *     should generate errors.
+ *   LPWORK: This is the ID of the low priority work queue that can be
+ *     used for any purpose.  if CONFIG_SCHED_LPWORK is not defined, then
+ *     there is only one kernel work queue and LPWORK == HPWORK.
  *
- *   User Work Queue:  Will be available if CONFIG_SCHED_USRWORK is defined
+ * User Work Queue:
+ *   USRWORK:  In the kernel phase a a kernel build, there should be no
+ *     references to user-space work queues.  That would be an error.
+ *     Otherwise, in a flat build, user applications will use the lower
+ *     priority work queue (if there is one).
  */
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
-#  ifdef CONFIG_SCHED_USRWORK
-#    define NWORKERS 1
-#    define USRWORK 0
-#  endif
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+/* User mode */
+
+#  define USRWORK  2          /* User mode work queue */
+#  define HPWORK   USRWORK    /* Redirect kernel-mode references */
+#  define LPWORK   USRWORK
+
 #else
+/* Kernel mode */
 
-  /* In a flat build (CONFIG_BUILD_PROTECTED=n) or during the kernel phase of
-   * the kernel build, there may be 0, 1, or 2 work queues.
-   *
-   * Work queue IDs (indices):
-   *
-   * Kernel Work Queues:
-   *   HPWORK: This ID of the high priority work queue that should only be
-   *     used for hi-priority, time-critical, driver bottom-half functions.
-   *
-   *   LPWORK: This is the ID of the low priority work queue that can be
-   *     used for any purpose.  if CONFIG_SCHED_LPWORK is not defined, then
-   *     there is only one kernel work queue and LPWORK == HPWORK.
-   *
-   * User Work Queue:
-   *   USRWORK:  In the kernel phase a a kernel build, there should be no
-   *     references to user-space work queues.  That would be an error.
-   *     Otherwise, in a flat build, user applications will use the lower
-   *     priority work queue (if there is one).
-   */
-
-#  define HPWORK 0
+#  define HPWORK   0          /* High priority, kernel-mode work queue */
 #  ifdef CONFIG_SCHED_LPWORK
-#    define LPWORK (HPWORK+1)
-#    define NWORKERS 2
+#    define LPWORK (HPWORK+1) /* Low priority, kernel-mode work queue */
 #  else
-#    define LPWORK HPWORK
-#    define NWORKERS 1
+#    define LPWORK HPWORK     /* Redirect low-priority references */
 #  endif
+#  define USRWORK  LPWORK     /* Redirect user-mode references */
 
-#  if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-#    define USRWORK LPWORK
-#  endif
-
-#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */
+#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__
 
 /****************************************************************************
  * Public Types
@@ -334,32 +319,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/* The state of each work queue.  This data structure is used internally by
- * the OS and worker queue logic and should not be accessed by application
- * logic.
- */
-
-#ifdef CONFIG_BUILD_PROTECTED
-
-  /* Play some games in the kernel mode build to assure that different
-   * naming is used for the global work queue data structures.  This may
-   * not be necessary but it safer.
-   */
-
-#  ifdef __KERNEL__
-EXTERN struct wqueue_s g_kernelwork[NWORKERS];
-#    define g_work g_kernelwork
-#  else
-EXTERN struct wqueue_s g_usrwork[NWORKERS];
-#    define g_work g_usrwork
-#  endif
-
-#else /* CONFIG_BUILD_PROTECTED */
-
-EXTERN struct wqueue_s g_work[NWORKERS];
-
-#endif /* CONFIG_BUILD_PROTECTED */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -427,7 +386,7 @@ int work_usrstart(void);
 #endif
 
 /****************************************************************************
- * Name: work_queue
+ * Name: work_queue and work_qqueue
  *
  * Description:
  *   Queue work to be performed at a later time.  All queued work will be
@@ -439,6 +398,11 @@ int work_usrstart(void);
  *   again until either (1) the previous work has been performed and removed
  *   from the queue, or (2) work_cancel() has been called to cancel the work
  *   and remove it from the work queue.
+ *
+ *   work_queue() is the application interface.  It simply maps the qid to
+ *     the correct work queue and calls work_qqueue().
+ *   work_qqueue() is the common cancellation logic that operates on the
+ *     particular work queue selected by work_queue().
  *
  * Input parameters:
  *   qid    - The work queue ID
@@ -457,14 +421,21 @@ int work_usrstart(void);
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, uint32_t delay);
+int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
+                worker_t worker, FAR void *arg, uint32_t delay);
 
 /****************************************************************************
- * Name: work_cancel
+ * Name: work_cancel and work_qcancel;
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been canceled, it may be re-queue by calling work_queue()
+ *   After work has been cancelled, it may be re-queue by calling work_queue()
  *   again.
+ *
+ *   work_cancel() is the application interface.  It simply maps the qid to
+ *     the correct work queue and calls work_qcancel().
+ *   work_qcancel() is the common cancellation logic that operates on the
+ *     particular work queue selected by work_cancel().
  *
  * Input parameters:
  *   qid    - The work queue ID
@@ -473,8 +444,12 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  * Returned Value:
  *   Zero on success, a negated errno on failure
  *
+ *   -ENOENT - There is no such work queued.
+ *   -EINVAL - An invalid work queue was specified
+ *
  ****************************************************************************/
 
+int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work);
 int work_cancel(int qid, FAR struct work_s *work);
 
 /****************************************************************************

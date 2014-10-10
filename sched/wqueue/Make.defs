@@ -37,18 +37,20 @@
 
 ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
+CSRCS += kwork_queue.c kwork_cancel.c kwork_signal.c
+
 # Add high priority work queue files
 
 ifeq ($(CONFIG_SCHED_HPWORK),y)
-CSRCS += work_hpthread.c
+CSRCS += kwork_hpthread.c
 endif
 
 # Add low priority work queue files
 
 ifeq ($(CONFIG_SCHED_LPWORK),y)
-CSRCS += work_lpthread.c
+CSRCS += kwork_lpthread.c
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-CSRCS += work_inherit.c
+CSRCS += kwork_inherit.c
 endif # CONFIG_PRIORITY_INHERITANCE
 endif # CONFIG_SCHED_LPWORK
 
