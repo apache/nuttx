@@ -8820,3 +8820,12 @@
 	* arch/mips/src/pic32mx/pic32mx-devcfg.h: For PIC32MX7, DEVCFG0 bit
 	  2 must be set.  Writing bit 2 as zero can brick the CPU on some
 	  versions.  From Cris Kvist (2014-10-9).
+	* sched/wqueue/, libc/wqueue, and include/nuttx/wqeueue.h:  Separate
+	  kernel- and user-mode work queue logic. Decouple work queue data
+	  structures.  This is part of the preparation to support multiple
+	  low-priority worker threads (2014-10-10).
+	* include/nuttx/wqueue.h, libc/wqueue/Make.defs, work_usrthread.c,
+	  work_usrstart.c sched/init/os_bringup.c wqueue/kwork_hpthread.c,
+	  kwork_lpthread.c, and wqueue.h: Modularize starting of worker
+	  threads to better isolate individual initialization characteristics
+	  (2014-10-10).
