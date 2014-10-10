@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/environ/env_putenv.c
+ * sched/work/work_inherit.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <nuttx/wqueue.h>
 
 #include "sched/sched.h"
+#include "wqueue/wqueue.h"
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_LPWORK) && \
     defined(CONFIG_PRIORITY_INHERITANCE)

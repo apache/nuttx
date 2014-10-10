@@ -366,24 +366,34 @@ EXTERN struct wqueue_s g_work[NWORKERS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpthread, work_lpthread, and work_usrthread
+ * Name: work_process
  *
  * Description:
- *   These are the worker threads that performs actions placed on the work
- *   lists.
+ *   This is the logic that performs actions placed on any work list.  This
+ *   logic is the common underlying logic to all work queues.  This logic is
+ *   part of the internal implementation of each work queue; it should not
+ *   be called from application level logic.
  *
- *   work_hpthread and work_lpthread:  These are the kernel mode work queues
- *     (also build in the flat build).  One of these threads also performs
- *     periodic garbage collection (that is otherwise performed by the idle
- *     thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ * Input parameters:
+ *   wqueue - Describes the work queue to be processed
  *
- *     These worker threads are started by the OS during normal bringup.
+ * Returned Value:
+ *   None
  *
- *   work_usrthread:  This is a user mode work queue.  It must be started
- *     by application code by calling work_usrstart().
+ ****************************************************************************/
+
+void work_process(FAR struct wqueue_s *wqueue);
+
+/****************************************************************************
+ * Name: work_usrthread
  *
- *   All of these entrypoints are referenced by OS internally and should not
- *   not be accessed by application logic.
+ * Description:
+ *   This is the worker thread that performs the actions placed on the user
+ *   work queue.
+ *
+ *   This is a user mode work queue.  It must be used by applications for
+ *   miscellaneous operations.  The user work thread must be started by
+ *   application start-up logic by calling work_usrstart().
  *
  * Input parameters:
  *   argc, argv (not used)
@@ -392,14 +402,6 @@ EXTERN struct wqueue_s g_work[NWORKERS];
  *   Does not return
  *
  ****************************************************************************/
-
-#ifdef CONFIG_SCHED_HPWORK
-int work_hpthread(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_SCHED_LPWORK
-int work_lpthread(int argc, char *argv[]);
-#endif
 
 #if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 int work_usrthread(int argc, char *argv[]);

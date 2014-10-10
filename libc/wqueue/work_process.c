@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/wqueue/work_thread.c
+ * libc/wqueue/work_process.c
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,14 +42,11 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <queue.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
+
+#include <arch/irq.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -62,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /* The state of each work queue. */
@@ -90,7 +87,7 @@ struct wqueue_s g_work[NWORKERS];
 #endif /* CONFIG_BUILD_PROTECTED */
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -98,10 +95,17 @@ struct wqueue_s g_work[NWORKERS];
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: work_process
  *
  * Description:
- *   This is the logic that performs actions placed on any work list.
+ *   This is the logic that performs actions placed on any work list.  This
+ *   logic is the common underlying logic to all work queues.  This logic is
+ *   part of the internal implementation of each work queue; it should not
+ *   be called from application level logic.
  *
  * Input parameters:
  *   wqueue - Describes the work queue to be processed
@@ -111,7 +115,7 @@ struct wqueue_s g_work[NWORKERS];
  *
  ****************************************************************************/
 
-static void work_process(FAR struct wqueue_s *wqueue)
+void work_process(FAR struct wqueue_s *wqueue)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
@@ -214,118 +218,5 @@ static void work_process(FAR struct wqueue_s *wqueue)
   usleep(next * USEC_PER_TICK);
   irqrestore(flags);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-/****************************************************************************
- * Name: work_hpthread, work_lpthread, and work_usrthread
- *
- * Description:
- *   These are the worker threads that performs actions placed on the work
- *   lists.
- *
- *   work_hpthread and work_lpthread:  These are the kernel mode work queues
- *     (also build in the flat build).  One of these threads also performs
- *     periodic garbage collection (that is otherwise performed by the idle
- *     thread if CONFIG_SCHED_WORKQUEUE is not defined).
- *
- *     These worker threads are started by the OS during normal bringup.
- *
- *   work_usrthread:  This is a user mode work queue.  It must be built into
- *     the application blob during the user phase of a kernel build.  The
- *     user work thread will then automatically be started when the system
- *     boots by calling through the pointer found in the header on the user
- *     space blob.
- *
- *   All of these entrypoints are referenced by OS internally and should not
- *   not be accessed by application logic.
- *
- * Input parameters:
- *   argc, argv (not used)
- *
- * Returned Value:
- *   Does not return
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_HPWORK)
-
-int work_hpthread(int argc, char *argv[])
-{
-  /* Loop forever */
-
-  for (;;)
-    {
-      /* First, perform garbage collection.  This cleans-up memory de-allocations
-       * that were queued because they could not be freed in that execution
-       * context (for example, if the memory was freed from an interrupt handler).
-       * NOTE: If the work thread is disabled, this clean-up is performed by
-       * the IDLE thread (at a very, very low priority).
-       */
-
-#ifndef CONFIG_SCHED_LPWORK
-      sched_garbagecollection();
-#endif
-
-      /* Then process queued work.  We need to keep interrupts disabled while
-       * we process items in the work list.
-       */
-
-      work_process(&g_work[HPWORK]);
-    }
-
-  return OK; /* To keep some compilers happy */
-}
-
-#ifdef CONFIG_SCHED_LPWORK
-
-int work_lpthread(int argc, char *argv[])
-{
-  /* Loop forever */
-
-  for (;;)
-    {
-      /* First, perform garbage collection.  This cleans-up memory de-allocations
-       * that were queued because they could not be freed in that execution
-       * context (for example, if the memory was freed from an interrupt handler).
-       * NOTE: If the work thread is disabled, this clean-up is performed by
-       * the IDLE thread (at a very, very low priority).
-       */
-
-      sched_garbagecollection();
-
-      /* Then process queued work.  We need to keep interrupts disabled while
-       * we process items in the work list.
-       */
-
-      work_process(&g_work[LPWORK]);
-    }
-
-  return OK; /* To keep some compilers happy */
-}
-
-#endif /* CONFIG_SCHED_LPWORK */
-#endif /* CONFIG_SCHED_HPWORK */
-
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
-
-int work_usrthread(int argc, char *argv[])
-{
-  /* Loop forever */
-
-  for (;;)
-    {
-      /* Then process queued work.  We need to keep interrupts disabled while
-       * we process items in the work list.
-       */
-
-      work_process(&g_work[USRWORK]);
-    }
-
-  return OK; /* To keep some compilers happy */
-}
-
-#endif /* CONFIG_SCHED_USRWORK */
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

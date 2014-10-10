@@ -37,10 +37,14 @@ ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
 # Add the work queue C files to the build
 
-CSRCS += work_thread.c work_queue.c work_cancel.c work_signal.c
+CSRCS += work_process.c work_queue.c work_cancel.c work_signal.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CSRCS += work_usrstart.c
+CSRCS += work_usrstart.c work_usrthread.c
+else
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CSRCS += work_usrstart.c work_usrthread.c
+endif
 endif
 
 # Add the wqueue directory to the build

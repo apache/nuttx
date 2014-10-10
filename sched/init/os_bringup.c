@@ -57,6 +57,7 @@
 #ifdef CONFIG_PAGING
 # include "paging/paging.h"
 #endif
+# include "wqueue/wqueue.h"
 # include "init/init.h"
 
 /****************************************************************************

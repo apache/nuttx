@@ -37,18 +37,24 @@
 
 ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
+# Add high priority work queue files
+
+ifeq ($(CONFIG_SCHED_HPWORK),y)
+CSRCS += work_hpthread.c
+endif
+
 # Add low priority work queue files
 
 ifeq ($(CONFIG_SCHED_LPWORK),y)
+CSRCS += work_lpthread.c
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-
 CSRCS += work_inherit.c
+endif # CONFIG_PRIORITY_INHERITANCE
+endif # CONFIG_SCHED_LPWORK
 
 # Include wqueue build support
 
 DEPPATH += --dep-path wqueue
 VPATH += :wqueue
 
-endif # CONFIG_PRIORITY_INHERITANCE
-endif # CONFIG_SCHED_LPWORK
 endif # CONFIG_SCHED_WORKQUEUE
