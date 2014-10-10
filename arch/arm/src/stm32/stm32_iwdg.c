@@ -671,7 +671,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
   priv->lsifreq = lsifreq;
   priv->started = false;
 
-  /* Make sure that the LSI ocsillator is enabled.  NOTE:  The LSI oscillator
+  /* Make sure that the LSI oscillator is enabled.  NOTE:  The LSI oscillator
    * is enabled here but is not disabled by this file (because this file does
    * not know the global usage of the oscillator.  Any clock management
    * logic (say, as part of a power management scheme) needs handle other
@@ -701,9 +701,16 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
+      uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ);
+      cr |= DBGMCU_APB1_IWDGSTOP;
+      putreg32(cr, STM32_DBGMCU_APB1_FZ);
+#else /* if defined(CONFIG_STM32_STM32F10XX) */
       uint32_t cr = getreg32(STM32_DBGMCU_CR);
       cr |= DBGMCU_CR_IWDGSTOP;
       putreg32(cr, STM32_DBGMCU_CR);
+#endif
     }
 #endif
 }
