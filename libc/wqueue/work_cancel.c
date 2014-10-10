@@ -48,7 +48,8 @@
 
 #include "wqueue/wqueue.h"
 
-#ifdef CONFIG_SCHED_WORKQUEUE
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_USRWORK) && \
+   !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,10 +69,6 @@
 
 /****************************************************************************
  * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -95,19 +92,21 @@
  *
  ****************************************************************************/
 
-int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
+static int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
 {
-  irqstate_t flags;
   int ret = -ENOENT;
 
   DEBUGASSERT(work != NULL);
+
+  /* Get exclusive access to the work queue */
+
+  while (work_lock() < 0);
 
   /* Cancelling the work is simply a matter of removing the work structure
    * from the work queue.  This must be done with interrupts disabled because
    * new work is typically added to the work queue from interrupt handlers.
    */
 
-  flags = irqsave();
   if (work->worker != NULL)
     {
       /* A little test of the integrity of the work queue */
@@ -124,9 +123,13 @@ int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
       ret = OK;
     }
 
-  irqrestore(flags);
+  work_unlock();
   return ret;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: work_cancel
@@ -148,8 +151,6 @@ int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
-
 int work_cancel(int qid, FAR struct work_s *work)
 {
   if (qid == USRWORK)
@@ -162,5 +163,4 @@ int work_cancel(int qid, FAR struct work_s *work)
     }
 }
 
-#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
-#endif /* CONFIG_SCHED_WORKQUEUE */
+#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_USRWORK && !__KERNEL__ */

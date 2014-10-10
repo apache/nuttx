@@ -42,6 +42,11 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
+#include <pthread.h>
+
+#include <nuttx/wqueue.h>
+
 #ifdef CONFIG_SCHED_WORKQUEUE
 
 /****************************************************************************
@@ -57,15 +62,61 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
-
 /* The state of the user mode work queue */
 
 extern struct wqueue_s g_usrwork;
+
+/* This semaphore/mutex supports exclusive access to the user-mode work queue */
+
+#ifdef CONFIG_BUILD_PROTECTED
+extern sem_t g_usrsem;
+#else
+extern pthread_mutex_t g_usrmutex;
+#endif
 #endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_lock
+ *
+ * Description:
+ *   Lock the user-mode work queue.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -EINTR - Wait was interrupted by a signal
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+int work_lock(void);
+#endif
+
+/****************************************************************************
+ * Name: work_unlock
+ *
+ * Description:
+ *   Unlock the user-mode work queue.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+void work_unlock(void);
+#endif
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __LIBC_WQUEUE_WQUEUE_H */

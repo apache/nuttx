@@ -37,7 +37,7 @@
 
 ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
-CSRCS += kwork_queue.c kwork_cancel.c kwork_signal.c
+CSRCS += kwork_queue.c kwork_process.c kwork_cancel.c kwork_signal.c
 
 # Add high priority work queue files
 

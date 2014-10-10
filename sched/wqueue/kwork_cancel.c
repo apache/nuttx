@@ -39,8 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <queue.h>
+#include <assert.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -66,6 +69,60 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_qcancel
+ *
+ * Description:
+ *   Cancel previously queued work.  This removes work from the work queue.
+ *   After work has been cancelled, it may be re-queue by calling work_queue()
+ *   again.
+ *
+ * Input parameters:
+ *   qid    - The work queue ID
+ *   work   - The previously queue work structure to cancel
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -ENOENT - There is no such work queued.
+ *   -EINVAL - An invalid work queue was specified
+ *
+ ****************************************************************************/
+
+static int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work)
+{
+  irqstate_t flags;
+  int ret = -ENOENT;
+
+  DEBUGASSERT(work != NULL);
+
+  /* Cancelling the work is simply a matter of removing the work structure
+   * from the work queue.  This must be done with interrupts disabled because
+   * new work is typically added to the work queue from interrupt handlers.
+   */
+
+  flags = irqsave();
+  if (work->worker != NULL)
+    {
+      /* A little test of the integrity of the work queue */
+
+      DEBUGASSERT(work->dq.flink || (FAR dq_entry_t *)work == wqueue->q.tail);
+      DEBUGASSERT(work->dq.blink || (FAR dq_entry_t *)work == wqueue->q.head);
+
+      /* Remove the entry from the work queue and make sure that it is
+       * mark as available (i.e., the worker field is nullified).
+       */
+
+      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
+      work->worker = NULL;
+      ret = OK;
+    }
+
+  irqrestore(flags);
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions

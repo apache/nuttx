@@ -540,7 +540,7 @@ config SCHED_LPWORKSTACKSIZE
 
 endif # SCHED_LPWORK
 
-if BUILD_PROTECTED
+if BUILD_PROTECTED || BUILD_KERNEL
 
 config SCHED_USRWORK
 	bool "User mode worker thread"

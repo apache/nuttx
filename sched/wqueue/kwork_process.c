@@ -173,7 +173,7 @@ void work_process(FAR struct wqueue_s *wqueue)
               work->worker = NULL;
 
               /* Do the work.  Re-enable interrupts while the work is being
-               * performed... we don't have any idea how long that will take!
+               * performed... we don't have any idea how long this will take!
                */
 
               irqrestore(flags);

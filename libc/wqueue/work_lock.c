@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/wqueue/wqueue.h
+ * libc/wqueue/work_lock.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,114 +33,107 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_WQUEUE_WQUEUE_H
-#define __SCHED_WQUEUE_WQUEUE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_SCHED_WORKQUEUE
+#include <pthread.h>
+#include <semaphore.h>
+#include <assert.h>
+#include <errno.h>
+
+#include "wqueue/wqueue.h"
+
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_USRWORK) && \
+   !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Customize kernel thread names */
-
-#ifdef CONFIG_SCHED_HPWORK
-#  if defined(CONFIG_SCHED_LPWORK)
-#    define HPWORKNAME "hpwork"
-#    define LPWORKNAME "lpwork"
-#  elif defined(CONFIG_SCHED_USRWORK)
-#    define HPWORKNAME "kwork"
-#  else
-#    define HPWORKNAME "work"
-#  endif
-#endif
-
 /****************************************************************************
- * Public Type Definitions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_HPWORK
-/* The state of the kernel mode, high priority work queue. */
-
-extern struct wqueue_s g_hpwork;
-#endif
-
-#ifdef CONFIG_SCHED_LPWORK
-/* The state of the kernel mode, low priority work queue(s). */
-
-extern struct wqueue_s g_lpwork;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpstart
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_lock
  *
  * Description:
- *   Start the high-priority, kernel-mode work queue.
+ *   Lock the user-mode work queue.
  *
  * Input parameters:
  *   None
  *
  * Returned Value:
- *   The task ID of the worker thread is returned on success.  A negated
- *   errno value is returned on failure.
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -EINTR - Wait was interrupted by a signal
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_HPWORK
-int work_hpstart(void);
+int work_lock(void)
+{
+  int ret;
+
+#ifdef CONFIG_BUILD_PROTECTED
+  int ret = sem_wait(&g_usrsem);
+  if (ret < 0)
+    {
+      DEBUGASSERT(errno == EINTR);
+      return -EINTR;
+    }
+#else
+   ret = pthread_mutex_lock(&g_usrmutex);
+   if (ret != 0)
+     {
+       DEBUGASSERT(ret == EINTR);
+       return -EINTR;
+     }
 #endif
 
+  return ret;
+}
+
 /****************************************************************************
- * Name: work_lpstart
+ * Name: work_unlock
  *
  * Description:
- *   Start the low-priority, kernel-mode worker thread(s)
+ *   Unlock the user-mode work queue.
  *
  * Input parameters:
  *   None
- *
- * Returned Value:
- *   The task ID of the worker thread is returned on success.  A negated
- *   errno value is returned on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_LPWORK
-int work_lpstart(void);
-#endif
-
-/****************************************************************************
- * Name: work_process
- *
- * Description:
- *   This is the logic that performs actions placed on any work list.  This
- *   logic is the common underlying logic to all work queues.  This logic is
- *   part of the internal implementation of each work queue; it should not
- *   be called from application level logic.
- *
- * Input parameters:
- *   wqueue - Describes the work queue to be processed
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void work_process(FAR struct wqueue_s *wqueue);
+void work_unlock(void)
+{
+#ifdef CONFIG_BUILD_PROTECTED
+  (void)sem_post(&g_usrsem);
+#else
+  (void)pthread_mutex_unlock(&g_usrmutex);
+#endif
+}
 
-#endif /* CONFIG_SCHED_WORKQUEUE */
-#endif /* __SCHED_WQUEUE_WQUEUE_H */
+#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_USRWORK && !__KERNEL__*/

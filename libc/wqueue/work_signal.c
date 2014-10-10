@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <signal.h>
+#include <errno.h>
 
 #include <nuttx/wqueue.h>
 
@@ -100,13 +101,15 @@ int work_signal(int qid)
       if (ret < 0)
         {
           int errcode = errno;
-          return -errcode;
+          ret = -errcode;
         }
     }
   else
     {
-      return -EINVAL;
+      ret = -EINVAL;
     }
+
+  return ret;
 }
 
 #endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */

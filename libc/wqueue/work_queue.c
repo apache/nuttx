@@ -40,17 +40,18 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <queue.h>
+#include <signal.h>
 #include <assert.h>
+#include <queue.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
 
-#ifdef CONFIG_SCHED_WORKQUEUE
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_USRWORK) && \
+   !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,10 +71,6 @@
 
 /****************************************************************************
  * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -105,11 +102,9 @@
  *
  ****************************************************************************/
 
-int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
-                worker_t worker, FAR void *arg, uint32_t delay)
+static int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
+                       worker_t worker, FAR void *arg, uint32_t delay)
 {
-  irqstate_t flags;
-
   DEBUGASSERT(work != NULL);
 
   /* First, initialize the work structure */
@@ -118,20 +113,24 @@ int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
   work->arg    = arg;              /* Callback argument */
   work->delay  = delay;            /* Delay until work performed */
 
-  /* Now, time-tag that entry and put it in the work queue.  This must be
-   * done with interrupts disabled.  This permits this function to be called
-   * from with task logic or interrupt handlers.
-   */
+  /* Get exclusive access to the work queue */
 
-  flags        = irqsave();
+  while (work_lock() < 0);
+
+  /* Now, time-tag that entry and put it in the work queue. */
+
   work->qtime  = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
   kill(wqueue->pid[0], SIGWORK);   /* Wake up the worker thread */
 
-  irqrestore(flags);
+  work_unlock();
   return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: work_queue
@@ -162,8 +161,6 @@ int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
-
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, uint32_t delay)
 {
@@ -177,5 +174,4 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     }
 }
 
-#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
-#endif /* CONFIG_SCHED_WORKQUEUE */
+#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_USRWORK && !__KERNEL__ */

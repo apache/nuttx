@@ -340,25 +340,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_process
- *
- * Description:
- *   This is the logic that performs actions placed on any work list.  This
- *   logic is the common underlying logic to all work queues.  This logic is
- *   part of the internal implementation of each work queue; it should not
- *   be called from application level logic.
- *
- * Input parameters:
- *   wqueue - Describes the work queue to be processed
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void work_process(FAR struct wqueue_s *wqueue);
-
-/****************************************************************************
  * Name: work_usrstart
  *
  * Description:
@@ -378,7 +359,7 @@ int work_usrstart(void);
 #endif
 
 /****************************************************************************
- * Name: work_queue and work_qqueue
+ * Name: work_queue
  *
  * Description:
  *   Queue work to be performed at a later time.  All queued work will be
@@ -390,11 +371,6 @@ int work_usrstart(void);
  *   again until either (1) the previous work has been performed and removed
  *   from the queue, or (2) work_cancel() has been called to cancel the work
  *   and remove it from the work queue.
- *
- *   work_queue() is the application interface.  It simply maps the qid to
- *     the correct work queue and calls work_qqueue().
- *   work_qqueue() is the common cancellation logic that operates on the
- *     particular work queue selected by work_queue().
  *
  * Input parameters:
  *   qid    - The work queue ID
@@ -413,21 +389,14 @@ int work_usrstart(void);
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, uint32_t delay);
-int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
-                worker_t worker, FAR void *arg, uint32_t delay);
 
 /****************************************************************************
- * Name: work_cancel and work_qcancel;
+ * Name: work_cancel
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
  *   After work has been cancelled, it may be re-queue by calling work_queue()
  *   again.
- *
- *   work_cancel() is the application interface.  It simply maps the qid to
- *     the correct work queue and calls work_qcancel().
- *   work_qcancel() is the common cancellation logic that operates on the
- *     particular work queue selected by work_cancel().
  *
  * Input parameters:
  *   qid    - The work queue ID
@@ -441,7 +410,6 @@ int work_qqueue(FAR struct wqueue_s *wqueue, FAR struct work_s *work,
  *
  ****************************************************************************/
 
-int work_qcancel(FAR struct wqueue_s *wqueue, FAR struct work_s *work);
 int work_cancel(int qid, FAR struct work_s *work);
 
 /****************************************************************************
