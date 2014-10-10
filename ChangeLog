@@ -8829,3 +8829,5 @@
 	  kwork_lpthread.c, and wqueue.h: Modularize starting of worker
 	  threads to better isolate individual initialization characteristics
 	  (2014-10-10).
+	* arch/arm/src/ stm32_iwdg.c, stm32_wwdg.c, and chip/stm32_dbgmcu.h:
+	  Fix watchdog stop bit usage.  From Lazlo (2014-10-10).
