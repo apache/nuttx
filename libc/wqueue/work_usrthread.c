@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/wqueue.h>
@@ -126,6 +128,10 @@ static int work_usrthread(int argc, char *argv[])
 
 int work_usrstart(void)
 {
+  /* Initialize work queue data structures */
+
+  dq_init(&g_usrwork.q);
+
   /* Start a user-mode worker thread for use by applications. */
 
   svdbg("Starting user-mode worker thread\n");

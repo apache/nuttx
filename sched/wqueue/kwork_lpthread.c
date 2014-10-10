@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/wqueue.h>
@@ -145,6 +146,10 @@ static int work_lpthread(int argc, char *argv[])
 
 int work_lpstart(void)
 {
+  /* Initialize work queue data structures */
+
+  dq_init(&g_lpwork.q);
+
   /* Start the low-priority, kernel mode worker thread(s) */
 
   svdbg("Starting low-priority kernel worker thread\n");

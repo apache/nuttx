@@ -54,6 +54,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Use CLOCK_MONOTONIC if it is available.  CLOCK_REALTIME can cause bad
+ * delays if the time is changed.
+ */
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+#  define WORK_CLOCK CLOCK_MONOTONIC
+#else
+#  define WORK_CLOCK CLOCK_REALTIME
+#endif
+
+/* The work poll period is in system ticks. */
+
+#define WORKPERIOD_TICKS  (CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK)
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -99,24 +113,39 @@ void work_process(FAR struct wqueue_s *wqueue)
   FAR void *arg;
   uint32_t elapsed;
   uint32_t remaining;
+  uint32_t stick;
+  uint32_t ctick;
   uint32_t next;
 
   /* Then process queued work.  We need to keep interrupts disabled while
    * we process items in the work list.
    */
 
-  next  = CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK;
+  next  = WORKPERIOD_TICKS;
   flags = irqsave();
-  work  = (FAR struct work_s *)wqueue->q.head;
+
+  /* Get the time that we started this polling cycle in clock ticks. */
+
+  stick = clock_systimer();
+
+  /* And check each entry in the work queue.  Since we have disabled
+   * interrupts we know:  (1) we will not be suspended unless we do
+   * so ourselves, and (2) there will be no changes to the work queue
+   */
+
+  work = (FAR struct work_s *)wqueue->q.head;
   while (work)
     {
+      DEBUGASSERT(wqueue->wq_sem.count > 0);
+
       /* Is this work ready?  It is ready if there is no delay or if
        * the delay has elapsed. qtime is the time that the work was added
        * to the work queue.  It will always be greater than or equal to
        * zero.  Therefore a delay of zero will always execute immediately.
        */
 
-      elapsed = clock_systimer() - work->qtime;
+      ctick   = clock_systimer();
+      elapsed = ctick - work->qtime;
       if (elapsed >= work->delay)
         {
           /* Remove the ready-to-execute work from the list */
@@ -171,8 +200,13 @@ void work_process(FAR struct wqueue_s *wqueue)
         {
           /* This one is not ready.. will it be ready before the next
            * scheduled wakeup interval?
+           *
+           * NOTE that elapsed is relative to the the current time,
+           * not the time of beginning of this queue processing pass.
+           * So it may need an adjustment.
            */
 
+          elapsed  += (ctick - stick);
           remaining = elapsed - work->delay;
           if (remaining < next)
             {
@@ -187,11 +221,20 @@ void work_process(FAR struct wqueue_s *wqueue)
         }
     }
 
-  /* Wait awhile to check the work list.  We will wait here until either
-   * the time elapses or until we are awakened by a signal.
+  /* There is no work to be performed now.  Check if we need to delay or if we have
+   * already exceed the duration of the polling period.
    */
 
-  usleep(next * USEC_PER_TICK);
+  if (next < WORKPERIOD_TICKS)
+    {
+      /* Wait awhile to check the work list.  We will wait here until either
+       * the time elapses or until we are awakened by a signal.  Interrupts
+       * will be re-enabled while we wait.
+       */
+
+      usleep(next * USEC_PER_TICK);
+    }
+
   irqrestore(flags);
 }
 

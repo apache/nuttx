@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/wqueue.h>
@@ -148,6 +149,10 @@ static int work_hpthread(int argc, char *argv[])
 
 int work_hpstart(void)
 {
+  /* Initialize work queue data structures */
+
+  dq_init(&g_hpwork.q);
+
   /* Start the high-priority, kernel mode worker thread */
 
   svdbg("Starting high-priority kernel worker thread\n");
