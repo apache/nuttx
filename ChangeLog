@@ -8834,4 +8834,8 @@
 	* sched/wqueue/, libc/wqueue, and include/nuttx/wqueue.h:  Add support
 	  for multiple low-priority worker threads.  This is a necessary
 	  piece of the support for asynchonous I/O (2014-10-10).
-
+	* sched/wqueue/work_inherit.c:  Add logic for priority inheritance with
+	  multiple worker threads.  How should this work?  Tentatively, the all
+	  get reprioritized together.  It would be best to just reprioritize the
+	  single thread doing the high priority work, but we don't know which
+	  that will be in advance (2014-10-10).
