@@ -87,9 +87,9 @@ struct usr_wqueue_s g_usrwork;
 /* This semaphore supports exclusive access to the user-mode work queue */
 
 #ifdef CONFIG_BUILD_PROTECTED
-extern sem_t g_usrsem;
+sem_t g_usrsem;
 #else
-extern pthread_mutex_t g_usrmutex;
+pthread_mutex_t g_usrmutex;
 #endif
 
 /****************************************************************************

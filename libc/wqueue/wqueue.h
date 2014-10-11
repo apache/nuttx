@@ -81,7 +81,6 @@ extern sem_t g_usrsem;
 #else
 extern pthread_mutex_t g_usrmutex;
 #endif
-#endif
 
 /****************************************************************************
  * Public Function Prototypes

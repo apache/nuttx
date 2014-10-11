@@ -87,8 +87,6 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
-
 int work_signal(int qid)
 {
   int ret;

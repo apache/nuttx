@@ -94,7 +94,7 @@ int work_lock(void)
   int ret;
 
 #ifdef CONFIG_BUILD_PROTECTED
-  int ret = sem_wait(&g_usrsem);
+  ret = sem_wait(&g_usrsem);
   if (ret < 0)
     {
       DEBUGASSERT(errno == EINTR);
