@@ -669,7 +669,7 @@ Configurations
 
           Library Routines
             CONFIG_SCHED_WORKQUEUE=y      : Work queue support is needed
-            CONFIG_SCHED_WORKSTACKSIZE=1536
+            CONFIG_SCHED_HPWORKSTACKSIZE=1536
 
        b. USB Mass Storage Class.  With this class enabled, you can support
           connection of USB FLASH storage drives.  Support for the USB
