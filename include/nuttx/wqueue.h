@@ -51,7 +51,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* CONFIG_SCHED_WORKQUEUE.  Create a dedicated "worker" thread to
+/* CONFIG_SCHED_WORKQUEUE.  Not selectable.  Set by the configuration system
+ *   if either CONFIG_SCHED_HPWORK or CONFIG_SCHED_LPWORK are selected.
+ * CONFIG_SCHED_HPWORK.  Create a dedicated "worker" thread to
  *   handle delayed processing from interrupt handlers.  This feature
  *   is required for some drivers but, if there are not complaints,
  *   can be safely disabled.  The worker thread also performs
@@ -59,7 +61,7 @@
  *   from interrupt handlers.  If the worker thread is disabled,
  *   then that clean will be performed by the IDLE thread instead
  *   (which runs at the lowest of priority and may not be appropriate
- *   if memory reclamation is of high priority).  If CONFIG_SCHED_WORKQUEUE
+ *   if memory reclamation is of high priority).  If CONFIG_SCHED_HPWORK
  *   is enabled, then the following options can also be used:
  * CONFIG_SCHED_HPWORK - Build the high priority work queue. To preserve
  *   legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true in a flat
@@ -77,11 +79,10 @@
  * CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
  *   the worker thread.  Default: 17
  *
- * CONFIG_SCHED_LPWORK. If CONFIG_SCHED_WORKQUEUE is defined, then a single
- *   work queue is created by default.  If CONFIG_SCHED_LPWORK is also defined
- *   then an additional, lower-priority work queue will also be created.  This
- *   lower priority work queue is better suited for more extended processing
- *   (such as file system clean-up operations)
+ * CONFIG_SCHED_LPWORK. If CONFIG_SCHED_LPWORK is selected then a lower-
+ *   priority work queue will be created.  This lower priority work queue
+ *   is better suited for more extended processing (such as file system
+ *   clean-up operations)
  * CONFIG_SCHED_LPNTHREADS - The number of thread in the low-priority queue's
  *   thread pool.  Default: 1
  * CONFIG_SCHED_LPWORKPRIORITY - The minimum execution priority of the lower
@@ -119,10 +120,7 @@
 
 #    undef CONFIG_SCHED_HPWORK
 #    undef CONFIG_SCHED_LPWORK
-
-#    ifndef CONFIG_SCHED_USRWORK
-#      undef CONFIG_SCHED_WORKQUEUE
-#    endif
+#    undef CONFIG_SCHED_WORKQUEUE
 
   /* User-space worker threads are not built in a kernel build when we are
    * building the kernel-space libraries (but we still need to know that it
@@ -144,7 +142,7 @@
 #  undef CONFIG_SCHED_USRWORK
 #endif
 
-#ifdef CONFIG_SCHED_WORKQUEUE
+#if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_SCHED_USRWORK)
 
 /* High priority, kernel work queue configuration ***************************/
 
@@ -471,5 +469,5 @@ void lpwork_restorepriority(uint8_t reqprio);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_SCHED_WORKQUEUE */
+#endif /* CONFIG_SCHED_WORKQUEUE || CONFIG_SCHED_USRWORK */
 #endif /* __INCLUDE_NUTTX_WQUEUE_H */

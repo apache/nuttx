@@ -50,8 +50,7 @@
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_USRWORK) && \
-   !defined(__KERNEL__)
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -175,4 +174,4 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     }
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_USRWORK && !__KERNEL__ */
+#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */

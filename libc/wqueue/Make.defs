@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
+ifeq ($(CONFIG_SCHED_USRWORK),y)
 
 # Add the work queue C files to the build
 

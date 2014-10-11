@@ -46,7 +46,7 @@
 
 #include "wqueue/wqueue.h"
 
-#ifdef CONFIG_SCHED_WORKQUEUE
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -113,4 +113,3 @@ int work_signal(int qid)
 }
 
 #endif /* CONFIG_SCHED_USRWORK && !__KERNEL__ */
-#endif /* CONFIG_SCHED_WORKQUEUE */
