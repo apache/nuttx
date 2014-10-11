@@ -786,7 +786,7 @@ config SIG_SIGCONDTIMEDOUT
 config SIG_SIGWORK
 	int "SIGWORK"
 	default 17
-	depends on SCHED_WORKQUEUE || SCHED_USRWORK
+	depends on SCHED_WORKQUEUE || LIB_USRWORK
 	---help---
 		SIGWORK is a non-standard signal used to wake up the internal NuttX
 		worker thread.  This setting specifies the signal number that will be

@@ -120,7 +120,7 @@
 /* In the protected build (only) we also need to start the user work queue */
 
 #if !defined(CONFIG_BUILD_PROTECTED)
-#  undef CONFIG_SCHED_USRWORK
+#  undef CONFIG_LIB_USRWORK
 #endif
 
 /****************************************************************************
@@ -197,7 +197,7 @@ static inline void os_pgworker(void)
 #ifdef CONFIG_SCHED_WORKQUEUE
 static inline void os_workqueues(void)
 {
-#ifdef CONFIG_SCHED_USRWORK
+#ifdef CONFIG_LIB_USRWORK
   pid_t pid;
 #endif
 
@@ -219,7 +219,7 @@ static inline void os_workqueues(void)
 
 #endif /* CONFIG_SCHED_LPWORK */
 
-#ifdef CONFIG_SCHED_USRWORK
+#ifdef CONFIG_LIB_USRWORK
   /* Start the user-space work queue */
 
   DEBUGASSERT(USERSPACE->work_usrstart != NULL);

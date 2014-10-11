@@ -47,7 +47,7 @@
 
 #include <nuttx/wqueue.h>
 
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -122,5 +122,5 @@ int work_lock(void);
 
 void work_unlock(void);
 
-#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__*/
+#endif /* CONFIG_LIB_USRWORK && !__KERNEL__*/
 #endif /* __LIBC_WQUEUE_WQUEUE_H */

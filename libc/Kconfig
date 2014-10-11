@@ -395,7 +395,7 @@ comment "Non-standard Library Support"
 
 if BUILD_PROTECTED || BUILD_KERNEL
 
-config SCHED_USRWORK
+config LIB_USRWORK
 	bool "User mode worker thread"
 	default n
 	depends on !DISABLE_SIGNALS
@@ -403,28 +403,28 @@ config SCHED_USRWORK
 		User space work queues can also be made available for deferred
 		processing in the NuttX kernel build.
 
-if SCHED_USRWORK
+if LIB_USRWORK
 
-config SCHED_USRWORKPRIORITY
+config LIB_USRWORKPRIORITY
 	int "User mode priority worker thread priority"
 	default 100
 	---help---
 		The execution priority of the lopwer priority worker thread.  Default: 192
 
-config SCHED_USRWORKPERIOD
+config LIB_USRWORKPERIOD
 	int "User mode worker thread period"
 	default 100000
 	---help---
 		How often the lower priority worker thread checks for work in units
 		of microseconds. Default: 100*1000 (100 MS).
 
-config SCHED_USRWORKSTACKSIZE
+config LIB_USRWORKSTACKSIZE
 	int "User mode worker thread stack size"
 	default 2048
 	---help---
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
-endif # SCHED_USRWORK
+endif # LIB_USRWORK
 endif # BUILD_PROTECTED
 
 config LIB_KBDCODEC

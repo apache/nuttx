@@ -52,7 +52,7 @@
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -339,7 +339,7 @@ int work_usrstart(void)
 {
   /* Initialize work queue data structures */
 
-  g_usrwork.delay = CONFIG_SCHED_USRWORKPERIOD / USEC_PER_TICK;
+  g_usrwork.delay = CONFIG_LIB_USRWORKPERIOD / USEC_PER_TICK;
   dq_init(&g_usrwork.q);
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -351,8 +351,8 @@ int work_usrstart(void)
     /* Start a user-mode worker thread for use by applications. */
 
     g_usrwork.pid = task_create("uwork",
-                                CONFIG_SCHED_USRWORKPRIORITY,
-                                CONFIG_SCHED_USRWORKSTACKSIZE,
+                                CONFIG_LIB_USRWORKPRIORITY,
+                                CONFIG_LIB_USRWORKSTACKSIZE,
                                 (main_t)work_usrthread,
                                 (FAR char * const *)NULL);
 
@@ -380,9 +380,9 @@ int work_usrstart(void)
     /* Start a user-mode worker thread for use by applications. */
 
     (void)pthread_attr_init(&attr);
-    (void)pthread_attr_setstacksize(&attr, CONFIG_SCHED_USRWORKSTACKSIZE);
+    (void)pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
 
-    param.sched_priority = CONFIG_SCHED_USRWORKPRIORITY;
+    param.sched_priority = CONFIG_LIB_USRWORKPRIORITY;
     (void)pthread_attr_setschedparam(&attr, &param);
 
     status = pthread_create(&usrwork, &attr, work_usrthread, NULL);
@@ -403,4 +403,4 @@ int work_usrstart(void)
 #endif
 }
 
-#endif /* CONFIG_SCHED_USRWORK && !__KERNEL__*/
+#endif /* CONFIG_LIB_USRWORK && !__KERNEL__*/

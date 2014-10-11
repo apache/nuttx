@@ -149,7 +149,7 @@ struct userspace_s
 
   /* User-space work queue support */
 
-#ifdef CONFIG_SCHED_USRWORK
+#ifdef CONFIG_LIB_USRWORK
   int (*work_usrstart)(void);
 #endif
 };
