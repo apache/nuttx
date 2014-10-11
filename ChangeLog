@@ -8839,3 +8839,5 @@
 	  get reprioritized together.  It would be best to just reprioritize the
 	  single thread doing the high priority work, but we don't know which
 	  that will be in advance (2014-10-10).
+	* fs/aio/ and include/aio.h:  Add support for socket-based transfers
+	  (2014-10-11).
