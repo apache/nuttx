@@ -291,7 +291,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
   sem_post(&priv->exclsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
-   * that is posted when new sample data is availble.
+   * that is posted when new sample data is available.
    */
 
   while (stmpe811_sample(priv, sample) < 0)
@@ -368,7 +368,7 @@ static int stmpe811_open(FAR struct file *filep)
   ret = sem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
+      /* This should only happen if the wait was cancelled by an signal */
 
       DEBUGASSERT(errno == EINTR);
       return -EINTR;
@@ -702,7 +702,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_STMPE811_NPOLLWAITERS)
         {
-          idbg("ERROR: No availabled slot found: %d\n", i);
+          idbg("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
@@ -879,7 +879,7 @@ static inline void stmpe811_tscinitialize(FAR struct stmpe811_dev_s *priv)
  *
  * Description:
  *  Enable TSC functionality.  GPIO4-7 must be available.  This function
- *  will register the touchsceen driver as /dev/inputN where N is the minor
+ *  will register the touchscreen driver as /dev/inputN where N is the minor
  *  device number
  *
  * Input Parameters:
@@ -972,25 +972,17 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
 
 void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 {
-  FAR struct stmpe811_config_s *config;   /* Convenience pointer */
-  bool                          pendown;  /* true: pend is down */
-  uint16_t                      xdiff;    /* X difference used in thresholding */
-  uint16_t                      ydiff;    /* Y difference used in thresholding */
-  uint16_t                      x;        /* X position */
-  uint16_t                      y;        /* Y position */
+  uint16_t xdiff;    /* X difference used in thresholding */
+  uint16_t ydiff;    /* Y difference used in thresholding */
+  uint16_t x;        /* X position */
+  uint16_t y;        /* Y position */
+  bool     pendown;  /* true: pen is down */
 
   ASSERT(priv != NULL);
 
   /* Cancel the missing pen up timer */
 
   (void)wd_cancel(priv->wdog);
-
-  /* Get a pointer the callbacks for convenience (and so the code is not so
-   * ugly).
-   */
-
-  config = priv->config;
-  DEBUGASSERT(config != NULL);
 
   /* Check for pen up or down from the TSC_STA ibit n the STMPE811_TSC_CTRL register. */
 
@@ -1018,7 +1010,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
         }
 
       /* A pen-down to up transition has been detected.  CONTACT_UP indicates the
-       * initial loss of contzt.  The state will be changed to CONTACT_NONE
+       * initial loss of contact.  The state will be changed to CONTACT_NONE
        * after the loss of contact is sampled.
        */
 
@@ -1122,7 +1114,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   stmpe811_notify(priv);
 
-  /* If we think that the pend is still down, the start/re-start the pen up
+  /* If we think that the pen is still down, the start/re-start the pen up
    * timer.
    */
 
@@ -1141,4 +1133,3 @@ ignored:
 }
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_TSC_DISABLE */
-

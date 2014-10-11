@@ -90,7 +90,6 @@
 int work_signal(int qid)
 {
   pid_t pid;
-  int wndx;
   int ret;
 
   /* Get the process ID of the worker thread */
@@ -105,6 +104,7 @@ int work_signal(int qid)
 #ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
+      int wndx;
       int i;
 
       /* Find an IDLE worker thread */
