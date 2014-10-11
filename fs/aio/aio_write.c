@@ -141,7 +141,7 @@ static void aio_write_worker(FAR void *arg)
           int errcode = get_errno();
           fdbg("ERROR: fcntl failed: %d\n", errcode);
           aiocbp->aio_result = -errcode;
-          goto errout:
+          goto errout;
         }
 
       /* Perform the write using:

@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <signal.h>
+#include <assert.h>
 #include <queue.h>
 
 #include <nuttx/clock.h>
