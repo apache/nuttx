@@ -53,7 +53,7 @@
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_LPWORK)
+#ifdef CONFIG_SCHED_LPWORK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -237,4 +237,4 @@ int work_lpstart(void)
   return g_lpwork.worker[0].pid;
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK */
+#endif /* CONFIG_SCHED_LPWORK */

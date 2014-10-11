@@ -50,7 +50,7 @@
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
+#ifdef CONFIG_SCHED_HPWORK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -159,15 +159,15 @@ int work_hpstart(void)
 
   /* Initialize work queue data structures */
 
-  g_hpwork.delay          = CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK;
+  g_hpwork.delay          = CONFIG_SCHED_HPWORKPERIOD / USEC_PER_TICK;
   dq_init(&g_hpwork.q);
 
   /* Start the high-priority, kernel mode worker thread */
 
   svdbg("Starting high-priority kernel worker thread\n");
 
-  pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
-                      CONFIG_SCHED_WORKSTACKSIZE,
+  pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
+                      CONFIG_SCHED_HPWORKSTACKSIZE,
                       (main_t)work_hpthread,
                       (FAR char * const *)NULL);
 
@@ -186,4 +186,4 @@ int work_hpstart(void)
   return pid;
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_HPWORK*/
+#endif /* CONFIG_SCHED_HPWORK */

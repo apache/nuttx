@@ -67,14 +67,14 @@
  *   legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true in a flat
  *   build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel mode
  *   in order to build the high priority work queue.
- * CONFIG_SCHED_WORKPRIORITY - The execution priority of the worker
- *   thread.  Default: 224
- * CONFIG_SCHED_WORKPERIOD - How often the worker thread checks for
+ * CONFIG_SCHED_HPWORKPRIORITY - The execution priority of the high-
+ *   priority worker thread.  Default: 224
+ * CONFIG_SCHED_HPWORKPERIOD - How often the worker thread checks for
  *   work in units of microseconds.  If the high priority worker thread is
  *   performing garbage collection, then the default is 50*1000 (50 MS).
  *   Otherwise, if the lower priority worker thread is performing garbage
  *   collection, the default is 100*1000.
- * CONFIG_SCHED_WORKSTACKSIZE - The stack size allocated for the worker
+ * CONFIG_SCHED_HPWORKSTACKSIZE - The stack size allocated for the worker
  *   thread.  Default: 2048.
  * CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
  *   the worker thread.  Default: 17
@@ -148,20 +148,20 @@
 
 #ifdef CONFIG_SCHED_HPWORK
 
-#  ifndef CONFIG_SCHED_WORKPRIORITY
-#    define CONFIG_SCHED_WORKPRIORITY 224
+#  ifndef CONFIG_SCHED_HPWORKPRIORITY
+#    define CONFIG_SCHED_HPWORKPRIORITY 224
 #  endif
 
-#  ifndef CONFIG_SCHED_WORKPERIOD
-#    ifdef CONFIG_SCHED_LOWORK
-#      define CONFIG_SCHED_WORKPERIOD (100*1000) /* 100 milliseconds */
+#  ifndef CONFIG_SCHED_HPWORKPERIOD
+#    ifdef CONFIG_SCHED_LPWORK
+#      define CONFIG_SCHED_HPWORKPERIOD (100*1000) /* 100 milliseconds */
 #    else
-#      define CONFIG_SCHED_WORKPERIOD (50*1000)  /* 50 milliseconds */
+#      define CONFIG_SCHED_HPWORKPERIOD (50*1000)  /* 50 milliseconds */
 #    endif
 #  endif
 
-#  ifndef CONFIG_SCHED_WORKSTACKSIZE
-#    define CONFIG_SCHED_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#  ifndef CONFIG_SCHED_HPWORKSTACKSIZE
+#    define CONFIG_SCHED_HPWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #  endif
 
 #endif /* CONFIG_SCHED_HPWORK */
@@ -180,18 +180,18 @@
 
 #  ifndef CONFIG_SCHED_LPWORKPRIOMAX
 #    ifdef CONFIG_SCHED_HPWORK
-#      define CONFIG_SCHED_LPWORKPRIOMAX (CONFIG_SCHED_WORKPRIORITY-16)
+#      define CONFIG_SCHED_LPWORKPRIOMAX (CONFIG_SCHED_HPWORKPRIORITY-16)
 #    else
 #      define CONFIG_SCHED_LPWORKPRIOMAX 176
 #    endif
 #  endif
 
 #  ifdef CONFIG_SCHED_HPWORK
-#    if CONFIG_SCHED_LPWORKPRIORITY >= CONFIG_SCHED_WORKPRIORITY
-#      error CONFIG_SCHED_LPWORKPRIORITY >= CONFIG_SCHED_WORKPRIORITY
+#    if CONFIG_SCHED_LPWORKPRIORITY >= CONFIG_SCHED_HPWORKPRIORITY
+#      error CONFIG_SCHED_LPWORKPRIORITY >= CONFIG_SCHED_HPWORKPRIORITY
 #    endif
-#    if CONFIG_SCHED_LPWORKPRIOMAX >= CONFIG_SCHED_WORKPRIORITY
-#      error CONFIG_SCHED_LPWORKPRIOMAX >= CONFIG_SCHED_WORKPRIORITY
+#    if CONFIG_SCHED_LPWORKPRIOMAX >= CONFIG_SCHED_HPWORKPRIORITY
+#      error CONFIG_SCHED_LPWORKPRIOMAX >= CONFIG_SCHED_HPWORKPRIORITY
 #    endif
 #  endif
 
@@ -212,7 +212,7 @@
    * priority worker thread.
    */
 
-#  if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_WORKPRIORITY
+#  if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_HPWORKPRIORITY
 #    warning "The Lower priority worker thread has the higher priority"
 #  endif
 #endif
