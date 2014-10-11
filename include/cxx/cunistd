@@ -59,6 +59,8 @@ namespace std
   using ::lseek;
   using ::read;
   using ::write;
+  using ::pread;
+  using ::pwrite;
   using ::pipe;
   using ::chdir;
   using ::getcwd;

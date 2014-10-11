@@ -49,7 +49,7 @@
 namespace std
 {
   using ::flock;
-  using ::creat;
+//using ::creat;
   using ::open;
   using ::fcntl;
 }
