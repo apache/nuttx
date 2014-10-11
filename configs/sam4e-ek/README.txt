@@ -1628,5 +1628,7 @@ Configurations
        $ cd ~/nuttx-git/nuttx
        $ make
 
-    STATUS:  2014-8-20. I have seen the demo work well but it is not
-    thoroughly exercised.
+    STATUS:
+    2014-08-20. I have seen the demo work well but it is not thoroughly
+                exercised.  I suspect some touchscreen issues.
+    2014-10-11. Today's build crashes in nxwm_main on startup.
