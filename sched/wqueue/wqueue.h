@@ -52,18 +52,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Customize kernel thread names */
+/* Kkernel thread names */
 
-#ifdef CONFIG_SCHED_HPWORK
-#  if defined(CONFIG_SCHED_LPWORK)
-#    define HPWORKNAME "hpwork"
-#    define LPWORKNAME "lpwork"
-#  elif defined(CONFIG_SCHED_USRWORK)
-#    define HPWORKNAME "kwork"
-#  else
-#    define HPWORKNAME "work"
-#  endif
-#endif
+#define HPWORKNAME "hpwork"
+#define LPWORKNAME "lpwork"
 
 /****************************************************************************
  * Public Type Definitions

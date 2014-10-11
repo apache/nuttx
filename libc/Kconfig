@@ -452,7 +452,6 @@ config SCHED_WORKPERIOD
 config SCHED_WORKSTACKSIZE
 	int "High priority worker thread stack size"
 	default 2048
-	depends on SCHED_WORKQUEUE
 	---help---
 		The stack size allocated for the worker thread.  Default: 2K.
 

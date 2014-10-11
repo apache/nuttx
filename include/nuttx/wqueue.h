@@ -139,28 +139,9 @@
 #else
   /* User-space worker threads are not built in a flat build
    * (CONFIG_BUILD_PROTECTED=n && CONFIG_BUILD_KERNEL=n)
-   *
-   * To preserve legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true
-   * in a flat build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel
-   * mode in order to build the high priority work queue.
-   *
-   * In the kernel build, it is possible that no kernel work queues will be
-   * built.  But in the flat build, the high priority work queue will always
-   * be built.
    */
 
-#  undef CONFIG_SCHED_HPWORK
 #  undef CONFIG_SCHED_USRWORK
-#  define CONFIG_SCHED_HPWORK 1
-#endif
-
-/* We never build the low priority work queue without building the high
- * priority work queue.
- */
-
-#if defined(CONFIG_SCHED_LPWORK) && !defined(CONFIG_SCHED_HPWORK)
-#  error "CONFIG_SCHED_LPWORK defined, but CONFIG_SCHED_HPWORK not defined"
-#  undef CONFIG_SCHED_LPWORK
 #endif
 
 #ifdef CONFIG_SCHED_WORKQUEUE
@@ -228,12 +209,14 @@
 #    define CONFIG_SCHED_LPWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #  endif
 
-/* The high priority worker thread should be higher priority than the low
- * priority worker thread.
- */
+#  ifdef CONFIG_WORK_HPWORK
+  /* The high priority worker thread should be higher priority than the low
+   * priority worker thread.
+   */
 
-#if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_WORKPRIORITY
-#  warning "The Lower priority worker thread has the higher priority"
+#  if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_WORKPRIORITY
+#    warning "The Lower priority worker thread has the higher priority"
+#  endif
 #endif
 
 #endif /* CONFIG_SCHED_LPWORK */
