@@ -10,6 +10,7 @@ README
     - Notes about Header Files
   o Configuring NuttX
     - Instantiating "Canned" Configurations
+    - Refreshing Configurations
     - NuttX Configuration Tool
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
@@ -224,53 +225,67 @@ CONFIGURING NUTTX
 Instantiating "Canned" Configurations
 -------------------------------------
 
-"Canned" NuttX configuration files are retained in:
+  "Canned" NuttX configuration files are retained in:
 
-  configs/<board-name>/<config-dir>
+    configs/<board-name>/<config-dir>
 
-Where <board-name> is the name of your development board and <config-dir>.
-Configuring NuttX requires only copying three files from the <config-dir>
-to the directory where you installed NuttX (TOPDIR) (and sometimes one
-additional file to the directory the NuttX application package (APPSDIR)):
+  Where <board-name> is the name of your development board and <config-dir>.
+  Configuring NuttX requires only copying three files from the <config-dir>
+  to the directory where you installed NuttX (TOPDIR) (and sometimes one
+  additional file to the directory the NuttX application package (APPSDIR)):
 
-  Copy configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
+    Copy configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
 
-    Make.defs describes the rules needed by you tool chain to compile
-    and link code.  You may need to modify this file to match the
-    specific needs of your toolchain.
+      Make.defs describes the rules needed by you tool chain to compile
+      and link code.  You may need to modify this file to match the
+      specific needs of your toolchain.
 
-  Copy configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
+    Copy configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
 
-    setenv.sh is an optional convenience file that I use to set
-    the PATH variable to the toolchain binaries.  You may chose to
-    use setenv.sh or not.  If you use it, then it may need to be
-    modified to include the path to your toolchain binaries.
+      setenv.sh is an optional convenience file that I use to set
+      the PATH variable to the toolchain binaries.  You may chose to
+      use setenv.sh or not.  If you use it, then it may need to be
+      modified to include the path to your toolchain binaries.
 
-  Copy configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
+    Copy configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
-    The defconfig file holds the actual build configuration.  This
-    file is included by all other make files to determine what is
-    included in the build and what is not.  This file is also used
-    to generate a C configuration header at include/nuttx/config.h.
+      The defconfig file holds the actual build configuration.  This
+      file is included by all other make files to determine what is
+      included in the build and what is not.  This file is also used
+      to generate a C configuration header at include/nuttx/config.h.
 
-General information about configuring NuttX can be found in:
+   General information about configuring NuttX can be found in:
 
-  ${TOPDIR}/configs/README.txt
-  ${TOPDIR}/configs/<board-name>/README.txt
+      ${TOPDIR}/configs/README.txt
+      ${TOPDIR}/configs/<board-name>/README.txt
 
-There is a configuration script in the tools/ directory that makes this
-easier.  It is used as follows:
+    There is a configuration script in the tools/ directory that makes this
+    easier.  It is used as follows:
 
-  cd ${TOPDIR}/tools
-  ./configure.sh <board-name>/<config-dir>
+      cd ${TOPDIR}/tools
+      ./configure.sh <board-name>/<config-dir>
 
-There is an alternative Windows batch file that can be used in the
-windows native environment like:
+    There is an alternative Windows batch file that can be used in the
+    windows native environment like:
 
-  cd ${TOPDIR}\tools
-  configure.bat <board-name>\<config-dir>
+      cd ${TOPDIR}\tools
+      configure.bat <board-name>\<config-dir>
 
-See tools/README.txt for more information about these scripts.
+    See tools/README.txt for more information about these scripts.
+
+Refreshing Configurations
+-------------------------
+
+  Configurations can get out of data.  It is a good practice to "refresh"
+  each configuration before making.  To refresh the configuration, use the
+  NuttX Configuration Tool like this:
+
+    make oldconfig
+
+  If you configuration is out of date, you will be prompted to resolve the
+  issues detected by the configuration tool.  Doing this can save you a lot
+  of problems done the road due to a bad configuration.  The NuttX
+  onfiguration is discussed in the following paragraph.
 
 NuttX Configuration Tool
 ------------------------
