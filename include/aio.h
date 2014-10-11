@@ -125,7 +125,7 @@ struct aiocb
   FAR volatile void *aio_buf;    /* Location of buffer */
   off_t aio_offset;              /* File offset */
   size_t aio_nbytes;             /* Length of transfer */
-#if CONFIG_NFILE_DESCRIPTORS > 127
+#if (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS) > 127
   int16_t aio_fildes;            /* File descriptor (should be int) */
 #else
   int8_t aio_fildes;             /* File descriptor (should be int) */

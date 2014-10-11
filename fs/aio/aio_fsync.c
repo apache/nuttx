@@ -110,9 +110,9 @@ static void aio_fsync_worker(FAR void *arg)
 #endif
   aiocbp = aioc_decant(aioc);
 
-  /* Perform the fsync using aioc_filep */
+  /* Perform the fsync using u.aioc_filep */
 
-  ret = file_fsync(aioc->aioc_filep);
+  ret = file_fsync(aioc->u.aioc_filep);
   if (ret < 0)
     {
       int errcode = get_errno();

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 10, 2014)
+NuttX TODO List (Last updated October 11, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (12)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1162,22 +1162,6 @@ o File system / Generic drivers (fs/, drivers/)
                suspecting that some evil has crept in.
   Status:      Open
   Priority:    Medium
-
-  Title:       ASYNCHRONOUS I/O DOES NOT WORK WITH SOCKETS
-  Description: The current asynchronous I/O logic will only work with
-               file descriptions.  If given a socket descriptor, the
-               AIO interfaces will fail with EBADF.  The existing logic
-               should be extended to handle socket descriptors.
-
-               This should be an easy fix:  There could have to be a
-               tagged union of a struct file and struct socket in the
-               AIO container and the worker logic would have to select
-               the correct low-level, internal interface.  There would
-               be no lseek'ing on sockets.
-
-  Status:      Open
-  Priority:    Pretty high because this limits the usefulness of the
-               AIO implementation.
 
 o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

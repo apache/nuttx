@@ -48,6 +48,7 @@
 #include <queue.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/net/net.h>
 
 #ifdef CONFIG_FS_AIO
 
@@ -62,6 +63,21 @@
 #  define CONFIG_FS_NAIOC 8
 #endif
 
+#undef AIO_HAVE_FILEP
+#undef AIO_HAVE_PSOCK
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+#  define AIO_HAVE_FILEP
+#endif
+
+#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#  define AIO_HAVE_PSOCK
+#endif
+
+#if !defined(AIO_HAVE_FILEP) && !defined(AIO_HAVE_PSOCK)
+#  error AIO needs file and/or socket descriptors
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -73,13 +89,22 @@
 struct file;
 struct aio_container_s
 {
-  dq_entry_t aioc_link;          /* Supports a doubly linked list */
-  FAR struct aiocb *aioc_aiocbp; /* The contained AIO control block */
-  FAR struct file *aioc_filep;   /* File structure to use with the I/O */
-  struct work_s aioc_work;       /* Used to defer I/O to the work thread */
-  pid_t aioc_pid;                /* ID of the waiting task */
+  dq_entry_t aioc_link;            /* Supports a doubly linked list */
+  FAR struct aiocb *aioc_aiocbp;   /* The contained AIO control block */
+  union
+  {
+#ifdef AIO_HAVE_FILEP
+    FAR struct file *aioc_filep;   /* File structure to use with the I/O */
+#endif
+#ifdef AIO_HAVE_PSOCK
+    FAR struct socket *aioc_psock; /* Socket structure to use with the I/O */
+#endif
+    FAR void *ptr;                 /* Generic pointer to FAR data */
+  } u;
+  struct work_s aioc_work;         /* Used to defer I/O to the work thread */
+  pid_t aioc_pid;                  /* ID of the waiting task */
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t aioc_prio;             /* Priority of the waiting task */
+  uint8_t aioc_prio;               /* Priority of the waiting task */
 #endif
 };
 

@@ -46,6 +46,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/net.h>
+
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
@@ -108,16 +110,39 @@ static void aio_read_worker(FAR void *arg)
 #endif
   aiocbp = aioc_decant(aioc);
 
-  /* Perform the read using:
-   *
-   *   aioc_filep  - File structure pointer
-   *   aio_buf     - Location of buffer
-   *   aio_nbytes  - Length of transfer
-   *   aio_offset  - File offset
-   */
+#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+  if (aioc->fildes >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+#ifdef AIO_HAVE_FILEP
+    {
+      /* Perform the file read using:
+       *
+       *   u.aioc_filep - File structure pointer
+       *   aio_buf      - Location of buffer
+       *   aio_nbytes   - Length of transfer
+       *   aio_offset   - File offset
+       */
 
- nread = file_pread(aioc->aioc_filep, (FAR void *)aiocbp->aio_buf,
-                    aiocbp->aio_nbytes, aiocbp->aio_offset);
+     nread = file_pread(aioc->u.aioc_filep, (FAR void *)aiocbp->aio_buf,
+                        aiocbp->aio_nbytes, aiocbp->aio_offset);
+    }
+#endif
+#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+  else
+#endif
+#ifdef AIO_HAVE_PSOCK
+    {
+      /* Perform the socket receive using:
+       *
+       *   u.aioc_psock - Socket structure pointer
+       *   aio_buf      - Location of buffer
+       *   aio_nbytes   - Length of transfer
+       */
+
+      nread = psock_recv(aioc->u.aioc_psock, (FAR void *)aiocbp->aio_buf,
+                         aiocbp->aio_nbytes, 0);
+    }
+#endif
 
   /* Set the result of the read */
 

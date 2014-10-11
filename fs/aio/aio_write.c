@@ -76,6 +76,7 @@
  * Name: file_fcntl
  ****************************************************************************/
 
+#ifdef AIO_HAVE_FILEP
 static inline int file_fcntl(FAR struct file *filep, int cmd, ...)
 {
   va_list ap;
@@ -86,6 +87,7 @@ static inline int file_fcntl(FAR struct file *filep, int cmd, ...)
   va_end(ap);
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: aio_write_worker
@@ -126,23 +128,28 @@ static void aio_write_worker(FAR void *arg)
 #endif
   aiocbp = aioc_decant(aioc);
 
-  /* Call fcntl(F_GETFL) to get the file open mode. */
+#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+  if (aioc->fildes >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+#ifdef AIO_HAVE_FILEP
+    {
+      /* Call fcntl(F_GETFL) to get the file open mode. */
 
-  oflags = file_fcntl(aioc->aioc_filep, F_GETFL);
-  if (oflags < 0)
-    {
-      int errcode = get_errno();
-      fdbg("ERROR: fcntl failed: %d\n", errcode);
-      aiocbp->aio_result = -errcode;
-    }
-  else
-    {
+      oflags = file_fcntl(aioc->u.aioc_filep, F_GETFL);
+      if (oflags < 0)
+        {
+          int errcode = get_errno();
+          fdbg("ERROR: fcntl failed: %d\n", errcode);
+          aiocbp->aio_result = -errcode;
+          goto errout:
+        }
+
       /* Perform the write using:
        *
-       *   aioc_filep  - File descriptor
-       *   aio_buf     - Location of buffer
-       *   aio_nbytes  - Length of transfer
-       *   aio_offset  - File offset
+       *   u.aioc_filep - File structure pointer
+       *   aio_buf      - Location of buffer
+       *   aio_nbytes   - Length of transfer
+       *   aio_offset   - File offset
        */
 
       /* Check if O_APPEND is set in the file open flags */
@@ -151,32 +158,54 @@ static void aio_write_worker(FAR void *arg)
         {
           /* Append to the current file position */
 
-          nwritten = file_write(aioc->aioc_filep,
+          nwritten = file_write(aioc->u.aioc_filep,
                                 (FAR const void *)aiocbp->aio_buf,
                                 aiocbp->aio_nbytes);
         }
       else
         {
-          nwritten = file_pwrite(aioc->aioc_filep,
+          nwritten = file_pwrite(aioc->u.aioc_filep,
                                  (FAR const void *)aiocbp->aio_buf,
                                  aiocbp->aio_nbytes,
                                  aiocbp->aio_offset);
         }
-
-      /* Set the result of the write */
-
-      if (nwritten < 0)
-        {
-          int errcode = get_errno();
-          fdbg("ERROR: write/pwrite failed: %d\n", errcode);
-          DEBUGASSERT(errcode > 0);
-          aiocbp->aio_result = -errcode;
-        }
-      else
-        {
-          aiocbp->aio_result = nwritten;
-        }
     }
+#endif
+#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+  else
+#endif
+#ifdef AIO_HAVE_PSOCK
+    {
+      /* Perform the send using:
+       *
+       *   u.aioc_psock - Socket structure pointer
+       *   aio_buf      - Location of buffer
+       *   aio_nbytes   - Length of transfer
+       */
+
+      nwritten = psock_send(aioc->u.aioc_psock,
+                            (FAR const void *)aiocbp->aio_buf,
+                            aiocbp->aio_nbytes, 0);
+    }
+#endif
+
+  /* Check the result of the write */
+
+  if (nwritten < 0)
+    {
+      int errcode = get_errno();
+      fdbg("ERROR: write/pwrite failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      aiocbp->aio_result = -errcode;
+    }
+  else
+    {
+      aiocbp->aio_result = nwritten;
+    }
+
+#ifdef AIO_HAVE_FILEP
+errout:
+#endif
 
   /* Signal the client */
 

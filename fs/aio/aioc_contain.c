@@ -42,6 +42,7 @@
 #include <sched.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
 
 #include "aio/aio.h"
 
@@ -90,20 +91,53 @@
 FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
-  FAR struct file *filep;
+  union
+  {
+#ifdef AIO_HAVE_FILEP
+    FAR struct file *filep;
+#endif
+#ifdef AIO_HAVE_FILEP
+    FAR struct socket *psock;
+#endif
+    FAR void *ptr;
+  } u;
 #ifdef CONFIG_PRIORITY_INHERITANCE
   struct sched_param param;
 #endif
 
-  /* Get the file structure corresponding to the file descriptor. */
-
-  filep = fs_getfilep(aiocbp->aio_fildes);
-  if (!filep)
+#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+  if (aioc->fildes >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+#ifdef AIO_HAVE_FILEP
     {
-      /* The errno value has already been set */
+      /* Get the file structure corresponding to the file descriptor. */
 
-      return NULL;
+      u.filep = fs_getfilep(aiocbp->aio_fildes);
+      if (!u.filep)
+        {
+          /* The errno value has already been set */
+
+          return NULL;
+        }
     }
+#endif
+#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+  else
+#endif
+#ifdef AIO_HAVE_PSOCK
+    {
+      /* Get the socket structure corresponding to the socket descriptor */
+
+      u.psock = sockfd_socket(aiocbp->aio_fildes);
+      if (!u.psock)
+        {
+          /* Does not set the errno.  EBADF is the most likely explanation. */
+
+          set_errno(EBADF);
+          return NULL;
+        }
+    }
+#endif
 
   /* Allocate the AIO control block container, waiting for one to become
    * available if necessary.  This should never fail.
@@ -116,7 +150,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 
   memset(aioc, 0, sizeof(struct aio_container_s));
   aioc->aioc_aiocbp = aiocbp;
-  aioc->aioc_filep = filep;
+  aioc->u.aioc_filep = u.ptr;
   aioc->aioc_pid = getpid();
 
 #ifdef CONFIG_PRIORITY_INHERITANCE

@@ -94,7 +94,7 @@ static void _net_semtake(FAR struct socketlist *list)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:
+ * Name: net_initlist
  *
  * Description:
  *   Initialize a list of sockets for a new task
