@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <signal.h>
 #include <queue.h>
 
 #include <nuttx/clock.h>
@@ -107,7 +108,7 @@
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
+void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
@@ -123,7 +124,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
    * we process items in the work list.
    */
 
-  next  = wqueue->delay;
+  next  = period;
   flags = irqsave();
 
   /* Get the time that we started this polling cycle in clock ticks. */
@@ -221,21 +222,41 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
         }
     }
 
-  /* Get the delay (in clock ticks) since we started the sampling */
+#if defined(CONFIG_SCHED_LPWORK) && CONFIG_SCHED_LPNTHREADS > 0
+  /* Value of zero for period means that we should wait indefinitely until
+   * signalled.  This option is used only for the case where there are
+   * multiple, low-priority worker threads.  In that case, only one of
+   * the threads does the poll... the others simple.  In all other cases
+   * period will be non-zero and equal to wqueue->delay.
+   */
 
-  elapsed = clock_systimer() - stick;
-  if (elapsed <= wqueue->delay)
+   if (period == 0)
+     {
+       sigset_t set;
+
+       /* Wait indefinitely until signalled with SIGWORK */
+
+       sigemptyset(&set);
+       sigaddset(&set, SIGWORK);
+       DEBUGVERIFY(sigwaitinfo(&set, NULL));
+     }
+   else
+#endif
     {
-      /* How much time would we need to delay to get to the end of the
-       * sampling period?  The amount of time we delay should be the smaller
-       * of the time to the end of the sampling period and the time to the
-       * next work expiry.
-       */
+      /* Get the delay (in clock ticks) since we started the sampling */
 
-      remaining = wqueue->delay - elapsed;
-      next      = MIN(next, remaining);
-      if (next > 0)
+      elapsed = clock_systimer() - stick;
+      if (elapsed < period && next > 0)
         {
+          /* How much time would we need to delay to get to the end of the
+           * sampling period?  The amount of time we delay should be the smaller
+           * of the time to the end of the sampling period and the time to the
+           * next work expiry.
+           */
+
+          remaining = period - elapsed;
+          next      = MIN(next, remaining);
+
           /* Wait awhile to check the work list.  We will wait here until
            * either the time elapses or until we are awakened by a signal.
            * Interrupts will be re-enabled while we wait.

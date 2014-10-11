@@ -180,13 +180,15 @@ int work_lpstart(void);
  *
  * Input parameters:
  *   wqueue - Describes the work queue to be processed
+ *   period - The polling period in clock ticks
+ *   wndx   - The worker thread index
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
+void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx);
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __SCHED_WQUEUE_WQUEUE_H */

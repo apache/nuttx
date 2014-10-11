@@ -108,22 +108,27 @@ static int work_hpthread(int argc, char *argv[])
 
   for (;;)
     {
-      /* First, perform garbage collection.  This cleans-up memory de-allocations
-       * that were queued because they could not be freed in that execution
-       * context (for example, if the memory was freed from an interrupt handler).
+#ifndef CONFIG_SCHED_LPWORK
+      /* First, perform garbage collection.  This cleans-up memory
+       * de-allocations that were queued because they could not be freed in
+       * that execution context (for example, if the memory was freed from
+       * an interrupt handler).
+       *
        * NOTE: If the work thread is disabled, this clean-up is performed by
-       * the IDLE thread (at a very, very low priority).
+       * the IDLE thread (at a very, very low priority).  If the low-priority
+       * work thread is enabled, then the garbage collection is done on that
+       * thread instead.
        */
 
-#ifndef CONFIG_SCHED_LPWORK
       sched_garbagecollection();
 #endif
 
-      /* Then process queued work.  We need to keep interrupts disabled while
-       * we process items in the work list.
+      /* Then process queued work.  work_process will not return until: (1)
+       * there is no further work in the work queue, and (2) the polling
+       * period provided by g_hpwork.delay expires.
        */
 
-      work_process((FAR struct kwork_wqueue_s *)&g_hpwork, 0);
+      work_process((FAR struct kwork_wqueue_s *)&g_hpwork, g_hpwork.delay, 0);
     }
 
   return OK; /* To keep some compilers happy */
