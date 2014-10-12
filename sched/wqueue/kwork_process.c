@@ -239,7 +239,10 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
 
        sigemptyset(&set);
        sigaddset(&set, SIGWORK);
+
+       wqueue->worker[wndx].busy = false;
        DEBUGVERIFY(sigwaitinfo(&set, NULL));
+       wqueue->worker[wndx].busy = true;
      }
    else
 #endif
