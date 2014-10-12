@@ -846,7 +846,7 @@ config SCHED_HPWORK
 
 if SCHED_HPWORK
 
-config SCHED_WORKPRIORITY
+config SCHED_HPWORKPRIORITY
 	int "High priority worker thread priority"
 	default 224
 	---help---
@@ -865,7 +865,7 @@ config SCHED_WORKPRIORITY
 		priority worker thread can then be adjusted to match the highest
 		priority client.
 
-config SCHED_WORKPERIOD
+config SCHED_HPWORKPERIOD
 	int "High priority worker thread period"
 	default 100000 if SCHED_LPWORK
 	default 50000 if !SCHED_LPWORK
@@ -876,7 +876,7 @@ config SCHED_WORKPERIOD
 		lower priority worker thread is performing garbage collection, the
 		default is 100*1000.
 
-config SCHED_WORKSTACKSIZE
+config SCHED_HPWORKSTACKSIZE
 	int "High priority worker thread stack size"
 	default 2048
 	---help---
