@@ -154,8 +154,6 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
   work = (FAR struct work_s *)wqueue->q.head;
   while (work)
     {
-      DEBUGASSERT(wqueue->wq_sem.count > 0);
-
       /* Is this work ready?  It is ready if there is no delay or if
        * the delay has elapsed. qtime is the time that the work was added
        * to the work queue.  It will always be greater than or equal to
@@ -210,7 +208,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
                   return;
                 }
 
-              work  = (FAR struct work_s *)wqueue->q.head;
+              work = (FAR struct work_s *)wqueue->q.head;
             }
           else
             {
@@ -248,8 +246,8 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
   /* Get the delay (in clock ticks) since we started the sampling */
 
-  elapsed = clock_systimer() - work->qtime;
-  if (elapsed <= wqueue->delay)
+  elapsed = clock_systimer() - stick;
+  if (elapsed < wqueue->delay && next > 0)
     {
       /* How must time would we need to delay to get to the end of the 
        * sampling period?  The amount of time we delay should be the smaller
@@ -259,15 +257,13 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
       remaining = wqueue->delay - elapsed;
       next      = MIN(next, remaining);
-      if (next > 0)
-        {
-          /* Wait awhile to check the work list.  We will wait here until
-           * either the time elapses or until we are awakened by a signal.
-           * Interrupts will be re-enabled while we wait.
-           */
 
-          usleep(next * USEC_PER_TICK);
-        }
+      /* Wait awhile to check the work list.  We will wait here until
+       * either the time elapses or until we are awakened by a signal.
+       * Interrupts will be re-enabled while we wait.
+       */
+
+      usleep(next * USEC_PER_TICK);
     }
 
   work_unlock();
