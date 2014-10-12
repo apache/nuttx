@@ -185,8 +185,8 @@
 
 /* Division operators */
 
-#  define b16divb16(a,b)   b32tob16(b16tob32(a)/(b32_t)(b))
-#  define ub16divub16(a,b) ub32toub16(ub16toub32(a)/(ub32_t)(b))
+#  define b16divb16(a,b)   (b16_t)(b16tob32(a)/(b32_t)(b))
+#  define ub16divub16(a,b) (ub16_t)(ub16toub32(a)/(ub32_t)(b))
 #endif
 
 /**************************************************************************
