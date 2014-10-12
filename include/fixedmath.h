@@ -99,7 +99,7 @@
 #define b32MIN          0x8000000000000000      /* Min value of b16_t */
 #define ub32MIN         0x0000000000000000      /* Min value of ub16_t */
 
-/* Conversions between b16 and b8 *****************************************/
+/* Conversions between b32, b16, and b8 ***********************************/
 
 #define b8tob16(b)      (((b16_t)(b)) << 8)
 #define ub8toub16(b)    (((ub16_t)(b)) << 8)
@@ -173,12 +173,20 @@
 #define b16idiv(i,j)    (((i)<<16)/j)           /* Division of integer, b16 result */
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#  define b16mulb16(a,b)   b32tob16((b32_t)(a)*(b32_t)(b)) /* Muliplication */
-#  define ub16mulub16(a,b) ub32toub16((ub32_t)(a)*(ub32_t)(b)
-#  define b16sqr(a)        b16mulb16(a,a)                  /* Square */
-#  define ub16sqr(a)       ub16mulub16(a,a)                /* Square */
-#  define b16divb16(a,b)   b16tob32(a)/(b32_t)(b)          /* Division */
-#  define ub16divub16(a,b) ub16toub32(a)/(ub32_t)(b)
+/* Multiplication operators */
+
+#  define b16mulb16(a,b)   b32tob16((b32_t)(a)*(b32_t)(b))
+#  define ub16mulub16(a,b) ub32toub16((ub32_t)(a)*(ub32_t)(b))
+
+/* Square operators */
+
+#  define b16sqr(a)        b16mulb16(a,a)
+#  define ub16sqr(a)       ub16mulub16(a,a)
+
+/* Division operators */
+
+#  define b16divb16(a,b)   b32tob16(b16tob32(a)/(b32_t)(b))
+#  define ub16divub16(a,b) ub32toub16(ub16toub32(a)/(ub32_t)(b))
 #endif
 
 /**************************************************************************
@@ -195,32 +203,44 @@ typedef uint64_t ub32_t;
 #endif
 
 /**************************************************************************
- * Global Functions
+ * Public Functions
  **************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 #ifndef CONFIG_HAVE_LONG_LONG
-EXTERN b16_t  b16mulb16(b16_t m1, b16_t m2);
-EXTERN ub16_t ub16mulub16(ub16_t m1, ub16_t m2);
-EXTERN b16_t  b16sqr(b16_t a);
-EXTERN ub16_t ub16sqr(ub16_t a);
-EXTERN b16_t  b16divb16(b16_t num, b16_t denom);
-EXTERN ub16_t ub16divub16(ub16_t num, ub16_t denom);
+/* Multiplication operators */
+
+b16_t  b16mulb16(b16_t m1, b16_t m2);
+ub16_t ub16mulub16(ub16_t m1, ub16_t m2);
+
+/* Square operators */
+
+b16_t  b16sqr(b16_t a);
+ub16_t ub16sqr(ub16_t a);
+
+/* Division operators */
+
+b16_t  b16divb16(b16_t num, b16_t denom);
+ub16_t ub16divub16(ub16_t num, ub16_t denom);
 #endif
 
-EXTERN b16_t b16sin(b16_t rad);
-EXTERN b16_t b16cos(b16_t rad);
-EXTERN b16_t b16atan2(b16_t y, b16_t x);
+/* Trigonometric Functions */
+
+b16_t  b16sin(b16_t rad);
+b16_t  b16cos(b16_t rad);
+b16_t  b16atan2(b16_t y, b16_t x);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __INCLUDE_FIXEDMATH_H */
