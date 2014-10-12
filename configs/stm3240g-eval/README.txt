@@ -1067,6 +1067,14 @@ Where <subdir> is one of the following:
        you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
+       STATUS:
+       2014-10-11:  This worked at one time, but today I am getting a
+         failure inside of the GCC library.  This occurred with the
+         computations at the end of touchscreen calibration. The
+         NuttX code seems to be working correctly, but there is some
+         problem with how the GCC integer math is hooked in???  I did
+         not dig into this very deeply.
+
   nettest:
   -------
 
