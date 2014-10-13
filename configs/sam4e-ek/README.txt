@@ -16,6 +16,7 @@ Contents
   - NXFLAT Toolchain
   - Atmel Studio 6.1
   - Loading Code with J-Link
+  - Loading Code OpenOCD
   - Writing to FLASH using SAM-BA
   - LEDs
   - Serial Console
@@ -251,8 +252,8 @@ Atmel Studio 6.1
     STATUS: At this point, Atmel Studio 6.1 claims that my object files are
     not readable.  A little more needs to be done to wring out this procedure.
 
-Loading Code into SRAM with J-Link
-==================================
+Loading Code with J-Link
+========================
 
   Loading code with the Segger tools and GDB
   ------------------------------------------
@@ -281,6 +282,44 @@ Loading Code into SRAM with J-Link
   of the FLASH memory remain unchanged.  This may be because of issues with
   GPNVM1 settings and flash lock bits?  In any event, the GDB server works
   great for debugging after writing the program to FLASH using SAM-BA.
+
+Loading Code OpenOCD
+====================
+
+  OpenOCD scripts are available in the configs/sam4e-ek/tools directory.
+  These scripts were used with OpenOCD 0.8.0.  If you use a version after
+  OpenOCD 0.8.0, then you should comment out the following lines in the
+  openocd.cfg file:
+
+    # set CHIPNAME SAM4E16E
+    # source [find target/at91sam4sXX.cfg]
+
+  And uncomment this line:
+
+    source [find board/atmel_sam4e_ek.cfg]
+
+  This have been reported to work under Linux, but I have not been
+  successful using it under Windows OpenOCD 0.8.0 iwht libUSB.  I get
+
+    Open On-Chip Debugger 0.8.0 (2014-04-28-08:42)
+    ...
+    Error: libusb_open() failed with LIBUSB_ERROR_NOT_SUPPORTED
+    Error: Cannot find jlink Interface! Please check connection and permissions.
+    ...
+
+  This is telling me that the Segger J-Link USB driver is incompatible
+  with libUSB.  It may be necessary to replace the Segger J-Link driver
+  with the driver from libusb-win32-device-bin on sourceforge. 
+  
+    - Go into Control Panel/System/Device Manager and update the J-Link
+      driver to point at the new jlink.inf file made with the
+      libusb-win32/bin inf-wizard.   Browse to the unsigned driver
+      pointed to by the inf, libusb0.dll from the libusb-win32-device-bin
+      distribution to complete the installation.
+
+    - The Segger driver appeared under "Universal Serial Bus Controllers"
+      in Device Manager (winXP) while the libusb-win32 driver appears as
+      new top level Dev Mgr category "LibUSB-Win32 Devices".
 
 Writing to FLASH using SAM-BA
 =============================
