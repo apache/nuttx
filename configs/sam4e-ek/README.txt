@@ -299,7 +299,7 @@ Loading Code OpenOCD
     source [find board/atmel_sam4e_ek.cfg]
 
   This have been reported to work under Linux, but I have not been
-  successful using it under Windows OpenOCD 0.8.0 iwht libUSB.  I get
+  successful using it under Windows OpenOCD 0.8.0 with libUSB.  I get
 
     Open On-Chip Debugger 0.8.0 (2014-04-28-08:42)
     ...
@@ -313,7 +313,7 @@ Loading Code OpenOCD
   
     - Go into Control Panel/System/Device Manager and update the J-Link
       driver to point at the new jlink.inf file made with the
-      libusb-win32/bin inf-wizard.   Browse to the unsigned driver
+      libusb-win32/bin inf-wizard.  Browse to the unsigned driver
       pointed to by the inf, libusb0.dll from the libusb-win32-device-bin
       distribution to complete the installation.
 
