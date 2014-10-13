@@ -263,9 +263,13 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
   elf_elfsize(loadinfo);
 
-  /* Determine the heapsize to allocate */
+  /* Determine the heapsize to allocate.  heapsize is ignored if there is
+   * no address environment.
+   */
 
-#ifdef CONFIG_ARCH_STACK_DYNAMIC
+#if !defined(CONFIG_ARCH_ADDRENV)
+  heapsize = 0;
+#elif defined(CONFIG_ARCH_STACK_DYNAMIC)
   heapsize = ARCH_HEAP_SIZE;
 #else
   heapsize = MIN(ARCH_HEAP_SIZE, CONFIG_ELF_STACKSIZE);
