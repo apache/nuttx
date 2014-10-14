@@ -252,9 +252,10 @@
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 
-   /* The STM32 F2 and the STM32 F401 have no CCM SRAM */
+   /* The STM32 F2 and the STM32 F401/F411 have no CCM SRAM */
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F401)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F401) || \
+      defined(CONFIG_STM32_STM32F411)
 #    undef CONFIG_STM32_CCMEXCLUDE
 #    define CONFIG_STM32_CCMEXCLUDE 1
 #  endif
