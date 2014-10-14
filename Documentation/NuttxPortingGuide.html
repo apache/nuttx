@@ -3098,6 +3098,7 @@ VxWorks provides the following comparable interface:
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
+#include &lt;nuttx/wqueue.h&gt;
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, uint32_t delay);
 </pre></ul>
@@ -3156,6 +3157,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 <h5><a name="workcancel">4.4.2.3.2 <code>work_cancel()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
+#include &lt;nuttx/wqueue.h&gt;
 int work_cancel(int qid, FAR struct work_s *work);
   <ul><pre>
 </pre></ul>
@@ -3197,6 +3199,7 @@ int work_cancel(int qid, FAR struct work_s *work);
 <h5><a name="worksignal">4.4.2.3.3 <code>work_signal()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
+#include &lt;nuttx/wqueue.h&gt;
 int work_signal(int qid);
   <ul><pre>
 </pre></ul>
@@ -3228,6 +3231,7 @@ int work_signal(int qid);
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
+#include &lt;nuttx/wqueue.h&gt;
 bool work_available(FAR struct work_s *work);
 </pre></ul>
 </p>
@@ -3258,6 +3262,8 @@ bool work_available(FAR struct work_s *work);
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
+#include &lt;nuttx/config.h&gt;
+#include &lt;nuttx/wqueue.h&gt;
 #if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
 int work_usrstart(void);
 #endif
@@ -3283,6 +3289,8 @@ int work_usrstart(void);
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
+#include &lt;nuttx/config.h&gt;
+#include &lt;nuttx/wqueue.h&gt;
 #if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
 void lpwork_boostpriority(uint8_t reqprio);
 #endif
@@ -3311,6 +3319,8 @@ void lpwork_boostpriority(uint8_t reqprio);
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
+#include &lt;nuttx/config.h&gt;
+#include &lt;nuttx/wqueue.h&gt;
 #if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
 void lpwork_restorepriority(uint8_t reqprio);
 #endif
@@ -3395,7 +3405,7 @@ void lpwork_restorepriority(uint8_t reqprio);
     <p>
       <b>Tasking Support</b>.
       Other interfaces must be provided to support higher-level interfaces used by the NuttX tasking logic.
-      These interfaces are* used by the functions in <code>sched/</code> and all operate on the task group which as been assigned an address environment by <code>up_addrenv_clone()</code>.
+      These interfaces are used by the functions in <code>sched/</code> and all operate on the task group which as been assigned an address environment by <code>up_addrenv_clone()</code>.
     </p>
     <ul>
       <li>
@@ -3413,7 +3423,7 @@ void lpwork_restorepriority(uint8_t reqprio);
     <p>
       <b>Dynamic Stack Support</b>.
       <code>CONFIG_ARCH_STACK_DYNAMIC=y</code> indicates that the user process stack resides in its own address space.
-      This options is also <i>required</i> if <code> CONFIG_BUILD_KERNEL</code> and <code>CONFIG_LIBC_EXECFUNCS</code> are selected.
+      This option is also <i>required</i> if <code> CONFIG_BUILD_KERNEL</code> and <code>CONFIG_LIBC_EXECFUNCS</code> are selected.
       Why?
       Because the caller's stack must be preserved in its own address space when we instantiate the environment of the new process in order to initialize it.
     </p>
