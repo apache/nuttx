@@ -8841,3 +8841,10 @@
 	  that will be in advance (2014-10-10).
 	* fs/aio/ and include/aio.h:  Add support for socket-based transfers
 	  (2014-10-11).
+	* arch/arm/include/stm32/chip.h, /src/stm32/Kconfig, and
+	  stm32_allocateheap.c: Support for the STM32 F411RE from Serg Podtynnyi
+	  (2014-10-14).
+	* configs/Kconfig, README.txt, and nucleo-f401re:  Extend this board
+	  configuration to also support the Nucleo-F411RE.  From Serg Podtynnyi
+	  (2014-10-14).
+
