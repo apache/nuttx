@@ -264,7 +264,10 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   elf_elfsize(loadinfo);
 
   /* Determine the heapsize to allocate.  heapsize is ignored if there is
-   * no address environment.
+   * no address environment because the heap is a shared resource in that
+   * case.  If there is no dynamic stack then heapsize must at least as big
+   * as the fixed stack size since the stack will be allocated from the heap
+   * in that case.
    */
 
 #if !defined(CONFIG_ARCH_ADDRENV)

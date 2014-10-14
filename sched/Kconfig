@@ -855,7 +855,7 @@ config SCHED_HPWORKPRIORITY
 		The higher priority worker thread is intended to serve as the
 		"bottom" half for device drivers.  As a consequence it must run at
 		a very high, fixed priority.  Typically, it should be the highest
-		priority thread in your system.  Default: 192
+		priority thread in your system.  Default: 224
 
 		For lower priority, application oriented worker thread support,
 		please consider enabling the lower priority work queue.  The lower
@@ -903,14 +903,14 @@ config SCHED_LPNTHREADS
 	default 4 if FS_AIO
 	---help---
 		This options selects multiple, low-priority threads.  This is
-		essentially a "thread pool" that provides multi-threaded service
-		of the low-priority work thread.  This breaks the serialization
+		essentially a "thread pool" that provides multi-threaded servicing
+		of the low-priority work queue.  This breaks the serialization
 		of the "queue" (hence, it is no longer a queue at all).
 
 		This options is required to support, for example, I/O operations
 		that stall waiting for input.  If there is only a single thread,
 		then the entire low-priority queue processing stalls in such cases.
-		Such behvior must be support for asynchronous I/O, AIO (for example).
+		Such behavior is necessary to support asynchronous I/O, AIO (for example).
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
@@ -959,7 +959,7 @@ config SCHED_LPWORKPRIOMAX
 		it must run at a very high, fixed priority.  Typically, it should
 		be the highest priority thread in your system.
 
-		This function provides an upper limit on the priority of the lower
+		This value provides an upper limit on the priority of the lower
 		priority worker thread.  This would be necessary, for example, if
 		the higher priority worker thread were to defer work to the lower
 		priority thread.  Clearly, in such a case, you would want to limit

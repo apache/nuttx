@@ -108,7 +108,10 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
     }
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* Determine the heapsize to allocate */
+  /* Determine the heapsize to allocate. If there is no dynamic stack then
+   * heapsize must at least as big as the fixed stack size since the stack
+   * will be allocated from the heap in that case.
+   */
 
 #ifdef CONFIG_ARCH_STACK_DYNAMIC
   heapsize = ARCH_HEAP_SIZE;

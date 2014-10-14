@@ -409,7 +409,7 @@ config LIB_USRWORKPRIORITY
 	int "User mode priority worker thread priority"
 	default 100
 	---help---
-		The execution priority of the lopwer priority worker thread.  Default: 192
+		The execution priority of the user-mode priority worker thread.  Default: 100
 
 config LIB_USRWORKPERIOD
 	int "User mode worker thread period"
@@ -425,7 +425,7 @@ config LIB_USRWORKSTACKSIZE
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
 endif # LIB_USRWORK
-endif # BUILD_PROTECTED
+endif # BUILD_PROTECTED || BUILD_KERNEL
 
 config LIB_KBDCODEC
 	bool "Keyboard CODEC"

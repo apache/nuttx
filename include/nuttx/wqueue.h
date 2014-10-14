@@ -63,10 +63,6 @@
  *   (which runs at the lowest of priority and may not be appropriate
  *   if memory reclamation is of high priority).  If CONFIG_SCHED_HPWORK
  *   is enabled, then the following options can also be used:
- * CONFIG_SCHED_HPWORK - Build the high priority work queue. To preserve
- *   legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true in a flat
- *   build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel mode
- *   in order to build the high priority work queue.
  * CONFIG_SCHED_HPWORKPRIORITY - The execution priority of the high-
  *   priority worker thread.  Default: 224
  * CONFIG_SCHED_HPWORKPERIOD - How often the worker thread checks for
@@ -338,7 +334,7 @@ int work_usrstart(void);
  *
  * Description:
  *   Queue work to be performed at a later time.  All queued work will be
- *   performed on the worker thread of of execution (not the caller's).
+ *   performed on the worker thread of execution (not the caller's).
  *
  *   The work structure is allocated by caller, but completely managed by
  *   the work queue logic.  The caller should never modify the contents of
@@ -412,6 +408,7 @@ int work_signal(int qid);
  *   Check if the work structure is available.
  *
  * Input parameters:
+ *   work - The work queue structure to check.
  *   None
  *
  * Returned Value:
