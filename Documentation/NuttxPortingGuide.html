@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 14, 2014</p>
+      <p>Last Updated: October 14, 2014</p>
     </td>
   </tr>
 </table>
@@ -104,45 +104,69 @@
       <a href="#tickless">4.3.4 Tickless OS</a><br>
       <a href="#Watchdogs">4.3.5 Watchdog Timer Interfaces</a>
     </ul>
-    <a href="#addrenv">4.4 Address Environments</a>
+    <a href="#workqueues">4.4 Work Queues</a>
     <ul>
-      <a href="#up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></br>
-      <a href="#up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a></br>
-      <a href="#up_addrenv_vtext">4.4.3 <code>up_addrenv_vtext()</code></a></br>
-      <a href="#up_addrenv_vdata">4.4.4 <code>up_addrenv_vdata()</code></a></br>
-      <a href="#up_addrenv_heapsize">4.4.5 <code>up_addrenv_heapsize()</code></a></br>
-      <a href="#up_addrenv_select">4.4.6 <code>up_addrenv_select()</code></a></br>
-      <a href="#up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a></br>
-      <a href="#up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a></br>
-      <a href="#up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a></br>
-      <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a></br>
-      <a href="#up_addrenv_ustackalloc">4.4.11 <code>up_addrenv_ustackalloc()</code></a></br>
-      <a href="#up_addrenv_ustackfree">4.4.12 <code>up_addrenv_ustackfree()</code></a></br>
-      <a href="#up_addrenv_vustack">4.4.13 <code>up_addrenv_vustack()</code></a></br>
-      <a href="#up_addrenv_ustackselect">4.4.14 <code>up_addrenv_ustackselect()</code></a></br>
-      <a href="#up_addrenv_kstackalloc">4.4.15 <code>up_addrenv_kstackalloc()</code></a></br>
-      <a href="#up_addrenv_kstackfree">4.4.16 <code>up_addrenv_kstackfree()</code></a>
+      <a href="#wqclasses">4.4.1 Classes of Work Queues</a>
+      <ul>
+        <a href="#hpwork">4.4.1.1 High Priority Kernel Work queue</a><br>
+        <a href="#lpwork">4.4.1.2 Low Priority Kernel Work Queue</a><br>
+        <a href="#usrwork">4.4.1.3 User-Mode Work Queue</a>
+      </ul>
+      <a href="#cmnwqifs">4.4.2 Common Work Queue Interfaces</a>
+      <ul>
+        <a href="#wqids">4.4.2.1 Work Queue IDs</a><br>
+        <a href="#wqiftypes">4.4.2.2 Work Queue Interface Types</a><br>
+        <a href="#wqintfs">4.4.2.3 Work Queue Interfaces</a>
+        <ul>
+          <a href="#workqueue">4.4.2.3.1 <code>work_queue()</code></a><br>
+          <a href="#workcancel">4.4.2.3.2 <code>work_cancel()</code></a><br>
+          <a href="#worksignal">4.4.2.3.3 <code>work_signal()</code></a><br>
+          <a href="#workavailable">4.4.2.3.4 <code>work_available()</code></a><br>
+          <a href="#workusrstart">4.4.2.3.5 <code>work_usrstart()</code></a><br>
+          <a href="#lpworkboostpriority">4.4.2.3.6 <code>lpwork_boostpriority()</code></a><br>
+          <a href="#lpworkrestorepriority">4.4.2.3.7 <code>lpwork_restorepriority()</code></a>
+        </ul>
+      </ul>
     </ul>
-    <a href="#exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#addrenv">4.5 Address Environments</a>
     <ul>
-      <a href="#osstart">4.5.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.5.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.5.3 <code>sched_process_timer()</code></a><br>
-      <a href="#schedtimerexpiration">4.5.4 <code>sched_timer_expiration()</code></a></br>
-      <a href="#schedalarmexpiration">4.5.5 <code>sched_alarm_expiration()</code></a></br>
-      <a href="#irqdispatch">4.5.6 <code>irq_dispatch()</code></a>
+      <a href="#up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a></br>
+      <a href="#up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a></br>
+      <a href="#up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a></br>
+      <a href="#up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a></br>
+      <a href="#up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a></br>
+      <a href="#up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a></br>
+      <a href="#up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a></br>
+      <a href="#up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a></br>
+      <a href="#up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a></br>
+      <a href="#up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a></br>
+      <a href="#up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a></br>
+      <a href="#up_addrenv_ustackfree">4.5.12 <code>up_addrenv_ustackfree()</code></a></br>
+      <a href="#up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a></br>
+      <a href="#up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a></br>
+      <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a></br>
+      <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
-    <a href="#shm">4.6 Shared Memory</a>
+    <a href="#exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#upshmat">4.6.1 <code>up_shmat()</code></a><br>
-      <a href="#upshmdt">4.6.2 <code>up_shmdt()</code></a><br>
+      <a href="#osstart">4.6.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.6.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a><br>
+      <a href="#schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a></br>
+      <a href="#schedalarmexpiration">4.6.5 <code>sched_alarm_expiration()</code></a></br>
+      <a href="#irqdispatch">4.6.6 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#demandpaging">4.7 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.8 LED Support</a>
+    <a href="#shm">4.7 Shared Memory</a>
     <ul>
-      <a href="#ledheaders">4.8.1 Header Files</a><br>
-      <a href="#leddefinitions">4.8.2 LED Definitions</a><br>
-      <a href="#ledapis">4.8.3 Common LED interfaces</a>
+      <a href="#upshmat">4.7.1 <code>up_shmat()</code></a><br>
+      <a href="#upshmdt">4.7.2 <code>up_shmdt()</code></a><br>
+    </ul>
+    <a href="#demandpaging">4.8 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.9 LED Support</a>
+    <ul>
+      <a href="#ledheaders">4.9.1 Header Files</a><br>
+      <a href="#leddefinitions">4.9.2 LED Definitions</a><br>
+      <a href="#ledapis">4.9.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -2900,7 +2924,418 @@ VxWorks provides the following comparable interface:
   means either that wdog is not valid or that the wdog has already expired.
 </p>
 
-<h2><a name="addrenv">4.4 Address Environments</a></h2>
+<h2><a name="workqueues">4.4 Work Queues</a></h2>
+<p><b>Work Queues</b>.
+  NuttX provides <i>work queues</i>.  Work queues are threads the service a queue of work items to be performed.  There are useful for off-loading work to a different threading context, for delayed processing, or for serializing activities.
+</p>
+
+<h3><a name="wqclasses">4.4.1 Classes of Work Queues</a></h3>
+
+<p><b>Classes of Work Queues</b>.
+  There are three different classes of work queues, each with different properties and intended usage.  These class of work queues along with the the common work queue interface are described in the following paragraphs.
+</p>
+
+<h4><a name="hpwork">4.4.1.1 High Priority Kernel Work queue</a></h4>
+
+<p><b>High Priority Kernel Work queue</b>.
+  The dedicated high-priority work queue is intended to handle delayed processing from interrupt handlers.  This work queue is required for some drivers but, if there are no complaints, can be safely disabled.  The high priority worker thread also performs garbage collection -- completing any delayed memory deallocations from interrupt handlers.  If the high-priority worker thread is disabled, then that clean up will be performed either by (1) the low-priority worker thread, if enabled, and if not (2) the IDLE thread instead (which runs at the lowest of priority and may not be appropriate if memory reclamation is of high priority)
+</p>
+<p><b>Device Driver Bottom Half</b>.
+  The higher priority worker thread is intended to serve as the <i>bottom half</i> for device drivers.  As a consequence it must run at a very high, fixed priority rivalling the priority of the interrupt handler itself.  Typically, the high priority work queue should be the highest priority thread in your system (the default priority is 224).
+</p>
+<p><b>Compared to the Low Priority Kernel Work Queue</b>.
+  For less critical, lower priority, application oriented worker thread support, consider enabling the lower priority work queue.  The lower priority work queue runs at a lower priority, of course, but has the added advantage that it supports <i>priority inheritance</i> (if <config> CONFIG_PRIORITY_INHERITANCE</code> is also selected):  The priority of the lower priority worker thread can then be adjusted to match the highest priority client.
+</p>
+<p>
+  <b>Configuration Options</b>.
+</p>
+<ul>
+  <li><code>CONFIG_SCHED_HPWORK</code>.
+    Enables the hight prioirity work queue.
+  </li>
+  <li><code>CONFIG_SCHED_HPWORKPRIORITY</code>.
+    The execution priority of the high-priority worker thread.  Default: 224
+  </li>
+  <li><code>CONFIG_SCHED_HPWORKPERIOD</code>.
+    How often the worker thread re-checks for work in units of microseconds.  This work period is really only necessary if the the high priority thread is performing periodic garbage collection.  The worker thread will be awakened immediately with it is queued work to be done.  If the high priority worker thread is performing garbage collection, then the default is 50*1000 (50 MS).  Otherwise, if the lower priority worker thread is performing garbage collection, the default is 100*1000.
+  <li><code>CONFIG_SCHED_HPWORKSTACKSIZE</code>.
+    The stack size allocated for the worker thread in bytes.  Default: 2048.
+  </li>
+</ul>
+<p>
+  <b>Common Configuration Options</b>.
+  These options apply to all work queues:
+</p>
+<ul>
+  <li><code>CONFIG_SIG_SIGWORK</code>
+    The signal number that will be used to wake-up the worker thread.  This same signal is used with the   Default: 17
+  </li>
+</ul>
+
+<h4><a name="lpwork">4.4.1.2 Low Priority Kernel Work Queue</a></h4>
+<p>
+  <b>Low Priority Kernel Work Queue</b>.
+  This lower priority work queue is better suited for more extended, application oriented processing such as file system clean-up, memory garbage collection and asynchronous I/O operations.
+</p>
+<p>
+  <b>Compared to the High Priority Work Queue</b>.
+  The lower priority work queue runs at a lower priority than the high priority work queue, of course, and so is inapproperiate to serve as a driver <i>bottom half</i>.  The lower priority work queue has the other advantages, however, that make it better suited for some tasks:
+</p>
+<ul>
+  <li>
+    <p><b>Priority Inheritance</b>.
+      The lower priority worker thread(s) support <i>priority inheritance</i> (if <config> CONFIG_PRIORITY_INHERITANCE</code> is also selected):  The priority of the lower priority worker thread can then be adjusted to match the highest priority client.
+    </p>
+    <blockquote>
+      <b>NOTE:</b> This priority inheritance feature is not automatic.  The lower priority worker thread will always a fixed priority unless additional logic implements that calls <code>lpwork_boostpriority()</code> to raise the priority of the lower priority worker thread (typically called before scheduling the work) and then calls the matching <code>lpwork_restorepriority()</code> when the work is completed (typically called within the work handler at the completion of the work). Currently, only the NuttX asynchronous I/O logic uses this dynamic prioritization feature.
+    </blockquote>
+    <p>
+      The higher priority worker thread, on the other hand, is intended to serve as the <i>bottom half</i> for device drivers.  As a consequence must run at a very high, fixed priority.  Typically, it should be the highest priority thread in your system.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Thread Pool</b>.
+      The low-priority work queue can be configured to support multiple, low-priority threads.  This is essentially a <i>thread pool</i> that provides multi-threaded servicing of the low-priority work thread.  This breaks the strict serialization of the &quot;queue&quot; (and hence, the low-priority work queue is no longer a queue at all).
+    </p>
+    <p>
+      Multiple worker threads are required to support, for example, I/O operations that stall waiting for input.  If there is only a single thread, then the entire low-priority queue processing would stall in such cases. Such behavior is necessary to support asynchronous I/O, AIO, for example.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Configuration Options</b>.
+</p>
+<ul>
+  <li><code>CONFIG_SCHED_LPWORK</code>.
+    If CONFIG_SCHED_LPWORK is selected then a lower-priority work queue will be enabled.
+  </li>
+  <li><code>CONFIG_SCHED_LPNTHREADS</code>.
+    The number of thread in the low-priority queue's thread pool.  Default: 1
+  </li>
+  <li><code>CONFIG_SCHED_LPWORKPRIORITY</code>.
+    The minimum execution priority of the lower priority worker thread.  The priority of the all worker threads start at this priority.  If priority inheritance is in effect, the priority may be boosted from this level.  Default: 50.
+  </li>
+  <li><code>CONFIG_SCHED_LPWORKPRIOMAX</code>.
+    The maximum execution priority of the lower priority worker thread.  Lower priority worker threads will be started at <code>CONFIG_SCHED_LPWORKPRIORITY</code> but their priority may be boosted due to priority inheritance.  The boosted priority of the low priority worker thread will not, however, ever exceed<code>CONFIG_SCHED_LPWORKPRIOMAX</code>.  This limit would be necessary, for example, if the higher priority worker thread were to defer work to the lower priority thread.  Clearly, in such a case, you would want to limit the maximum priority of the lower priority work thread.  Default: 176.
+  </li>
+  <li><code>CONFIG_SCHED_LPWORKPERIOD</code>.
+    How often the lower priority worker thread checks for garbage collection in units of microseconds.  Default: 50*1000 (50 MS).
+  </li>
+  <li><code>CONFIG_SCHED_LPWORKSTACKSIZE</code>.
+    The stack size allocated for the lower priority worker thread.  Default: 2048.
+  </li>
+</ul>
+
+<h4><a name="usrwork">4.4.1.3 User-Mode Work Queue</a></h4>
+<p>
+  <b>Work Queue Accessibility</b>.
+  The high- and low-priority worker threads are kernel-mode threads.  In the normal, <i>flat</i> NuttX build, these work queues are are useful to application code and may be shared.  However, in the NuttX protected and kernel build modes, kernel mode code is isolated and cannot be accessed from user-mode code.
+</p>
+<p>
+  <b>User-Mode Work Queue</b>.
+  if either <code>CONFIG_BUILD_PROTECTED</code> or <code>CONFIG_BUILD_KERNEL</code> are selected, then the option to enable a special user-mode work queue is enable.  The interface to the user-mode work queue is identical to the interface to the kernel-mode work queues and the user-mode work queue is functionally equivalent to the high priority work queue.  It differs in that its implementation does not depend on internal, kernel-space facilities.
+</p>
+<p>
+  <b>Configuration Options</b>.
+</p>
+<ul>
+  <li><code>CONFIG_LIB_USRWORK</code>.
+    If CONFIG_LIB_USRWORK is also defined then the user-mode work queue will be enabled.
+  <li><code>CONFIG_LIB_USRWORKPRIORITY</code>.
+    The execution priority of the user-mode priority worker thread.  Default: 100
+  <li><code>CONFIG_LIB_USRWORKPERIOD</code>
+    How often the lower priority worker thread is awakened in units of microseconds.  Default: 100*1000 (100 MS).
+  <li><code>CONFIG_LIB_USRWORKSTACKSIZE</code>.
+    The stack size allocated for the lower priority worker thread.  Default: 2048.
+</ul>
+
+<h3><a name="cmnwqifs">4.4.2 Common Work Queue Interfaces</a></h3>
+<h4><a name="wqids">4.4.2.1 Work Queue IDs</a></h4>
+
+<p>
+  <b>Work queue IDs</b>.
+  All work queues use the identical interface functions (at least identical in terms of the function <i>signature</i>).  The first parameter passed to the work queue interface function identifies the work queue:
+</p>
+<p>
+  <b>Kernel-Mode Work Queue IDs:</b>
+<p>
+<ul>
+  <li>
+    <code>HPWORK</code>.
+    This ID of the high priority work queue that should only be used for hi-priority, time-critical, driver bottom-half functions.
+  </li>
+  <li>
+    <code>LPWORK</code>.
+    This is the ID of the low priority work queue that can be used for any purpose.  if <code>CONFIG_SCHED_LPWORK</code> is not defined, then there is only one kernel work queue and <code>LPWORK</code> is equal to <code>HPWORK</code>.
+  </li>
+</ul>
+<p>
+  <b>User-Mode Work Queue IDs:</b>
+<p>
+<ul>
+  <li>
+    <code>USRWORK</code>.
+    This is the ID of the user-mode work queue that can be used for any purpose by applications.  In a flat build, <code>LPWORK</code> is equal to <code>LPWORK</code> so that user applications will use the lower priority work queue (if there is one).
+  </li>
+</ul>
+
+<h4><a name="wqiftypes">4.4.2.2 Work Queue Interface Types</a></h4>
+
+<ul>
+  <li>
+    <code>typedef void (*worker_t)(FAR void *arg);</code>
+    Defines the type of the work callback.
+  </li>
+  <li>
+    <code>struct work_s</code>.
+    Defines one entry in the work queue.  This is a client-allocated structure.  Work queue clients should not reference any field in this structure since they are subjec to change.  The user only needs this structure in order to declare instances of the work structure.  Handling of all fields is performed by the work queue interfaces described below.
+  </li>
+</ul>
+
+<h4><a name="wqintfs">4.4.2.3 Work Queue Interfaces</a></h4>
+<h5><a name="workqueue">4.4.2.3.1 <code>work_queue()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+  <ul><pre>
+int work_queue(int qid, FAR struct work_s *work, worker_t worker,
+               FAR void *arg, uint32_t delay);
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+  Queue work to be performed at a later time.  All queued work will be performed on the worker thread of execution (not the caller's).
+</p>
+<p>
+  The work structure is allocated by caller, but completely managed by the work queue logic.  The caller should never modify the contents of the work queue structure; the caller should not call  <code>work_queue()</code> again until either (1) the previous work has been performed and removed from the queue, or (2) <code>work_cancel()</code> has been called to cancel the work and remove it from the work queue.
+</p>
+<p>
+  <b>Input Parameters</b>:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>qid</code>:
+      The work queue ID.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>work</code>:
+      The work structure to queue
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>worker</code>:
+      The worker callback to be invoked.  The callback will invoked on the worker thread of execution.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>arg</code>:
+      The argument that will be passed to the worker callback function when it is invoked.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>delay</code>:
+      Delay (in system clock ticks) from the time queue until the worker is invoked. Zero means to perform the work immediately.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Returned Value</b>:
+</p>
+<ul>
+  <p>
+     Zero is returned on success; a negated <code>errno</code> is returned on failure.
+  </p>
+</ul>
+
+<h5><a name="workcancel">4.4.2.3.2 <code>work_cancel()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+int work_cancel(int qid, FAR struct work_s *work);
+  <ul><pre>
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+  Cancel previously queued work.  This removes work from the work queue.  After work has been cancelled, it may be re-queue by calling <code>work_queue()</code> again.
+</p>
+<p>
+  <b>Input Parameters</b>:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>qid</code>:
+      The work queue ID.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>work</code>:
+      The previously queue work structure to cancel.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Returned Value</b>:
+</p>
+<ul>
+  <p>
+     Zero is returned on success; a negated <code>errno</code> is returned on failure.
+  </p>
+  <ul>
+    <li><code>ENOENT</code>: There is no such work queued.</li>
+    <li><code>EINVAL</code>: An invalid work queue was specified.</li>
+  </ul>
+</ul>
+
+<h5><a name="worksignal">4.4.2.3.3 <code>work_signal()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+int work_signal(int qid);
+  <ul><pre>
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+  Signal the worker thread to process the work queue now.  This function is used internally by the work logic but could also be used by the user to force an immediate re-assessment of pending work.
+</p>
+<p>
+  <b>Input Parameters</b>:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>qid</code>:
+      The work queue ID.
+    </p>
+</ul>
+<p>
+  <b>Returned Value</b>:
+</p>
+<ul>
+  <p>
+     Zero is returned on success; a negated <code>errno</code> is returned on failure.
+  </p>
+</ul>
+
+<h5><a name="workavailable">4.4.2.3.4 <code>work_available()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+  <ul><pre>
+bool work_available(FAR struct work_s *work);
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+</p>
+<p>
+  <b>Input Parameters</b>:
+  Check if the work structure is available.
+</p>
+<ul>
+  <li>
+    <p>
+      <code>work</code>:
+      The work queue structure to check.
+    </p>
+</ul>
+<p>
+  <b>Returned Value</b>:
+</p>
+<ul>
+  <p>
+  <code>true</code> if available; false if <code>busy</code> (i.e., there is still pending work).
+  </p>
+</ul>
+
+<h5><a name="workusrstart">4.4.2.3.5 <code>work_usrstart()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+  <ul><pre>
+#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+int work_usrstart(void);
+#endif
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+  The function is only available as a user interface in the kernel-mode build.  In the flat build, there is no user-mode work queue; in the protected mode, the user-mode work queue will automatically be started by the OS start-up code.  But in the kernel mode, each user process will be required to start is own, private instance of the user-mode work thread using this interface.
+</p>
+<p>
+  <b>Input Parameters</b>: None
+</p>
+<p>
+  <b>Returned Value</b>:
+</p>
+<ul>
+  <p>
+     The task ID of the worker thread is returned on success.  A negated <code>errno</code> value is returned on failure.
+  </p>
+</ul>
+
+<h5><a name="lpworkboostpriority">4.4.2.3.6 <code>lpwork_boostpriority()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+  <ul><pre>
+#if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
+void lpwork_boostpriority(uint8_t reqprio);
+#endif
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+  Called by the work queue client to assure that the priority of the low-priority worker thread is at least at the requested level, <code>reqprio</code>.  This function would normally be called just before calling <code>work_queue()</code>.
+</p>
+<p>
+  <b>Input Parameters</b>:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>reqprio</code>:
+      Requested minimum worker thread priority.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Returned Value</b>: None
+</p>
+
+<h5><a name="lpworkrestorepriority">4.4.2.3.7 <code>lpwork_restorepriority()</code></a></h5>
+<p>
+  <b>Function Prototype</b>:
+  <ul><pre>
+#if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
+void lpwork_restorepriority(uint8_t reqprio);
+#endif
+</pre></ul>
+</p>
+<p>
+  <b>Description</b>.
+  This function is called to restore the priority after it was previously boosted.  This is often done by client logic on the worker thread when the scheduled work completes.  It will check if we need to drop the priority of the worker thread.
+</p>
+<p>
+  <b>Input Parameters</b>:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>reqprio</code>:
+      Previously requested minimum worker thread priority to be &quot;unboosted&quot;.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Returned Value</b>: None
+</p>
+
+<h2><a name="addrenv">4.5 Address Environments</a></h2>
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
   The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ARCH_HAVE_ADDRENV=y</code>.
@@ -2923,35 +3358,35 @@ VxWorks provides the following comparable interface:
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a>:
+        <a href="#up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a>:
         Create an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a>:
+        <a href="#up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a>:
         Destroy an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vtext">4.4.3 <code>up_addrenv_vtext()</code></a>:
+        <a href="#up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a>:
         Returns the virtual base address of the <code>.text</code> address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vdata">4.4.4 <code>up_addrenv_vdata()</code></a>:
+        <a href="#up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a>:
         Returns the virtual base address of the <code>.bss</code>/<code>.data</code> address environment.
       </li>
       <li>
-        <a href="#up_addrenv_heapsize">4.4.5 <code>up_addrenv_heapsize()</code></a>:
+        <a href="#up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a>:
        Return the initial heap size.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.4.6 <code>up_addrenv_select()</code></a>:
+        <a href="#up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a>:
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a>:
+        <a href="#up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a>:
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a>:
+        <a href="#up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a>:
         Copy an address environment from one location to another.
       </li>
     </ul>
@@ -2964,12 +3399,12 @@ VxWorks provides the following comparable interface:
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a>:
+        <a href="#up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a>:
         Clone the group address environment assigned to a new thread.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a>:
+        <a href="#up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a>:
         Release the thread's reference to a group address environment when a task/thread exits.
       </li>
     </ul>
@@ -2992,19 +3427,19 @@ VxWorks provides the following comparable interface:
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_ustackalloc">4.4.11 <code>up_addrenv_ustackalloc()</code></a>:
+        <a href="#up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a>:
         Create a stack address environment
       </li>
       <li>
-        <a href="#up_addrenv_ustackfree">4.4.12 <code>up_addrenv_ustackfree()</code></a>:
+        <a href="#up_addrenv_ustackfree">4.5.12 <code>up_addrenv_ustackfree()</code></a>:
         Destroy a stack address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vustack">4.4.13 <code>up_addrenv_vustack()</code></a>:
+        <a href="#up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a>:
         Returns the virtual base address of the stack
       </li>
       <li>
-        <a href="#up_addrenv_ustackselect">4.4.14 <code>up_addrenv_ustackselect()</code></a>:
+        <a href="#up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a>:
         Instantiate a stack address environment
       </li>
     </ul>
@@ -3018,17 +3453,17 @@ VxWorks provides the following comparable interface:
     </p>
     <ul>   
       <li>
-        <a href="#up_addrenv_kstackalloc">4.4.15 <code>up_addrenv_kstackalloc()</code></a>:
+        <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a>:
         Allocate the process kernel stack.
       </li>
-        <a href="#up_addrenv_kstackfree">4.4.16 <code>up_addrenv_kstackfree()</code></a>:
+        <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>:
         Free the process kernel stack.
       </li>
     </ul>
   </li>
 </ol>
 
-<h3><a name="up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></h3>
+<h3><a name="up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a></h3>
 <p><b>Function Prototype</b>:</p>
 <ul>
   <code>int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize, FAR group_addrenv_t *addrenv);</code>
@@ -3050,7 +3485,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a></h3>
+<h3><a name="up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_destroy(group_addrenv_t *addrenv);</code>
@@ -3068,7 +3503,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vtext">4.4.3 <code>up_addrenv_vtext()</code></a></h3>
+<h3><a name="up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext);</code>
@@ -3088,7 +3523,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vdata">4.4.4 <code>up_addrenv_vdata()</code></a></h3>
+<h3><a name="up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vdata(FAR group_addrenv_t *addrenv, size_t textsize, FAR void **vdata);</code>
@@ -3109,7 +3544,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_heapsize">4.4.5 <code>up_addrenv_heapsize()</code></a></h3>
+<h3><a name="up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);</code>
@@ -3129,7 +3564,7 @@ VxWorks provides the following comparable interface:
   The initial heap size allocated is returned on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_select">4.4.6 <code>up_addrenv_select()</code></a></h3>
+<h3><a name="up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(group_addrenv_t *addrenv, save_addrenv_t *oldenv);</code>
@@ -3153,7 +3588,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a></h3>
+<h3><a name="up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(save_addrenv_t oldenv);</code>
@@ -3172,7 +3607,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a></h3>
+<h3><a name="up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_clone(FAR const task_group_s *src, FAR struct task_group_s *dest);</code>
@@ -3191,7 +3626,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a></h3>
+<h3><a name="up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);</code>
@@ -3217,7 +3652,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a></h3>
+<h3><a name="up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_detach(FAR struct task_group_s *group, FAR struct task_group_s *tcb);</code>
@@ -3236,7 +3671,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_ustackalloc">4.4.11 <code>up_addrenv_ustackalloc()</code></a></h3>
+<h3><a name="up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize);</code>
@@ -3258,7 +3693,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_up_addrenv_ustackfreeattach">4.4.12 <code>up_addrenv_ustackfree()</code></a></h3>
+<h3><a name="up_addrenv_up_addrenv_ustackfreeattach">4.5.12 <code>up_addrenv_ustackfree()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_ustackfree(FAR struct tcb_s *tcb);</code>
@@ -3279,7 +3714,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vustack">4.4.13 <code>up_addrenv_vustack()</code></a></h3>
+<h3><a name="up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);</code>
@@ -3300,7 +3735,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_ustackselect">4.4.14 <code>up_addrenv_ustackselect()</code></a></h3>
+<h3><a name="up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);</code>
@@ -3322,7 +3757,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_kstackalloc">4.4.15 <code>up_addrenv_kstackalloc()</code></a></h3>
+<h3><a name="up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_kstackalloc(FAR struct tcb_s *tcb);</code>
@@ -3344,7 +3779,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_kstackfree">4.4.16 <code>up_addrenv_kstackfree()</code></a></h3>
+<h3><a name="up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_kstackfree(FAR struct tcb_s *tcb);</code>
@@ -3366,23 +3801,23 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h2><a name="exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<h2><a name="exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
 <p>
   These are standard interfaces that are exported by the OS
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.5.1 <code>os_start()</code></a></h3>
+<h3><a name="osstart">4.6.1 <code>os_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="listmgmt">4.5.2 OS List Management APIs</a></h3></h3>
+<h3><a name="listmgmt">4.6.2 OS List Management APIs</a></h3></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="schedprocesstimer">4.5.3 <code>sched_process_timer()</code></a></h3>
+<h3><a name="schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void sched_process_timer(void);</code></p>
 
 <p><b>Description</b>.
@@ -3393,7 +3828,7 @@ VxWorks provides the following comparable interface:
   <code>MSEC_PER_TICK</code>.
 </p>
 
-<h3><a name="schedtimerexpiration">4.5.4 <code>sched_timer_expiration()</code></a></h3>
+<h3><a name="schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3416,7 +3851,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.5.5 <code>sched_alaram_expiration()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.6.5 <code>sched_alaram_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3439,7 +3874,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="irqdispatch">4.5.6 <code>irq_dispatch()</code></a></h3>
+<h3><a name="irqdispatch">4.6.6 <code>irq_dispatch()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
@@ -3448,7 +3883,7 @@ void sched_timer_expiration(void);
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="shm">4.6 Shared Memory</a></h2>
+<h2><a name="shm">4.7 Shared Memory</a></h2>
 <p>
   Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
   These interfaces support user memory regions that can be shared between multiple user processes.
@@ -3457,7 +3892,7 @@ void sched_timer_expiration(void);
   Those interfaces are described below:
 </p>
 
-<h3><a name="upshmat">4.6.1 <code>up_shmat()</code></a></h3>
+<h3><a name="upshmat">4.7.1 <code>up_shmat()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3486,7 +3921,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h3><a name="upshmdt">4.6.2 <code>up_shmdt()</code></a></h3>
+<h3><a name="upshmdt">4.7.2 <code>up_shmdt()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3512,7 +3947,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h2><a name="demandpaging">4.7 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.8 On-Demand Paging</a></h2>
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
   If the platform meets certain requirements, then NuttX can provide on-demand paging:
@@ -3521,7 +3956,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.8 LED Support</a></h2>
+<h2><a name="ledsupport">4.9 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -3531,7 +3966,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.8.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.9.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -3555,7 +3990,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.8.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.9.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -3619,7 +4054,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </li>
 </ul>
 
-<h3><a name="ledapis">4.8.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.9.3 Common LED interfaces</a></h3>
 
 <p>
   The <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code> probably has definitions
