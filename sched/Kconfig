@@ -826,7 +826,7 @@ config SCHED_WORKQUEUE
 
 config SCHED_HPWORK
 	bool "High priority (kernel) worker thread"
-	default y
+	default n
 	depends on !DISABLE_SIGNALS
 	select SCHED_WORKQUEUE
 	---help---
