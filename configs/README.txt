@@ -331,7 +331,10 @@ configs/ntosd-dm320
   NuttX 0.2.1 release.
 
 configs/nucleo-f401re
-  STMicro ST Nucleo F401RE http://mbed.org/platforms/ST-Nucleo-F401RE
+  STMicro ST Nucleo F401RE and F411RE boards.  See
+  http://mbed.org/platforms/ST-Nucleo-F401RE and
+  http://developer.mbed.org/platforms/ST-Nucleo-F411RE for more
+  information about these boards.
 
 configs/nucleus2g
   This port uses the Nucleus 2G board (with Babel CAN board).  This board
