@@ -1,14 +1,28 @@
 README
 ======
 
-This README discusses issues unique to NuttX configurations for the ST NucleoF401RE board
-from ST Micro (http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797)
+This README discusses issues unique to NuttX configurations for the ST
+NucleoF401RE and NucleoF411RE boards from ST Micro.  See
 
+  http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797
+  http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1877/PF260049
+
+These two boards are very similar, differing only in the STM32 chip
+mounted on board.
+
+NucleoF401RE:
 
   Microprocessor: 32-bit ARM Cortex M4 at 84MHz STM32F104RE
   Memory:         512 KB Flash and 96 KB SRAM
+
+NucleoF411RE:
+
+  Microprocessor: 32-bit ARM Cortex M4 at 100MHz STM32F411RE
+  Memory:         512 KB Flash and 128 KB SRAM
+
+Other board features are identical:
+
   I/O Pins Out:   37, 17 On the Connector
-  Network:        TI CC3000 Wifi Module
   ADCs:           1 (at 12-bit resolution)
   Peripherals:    10 timers, 2 I2Cs, 2 SPI ports, 3 USARTs, 1 led
   Other:          Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
@@ -16,9 +30,6 @@ from ST Micro (http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF25
 
   Uses a STM32F103 to provide a ST-Link for programming, debug similar to the OpenOcd
   FTDI function - USB to JTAG front-end.
-
-  Wireless WIFI + SD Card SDIO via a "CC3000 WiFi Arduino Shield" added card
-  RS232 console support via a "RS232 Arduino Shield" added card
 
 Contents
 ========
@@ -196,9 +207,11 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     $ (cd tools; ./configure.sh nucleo-f401re/nsh)
+     $ (cd tools; ./configure.sh nucleo-f401re/f401-nsh)
      $ make qconfig
      $ V=1 make context all 2>&1 | tee mout
+
+     use the f411-nsh configuration if you have the Nucleo-F411RE board.
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -269,12 +282,12 @@ mbed
 
   Using the mbed loader:
 
-  1. Connect the Nucleo-F401RE to the host PC using the USB connector.
+  1. Connect the Nucleo-F4x1RE to the host PC using the USB connector.
   2. A new file system will appear called NUCLEO; open it with Windows
      Explorer (assuming that you are using Windows).
   3. Drag and drop nuttx.bin into the MBED window.  This will load the
-     nuttx.bin binary into the Nucleo-F401RE.  The NUCLEO window will
-     close then re-open and the Nucleo-F401RE will be running the new code.
+     nuttx.bin binary into the Nucleo-F4x1RE.  The NUCLEO window will
+     close then re-open and the Nucleo-F4x1RE will be running the new code.
 
 Hardware
 ========
@@ -302,9 +315,9 @@ Hardware
 
   LEDs
   ----
-  The Nucleo F401RE and a single user LED, LD2.  LD2 is the green LED
-  connected to Arduino signal D13 corresponding to MCU I/O PA5 (pin 21) or
-  PB13 (pin 34) depending on the STM32target.
+  The Nucleo F401RE and Nucleo F401RE provide a single user LED, LD2.  LD2
+  is the green LED connected to Arduino signal D13 corresponding to MCU I/O
+  PA5 (pin 21) or PB13 (pin 34) depending on the STM32target.
 
     - When the I/O is HIGH value, the LED is on.
     - When the I/O is LOW, the LED is off.
@@ -455,31 +468,25 @@ Serial Consoles
 Shields
 =======
 
-  1. RS-232 from Cutedigi.com.  Supports a single RS-232 connected via
+  RS-232 from Cutedigi.com.  Supports a single RS-232 connected via
 
-       Nucleo CN9  STM32F401RE  Cutedigi
-       ----------- ------------ --------
-       Pin 1  PA3  USART2_RX    RXD
-       Pin 2  PA2  USART2_TX    TXD
+    Nucleo CN9  STM32F401RE  Cutedigi
+    ----------- ------------ --------
+    Pin 1  PA3  USART2_RX    RXD
+    Pin 2  PA2  USART2_TX    TXD
 
-     Support for this shield is enabled by selecting USART2 and configuring
-     SB13, 14, 62, and 63 as described above under "Serial Consoles"
-
-  2. CC3000 Wireless shield
-
-     Support this shield is enabled by configuring the CC3000 networking:
-
-       CONFIG_WL_CC3000
+  Support for this shield is enabled by selecting USART2 and configuring
+  SB13, 14, 62, and 63 as described above under "Serial Consoles"
 
 Configurations
 ==============
 
-  nsh:
-  ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART2.  Support for
-    builtin applications is enabled, but in the base configuration no
-    builtin applications are selected (see NOTES below).
+  f401-nsh:
+  ---------
+    Configures the NuttShell (nsh) located at apps/examples/nsh for the
+    Nucleo-F401RE board.  The Configuration enables the serial interfaces
+    on UART2.  Support for builtin applications is enabled, but in the base
+    configuration no builtin applications are selected (see NOTES below).
 
     NOTES:
 
@@ -499,7 +506,7 @@ Configurations
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery for Linux
 
     3. Although the default console is USART2 (which would correspond to
-       the Virtual COM port) I have done all testing with the console 
+       the Virtual COM port) I have done all testing with the console
        device configured for USART1 (see instruction above under "Serial
        Consoles).  I have been using a TTL-to-RS-232 converted connected
        as shown below:
@@ -511,57 +518,7 @@ Configurations
        Pin 20 GND
        Pin 8  U5V
 
-  cc3000:
-  ------
-    This configuration adds support for the CC3000 Shield.
-
-    Build it with
-
-      make distclean;(cd tools;./configure.sh nucleo-f401re/nsh)
-
-    then run make menuconfig if you wish to customize things.
-
-    or
-
-    $ make qconfig
-
-    You can use the scripts/cdc-acm.inf file to install the windows
-    composite device.
-
-    Network control is facilitated by running the c3b (cc3000basic) application.
-
-    Run c3b from the nsh prompt.
-
-      +-------------------------------------------+
-      |      Nuttx CC3000 Demo Program            |
-      +-------------------------------------------+
-
-        01 - Initialize the CC3000
-        02 - Show RX & TX buffer sizes, & free RAM
-        03 - Start Smart Config
-        04 - Manually connect to AP
-        05 - Manually add connection profile
-        06 - List access points
-        07 - Show CC3000 information
-        08 - Telnet
-
-       Type 01-07 to select above option:
-
-    Select 01. Then use 03 and the TI Smart config application running on an
-    IOS or Android device to configure join your network.
-
-    Use 07 to see the IP address of the device.
-
-    (On the next reboot running c3b 01 the CC3000 will automaticaly rejoin the
-    network after the 01 give it a few seconds and enter 07 or 08)
-
-    Use 08 to start Telnet. Then you can connect to the device using the
-    address listed in command 07.
-
-    qq will exit the c3b with the telnet deamon running (if started)
-
-    Slow.... You will be thinking 300 bps. This is because of packet sizes and
-    how the select thread runs in the telnet session. Telnet is not the best
-    showcase for the CC3000, but simply a proof of network connectivity.
-
-    http POST and GET should be more efficient.
+  f411-nsh
+  --------
+    This configuration is the same as the f401-nsh configuration, except
+    that it is configured to support the Nucleo-F411RE.

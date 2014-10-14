@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nucleo-f401re/nsh/Make.defs
+# configs/nucleo-f401re/f401-nsh/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,7 +37,13 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = ld.script
+ifeq ($(CONFIG_ARCH_CHIP_STM32F401RE),y)
+LDSCRIPT = f401re.ld
+else
+ifeq ($(CONFIG_ARCH_CHIP_STM32F411RE),y)
+LDSCRIPT = f411re.ld
+endif
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
