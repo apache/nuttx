@@ -399,7 +399,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Built-in, per-thread CPU load measurments.</li>
+      <li>Built-in, per-thread CPU load measurements.</li>
     </p>
 </tr>
 
@@ -616,7 +616,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Cryptiographic subsystem</li>
+      <li>Cryptographic subsystem</li>
     </p>
   </td>
 </tr>
@@ -1971,7 +1971,7 @@
     <p>
       <b>Development Environments:</b>
       1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS  with Windows native toolchain, or 4) Native Windows.
-      All testing has been perfomed with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin environment under Windows.
+      All testing has been performed with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin environment under Windows.
     </p>
   </td>
 </tr>
@@ -2482,7 +2482,7 @@ nsh>
             The basic STM32 port was released in NuttX version 0.4.12. The basic port includes boot-up
             logic, interrupt driven serial console, and system timer interrupts.
             The 0.4.13 release added support for SPI, serial FLASH, and USB device.;
-            The 4.14 release added support for buttons and SDIO-based MMC/SD and verifed DMA support.
+            The 4.14 release added support for buttons and SDIO-based MMC/SD and verified DMA support.
             Verified configurations are available for the NuttShell (NSH) example,
             the USB serial device class, and the USB mass storage device class example.
           </p>
@@ -2766,7 +2766,7 @@ nsh>
         The NSH configuration supports the Nucleus2G's microSD slot and additional configurations
         are available to exercise the USB serial and USB mass storage devices.
         However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
-        (Although they have since been verfiied on other platforms; this needs to be revisited on the Nucleus2G).
+        (Although they have since been verified on other platforms; this needs to be revisited on the Nucleus2G).
       </p>
       </li>
       <li>
@@ -2868,7 +2868,7 @@ nsh>
       Initial Open1788 support appeared in NuttX-6.26 with the first verified configurations in NuttX-6.27.
       In NuttX-6.27 there is a working basic port with OS verification, Nuttshell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) configurations, and a graphics test configuration.
       SDRAM and GPDMA are working.
-      The NSH configuration includes verfied support for a DMA-based SD card interface.
+      The NSH configuration includes verified support for a DMA-based SD card interface.
       The frame-buffer LCD driver is functional and uses the SDRAM for frame-buffer memory.
       A touchscreen interface has been developed but there appears to be a hardware issue with the WaveShare implementation of the XPT2046 touchscreen controller.
       Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/open1788/README.txt">README</a> file for further information.
@@ -2951,7 +2951,7 @@ nsh>
       <p>
         <b>STATUS:</b>
         The basic port for the STM32F3-Discover was first released in NuttX-6.26.
-        Many of the drivers previously released for the STM32 F1, Value Line, and F2 and F4 may be usable on this plaform as well.
+        Many of the drivers previously released for the STM32 F1, Value Line, and F2 and F4 may be usable on this platform as well.
         New drivers will be required for ADC and I2C which are very different on this platform.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f3discovery/README.txt">README</a> file for further information.
       </p>
@@ -3529,7 +3529,7 @@ Mem:         29232       5920      23312      23312
       </p>
       <p>
          An SPI driver and a USB device driver exist for the AT90USB as well
-         as a USB mass storage configureation.  However, this configuration is not
+         as a USB mass storage configuration.  However, this configuration is not
          fully debugged as of the NuttX-6.5 release.
          Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/teensy/README.txt">README</a> file for further information.
       </p>
@@ -4321,7 +4321,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
         dependencies are retained in files called <code>Make.deps</code> throughout the system.
         For compilers other than GCC, there is no support for making dependencies in this way.
         For Windows native GCC compilers, the generated dependencies are windows paths and not
-        directly usable in the Cygwin make.  By default, dependencies are surpressed for these
+        directly usable in the Cygwin make.  By default, dependencies are suppressed for these
         compilers as well.
       </li>
       <p><small>
@@ -4362,7 +4362,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
     </ol>
     <p>
       This capability first appeared in NuttX-6.24 and should still be considered a work in progress because: (1) it has not been verfied on all targets and tools, and (2) still lacks some of the creature-comforts of the more mature environments.
-      The windows native build logic initiatiated if <code>CONFIG_WINDOWS_NATIVE=y</code> is defined in the NuttX configuration file:
+      The windows native build logic initiated if <code>CONFIG_WINDOWS_NATIVE=y</code> is defined in the NuttX configuration file:
     </p>
     <p>
       At present, this build environment also requires:
@@ -4385,7 +4385,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
         <b>MinGW-GCC</b>.
         MinGW-GCC is used to compiler the C tools in the <code>nuttx/tools</code> directory that are neede by the build.
         MinGW-GCC can be downloaded from http://www.mingw.org/.
-        If you are using GNUWin32, then it is recommendedthe you not install the optional MSYS components as there may be conflicts.
+        If you are using GNUWin32, then it is recommended that you not install the optional MSYS components as there may be conflicts.
       </li>
   </td>
 </tr>
