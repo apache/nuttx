@@ -7,31 +7,60 @@ NucleoF401RE and NucleoF411RE boards from ST Micro.  See
   http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797
   http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1877/PF260049
 
-These two boards are very similar, differing only in the STM32 chip
-mounted on board.
+These two boards are very similar, both supporting STM32 "Dynamic Efficiency
+Line" parts but differing in the specific STM32 chip mounted on board.  The
+chips themselves are also very similar with the STM32F411RE having some
+additional capability:
 
 NucleoF401RE:
 
   Microprocessor: 32-bit ARM Cortex M4 at 84MHz STM32F104RE
   Memory:         512 KB Flash and 96 KB SRAM
+  ADC:            1×12-bit, 2.4 MSPS A/D converter: up to 10 channels
+  DMA:            16-stream DMA controllers with FIFOs and burst support
+  Timers:         Up to 11 timers: up to six 16-bit, two 32-bit timers, two
+                  watchdog timers, and a SysTick timer
+  GPIO:           Up to 81 I/O ports with interrupt capability
+  I2C:            Up to 3 × I2C interfaces
+  USARTs:         Up to 3 USARTs
+  SPIs:           Up to 4 SPIs (2 I2S)
+  SDIO interface
+  USB:            USB 2.0 full-speed device/host/OTG controller with on-chip PHY
+  CRC calculation unit
+  RTC
 
 NucleoF411RE:
 
   Microprocessor: 32-bit ARM Cortex M4 at 100MHz STM32F411RE
   Memory:         512 KB Flash and 128 KB SRAM
+  ADC:            1×12-bit, 2.4 MSPS A/D converter: up to 10 channels
+  DMA:            16-stream DMA controllers with FIFOs and burst support
+  Timers:         Up to 11 timers: up to six 16-bit, two 32-bit timers, two
+                  watchdog timers, and a SysTick timer
+  GPIO:           Up to 81 I/O ports with interrupt capability
+  I2C:            Up to 3 × I2C interfaces
+  USARTs:         Up to 3 USARTs
+  USARTs:         Up to 3 USARTs
+  SPIs:           Up to 4 SPIs (2 I2S)
+  SDIO interface
+  USB:            USB 2.0 full-speed device/host/OTG controller with on-chip PHY
+  CRC calculation unit
+  RTC
 
 The NucleoF411RE also has additional DMA and SPI peripheral capabilities.
 
 Board features, however, are identical:
 
-  I/O Pins Out:   37, 17 On the Connector
-  ADCs:           1 (at 12-bit resolution)
-  Peripherals:    10 timers, 2 I2Cs, 2 SPI ports, 3 USARTs, 1 led
-  Other:          Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
+  Peripherals:    1 led, 1 push button
+  Debug:          Serial wire debug and JTAG interfaces
   Expansion I/F   Ardino and Morpho Headers
 
-  Uses a STM32F103 to provide a ST-Link for programming, debug similar to the OpenOcd
-  FTDI function - USB to JTAG front-end.
+  Uses a STM32F103 to provide a ST-Link for programming, debug similar to the
+  OpenOcd FTDI function - USB to JTAG front-end.
+
+  See http://mbed.org/platforms/ST-Nucleo-F401RE and
+  http://developer.mbed.org/platforms/ST-Nucleo-F411RE for more
+  information about these boards.
 
 Contents
 ========
