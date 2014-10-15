@@ -1008,7 +1008,7 @@ config ARCH_BOARD
 	default "pic32mx7mmb"         if ARCH_BOARD_PIC32MX7MMB
 	default "pirelli_dpl10"       if ARCH_BOARD_PIRELLI_DPL10
 	default "px4fmu-v2_upstream"  if ARCH_BOARD_PX4FMU_V2
-	default "nucleo-f401re"       if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-f4x1re"       if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "qemu-i486"           if ARCH_BOARD_QEMU_I486
 	default "rgmp"                if ARCH_BOARD_RGMP
 	default "sama5d3x-ek"         if ARCH_BOARD_SAMA5D3X_EK
@@ -1251,8 +1251,8 @@ endif
 if ARCH_BOARD_PIRELLI_DPL10
 source "configs/pirelli_dpl10/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_F401RE
-source "configs/nucleo-f401re/Kconfig"
+if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+source "configs/nucleo-f4x1re/Kconfig"
 endif
 if ARCH_BOARD_PX4FMU_V2
 source "configs/px4fmu-v2_upstream/Kconfig"

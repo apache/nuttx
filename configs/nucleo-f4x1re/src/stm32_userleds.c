@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f401re/src/stm32_io.c
+ * configs/nucleo-f4x1re/src/stm32_userleds.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,157 +40,194 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
-#include "chip/stm32_tim.h"
+#include <nuttx/power/pm.h>
 
-#include "nucleo-f401re.h"
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+#include "stm32.h"
+#include "nucleo-f4x1re.h"
 
-#ifndef CONFIG_CC3000_PROBES
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* LED Power Management */
+
+#ifdef CONFIG_PM
+static void led_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate);
+static int led_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static struct pm_callback_s g_ledscb =
+{
+  .notify  = led_pm_notify,
+  .prepare = led_pm_prepare,
+};
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: led_pm_notify
+ *
+ * Description:
+ *   Notify the driver of new power state. This callback is called after
+ *   all drivers have had the opportunity to prepare for the new power state.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void led_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
+{
+  switch (pmstate)
+    {
+      case(PM_NORMAL):
+        {
+          /* Restore normal LEDs operation */
+
+        }
+        break;
+
+      case(PM_IDLE):
+        {
+          /* Entering IDLE mode - Turn leds off */
+
+        }
+        break;
+
+      case(PM_STANDBY):
+        {
+          /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
+
+        }
+        break;
+
+      case(PM_SLEEP):
+        {
+          /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
+
+        }
+        break;
+
+      default:
+        {
+          /* Should not get here */
+
+        }
+        break;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: led_pm_prepare
+ *
+ * Description:
+ *   Request the driver to prepare for a new power state. This is a warning
+ *   that the system is about to enter into a new power state. The driver
+ *   should begin whatever operations that may be required to enter power
+ *   state. The driver may abort the state change mode by returning a
+ *   non-zero value from the callback function.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
+{
+  /* No preparation to change power modes is required by the LEDs driver.
+   * We always accept the state change by returning OK.
+   */
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_leds
- *
- * Description:
- *
+ * Name: stm32_ledinit
  ****************************************************************************/
 
-void up_leds(int r, int g ,int b, int freqs)
+void stm32_ledinit(void)
 {
-  long fosc = 72000000;
-  long prescale = 2048;
-  long p1s = fosc/prescale;
-  long p0p5s  = p1s/2;
-  long p;
+  /* Configure LD2 GPIO for output */
 
-  static struct stm32_tim_dev_s *tim1 = 0;
-
-  if (tim1 == 0)
-    {
-      tim1 = stm32_tim_init(1);
-      STM32_TIM_SETMODE(tim1, STM32_TIM_MODE_UP);
-      STM32_TIM_SETCLOCK(tim1, p1s-8);
-      STM32_TIM_SETPERIOD(tim1, p1s);
-      STM32_TIM_SETCOMPARE(tim1, 1, 0);
-      STM32_TIM_SETCOMPARE(tim1, 2, 0);
-      STM32_TIM_SETCOMPARE(tim1, 3, 0);
-      STM32_TIM_SETCHANNEL(tim1, 1, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
-      STM32_TIM_SETCHANNEL(tim1, 2, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
-      STM32_TIM_SETCHANNEL(tim1, 3, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
-    }
-
-  p = freqs == 0 ? p1s : p1s / freqs;
-  STM32_TIM_SETPERIOD(tim1, p);
-
-  p = freqs == 0 ? p1s + 1 : p0p5s / freqs;
-
-  STM32_TIM_SETCOMPARE(tim1, 2, (r * p) / 255);
-  STM32_TIM_SETCOMPARE(tim1, 1, (b * p) / 255);
-  STM32_TIM_SETCOMPARE(tim1, 3, (g * p) / 255);
+  stm32_configgpio(GPIO_LD2);
 }
 
 /****************************************************************************
- * Name: up_ioinit
- *
- * Description:
- *
+ * Name: stm32_setled
  ****************************************************************************/
 
-void up_ioinit(void)
+void stm32_setled(int led, bool ledon)
 {
-  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are 
-   * configured for all pins.
-   */
-
-  up_leds(0,0,0,0);
-  stm32_configgpio(GPIO_A0);       /* Probes */
-  stm32_configgpio(GPIO_A1);       /* Probes */
-  stm32_configgpio(GPIO_A2);       /* Smart Config */
-  stm32_configgpio(GPIO_A3);       /* not used */
-  stm32_configgpio(GPIO_BTN_USER); /* Sw 1 */
-  stm32_configgpio(GPIO_D0);       /* USART2 RX*/
-  stm32_configgpio(GPIO_D1);       /* uSART2 TX*/
-  stm32_configgpio(GPIO_D2);       /* Activate */
-}
-
-/****************************************************************************
- * Name: up_read_inputs
- *
- * N.B The return state in true logic, the button polarity is dealt here in
- *
- ****************************************************************************/
-
-uint8_t up_read_inputs(void)
-{
-  uint8_t bits = 0;
-  bits |= stm32_gpioread(GPIO_D14) == 0 ? 1 : 0;
-  bits |= stm32_gpioread(GPIO_D15) == 0 ? 2 : 0;
-  bits |= stm32_gpioread(GPIO_A2)  == 0 ? 4 : 0;
-  bits |= stm32_gpioread(GPIO_A3)  == 0 ? 8 : 0;
-  return bits;
-}
-
-/****************************************************************************
- * Name: up_write_outputs
- *
- * N.B The return state in true logic, the button polarity is dealt here in
- *
- ****************************************************************************/
-
-void up_write_outputs(int id, bool bits)
-{
-  if (id == 2)
+  if (led == 1)
     {
-      stm32_gpiowrite(GPIO_D2, bits);
-    }
-  else if (id == 0)
-    {
-      stm32_gpiowrite(GPIO_A0, bits);
-    }
-  else if (id == 1)
-    {
-      stm32_gpiowrite(GPIO_A1, bits);
+      stm32_gpiowrite(GPIO_LD2, ldeon);
     }
 }
 
 /****************************************************************************
- * Name: up_irqio
- *
- * Description:
- *
+ * Name: stm32_setleds
  ****************************************************************************/
 
-xcpt_t up_irqio(int id, xcpt_t irqhandler)
+void stm32_setleds(uint8_t ledset)
 {
-  xcpt_t oldhandler = NULL;
-
-  /* The following should be atomic */
-
-  if (id == 0)
+  if (led == 1)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D14, true, true, true, irqhandler);
+      stm32_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
     }
-  else if (id == 1)
-    {
-      oldhandler = stm32_gpiosetevent(GPIO_D15, true, true, true, irqhandler);
-    }
-
-  return oldhandler;
 }
-#endif /* CONFIG_CC3000_PROBES */
+
+/****************************************************************************
+ * Name: stm32_led_pminitialize
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+void stm32_led_pminitialize(void)
+{
+  /* Register to receive power management callbacks */
+
+  int ret = pm_register(&g_ledscb);
+  DEBUGASSERT(ret == OK);
+  UNUSED(ret);
+}
+#endif /* CONFIG_PM */
+
+#endif /* !CONFIG_ARCH_LEDS */

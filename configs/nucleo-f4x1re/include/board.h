@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-f401re/include/board.h
+ * configs/nucleo-f4x1re/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

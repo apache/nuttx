@@ -1015,7 +1015,7 @@ nuttx
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt
  |   |   `- README.txt
- |   |- nucleo-f401re/
+ |   |- nucleo-f4x1re/
  |   |   `- README.txt
  |   |- nucleus2g/
  |   |   `- README.txt

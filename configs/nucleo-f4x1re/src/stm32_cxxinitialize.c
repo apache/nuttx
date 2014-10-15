@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-f401re/src/stm32_cxxinitialize.c
+ * configs/nucleo-f4x1re/src/stm32_cxxinitialize.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

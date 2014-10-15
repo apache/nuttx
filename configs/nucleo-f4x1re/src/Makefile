@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nucleo-f401re/src/Makefile
+# configs/nucleo-f4x1re/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
