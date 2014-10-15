@@ -246,7 +246,11 @@ cat $rcstemplate | \
 
 # And install it at the specified relative location
 
-install -D -m 0755 $rcsfile $workingdir/$uinitscript || \
+# Fix for BSD install without -D option
+mkdir -p $workingdir/$uinitscript
+rmdir $workingdir/$uinitscript
+
+install -m 0755 $rcsfile $workingdir/$uinitscript || \
     { echo "Failed to install $rcsfile at $workingdir/$uinitscript"; rm -f $rcsfile; exit 1; }
 rm -f $rcsfile
 
