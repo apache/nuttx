@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f401re/src/stm32_buttons.c
+ * configs/nucleo-f4x1re/src/stm32_nsh.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,17 +39,23 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+
+#include <stm32.h>
+#include <stm32_uart.h>
+
 #include <arch/board/board.h>
 
-#include "nucleo-f401re.h"
-
-#ifdef CONFIG_ARCH_BUTTONS
+#include "nucleo-f4x1re.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,73 +71,69 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_button_initialize
+ * Name: up_netinitialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state
- *   of all buttons or board_button_irq() may be called to register button
- *   interrupt handlers.
+ *   Dummy function expected to start-up logic.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+#ifdef CONFIG_WL_CC3000
+void up_netinitialize(void)
 {
-  /* Configure the single button as an input.  NOTE that EXTI interrupts are
-   * also configured for the pin.
-   */
-
-  stm32_configgpio(GPIO_BTN_USER);
-}
-
-/****************************************************************************
- * Name: board_buttons
- ****************************************************************************/
-
-uint8_t board_buttons(void)
-{
-  /* Check that state of each USER button. A LOW value means that the key is
-   * pressed.
-   */
-
-  bool released = stm32_gpioread(GPIO_BTN_USER);
-  return !released;
-}
-
-/************************************************************************************
- * Button support.
- *
- * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
- *
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT
- *   definitions in board.h for the meaning of each bit.
- *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
-{
-  xcpt_t oldhandler = NULL;
-
-  if (id == BUTTON_USER)
-    {
-      oldhandler = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler);
-    }
-
-  return oldhandler;
 }
 #endif
-#endif /* CONFIG_ARCH_BUTTONS */
+
+/****************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ ****************************************************************************/
+
+int nsh_archinitialize(void)
+{
+#ifdef HAVE_MMCSD
+  int ret;
+#endif
+
+  /* Configure CPU load estimation */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  cpuload_initialize_once();
+#endif
+
+#ifdef HAVE_MMCSD
+  /* First, get an instance of the SDIO interface */
+
+  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdio)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
+      return ret;
+    }
+
+  /* Then let's guess and say that there is a card in the slot. There is no
+   * card detect GPIO.
+   */
+
+  sdio_mediachange(g_sdio, true);
+
+  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
+#endif
+
+  return OK;
+}

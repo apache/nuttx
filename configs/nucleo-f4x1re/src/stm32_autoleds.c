@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f401re/src/stm32_nsh.c
+ * configs/nucleo-f4x1re/src/stm32_autoleds.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,24 +39,35 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sdio.h>
-#include <nuttx/mmcsd.h>
-
-#include <stm32.h>
-#include <stm32_uart.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
-#include "nucleo-f401re.h"
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+#include "stm32.h"
+#include "nucleo-f4x1re.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -71,69 +82,38 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
- *
- * Description:
- *   Dummy function expected to start-up logic.
- *
+ * Name: board_led_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_WL_CC3000
-void up_netinitialize(void)
+void board_led_initialize(void)
 {
+  /* Configure LD2 GPIO for output */
+
+  stm32_configgpio(GPIO_LD2);
 }
-#endif
 
 /****************************************************************************
- * Name: nsh_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
+ * Name: board_led_on
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+void board_led_on(int led)
 {
-#ifdef HAVE_MMCSD
-  int ret;
-#endif
-
-  /* Configure CPU load estimation */
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  cpuload_initialize_once();
-#endif
-
-#ifdef HAVE_MMCSD
-  /* First, get an instance of the SDIO interface */
-
-  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!g_sdio)
+  if (led == 1)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
-             CONFIG_NSH_MMCSDSLOTNO);
-      return -ENODEV;
+      stm32_gpiowrite(GPIO_LD2, true);
     }
-
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-             ret);
-      return ret;
-    }
-
-  /* Then let's guess and say that there is a card in the slot. There is no
-   * card detect GPIO.
-   */
-
-  sdio_mediachange(g_sdio, true);
-
-  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
-#endif
-
-  return OK;
 }
+
+/****************************************************************************
+ * Name: board_led_off
+ ****************************************************************************/
+
+void board_led_off(int led)
+{
+  if (led == 1)
+    {
+      stm32_gpiowrite(GPIO_LD2, false);
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */

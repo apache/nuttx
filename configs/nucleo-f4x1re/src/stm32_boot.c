@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-f401re/src/stm32_boot.c
+ * configs/nucleo-f4x1re/src/stm32_boot.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "nucleo-f401re.h"
+#include "nucleo-f4x1re.h"
 
 /************************************************************************************
  * Pre-processor Definitions

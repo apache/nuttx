@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-f401re/src/stm32_wireless.c
+ * configs/nucleo-f4x1re/src/stm32_wireless.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
@@ -52,7 +52,7 @@
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 
 #include "stm32.h"
-#include "nucleo-f401re.h"
+#include "nucleo-f4x1re.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

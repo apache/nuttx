@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-f401re/src/nucleo-f401re.h
+ * configs/nucleo-f4x1re/src/nucleo-f4x1re.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett

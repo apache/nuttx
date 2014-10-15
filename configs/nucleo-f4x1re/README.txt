@@ -20,7 +20,9 @@ NucleoF411RE:
   Microprocessor: 32-bit ARM Cortex M4 at 100MHz STM32F411RE
   Memory:         512 KB Flash and 128 KB SRAM
 
-Other board features are identical:
+The NucleoF411RE also has additional DMA and SPI peripheral capabilities.
+
+Board features, however, are identical:
 
   I/O Pins Out:   37, 17 On the Connector
   ADCs:           1 (at 12-bit resolution)
@@ -207,11 +209,11 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     $ (cd tools; ./configure.sh nucleo-f401re/f401-nsh)
+     $ (cd tools; ./configure.sh nucleo-f4x1re/f401-nsh)
      $ make qconfig
      $ V=1 make context all 2>&1 | tee mout
 
-     use the f411-nsh configuration if you have the Nucleo-F411RE board.
+     Use the f411-nsh configuration if you have the Nucleo-F411RE board.
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -315,7 +317,7 @@ Hardware
 
   LEDs
   ----
-  The Nucleo F401RE and Nucleo F401RE provide a single user LED, LD2.  LD2
+  The Nucleo F401RE and Nucleo F411RE provide a single user LED, LD2.  LD2
   is the green LED connected to Arduino signal D13 corresponding to MCU I/O
   PA5 (pin 21) or PB13 (pin 34) depending on the STM32target.
 
@@ -360,7 +362,7 @@ Serial Consoles
 
   TTL to RS-232 converter connection:
 
-    Nucleo CN10 STM32F401RE
+    Nucleo CN10 STM32F4x1RE
     ----------- ------------
     Pin 21 PA9  USART2_RX
     Pin 33 PA10 USART2_TX
@@ -392,7 +394,7 @@ Serial Consoles
 
   TTL to RS-232 converter connection:
 
-    Nucleo CN9  STM32F401RE
+    Nucleo CN9  STM32F4x1RE
     ----------- ------------
     Pin 1  PA3  USART2_RX
     Pin 2  PA2  USART2_TX
@@ -470,7 +472,7 @@ Shields
 
   RS-232 from Cutedigi.com.  Supports a single RS-232 connected via
 
-    Nucleo CN9  STM32F401RE  Cutedigi
+    Nucleo CN9  STM32F4x1RE  Cutedigi
     ----------- ------------ --------
     Pin 1  PA3  USART2_RX    RXD
     Pin 2  PA2  USART2_TX    TXD
@@ -511,7 +513,7 @@ Configurations
        Consoles).  I have been using a TTL-to-RS-232 converted connected
        as shown below:
 
-       Nucleo CN10 STM32F401RE
+       Nucleo CN10 STM32F4x1RE
        ----------- ------------
        Pin 21 PA9  USART2_RX
        Pin 33 PA10 USART2_TX

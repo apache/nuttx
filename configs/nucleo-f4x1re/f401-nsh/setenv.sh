@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/nucleo-f401re/f401nsh/setenv.sh
+# configs/nucleo-f4x1re/f401nsh/setenv.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
