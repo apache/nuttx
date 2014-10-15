@@ -285,7 +285,7 @@ Refreshing Configurations
   If you configuration is out of date, you will be prompted to resolve the
   issues detected by the configuration tool.  Doing this can save you a lot
   of problems done the road due to a bad configuration.  The NuttX
-  onfiguration is discussed in the following paragraph.
+  configuration is discussed in the following paragraph.
 
 NuttX Configuration Tool
 ------------------------
@@ -499,7 +499,7 @@ NuttX Buildroot Toolchain
 
   NOTE: For Cortex-M3/4, there are OABI and EABI versions of the buildroot
   toolchains.  If you are using the older OABI toolchain the prefix for
-  the tools will be arm-nuttx-elf-; for the EABI toolchin the prefix will
+  the tools will be arm-nuttx-elf-; for the EABI toolchain the prefix will
   be arm-nuttx-eabi-.  If you are using the older OABI toolchain with
   an ARM Cortex-M3/4, you will need to set CONFIG_ARMV7M_OABI_TOOLCHAIN
   in the .config file in order to pick the right tool prefix.
@@ -857,14 +857,14 @@ General Pre-built Toolchain Issues
      you will get the stdio.h from the incompatible, foreign C library and
      not the nuttx stdio.h (at nuttx/include/stdio.h) that you wanted.
 
-     This can cause really confusion in the buildds and you must always be
+     This can cause really confusion in the builds and you must always be
      sure the -nostdinc is included in the CFLAGS.  That will assure that
      you take the include files only from
 
   5. Libraries.  What was said above header files applies to libraries.
      You do not want to include code from the libraries of any foreign
      C libraries built into your toolchain.  If this happens you will get
-     perplexing errors about undefined sysmbols.  To avoid these errors,
+     perplexing errors about undefined symbols.  To avoid these errors,
      you will need to add -nostdlib to your CFLAGS flags to assure that
      you only take code from the NuttX libraries.
 
@@ -889,7 +889,7 @@ General Pre-built Toolchain Issues
      of this in the misc/buildroot/configs directory.  However, it
      is possible that there could be interoperability issues with
      your toolchain since they will be using different versions of
-     binutials and possibly different ABIs.
+     binutils and possibly different ABIs.
 
 DOCUMENTATION
 ^^^^^^^^^^^^^

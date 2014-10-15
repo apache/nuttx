@@ -133,13 +133,13 @@ o Task/Scheduler (sched/)
 
   Title:       execv() AND vfork()
   Description: There is a problem when vfork() calls execv() (or execl()) to
-               start a new appliction:  When the parent thread calls vfork()
+               start a new application:  When the parent thread calls vfork()
                it receives and gets the pid of the vforked task, and *not*
                the pid of the desired execv'ed application.
 
                The same tasking arrangement is used by the standard function
                posix_spawn().  However, posix_spawn uses the non-standard, internal
-               NuttX interface task_reparent() to replace the childs parent task
+               NuttX interface task_reparent() to replace the child's parent task
                with the caller of posix_spawn().  That cannot be done with vfork()
                because we don't know what vfork() is going to do.
 
@@ -311,7 +311,7 @@ o pthreads (sched/)
                would have to know the priority of every semaphore held by
                every thread.
 
-               "Providing the HLS capability on a simple phread mutex would not
+               "Providing the HLS capability on a simple pthread mutex would not
                be such quite such a complex job if you allow only one mutex per
                thread. However, the more general case seems almost as complex
                as priority inheritance. I decided that the implementation does
@@ -390,7 +390,7 @@ o Kernel/Protected Build
   Description: There are a few syscalls that operate very often in user space.
                Since syscalls are (relatively) time consuming this could be
                a performance issue.  Here is some numbers that I collected
-               in an application that was doing mostly printf outout:
+               in an application that was doing mostly printf output:
 
                  sem_post - 18% of syscalls
                  sem_wait - 18% of syscalls
@@ -490,7 +490,7 @@ o C++ Support
                this will provide the model for all solutions.  Basically, if
                CONFIG_HAVE_CXXINITIALIZE=y is defined in the configuration, then
                board-specific code must provide the interface up_cxxinitialize().
-               up_cxxinitialize() is called from aplication logic to initialize
+               up_cxxinitialize() is called from application logic to initialize
                all static class instances.  This TODO item probably has to stay
                open because this solution is only available on STM32 F4.
   Status:      Open
@@ -580,8 +580,8 @@ o C++ Support
                uClibc++ and NuttX would need some extensions. I am thinking
                along the lines of the following:
 
-               1) There is a per-task group storage are withing the RTOS (see
-                  include/nuttx/sched.h). If we add some new, nonstandard APIs
+               1) There is a per-task group storage are within the RTOS (see
+                  include/nuttx/sched.h). If we add some new, non-standard APIs
                   then uClibc++ could get access to per-task group storage (in
                   the spirit of pthread_getspecific() which gives you access to
                   per-thread storage).
@@ -1032,7 +1032,7 @@ o Libraries (libc/)
                 time error, and some, such as sdcc, do. AFAIK, C implementations
                 are not even required to support infinity. In C99 the macro isinf()
                 could replace the first use of division by zero. Unfortunately, the
-                macro INFINITY from math.h probably can't replce the second division
+                macro INFINITY from math.h probably can't replace the second division
                 by zero, since it will result in a compile-time diagnostic, if the
                 implementation does not support infinity."
   Status:       Open
@@ -1106,7 +1106,7 @@ o File system / Generic drivers (fs/, drivers/)
 
   Title:       POLLHUP SUPPORT
   Description: All drivers that support the poll method should also report
-               POLLHUP event when the driver is closedd.
+               POLLHUP event when the driver is closed.
   Status:      Open
   Priority:    Medium-Low
 
@@ -1128,7 +1128,7 @@ o File system / Generic drivers (fs/, drivers/)
                On an array of file structures and the other an array of
                socket structures.  There really should be one array that
                is a union of file and socket descriptors.  Then socket and
-               file decriptors could lie in the same range.
+               file descriptors could lie in the same range.
   Status:      Open
   Priority:    Low
 
@@ -1294,7 +1294,7 @@ o Linux/Cywgin simulation (arch/sim)
 
   Title:       SIMULATOR HAS NO INTERRUPTS (NON-PREMPTIBLE)
   Description: The current simulator implementation is has no interrupts and, hence,
-               is non-preemptible.  Also, without simulated interrutps, there can
+               is non-preemptible.  Also, without simulated interrupt, there can
                be no high-fidelity simulated device drivers.
 
                Currently, all timing and serial input is simulated in the IDLE loop:
@@ -1581,6 +1581,8 @@ o ARM/LPC31xx (arch/arm/src/lpc31xx/)
 o ARM/LPC43x (arch/arm/src/lpc43xx/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  See comments in configs/lpc4330-xplorer/README.txt
+
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1706,7 +1708,7 @@ o AVR (arch/avr)
                 into the more abundant FLASH memory, but this would require modification
                 to the printf logic to access the strings from program memory.
   Status:       Open
-  Priority:     Low.  The AVR is probably not the architecuture that you want to use
+  Priority:     Low.  The AVR is probably not the architecture that you want to use
                 for extensive string operations.
 
   Title:        SPI AND USB DRIVERS UNTESTED
@@ -1774,7 +1776,7 @@ o MIPS/PIC32(arch/mips)
 
   Title:       PIC32 USB MASS STORAGE DEVICE FAILS TO RE-CONNECT
   Description: Found using configuration configs/pic32mx7mmb/nsh.
-               In this configuratin, the NSH 'msconn' command will connect the
+               In this configuration, the NSH 'msconn' command will connect the
                mass storage device to the host; the 'msdis' command will
                disconnect the device.  The first 'msconn' works perfectly.
                However, when attempting to re-connect, the second 'msconn'
@@ -1863,7 +1865,7 @@ o Renesas M16C/26 (arch/sh/src/m16c)
   Priority:    Low
 
   Title:       UNIMPLEMENTED M16C DRIVERS
-  Description: Should implement SPI, I2C, Virual EEPROM, FLASH, RTC drivers
+  Description: Should implement SPI, I2C, Virtual EEPROM, FLASH, RTC drivers
   Status:      Open
   Priority:    Medium
 
@@ -1874,7 +1876,7 @@ o z80/z8/ez80/z180 (arch/z80)
   Description: The SDCC version the same problems with integer overflow during
                compilation for certain 8-bit platform.  At typical cause is code like
                usleep(500*1000) which exceeds the range of a 16-bit integer.
-  Status:      These have probably been fixed but have not yet been verified on thes
+  Status:      These have probably been fixed but have not yet been verified on these
                affected platforms.
   Priority:    Low for now
 
@@ -1935,7 +1937,7 @@ o z80/z8/ez80/z180 (arch/z80)
                rule removes .asm files.  This works because there are no .asm
                files except in sub-directories that are provided from 'make clean' --
                except for XTRS:  It has a .asm file in its src/ directory that
-               gets removed every time clean is performd.
+               gets removed every time clean is performed.
   Status:      Open
   Priority:    High if you happen to be working with XTRS.
 
@@ -2100,6 +2102,7 @@ o mc68hc1x (arch/hc)
   Priority:    Medium/Low
 
 o Network Utilities (apps/netutils/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PPP PORT
   Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
@@ -2115,7 +2118,7 @@ o Network Utilities (apps/netutils/)
 
   Title:       THE ARP ISSUES AGAIN
   Description: The first GET received by THTTPD is not responded to.  Refreshing the page
-               from the browser solves the problem and THTTPD works fine after thatg.  I
+               from the browser solves the problem and THTTPD works fine after that.  I
                believe that this is the duplicate of another bug: "Outgoing
                [uIP] packets are dropped and overwritten by ARP packets if the
                destination IP has not been mapped to a MAC."
@@ -2154,7 +2157,7 @@ o System libraries apps/system (apps/system)
   Title:       READLINE IMPLEMENTATION
   Description: readline implementation does not use C-buffered I/O, but rather
                talks to serial driver directly via read().  It includes VT-100
-               specific editting commands.  A more generic readline() should be
+               specific editing commands.  A more generic readline() should be
                implemented using termios' tcsetattr() to put the serial driver
                into a "raw" mode.
   Status:      Open
@@ -2185,7 +2188,7 @@ o Other Applications & Tests (apps/examples/)
                leveraged for more general purposes, it would be a problem.
                Update: see examples/nxtext for some improved font cache handling.
   Status:      Open
-  Priority:    Low.  This is not really a problem becauses examples/nx works
+  Priority:    Low.  This is not really a problem because examples/nx works
                fine with its bogus font caching.
 
   Title:       EXAMPLES/NXTEXT ARTIFACTS
