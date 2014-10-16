@@ -591,6 +591,7 @@ endchoice
 config STM32_STM32L15XX
 	bool
 	default n
+	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
 
 config STM32_ENERGYLITE
