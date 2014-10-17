@@ -1,10 +1,8 @@
 /************************************************************************************
- * arch/arm/src/efm32/chip.h
+ * arch/arm/src/efm32/chip/efm32_memorymap.h
  *
- *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Pierre-noel Bouteville <pnb990@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,35 +33,24 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_H
+#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_MEMORYMAP_H
+#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip.h"
 
-/* Include the chip capabilities file */
-
-#include <arch/efm32/chip.h>
-
-/* Include the chip pin configuration file */
-
-#ifdef CONFIG_ARMV7M_CMNVECTOR
-#  if defined(CONFIG_EFM32_EFM32TG)
-#    include "chip/efm32tg_vectors.h"
-#  elif defined(CONFIG_EFM32_EFM32G)
-#    include "chip/efm32g_vectors.h"
-#  elif defined(CONFIG_EFM32_EFM32GG)
-#    include "chip/efm32gg_vectors.h"
-#  else
-#    error "No vector file for this EFM32 family"
-#  endif
+#if defined(CONFIG_EFM32_EFM32TG)
+#  include "chip/efm32tg_memorymap.h"
+#elif defined(CONFIG_EFM32_EFM32G)
+#  include "chip/efm32g_memorymap.h"
+#elif defined(CONFIG_EFM32_EFM32GG)
+#  include "chip/efm32gg_memorymap.h"
+#else
+#  error "Unsupported EFM32 memory map"
 #endif
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_H */
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_MEMORYMAP_H */

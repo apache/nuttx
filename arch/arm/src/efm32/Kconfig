@@ -44,14 +44,98 @@ config ARCH_CHIP_EFM32GG332F1024
 
 endchoice
 
+# These hidden selections represent automatically selected MCU families and,
+# in turn, select general capabilities of the MCU family
+
 config EFM32_EFM32TG
-bool n
+	bool n
 
 config EFM32_EFM32G
-bool n
+	bool n
+	select EFM32_HAVE_USART2
+	select EFM32_HAVE_UART0
+	select EFM32_HAVE_LEUART1
 
 config EFM32_EFM32GG
-bool n
+	bool n
+	select EFM32_HAVE_USART2
+	select EFM32_HAVE_UART0
+	select EFM32_HAVE_UART1
+	select EFM32_HAVE_LEUART1
+
+menu "EFM32 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for
+# the selection MCU
+
+config EFM32_HAVE_USART2
+	bool
+	default n
+
+config EFM32_HAVE_UART0
+	bool
+	default n
+
+config EFM32_HAVE_UART1
+	bool
+	default n
+
+config EFM32_HAVE_LEUART1
+	bool
+	default n
+
+# When there are multiple instances of a device, these "hidden" settings
+#will automatically be selected and will represent the 'OR' of the
+# instances selected.
+
+# selection MCU
+
+config EFM32_UART
+	bool
+	default n
+
+# Then, these are the actual, selectable peripheral options
+
+config EFM32_UART0
+	bool "USART0"
+	default n
+	select ARCH_HAVE_USART0
+	select EFM32_UART
+
+config EFM32_UART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+	select EFM32_UART
+
+config EFM32_UART2
+	bool "USART2"
+	default n
+	depends on EFM32_HAVE_USART2
+	select ARCH_HAVE_USART2
+	select EFM32_UART
+
+config EFM32_UART0
+	bool "UART0"
+	default n
+	select ARCH_HAVE_UART0
+	select EFM32_UART
+
+config EFM32_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select EFM32_UART
+
+config EFM32_LEUART0
+	bool "Low energy UART0"
+	default n
+	select EFM32_UART
+
+config EFM32_LEUART1
+	bool "Low energy UART1"
+	default n
+	select EFM32_HAVE_LEUART1
+	select EFM32_UART
 
 endif
-
