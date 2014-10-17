@@ -1,5 +1,5 @@
-/*****************************************************************************
- * configs/efm32-g8xx-stk/src/efm32_boot.c
+/****************************************************************************
+ * arch/arm/src/efm32/efm32_clockconfig.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,49 +33,29 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_EFM32_EFM32_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_EFM32_EFM32_CLOCKCONFIG_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "efm32_start.h"
-
-#include "efm32-g8xx-stk.h"
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_boardinitialize
+ * Name: efm32_clockconfig
  *
  * Description:
- *   All EFM32 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization before any devices
- *   have been initialized.
+ *   Called to initialize the EFM32.  This does whatever setup is needed to
+ *   put the SoC in a usable state.  This includes the initialization of
+ *   clocking using the settings in board.h.
  *
  ****************************************************************************/
 
-void efm32_boardinitialize(void)
-{
-}
+void efm32_clockconfig(void);
 
-/****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-}
-#endif
+#endif /* __ARCH_ARM_SRC_EFM32_EFM32_CLOCKCONFIG_H */

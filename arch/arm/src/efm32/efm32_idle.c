@@ -1,5 +1,5 @@
-/*****************************************************************************
- * configs/efm32-g8xx-stk/src/efm32_boot.c
+/****************************************************************************
+ *  arch/arm/src/efm32/efm32_idle.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,45 +37,60 @@
  * Included Files
  ****************************************************************************/
 
+#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include "efm32_start.h"
+#include <nuttx/arch.h>
+#include <nuttx/power/pm.h>
 
-#include "efm32-g8xx-stk.h"
+#include <arch/irq.h>
+
+#include "chip.h"
+#include "up_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Does the board support an IDLE LED to indicate that the board is in the
+ * IDLE state?
+ */
+
+#if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
+#  define BEGIN_IDLE() board_led_on(LED_IDLE)
+#  define END_IDLE()   board_led_off(LED_IDLE)
+#else
+#  define BEGIN_IDLE()
+#  define END_IDLE()
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_boardinitialize
+ * Name: up_idle
  *
  * Description:
- *   All EFM32 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization before any devices
- *   have been initialized.
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
  *
  ****************************************************************************/
 
-void efm32_boardinitialize(void)
+void up_idle(void)
 {
+  /* Perform IDLE mode power management */
+  /* Sleep until an interrupt occurs to save power. */
 }
-
-/****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-}
-#endif
