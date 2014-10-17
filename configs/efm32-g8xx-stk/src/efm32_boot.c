@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "efm3_g8xx_stk.h"
+#include "efm32-g8xx-stk.h"
 
 /****************************************************************************
  * Public Functions
