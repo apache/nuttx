@@ -18,10 +18,25 @@ README
 LEDs
 ====
 
-  The EFM32 Gecko Start Kithas four yellow LEDs.  These LEDs are not used by
-  the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the
-  usage by the board port is defined in include/board.h and src/efm32_autoleds.c.
-  The LEDs are used to encode OS-related events as follows:
+  The EFM32 Gecko Start Kit has four yellow LEDs.  These LEDs are connected
+  as follows:
+
+  ------------------------------------- --------------------
+  EFM32 PIN                             BOARD SIGNALS
+  ------------------------------------- --------------------
+  C0/USART1_TX#0/PCNT0_S0IN#2/ACMP0_CH0  MCU_PC0  UIF_LED0
+  C1/USART1_RX#0/PCNT0_S1IN#2/ACMP0_CH1  MCU_PC1  UIF_LED1
+  C2/USART2_TX#0/ACMP0_CH2               MCU_PC2  UIF_LED2
+  C3/USART2_RX#0/ACMP0_CH3               MCU_PC3  UIF_LED3
+  ------------------------------------- --------------------
+
+  All LEDs are grounded and so are illuminated by outputting a high
+  value to the LED.
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/efm32_autoleds.c.  The LEDs are used to
+  encode OS-related events as follows:
 
     SYMBOL             Meaning                 LED1*  LED2   LED3   LED4
     ----------------- -----------------------  ------ -----  -----  ------

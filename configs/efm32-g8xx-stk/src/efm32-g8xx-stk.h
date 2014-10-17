@@ -41,6 +41,37 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+ /* LEDs
+  *
+  * The EFM32 Gecko Start Kit has four yellow LEDs.  These LEDs are connected
+  * as follows:
+  *
+  *   ------------------------------------- --------------------
+  *   EFM32 PIN                             BOARD SIGNALS
+  *   ------------------------------------- --------------------
+  *   C0/USART1_TX#0/PCNT0_S0IN#2/ACMP0_CH0  MCU_PC0  UIF_LED0
+  *   C1/USART1_RX#0/PCNT0_S1IN#2/ACMP0_CH1  MCU_PC1  UIF_LED1
+  *   C2/USART2_TX#0/ACMP0_CH2               MCU_PC2  UIF_LED2
+  *   C3/USART2_RX#0/ACMP0_CH3               MCU_PC3  UIF_LED3
+  *   ------------------------------------- --------------------
+  *
+  * All LEDs are grounded and so are illuminated by outputting a high
+  * value to the LED.
+  */
+
+#define GPIO_LED1       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN0)
+#define GPIO_LED2       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN1)
+#define GPIO_LED3       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN2)
+#define GPIO_LED4       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN3)
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
