@@ -57,6 +57,55 @@ LEDs
     on a small proportion of the time.
 *** LED2 may also flicker normally if signals are processed.
 
+Serial Console
+==============
+
+  The EFM32G890F128 support the following options for serial output:
+
+    ------- -- ----
+     US0_RX #0 PE11
+     US0_RX #1 PE6
+     US0_RX #2 PC10
+
+     US0_TX #0 PE10
+     US0_TX #1 PE7
+     US0_TX #2 PC11
+    ------- -- ----
+     US1_RX #0 PC1
+     US1_RX #1 PD1
+
+     US1_TX #0 PC0
+     US1_TX #1 PD0
+    ------- -- ----
+     US2_RX #0 PC3
+     US2_RX #1 PB4
+
+     US2_TX #0 PC2
+     US2_TX #1 PB3
+    ------- -- ----
+      U0_RX #1 PE1
+      U0_RX #2 PA4
+
+      U0_TX #0 PF6
+      U0_TX #1 PE0
+      U0_TX #2 PA3
+      U0_TX #3 PC14
+    ------- -- ----
+    LEU0_RX #0 PD5
+    LEU0_RX #1 PB14
+    LEU0_RX #2 PE15
+
+    LEU0_TX #0 PD4
+    LEU0_TX #1 PB13
+    LEU0_TX #2 PE14
+    ------- -- ----
+    LEU1_RX #0 PC7
+    LEU1_RX #1 PA6
+
+    LEU1_TX #0 PC6
+    LEU1_TX #1 PA5
+    ------- -- ----
+
 Configurations
 ==============
   Each EFM32 Gecko Starter Kit configuration is maintained in a sub-director
