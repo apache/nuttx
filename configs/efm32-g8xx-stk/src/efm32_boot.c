@@ -1,8 +1,8 @@
 /*****************************************************************************
- * configs/efm32-dk3650/src/efm32_boot.c
+ * configs/efm32-g8xx-stk/src/efm32_boot.c
  *
- *   Copyright (C) 2014 Richard Cochran. All rights reserved.
- *   Author: Richard Cochran <richardcochran@gmail.com>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,21 +39,23 @@
 
 #include <nuttx/config.h>
 
+#include "efm32_start.h"
+
 #include "efm32-g8xx-stk.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All EFM32 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization before any devices
+ *   have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void efm32_boardinitialize(void)
 {
