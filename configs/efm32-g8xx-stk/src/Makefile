@@ -37,6 +37,12 @@
 
 CSRCS = efm32_boot.c
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += efm32_autoleds.c
+else
+CSRCS += efm32_userleds.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
