@@ -8847,4 +8847,6 @@
 	* configs/Kconfig, README.txt, and nucleo-f401re:  Extend this board
 	  configuration to also support the Nucleo-F411RE.  From Serg Podtynnyi
 	  (2014-10-14).
+	* tools/Config.mk: "Add a PRELINK macro to Config.mk.  From Kriegleder
+	  (2014-10-17).
 

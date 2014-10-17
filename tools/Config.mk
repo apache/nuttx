@@ -191,6 +191,39 @@ define ARCHIVE
 endef
 endif
 
+# PRELINK - Prelink a list of files
+# This is useful when files were compiled with fvisibility=hidden.
+# Any symbol which was not explicitly made global is invisible outside the
+# prelinked file.
+#
+# Example: $(call PRELINK, prelink-file, "file1 file2 file3 ...")
+#
+# Note: The fileN strings may not contain spaces or  characters that may be
+# interpreted strangely by the shell
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   LD - The command to invoke the linker (includes any options)
+#    OBJCOPY - The command to invoke the object cop (includes any options)
+#
+# Depends on this settings defined in board-specific defconfig file installed
+# at $(TOPDIR)/.config:
+#
+#   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define PRELINK
+	@echo PRELINK: $1
+	$(Q) $(LD) -Ur -o $1 $2 && $(OBJCOPY) --localize-hidden $1
+endef
+else
+define PRELINK
+	@echo "PRELINK: $1"
+	$(Q) $(LD) -Ur -o $1 $2 && $(OBJCOPY) --localize-hidden $1
+endef
+endif
+
 # DELFILE - Delete one file
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
