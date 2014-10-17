@@ -1,0 +1,57 @@
+#
+# arch/arm/src/efm32/Kconfig
+#
+
+if ARCH_CHIP_EFM32
+
+comment "EFM32 Configuration Options"
+
+choice
+	prompt "EFM32 Chip Selection"
+	default ARCH_CHIP_EFM32TG840F32
+
+config ARCH_CHIP_EFM32TG840F32
+	bool "EFM32TG840F32"
+	select EFM32_EFM32TG
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Tiny Gecko with 32 KB flash and 4 KB RAM in a QFN64
+		package
+
+config ARCH_CHIP_EFM32G880F128
+	bool "EFM32G880F128"
+	select EFM32_EFM32G
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Gecko with 128KiB flash and 16KiB RAM in a LQFP100
+		package
+
+config ARCH_CHIP_EFM32G890F128
+	bool "EFM32G890F128"
+	select EFM32_EFM32G
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Gecko with 128KiB flash and 16KiB RAM in a BGA112
+		package
+
+config ARCH_CHIP_EFM32GG332F1024
+	bool "EFM32GG332F1024"
+	select EFM32_EFM32GG
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Giant Gecko with 1024KiB flash and 128KiB RAM in a
+		QFP64 package.
+
+endchoice
+
+config EFM32_EFM32TG
+bool n
+
+config EFM32_EFM32G
+bool n
+
+config EFM32_EFM32GG
+bool n
+
+endif
+
