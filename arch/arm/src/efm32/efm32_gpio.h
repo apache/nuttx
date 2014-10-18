@@ -50,12 +50,6 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#if !defined(CONFIG_EFM32_GPIOA_IRQ) && !defined(CONFIG_EFM32_GPIOB_IRQ) && \
-    !defined(CONFIG_EFM32_GPIOC_IRQ) && !defined(CONFIG_EFM32_GPIOD_IRQ) && \
-    !defined(CONFIG_EFM32_GPIOE_IRQ) && !defined(CONFIG_EFM32_GPIOF_IRQ)
-#  undef CONFIG_EFM32_GPIO_IRQ
-#endif
-
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_GPIO
 #endif
