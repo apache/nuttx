@@ -60,51 +60,69 @@ LEDs
 Serial Console
 ==============
 
-  The EFM32G890F128 support the following options for serial output:
+  Pin Availability
+  ----------------
+  The EFM32G890F128 support the following options for serial output.  NOTE
+  (1) that not all of these pins are available for use as a serial console,
+  however.  And (2) not all pins made available by the board.
 
-    ------- -- ----
-     US0_RX #0 PE11
-     US0_RX #1 PE6
-     US0_RX #2 PC10
+    EFM32 PIN  GPIO NOTES/CONFLICTS/AVAILABILITY
+    ------- -- ---- ----------------------------------------------
+     US0_RX #0 PE11 LCD_PE11, LCD_SEG7
+     US0_RX #1 PE6  LCD_PE6, LCD_COM2
+     US0_RX #2 PC10 UIF_SLIDER2
 
-     US0_TX #0 PE10
-     US0_TX #1 PE7
-     US0_TX #2 PC11
+     US0_TX #0 PE10 LCD_PE10, LCD_SEGG
+     US0_TX #1 PE7  LCD_PE7, LCD_COM3
+     US0_TX #2 PC11 UIF_SLIDER3
     ------- -- ----
-     US1_RX #0 PC1
-     US1_RX #1 PD1
+     US1_RX #0 PC1  UIF_LED1
+     US1_RX #1 PD1  Not connected on this board
 
-     US1_TX #0 PC0
-     US1_TX #1 PD0
+     US1_TX #0 PC0  UIF_LED0
+     US1_TX #1 PD0  Not connected on this board
     ------- -- ----
-     US2_RX #0 PC3
-     US2_RX #1 PB4
+     US2_RX #0 PC3  UIF_LED3
+     US2_RX #1 PB4  LCD_PB4, LCD_SEG21
 
-     US2_TX #0 PC2
-     US2_TX #1 PB3
+     US2_TX #0 PC2  UIF_LED2
+     US2_TX #1 PB3  LCD_PB3, LCD_SEG20
     ------- -- ----
-      U0_RX #1 PE1
-      U0_RX #2 PA4
+      U0_RX #1 PE1  **AVAILABLE at TP130** (if BC_EN is low, see below)
+      U0_RX #2 PA4  LCD_PA4, LCD_SEG17
 
-      U0_TX #0 PF6
-      U0_TX #1 PE0
-      U0_TX #2 PA3
-      U0_TX #3 PC14
+      U0_TX #0 PF6  LCD_PF6, LCD_SEG24
+      U0_TX #1 PE0  **AVAILABLE at TP129** (if BC_EN is low, see below)
+      U0_TX #2 PA3  LCD_PA3, LCD_SEG16
+      U0_TX #3 PC14 **AVAILABLE at TP117**
     ------- -- ----
-    LEU0_RX #0 PD5
-    LEU0_RX #1 PB14
-    LEU0_RX #2 PE15
+    LEU0_RX #0 PD5  **AVAILABLE at TP123 and EXP port pin 14**
+    LEU0_RX #1 PB14 CTRLMCU_SPI_MISO
+    LEU0_RX #2 PE15 LCD_PE15, LCD_SEG11
 
-    LEU0_TX #0 PD4
-    LEU0_TX #1 PB13
-    LEU0_TX #2 PE14
+    LEU0_TX #0 PD4  **AVAILABLE at TP122 and EXP port pin 12**
+    LEU0_TX #1 PB13 CTRLMCU_SPI_SCK
+    LEU0_TX #2 PE14 LCD_PE14, LCD_SEG10
     ------- -- ----
-    LEU1_RX #0 PC7
-    LEU1_RX #1 PA6
+    LEU1_RX #0 PC7  DEBUG_MCU_SW_ENABLE
+    LEU1_RX #1 PA6  DEBUG_TDI_IN
 
-    LEU1_TX #0 PC6
-    LEU1_TX #1 PA5
+    LEU1_TX #0 PC6  DEBUG_DH_SW_ENABLE
+    LEU1_TX #1 PA5  DEBUG_TMS_SWDIO_IN
     ------- -- ----
+
+   Default Serial Console
+   ----------------------
+   UART0 is configured as the default serial console at 115200 8N1
+   on pins PE0 and PE1.
+
+   Communication through the Board Controller
+   ------------------------------------------
+   The control MCU acts as a board controller (BC). There is a UART
+   connection between the EFM and the BC. The connection is made by
+   setting the BC_EN line high. The EFM can then use the BSP to send
+   commands to the BC. When BC_EN is low, BC_TX and BC_RX can be used
+   by other applications.
 
 Configurations
 ==============
