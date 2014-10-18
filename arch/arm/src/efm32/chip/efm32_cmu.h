@@ -65,7 +65,7 @@
  * Included Files
  *******************************************************************************************************************************/
 
-#include "chip/efm32_memorymaph.h"
+#include "chip/efm32_memorymap.h"
 
 /*******************************************************************************************************************************
  * Pre-processor Definitions
@@ -1055,7 +1055,85 @@
 #  define _CMU_HFPERCLKEN0_I2C0_MASK               0x800UL                                /* Bit mask for CMU_I2C0 */
 #  define _CMU_HFPERCLKEN0_I2C0_DEFAULT            0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
 #  define CMU_HFPERCLKEN0_I2C0_DEFAULT             (_CMU_HFPERCLKEN0_I2C0_DEFAULT << 11)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32G)
+#  define _CMU_HFPERCLKEN0_RESETVALUE              0x00000000UL                           /* Default value for CMU_HFPERCLKEN0 */
+#  define _CMU_HFPERCLKEN0_MASK                    0x0000FDFFUL                           /* Mask for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_USART0                   (0x1UL << 0)                           /* Universal Synchronous/Asynchronous Receiver/Transmitter 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_USART0_SHIFT            0                                      /* Shift value for CMU_USART0 */
+#  define _CMU_HFPERCLKEN0_USART0_MASK             0x1UL                                  /* Bit mask for CMU_USART0 */
+#  define _CMU_HFPERCLKEN0_USART0_DEFAULT          0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_USART0_DEFAULT           (_CMU_HFPERCLKEN0_USART0_DEFAULT << 0) /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_USART1                   (0x1UL << 1)                           /* Universal Synchronous/Asynchronous Receiver/Transmitter 1 Clock Enable */
+#  define _CMU_HFPERCLKEN0_USART1_SHIFT            1                                      /* Shift value for CMU_USART1 */
+#  define _CMU_HFPERCLKEN0_USART1_MASK             0x2UL                                  /* Bit mask for CMU_USART1 */
+#  define _CMU_HFPERCLKEN0_USART1_DEFAULT          0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_USART1_DEFAULT           (_CMU_HFPERCLKEN0_USART1_DEFAULT << 1) /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_USART2                   (0x1UL << 2)                           /* Universal Synchronous/Asynchronous Receiver/Transmitter 2 Clock Enable */
+#  define _CMU_HFPERCLKEN0_USART2_SHIFT            2                                      /* Shift value for CMU_USART2 */
+#  define _CMU_HFPERCLKEN0_USART2_MASK             0x4UL                                  /* Bit mask for CMU_USART2 */
+#  define _CMU_HFPERCLKEN0_USART2_DEFAULT          0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_USART2_DEFAULT           (_CMU_HFPERCLKEN0_USART2_DEFAULT << 2) /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_UART0                    (0x1UL << 3)                           /* Universal Asynchronous Receiver/Transmitter 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_UART0_SHIFT             3                                      /* Shift value for CMU_UART0 */
+#  define _CMU_HFPERCLKEN0_UART0_MASK              0x8UL                                  /* Bit mask for CMU_UART0 */
+#  define _CMU_HFPERCLKEN0_UART0_DEFAULT           0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_UART0_DEFAULT            (_CMU_HFPERCLKEN0_UART0_DEFAULT << 3)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_TIMER0                   (0x1UL << 4)                           /* Timer 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_TIMER0_SHIFT            4                                      /* Shift value for CMU_TIMER0 */
+#  define _CMU_HFPERCLKEN0_TIMER0_MASK             0x10UL                                 /* Bit mask for CMU_TIMER0 */
+#  define _CMU_HFPERCLKEN0_TIMER0_DEFAULT          0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_TIMER0_DEFAULT           (_CMU_HFPERCLKEN0_TIMER0_DEFAULT << 4) /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_TIMER1                   (0x1UL << 5)                           /* Timer 1 Clock Enable */
+#  define _CMU_HFPERCLKEN0_TIMER1_SHIFT            5                                      /* Shift value for CMU_TIMER1 */
+#  define _CMU_HFPERCLKEN0_TIMER1_MASK             0x20UL                                 /* Bit mask for CMU_TIMER1 */
+#  define _CMU_HFPERCLKEN0_TIMER1_DEFAULT          0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_TIMER1_DEFAULT           (_CMU_HFPERCLKEN0_TIMER1_DEFAULT << 5) /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_TIMER2                   (0x1UL << 6)                           /* Timer 2 Clock Enable */
+#  define _CMU_HFPERCLKEN0_TIMER2_SHIFT            6                                      /* Shift value for CMU_TIMER2 */
+#  define _CMU_HFPERCLKEN0_TIMER2_MASK             0x40UL                                 /* Bit mask for CMU_TIMER2 */
+#  define _CMU_HFPERCLKEN0_TIMER2_DEFAULT          0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_TIMER2_DEFAULT           (_CMU_HFPERCLKEN0_TIMER2_DEFAULT << 6) /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_ACMP0                    (0x1UL << 7)                           /* Analog Comparator 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_ACMP0_SHIFT             7                                      /* Shift value for CMU_ACMP0 */
+#  define _CMU_HFPERCLKEN0_ACMP0_MASK              0x80UL                                 /* Bit mask for CMU_ACMP0 */
+#  define _CMU_HFPERCLKEN0_ACMP0_DEFAULT           0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_ACMP0_DEFAULT            (_CMU_HFPERCLKEN0_ACMP0_DEFAULT << 7)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_ACMP1                    (0x1UL << 8)                           /* Analog Comparator 1 Clock Enable */
+#  define _CMU_HFPERCLKEN0_ACMP1_SHIFT             8                                      /* Shift value for CMU_ACMP1 */
+#  define _CMU_HFPERCLKEN0_ACMP1_MASK              0x100UL                                /* Bit mask for CMU_ACMP1 */
+#  define _CMU_HFPERCLKEN0_ACMP1_DEFAULT           0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_ACMP1_DEFAULT            (_CMU_HFPERCLKEN0_ACMP1_DEFAULT << 8)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_PRS                      (0x1UL << 10)                          /* Peripheral Reflex System Clock Enable */
+#  define _CMU_HFPERCLKEN0_PRS_SHIFT               10                                     /* Shift value for CMU_PRS */
+#  define _CMU_HFPERCLKEN0_PRS_MASK                0x400UL                                /* Bit mask for CMU_PRS */
+#  define _CMU_HFPERCLKEN0_PRS_DEFAULT             0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_PRS_DEFAULT              (_CMU_HFPERCLKEN0_PRS_DEFAULT << 10)   /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_DAC0                     (0x1UL << 11)                          /* Digital to Analog Converter 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_DAC0_SHIFT              11                                     /* Shift value for CMU_DAC0 */
+#  define _CMU_HFPERCLKEN0_DAC0_MASK               0x800UL                                /* Bit mask for CMU_DAC0 */
+#  define _CMU_HFPERCLKEN0_DAC0_DEFAULT            0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_DAC0_DEFAULT             (_CMU_HFPERCLKEN0_DAC0_DEFAULT << 11)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_GPIO                     (0x1UL << 12)                          /* General purpose Input/Output Clock Enable */
+#  define _CMU_HFPERCLKEN0_GPIO_SHIFT              12                                     /* Shift value for CMU_GPIO */
+#  define _CMU_HFPERCLKEN0_GPIO_MASK               0x1000UL                               /* Bit mask for CMU_GPIO */
+#  define _CMU_HFPERCLKEN0_GPIO_DEFAULT            0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_GPIO_DEFAULT             (_CMU_HFPERCLKEN0_GPIO_DEFAULT << 12)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_VCMP                     (0x1UL << 13)                          /* Voltage Comparator Clock Enable */
+#  define _CMU_HFPERCLKEN0_VCMP_SHIFT              13                                     /* Shift value for CMU_VCMP */
+#  define _CMU_HFPERCLKEN0_VCMP_MASK               0x2000UL                               /* Bit mask for CMU_VCMP */
+#  define _CMU_HFPERCLKEN0_VCMP_DEFAULT            0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_VCMP_DEFAULT             (_CMU_HFPERCLKEN0_VCMP_DEFAULT << 13)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_ADC0                     (0x1UL << 14)                          /* Analog to Digital Converter 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_ADC0_SHIFT              14                                     /* Shift value for CMU_ADC0 */
+#  define _CMU_HFPERCLKEN0_ADC0_MASK               0x40000UL                              /* Bit mask for CMU_ADC0 */
+#  define _CMU_HFPERCLKEN0_ADC0_DEFAULT            0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_ADC0_DEFAULT             (_CMU_HFPERCLKEN0_ADC0_DEFAULT << 14)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_I2C0                     (0x1UL << 15)                          /* I2C 0 Clock Enable */
+#  define _CMU_HFPERCLKEN0_I2C0_SHIFT              15                                     /* Shift value for CMU_I2C0 */
+#  define _CMU_HFPERCLKEN0_I2C0_MASK               0x8000UL                               /* Bit mask for CMU_I2C0 */
+#  define _CMU_HFPERCLKEN0_I2C0_DEFAULT            0x00000000UL                           /* Mode DEFAULT for CMU_HFPERCLKEN0 */
+#  define CMU_HFPERCLKEN0_I2C0_DEFAULT             (_CMU_HFPERCLKEN0_I2C0_DEFAULT << 15)  /* Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_HFPERCLKEN0_RESETVALUE              0x00000000UL                           /* Default value for CMU_HFPERCLKEN0 */
 #  define _CMU_HFPERCLKEN0_MASK                    0x0003FFFFUL                           /* Mask for CMU_HFPERCLKEN0 */
 #  define CMU_HFPERCLKEN0_USART0                   (0x1UL << 0)                           /* Universal Synchronous/Asynchronous Receiver/Transmitter 0 Clock Enable */

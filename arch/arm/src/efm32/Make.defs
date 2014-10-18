@@ -95,9 +95,8 @@ endif
 CHIP_ASRCS  =
 CHIP_CSRCS  =
 
-CHIP_CSRCS += efm32_start.c efm32_irq.c
+CHIP_CSRCS += efm32_start.c efm32_clockconfig.c efm32_irq.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c
 endif
-
