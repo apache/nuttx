@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/efm32/efm32_lowputc.h
+ * arch/arm/src/efm32/efm32_lowputc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_EFM32_LOWPUTC_H
-#define __ARCH_ARM_SRC_EFM32_EFM32_LOWPUTC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -44,7 +41,7 @@
 
 #include <stdint.h>
 
-#include "efm32_config.h"
+#include "efm32_lowputc.h"
 
 /****************************************************************************
  * Public Functions
@@ -61,7 +58,10 @@
  *
  ****************************************************************************/
 
-void efm32_lowsetup(void);
+void efm32_lowsetup(void)
+{
+#warning Missing logic
+}
 
 /*****************************************************************************
  * Name: efm32_lowputc
@@ -72,7 +72,10 @@ void efm32_lowsetup(void);
  *****************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
-void efm32_lowputc(uint32_t ch);
+void efm32_lowputc(uint32_t ch)
+{
+#warning Missing logic
+}
 #endif
 
 /*****************************************************************************
@@ -85,7 +88,8 @@ void efm32_lowputc(uint32_t ch);
 
 #ifdef HAVE_UART_DEVICE
 void efm32_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
-                         unsigned int parity, unsigned int nbits);
+                         unsigned int parity, unsigned int nbits)
+{
+#warning Missing logic
+}
 #endif
-
-#endif /* __ARCH_ARM_SRC_EFM32_EFM32_LOWPUTC_H */
