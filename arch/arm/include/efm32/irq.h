@@ -68,8 +68,8 @@
 #define EFM32_IRQ_MEMFAULT     (4) /* Vector  4: Memory management (MPU) */
 #define EFM32_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
 #define EFM32_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
-#define EFM32_IRQ_SVCALL       11) /* Vector 11: SVC call */
-#define EFM32_IRQ_DBGMONITOR   12) /* Vector 12: Debug Monitor */
+#define EFM32_IRQ_SVCALL      (11) /* Vector 11: SVC call */
+#define EFM32_IRQ_DBGMONITOR  (12) /* Vector 12: Debug Monitor */
                                    /* Vector 13: Reserved */
 #define EFM32_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
 #define EFM32_IRQ_SYSTICK     (15) /* Vector 15: System tick */
