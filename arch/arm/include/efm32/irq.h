@@ -50,7 +50,7 @@
 #include <arch/efm32/chip.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
@@ -60,23 +60,23 @@
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define EFM32_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG) */
-                                     /* Vector  0: Reset stack pointer value */
-                                     /* Vector  1: Reset (not handler as an IRQ) */
-#define EFM32_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define EFM32_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-#define EFM32_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
-#define EFM32_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
-#define EFM32_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
-#define EFM32_IRQ_SVCALL        (11) /* Vector 11: SVC call */
-#define EFM32_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
-                                     /* Vector 13: Reserved */
-#define EFM32_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
-#define EFM32_IRQ_SYSTICK       (15) /* Vector 15: System tick */
+#define EFM32_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
+                                   /* Vector  0: Reset stack pointer value */
+                                   /* Vector  1: Reset (not handler as an IRQ) */
+#define EFM32_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
+#define EFM32_IRQ_HARDFAULT    (3) /* Vector  3: Hard fault */
+#define EFM32_IRQ_MEMFAULT     (4) /* Vector  4: Memory management (MPU) */
+#define EFM32_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
+#define EFM32_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
+#define EFM32_IRQ_SVCALL       11) /* Vector 11: SVC call */
+#define EFM32_IRQ_DBGMONITOR   12) /* Vector 12: Debug Monitor */
+                                   /* Vector 13: Reserved */
+#define EFM32_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
+#define EFM32_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
 /* External interrupts (vectors >= 16).  These definitions are chip-specific */
 
-#define EFM32_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
+#define EFM32_IRQ_INTERRUPTS  (16) /* Vector number of the first external interrupt */
 
 #if defined(CONFIG_EFM32_EFM32TG)
 #  include <arch/efm32/efm32tg_irq.h>
@@ -86,6 +86,35 @@
 #  include <arch/efm32/efm32gg_irq.h>
 #else
 #  error "Unsupported EFM32 chip"
+#endif
+
+#ifdef CONFIG_EFM32_GPIO_IRQ
+/* If GPIO interrupt support is enabled then up to 16 additional GPIO interrupt
+ * sources are available.  There are actually only two physical interrupt lines:
+ * GPIO_EVEN and GPIO_ODD.  However, from the software point of view, there are
+ * 16-additional interrupts generated from a second level of decoding.
+ */
+
+#  define EFM32_IRQ_EXTI0     (NR_VECTORS+0)  /* Port[n], pin0 external interrupt */
+#  define EFM32_IRQ_EXTI1     (NR_VECTORS+1)  /* Port[n], pin1 external interrupt */
+#  define EFM32_IRQ_EXTI2     (NR_VECTORS+2)  /* Port[n], pin2 external interrupt */
+#  define EFM32_IRQ_EXTI3     (NR_VECTORS+3)  /* Port[n], pin3 external interrupt */
+#  define EFM32_IRQ_EXTI4     (NR_VECTORS+4)  /* Port[n], pin4 external interrupt */
+#  define EFM32_IRQ_EXTI5     (NR_VECTORS+5)  /* Port[n], pin5 external interrupt */
+#  define EFM32_IRQ_EXTI6     (NR_VECTORS+6)  /* Port[n], pin6 external interrupt */
+#  define EFM32_IRQ_EXTI7     (NR_VECTORS+7)  /* Port[n], pin7 external interrupt */
+#  define EFM32_IRQ_EXTI8     (NR_VECTORS+8)  /* Port[n], pin8 external interrupt */
+#  define EFM32_IRQ_EXTI9     (NR_VECTORS+9)  /* Port[n], pin9 external interrupt */
+#  define EFM32_IRQ_EXTI10    (NR_VECTORS+10) /* Port[n], pin10 external interrupt */
+#  define EFM32_IRQ_EXTI11    (NR_VECTORS+11) /* Port[n], pin11 external interrupt */
+#  define EFM32_IRQ_EXTI12    (NR_VECTORS+12) /* Port[n], pin12 external interrupt */
+#  define EFM32_IRQ_EXTI13    (NR_VECTORS+13) /* Port[n], pin13 external interrupt */
+#  define EFM32_IRQ_EXTI14    (NR_VECTORS+14) /* Port[n], pin14 external interrupt */
+#  define EFM32_IRQ_EXTI15    (NR_VECTORS+15) /* Port[n], pin15 external interrupt */
+
+#  define NR_IRQS             (NR_VECTORS+16) /* Total number of interrupts */
+#else
+#  define NR_IRQS             NR_VECTORS      /* Total number of interrupts */
 #endif
 
 /************************************************************************************

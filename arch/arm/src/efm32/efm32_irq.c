@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -53,6 +54,7 @@
 #include "up_internal.h"
 
 #include "chip.h"
+#include "efm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -119,15 +121,15 @@ static void efm32_dumpnvic(const char *msg, int irq)
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
         getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 32)
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 48)
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 48)
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
         getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 64)
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
   lldbg("              %08x\n",
         getreg32(NVIC_IRQ64_67_PRIORITY));
 #endif
@@ -237,32 +239,63 @@ static int efm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 {
   DEBUGASSERT(irq >= EFM32_IRQ_NMI && irq < NR_IRQS);
 
-  /* Check for external interrupt */
+  /* Check for external interrupt or (a second level GPIO interrupt) */
 
   if (irq >= EFM32_IRQ_INTERRUPTS)
     {
-      if (irq < EFM32_IRQ_INTERRUPTS + 32)
+      /* Is this an external interrupt? */
+
+      if (irq < NR_VECTORS)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS);
-        }
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 32)
-      else if (irq < EFM32_IRQ_INTERRUPTS + 64)
-        {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 32);
-        }
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 64)
-      else if (irq < NR_IRQS)
-        {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 64);
-        }
+          /* Yes.. We have support implemented for vectors 0-95 */
+
+          DEBUGASSERT(irq < (EFM32_IRQ_INTERRUPTS + 96));
+
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
+          /* Check for vectors 0-31 */
+
+          if (irq < EFM32_IRQ_INTERRUPTS + 32)
+#endif
+            {
+              *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS);
+            }
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
+          /* Yes..  Check for vectors 32-63 */
+
+          else
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
+          if (irq < EFM32_IRQ_INTERRUPTS + 64)
+#endif
+            {
+              *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 32);
+            }
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
+          /* Yes..  Check for vectors 64-95 */
+
+          else
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 96)
+          /* Yes..  Check for vectors 64-95 */
+
+          if (irq < NR_VECTORS)
+#endif
+            {
+              *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+              *bit     = 1 << (irq - EFM32_IRQ_INTERRUPTS - 64);
+            }
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 96)
+          else
+            {
+              return -EINVAL; /* We should never get here */
+            }
 #endif
 #endif
+#endif
+        }
       else
         {
-          return ERROR; /* Invalid interrupt */
+          return -EINVAL; /* Invalid interrupt */
         }
     }
 
@@ -290,7 +323,7 @@ static int efm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
         {
-          return ERROR; /* Invalid or unsupported exception */
+          return -EINVAL; /* Invalid or unsupported exception */
         }
     }
 
@@ -313,9 +346,9 @@ void up_irqinitialize(void)
   /* Disable all interrupts */
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 32)
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
   putreg32(0, NVIC_IRQ32_63_ENABLE);
-#if NR_IRQS >= (EFM32_IRQ_INTERRUPTS + 64)
+#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
   putreg32(0, NVIC_IRQ64_95_ENABLE);
 #endif
 #endif
@@ -406,9 +439,16 @@ void up_irqinitialize(void)
   irq_attach(EFM32_IRQ_RESERVED, efm32_reserved);
 #endif
 
-  efm32_dumpnvic("initial", NR_IRQS);
+  efm32_dumpnvic("initial", NR_VECTORS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_EFM32_GPIO_IRQ
+  /* Initialize logic to support a second level of interrupt decoding for
+   * GPIO pins.
+   */
+
+  efm32_gpioirqinitialize();
+#endif
 
   /* And finally, enable interrupts */
 
@@ -449,6 +489,14 @@ void up_disable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
+#ifdef CONFIG_EFM32_GPIO_IRQ
+  else
+    {
+      /* Maybe it is a (derived) GPIO IRQ */
+
+      efm32_gpioirqdisable(irq);
+    }
+#endif
 
   efm32_dumpnvic("disable", irq);
 }
@@ -486,6 +534,14 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
+#ifdef CONFIG_EFM32_GPIO_IRQ
+  else
+    {
+      /* Maybe it is a (derived) PIO IRQ */
+
+      efm32_gpioirqenable(irq);
+    }
+#endif
 
   efm32_dumpnvic("enable", irq);
 }
@@ -520,7 +576,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= EFM32_IRQ_MEMFAULT && irq < NR_IRQS &&
+  DEBUGASSERT(irq >= EFM32_IRQ_MEMFAULT && irq < NR_VECTORS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < EFM32_IRQ_INTERRUPTS)
@@ -532,12 +588,18 @@ int up_prioritize_irq(int irq, int priority)
       regaddr = NVIC_SYSH_PRIORITY(irq);
       irq    -= 4;
     }
-  else
+  else (irq < NR_VECTORS)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
       irq    -= EFM32_IRQ_INTERRUPTS;
       regaddr = NVIC_IRQ_PRIORITY(irq);
+    }
+  else
+    {
+      /* Must be a GPIO interrupt */
+
+      return -EINVAL;
     }
 
   regval      = getreg32(regaddr);
