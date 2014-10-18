@@ -90,7 +90,6 @@
 #define EFM32_IRQ_AES        (EFM32_IRQ_INTERRUPTS+29)  /* 29   AES         */
 
 #define NR_VECTORS           (EFM32_IRQ_INTERRUPTS+30)
-#define NR_IRQS              (EFM32_IRQ_INTERRUPTS+30)
 
 /*****************************************************************************
  * Public Types
