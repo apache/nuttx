@@ -47,6 +47,21 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Clocking *****************************************************************/
+/* Clock Sources
+ *   - 1-28 MHz High Frequency RC Oscillator (HFRCO)
+ *   - 4-32 MHz High Frequency Crystal Oscillator (HFXO)
+ *   - 32.768 kHz Low Frequency RC Oscillator (LFRCO)
+ *   - 32.768 kHz Low Frequency Crystal Oscillator (LFXO)
+ *
+ * The device boots with 14 MHz HFRCO as the HFCLK source.
+ */
+
+#define BOARD_HFRCO_FREQUENCY  14000000 /* 14MHz on reset */
+#define BOARD_HFXO_FREQUENCY   32000000 /* 32MHz crystal on board */
+#define BOARD_LFRCO_FREQUENCY  32768    /* Low frequency oscillator */
+#define BOARD_LFXO_FREQUENCY   32768    /* 32MHz crystal on board */
+
 /* The EFM32 Gecko Starter Kit supports 4 yellow LEDs.  One side is grounded
  * so these LEDs are illuminated by outputting a high value.
  *
