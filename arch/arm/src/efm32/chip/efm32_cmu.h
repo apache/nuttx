@@ -25,7 +25,9 @@
  * any third party, arising from your use of this Software.
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
- *   Author: Pierre-noel Bouteville <pnb990@gmail.com>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Authors: Pierre-noel Bouteville <pnb990@gmail.com>
+ *            Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,44 +71,69 @@
  * Pre-processor Definitions
  *******************************************************************************************************************************/
 
-typedef struct
-{
-  __IO uint32_t CTRL;         /* CMU Control Register */
-  __IO uint32_t HFCORECLKDIV; /* High Frequency Core Clock Division Register */
-  __IO uint32_t HFPERCLKDIV;  /* High Frequency Peripheral Clock Division Register */
-  __IO uint32_t HFRCOCTRL;    /* HFRCO Control Register */
-  __IO uint32_t LFRCOCTRL;    /* LFRCO Control Register */
-  __IO uint32_t AUXHFRCOCTRL; /* AUXHFRCO Control Register */
-  __IO uint32_t CALCTRL;      /* Calibration Control Register */
-  __IO uint32_t CALCNT;       /* Calibration Counter Register */
-  __IO uint32_t OSCENCMD;     /* Oscillator Enable/Disable Command Register */
-  __IO uint32_t CMD;          /* Command Register */
-  __IO uint32_t LFCLKSEL;     /* Low Frequency Clock Select Register */
-  __I uint32_t  STATUS;       /* Status Register */
-  __I uint32_t  IF;           /* Interrupt Flag Register */
-  __IO uint32_t IFS;          /* Interrupt Flag Set Register */
-  __IO uint32_t IFC;          /* Interrupt Flag Clear Register */
-  __IO uint32_t IEN;          /* Interrupt Enable Register */
-  __IO uint32_t HFCORECLKEN0; /* High Frequency Core Clock Enable Register 0 */
-  __IO uint32_t HFPERCLKEN0;  /* High Frequency Peripheral Clock Enable Register 0 */
-  uint32_t      RESERVED0[2]; /* Reserved for future use **/
-  __I uint32_t  SYNCBUSY;     /* Synchronization Busy Register */
-  __IO uint32_t FREEZE;       /* Freeze Register */
-  __IO uint32_t LFACLKEN0;    /* Low Frequency A Clock Enable Register 0 (Async Reg) */
-  uint32_t      RESERVED1[1]; /* Reserved for future use **/
-  __IO uint32_t LFBCLKEN0;    /* Low Frequency B Clock Enable Register 0 (Async Reg) */
-  uint32_t      RESERVED2[1]; /* Reserved for future use **/
-  __IO uint32_t LFAPRESC0;    /* Low Frequency A Prescaler Register 0 (Async Reg) */
-  uint32_t      RESERVED3[1]; /* Reserved for future use **/
-  __IO uint32_t LFBPRESC0;    /* Low Frequency B Prescaler Register 0 (Async Reg) */
-  uint32_t      RESERVED4[1]; /* Reserved for future use **/
-  __IO uint32_t PCNTCTRL;     /* PCNT Control Register */
-  __IO uint32_t LCDCTRL;      /* LCD Control Register */
-  __IO uint32_t ROUTE;        /* I/O Routing Register */
-  __IO uint32_t LOCK;         /* Configuration Lock Register */
-} CMU_TypeDef;
+/* CMU Register Offsets ********************************************************************************************************/
 
-/* Bit field definitions *******************************************************************************************************/
+#define EFM32_CMU_CTRL_OFFSET                      0x0000  /* CMU Control Register */
+#define EFM32_CMU_HFCORECLKDIV_OFFSET              0x0004  /* High Frequency Core Clock Division Register */
+#define EFM32_CMU_HFPERCLKDIV_OFFSET               0x0008  /* High Frequency Peripheral Clock Division Register */
+#define EFM32_CMU_HFRCOCTRL_OFFSET                 0x000c  /* HFRCO Control Register */
+#define EFM32_CMU_LFRCOCTRL_OFFSET                 0x0010  /* LFRCO Control Register */
+#define EFM32_CMU_AUXHFRCOCTRL_OFFSET              0x0014  /* AUXHFRCO Control Register */
+#define EFM32_CMU_CALCTRL_OFFSET                   0x0018  /* Calibration Control Register */
+#define EFM32_CMU_CALCNT_OFFSET                    0x001c  /* Calibration Counter Register */
+#define EFM32_CMU_OSCENCMD_OFFSET                  0x0020  /* Oscillator Enable/Disable Command Register */
+#define EFM32_CMU_CMD_OFFSET                       0x0024  /* Command Register */
+#define EFM32_CMU_LFCLKSEL_OFFSET                  0x0028  /* Low Frequency Clock Select Register */
+#define EFM32_CMU_STATUS_OFFSET                    0x002c  /* Status Register */
+#define EFM32_CMU_IF_OFFSET                        0x0030  /* Interrupt Flag Register */
+#define EFM32_CMU_IFS_OFFSET                       0x0034  /* Interrupt Flag Set Register */
+#define EFM32_CMU_IFC_OFFSET                       0x0038  /* Interrupt Flag Clear Register */
+#define EFM32_CMU_IEN_OFFSET                       0x003c  /* Interrupt Enable Register */
+#define EFM32_CMU_HFCORECLKEN0_OFFSET              0x0040  /* High Frequency Core Clock Enable Register 0 */
+#define EFM32_CMU_HFPERCLKEN0_OFFSET               0x0044  /* High Frequency Peripheral Clock Enable Register 0 */
+#define EFM32_CMU_SYNCBUSY_OFFSET                  0x0050  /* Synchronization Busy Register */
+#define EFM32_CMU_FREEZE_OFFSET                    0x0054  /* Freeze Register */
+#define EFM32_CMU_LFACLKEN0_OFFSET                 0x0058  /* Low Frequency A Clock Enable Register 0 (Async Reg) */
+#define EFM32_CMU_LFBCLKEN0_OFFSET                 0x0060  /* Low Frequency B Clock Enable Register 0 (Async Reg) */
+#define EFM32_CMU_LFAPRESC0_OFFSET                 0x0068  /* Low Frequency A Prescaler Register 0 (Async Reg) */
+#define EFM32_CMU_LFBPRESC0_OFFSET                 0x0070  /* Low Frequency B Prescaler Register 0 (Async Reg) */
+#define EFM32_CMU_PCNTCTRL_OFFSET                  0x0078  /* PCNT Control Register */
+#define EFM32_CMU_LCDCTRL_OFFSET                   0x007c  /* LCD Control Register */
+#define EFM32_CMU_ROUTE_OFFSET                     0x0080  /* I/O Routing Register */
+#define EFM32_CMU_LOCK_OFFSET                      0x0084  /* Configuration Lock Register */
+
+/* CMU Register Addresses ******************************************************************************************************/
+
+#define EFM32_CMU_CTRL                             (EFM32_CMU_BASE+EFM32_CMU_CTRL_OFFSET)
+#define EFM32_CMU_HFCORECLKDIV                     (EFM32_CMU_BASE+EFM32_CMU_HFCORECLKDIV_OFFSET)
+#define EFM32_CMU_HFPERCLKDIV                      (EFM32_CMU_BASE+EFM32_CMU_HFPERCLKDIV_OFFSET)
+#define EFM32_CMU_HFRCOCTRL                        (EFM32_CMU_BASE+EFM32_CMU_HFRCOCTRL_OFFSET)
+#define EFM32_CMU_LFRCOCTRL                        (EFM32_CMU_BASE+EFM32_CMU_LFRCOCTRL_OFFSET)
+#define EFM32_CMU_AUXHFRCOCTRL                     (EFM32_CMU_BASE+EFM32_CMU_AUXHFRCOCTRL_OFFSET)
+#define EFM32_CMU_CALCTRL                          (EFM32_CMU_BASE+EFM32_CMU_CALCTRL_OFFSET)
+#define EFM32_CMU_CALCNT                           (EFM32_CMU_BASE+EFM32_CMU_CALCNT_OFFSET)
+#define EFM32_CMU_OSCENCMD                         (EFM32_CMU_BASE+EFM32_CMU_OSCENCMD_OFFSET)
+#define EFM32_CMU_CMD                              (EFM32_CMU_BASE+EFM32_CMU_CMD_OFFSET)
+#define EFM32_CMU_LFCLKSEL                         (EFM32_CMU_BASE+EFM32_CMU_LFCLKSEL_OFFSET)
+#define EFM32_CMU_STATUS                           (EFM32_CMU_BASE+EFM32_CMU_STATUS_OFFSET)
+#define EFM32_CMU_IF                               (EFM32_CMU_BASE+EFM32_CMU_IF_OFFSET)
+#define EFM32_CMU_IFS                              (EFM32_CMU_BASE+EFM32_CMU_IFS_OFFSET)
+#define EFM32_CMU_IFC                              (EFM32_CMU_BASE+EFM32_CMU_IFC_OFFSET)
+#define EFM32_CMU_IEN                              (EFM32_CMU_BASE+EFM32_CMU_IEN_OFFSET)
+#define EFM32_CMU_HFCORECLKEN0                     (EFM32_CMU_BASE+EFM32_CMU_HFCORECLKEN0_OFFSET)
+#define EFM32_CMU_HFPERCLKEN0                      (EFM32_CMU_BASE+EFM32_CMU_HFPERCLKEN0_OFFSET)
+#define EFM32_CMU_SYNCBUSY                         (EFM32_CMU_BASE+EFM32_CMU_SYNCBUSY_OFFSET)
+#define EFM32_CMU_FREEZE                           (EFM32_CMU_BASE+EFM32_CMU_FREEZE_OFFSET)
+#define EFM32_CMU_LFACLKEN0                        (EFM32_CMU_BASE+EFM32_CMU_LFACLKEN0_OFFSET)
+#define EFM32_CMU_LFBCLKEN0                        (EFM32_CMU_BASE+EFM32_CMU_LFBCLKEN0_OFFSET)
+#define EFM32_CMU_LFAPRESC0                        (EFM32_CMU_BASE+EFM32_CMU_LFAPRESC0_OFFSET)
+#define EFM32_CMU_LFBPRESC0                        (EFM32_CMU_BASE+EFM32_CMU_LFBPRESC0_OFFSET)
+#define EFM32_CMU_PCNTCTRL                         (EFM32_CMU_BASE+EFM32_CMU_PCNTCTRL_OFFSET)
+#define EFM32_CMU_LCDCTRL                          (EFM32_CMU_BASE+EFM32_CMU_LCDCTRL_OFFSET)
+#define EFM32_CMU_ROUTE                            (EFM32_CMU_BASE+EFM32_CMU_ROUTE_OFFSET)
+#define EFM32_CMU_LOCK                             (EFM32_CMU_BASE+EFM32_CMU_LOCK_OFFSET)
+
+/* CMU Register Bit Definitions ************************************************************************************************/
 
 /* Bit fields for CMU CTRL */
 
