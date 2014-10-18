@@ -1,7 +1,7 @@
 /********************************************************************************************************************************
  * arch/arm/src/efm32/chip/efm32_cmu.h
  *
- *    (C) Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ *    (C) Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com
  *
  * Permission is granted to anyone to use this software for any purpose,
  * including commercial applications, and to alter it and redistribute it
