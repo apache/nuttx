@@ -33,11 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 HEAD_ASRC =
-else
-HEAD_ASRC = efm32_vectors.S
-endif
 
 CMN_UASRCS =
 CMN_UCSRCS =
@@ -93,9 +89,12 @@ endif
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  =
 
-CHIP_CSRCS += efm32_start.c efm32_clockconfig.c efm32_irq.c efm32_timerisr.c
+ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CHIP_ASRCS += efm32_vectors.S
+endif
+
+CHIP_CSRCS = efm32_start.c efm32_clockconfig.c efm32_irq.c efm32_timerisr.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c
