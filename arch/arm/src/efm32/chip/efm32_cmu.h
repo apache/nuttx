@@ -137,10 +137,10 @@
 
 /* Bit fields for CMU CTRL */
 
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_CTRL_RESETVALUE                     0x000C262CUL                                /* Default value for CMU_CTRL */
 #  define _CMU_CTRL_MASK                           0x13FE3EEFUL                                /* Mask for CMU_CTRL */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_CTRL_RESETVALUE                     0x000C062CUL                                /* Default value for CMU_CTRL */
 #  define _CMU_CTRL_MASK                           0x53FFFEEFUL                                /* Mask for CMU_CTRL */
 #endif
@@ -170,12 +170,12 @@
 #define _CMU_CTRL_HFXOBUFCUR_SHIFT                 5                                           /* Shift value for CMU_HFXOBUFCUR */
 #define _CMU_CTRL_HFXOBUFCUR_MASK                  0x60UL                                      /* Bit mask for CMU_HFXOBUFCUR */
 #define _CMU_CTRL_HFXOBUFCUR_DEFAULT               0x00000001UL                                /* Mode DEFAULT for CMU_CTRL */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_CTRL_HFXOBUFCUR_BOOSTUPTO32MHZ      0x00000001UL                                /* Mode BOOSTUPTO32MHZ for CMU_CTRL */
 #  define _CMU_CTRL_HFXOBUFCUR_BOOSTABOVE32MHZ     0x00000003UL                                /* Mode BOOSTABOVE32MHZ for CMU_CTRL */
 #endif
 #define CMU_CTRL_HFXOBUFCUR_DEFAULT                (_CMU_CTRL_HFXOBUFCUR_DEFAULT << 5)         /* Shifted mode DEFAULT for CMU_CTRL */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_CTRL_HFXOBUFCUR_BOOSTUPTO32MHZ       (_CMU_CTRL_HFXOBUFCUR_BOOSTUPTO32MHZ << 5)  /* Shifted mode BOOSTUPTO32MHZ for CMU_CTRL */
 #  define CMU_CTRL_HFXOBUFCUR_BOOSTABOVE32MHZ      (_CMU_CTRL_HFXOBUFCUR_BOOSTABOVE32MHZ << 5) /* Shifted mode BOOSTABOVE32MHZ for CMU_CTRL */
 #endif
@@ -215,7 +215,7 @@
 #define CMU_CTRL_LFXOBOOST_70PCENT                 (_CMU_CTRL_LFXOBOOST_70PCENT << 13)         /* Shifted mode 70PCENT for CMU_CTRL */
 #define CMU_CTRL_LFXOBOOST_DEFAULT                 (_CMU_CTRL_LFXOBOOST_DEFAULT << 13)         /* Shifted mode DEFAULT for CMU_CTRL */
 #define CMU_CTRL_LFXOBOOST_100PCENT                (_CMU_CTRL_LFXOBOOST_100PCENT << 13)        /* Shifted mode 100PCENT for CMU_CTRL */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_CTRL_HFCLKDIV_SHIFT                 14                                          /* Shift value for CMU_HFCLKDIV */
 #  define _CMU_CTRL_HFCLKDIV_MASK                  0x1C000UL                                   /* Bit mask for CMU_HFCLKDIV */
 #  define _CMU_CTRL_HFCLKDIV_DEFAULT               0x00000000UL                                /* Mode DEFAULT for CMU_CTRL */
@@ -287,7 +287,7 @@
 #define CMU_CTRL_DBGCLK_DEFAULT                    (_CMU_CTRL_DBGCLK_DEFAULT << 28)            /* Shifted mode DEFAULT for CMU_CTRL */
 #define CMU_CTRL_DBGCLK_AUXHFRCO                   (_CMU_CTRL_DBGCLK_AUXHFRCO << 28)           /* Shifted mode AUXHFRCO for CMU_CTRL */
 #define CMU_CTRL_DBGCLK_HFCLK                      (_CMU_CTRL_DBGCLK_HFCLK << 28)              /* Shifted mode HFCLK for CMU_CTRL */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_CTRL_HFLE                            (0x1UL << 30)                               /* High-Frequency LE Interface */
 #  define _CMU_CTRL_HFLE_SHIFT                     30                                          /* Shift value for CMU_HFLE */
 #  define _CMU_CTRL_HFLE_MASK                      0x40000000UL                                /* Bit mask for CMU_HFLE */
@@ -298,11 +298,12 @@
 /* Bit fields for CMU HFCORECLKDIV */
 
 #define _CMU_HFCORECLKDIV_RESETVALUE               0x00000000UL                                    /* Default value for CMU_HFCORECLKDIV */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_HFCORECLKDIV_MASK                   0x0000000FUL                                    /* Mask for CMU_HFCORECLKDIV */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_HFCORECLKDIV_MASK                   0x0000010FUL                                    /* Mask for CMU_HFCORECLKDIV */
 #endif
+
 #define _CMU_HFCORECLKDIV_HFCORECLKDIV_SHIFT       0                                               /* Shift value for CMU_HFCORECLKDIV */
 #define _CMU_HFCORECLKDIV_HFCORECLKDIV_MASK        0xFUL                                           /* Bit mask for CMU_HFCORECLKDIV */
 #define _CMU_HFCORECLKDIV_HFCORECLKDIV_DEFAULT     0x00000000UL                                    /* Mode DEFAULT for CMU_HFCORECLKDIV */
@@ -327,7 +328,7 @@
 #define CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK128     (_CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK128 << 0)  /* Shifted mode HFCLK128 for CMU_HFCORECLKDIV */
 #define CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK256     (_CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK256 << 0)  /* Shifted mode HFCLK256 for CMU_HFCORECLKDIV */
 #define CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK512     (_CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK512 << 0)  /* Shifted mode HFCLK512 for CMU_HFCORECLKDIV */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_HFCORECLKDIV_HFCORECLKLEDIV          (0x1UL << 8)                                    /* Additional Division Factor For HFCORECLKLE */
 #  define _CMU_HFCORECLKDIV_HFCORECLKLEDIV_SHIFT   8                                               /* Shift value for CMU_HFCORECLKLEDIV */
 #  define _CMU_HFCORECLKDIV_HFCORECLKLEDIV_MASK    0x100UL                                         /* Bit mask for CMU_HFCORECLKLEDIV */
@@ -343,6 +344,7 @@
 
 #define _CMU_HFPERCLKDIV_RESETVALUE                0x00000100UL                                 /* Default value for CMU_HFPERCLKDIV */
 #define _CMU_HFPERCLKDIV_MASK                      0x0000010FUL                                 /* Mask for CMU_HFPERCLKDIV */
+
 #define _CMU_HFPERCLKDIV_HFPERCLKDIV_SHIFT         0                                            /* Shift value for CMU_HFPERCLKDIV */
 #define _CMU_HFPERCLKDIV_HFPERCLKDIV_MASK          0xFUL                                        /* Bit mask for CMU_HFPERCLKDIV */
 #define _CMU_HFPERCLKDIV_HFPERCLKDIV_DEFAULT       0x00000000UL                                 /* Mode DEFAULT for CMU_HFPERCLKDIV */
@@ -377,6 +379,7 @@
 
 #define _CMU_HFRCOCTRL_RESETVALUE                  0x00000380UL                           /* Default value for CMU_HFRCOCTRL */
 #define _CMU_HFRCOCTRL_MASK                        0x0001F7FFUL                           /* Mask for CMU_HFRCOCTRL */
+
 #define _CMU_HFRCOCTRL_TUNING_SHIFT                0                                      /* Shift value for CMU_TUNING */
 #define _CMU_HFRCOCTRL_TUNING_MASK                 0xFFUL                                 /* Bit mask for CMU_TUNING */
 #define _CMU_HFRCOCTRL_TUNING_DEFAULT              0x00000080UL                           /* Mode DEFAULT for CMU_HFRCOCTRL */
@@ -406,6 +409,7 @@
 
 #define _CMU_LFRCOCTRL_RESETVALUE                  0x00000040UL                         /* Default value for CMU_LFRCOCTRL */
 #define _CMU_LFRCOCTRL_MASK                        0x0000007FUL                         /* Mask for CMU_LFRCOCTRL */
+
 #define _CMU_LFRCOCTRL_TUNING_SHIFT                0                                    /* Shift value for CMU_TUNING */
 #define _CMU_LFRCOCTRL_TUNING_MASK                 0x7FUL                               /* Bit mask for CMU_TUNING */
 #define _CMU_LFRCOCTRL_TUNING_DEFAULT              0x00000040UL                         /* Mode DEFAULT for CMU_LFRCOCTRL */
@@ -415,6 +419,7 @@
 
 #define _CMU_AUXHFRCOCTRL_RESETVALUE               0x00000080UL                            /* Default value for CMU_AUXHFRCOCTRL */
 #define _CMU_AUXHFRCOCTRL_MASK                     0x000007FFUL                            /* Mask for CMU_AUXHFRCOCTRL */
+
 #define _CMU_AUXHFRCOCTRL_TUNING_SHIFT             0                                       /* Shift value for CMU_TUNING */
 #define _CMU_AUXHFRCOCTRL_TUNING_MASK              0xFFUL                                  /* Bit mask for CMU_TUNING */
 #define _CMU_AUXHFRCOCTRL_TUNING_DEFAULT           0x00000080UL                            /* Mode DEFAULT for CMU_AUXHFRCOCTRL */
@@ -440,6 +445,7 @@
 
 #define _CMU_CALCTRL_RESETVALUE                    0x00000000UL                         /* Default value for CMU_CALCTRL */
 #define _CMU_CALCTRL_MASK                          0x0000007FUL                         /* Mask for CMU_CALCTRL */
+
 #define _CMU_CALCTRL_UPSEL_SHIFT                   0                                    /* Shift value for CMU_UPSEL */
 #define _CMU_CALCTRL_UPSEL_MASK                    0x7UL                                /* Bit mask for CMU_UPSEL */
 #define _CMU_CALCTRL_UPSEL_DEFAULT                 0x00000000UL                         /* Mode DEFAULT for CMU_CALCTRL */
@@ -480,6 +486,7 @@
 
 #define _CMU_CALCNT_RESETVALUE                     0x00000000UL                      /* Default value for CMU_CALCNT */
 #define _CMU_CALCNT_MASK                           0x000FFFFFUL                      /* Mask for CMU_CALCNT */
+
 #define _CMU_CALCNT_CALCNT_SHIFT                   0                                 /* Shift value for CMU_CALCNT */
 #define _CMU_CALCNT_CALCNT_MASK                    0xFFFFFUL                         /* Bit mask for CMU_CALCNT */
 #define _CMU_CALCNT_CALCNT_DEFAULT                 0x00000000UL                      /* Mode DEFAULT for CMU_CALCNT */
@@ -489,6 +496,7 @@
 
 #define _CMU_OSCENCMD_RESETVALUE                   0x00000000UL                             /* Default value for CMU_OSCENCMD */
 #define _CMU_OSCENCMD_MASK                         0x000003FFUL                             /* Mask for CMU_OSCENCMD */
+
 #define CMU_OSCENCMD_HFRCOEN                       (0x1UL << 0)                             /* HFRCO Enable */
 #define _CMU_OSCENCMD_HFRCOEN_SHIFT                0                                        /* Shift value for CMU_HFRCOEN */
 #define _CMU_OSCENCMD_HFRCOEN_MASK                 0x1UL                                    /* Bit mask for CMU_HFRCOEN */
@@ -543,11 +551,12 @@
 /* Bit fields for CMU CMD */
 
 #define _CMU_CMD_RESETVALUE                        0x00000000UL                          /* Default value for CMU_CMD */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_CMD_MASK                            0x0000001FUL                          /* Mask for CMU_CMD */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_CMD_MASK                            0x0000007FUL                          /* Mask for CMU_CMD */
 #endif
+
 #define _CMU_CMD_HFCLKSEL_SHIFT                    0                                     /* Shift value for CMU_HFCLKSEL */
 #define _CMU_CMD_HFCLKSEL_MASK                     0x7UL                                 /* Bit mask for CMU_HFCLKSEL */
 #define _CMU_CMD_HFCLKSEL_DEFAULT                  0x00000000UL                          /* Mode DEFAULT for CMU_CMD */
@@ -570,7 +579,7 @@
 #define _CMU_CMD_CALSTOP_MASK                      0x10UL                                /* Bit mask for CMU_CALSTOP */
 #define _CMU_CMD_CALSTOP_DEFAULT                   0x00000000UL                          /* Mode DEFAULT for CMU_CMD */
 #define CMU_CMD_CALSTOP_DEFAULT                    (_CMU_CMD_CALSTOP_DEFAULT << 4)       /* Shifted mode DEFAULT for CMU_CMD */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_CMD_USBCCLKSEL_SHIFT                5                                     /* Shift value for CMU_USBCCLKSEL */
 #  define _CMU_CMD_USBCCLKSEL_MASK                 0x60UL                                /* Bit mask for CMU_USBCCLKSEL */
 #  define _CMU_CMD_USBCCLKSEL_DEFAULT              0x00000000UL                          /* Mode DEFAULT for CMU_CMD */
@@ -587,6 +596,7 @@
 
 #define _CMU_LFCLKSEL_RESETVALUE                   0x00000005UL                             /* Default value for CMU_LFCLKSEL */
 #define _CMU_LFCLKSEL_MASK                         0x0011000FUL                             /* Mask for CMU_LFCLKSEL */
+
 #define _CMU_LFCLKSEL_LFA_SHIFT                    0                                        /* Shift value for CMU_LFA */
 #define _CMU_LFCLKSEL_LFA_MASK                     0x3UL                                    /* Bit mask for CMU_LFA */
 #define _CMU_LFCLKSEL_LFA_DISABLED                 0x00000000UL                             /* Mode DISABLED for CMU_LFCLKSEL */
@@ -633,11 +643,12 @@
 /* Bit fields for CMU STATUS */
 
 #define _CMU_STATUS_RESETVALUE                     0x00000403UL                             /* Default value for CMU_STATUS */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_STATUS_MASK                         0x00007FFFUL                             /* Mask for CMU_STATUS */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_STATUS_MASK                         0x0003FFFFUL                             /* Mask for CMU_STATUS */
 #endif
+
 #define CMU_STATUS_HFRCOENS                        (0x1UL << 0)                             /* HFRCO Enable Status */
 #define _CMU_STATUS_HFRCOENS_SHIFT                 0                                        /* Shift value for CMU_HFRCOENS */
 #define _CMU_STATUS_HFRCOENS_MASK                  0x1UL                                    /* Bit mask for CMU_HFRCOENS */
@@ -713,7 +724,7 @@
 #define _CMU_STATUS_CALBSY_MASK                    0x4000UL                                 /* Bit mask for CMU_CALBSY */
 #define _CMU_STATUS_CALBSY_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for CMU_STATUS */
 #define CMU_STATUS_CALBSY_DEFAULT                  (_CMU_STATUS_CALBSY_DEFAULT << 14)       /* Shifted mode DEFAULT for CMU_STATUS */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_STATUS_USBCHFCLKSEL                  (0x1UL << 15)                            /* USBC HFCLK Selected */
 #  define _CMU_STATUS_USBCHFCLKSEL_SHIFT           15                                       /* Shift value for CMU_USBCHFCLKSEL */
 #  define _CMU_STATUS_USBCHFCLKSEL_MASK            0x8000UL                                 /* Bit mask for CMU_USBCHFCLKSEL */
@@ -734,11 +745,12 @@
 /* Bit fields for CMU IF */
 
 #define _CMU_IF_RESETVALUE                         0x00000001UL                        /* Default value for CMU_IF */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_IF_MASK                             0x0000007FUL                        /* Mask for CMU_IF */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_IF_MASK                             0x000000FFUL                        /* Mask for CMU_IF */
 #endif
+
 #define CMU_IF_HFRCORDY                            (0x1UL << 0)                        /* HFRCO Ready Interrupt Flag */
 #define _CMU_IF_HFRCORDY_SHIFT                     0                                   /* Shift value for CMU_HFRCORDY */
 #define _CMU_IF_HFRCORDY_MASK                      0x1UL                               /* Bit mask for CMU_HFRCORDY */
@@ -774,7 +786,7 @@
 #define _CMU_IF_CALOF_MASK                         0x40UL                              /* Bit mask for CMU_CALOF */
 #define _CMU_IF_CALOF_DEFAULT                      0x00000000UL                        /* Mode DEFAULT for CMU_IF */
 #define CMU_IF_CALOF_DEFAULT                       (_CMU_IF_CALOF_DEFAULT << 6)        /* Shifted mode DEFAULT for CMU_IF */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_IF_USBCHFCLKSEL                        (0x1UL << 7)                        /* USBC HFCLK Selected Interrupt Flag */
 #  define _CMU_IF_USBCHFCLKSEL_SHIFT                 7                                   /* Shift value for CMU_USBCHFCLKSEL */
 #  define _CMU_IF_USBCHFCLKSEL_MASK                  0x80UL                              /* Bit mask for CMU_USBCHFCLKSEL */
@@ -785,11 +797,12 @@
 /* Bit fields for CMU IFS */
 
 #define _CMU_IFS_RESETVALUE                        0x00000000UL                         /* Default value for CMU_IFS */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_IFS_MASK                            0x0000007FUL                         /* Mask for CMU_IFS */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_IFS_MASK                            0x000000FFUL                         /* Mask for CMU_IFS */
 #endif
+
 #define CMU_IFS_HFRCORDY                           (0x1UL << 0)                         /* HFRCO Ready Interrupt Flag Set */
 #define _CMU_IFS_HFRCORDY_SHIFT                    0                                    /* Shift value for CMU_HFRCORDY */
 #define _CMU_IFS_HFRCORDY_MASK                     0x1UL                                /* Bit mask for CMU_HFRCORDY */
@@ -825,7 +838,7 @@
 #define _CMU_IFS_CALOF_MASK                        0x40UL                               /* Bit mask for CMU_CALOF */
 #define _CMU_IFS_CALOF_DEFAULT                     0x00000000UL                         /* Mode DEFAULT for CMU_IFS */
 #define CMU_IFS_CALOF_DEFAULT                      (_CMU_IFS_CALOF_DEFAULT << 6)        /* Shifted mode DEFAULT for CMU_IFS */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_IFS_USBCHFCLKSEL                     (0x1UL << 7)                         /* USBC HFCLK Selected Interrupt Flag Set */
 #  define _CMU_IFS_USBCHFCLKSEL_SHIFT              7                                    /* Shift value for CMU_USBCHFCLKSEL */
 #  define _CMU_IFS_USBCHFCLKSEL_MASK               0x80UL                               /* Bit mask for CMU_USBCHFCLKSEL */
@@ -836,11 +849,12 @@
 /* Bit fields for CMU IFC */
 
 #define _CMU_IFC_RESETVALUE                        0x00000000UL                         /* Default value for CMU_IFC */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_IFC_MASK                            0x0000007FUL                         /* Mask for CMU_IFC */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_IFC_MASK                            0x000000FFUL                         /* Mask for CMU_IFC */
 #endif
+
 #define CMU_IFC_HFRCORDY                           (0x1UL << 0)                         /* HFRCO Ready Interrupt Flag Clear */
 #define _CMU_IFC_HFRCORDY_SHIFT                    0                                    /* Shift value for CMU_HFRCORDY */
 #define _CMU_IFC_HFRCORDY_MASK                     0x1UL                                /* Bit mask for CMU_HFRCORDY */
@@ -876,7 +890,7 @@
 #define _CMU_IFC_CALOF_MASK                        0x40UL                               /* Bit mask for CMU_CALOF */
 #define _CMU_IFC_CALOF_DEFAULT                     0x00000000UL                         /* Mode DEFAULT for CMU_IFC */
 #define CMU_IFC_CALOF_DEFAULT                      (_CMU_IFC_CALOF_DEFAULT << 6)        /* Shifted mode DEFAULT for CMU_IFC */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_IFC_USBCHFCLKSEL                     (0x1UL << 7)                         /* USBC HFCLK Selected Interrupt Flag Clear */
 #  define _CMU_IFC_USBCHFCLKSEL_SHIFT              7                                    /* Shift value for CMU_USBCHFCLKSEL */
 #  define _CMU_IFC_USBCHFCLKSEL_MASK               0x80UL                               /* Bit mask for CMU_USBCHFCLKSEL */
@@ -887,11 +901,12 @@
 /* Bit fields for CMU IEN */
 
 #define _CMU_IEN_RESETVALUE                        0x00000000UL                         /* Default value for CMU_IEN */
-#if defined(CONFIG_EFM32_EFM32TG)
+#if defined(CONFIG_EFM32_EFM32TG) || defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_IEN_MASK                            0x0000007FUL                         /* Mask for CMU_IEN */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_IEN_MASK                            0x000000FFUL                         /* Mask for CMU_IEN */
 #endif
+
 #define CMU_IEN_HFRCORDY                           (0x1UL << 0)                         /* HFRCO Ready Interrupt Enable */
 #define _CMU_IEN_HFRCORDY_SHIFT                    0                                    /* Shift value for CMU_HFRCORDY */
 #define _CMU_IEN_HFRCORDY_MASK                     0x1UL                                /* Bit mask for CMU_HFRCORDY */
@@ -927,7 +942,7 @@
 #define _CMU_IEN_CALOF_MASK                        0x40UL                               /* Bit mask for CMU_CALOF */
 #define _CMU_IEN_CALOF_DEFAULT                     0x00000000UL                         /* Mode DEFAULT for CMU_IEN */
 #define CMU_IEN_CALOF_DEFAULT                      (_CMU_IEN_CALOF_DEFAULT << 6)        /* Shifted mode DEFAULT for CMU_IEN */
-#if defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#if defined(CONFIG_EFM32_EFM32GG)
 #  define CMU_IEN_USBCHFCLKSEL                     (0x1UL << 7)                         /* USBC HFCLK Selected Interrupt Enable */
 #  define _CMU_IEN_USBCHFCLKSEL_SHIFT              7                                    /* Shift value for CMU_USBCHFCLKSEL */
 #  define _CMU_IEN_USBCHFCLKSEL_MASK               0x80UL                               /* Bit mask for CMU_USBCHFCLKSEL */
@@ -940,6 +955,7 @@
 #if defined(CONFIG_EFM32_EFM32TG)
 #  define _CMU_HFCORECLKEN0_RESETVALUE             0x00000000UL                          /* Default value for CMU_HFCORECLKEN0 */
 #  define _CMU_HFCORECLKEN0_MASK                   0x00000007UL                          /* Mask for CMU_HFCORECLKEN0 */
+
 #  define CMU_HFCORECLKEN0_AES                     (0x1UL << 0)                          /* Advanced Encryption Standard Accelerator Clock Enable */
 #  define _CMU_HFCORECLKEN0_AES_SHIFT              0                                     /* Shift value for CMU_AES */
 #  define _CMU_HFCORECLKEN0_AES_MASK               0x1UL                                 /* Bit mask for CMU_AES */
@@ -955,9 +971,34 @@
 #  define _CMU_HFCORECLKEN0_LE_MASK                0x4UL                                 /* Bit mask for CMU_LE */
 #  define _CMU_HFCORECLKEN0_LE_DEFAULT             0x00000000UL                          /* Mode DEFAULT for CMU_HFCORECLKEN0 */
 #  define CMU_HFCORECLKEN0_LE_DEFAULT              (_CMU_HFCORECLKEN0_LE_DEFAULT << 2)   /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
-#elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
+#elif defined(CONFIG_EFM32_EFM32G)
+#  define _CMU_HFCORECLKEN0_RESETVALUE             0x00000000UL                          /* Default value for CMU_HFCORECLKEN0 */
+#  define _CMU_HFCORECLKEN0_MASK                   0x00000007UL                          /* Mask for CMU_HFCORECLKEN0 */
+
+#  define CMU_HFCORECLKEN0_AES                     (0x1UL << 0)                          /* Advanced Encryption Standard Accelerator Clock Enable */
+#  define _CMU_HFCORECLKEN0_AES_SHIFT              0                                     /* Shift value for CMU_AES */
+#  define _CMU_HFCORECLKEN0_AES_MASK               0x1UL                                 /* Bit mask for CMU_AES */
+#  define _CMU_HFCORECLKEN0_AES_DEFAULT            0x00000000UL                          /* Mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_AES_DEFAULT             (_CMU_HFCORECLKEN0_AES_DEFAULT << 0)  /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_DMA                     (0x1UL << 1)                          /* Direct Memory Access Controller Clock Enable */
+#  define _CMU_HFCORECLKEN0_DMA_SHIFT              1                                     /* Shift value for CMU_DMA */
+#  define _CMU_HFCORECLKEN0_DMA_MASK               0x2UL                                 /* Bit mask for CMU_DMA */
+#  define _CMU_HFCORECLKEN0_DMA_DEFAULT            0x00000000UL                          /* Mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_DMA_DEFAULT             (_CMU_HFCORECLKEN0_DMA_DEFAULT << 1)  /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_LE                      (0x1UL << 2)                          /* Low Energy Peripheral Interface Clock Enable */
+#  define _CMU_HFCORECLKEN0_LE_SHIFT               2                                     /* Shift value for CMU_LE */
+#  define _CMU_HFCORECLKEN0_LE_MASK                0x4UL                                 /* Bit mask for CMU_LE */
+#  define _CMU_HFCORECLKEN0_LE_DEFAULT             0x00000000UL                          /* Mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_LE_DEFAULT              (_CMU_HFCORECLKEN0_LE_DEFAULT << 2)   /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_EBI                     (0x1UL << 3)                          /* External Bus Interface Clock Enable */
+#  define _CMU_HFCORECLKEN0_EBI_SHIFT              3                                     /* Shift value for CMU_EBI */
+#  define _CMU_HFCORECLKEN0_EBI_MASK               0x8UL                                /* Bit mask for CMU_EBI */
+#  define _CMU_HFCORECLKEN0_EBI_DEFAULT            0x00000000UL                          /* Mode DEFAULT for CMU_HFCORECLKEN0 */
+#  define CMU_HFCORECLKEN0_EBI_DEFAULT             (_CMU_HFCORECLKEN0_EBI_DEFAULT << 3)  /* Shifted mode DEFAULT for CMU_HFCORECLKEN0 */
+#elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_HFCORECLKEN0_RESETVALUE             0x00000000UL                          /* Default value for CMU_HFCORECLKEN0 */
 #  define _CMU_HFCORECLKEN0_MASK                   0x0000003FUL                          /* Mask for CMU_HFCORECLKEN0 */
+
 #  define CMU_HFCORECLKEN0_DMA                     (0x1UL << 0)                          /* Direct Memory Access Controller Clock Enable */
 #  define _CMU_HFCORECLKEN0_DMA_SHIFT              0                                     /* Shift value for CMU_DMA */
 #  define _CMU_HFCORECLKEN0_DMA_MASK               0x1UL                                 /* Bit mask for CMU_DMA */
@@ -995,6 +1036,7 @@
 #if defined(CONFIG_EFM32_EFM32TG)
 #  define _CMU_HFPERCLKEN0_RESETVALUE              0x00000000UL                           /* Default value for CMU_HFPERCLKEN0 */
 #  define _CMU_HFPERCLKEN0_MASK                    0x00000FFFUL                           /* Mask for CMU_HFPERCLKEN0 */
+
 #  define CMU_HFPERCLKEN0_ACMP0                    (0x1UL << 0)                           /* Analog Comparator 0 Clock Enable */
 #  define _CMU_HFPERCLKEN0_ACMP0_SHIFT             0                                      /* Shift value for CMU_ACMP0 */
 #  define _CMU_HFPERCLKEN0_ACMP0_MASK              0x1UL                                  /* Bit mask for CMU_ACMP0 */
@@ -1058,6 +1100,7 @@
 #elif defined(CONFIG_EFM32_EFM32G)
 #  define _CMU_HFPERCLKEN0_RESETVALUE              0x00000000UL                           /* Default value for CMU_HFPERCLKEN0 */
 #  define _CMU_HFPERCLKEN0_MASK                    0x0000FDFFUL                           /* Mask for CMU_HFPERCLKEN0 */
+
 #  define CMU_HFPERCLKEN0_USART0                   (0x1UL << 0)                           /* Universal Synchronous/Asynchronous Receiver/Transmitter 0 Clock Enable */
 #  define _CMU_HFPERCLKEN0_USART0_SHIFT            0                                      /* Shift value for CMU_USART0 */
 #  define _CMU_HFPERCLKEN0_USART0_MASK             0x1UL                                  /* Bit mask for CMU_USART0 */
@@ -1136,6 +1179,7 @@
 #elif defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_HFPERCLKEN0_RESETVALUE              0x00000000UL                           /* Default value for CMU_HFPERCLKEN0 */
 #  define _CMU_HFPERCLKEN0_MASK                    0x0003FFFFUL                           /* Mask for CMU_HFPERCLKEN0 */
+
 #  define CMU_HFPERCLKEN0_USART0                   (0x1UL << 0)                           /* Universal Synchronous/Asynchronous Receiver/Transmitter 0 Clock Enable */
 #  define _CMU_HFPERCLKEN0_USART0_SHIFT            0                                      /* Shift value for CMU_USART0 */
 #  define _CMU_HFPERCLKEN0_USART0_MASK             0x1UL                                  /* Bit mask for CMU_USART0 */
@@ -1232,6 +1276,7 @@
 
 #define _CMU_SYNCBUSY_RESETVALUE                   0x00000000UL                           /* Default value for CMU_SYNCBUSY */
 #define _CMU_SYNCBUSY_MASK                         0x00000055UL                           /* Mask for CMU_SYNCBUSY */
+
 #define CMU_SYNCBUSY_LFACLKEN0                     (0x1UL << 0)                           /* Low Frequency A Clock Enable 0 Busy */
 #define _CMU_SYNCBUSY_LFACLKEN0_SHIFT              0                                      /* Shift value for CMU_LFACLKEN0 */
 #define _CMU_SYNCBUSY_LFACLKEN0_MASK               0x1UL                                  /* Bit mask for CMU_LFACLKEN0 */
@@ -1257,6 +1302,7 @@
 
 #define _CMU_FREEZE_RESETVALUE                     0x00000000UL                         /* Default value for CMU_FREEZE */
 #define _CMU_FREEZE_MASK                           0x00000001UL                         /* Mask for CMU_FREEZE */
+
 #define CMU_FREEZE_REGFREEZE                       (0x1UL << 0)                         /* Register Update Freeze */
 #define _CMU_FREEZE_REGFREEZE_SHIFT                0                                    /* Shift value for CMU_REGFREEZE */
 #define _CMU_FREEZE_REGFREEZE_MASK                 0x1UL                                /* Bit mask for CMU_REGFREEZE */
@@ -1271,6 +1317,7 @@
 
 #define _CMU_LFACLKEN0_RESETVALUE                  0x00000000UL                           /* Default value for CMU_LFACLKEN0 */
 #define _CMU_LFACLKEN0_MASK                        0x0000000FUL                           /* Mask for CMU_LFACLKEN0 */
+
 #define CMU_LFACLKEN0_LESENSE                      (0x1UL << 0)                           /* Low Energy Sensor Interface Clock Enable */
 #define _CMU_LFACLKEN0_LESENSE_SHIFT               0                                      /* Shift value for CMU_LESENSE */
 #define _CMU_LFACLKEN0_LESENSE_MASK                0x1UL                                  /* Bit mask for CMU_LESENSE */
@@ -1300,6 +1347,7 @@
 #elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_LFBCLKEN0_MASK                      0x00000003UL                          /* Mask for CMU_LFBCLKEN0 */
 #endif
+
 #define CMU_LFBCLKEN0_LEUART0                      (0x1UL << 0)                          /* Low Energy UART 0 Clock Enable */
 #define _CMU_LFBCLKEN0_LEUART0_SHIFT               0                                     /* Shift value for CMU_LEUART0 */
 #define _CMU_LFBCLKEN0_LEUART0_MASK                0x1UL                                 /* Bit mask for CMU_LEUART0 */
@@ -1317,6 +1365,7 @@
 
 #define _CMU_LFAPRESC0_RESETVALUE                  0x00000000UL                            /* Default value for CMU_LFAPRESC0 */
 #define _CMU_LFAPRESC0_MASK                        0x00003FF3UL                            /* Mask for CMU_LFAPRESC0 */
+
 #define _CMU_LFAPRESC0_LESENSE_SHIFT               0                                       /* Shift value for CMU_LESENSE */
 #define _CMU_LFAPRESC0_LESENSE_MASK                0x3UL                                   /* Bit mask for CMU_LESENSE */
 #define _CMU_LFAPRESC0_LESENSE_DIV1                0x00000000UL                            /* Mode DIV1 for CMU_LFAPRESC0 */
@@ -1414,6 +1463,7 @@
 #elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_LFBPRESC0_MASK                      0x00000033UL                       /* Mask for CMU_LFBPRESC0 */
 #endif
+
 #define _CMU_LFBPRESC0_LEUART0_SHIFT               0                                  /* Shift value for CMU_LEUART0 */
 #define _CMU_LFBPRESC0_LEUART0_MASK                0x3UL                              /* Bit mask for CMU_LEUART0 */
 #define _CMU_LFBPRESC0_LEUART0_DIV1                0x00000000UL                       /* Mode DIV1 for CMU_LFBPRESC0 */
@@ -1445,6 +1495,7 @@
 #elif defined(CONFIG_EFM32_EFM32G) || defined(CONFIG_EFM32_EFM32GG)
 #  define _CMU_PCNTCTRL_MASK                       0x0000003FUL                             /* Mask for CMU_PCNTCTRL */
 #endif
+
 #define CMU_PCNTCTRL_PCNT0CLKEN                    (0x1UL << 0)                             /* PCNT0 Clock Enable */
 #define _CMU_PCNTCTRL_PCNT0CLKEN_SHIFT             0                                        /* Shift value for CMU_PCNT0CLKEN */
 #define _CMU_PCNTCTRL_PCNT0CLKEN_MASK              0x1UL                                    /* Bit mask for CMU_PCNT0CLKEN */
@@ -1494,6 +1545,7 @@
 
 #define _CMU_LCDCTRL_RESETVALUE                    0x00000020UL                         /* Default value for CMU_LCDCTRL */
 #define _CMU_LCDCTRL_MASK                          0x0000007FUL                         /* Mask for CMU_LCDCTRL */
+
 #define _CMU_LCDCTRL_FDIV_SHIFT                    0                                    /* Shift value for CMU_FDIV */
 #define _CMU_LCDCTRL_FDIV_MASK                     0x7UL                                /* Bit mask for CMU_FDIV */
 #define _CMU_LCDCTRL_FDIV_DEFAULT                  0x00000000UL                         /* Mode DEFAULT for CMU_LCDCTRL */
@@ -1528,6 +1580,7 @@
 
 #define _CMU_ROUTE_RESETVALUE                      0x00000000UL                         /* Default value for CMU_ROUTE */
 #define _CMU_ROUTE_MASK                            0x0000001FUL                         /* Mask for CMU_ROUTE */
+
 #define CMU_ROUTE_CLKOUT0PEN                       (0x1UL << 0)                         /* CLKOUT0 Pin Enable */
 #define _CMU_ROUTE_CLKOUT0PEN_SHIFT                0                                    /* Shift value for CMU_CLKOUT0PEN */
 #define _CMU_ROUTE_CLKOUT0PEN_MASK                 0x1UL                                /* Bit mask for CMU_CLKOUT0PEN */
@@ -1553,6 +1606,7 @@
 
 #define _CMU_LOCK_RESETVALUE                       0x00000000UL                      /* Default value for CMU_LOCK */
 #define _CMU_LOCK_MASK                             0x0000FFFFUL                      /* Mask for CMU_LOCK */
+
 #define _CMU_LOCK_LOCKKEY_SHIFT                    0                                 /* Shift value for CMU_LOCKKEY */
 #define _CMU_LOCK_LOCKKEY_MASK                     0xFFFFUL                          /* Bit mask for CMU_LOCKKEY */
 #define _CMU_LOCK_LOCKKEY_DEFAULT                  0x00000000UL                      /* Mode DEFAULT for CMU_LOCK */
