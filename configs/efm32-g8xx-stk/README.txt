@@ -88,8 +88,10 @@ Serial Console
      US2_TX #0 PC2  UIF_LED2
      US2_TX #1 PB3  LCD_PB3, LCD_SEG20
     ------- -- ----
+      U0_RX #0 PF7  LCD_PF7, LCD_SEG25
       U0_RX #1 PE1  **AVAILABLE at TP130** (if BC_EN is low, see below)
       U0_RX #2 PA4  LCD_PA4, LCD_SEG17
+      U0_RX #3 PC15 MCUDBG_TDO_SWO
 
       U0_TX #0 PF6  LCD_PF6, LCD_SEG24
       U0_TX #1 PE0  **AVAILABLE at TP129** (if BC_EN is low, see below)

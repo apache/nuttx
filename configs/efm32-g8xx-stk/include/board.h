@@ -45,6 +45,7 @@
 #include <stdbool.h>
 
 #include "chip/efm32_cmu.h"
+#include "chip/efm32_usart.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -192,6 +193,15 @@
 #define LED_SIGNAL        5  /* LED2 + LED3 */
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
+
+/* Pin routing **************************************************************/
+/* UART0:
+ *
+ *   U0_RX #1 PE1  **AVAILABLE at TP130**
+ *   U0_TX #1 PE0  **AVAILABLE at TP129**
+ */
+
+#define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
 
 /****************************************************************************
  * Public Function Prototypes
