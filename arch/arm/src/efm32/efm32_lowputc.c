@@ -40,8 +40,58 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+
+#include "chip/efm32_memorymap.h"
+#include "chip/efm32_usart.h"
+#include "chip/efm32_cmu.h"
 #include "efm32_lowputc.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Console U[S]ART base address */
+
+#ifdef HAVE_SERIAL_CONSOLE
+#  if defined(CONFIG_USART0_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_USART0_BASE
+#    define CONSOLE_BAUD   CONFIG_USART0_BAUD
+#    define CONSOLE_PARITY CONFIG_USART0_PARITY
+#    define CONSOLE_NBITS  CONFIG_UART0_BITS
+#    define CONSOLE_2STOP  CONFIG_UART0_2STOP
+#  elif defined(CONFIG_USART1_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_USART1_BASE
+#    define CONSOLE_BAUD   CONFIG_USART1_BAUD
+#    define CONSOLE_PARITY CONFIG_USART1_PARITY
+#    define CONSOLE_NBITS  CONFIG_UART1_BITS
+#    define CONSOLE_2STOP  CONFIG_UART1_2STOP
+#  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_USART2_BASE
+#    define CONSOLE_BAUD   CONFIG_USART2_BAUD
+#    define CONSOLE_PARITY CONFIG_USART2_PARITY
+#    define CONSOLE_NBITS  CONFIG_UART2_BITS
+#    define CONSOLE_2STOP  CONFIG_UART2_2STOP
+#  elif defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_UART0_BASE
+#    define CONSOLE_BAUD   CONFIG_UART0_BAUD
+#    define CONSOLE_PARITY CONFIG_UART0_PARITY
+#    define CONSOLE_NBITS  CONFIG_UART0_BITS
+#    define CONSOLE_2STOP  CONFIG_UART0_2STOP
+#  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_UART1_BASE
+#    define CONSOLE_BAUD   CONFIG_UART1_BAUD
+#    define CONSOLE_PARITY CONFIG_UART1_PARITY
+#    define CONSOLE_NBITS  CONFIG_UART1_BITS
+#    define CONSOLE_2STOP  CONFIG_UART1_2STOP
+#  else
+#    error No console is selected????  Internal craziness!!!
+#  endif
+#endif /* HAVE_SERIAL_CONSOLE */
 
 /****************************************************************************
  * Public Functions
@@ -60,7 +110,96 @@
 
 void efm32_lowsetup(void)
 {
-#warning Missing logic
+#ifdef HAVE_UART_DEVICE
+  uint32_t regval;
+
+  /* Enable clocking to configured UART/USART devices */
+
+  regval = getreg32(EFM32_CMU_HFPERCLKEN0);
+  regval &= ~(CMU_HFPERCLKEN0_USART0
+             | CMU_HFPERCLKEN0_USART1
+#ifdef CONFIG_EFM32_HAVE_USART2
+             | CMU_HFPERCLKEN0_USART2
+#endif
+#ifdef CONFIG_EFM32_HAVE_UART0
+             | CMU_HFPERCLKEN0_UART0
+#endif
+#ifdef CONFIG_EFM32_HAVE_UART1
+             | CMU_HFPERCLKEN0_UART1
+#endif
+             );
+
+#ifdef CONFIG_EFM32_USART0
+  regval |= CMU_HFPERCLKEN0_USART0;
+#endif
+
+#ifdef CONFIG_EFM32_USART1
+  regval |= CMU_HFPERCLKEN0_USART1;
+#endif
+
+#ifdef CONFIG_EFM32_USART2
+  regval |= CMU_HFPERCLKEN0_USART2;
+#endif
+
+#ifdef CONFIG_EFM32_UART0
+  regval |= CMU_HFPERCLKEN0_UART0;
+#endif
+
+#ifdef CONFIG_EFM32_UART1
+  regval |= CMU_HFPERCLKEN0_UART1;
+#endif
+
+  putreg32(regval, EFM32_CMU_HFPERCLKEN0);
+
+  /* Set location in the ROUTE register */
+
+#ifdef CONFIG_EFM32_USART0
+  regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
+           (BOARD_USART0_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_USART0_ROUTE);
+#endif
+
+#ifdef CONFIG_EFM32_USART1
+  regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
+           (BOARD_USART1_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_USART1_ROUTE);
+#endif
+
+#ifdef CONFIG_EFM32_USART2
+  regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
+           (BOARD_USART2_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_USART2_ROUTE);
+#endif
+
+#ifdef CONFIG_EFM32_UART0
+  regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
+           (BOARD_UART0_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_UART0_ROUTE);
+#endif
+
+#ifdef CONFIG_EFM32_UART1
+  regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
+           (BOARD_UART1_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_UART1_ROUTE);
+#endif
+
+
+#endif /* HAVE_UART_DEVICE */
+
+#ifdef CONFIG_EFM32_LEUART0
+#  warning Missing LEUART0 support
+#endif
+
+#ifdef CONFIG_EFM32_LEUART1
+#  warning Missing LEUART1 support
+#endif
+
+#ifdef HAVE_SERIAL_CONSOLE
+  /* Configure the serial console */
+
+  efm32_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_PARITY,
+                      CONSOLE_NBITS, CONSOLE_2STOP);
+#endif
 }
 
 /*****************************************************************************
@@ -87,8 +226,8 @@ void efm32_lowputc(uint32_t ch)
  *****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void efm32_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
-                         unsigned int parity, unsigned int nbits)
+void efm32_uartconfigure(uintptr_t uart_base, uint32_t baud,
+                         unsigned int parity, unsigned int nbits, bool stop2)
 {
 #warning Missing logic
 }

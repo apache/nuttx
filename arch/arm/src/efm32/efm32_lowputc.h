@@ -84,8 +84,8 @@ void efm32_lowputc(uint32_t ch);
  *****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void efm32_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
-                         unsigned int parity, unsigned int nbits);
+void efm32_uartconfigure(uintptr_t uart_base, uint32_t baud,
+                         unsigned int parity, unsigned int nbits, bool stop2);
 #endif
 
 #endif /* __ARCH_ARM_SRC_EFM32_EFM32_LOWPUTC_H */
