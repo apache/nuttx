@@ -142,4 +142,10 @@ config EFM32_LEUART1
 	select EFM32_UART
 
 endmenu # EFM32 Peripheral Support
+
+config EFM32_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
 endif # ARCH_CHIP_EFM32
