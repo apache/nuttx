@@ -41,15 +41,35 @@
 
 #include <arch/board/board.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
+
 #include "up_arch.h"
 
 #include "chip.h"
 #include "efm32_gpio.h"
+#include "chip/efm32_msc.h"
 #include "chip/efm32_cmu.h"
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
+/* BOARD Configuration ******************************************************/
+
+/* Pre-scalers not currently implemented */
+
+#if defined(CONFIG_EFM32_EFM32GG) && defined(BOARD_HFCLKDIV) && BOARD_HFCLKDIV != 0
+#  error HFCLK divisor not yet supported
+#endif
+
+#if defined(BOARD_HFCORECLKDIV) && BOARD_HFCORECLKDIV != 0
+#  error HFCORECLK divisor not yet supported
+#endif
+
+#if defined(BOARD_HFPERCLKDIV) && BOARD_HFPERCLKDIV != 0
+#  error HFPERCLK divisor not yet supported
+#endif
 
 /****************************************************************************
  * Public Data
@@ -60,7 +80,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: emf32_synchronize
+ * Name: efm32_synchronize
  *
  * Description:
  *   Wait for ongoing sync of register(s) to low frequency domain to
@@ -76,7 +96,7 @@
  *
  ****************************************************************************/
 
-static inline void emf32_synchronize(uint32_t bitset)
+static inline void efm32_synchronize(uint32_t bitset)
 {
   /* Avoid deadlock if modifying a register again after freeze mode is
    * activated.
@@ -88,6 +108,200 @@ static inline void emf32_synchronize(uint32_t bitset)
 
       while ((getreg32(EFM32_CMU_SYNCBUSY) & bitset) != 0);
     }
+}
+
+/****************************************************************************
+ * Name: efm32_statuswait
+ *
+ * Description:
+ *   Wait for ongoing CMU status bit(s) to become set
+ *
+ * Input Parameters:
+ *   bitset - Bitset corresponding to STATUS register defined bits,
+ *            indicating events that we are waiting for.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void efm32_statuswait(uint32_t bitset)
+{
+  /* Wait for clock to stabilize if requested */
+
+   while ((getreg32(EFM32_CMU_STATUS) & bitset) == 0);
+}
+
+/****************************************************************************
+ * Name: efm32_enable_XXX
+ *
+ * Description:
+ *   Enable specific oscillators
+ *
+ ****************************************************************************/
+
+static inline void efm32_enable_lfrco(void)
+{
+  /* Enable the LFRCO */
+
+  putreg32(CMU_OSCENCMD_LFRCOEN, EFM32_CMU_OSCENCMD);
+  efm32_statuswait(CMU_STATUS_LFRCORDY);
+}
+
+
+static inline void efm32_enable_lfxo(void)
+{
+  /* Enable the LFXO */
+
+  putreg32(CMU_OSCENCMD_LFRCOEN, EFM32_CMU_OSCENCMD);
+  efm32_statuswait(CMU_STATUS_LFXORDY);
+}
+
+static inline void efm32_enable_hfrco(void)
+{
+  /* Enable the HFRCO */
+
+  putreg32(CMU_OSCENCMD_HFRCOEN, EFM32_CMU_OSCENCMD);
+  efm32_statuswait(CMU_STATUS_HFRCORDY);
+}
+
+static inline void efm32_enable_hfxo(void)
+{
+  /* Enable the HFXO */
+
+  putreg32(CMU_OSCENCMD_HFXOEN, EFM32_CMU_OSCENCMD);
+  efm32_statuswait(CMU_STATUS_HFXORDY);
+}
+
+static inline void efm32_enable_auxhfrco(void)
+{
+  /* Enable the HFXO */
+
+  putreg32(CMU_OSCENCMD_AUXHFRCOEN, EFM32_CMU_OSCENCMD);
+  efm32_statuswait(CMU_STATUS_AUXHFRCORDY);
+}
+
+/****************************************************************************
+ * Name: efm32_maxwaitstates
+ *
+ * Description:
+ *   Configure flash access wait states to most maximum number of wait
+ *   states, preserving the SCBTP setting.
+ *
+ ****************************************************************************/
+
+static void efm32_maxwaitstates(void)
+{
+  uint32_t regval;
+  uint32_t mode;
+
+  /* Get the READCTRL register content and mask out the mode setting */
+
+  regval  = getreg32(EFM32_MSC_READCTRL);
+  mode    = regval & _MSC_READCTRL_MODE_MASK;
+  regval &= ~_MSC_READCTRL_MODE_MASK;
+
+  /* SCBTP mode? */
+
+  if (mode == MSC_READCTRL_MODE_WS0SCBTP
+     || mode == MSC_READCTRL_MODE_WS1SCBTP
+#ifdef MSC_READCTRL_MODE_WS2SCBTP
+     || mode == MSC_READCTRL_MODE_WS2SCBTP
+#endif
+     )
+    {
+      /* Yes.. select the mximum number of wait states with SCBTP */
+
+      regval |= MSC_READCTRL_MODE_WSMAXSCBTP;
+    }
+   else
+    {
+      /* No.. select the mximum number of wait states without SCBTP */
+
+      regval |= MSC_READCTRL_MODE_WSMAX;
+    }
+
+  /* And save the update READCTRL register */
+
+  putreg32(regval, EFM32_MSC_READCTRL);
+}
+
+/****************************************************************************
+ * Name: efm32_setwaitstates
+ *
+ * Description:
+ *   Configure the optimal number of flash access wait states, preserving
+ *   the SCBTP setting.
+ *
+ ****************************************************************************/
+
+static void efm32_setwaitstates(uint32_t hfcoreclk)
+{
+  uint32_t regval;
+  uint32_t mode;
+  bool scbtp;
+
+  /* SCBTP mode? */
+
+  regval  = getreg32(EFM32_MSC_READCTRL);
+  mode    = regval & _MSC_READCTRL_MODE_MASK;
+  scbtp = (mode == MSC_READCTRL_MODE_WS0SCBTP
+           || mode == MSC_READCTRL_MODE_WS1SCBTP
+#ifdef MSC_READCTRL_MODE_WS2SCBTP
+           || mode == MSC_READCTRL_MODE_WS2SCBTP
+#endif
+           );
+
+  /* Select the number of wait states based on the HFCORECLK frequency */
+
+  regval &= ~_MSC_READCTRL_MODE_MASK;
+
+  /* We can't do more than 2 wait states in any configuration */
+
+#ifdef MSC_READCTRL_MODE_WS2
+  if (hfcoreclk > CMU_MAX_FREQ_2WS)
+    {
+      PANIC();
+    }
+  else
+#endif
+
+  /* Check if we can use 2 wait states */
+
+  if (hfcoreclk > CMU_MAX_FREQ_1WS)
+    {
+#ifdef MSC_READCTRL_MODE_WS2
+      /* Yes.. select 2 wait states */
+
+      regval |= (scbtp ? MSC_READCTRL_MODE_WS2SCBTP : MSC_READCTRL_MODE_WS2);
+#else
+      /* No.. this MCU does not support 2 wait states */
+
+      PANIC();
+#endif
+    }
+
+  /* Check if we can use 1 wait states */
+
+  else if (hfcoreclk > CMU_MAX_FREQ_0WS)
+    {
+      /* Yes.. select 1 wait state */
+
+      regval |= (scbtp ? MSC_READCTRL_MODE_WS1SCBTP : MSC_READCTRL_MODE_WS1);
+    }
+
+  /* Check if we can use no wait states */
+
+  else
+    {
+      /* Select no wait states */
+
+      regval |= (scbtp ? MSC_READCTRL_MODE_WS0SCBTP : MSC_READCTRL_MODE_WS0);
+    }
+
+  /* And save the update READCTRL register */
+
+  putreg32(regval, EFM32_MSC_READCTRL);
 }
 
 /****************************************************************************
@@ -112,9 +326,107 @@ static inline void emf32_synchronize(uint32_t bitset)
  *
  ****************************************************************************/
 
-static inline void efm32_hfclk_config(void)
+static inline void efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
 {
-#warning Missing logic
+  uint32_t frequency;
+#ifdef CMU_CTRL_HFLE
+  uint32_t regval;
+#endif
+
+  /* The HFRCO oscillator is selected by hardware as the clock source for
+   * HFCLK when the device starts up . After reset, the HFRCO frequency is
+   * 14 MHz.
+   *
+   * First enable the oscillator and wait for the oscillator to become ready
+   * before switching the clock source. This way, the system continues to run
+   * on the HFRCO until the oscillator has timed out and provides a reliable
+   * clock.
+   */
+
+    switch (hfclksel)
+    {
+    case _CMU_CMD_HFCLKSEL_LFRCO:
+      {
+        frequency = BOARD_LFRCO_FREQUENCY;
+        efm32_enable_lfrco();
+      }
+      break;
+
+    case _CMU_CMD_HFCLKSEL_LFXO:
+      {
+        frequency = BOARD_LFXO_FREQUENCY;
+        efm32_enable_lfxo();
+      }
+      break;
+
+    case _CMU_CMD_HFCLKSEL_HFRCO:
+      {
+        frequency = BOARD_HFRCO_FREQUENCY;
+        efm32_enable_hfrco();
+      }
+      break;
+
+    case _CMU_CMD_HFCLKSEL_HFXO:
+      {
+        frequency = BOARD_HFXO_FREQUENCY;
+
+#ifdef CMU_CTRL_HFLE
+#if BOARD_LFXO_FREQUENCY > CMU_MAX_FREQ_HFLE
+        /* Adjust HFXO buffer current for high crystal frequencies, enable HFLE
+         * for frequencies above CMU_MAX_FREQ_HFLE.
+         *
+         * We must also have HFLE enabled to access some LE peripherals >= 32MHz.
+         */
+
+        regval = getreg32(EFM32_CMU_CTRL);
+        regval &= ~_CMU_CTRL_HFXOBUFCUR_MASK;
+        regval |= CMU_CTRL_HFXOBUFCUR_BOOSTABOVE32MHZ | CMU_CTRL_HFLE;
+        putreg32(regval, EFM32_CMU_CTRL);
+
+        /* Set DIV4 factor for peripheral clock if HFCORE clock for LE is
+         * enabled.
+         */
+
+        if ((CMU->HFCORECLKEN0 & CMU_HFCORECLKEN0_LE) != 0)
+          {
+            regval  = getreg32(EFM32_CMU_HFCORECLKDIV);
+            regval |= CMU_HFCORECLKDIV_HFCORECLKLEDIV_DIV4;
+            putreg32(regval, EFM32_CMU_HFCORECLKDIV);
+          }
+#else
+        /* No boost... no HFLE */
+
+        regval = getreg32(EFM32_CMU_CTRL);
+        regval &= ~(_CMU_CTRL_HFXOBUFCUR_MASK | CMU_CTRL_HFLE);
+        regval |= CMU_CTRL_HFXOBUFCUR_BOOSTUPTO32MHZ;
+        putreg32(regval, EFM32_CMU_CTRL);
+#endif
+#endif
+        /* Enable the HFXO */
+
+        efm32_enable_hfxo();
+      }
+      break;
+
+#ifdef CONFIG_DEBUG
+      default:
+        PANIC();
+#endif
+    }
+
+   /* Set the maximum  number of FLASH wait states before selecting the new
+    * HFCLK source.
+    */
+
+  efm32_maxwaitstates();
+
+  /* Switch to selected oscillator */
+
+  putreg32(hfclksel << _CMU_CMD_HFCLKSEL_SHIFT, EFM32_CMU_CMD);
+
+  /* Now select the optimal number of FLASH wait states */
+
+  efm32_setwaitstates(frequency);
 }
 
 /****************************************************************************
@@ -146,9 +458,9 @@ static inline void efm32_hfclk_config(void)
  *
  ****************************************************************************/
 
-static inline void efm32_hfcoreclk_config(void)
+static inline void efm32_hfcoreclk_config(uint32_t hfcoreclkdiv)
 {
-#warning Missing logic
+  /* REVISIT:  Divider not currently used */
 }
 
 /****************************************************************************
@@ -167,9 +479,9 @@ static inline void efm32_hfcoreclk_config(void)
  *
  ****************************************************************************/
 
-static inline void efm32_hfperclk_config(void)
+static inline void efm32_hfperclk_config(uint32_t hfperclkdiv)
 {
-#warning Missing logic
+  /* REVISIT:  Divider not currently used */
 }
 
 /****************************************************************************
@@ -197,9 +509,9 @@ static inline void efm32_hfperclk_config(void)
  *
  ****************************************************************************/
 
-static inline void efm32_lfaclk_config(void)
+static inline void efm32_lfaclk_config(uint32_t lfaclksel)
 {
-#warning Missing logic
+  /* REVISIT: Not yet implemented */
 }
 
 /****************************************************************************
@@ -223,9 +535,9 @@ static inline void efm32_lfaclk_config(void)
  *
  ****************************************************************************/
 
-static inline void efm32_lfbclk_config(void)
+static inline void efm32_lfbclk_config(uint32_t lfbclksel)
 {
-#warning Missing logic
+  /* REVISIT: Not yet implemented */
 }
 
 /****************************************************************************
@@ -242,7 +554,7 @@ static inline void efm32_lfbclk_config(void)
 
 static inline void efm32_pcntclk_config(void)
 {
-#warning Missing logic
+  /* REVISIT: Not yet implemented */
 }
 
 /****************************************************************************
@@ -260,7 +572,7 @@ static inline void efm32_pcntclk_config(void)
 
 static inline void efm32_wdogclk_config(void)
 {
-#warning Missing logic
+  /* REVISIT: Not yet implemented */
 }
 
 /****************************************************************************
@@ -282,7 +594,7 @@ static inline void efm32_wdogclk_config(void)
 
 static inline void efm32_auxclk_config(void)
 {
-#warning Missing logic
+  /* REVISIT: Not yet implemented */
 }
 
 /****************************************************************************
@@ -324,11 +636,11 @@ void efm32_clockconfig(void)
 {
   /* Enable clocks and set dividers as determined by the board.h header file */
 
-  efm32_hfclk_config();
-  efm32_hfcoreclk_config();
-  efm32_hfperclk_config();
-  efm32_lfaclk_config();
-  efm32_lfbclk_config();
+  efm32_hfclk_config(BOARD_HFCLKSEL, BOARD_HFCLKDIV);
+  efm32_hfcoreclk_config(BOARD_HFCORECLKDIV);
+  efm32_hfperclk_config(BOARD_HFPERCLKDIV);
+  efm32_lfaclk_config(BOARD_LFACLKSEL);
+  efm32_lfbclk_config(BOARD_LFBCLKSEL);
   efm32_pcntclk_config();
   efm32_wdogclk_config();
   efm32_auxclk_config();
