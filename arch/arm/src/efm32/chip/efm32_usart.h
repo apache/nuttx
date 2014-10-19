@@ -138,7 +138,7 @@
 #ifdef CONFIG_EFM32_EFM32GG
 #  define EFM32_USART0_INPUT                 (EFM32_USART0_BASE+EFM32_USART_INPUT_OFFSET)
 #  define EFM32_USART0_I2SCTRL               (EFM32_USART0_BASE+EFM32_USART_I2SCTRL_OFFSET)
-#endf
+#endif
 
 #define EFM32_USART1_CTRL                    (EFM32_USART1_BASE+EFM32_USART_CTRL_OFFSET)
 #define EFM32_USART1_FRAME                   (EFM32_USART1_BASE+EFM32_USART_FRAME_OFFSET)
@@ -165,7 +165,7 @@
 #ifdef CONFIG_EFM32_EFM32GG
 #  define EFM32_USART1_INPUT                 (EFM32_USART1_BASE+EFM32_USART_INPUT_OFFSET)
 #  define EFM32_USART1_I2SCTRL               (EFM32_USART1_BASE+EFM32_USART_I2SCTRL_OFFSET)
-#endf
+#endif
 
 #define EFM32_USART2_CTRL                    (EFM32_USART2_BASE+EFM32_USART_CTRL_OFFSET)
 #define EFM32_USART2_FRAME                   (EFM32_USART2_BASE+EFM32_USART_FRAME_OFFSET)
@@ -192,7 +192,7 @@
 #ifdef CONFIG_EFM32_EFM32GG
 #  define EFM32_USART2_INPUT                 (EFM32_USART2_BASE+EFM32_USART_INPUT_OFFSET)
 #  define EFM32_USART2_I2SCTRL               (EFM32_USART2_BASE+EFM32_USART_I2SCTRL_OFFSET)
-#endf
+#endif
 
 #define EFM32_UART0_CTRL                     (EFM32_UART0_BASE+EFM32_USART_CTRL_OFFSET)
 #define EFM32_UART0_FRAME                    (EFM32_UART0_BASE+EFM32_USART_FRAME_OFFSET)
@@ -219,7 +219,7 @@
 #ifdef CONFIG_EFM32_EFM32GG
 #  define EFM32_UART0_INPUT                  (EFM32_UART0_BASE+EFM32_USART_INPUT_OFFSET)
 #  define EFM32_UART0_I2SCTRL                (EFM32_UART0_BASE+EFM32_USART_I2SCTRL_OFFSET)
-#endf
+#endif
 
 #define EFM32_UART1_CTRL                     (EFM32_UART1_BASE+EFM32_USART_CTRL_OFFSET)
 #define EFM32_UART1_FRAME                    (EFM32_UART1_BASE+EFM32_USART_FRAME_OFFSET)
@@ -246,7 +246,7 @@
 #ifdef CONFIG_EFM32_EFM32GG
 #  define EFM32_UART1_INPUT                  (EFM32_UART1_BASE+EFM32_USART_INPUT_OFFSET)
 #  define EFM32_UART1_I2SCTRL                (EFM32_UART1_BASE+EFM32_USART_I2SCTRL_OFFSET)
-#endf
+#endif
 
 /* USART Register Register Bit Definitions *************************************************************************************/
 
@@ -254,6 +254,7 @@
 
 #define _USART_CTRL_RESETVALUE                0x00000000UL                             /* Default value for USART_CTRL */
 #define _USART_CTRL_MASK                      0x7DFFFF7FUL                             /* Mask for USART_CTRL */
+
 #define USART_CTRL_SYNC                       (0x1UL << 0)                             /* USART Synchronous Mode */
 #define _USART_CTRL_SYNC_SHIFT                0                                        /* Shift value for USART_SYNC */
 #define _USART_CTRL_SYNC_MASK                 0x1UL                                    /* Bit mask for USART_SYNC */
@@ -424,6 +425,7 @@
 
 #define _USART_FRAME_RESETVALUE               0x00001005UL                              /* Default value for USART_FRAME */
 #define _USART_FRAME_MASK                     0x0000330FUL                              /* Mask for USART_FRAME */
+
 #define _USART_FRAME_DATABITS_SHIFT           0                                         /* Shift value for USART_DATABITS */
 #define _USART_FRAME_DATABITS_MASK            0xFUL                                     /* Bit mask for USART_DATABITS */
 #define _USART_FRAME_DATABITS_FOUR            0x00000001UL                              /* Mode FOUR for USART_FRAME */
@@ -481,6 +483,7 @@
 
 #define _USART_TRIGCTRL_RESETVALUE            0x00000000UL                             /* Default value for USART_TRIGCTRL */
 #define _USART_TRIGCTRL_MASK                  0x00000077UL                             /* Mask for USART_TRIGCTRL */
+
 #define _USART_TRIGCTRL_TSEL_SHIFT            0                                        /* Shift value for USART_TSEL */
 #define _USART_TRIGCTRL_TSEL_MASK             0x7UL                                    /* Bit mask for USART_TSEL */
 #define _USART_TRIGCTRL_TSEL_DEFAULT          0x00000000UL                             /* Mode DEFAULT for USART_TRIGCTRL */
@@ -521,6 +524,7 @@
 
 #define _USART_CMD_RESETVALUE                 0x00000000UL                         /* Default value for USART_CMD */
 #define _USART_CMD_MASK                       0x00000FFFUL                         /* Mask for USART_CMD */
+
 #define USART_CMD_RXEN                        (0x1UL << 0)                         /* Receiver Enable */
 #define _USART_CMD_RXEN_SHIFT                 0                                    /* Shift value for USART_RXEN */
 #define _USART_CMD_RXEN_MASK                  0x1UL                                /* Bit mask for USART_RXEN */
@@ -586,6 +590,7 @@
 
 #define _USART_STATUS_RESETVALUE              0x00000040UL                               /* Default value for USART_STATUS */
 #define _USART_STATUS_MASK                    0x00001FFFUL                               /* Mask for USART_STATUS */
+
 #define USART_STATUS_RXENS                    (0x1UL << 0)                               /* Receiver Enable Status */
 #define _USART_STATUS_RXENS_SHIFT             0                                          /* Shift value for USART_RXENS */
 #define _USART_STATUS_RXENS_MASK              0x1UL                                      /* Bit mask for USART_RXENS */
@@ -656,6 +661,7 @@
 
 #define _USART_CLKDIV_RESETVALUE              0x00000000UL                         /* Default value for USART_CLKDIV */
 #define _USART_CLKDIV_MASK                    0x001FFFC0UL                         /* Mask for USART_CLKDIV */
+
 #define _USART_CLKDIV_DIV_SHIFT               6                                    /* Shift value for USART_DIV */
 #define _USART_CLKDIV_DIV_MASK                0x1FFFC0UL                           /* Bit mask for USART_DIV */
 #define _USART_CLKDIV_DIV_DEFAULT             0x00000000UL                         /* Mode DEFAULT for USART_CLKDIV */
@@ -665,6 +671,7 @@
 
 #define _USART_RXDATAX_RESETVALUE             0x00000000UL                         /* Default value for USART_RXDATAX */
 #define _USART_RXDATAX_MASK                   0x0000C1FFUL                         /* Mask for USART_RXDATAX */
+
 #define _USART_RXDATAX_RXDATA_SHIFT           0                                    /* Shift value for USART_RXDATA */
 #define _USART_RXDATAX_RXDATA_MASK            0x1FFUL                              /* Bit mask for USART_RXDATA */
 #define _USART_RXDATAX_RXDATA_DEFAULT         0x00000000UL                         /* Mode DEFAULT for USART_RXDATAX */
@@ -684,6 +691,7 @@
 
 #define _USART_RXDATA_RESETVALUE              0x00000000UL                         /* Default value for USART_RXDATA */
 #define _USART_RXDATA_MASK                    0x000000FFUL                         /* Mask for USART_RXDATA */
+
 #define _USART_RXDATA_RXDATA_SHIFT            0                                    /* Shift value for USART_RXDATA */
 #define _USART_RXDATA_RXDATA_MASK             0xFFUL                               /* Bit mask for USART_RXDATA */
 #define _USART_RXDATA_RXDATA_DEFAULT          0x00000000UL                         /* Mode DEFAULT for USART_RXDATA */
@@ -693,6 +701,7 @@
 
 #define _USART_RXDOUBLEX_RESETVALUE           0x00000000UL                             /* Default value for USART_RXDOUBLEX */
 #define _USART_RXDOUBLEX_MASK                 0xC1FFC1FFUL                             /* Mask for USART_RXDOUBLEX */
+
 #define _USART_RXDOUBLEX_RXDATA0_SHIFT        0                                        /* Shift value for USART_RXDATA0 */
 #define _USART_RXDOUBLEX_RXDATA0_MASK         0x1FFUL                                  /* Bit mask for USART_RXDATA0 */
 #define _USART_RXDOUBLEX_RXDATA0_DEFAULT      0x00000000UL                             /* Mode DEFAULT for USART_RXDOUBLEX */
@@ -726,6 +735,7 @@
 
 #define _USART_RXDOUBLE_RESETVALUE            0x00000000UL                           /* Default value for USART_RXDOUBLE */
 #define _USART_RXDOUBLE_MASK                  0x0000FFFFUL                           /* Mask for USART_RXDOUBLE */
+
 #define _USART_RXDOUBLE_RXDATA0_SHIFT         0                                      /* Shift value for USART_RXDATA0 */
 #define _USART_RXDOUBLE_RXDATA0_MASK          0xFFUL                                 /* Bit mask for USART_RXDATA0 */
 #define _USART_RXDOUBLE_RXDATA0_DEFAULT       0x00000000UL                           /* Mode DEFAULT for USART_RXDOUBLE */
@@ -739,6 +749,7 @@
 
 #define _USART_RXDATAXP_RESETVALUE            0x00000000UL                           /* Default value for USART_RXDATAXP */
 #define _USART_RXDATAXP_MASK                  0x0000C1FFUL                           /* Mask for USART_RXDATAXP */
+
 #define _USART_RXDATAXP_RXDATAP_SHIFT         0                                      /* Shift value for USART_RXDATAP */
 #define _USART_RXDATAXP_RXDATAP_MASK          0x1FFUL                                /* Bit mask for USART_RXDATAP */
 #define _USART_RXDATAXP_RXDATAP_DEFAULT       0x00000000UL                           /* Mode DEFAULT for USART_RXDATAXP */
@@ -758,6 +769,7 @@
 
 #define _USART_RXDOUBLEXP_RESETVALUE          0x00000000UL                               /* Default value for USART_RXDOUBLEXP */
 #define _USART_RXDOUBLEXP_MASK                0xC1FFC1FFUL                               /* Mask for USART_RXDOUBLEXP */
+
 #define _USART_RXDOUBLEXP_RXDATAP0_SHIFT      0                                          /* Shift value for USART_RXDATAP0 */
 #define _USART_RXDOUBLEXP_RXDATAP0_MASK       0x1FFUL                                    /* Bit mask for USART_RXDATAP0 */
 #define _USART_RXDOUBLEXP_RXDATAP0_DEFAULT    0x00000000UL                               /* Mode DEFAULT for USART_RXDOUBLEXP */
@@ -791,6 +803,7 @@
 
 #define _USART_TXDATAX_RESETVALUE             0x00000000UL                           /* Default value for USART_TXDATAX */
 #define _USART_TXDATAX_MASK                   0x0000F9FFUL                           /* Mask for USART_TXDATAX */
+
 #define _USART_TXDATAX_TXDATAX_SHIFT          0                                      /* Shift value for USART_TXDATAX */
 #define _USART_TXDATAX_TXDATAX_MASK           0x1FFUL                                /* Bit mask for USART_TXDATAX */
 #define _USART_TXDATAX_TXDATAX_DEFAULT        0x00000000UL                           /* Mode DEFAULT for USART_TXDATAX */
@@ -825,6 +838,7 @@
 
 #define _USART_TXDATA_RESETVALUE              0x00000000UL                           /* Default value for USART_TXDATA */
 #define _USART_TXDATA_MASK                    0x000000FFUL                           /* Mask for USART_TXDATA */
+
 #define _USART_TXDATA_TXDATA_SHIFT            0                                      /* Shift value for USART_TXDATA */
 #define _USART_TXDATA_TXDATA_MASK             0xFFUL                                 /* Bit mask for USART_TXDATA */
 #define _USART_TXDATA_TXDATA_DEFAULT          0x00000000UL                           /* Mode DEFAULT for USART_TXDATA */
@@ -834,6 +848,7 @@
 
 #define _USART_TXDOUBLEX_RESETVALUE           0x00000000UL                              /* Default value for USART_TXDOUBLEX */
 #define _USART_TXDOUBLEX_MASK                 0xF9FFF9FFUL                              /* Mask for USART_TXDOUBLEX */
+
 #define _USART_TXDOUBLEX_TXDATA0_SHIFT        0                                         /* Shift value for USART_TXDATA0 */
 #define _USART_TXDOUBLEX_TXDATA0_MASK         0x1FFUL                                   /* Bit mask for USART_TXDATA0 */
 #define _USART_TXDOUBLEX_TXDATA0_DEFAULT      0x00000000UL                              /* Mode DEFAULT for USART_TXDOUBLEX */
@@ -897,6 +912,7 @@
 
 #define _USART_TXDOUBLE_RESETVALUE            0x00000000UL                              /* Default value for USART_TXDOUBLE */
 #define _USART_TXDOUBLE_MASK                  0x0000FFFFUL                              /* Mask for USART_TXDOUBLE */
+
 #define _USART_TXDOUBLE_TXDATA0_SHIFT         0                                         /* Shift value for USART_TXDATA0 */
 #define _USART_TXDOUBLE_TXDATA0_MASK          0xFFUL                                    /* Bit mask for USART_TXDATA0 */
 #define _USART_TXDOUBLE_TXDATA0_DEFAULT       0x00000000UL                              /* Mode DEFAULT for USART_TXDOUBLE */
@@ -910,6 +926,7 @@
 
 #define _USART_IF_RESETVALUE                  0x00000002UL                     /* Default value for USART_IF */
 #define _USART_IF_MASK                        0x00001FFFUL                     /* Mask for USART_IF */
+
 #define USART_IF_TXC                          (0x1UL << 0)                     /* TX Complete Interrupt Flag */
 #define _USART_IF_TXC_SHIFT                   0                                /* Shift value for USART_TXC */
 #define _USART_IF_TXC_MASK                    0x1UL                            /* Bit mask for USART_TXC */
@@ -980,6 +997,7 @@
 
 #define _USART_IFS_RESETVALUE                 0x00000000UL                     /* Default value for USART_IFS */
 #define _USART_IFS_MASK                       0x00001FF9UL                     /* Mask for USART_IFS */
+
 #define USART_IFS_TXC                         (0x1UL << 0)                     /* Set TX Complete Interrupt Flag */
 #define _USART_IFS_TXC_SHIFT                  0                                /* Shift value for USART_TXC */
 #define _USART_IFS_TXC_MASK                   0x1UL                            /* Bit mask for USART_TXC */
@@ -1040,6 +1058,7 @@
 
 #define _USART_IFC_RESETVALUE                 0x00000000UL                     /* Default value for USART_IFC */
 #define _USART_IFC_MASK                       0x00001FF9UL                     /* Mask for USART_IFC */
+
 #define USART_IFC_TXC                         (0x1UL << 0)                     /* Clear TX Complete Interrupt Flag */
 #define _USART_IFC_TXC_SHIFT                  0                                /* Shift value for USART_TXC */
 #define _USART_IFC_TXC_MASK                   0x1UL                            /* Bit mask for USART_TXC */
@@ -1100,6 +1119,7 @@
 
 #define _USART_IEN_RESETVALUE                 0x00000000UL                      /* Default value for USART_IEN */
 #define _USART_IEN_MASK                       0x00001FFFUL                      /* Mask for USART_IEN */
+
 #define USART_IEN_TXC                         (0x1UL << 0)                      /* TX Complete Interrupt Enable */
 #define _USART_IEN_TXC_SHIFT                  0                                 /* Shift value for USART_TXC */
 #define _USART_IEN_TXC_MASK                   0x1UL                             /* Bit mask for USART_TXC */
@@ -1170,6 +1190,7 @@
 
 #define _USART_IRCTRL_RESETVALUE              0x00000000UL                          /* Default value for USART_IRCTRL */
 #define _USART_IRCTRL_MASK                    0x000000FFUL                          /* Mask for USART_IRCTRL */
+
 #define USART_IRCTRL_IREN                     (0x1UL << 0)                          /* Enable IrDA Module */
 #define _USART_IRCTRL_IREN_SHIFT              0                                     /* Shift value for USART_IREN */
 #define _USART_IRCTRL_IREN_MASK               0x1UL                                 /* Bit mask for USART_IREN */
@@ -1222,6 +1243,7 @@
 
 #define _USART_ROUTE_RESETVALUE               0x00000000UL                         /* Default value for USART_ROUTE */
 #define _USART_ROUTE_MASK                     0x0000070FUL                         /* Mask for USART_ROUTE */
+
 #define USART_ROUTE_RXPEN                     (0x1UL << 0)                         /* RX Pin Enable */
 #define _USART_ROUTE_RXPEN_SHIFT              0                                    /* Shift value for USART_RXPEN */
 #define _USART_ROUTE_RXPEN_MASK               0x1UL                                /* Bit mask for USART_RXPEN */
@@ -1263,6 +1285,7 @@
 
 #define _USART_INPUT_RESETVALUE               0x00000000UL                         /* Default value for USART_INPUT */
 #define _USART_INPUT_MASK                     0x0000001FUL                         /* Mask for USART_INPUT */
+
 #define _USART_INPUT_RXPRSSEL_SHIFT           0                                    /* Shift value for USART_RXPRSSEL */
 #define _USART_INPUT_RXPRSSEL_MASK            0xFUL                                /* Bit mask for USART_RXPRSSEL */
 #define _USART_INPUT_RXPRSSEL_DEFAULT         0x00000000UL                         /* Mode DEFAULT for USART_INPUT */
@@ -1301,6 +1324,7 @@
 
 #define _USART_I2SCTRL_RESETVALUE             0x00000000UL                           /* Default value for USART_I2SCTRL */
 #define _USART_I2SCTRL_MASK                   0x0000071FUL                           /* Mask for USART_I2SCTRL */
+
 #define USART_I2SCTRL_EN                      (0x1UL << 0)                           /* Enable I2S Mode */
 #define _USART_I2SCTRL_EN_SHIFT               0                                      /* Shift value for USART_EN */
 #define _USART_I2SCTRL_EN_MASK                0x1UL                                  /* Bit mask for USART_EN */
