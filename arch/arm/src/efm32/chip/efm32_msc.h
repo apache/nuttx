@@ -154,14 +154,23 @@
 #if defined(CONFIG_EFM32_EFM32GG)
 #  define _MSC_READCTRL_MODE_WS2                0x00000004UL                              /* Mode WS2 for MSC_READCTRL */
 #  define _MSC_READCTRL_MODE_WS2SCBTP           0x00000005UL                              /* Mode WS2SCBTP for MSC_READCTRL */
+#  define _MSC_READCTRL_MODE_WSMAX              _MSC_READCTRL_MODE_WS2                    /* Max wait state setting (without SCBTP) */
+#  define _MSC_READCTRL_MODE_WSMAXSCBTP         _MSC_READCTRL_MODE_WS2SCBTP               /* Max wait state setting (with SCBTP) */
+#else
+#  define _MSC_READCTRL_MODE_WSMAX              _MSC_READCTRL_MODE_WS1                    /* Max wait state setting (without SCBTP) */
+#  define _MSC_READCTRL_MODE_WSMAXSCBTP         _MSC_READCTRL_MODE_WS1SCBTP               /* Max wait state setting (with SCBTP) */
 #endif
 #define MSC_READCTRL_MODE_WS0                   (_MSC_READCTRL_MODE_WS0 << 0)             /* Shifted mode WS0 for MSC_READCTRL */
 #define MSC_READCTRL_MODE_DEFAULT               (_MSC_READCTRL_MODE_DEFAULT << 0)         /* Shifted mode DEFAULT for MSC_READCTRL */
 #define MSC_READCTRL_MODE_WS1                   (_MSC_READCTRL_MODE_WS1 << 0)             /* Shifted mode WS1 for MSC_READCTRL */
 #define MSC_READCTRL_MODE_WS0SCBTP              (_MSC_READCTRL_MODE_WS0SCBTP << 0)        /* Shifted mode WS0SCBTP for MSC_READCTRL */
 #define MSC_READCTRL_MODE_WS1SCBTP              (_MSC_READCTRL_MODE_WS1SCBTP << 0)        /* Shifted mode WS1SCBTP for MSC_READCTRL */
-#define MSC_READCTRL_MODE_WS2                   (_MSC_READCTRL_MODE_WS2 << 0)             /* Shifted mode WS2 for MSC_READCTRL */
-#define MSC_READCTRL_MODE_WS2SCBTP              (_MSC_READCTRL_MODE_WS2SCBTP << 0)        /* Shifted mode WS2SCBTP for MSC_READCTRL */
+#if defined(CONFIG_EFM32_EFM32GG)
+#  define MSC_READCTRL_MODE_WS2                 (_MSC_READCTRL_MODE_WS2 << 0)             /* Shifted mode WS2 for MSC_READCTRL */
+#  define MSC_READCTRL_MODE_WS2SCBTP            (_MSC_READCTRL_MODE_WS2SCBTP << 0)        /* Shifted mode WS2SCBTP for MSC_READCTRL */
+#endif
+#define MSC_READCTRL_MODE_WSMAX                 (_MSC_READCTRL_MODE_WSMAX << 0)           /* Max wait state setting (without SCBTP) */
+#define MSC_READCTRL_MODE_WSMAXSCBTP            (_MSC_READCTRL_MODE_WSMAXSCBTP << 0)      /* Max wait state setting (with SCBTP) */
 
 #if defined(CONFIG_EFM32_EFM32GG)
 #  define MSC_READCTRL_IFCDIS                   (0x1UL << 3)                              /* Internal Flash Cache Disable */

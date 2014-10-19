@@ -70,6 +70,23 @@
 /*******************************************************************************************************************************
  * Pre-processor Definitions
  *******************************************************************************************************************************/
+/* Maximum allowed core frequency when using 0 wait states on flash access */
+
+#define CMU_MAX_FREQ_0WS                           16000000
+
+/* Maximum allowed core frequency when using 1 wait states on flash access */
+
+#define CMU_MAX_FREQ_1WS                           32000000
+
+/* Maximum allowed core frequency when using 1 wait states on flash access */
+
+#define CMU_MAX_FREQ_2WS                           48000000
+
+/* Maximum frequency that HFLE needs to be enabled on Giant, Leopard and Wonder parts. */
+
+#if defined(CONFIG_EFM32_EFM32GG)
+#  define CMU_MAX_FREQ_HFLE                        32000000
+#endif
 
 /* CMU Register Offsets ********************************************************************************************************/
 
