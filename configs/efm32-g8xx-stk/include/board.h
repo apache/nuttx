@@ -74,13 +74,10 @@
  * HFCLK can be driven by a high-frequency oscillator (HFRCO or HFXO) or one
  * of the low-frequency oscillators (LFRCO or LFXO). By default the HFRCO is
  * selected.
- *
- * HFCLK can optionally be divided down by setting HFCLKDIV in CMU_CTRL to a
- * nonzero value.  _CMU_CTRL_HFCLKDIV_DEFAULT is zero.
  */
 
 #define BOARD_HFCLKSEL            _CMU_CMD_HFCLKSEL_HFXO
-#define BOARD_HFCLKDIV            _CMU_CTRL_HFCLKDIV_DEFAULT
+#define BOARD_HFCLKDIV            0     /* Does not apply to EFM32G */
 #define BOARD_HFCLK_FREQUENCY     BOARD_HFXO_FREQUENCY
 
 /* HFCORECLK - High Frequency Core Clock
