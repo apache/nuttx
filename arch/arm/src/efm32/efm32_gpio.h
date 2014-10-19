@@ -71,7 +71,10 @@
 
 #define GPIO_MODE_SHIFT            (12)        /* Bits 12-15: Port mode */
 #define GPIO_MODE_MASK             (15 << GPIO_MODE_SHIFT)
-#define GPIO_MODE_DOUT             (1 << 11)   /* DOUT input mode modifier */
+
+#define GPIO_MODE_DOUT_SHIFT       (11)        /* Bit 11: Input mode modifer */
+#define GPIO_MODE_DOUT_MASK        (1 << GPIO_MODE_DOUT_SHIFT)
+#  define GPIO_MODE_DOUT           GPIO_MODE_DOUT_MASK
 
 /* Input modes */
 
@@ -127,8 +130,10 @@
  *  .... V... .... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 11)   /* Bit 11: Initial value of output */
-#define GPIO_OUTPUT_CLEAR          (0)
+#define GPIO_OUTPUT_SHIFT          (11)        /* Bit 11: Initial value of output */
+#define GPIO_OUTPUT_MASK           (1 << GPIO_OUTPUT_SHIFT)
+#  define GPIO_OUTPUT_SET          GPIO_OUTPUT_MASK
+#  define GPIO_OUTPUT_CLEAR        (0)
 
 /* Output drive:
  *
@@ -137,10 +142,14 @@
 
 #define GPIO_DRIVE_SHIFT           (9)         /* Bits 9-10: Output drive strength */
 #define GPIO_DRIVE_MASK            (3 << GPIO_MODE_SHIFT)
-#  define GPIO_DRIVE_STANDARD      (0 << GPIO_MODE_SHIFT) /* 6 mA drive current */
-#  define GPIO_DRIVE_LOWEST        (1 << GPIO_MODE_SHIFT) /* 0.5 mA drive current */
-#  define GPIO_DRIVE_HIGH          (2 << GPIO_MODE_SHIFT) /* 20 mA drive current */
-#  define GPIO_DRIVE_LOW           (3 << GPIO_MODE_SHIFT) /* 2 mA drive current */
+#  define _GPIO_DRIVE_STANDARD     (0)         /* 6 mA drive current */
+#  define _GPIO_DRIVE_LOWEST       (1)         /* 0.5 mA drive current */
+#  define _GPIO_DRIVE_HIGH         (2)         /* 20 mA drive current */
+#  define _GPIO_DRIVE_LOW          (3)         /* 2 mA drive current */
+#  define GPIO_DRIVE_STANDARD      (_GPIO_DRIVE_STANDARD << GPIO_MODE_SHIFT)
+#  define GPIO_DRIVE_LOWEST        (_GPIO_DRIVE_LOWEST << GPIO_MODE_SHIFT)
+#  define GPIO_DRIVE_HIGH          (_GPIO_DRIVE_HIGH << GPIO_MODE_SHIFT)
+#  define GPIO_DRIVE_LOW           (_GPIO_DRIVE_LOW << GPIO_MODE_SHIFT)
 
 /* Interrupt Mode (Input only):
  *
@@ -158,7 +167,7 @@
  *   .... .... .PPP ....
  */
 
-#define GPIO_PORT_SHIFT            (4)         /* Bit 4-7:  Port number */
+#define GPIO_PORT_SHIFT            (4)         /* Bit 4-6:  Port number */
 #define GPIO_PORT_MASK             (7 << GPIO_PORT_SHIFT)
 #  define GPIO_PORTA               (0 << GPIO_PORT_SHIFT)
 #  define GPIO_PORTB               (1 << GPIO_PORT_SHIFT)
@@ -173,23 +182,23 @@
  */
 
 #define GPIO_PIN_SHIFT             (0)         /* Bits 0-3: Pin number: 0-15 */
-#define GPIO_PIN_MASK              (31 << GPIO_PIN_SHIFT)
-#define GPIO_PIN0                  (0  << GPIO_PIN_SHIFT)
-#define GPIO_PIN1                  (1  << GPIO_PIN_SHIFT)
-#define GPIO_PIN2                  (2  << GPIO_PIN_SHIFT)
-#define GPIO_PIN3                  (3  << GPIO_PIN_SHIFT)
-#define GPIO_PIN4                  (4  << GPIO_PIN_SHIFT)
-#define GPIO_PIN5                  (5  << GPIO_PIN_SHIFT)
-#define GPIO_PIN6                  (6  << GPIO_PIN_SHIFT)
-#define GPIO_PIN7                  (7  << GPIO_PIN_SHIFT)
-#define GPIO_PIN8                  (8  << GPIO_PIN_SHIFT)
-#define GPIO_PIN9                  (9  << GPIO_PIN_SHIFT)
-#define GPIO_PIN10                 (10 << GPIO_PIN_SHIFT)
-#define GPIO_PIN11                 (11 << GPIO_PIN_SHIFT)
-#define GPIO_PIN12                 (12 << GPIO_PIN_SHIFT)
-#define GPIO_PIN13                 (13 << GPIO_PIN_SHIFT)
-#define GPIO_PIN14                 (14 << GPIO_PIN_SHIFT)
-#define GPIO_PIN15                 (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN_MASK              (15 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN0                (0  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN1                (1  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN2                (2  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN3                (3  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN4                (4  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN5                (5  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN6                (6  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN7                (7  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN8                (8  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN9                (9  << GPIO_PIN_SHIFT)
+#  define GPIO_PIN10               (10 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN11               (11 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN12               (12 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN13               (13 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN14               (14 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN15               (15 << GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types
