@@ -39,10 +39,13 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
 
+#include "up_arch.h"
+#include "chip/efm32_gpio.h"
 #include "efm32_gpio.h"
 
 /************************************************************************************
@@ -94,53 +97,53 @@ static const uint8_t g_gpiomode[16] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: efm32_port
+ * Name: efm32_getport
  *
  * Description:
  *   Extract the encoded port number
  *
  ************************************************************************************/
 
-static inline uint8_t efm32_port(gpio_pinset_t cfgset)
+static inline uint8_t efm32_getport(gpio_pinset_t cfgset)
 {
   return (uint8_t)((cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
 }
 
 /************************************************************************************
- * Name: efm32_pin
+ * Name: efm32_getpin
  *
  * Description:
  *   Extract the encoded pin number
  *
  ************************************************************************************/
 
-static inline uint8_t efm32_pin(gpio_pinset_t cfgset)
+static inline uint8_t efm32_getpin(gpio_pinset_t cfgset)
 {
   return (uint8_t)((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
 /************************************************************************************
- * Name: efm32_mode
+ * Name: efm32_getmode
  *
  * Description:
  *   Extract the encoded pin mode
  *
  ************************************************************************************/
 
-static inline uint8_t efm32_pin(gpio_pinset_t cfgset)
+static inline uint8_t efm32_getmode(gpio_pinset_t cfgset)
 {
   return (uint8_t)((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
 /************************************************************************************
- * Name: efm32_drivestrength
+ * Name: efm32_getdrive
  *
  * Description:
- *   Extract the output drive strength
+ *   Extract the output drive strength from the encoded configuration
  *
  ************************************************************************************/
 
-static uint8_t efm32_drivestrength(uint8_t mode, gpio_pinset_t cfgset)
+static uint8_t efm32_getdrive(uint8_t mode, gpio_pinset_t cfgset)
 {
   if ((g_gpiomode[mode] & __GPIO_DRIVE) != 0)
     {
@@ -153,27 +156,118 @@ static uint8_t efm32_drivestrength(uint8_t mode, gpio_pinset_t cfgset)
 }
 
 /************************************************************************************
- * Name: efm32_dout
+ * Name: efm32_setdrive
+ *
+ * Description:
+ *   Set the GPIO output drive strength
+ *
+ ************************************************************************************/
+
+static inline void efm32_setdrive(uintptr_t base, uint8_t pin, uint8_t drive)
+{
+  /* Select drive mode for all pins on port configured with alternate drive
+   * strength.
+   *
+   * REVISIT: Is there any sane way to manage this for multiple pins in the port
+   * with different drive values?
+   */
+
+  putreg32((uint32_t)drive << _GPIO_P_CTRL_DRIVEMODE_SHIFT,
+           base + EFM32_GPIO_Pn_CTRL_OFFSET);
+}
+
+/************************************************************************************
+ * Name: efm32_getdout
  *
  * Description:
  *   Extract the encoded port number
  *
  ************************************************************************************/
 
-static uint8_t efm32_dout(uint8_t mode, gpio_pinset_t cfgset)
+static inline bool efm32_getdout(uint8_t mode, gpio_pinset_t cfgset)
 {
   if ((g_gpiomode[mode] & __GPIO_DOUT) != 0)
     {
-      return (uint8_t)((cfgset >> GPIO_MODE_DOUT_SHIFT) & 1);
+      return (bool)((cfgset >> GPIO_MODE_DOUT_SHIFT) & 1);
     }
   else if ((g_gpiomode[mode] & __GPIO_OUTPUT) != 0)
     {
-      return (uint8_t)((cfgset >> GPIO_OUTPUT_SHIFT) & 1);
+      return (bool)((cfgset >> GPIO_OUTPUT_SHIFT) & 1);
     }
   else
     {
       return 0;
     }
+}
+
+/************************************************************************************
+ * Name: efm32_setdout
+ *
+ * Description:
+ *   Set the GPIO output data value
+ *
+ ************************************************************************************/
+
+static inline void efm32_setdout(uintptr_t base, uint8_t pin, bool dout)
+{
+  /* Set or clear the port data out bit */
+
+  if (dout)
+    {
+      putreg32(1 << pin, base + EFM32_GPIO_Pn_DOUTSET_OFFSET);
+    }
+  else
+    {
+      putreg32(1 << pin, base + EFM32_GPIO_Pn_DOUTCLR_OFFSET);
+    }
+}
+
+/************************************************************************************
+ * Name: efm32_getdin
+ *
+ * Description:
+ *   Get the GPIO input value
+ *
+ ************************************************************************************/
+
+static inline bool efm32_getdin(uintptr_t base, uint8_t pin)
+{
+  return ((getreg32(base + EFM32_GPIO_Pn_DIN_OFFSET) & ((uint32_t)1 << pin)) != 0);
+}
+
+/************************************************************************************
+ * Name: efm32_setmode
+ *
+ * Description:
+ *   Set the GPIO mode
+ *
+ ************************************************************************************/
+
+static inline void efm32_setmode(uintptr_t base, uint8_t pin, uint8_t mode)
+{
+  uintptr_t regaddr;
+  unsigned int shift;
+  uint32_t regval;
+
+  /* Select high or low register */
+
+  if (pin < 8)
+    {
+      regaddr = base + EFM32_GPIO_Pn_MODEL_OFFSET;
+      shift = (unsigned int)pin << 2;
+    }
+  else
+    {
+      regaddr = base + EFM32_GPIO_Pn_MODEH_OFFSET;
+      shift = (unsigned int)(pin - 8) << 2;
+    }
+
+  /* Set the new mode */
+
+  regval  = getreg32(regaddr);
+  regval &= ~((uint32_t)15 << shift);
+  regval |= ~((uint32_t)mode << shift);
+  putreg32(regval, regaddr);
 }
 
 /************************************************************************************
@@ -190,14 +284,34 @@ static uint8_t efm32_dout(uint8_t mode, gpio_pinset_t cfgset)
 
 int efm32_configgpio(gpio_pinset_t cfgset)
 {
-  uint8_t port  = efm32_pin(cfgset);
-  uint8_t pin   = efm32_port(cfgset);
-  uint8_t mode  = efm32_mode(cfgset);
-  uint8_t drive = efm32_drivestrength(mode, cfgset);
-  uint8_t dout  = efm32_dout(mode, cfgset);
+  uintptr_t base;
+  uint8_t port;
+  uint8_t pin;
+  uint8_t mode;
+  uint8_t drive;
+  bool dout;
 
-#warning Missing logic
-  return -ENOSYS;
+  /* Get basic pin configuration information */
+
+  port = efm32_getpin(cfgset);
+  base = EFM32_GPIO_Pn_BASE(port);
+  pin  = efm32_getport(cfgset);
+  mode = efm32_getmode(cfgset);
+
+  /* Set the drive strength in the GPIO control register */
+
+  drive = efm32_getdrive(mode, cfgset);
+  efm32_setdrive(base, pin, drive);
+
+  /* Set the port data out register */
+
+  dout = efm32_getdout(mode, cfgset);
+  efm32_setdout(base, pin, dout);
+
+  /* Finally, set the pin mode */
+
+  efm32_setmode(base, pin, mode);
+  return OK;
 }
 
 /************************************************************************************
@@ -210,7 +324,19 @@ int efm32_configgpio(gpio_pinset_t cfgset)
 
 void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
 {
-#warning Missing logic
+  uintptr_t base;
+  uint8_t port;
+  uint8_t pin;
+
+  /* Get basic pin configuration information */
+
+  port = efm32_getpin(pinset);
+  base = EFM32_GPIO_Pn_BASE(port);
+  pin  = efm32_getport(pinset);
+
+  /* And set the output value */
+
+  efm32_setdout(base, pin, value);
 }
 
 /************************************************************************************
@@ -223,8 +349,19 @@ void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
 
 bool efm32_gpioread(gpio_pinset_t pinset)
 {
-#warning Missing logic
-  return false;
+  uintptr_t base;
+  uint8_t port;
+  uint8_t pin;
+
+  /* Get basic pin configuration information */
+
+  port = efm32_getpin(pinset);
+  base = EFM32_GPIO_Pn_BASE(port);
+  pin  = efm32_getport(pinset);
+
+  /* And return the input value of the pin */
+
+  return efm32_getdin(base, pin);
 }
 
 /************************************************************************************
