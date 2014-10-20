@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/kl/kl_serial.c
+ * arch/arm/src/kl/kl_serial.c
  *
  *   Copyright (C) 2013-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -497,7 +497,7 @@ static void up_detach(struct uart_dev_s *dev)
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite uart_dev_s structure in order to call these functions.
+ *   appropriate uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 
@@ -700,8 +700,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   flags = irqsave();
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -827,8 +827,8 @@ static bool up_txready(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock iniialization
- *   performed in up_clkinitialize().
+ *   configuration performed in up_consoleinit() and main clock
+ *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
 
@@ -867,8 +867,8 @@ void up_earlyserialinit(void)
  * Name: up_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   Register serial console and serial ports.  This assumes that
+ *   up_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
@@ -973,4 +973,3 @@ int up_getc(void)
   return kl_lowgetc();
 }
 #endif /* USE_SERIALDRIVER */
-
