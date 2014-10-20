@@ -8849,4 +8849,8 @@
 	  (2014-10-14).
 	* tools/Config.mk: "Add a PRELINK macro to Config.mk.  From Kriegleder
 	  (2014-10-17).
-
+	* arch/arm/src/efm32 and arch/arm/include/efm32: Add a basic port for
+	  the SiLabs EFM32 family.  Includes many files contributed by Pierre-noel
+	  Bouteville (2104-10-20).
+	* configs/efm32-gxxx-stk:  Add board support for the EFM32 Gecko Starter
+	  Kit (2014-10-20).
