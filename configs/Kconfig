@@ -126,6 +126,14 @@ config ARCH_BOARD_EAGLE100
 		an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
 		arm-nuttx-elf toolchain*.  STATUS:  This port is complete and mature.
 
+config ARCH_BOARD_EFM32G8XXSTK
+	bool "EFM32 Gecko Starter Kit"
+	depends on ARCH_CHIP_EFM32G890F128
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This options selects the EFM32 Gecko Starter Kit (EFM32-G8XX-STK).
+
 config ARCH_BOARD_EKKLM3S9B96
 	bool "TI/Stellaris EKK-LM3S9B96"
 	depends on ARCH_CHIP_LM3S9B96
@@ -969,6 +977,7 @@ config ARCH_BOARD
 	default "ea3131"              if ARCH_BOARD_EA3131
 	default "ea3152"              if ARCH_BOARD_EA3152
 	default "eagle100"            if ARCH_BOARD_EAGLE100
+	default "efm32-g8xx-stk"      if ARCH_BOARD_EFM32G8XXSTK
 	default "ekk-lm3s9b96"        if ARCH_BOARD_EKKLM3S9B96
 	default "ez80f910200kitg"     if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"      if ARCH_BOARD_EZ80F910200ZCO
@@ -1139,6 +1148,9 @@ source "configs/ea3152/Kconfig"
 endif
 if ARCH_BOARD_EAGLE100
 source "configs/eagle100/Kconfig"
+endif
+if ARCH_BOARD_EFM32G8XXSTK
+source "configs/efm32-g8xx-stk/Kconfig"
 endif
 if ARCH_BOARD_EKKLM3S9B96
 source "configs/ekk-lm3s9b96/Kconfig"
