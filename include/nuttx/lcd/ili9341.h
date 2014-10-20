@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Marco Krahl <ocram.lhark@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -141,6 +142,14 @@
 #define ILI9341_PUMP_RATIO_CONTROL             0xf7 /* Pump ration control */
 
 /* ILI9341 LCD Register Bit Definitions ***********************************************/
+/* Pixel format set */
+#define ILI9341_PIXEL_FORMAT_SET_DPI_SHIFT     (4)
+#define ILI9341_PIXEL_FORMAT_SET_DPI_MASK      (7 << ILI9341_PIXEL_FORMAT_SET_DPI_SHIFT)
+#define ILI9341_PIXEL_FORMAT_SET_DPI(n)        ((n) << ILI9341_PIXEL_FORMAT_SET_DPI_SHIFT)
+#define ILI9341_PIXEL_FORMAT_SET_DBI_SHIFT     (0)
+#define ILI9341_PIXEL_FORMAT_SET_DBI_MASK      (7 << ILI9341_PIXEL_FORMAT_SET_DBI_SHIFT)
+#define ILI9341_PIXEL_FORMAT_SET_DBI(n)        ((n) << ILI9341_PIXEL_FORMAT_SET_DBI_SHIFT)
+
 /* Memory Access control */
 
 #define ILI9341_MEMORY_ACCESS_CONTROL_MH       (1 << 2) /* Horizontal refresh order */
@@ -154,15 +163,71 @@
 
 #define ILI9341_DISP_FUNC_CTL_ISC_SHIFT        (0)
 #define ILI9341_DISP_FUNC_CTL_ISC_MASK         (15 << ILI9341_DISP_FUNC_CTL_ISC_SHIFT)
-#  define ILI9341_DISP_FUNC_CTL_ISC(n)         ((n) << ILI9341_DISP_FUNC_CTL_ISC_SHIFT))
+#  define ILI9341_DISP_FUNC_CTL_ISC(n)         ((n) << ILI9341_DISP_FUNC_CTL_ISC_SHIFT)
 #define ILI9341_DISP_FUNC_CTL_SM               (1 << 4)
 #define ILI9341_DISP_FUNC_CTL_SS               (1 << 5)
 #define ILI9341_DISP_FUNC_CTL_GS               (1 << 6)
 #define ILI9341_DISP_FUNC_CTL_REV              (1 << 7)
 
+/* Interface function control */
+
+#define ILI9341_INTERFACE_CONTROL_WEMODE       (1)
+#define ILI9341_INTERFACE_CONTROL_BGREOR       (1 << 3)
+#define ILI9341_INTERFACE_CONTROL_MVEOR        (1 << 5)
+#define ILI9341_INTERFACE_CONTROL_MXEOR        (1 << 6)
+#define ILI9341_INTERFACE_CONTROL_MYEOR        (1 << 7)
+
+#define ILI9341_INTERFACE_CONTROL_MDT_SHIFT    (0)
+#define ILI9341_INTERFACE_CONTROL_MDT_MASK     (3 << ILI9341_INTERFACE_CONTROL_MDT_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_MDT(n)       ((n) << ILI9341_INTERFACE_CONTROL_MDT_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_EPF_SHIFT    (4)
+#define ILI9341_INTERFACE_CONTROL_EPF_MASK     (3 << ILI9341_INTERFACE_CONTROL_EPF_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_EPF(n)       ((n) << ILI9341_INTERFACE_CONTROL_EPF_SHIFT)
+
+#define ILI9341_INTERFACE_CONTROL_RIM          (1)
+#define ILI9341_INTERFACE_CONTROL_RM           (1 << 1)
+#define ILI9341_INTERFACE_CONTROL_DM_SHIFT     (4)
+#define ILI9341_INTERFACE_CONTROL_DM_MASK      (2 << ILI9341_INTERFACE_CONTROL_DM_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_DM(n)        ((n) << ILI9341_INTERFACE_CONTROL_DM_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_ENDIAN       (1 << 5)
+
 /**************************************************************************************
  * Public Types
  **************************************************************************************/
+
+struct ili9341_lcd_s
+{
+  /* Interface to control the ILI9341 lcd driver
+   *
+   *  - select      Select the device (as neccessary) before performing any operations.
+   *  - deselect    Deselect the device (as necessary).
+   *  - sendcmd     Send specific command to the LCD driver.
+   *  - sendparam   Send specific parameter to the LCD driver.
+   *  - recvparam   Receive specific parameter from the LCD driver.
+   *  - sendgram    Send pixel data to the LCD drivers gram.
+   *  - recvgram    Receive pixel data from the LCD drivers gram.
+   *  - backlight   Change the backlight level of the connected display.
+   *                In the context of the ili9341 that means change the
+   *                backlight level of the connected LED driver.
+   *                The implementation in detail is part of the platform
+   *                specific sub driver.
+   *
+   */
+
+  void (*select)(FAR struct ili9341_lcd_s *lcd);
+  void (*deselect)(FAR struct ili9341_lcd_s *lcd);
+  int (*sendcmd)(FAR struct ili9341_lcd_s *lcd, const uint8_t cmd);
+  int (*sendparam)(FAR struct ili9341_lcd_s *lcd, const uint8_t param);
+  int (*recvparam)(FAR struct ili9341_lcd_s *lcd, uint8_t *param);
+  int (*recvgram)(FAR struct ili9341_lcd_s *lcd,
+                  uint16_t *wd, uint32_t nwords);
+  int (*sendgram)(FAR struct ili9341_lcd_s *lcd,
+                  const uint16_t *wd, uint32_t nwords);
+  int (*backlight)(FAR struct ili9341_lcd_s *lcd, int level);
+
+  /* mcu interface specific data following */
+};
+
 
 /**************************************************************************************
  * Public Data
@@ -180,6 +245,52 @@ extern "C"
  * Public Function Prototypes
  **************************************************************************************/
 
+/**************************************************************************************
+ * Name:  ili9341_initialize
+ *
+ * Description:
+ *   Initialize the LCD video driver internal sturcture. Also initialize the
+ *   lcd hardware if not done. The control of the LCD driver is depend on the
+ *   selected MCU interface and part of the platform specific subdriver (see
+ *   config/stm32f429i-disco/src/stm32_ili93414ws.c)
+ *
+ * Input Parameters:
+ *
+ *   lcd - A reference to the platform specific driver instance to control the
+ *     ili9341 display driver.
+ *   devno - A value in the range of 0 through CONFIG_ILI9341_NINTERFACES-1.
+ *     This allows support for multiple LCD devices.
+ *
+ * Returned Value:
+ *
+ *   On success, this function returns a reference to the LCD driver object for
+ *   the specified LCD driver. NULL is returned on any failure.
+ *
+ **************************************************************************************/
+
+FAR struct lcd_dev_s *ili9341_initialize(FAR struct ili9341_lcd_s *lcd, int devno);
+
+/**************************************************************************************
+ * Name:  ili9341_clear
+ *
+ * Description:
+ *   This is a non-standard LCD interface.  Because of the various rotations, clearing
+ *   the display in the normal way by writing a sequences of runs that covers the
+ *   entire display can be very slow.  Here the display is cleared by simply setting
+ *   all GRAM memory to the specified color.
+ *
+ * Parameter:
+ *   dev   - A reference to the lcd driver structure
+ *   color - The background color
+ *
+ * Returned Value:
+ *
+ *  On success - OK
+ *  On error   - -EINVAL
+ *
+ **************************************************************************************/
+
+int ili9341_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 #undef EXTERN
 #ifdef __cplusplus
 }
