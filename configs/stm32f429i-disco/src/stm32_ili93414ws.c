@@ -1173,7 +1173,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
   lcddbg("initialize ili9341 4-wire serial subdriver\n");
 
   lcdvdbg("initialize spi device: %d\n", ILI93414WS_SPI_DEVICE);
-  spi = up_spiinitialize(ILI9341WS_SPI_DEVICE);
+  spi = stm32_spi5initialize();
 
   if (spi)
     {
