@@ -158,9 +158,10 @@
 
 #define GPIO_INT_SHIFT             (9)        /* Bits 9-10: Interrupt mode */
 #define GPIO_INT_MASK              (3 << GPIO_INT_SHIFT)
+#  define GPIO_INT_NONE            (0)
 #  define GPIO_INT_RISING          (1 << GPIO_INT_SHIFT)
 #  define GPIO_INT_FALLING         (2 << GPIO_INT_SHIFT)
-#  define GPIO_INT_BOTH            (3 << GPIO_INT_SHIFT)
+#  define GPIO_INT_BOTH            (GPIO_INT_RISING | GPIO_INT_FALLING)
 
 /* This identifies the PIO port:
  *

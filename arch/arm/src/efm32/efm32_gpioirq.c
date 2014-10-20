@@ -41,7 +41,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
+#include <nuttx/arch.h>
+#include <arch/irq.h>
+
+#include "up_arch.h"
+#include "chip/efm32_gpio.h"
 #include "efm32_gpio.h"
 
 #ifdef CONFIG_EFM32_GPIO_IRQ
@@ -50,9 +56,99 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
- /************************************************************************************
- * Public Data
+/************************************************************************************
+ * Private Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: efm32_getport
+ *
+ * Description:
+ *   Extract the encoded port number
+ *
+ ************************************************************************************/
+
+static inline uint8_t efm32_getport(gpio_pinset_t cfgset)
+{
+  return (uint8_t)((cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
+}
+
+/************************************************************************************
+ * Name: efm32_getpin
+ *
+ * Description:
+ *   Extract the encoded pin number
+ *
+ ************************************************************************************/
+
+static inline uint8_t efm32_getpin(gpio_pinset_t cfgset)
+{
+  return (uint8_t)((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
+}
+
+/************************************************************************************
+ * Name: efm32_gpio_interrupt
+ *
+ * Description:
+ *   Common GPIO interrupt handling logic
+ *
+ ************************************************************************************/
+
+static int  efm32_gpio_interrupt(uint32_t mask, void *context)
+{
+  uint32_t pending;
+  uint32_t bit;
+  int      irq;
+
+  /* Get the set of even/odd, pending, enabled interrupts */
+
+  pending = getreg32(EFM32_GPIO_IF) & getreg32(EFM32_GPIO_IEN) & mask;
+  putreg32(pending, EFM32_GPIO_IFC);
+
+  /* Then dispatch each interrupt */
+
+  for (bit = 1, irq = EFM32_IRQ_EXTI0; pending != 0; bit <<= 1, irq++)
+    {
+      if ((pending & bit) != 0)
+        {
+          /* Re-deliver the IRQ (recurses! We got here from irq_dispatch!) */
+
+          irq_dispatch(irq, context);
+
+          /* Remove this from the set of pending interrupts */
+
+          pending &= ~bit;
+        }
+    }
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: efm32_even_interrupt
+ *
+ * Description:
+ *   Even GPIO interrupt handling logic
+ *
+ ************************************************************************************/
+
+static int efm32_even_interrupt(int irq, void *context)
+{
+  return efm32_gpio_interrupt(0x00005555, context);
+}
+
+/************************************************************************************
+ * Name: efm32_even_interrupt
+ *
+ * Description:
+ *   Even GPIO interrupt handling logic
+ *
+ ************************************************************************************/
+
+static int efm32_odd_interrupt(int irq, void *context)
+{
+  return efm32_gpio_interrupt(0x0000aaaa, context);
+}
 
 /************************************************************************************
  * Public Function Prototypes
@@ -68,7 +164,21 @@
 
 void efm32_gpioirqinitialize(void)
 {
-#warning Missing logic
+  /* Initialize GPIO interrupt registers, disabling GPIO interrupts at the source */
+
+  putreg32(0, EFM32_GPIO_EXTIRISE);
+  putreg32(0, EFM32_GPIO_EXTIFALL);
+  putreg32(0, EFM32_GPIO_IEN);
+
+  /* Attach the even and odd interrupt handlers */
+
+  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_ODD, efm32_even_interrupt));
+  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_ODD, efm32_odd_interrupt));
+
+  /* Enable GPIO even and odd interrupts at the NVIC */
+
+  up_enable_irq(EFM32_IRQ_GPIO_ODD);
+  up_enable_irq(EFM32_IRQ_GPIO_EVEN);
 }
 
 /************************************************************************************
@@ -81,7 +191,73 @@ void efm32_gpioirqinitialize(void)
 
 void efm32_gpioirq(gpio_pinset_t pinset)
 {
-#warning Missing logic
+  irqstate_t flags;
+  unsigned int shift;
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t bit;
+  uint8_t port;
+  uint8_t pin;
+
+  /* Get basic pin configuration information */
+
+  port = efm32_getpin(pinset);
+  pin  = efm32_getport(pinset);
+  bit  = ((uint32_t)1 << pin);
+
+  /* Make sure that the pin interrupt is disabled */
+
+  flags   = irqsave();
+  regval  = getreg32(EFM32_GPIO_IEN);
+  regval &= ~bit;
+  putreg32(regval, EFM32_GPIO_IEN);
+
+  /* Set the interrupt port */
+
+  if (pin < 8)
+    {
+      regaddr = EFM32_GPIO_EXTIPSELL;
+      shift   = (unsigned int)pin << 2;
+    }
+  else
+    {
+      regaddr = EFM32_GPIO_EXTIPSELH;
+      shift   = (unsigned int)(pin - 8) << 2;
+    }
+
+  regval = getreg32(regaddr);
+  regval &= ~(7 << shift);
+  regval |= ((uint32_t)port << shift);
+  putreg32(regval, regaddr);
+
+  /* Set/clear rising edge interrupt detection */
+
+  regval = getreg32(EFM32_GPIO_EXTIRISE);
+  if ((pinset & GPIO_INT_RISING) != 0)
+    {
+      regval |= bit;
+    }
+  else
+    {
+      regval &= ~bit;
+    }
+
+  putreg32(regval, EFM32_GPIO_EXTIRISE);
+
+  /* Set/clear rising edge interrupt detection */
+
+  regval  = getreg32(EFM32_GPIO_EXTIFALL);
+  if ((pinset & GPIO_INT_FALLING) != 0)
+    {
+      regval |= bit;
+    }
+  else
+    {
+      regval &= ~bit;
+    }
+
+  putreg32(regval, EFM32_GPIO_EXTIFALL);
+  irqrestore(flags);
 }
 
 /************************************************************************************
@@ -94,7 +270,21 @@ void efm32_gpioirq(gpio_pinset_t pinset)
 
 void efm32_gpioirqenable(int irq)
 {
-#warning Missing logic
+  irqstate_t flags;
+  uint32_t regval;
+  uint32_t bit;
+
+  if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
+    {
+      /* Enable the interrupt associated with the pin */
+
+      bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
+      flags   = irqsave();
+      regval  = getreg32(EFM32_GPIO_IEN);
+      regval |= bit;
+      putreg32(regval, EFM32_GPIO_IEN);
+      irqrestore(flags);
+    }
 }
 
 /************************************************************************************
@@ -107,7 +297,21 @@ void efm32_gpioirqenable(int irq)
 
 void efm32_gpioirqdisable(int irq)
 {
-#warning Missing logic
+  irqstate_t flags;
+  uint32_t regval;
+  uint32_t bit;
+
+  if (irq >= EFM32_IRQ_EXTI0 && irq <= EFM32_IRQ_EXTI15)
+    {
+      /* Enable the interrupt associated with the pin */
+
+      bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
+      flags   = irqsave();
+      regval  = getreg32(EFM32_GPIO_IEN);
+      regval &= ~bit;
+      putreg32(regval, EFM32_GPIO_IEN);
+      irqrestore(flags);
+    }
 }
 
 #endif /* CONFIG_EFM32_GPIO_IRQ */
