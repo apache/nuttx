@@ -139,14 +139,14 @@ Configurations
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:
 
-    configure.bat STM32F4Discovery\<subdir>
+    configure.bat efm32-g8xx-stk\<subdir>
 
   Where <subdir> is one of the following:
 
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on USARTx.  Support for
+    Configuration enables the serial interfaces on UART0.  Support for
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected (see NOTES below).
 
