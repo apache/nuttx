@@ -110,7 +110,7 @@
 static void efm32_setbaud(uintptr_t base,  uint32_t baud)
 {
   uint64_t clkdiv;
-  uint64_t minover;
+  uint64_t maxover;
   uint32_t oversample;
   uint32_t regval;
   uint32_t ovs;
@@ -134,36 +134,36 @@ static void efm32_setbaud(uintptr_t base,  uint32_t baud)
    *
    * Suppose we insist on a CLKDIV >= 24, then:
    *
-   *   MINoversample = 256 * fHFPERCLK / (280 * baud))
+   *   MAXoversample = 256 * fHFPERCLK / (280 * baud))
    *
    * Example: fHPERCLK = 32MHz, baud=115200
-   *   MINoversample = 254.0 -> 16
+   *   MAXoversample = 254.0 -> 16
    *   CLKDIV        = 4445.4
    *   baud          = 115,249.3
    */
 
-  minover = ((BOARD_HFPERCLK_FREQUENCY << 8) / 280) / baud;
-  if (minover >= 16)
+  maxover = ((BOARD_HFPERCLK_FREQUENCY << 8) / 280) / baud;
+  if (maxover >= 16)
     {
       DEBUGASSERT(baud <= (BOARD_HFPERCLK_FREQUENCY / 16));
       oversample = 16;
       ovs        = USART_CTRL_OVS_X16;
     }
-  else if (minover >= 8)
+  else if (maxover >= 8)
     {
       DEBUGASSERT(baud <= (BOARD_HFPERCLK_FREQUENCY / 8));
       oversample = 8;
       ovs        = USART_CTRL_OVS_X8;
     }
-  else if (minover >= 6)
+  else if (maxover >= 6)
     {
       DEBUGASSERT(baud <= (BOARD_HFPERCLK_FREQUENCY / 6));
       oversample = 6;
       ovs        = USART_CTRL_OVS_X6;
     }
-  else /* if (minover >= 4) */
+  else /* if (maxover >= 4) */
     {
-      DEBUGASSERT(minover >= 4 && baud <= (BOARD_HFPERCLK_FREQUENCY / 4));
+      DEBUGASSERT(maxover >= 4 && baud <= (BOARD_HFPERCLK_FREQUENCY / 4));
       oversample = 4;
       ovs        = USART_CTRL_OVS_X4;
     }
