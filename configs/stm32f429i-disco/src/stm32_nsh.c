@@ -136,7 +136,7 @@ int nsh_archinitialize(void)
 #if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
   int ret;
 #endif
-#if defined(CONFIG_STM32_SPI5) || defined(CONFIG_STM32_SPI4)
+#if defined(CONFIG_STM32_SPI4)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #endif
