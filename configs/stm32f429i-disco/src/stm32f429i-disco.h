@@ -258,6 +258,31 @@ int nsh_archinitialize(void);
 FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #endif
 
+#ifdef CONFIG_STM32_SPI5
+/******************************************************************************
+ * Name: stm32_spi5initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port.
+ *   As long as the method up_spiinitialize recognized the initialized state of
+ *   the spi device by the spi enable flag of the cr1 register, it isn't safe to
+ *   disable the spi device outside of the nuttx spi interface structure. But
+ *   this has to be done as long as the nuttx spi interface doesn't support
+ *   bidirectional data transfer for multiple devices share one spi bus. This
+ *   wrapper does nothing else than store the initialized state of the spi
+ *   device after the first initializing and should be used by each driver who
+ *   shares the spi5 bus.
+ *
+ * Input Parameter:
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ******************************************************************************/
+
+FAR struct spi_dev_s *stm32_spi5initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
 

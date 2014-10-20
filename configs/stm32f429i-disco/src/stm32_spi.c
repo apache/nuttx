@@ -54,7 +54,7 @@
 #include "stm32f429i-disco.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3) ||\
-	defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)
+    defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)
 
 /************************************************************************************
  * Definitions
@@ -76,6 +76,14 @@
 #  undef SPI_VERBOSE
 #  define spidbg(x...)
 #  define spivdbg(x...)
+#endif
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI5
+FAR struct spi_dev_s *g_spidev5 = NULL;
 #endif
 
 /************************************************************************************
@@ -283,4 +291,35 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 
 #endif /* CONFIG_SPI_CMDDATA */
 
+/******************************************************************************
+ * Name: stm32_spi5initialize
+ *
+ * Description:
+ *   Initialize the selected SPI port.
+ *   As long as the method up_spiinitialize recognized the initialized state of
+ *   the spi device by the spi enable flag of the cr1 register, it isn't safe to
+ *   disable the spi device outside of the nuttx spi interface structure. But
+ *   this has to be done as long as the nuttx spi interface doesn't support
+ *   bidirectional data transfer for multiple devices share one spi bus. This
+ *   wrapper does nothing else than store the initialized state of the spi
+ *   device after the first initializing and should be used by each driver who
+ *   shares the spi5 bus.
+ *
+ * Input Parameter:
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ******************************************************************************/
+#ifdef CONFIG_STM32_SPI5
+FAR struct spi_dev_s *stm32_spi5initialize(void)
+{
+  if (!g_spidev5)
+    {
+      g_spidev5 = up_spiinitialize(5);
+    }
+
+  return g_spidev5;
+}
+#endif
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */
