@@ -75,4 +75,12 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: board_led_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void board_led_initialize(void);
+#endif
+
 #endif /* __CONFIGS_EFM32_DK3650_INCLUDE_BOARD_H */
