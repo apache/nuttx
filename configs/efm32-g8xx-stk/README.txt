@@ -1,7 +1,8 @@
 README
 ======
 
-  This README file discusses the port of NuttX to the Silicon Labs EFM32™ Gecko Starter Kit (EFM32-G8XX-STK). The Gecko Starter Kit features:
+  This README file discusses the port of NuttX to the Silicon Labs EFM32™
+  Gecko Starter Kit (EFM32-G8XX-STK). The Gecko Starter Kit features:
 
     • EFM32G890F128 MCU with 128 kB flash and 16 kB RAM
     •   32.768 kHz crystal
@@ -14,6 +15,12 @@ README
     • Reset button and a switch to disconnect the battery.
     • On-board SEGGER J-Link USB emulator
     •   ARM 20 pin JTAG/SWD standard Debug in/out connector
+
+STATUS
+======
+
+  My board is on order and has not arrived as of this writing.  So no debug
+  has yet been done.  So the status is code-complete but untested.
 
 LEDs
 ====
