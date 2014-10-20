@@ -213,7 +213,16 @@ void efm32_lowsetup(void)
 #ifdef HAVE_SERIAL_CONSOLE
 void efm32_lowputc(uint32_t ch)
 {
-#warning Missing logic
+  /* The TX Buffer Level (TXBL) status bit indicates the level of the
+   * transmit buffer.  If TXBIL is set, TXBL is set whenever the transmit
+   * buffer is half-full or empty.
+   */
+
+  while ((getreg32(CONSOLE_BASE + EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) == 0);
+
+  /* Then send the character */
+
+  putreg32((uint32_t)ch, CONSOLE_BASE + EFM32_USART_TXDATA_OFFSET);
 }
 #endif
 
