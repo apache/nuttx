@@ -149,7 +149,7 @@
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F40XX)
-#  define STM32_SPI3_FRF          (1 << 4)  /* Bit 4: Frame format */
+#  define SPI_CR2_FRF             (1 << 4)  /* Bit 4: Frame format */
 #endif
 
 #define SPI_CR2_ERRIE             (1 << 5)  /* Bit 5: Error interrupt enable */
