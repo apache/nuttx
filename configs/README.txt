@@ -345,6 +345,10 @@ configs/nutiny-nuc120
   This is the port of NuttX to the NuvoTon NuTiny-SDK-NUC120 board.  This
   board has the NUC120LE3AN chip with a built-in NuLink debugger.
 
+configs/olimex-efm32g880f128-stk
+  This is the port of NuttX to the Olimex EFM32G880F128-STK development
+  board.
+
 configs/olimex-lpc1766stk
   This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
   Linux or Cygwin.  STATUS: Complete and mature.
