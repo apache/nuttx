@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <arch/board/board.h>
 
@@ -92,6 +93,74 @@
 #    error No console is selected????  Internal craziness!!!
 #  endif
 #endif /* HAVE_SERIAL_CONSOLE */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: efm32_setbaud
+ *
+ * Description:
+ *   Set optimal oversampling and set the baud for this U[S]ART.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+static void efm32_setbaud(uintptr_t base,  uint32_t baud)
+{
+  uint64_t clkdiv;
+  uint32_t oversample;
+  uint32_t regval;
+  uint32_t ovs;
+
+  /* Select oversampling */
+
+  if (baud <= (BOARD_HFPERCLK_FREQUENCY / 4))
+    {
+      oversample = 16;
+      ovs        = USART_CTRL_OVS_X16;
+    }
+  else if (baud <= (BOARD_HFPERCLK_FREQUENCY / 6))
+    {
+      oversample = 16;
+      ovs        = USART_CTRL_OVS_X16;
+    }
+  else if (baud <= (BOARD_HFPERCLK_FREQUENCY / 8))
+    {
+      oversample = 8;
+      ovs        = USART_CTRL_OVS_X8;
+    }
+  else /* if (baud <= (BOARD_HFPERCLK_FREQUENCY / 16)) */
+    {
+      DEBUGASSERT(baud <= (BOARD_HFPERCLK_FREQUENCY / 16));
+      oversample = 16;
+      ovs        = USART_CTRL_OVS_X16;
+    }
+
+  /* CLKDIV in asynchronous mode is given by:
+   *
+   * CLKDIV = 256 * (fHFPERCLK/(oversample * baud) - 1)
+   * or
+   * CLKDIV = (256 * fHFPERCLK)/(oversample * baud) - 256
+   */
+
+  clkdiv  = ((uint64_t)BOARD_HFPERCLK_FREQUENCY << 8) / ((uint64_t)baud * oversample);
+  clkdiv -= 256;
+
+  DEBUGASSERT(clkdiv <= _USART_CLKDIV_MASK);
+
+  /* Set up the select oversampling and baud */
+
+  regval = getreg32(base + EFM32_USART_CTRL_OFFSET);
+  regval  &= ~_USART_CTRL_OVS_MASK;
+  regval  |= ovs;
+  putreg32(regval, base + EFM32_USART_CTRL_OFFSET);
+
+  putreg32((uint32_t)clkdiv & _USART_CTRL_OVS_MASK,
+           base + EFM32_USART_CLKDIV_OFFSET);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -235,9 +304,146 @@ void efm32_lowputc(uint32_t ch)
  *****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void efm32_uartconfigure(uintptr_t uart_base, uint32_t baud,
-                         unsigned int parity, unsigned int nbits, bool stop2)
+void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
+                         unsigned int nbits, bool stop2)
 {
-#warning Missing logic
+  uint32_t regval = 0;
+
+  /* Make sure that the U[S]ART registers are in the reset state (except for
+   * ROUTE information which must be preserved).
+   */
+
+  efm32_uartreset(base);
+
+  /* Configure number of data bits */
+
+  switch (nbits)
+    {
+    case 4:
+      regval |= USART_FRAME_DATABITS_FOUR;
+      break;
+
+    case 5:
+      regval |= USART_FRAME_DATABITS_FIVE;
+      break;
+
+    case 6:
+      regval |= USART_FRAME_DATABITS_SIX;
+      break;
+
+    case 7:
+      regval |= USART_FRAME_DATABITS_SEVEN;
+      break;
+
+    default:
+    case 8:
+      regval |= USART_FRAME_DATABITS_EIGHT;
+      break;
+
+    case 9:
+      regval |= USART_FRAME_DATABITS_NINE;
+      break;
+
+    case 10:
+      regval |= USART_FRAME_DATABITS_TEN;
+      break;
+
+    case 11:
+      regval |= USART_FRAME_DATABITS_ELEVEN;
+      break;
+
+    case 12:
+      regval |= USART_FRAME_DATABITS_TWELVE;
+      break;
+
+    case 13:
+      regval |= USART_FRAME_DATABITS_THIRTEEN;
+      break;
+
+    case 14:
+      regval |= USART_FRAME_DATABITS_FOURTEEN;
+      break;
+
+    case 15:
+      regval |= USART_FRAME_DATABITS_FIFTEEN;
+      break;
+
+    case 16:
+      regval |= USART_FRAME_DATABITS_SIXTEEN;
+      break;
+    }
+
+  /* Configure parity */
+
+  switch (parity)
+    {
+    default:
+    case 0:
+      regval |= USART_FRAME_PARITY_NONE;
+      break;
+
+    case 1:
+      regval |= USART_FRAME_PARITY_ODD;
+      break;
+
+    case 2:
+      regval |= USART_FRAME_PARITY_EVEN;
+      break;
+
+    }
+
+  /* Configure stop bits */
+
+  if (stop2)
+    {
+      regval |= USART_FRAME_STOPBITS_TWO;
+    }
+  else
+    {
+      regval |= USART_FRAME_STOPBITS_ONE;
+    }
+
+  putreg32(regval, base + EFM32_USART_FRAME_OFFSET);
+
+  /* Set the baud clock divisor */
+
+  efm32_setbaud(base, baud);
+
+  /* Enable the U[S]ART */
+
+  putreg32(USART_CMD_RXEN | USART_CMD_TXEN, base + EFM32_USART_CMD_OFFSET);
+}
+#endif
+
+/*****************************************************************************
+ * Name: efm32_uartreset
+ *
+ * Description:
+ *   Reset the USART/UART by disabling it and restoring all of the registers
+ *   to the initial, reset value.  Only the ROUTE data set by efm32_lowsetup
+ *   is preserved.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+void efm32_uartreset(uintptr_t base)
+{
+  putreg32(USART_CMD_RXDIS | USART_CMD_TXDIS | USART_CMD_MASTERDIS |
+           USART_CMD_RXBLOCKDIS | USART_CMD_TXTRIDIS | USART_CMD_CLEARTX |
+           USART_CMD_CLEARRX, base + EFM32_USART_CMD_OFFSET);
+  putreg32(_USART_CTRL_RESETVALUE, base + EFM32_USART_CTRL_OFFSET);
+  putreg32(_USART_FRAME_RESETVALUE, base + EFM32_USART_FRAME_OFFSET);
+  putreg32(_USART_TRIGCTRL_RESETVALUE, base + EFM32_USART_TRIGCTRL_OFFSET);
+  putreg32(_USART_CLKDIV_RESETVALUE, base + EFM32_USART_CLKDIV_OFFSET);
+  putreg32(_USART_IEN_RESETVALUE, base + EFM32_USART_IEN_OFFSET);
+  putreg32(_USART_IFC_MASK, base + EFM32_USART_IFC_OFFSET);
+
+  putreg32(_USART_IRCTRL_RESETVALUE, base + EFM32_USART_IRCTRL_OFFSET);
+#if defined(EFM32_USART_INPUT_OFFSET)
+  putreg32(_USART_INPUT_RESETVALUE, base + EFM32_USART_INPUT_OFFSET);
+#endif
+#if defined(EFM32_USART_I2SCTRL_OFFSET)
+  putreg32(_USART_I2SCTRL_RESETVALUE, base + EFM32_USART_I2SCTRL_OFFSET);
+#endif
 }
 #endif

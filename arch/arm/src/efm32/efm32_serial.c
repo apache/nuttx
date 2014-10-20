@@ -642,6 +642,13 @@ static void efm32_shutdown(struct uart_dev_s *dev)
   /* Disable interrupts */
 
   efm32_restoreuartint(priv, 0);
+
+  /* Reset the USART/UART by disabling it and restoring all of the registers
+   * to the initial, reset value.  Only the ROUTE data set by efm32_lowsetup
+   * is preserved.
+   */
+
+  efm32_uartreset(priv->config->uartbase);
 }
 
 /****************************************************************************
