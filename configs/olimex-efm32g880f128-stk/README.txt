@@ -34,6 +34,13 @@ README
     • Power supply filtering capacitor
     • Extension headers for some of the uC ports + RST and power supply
 
+STATUS
+======
+
+  I created this configuration with good intentions but was stopped because
+  I do not have a SWD tool that I can use with the board -- and I am not
+  likely to get one soon.
+
 LEDs
 ====
 
