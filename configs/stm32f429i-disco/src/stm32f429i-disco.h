@@ -2,7 +2,8 @@
  * configs/stm32f429i-disco/src/stm32f429i-disco.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Marco Krahl <ocram.lhark@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,6 +44,10 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
+
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341
+#include <nuttx/lcd/ili9341.h>
+#endif
 
 /****************************************************************************************************
  * Definitions
@@ -232,6 +237,25 @@ void stm32_pmbuttons(void);
 
 #ifdef CONFIG_NSH_LIBRARY
 int nsh_archinitialize(void);
+#endif
+
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341
+/****************************************************************************
+ * Name:  stm32_ili93414ws_initialize
+ *
+ * Description:
+ *   Initialize the device structure to control the LCD Single chip driver.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   On success, this function returns a reference to the LCD control object
+ *   for the specified ILI9341 LCD Single chip driver connected as 4 wire serial
+ *   (spi). NULL is returned on any failure.
+ *
+ ******************************************************************************/
+
+FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
