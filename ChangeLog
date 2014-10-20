@@ -8854,3 +8854,5 @@
 	  Bouteville (2104-10-20).
 	* configs/efm32-gxxx-stk:  Add board support for the EFM32 Gecko Starter
 	  Kit (2014-10-20).
+	* configs/olimex-efm32g880f128-stk: Add board support for the Olimex
+	  EFM32G8809128 STK (2014-10-20).
