@@ -2,7 +2,8 @@
  * configs/stm32f429i-disco/src/stm32_spi.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Marco Krahl <ocram.lhark@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -189,7 +190,7 @@ void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_STM32_LTDC)
+#if defined(CONFIG_STM32F429I_DISCO_ILI9341)
   if (devid == SPIDEV_DISPLAY)
     {
       stm32_gpiowrite(GPIO_CS_LCD, !selected);
@@ -263,16 +264,15 @@ int stm32_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #ifdef CONFIG_STM32_SPI5
 int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-#if defined(CONFIG_STM32_LTDC)
+#if defined(CONFIG_STM32F429I_DISCO_ILI9341)
   if (devid == SPIDEV_DISPLAY)
     {
-      /* "This is the Data/Command control pad which determines whether the
+      /*  This is the Data/Command control pad which determines whether the
        *  data bits are data or a command.
        */
 
-# if defined(CONFIG_STM32_LTDC)
       (void)stm32_gpiowrite(GPIO_LCD_DC, !cmd);
-# endif
+
       return OK;
     }
 #endif

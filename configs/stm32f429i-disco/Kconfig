@@ -133,4 +133,45 @@ config PM_SLEEP_WAKEUP_NSEC
 	---help---
 		Number of additional nanoseconds to wait in PM_SLEEP before going to PM_STANDBY mode.
 
+config STM32F429I_DISCO_ILI9341
+	bool "LCD driver for ILI9341 Liquid Crystal Display Controller"
+	default n
+	---help---
+		Enables  support for a connected display based on ili9341 LCD Single Chip
+		Driver. This sub driver supports only communication with the display driver
+		connected via 4-wire serial (spi) mcu interface.
+
+config STM32F429I_DISCO_ILI9341_SPIFREQUENCY
+	int "SPI frequency"
+	default 12000000
+	depends on STM32F429I_DISCO_ILI9341
+	---help---
+		Define the bus freqency of the spi device.
+
+config STM32F429I_DISCO_ILI9341_SPIBITS16
+	bool "Enable 16 bit pixel read/write"
+	default n
+	depends on STM32F429I_DISCO_ILI9341
+	---help---
+		This enables faster 16-bit spi mode for transmitting or receiving pixel data
+		to or from the display gram. But uses default 8-bit spi mode for all other
+		display operations.
+
+config STM32F429I_DISCO_ILI9341_LCDIFACE
+	bool "Enable support for nuttx lcd interface"
+	default n
+	depends on STM32F429I_DISCO_ILI9341 && LCD_ILI9341
+	---help---
+		Enable lcd driver support for the nuttx lcd interface.
+
+config STM32F429I_DISCO_ILI9341_LCDDEVICE
+	int "LCD interface"
+	default 0
+	range 0 1
+	depends on STM32F429I_DISCO_ILI9341_LCDIFACE
+	---help---
+		Define the lcd interface which should be used. This must be
+		corresponding to the configured ili9341 lcd device in the driver
+		section.
+
 endif
