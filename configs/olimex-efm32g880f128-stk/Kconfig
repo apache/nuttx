@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
+
+#comment "EFM32 G8XX STK Hardware Configuration"
+
+endif # ARCH_BOARD_OLIMEX_EFM32G880F128_STK

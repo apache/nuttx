@@ -363,6 +363,13 @@ config ARCH_BOARD_NUTINY_NUC120
 		Nuvoton NUC120 chip, specifically the NUC120LE3AN.  See http://www.nuvoton.com/
 		for further information.
 
+config ARCH_BOARD_OLIMEX_EFM32G880F128_STK
+	bool "Olimex EFM32G880F128 STK"
+	depends on ARCH_CHIP_EFM32G880F128
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This options selects the Olimex EFM32G880F128 STK
+
 config ARCH_BOARD_OLIMEXLPC2378
 	bool "Olimex-lpc2378 board"
 	depends on ARCH_CHIP_LPC2378
@@ -966,100 +973,101 @@ config ARCH_BOARD_CUSTOM_DIR
 
 config ARCH_BOARD
 	string
-	default "amber"               if ARCH_BOARD_AMBER
-	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
-	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
-	default "c5471evm"            if ARCH_BOARD_C5471EVM
-	default "compal_e86"          if ARCH_BOARD_COMPALE86
-	default "compal_e88"          if ARCH_BOARD_COMPALE88
-	default "compal_e99"          if ARCH_BOARD_COMPALE99
-	default "demo9s12ne64"        if ARCH_BOARD_DEMOS92S12NEC64
-	default "ea3131"              if ARCH_BOARD_EA3131
-	default "ea3152"              if ARCH_BOARD_EA3152
-	default "eagle100"            if ARCH_BOARD_EAGLE100
-	default "efm32-g8xx-stk"      if ARCH_BOARD_EFM32G8XXSTK
-	default "ekk-lm3s9b96"        if ARCH_BOARD_EKKLM3S9B96
-	default "ez80f910200kitg"     if ARCH_BOARD_EZ80F910200KITG
-	default "ez80f910200zco"      if ARCH_BOARD_EZ80F910200ZCO
-	default "fire-stm32v2"        if ARCH_BOARD_FIRE_STM32
-	default "freedom-kl25z"       if ARCH_BOARD_FREEDOM_KL25Z
-	default "hymini-stm32v"       if ARCH_BOARD_HYMINI_STM32V
-	default "kwikstik-k40"        if ARCH_BOARD_KWIKSTIK_K40
-	default "lincoln60"           if ARCH_BOARD_LINCOLN60
-	default "lm3s6432-s2e"        if ARCH_BOARD_LM3S6432S2E
-	default "lm3s6965-ek"         if ARCH_BOARD_LM3S6965EK
-	default "lm3s8962-ek"         if ARCH_BOARD_LM3S8962EK
-	default "lm4f120-launchpad"   if ARCH_BOARD_LM4F120_LAUNCHPAD
-	default "lpc4330-xplorer"     if ARCH_BOARD_LPC4330_XPLORER
-	default "lpcxpresso-lpc1768"  if ARCH_BOARD_LPCXPRESSO
-	default "maple"               if ARCH_BOARD_MAPLE
-	default "mbed"                if ARCH_BOARD_MBED
-	default "mcu123-lpc214x"      if ARCH_BOARD_MCU123_LPC214X
-	default "micropendous3"       if ARCH_BOARD_MICROPENDOUS3
-	default "mirtoo"              if ARCH_BOARD_MIRTOO
-	default "mx1ads"              if ARCH_BOARD_MX1ADS
-	default "ne64badge"           if ARCH_BOARD_NE64BADGE
-	default "ntosd-dm320"         if ARCH_BOARD_NTOSD_DM320
-	default "nucleus2g"           if ARCH_BOARD_NUCLEUS2G
-	default "nutiny-nuc120"       if ARCH_BOARD_NUTINY_NUC120
-	default "olimex-lpc1766stk"   if ARCH_BOARD_LPC1766STK
-	default "olimex-lpc2378"      if ARCH_BOARD_OLIMEXLPC2378
-	default "olimex-lpc-h3131"    if ARCH_BOARD_OLIMEX_LPC_H3131
-	default "olimex-stm32-h405"   if ARCH_BOARD_OLIMEX_STM32H405
-	default "olimex-stm32-p107"   if ARCH_BOARD_OLIMEX_STM32P107
-	default "olimex-stm32-p207"   if ARCH_BOARD_OLIMEX_STM32P207
-	default "olimex-strp711"      if ARCH_BOARD_OLIMEX_STRP711
-	default "open1788"            if ARCH_BOARD_OPEN1788
-	default "p112"                if ARCH_BOARD_P112
-	default "pcblogic-pic32mx"    if ARCH_BOARD_PCBLOGICPIC32MX
-	default "pcduino-a10"         if ARCH_BOARD_PCDUINO_A10
-	default "pic32-starterkit"    if ARCH_BOARD_PIC32_STARTERKIT
-	default "pic32mx7mmb"         if ARCH_BOARD_PIC32MX7MMB
-	default "pirelli_dpl10"       if ARCH_BOARD_PIRELLI_DPL10
-	default "px4fmu-v2_upstream"  if ARCH_BOARD_PX4FMU_V2
-	default "nucleo-f4x1re"       if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
-	default "qemu-i486"           if ARCH_BOARD_QEMU_I486
-	default "rgmp"                if ARCH_BOARD_RGMP
-	default "sama5d3x-ek"         if ARCH_BOARD_SAMA5D3X_EK
-	default "sama5d3-xplained"    if ARCH_BOARD_SAMA5D3_XPLAINED
-	default "sama5d4-ek"          if ARCH_BOARD_SAMA5D4_EK
-	default "samd20-xplained"     if ARCH_BOARD_SAMD20_XPLAINED
-	default "sam3u-ek"            if ARCH_BOARD_SAM3UEK
-	default "sam4e-ek"            if ARCH_BOARD_SAM4EEK
-	default "sam4l-xplained"      if ARCH_BOARD_SAM4L_XPLAINED
-	default "sam4s-xplained"      if ARCH_BOARD_SAM4S_XPLAINED
-	default "sam4s-xplained-pro"  if ARCH_BOARD_SAM4S_XPLAINED_PRO
-	default "shenzhou"            if ARCH_BOARD_SHENZHOU
-	default "skp16c26"            if ARCH_BOARD_SKP16C26
-	default "spark"               if ARCH_BOARD_SPARK
-	default "stm32_tiny"          if ARCH_BOARD_STM32_TINY
-	default "stm3210e-eval"       if ARCH_BOARD_STM3210E_EVAL
-	default "stm3220g-eval"       if ARCH_BOARD_STM3220G_EVAL
-	default "stm3240g-eval"       if ARCH_BOARD_STM3240G_EVAL
-	default "stm32f100rc_generic" if ARCH_BOARD_STM32F100RC_GENERIC
-	default "stm32f3discovery"    if ARCH_BOARD_STM32F3_DISCOVERY
-	default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
-	default "stm32f429i-disco"    if ARCH_BOARD_STM32F429I_DISCO
-	default "stm32ldiscovery"     if ARCH_BOARD_STM32L_DISCOVERY
-	default "stm32vldiscovery"    if ARCH_BOARD_STM32VL_DISCOVERY
-	default "mikroe-stm32f4"      if ARCH_BOARD_MIKROE_STM32F4
-	default "sure-pic32mx"        if ARCH_BOARD_SUREPIC32MX
-	default "teensy"              if ARCH_BOARD_TEENSY
-	default "tm4c123g-launchpad"  if ARCH_BOARD_TM4C123G_LAUNCHPAD
-	default "cc3200-launchpad"    if ARCH_BOARD_CC3200_LAUNCHPAD
-	default "twr-k60n512"         if ARCH_BOARD_TWR_K60N512
-	default "ubw32"               if ARCH_BOARD_UBW32
-	default "us7032evb1"          if ARCH_BOARD_US7032EVB1
-	default "viewtool-stm32f107"  if ARCH_BOARD_VIEWTOOL_STM32F107
-	default "vsn"                 if ARCH_BOARD_VSN
-	default "xtrs"                if ARCH_BOARD_XTRS
-	default "z16f2800100zcog"     if ARCH_BOARD_Z16F2800100ZCOG
-	default "z80sim"              if ARCH_BOARD_Z80SIM
-	default "z8encore000zco"      if ARCH_BOARD_Z8ENCORE000ZCO
-	default "z8f64200100kit"      if ARCH_BOARD_Z8F64200100KIT
-	default "zp214xpa"            if ARCH_BOARD_ZP214XPA
-	default "zkit-arm-1769"       if ARCH_BOARD_ZKITARM
-	default "sim"                 if ARCH_BOARD_SIM
+	default "amber"                    if ARCH_BOARD_AMBER
+	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
+	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
+	default "c5471evm"                 if ARCH_BOARD_C5471EVM
+	default "compal_e86"               if ARCH_BOARD_COMPALE86
+	default "compal_e88"               if ARCH_BOARD_COMPALE88
+	default "compal_e99"               if ARCH_BOARD_COMPALE99
+	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
+	default "ea3131"                   if ARCH_BOARD_EA3131
+	default "ea3152"                   if ARCH_BOARD_EA3152
+	default "eagle100"                 if ARCH_BOARD_EAGLE100
+	default "efm32-g8xx-stk"           if ARCH_BOARD_EFM32G8XXSTK
+	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
+	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
+	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
+	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
+	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
+	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
+	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
+	default "lincoln60"                if ARCH_BOARD_LINCOLN60
+	default "lm3s6432-s2e"             if ARCH_BOARD_LM3S6432S2E
+	default "lm3s6965-ek"              if ARCH_BOARD_LM3S6965EK
+	default "lm3s8962-ek"              if ARCH_BOARD_LM3S8962EK
+	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
+	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
+	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
+	default "maple"                    if ARCH_BOARD_MAPLE
+	default "mbed"                     if ARCH_BOARD_MBED
+	default "mcu123-lpc214x"           if ARCH_BOARD_MCU123_LPC214X
+	default "micropendous3"            if ARCH_BOARD_MICROPENDOUS3
+	default "mirtoo"                   if ARCH_BOARD_MIRTOO
+	default "mx1ads"                   if ARCH_BOARD_MX1ADS
+	default "ne64badge"                if ARCH_BOARD_NE64BADGE
+	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
+	default "nucleus2g"                if ARCH_BOARD_NUCLEUS2G
+	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
+	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
+	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
+	default "olimex-lpc2378"           if ARCH_BOARD_OLIMEXLPC2378
+	default "olimex-lpc-h3131"         if ARCH_BOARD_OLIMEX_LPC_H3131
+	default "olimex-stm32-h405"        if ARCH_BOARD_OLIMEX_STM32H405
+	default "olimex-stm32-p107"        if ARCH_BOARD_OLIMEX_STM32P107
+	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
+	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
+	default "open1788"                 if ARCH_BOARD_OPEN1788
+	default "p112"                     if ARCH_BOARD_P112
+	default "pcblogic-pic32mx"         if ARCH_BOARD_PCBLOGICPIC32MX
+	default "pcduino-a10"              if ARCH_BOARD_PCDUINO_A10
+	default "pic32-starterkit"         if ARCH_BOARD_PIC32_STARTERKIT
+	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
+	default "pirelli_dpl10"            if ARCH_BOARD_PIRELLI_DPL10
+	default "px4fmu-v2_upstream"       if ARCH_BOARD_PX4FMU_V2
+	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
+	default "rgmp"                     if ARCH_BOARD_RGMP
+	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
+	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
+	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
+	default "samd20-xplained"          if ARCH_BOARD_SAMD20_XPLAINED
+	default "sam3u-ek"                 if ARCH_BOARD_SAM3UEK
+	default "sam4e-ek"                 if ARCH_BOARD_SAM4EEK
+	default "sam4l-xplained"           if ARCH_BOARD_SAM4L_XPLAINED
+	default "sam4s-xplained"           if ARCH_BOARD_SAM4S_XPLAINED
+	default "sam4s-xplained-pro"       if ARCH_BOARD_SAM4S_XPLAINED_PRO
+	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
+	default "skp16c26"                 if ARCH_BOARD_SKP16C26
+	default "spark"                    if ARCH_BOARD_SPARK
+	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
+	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
+	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
+	default "stm3240g-eval"            if ARCH_BOARD_STM3240G_EVAL
+	default "stm32f100rc_generic"      if ARCH_BOARD_STM32F100RC_GENERIC
+	default "stm32f3discovery"         if ARCH_BOARD_STM32F3_DISCOVERY
+	default "stm32f4discovery"         if ARCH_BOARD_STM32F4_DISCOVERY
+	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
+	default "stm32ldiscovery"          if ARCH_BOARD_STM32L_DISCOVERY
+	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
+	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
+	default "sure-pic32mx"             if ARCH_BOARD_SUREPIC32MX
+	default "teensy"                   if ARCH_BOARD_TEENSY
+	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
+	default "cc3200-launchpad"         if ARCH_BOARD_CC3200_LAUNCHPAD
+	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
+	default "ubw32"                    if ARCH_BOARD_UBW32
+	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
+	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
+	default "vsn"                      if ARCH_BOARD_VSN
+	default "xtrs"                     if ARCH_BOARD_XTRS
+	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
+	default "z80sim"                   if ARCH_BOARD_Z80SIM
+	default "z8encore000zco"           if ARCH_BOARD_Z8ENCORE000ZCO
+	default "z8f64200100kit"           if ARCH_BOARD_Z8F64200100KIT
+	default "zp214xpa"                 if ARCH_BOARD_ZP214XPA
+	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
+	default "sim"                      if ARCH_BOARD_SIM
 
 comment "Common Board Options"
 
@@ -1223,6 +1231,9 @@ source "configs/nucleus2g/Kconfig"
 endif
 if ARCH_BOARD_NUTINY_NUC120
 source "configs/nutiny-nuc120/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
+source "configs/olimex-efm32g880f128-stk/Kconfig"
 endif
 if ARCH_BOARD_LPC1766STK
 source "configs/olimex-lpc1766stk/Kconfig"

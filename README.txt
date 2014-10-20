@@ -1023,6 +1023,8 @@ nuttx
  |   |   `- README.txt
  |   |- nutiny-nuc120/
  |   |   `- README.txt
+ |   |- olimex-efm32g880f129-stk/
+ |   |   `- README.txt
  |   |- olimex-lpc1766stk/
  |   |   `- README.txt
  |   |- olimex-lpc2378/
