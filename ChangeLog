@@ -8856,3 +8856,7 @@
 	  Kit (2014-10-20).
 	* configs/olimex-efm32g880f128-stk: Add board support for the Olimex
 	  EFM32G8809128 STK (2014-10-20).
+	* drivers/lcd/Kconfig, ili9341.c, Make.defs, and include/nuttx/lcd/ili9341.h:
+	  Add support for a generic ILI9341 driver.  From Marco Krahl (2014-10-20).
+	* configs/stm32f429i-disco/Kconfig, src/ and lcd/:  Add support for the
+	  STM32F429i Discovery's LCD.  From Marco Krahl (2014-10-20).
