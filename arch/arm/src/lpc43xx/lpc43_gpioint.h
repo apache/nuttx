@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_gpioint.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@
  *
  ****************************************************************************/
 
-EXTERN int lpc43_gpioint_grpinitialize(int group, bool anded, bool level);
+int lpc43_gpioint_grpinitialize(int group, bool anded, bool level);
 
 /****************************************************************************
  * Name: lpc43_gpioint_pinconfig
@@ -115,7 +115,7 @@ EXTERN int lpc43_gpioint_grpinitialize(int group, bool anded, bool level);
  *
  ****************************************************************************/
 
-EXTERN int lpc43_gpioint_pinconfig(uint16_t gpiocfg);
+int lpc43_gpioint_pinconfig(uint16_t gpiocfg);
 
 /****************************************************************************
  * Name: lpc43_gpioint_grpconfig
@@ -134,7 +134,7 @@ EXTERN int lpc43_gpioint_pinconfig(uint16_t gpiocfg);
  *
  ****************************************************************************/
 
-EXTERN int lpc43_gpioint_grpconfig(uint16_t gpiocfg);
+int lpc43_gpioint_grpconfig(uint16_t gpiocfg);
 
 #endif /* CONFIG_GPIO_IRQ */
 #endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_GPIOINT_H */

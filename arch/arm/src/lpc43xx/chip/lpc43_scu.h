@@ -371,7 +371,7 @@
 #define SCU_GPIO_PIN31                31
 
 #define SCU_PINTSEL0_SHIFT(n)         ((n) << 3)
-#define SCU_PINTSEL0_MASK(n)          (0xff << SCU_PINTSEL0_SHIFT(n)))
+#define SCU_PINTSEL0_MASK(n)          (0xff << SCU_PINTSEL0_SHIFT(n))
 #define SCU_PINTSEL0_INTPIN_SHIFT(n)  ((n) << 3)
 #define SCU_PINTSEL0_INTPIN_MASK(n)   (31 << SCU_PINTSEL0_INTPIN_SHIFT(n))
 #define SCU_PINTSEL0_PORTSEL_SHIFT(n) (((n) << 3) + 5)
