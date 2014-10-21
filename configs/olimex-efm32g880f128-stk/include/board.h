@@ -56,6 +56,7 @@
  *   - 4-32 MHz High Frequency Crystal Oscillator (HFXO)
  *   - 32.768 kHz Low Frequency RC Oscillator (LFRCO)
  *   - 32.768 kHz Low Frequency Crystal Oscillator (LFXO)
+ *   - 1KHz Ultra Low Frequency RC Oscillator (ULFRCO)
  *
  * The device boots with 14 MHz HFRCO as the HFCLK source.
  */
@@ -67,6 +68,7 @@
 #define BOARD_HFXO_FREQUENCY   32000000 /* 32MHz crystal on board */
 #define BOARD_LFRCO_FREQUENCY  32768    /* Low frequency oscillator */
 #define BOARD_LFXO_FREQUENCY   32768    /* 32MHz crystal on board */
+#define BOARD_ULFRCO_FREQUNCY  1000     /* Ultra low frequency oscillator */
 
 /* HFCLK - High Frequency Clock
  *
@@ -110,9 +112,13 @@
  * LFRCO is disabled from reset. The selection is configured using the LFA
  * field in CMU_LFCLKSEL. The HFCORECLK/2 setting allows the Low Energy A
  * Peripherals to be used as high-frequency peripherals.
+ *
+ * Use _CMU_LFCLKSEL_LFA_DISABLED to disable
+ * ULFRCO is a special case.
  */
 
 #define BOARD_LFACLKSEL           _CMU_LFCLKSEL_LFA_LFXO
+#undef  BOARD_LFACLK_ULFRCO
 #define BOARD_LFACLK_FREQUENCY    BOARD_LFXO_FREQUENCY
 
 /* LFBCLK - Low Frequency B Clock
@@ -123,9 +129,13 @@
  * LFRCO is disabled from reset. The selection is configured using the LFB
  * field in CMU_LFCLKSEL. The HFCORECLK/2 setting allows the Low Energy B
  * Peripherals to be used as high-frequency peripherals.
+ *
+ * Use _CMU_LFCLKSEL_LFB_DISABLED to disable
+ * ULFRCO is a special case.
  */
 
 #define BOARD_LFBCLKSEL           _CMU_LFCLKSEL_LFB_LFXO
+#undef  BOARD_LFBCLK_ULFRCO
 #define BOARD_LFBCLK_FREQUENCY    BOARD_LFXO_FREQUENCY
 
 /* PCNTnCLK - Pulse Counter n Clock
