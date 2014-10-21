@@ -8867,3 +8867,5 @@
 	  definitions for the STM32 F103R from Martin Lederhilger  (2014-10-21).
 	* arch/arm/src/armv7-m/up_itm.c and itm.h: Add CMSIS ITM header file and
 	  library.  From Pierre-noel Bouteville (2104-10-21).
+	* arch/arm/src/armv7-m/dwt.h and tpi.h: Add CMSIS DWT and TPI header files.
+	  From Pierre-noel Bouteville (2104-10-21).
