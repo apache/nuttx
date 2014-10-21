@@ -8863,3 +8863,5 @@
 	* arch/arm/src/lpc43xx/lpc43_gpioint.c, .h, lpc43_irq.c, and
 	  chip/lpc43_gpio.h: Fixes to allow compile of lpc43_gpioint.c.  It
 	  likely doesn't work.  From Brandon warhurst_002 (2014-10-21).
+	* arch/arm/src/stm32/chip/stm32f103r_pinmap.h: Add ADC pinmap
+	  definitions for the STM32 F103R from Martin Lederhilger  (2014-10-21).
