@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/lpc43_gpioint.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,19 +34,21 @@
  ****************************************************************************/
 /* GPIO pin interrupts
  *
- * From all available GPIO pins, up to eight pins can be selected in the system
- * control block to serve as external interrupt pins. The external interrupt pins
- * are connected to eight individual interrupts in the NVIC and are created based
- * on rising or falling edges or on the input level on the pin.
+ *   From all available GPIO pins, up to eight pins can be selected in the
+ *   system control block to serve as external interrupt pins. The external
+ *   interrupt pins are connected to eight individual interrupts in the NVIC
+ *   and are created based on rising or falling edges or on the input level
+ *   on the pin.
  *
  * GPIO group interrupt
  *
- * For each port/pin connected to one of the two the GPIO Grouped Interrupt blocks
- * (GROUP0 and GROUP1), the GPIO grouped interrupt registers determine which pins are
- * enabled to generate interrupts and what the active polarities of each of those
- * inputs are. The GPIO grouped interrupt registers also select whether the interrupt
- * output will be level or edge triggered and whether it will be based on the OR or
- * the AND of all of the enabled inputs.
+ *   For each port/pin connected to one of the two the GPIO Grouped Interrupt
+ *   blocks (GROUP0 and GROUP1), the GPIO grouped interrupt registers
+ *   determine which pins are enabled to generate interrupts and what the
+ *   active polarities of each of those inputs are. The GPIO grouped
+ *   interrupt registers also select whether the interrupt output will be
+ *   level or edge triggered and whether it will be based on the OR or the
+ *   AND of all of the enabled inputs.
  */
 
 /****************************************************************************
@@ -59,8 +61,11 @@
 #include <nuttx/arch.h>
 #include <errno.h>
 
+#include "up_arch.h"
 #include "chip.h"
 #include "chip/lpc43_scu.h"
+#include "chip/lpc43_gpio.h"
+#include "lpc43_gpio.h"
 #include "lpc43_gpioint.h"
 
 #ifdef CONFIG_GPIO_IRQ
@@ -144,7 +149,8 @@ int lpc43_gpioint_grpinitialize(int group, bool anded, bool level)
     {
       regval |= GRPINT_CTRL_TRIG;
     }
-  putreg32(regbal, grpbase + LPC43_GRP1INT_CTRL_OFFSET);
+
+  putreg32(regval, grpbase + LPC43_GRPINT_CTRL_OFFSET);
 
   irqrestore(flags);
   return OK;
@@ -172,7 +178,6 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
   unsigned int pinint  = ((gpiocfg & GPIO_PININT_MASK) >> GPIO_PININT_SHIFT);
   uint32_t     bitmask = (1 << pinint);
   uint32_t     regval;
-  int          ret     = OK;
 
   DEBUGASSERT(port < NUM_GPIO_PORTS && pin < NUM_GPIO_PINS && GPIO_IS_PININT(gpiocfg));
 
@@ -215,6 +220,7 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
     {
       regval &= ~bitmask;
     }
+
   putreg32(regval, LPC43_GPIOINT_ISEL);
 
   /* Configure the active high level or rising edge */
@@ -228,6 +234,7 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
     {
       regval &= ~bitmask;
     }
+
   putreg32(regval, LPC43_GPIOINT_IENR);
 
   /* Configure the active high low or falling edge */
@@ -241,8 +248,8 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
     {
       regval &= ~bitmask;
     }
-  putreg32(regval, LPC43_GPIOINT_IENF);
 
+  putreg32(regval, LPC43_GPIOINT_IENF);
   return OK;
 }
 
@@ -250,8 +257,8 @@ int lpc43_gpioint_pinconfig(uint16_t gpiocfg)
  * Name: lpc43_gpioint_grpconfig
  *
  * Description:
- *   Configure a GPIO pin as an GPIO group interrupt member (after it has been
- *   configured as an input).
+ *   Configure a GPIO pin as an GPIO group interrupt member (after it has
+ *   been configured as an input).
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -270,7 +277,6 @@ int lpc43_gpioint_grpconfig(uint16_t gpiocfg)
   uintptr_t    regaddr;
   uint32_t     regval;
   uint32_t     bitmask = (1 << pin);
-  int          ret     = OK;
 
   /* Select the group register base address */
 
@@ -314,4 +320,3 @@ int lpc43_gpioint_grpconfig(uint16_t gpiocfg)
 }
 
 #endif /* CONFIG_GPIO_IRQ */
-
