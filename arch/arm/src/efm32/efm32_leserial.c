@@ -57,7 +57,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/efm32_leart.h"
+#include "chip/efm32_leuart.h"
 #include "efm32_config.h"
 #include "efm32_lowputc.h"
 
@@ -364,7 +364,6 @@ static void efm32_disableuartint(struct efm32_leuart_s *priv, uint32_t *ien)
 static int efm32_setup(struct uart_dev_s *dev)
 {
  struct efm32_leuart_s *priv = (struct efm32_leuart_s*)dev->priv;
- uint32_t regval;
 
 #ifndef CONFIG_SUPPRESS_LEUART_CONFIG
  const struct efm32_config_s *config = priv->config;
