@@ -204,6 +204,32 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
+/* Buttons ******************************************************************/
+/* The Olimex board has four buttons, BUT1-4.  Each is grounded and so should
+ * have a weak pull-up so that it will be sensed as "1" when open and "0"
+ * when closed.
+ *
+ * --------------------- ---------------------
+ * PIN                   CONNECTIONS
+ * --------------------- ---------------------
+ * PE0/PCNT0_S0IN/U0_TX  BUT1, EXT-18
+ * PE1/PCNT0_S1IN/U0_RX  BUT2, EXT-19
+ * PE2/ACMP0_O           BUT3, EXT-20
+ * PE3/ACMP1_O           BUT4, EXT-21
+ * --------------------- ---------------------
+ */
+
+#define BUTTON_1          0
+#define BUTTON_2          1
+#define BUTTON_3          2
+#define BUTTON_4          3
+#define NUM_BUTTONS       4
+
+#define BUTTON_1_BIT  (1 << BUTTON_1)
+#define BUTTON_2_BIT  (1 << BUTTON_2)
+#define BUTTON_3_BIT  (1 << BUTTON_3)
+#define BUTTON_4_BIT  (1 << BUTTON_4)
+
 /* Pin routing **************************************************************/
 /* UART0:
  *

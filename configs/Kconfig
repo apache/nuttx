@@ -367,6 +367,7 @@ config ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	bool "Olimex EFM32G880F128 STK"
 	depends on ARCH_CHIP_EFM32G880F128
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This options selects the Olimex EFM32G880F128 STK
 
