@@ -434,6 +434,10 @@ config ARCH_HAVE_USART8
 	bool
 	default n
 
+config ARCH_HAVE_OTHER_UART
+	bool
+	default n
+
 #
 # USARTn configuration.  Is the USART configured to behave like a UART?
 #
@@ -535,8 +539,9 @@ config SERIAL_TIOCSERGSTRUCT
 
 choice
 	prompt "Serial console"
+	default NO_SERIAL_CONSOLE if !ARCH_HAVE_OTHER_UART
+	default OTHER_SERIAL_CONSOLE if ARCH_HAVE_OTHER_UART
 	depends on MCU_SERIAL
-	default NO_SERIAL_CONSOLE
 	depends on DEV_CONSOLE
 
 config UART_SERIAL_CONSOLE

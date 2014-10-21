@@ -102,6 +102,7 @@ config EFM32_UART
 config EFM32_LEUART
 	bool
 	default n
+	select MCU_SERIAL
 
 # Then, these are the actual, selectable peripheral options
 
@@ -139,12 +140,14 @@ config EFM32_UART1
 config EFM32_LEUART0
 	bool "Low energy UART0"
 	default n
+	select ARCH_HAVE_OTHER_UART
 	select EFM32_LEUART
 
 config EFM32_LEUART1
 	bool "Low energy UART1"
 	default n
-	select EFM32_HAVE_LEUART1
+	depends on EFM32_HAVE_LEUART1
+	select ARCH_HAVE_OTHER_UART
 	select EFM32_LEUART
 
 endmenu # EFM32 Peripheral Support
@@ -174,7 +177,7 @@ config LEUART1_SERIAL_CONSOLE
 		Use the LEUART0 device as the serial console
 
 config NO_LEUART_SERIAL_CONSOLE
-	bool "Other serial console"
+	bool "No LEUART serial console"
 	---help---
 		No serial console OR some other serial device provides the serial console
 

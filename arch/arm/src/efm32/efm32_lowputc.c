@@ -277,7 +277,7 @@ static void efm32_leuart_setbaud(uintptr_t base,  uint32_t baud)
 
 void efm32_lowsetup(void)
 {
-#if defined(HAVE_UART_DEVICE) || defined(HAVE_UART_DEVICE)
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_LEUART_DEVICE)
   uint32_t regval;
 #endif
 
@@ -327,7 +327,7 @@ void efm32_lowsetup(void)
   regval = getreg32(EFM32_CMU_LFBCLKEN0);
   regval &= ~(CMU_LFBCLKEN0_LEUART0
 #ifdef CONFIG_EFM32_LEUART1
-             | CMU_HFPERCLKEN0_UART1
+             | CMU_LFBCLKEN0_LEUART1
 #endif
              );
 
@@ -578,11 +578,11 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 {
   uint32_t regval = 0;
 
-  /* Make sure that the U[S]ART registers are in the reset state (except for
+  /* Make sure that the LEUART registers are in the reset state (except for
    * ROUTE information which must be preserved).
    */
 
-  efm32_uart_reset(base);
+  efm32_leuart_reset(base);
 
   /* Configure number of data bits */
 
@@ -634,7 +634,7 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
   efm32_leuart_setbaud(base, baud);
 
-  /* Enable the U[S]ART */
+  /* Enable the LEUART */
 
   putreg32(LEUART_CMD_RXEN | LEUART_CMD_TXEN, base + EFM32_LEUART_CMD_OFFSET);
 }

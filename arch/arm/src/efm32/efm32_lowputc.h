@@ -71,7 +71,7 @@ void efm32_lowsetup(void);
  *
  *****************************************************************************/
 
-#ifdef HAVE_UART_CONSOLE
+#if defined(HAVE_UART_CONSOLE) || defined(HAVE_LEUART_CONSOLE)
 void efm32_lowputc(uint32_t ch);
 #endif
 
@@ -98,7 +98,7 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
 #ifdef HAVE_LEUART_DEVICE
 void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
-                           unsigned int nbits, bool stop2)
+                           unsigned int nbits, bool stop2);
 #endif
 
 /*****************************************************************************
@@ -113,6 +113,20 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
 #ifdef HAVE_UART_DEVICE
 void efm32_uart_reset(uintptr_t base);
+#endif
+
+/*****************************************************************************
+ * Name: efm32_uart_reset
+ *
+ * Description:
+ *   Reset the USART/UART by disabling it and restoring all of the registers
+ *   to the initial, reset value.  Only the ROUTE data set by efm32_lowsetup
+ *   is preserved.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_LEUART_DEVICE
+void efm32_leuart_reset(uintptr_t base);
 #endif
 
 #endif /* __ARCH_ARM_SRC_EFM32_EFM32_LOWPUTC_H */
