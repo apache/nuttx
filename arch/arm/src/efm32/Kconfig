@@ -154,4 +154,122 @@ config EFM32_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
+choice
+	prompt "LEUART Serial Console"
+	default NO_LEUART_SERIAL_CONSOLE
+	depends on DEV_CONSOLE && EFM32_LEUART
+
+config LEUART0_SERIAL_CONSOLE
+	bool "Use LEUART0 as the serial console"
+	depends on EFM32_LEUART0
+	select OTHER_SERIAL_CONSOLE
+	---help---
+		Use the LEUART0 device as the serial console
+
+config LEUART1_SERIAL_CONSOLE
+	bool "Use LEUART1 as the serial console"
+	depends on EFM32_LEUART1
+	select OTHER_SERIAL_CONSOLE
+	---help---
+		Use the LEUART0 device as the serial console
+
+config NO_LEUART_SERIAL_CONSOLE
+	bool "Other serial console"
+	---help---
+		No serial console OR some other serial device provides the serial console
+
+endchoice # LEUART Serial Console
+
+menu "LEUART0 Configuration"
+	depends on EFM32_LEUART0
+
+config LEUART0_RXBUFSIZE
+	int "Receive buffer size"
+	default 64
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LEUART0_TXBUFSIZE
+	int "Transmit buffer size"
+	default 64
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LEUART0_BAUD
+	int "BAUD rate"
+	default 2400
+	---help---
+		The configured BAUD of the UART.
+
+config LEUART0_BITS
+	int "Character size"
+	default 8
+	range 8 9
+	---help---
+		The number of bits.  Must be either 8 or 9.
+
+config LEUART0_PARITY
+	int "Parity setting"
+	range 0 2
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LEUART0_2STOP
+	int "use 2 stop bits"
+	default 0
+	range 0 1
+	---help---
+		1=Two stop bits
+
+endmenu # LEUART0 Configuration
+
+menu "LEUART1 Configuration"
+	depends on EFM32_LEUART1
+
+config LEUART1_RXBUFSIZE
+	int "Receive buffer size"
+	default 64
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LEUART1_TXBUFSIZE
+	int "Transmit buffer size"
+	default 64
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LEUART1_BAUD
+	int "BAUD rate"
+	default 2400
+	---help---
+		The configured BAUD of the UART.
+
+config LEUART1_BITS
+	int "Character size"
+	default 8
+	range 8 9
+	---help---
+		The number of bits.  Must be either 8 or 9.
+
+config LEUART1_PARITY
+	int "Parity setting"
+	range 0 2
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LEUART1_2STOP
+	int "use 2 stop bits"
+	default 0
+	range 0 1
+	---help---
+		1=Two stop bits
+
+endmenu # LEUART1 Configuration
+
 endif # ARCH_CHIP_EFM32

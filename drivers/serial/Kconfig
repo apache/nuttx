@@ -623,6 +623,9 @@ config SCI1_SERIAL_CONSOLE
 	bool "SCI1"
 	depends on ARCH_HAVE_SCI1
 
+config OTHER_SERIAL_CONSOLE
+	bool "Other serial console"
+
 config NO_SERIAL_CONSOLE
 	bool "No serial console"
 
