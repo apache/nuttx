@@ -648,7 +648,7 @@ static void efm32_shutdown(struct uart_dev_s *dev)
    * is preserved.
    */
 
-  efm32_uartreset(priv->config->uartbase);
+  efm32_uart_reset(priv->config->uartbase);
 }
 
 /****************************************************************************
@@ -1203,7 +1203,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   struct efm32_usart_s *priv = (struct efm32_usart_s*)CONSOLE_DEV.priv;
   uint32_t ien;
 
@@ -1236,7 +1236,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef HAVE_UART_CONSOLE
   /* Check for LF */
 
   if (ch == '\n')
