@@ -71,6 +71,18 @@
 #  error HFPERCLK divisor not yet supported
 #endif
 
+#ifdef BOARD_LFACLK_ULFRCO
+#  define BOARD_LFA_ULFCO_ENABLE true
+#else
+#  define BOARD_LFA_ULFCO_ENABLE false
+#endif
+
+#ifdef BOARD_LFBCLK_ULFRCO
+#  define BOARD_LFB_ULFCO_ENABLE true
+#else
+#  define BOARD_LFB_ULFCO_ENABLE false
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -140,7 +152,7 @@ static inline void efm32_statuswait(uint32_t bitset)
  *
  ****************************************************************************/
 
-static inline void efm32_enable_lfrco(void)
+static void efm32_enable_lfrco(void)
 {
   /* Enable the LFRCO */
 
@@ -148,8 +160,7 @@ static inline void efm32_enable_lfrco(void)
   efm32_statuswait(CMU_STATUS_LFRCORDY);
 }
 
-
-static inline void efm32_enable_lfxo(void)
+static void efm32_enable_lfxo(void)
 {
   /* Enable the LFXO */
 
@@ -165,7 +176,7 @@ static inline void efm32_enable_hfrco(void)
   efm32_statuswait(CMU_STATUS_HFRCORDY);
 }
 
-static inline void efm32_enable_hfxo(void)
+static void efm32_enable_hfxo(void)
 {
   /* Enable the HFXO */
 
@@ -180,6 +191,58 @@ static inline void efm32_enable_auxhfrco(void)
   putreg32(CMU_OSCENCMD_AUXHFRCOEN, EFM32_CMU_OSCENCMD);
   efm32_statuswait(CMU_STATUS_AUXHFRCORDY);
 }
+
+/****************************************************************************
+ * Name: efm32_enable_leclocking
+ *
+ * Description:
+ *   Enable HFCORE clocking to the LE
+ *
+ ****************************************************************************/
+
+static void efm32_enable_leclocking(void)
+{
+  uint32_t regval;
+
+  regval  = getreg32(EFM32_CMU_HFCORECLKEN0);
+  regval |= CMU_HFCORECLKEN0_LE;
+  putreg32(regval, EFM32_CMU_HFCORECLKEN0);
+}
+
+/****************************************************************************
+ * Name: efm32_enable_leclocking
+ *
+ * Description:
+ *   If the core frequency is higher than CMU_MAX_FREQ_HFLE on
+ *   Giant/Leopard/Wonder, enable HFLE and DIV4.
+ *
+ ****************************************************************************/
+
+#ifdef CMU_CTRL_HFLE
+static void efm32_enable_hfle(uint32_t frequency)
+{
+  uint32_t regval;
+
+  /* Check if the core frequency is higher than CMU_MAX_FREQ_HFLE */
+
+   if (frequency > CMU_MAX_FREQ_HFLE)
+    {
+      /* Enable HFLE */
+
+      regval = getreg32(EFM32_CMU_CTRL);
+      regval |= CMU_CTRL_HFLE;
+      putreg32(regval, EFM32_CMU_CTRL);
+
+      /* Enable DIV4 factor for peripheral clock */
+
+      regval  = getreg32(EFM32_CMU_HFCORECLKDIV);
+      regval |= CMU_HFCORECLKDIV_HFCORECLKLEDIV_DIV4;
+      putreg32(regval, EFM32_CMU_HFCORECLKDIV);
+    }
+}
+#else
+#  define efm32_enable_hfle(f)
+#endif
 
 /****************************************************************************
  * Name: efm32_maxwaitstates
@@ -326,7 +389,7 @@ static void efm32_setwaitstates(uint32_t hfcoreclk)
  *
  ****************************************************************************/
 
-static inline void efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
+static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
 {
   uint32_t frequency;
 #ifdef CMU_CTRL_HFLE
@@ -427,6 +490,7 @@ static inline void efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
   /* Now select the optimal number of FLASH wait states */
 
   efm32_setwaitstates(frequency);
+  return frequency;
 }
 
 /****************************************************************************
@@ -458,9 +522,11 @@ static inline void efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
  *
  ****************************************************************************/
 
-static inline void efm32_hfcoreclk_config(uint32_t hfcoreclkdiv)
+static inline uint32_t efm32_hfcoreclk_config(uint32_t hfcoreclkdiv,
+                                              uint32_t hfclk)
 {
   /* REVISIT:  Divider not currently used */
+  return hfclk;
 }
 
 /****************************************************************************
@@ -479,9 +545,11 @@ static inline void efm32_hfcoreclk_config(uint32_t hfcoreclkdiv)
  *
  ****************************************************************************/
 
-static inline void efm32_hfperclk_config(uint32_t hfperclkdiv)
+static inline uint32_t efm32_hfperclk_config(uint32_t hfperclkdiv,
+                                             uint32_t hfclk)
 {
   /* REVISIT:  Divider not currently used */
+  return hfclk;
 }
 
 /****************************************************************************
@@ -509,9 +577,77 @@ static inline void efm32_hfperclk_config(uint32_t hfperclkdiv)
  *
  ****************************************************************************/
 
-static inline void efm32_lfaclk_config(uint32_t lfaclksel)
+static inline uint32_t efm32_lfaclk_config(uint32_t lfaclksel, bool ulfrco,
+                                           uint32_t hfcoreclk)
 {
-  /* REVISIT: Not yet implemented */
+  uint32_t lfaclk;
+  uint32_t regval;
+
+  /* ULFRCO is a special case */
+
+  if (ulfrco)
+    {
+      /* ULFRCO is always enabled */
+
+      lfaclksel = _CMU_LFCLKSEL_LFA_DISABLED;
+      lfaclk    = BOARD_ULFRCO_FREQUNCY;
+    }
+  else
+    {
+      /* Enable the oscillator source */
+
+      switch (lfaclksel)
+        {
+          default:
+          case _CMU_LFCLKSEL_LFA_DISABLED:
+            {
+              lfaclk = 0;
+            }
+            break;
+
+          case CMU_LFCLKSEL_LFA_LFRCO:
+            {
+              efm32_enable_lfrco();
+            }
+            break;
+
+          case _CMU_LFCLKSEL_LFA_LFXO:
+            {
+              efm32_enable_lfxo();
+              lfaclk = BOARD_LFXO_FREQUENCY;
+            }
+            break;
+
+          case _CMU_LFCLKSEL_LFA_HFCORECLKLEDIV2:
+            {
+              /* Enable core clocking to the LE */
+
+              efm32_enable_leclocking();
+
+              /* Enable HFLE, if appropriate */
+
+              efm32_enable_hfle(hfcoreclk);
+
+              /* And, finally, enable the HFXO */
+
+              efm32_enable_hfxo();
+              lfaclk = hfcoreclk >> 1;
+            }
+            break;
+        }
+    }
+
+  /* Enable the LFA clock in the LFCLKSEL register */
+
+  regval  = getreg32(EFM32_CMU_LFCLKSEL);
+  regval &= ~(_CMU_LFCLKSEL_LFA_MASK | _CMU_LFCLKSEL_LFAE_MASK);
+  regval |= (lfaclksel << _CMU_LFCLKSEL_LFA_SHIFT);
+#ifdef CMU_LFCLKSEL_LFAE_ULFRCO
+  regval |= ((uint32_t)ulfrco << _CMU_LFCLKSEL_LFAE_SHIFT);
+#endif
+  putreg32(regval, EFM32_CMU_LFCLKSEL);
+
+  return lfaclk;
 }
 
 /****************************************************************************
@@ -535,9 +671,77 @@ static inline void efm32_lfaclk_config(uint32_t lfaclksel)
  *
  ****************************************************************************/
 
-static inline void efm32_lfbclk_config(uint32_t lfbclksel)
+static inline uint32_t efm32_lfbclk_config(uint32_t lfbclksel, bool ulfrco,
+                                           uint32_t hfcoreclk)
 {
-  /* REVISIT: Not yet implemented */
+  uint32_t lfbclk;
+  uint32_t regval;
+
+  /* ULFRCO is a special case */
+
+  if (ulfrco)
+    {
+      /* ULFRCO is always enabled */
+
+      lfbclksel = _CMU_LFCLKSEL_LFB_DISABLED;
+      lfbclk    = BOARD_ULFRCO_FREQUNCY;
+    }
+  else
+    {
+      /* Enable the oscillator source */
+
+      switch (lfbclksel)
+        {
+          default:
+          case _CMU_LFCLKSEL_LFB_DISABLED:
+            {
+              lfbclk = 0;
+            }
+            break;
+
+          case CMU_LFCLKSEL_LFB_LFRCO:
+            {
+              efm32_enable_lfrco();
+            }
+            break;
+
+          case _CMU_LFCLKSEL_LFB_LFXO:
+            {
+              efm32_enable_lfxo();
+              lfbclk = BOARD_LFXO_FREQUENCY;
+            }
+            break;
+
+          case _CMU_LFCLKSEL_LFB_HFCORECLKLEDIV2:
+            {
+              /* Enable core clocking to the LE */
+
+              efm32_enable_leclocking();
+
+              /* Enable HFLE, if appropriate */
+
+              efm32_enable_hfle(hfcoreclk);
+
+              /* And, finally, enable the HFXO */
+
+              efm32_enable_hfxo();
+              lfbclk = hfcoreclk >> 1;
+            }
+            break;
+        }
+    }
+
+  /* Enable the LFB clock in the LFCLKSEL register */
+
+  regval  = getreg32(EFM32_CMU_LFCLKSEL);
+  regval &= ~(_CMU_LFCLKSEL_LFB_MASK | _CMU_LFCLKSEL_LFBE_MASK);
+  regval |= (lfbclksel << _CMU_LFCLKSEL_LFB_SHIFT);
+#ifdef CMU_LFCLKSEL_LFBE_ULFRCO
+  regval |= ((uint32_t)ulfrco << _CMU_LFCLKSEL_LFBE_SHIFT);
+#endif
+  putreg32(regval, EFM32_CMU_LFCLKSEL);
+
+  return lfbclk;
 }
 
 /****************************************************************************
@@ -634,16 +838,27 @@ static inline void efm32_gpioclock(void)
 
 void efm32_clockconfig(void)
 {
+  uint32_t hfclk;
+  uint32_t hfcoreclk;
+  uint32_t hfperclk;
+  uint32_t lfaclk;
+  uint32_t lfbclk;
+
   /* Enable clocks and set dividers as determined by the board.h header file */
 
-  efm32_hfclk_config(BOARD_HFCLKSEL, BOARD_HFCLKDIV);
-  efm32_hfcoreclk_config(BOARD_HFCORECLKDIV);
-  efm32_hfperclk_config(BOARD_HFPERCLKDIV);
-  efm32_lfaclk_config(BOARD_LFACLKSEL);
-  efm32_lfbclk_config(BOARD_LFBCLKSEL);
+  hfclk     = efm32_hfclk_config(BOARD_HFCLKSEL, BOARD_HFCLKDIV);
+  hfcoreclk = efm32_hfcoreclk_config(BOARD_HFCORECLKDIV, hfclk);
+  hfperclk  = efm32_hfperclk_config(BOARD_HFPERCLKDIV, hfclk);
+  lfaclk    = efm32_lfaclk_config(BOARD_LFACLKSEL, BOARD_LFA_ULFCO_ENABLE, hfcoreclk);
+  lfbclk    = efm32_lfbclk_config(BOARD_LFBCLKSEL, BOARD_LFB_ULFCO_ENABLE, hfcoreclk);
+
   efm32_pcntclk_config();
   efm32_wdogclk_config();
   efm32_auxclk_config();
+
+  UNUSED(hfperclk);
+  UNUSED(lfaclk);
+  UNUSED(lfbclk);
 
   /* Enable clocking of the GPIO ports */
 
