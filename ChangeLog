@@ -8860,3 +8860,6 @@
 	  Add support for a generic ILI9341 driver.  From Marco Krahl (2014-10-20).
 	* configs/stm32f429i-disco/Kconfig, src/ and lcd/:  Add support for the
 	  STM32F429i Discovery's LCD.  From Marco Krahl (2014-10-20).
+	* arch/arm/src/lpc43xx/lpc43_gpioint.c, .h, lpc43_irq.c, and
+	  chip/lpc43_gpio.h: Fixes to allow compile of lpc43_gpioint.c.  It
+	  likely doesn't work.  From Brandon warhurst_002 (2014-10-21).
