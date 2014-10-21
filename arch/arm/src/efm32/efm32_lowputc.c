@@ -49,6 +49,7 @@
 
 #include "chip/efm32_memorymap.h"
 #include "chip/efm32_usart.h"
+#include "chip/efm32_leuart.h"
 #include "chip/efm32_cmu.h"
 #include "efm32_lowputc.h"
 
@@ -58,7 +59,7 @@
 
 /* Console U[S]ART base address */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#if defined(HAVE_UART_CONSOLE)
 #  if defined(CONFIG_USART0_SERIAL_CONSOLE)
 #    define CONSOLE_BASE   EFM32_USART0_BASE
 #    define CONSOLE_BAUD   CONFIG_USART0_BAUD
@@ -90,16 +91,32 @@
 #    define CONSOLE_NBITS  CONFIG_UART1_BITS
 #    define CONSOLE_2STOP  CONFIG_UART1_2STOP
 #  else
-#    error No console is selected????  Internal craziness!!!
+#    error No U[S]ART console is selected????  Internal craziness!!!
 #  endif
-#endif /* HAVE_SERIAL_CONSOLE */
+#elif defined(HAVE_LEUART_CONSOLE)
+#  if defined(CONFIG_LEUART0_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_LEUART0_BASE
+#    define CONSOLE_BAUD   CONFIG_LEUART0_BAUD
+#    define CONSOLE_PARITY CONFIG_LEUART0_PARITY
+#    define CONSOLE_NBITS  CONFIG_LEUART0_BITS
+#    define CONSOLE_2STOP  CONFIG_LEUART0_2STOP
+#  elif defined(CONFIG_LEUART1_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   EFM32_LEUART1_BASE
+#    define CONSOLE_BAUD   CONFIG_LEUART1_BAUD
+#    define CONSOLE_PARITY CONFIG_LEUART1_PARITY
+#    define CONSOLE_NBITS  CONFIG_LEUART1_BITS
+#    define CONSOLE_2STOP  CONFIG_LEUART1_2STOP
+#  else
+#    error No U[S]ART console is selected????  Internal craziness!!!
+#  endif
+#endif /* HAVE_UART_CONSOLE */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_setbaud
+ * Name: efm32_uart_setbaud
  *
  * Description:
  *   Set optimal oversampling and set the baud for this U[S]ART.
@@ -107,7 +124,7 @@
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-static void efm32_setbaud(uintptr_t base,  uint32_t baud)
+static void efm32_uart_setbaud(uintptr_t base,  uint32_t baud)
 {
   uint64_t clkdiv;
   uint64_t maxover;
@@ -189,15 +206,57 @@ static void efm32_setbaud(uintptr_t base,  uint32_t baud)
 
   DEBUGASSERT(clkdiv <= _USART_CLKDIV_MASK);
 
-  /* Set up the select oversampling and baud */
+  /* Set up the selected oversampling and baud */
 
   regval = getreg32(base + EFM32_USART_CTRL_OFFSET);
   regval  &= ~_USART_CTRL_OVS_MASK;
   regval  |= ovs;
   putreg32(regval, base + EFM32_USART_CTRL_OFFSET);
 
-  putreg32((uint32_t)clkdiv & _USART_CTRL_OVS_MASK,
+  putreg32((uint32_t)clkdiv & _USART_CLKDIV_DIV_MASK,
            base + EFM32_USART_CLKDIV_OFFSET);
+}
+#endif
+
+/****************************************************************************
+ * Name: efm32_leuart_setbaud
+ *
+ * Description:
+ *   Set optimal oversampling and set the baud for this U[S]ART.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LEUART_DEVICE
+static void efm32_leuart_setbaud(uintptr_t base,  uint32_t baud)
+{
+  uint32_t clkdiv;
+
+  /* Baud is configured by:
+   *
+   *   baud = fLEUART / (1 + CLKDIV / 256)
+   *
+   * Or
+   *
+   *   CLKDIV = 256 * (fLEUART / baud - 1)
+   *   CLKDIV = (256 * fLEUART) / baud - 256
+   */
+
+  clkdiv = (BOARD_LFBCLK_FREQUENCY << 8) / baud;
+  if (clkdiv > 256)
+    {
+      clkdiv -= 256;
+    }
+  else
+    {
+      clkdiv = 0;
+    }
+
+  DEBUGASSERT(clkdiv <= _LEUART_CLKDIV_MASK);
+
+  /* Set up the selected baud */
+
+  putreg32((uint32_t)clkdiv & _LEUART_CLKDIV_DIV_MASK,
+           base + EFM32_LEUART_CLKDIV_OFFSET);
 }
 #endif
 
@@ -218,10 +277,12 @@ static void efm32_setbaud(uintptr_t base,  uint32_t baud)
 
 void efm32_lowsetup(void)
 {
-#ifdef HAVE_UART_DEVICE
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_UART_DEVICE)
   uint32_t regval;
+#endif
 
-  /* Enable clocking to configured UART/USART devices */
+#ifdef HAVE_UART_DEVICE
+  /* Enable clocking to configured UART/USART interfaces */
 
   regval = getreg32(EFM32_CMU_HFPERCLKEN0);
   regval &= ~(CMU_HFPERCLKEN0_USART0
@@ -258,9 +319,32 @@ void efm32_lowsetup(void)
 #endif
 
   putreg32(regval, EFM32_CMU_HFPERCLKEN0);
+#endif /* HAVE_UART_DEVICE */
+
+#ifdef HAVE_LEUART_DEVICE
+  /* Enable clocking to configured LEUART interfaces */
+
+  regval = getreg32(EFM32_CMU_LFBCLKEN0);
+  regval &= ~(CMU_LFBCLKEN0_LEUART0
+#ifdef CONFIG_EFM32_LEUART1
+             | CMU_HFPERCLKEN0_UART1
+#endif
+             );
+
+#ifdef CONFIG_EFM32_LEUART0
+  regval |= CMU_LFBCLKEN0_LEUART0;
+#endif
+
+#ifdef CONFIG_EFM32_LEUART1
+  regval |= CMU_LFBCLKEN0_LEUART1;
+#endif
+
+  putreg32(regval, EFM32_CMU_LFBCLKEN0);
+#endif /* HAVE_LEUART_DEVICE */
 
   /* Set location in the ROUTE register */
 
+#ifdef HAVE_UART_DEVICE
 #ifdef CONFIG_EFM32_USART0
   regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
            (BOARD_USART0_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
@@ -290,23 +374,34 @@ void efm32_lowsetup(void)
            (BOARD_UART1_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
   putreg32(regval, EFM32_UART1_ROUTE);
 #endif
-
-
 #endif /* HAVE_UART_DEVICE */
 
-#ifdef CONFIG_EFM32_LEUART0
-#  warning Missing LEUART0 support
+#ifdef HAVE_LEUART_DEVICE
+#ifdef CONFIG_EFM32_UART0
+  regval = (LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN |
+           (BOARD_LEUART0_ROUTE_LOCATION << _LEUART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_LEUART0_ROUTE);
 #endif
 
-#ifdef CONFIG_EFM32_LEUART1
-#  warning Missing LEUART1 support
+#ifdef CONFIG_EFM32_UART1
+  regval = (LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN |
+           (BOARD_LEUART1_ROUTE_LOCATION << _LEUART_ROUTE_LOCATION_SHIFT));
+  putreg32(regval, EFM32_LEUART1_ROUTE);
 #endif
+#endif /* HAVE_LEUART_DEVICE */
 
-#ifdef HAVE_SERIAL_CONSOLE
-  /* Configure the serial console */
+#if defined(HAVE_UART_CONSOLE)
+  /* Configure the U[S]ART serial console */
 
   efm32_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_PARITY,
                       CONSOLE_NBITS, CONSOLE_2STOP);
+
+#elif defined(HAVE_LEUART_CONSOLE)
+  /* Configure the LEUART serial console */
+
+  efm32_leuartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_PARITY,
+                        CONSOLE_NBITS, CONSOLE_2STOP);
+
 #endif
 }
 
@@ -318,7 +413,7 @@ void efm32_lowsetup(void)
  *
  *****************************************************************************/
 
-#ifdef HAVE_SERIAL_CONSOLE
+#if defined(HAVE_UART_CONSOLE)
 void efm32_lowputc(uint32_t ch)
 {
   /* The TX Buffer Level (TXBL) status bit indicates the level of the
@@ -332,13 +427,28 @@ void efm32_lowputc(uint32_t ch)
 
   putreg32((uint32_t)ch, CONSOLE_BASE + EFM32_USART_TXDATA_OFFSET);
 }
+
+#elif defined(HAVE_LEUART_CONSOLE)
+void efm32_lowputc(uint32_t ch)
+{
+  /* The TX Buffer Level (TXBL) status bit indicates the level of the
+   * transmit buffer.  If TXBIL is set, TXBL is set whenever the transmit
+   * buffer is half-full or empty.
+   */
+
+  while ((getreg32(CONSOLE_BASE + EFM32_LEUART_STATUS_OFFSET) & LEUART_STATUS_TXBL) == 0);
+
+  /* Then send the character */
+
+  putreg32((uint32_t)ch, CONSOLE_BASE + EFM32_LEUART_TXDATA_OFFSET);
+}
 #endif
 
 /*****************************************************************************
  * Name: efm32_uartconfigure
  *
  * Description:
- *   Configure a UART as a RS-232 UART.
+ *   Configure a U[S]ART as a RS-232 UART.
  *
  *****************************************************************************/
 
@@ -352,7 +462,7 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
    * ROUTE information which must be preserved).
    */
 
-  efm32_uartreset(base);
+  efm32_uart_reset(base);
 
   /* Configure number of data bits */
 
@@ -446,7 +556,7 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 
   /* Set the baud clock divisor */
 
-  efm32_setbaud(base, baud);
+  efm32_uart_setbaud(base, baud);
 
   /* Enable the U[S]ART */
 
@@ -455,7 +565,83 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
 #endif
 
 /*****************************************************************************
- * Name: efm32_uartreset
+ * Name: efm32_leuartconfigure
+ *
+ * Description:
+ *   Configure a LEUART as a RS-232 UART.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_LEUART_DEVICE
+void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
+                           unsigned int nbits, bool stop2)
+{
+  uint32_t regval = 0;
+
+  /* Make sure that the U[S]ART registers are in the reset state (except for
+   * ROUTE information which must be preserved).
+   */
+
+  efm32_uart_reset(base);
+
+  /* Configure number of data bits */
+
+  switch (nbits)
+    {
+    default:
+    case 8:
+      regval |= LEUART_CTRL_DATABITS_EIGHT;
+      break;
+
+    case 9:
+      regval |= LEUART_CTRL_DATABITS_NINE;
+      break;
+    }
+
+  /* Configure parity */
+
+  switch (parity)
+    {
+    default:
+    case 0:
+      regval |= LEUART_CTRL_PARITY_NONE;
+      break;
+
+    case 1:
+      regval |= LEUART_CTRL_PARITY_ODD;
+      break;
+
+    case 2:
+      regval |= LEUART_CTRL_PARITY_EVEN;
+      break;
+
+    }
+
+  /* Configure stop bits */
+
+  if (stop2)
+    {
+      regval |= _LEUART_CTRL_STOPBITS_TWO;
+    }
+  else
+    {
+      regval |= _LEUART_CTRL_STOPBITS_ONE;
+    }
+
+  putreg32(regval, base + EFM32_LEUART_CTRL_OFFSET);
+
+  /* Set the baud clock divisor */
+
+  efm32_leuart_setbaud(base, baud);
+
+  /* Enable the U[S]ART */
+
+  putreg32(LEUART_CMD_RXEN | LEUART_CMD_TXEN, base + EFM32_LEUART_CMD_OFFSET);
+}
+#endif
+
+/*****************************************************************************
+ * Name: efm32_uart_reset
  *
  * Description:
  *   Reset the USART/UART by disabling it and restoring all of the registers
@@ -465,7 +651,7 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  *****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void efm32_uartreset(uintptr_t base)
+void efm32_uart_reset(uintptr_t base)
 {
   putreg32(USART_CMD_RXDIS | USART_CMD_TXDIS | USART_CMD_MASTERDIS |
            USART_CMD_RXBLOCKDIS | USART_CMD_TXTRIDIS | USART_CMD_CLEARTX |
@@ -483,6 +669,35 @@ void efm32_uartreset(uintptr_t base)
 #endif
 #if defined(EFM32_USART_I2SCTRL_OFFSET)
   putreg32(_USART_I2SCTRL_RESETVALUE, base + EFM32_USART_I2SCTRL_OFFSET);
+#endif
+}
+#endif
+
+/*****************************************************************************
+ * Name: efm32_leuart_reset
+ *
+ * Description:
+ *   Reset the USART/UART by disabling it and restoring all of the registers
+ *   to the initial, reset value.  Only the ROUTE data set by efm32_lowsetup
+ *   is preserved.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_LEUART_DEVICE
+void efm32_leuart_reset(uintptr_t base)
+{
+  putreg32(LEUART_CMD_RXDIS | LEUART_CMD_TXDIS | LEUART_CMD_RXBLOCKDIS |
+           LEUART_CMD_CLEARTX | LEUART_CMD_CLEARRX,
+           base + EFM32_LEUART_CMD_OFFSET);
+  putreg32(_LEUART_CTRL_RESETVALUE, base + EFM32_LEUART_CTRL_OFFSET);
+  putreg32(_LEUART_CLKDIV_RESETVALUE, base + EFM32_LEUART_CLKDIV_OFFSET);
+  putreg32(_LEUART_STARTFRAME_RESETVALUE, base + EFM32_LEUART_STARTFRAME_OFFSET);
+  putreg32(_LEUART_SIGFRAME_RESETVALUE, base + EFM32_LEUART_SIGFRAME_OFFSET);
+  putreg32(_LEUART_IEN_RESETVALUE, base + EFM32_LEUART_IEN_OFFSET);
+  putreg32(_LEUART_IFC_MASK, base + EFM32_LEUART_IFC_OFFSET);
+  putreg32(_LEUART_PULSECTRL_RESETVALUE, base + EFM32_LEUART_PULSECTRL_OFFSET);
+#if defined(EFM32_LEUART_INPUT_OFFSET)
+  putreg32(_LEUART_INPUT_RESETVALUE, base + EFM32_LEUART_INPUT_OFFSET);
 #endif
 }
 #endif
