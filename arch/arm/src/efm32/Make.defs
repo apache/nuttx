@@ -95,10 +95,22 @@ CHIP_ASRCS += efm32_vectors.S
 endif
 
 CHIP_CSRCS  = efm32_start.c efm32_clockconfig.c efm32_irq.c efm32_timerisr.c
-CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c efm32_serial.c
+CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c
+endif
+
+ifeq ($(CONFIG_EFM32_USART),y)
+CHIP_CSRCS += efm32_serial.c
+else
+ifeq ($(CONFIG_EFM32_UART),y)
+CHIP_CSRCS += efm32_serial.c
+endif
+endif
+
+ifeq ($(CONFIG_EFM32_LEART),y)
+CHIP_CSRCS += efm32_leserial.c
 endif
 
 ifeq ($(CONFIG_EFM32_GPIO_IRQ),y)

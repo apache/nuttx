@@ -77,7 +77,7 @@
 
 #ifdef USE_SERIALDRIVER
 
-/* Which UART with be tty0/console and which tty1-4?  The console will always
+/* Which UART with be ttyS0/console and which tty1-4?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
  */
 
@@ -740,6 +740,12 @@ static int  efm32_rxinterrupt(struct uart_dev_s *dev)
 
   intflags = efm32_serialin(priv, EFM32_USART_IF_OFFSET);
 
+  /* Clear pending interrupts by writing to the interrupt flag clear
+   * register.
+   */
+
+  efm32_serialout(priv, EFM32_USART_IFC_OFFSET, intflags & EFM32_RX_INTS);
+
   /* Check if the receive data is available is full (RXDATAV). */
 
   if ((intflags & USART_IEN_RXDATAV) != 0)
@@ -765,11 +771,6 @@ static int  efm32_rxinterrupt(struct uart_dev_s *dev)
     }
 #endif
 
-  /* Clear pending interrupts by writing to the interrupt flag clear
-   * register.
-   */
-
-  efm32_serialout(priv, EFM32_USART_IFC_OFFSET, intflags & EFM32_RX_INTS);
   return OK;
 }
 
@@ -827,6 +828,12 @@ static int  efm32_txinterrupt(struct uart_dev_s *dev)
 
   intflags = efm32_serialin(priv, EFM32_USART_IF_OFFSET);
 
+  /* Clear pending interrupts by writing to the interrupt flag clear
+   * register.  We won't clear RX errors until they have been reported.
+   */
+
+  efm32_serialout(priv, EFM32_USART_IFC_OFFSET, intflags & EFM32_TX_INTS);
+
   /* Check if the transmit data buffer became half full */
 
   if ((intflags & USART_IEN_TXBL) != 0)
@@ -847,11 +854,6 @@ static int  efm32_txinterrupt(struct uart_dev_s *dev)
     }
 #endif
 
-  /* Clear pending interrupts by writing to the interrupt flag clear
-   * register.  We won't clear RX errors until they have been reported.
-   */
-
-  efm32_serialout(priv, EFM32_USART_IFC_OFFSET, intflags & EFM32_TX_INTS);
   return OK;
 }
 
@@ -946,12 +948,8 @@ static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
 
   /* Get error status information:
    *
-   * FE: Framing error. To clear FE, read S1 with FE set and then read
-   *     read UART data register (D).
-   * NF: Noise flag. To clear NF, read S1 and then read the UART data
-   *     register (D).
-   * PF: Parity error flag. To clear PF, read S1 and then read the UART
-   *     data register (D).
+   *   FERR Data Framing Error
+   *   PERR Data Parity Error
    */
 
   rxdatax = efm32_serialin(priv, EFM32_USART_RXDATAX_OFFSET);
@@ -963,9 +961,7 @@ static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
       *status = rxdatax;
     }
 
-  /* Then return the actual received byte.  Reading S1 then D clears all
-   * RX errors.
-   */
+  /* Then return the actual received byte. */
 
   return (int)(rxdatax & _USART_RXDATAX_RXDATA_MASK);
 }
@@ -1016,7 +1012,7 @@ static bool efm32_rxavailable(struct uart_dev_s *dev)
 {
   struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
 
-  /* Return true if the receive data is available is full (RXDATAV). */
+  /* Return true if the receive data is available (RXDATAV). */
 
   return (efm32_serialin(priv, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) != 0;
 }
@@ -1108,8 +1104,7 @@ static bool efm32_txempty(struct uart_dev_s *dev)
   struct efm32_usart_s *priv = (struct efm32_usart_s*)dev->priv;
 
   /* TX Complete (TXC) is set when a transmission has completed and no more
-   * data is available in the transmit buffer. Cleared when data is written
-   * to the transmit buffer
+   * data is available in the transmit buffer.
    */
 
   return (efm32_serialin(priv, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXC) != 0;
@@ -1201,6 +1196,7 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
+#ifndef HAVE_LEUART_CONSOLE
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
@@ -1223,6 +1219,7 @@ int up_putc(int ch)
 #endif
   return ch;
 }
+#endif
 
 #else /* USE_SERIALDRIVER */
 
@@ -1234,6 +1231,7 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
+#ifndef HAVE_LEUART_CONSOLE
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
@@ -1250,5 +1248,6 @@ int up_putc(int ch)
 #endif
   return ch;
 }
+#endif
 
 #endif /* USE_SERIALDRIVER */
