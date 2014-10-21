@@ -110,8 +110,8 @@ Serial Console
 
    Default Serial Console
    ----------------------
-   UART0 is configured as the default serial console at 115200 8N1
-   on pins PE0 and PE1.
+   LEUART1 is configured as the default serial console at 2400 8N1
+   on pins PC6 and PC7.
 
 Configurations
 ==============
@@ -133,7 +133,7 @@ Configurations
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART0.  Support for
+    Configuration enables the serial interfaces on LEUART1.  Support for
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected (see NOTES below).
 

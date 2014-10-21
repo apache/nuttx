@@ -207,11 +207,19 @@
 /* Pin routing **************************************************************/
 /* UART0:
  *
- *   U0_RX #1 PE1  **AVAILABLE at TP130**
- *   U0_TX #1 PE0  **AVAILABLE at TP129**
+ *   U0_RX #1 PE1  **AVAILABLE at EXT-19**
+ *   U0_TX #1 PE0  **AVAILABLE at EXT-18**
  */
 
 #define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
+
+/* LEUART1:
+ *
+ *   LEU1_RX #0 PC7  LEU1_RX to DB-9 connector
+ *   LEU1_TX #0 PC6  LEU1_TX to DB-9 connector
+ */
+
+#define BOARD_LEUART1_ROUTE_LOCATION _LEUART_ROUTE_LOCATION_LOC0
 
 /****************************************************************************
  * Public Function Prototypes
