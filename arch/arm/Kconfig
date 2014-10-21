@@ -28,6 +28,7 @@ config ARCH_CHIP_C5471
 	bool "TMS320 C5471"
 	select ARCH_ARM7TDMI
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_OTHER_UART
 	---help---
 		TI TMS320 C5471, A180, or DA180 (ARM7TDMI)
 
@@ -36,6 +37,7 @@ config ARCH_CHIP_CALYPSO
 	select ARCH_ARM7TDMI
 	select ARCH_HAVE_HEAP2
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_OTHER_UART
 	---help---
 		TI Calypso-based cell phones (ARM7TDMI)
 
