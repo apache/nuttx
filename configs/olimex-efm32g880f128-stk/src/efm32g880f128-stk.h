@@ -40,36 +40,44 @@
  * Included Files
  ****************************************************************************/
 
+#include <arch/irq.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* LEDs
-  *
-  * The EFM32 Gecko Start Kit has four yellow LEDs.  These LEDs are connected
-  * as follows:
-  *
-  *   ------------------------------------- --------------------
-  *   EFM32 PIN                             BOARD SIGNALS
-  *   ------------------------------------- --------------------
-  *   C0/USART1_TX#0/PCNT0_S0IN#2/ACMP0_CH0  MCU_PC0  UIF_LED0
-  *   C1/USART1_RX#0/PCNT0_S1IN#2/ACMP0_CH1  MCU_PC1  UIF_LED1
-  *   C2/USART2_TX#0/ACMP0_CH2               MCU_PC2  UIF_LED2
-  *   C3/USART2_RX#0/ACMP0_CH3               MCU_PC3  UIF_LED3
-  *   ------------------------------------- --------------------
-  *
-  * All LEDs are grounded and so are illuminated by outputting a high
-  * value to the LED.
-  */
+/* Buttons:
+ *
+ * The Olimex board has four buttons, BUT1-4.  Each is grounded and so should
+ * have a weak pull-up so that it will be sensed as "1" when open and "0"
+ * when closed.
+ *
+ * --------------------- ---------------------
+ * PIN                   CONNECTIONS
+ * --------------------- ---------------------
+ * PE0/PCNT0_S0IN/U0_TX  BUT1, EXT-18
+ * PE1/PCNT0_S1IN/U0_RX  BUT2, EXT-19
+ * PE2/ACMP0_O           BUT3, EXT-20
+ * PE3/ACMP1_O           BUT4, EXT-21
+ * --------------------- ---------------------
+ */
 
-#define GPIO_LED1       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN0)
-#define GPIO_LED2       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN1)
-#define GPIO_LED3       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN2)
-#define GPIO_LED4       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN3)
+#ifdef CONFIG_EFM32_GPIO_IRQ
+#  define GPIO_BUTTON_1 (GPIO_INPUT_PULLUP|GPIO_INT_BOTH|GPIO_PORTE|GPIO_PIN0)
+#  define GPIO_BUTTON_2 (GPIO_INPUT_PULLUP|GPIO_INT_BOTH|GPIO_PORTE|GPIO_PIN1)
+#  define GPIO_BUTTON_3 (GPIO_INPUT_PULLUP|GPIO_INT_BOTH|GPIO_PORTE|GPIO_PIN2)
+#  define GPIO_BUTTON_4 (GPIO_INPUT_PULLUP|GPIO_INT_BOTH|GPIO_PORTE|GPIO_PIN3)
+
+#  define GPIO_IRQ_BUTTON_1 EFM32_IRQ_EXTI0
+#  define GPIO_IRQ_BUTTON_2 EFM32_IRQ_EXTI1
+#  define GPIO_IRQ_BUTTON_3 EFM32_IRQ_EXTI2
+#  define GPIO_IRQ_BUTTON_4 EFM32_IRQ_EXTI3
+#else
+#  define GPIO_BUTTON_1 (GPIO_INPUT_PULLUP|GPIO_PORTE|GPIO_PIN0)
+#  define GPIO_BUTTON_2 (GPIO_INPUT_PULLUP|GPIO_PORTE|GPIO_PIN1)
+#  define GPIO_BUTTON_3 (GPIO_INPUT_PULLUP|GPIO_PORTE|GPIO_PIN2)
+#  define GPIO_BUTTON_4 (GPIO_INPUT_PULLUP|GPIO_PORTE|GPIO_PIN3)
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

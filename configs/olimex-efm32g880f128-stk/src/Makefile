@@ -37,6 +37,10 @@
 
 CSRCS = efm32_boot.c
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += efm32_buttons.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
