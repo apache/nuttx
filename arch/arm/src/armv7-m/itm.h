@@ -72,11 +72,12 @@
  * Pre-processor Definitions
  ***********************************************************************************************/
 
-/* Instrumentation Trace Macrocell Register (ITM) ase address. */
+/* Instrumentation Trace Macrocell Register (ITM) Definitions **********************************/
+/* ITM Register Base Address *******************************************************************/
 
 #define ITM_BASE                 (0xe0000000ul)
 
-/* ITM port used : 0-31 */
+/* ITM Register Addresses **********************************************************************/
 
 #define ITM_PORT(i)              (ITM_BASE+(i*4))  /* Stimulus Port 32-bit */
 #define ITM_TER                  (ITM_BASE+0x0e00) /* Trace Enable Register */
@@ -100,33 +101,27 @@
 #define ITM_CID2                 (ITM_BASE+0x0ff8) /* Component  Identification Register #2 */
 #define ITM_CID3                 (ITM_BASE+0x0ffc) /* Component  Identification Register #3 */
 
+/* ITM Register Bit Field Definitions **********************************************************/
+
 #define ITM_TPR_PRIVMASK_Pos     0                                  /* ITM TPR: PRIVMASK Position */
 #define ITM_TPR_PRIVMASK_Msk     (0xful << ITM_TPR_PRIVMASK_Pos)    /* ITM TPR: PRIVMASK Mask */
 
 #define ITM_TCR_BUSY_Pos         23                                 /* ITM TCR: BUSY Position */
 #define ITM_TCR_BUSY_Msk         (1ul << ITM_TCR_BUSY_Pos)          /* ITM TCR: BUSY Mask */
-
 #define ITM_TCR_TraceBusID_Pos   16                                 /* ITM TCR: ATBID Position */
 #define ITM_TCR_TraceBusID_Msk   (0x7ful << ITM_TCR_TraceBusID_Pos) /* ITM TCR: ATBID Mask */
-
 #define ITM_TCR_GTSFREQ_Pos      10                                 /* ITM TCR: Global timestamp frequency Position */
 #define ITM_TCR_GTSFREQ_Msk      (3ul << ITM_TCR_GTSFREQ_Pos)       /* ITM TCR: Global timestamp frequency Mask */
-
 #define ITM_TCR_TSPrescale_Pos   8                                  /* ITM TCR: TSPrescale Position */
 #define ITM_TCR_TSPrescale_Msk   (3ul << ITM_TCR_TSPrescale_Pos)    /* ITM TCR: TSPrescale Mask */
-
 #define ITM_TCR_SWOENA_Pos       4                                  /* ITM TCR: SWOENA Position */
 #define ITM_TCR_SWOENA_Msk       (1ul << ITM_TCR_SWOENA_Pos)        /* ITM TCR: SWOENA Mask */
-
 #define ITM_TCR_DWTENA_Pos       3                                  /* ITM TCR: DWTENA Position */
 #define ITM_TCR_DWTENA_Msk       (1ul << ITM_TCR_DWTENA_Pos)        /* ITM TCR: DWTENA Mask */
-
 #define ITM_TCR_SYNCENA_Pos      2                                  /* ITM TCR: SYNCENA Position */
 #define ITM_TCR_SYNCENA_Msk      (1ul << ITM_TCR_SYNCENA_Pos)       /* ITM TCR: SYNCENA Mask */
-
 #define ITM_TCR_TSENA_Pos        1                                  /* ITM TCR: TSENA Position */
 #define ITM_TCR_TSENA_Msk        (1ul << ITM_TCR_TSENA_Pos)         /* ITM TCR: TSENA Mask */
-
 #define ITM_TCR_ITMENA_Pos       0                                  /* ITM TCR: ITM Enable bit Position */
 #define ITM_TCR_ITMENA_Msk       (1ul << ITM_TCR_ITMENA_Pos)        /* ITM TCR: ITM Enable bit Mask */
 
@@ -141,10 +136,8 @@
 
 #define ITM_LSR_ByteAcc_Pos      2                                  /* ITM LSR: ByteAcc Position */
 #define ITM_LSR_ByteAcc_Msk      (1ul << ITM_LSR_ByteAcc_Pos)       /* ITM LSR: ByteAcc Mask */
-
 #define ITM_LSR_Access_Pos       1                                  /* ITM LSR: Access Position */
 #define ITM_LSR_Access_Msk       (1ul << ITM_LSR_Access_Pos)        /* ITM LSR: Access Mask */
-
 #define ITM_LSR_Present_Pos      0                                  /* ITM LSR: Present Position */
 #define ITM_LSR_Present_Msk      (1ul << ITM_LSR_Present_Pos)       /* ITM LSR: Present Mask */
 
