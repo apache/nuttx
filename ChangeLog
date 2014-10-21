@@ -8865,3 +8865,5 @@
 	  likely doesn't work.  From Brandon warhurst_002 (2014-10-21).
 	* arch/arm/src/stm32/chip/stm32f103r_pinmap.h: Add ADC pinmap
 	  definitions for the STM32 F103R from Martin Lederhilger  (2014-10-21).
+	* arch/arm/src/armv7-m/up_itm.c and itm.h: Add CMSIS ITM header file and
+	  library.  From Pierre-noel Bouteville (2104-10-21).
