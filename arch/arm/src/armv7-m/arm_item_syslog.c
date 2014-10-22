@@ -47,14 +47,14 @@
 #include "up_arch.h"
 #include "itm_syslog.h"
 
-#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)  
+#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_ARMV7M_ITMSYSLOG_SWODIV
-#  define CONFIG_ARMV7M_ITMSYSLOG_SWODIV 15 
+#  define CONFIG_ARMV7M_ITMSYSLOG_SWODIV 15
 #endif
 
 #if CONFIG_ARMV7M_ITMSYSLOG_SWODIV < 0
@@ -129,14 +129,14 @@ int syslog_putc(int ch);
 {
   /* ITM enabled */
 
-  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) == 0)   
+  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) == 0)
     {
       return;
     }
 
   /* ITM Port "CONFIG_ARMV7M_ITMSYSLOG_PORT" enabled */
 
-  if (getreg32(ITM_TER) & (1 << CONFIG_ARMV7M_ITMSYSLOG_PORT))            
+  if (getreg32(ITM_TER) & (1 << CONFIG_ARMV7M_ITMSYSLOG_PORT))
     {
       while (getreg32(ITM_PORT(CONFIG_ARMV7M_ITMSYSLOG_PORT)) == 0);
       putreg8((uint8_t)ch, ITM_PORT(CONFIG_ARMV7M_ITMSYSLOG_PORT));

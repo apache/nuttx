@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)  
+#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
 void itm_syslog_initialize(void);
 #else
 #  define itm_syslog_initialize()
