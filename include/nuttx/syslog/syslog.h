@@ -119,7 +119,7 @@ EXTERN int syslog_initialize(void);
  *   interfaces are syslog() and lowsyslog().  The difference is that
  *   the syslog() internface writes to fd=1 (stdout) whereas lowsyslog() uses
  *   a lower level interface that works from interrupt handlers.  This
- *   function is a a low-level interface used to implement lowsyslog().
+ *   function is the low-level interface used to implement lowsyslog().
  *
  ****************************************************************************/
 
