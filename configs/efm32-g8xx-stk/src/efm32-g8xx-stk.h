@@ -43,6 +43,22 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+ /* UART0
+  *
+  *   The control MCU acts as a board controller (BC). There is a UART
+  *   connection between the EFM and the BC. The connection is made by
+  *   setting the EFM_BC_EN (PD13) line high. The EFM can then use the BSP to
+  *   send commands to the BC. When EFM_BC_EN is low, EFM_BC_TX and EFM_BC_RX
+  *   can be used by other applications.
+  */
+
+#ifdef CONFIG_EFM32G8STK_BCEN
+#  define GPIO_BC_EN  (GPIO_OUTPUT_PUSHPULL|GPIO_OUTPUT_SET|\
+                       GPIO_PORTD|GPIO_PIN13)
+#else
+#  define GPIO_BC_EN  (GPIO_OUTPUT_PUSHPULL|GPIO_OUTPUT_CLEAR|\
+                       GPIO_PORTD|GPIO_PIN13)
+#endif
 
  /* LEDs
   *

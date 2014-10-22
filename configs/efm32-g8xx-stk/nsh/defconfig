@@ -119,6 +119,7 @@ CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL is not set
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW is not set
 # CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE is not set
+# CONFIG_ARMV7M_ITMSYSLOG is not set
 
 #
 # EFM32 Configuration Options
@@ -223,6 +224,11 @@ CONFIG_NSH_MMCSDMINOR=0
 #
 # Board-Specific Options
 #
+
+#
+# EFM32 G8XX STK Hardware Configuration
+#
+# CONFIG_EFM32G8STK_BCEN is not set
 
 #
 # RTOS Features
