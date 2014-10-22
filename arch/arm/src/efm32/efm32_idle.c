@@ -40,6 +40,8 @@
 #include <arch/board/board.h>
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
 
@@ -47,6 +49,7 @@
 
 #include "chip.h"
 #include "up_internal.h"
+#include "efm32_pm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,6 +76,85 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_idlepm
+ *
+ * Description:
+ *   Perform IDLE state power management.
+ *
+ *   REVISIT: These power management hooks were taken with no modification
+ *   from the STM32 implementation and need review against EFM32 reduced
+ *   power modes.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_idlepm(void)
+{
+  static enum pm_state_e oldstate = PM_NORMAL;
+  enum pm_state_e newstate;
+  irqstate_t flags;
+  int ret;
+
+  /* Decide, which power saving level can be obtained */
+
+  newstate = pm_checkstate();
+
+  /* Check for state changes */
+
+  if (newstate != oldstate)
+    {
+      flags = irqsave();
+
+      /* Perform board-specific, state-dependent logic here */
+
+      llvdbg("newstate= %d oldstate=%d\n", newstate, oldstate);
+
+      /* Then force the global state change */
+
+      ret = pm_changestate(newstate);
+      if (ret < 0)
+        {
+          /* The new state change failed, revert to the preceding state */
+
+          (void)pm_changestate(oldstate);
+        }
+      else
+        {
+          /* Save the new state */
+
+          oldstate = newstate;
+        }
+
+      /* MCU-specific power management logic */
+
+      switch (newstate)
+        {
+        case PM_NORMAL:
+          break;
+
+        case PM_IDLE:
+          break;
+
+        case PM_STANDBY:
+          efm32_pmstop(true);
+          break;
+
+        case PM_SLEEP:
+          (void)efm32_pmstandby();
+          break;
+
+        default:
+          break;
+        }
+
+      irqrestore(flags);
+    }
+}
+#else
+#  define up_idlepm()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -92,5 +174,12 @@
 void up_idle(void)
 {
   /* Perform IDLE mode power management */
+
+  up_idlepm();
+
   /* Sleep until an interrupt occurs to save power. */
+
+  BEGIN_IDLE();
+  asm("WFI");
+  END_IDLE();
 }
