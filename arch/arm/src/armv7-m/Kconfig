@@ -62,5 +62,28 @@ config ARMV7M_OABI_TOOLCHAIN
 	default n
 	depends on ARMV7M_TOOLCHAIN_BUILDROOT
 	---help---
-		Most of the older buildroot toolchains are OABI and are named arm-nuttx-elf- vs. arm-nuttx-eabi-
+		Most of the older buildroot toolchains are OABI and are named
+		arm-nuttx-elf- vs. arm-nuttx-eabi-
 
+config ARMV7M_ITMSYSLOG
+	bool "ITM SYSLOG support"
+	default n
+	select SYSLOG
+	---help---
+		Enable hooks to support ITM syslog output.  This requires additional
+		MCU support in order to be used.  See arch/arm/src/armv7-m/itm_syslog.h
+		for additional initialization information.
+
+if ARMV7M_ITMSYSLOG
+
+config ARMV7M_ITMSYSLOG_PORT
+	int "ITM SYSLOG Port"
+	default 0
+	range 0 31
+
+config ARMV7M_ITMSYSLOG_SWODIV
+	int "ITM SYSLOG SWO divider"
+	default 15
+	range 1 8192
+
+endif # ARMV7M_ITMSYSLOG
