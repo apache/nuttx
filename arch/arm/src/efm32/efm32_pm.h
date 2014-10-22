@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_pm.h
+ * arch/arm/src/efm32/efm32_pm.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_PM_H
-#define __ARCH_ARM_SRC_STM32_STM32_PM_H
+#ifndef __ARCH_ARM_SRC_EFM32_EFM32_PM_H
+#define __ARCH_ARM_SRC_EFM32_EFM32_PM_H
 
 /****************************************************************************
  * Included Files
@@ -73,10 +73,14 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_pmstop
+ * Name: efm32_pmstop
  *
  * Description:
  *   Enter STOP mode.
+ *
+ *   REVISIT: This power management interface was taken with no modification
+ *   from the STM32 implementation and needs to be reviewed against EFM32
+ *   reduced power modes.  Comments here apply to the STM32!
  *
  * Input Parameters:
  *   lpds - true: To further reduce power consumption in Stop mode, put the
@@ -91,13 +95,17 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32_pmstop(bool lpds);
+int efm32_pmstop(bool lpds);
 
 /****************************************************************************
- * Name: stm32_pmstandby
+ * Name: efm32_pmstandby
  *
  * Description:
  *   Enter STANDBY mode.
+ *
+ *   REVISIT: This power management interface was taken with no modification
+ *   from the STM32 implementation and needs to be reviewed against EFM32
+ *   reduced power modes.  Comments here apply to the STM32!
  *
  * Input Parameters:
  *   None
@@ -110,13 +118,17 @@ int stm32_pmstop(bool lpds);
  *
  ****************************************************************************/
 
-int stm32_pmstandby(void);
+int efm32_pmstandby(void);
 
 /****************************************************************************
- * Name: stm32_pmsleep
+ * Name: efm32_pmsleep
  *
  * Description:
  *   Enter SLEEP mode.
+ *
+ *   REVISIT: This power management interface was taken with no modification
+ *   from the STM32 implementation and needs to be reviewed against EFM32
+ *   reduced power modes.  Comments here apply to the STM32!
  *
  * Input Parameters:
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
@@ -132,7 +144,7 @@ int stm32_pmstandby(void);
  *
  ****************************************************************************/
 
-void stm32_pmsleep(bool sleeponexit);
+void efm32_pmsleep(bool sleeponexit);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -140,4 +152,4 @@ void stm32_pmsleep(bool sleeponexit);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_PM_H */
+#endif /* __ARCH_ARM_SRC_EFM32_EFM32_PM_H */

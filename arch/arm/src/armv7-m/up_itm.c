@@ -93,7 +93,7 @@
  *   ch - Character to transmit.
  *
  * Returned Value:
- *      Character to transmit.
+ *   Character to transmit.
  *
  *****************************************************************************/
 
@@ -141,11 +141,12 @@ int32_t itm_receivechar(void)
  * Description:
  *
  * Input Parameters:
- *  The function checks whether a character is pending for reading in the variable g_itm_rxbuffer.
+ *  The function checks whether a character is pending for reading in the
+ *  variable g_itm_rxbuffer.
  *
  * Returned Value:
- *      0  No character available.
- *      1  Character available.
+ *   0  No character available.
+ *   1  Character available.
  *
  *****************************************************************************/
 

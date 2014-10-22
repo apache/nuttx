@@ -249,6 +249,7 @@ int battery_register(FAR const char *devpath, FAR struct battery_dev_s *dev)
     {
       dbg("Failed to register driver: %d\n", ret);
     }
+
   return ret;
 }
 #endif /* CONFIG_BATTERY */
