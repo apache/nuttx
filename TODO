@@ -8,7 +8,7 @@ board port.
 
 nuttx/
 
-  (9)  Task/Scheduler (sched/)
+ (10)  Task/Scheduler (sched/)
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
@@ -19,12 +19,12 @@ nuttx/
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (11)  File system/Generic drivers (fs/, drivers/)
-  (6)  Graphics subystem (graphics/)
+  (8)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
-  (4)  ARM (arch/arm/)
+  (5)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
@@ -47,7 +47,7 @@ nuttx/
 
 apps/
 
-  (4)  Network Utilities (apps/netutils/)
+  (6)  Network Utilities (apps/netutils/)
   (2)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (4)  Other Applications & Tests (apps/examples/)
@@ -158,6 +158,20 @@ o Task/Scheduler (sched/)
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low
+
+  Title:       REMOVE TASK_DELETE
+  Description: Need to remove or fix task delete.  This interface is non-
+               standard and not safe.  Arbitrary deleting tasks can cause
+               serious problems such as memory leaks.  Better to remove it
+               than to retain it as a latent bug.
+
+               Currently used within the OS and also part of the
+               implementation of pthread_cancel() and task_restart() (which
+               should also go for the same reasons).  It is used in
+               NxWM::CNxConsole to terminate console tasks and also in
+               apps/netutils/thttpd to kill CGI tasks that timeout.
+  Status:      Open
+  Priority:    Low and not easily removable.
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
@@ -1225,6 +1239,31 @@ o Graphics subsystem (graphics/)
   Status:      Open
   Priority:    Low, the need has not yet arisen.
 
+  Title:       ANTI-ALIASING
+  Description: Needed for proper rendering.  After some analysis, I believe
+               this change would only be required in the the trapezoid
+               rendering logic.  Essentially, it would need to blend the
+               fractional pixels at ends of each run with the underlying
+               pixel.
+
+               Hmmm.. graphics are sometimes erased by just redrawing them
+               with the background color.  Would this approach leave ghost
+               images around where the erase image was?
+  Status:      Open
+  Priority:    Medium-ish.  This would definitely improve graphics rendering
+               and line drawing.
+
+  Title:       LINE JOINS
+  Description: Lines are currently draw as rectangles with the width of the
+               rectangle being the line width.  So when shapes, like circles,
+               are drawn with fat lines, they do not join cleanly from
+               segment to segment.
+
+               The fix would be to draw a circle at each endpoint that has a
+               radius equal to the width of the line.
+  Status:      Open
+  Priority:    Medium-ish.  This would definitely improve line drawing.
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1407,6 +1446,27 @@ o ARM (arch/arm/)
   Status:      Open
   Priority:    Low for me because I never do floating point operations in
                interrupt handlers.
+
+  Title:       IMPROVED TASK START-UP AND SYSCALL RETURN
+  Description: Couldn't up_start_task and up_start_pthread syscalls be
+               eliminated.  Wouldn't this work to get us from kernel-
+               to user-mode with a system trap:
+
+                 lda r13, #address
+                 str rn, [r13]
+                 msr spsr_SVC, rm
+                 ld r13,{r15}^
+
+               Would also need to set r13_USER and r14_USER. For new SYS_context_switch... couldn't we do he same thing?
+
+               Also... System calls use traps to get from user- to kernel-
+               mode to perform OS services.  That is necessary to get from
+               user- to kernel-mode.  But then another trap is used to get
+               from kernel- back to user-mode.  It seems like this second
+               trap should be unnecessary.  We should be able to do the
+               same kind of logic to do this.
+  Status:      Open
+  Priority:    Low-ish, but a good opportunity for performance improvement.
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2132,6 +2192,26 @@ o Network Utilities (apps/netutils/)
                of pointless warnings.  This is kind of annoying and unprofessional; needs to
                be fixed someday.
   Status:      Open.  An annoyance, but not a real problem.
+  Priority:    Low
+
+  Title:       DHCPD ACCESSES KERNEL PRIVATE INTERFACE
+  Description: arp_update() is referenced outside of nuttx/net.  It is used in
+               in the netutils/ DHCPD logic to set entries in the ARP table.
+               That is violation of the separation of kernel and OS
+               functionality.  As a consequence, dhcpd will not work with the
+               NuttX kernel built.
+
+               This direct OS call needs to be replaced with a network ioctl()
+               call.
+  Status:      Open
+  Priority:    Medium.  Important for full functionality with kernel build.
+
+  Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
+  Description: The NSH network management logic has generally applicability
+               but is currently useful only because it is embedded in the NSH
+               module.  It should be moved to apps/system or, better,
+               apps/netutils.
+  Status:      Open
   Priority:    Low
 
 o NuttShell (NSH) (apps/nshlib)
