@@ -8869,3 +8869,9 @@
 	  library.  From Pierre-noel Bouteville (2104-10-21).
 	* arch/arm/src/armv7-m/dwt.h and tpi.h: Add CMSIS DWT and TPI header files.
 	  From Pierre-noel Bouteville (2104-10-21).
+	* arch/arm/src/armv7-m/arm_item_syslog.c, itm_syslog.h, and Kconfig: Add
+	  ARMv7 support to use ITM for SYSLOG debug output. Includes logic from
+	  Pierre-noel Bouteville (2014-10-22).
+	* arch/arm/src/efm32/efm32_clockconfig.c, efm32_start.c, and Make.defs:
+	  Add logic to initialize and use ITM for syslog. Includes logic from
+	  Pierre-noel Bouteville (2014-10-22).
