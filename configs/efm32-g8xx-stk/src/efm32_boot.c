@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include "efm32_gpio.h"
 #include "efm32_start.h"
-
 #include "efm32-g8xx-stk.h"
 
 /****************************************************************************
@@ -59,6 +59,17 @@
 
 void efm32_boardinitialize(void)
 {
+#ifdef CONFIG_EFM32_UART0
+  /*   The control MCU acts as a board controller (BC). There is a UART
+   *   connection between the EFM and the BC. The connection is made by
+   *   setting the EFM_BC_EN (PD13) line high. The EFM can then use the BSP to
+   *   send commands to the BC. When EFM_BC_EN is low, EFM_BC_TX and EFM_BC_RX
+   *   can be used by other applications.
+   */
+
+  efm32_configgpio(GPIO_BC_EN);
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 

@@ -5,8 +5,8 @@ README
   Gecko Starter Kit (EFM32-G8XX-STK). The Gecko Starter Kit features:
 
     • EFM32G890F128 MCU with 128 kB flash and 16 kB RAM
-    •   32.768 kHz crystal
-    •   32 MHz crystal
+    •   32.768 kHz crystal (LXFO)
+    •   32 MHz crystal (HXFO)
     • Advanced Energy Monitoring
     • Touch slider
     • 4x40 LCD
@@ -14,7 +14,7 @@ README
     • 2 pushbutton switches
     • Reset button and a switch to disconnect the battery.
     • On-board SEGGER J-Link USB emulator
-    •   ARM 20 pin JTAG/SWD standard Debug in/out connector
+    • ARM 20 pin JTAG/SWD standard Debug in/out connector
 
 STATUS
 ======
@@ -129,13 +129,13 @@ Serial Console
    ------------------------------------------
    The control MCU acts as a board controller (BC). There is a UART
    connection between the EFM and the BC. The connection is made by
-   setting the BC_EN line high. The EFM can then use the BSP to send
-   commands to the BC. When BC_EN is low, BC_TX and BC_RX can be used
-   by other applications.
+   setting the EFM_BC_EN (PD13) line high. The EFM can then use the BSP to
+   send commands to the BC. When EFM_BC_EN is low, EFM_BC_TX and EFM_BC_RX
+   can be used by other applications.
 
 Configurations
 ==============
-  Each EFM32 Gecko Starter Kit configuration is maintained in a sub-director
+  Each EFM32 Gecko Starter Kit configuration is maintained in a sub-directory
   and can be selected as follow:
 
     cd tools
@@ -154,8 +154,8 @@ Configurations
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables the serial interfaces on UART0.  Support for
-    builtin applications is enabled, but in the base configuration no
-    builtin applications are selected (see NOTES below).
+    built-in applications is enabled, but in the base configuration no
+    built-in applications are selected (see NOTES below).
 
     NOTES:
 
