@@ -961,6 +961,8 @@ nuttx
  |   |   `- README.txt
  |   |- efm32-g8xx-stk/
  |   |   `- README.txt
+ |   |- efm32gg-stk3700/
+ |   |   `- README.txt
  |   |- ekk-lm3s9b96/
  |   |   `- README.txt
  |   |- ez80f910200kitg/

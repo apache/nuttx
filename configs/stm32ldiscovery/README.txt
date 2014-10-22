@@ -487,7 +487,7 @@ Serial Console
     drive an external RS-232 transceiver.
 
   - The crystal X3 is not installed on the STM32L3-Discovery.  As a result,
-    the HSE clock is not availabled and the less acurate HSI must be used.
+    the HSE clock is not available and the less accurate HSI must be used.
     This may limit the accuracy of the computed baud, especially at higher
     BAUD.  The HSI is supposedly calibrated in the factory to within 1% at
     room temperatures so perhaps this not a issue.
@@ -608,7 +608,7 @@ STM32L-Discovery-specific Configuration Options
 
     CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
        cause a 100 second delay during boot-up.  This 100 second delay
-       serves no purpose other than it allows you to calibratre
+       serves no purpose other than it allows you to calibrate
        CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
        the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
        the delay actually is 100 seconds.
@@ -792,7 +792,7 @@ Configuration sub-directories
          CONFIG_STM32_LCD=y                      : Enable the Segment LCD
 
        When the LCD is enabled and the LEDs are disabled, the USART1
-       serial console will automaticall move to PB6 and PB7 (you will get
+       serial console will automatically move to PB6 and PB7 (you will get
        a compilation error if you forget to disable the LEDs).
 
        SIGNAL FUNCTION   LED        CONNECTION
