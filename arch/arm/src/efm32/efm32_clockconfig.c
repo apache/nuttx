@@ -48,9 +48,11 @@
 #include "up_arch.h"
 
 #include "chip.h"
+#include "itm_syslog.h"
 #include "efm32_gpio.h"
 #include "chip/efm32_msc.h"
 #include "chip/efm32_cmu.h"
+#include "chip/efm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -658,7 +660,7 @@ static inline uint32_t efm32_lfaclk_config(uint32_t lfaclksel, bool ulfrco,
  *
  *   LFBCLK is the selected clock for the Low Energy B Peripherals. There
  *   are four selectable sources for LFBCLK: LFRCO, LFXO, HFCORECLK/2 and
- *   ULFRCO. In addition, the LFBCLK can be disabled. From reset, the LFBCLK 
+ *   ULFRCO. In addition, the LFBCLK can be disabled. From reset, the LFBCLK
  *   source is set to LFRCO. However, note that the LFRCO is disabled from
  *   reset. The selection is configured using the LFB field in CMU_LFCLKSEL.
  *   The HFCORECLK/2 setting allows the Low Energy B Peripherals to be used
@@ -823,6 +825,48 @@ static inline void efm32_gpioclock(void)
 }
 
 /****************************************************************************
+ * Name: efm32_itm_syslog
+ *
+ * Description:
+ *   Enable Serial wire output pin, configure debug clocking, and enable
+ *   ITM syslog support.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSLOG) || defined(CONFIG_ARMV7M_ITMSYSLOG)
+static inline void efm32_itm_syslog(void)
+{
+  int regval;
+
+  /* Enable Serial wire output pin
+   *
+   * Set location and enable output on the pin.  All pin configuration
+   * information must be provided in the board.h header file.
+   */
+
+  regval  = getreg32(EFM32_GPIO_ROUTE);
+  regval &= _GPIO_ROUTE_SWLOCATION_MASK;
+  regval |= GPIO_ROUTE_SWOPEN;
+  regval |= ((uint32_t)BOARD_SWOPORT_LOCATION << _GPIO_ROUTE_SWLOCATION_SHIFT);
+  putreg32(regval, EFM32_GPIO_ROUTE);
+
+  /* Enable output on pin */
+
+  efm32_configgpio(BOARD_GPIO_SWOPORT);
+
+  /* Enable debug clock AUXHFRCO */
+
+  efm32_enable_auxhfrco();
+
+  /* Then perform ARMv7-M ITM SYSLOG initialization */
+
+  itm_syslog_initialize();
+}
+#else
+#  define efm32_itm_syslog()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -863,4 +907,10 @@ void efm32_clockconfig(void)
   /* Enable clocking of the GPIO ports */
 
   efm32_gpioclock();
+
+  /* Enable Serial wire output pin, configure debug clocking, and enable ITM
+   * syslog support.
+   */
+
+  efm32_itm_syslog();
 }

@@ -44,11 +44,14 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
+#include <nuttx/syslog/syslog.h>
+
 #include <arch/board/board.h>
 #include <arch/efm32/chip.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "efm32_config.h"
 #include "efm32_lowputc.h"
 #include "efm32_clockconfig.h"
 #include "efm32_start.h"
@@ -75,7 +78,13 @@ static void go_os_start(void *pv, unsigned int nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
+#  if defined(CONFIG_ARMV7M_ITMSYSLOG)
+#    define showprogress(c) (void)syslog_putc(c)
+#  elif defined(HAVE_UART_CONSOLE) || defined(HAVE_LEUART_CONSOLE)
+#    define showprogress(c) up_lowputc(c)
+#  else
+#    define showprogress(c)
+#  endif
 #else
 #  define showprogress(c)
 #endif
