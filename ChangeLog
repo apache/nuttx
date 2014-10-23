@@ -8875,3 +8875,9 @@
 	* arch/arm/src/efm32/efm32_clockconfig.c, efm32_start.c, and Make.defs:
 	  Add logic to initialize and use ITM for syslog. Includes logic from
 	  Pierre-noel Bouteville (2014-10-22).
+	* sched/sched/sched_timerexpiration.c and include/nuttx/arch.h:  Fixes
+	  to tickless operation code, especially in alarm mode.  From Brandon
+	  Warhurst (2014-10-23).
+	* nuttx/arch/arm/src/lpc43xx/lpc43_rit.c, lpc43_rit.h, and related
+	  files: Add support for tickless operation using the NXP LPC43xx.  From
+	  Brandon Warhurst (2014-10-23).
