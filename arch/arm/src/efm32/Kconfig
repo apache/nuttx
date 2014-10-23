@@ -91,7 +91,11 @@ config EFM32_HAVE_LEUART1
 # will automatically be selected and will represent the 'OR' of the
 # instances selected.
 
-config EFM32_USART
+config EFM32_USART_ISUART
+	bool
+	default n
+
+config EFM32_USART_ISSPI
 	bool
 	default n
 
@@ -110,20 +114,17 @@ config EFM32_USART0
 	bool "USART0"
 	default n
 	select ARCH_HAVE_USART0
-	select EFM32_USART
 
 config EFM32_USART1
 	bool "USART1"
 	default n
 	select ARCH_HAVE_USART1
-	select EFM32_USART
 
 config EFM32_USART2
 	bool "USART2"
 	default n
 	depends on EFM32_HAVE_USART2
 	select ARCH_HAVE_USART2
-	select EFM32_USART
 
 config EFM32_UART0
 	bool "UART0"
@@ -165,9 +166,11 @@ choice
 config EFM32_USART0_ISUART
 	bool "USART0 is a UART"
 	select USART0_ISUART
+	select EFM32_USART_ISUART
 
 config EFM32_USART0_ISSPI
 	bool "USART0 is SPI"
+	select EFM32_USART_ISSPI
 
 endchoice # USART0 Mode
 
@@ -179,9 +182,11 @@ choice
 config EFM32_USART1_ISUART
 	bool "USART1 is a UART"
 	select USART1_ISUART
+	select EFM32_USART_ISUART
 
 config EFM32_USART1_ISSPI
 	bool "USART1 is SPI"
+	select EFM32_USART_ISSPI
 
 endchoice # USART1 Mode
 
@@ -193,9 +198,11 @@ choice
 config EFM32_USART2_ISUART
 	bool "USART2 is a UART"
 	select USART2_ISUART
+	select EFM32_USART_ISUART
 
 config EFM32_USART2_ISSPI
 	bool "USART2 is SPI"
+	select EFM32_USART_ISSPI
 
 endchoice # USART2 Mode
 
