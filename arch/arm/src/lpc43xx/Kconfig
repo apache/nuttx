@@ -203,6 +203,11 @@ config LPC43_RIT
 	bool "Repetitive Interrupt Timer (RIT)"
 	default n
 
+config LPC43_RIT_RES
+	int  "Interrupt schedule resolution (nS)"
+	default 250
+	depends on LPC43_RIT
+
 config LPC43_RTC
 	bool "Real Time Clock (RTC)"
 	default n
