@@ -66,23 +66,18 @@
 #  undef CONFIG_EFM32_LEUART1
 #endif
 
-#ifndef CONFIG_EFM32_USART
-#  undef CONFIG_EFM32_USART0
-#  undef CONFIG_EFM32_USART1
-#  undef CONFIG_EFM32_USART2
+/* Is there a UART device?  Or an SPI device? */
+
+#ifndef CONFIG_EFM32_USART_ISUART
+#  undef CONFIG_EFM32_USART0_ISUART
+#  undef CONFIG_EFM32_USART1_ISUART
+#  undef CONFIG_EFM32_USART2_ISUART
 #endif
 
 #ifndef CONFIG_EFM32_UART
 #  undef CONFIG_EFM32_UART0
 #  undef CONFIG_EFM32_UART1
 #endif
-
-#ifndef CONFIG_EFM32_LEUART
-#  undef CONFIG_EFM32_LEUART0
-#  undef CONFIG_EFM32_LEUART1
-#endif
-
-/* Is there a UART device?  Or an SPI device? */
 
 #ifndef CONFIG_EFM32_USART0
 #  undef CONFIG_EFM32_USART0_ISUART
@@ -116,6 +111,11 @@
 #endif
 
 /* Is there an LEUART device?  */
+
+#ifndef CONFIG_EFM32_LEUART
+#  undef CONFIG_EFM32_LEUART0
+#  undef CONFIG_EFM32_LEUART1
+#endif
 
 #undef HAVE_LEUART_DEVICE
 #if defined(CONFIG_EFM32_LEUART0) ||  defined(CONFIG_EFM32_LEUART1)
