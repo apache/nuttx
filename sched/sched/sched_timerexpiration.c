@@ -131,14 +131,14 @@ static struct timespec g_stop_time;
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 static void sched_timespec_add(FAR const struct timespec *ts1,
                                FAR const struct timespec *ts2,
-                               FAR struct timespec ts3)
+                               FAR struct timespec *ts3)
 {
   time_t sec = ts1->tv_sec + ts2->tv_sec;
   long nsec  = ts1->tv_nsec + ts2->tv_nsec;
 
   if (nsec >= NSEC_PER_SEC)
     {
-      nsec -= NSEC_PER_SEC
+      nsec -= NSEC_PER_SEC;
       sec++;
     }
 
@@ -166,7 +166,7 @@ static void sched_timespec_add(FAR const struct timespec *ts1,
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 static void sched_timespec_subtract(FAR const struct timespec *ts1,
                                     FAR const struct timespec *ts2,
-                                    FAR struct timespec ts3)
+                                    FAR struct timespec *ts3)
 {
   time_t sec;
   long nsec;
@@ -196,7 +196,7 @@ static void sched_timespec_subtract(FAR const struct timespec *ts1,
     }
 
   ts3->tv_sec = sec;
-  ts3->tv_nsec = sec;
+  ts3->tv_nsec = nsec;
 }
 #endif
 
@@ -497,7 +497,7 @@ static void sched_timer_start(unsigned int ticks)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
-void sched_alarm_expiration(FAR const struct *ts);
+void sched_alarm_expiration(FAR const struct timespec *ts)
 {
   unsigned int elapsed;
   unsigned int nexttime;

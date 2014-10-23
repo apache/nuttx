@@ -1676,7 +1676,7 @@ void sched_timer_expiration(void);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-void sched_alarm_expiration(FAR const struct *ts);
+void sched_alarm_expiration(FAR const struct timespec *ts);
 #endif
 
 /************************************************************************
