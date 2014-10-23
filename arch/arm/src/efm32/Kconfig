@@ -158,6 +158,48 @@ config EFM32_GPIO_IRQ
 		Enable support for interrupting GPIO pins
 
 choice
+	prompt "USART0 Mode"
+	default EFM32_USART0_ISUART
+	depends on EFM32_USART0
+
+config EFM32_USART0_ISUART
+	bool "USART0 is a UART"
+	select USART0_ISUART
+
+config EFM32_USART0_ISSPI
+	bool "USART0 is SPI"
+
+endchoice # USART0 Mode
+
+choice
+	prompt "USART1 Mode"
+	default EFM32_USART1_ISUART
+	depends on EFM32_USART1
+
+config EFM32_USART1_ISUART
+	bool "USART1 is a UART"
+	select USART1_ISUART
+
+config EFM32_USART1_ISSPI
+	bool "USART1 is SPI"
+
+endchoice # USART1 Mode
+
+choice
+	prompt "USART2 Mode"
+	default EFM32_USART2_ISUART
+	depends on EFM32_USART2
+
+config EFM32_USART2_ISUART
+	bool "USART2 is a UART"
+	select USART2_ISUART
+
+config EFM32_USART2_ISSPI
+	bool "USART2 is SPI"
+
+endchoice # USART2 Mode
+
+choice
 	prompt "LEUART Serial Console"
 	default NO_LEUART_SERIAL_CONSOLE
 	depends on DEV_CONSOLE && EFM32_LEUART
