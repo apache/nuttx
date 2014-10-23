@@ -459,6 +459,12 @@ static void sched_timer_start(unsigned int ticks)
        */
 
       sched_timespec_add(&g_stop_time, &ts, &ts);
+      ret = up_alarm_start(&ts);
+
+#else
+       /* [Re-]start the interval timer */
+
+       ret = up_timer_start(&ts);
 #endif
 
       /* [Re-]start the interval timer */
@@ -594,7 +600,7 @@ unsigned int sched_timer_cancel(void)
   ts.tv_nsec       = g_stop_time.tv_nsec;
   g_timer_interval = 0;
 
-  (void)up_timer_cancel(&g_stop_time);
+  (void)up_alarm_cancel(&g_stop_time);
 
   /* Convert this to the elapsed time */
 
