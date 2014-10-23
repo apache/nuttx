@@ -34,6 +34,16 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * WARNING -- This code is currently *NOT* thread safe.  No checking is done
+ *            that one alarm call might not override an already enabled one.
+ *            You might be able to handle this with some kind of cascading
+ *            scheme where alarm receives the next value in a list of alarms
+ *            all in the future.
+ *
+ *            Brandon Warhurst
+ ****************************************************************************/
+
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -53,13 +63,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* set the timer resolution at 1uS
+/* Set the timer resolution at 1uS
  *
  * This is a battery waster, but I need this kind of resolution for 1-wire
  * protocols... Until I can find a better way to implement them.
- */
+ *
+ * This should probable be Kconfig material.
+  */
 
-#define RIT_TIMER_RESOLUTION 250
+#define RIT_TIMER_RESOLUTION CONFIG_LPC43_RIT_RES
 
 /****************************************************************************
  * Private Data
@@ -166,6 +178,7 @@ void up_timer_initialize(void)
    * resolution, that would be 250ns resolution.  The timer is an integer
    * value, although maybe this should change, but that means
    * 250/1000000000*0.00000000490 = 51.02 ticks or 51 ticks, roughly.
+   * We round up by 1 tick.
    */
 
   ticks_per_int = RIT_TIMER_RESOLUTION/(1000000000*sec_per_tick)+1;
@@ -176,10 +189,10 @@ void up_timer_initialize(void)
    * 64 bit nanosecond timer than can "free-run" by being updated every
    * RIT_TIMER_RESOLUTION cycles.  I would have implemented the better
    * approach, but I didn't have a good way to determine how to manage a
-   * 32 bit ns timer.  Every 21 seconds the thing rolls over, so you'd have
-   * to set up the compare interrupt to handle the roll over.  It WOULD be
-   * fewer interrupts, but it seemed to make things more complicated.  When
-   * I have a better idea, I'll change this.
+   * 32 bit ns timer.  Every 21 seconds the thing rolls over@ 204MHz, so
+   * you'd have to set up the compare interrupt to handle the roll over.  It
+   * WOULD be fewer interrupts, but it seemed to make things more
+   * complicated.  When I have a better idea, I'll change this.
    */
 
   while(!((mask_test >> mask_bits) & ticks_per_int)) mask_bits++;
@@ -221,6 +234,11 @@ int up_alarm_cancel(FAR struct timespec *ts)
 
 int up_alarm_start(FAR const struct timespec *ts)
 {
+  /* According to the docs, this version should expect to receive the time
+   * in the future when the alarm should expire. So that's the way it's
+   * coded.
+   */
+
   alarm = (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
   return OK;
 }
@@ -230,6 +248,7 @@ int up_timer_cancel(FAR struct timespec *ts)
   /* Currently this is just an alarm and both are implemented.  This is *NOT*
    * how it is supposed to be and will be corrected, but for now, this is a
    * simple way to implement both.
+   * FIXME
    */
 
   return up_alarm_cancel(ts);
@@ -237,12 +256,14 @@ int up_timer_cancel(FAR struct timespec *ts)
 
 int up_timer_start(FAR const struct timespec *ts)
 {
-  /* Currently this is just an alarm and both are implemented.  This is *NOT*
-   * how it is supposed to be and will be corrected, but for now, this is a
-   * simple way to implement both.
+  /* According to the docs, this version should basically compute the time
+   * in the future when an alarm should go off.  That is the way it could
+   * potentially be implemented, so that's the way I did it.
    */
 
-  return up_alarm_start(ts);
+  alarm = internal_timer;
+  alarm += (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
+  return OK;
 }
 
 #endif /* CONFIG_LPC43_RIT */
