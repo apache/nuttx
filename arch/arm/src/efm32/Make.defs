@@ -103,7 +103,7 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c
 endif
 
-ifeq ($(CONFIG_EFM32_USART),y)
+ifeq ($(CONFIG_EFM32_USART_ISUART),y)
 CHIP_CSRCS += efm32_serial.c
 else
 ifeq ($(CONFIG_EFM32_UART),y)
