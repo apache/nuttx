@@ -128,6 +128,10 @@ CHIP_CSRCS += lpc43_ssp.c
 endif
 endif
 
+ifeq ($(CONFIG_LPC43_RIT),y)
+CHIP_CSRCS += lpc43_rit.c
+endif
+
 ifeq ($(CONFIG_LPC43_I2C0),y)
 CHIP_CSRCS += lpc43_i2c.c
 else
