@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_dma.h
+ * arch/arm/src/efm32/efm32_dma.h
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,59 +33,28 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_DMA_H
-#define __ARCH_ARM_SRC_STM32_STM32_DMA_H
+#ifndef __ARCH_ARM_SRC_EFM32_EFM32_DMA_H
+#define __ARCH_ARM_SRC_EFM32_EFM32_DMA_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "chip.h"
-
-/* Include the correct DMA register definitions for this STM32 family */
-
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX)
-#  include "chip/stm32f10xxx_dma.h"
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include "chip/stm32f20xxx_dma.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include "chip/stm32f40xxx_dma.h"
-#else
-#  error "Unknown STM32 DMA"
-#endif
-
-/* These definitions provide the bit encoding of the 'status' parameter passed to the
- * DMA callback function (see dma_callback_t).
- */
-
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX)
-#  define DMA_STATUS_FEIF         0                     /* (Not available in F1) */
-#  define DMA_STATUS_DMEIF        0                     /* (Not available in F1) */
-#  define DMA_STATUS_TEIF         DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
-#  define DMA_STATUS_HTIF         DMA_CHAN_HTIF_BIT     /* Channel Half Transfer */
-#  define DMA_STATUS_TCIF         DMA_CHAN_TCIF_BIT     /* Channel Transfer Complete */
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define DMA_STATUS_FEIF         0                    /* Stream FIFO error (ignored) */
-#  define DMA_STATUS_DMEIF        DMA_STREAM_DMEIF_BIT /* Stream direct mode error */
-#  define DMA_STATUS_TEIF         DMA_STREAM_TEIF_BIT  /* Stream Transfer Error */
-#  define DMA_STATUS_HTIF         DMA_STREAM_HTIF_BIT  /* Stream Half Transfer */
-#  define DMA_STATUS_TCIF         DMA_STREAM_TCIF_BIT  /* Stream Transfer Complete */
-#endif
-
-#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF|DMA_STATUS_DMEIF|DMA_STATUS_TEIF)
-#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF|DMA_STATUS_HTIF)
+#include "chip/efm32_dma.h"
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
 /* DMA_HANDLE provides an opaque are reference that can be used to represent a DMA
- * channel (F1) or a DMA stream (F4).
+ * channel.
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -98,38 +67,38 @@ typedef FAR void *DMA_HANDLE;
  *   handle - Refers tot he DMA channel or stream
  *   status - A bit encoded value that provides the completion status.  See the
  *            DMASTATUS_* definitions above.
- *   arg    - A user-provided value that was provided when stm32_dmastart() was
+ *   arg    - A user-provided value that was provided when efm32_dmastart() was
  *            called.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
 #ifdef CONFIG_DEBUG_DMA
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX)
-struct stm32_dmaregs_s
+struct efm32_dmaregs_s
 {
-  uint32_t isr;
-  uint32_t ccr;
-  uint32_t cndtr;
-  uint32_t cpar;
-  uint32_t cmar;
-};
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-struct stm32_dmaregs_s
-{
-  uint32_t lisr;
-  uint32_t hisr;
-  uint32_t scr;
-  uint32_t sndtr;
-  uint32_t spar;
-  uint32_t sm0ar;
-  uint32_t sm1ar;
-  uint32_t sfcr;
-};
-#else
-#  error "Unknown STM32 DMA"
+  uint32_t status;            /* DMA Status Registers */
+  uint32_t ctrlbase;          /* Channel Control Data Base Pointer Register */
+  uint32_t altctrlbase;       /* Channel Alternate Control Data Base Pointer Register */
+  uint32_t chwaitstatus;      /* Channel Wait on Request Status Register */
+  uint32_t chusebursts;       /* Channel Useburst Set Register */
+  uint32_t chreqmasks;        /* Channel Request Mask Set Register */
+  uint32_t chens;             /* Channel Enable Set Register */
+  uint32_t chalts;            /* Channel Alternate Set Register */
+  uint32_t chpris;            /* Channel Priority Set Register */
+  uint32_t errorc;            /* Bus Error Clear Register */
+  uint32_t chreqstatus;       /* Channel Request Status */
+  uint32_t chsreqstatus;      /* Channel Single Request Status */
+  uint32_t ifr;               /* Interrupt Flag Register */
+  uint32_t ien;               /* Interrupt Enable register */
+#if defined(CONFIG_EFM32_EFM32GG)
+  uint32_t ctrl;              /* DMA Control Register */
+  uint32_t rds;               /* DMA Retain Descriptor State */
+  uint32_t loop0;             /* Channel 0 Loop Register */
+  uint32_t loop1;             /* Channel 1 Loop Register */
+  uint32_t rect0;             /* Channel 0 Rectangle Register */
 #endif
+  uint32_t chcgrl             /* Channel n Control Register */
+};
 #endif
 
 /************************************************************************************
@@ -148,23 +117,23 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /****************************************************************************
- * Name: stm32_dmachannel
+ * Name: efm32_dmachannel
  *
  * Description:
  *   Allocate a DMA channel.  This function gives the caller mutually
  *   exclusive access to the DMA channel specified by the 'chan' argument.
- *   DMA channels are shared on the STM32:  Devices sharing the same DMA
+ *   DMA channels are shared on the EFM32:  Devices sharing the same DMA
  *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
- *   stm32_dma.h.
+ *   efm32_dma.h.
  *
- *   If the DMA channel is not available, then stm32_dmachannel() will wait
+ *   If the DMA channel is not available, then efm32_dmachannel() will wait
  *   until the holder of the channel relinquishes the channel by calling
- *   stm32_dmafree().  WARNING: If you have two devices sharing a DMA
- *   channel and the code never releases the channel, the stm32_dmachannel
+ *   efm32_dmafree().  WARNING: If you have two devices sharing a DMA
+ *   channel and the code never releases the channel, the efm32_dmachannel
  *   call for the other will hang forever in this function!  Don't let your
  *   design do that!
  *
@@ -172,11 +141,7 @@ extern "C"
  *   version.  Feel free to do that if that is what you need.
  *
  * Input parameter:
- *   chan - Identifies the stream/channel resource
- *     For the STM32 F1, this is simply the channel number as provided by
- *     the DMACHAN_* definitions in chip/stm32f10xxx_dma.h.
- *     For the STM32 F4, this is a bit encoded value as provided by the
- *     the DMAMAP_* definitions in chip/stm32f40xxx_dma.h
+ *   chan - Identifies the channel resource
  *
  * Returned Value:
  *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
@@ -190,16 +155,16 @@ extern "C"
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32_dmachannel(unsigned int chan);
+DMA_HANDLE efm32_dmachannel(unsigned int chan);
 
 /****************************************************************************
- * Name: stm32_dmafree
+ * Name: efm32_dmafree
  *
  * Description:
  *   Release a DMA channel.  If another thread is waiting for this DMA channel
- *   in a call to stm32_dmachannel, then this function will re-assign the
+ *   in a call to efm32_dmachannel, then this function will re-assign the
  *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
- *   in this argument must NEVER be used again until stm32_dmachannel() is
+ *   in this argument must NEVER be used again until efm32_dmachannel() is
  *   called again to re-gain access to the channel.
  *
  * Returned Value:
@@ -211,64 +176,64 @@ DMA_HANDLE stm32_dmachannel(unsigned int chan);
  *
  ****************************************************************************/
 
-void stm32_dmafree(DMA_HANDLE handle);
+void efm32_dmafree(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: stm32_dmasetup
+ * Name: efm32_dmasetup
  *
  * Description:
  *   Configure DMA before using
  *
  ****************************************************************************/
 
-void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+void efm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
                     size_t ntransfers, uint32_t ccr);
 
 /****************************************************************************
- * Name: stm32_dmastart
+ * Name: efm32_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
  * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
+ *   - DMA handle allocated by efm32_dmachannel()
  *   - No DMA in progress
  *
  ****************************************************************************/
 
-void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
+void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
                     bool half);
 
 /****************************************************************************
- * Name: stm32_dmastop
+ * Name: efm32_dmastop
  *
  * Description:
- *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
- *   reset and stm32_dmasetup() must be called before stm32_dmastart() can be
+ *   Cancel the DMA.  After efm32_dmastop() is called, the DMA channel is
+ *   reset and efm32_dmasetup() must be called before efm32_dmastart() can be
  *   called again
  *
  * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
+ *   - DMA handle allocated by efm32_dmachannel()
  *
  ****************************************************************************/
 
-void stm32_dmastop(DMA_HANDLE handle);
+void efm32_dmastop(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: stm32_dmaresidual
+ * Name: efm32_dmaresidual
  *
  * Description:
  *   Returns the number of bytes remaining to be transferred
  *
  * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
+ *   - DMA handle allocated by efm32_dmachannel()
  *
  ****************************************************************************/
 
-size_t stm32_dmaresidual(DMA_HANDLE handle);
+size_t efm32_dmaresidual(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: stm32_dmacapable
+ * Name: efm32_dmacapable
  *
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
@@ -282,45 +247,45 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_DMACAPABLE
-bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
+#ifdef CONFIG_EFM32_DMACAPABLE
+bool efm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
-#  define stm32_dmacapable(maddr, count, ccr) (true)
+#  define efm32_dmacapable(maddr, count, ccr) (true)
 #endif
 
 /****************************************************************************
- * Name: stm32_dmasample
+ * Name: efm32_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
+ *   - DMA handle allocated by efm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
+void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs);
 #else
-#  define stm32_dmasample(handle,regs)
+#  define efm32_dmasample(handle,regs)
 #endif
 
 /****************************************************************************
- * Name: stm32_dmadump
+ * Name: efm32_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
+ *   - DMA handle allocated by efm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
+void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
                    const char *msg);
 #else
-#  define stm32_dmadump(handle,regs,msg)
+#  define efm32_dmadump(handle,regs,msg)
 #endif
 
 #undef EXTERN
@@ -329,4 +294,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_DMA_H */
+#endif /* __ARCH_ARM_SRC_EFM32_EFM32_DMA_H */
