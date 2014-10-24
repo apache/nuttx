@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/itm_syslog.c
+ * arch/arm/src/armv7-m/up_itm_syslog.c
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
