@@ -961,6 +961,9 @@ config ARCH_BOARD_CUSTOM
 
 endchoice
 
+if ARCH_BOARD_CUSTOM
+menu "Custom Board Configuration"
+
 config ARCH_BOARD_CUSTOM_DIR
 	string "Custom board directory"
 	depends on ARCH_BOARD_CUSTOM
@@ -971,6 +974,34 @@ config ARCH_BOARD_CUSTOM_DIR
 		toplevel NuttX directory (like "configs/myboard") or an absolute path
 		to some location outside of the NuttX source tree (like
 		"~/projects/myboard").
+
+config BOARD_CUSTOM_LEDS
+	bool "Custom board LEDs"
+	default n
+	select ARCH_HAVE_LEDS
+	select ARCH_LEDS
+
+config BOARD_CUSTOM_BUTTONS
+	bool "Custom board buttons"
+	default n
+	select ARCH_HAVE_BUTTONS
+	select ARCH__BUTTONS
+
+config BOARD_CUSTOM_IRQBUTTONS
+	bool "Custom Board IRQ buttons"
+	default n
+	depends on BOARD_CUSTOM_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_IRQBUTTONS
+
+config BOARD_CUSTOM_INTERRUPT
+	bool "Custom board PHY interrupts"
+	default n
+	depends on NETDEVICES
+	select ARCH_PHY_INTERRUPT if NETDEVICES
+
+endmenu # Custom Board Configuration
+endif #ARCH_BOARD_CUSTOM
 
 config ARCH_BOARD
 	string
