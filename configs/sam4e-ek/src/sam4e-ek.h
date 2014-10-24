@@ -59,6 +59,7 @@
 #define HAVE_AT25       1
 #define HAVE_USBDEV     1
 #define HAVE_USBMONITOR 1
+#define HAVE_NETWORK    1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -131,6 +132,12 @@
 
 #if !defined(CONFIG_SYSTEM_USBMONITOR) || !defined(CONFIG_USBDEV_TRACE)
 #  undef HAVE_USBMONITOR
+#endif
+
+/* Networking */
+
+#if !defined(CONFIG_NET) || !defined(CONFIG_SAM34_EMAC)
+#  undef HAVE_NETWORK
 #endif
 
 /* SAM4E-EK GPIO Pin Definitions ****************************************************/
@@ -243,8 +250,8 @@
 
 /* Ethernet MAC.  The PHY interrupt is available on pin PD28 */
 
-#define GPIO_PHY_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_INT_BOTHEDGES | \
-                       GPIO_PORT_PIOD | GPIO_PIN28)
+#define GPIO_PHY_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                       GPIO_INT_FALLING | GPIO_PORT_PIOD | GPIO_PIN28)
 #define SAM_PHY_IRQ   SAM_IRQ_PD28
 
 /* LEDs
@@ -395,6 +402,18 @@ void weak_function sam_spiinitialize(void);
 int sam_hsmci_initialize(int minor);
 #else
 # define sam_hsmci_initialize(minor) (-ENOSYS)
+#endif
+
+/************************************************************************************
+ * Name: sam_netinitialize
+ *
+ * Description:
+ *   Configure board resources to support networking.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_NETWORK
+void weak_function sam_netinitialize(void);
 #endif
 
 /************************************************************************************

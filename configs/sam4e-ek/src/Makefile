@@ -64,6 +64,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_SAM34_EMAC),y)
+CSRCS += sam_ethernet.c
+endif
+
 ifeq ($(CONFIG_INPUT_ADS7843E),y)
 CSRCS += sam_ads7843e.c
 endif
