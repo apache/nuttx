@@ -132,7 +132,7 @@ static inline uint8_t efm32_getpin(gpio_pinset_t cfgset)
 
 static inline uint8_t efm32_getmode(gpio_pinset_t cfgset)
 {
-  return (uint8_t)((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
+  return (uint8_t)((cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT);
 }
 
 /************************************************************************************
