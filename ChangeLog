@@ -8881,3 +8881,9 @@
 	* nuttx/arch/arm/src/lpc43xx/lpc43_rit.c, lpc43_rit.h, and related
 	  files: Add support for tickless operation using the NXP LPC43xx.  From
 	  Brandon Warhurst (2014-10-23).
+	* arch/arm/src/efm32/efm32_gpio.c and efm32_gpioirq.c: EFM32 port and
+	  pin decoding backward in every case.  From  Pierre-Noel Bouteville
+	  (2014-10-23).
+	* arch/arm/src/armv7-m/up_itm_syslog.c:  Correct file naming and fix
+	  compilation errors in up_itm_syslog.c.  From  Pierre-Noel Bouteville
+	  (2014-10-23).
