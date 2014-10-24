@@ -293,9 +293,9 @@ int efm32_configgpio(gpio_pinset_t cfgset)
 
   /* Get basic pin configuration information */
 
-  port = efm32_getpin(cfgset);
+  port = efm32_getport(cfgset);
   base = EFM32_GPIO_Pn_BASE(port);
-  pin  = efm32_getport(cfgset);
+  pin  = efm32_getpin(cfgset);
   mode = efm32_getmode(cfgset);
 
   /* Set the drive strength in the GPIO control register */
@@ -330,9 +330,9 @@ void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
 
   /* Get basic pin configuration information */
 
-  port = efm32_getpin(pinset);
+  port = efm32_getport(cfgset);
   base = EFM32_GPIO_Pn_BASE(port);
-  pin  = efm32_getport(pinset);
+  pin  = efm32_getpin(cfgset);
 
   /* And set the output value */
 
@@ -355,9 +355,9 @@ bool efm32_gpioread(gpio_pinset_t pinset)
 
   /* Get basic pin configuration information */
 
-  port = efm32_getpin(pinset);
+  port = efm32_getport(cfgset);
   base = EFM32_GPIO_Pn_BASE(port);
-  pin  = efm32_getport(pinset);
+  pin  = efm32_getpin(cfgset);
 
   /* And return the input value of the pin */
 
