@@ -70,7 +70,8 @@
 /* Configuration ********************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) || defined(CONFIG_SAM34_GPIOB_IRQ) || \
-    defined(CONFIG_SAM34_GPIOC_IRQ)
+    defined(CONFIG_SAM34_GPIOC_IRQ) || defined(CONFIG_SAM34_GPIOD_IRQ) || \
+    defined(CONFIG_SAM34_GPIOE_IRQ) || defined(CONFIG_SAM34_GPIOF_IRQ)
 #  define CONFIG_SAM34_GPIO_IRQ 1
 #else
 #  undef CONFIG_SAM34_GPIO_IRQ
