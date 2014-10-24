@@ -330,9 +330,9 @@ void efm32_gpiowrite(gpio_pinset_t pinset, bool value)
 
   /* Get basic pin configuration information */
 
-  port = efm32_getport(cfgset);
+  port = efm32_getport(pinset);
   base = EFM32_GPIO_Pn_BASE(port);
-  pin  = efm32_getpin(cfgset);
+  pin  = efm32_getpin(pinset);
 
   /* And set the output value */
 
@@ -355,9 +355,9 @@ bool efm32_gpioread(gpio_pinset_t pinset)
 
   /* Get basic pin configuration information */
 
-  port = efm32_getport(cfgset);
+  port = efm32_getport(pinset);
   base = EFM32_GPIO_Pn_BASE(port);
-  pin  = efm32_getpin(cfgset);
+  pin  = efm32_getpin(pinset);
 
   /* And return the input value of the pin */
 
