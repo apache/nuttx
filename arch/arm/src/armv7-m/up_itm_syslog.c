@@ -41,9 +41,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+
 #include <nuttx/syslog/syslog.h>
 
 #include "nvic.h"
+#include "itm.h"
+#include "tpi.h"
+#include "dwt.h"
 #include "up_arch.h"
 #include "itm_syslog.h"
 
@@ -94,7 +99,7 @@ void itm_syslog_initialize(void)
 
   regval  = getreg32(NVIC_DEMCR);
   regval |= NVIC_DEMCR_TRCENA;
-  putreg32(putreg, NVIC_DEMCR);
+  putreg32(regval, NVIC_DEMCR);
 
   putreg32(0xc5acce55,ITM_LAR);
   putreg32(0,         ITM_TER);
@@ -125,13 +130,13 @@ void itm_syslog_initialize(void)
  *
  ****************************************************************************/
 
-int syslog_putc(int ch);
+int syslog_putc(int ch)
 {
   /* ITM enabled */
 
   if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) == 0)
     {
-      return;
+      return EOF;
     }
 
   /* ITM Port "CONFIG_ARMV7M_ITMSYSLOG_PORT" enabled */
