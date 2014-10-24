@@ -87,7 +87,7 @@ endif
 endif
 
 ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
-CMN_CSRCS += arm_itm_syslog.c
+CMN_CSRCS += up_itm_syslog.c
 endif
 
 CHIP_ASRCS  =
