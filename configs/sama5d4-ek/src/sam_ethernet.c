@@ -249,7 +249,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 #ifdef CONFIG_SAMA5_EMAC0
   phydbg("EMAC0: devname=%s\n", SAMA5_EMAC0_DEVNAME);
 #endif
-#ifdef CONFIG_SAMA5_EMAC0
+#ifdef CONFIG_SAMA5_EMAC1
   phydbg("EMAC1: devname=%s\n", SAMA5_EMAC1_DEVNAME);
 #endif
 
