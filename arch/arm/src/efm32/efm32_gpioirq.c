@@ -201,8 +201,8 @@ void efm32_gpioirq(gpio_pinset_t pinset)
 
   /* Get basic pin configuration information */
 
-  port = efm32_getpin(pinset);
-  pin  = efm32_getport(pinset);
+  port = efm32_getport(pinset);
+  pin  = efm32_getpin(pinset);
   bit  = ((uint32_t)1 << pin);
 
   /* Make sure that the pin interrupt is disabled */
