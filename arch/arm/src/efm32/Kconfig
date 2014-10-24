@@ -110,6 +110,11 @@ config EFM32_LEUART
 
 # Then, these are the actual, selectable peripheral options
 
+config EFM32_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+
 config EFM32_USART0
 	bool "USART0"
 	default n
