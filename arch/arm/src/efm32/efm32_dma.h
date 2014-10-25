@@ -50,6 +50,37 @@
 #include "chip/efm32_dma.h"
 
 /************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Bit encoded input parameter to efm32_channel()
+ *
+ * Current limitations/assumptions in the encoding:
+ *
+ *   - RX transfers are peripheral to memory
+ *   - TX transfers are memory to peripheral
+ *   - Memory address is always incremented.
+ */
+
+#define EFM32_DMA_SIGSEL_SHIFT            (0)       /* Bits 0-3: _DMA_CH_CTRL_ * value */
+#define EFM32_DMA_SIGSEL_MASK             (15 << EFM32_DMA_SIGSEL_SHIFT)
+#  define EFM32_DMA_SIGSEL(n)             ((dma_config_t)(n) << EFM32_DMA_SIGSEL_SHIFT)
+
+#define EFM32_DMA_SOURCSEL_SHIFT          (4)       /* Bits 4-9: _DMA_CH_SOURCESEL_* value */
+#define EFM32_DMA_SOURCSEL_MASK           (63 << EFM32_DMA_SOURCSEL_SHIFT)
+#  define EFM32_DMA_SOURCSEL(n)           (dma_config_t)(n) << EFM32_DMA_SOURCSEL_SHIFT)
+
+#define EFM32_DMA_XFERSIZE_SHIFT          (10)      /* Bits 10-11: Transfer size */
+#define EFM32_DMA_XFERSIZE_MASK           (3 << EFM32_DMA_XFERSIZE_SHIFT)
+#  define EFM32_DMA_XFERSIZE_SHIFT_BYTE   (0 << EFM32_DMA_SOURCSEL_SHIFT)
+#  define EFM32_DMA_XFERSIZE_SHIFT_HWORD  (1 << EFM32_DMA_SOURCSEL_SHIFT)
+#  define EFM32_DMA_XFERSIZE_SHIFT_WORD   (2 << EFM32_DMA_SOURCSEL_SHIFT)
+
+#define EFM32_DMA_SINGLE_MASK            (1 << 12) /* Bit 12: Single or Buffer full request */
+#  define EFM32_DMA_SINGLE               (1 << 12) /*         1=Buffer full request */
+#  define EFM32_DMA_BUFFER_FULL          (0)       /*         0=Buffer full request */
+
+/************************************************************************************
  * Public Types
  ************************************************************************************/
 
@@ -100,6 +131,10 @@ struct efm32_dmaregs_s
   uint32_t chcgrl             /* Channel n Control Register */
 };
 #endif
+
+/* Type of 'config' argument passed to efm32_rxdmasetup() and efm32_txdmasetup */
+
+typedef uint32_t dma_config_t;
 
 /************************************************************************************
  * Public Data
@@ -167,15 +202,40 @@ DMA_HANDLE efm32_dmachannel(void);
 void efm32_dmafree(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: efm32_dmasetup
+ * Name: efm32_rxdmasetup
  *
  * Description:
- *   Configure DMA before using
+ *   Configure an RX (peripheral-to-memory) DMA before starting the transfer.
+ *
+ * Input Parameters:
+ *   paddr  - Peripheral address (source)
+ *   maddr  - Memory address (destination)
+ *   nbytes - Number of bytes to transfer.  Must be an even multiple of the
+ *            configured transfer size.
+ *   config - Channel configuration selections
  *
  ****************************************************************************/
 
-void efm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                    size_t ntransfers, uint32_t ccr);
+void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
+                      size_t nbytes, dma_config_t config);
+
+/****************************************************************************
+ * Name: efm32_txdmasetup
+ *
+ * Description:
+ *   Configure an TX (memory-to-memory) DMA before starting the transfer.
+ *
+ * Input Parameters:
+ *   paddr  - Peripheral address (destination)
+ *   maddr  - Memory address (source)
+ *   nbytes - Number of bytes to transfer.  Must be an even multiple of the
+ *            configured transfer size.
+ *   config - Channel configuration selections
+ *
+ ****************************************************************************/
+
+void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
+                      size_t nbytes, dma_config_t config);
 
 /****************************************************************************
  * Name: efm32_dmastart
@@ -189,8 +249,7 @@ void efm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *
  ****************************************************************************/
 
-void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
-                    bool half);
+void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
 /****************************************************************************
  * Name: efm32_dmastop
