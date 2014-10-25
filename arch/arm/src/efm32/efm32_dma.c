@@ -282,7 +282,7 @@ void weak_function up_dmainitialize(void)
       g_dmach[i].chan = i;
     }
 
-  /* Enable clock to the DMA module.  DMA is clocked by HFCORECLK. */
+  /* Enable clocking to the DMA module.  DMA is clocked by HFCORECLK. */
 
   regval  = getreg32(EFM32_CMU_HFCORECLKEN0);
   regval |= CMU_HFCORECLKEN0_DMA;
@@ -383,17 +383,12 @@ DMA_HANDLE efm32_dmachannel(void)
 
   sem_post(&g_dmac.exclsem);
 
-  /* Show the result of the allocation */
+  /* Since we have reserved a DMA descriptor by taking a count from chansem,
+   * it would be a serious logic failure if we could not find a free channel
+   * for our use.
+   */
 
-  if (dmach)
-    {
-      dmavdbg("Allocated DMA channel %d\n", dmach->chan);
-    }
-  else
-    {
-      dmadbg("ERROR: Failed allocate DMA channel\n");
-    }
-
+  DEBUGASSERT(dmach);
   return (DMA_HANDLE)dmach;
 }
 
@@ -495,12 +490,12 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   desc->dstend = (uint32_t *)(maddr + nbytes - xfersize);
 
   /* No source increment, destination increments according to transfer size.
-   * No privileges.  Arbitrate after each transfer.
+   * No privileges.  Arbitrate after each transfer. Default priority.
    */
 
   regval = DMA_CTRL_SRC_INC_NONE | DMA_CTRL_DST_PROT_NON_PRIVILEGED |
-          DMA_CTRL_SRC_PROT_NON_PRIVILEGED | DMA_CTRL_R_POWER_1 |
-          (0 << _DMA_CTRL_NEXT_USEBURST_SHIFT) | _DMA_CTRL_CYCLE_CTRL_BASIC;
+           DMA_CTRL_SRC_PROT_NON_PRIVILEGED | DMA_CTRL_R_POWER_1 |
+           (0 << _DMA_CTRL_NEXT_USEBURST_SHIFT) | _DMA_CTRL_CYCLE_CTRL_BASIC;
 
   switch (shift)
     {
@@ -580,8 +575,8 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   desc->srcend = (uint32_t *)(maddr + nbytes - xfersize);
   desc->dstend = (uint32_t *)paddr;
 
-  /* No source increment, destination increments according to transfer size.
-   * No privileges.  Arbitrate after each transfer.
+  /* No destination increment, source increments according to transfer size.
+   * No privileges.  Arbitrate after each transfer. Default priority.
    */
 
   regval = DMA_CTRL_DST_INC_NONE | DMA_CTRL_DST_PROT_NON_PRIVILEGED |
