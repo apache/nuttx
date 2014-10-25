@@ -1721,7 +1721,7 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
     {
       regval |= XDMACH_CNDC_NDSUP;
     }
-    
+
   /* Update the destination address if this is a *-to-memory transfer.
    *
    *   TYPE = 0 -> memory-to-memory
@@ -1887,7 +1887,7 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
           gpending &= !bit;
         }
     }
- 
+
   return OK;
 }
 

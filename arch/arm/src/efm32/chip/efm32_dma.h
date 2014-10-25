@@ -2277,6 +2277,6 @@ struct dma_descriptor_s
   volatile void * volatile dstend; /* DMA destination address end */
   volatile uint32_t        ctrl;   /* DMA control register */
   volatile uint32_t        user;   /* DMA padding register, available for user */
-};      
+};
 
 #endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DMA_H */

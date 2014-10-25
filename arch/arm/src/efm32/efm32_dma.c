@@ -646,7 +646,7 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
       /* Enable buffer-full requests for the channel */
 
-      putreg32(bit, EFM_DMA_CHREQMASKC);      
+      putreg32(bit, EFM_DMA_CHREQMASKC);
     }
   else
     {
@@ -656,12 +656,12 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
       /* Disable buffer-full requests for the channel */
 
-      putreg32(bit, EFM_DMA_CHREQMASKS);      
+      putreg32(bit, EFM_DMA_CHREQMASKS);
     }
 
   /* Use the primary data structure for channel 0 */
 
-  putreg32(bit, EFM_DMA_CHALTC);      
+  putreg32(bit, EFM_DMA_CHALTC);
 
   /* Enable the channel */
 
