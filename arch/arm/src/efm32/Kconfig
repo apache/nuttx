@@ -163,6 +163,18 @@ config EFM32_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
+if EFM32_DMA
+
+config EFM32_DMA_NDESCR
+	int "Pre-allocated Control Structures"
+	default 8
+	---help---
+		DMA transfers require DMA channel control descriptors.  These
+		descriptors are pre-allocated and this setting provides the number
+		of descriptors that will be pre-allocated.
+
+endif
+
 choice
 	prompt "USART0 Mode"
 	default EFM32_USART0_ISUART
