@@ -165,13 +165,12 @@ config EFM32_GPIO_IRQ
 
 if EFM32_DMA
 
-config EFM32_DMA_NDESCR
-	int "Pre-allocated Control Structures"
+config EFM32_DMA_ALTDSEC
+	int "Enable alternate descriptors"
 	default 8
+	depends on EXPERIMENTAL
 	---help---
-		DMA transfers require DMA channel control descriptors.  These
-		descriptors are pre-allocated and this setting provides the number
-		of descriptors that will be pre-allocated.
+		Enable support for alternate descriptors.  Not fully implemented.
 
 endif
 

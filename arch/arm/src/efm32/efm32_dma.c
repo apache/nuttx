@@ -65,34 +65,27 @@
 /*****************************************************************************
  * Public Types
  *****************************************************************************/
-/* This union allows us to keep free DMA descriptors in in a list */
-
-union dma_descriptor_u
-{
-  sq_entry_t link;
-  struct dma_descriptor_s desc;
-};
-
 /* This structure describes one DMA channel */
 
 struct dma_channel_s
 {
-  uint8_t chan;                 /* DMA channel number (0-EFM32_DMA_NCHANNELS) */
-  bool inuse;                   /* TRUE: The DMA channel is in use */
-  struct dma_descriptor_s *desc; /* DMA descriptor assigned to the channel */
-  dma_config_t config;          /* Current configuration */
-  dma_callback_t callback;      /* Callback invoked when the DMA completes */
-  void *arg;                    /* Argument passed to callback function */
+  uint8_t chan;                  /* DMA channel number (0-EFM32_DMA_NCHANNELS) */
+  bool inuse;                    /* TRUE: The DMA channel is in use */
+  struct dma_descriptor_s *desc; /* Primary DMA descriptor for channel */
+#ifdef CONFIG_EFM32_DMA_ALTDSEC
+  struct dma_descriptor_s *alt;  /* Alternate DMA descriptor for channel */
+#endif
+  dma_config_t config;           /* Current configuration */
+  dma_callback_t callback;       /* Callback invoked when the DMA completes */
+  void *arg;                     /* Argument passed to callback function */
 };
 
 /* This structure describes the state of the DMA controller */
 
 struct dma_controller_s
 {
-  sem_t exclsem;                /* Protects channel table */
-  sem_t chansem;                /* Count of free channels */
-  sem_t freesem;                /* Count of free descriptors */
-  sq_queue_t freedesc;          /* List of free DMA descriptors */
+  sem_t exclsem;                 /* Protects channel table */
+  sem_t chansem;                 /* Count of free channels */
 };
 
 /*****************************************************************************
@@ -111,8 +104,13 @@ static struct dma_channel_s g_dmach[EFM32_DMA_NCHANNELS];
  * Each structure must be aligned to the size of the DMA descriptor.
  */
 
-static union dma_descriptor_u g_descriptors[CONFIG_EFM32_DMA_NDESCR]
+static struct dma_descriptor_s g_primary_descriptors[EFM32_DMA_NCHANNELS]
   __attribute__((aligned(16)));
+
+#ifdef CONFIG_EFM32_DMA_ALTDSEC
+static struct dma_descriptor_s g_alt_descriptors[EFM32_DMA_NCHANNELS]
+  __attribute__((aligned(16)));
+#endif
 
 /*****************************************************************************
  * Public Data
@@ -121,82 +119,6 @@ static union dma_descriptor_u g_descriptors[CONFIG_EFM32_DMA_NDESCR]
 /*****************************************************************************
  * Private Functions
  *****************************************************************************/
-
-/****************************************************************************
- * Name: efm32_alloc_descriptor
- *
- * Description:
- *   Allocate one DMA descriptor by removing it from the free list.
- *
- * Returned Value:
- *   The allocated DMA descriptor.  If no DMA descriptors are available, this
- *   function will wait until one is returned to the freelist.
- *
- ****************************************************************************/
-
-static struct dma_descriptor_s *efm32_alloc_descriptor(void)
-{
-  struct dma_descriptor_s *desc;
-  irqstate_t flags;
-
-  /* Take a count from from the descriptor counting semaphore.  We may block
-   * if there are no free descriptors.  When we get the count, then we can
-   * be assured that a DMA descriptor is available in the free list and is
-   * reserved for us.
-   */
-
-  flags = irqsave();
-  while (sem_wait(&g_dmac.freesem) < 0)
-    {
-      /* sem_wait should fail only if it is awakened by a a signal */
-
-      DEBUGASSERT(errno == EINTR);
-    }
-
-  /* Get our descriptor to the free list.  Interrupts mus be disabled here
-   * because the free list may also be accessed from the DMA interrupt
-   * handler.
-   */
-
-  desc = (struct dma_descriptor_s *)sq_remfirst(&g_dmac.freedesc);
-  irqrestore(flags);
-
-  /* And return the descriptor */
-
-  DEBUGASSERT(desc && ((uintptr_t)desc & ~15) == 0);
-  return desc;
-}
-
-/****************************************************************************
- * Name: efm32_free_descriptor
- *
- * Description:
- *   Free one DMA descriptor by returning it to the free list.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void efm32_free_descriptor(struct dma_descriptor_s *desc)
-{
-  union dma_descriptor_u *udesc = (union dma_descriptor_u *)desc;
-  irqstate_t flags;
-
-  /* Return the descriptor to the free list.  This may be called from the
-   * the DMA completion interrupt handler.
-   */
-
-  flags = irqsave();
-  sq_addlast(&udesc->link, &g_dmac.freedesc);
-  irqrestore(flags);
-
-  /* Notify any waiters that a new DMA descriptor is available in the free
-   * list.
-   */
-
-  sem_post(&g_dmac.freesem);
-}
 
 /****************************************************************************
  * Name: efm32_set_chctrl
@@ -314,16 +236,6 @@ void weak_function up_dmainitialize(void)
 
   dmallvdbg("Initialize XDMAC0\n");
 
-  /* Add the pre-allocated DMA descriptors to the free list */
-
-  sq_init(&g_dmac.freedesc);
-  sem_init(&g_dmac.freesem, 0, CONFIG_EFM32_DMA_NDESCR);
-
-  for (i = 0; i < CONFIG_EFM32_DMA_NDESCR; i++)
-    {
-      sq_addlast(&g_descriptors[i].link, &g_dmac.freedesc);
-    }
-
   /* Initialize the channel list  */
 
   sem_init(&g_dmac.exclsem, 0, 1);
@@ -332,6 +244,10 @@ void weak_function up_dmainitialize(void)
   for (i = 0; i < EFM32_DMA_NCHANNELS; i++)
     {
       g_dmach[i].chan = i;
+      g_dmach[i].desc = &g_primary_descriptors[i];
+#ifdef CONFIG_EFM32_DMA_ALTDSEC
+      g_dmach[i].alt  = &g_alt_descriptors[i];
+#endif
     }
 
   /* Enable clock to the DMA module.  DMA is clocked by HFCORECLK. */
@@ -339,6 +255,13 @@ void weak_function up_dmainitialize(void)
   regval  = getreg32(EFM32_CMU_HFCORECLKEN0);
   regval |= CMU_HFCORECLKEN0_DMA;
   putreg32(regval, EFM32_CMU_HFCORECLKEN0);
+
+  /* Set the primary and alternate control base addresses */
+
+  putreg32((uint32_t)g_primary_descriptors, EFM32_DMA_CTRLBASE);
+#ifdef CONFIG_EFM32_DMA_ALTDSEC
+  putreg32((uint32_t)g_alt_descriptors, EFM32_DMA_ALTCTRLBASE);
+#endif
 
   /* Attach DMA interrupt vector */
 
@@ -525,10 +448,8 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   nbytes   = ALIGN_DOWN(nbytes, mask);
   DEBUGASSERT(nbytes > 0);
 
-  /* Allocate a DMA descriptor for the channel.  We may block here. */
+  /* Save the configuration (for efm32_dmastart()). */
 
-  desc          = efm32_alloc_descriptor();
-  dmach->desc   = desc;
   dmach->config = config;
 
   /* Configure for the selected peripheral */
@@ -537,6 +458,7 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 
   /* Configure the primary channel descriptor */
 
+  desc          = dmach->desc;
   desc->srcend = (uint32_t *)paddr;
   desc->dstend = (uint32_t *)(maddr + nbytes - xfersize);
 
@@ -611,10 +533,8 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   nbytes   = ALIGN_DOWN(nbytes, mask);
   DEBUGASSERT(nbytes > 0);
 
-  /* Allocate a DMA descriptor for the channel.  We may block here. */
+  /* Save the configuration (for efm32_dmastart()). */
 
-  desc          = efm32_alloc_descriptor();
-  dmach->desc   = desc;
   dmach->config = config;
 
   /* Configure for the selected peripheral */
@@ -623,6 +543,7 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 
   /* Configure the primary channel descriptor */
 
+  desc         = dmach->desc;
   desc->srcend = (uint32_t *)(maddr + nbytes - xfersize);
   desc->dstend = (uint32_t *)paddr;
 
@@ -746,7 +667,7 @@ void efm32_dmastop(DMA_HANDLE handle)
   uint32_t regval;
   uint32_t bit;
 
-  DEBUGASSERT(dmach && dmach->inuse && dmach->desc);
+  DEBUGASSERT(dmach && dmach);
   bit = 1 << dmach->chan;
 
   /* Disable the channel */
@@ -759,15 +680,6 @@ void efm32_dmastop(DMA_HANDLE handle)
   regval  = getreg32(EFM32_DMA_IEN);
   regval |= bit;
   putreg32(bit, EFM32_DMA_IEN);
-
-  /* Free any attached DMA descriptor */
-
-  if (dmach->desc)
-    {
-      efm32_free_descriptor(dmach->desc);
-      dmach->desc = NULL;
-    }
-
   irqrestore(flags);
 }
 

@@ -92,7 +92,6 @@ LEDs and Buttons
 Serial Console
 ==============
 
-
    Default Serial Console
    ----------------------
    UART0 is configured as the default serial console at 115200 8N1
