@@ -111,25 +111,24 @@ static struct dma_channel_s g_dmach[EFM32_DMA_NCHANNELS];
  *   Bits 4-7: The DMA channel (0-11)
  *   Bits 2-3: Selects the descriptor field
  *   Bits 0-1: Always zero
- *
- * So 256 byte alignment will work in either case (since the order in which
- * the tables appear in physical memory is not important).
  */
 
 #if EFM32_DMA_NCHANNELS <= 8
 #  define DESC_TABLE_SIZE  8
+#  define DESC_TABLE_ALIGN 256 /* 2*8*16 */
 #elif EFM32_DMA_NCHANNELS <= 16
 #  define DESC_TABLE_SIZE  16
+#  define DESC_TABLE_ALIGN 512 /* 2*16*16 */
 #else
 #  error Unknown descriptor table size
 #endif
 
 #ifdef CONFIG_EFM32_DMA_ALTDSEC
 static struct dma_descriptor_s g_descriptors[DESC_TABLE_SIZE + EFM32_DMA_NCHANNELS]
-  __attribute__((aligned(256)));
+  __attribute__((aligned(DESC_TABLE_ALIGN)));
 #else
 static struct dma_descriptor_s g_descriptors[EFM32_DMA_NCHANNELS]
-  __attribute__((aligned(256)));
+  __attribute__((aligned(DESC_TABLE_ALIGN)));
 #endif
 
 /*****************************************************************************
