@@ -488,6 +488,7 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 
   /* Set the number of transfers (minus 1) */
 
+  DEBUGASSERT((nbytes >> shift) < 1024);
   regval |= ((nbytes >> shift) - 1) << _DMA_CTRL_N_MINUS_1_SHIFT;
   desc->ctrl = regval;
   desc->user = 0;
@@ -573,6 +574,7 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 
   /* Set the number of transfers (minus 1) */
 
+  DEBUGASSERT((nbytes >> shift) < 1024);
   regval |= ((nbytes >> shift) - 1) << _DMA_CTRL_N_MINUS_1_SHIFT;
   desc->ctrl = regval;
   desc->user = 0;
@@ -630,7 +632,7 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       putreg32(bit, EFM32_DMA_CHREQMASKS);
     }
 
-  /* Use the primary data structure for channel 0 */
+  /* Use the primary data structure for the channel */
 
   putreg32(bit, EFM32_DMA_CHALTC);
 
