@@ -75,7 +75,7 @@ endif
 
 ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fno-rtti
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -fno-strict-aliasing
 ARCHWARNINGSXX = -Wall -Wshadow
 ARCHDEFINES =
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
