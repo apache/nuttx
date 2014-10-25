@@ -49,7 +49,17 @@
 
 #include <nuttx/arch.h>
 
+#include "up_arch.h"
+#include "chip/efm32_dma.h"
 #include "efm32_dma.h"
+
+/*****************************************************************************
+ * Pre-processor Definitions
+ *****************************************************************************/
+
+#define ALIGN_MASK(s)   ((1 << s) - 1)
+#define ALIGN_DOWN(v,m) ((v) & ~m)
+#define ALIGN_UP(v,m)   (((v) + (m)) & ~m)
 
 /*****************************************************************************
  * Public Types
@@ -59,28 +69,29 @@
 union dma_descriptor_u
 {
   sq_entry_t link;
-  struct dma_desriptor_s desc;
+  struct dma_descriptor_s desc;
 };
 
 /* This structure describes one DMA channel */
 
 struct dma_channel_s
 {
-  uint8_t chan;                  /* DMA channel number (0-EFM_DMA_NCHANNELS) */
-  bool inuse;                    /* TRUE: The DMA channel is in use */
-  struct dms_descriptor_s *desc; /* DMA descriptor assigned to the channel */
-  dma_callback_t callback;       /* Callback invoked when the DMA completes */
-  void *arg;                     /* Argument passed to callback function */
+  uint8_t chan;                 /* DMA channel number (0-EFM_DMA_NCHANNELS) */
+  bool inuse;                   /* TRUE: The DMA channel is in use */
+  struct dma_descriptor_s *desc; /* DMA descriptor assigned to the channel */
+  dma_config_t config;          /* Current configuration */
+  dma_callback_t callback;      /* Callback invoked when the DMA completes */
+  void *arg;                    /* Argument passed to callback function */
 };
 
 /* This structure describes the state of the DMA controller */
 
 struct dma_controller_s
 {
-  sem_t exclsem;                 /* Protects channel table */
-  sem_t chansem;                 /* Count of free channels */
-  sem_t freesem;                 /* Count of free descriptors */
-  sq_queue_t freedesc;           /* List of free DMA descriptors */
+  sem_t exclsem;                /* Protects channel table */
+  sem_t chansem;                /* Count of free channels */
+  sem_t freesem;                /* Count of free descriptors */
+  sq_queue_t freedesc;          /* List of free DMA descriptors */
 };
 
 /*****************************************************************************
@@ -187,6 +198,46 @@ static void efm32_free_descriptor(struct dma_descriptor_s *desc)
 }
 
 /****************************************************************************
+ * Name: efm32_set_chctrl
+ *
+ * Description:
+ *  Set the channel control register
+ *
+ ****************************************************************************/
+
+static void efm32_set_chctrl(struct dma_channel_s *dmach, dma_config_t config)
+{
+  uintptr_t regaddr;
+  uint32_t decoded;
+  uint32_t regval;
+
+  decoded  = (uint32_t)(config & EFM32_DMA_SIGSEL_MASK) >> EFM32_DMA_SIGSEL_SHIFT;
+  regval   = (decoded << _DMA_CH_CTRL_SIGSEL_SHIFT);
+  decoded  = (uint32_t)(config & EFM32_DMA_SOURCSEL_MASK) >> EFM32_DMA_SOURCSEL_SHIFT;
+  regval  |= (decoded << _DMA_CH_CTRL_SOURCESEL_SHIFT);
+
+  regaddr = EFM_DMA_CHn_CTRL(dmach->chan);
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: efm32_align_shift
+ *
+ * Description:
+ *  Set the channel control register
+ *
+ ****************************************************************************/
+
+static inline unsigned int efm32_align_shift(dma_config_t config)
+{
+  unsigned int shift;
+
+  shift = (config & EFM32_DMA_XFERSIZE_MASK) >> EFM32_DMA_XFERSIZE_SHIFT;
+  DEBUGASSERT(shift != 3);
+  return shift;
+}
+
+/****************************************************************************
  * Name: efm32_dmac_interrupt
  *
  * Description:
@@ -248,8 +299,9 @@ void weak_function up_dmainitialize(void)
 
   (void)irq_attach(EFM32_IRQ_DMA, efm32_dmac_interrupt);
 
-  /* Initialize the controller */
-#warning Missing logic
+  /* Enale the DMA controller */
+
+  putreg32(DMA_CONFIG_EN, EFM_DMA_CONFIG);
 
   /* Enable the IRQ at the AIC (still disabled at the DMA controller) */
 
@@ -313,14 +365,15 @@ DMA_HANDLE efm32_dmachannel(void)
       struct dma_channel_s *candidate = &g_dmach[chndx];
       if (!candidate->inuse)
         {
-          dmach        = candidate;
-          dmach->inuse = true;
+          dmach         = candidate;
+          dmach->inuse  = true;
 
           /* Clear any pending channel interrupts */
 #warning Missing logic
 
           /* Disable the channel */
-#warning Missing logic
+
+          putreg32(1 << dmach->chan, EFM_DMA_CHENC);
           break;
         }
     }
@@ -368,9 +421,10 @@ void efm32_dmafree(DMA_HANDLE handle)
   dmavdbg("DMA channel %d\n", dmach->chan);
 
   /* Disable the channel */
-#warning Missing logic
 
-  /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
+  putreg32(1 << dmach->chan, EFM_DMA_CHENC);
+
+  /* Mark the channel no longer in use.  Clearing the in-use flag is an atomic
    * operation and so should be safe.
    */
 
@@ -384,17 +438,175 @@ void efm32_dmafree(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: efm32_dmasetup
+ * Name: efm32_rxdmasetup
  *
  * Description:
- *   Configure DMA before using
+ *   Configure an RX (peripheral-to-memory) DMA before starting the transfer.
+ *
+ * Input Parameters:
+ *   paddr  - Peripheral address (source)
+ *   maddr  - Memory address (destination)
+ *   nbytes - Number of bytes to transfer.  Must be an even multiple of the
+ *            configured transfer size.
+ *   config - Channel configuration selections
  *
  ****************************************************************************/
 
-void efm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                    size_t ntransfers, uint32_t ccr)
+void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
+                      size_t nbytes, dma_config_t config)
 {
-#warning Missing logic
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
+  struct dma_descriptor_s *desc;
+  unsigned int xfersize;
+  unsigned int shift;
+  uint32_t regval;
+  uint32_t mask;
+
+  DEBUGASSERT(dmach != NULL && dmach->inuse);
+
+  /* Get the properly alignment shift and mask */
+
+  shift = efm32_align_shift(config);
+  mask  = ALIGN_MASK(shift);
+
+  /* Make sure that the number of bytes we are asked to transfer is a multiple
+   * of the transfer size.
+   */
+
+  xfersize = (1 << shift);
+  nbytes   = ALIGN_DOWN(nbytes, mask);
+  DEBUGASSERT(nbytes > 0);
+
+  /* Allocate a DMA descriptor for the channel.  We may block here. */
+
+  desc          = efm32_alloc_descriptor();
+  dmach->desc   = desc;
+  dmach->config = config;
+
+  /* Configure for the selected peripheral */
+
+  efm32_set_chctrl(dmach, config);
+
+  /* Configure the primary channel descriptor */
+
+  desc->srcend = (uint32_t *)paddr;
+  desc->dstend = (uint32_t *)(maddr + nbytes - xfersize);
+
+  /* No source increment, destination increments according to transfer size.
+   * No privileges.  Arbitrate after each transfer.
+   */
+
+  regval = DMA_CTRL_SRC_INC_NONE | DMA_CTRL_DST_PROT_NON_PRIVILEGED |
+          DMA_CTRL_SRC_PROT_NON_PRIVILEGED | DMA_CTRL_R_POWER_1 |
+          (0 << _DMA_CTRL_NEXT_USEBURST_SHIFT) | _DMA_CTRL_CYCLE_CTRL_BASIC;
+
+  switch (shift)
+    {
+    default:
+    case 0: /* Byte transfer */
+      regval = DMA_CTRL_DST_INC_BYTE | DMA_CTRL_DST_SIZE_BYTE | DMA_CTRL_SRC_SIZE_BYTE;
+      break;
+
+    case 1: /* Half word transfer */
+      regval = DMA_CTRL_DST_INC_HALFWORD | DMA_CTRL_DST_SIZE_HALFWORD | DMA_CTRL_SRC_SIZE_HALFWORD;
+      break;
+
+    case 2: /* Word transfer */
+      regval = DMA_CTRL_DST_INC_WORD | DMA_CTRL_DST_SIZE_WORD | DMA_CTRL_SRC_SIZE_WORD;
+      break;
+    }
+
+  /* Set the number of transfers (minus 1) */
+
+  regval |= ((nbytes >> shift) - 1) << _DMA_CTRL_N_MINUS_1_SHIFT;
+  desc->ctrl = regval;
+  desc->user = 0;
+}
+
+/****************************************************************************
+ * Name: efm32_txdmasetup
+ *
+ * Description:
+ *   Configure an TX (memory-to-memory) DMA before starting the transfer.
+ *
+ * Input Parameters:
+ *   paddr  - Peripheral address (destination)
+ *   maddr  - Memory address (source)
+ *   nbytes - Number of bytes to transfer.  Must be an even multiple of the
+ *            configured transfer size.
+ *   config - Channel configuration selections
+ *
+ ****************************************************************************/
+
+void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
+                      size_t nbytes, dma_config_t config)
+{
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
+  struct dma_descriptor_s *desc;
+  unsigned int xfersize;
+  unsigned int shift;
+  uint32_t regval;
+  uint32_t mask;
+
+  DEBUGASSERT(dmach != NULL && dmach->inuse);
+
+  /* Get the properly alignment shift and mask */
+
+  shift = efm32_align_shift(config);
+  mask  = ALIGN_MASK(shift);
+
+  /* Make sure that the number of bytes we are asked to transfer is a multiple
+   * of the transfer size.
+   */
+
+  xfersize = (1 << shift);
+  nbytes   = ALIGN_DOWN(nbytes, mask);
+  DEBUGASSERT(nbytes > 0);
+
+  /* Allocate a DMA descriptor for the channel.  We may block here. */
+
+  desc          = efm32_alloc_descriptor();
+  dmach->desc   = desc;
+  dmach->config = config;
+
+  /* Configure for the selected peripheral */
+
+  efm32_set_chctrl(dmach, config);
+
+  /* Configure the primary channel descriptor */
+
+  desc->srcend = (uint32_t *)(maddr + nbytes - xfersize);
+  desc->dstend = (uint32_t *)paddr;
+
+  /* No source increment, destination increments according to transfer size.
+   * No privileges.  Arbitrate after each transfer.
+   */
+
+  regval = DMA_CTRL_DST_INC_NONE | DMA_CTRL_DST_PROT_NON_PRIVILEGED |
+          DMA_CTRL_SRC_PROT_NON_PRIVILEGED | DMA_CTRL_R_POWER_1 |
+          (0 << _DMA_CTRL_NEXT_USEBURST_SHIFT) | _DMA_CTRL_CYCLE_CTRL_BASIC;
+
+  switch (shift)
+    {
+    default:
+    case 0: /* Byte transfer */
+      regval = DMA_CTRL_DST_SIZE_BYTE | DMA_CTRL_SRC_INC_BYTE | DMA_CTRL_SRC_SIZE_BYTE;
+      break;
+
+    case 1: /* Half word transfer */
+      regval = DMA_CTRL_DST_SIZE_HALFWORD | DMA_CTRL_SRC_INC_HALFWORD | DMA_CTRL_SRC_SIZE_HALFWORD;
+      break;
+
+    case 2: /* Word transfer */
+      regval = DMA_CTRL_DST_SIZE_WORD | DMA_CTRL_SRC_INC_WORD | DMA_CTRL_SRC_SIZE_WORD;
+      break;
+    }
+
+  /* Set the number of transfers (minus 1) */
+
+  regval |= ((nbytes >> shift) - 1) << _DMA_CTRL_N_MINUS_1_SHIFT;
+  desc->ctrl = regval;
+  desc->user = 0;
 }
 
 /****************************************************************************
@@ -409,10 +621,51 @@ void efm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *
  ****************************************************************************/
 
-void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
-                    bool half)
+void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 {
-#warning Missing logic
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
+  uint32_t bit;
+
+  DEBUGASSERT(dmach && dmach->inuse && dmach->desc);
+
+  /* Save the DMA complete callback info */
+
+  dmach->callback = callback;
+  dmach->arg       = arg;
+
+  /* Finish configuring the channel */
+
+  bit = 1 << dmach->chan;
+  if ((dmach->config & EFM32_DMA_SINGLE_MASK) == EFM32_DMA_BUFFER_FULL)
+    {
+      /* Disable the single requests for the channel (i.e. do not react to data
+       * available, wait for buffer full)
+       */
+
+      putreg32(bit, EFM_DMA_CHUSEBURSTS);
+
+      /* Enable buffer-full requests for the channel */
+
+      putreg32(bit, EFM_DMA_CHREQMASKC);      
+    }
+  else
+    {
+      /* Enable the single requests for the channel */
+
+      putreg32(bit, EFM_DMA_CHUSEBURSTC);
+
+      /* Disable buffer-full requests for the channel */
+
+      putreg32(bit, EFM_DMA_CHREQMASKS);      
+    }
+
+  /* Use the primary data structure for channel 0 */
+
+  putreg32(bit, EFM_DMA_CHALTC);      
+
+  /* Enable the channel */
+
+  putreg32(bit, EFM_DMA_CHENS);
 }
 
 /****************************************************************************
