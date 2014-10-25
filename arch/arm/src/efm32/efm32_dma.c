@@ -71,10 +71,6 @@ struct dma_channel_s
 {
   uint8_t chan;                  /* DMA channel number (0-EFM32_DMA_NCHANNELS) */
   bool inuse;                    /* TRUE: The DMA channel is in use */
-  struct dma_descriptor_s *desc; /* Primary DMA descriptor for channel */
-#ifdef CONFIG_EFM32_DMA_ALTDSEC
-  struct dma_descriptor_s *alt;  /* Alternate DMA descriptor for channel */
-#endif
   dma_config_t config;           /* Current configuration */
   dma_callback_t callback;       /* Callback invoked when the DMA completes */
   void *arg;                     /* Argument passed to callback function */
@@ -100,16 +96,40 @@ static struct dma_controller_s g_dmac;
 
 static struct dma_channel_s g_dmach[EFM32_DMA_NCHANNELS];
 
-/* This array describes the available channel control data structures.
- * Each structure must be aligned to the size of the DMA descriptor.
+/* This array describes the available channel control data structures.  Each
+ * structure must be aligned to a 256 address boundary.  The last 8 or 9
+ * bits of address are provided by the DMA controller:
+ *
+ * 8-Channels:
+ *   Bit 7:    Selects the alternate descriptor list
+ *   Bits 4-6: The DMA channel (0-7)
+ *   Bits 2-3: Selects the descriptor field
+ *   Bits 0-1: Always zero
+ *
+ * 12-Channels:
+ *   Bit 8:    Selects the alternate descriptor list
+ *   Bits 4-7: The DMA channel (0-11)
+ *   Bits 2-3: Selects the descriptor field
+ *   Bits 0-1: Always zero
+ *
+ * So 256 byte alignment will work in either case (since the order in which
+ * the tables appear in physical memory is not important).
  */
 
-static struct dma_descriptor_s g_primary_descriptors[EFM32_DMA_NCHANNELS]
-  __attribute__((aligned(16)));
+#if EFM32_DMA_NCHANNELS <= 8
+#  define DESC_TABLE_SIZE  8
+#elif EFM32_DMA_NCHANNELS <= 16
+#  define DESC_TABLE_SIZE  16
+#else
+#  error Unknown descriptor table size
+#endif
 
 #ifdef CONFIG_EFM32_DMA_ALTDSEC
-static struct dma_descriptor_s g_alt_descriptors[EFM32_DMA_NCHANNELS]
-  __attribute__((aligned(16)));
+static struct dma_descriptor_s g_descriptors[DESC_TABLE_SIZE + EFM32_DMA_NCHANNELS]
+  __attribute__((aligned(256)));
+#else
+static struct dma_descriptor_s g_descriptors[EFM32_DMA_NCHANNELS]
+  __attribute__((aligned(256)));
 #endif
 
 /*****************************************************************************
@@ -158,6 +178,23 @@ static inline unsigned int efm32_align_shift(dma_config_t config)
   shift = (config & EFM32_DMA_XFERSIZE_MASK) >> EFM32_DMA_XFERSIZE_SHIFT;
   DEBUGASSERT(shift != 3);
   return shift;
+}
+
+/****************************************************************************
+ * Name: efm32_get_descriptor
+ *
+ * Description:
+ *  Get the address of the primary or alternate descriptor assigned to the
+ *  DMA channel
+ *
+ ****************************************************************************/
+
+static inline struct dma_descriptor_s *
+efm32_get_descriptor(struct dma_channel_s *dmach, bool alt)
+{
+  uintptr_t base = alt ? getreg32(EFM32_DMA_ALTCTRLBASE) :
+                         getreg32(EFM32_DMA_CTRLBASE);
+  return ((struct dma_descriptor_s *)base) + dmach->chan;
 }
 
 /****************************************************************************
@@ -244,10 +281,6 @@ void weak_function up_dmainitialize(void)
   for (i = 0; i < EFM32_DMA_NCHANNELS; i++)
     {
       g_dmach[i].chan = i;
-      g_dmach[i].desc = &g_primary_descriptors[i];
-#ifdef CONFIG_EFM32_DMA_ALTDSEC
-      g_dmach[i].alt  = &g_alt_descriptors[i];
-#endif
     }
 
   /* Enable clock to the DMA module.  DMA is clocked by HFCORECLK. */
@@ -256,12 +289,12 @@ void weak_function up_dmainitialize(void)
   regval |= CMU_HFCORECLKEN0_DMA;
   putreg32(regval, EFM32_CMU_HFCORECLKEN0);
 
-  /* Set the primary and alternate control base addresses */
+  /* Set the control base addresses.  Note: EFM32_DMA_ALTCTRLBASE
+   * is a read-only register that provides the location where hardware
+   * will obtain the alternative descriptors.
+   */
 
-  putreg32((uint32_t)g_primary_descriptors, EFM32_DMA_CTRLBASE);
-#ifdef CONFIG_EFM32_DMA_ALTDSEC
-  putreg32((uint32_t)g_alt_descriptors, EFM32_DMA_ALTCTRLBASE);
-#endif
+  putreg32((uint32_t)g_descriptors, EFM32_DMA_CTRLBASE);
 
   /* Attach DMA interrupt vector */
 
@@ -458,7 +491,7 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 
   /* Configure the primary channel descriptor */
 
-  desc          = dmach->desc;
+  desc         = efm32_get_descriptor(dmach, false);
   desc->srcend = (uint32_t *)paddr;
   desc->dstend = (uint32_t *)(maddr + nbytes - xfersize);
 
@@ -544,7 +577,7 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 
   /* Configure the primary channel descriptor */
 
-  desc         = dmach->desc;
+  desc         = efm32_get_descriptor(dmach, false);
   desc->srcend = (uint32_t *)(maddr + nbytes - xfersize);
   desc->dstend = (uint32_t *)paddr;
 
