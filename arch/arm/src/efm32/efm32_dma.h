@@ -107,7 +107,7 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 #ifdef CONFIG_DEBUG_DMA
 struct efm32_dmaregs_s
 {
-  uint32_t status;            /* DMA Status Registers */
+  uint32_t status;            /* DMA Status Register */
   uint32_t ctrlbase;          /* Channel Control Data Base Pointer Register */
   uint32_t altctrlbase;       /* Channel Alternate Control Data Base Pointer Register */
   uint32_t chwaitstatus;      /* Channel Wait on Request Status Register */
@@ -128,7 +128,7 @@ struct efm32_dmaregs_s
   uint32_t loop1;             /* Channel 1 Loop Register */
   uint32_t rect0;             /* Channel 0 Rectangle Register */
 #endif
-  uint32_t chcgrl             /* Channel n Control Register */
+  uint32_t chnctrl;           /* Channel n Control Register */
 };
 #endif
 
@@ -265,40 +265,6 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  ****************************************************************************/
 
 void efm32_dmastop(DMA_HANDLE handle);
-
-/****************************************************************************
- * Name: efm32_dmaresidual
- *
- * Description:
- *   Returns the number of bytes remaining to be transferred
- *
- * Assumptions:
- *   - DMA handle allocated by efm32_dmachannel()
- *
- ****************************************************************************/
-
-size_t efm32_dmaresidual(DMA_HANDLE handle);
-
-/****************************************************************************
- * Name: efm32_dmacapable
- *
- * Description:
- *   Check if the DMA controller can transfer data to/from given memory
- *   address with the given configuration. This depends on the internal
- *   connections in the ARM bus matrix of the processor. Note that this
- *   only applies to memory addresses, it will return false for any peripheral
- *   address.
- *
- * Returned value:
- *   True, if transfer is possible.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EFM32_DMACAPABLE
-bool efm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
-#else
-#  define efm32_dmacapable(maddr, count, ccr) (true)
-#endif
 
 /****************************************************************************
  * Name: efm32_dmasample

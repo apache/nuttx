@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
+#include "chip/efm32_cmu.h"
 #include "chip/efm32_dma.h"
 #include "efm32_dma.h"
 
@@ -76,7 +77,7 @@ union dma_descriptor_u
 
 struct dma_channel_s
 {
-  uint8_t chan;                 /* DMA channel number (0-EFM_DMA_NCHANNELS) */
+  uint8_t chan;                 /* DMA channel number (0-EFM32_DMA_NCHANNELS) */
   bool inuse;                   /* TRUE: The DMA channel is in use */
   struct dma_descriptor_s *desc; /* DMA descriptor assigned to the channel */
   dma_config_t config;          /* Current configuration */
@@ -104,7 +105,7 @@ static struct dma_controller_s g_dmac;
 
 /* This is the array of all DMA channels */
 
-static struct dma_channel_s g_dmach[EFM_DMA_NCHANNELS];
+static struct dma_channel_s g_dmach[EFM32_DMA_NCHANNELS];
 
 /* This array describes the available channel control data structures.
  * Each structure must be aligned to the size of the DMA descriptor.
@@ -216,7 +217,7 @@ static void efm32_set_chctrl(struct dma_channel_s *dmach, dma_config_t config)
   decoded  = (uint32_t)(config & EFM32_DMA_SOURCSEL_MASK) >> EFM32_DMA_SOURCSEL_SHIFT;
   regval  |= (decoded << _DMA_CH_CTRL_SOURCESEL_SHIFT);
 
-  regaddr = EFM_DMA_CHn_CTRL(dmach->chan);
+  regaddr = EFM32_DMA_CHn_CTRL(dmach->chan);
   putreg32(regval, regaddr);
 }
 
@@ -247,7 +248,47 @@ static inline unsigned int efm32_align_shift(dma_config_t config)
 
 static int efm32_dmac_interrupt(int irq, void *context)
 {
-#warning Missing logic
+  struct dma_channel_s *dmach;
+  unsigned int chndx;
+  uint32_t pending;
+  uint32_t bit;
+
+  /* Get the set of pending, unmasked global XDMAC interrupts */
+
+  pending = getreg32(EFM32_DMA_IF) & getreg32(EFM32_DMA_IEN);
+  putreg32(pending, EFM32_DMA_IFC);
+
+  /* Check each bit to see which channel(s) have interrupted */
+
+  for (chndx = 0; chndx < EFM32_DMA_NCHANNELS && pending != 0; chndx++)
+    {
+      /* Are any interrupts pending for this channel? */
+
+      bit = 1 << chndx;
+      if ((pending & bit) != 0)
+        {
+          dmach = &g_dmach[chndx];
+
+          /* Put the DMA channel in the stopped state */
+
+          efm32_dmastop((DMA_HANDLE)dmach);
+
+          /* Call the DMA completion callback */
+
+          if (dmach->callback)
+            {
+              dmach->callback((DMA_HANDLE)dmach, OK, dmach->arg);
+              dmach->callback = NULL;
+            }
+
+          dmach->arg = NULL;
+
+          /* Clear the bit in the sampled set of pending interrupts */
+
+          pending &= !bit;
+        }
+    }
+
   return OK;
 }
 
@@ -268,6 +309,7 @@ static int efm32_dmac_interrupt(int irq, void *context)
 
 void weak_function up_dmainitialize(void)
 {
+  uint32_t regval;
   int i;
 
   dmallvdbg("Initialize XDMAC0\n");
@@ -285,23 +327,26 @@ void weak_function up_dmainitialize(void)
   /* Initialize the channel list  */
 
   sem_init(&g_dmac.exclsem, 0, 1);
-  sem_init(&g_dmac.chansem, 0, EFM_DMA_NCHANNELS);
+  sem_init(&g_dmac.chansem, 0, EFM32_DMA_NCHANNELS);
 
-  for (i = 0; i < EFM_DMA_NCHANNELS; i++)
+  for (i = 0; i < EFM32_DMA_NCHANNELS; i++)
     {
       g_dmach[i].chan = i;
     }
 
-  /* Enable clock to the DMA module */
-#warning Missing logic
+  /* Enable clock to the DMA module.  DMA is clocked by HFCORECLK. */
+
+  regval  = getreg32(EFM32_CMU_HFCORECLKEN0);
+  regval |= CMU_HFCORECLKEN0_DMA;
+  putreg32(regval, EFM32_CMU_HFCORECLKEN0);
 
   /* Attach DMA interrupt vector */
 
   (void)irq_attach(EFM32_IRQ_DMA, efm32_dmac_interrupt);
 
-  /* Enale the DMA controller */
+  /* Enable the DMA controller */
 
-  putreg32(DMA_CONFIG_EN, EFM_DMA_CONFIG);
+  putreg32(DMA_CONFIG_EN, EFM32_DMA_CONFIG);
 
   /* Enable the IRQ at the AIC (still disabled at the DMA controller) */
 
@@ -335,6 +380,7 @@ DMA_HANDLE efm32_dmachannel(void)
 {
   struct dma_channel_s *dmach;
   unsigned int chndx;
+  uint32_t bit;
 
   /* Take a count from from the channel counting semaphore.  We may block
    * if there are no free channels.  When we get the count, then we can
@@ -360,7 +406,7 @@ DMA_HANDLE efm32_dmachannel(void)
 
   /* Search for an available DMA channel */
 
-  for (chndx = 0, dmach = NULL; chndx < EFM_DMA_NCHANNELS; chndx++)
+  for (chndx = 0, dmach = NULL; chndx < EFM32_DMA_NCHANNELS; chndx++)
     {
       struct dma_channel_s *candidate = &g_dmach[chndx];
       if (!candidate->inuse)
@@ -369,11 +415,13 @@ DMA_HANDLE efm32_dmachannel(void)
           dmach->inuse  = true;
 
           /* Clear any pending channel interrupts */
-#warning Missing logic
+
+          bit = 1 << chndx;
+          putreg32(bit, EFM32_DMA_IFC);
 
           /* Disable the channel */
 
-          putreg32(1 << dmach->chan, EFM_DMA_CHENC);
+          putreg32(bit, EFM32_DMA_CHENC);
           break;
         }
     }
@@ -422,7 +470,7 @@ void efm32_dmafree(DMA_HANDLE handle)
 
   /* Disable the channel */
 
-  putreg32(1 << dmach->chan, EFM_DMA_CHENC);
+  putreg32(1 << dmach->chan, EFM32_DMA_CHENC);
 
   /* Mark the channel no longer in use.  Clearing the in-use flag is an atomic
    * operation and so should be safe.
@@ -624,6 +672,8 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
 void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 {
   struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
+  irqstate_t flags;
+  uint32_t regval;
   uint32_t bit;
 
   DEBUGASSERT(dmach && dmach->inuse && dmach->desc);
@@ -642,30 +692,38 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
        * available, wait for buffer full)
        */
 
-      putreg32(bit, EFM_DMA_CHUSEBURSTS);
+      putreg32(bit, EFM32_DMA_CHUSEBURSTS);
 
       /* Enable buffer-full requests for the channel */
 
-      putreg32(bit, EFM_DMA_CHREQMASKC);
+      putreg32(bit, EFM32_DMA_CHREQMASKC);
     }
   else
     {
       /* Enable the single requests for the channel */
 
-      putreg32(bit, EFM_DMA_CHUSEBURSTC);
+      putreg32(bit, EFM32_DMA_CHUSEBURSTC);
 
       /* Disable buffer-full requests for the channel */
 
-      putreg32(bit, EFM_DMA_CHREQMASKS);
+      putreg32(bit, EFM32_DMA_CHREQMASKS);
     }
 
   /* Use the primary data structure for channel 0 */
 
-  putreg32(bit, EFM_DMA_CHALTC);
+  putreg32(bit, EFM32_DMA_CHALTC);
+
+  /* Enable DMA completion interrupts */
+
+  flags   = irqsave();
+  regval  = getreg32(EFM32_DMA_IEN);
+  regval |= bit;
+  putreg32(bit, EFM32_DMA_IEN);
 
   /* Enable the channel */
 
-  putreg32(bit, EFM_DMA_CHENS);
+  putreg32(bit, EFM32_DMA_CHENS);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -683,48 +741,35 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
 void efm32_dmastop(DMA_HANDLE handle)
 {
-#warning Missing logic
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
+  irqstate_t flags;
+  uint32_t regval;
+  uint32_t bit;
+
+  DEBUGASSERT(dmach && dmach->inuse && dmach->desc);
+  bit = 1 << dmach->chan;
+
+  /* Disable the channel */
+
+  flags = irqsave();
+  putreg32(bit, EFM32_DMA_CHENC);
+
+  /* Disable Channel interrupts */
+
+  regval  = getreg32(EFM32_DMA_IEN);
+  regval |= bit;
+  putreg32(bit, EFM32_DMA_IEN);
+
+  /* Free any attached DMA descriptor */
+
+  if (dmach->desc)
+    {
+      efm32_free_descriptor(dmach->desc);
+      dmach->desc = NULL;
+    }
+
+  irqrestore(flags);
 }
-
-/****************************************************************************
- * Name: efm32_dmaresidual
- *
- * Description:
- *   Returns the number of bytes remaining to be transferred
- *
- * Assumptions:
- *   - DMA handle allocated by efm32_dmachannel()
- *
- ****************************************************************************/
-
-size_t efm32_dmaresidual(DMA_HANDLE handle)
-{
-#warning Missing logic
-  return 0;
-}
-
-/****************************************************************************
- * Name: efm32_dmacapable
- *
- * Description:
- *   Check if the DMA controller can transfer data to/from given memory
- *   address with the given configuration. This depends on the internal
- *   connections in the ARM bus matrix of the processor. Note that this
- *   only applies to memory addresses, it will return false for any peripheral
- *   address.
- *
- * Returned value:
- *   True, if transfer is possible.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EFM32_DMACAPABLE
-bool efm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
-{
-#warning Missing logic
-return false;
-}
-#endif
 
 /****************************************************************************
  * Name: efm32_dmasample
@@ -740,7 +785,42 @@ return false;
 #ifdef CONFIG_DEBUG_DMA
 void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 {
-#warning Missing logic
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
+  uintptr_t regaddr;
+  irqstate_t flags;
+
+  /* Sample DMA registers. */
+
+  flags              = irqsave();
+
+  regs->status       = getreg32(EFM32_DMA_STATUS);
+  regs->ctrlbase     = getreg32(EFM32_DMA_CTRLBASE);
+  regs->altctrlbase  = getreg32(EFM32_DMA_ALTCTRLBASE);
+  regs->chwaitstatus = getreg32(EFM32_DMA_CHWAITSTATUS);
+  regs->chusebursts  = getreg32(EFM32_DMA_CHUSEBURSTS);
+  regs->chreqmasks   = getreg32(EFM32_DMA_CHREQMASKS);
+  regs->chens        = getreg32(EFM32_DMA_CHENS);
+  regs->chalts       = getreg32(EFM32_DMA_CHALTS);
+  regs->chpris       = getreg32(EFM32_DMA_CHPRIS);
+  regs->errorc       = getreg32(EFM32_DMA_ERRORC);
+  regs->chreqstatus  = getreg32(EFM32_DMA_CHREQSTATUS);
+  regs->chsreqstatus = getreg32(EFM32_DMA_CHSREQSTATUS);
+  regs->ifr          = getreg32(EFM32_DMA_IF);
+  regs->ien          = getreg32(EFM32_DMA_IEN);
+#if defined(CONFIG_EFM32_EFM32GG)
+  regs->ctrl         = getreg32(EFM32_DMA_CTRL);
+  regs->rds          = getreg32(EFM32_DMA_RDS);
+  regs->loop0        = getreg32(EFM32_DMA_LOOP0);
+  regs->loop1        = getreg32(EFM32_DMA_LOOP1);
+  regs->rect0        = getreg32(EFM32_DMA_RECT0);
+#endif
+
+  /* Sample channel control register */
+
+  regaddr            = EFM32_DMA_CHn_CTRL(dmach->chan)
+  regs->chnctrl      = getreg32(regaddr);
+
+  irqrestore(flags);
 }
 #endif
 
@@ -759,6 +839,32 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
                    const char *msg)
 {
-#warning Missing logic
+  struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
+  struct sam_xdmac_s *xdmac = sam_controller(xdmach);
+
+  dmadbg("%s\n", msg);
+  dmadbg("  DMA Registers:\n");
+  dmadbg("        STATUS: %08x\n", regs->status);
+  dmadbg("      CTRLBASE: %08x\n", regs->ctrlbase);
+  dmadbg("   ALTCTRLBASE: %08x\n", regs->altctrlbase);
+  dmadbg("  CHWAITSTATUS: %08x\n", regs->chwaitstatus);
+  dmadbg("   CHUSEBURSTS: %08x\n", regs->chusebursts);
+  dmadbg("    CHREQMASKS: %08x\n", regs->chreqmasks);
+  dmadbg("         CHENS: %08x\n", regs->chens);
+  dmadbg("        CHALTS: %08x\n", regs->chalts);
+  dmadbg("        CHPRIS: %08x\n", regs->chpris);
+  dmadbg("        ERRORC: %08x\n", regs->errorc);
+  dmadbg("   CHREQSTATUS: %08x\n", regs->chreqstatus);
+  dmadbg("  CHSREQSTATUS: %08x\n", regs->chsreqstatus);
+  dmadbg("           IEN: %08x\n", regs->ien);
+#if defined(CONFIG_EFM32_EFM32GG)
+  dmadbg("          CTRL: %08x\n", regs->ctrl);
+  dmadbg("           RDS: %08x\n", regs->rds);
+  dmadbg("         LOOP0: %08x\n", regs->loop0);
+  dmadbg("         LOOP1: %08x\n", regs->loop1);
+  dmadbg("         RECT0: %08x\n", regs->rect0);
+#endif
+  dmadbg("  DMA Channel %d Registers:\n", dmach->chan);
+  dmadbg("        CHCTRL: %08x\n", regs->chnctrl);
 }
 #endif

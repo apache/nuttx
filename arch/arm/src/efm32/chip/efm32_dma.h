@@ -72,107 +72,107 @@
  *******************************************************************************************************************************/
 
  #if defined(CONFIG_EFM32_EFM32GG)
-#  define EFM_DMA_NCHANNELS            12
+#  define EFM32_DMA_NCHANNELS            12
 #elif defined(CONFIG_EFM32_EFM32G)
-#  define EFM_DMA_NCHANNELS            8
+#  define EFM32_DMA_NCHANNELS            8
 #endif
 
 /* DMA Register Offsets ********************************************************************************************************/
 
-#define EFM_DMA_STATUS_OFFSET          0x0000  /* DMA Status Registers */
-#define EFM_DMA_CONFIG_OFFSET          0x0004  /* DMA Configuration Register */
-#define EFM_DMA_CTRLBASE_OFFSET        0x0008  /* Channel Control Data Base Pointer Register */
-#define EFM_DMA_ALTCTRLBASE_OFFSET     0x000c  /* Channel Alternate Control Data Base Pointer Register */
-#define EFM_DMA_CHWAITSTATUS_OFFSET    0x0010  /* Channel Wait on Request Status Register */
-#define EFM_DMA_CHSWREQ_OFFSET         0x0014  /* Channel Software Request Register */
-#define EFM_DMA_CHUSEBURSTS_OFFSET     0x0018  /* Channel Useburst Set Register */
-#define EFM_DMA_CHUSEBURSTC_OFFSET     0x001c  /* Channel Useburst Clear Register */
-#define EFM_DMA_CHREQMASKS_OFFSET      0x0020  /* Channel Request Mask Set Register */
-#define EFM_DMA_CHREQMASKC_OFFSET      0x0024  /* Channel Request Mask Clear Register */
-#define EFM_DMA_CHENS_OFFSET           0x0028  /* Channel Enable Set Register */
-#define EFM_DMA_CHENC_OFFSET           0x002c  /* Channel Enable Clear Register */
-#define EFM_DMA_CHALTS_OFFSET          0x0030  /* Channel Alternate Set Register */
-#define EFM_DMA_CHALTC_OFFSET          0x0034  /* Channel Alternate Clear Register */
-#define EFM_DMA_CHPRIS_OFFSET          0x0038  /* Channel Priority Set Register */
-#define EFM_DMA_CHPRIC_OFFSET          0x003c  /* Channel Priority Clear Register */
-#define EFM_DMA_ERRORC_OFFSET          0x004c  /* Bus Error Clear Register */
-#define EFM_DMA_CHREQSTATUS_OFFSET     0x0e10  /* Channel Request Status */
-#define EFM_DMA_CHSREQSTATUS_OFFSET    0x0e18  /* Channel Single Request Status */
-#define EFM_DMA_IF_OFFSET              0x1000  /* Interrupt Flag Register */
-#define EFM_DMA_IFS_OFFSET             0x1004  /* Interrupt Flag Set Register */
-#define EFM_DMA_IFC_OFFSET             0x1008  /* Interrupt Flag Clear Register */
-#define EFM_DMA_IEN_OFFSET             0x100c  /* Interrupt Enable register */
+#define EFM32_DMA_STATUS_OFFSET          0x0000  /* DMA Status Registers */
+#define EFM32_DMA_CONFIG_OFFSET          0x0004  /* DMA Configuration Register */
+#define EFM32_DMA_CTRLBASE_OFFSET        0x0008  /* Channel Control Data Base Pointer Register */
+#define EFM32_DMA_ALTCTRLBASE_OFFSET     0x000c  /* Channel Alternate Control Data Base Pointer Register */
+#define EFM32_DMA_CHWAITSTATUS_OFFSET    0x0010  /* Channel Wait on Request Status Register */
+#define EFM32_DMA_CHSWREQ_OFFSET         0x0014  /* Channel Software Request Register */
+#define EFM32_DMA_CHUSEBURSTS_OFFSET     0x0018  /* Channel Useburst Set Register */
+#define EFM32_DMA_CHUSEBURSTC_OFFSET     0x001c  /* Channel Useburst Clear Register */
+#define EFM32_DMA_CHREQMASKS_OFFSET      0x0020  /* Channel Request Mask Set Register */
+#define EFM32_DMA_CHREQMASKC_OFFSET      0x0024  /* Channel Request Mask Clear Register */
+#define EFM32_DMA_CHENS_OFFSET           0x0028  /* Channel Enable Set Register */
+#define EFM32_DMA_CHENC_OFFSET           0x002c  /* Channel Enable Clear Register */
+#define EFM32_DMA_CHALTS_OFFSET          0x0030  /* Channel Alternate Set Register */
+#define EFM32_DMA_CHALTC_OFFSET          0x0034  /* Channel Alternate Clear Register */
+#define EFM32_DMA_CHPRIS_OFFSET          0x0038  /* Channel Priority Set Register */
+#define EFM32_DMA_CHPRIC_OFFSET          0x003c  /* Channel Priority Clear Register */
+#define EFM32_DMA_ERRORC_OFFSET          0x004c  /* Bus Error Clear Register */
+#define EFM32_DMA_CHREQSTATUS_OFFSET     0x0e10  /* Channel Request Status */
+#define EFM32_DMA_CHSREQSTATUS_OFFSET    0x0e18  /* Channel Single Request Status */
+#define EFM32_DMA_IF_OFFSET              0x1000  /* Interrupt Flag Register */
+#define EFM32_DMA_IFS_OFFSET             0x1004  /* Interrupt Flag Set Register */
+#define EFM32_DMA_IFC_OFFSET             0x1008  /* Interrupt Flag Clear Register */
+#define EFM32_DMA_IEN_OFFSET             0x100c  /* Interrupt Enable register */
 #if defined(CONFIG_EFM32_EFM32GG)
-#  define EFM_DMA_CTRL_OFFSET          0x1010  /* DMA Control Register */
-#  define EFM_DMA_RDS_OFFSET           0x1014  /* DMA Retain Descriptor State */
-#  define EFM_DMA_LOOP0_OFFSET         0x1020  /* Channel 0 Loop Register */
-#  define EFM_DMA_LOOP1_OFFSET         0x1024  /* Channel 1 Loop Register */
-#  define EFM_DMA_RECT0_OFFSET         0x1060  /* Channel 0 Rectangle Register */
+#  define EFM32_DMA_CTRL_OFFSET          0x1010  /* DMA Control Register */
+#  define EFM32_DMA_RDS_OFFSET           0x1014  /* DMA Retain Descriptor State */
+#  define EFM32_DMA_LOOP0_OFFSET         0x1020  /* Channel 0 Loop Register */
+#  define EFM32_DMA_LOOP1_OFFSET         0x1024  /* Channel 1 Loop Register */
+#  define EFM32_DMA_RECT0_OFFSET         0x1060  /* Channel 0 Rectangle Register */
 #endif
 
-#define EFM_DMA_CHn_CTRL_OFFSET(n)     (0x1100+((n)<<2))  /* Channel n Control Register */
-#define EFM_DMA_CH0_CTRL_OFFSET        0x1100  /* Channel 0 Control Register */
-#define EFM_DMA_CH1_CTRL_OFFSET        0x1104  /* Channel 1 Control Register */
-#define EFM_DMA_CH2_CTRL_OFFSET        0x1108  /* Channel 2 Control Register */
-#define EFM_DMA_CH3_CTRL_OFFSET        0x110c  /* Channel 3 Control Register */
-#define EFM_DMA_CH4_CTRL_OFFSET        0x1110  /* Channel 4 Control Register */
-#define EFM_DMA_CH5_CTRL_OFFSET        0x1114  /* Channel 5 Control Register */
-#define EFM_DMA_CH6_CTRL_OFFSET        0x1118  /* Channel 6 Control Register */
-#define EFM_DMA_CH7_CTRL_OFFSET        0x111c  /* Channel 7 Control Register */
+#define EFM32_DMA_CHn_CTRL_OFFSET(n)     (0x1100+((n)<<2))  /* Channel n Control Register */
+#define EFM32_DMA_CH0_CTRL_OFFSET        0x1100  /* Channel 0 Control Register */
+#define EFM32_DMA_CH1_CTRL_OFFSET        0x1104  /* Channel 1 Control Register */
+#define EFM32_DMA_CH2_CTRL_OFFSET        0x1108  /* Channel 2 Control Register */
+#define EFM32_DMA_CH3_CTRL_OFFSET        0x110c  /* Channel 3 Control Register */
+#define EFM32_DMA_CH4_CTRL_OFFSET        0x1110  /* Channel 4 Control Register */
+#define EFM32_DMA_CH5_CTRL_OFFSET        0x1114  /* Channel 5 Control Register */
+#define EFM32_DMA_CH6_CTRL_OFFSET        0x1118  /* Channel 6 Control Register */
+#define EFM32_DMA_CH7_CTRL_OFFSET        0x111c  /* Channel 7 Control Register */
 #if defined(CONFIG_EFM32_EFM32GG)
-#  define EFM_DMA_CH8_CTRL_OFFSET      0x1120  /* Channel 8 Control Register */
-#  define EFM_DMA_CH9_CTRL_OFFSET      0x1124  /* Channel 9 Control Register */
-#  define EFM_DMA_CH10_CTRL_OFFSET     0x1128  /* Channel 10 Control Register */
-#  define EFM_DMA_CH11_CTRL_OFFSET     0x112c  /* Channel 11 Control Register */
+#  define EFM32_DMA_CH8_CTRL_OFFSET      0x1120  /* Channel 8 Control Register */
+#  define EFM32_DMA_CH9_CTRL_OFFSET      0x1124  /* Channel 9 Control Register */
+#  define EFM32_DMA_CH10_CTRL_OFFSET     0x1128  /* Channel 10 Control Register */
+#  define EFM32_DMA_CH11_CTRL_OFFSET     0x112c  /* Channel 11 Control Register */
 #endif
 
 /* DMA Register Addresses ******************************************************************************************************/
 
-#define EFM_DMA_STATUS                 (EFM32_DMA_BASE+EFM_DMA_STATUS_OFFSET)
-#define EFM_DMA_CONFIG                 (EFM32_DMA_BASE+EFM_DMA_CONFIG_OFFSET)
-#define EFM_DMA_CTRLBASE               (EFM32_DMA_BASE+EFM_DMA_CTRLBASE_OFFSET)
-#define EFM_DMA_ALTCTRLBASE            (EFM32_DMA_BASE+EFM_DMA_ALTCTRLBASE_OFFSET)
-#define EFM_DMA_CHWAITSTATUS           (EFM32_DMA_BASE+EFM_DMA_CHWAITSTATUS_OFFSET)
-#define EFM_DMA_CHSWREQ                (EFM32_DMA_BASE+EFM_DMA_CHSWREQ_OFFSET)
-#define EFM_DMA_CHUSEBURSTS            (EFM32_DMA_BASE+EFM_DMA_CHUSEBURSTS_OFFSET)
-#define EFM_DMA_CHUSEBURSTC            (EFM32_DMA_BASE+EFM_DMA_CHUSEBURSTC_OFFSET)
-#define EFM_DMA_CHREQMASKS             (EFM32_DMA_BASE+EFM_DMA_CHREQMASKS_OFFSET)
-#define EFM_DMA_CHREQMASKC             (EFM32_DMA_BASE+EFM_DMA_CHREQMASKC_OFFSET)
-#define EFM_DMA_CHENS                  (EFM32_DMA_BASE+EFM_DMA_CHENS_OFFSET)
-#define EFM_DMA_CHENC                  (EFM32_DMA_BASE+EFM_DMA_CHENC_OFFSET)
-#define EFM_DMA_CHALTS                 (EFM32_DMA_BASE+EFM_DMA_CHALTS_OFFSET)
-#define EFM_DMA_CHALTC                 (EFM32_DMA_BASE+EFM_DMA_CHALTC_OFFSET)
-#define EFM_DMA_CHPRIS                 (EFM32_DMA_BASE+EFM_DMA_CHPRIS_OFFSET)
-#define EFM_DMA_CHPRIC                 (EFM32_DMA_BASE+EFM_DMA_CHPRIC_OFFSET)
-#define EFM_DMA_ERRORC                 (EFM32_DMA_BASE+EFM_DMA_ERRORC_OFFSET)
-#define EFM_DMA_CHREQSTATUS            (EFM32_DMA_BASE+EFM_DMA_CHREQSTATUS_OFFSET)
-#define EFM_DMA_CHSREQSTATUS           (EFM32_DMA_BASE+EFM_DMA_CHSREQSTATUS_OFFSET)
-#define EFM_DMA_IF                     (EFM32_DMA_BASE+EFM_DMA_IF_OFFSET)
-#define EFM_DMA_IFS                    (EFM32_DMA_BASE+EFM_DMA_IFS_OFFSET)
-#define EFM_DMA_IFC                    (EFM32_DMA_BASE+EFM_DMA_IFC_OFFSET)
-#define EFM_DMA_IEN                    (EFM32_DMA_BASE+EFM_DMA_IEN_OFFSET)
+#define EFM32_DMA_STATUS                 (EFM32_DMA_BASE+EFM32_DMA_STATUS_OFFSET)
+#define EFM32_DMA_CONFIG                 (EFM32_DMA_BASE+EFM32_DMA_CONFIG_OFFSET)
+#define EFM32_DMA_CTRLBASE               (EFM32_DMA_BASE+EFM32_DMA_CTRLBASE_OFFSET)
+#define EFM32_DMA_ALTCTRLBASE            (EFM32_DMA_BASE+EFM32_DMA_ALTCTRLBASE_OFFSET)
+#define EFM32_DMA_CHWAITSTATUS           (EFM32_DMA_BASE+EFM32_DMA_CHWAITSTATUS_OFFSET)
+#define EFM32_DMA_CHSWREQ                (EFM32_DMA_BASE+EFM32_DMA_CHSWREQ_OFFSET)
+#define EFM32_DMA_CHUSEBURSTS            (EFM32_DMA_BASE+EFM32_DMA_CHUSEBURSTS_OFFSET)
+#define EFM32_DMA_CHUSEBURSTC            (EFM32_DMA_BASE+EFM32_DMA_CHUSEBURSTC_OFFSET)
+#define EFM32_DMA_CHREQMASKS             (EFM32_DMA_BASE+EFM32_DMA_CHREQMASKS_OFFSET)
+#define EFM32_DMA_CHREQMASKC             (EFM32_DMA_BASE+EFM32_DMA_CHREQMASKC_OFFSET)
+#define EFM32_DMA_CHENS                  (EFM32_DMA_BASE+EFM32_DMA_CHENS_OFFSET)
+#define EFM32_DMA_CHENC                  (EFM32_DMA_BASE+EFM32_DMA_CHENC_OFFSET)
+#define EFM32_DMA_CHALTS                 (EFM32_DMA_BASE+EFM32_DMA_CHALTS_OFFSET)
+#define EFM32_DMA_CHALTC                 (EFM32_DMA_BASE+EFM32_DMA_CHALTC_OFFSET)
+#define EFM32_DMA_CHPRIS                 (EFM32_DMA_BASE+EFM32_DMA_CHPRIS_OFFSET)
+#define EFM32_DMA_CHPRIC                 (EFM32_DMA_BASE+EFM32_DMA_CHPRIC_OFFSET)
+#define EFM32_DMA_ERRORC                 (EFM32_DMA_BASE+EFM32_DMA_ERRORC_OFFSET)
+#define EFM32_DMA_CHREQSTATUS            (EFM32_DMA_BASE+EFM32_DMA_CHREQSTATUS_OFFSET)
+#define EFM32_DMA_CHSREQSTATUS           (EFM32_DMA_BASE+EFM32_DMA_CHSREQSTATUS_OFFSET)
+#define EFM32_DMA_IF                     (EFM32_DMA_BASE+EFM32_DMA_IF_OFFSET)
+#define EFM32_DMA_IFS                    (EFM32_DMA_BASE+EFM32_DMA_IFS_OFFSET)
+#define EFM32_DMA_IFC                    (EFM32_DMA_BASE+EFM32_DMA_IFC_OFFSET)
+#define EFM32_DMA_IEN                    (EFM32_DMA_BASE+EFM32_DMA_IEN_OFFSET)
 #if defined(CONFIG_EFM32_EFM32GG)
-#  define EFM_DMA_CTRL                 (EFM32_DMA_BASE+EFM_DMA_CTRL_OFFSET)
-#  define EFM_DMA_RDS                  (EFM32_DMA_BASE+EFM_DMA_RDS_OFFSET)
-#  define EFM_DMA_LOOP0                (EFM32_DMA_BASE+EFM_DMA_LOOP0_OFFSET)
-#  define EFM_DMA_LOOP1                (EFM32_DMA_BASE+EFM_DMA_LOOP1_OFFSET)
-#  define EFM_DMA_RECT0                (EFM32_DMA_BASE+EFM_DMA_RECT0_OFFSET)
+#  define EFM32_DMA_CTRL                 (EFM32_DMA_BASE+EFM32_DMA_CTRL_OFFSET)
+#  define EFM32_DMA_RDS                  (EFM32_DMA_BASE+EFM32_DMA_RDS_OFFSET)
+#  define EFM32_DMA_LOOP0                (EFM32_DMA_BASE+EFM32_DMA_LOOP0_OFFSET)
+#  define EFM32_DMA_LOOP1                (EFM32_DMA_BASE+EFM32_DMA_LOOP1_OFFSET)
+#  define EFM32_DMA_RECT0                (EFM32_DMA_BASE+EFM32_DMA_RECT0_OFFSET)
 #endif
 
-#define EFM_DMA_CHn_CTRL(n)            (EFM32_DMA_BASE+EFM_DMA_CHn_CTRL_OFFSET(n))
-#define EFM_DMA_CH0_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH0_CTRL_OFFSET)
-#define EFM_DMA_CH1_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH1_CTRL_OFFSET)
-#define EFM_DMA_CH2_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH2_CTRL_OFFSET)
-#define EFM_DMA_CH3_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH3_CTRL_OFFSET)
-#define EFM_DMA_CH4_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH4_CTRL_OFFSET)
-#define EFM_DMA_CH5_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH5_CTRL_OFFSET)
-#define EFM_DMA_CH6_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH6_CTRL_OFFSET)
-#define EFM_DMA_CH7_CTRL               (EFM32_DMA_BASE+EFM_DMA_CH7_CTRL_OFFSET)
+#define EFM32_DMA_CHn_CTRL(n)            (EFM32_DMA_BASE+EFM32_DMA_CHn_CTRL_OFFSET(n))
+#define EFM32_DMA_CH0_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH0_CTRL_OFFSET)
+#define EFM32_DMA_CH1_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH1_CTRL_OFFSET)
+#define EFM32_DMA_CH2_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH2_CTRL_OFFSET)
+#define EFM32_DMA_CH3_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH3_CTRL_OFFSET)
+#define EFM32_DMA_CH4_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH4_CTRL_OFFSET)
+#define EFM32_DMA_CH5_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH5_CTRL_OFFSET)
+#define EFM32_DMA_CH6_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH6_CTRL_OFFSET)
+#define EFM32_DMA_CH7_CTRL               (EFM32_DMA_BASE+EFM32_DMA_CH7_CTRL_OFFSET)
 #if defined(CONFIG_EFM32_EFM32GG)
-#  define EFM_DMA_CH8_CTRL             (EFM32_DMA_BASE+EFM_DMA_CH8_CTRL_OFFSET)
-#  define EFM_DMA_CH9_CTRL             (EFM32_DMA_BASE+EFM_DMA_CH9_CTRL_OFFSET)
-#  define EFM_DMA_CH10_CTRL            (EFM32_DMA_BASE+EFM_DMA_CH10_CTRL_OFFSET)
-#  define EFM_DMA_CH11_CTRL            (EFM32_DMA_BASE+EFM_DMA_CH11_CTRL_OFFSET)
+#  define EFM32_DMA_CH8_CTRL             (EFM32_DMA_BASE+EFM32_DMA_CH8_CTRL_OFFSET)
+#  define EFM32_DMA_CH9_CTRL             (EFM32_DMA_BASE+EFM32_DMA_CH9_CTRL_OFFSET)
+#  define EFM32_DMA_CH10_CTRL            (EFM32_DMA_BASE+EFM32_DMA_CH10_CTRL_OFFSET)
+#  define EFM32_DMA_CH11_CTRL            (EFM32_DMA_BASE+EFM32_DMA_CH11_CTRL_OFFSET)
 #endif
 
 /* DMA Register Bit Field Definitions ******************************************************************************************/
