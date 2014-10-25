@@ -136,7 +136,7 @@ struct sam_xdmach_s
   struct chnext_view1_s *lltail;  /* DMA link list head */
 };
 
-/* This structure describes the stae of one DMA controller */
+/* This structure describes the state of one DMA controller */
 
 struct sam_xdmac_s
 {

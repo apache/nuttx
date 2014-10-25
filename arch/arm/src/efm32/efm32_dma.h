@@ -125,37 +125,25 @@ extern "C"
  *
  * Description:
  *   Allocate a DMA channel.  This function gives the caller mutually
- *   exclusive access to the DMA channel specified by the 'chan' argument.
- *   DMA channels are shared on the EFM32:  Devices sharing the same DMA
- *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
- *   efm32_dma.h.
+ *   exclusive access to a DMA channel.
  *
- *   If the DMA channel is not available, then efm32_dmachannel() will wait
- *   until the holder of the channel relinquishes the channel by calling
- *   efm32_dmafree().  WARNING: If you have two devices sharing a DMA
- *   channel and the code never releases the channel, the efm32_dmachannel
- *   call for the other will hang forever in this function!  Don't let your
- *   design do that!
+ *   If no DMA channel is available, then efm32_dmachannel() will wait
+ *   until the holder of a channel relinquishes the channel by calling
+ *   efm32_dmafree().
  *
- *   Hmm.. I suppose this interface could be extended to make a non-blocking
- *   version.  Feel free to do that if that is what you need.
- *
- * Input parameter:
- *   chan - Identifies the channel resource
+ * Input parameters:
+ *   None
  *
  * Returned Value:
- *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
- *   void* DMA channel handle.  (If 'chan' is invalid, the function will
- *   assert if debug is enabled or do something ignorant otherwise).
+ *   This function ALWAYS returns a non-NULL, void* DMA channel handle.
  *
  * Assumptions:
- *   - The caller does not hold he DMA channel.
- *   - The caller can wait for the DMA channel to be freed if it is no
+ *   - The caller can wait for a DMA channel to be freed if it is not
  *     available.
  *
  ****************************************************************************/
 
-DMA_HANDLE efm32_dmachannel(unsigned int chan);
+DMA_HANDLE efm32_dmachannel(void);
 
 /****************************************************************************
  * Name: efm32_dmafree
