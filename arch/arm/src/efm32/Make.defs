@@ -111,6 +111,10 @@ CHIP_CSRCS += efm32_serial.c
 endif
 endif
 
+ifeq ($(CONFIG_EFM32_USART_ISSPI),y)
+CHIP_CSRCS += efm32_spi.c
+endif
+
 ifeq ($(CONFIG_EFM32_LEUART),y)
 CHIP_CSRCS += efm32_leserial.c
 endif

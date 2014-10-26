@@ -111,7 +111,7 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  *
  *****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_SPI_DEVICE)
 void efm32_uart_reset(uintptr_t base);
 #endif
 
