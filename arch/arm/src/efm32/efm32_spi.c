@@ -70,12 +70,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 /* SPI interrupts */
 
 #ifdef CONFIG_EFM32_SPI_INTERRUPTS
 #  error Interrupt driven SPI not yet supported
 #endif
+
+/* SPI DMA */
 
 #ifndef CONFIG_EFM32_SPI_DMA_TIMEO_NSEC
 #  define CONFIG_EFM32_SPI_DMA_TIMEO_NSEC 500
@@ -91,14 +93,14 @@
 #  error Cannot enable both interrupt mode and DMA mode for SPI
 #endif
 
-/* DMA definitions ******************************************************************/
+/* DMA definitions **********************************************************/
 
 #define SPI_DMA8_CONFIG       (EFM32_DMA_XFERSIZE_BYTE| EFM32_DMA_MEMINCR)
 #define SPI_DMA8NULL_CONFIG   (EFM32_DMA_XFERSIZE_BYTE | EFM32_DMA_NOINCR)
 #define SPI_DMA16_CONFIG      (EFM32_DMA_XFERSIZE_HWORD | EFM32_DMA_MEMINCR)
 #define SPI_DMA16NULL_CONFIG  (EFM32_DMA_XFERSIZE_HWORD | EFM32_DMA_NOINCR)
 
-/* Debug ****************************************************************************/
+/* Debug ********************************************************************/
 /* Check if SPI debug is enabled */
 
 #ifndef CONFIG_DEBUG
@@ -127,11 +129,14 @@
 struct efm32_spidev_s;
 struct efm32_spiconfig_s
 {
-  uintptr_t base;        /* USART base address */
+  uintptr_t base;           /* USART base address */
 #ifdef CONFIG_EFM32_SPI_DMA
-  dma_config_t rxconfig; /* RX DMA configuration (excluding transfer width) */
-  dma_config_t txconfig; /* TX DMA configuration (excluding transfer width) */
+  dma_config_t rxconfig;    /* RX DMA configuration */
+  dma_config_t txconfig;    /* TX DMA configuration */
 #endif
+
+  /* SPI-specific methods */
+
   void (*select)(struct spi_dev_s *dev, enum spi_dev_e devid,
                  bool selected);
   uint8_t (*status)(struct spi_dev_s *dev, enum spi_dev_e devid);
@@ -144,7 +149,7 @@ struct efm32_spiconfig_s
 
 struct efm32_spidev_s
 {
-  const struct spi_ops_s *spidev;         /* Externally visible part of the SPI interface */
+  const struct spi_ops_s *spidev;         /* Externally visible SPI interface */
   const struct efm32_spiconfig_s *config; /* Constant SPI hardware configuration */
 
 #ifdef CONFIG_EFM32_SPI_DMA
@@ -158,7 +163,7 @@ struct efm32_spidev_s
 #endif
 
 #ifndef CONFIG_SPI_OWNBUS
-  sem_t exclsem;             /* Held while chip is selected for mutual exclusion */
+  sem_t exclsem;             /* Supports mutually exclusive access */
   uint32_t frequency;        /* Requested clock frequency */
   uint32_t actual;           /* Actual clock frequency */
   uint8_t nbits;             /* Width of word in bits (8 or 16) */
@@ -187,8 +192,10 @@ static void      spi_dmarxwait(struct efm32_spidev_s *priv);
 static void      spi_dmatxwait(struct efm32_spidev_s *priv);
 static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv);
 static inline void spi_dmatxwakeup(struct efm32_spidev_s *priv);
-static void      spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
-static void      spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void      spi_dmarxcallback(DMA_HANDLE handle, uint8_t status,
+                   void *arg);
+static void      spi_dmatxcallback(DMA_HANDLE handle, uint8_t status,
+                   void *arg);
 static void      spi_dmarxsetup(struct efm32_spidev_s *priv,
                    void *rxbuffer, void *rxdummy, size_t nwords);
 static void      spi_dmatxsetup(struct efm32_spidev_s *priv,
@@ -205,7 +212,8 @@ static int       spi_lock(struct spi_dev_s *dev, bool lock);
 #endif
 static void      spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool selected);
-static uint32_t  spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
+static uint32_t  spi_setfrequency(struct spi_dev_s *dev,
+                   uint32_t frequency);
 static void      spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void      spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint8_t   spi_status(struct spi_dev_s *dev, enum spi_dev_e devid);
@@ -359,7 +367,7 @@ static uint32_t spi_getreg(const struct efm32_spiconfig_s *config,
  * Name: spi_putreg
  *
  * Description:
- *   Write a value to w\one SPI register
+ *   Write a value to one SPI register
  *
  * Input Parameters:
  *   config    - Device-specific configuration data
@@ -454,8 +462,8 @@ static void spi_dmarxwait(struct efm32_spidev_s *priv)
   flags = irqsave();
   while (sem_wait(&priv->rxdmasem) != 0)
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
       DEBUGASSERT(errno == EINTR);
@@ -491,8 +499,8 @@ static void spi_dmatxwait(struct efm32_spidev_s *priv)
   flags = irqsave();
   while (sem_wait(&priv->txdmasem) != 0)
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
       DEBUGASSERT(errno == EINTR);
@@ -816,7 +824,7 @@ static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
  *   Set the SPI frequency.
  *
  * Input Parameters:
- *   dev -       Device-specific state data
+ *   dev       - Device-specific state data
  *   frequency - The SPI frequency requested
  *
  * Returned Value:
@@ -1078,7 +1086,9 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       spi_putreg(config, EFM32_USART_FRAME_OFFSET, regval);
 
 #ifndef CONFIG_SPI_OWNBUS
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster
+       */
 
       priv->nbits = nbits;
     }
@@ -1166,7 +1176,7 @@ static int spi_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
  *         number of bits selected for the SPI interface.
  *
  * Returned Value:
- *   response
+ *   Response
  *
  ****************************************************************************/
 
@@ -1206,10 +1216,11 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
+ *   nwords   - the length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1362,10 +1373,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchanged in units of words.
+ *   nwords   - The length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1395,11 +1407,16 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   else
 #endif
     {
-      spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+      spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n",
+              txbuffer, rxbuffer, nwords);
 
-      /* Pre-calculate the timerout value */
+      /* Pre-calculate the timeout value */
 
       ticks = (CONFIG_EFM32_SPI_DMA_TIMEO_NSEC * nwords) / NSEC_PER_TICK;
+      if (ticks < 1)
+        {
+          ticks = 1;
+        }
 
       /* Setup DMAs */
 
@@ -1440,10 +1457,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   nwords   - the length of data to send from the buffer in number of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords   - The length of data to send from the buffer in number of
+ *              words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits
+ *              <= 8, the data is packed into uint8_t's; if nbits >8, the
+ *              data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1451,7 +1469,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer, size_t nwords)
+static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
+                         size_t nwords)
 {
   spivdbg("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);
@@ -1467,10 +1486,11 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer, size_t nwo
  * Input Parameters:
  *   dev      - Device-specific state data
  *   rxbuffer - A pointer to the buffer in which to recieve data
- *   nwords   - the length of data that can be received in the buffer in number
- *              of words.  The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords   - The length of data that can be received in the buffer in
+ *              number of words.  The wordsize is determined by the number
+ *              of bits-per-word selected for the SPI interface.  If nbits
+ *              <= 8, the data is packed into uint8_t's; if nbits >8, the
+ *              data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1478,7 +1498,8 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer, size_t nwo
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer, size_t nwords)
+static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
+                          size_t nwords)
 {
   spivdbg("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
@@ -1489,14 +1510,14 @@ static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer, size_t nwords)
  * Name: spi_portinitialize
  *
  * Description:
- *      Initialize the selected SPI port in its default state
- *  (Master, 8-bit, mode 0, etc.)
+ *   Initialize the selected SPI port in its default state (Master, 8-bit,
+ *   mode 0, etc.)
  *
  * Input Parameter:
- *      priv   - private SPI device structure
+ *   priv - private SPI device structure
  *
  * Returned Value:
- *      None
+ *   None
  *
  ****************************************************************************/
 
@@ -1562,14 +1583,16 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->rxdmach = efm32_dmachannel();
   if (!priv->rxdmach)
     {
-      spidbg("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n", port);
+      spidbg("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n",
+             port);
       goto errout;
     }
 
   priv->txdmach = efm32_dmachannel();
   if (!priv->txdmach)
     {
-      spidbg("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n", port);
+      spidbg("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n",
+             port);
       goto errout_with_rxdmach;
     }
 
@@ -1690,7 +1713,7 @@ struct spi_dev_s *efm32_spi_initialize(int port)
        irqrestore(flags);
     }
 
-   return (struct spi_dev_s *)priv;
+  return (struct spi_dev_s *)priv;
 }
 
 #endif /* HAVE_SPI_DEVICE */

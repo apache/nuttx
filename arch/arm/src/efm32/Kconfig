@@ -353,7 +353,7 @@ config EFM32_SPI_DMA
 if EFM32_SPI_DMA
 
 config EFM32_SPI_DMA_TIMEO_NSEC
-	int "Per word timer (nsec)"
+	int "Per word timeout (nsec)"
 	default 500
 	---help---
 		A timeout will be be used to detect hung DMA transfers.  The timeout

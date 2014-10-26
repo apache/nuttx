@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arm/arm/src/efm32/efm32_spi.h
  *
  *   Copyright (C) 2009-2013 Bouteville Pierre-Noel. All rights reserved.
@@ -36,22 +36,22 @@
 #ifndef __ARCH_ARM_EFM32_EFM32_SPI_H
 #define __ARCH_ARM_EFM32_EFM32_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "efm32_config.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_spi_initialize
  *
  * Description:
@@ -68,51 +68,58 @@
 struct spi_dev_s;
 struct spi_dev_s *efm32_spi_initialize(int port);
 
-/************************************************************************************
+/*****************************************************************************
  * Name:  efm32_spi[n]_select,  efm32_spi[n]_status, and efm32_spi[n]_cmddata
  *
  * Description:
  *   The external functions, efm32_spi[n]_select, efm32_spi[n]_status, and
- *   efm32_spi[n]_cmddata must be provided by board-specific logic.  These are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   (including up_spiinitialize()) are provided by common EFM32 logic.  To use this
- *   common SPI logic on your board:
+ *   efm32_spi[n]_cmddata must be provided by board-specific logic.  These
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including up_spiinitialize()) are provided by common
+ *   EFM32 logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in efm32_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide efm32_spi[n]_select() and efm32_spi[n]_status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file, then
- *      provide efm32_spi[n]_cmddata() functions in your board-specific logic.
- *      These functions will perform cmd/data selection operations using GPIOs in the
- *      way your board is configured.
+ *   2. Provide efm32_spi[n]_select() and efm32_spi[n]_status() functions in
+ *      your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file,
+ *      then provide efm32_spi[n]_cmddata() functions in your board-specific
+ *      logic.  These functions will perform cmd/data selection operations
+ *      using GPIOs in the way your board is configured.
  *   4. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
- *   5. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   5. The handle returned by up_spiinitialize() may then be used to bind
+ *      the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_USART0_ISSPI
-void efm32_spi0_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t efm32_spi0_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int efm32_spi0_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void efm32_spi0_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool selected);
+uint8_t efm32_spi0_status(struct spi_dev_s *dev, enum spi_dev_e devid);
+int efm32_spi0_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool cmd);
 #endif
 
 #ifdef CONFIG_EFM32_USART1_ISSPI
-void efm32_spi1_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t efm32_spi1_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int efm32_spi1_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void efm32_spi1_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool selected);
+uint8_t efm32_spi1_status(struct spi_dev_s *dev, enum spi_dev_e devid);
+int efm32_spi1_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool cmd);
 #endif
 
 #ifdef CONFIG_EFM32_USART2_ISSPI
-void efm32_spi2_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t efm32_spi2_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int efm32_spi2_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void efm32_spi2_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool selected);
+uint8_t efm32_spi2_status(struct spi_dev_s *dev, enum spi_dev_e devid);
+int efm32_spi2_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool cmd);
 #endif
 
 #endif /* __ARCH_ARM_EFM32_EFM32_SPI_H */
