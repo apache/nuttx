@@ -281,7 +281,7 @@ void efm32_lowsetup(void)
   uint32_t regval;
 #endif
 
-#ifdef HAVE_UART_DEVICE
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_SPI_DEVICE)
   /* Enable clocking to configured UART/USART interfaces */
 
   regval = getreg32(EFM32_CMU_HFPERCLKEN0);
@@ -348,18 +348,27 @@ void efm32_lowsetup(void)
 #ifdef CONFIG_EFM32_USART0
   regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
            (BOARD_USART0_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+#ifdef CONFIG_EFM32_USART0_ISSPI
+  regval |= USART_ROUTE_CLKPEN;
+#endif
   putreg32(regval, EFM32_USART0_ROUTE);
 #endif
 
 #ifdef CONFIG_EFM32_USART1
   regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
            (BOARD_USART1_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+#ifdef CONFIG_EFM32_USART1_ISSPI
+  regval |= USART_ROUTE_CLKPEN;
+#endif
   putreg32(regval, EFM32_USART1_ROUTE);
 #endif
 
 #ifdef CONFIG_EFM32_USART2
   regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
            (BOARD_USART2_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
+#ifdef CONFIG_EFM32_USART2_ISSPI
+  regval |= USART_ROUTE_CLKPEN;
+#endif
   putreg32(regval, EFM32_USART2_ROUTE);
 #endif
 
@@ -650,7 +659,7 @@ void efm32_leuartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
  *
  *****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_SPI_DEVICE)
 void efm32_uart_reset(uintptr_t base)
 {
   putreg32(USART_CMD_RXDIS | USART_CMD_TXDIS | USART_CMD_MASTERDIS |
