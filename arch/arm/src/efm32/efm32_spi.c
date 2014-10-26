@@ -1259,13 +1259,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       unsent  = nwords;
       while (unrecvd > 0)
         {
-          /* REVISIT: This might cause RX data overruns??? */
-          /* Send data while there is space in the TX buffer.  This should
-           * provide some benefit when the depth of the TC buffer is > 1
-           */
+          /* REVISIT:  Could this cause RX data overruns??? */
+          /* Send data if there is space in the TX buffer. */
 
-          while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
-                 unsent > 0)
+          if ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
+              unsent > 0)
             {
               /* Get the next word to write.  Is there a source buffer? */
 
@@ -1284,10 +1282,10 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
               unsent--;
             }
 
-          /* Receive data where there is data available */
+          /* Receive data if there is data available */
 
-          while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) != 0 &&
-                 unrecvd > 0)
+          if ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) != 0 &&
+              unrecvd > 0)
             {
               /* Receive the data */
 
@@ -1315,10 +1313,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       unsent  = nwords;
       while (unrecvd > 0)
         {
-          /* REVISIT: This might cause RX data overruns??? */
-          /* Send data while there is space in the TX buffer.  This should
-           * provide some benefit when the depth of the TC buffer is > 1
-           */
+          /* REVISIT:  Could this cause RX data overruns??? */
+          /* Send data if there is space in the TX buffer. */
 
           while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
                  unsent > 0)
@@ -1340,10 +1336,10 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
               unsent--;
             }
 
-          /* Receive data where there is data available */
+          /* Receive data if there is data available */
 
-          while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) != 0 &&
-                 unrecvd > 0)
+          if ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) != 0 &&
+              unrecvd > 0)
             {
               /* Receive the data */
 
