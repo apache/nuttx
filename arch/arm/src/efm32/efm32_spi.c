@@ -1248,13 +1248,14 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       unsent  = nwords;
       while (unrecvd > 0)
         {
-            /* Send data while there is space in the TX buffer.  This should
-             * provide some benefit when the depth of the TC buffer is > 1
-             */
+          /* REVISIT: This might cause RX data overruns??? */
+          /* Send data while there is space in the TX buffer.  This should
+           * provide some benefit when the depth of the TC buffer is > 1
+           */
 
-           while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
-                   unsent > 0)
-             {
+          while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
+                 unsent > 0)
+            {
               /* Get the next word to write.  Is there a source buffer? */
 
               if (src)
@@ -1303,13 +1304,14 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       unsent  = nwords;
       while (unrecvd > 0)
         {
-            /* Send data while there is space in the TX buffer.  This should
-             * provide some benefit when the depth of the TC buffer is > 1
-             */
+          /* REVISIT: This might cause RX data overruns??? */
+          /* Send data while there is space in the TX buffer.  This should
+           * provide some benefit when the depth of the TC buffer is > 1
+           */
 
-           while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
-                   unsent > 0)
-             {
+          while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
+                 unsent > 0)
+            {
               /* Get the next word to write.  Is there a source buffer? */
 
               if (src)
