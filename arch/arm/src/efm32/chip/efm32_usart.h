@@ -1,6 +1,6 @@
 /********************************************************************************************************************************
  * arch/arm/src/efm32/EFM32GG/efm32_usart.h
- * 
+ *
  *    (C) Copyright 2014 Silicon Labs, http://www.silabs.com
  *
  * Permission is granted to anyone to use this software for any purpose,

@@ -457,6 +457,7 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   unsigned int xfersize;
   unsigned int shift;
   uint32_t regval;
+  uint32_t incr;
   uint32_t mask;
 
   DEBUGASSERT(dmach != NULL && dmach->inuse);
@@ -500,16 +501,26 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
     {
     default:
     case 0: /* Byte transfer */
-      regval = DMA_CTRL_DST_INC_BYTE | DMA_CTRL_DST_SIZE_BYTE | DMA_CTRL_SRC_SIZE_BYTE;
+      regval |= DMA_CTRL_DST_SIZE_BYTE | DMA_CTRL_SRC_SIZE_BYTE;
+      incr    = DMA_CTRL_DST_INC_BYTE;
       break;
 
     case 1: /* Half word transfer */
-      regval = DMA_CTRL_DST_INC_HALFWORD | DMA_CTRL_DST_SIZE_HALFWORD | DMA_CTRL_SRC_SIZE_HALFWORD;
+      regval |= DMA_CTRL_DST_SIZE_HALFWORD | DMA_CTRL_SRC_SIZE_HALFWORD;
+      incr    = DMA_CTRL_DST_INC_HALFWORD;
       break;
 
     case 2: /* Word transfer */
-      regval = DMA_CTRL_DST_INC_WORD | DMA_CTRL_DST_SIZE_WORD | DMA_CTRL_SRC_SIZE_WORD;
+      regval |=  DMA_CTRL_DST_SIZE_WORD | DMA_CTRL_SRC_SIZE_WORD;
+      incr    = DMA_CTRL_DST_INC_WORD;
       break;
+    }
+
+  /* Do we need to increment the memory address? */
+
+  if ((config & EFM32_DMA_MEMINCR_MASK) == EFM32_DMA_MEMINCR)
+    {
+      regval |= incr;
     }
 
   /* Set the number of transfers (minus 1) */
@@ -543,6 +554,7 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   unsigned int xfersize;
   unsigned int shift;
   uint32_t regval;
+  uint32_t incr;
   uint32_t mask;
 
   DEBUGASSERT(dmach != NULL && dmach->inuse);
@@ -579,23 +591,33 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
    */
 
   regval = DMA_CTRL_DST_INC_NONE | DMA_CTRL_DST_PROT_NON_PRIVILEGED |
-          DMA_CTRL_SRC_PROT_NON_PRIVILEGED | DMA_CTRL_R_POWER_1 |
-          (0 << _DMA_CTRL_NEXT_USEBURST_SHIFT) | _DMA_CTRL_CYCLE_CTRL_BASIC;
+           DMA_CTRL_SRC_PROT_NON_PRIVILEGED | DMA_CTRL_R_POWER_1 |
+           (0 << _DMA_CTRL_NEXT_USEBURST_SHIFT) | _DMA_CTRL_CYCLE_CTRL_BASIC;
 
   switch (shift)
     {
     default:
     case 0: /* Byte transfer */
-      regval = DMA_CTRL_DST_SIZE_BYTE | DMA_CTRL_SRC_INC_BYTE | DMA_CTRL_SRC_SIZE_BYTE;
+      regval |= DMA_CTRL_DST_SIZE_BYTE | DMA_CTRL_SRC_SIZE_BYTE;
+      incr    = DMA_CTRL_SRC_INC_BYTE;
       break;
 
     case 1: /* Half word transfer */
-      regval = DMA_CTRL_DST_SIZE_HALFWORD | DMA_CTRL_SRC_INC_HALFWORD | DMA_CTRL_SRC_SIZE_HALFWORD;
+      regval |= DMA_CTRL_DST_SIZE_HALFWORD | DMA_CTRL_SRC_SIZE_HALFWORD;
+      incr    = DMA_CTRL_SRC_INC_HALFWORD;
       break;
 
     case 2: /* Word transfer */
-      regval = DMA_CTRL_DST_SIZE_WORD | DMA_CTRL_SRC_INC_WORD | DMA_CTRL_SRC_SIZE_WORD;
+      regval |= DMA_CTRL_DST_SIZE_WORD | DMA_CTRL_SRC_SIZE_WORD;
+      incr    = DMA_CTRL_SRC_INC_WORD;
       break;
+    }
+
+  /* Do we need to increment the memory address? */
+
+  if ((config & EFM32_DMA_MEMINCR_MASK) == EFM32_DMA_MEMINCR)
+    {
+      regval |= incr;
     }
 
   /* Set the number of transfers (minus 1) */

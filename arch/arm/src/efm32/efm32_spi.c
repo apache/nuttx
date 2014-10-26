@@ -46,9 +46,12 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -70,12 +73,16 @@
 /* Configuration ********************************************************************/
 /* SPI interrupts */
 
-#ifdef CONFIG_EFM32_SPI_DMA
-#  error DMA driven SPI not yet supported
-#endif
-
 #ifdef CONFIG_EFM32_SPI_INTERRUPTS
 #  error Interrupt driven SPI not yet supported
+#endif
+
+#ifndef CONFIG_EFM32_SPI_DMA_TIMEO_NSEC
+#  define CONFIG_EFM32_SPI_DMA_TIMEO_NSEC 500
+#endif
+
+#ifndef CONFIG_EFM32_SPI_DMA_MINSIZE
+#  define CONFIG_EFM32_SPI_DMA_MINSIZE 16
 #endif
 
 /* Can't have both interrupt driven SPI and SPI DMA */
@@ -83,6 +90,13 @@
 #if defined(CONFIG_EFM32_SPI_INTERRUPTS) && defined(CONFIG_EFM32_SPI_DMA)
 #  error Cannot enable both interrupt mode and DMA mode for SPI
 #endif
+
+/* DMA definitions ******************************************************************/
+
+#define SPI_DMA8_CONFIG       (EFM32_DMA_XFERSIZE_BYTE| EFM32_DMA_MEMINCR)
+#define SPI_DMA8NULL_CONFIG   (EFM32_DMA_XFERSIZE_BYTE | EFM32_DMA_NOINCR)
+#define SPI_DMA16_CONFIG      (EFM32_DMA_XFERSIZE_HWORD | EFM32_DMA_MEMINCR)
+#define SPI_DMA16NULL_CONFIG  (EFM32_DMA_XFERSIZE_HWORD | EFM32_DMA_NOINCR)
 
 /* Debug ****************************************************************************/
 /* Check if SPI debug is enabled */
@@ -118,11 +132,11 @@ struct efm32_spiconfig_s
   dma_config_t rxconfig; /* RX DMA configuration (excluding transfer width) */
   dma_config_t txconfig; /* TX DMA configuration (excluding transfer width) */
 #endif
-  void (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+  void (*select)(struct spi_dev_s *dev, enum spi_dev_e devid,
                  bool selected);
-  uint8_t (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+  uint8_t (*status)(struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-  int (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+  int (*cmddata)(struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 };
 
@@ -134,8 +148,9 @@ struct efm32_spidev_s
   const struct efm32_spiconfig_s *config; /* Constant SPI hardware configuration */
 
 #ifdef CONFIG_EFM32_SPI_DMA
-  volatile int8_t rxresult;  /* Result of the RX DMA */
-  volatile int8_t txresult;  /* Result of the TX DMA */
+  WDOG_ID wdog;              /* Timer to catch hung DMA */
+  volatile uint8_t rxresult; /* Result of the RX DMA */
+  volatile uint8_t txresult; /* Result of the TX DMA */
   DMA_HANDLE rxdmach;        /* RX DMA channel handle */
   DMA_HANDLE txdmach;        /* TX DMA channel handle */
   sem_t rxdmasem;            /* Wait for RX DMA to complete */
@@ -164,6 +179,25 @@ static void      spi_putreg(const struct efm32_spiconfig_s *config,
                    unsigned int regoffset, uint32_t regval);
 static bool      spi_16bitmode(struct efm32_spidev_s *priv);
 
+/* DMA support */
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void      spi_dma_timeout(int argc, uint32_t arg1, ...);
+static void      spi_dmarxwait(struct efm32_spidev_s *priv);
+static void      spi_dmatxwait(struct efm32_spidev_s *priv);
+static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv);
+static inline void spi_dmatxwakeup(struct efm32_spidev_s *priv);
+static void      spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void      spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void      spi_dmarxsetup(struct efm32_spidev_s *priv,
+                   void *rxbuffer, void *rxdummy, size_t nwords);
+static void      spi_dmatxsetup(struct efm32_spidev_s *priv,
+                   const void *txbuffer, const void *txdummy,
+                   size_t nwords);
+static inline void spi_dmarxstart(FAR struct efm32_spidev_s *priv);
+static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv);
+#endif
+
 /* SPI methods */
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -174,9 +208,9 @@ static void      spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
 static uint32_t  spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
 static void      spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void      spi_setbits(struct spi_dev_s *dev, int nbits);
-static uint8_t   spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t   spi_status(struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int       spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static int       spi_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
                    bool cmd);
 #endif
 static uint16_t  spi_send(struct spi_dev_s *dev, uint16_t wd);
@@ -191,7 +225,7 @@ static void      spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
 
 /* Initialization */
 
-static void      spi_portinitialize(struct efm32_spidev_s *priv);
+static int       spi_portinitialize(struct efm32_spidev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -357,7 +391,6 @@ static void spi_putreg(const struct efm32_spiconfig_s *config,
  *   True: 16-bit; false: 8-bit
  *
  ****************************************************************************/
-/* helper SPI function */
 
 static bool spi_16bitmode(struct efm32_spidev_s *priv)
 {
@@ -374,15 +407,339 @@ static bool spi_16bitmode(struct efm32_spidev_s *priv)
 }
 
 /****************************************************************************
+ * Name: spi_dma_timeout
+ *
+ * Description:
+ *  Invoked when a DMA timeout occurs
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dma_timeout(int argc, uint32_t arg1, ...)
+{
+  struct efm32_spidev_s *priv = (struct efm32_spidev_s *)((uintptr_t)arg1);
+
+  /* Mark DMA timeout error and wakeup form RX and TX waiters */
+
+  DEBUGASSERT(priv->rxresult == EINPROGRESS || priv->txresult == EINPROGRESS);
+  if (priv->rxresult == EINPROGRESS)
+    {
+      priv->rxresult = ETIMEDOUT;
+      spi_dmarxwakeup(priv);
+    }
+
+  if (priv->txresult == EINPROGRESS)
+    {
+      priv->txresult = ETIMEDOUT;
+      spi_dmatxwakeup(priv);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxwait
+ *
+ * Description:
+ *   Wait for RX DMA to complete.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmarxwait(struct efm32_spidev_s *priv)
+{
+  irqstate_t flags;
+
+  /* Take the semaphore (perhaps waiting). */
+
+  flags = irqsave();
+  while (sem_wait(&priv->rxdmasem) != 0)
+    {
+      /* The only case that an error should occur here is if the wait was awakened
+       * by a signal.
+       */
+
+      DEBUGASSERT(errno == EINTR);
+    }
+
+  /* Cancel the timeout only if both the RX and TX transfers have completed */
+
+  DEBUGASSERT(priv->rxresult != EINPROGRESS);
+  if (priv->txresult != EINPROGRESS)
+    {
+      wd_cancel(priv->wdog);
+    }
+
+  irqrestore(flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxwait
+ *
+ * Description:
+ *   Wait for DMA to complete.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmatxwait(struct efm32_spidev_s *priv)
+{
+  irqstate_t flags;
+
+  /* Take the semaphore (perhaps waiting). */
+
+  flags = irqsave();
+  while (sem_wait(&priv->txdmasem) != 0)
+    {
+      /* The only case that an error should occur here is if the wait was awakened
+       * by a signal.
+       */
+
+      DEBUGASSERT(errno == EINTR);
+    }
+
+  /* Cancel the timeout only if both the RX and TX transfers have completed */
+
+  DEBUGASSERT(priv->txresult != EINPROGRESS);
+  if (priv->rxresult != EINPROGRESS)
+    {
+      wd_cancel(priv->wdog);
+    }
+
+  irqrestore(flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxwakeup
+ *
+ * Description:
+ *   Signal that DMA is complete
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv)
+{
+  (void)sem_post(&priv->rxdmasem);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxwakeup
+ *
+ * Description:
+ *   Signal that DMA is complete
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static inline void spi_dmatxwakeup(struct efm32_spidev_s *priv)
+{
+  (void)sem_post(&priv->txdmasem);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxcallback
+ *
+ * Description:
+ *   Called when the RX DMA completes
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
+{
+  struct efm32_spidev_s *priv = (struct efm32_spidev_s *)arg;
+  DEBUGASSERT(priv && status != EINPROGRESS);
+
+  /* Wake-up the SPI driver */
+
+  priv->rxresult = status;
+  spi_dmarxwakeup(priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxcallback
+ *
+ * Description:
+ *   Called when the RX DMA completes
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
+{
+  struct efm32_spidev_s *priv = (struct efm32_spidev_s *)arg;
+  DEBUGASSERT(priv && status != EINPROGRESS);
+
+  /* Wake-up the SPI driver */
+
+  priv->txresult = status;
+  spi_dmatxwakeup(priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxsetup
+ *
+ * Description:
+ *   Setup to perform RX DMA
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmarxsetup(struct efm32_spidev_s *priv, void *rxbuffer,
+                           void *rxdummy, size_t nwords)
+{
+  const struct efm32_spiconfig_s *config = priv->config;
+  dma_config_t dmaconfig = config->rxconfig;
+  size_t nbytes;
+
+  /* 8- or 16-bit mode? */
+
+  if (spi_16bitmode(priv))
+    {
+      /* 16-bit mode -- is there a buffer to receive data in? */
+
+      if (rxbuffer)
+        {
+          dmaconfig |= SPI_DMA16_CONFIG;
+        }
+      else
+        {
+          rxbuffer   = rxdummy;
+          dmaconfig |= SPI_DMA16NULL_CONFIG;
+        }
+
+      nbytes = nwords << 1;
+    }
+  else
+    {
+      /* 8-bit mode -- is there a buffer to receive data in? */
+
+      if (rxbuffer)
+        {
+          dmaconfig |= SPI_DMA8_CONFIG;
+        }
+      else
+        {
+          rxbuffer   = rxdummy;
+          dmaconfig |= SPI_DMA8NULL_CONFIG;
+        }
+
+      nbytes = nwords;
+    }
+
+  /* Configure the RX DMA */
+
+  efm32_rxdmasetup(priv->rxdmach, config->base + EFM32_USART_RXDATA_OFFSET,
+                   (uintptr_t)rxbuffer, nbytes, dmaconfig);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxsetup
+ *
+ * Description:
+ *   Setup to perform TX DMA
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmatxsetup(struct efm32_spidev_s *priv, const void *txbuffer,
+                           const void *txdummy, size_t nwords)
+{
+  const struct efm32_spiconfig_s *config = priv->config;
+  dma_config_t dmaconfig = config->txconfig;
+  size_t nbytes;
+
+  /* 8- or 16-bit mode? */
+
+  if (spi_16bitmode(priv))
+    {
+      /* 16-bit mode -- is there a buffer to receive data in? */
+
+      if (txbuffer)
+        {
+          dmaconfig |= SPI_DMA16_CONFIG;
+        }
+      else
+        {
+          txbuffer   = txdummy;
+          dmaconfig |= SPI_DMA16NULL_CONFIG;
+        }
+
+      nbytes = nwords << 1;
+    }
+  else
+    {
+      /* 8-bit mode -- is there a buffer to receive data in? */
+
+      if (txbuffer)
+        {
+          dmaconfig |= SPI_DMA8_CONFIG;
+        }
+      else
+        {
+          txbuffer   = txdummy;
+          dmaconfig |= SPI_DMA8NULL_CONFIG;
+        }
+
+      nbytes = nwords;
+    }
+
+  /* Configure the RX DMA */
+
+  efm32_txdmasetup(priv->txdmach, config->base + EFM32_USART_TXDATA_OFFSET,
+                   (uintptr_t)txbuffer, nbytes, dmaconfig);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxstart
+ *
+ * Description:
+ *   Start RX DMA
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static void spi_dmarxstart(FAR struct efm32_spidev_s *priv)
+{
+  priv->rxresult = EINPROGRESS;
+  efm32_dmastart(priv->rxdmach, spi_dmarxcallback, priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxstart
+ *
+ * Description:
+ *   Start TX DMA
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EFM32_SPI_DMA
+static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv)
+{
+  priv->txresult = EINPROGRESS;
+  efm32_dmastart(priv->txdmach, spi_dmatxcallback, priv);
+}
+#endif
+
+/****************************************************************************
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -425,7 +782,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
  * Name: spi_select
  *
  * Description:
- *   Enable/disable the SPI chip select. 
+ *   Enable/disable the SPI chip select.
  *
  * Input Parameters:
  *   dev -      Device-specific state data
@@ -743,7 +1100,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
   const struct efm32_spiconfig_s *config;
@@ -781,7 +1138,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static int spi_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
                        bool cmd);
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
@@ -859,12 +1216,12 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_EFM32_SPI_DMA)
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
-                         void *rxbuffer, size_t nwords)
-#else
+#if defined(CONFIG_EFM32_SPI_DMA) && CONFIG_EFM32_SPI_DMA_MINSIZE > 0
 static void spi_exchange_nodma(struct spi_dev_s *dev, const void *txbuffer,
                                void *rxbuffer, size_t nwords)
+#else
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
 #endif
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
@@ -989,7 +1346,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev, const void *txbuffer,
             }
         }
     }
- 
+
   DEBUGASSERT(unsent == 0);
 }
 
@@ -1018,26 +1375,29 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
-  const struct efm32_spiconfig_s *config;
+  static uint16_t rxdummy = 0xffff;
+  static const uint16_t txdummy = 0xffff;
+  irqstate_t flags;
+  uint64_t ticks;
+  int ret;
 
   DEBUGASSERT(priv && priv->config);
-  config = priv->config;
 
-#ifdef CONFIG_STM32_DMACAPABLE
-  if ((txbuffer && !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
-      (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+#if CONFIG_EFM32_SPI_DMA_MINSIZE > 0
+  if (nwords <= CONFIG_EFM32_SPI_DMA_MINSIZE)
     {
-      /* Unsupported memory region, fall back to non-DMA method. */
+      /* Small transfer, fall back to non-DMA method. */
 
       spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
   else
 #endif
     {
-      static uint16_t rxdummy = 0xffff;
-      static const uint16_t txdummy = 0xffff;
-
       spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+      /* Pre-calculate the timerout value */
+
+      ticks = (CONFIG_EFM32_SPI_DMA_TIMEO_NSEC * nwords) / NSEC_PER_TICK;
 
       /* Setup DMAs */
 
@@ -1046,13 +1406,25 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Start the DMAs */
 
+      flags = irqsave();
       spi_dmarxstart(priv);
       spi_dmatxstart(priv);
 
-      /* Then wait for each to complete */
+      /* Start a timer to catch hung DMA transfers.  Timeout will be canceled
+       * when both RX and TX transfers complete.
+       */
 
-      spi_dmarxwait(priv);
+      ret = wd_start(priv->wdog, (int)ticks, spi_dma_timeout, 1, (uint32_t)priv);
+      if (ret < 0)
+        {
+          spidbg("ERROR: Failed to start timeout\n");
+        }
+
+      /* Then wait for each to complete.  TX should complete first */
+
       spi_dmatxwait(priv);
+      spi_dmarxwait(priv);
+      irqrestore(flags);
     }
 }
 #endif /* CONFIG_EFM32_SPI_DMA */
@@ -1115,7 +1487,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer, size_t nwords)
  * Name: spi_portinitialize
  *
  * Description:
- *      Initialize the selected SPI port in its default state 
+ *      Initialize the selected SPI port in its default state
  *  (Master, 8-bit, mode 0, etc.)
  *
  * Input Parameter:
@@ -1126,7 +1498,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer, size_t nwords)
  *
  ****************************************************************************/
 
-static void spi_portinitialize(struct efm32_spidev_s *priv)
+static int spi_portinitialize(struct efm32_spidev_s *priv)
 {
   const struct efm32_spiconfig_s *config = priv->config;
   uint32_t regval;
@@ -1135,11 +1507,12 @@ static void spi_portinitialize(struct efm32_spidev_s *priv)
 
   efm32_uart_reset(config->base);
 
-  /* Configure CR1. Default configuration:
-   *   Mode 0:                          USART_CTRL_CLKPOL_IDLELOW 
-   *                                    USART_CTRL_CLKPHA_SAMPLELEADING  
-   *   8-bit:                           USART_FRAME_DATABITS_EIGHT 
-   *   MSB tranmitted first:            ~USART_CTRL_MSBF
+  /* NOTES:
+   *
+   * 1. USART GPIO pins were configured in efm32_lowsetup().  Chip select
+   *    pins must be configured by board specific logic before
+   *    efm32_spi_initialize() is called.
+   * 2. Clocking for the USART as also enabled in up_lowsetup();
    */
 
   /* Set bits for synchronous mode */
@@ -1179,15 +1552,57 @@ static void spi_portinitialize(struct efm32_spidev_s *priv)
   sem_init(&priv->exclsem, 0, 1);
 #endif
 
-  /* Initialize the SPI semaphores that is used to wait for DMA completion */
-
 #ifdef CONFIG_EFM32_SPI_DMA
-  spi_portinitialize_dma(priv);
+  /* Allocate two DMA channels... one for the RX and one for the TX side of
+   * the transfer.
+   */
+
+  priv->rxdmach = efm32_dmachannel();
+  if (!priv->rxdmach)
+    {
+      spidbg("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n", port);
+      goto errout;
+    }
+
+  priv->txdmach = efm32_dmachannel();
+  if (!priv->txdmach)
+    {
+      spidbg("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n", port);
+      goto errout_with_rxdmach;
+    }
+
+  /* Allocate a timer to catch hung DMA transfers */
+
+  priv->wdog = wd_create();
+  if (!priv->wdog)
+    {
+      spidbg("ERROR: Failed to create a timer for SPI port: %d\n", port);
+      goto errout_with_txdmach;
+    }
+
+  /* Initialized semaphores used to wait for DMA completion */
+
+  (void)sem_init(&priv->rxdmasem, 0, 0);
+  (void)sem_init(&priv->txdmasem, 0, 0);
 #endif
 
   /* Enable SPI */
 
   spi_putreg(config, EFM32_USART_CMD_OFFSET, USART_CMD_RXEN | USART_CMD_TXEN);
+  return OK;
+
+#ifdef CONFIG_EFM32_SPI_DMA
+errout_with_txdmach:
+  efm32_dmafree(priv->txdmach);
+  priv->txdmach = NULL;
+
+errout_with_rxdmach:
+  efm32_dmafree(priv->rxdmach);
+  priv->rxdmach = NULL;
+
+errout:
+  return -EBUSY;
+#endif
 }
 
 /****************************************************************************
@@ -1213,6 +1628,7 @@ struct spi_dev_s *efm32_spi_initialize(int port)
   const struct efm32_spiconfig_s *config;
   struct efm32_spidev_s *priv;
   irqstate_t flags;
+  int ret;
 
 #ifdef CONFIG_EFM32_USART0_ISSPI
   if (port == 0)
@@ -1254,44 +1670,17 @@ struct spi_dev_s *efm32_spi_initialize(int port)
       /* Initialize the state structure */
 
       priv->spidev    = &g_spiops;
-      priv->config     = config; 
+      priv->config     = config;
 
-#ifdef CONFIG_EFM32_SPI_DMA
-      /* Allocate two DMA channels... one for the RX and one for the TX side
-       * of the transfer.
-       */
+      /* Initialize the SPI device */
 
-      priv->rxdmach = efm3_dmachannel();
-      if (!priv->rxdmach)
-        {
-          spidbg("ERROR: Failed to allocate the RX DMA channel for SPI port: %d\n", port);
-          return NULL;
-        }
-
-      priv-txdmach = efm3_dmachannel();
-      if (!priv->txdmach)
-        {
-          spidbg("ERROR: Failed to allocate the TX DMA channel for SPI port: %d\n", port);
-          efm32_dmafree(priv->rxdmach);
-          priv->rxdmach = NULL;
-          return NULL;
-        }
-
-      /* Initialized semaphores used to wait for DMA completion */
-
-      sem_init(&priv->rxdmasem, 0, 0);
-      sem_init(&priv->txdmasem, 0, 0);
-#endif
-
-      /* NOTES:
-       *
-       * 1. USART GPIO pins were configured in efm32_lowsetup().  Chip
-       *    select pins must be configured by board specific logic before
-       *    efm32_spi_initialize() is called.
-       * 2. Clocking for the USART as also enabled in up_lowsetup();
-       */
-
-        spi_portinitialize(priv);
+       ret = spi_portinitialize(priv);
+       if (ret < 0)
+         {
+           spidbg("ERROR: Failed to initialize SPI port %d\n", port);
+           irqrestore(flags);
+           return NULL;
+         }
 
        /* Now we are initialized */
 

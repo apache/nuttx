@@ -63,23 +63,27 @@
  *   - Memory address is always incremented.
  */
 
-#define EFM32_DMA_SIGSEL_SHIFT            (0)       /* Bits 0-3: _DMA_CH_CTRL_ * value */
-#define EFM32_DMA_SIGSEL_MASK             (15 << EFM32_DMA_SIGSEL_SHIFT)
-#  define EFM32_DMA_SIGSEL(n)             ((dma_config_t)(n) << EFM32_DMA_SIGSEL_SHIFT)
+#define EFM32_DMA_SIGSEL_SHIFT           (0)       /* Bits 0-3: _DMA_CH_CTRL_ * value */
+#define EFM32_DMA_SIGSEL_MASK            (15 << EFM32_DMA_SIGSEL_SHIFT)
+#  define EFM32_DMA_SIGSEL(n)            ((dma_config_t)(n) << EFM32_DMA_SIGSEL_SHIFT)
 
-#define EFM32_DMA_SOURCSEL_SHIFT          (4)       /* Bits 4-9: _DMA_CH_SOURCESEL_* value */
-#define EFM32_DMA_SOURCSEL_MASK           (63 << EFM32_DMA_SOURCSEL_SHIFT)
-#  define EFM32_DMA_SOURCSEL(n)           (dma_config_t)(n) << EFM32_DMA_SOURCSEL_SHIFT)
+#define EFM32_DMA_SOURCSEL_SHIFT         (4)       /* Bits 4-9: _DMA_CH_SOURCESEL_* value */
+#define EFM32_DMA_SOURCSEL_MASK          (63 << EFM32_DMA_SOURCSEL_SHIFT)
+#  define EFM32_DMA_SOURCSEL(n)          ((dma_config_t)(n) << EFM32_DMA_SOURCSEL_SHIFT)
 
-#define EFM32_DMA_XFERSIZE_SHIFT          (10)      /* Bits 10-11: Transfer size */
-#define EFM32_DMA_XFERSIZE_MASK           (3 << EFM32_DMA_XFERSIZE_SHIFT)
-#  define EFM32_DMA_XFERSIZE_SHIFT_BYTE   (0 << EFM32_DMA_SOURCSEL_SHIFT)
-#  define EFM32_DMA_XFERSIZE_SHIFT_HWORD  (1 << EFM32_DMA_SOURCSEL_SHIFT)
-#  define EFM32_DMA_XFERSIZE_SHIFT_WORD   (2 << EFM32_DMA_SOURCSEL_SHIFT)
+#define EFM32_DMA_XFERSIZE_SHIFT         (10)      /* Bits 10-11: Transfer size */
+#define EFM32_DMA_XFERSIZE_MASK          (3 << EFM32_DMA_XFERSIZE_SHIFT)
+#  define EFM32_DMA_XFERSIZE_BYTE        (0 << EFM32_DMA_SOURCSEL_SHIFT)
+#  define EFM32_DMA_XFERSIZE_HWORD       (1 << EFM32_DMA_SOURCSEL_SHIFT)
+#  define EFM32_DMA_XFERSIZE_WORD        (2 << EFM32_DMA_SOURCSEL_SHIFT)
 
-#define EFM32_DMA_SINGLE_MASK             (1 << 12) /* Bit 12: Single or Buffer full request */
-#  define EFM32_DMA_SINGLE                (1 << 12) /*         1=Buffer full request */
-#  define EFM32_DMA_BUFFER_FULL           (0)       /*         0=Buffer full request */
+#define EFM32_DMA_SINGLE_MASK            (1 << 12) /* Bit 12: Single or Buffer full request */
+#  define EFM32_DMA_SINGLE               (1 << 12) /*         1=Buffer full request */
+#  define EFM32_DMA_BUFFER_FULL          (0)       /*         0=Buffer full request */
+
+#define EFM32_DMA_MEMINCR_MASK           (1 << 13) /* Bit 13: Increment memory address */
+#  define EFM32_DMA_MEMINCR              (1 << 13) /*         1=Increment memory address */
+#  define EFM32_DMA_NOINCR               (0)       /*         0=No memory address increment */
 
 /************************************************************************************
  * Public Types
