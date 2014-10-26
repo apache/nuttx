@@ -183,6 +183,9 @@ static uint32_t  spi_getreg(const struct efm32_spiconfig_s *config,
 static void      spi_putreg(const struct efm32_spiconfig_s *config,
                    unsigned int regoffset, uint32_t regval);
 static bool      spi_16bitmode(struct efm32_spidev_s *priv);
+static void      spi_rxflush(const struct efm32_spiconfig_s *config);
+static void      spi_wait_status(const struct efm32_spiconfig_s *config,
+                   uint32_t mask, uint32_t match);
 
 /* DMA support */
 
@@ -412,6 +415,40 @@ static bool spi_16bitmode(struct efm32_spidev_s *priv)
   regval >>= _USART_FRAME_DATABITS_SHIFT;
   return (regval > _USART_FRAME_DATABITS_EIGHT);
 #endif
+}
+
+/****************************************************************************
+ * Name: spi_rxflush
+ *
+ * Description:
+ *  Flush any garbage from the RX buffer
+ *
+ ****************************************************************************/
+
+static void spi_rxflush(const struct efm32_spiconfig_s *config)
+{
+  /* Loop while data is available */
+
+  while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) != 0)
+    {
+      /* Read and discard the data */
+
+      (void)spi_getreg(config, EFM32_USART_RXDATA_OFFSET);
+    }
+}
+
+/****************************************************************************
+ * Name: spi_wait_status
+ *
+ * Description:
+ *   Poll until the SPI status under the mask is equal to the mask value.
+ *
+ ****************************************************************************/
+
+static void spi_wait_status(const struct efm32_spiconfig_s *config,
+                            uint32_t mask, uint32_t match)
+{
+  while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & mask) != match);
 }
 
 /****************************************************************************
@@ -1191,7 +1228,11 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
 
   /* Wait until there is space in the TX buffer */
 
-  while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) == 0);
+  spi_wait_status(config, _USART_STATUS_TXBL_MASK, USART_STATUS_TXBL);
+
+  /* Flush any unread data */
+
+  spi_rxflush(config);
 
   /* Write the data */
 
@@ -1199,7 +1240,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
 
   /* Wait for receive data to be available */
 
-  while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_RXDATAV) == 0);
+  spi_wait_status(config, _USART_STATUS_RXDATAV_MASK, USART_STATUS_RXDATAV);
   ret = (uint16_t)spi_getreg(config, EFM32_USART_RXDATA_OFFSET);
 
   spivdbg("Sent: %04x Return: %04x \n", wd, ret);
@@ -1244,6 +1285,10 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   config = priv->config;
 
   spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+  /* Flush any unread data */
+
+  spi_rxflush(config);
 
   /* 8- or 16-bit mode? */
 
@@ -1316,7 +1361,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           /* REVISIT:  Could this cause RX data overruns??? */
           /* Send data if there is space in the TX buffer. */
 
-          while ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
+          if ((spi_getreg(config, EFM32_USART_STATUS_OFFSET) & USART_STATUS_TXBL) != 0 &&
                  unsent > 0)
             {
               /* Get the next word to write.  Is there a source buffer? */
