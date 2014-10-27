@@ -1192,6 +1192,8 @@ apps
  |- graphics/
  |   `- tiff/README.txt
  |- interpreters/
+ |   |- bas
+ |   |  `- README
  |   |- ficl
  |   |  `- README.txt
  |   `- README.txt
