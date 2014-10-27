@@ -565,31 +565,37 @@ config PIC32MX_UART1
 	bool "UART1"
 	default n
 	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config PIC32MX_UART2
 	bool "UART2"
 	default n
 	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config PIC32MX_UART3
 	bool "UART3"
 	default n
 	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config PIC32MX_UART4
 	bool "UART4"
 	default n
 	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config PIC32MX_UART5
 	bool "UART5"
 	default n
 	select ARCH_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config PIC32MX_UART6
 	bool "UART6"
 	default n
 	select ARCH_HAVE_UART6
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config PIC32MX_ADC
 	bool "ADC1"
@@ -989,15 +995,6 @@ config PIC32MX_USBPRIO
 		USB.  Range 4-31, Default 16.
 
 endmenu
-
-config SERIAL_TERMIOS
-	bool "Serial driver TERMIOS supported"
-	depends on PIC32MX_UART1 || PIC32MX_UART2 || PIC32MX_UART3 || PIC32MX_UART4 || PIC32MX_UART5 || PIC32MX_UART6
-	default n
-	---help---
-		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
-		If this is not defined, then the terminal settings (baud, parity, etc).
-		are not configurable at runtime; serial streams cannot be flushed, etc..
 
 menu "PIC32MX PHY/Ethernet device driver settings"
 	depends on PIC32MX_ETHERNET

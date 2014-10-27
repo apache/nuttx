@@ -533,6 +533,19 @@ config SERIAL_TIOCSERGSTRUCT
 		supports the TIOCSERGSTRUCT ioctl, and (2) this option is selected, then
 		support for the TIOCSERGSTRUCT will be enabled.
 
+config ARCH_HAVE_SERIAL_TERMIOS
+	bool
+	default n
+
+config SERIAL_TERMIOS
+	bool "Serial TERMIOS support"
+	depends on ARCH_HAVE_SERIAL_TERMIOS
+	default n
+	---help---
+		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
+		If this is not defined, then the terminal settings (baud, parity, etc).
+		are not configurable at runtime; serial streams cannot be flushed, etc..
+
 #
 # Serial console selection
 #
@@ -1837,4 +1850,3 @@ config SERIAL_IFLOWCONTROL
 config SERIAL_OFLOWCONTROL
 	bool
 	default n
-
