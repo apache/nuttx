@@ -8889,3 +8889,7 @@
 	  (2014-10-23).
 	* configs/sam4e-ek/src/sam_ethernet.c (and other files):SAM4E-EK: Add
 	  support for PHY insterrupt (2014-10-24).
+	* include/wchar.h:  Add a mostly bogus wchar.h header file.  This file
+	  is mostly bogus because noneo of the wide character operations are
+	  currently supported in the Nuttx C library (2014-10-27).
+
