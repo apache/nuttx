@@ -315,17 +315,20 @@ config NUC_UART0
 	bool "UART0"
 	default y
 	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config NUC_UART1
 	bool "UART1"
 	default n
 	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config NUC_UART2
 	bool "UART2"
 	default n
-	depends on NUC_HAVE_UART1
+	depends on NUC_HAVE_UART2
 	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config NUC_USBD
 	bool "USB 2.0 FS device controller"

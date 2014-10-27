@@ -22,41 +22,49 @@ config A1X_UART0
 	bool "UART 0"
 	default n
 	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART1
 	bool "UART 1"
 	default n
 	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART2
 	bool "UART 2"
 	default n
 	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART3
 	bool "UART 3"
 	default n
 	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART4
 	bool "UART 4"
 	default n
 	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART5
 	bool "UART 5"
 	default n
 	select ARCH_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART6
 	bool "UART 6"
 	default n
 	select ARCH_HAVE_UART6
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_UART7
 	bool "UART 7"
 	default n
 	select ARCH_HAVE_UART7
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config A1X_IR0
 	bool "IR 0"

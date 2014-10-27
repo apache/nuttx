@@ -254,23 +254,27 @@ config LPC43_TMR3
 
 config LPC43_USART0
 	bool "USART0"
-	select ARCH_HAVE_USART0
 	default n
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC43_UART1
 	bool "UART1"
-	select ARCH_HAVE_UART1
 	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC43_USART2
 	bool "USART2"
-	select ARCH_HAVE_USART2
 	default n
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC43_USART3
 	bool "USART3"
-	select ARCH_HAVE_USART3
 	default n
+	select ARCH_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC43_USB0
 	bool "USB0"
@@ -290,12 +294,3 @@ config LPC43_WWDT
 	default n
 
 endmenu
-
-config SERIAL_TERMIOS
-	bool "Serial driver TERMIOS supported"
-	depends on LPC43_USART0 || LPC43_UART1 || LPC43_USART2 || LPC43_USART3
-	default n
-	---help---
-		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
-		If this is not defined, then the terminal settings (baud, parity, etc).
-		are not configurable at runtime; serial streams cannot be flushed, etc..
