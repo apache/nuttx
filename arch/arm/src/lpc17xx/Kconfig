@@ -169,28 +169,33 @@ config LPC17_SDCARD
 
 config LPC17_UART0
 	bool "UART0"
-	select ARCH_HAVE_UART0
 	default n
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART1
 	bool "UART1"
-	select ARCH_HAVE_UART1
 	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART2
 	bool "UART2"
-	select ARCH_HAVE_UART2
 	default n
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART3
 	bool "UART3"
-	select ARCH_HAVE_UART3
 	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_UART4
 	bool "UART4"
-	select ARCH_HAVE_UART4
 	default n
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config LPC17_CAN1
 	bool "CAN1"
@@ -464,15 +469,6 @@ endmenu
 
 menu "Serial driver options"
 	depends on LPC17_UART0 || LPC17_UART1 || LPC17_UART2 || LPC17_UART3 || LPC17_UART4
-
-config SERIAL_TERMIOS
-	bool "Serial driver TERMIOS supported"
-	depends on LPC17_UART0 || LPC17_UART1 || LPC17_UART2 || LPC17_UART3
-	default n
-	---help---
-		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
-		If this is not defined, then the terminal settings (baud, parity, etc).
-		are not configurable at runtime; serial streams cannot be flushed, etc..
 
 config UART1_RINGINDICATOR
 	bool "UART1 ring indicator"
