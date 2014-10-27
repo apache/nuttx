@@ -169,7 +169,7 @@ struct efm32_spidev_s
   uint8_t mode;              /* Mode 0,1,2,3 */
 #endif
 
-  uint8_t nbits;             /* Width of word in bits (8 or 16) */
+  uint8_t nbits;             /* Width of word in bits (4-16) */
   bool initialized;          /* True: Already initialized */
 };
 
