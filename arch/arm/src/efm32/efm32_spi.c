@@ -166,11 +166,11 @@ struct efm32_spidev_s
   sem_t exclsem;             /* Supports mutually exclusive access */
   uint32_t frequency;        /* Requested clock frequency */
   uint32_t actual;           /* Actual clock frequency */
-  uint8_t nbits;             /* Width of word in bits (8 or 16) */
   uint8_t mode;              /* Mode 0,1,2,3 */
 #endif
 
-  bool initialized; /* True: Already initialized */
+  uint8_t nbits;             /* Width of word in bits (8 or 16) */
+  bool initialized;          /* True: Already initialized */
 };
 
 /****************************************************************************
@@ -182,7 +182,6 @@ static uint32_t  spi_getreg(const struct efm32_spiconfig_s *config,
                    unsigned int regoffset);
 static void      spi_putreg(const struct efm32_spiconfig_s *config,
                    unsigned int regoffset, uint32_t regval);
-static bool      spi_16bitmode(struct efm32_spidev_s *priv);
 static void      spi_rxflush(const struct efm32_spiconfig_s *config);
 static void      spi_wait_status(const struct efm32_spiconfig_s *config,
                    uint32_t mask, uint32_t match);
@@ -387,34 +386,6 @@ static void spi_putreg(const struct efm32_spiconfig_s *config,
 {
   uintptr_t regaddr = config->base + regoffset;
   putreg32(regval, regaddr);
-}
-
-/****************************************************************************
- * Name: spi_16bitmode
- *
- * Description:
- *   Return true if the transfer is performed on 16-bit (vs 8-bit) data.
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *
- * Returned Value:
- *   True: 16-bit; false: 8-bit
- *
- ****************************************************************************/
-
-static bool spi_16bitmode(struct efm32_spidev_s *priv)
-{
-#ifndef CONFIG_SPI_OWNBUS
-    return (priv->nbits > 8) ? true : false;
-#else
-  uint32_t regval;
-
-  regval   = spi_getreg(config, EFM32_USART_FRAME_OFFSET);
-  regval  &= _USART_FRAME_DATABITS_MASK;
-  regval >>= _USART_FRAME_DATABITS_SHIFT;
-  return (regval > _USART_FRAME_DATABITS_EIGHT);
-#endif
 }
 
 /****************************************************************************
@@ -645,7 +616,7 @@ static void spi_dmarxsetup(struct efm32_spidev_s *priv, void *rxbuffer,
 
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode -- is there a buffer to receive data in? */
 
@@ -703,7 +674,7 @@ static void spi_dmatxsetup(struct efm32_spidev_s *priv, const void *txbuffer,
 
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode -- is there a buffer to receive data in? */
 
@@ -874,6 +845,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
   const struct efm32_spiconfig_s *config;
   uint32_t clkdiv;
+  uint32_t actual;
 
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
@@ -881,9 +853,15 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   /* Has the frequency changed? */
 
 #ifndef CONFIG_SPI_OWNBUS
-  if (frequency != priv->frequency)
+  if (frequency == priv->frequency)
     {
+      /* No... just return the actual frequency from the last calcualtion */
+
+      actual = priv->actual;
+    }
+  else
 #endif
+    {
       /* We want to use integer division to avoid forcing in float division
        * utils, and yet keep rounding effect errors to a minimum.
        *
@@ -928,7 +906,14 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       clkdiv &= _USART_CLKDIV_DIV_MASK;
       spi_putreg(config, EFM32_USART_CLKDIV_OFFSET, clkdiv);
 
-      spivdbg("Frequency %d\n", frequency);
+      /* The actual frequency is then given by:
+       *
+       * br = fHFPERCLK / (2 * (1 + CLKDIV / 256))
+       *    = 128 * fHFPERCLK / (256 + CLKDIV)
+       */
+
+      actual = (BOARD_HFPERCLK_FREQUENCY << 7) / ( 256 + clkdiv);
+      spivdbg("frequency=%u actual=%u\n", frequency, actual);
 
 #ifndef CONFIG_SPI_OWNBUS
       /* Save the frequency selection so that subsequent reconfigurations
@@ -936,10 +921,11 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
        */
 
       priv->frequency = frequency;
-    }
+      priv->actual    = actual;
 #endif
+    }
 
-  return frequency;
+  return actual;
 }
 
 /****************************************************************************
@@ -1041,10 +1027,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
   /* Has the number of bits changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (nbits != priv->nbits)
     {
-#endif
       regval = spi_getreg(config, EFM32_USART_CTRL_OFFSET);
       if (nbits < 0)
         {
@@ -1122,14 +1106,12 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       regval |= setting;
       spi_putreg(config, EFM32_USART_FRAME_OFFSET, regval);
 
-#ifndef CONFIG_SPI_OWNBUS
       /* Save the selection so the subsequence re-configurations will be
        * faster
        */
 
       priv->nbits = nbits;
     }
-#endif
 }
 
 /****************************************************************************
@@ -1292,7 +1274,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode */
 
@@ -1592,9 +1574,9 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
 #ifndef CONFIG_SPI_OWNBUS
   priv->frequency = 0;
-  priv->nbits     = 8;
   priv->mode      = SPIDEV_MODE0;
 #endif
+  priv->nbits     = 8;
 
   /* 8 bits */
 
