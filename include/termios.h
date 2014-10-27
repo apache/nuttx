@@ -298,7 +298,7 @@ int tcsendbreak(int fd, int duration);
 
 int tcsetattr(int fd, int options, FAR const struct termios *termiosp);
 
-/* Verify if a file descript is a terminal i/o file */
+/* Check if a file descriptor corresponds to a terminal I/O file */
 
 int isatty(int fd);
 

@@ -8892,4 +8892,5 @@
 	* include/wchar.h:  Add a mostly bogus wchar.h header file.  This file
 	  is mostly bogus because noneo of the wide character operations are
 	  currently supported in the Nuttx C library (2014-10-27).
-
+	* include/termios.h, libc/termios/lib_isatty.c, and Make.defs: Add
+	  isatty() function. From  Alan Carvalho de Assis (2014-10-27).
