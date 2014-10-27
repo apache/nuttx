@@ -242,7 +242,8 @@ struct termios
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -254,7 +255,7 @@ extern "C" {
  * supported by simply defining them to be cfgetspeed().
  */
 
-EXTERN speed_t cfgetspeed(FAR const struct termios *termiosp);
+speed_t cfgetspeed(FAR const struct termios *termiosp);
 #define cfgetispeed(termiosp) cfgetspeed(termiosp)
 #define cfgetospeed(termiosp) cfgetspeed(termiosp)
 
@@ -265,37 +266,37 @@ EXTERN speed_t cfgetspeed(FAR const struct termios *termiosp);
  * supported by simply defining them to be cfsetspeed().
  */
 
-EXTERN int cfsetspeed(FAR struct termios *termiosp, speed_t speed);
+int cfsetspeed(FAR struct termios *termiosp, speed_t speed);
 #define cfsetispeed(termiosp,speed) cfsetspeed(termiosp,speed)
 #define cfsetospeed(termiosp,speed) cfsetspeed(termiosp,speed)
 
 /* Wait for transmission of output */
 
-EXTERN int tcdrain(int fd);
+int tcdrain(int fd);
 
 /* Suspend or restart the transmission or reception of data */
 
-EXTERN int tcflow(int fd, int action);
+int tcflow(int fd, int action);
 
 /* Flush non-transmitted output data, non-read input data or both */
 
-EXTERN int tcflush(int fd, int cmd);
+int tcflush(int fd, int cmd);
 
 /* Get the parameters associated with the terminal */
 
-EXTERN int tcgetattr(int fd, FAR struct termios *termiosp);
+int tcgetattr(int fd, FAR struct termios *termiosp);
 
 /* Get process group ID for session leader for controlling terminal */
 
-EXTERN pid_t tcgetsid(int fd);
+pid_t tcgetsid(int fd);
 
 /* Send a "break" for a specific duration */
 
-EXTERN int tcsendbreak(int fd, int duration);
+int tcsendbreak(int fd, int duration);
 
 /* Set the parameters associated with the terminal */
 
-EXTERN int tcsetattr(int fd, int options, FAR const struct termios *termiosp);
+int tcsetattr(int fd, int options, FAR const struct termios *termiosp);
 
 #undef EXTERN
 #ifdef __cplusplus
