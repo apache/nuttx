@@ -71,12 +71,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* SPI interrupts */
-
-#ifdef CONFIG_EFM32_SPI_INTERRUPTS
-#  error Interrupt driven SPI not yet supported
-#endif
-
 /* SPI DMA */
 
 #ifndef CONFIG_EFM32_SPI_DMA_TIMEO_NSEC
@@ -85,12 +79,6 @@
 
 #ifndef CONFIG_EFM32_SPI_DMA_MINSIZE
 #  define CONFIG_EFM32_SPI_DMA_MINSIZE 16
-#endif
-
-/* Can't have both interrupt driven SPI and SPI DMA */
-
-#if defined(CONFIG_EFM32_SPI_INTERRUPTS) && defined(CONFIG_EFM32_SPI_DMA)
-#  error Cannot enable both interrupt mode and DMA mode for SPI
 #endif
 
 /* DMA definitions **********************************************************/
