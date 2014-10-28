@@ -206,6 +206,8 @@
  *   U0_TX #1 PE0  **AVAILABLE at TP129**
  */
 
+#define BOARD_UART0_RX_GPIO        (GPIO_PORTE|GPIO_PIN1)
+#define BOARD_UART0_TX_GPIO        (GPIO_PORTE|GPIO_PIN0)
 #define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
 
 /****************************************************************************
