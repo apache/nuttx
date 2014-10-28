@@ -51,6 +51,8 @@
 #include "chip/efm32_usart.h"
 #include "chip/efm32_leuart.h"
 #include "chip/efm32_cmu.h"
+
+#include "efm32_gpio.h"
 #include "efm32_lowputc.h"
 
 /****************************************************************************
@@ -341,9 +343,71 @@ void efm32_lowsetup(void)
   putreg32(regval, EFM32_CMU_LFBCLKEN0);
 #endif /* HAVE_LEUART_DEVICE */
 
-  /* Set location in the ROUTE register */
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_SPI_DEVICE)
+  /* Enable output on U[S]ART output pins */
 
-#ifdef HAVE_UART_DEVICE
+#ifdef CONFIG_EFM32_USART0
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_USART0_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_USART0_TX_GPIO);
+#ifdef CONFIG_EFM32_USART0_ISSPI
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_USART0_CLK_GPIO);
+#endif
+#endif
+
+#ifdef CONFIG_EFM32_USART1
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_USART1_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_USART1_TX_GPIO);
+#ifdef CONFIG_EFM32_USART1_ISSPI
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_USART1_CLK_GPIO);
+#endif
+#endif
+
+#ifdef CONFIG_EFM32_USART2
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_USART2_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_USART2_TX_GPIO);
+#ifdef CONFIG_EFM32_USART2_ISSPI
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_USART2_CLK_GPIO);
+#endif
+#endif
+
+#ifdef CONFIG_EFM32_UART0
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_UART0_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_UART0_TX_GPIO);
+#endif
+
+#ifdef CONFIG_EFM32_UART1
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_UART1_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_UART1_TX_GPIO);
+#endif
+#endif /* HAVE_UART_DEVICE */
+
+#ifdef HAVE_LEUART_DEVICE
+  /* Enable output on LEUART output pins */
+
+#ifdef CONFIG_EFM32_LEUART0
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_LEUART0_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_LEUART0_TX_GPIO);
+#endif
+
+#ifdef CONFIG_EFM32_LEUART1
+  efm32_configgpio(GPIO_INPUT | GPIO_INT_NONE | BOARD_LEUART1_RX_GPIO);
+  efm32_configgpio(GPIO_OUTPUT_PUSHPULL | GPIO_OUTPUT_CLEAR |
+                   GPIO_DRIVE_STANDARD | BOARD_LEUART1_TX_GPIO);
+#endif
+#endif /* HAVE_LEUART_DEVICE */
+
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_SPI_DEVICE)
+  /* Set location in the U[S]ART ROUTE registers */
+
 #ifdef CONFIG_EFM32_USART0
   regval = (USART_ROUTE_RXPEN | USART_ROUTE_TXPEN |
            (BOARD_USART0_ROUTE_LOCATION << _USART_ROUTE_LOCATION_SHIFT));
@@ -385,13 +449,15 @@ void efm32_lowsetup(void)
 #endif /* HAVE_UART_DEVICE */
 
 #ifdef HAVE_LEUART_DEVICE
-#ifdef CONFIG_EFM32_UART0
+  /* Set location in the LEUART ROUTE registers */
+
+#ifdef CONFIG_EFM32_LEUART0
   regval = (LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN |
            (BOARD_LEUART0_ROUTE_LOCATION << _LEUART_ROUTE_LOCATION_SHIFT));
   putreg32(regval, EFM32_LEUART0_ROUTE);
 #endif
 
-#ifdef CONFIG_EFM32_UART1
+#ifdef CONFIG_EFM32_LEUART1
   regval = (LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN |
            (BOARD_LEUART1_ROUTE_LOCATION << _LEUART_ROUTE_LOCATION_SHIFT));
   putreg32(regval, EFM32_LEUART1_ROUTE);

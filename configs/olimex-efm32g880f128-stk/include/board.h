@@ -237,6 +237,8 @@
  *   U0_TX #1 PE0  **AVAILABLE at EXT-18**
  */
 
+#define BOARD_UART0_RX_GPIO        (GPIO_PORTE|GPIO_PIN1)
+#define BOARD_UART0_TX_GPIO        (GPIO_PORTE|GPIO_PIN0)
 #define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
 
 /* LEUART1:
@@ -245,6 +247,8 @@
  *   LEU1_TX #0 PC6  LEU1_TX to DB-9 connector
  */
 
+#define BOARD_LEUART1_RX_GPIO        (GPIO_PORTC|GPIO_PIN7)
+#define BOARD_LEUART1_TX_GPIO        (GPIO_PORTC|GPIO_PIN6)
 #define BOARD_LEUART1_ROUTE_LOCATION _LEUART_ROUTE_LOCATION_LOC0
 
 /****************************************************************************
