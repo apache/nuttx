@@ -422,13 +422,13 @@ void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
 
-#if USE_SERIALDRIVER
+#ifdef USE_SERIALDRIVER
 void up_serialinit(void);
 #else
 #  define up_serialinit()
 #endif
 
-#if USE_EARLYSERIALINIT
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void);
 #else
 #  define up_earlyserialinit()
