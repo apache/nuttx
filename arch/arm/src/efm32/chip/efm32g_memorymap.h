@@ -77,7 +77,7 @@
 #define EFM32_USART0_BASE          0x4000c000 /* USART0 base address */
 #define EFM32_USART1_BASE          0x4000c400 /* USART1 base address */
 #define EFM32_USART2_BASE          0x4000c800 /* USART2 base address */
-#define EFM32_UART0_BASE           0x4000e00  /* UART0 base address */
+#define EFM32_UART0_BASE           0x4000e000 /* UART0 base address */
 #define EFM32_TIMER0_BASE          0x40010000 /* TIMER0 base address */
 #define EFM32_TIMER1_BASE          0x40010400 /* TIMER1 base address */
 #define EFM32_TIMER2_BASE          0x40010800 /* TIMER2 base address */

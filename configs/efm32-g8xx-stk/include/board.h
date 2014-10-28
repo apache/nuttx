@@ -172,37 +172,32 @@
 
 /* LED index values for use with efm32_setled() */
 
-#define BOARD_LED1        0
-#define BOARD_LED2        1
-#define BOARD_LED3        2
-#define BOARD_LED4        3
+#define BOARD_LED0        0
+#define BOARD_LED1        1
+#define BOARD_LED2        2
+#define BOARD_LED3        3
 #define BOARD_NLEDS       4
-
-#define BOARD_LED_GREEN   BOARD_LED1
-#define BOARD_LED_ORANGE  BOARD_LED2
-#define BOARD_LED_RED     BOARD_LED3
-#define BOARD_LED_BLUE    BOARD_LED4
 
 /* LED bits for use with efm32_setleds() */
 
+#define BOARD_LED0_BIT    (1 << BOARD_LED0)
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
-#define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
  * board the EFM32 Gecko Starter Kit.  The following definitions describe
  * how NuttX controls the LEDs in this configuration:
  */
 
-#define LED_STARTED       0  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED2 */
-#define LED_IRQSENABLED   2  /* LED1 + LED2 */
-#define LED_STACKCREATED  3  /* LED3 */
-#define LED_INIRQ         4  /* LED1 + LED3 */
-#define LED_SIGNAL        5  /* LED2 + LED3 */
-#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
-#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
+#define LED_STARTED       0  /* LED0 */
+#define LED_HEAPALLOCATE  1  /* LED1 */
+#define LED_IRQSENABLED   2  /* LED0 + LED1 */
+#define LED_STACKCREATED  3  /* LED2 */
+#define LED_INIRQ         4  /* LED0 + LED2 */
+#define LED_SIGNAL        5  /* LED1 + LED3 */
+#define LED_ASSERTION     6  /* LED0 + LED2 + LED2 */
+#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED3 */
 
 /* Pin routing **************************************************************/
 /* UART0:
@@ -211,6 +206,8 @@
  *   U0_TX #1 PE0  **AVAILABLE at TP129**
  */
 
+#define BOARD_UART0_RX_GPIO        (GPIO_PORTE|GPIO_PIN1)
+#define BOARD_UART0_TX_GPIO        (GPIO_PORTE|GPIO_PIN0)
 #define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
 
 /****************************************************************************

@@ -16,11 +16,20 @@ README
     • On-board SEGGER J-Link USB emulator
     • ARM 20 pin JTAG/SWD standard Debug in/out connector
 
+CONTENTS
+=======
+
+    • Status
+    • LEDs
+    • Serial Console
+    • Using the J-Link GDB Server
+    • Configurations
+
 STATUS
 ======
 
-  My board is on order and has not arrived as of this writing.  So no debug
-  has yet been done.  So the status is code-complete but untested.
+  Testing has just begun.  So the status is code-complete but only
+  partially tested.
 
 LEDs
 ====
@@ -45,7 +54,7 @@ LEDs
   include/board.h and src/efm32_autoleds.c.  The LEDs are used to
   encode OS-related events as follows:
 
-    SYMBOL             Meaning                 LED1*  LED2   LED3   LED4
+    SYMBOL             Meaning                 LED0*  LED1   LED2   LED3
     ----------------- -----------------------  ------ -----  -----  ------
     LED_STARTED       NuttX has been started   ON     OFF    OFF    OFF
     LED_HEAPALLOCATE  Heap has been allocated  OFF    ON     OFF    OFF
@@ -57,14 +66,14 @@ LEDs
     LED_PANIC         The system has crashed   N/C    N/C    N/C    ON
     LED_IDLE          STM32 is is sleep mode   (Optional, not used)
 
-  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
+  * If LED0, LED1, LED2 are statically on, then NuttX probably failed to boot
     and these LEDs will give you some indication of where the failure was
- ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
+ ** The normal state is LED2 ON and LED3 faintly glowing.  This faint glow
     is because of timer interrupt that result in the LED being illuminated
     on a small proportion of the time.
-*** LED2 may also flicker normally if signals are processed.
+*** LED1 may also flicker normally if signals are processed.
 
-Serial Console
+SERIAL CONSOLE
 ==============
 
   Pin Availability
@@ -133,8 +142,58 @@ Serial Console
    send commands to the BC. When EFM_BC_EN is low, EFM_BC_TX and EFM_BC_RX
    can be used by other applications.
 
-Configurations
+USING THE J-LINK GDB SERVER
+===========================
+
+   1. Star the J-Link GDB server.  You should see the start-up confiration
+      window.  SelectL
+
+      a. Target device = EFM32G880F128
+      b. Select Target interface = SWD
+
+   2. Press OK.  The GDB server should start and the last message in the Log
+      output should be "Waiting for GDB connection".
+
+   3. In a terminal window, start GDB:
+
+      arm-none-eabi-gdb
+
+   4. Connect to the J-Link GDB serer:
+
+     (gdb) target remote local host
+
+   5. Load and run nuttx
+
+     (gdb) mon halt
+     (gdb) load nuttx
+     (gdb) mon reset go
+
+   I had to tinker with the setup a few times repeating the same steps above
+   before things finally began to work.  Don't know why.
+
+   To debug code already burned into FLASH:
+
+   1. Start the GDB server as above.
+
+   2. In a terminal window, start GDB:
+
+      arm-none-eabi-gdb
+
+   3. Connect to the J-Link GDB serer:
+
+     (gdb) target remote local host
+
+   3. Load the nuttx symbol file, reset, and debug
+
+     (gdb) mon halt
+     (gdb) file nuttx
+     (gdb) mon reset
+     (gdb) s
+     ...
+
+CONFIGURATIONS
 ==============
+
   Each EFM32 Gecko Starter Kit configuration is maintained in a sub-directory
   and can be selected as follow:
 

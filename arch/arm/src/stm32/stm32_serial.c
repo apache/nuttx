@@ -2547,6 +2547,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
  *
  ****************************************************************************/
 
+#if USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
 #ifdef HAVE_UART
@@ -2569,6 +2570,7 @@ void up_earlyserialinit(void)
 #endif
 #endif /* HAVE UART */
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
