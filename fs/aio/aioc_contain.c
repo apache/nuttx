@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <errno.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -106,7 +107,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 #endif
 
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
-  if (aioc->fildes >= CONFIG_NFILE_DESCRIPTORS)
+  if (aiocbp->aio_fildes  >= CONFIG_NFILE_DESCRIPTORS)
 #endif
 #ifdef AIO_HAVE_FILEP
     {
