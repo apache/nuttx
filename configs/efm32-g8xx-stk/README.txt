@@ -172,7 +172,7 @@ USING THE J-LINK GDB SERVER
    before things finally began to work.  Don't know why.
 
    To debug code already burned into FLASH:
- 
+
    1. Start the GDB server as above.
 
    2. In a terminal window, start GDB:
