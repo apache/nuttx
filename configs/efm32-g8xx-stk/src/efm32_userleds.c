@@ -78,7 +78,7 @@
 
 static gpio_pinset_t g_ledcfg[BOARD_NLEDS] =
 {
-  GPIO_LED1, GPIO_LED2, GPIO_LED3, GPIO_LED4
+  GPIO_LED0, GPIO_LED1, GPIO_LED2, GPIO_LED3
 };
 
 /****************************************************************************
@@ -193,12 +193,12 @@ static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
 
 void efm32_ledinit(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+   /* Configure LED0-4 GPIOs for output */
 
+   efm32_configgpio(GPIO_LED0);
    efm32_configgpio(GPIO_LED1);
    efm32_configgpio(GPIO_LED2);
    efm32_configgpio(GPIO_LED3);
-   efm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************
@@ -219,10 +219,10 @@ void efm32_setled(int led, bool ledon)
 
 void efm32_setleds(uint8_t ledset)
 {
-  efm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  efm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
-  efm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
-  efm32_gpiowrite(GPIO_LED4, (ledset & BOARD_LED4_BIT) == 0);
+  efm32_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) != 0);
+  efm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);
+  efm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) != 0);
+  efm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) != 0);
 }
 
 /****************************************************************************
