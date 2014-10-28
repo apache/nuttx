@@ -78,13 +78,13 @@
   * value to the LED.
   */
 
-#define GPIO_LED1       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+#define GPIO_LED0       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN0)
-#define GPIO_LED2       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+#define GPIO_LED1       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN1)
-#define GPIO_LED3       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+#define GPIO_LED2       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN2)
-#define GPIO_LED4       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+#define GPIO_LED3       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN3)
 
 /****************************************************************************

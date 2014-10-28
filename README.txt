@@ -143,20 +143,20 @@ Installation Directories with Spaces in the Path
 Downloading from Repositories
 -----------------------------
 
-Cloning the Repository
+  Cloning the Repository
 
-  The current NuttX du jour is available in from a GIT repository.  Cloning
-  instructions are available here:
+    The current NuttX du jour is available in from a GIT repository.  Cloning
+    instructions are available here:
 
-  https://sourceforge.net/p/nuttx/git
+      https://sourceforge.net/p/nuttx/git
 
-Cloning NuttX Inside Cygwin
+  Cloning NuttX Inside Cygwin
 
-  If you are cloning the NuttX repository, it is recommended to avoid
-  automatic end of lines conversions by git. These conversions may break
-  some scripts like configure.sh. Before cloning, do the following:
+    If you are cloning the NuttX repository, it is recommended to avoid
+    automatic end of lines conversions by git. These conversions may break
+    some scripts like configure.sh. Before cloning, do the following:
 
-    git config --global core.autocrlf false
+      git config --global core.autocrlf false
 
 Notes about Header Files
 ------------------------

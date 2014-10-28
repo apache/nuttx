@@ -72,10 +72,10 @@
 
 /* The following definitions map the encoded LED setting to GPIO settings */
 
-#define EFM32F4_LED1      (1 << 0)
-#define EFM32F4_LED2      (1 << 1)
-#define EFM32F4_LED3      (1 << 2)
-#define EFM32F4_LED4      (1 << 3)
+#define EFM32_LED0        (1 << 0)
+#define EFM32_LED1        (1 << 1)
+#define EFM32_LED2        (1 << 2)
+#define EFM32_LED3        (1 << 3)
 
 #define ON_SETBITS_SHIFT  (0)
 #define ON_CLRBITS_SHIFT  (4)
@@ -92,45 +92,45 @@
 #define OFF_SETBITS(v)    (SETBITS(OFF_BITS(v))
 #define OFF_CLRBITS(v)    (CLRBITS(OFF_BITS(v))
 
-#define LED_STARTED_ON_SETBITS       ((EFM32F4_LED1) << ON_SETBITS_SHIFT)
-#define LED_STARTED_ON_CLRBITS       ((EFM32F4_LED2|EFM32F4_LED3|EFM32F4_LED4) << ON_CLRBITS_SHIFT)
+#define LED_STARTED_ON_SETBITS       ((EFM32_LED0) << ON_SETBITS_SHIFT)
+#define LED_STARTED_ON_CLRBITS       ((EFM32_LED1|EFM32_LED2|EFM32_LED3) << ON_CLRBITS_SHIFT)
 #define LED_STARTED_OFF_SETBITS      (0 << OFF_SETBITS_SHIFT)
-#define LED_STARTED_OFF_CLRBITS      ((EFM32F4_LED1|EFM32F4_LED2|EFM32F4_LED3|EFM32F4_LED4) << OFF_CLRBITS_SHIFT)
+#define LED_STARTED_OFF_CLRBITS      ((EFM32_LED0|EFM32_LED1|EFM32_LED2|EFM32_LED3) << OFF_CLRBITS_SHIFT)
 
-#define LED_HEAPALLOCATE_ON_SETBITS  ((EFM32F4_LED2) << ON_SETBITS_SHIFT)
-#define LED_HEAPALLOCATE_ON_CLRBITS  ((EFM32F4_LED1|EFM32F4_LED3|EFM32F4_LED4) << ON_CLRBITS_SHIFT)
-#define LED_HEAPALLOCATE_OFF_SETBITS ((EFM32F4_LED1) << OFF_SETBITS_SHIFT)
-#define LED_HEAPALLOCATE_OFF_CLRBITS ((EFM32F4_LED2|EFM32F4_LED3|EFM32F4_LED4) << OFF_CLRBITS_SHIFT)
+#define LED_HEAPALLOCATE_ON_SETBITS  ((EFM32_LED1) << ON_SETBITS_SHIFT)
+#define LED_HEAPALLOCATE_ON_CLRBITS  ((EFM32_LED0|EFM32_LED2|EFM32_LED3) << ON_CLRBITS_SHIFT)
+#define LED_HEAPALLOCATE_OFF_SETBITS ((EFM32_LED0) << OFF_SETBITS_SHIFT)
+#define LED_HEAPALLOCATE_OFF_CLRBITS ((EFM32_LED1|EFM32_LED2|EFM32_LED3) << OFF_CLRBITS_SHIFT)
 
-#define LED_IRQSENABLED_ON_SETBITS   ((EFM32F4_LED1|EFM32F4_LED2) << ON_SETBITS_SHIFT)
-#define LED_IRQSENABLED_ON_CLRBITS   ((EFM32F4_LED3|EFM32F4_LED4) << ON_CLRBITS_SHIFT)
-#define LED_IRQSENABLED_OFF_SETBITS  ((EFM32F4_LED2) << OFF_SETBITS_SHIFT)
-#define LED_IRQSENABLED_OFF_CLRBITS  ((EFM32F4_LED1|EFM32F4_LED3|EFM32F4_LED4) << OFF_CLRBITS_SHIFT)
+#define LED_IRQSENABLED_ON_SETBITS   ((EFM32_LED0|EFM32_LED1) << ON_SETBITS_SHIFT)
+#define LED_IRQSENABLED_ON_CLRBITS   ((EFM32_LED2|EFM32_LED3) << ON_CLRBITS_SHIFT)
+#define LED_IRQSENABLED_OFF_SETBITS  ((EFM32_LED1) << OFF_SETBITS_SHIFT)
+#define LED_IRQSENABLED_OFF_CLRBITS  ((EFM32_LED0|EFM32_LED2|EFM32_LED3) << OFF_CLRBITS_SHIFT)
 
-#define LED_STACKCREATED_ON_SETBITS  ((EFM32F4_LED3) << ON_SETBITS_SHIFT)
-#define LED_STACKCREATED_ON_CLRBITS  ((EFM32F4_LED1|EFM32F4_LED2|EFM32F4_LED4) << ON_CLRBITS_SHIFT)
-#define LED_STACKCREATED_OFF_SETBITS ((EFM32F4_LED1|EFM32F4_LED2) << OFF_SETBITS_SHIFT)
-#define LED_STACKCREATED_OFF_CLRBITS ((EFM32F4_LED3|EFM32F4_LED4) << OFF_CLRBITS_SHIFT)
+#define LED_STACKCREATED_ON_SETBITS  ((EFM32_LED2) << ON_SETBITS_SHIFT)
+#define LED_STACKCREATED_ON_CLRBITS  ((EFM32_LED0|EFM32_LED1|EFM32_LED3) << ON_CLRBITS_SHIFT)
+#define LED_STACKCREATED_OFF_SETBITS ((EFM32_LED0|EFM32_LED1) << OFF_SETBITS_SHIFT)
+#define LED_STACKCREATED_OFF_CLRBITS ((EFM32_LED2|EFM32_LED3) << OFF_CLRBITS_SHIFT)
 
-#define LED_INIRQ_ON_SETBITS         ((EFM32F4_LED1) << ON_SETBITS_SHIFT)
+#define LED_INIRQ_ON_SETBITS         ((EFM32_LED0) << ON_SETBITS_SHIFT)
 #define LED_INIRQ_ON_CLRBITS         ((0) << ON_CLRBITS_SHIFT)
 #define LED_INIRQ_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
-#define LED_INIRQ_OFF_CLRBITS        ((EFM32F4_LED1) << OFF_CLRBITS_SHIFT)
+#define LED_INIRQ_OFF_CLRBITS        ((EFM32_LED0) << OFF_CLRBITS_SHIFT)
 
-#define LED_SIGNAL_ON_SETBITS        ((EFM32F4_LED2) << ON_SETBITS_SHIFT)
+#define LED_SIGNAL_ON_SETBITS        ((EFM32_LED1) << ON_SETBITS_SHIFT)
 #define LED_SIGNAL_ON_CLRBITS        ((0) << ON_CLRBITS_SHIFT)
 #define LED_SIGNAL_OFF_SETBITS       ((0) << OFF_SETBITS_SHIFT)
-#define LED_SIGNAL_OFF_CLRBITS       ((EFM32F4_LED2) << OFF_CLRBITS_SHIFT)
+#define LED_SIGNAL_OFF_CLRBITS       ((EFM32_LED1) << OFF_CLRBITS_SHIFT)
 
-#define LED_ASSERTION_ON_SETBITS     ((EFM32F4_LED4) << ON_SETBITS_SHIFT)
+#define LED_ASSERTION_ON_SETBITS     ((EFM32_LED3) << ON_SETBITS_SHIFT)
 #define LED_ASSERTION_ON_CLRBITS     ((0) << ON_CLRBITS_SHIFT)
 #define LED_ASSERTION_OFF_SETBITS    ((0) << OFF_SETBITS_SHIFT)
-#define LED_ASSERTION_OFF_CLRBITS    ((EFM32F4_LED4) << OFF_CLRBITS_SHIFT)
+#define LED_ASSERTION_OFF_CLRBITS    ((EFM32_LED3) << OFF_CLRBITS_SHIFT)
 
-#define LED_PANIC_ON_SETBITS         ((EFM32F4_LED4) << ON_SETBITS_SHIFT)
+#define LED_PANIC_ON_SETBITS         ((EFM32_LED3) << ON_SETBITS_SHIFT)
 #define LED_PANIC_ON_CLRBITS         ((0) << ON_CLRBITS_SHIFT)
 #define LED_PANIC_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
-#define LED_PANIC_OFF_CLRBITS        ((EFM32F4_LED4) << OFF_CLRBITS_SHIFT)
+#define LED_PANIC_OFF_CLRBITS        ((EFM32_LED3) << OFF_CLRBITS_SHIFT)
 
 /****************************************************************************
  * Private Data
@@ -169,47 +169,47 @@ static const uint16_t g_ledbits[8] =
 
 static inline void led_clrbits(unsigned int clrbits)
 {
-  if ((clrbits & EFM32F4_LED1) != 0)
+  if ((clrbits & EFM32_LED0) != 0)
+    {
+      efm32_gpiowrite(GPIO_LED0, false);
+    }
+
+  if ((clrbits & EFM32_LED1) != 0)
     {
       efm32_gpiowrite(GPIO_LED1, false);
     }
 
-  if ((clrbits & EFM32F4_LED2) != 0)
+  if ((clrbits & EFM32_LED2) != 0)
     {
       efm32_gpiowrite(GPIO_LED2, false);
     }
 
-  if ((clrbits & EFM32F4_LED3) != 0)
+  if ((clrbits & EFM32_LED3) != 0)
     {
       efm32_gpiowrite(GPIO_LED3, false);
-    }
-
-  if ((clrbits & EFM32F4_LED4) != 0)
-    {
-      efm32_gpiowrite(GPIO_LED4, false);
     }
 }
 
 static inline void led_setbits(unsigned int setbits)
 {
-  if ((setbits & EFM32F4_LED1) != 0)
+  if ((setbits & EFM32_LED0) != 0)
+    {
+      efm32_gpiowrite(GPIO_LED0, true);
+    }
+
+  if ((setbits & EFM32_LED1) != 0)
     {
       efm32_gpiowrite(GPIO_LED1, true);
     }
 
-  if ((setbits & EFM32F4_LED2) != 0)
+  if ((setbits & EFM32_LED2) != 0)
     {
       efm32_gpiowrite(GPIO_LED2, true);
     }
 
-  if ((setbits & EFM32F4_LED3) != 0)
+  if ((setbits & EFM32_LED3) != 0)
     {
       efm32_gpiowrite(GPIO_LED3, true);
-    }
-
-  if ((setbits & EFM32F4_LED4) != 0)
-    {
-      efm32_gpiowrite(GPIO_LED4, true);
     }
 }
 
@@ -229,12 +229,12 @@ static void led_setonoff(unsigned int bits)
 
 void board_led_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+   /* Configure LED0-4 GPIOs for output */
 
+   efm32_configgpio(GPIO_LED0);
    efm32_configgpio(GPIO_LED1);
    efm32_configgpio(GPIO_LED2);
    efm32_configgpio(GPIO_LED3);
-   efm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************

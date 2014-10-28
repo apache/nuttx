@@ -54,7 +54,7 @@ LEDs
   include/board.h and src/efm32_autoleds.c.  The LEDs are used to
   encode OS-related events as follows:
 
-    SYMBOL             Meaning                 LED1*  LED2   LED3   LED4
+    SYMBOL             Meaning                 LED0*  LED1   LED2   LED3
     ----------------- -----------------------  ------ -----  -----  ------
     LED_STARTED       NuttX has been started   ON     OFF    OFF    OFF
     LED_HEAPALLOCATE  Heap has been allocated  OFF    ON     OFF    OFF
@@ -66,12 +66,12 @@ LEDs
     LED_PANIC         The system has crashed   N/C    N/C    N/C    ON
     LED_IDLE          STM32 is is sleep mode   (Optional, not used)
 
-  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
+  * If LED0, LED1, LED2 are statically on, then NuttX probably failed to boot
     and these LEDs will give you some indication of where the failure was
- ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
+ ** The normal state is LED2 ON and LED3 faintly glowing.  This faint glow
     is because of timer interrupt that result in the LED being illuminated
     on a small proportion of the time.
-*** LED2 may also flicker normally if signals are processed.
+*** LED1 may also flicker normally if signals are processed.
 
 SERIAL CONSOLE
 ==============
