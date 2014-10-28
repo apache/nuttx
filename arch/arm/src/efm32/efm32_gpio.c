@@ -266,7 +266,7 @@ static inline void efm32_setmode(uintptr_t base, uint8_t pin, uint8_t mode)
 
   regval  = getreg32(regaddr);
   regval &= ~((uint32_t)15 << shift);
-  regval |= ~((uint32_t)mode << shift);
+  regval |= (uint32_t)mode << shift;
   putreg32(regval, regaddr);
 }
 
