@@ -1154,6 +1154,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the USARTs was performed in
@@ -1186,6 +1187,7 @@ void up_earlyserialinit(void)
   up_setup(&CONSOLE_DEV);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
