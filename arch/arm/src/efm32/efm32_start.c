@@ -81,7 +81,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
 #  if defined(CONFIG_ARMV7M_ITMSYSLOG)
 #    define showprogress(c) (void)syslog_putc(c)
 #  elif defined(HAVE_UART_CONSOLE) || defined(HAVE_LEUART_CONSOLE)
-#    define showprogress(c) up_lowputc(c)
+#    define showprogress(c) efm32_lowputc(c)
 #  else
 #    define showprogress(c)
 #  endif
