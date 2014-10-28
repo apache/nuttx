@@ -212,7 +212,7 @@ static void efm32_uart_setbaud(uintptr_t base,  uint32_t baud)
   putreg32(regval, base + EFM32_USART_CTRL_OFFSET);
 
   regval = (uint32_t)clkdiv << _USART_CLKDIV_DIV_SHIFT;
-  DEBUGASSERT((regval & _USART_CLKDIV_MASK) == clkdiv);
+  DEBUGASSERT((regval & _USART_CLKDIV_MASK) == regval);
   putreg32(regval, base + EFM32_USART_CLKDIV_OFFSET);
 }
 #endif
