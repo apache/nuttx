@@ -370,11 +370,11 @@
 #if defined(CONFIG_ARCH_CHIP_SAM4E)
 #define TC_CMR_SBSMPLR_SHIFT         (20)      /* Bits 20-22: Loading Edge Subsampling Ratio */
 #define TC_CMR_SBSMPLR_MASK          (7 << TC_CMR_SBSMPLR_SHIFT)
-#  define TC_CMR_SBSMPLR_ ONE        (0 << TC_CMR_SBSMPLR_SHIFT) /* Load on each selected edge */
-#  define TC_CMR_SBSMPLR_ HALF       (1 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 2 selected edges */
-#  define TC_CMR_SBSMPLR_ 4TH        (2 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 4 selected edges */
-#  define TC_CMR_SBSMPLR_ 8TH        (3 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 8 selected edges */
-#  define TC_CMR_SBSMPLR_ 16TH       (4 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 16 selected edges */
+#  define TC_CMR_SBSMPLR_ONE         (0 << TC_CMR_SBSMPLR_SHIFT) /* Load on each selected edge */
+#  define TC_CMR_SBSMPLR_HALF        (1 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 2 selected edges */
+#  define TC_CMR_SBSMPLR_4TH         (2 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 4 selected edges */
+#  define TC_CMR_SBSMPLR_8TH         (3 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 8 selected edges */
+#  define TC_CMR_SBSMPLR_16TH        (4 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 16 selected edges */
 #endif
 
 /* TC Channel Mode Register -- Waveform mode only */
