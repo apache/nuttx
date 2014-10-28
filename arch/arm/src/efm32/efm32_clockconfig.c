@@ -166,7 +166,7 @@ static void efm32_enable_lfxo(void)
 {
   /* Enable the LFXO */
 
-  putreg32(CMU_OSCENCMD_LFRCOEN, EFM32_CMU_OSCENCMD);
+  putreg32(CMU_OSCENCMD_LFXOEN, EFM32_CMU_OSCENCMD);
   efm32_statuswait(CMU_STATUS_LFXORDY);
 }
 
@@ -610,6 +610,7 @@ static inline uint32_t efm32_lfaclk_config(uint32_t lfaclksel, bool ulfrco,
           case CMU_LFCLKSEL_LFA_LFRCO:
             {
               efm32_enable_lfrco();
+              lfaclk = BOARD_LFRCO_FREQUENCY;
             }
             break;
 
