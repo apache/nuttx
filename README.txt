@@ -63,12 +63,21 @@ Installing Cygwin
      of the Cygwin utilities that you will need to build NuttX.  The
      build will fail in numerous places because of missing packages.
 
+     NOTE: You don't really have to install EVERYTHING but I cannot
+     answer the question "Then what should I install?"  I don't know
+     the answer to that and so will continue to recommend installing
+     EVERYTHING.
+
   After installing Cygwin, you will get lots of links for installed
   tools and shells.  I use the RXVT native shell.  It is fast and reliable
   and does not require you to run the Cygwin X server (which is neither
   fast nor reliable).  Unless otherwise noted, the rest of these
   instructions assume that you are at a bash command line prompt in
   either Linux or in Cygwin shell.
+
+  UPDATE: The last time I installed EVERTHING, the download was
+  about 5GiB.  The server I selected was also very slow so it took
+  over a day to do the whole install!
 
 Download and Unpack
 -------------------
@@ -110,7 +119,7 @@ Semi-Optional apps/ Package
       nuttx/     apps/
 
   This is important because the NuttX build will expect to find the
-  apps directory in that (default) location.  )That default location
+  apps directory in that (default) location.  That default location
   can be changed by editing your NuttX configuration file, but that
   is another story).
 
@@ -134,10 +143,20 @@ Installation Directories with Spaces in the Path
 Downloading from Repositories
 -----------------------------
 
-  The current NuttX du jour is available in from a GIT repository.  Download
+Cloning the Repository
+
+  The current NuttX du jour is available in from a GIT repository.  Cloning
   instructions are available here:
 
   https://sourceforge.net/p/nuttx/git
+
+Cloning NuttX Inside Cygwin
+
+  If you are cloning the NuttX repository, it is recommended to avoid
+  automatic end of lines conversions by git. These conversions may break
+  some scripts like configure.sh. Before cloning, do the following:
+
+    git config --global core.autocrlf false
 
 Notes about Header Files
 ------------------------
@@ -528,7 +547,7 @@ SHELLS
 
      In this case, bash is probably available and the #!/bin/bash at the
      beginning of the file should do the job.  If any scripts with #!/bin/sh
-     fail, try changing that ti #!/bin/bash and let me know about the change.
+     fail, try changing that to #!/bin/bash and let me know about the change.
 
   2. FreeBSD with the Bourne Shell and no bash shell.
 
@@ -848,7 +867,7 @@ General Pre-built Toolchain Issues
   There may be incompatibilities with header files, libraries, and compiler
   built-in functions at detailed below.  For the most part, these issues
   are handled in the existing make logic.  But if you are breaking new ground,
-  then you may incounter these:
+  then you may encounter these:
 
   4. Header Files.  Most pre-built toolchains will build with a foreign C
      library (usually newlib, but maybe uClibc or glibc if you are using a
@@ -890,6 +909,42 @@ General Pre-built Toolchain Issues
      is possible that there could be interoperability issues with
      your toolchain since they will be using different versions of
      binutils and possibly different ABIs.
+
+Building Original Linux Boards in Cygwin
+
+  Some default board configurations are set to build under Linux and others
+  to build under Windows with Cygwin.  Various default toolchains may also
+  be used in each configuration.  It is possible to change the default
+  setup.  Here, for example, is what you must do in order to compile a
+  default Linux configuration in the Cygwin environment using the
+  CodeSourceery for Windows toolchain.  After instantiating a "canned"
+  NuttX configuration, run the target 'menuconfig' and set the following
+  items:
+
+    Build Setup->Build Host Platform->Windows
+    Build Setup->Windows Build Environment->Cygwin
+    System Type->Toolchain Selection->CodeSourcery GNU Toolchain under Windows
+
+  In Windows 7 it may be required to open the Cygwin shell as Administrator
+  ("Run As" option, right button) you find errors like "Permission denied".
+
+Recovering from Bad Configurations
+
+  Many people make the mistake of configuring NuttX with the "canned"
+  configuration and then just typing 'make' with disastrous consequences;
+  the build may fail with mysterious, uninterpretable, and irrecoverable
+  build errors.  If, for example, you do this with an unmodified Linux
+  configuration in a Windows/Cgwin environment, you will corrupt the
+  build environment.  The environment will be corrupted because of POSIX vs
+  Windows path issues and with issues related to symbolic links.  If you
+  make the mistake of doing this, the easiest way to recover is to just
+  start over: Do 'make distclean' to remove every trace of the corrupted
+  configuration, reconfigure from scratch, and make certain that the set
+  the configuration correctly for your platform before attempting to make
+  again.
+
+  Just fixing the configuration file after you have instantiated the bad
+  configuration with 'make' is not enough.
 
 DOCUMENTATION
 ^^^^^^^^^^^^^
