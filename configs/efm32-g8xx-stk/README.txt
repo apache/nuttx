@@ -137,8 +137,15 @@ SERIAL CONSOLE
 
    Default Serial Console
    ----------------------
-   UART0 is configured as the default serial console at 115200 8N1
-   on pins PE0 and PE1.
+   LEUART0 is configured as the default serial console at 2400 8N1
+   on pins PD5 and PD4.  It certainly be possible to go to 4800 baud
+   and the documentation claims that 9600 baud is possible (although
+   I am not sure how).
+
+   It should also be possible to use UART0 is configured at 115200 8N1
+   on pins PE0 and PE1.  However, my attempts to use USART0 were
+   unsuccessful -- I see no activity on PE0 and PE1 and have not yet
+   figured out why that is.
 
    Communication through the Board Controller
    ------------------------------------------
@@ -218,9 +225,7 @@ CONFIGURATIONS
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART0.  Support for
-    built-in applications is enabled, but in the base configuration no
-    built-in applications are selected (see NOTES below).
+    Configuration enables the serial interfaces on LEUART0 at 2400 8N1.
 
     NOTES:
 
