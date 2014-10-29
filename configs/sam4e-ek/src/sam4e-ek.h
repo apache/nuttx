@@ -304,9 +304,9 @@
  */
 
 #define GPIO_RS232_ENABLE (GPIO_OUTPUT | GPIO_CFG_DEFAULT | \
-                           GPIO_OUTPUT_CLEAR | GPIO_PORT_PIOA | GPIO_PIN21)
+                           GPIO_OUTPUT_CLEAR | GPIO_PORT_PIOA | GPIO_PIN23)
 #define GPIO_RS485_ENABLE (GPIO_OUTPUT | GPIO_CFG_DEFAULT | \
-                           GPIO_OUTPUT_SET | GPIO_PORT_PIOA | GPIO_PIN21)
+                           GPIO_OUTPUT_SET | GPIO_PORT_PIOA | GPIO_PIN23)
 
 /* HSMCI SD Card Detect
  *
