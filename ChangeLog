@@ -8897,4 +8897,7 @@
 	* arch/arm/include/efm32, src/efm32, and configs/efm32-gxxx-stk:
 	  The EFM32 Gecko Starter Kit port is now functional.  At least
 	  NSH is running over LEUART0 on the board (2014-10-29).
+	* arch/arm/src/sm34/sam_serial.c and Kconfig:  Add support for SAM3/4
+	  basic TERMIOS and flow control.  There are issues with IFLOW control:
+	  PDC or DMAC support is required (2014-10-29).
 
