@@ -550,8 +550,24 @@ static inline uint32_t efm32_hfcoreclk_config(uint32_t hfcoreclkdiv,
 static inline uint32_t efm32_hfperclk_config(uint32_t hfperclkdiv,
                                              uint32_t hfclk)
 {
-  /* REVISIT:  Divider not currently used */
-  return hfclk;
+  uint32_t regval;
+  uint32_t hfperclk;
+  unsigned int divider;
+
+  DEBUGASSERT(hfperclkdiv <= _CMU_HFPERCLKDIV_HFPERCLKDIV_HFCLK512);
+
+  /* Set the divider and enable the HFPERCLK */
+
+  regval = (hfperclkdiv << _CMU_HFPERCLKDIV_HFPERCLKDIV_SHIFT) |
+           CMU_HFPERCLKDIV_HFPERCLKEN;
+  putreg32(regval, EFM32_CMU_HFPERCLKDIV);
+
+  /* The value of hfperclkdiv is log2 of the arithmetic divisor:
+   * 0->1, 1->2, 2->4, 3->8, ... 9->512.
+   */
+
+  divider = 1 << hfperclkdiv;
+  return hfclk / divider;
 }
 
 /****************************************************************************
