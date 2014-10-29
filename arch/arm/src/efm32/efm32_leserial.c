@@ -127,7 +127,6 @@
 #  define EFM32_RX_INTS        LEUART_IEN_RXDATAV
 #endif
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -217,7 +216,7 @@ static char g_leuart1txbuffer[CONFIG_LEUART1_TXBUFSIZE];
 /* This describes the state of the EFM32 LEUART0 port. */
 
 #ifdef CONFIG_EFM32_LEUART0
-static const struct efm32_leuart_s g_leuart0config =
+static const struct efm32_config_s g_leuart0config =
 {
   .uartbase  = EFM32_LEUART0_BASE,
   .handler   = efm32_leuart0_interrupt,

@@ -611,8 +611,13 @@
 
 /* Bit fields for CMU LFCLKSEL */
 
-#define _CMU_LFCLKSEL_RESETVALUE                   0x00000005UL                             /* Default value for CMU_LFCLKSEL */
-#define _CMU_LFCLKSEL_MASK                         0x0011000FUL                             /* Mask for CMU_LFCLKSEL */
+#if defined(CONFIG_EFM32_EFM32GG)
+#  define _CMU_LFCLKSEL_RESETVALUE                 0x00000005UL                             /* Default value for CMU_LFCLKSEL */
+#  define _CMU_LFCLKSEL_MASK                       0x0011000FUL                             /* Mask for CMU_LFCLKSEL */
+#elif defined(CONFIG_EFM32_EFM32G)
+#  define _CMU_LFCLKSEL_RESETVALUE                 0x00000005UL                             /* Default value for CMU_LFCLKSEL */
+#  define _CMU_LFCLKSEL_MASK                       0x0011000FUL                             /* Mask for CMU_LFCLKSEL */
+#endif
 
 #define _CMU_LFCLKSEL_LFA_SHIFT                    0                                        /* Shift value for CMU_LFA */
 #define _CMU_LFCLKSEL_LFA_MASK                     0x3UL                                    /* Bit mask for CMU_LFA */
@@ -638,24 +643,27 @@
 #define CMU_LFCLKSEL_LFB_LFRCO                     (_CMU_LFCLKSEL_LFB_LFRCO << 2)           /* Shifted mode LFRCO for CMU_LFCLKSEL */
 #define CMU_LFCLKSEL_LFB_LFXO                      (_CMU_LFCLKSEL_LFB_LFXO << 2)            /* Shifted mode LFXO for CMU_LFCLKSEL */
 #define CMU_LFCLKSEL_LFB_HFCORECLKLEDIV2           (_CMU_LFCLKSEL_LFB_HFCORECLKLEDIV2 << 2) /* Shifted mode HFCORECLKLEDIV2 for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFAE                          (0x1UL << 16)                            /* Clock Select for LFA Extended */
-#define _CMU_LFCLKSEL_LFAE_SHIFT                   16                                       /* Shift value for CMU_LFAE */
-#define _CMU_LFCLKSEL_LFAE_MASK                    0x10000UL                                /* Bit mask for CMU_LFAE */
-#define _CMU_LFCLKSEL_LFAE_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for CMU_LFCLKSEL */
-#define _CMU_LFCLKSEL_LFAE_DISABLED                0x00000000UL                             /* Mode DISABLED for CMU_LFCLKSEL */
-#define _CMU_LFCLKSEL_LFAE_ULFRCO                  0x00000001UL                             /* Mode ULFRCO for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFAE_DEFAULT                  (_CMU_LFCLKSEL_LFAE_DEFAULT << 16)       /* Shifted mode DEFAULT for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFAE_DISABLED                 (_CMU_LFCLKSEL_LFAE_DISABLED << 16)      /* Shifted mode DISABLED for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFAE_ULFRCO                   (_CMU_LFCLKSEL_LFAE_ULFRCO << 16)        /* Shifted mode ULFRCO for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFBE                          (0x1UL << 20)                            /* Clock Select for LFB Extended */
-#define _CMU_LFCLKSEL_LFBE_SHIFT                   20                                       /* Shift value for CMU_LFBE */
-#define _CMU_LFCLKSEL_LFBE_MASK                    0x100000UL                               /* Bit mask for CMU_LFBE */
-#define _CMU_LFCLKSEL_LFBE_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for CMU_LFCLKSEL */
-#define _CMU_LFCLKSEL_LFBE_DISABLED                0x00000000UL                             /* Mode DISABLED for CMU_LFCLKSEL */
-#define _CMU_LFCLKSEL_LFBE_ULFRCO                  0x00000001UL                             /* Mode ULFRCO for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFBE_DEFAULT                  (_CMU_LFCLKSEL_LFBE_DEFAULT << 20)       /* Shifted mode DEFAULT for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFBE_DISABLED                 (_CMU_LFCLKSEL_LFBE_DISABLED << 20)      /* Shifted mode DISABLED for CMU_LFCLKSEL */
-#define CMU_LFCLKSEL_LFBE_ULFRCO                   (_CMU_LFCLKSEL_LFBE_ULFRCO << 20)        /* Shifted mode ULFRCO for CMU_LFCLKSEL */
+
+#if defined(CONFIG_EFM32_EFM32GG)
+#  define CMU_LFCLKSEL_LFAE                        (0x1UL << 16)                            /* Clock Select for LFA Extended */
+#  define _CMU_LFCLKSEL_LFAE_SHIFT                 16                                       /* Shift value for CMU_LFAE */
+#  define _CMU_LFCLKSEL_LFAE_MASK                  0x10000UL                                /* Bit mask for CMU_LFAE */
+#  define _CMU_LFCLKSEL_LFAE_DEFAULT               0x00000000UL                             /* Mode DEFAULT for CMU_LFCLKSEL */
+#  define _CMU_LFCLKSEL_LFAE_DISABLED              0x00000000UL                             /* Mode DISABLED for CMU_LFCLKSEL */
+#  define _CMU_LFCLKSEL_LFAE_ULFRCO                0x00000001UL                             /* Mode ULFRCO for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFAE_DEFAULT                (_CMU_LFCLKSEL_LFAE_DEFAULT << 16)       /* Shifted mode DEFAULT for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFAE_DISABLED               (_CMU_LFCLKSEL_LFAE_DISABLED << 16)      /* Shifted mode DISABLED for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFAE_ULFRCO                 (_CMU_LFCLKSEL_LFAE_ULFRCO << 16)        /* Shifted mode ULFRCO for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFBE                        (0x1UL << 20)                            /* Clock Select for LFB Extended */
+#  define _CMU_LFCLKSEL_LFBE_SHIFT                 20                                       /* Shift value for CMU_LFBE */
+#  define _CMU_LFCLKSEL_LFBE_MASK                  0x100000UL                               /* Bit mask for CMU_LFBE */
+#  define _CMU_LFCLKSEL_LFBE_DEFAULT               0x00000000UL                             /* Mode DEFAULT for CMU_LFCLKSEL */
+#  define _CMU_LFCLKSEL_LFBE_DISABLED              0x00000000UL                             /* Mode DISABLED for CMU_LFCLKSEL */
+#  define _CMU_LFCLKSEL_LFBE_ULFRCO                0x00000001UL                             /* Mode ULFRCO for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFBE_DEFAULT                (_CMU_LFCLKSEL_LFBE_DEFAULT << 20)       /* Shifted mode DEFAULT for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFBE_DISABLED               (_CMU_LFCLKSEL_LFBE_DISABLED << 20)      /* Shifted mode DISABLED for CMU_LFCLKSEL */
+#  define CMU_LFCLKSEL_LFBE_ULFRCO                 (_CMU_LFCLKSEL_LFBE_ULFRCO << 20)        /* Shifted mode ULFRCO for CMU_LFCLKSEL */
+#endif
 
 /* Bit fields for CMU STATUS */
 
