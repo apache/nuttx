@@ -29,13 +29,32 @@ STATUS
 ======
 
   2014-10-28.  Testing is still in progress.  At this point all basic boot
-  operations are successful:  The LEDs work and the application tasks appear
-  to be successfully started.  LED2 is on and LED0 is glowing (meaning that
-  interrupts are being processed).  However, I get no output on PE0.  Data
-  appears to be sent (at least by efm32_lowputc()).  However, no signal
-  activity is present on PE0.
+    operations are successful:  The LEDs work and the application tasks appear
+    to be successfully started.  LED2 is on and LED0 is glowing (meaning that
+    interrupts are being processed).  However, I get no output on PE0.  Data
+    appears to be sent (at least by efm32_lowputc()).  However, no signal
+    activity is present on PE0.
 
-  I am, of course, thinking that this is a pin configuration issue.
+  2014-10-29:  The NuttX is running on the EFM32 Gecko Starter Kit.  There
+    are not many peripherals to test in that configuration, but the NuttShell
+    (NSH) is working over LEUART0 at 2400 baud (certainly that could go up
+    to 4800.  The documentation says that 9600 is also possible on the
+    LEUART, but I am not sure how).
+
+    I originally planned to use UART0 at 115200 baud, but I never could get
+    any output from the board.  I reviewd my pin configuration and clocking
+    carefully and the USART seems to think it is working correctly.  So I
+    am thinking that there is some board issue that prohibits that option
+    (probably because UART0 is used with the board controller???).  Pins
+    are not available for other U[S]ARTs on the board.
+
+  2014-10-29:  Calibrated the delays loops.
+
+  2014-10-29:  The start-up time is long -- about a second.  I have traced
+    this to the default delay in bringing up the LFCLK in efm32_clockconfig.
+    The default, reset setting of the LFXOTIMEOUT field of the CMU_CTRL
+    register is 3 which corresponds to a delay of 32768 cycles, or a full
+    second.  I have not experimented to see if this delay can be reduced.
 
 LEDs
 ====
