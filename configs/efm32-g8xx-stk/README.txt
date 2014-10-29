@@ -28,8 +28,14 @@ CONTENTS
 STATUS
 ======
 
-  Testing has just begun.  So the status is code-complete but only
-  partially tested.
+  2014-10-28.  Testing is still in progress.  At this point all basic boot
+  operations are successful:  The LEDs work and the application tasks appear
+  to be successfully started.  LED2 is on and LED0 is glowing (meaning that
+  interrupts are being processed).  However, I get no output on PE0.  Data
+  appears to be sent (at least by efm32_lowputc()).  However, no signal
+  activity is present on PE0.
+
+  I am, of course, thinking that this is a pin configuration issue.
 
 LEDs
 ====

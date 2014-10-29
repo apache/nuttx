@@ -100,7 +100,7 @@
 #elif defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart0port  /* UART0 is console */
 #    define TTYS0_DEV           g_uart0port  /* UART0 is ttyS0 */
-#    define UART1_ASSIGNED      1
+#    define UART0_ASSIGNED      1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart1port  /* UART1 is console */
 #    define TTYS0_DEV           g_uart1port  /* UART1 is ttyS0 */
@@ -359,15 +359,15 @@ static struct uart_dev_s g_usart0port =
   .recv      =
   {
     .size    = CONFIG_USART0_RXBUFSIZE,
-    .buffer  = g_uart0rxbuffer,
+    .buffer  = g_usart0rxbuffer,
   },
   .xmit      =
   {
     .size    = CONFIG_USART0_TXBUFSIZE,
-    .buffer  = g_uart0txbuffer,
+    .buffer  = g_usart0txbuffer,
    },
   .ops       = &g_uart_ops,
-  .priv      = &g_uart0priv,
+  .priv      = &g_usart0priv,
 };
 #endif
 
@@ -397,15 +397,15 @@ static struct uart_dev_s g_usart1port =
   .recv      =
   {
     .size    = CONFIG_USART1_RXBUFSIZE,
-    .buffer  = g_uart1rxbuffer,
+    .buffer  = g_usart1rxbuffer,
   },
   .xmit      =
   {
     .size    = CONFIG_USART1_TXBUFSIZE,
-    .buffer  = g_uart1txbuffer,
+    .buffer  = g_usart1txbuffer,
    },
   .ops       = &g_uart_ops,
-  .priv      = &g_uart1priv,
+  .priv      = &g_usart1priv,
 };
 #endif
 
@@ -435,15 +435,15 @@ static struct uart_dev_s g_usart2port =
   .recv     =
   {
     .size   = CONFIG_USART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
+    .buffer = g_usart2rxbuffer,
   },
   .xmit     =
   {
     .size   = CONFIG_USART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
+    .buffer = g_usart2txbuffer,
    },
   .ops      = &g_uart_ops,
-  .priv     = &g_uart2priv,
+  .priv     = &g_usart2priv,
 };
 #endif
 
