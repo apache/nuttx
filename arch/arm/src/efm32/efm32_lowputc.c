@@ -325,7 +325,7 @@ void efm32_lowsetup(void)
 #ifdef HAVE_LEUART_DEVICE
   /* Enable clocking to configured LEUART interfaces */
 
-  regval = getreg32(EFM32_CMU_LFBCLKEN0);
+  regval  = getreg32(EFM32_CMU_LFBCLKEN0);
   regval &= ~(CMU_LFBCLKEN0_LEUART0
 #ifdef CONFIG_EFM32_LEUART1
              | CMU_LFBCLKEN0_LEUART1
