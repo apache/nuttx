@@ -198,8 +198,7 @@
 
 #define EFM32_TXERR_INTS      (USART_IEN_TXOF)
 #define EFM32_RXERR_INTS      (USART_IEN_RXOF | USART_IEN_RXUF | \
-                               USART_IEN_TXUF | USART_IEN_PERR | \
-                               USART_IEN_FERR)
+                               USART_IEN_PERR | USART_IEN_FERR)
 #ifdef CONFIG_DEBUG
 #  define EFM32_TX_INTS       (USART_IEN_TXBL | EFM32_TXERR_INTS)
 #  define EFM32_RX_INTS       (USART_IEN_RXDATAV | EFM32_RXERR_INTS)
