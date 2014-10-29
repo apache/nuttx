@@ -8894,3 +8894,7 @@
 	  currently supported in the Nuttx C library (2014-10-27).
 	* include/termios.h, libc/termios/lib_isatty.c, and Make.defs: Add
 	  isatty() function. From  Alan Carvalho de Assis (2014-10-27).
+	* arch/arm/include/efm32, src/efm32, and configs/efm32-gxxx-stk:
+	  The EFM32 Gecko Starter Kit port is now functional.  At least
+	  NSH is running over LEUART0 on the board (2014-10-29).
+
