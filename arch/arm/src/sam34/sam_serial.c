@@ -48,6 +48,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#ifdef CONFIG_SERIAL_TERMIOS
+#  include <termios.h>
+#endif
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
@@ -71,7 +75,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
@@ -104,6 +108,17 @@
 #if defined(CONFIG_SAM34_USART0) || defined(CONFIG_SAM34_USART1) ||\
     defined(CONFIG_SAM34_USART2) || defined(CONFIG_SAM34_USART3)
 #  define HAVE_USART
+#endif
+
+/* Hardware flow control requires using the PDC or DMAC channel for reception */
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#  warning PDC or DMAC support is required for RTS hardware flow control
+#  undef CONFIG_SERIAL_IFLOWCONTROL
+#  undef CONFIG_USART0_IFLOWCONTROL
+#  undef CONFIG_USART1_IFLOWCONTROL
+#  undef CONFIG_USART2_IFLOWCONTROL
+#  undef CONFIG_USART3_IFLOWCONTROL
 #endif
 
 /* Is there a serial console?  It could be on UART0-1 or USART0-3 */
@@ -339,13 +354,16 @@
 
 struct up_dev_s
 {
-  uint32_t usartbase; /* Base address of USART registers */
-  uint32_t baud;      /* Configured baud */
-  uint32_t sr;        /* Saved status bits */
-  uint8_t  irq;       /* IRQ associated with this USART */
-  uint8_t  parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;      /* Number of bits (7 or 8) */
-  bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  const uint32_t usartbase;     /* Base address of USART registers */
+  uint32_t baud;                /* Configured baud */
+  uint32_t sr;                  /* Saved status bits */
+  uint8_t  irq;                 /* IRQ associated with this USART */
+  uint8_t  parity;              /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;                /* Number of bits (5-9) */
+  bool     stopbits2;           /* true: Configure with 2 stop bits instead of 1 */
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  bool     flowc;               /* input flow control (RTS) enabled */
+#endif
 };
 
 /****************************************************************************
@@ -487,6 +505,9 @@ static struct up_dev_s g_usart0priv =
   .parity         = CONFIG_USART0_PARITY,
   .bits           = CONFIG_USART0_BITS,
   .stopbits2      = CONFIG_USART0_2STOP,
+#if defined(CONFIG_USART0_OFLOWCONTROL) || defined(CONFIG_USART0_IFLOWCONTROL)
+  .flowc          = true,
+#endif
 };
 
 static uart_dev_t g_usart0port =
@@ -517,6 +538,9 @@ static struct up_dev_s g_usart1priv =
   .parity         = CONFIG_USART1_PARITY,
   .bits           = CONFIG_USART1_BITS,
   .stopbits2      = CONFIG_USART1_2STOP,
+#if defined(CONFIG_USART1_OFLOWCONTROL) || defined(CONFIG_USART1_IFLOWCONTROL)
+  .flowc          = true,
+#endif
 };
 
 static uart_dev_t g_usart1port =
@@ -547,6 +571,9 @@ static struct up_dev_s g_usart2priv =
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
+#if defined(CONFIG_USART2_OFLOWCONTROL) || defined(CONFIG_USART2_IFLOWCONTROL)
+  .flowc          = true,
+#endif
 };
 
 static uart_dev_t g_usart2port =
@@ -577,6 +604,9 @@ static struct up_dev_s g_usart3priv =
   .parity         = CONFIG_USART3_PARITY,
   .bits           = CONFIG_USART3_BITS,
   .stopbits2      = CONFIG_USART3_2STOP,
+#if defined(CONFIG_USART3_OFLOWCONTROL) || defined(CONFIG_USART3_IFLOWCONTROL)
+  .flowc          = true,
+#endif
 };
 
 static uart_dev_t g_usart3port =
@@ -680,7 +710,28 @@ static int up_setup(struct uart_dev_s *dev)
    * as the timing source
    */
 
-  regval = (UART_MR_MODE_NORMAL | SAM_MR_USCLKS);
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  /* "Setting the USART to operate with hardware handshaking is performed by
+   *  writing the USART_MODE field in the Mode Register (US_MR) to the value
+   *  0x2. ... Using this mode requires using the PDC or DMAC channel for
+   *  reception. The transmitter can handle hardware handshaking in any case."
+   */
+
+  if (priv->flowc)
+    {
+      /* Enable hardware flow control and MCK as the timing source */
+
+      regval = (UART_MR_MODE_HWHS | SAM_MR_USCLKS);
+    }
+  else
+#endif
+    {
+      /* Set up the mode register.  Start with normal UART mode and the MCK
+       * as the timing source
+       */
+
+      regval = (UART_MR_MODE_NORMAL | SAM_MR_USCLKS);
+    }
 
   /* OR in settings for the selected number of bits */
 
@@ -760,6 +811,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, SAM_UART_CR_OFFSET, (UART_CR_RXEN|UART_CR_TXEN));
 #endif
+
   return OK;
 }
 
@@ -959,7 +1011,7 @@ static int up_interrupt(int irq, void *context)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
@@ -982,6 +1034,160 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
        }
        break;
 #endif
+
+#ifdef CONFIG_SERIAL_TERMIOS
+    case TCGETS:
+      {
+        struct termios  *termiosp = (struct termios*)arg;
+        struct up_dev_s *priv     = (struct up_dev_s *)dev->priv;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+
+        /* Return parity */
+
+        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                            ((priv->parity == 1) ? PARODD : 0);
+
+        /* Return stop bits */
+
+        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+
+        /* Return flow control */
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+        termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
+#endif
+        /* Return number of bits */
+
+        switch (priv->bits)
+          {
+          case 5:
+            termiosp->c_cflag |= CS5;
+            break;
+
+          case 6:
+            termiosp->c_cflag |= CS6;
+            break;
+
+          case 7:
+            termiosp->c_cflag |= CS7;
+            break;
+
+          default:
+          case 8:
+            termiosp->c_cflag |= CS8;
+            break;
+
+          case 9:
+            termiosp->c_cflag |= CS8 /* CS9 */;
+            break;
+          }
+      }
+      break;
+
+    case TCSETS:
+      {
+        struct termios  *termiosp = (struct termios*)arg;
+        struct up_dev_s *priv     = (struct up_dev_s *)dev->priv;
+        uint32_t baud;
+        uint8_t parity;
+        uint8_t nbits;
+        bool stop2;
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+        bool flowc;
+#endif
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Decode baud. */
+
+        ret = OK;
+        baud = cfgetispeed(termiosp);
+
+        /* Decode number of bits */
+
+        switch (priv->bits)
+          {
+          case CS5:
+            nbits = 5;
+            break;
+
+          case CS6:
+            nbits = 6;
+            break;
+
+          case CS7:
+            nbits = 7;
+            break;
+
+          case CS8:
+            nbits = 8;
+            break;
+#if 0
+          case CS9:
+            nbits = 9;
+            break;
+#endif
+          default:
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Decode parity */
+
+        if (termiosp->c_cflag & PARENB)
+          {
+            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            parity = 0;
+          }
+
+        /* Decode stop bits */
+
+        stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+
+        /* Decode flow control */
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+        flowc = (termiosp->c_cflag & (CCTS_OFLOW | CRTS_IFLOW)) != 0;
+#endif
+        /* Verify that all settings are valid before committing */
+
+        if (ret == OK)
+          {
+            /* Commit */
+
+            priv->baud      = baud;
+            priv->parity    = parity;
+            priv->bits      = nbits;
+            priv->stopbits2 = stop2;
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+            priv->flowc     = flowc;
+#endif
+
+            /* effect the changes immediately - note that we do not
+             * implement TCSADRAIN / TCSAFLUSH
+             */
+
+            up_setup(dev);
+          }
+      }
+      break;
+#endif /* CONFIG_SERIAL_TERMIOS */
 
     default:
       ret = -ENOTTY;
