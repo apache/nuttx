@@ -210,6 +210,16 @@
 #define BOARD_UART0_TX_GPIO        (GPIO_PORTE|GPIO_PIN0)
 #define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
 
+/* LEUART0:
+ *
+ *   LEU0_RX #0 PD5  **AVAILABLE at TP123 and EXP port pin 14**
+ *   LEU0_TX #0 PD4  **AVAILABLE at TP122 and EXP port pin 12**
+ */
+
+#define BOARD_LEUART0_RX_GPIO        (GPIO_PORTD|GPIO_PIN5)
+#define BOARD_LEUART0_TX_GPIO        (GPIO_PORTD|GPIO_PIN4)
+#define BOARD_LEUART0_ROUTE_LOCATION _LEUART_ROUTE_LOCATION_LOC0
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
