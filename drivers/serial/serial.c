@@ -1376,7 +1376,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
           (void)sem_post(&dev->recvsem);
         }
 
-      /* Notify all poll/select waiters that and hangup occurred */
+      /* Notify all poll/select waiters that a hangup occurred */
 
       uart_pollnotify(dev, (POLLERR|POLLHUP));
     }

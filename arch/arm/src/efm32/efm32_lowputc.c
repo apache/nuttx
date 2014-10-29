@@ -323,6 +323,12 @@ void efm32_lowsetup(void)
 #endif /* HAVE_UART_DEVICE */
 
 #ifdef HAVE_LEUART_DEVICE
+  /* Enable the LE interface clock must be enabled in CMU_HFCORECLKEN0 */
+
+  regval  = getreg32(EFM32_CMU_HFCORECLKEN0);
+  regval |= CMU_HFCORECLKEN0_LE;
+  putreg32(regval, EFM32_CMU_HFCORECLKEN0);
+
   /* Enable clocking to configured LEUART interfaces */
 
   regval  = getreg32(EFM32_CMU_LFBCLKEN0);
