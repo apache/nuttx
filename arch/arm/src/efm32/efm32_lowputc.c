@@ -161,7 +161,7 @@ static void efm32_uart_setbaud(uintptr_t base,  uint32_t baud)
    *   baud          = 2400.0
    */
 
-  maxover = ((BOARD_HFPERCLK_FREQUENCY << 8) / 280) / baud;
+  maxover = (((uint64_t)BOARD_HFPERCLK_FREQUENCY << 8) / 280) / baud;
   if (maxover >= 16)
     {
       DEBUGASSERT(baud <= (BOARD_HFPERCLK_FREQUENCY / 16));
@@ -612,7 +612,6 @@ void efm32_uartconfigure(uintptr_t base, uint32_t baud, unsigned int parity,
     case 2:
       regval |= USART_FRAME_PARITY_EVEN;
       break;
-
     }
 
   /* Configure stop bits */
