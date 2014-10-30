@@ -29,7 +29,7 @@ STATUS
 ======
 
   2014-10-28.  At this point all basic boot operations are successful:  The
-    LEDs work and the application tasks appear to be successfully started. 
+    LEDs work and the application tasks appear to be successfully started.
     LED2 is on and LED0 is glowing (meaning that interrupts are being
     processed).  However, I get no output on PE0.  Data appears to be sent
     (at least by efm32_lowputc()).  However, no signal activity is present
