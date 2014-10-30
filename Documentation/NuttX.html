@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 28, 2014</p>
+      <p>Last Updated: October 30, 2014</p>
     </td>
   </tr>
 </table>
@@ -1262,7 +1262,7 @@
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (3)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (27)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (29)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (16)</li>
     </ul>
   <li>Atmel AVR
@@ -1391,6 +1391,12 @@
       <li><a href="#m16c">Renesas M16C/26</a></li>
     </ul>
   </li>
+  <li>Silicon Laboratories
+    <ul>
+      <li><a href="#efm32g">EFM32 Gecko</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#emf32gg">EFM32 Giant Gecko</a> <small>(ARM Cortex-M3)</small></li>
+    </ul>
+  </li>
   <li>STMicroelectronics
     <ul>
       <li><a href="#str71x">STMicro STR71x</a> <small>(ARM7TDMI)</small></li>
@@ -1401,15 +1407,17 @@
       <li><a href="#stm32f103x">STMicro STM32F103x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f107x">STMicro STM32F107x</a> <small>(STM32 F1 &quot;Connectivity Line&quot; family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f207x">STMicro STM32F207x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
+    </ul>
+  </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
+    <ul>
       <li><a href="#stm32303x">STMicro STM32F303x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
       <li><a href="#stm32f401x">STMicro STM32F401x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
     </ul>
-  </li>
-  </td>
-  <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>Texas Instruments (some formerly Luminary)
     <ul>
       <li><a href="#tms320c5471">TI TMS320-C5471</a> <small>(ARM7TDMI)</small></li>
@@ -2264,6 +2272,93 @@ nsh>
       That port was available in the NuttX-6.20 release.
       Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/ekk-lm3s9b96/README.txt">README</a> file for further information.
     </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="efm32g"><b>SiLabs EFM32 Gecko</b>.</a>
+      This is a port for the Silicon Laboraties EFM32 <i>Gecko</i> family.
+      Board support is available for the following:
+    </p>
+    <ol>
+      <li>
+        <p>
+          <b>SiLabs EFM32 Gecko Starter Kit t (EFM32-G8XX-STK)</b>.
+          The Gecko Starter Kit features:
+        <p>
+        <ul>
+          <li>EFM32G890F128 MCU with 128 kB flash and 16 kB RAM
+          <li>32.768 kHz crystal (LXFO) and 32 MHz crystal (HXFO)
+          <li>Advanced Energy Monitoring
+          <li>Touch slider
+          <li>4x40 LCD
+          <li>4 User LEDs
+          <li>2 pushbutton switches
+          <li>Reset button and a switch to disconnect the battery.
+          <li>On-board SEGGER J-Link USB emulator
+          <li>ARM 20 pin JTAG/SWD standard Debug in/out connector 
+        </ul>
+        <p>
+          <b>STATUS</b>.
+          The basic port is verified and available now.  This includes
+          on-board LED and button support and a serial console available
+          on LEUART0.  A single configuration is available using the
+          NuttShell NSH and the LEUART0 serial console.
+        </p>
+        <p>
+           Refer to the EFM32 Gecko Starter Kit <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/efm32-g8xx-stk/README.txt"><i>README.txt</i></a> file for further information.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>Olimex EFM32G880F120-STK</b>.
+          This board features:
+        </p>
+        <ul>
+          <li>EFM32G880F128 with 128 kB flash and 16 kB RAM
+          <li>32.768 kHz crystal (LXFO) and 32 MHz crystal (HXFO)
+          <li>LCD custom display
+          <li>DEBUG connector with ARM 2x10 pin layout for programming/debugging with ARM-JTAG-EW
+          <li>UEXT connector
+          <li>EXT extension connector
+          <li>RS232 connector and driver
+          <li>Four user buttons
+          <li>Buzzer
+        </ul>
+        <p>
+          <b>STATUS</b>.
+          The board suppport is complete but untested because of tool-related issues.  An OpenOCD compatible, SWD debugger would be required to make further progress in testing.
+        </p>
+        <p>
+           Refer to the Olimex EFM32G880F120-STK <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/olimex-efm32g880f129-stk/README.txt"><i>README.txt</i></a> for further information.
+        </p>
+      </li>
+    </ol>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="efm32gg"><b>SiLabs EFM32 Giant Gecko</b>.</a>
+      This is a port for the Silicon Laboraties EFM32 <i>Giant Gecko</i> family.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS</b>.
+          At this time there are no board support packages for the <i>Giant Gecko</i> in the NuttX source tree (there are ports to proprietary <i>Giant Gecko</i> hardware, howevever).
+      </p>
+    </ul>
   </td>
 </tr>
 <tr>
