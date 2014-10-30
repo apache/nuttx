@@ -985,7 +985,7 @@ config BOARD_CUSTOM_BUTTONS
 	bool "Custom board buttons"
 	default n
 	select ARCH_HAVE_BUTTONS
-	select ARCH__BUTTONS
+	select ARCH_BUTTONS
 
 config BOARD_CUSTOM_IRQBUTTONS
 	bool "Custom Board IRQ buttons"
