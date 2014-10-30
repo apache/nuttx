@@ -1278,7 +1278,7 @@
 	  board (Contributed by Dave Marples).
 	* sched/sem_wait.c and sem_waitirq.c: Eliminate a race condition
 	  that can occur when a semaphore wait is interrupt by a signal.
-	  (see email thread: http://tech.groups.yahoo.com/group/nuttx/message/530)
+	  (see email thread: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/530)
 	* drivers/mtd/at45db.c: Add a driver for the Atmel AT45DB161D 4Mbit
 	  SPI FLASH part (untested on initial check-in).
 	* arch/arm/src/lm3s and arch/arm/include/lm3s: Corrections for the
