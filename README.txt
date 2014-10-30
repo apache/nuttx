@@ -150,6 +150,24 @@ Downloading from Repositories
 
       https://sourceforge.net/p/nuttx/git
 
+  Configuring the Cone
+
+    Set your identity:
+
+      git config --global user.name "My Name"
+      git config --global user.email my.name@example.com
+
+    Colorized diffs are much easier to read:
+
+      git config --global color.branch auto
+      git config --global color.diff auto
+      git config --global color.interactive auto
+      git config --global color.status auto
+
+    Checkout other settings
+
+      git config --list
+
   Cloning NuttX Inside Cygwin
 
     If you are cloning the NuttX repository, it is recommended to avoid
