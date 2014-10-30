@@ -146,7 +146,7 @@ LPC21ISP (Linux)
 
 (ca. 2008)
 I use the lpc21isp tool to load NuttX into FLASH.  That tool is available
-in the files section at http://tech.groups.yahoo.com/group/lpc21isp/.  In
+in the files section at https://groups.yahoo.com/neo/groups/lpc21isp/info.  In
 the older version 1.60 of lpc21isp for Linux, I had to make several changes.
 This changes are shown in lpc21ips-1.60.diff.
 

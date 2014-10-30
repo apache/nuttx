@@ -48,6 +48,8 @@ STATUS
     (probably because UART0 is used with the board controller???).  Pins
     are not available for other U[S]ARTs on the board.
 
+    DMA and USART-based SPI supported are included, but not yet tested.
+
   2014-10-29:  Calibrated the delays loops.
 
   2014-10-29:  The start-up time is long -- about a second.  I have traced
