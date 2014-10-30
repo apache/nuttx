@@ -1118,7 +1118,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Decode number of bits */
 
-        switch (priv->bits)
+        switch (termiosp->c_cflag & CSIZE)
           {
           case CS5:
             nbits = 5;
@@ -1147,7 +1147,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Decode parity */
 
-        if (termiosp->c_cflag & PARENB)
+        if ((termiosp->c_cflag & PARENB) != 0)
           {
             parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
           }
@@ -1183,7 +1183,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            up_setup(dev);
+            ret = up_setup(dev);
           }
       }
       break;
