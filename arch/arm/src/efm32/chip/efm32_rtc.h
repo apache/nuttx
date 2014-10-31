@@ -58,8 +58,8 @@
  *
  *******************************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_RTC_H_
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_RTC_H_
+#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_RTC_H
+#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_RTC_H
 
 /*******************************************************************************************************************************
  * Included Files
@@ -278,4 +278,4 @@
 #define _RTC_SYNCBUSY_COMP1_DEFAULT      0x00000000UL                       /* Mode DEFAULT for RTC_SYNCBUSY */
 #define RTC_SYNCBUSY_COMP1_DEFAULT       (_RTC_SYNCBUSY_COMP1_DEFAULT << 2) /* Shifted mode DEFAULT for RTC_SYNCBUSY */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_RTC_H_ */
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_RTC_H */

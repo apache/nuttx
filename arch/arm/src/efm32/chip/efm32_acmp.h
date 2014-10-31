@@ -58,8 +58,8 @@
  *
  *******************************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ACMP_H_
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ACMP_H_
+#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ACMP_H
+#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ACMP_H
 
 /*******************************************************************************************************************************
  * Included Files
@@ -399,4 +399,4 @@
 #define ACMP_ROUTE_LOCATION_LOC1           (_ACMP_ROUTE_LOCATION_LOC1 << 8)    /* Shifted mode LOC1 for ACMP_ROUTE */
 #define ACMP_ROUTE_LOCATION_LOC2           (_ACMP_ROUTE_LOCATION_LOC2 << 8)    /* Shifted mode LOC2 for ACMP_ROUTE */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ACMP_H_ */
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ACMP_H */

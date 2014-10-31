@@ -58,8 +58,8 @@
  *
  *******************************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H_
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H_
+#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H
+#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H
 
 /*******************************************************************************************************************************
  * Included Files
@@ -175,4 +175,4 @@
 #define _WDOG_SYNCBUSY_CMD_DEFAULT       0x00000000UL                       /* Mode DEFAULT for WDOG_SYNCBUSY */
 #define WDOG_SYNCBUSY_CMD_DEFAULT        (_WDOG_SYNCBUSY_CMD_DEFAULT << 1)  /* Shifted mode DEFAULT for WDOG_SYNCBUSY */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H_ */
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H */

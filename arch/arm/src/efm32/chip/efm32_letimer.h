@@ -58,8 +58,8 @@
  *
  *******************************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H_
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H_
+#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H
+#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H
 
 /*******************************************************************************************************************************
  * Included Files
@@ -485,4 +485,4 @@
 #define LETIMER_ROUTE_LOCATION_LOC2          (_LETIMER_ROUTE_LOCATION_LOC2 << 8)    /* Shifted mode LOC2 for LETIMER_ROUTE */
 #define LETIMER_ROUTE_LOCATION_LOC3          (_LETIMER_ROUTE_LOCATION_LOC3 << 8)    /* Shifted mode LOC3 for LETIMER_ROUTE */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H_ */
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LETIMER_H */

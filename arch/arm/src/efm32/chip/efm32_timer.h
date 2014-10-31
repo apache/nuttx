@@ -58,8 +58,8 @@
  *
  *******************************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_TIMER_H_
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_TIMER_H_
+#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_TIMER_H
+#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_TIMER_H
 
 /*******************************************************************************************************************************
  * Included Files
@@ -1216,4 +1216,4 @@
 #define TIMER_DTLOCK_LOCKKEY_LOCKED                (_TIMER_DTLOCK_LOCKKEY_LOCKED << 0)   /* Shifted mode LOCKED for TIMER_DTLOCK */
 #define TIMER_DTLOCK_LOCKKEY_UNLOCK                (_TIMER_DTLOCK_LOCKKEY_UNLOCK << 0)   /* Shifted mode UNLOCK for TIMER_DTLOCK */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_TIMER_H_ */
+#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_TIMER_H */
