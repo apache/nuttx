@@ -1,5 +1,5 @@
 /*******************************************************************************************************************************
- * arch/arm/src/efm32/EFM32GG/efm32gg_acmp.h
+ * arch/arm/src/efm32/chip/efm32_acmp.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
