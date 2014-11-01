@@ -73,13 +73,13 @@ config SYSLOG
 		console (like printf()).  This setting is required to enable
 		customization of the basic system loggin capability.
 
-if SYSLOG
-
 config SYSLOG_TIMESTAMP
 	bool "Prepend timestamp to syslog message"
-	default y
+	default n
 	---help---
 		Prepend timestamp to syslog message.
+
+if SYSLOG
 
 config SYSLOG_CHAR
 	bool "System log character device support"
