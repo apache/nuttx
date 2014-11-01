@@ -60,6 +60,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
+#include "chip/efm32_usart.h"
 #include "efm32_config.h"
 #include "efm32_dma.h"
 #include "efm32_lowputc.h"

@@ -875,7 +875,7 @@ static inline void efm32_itm_syslog(void)
    */
 
   regval  = getreg32(EFM32_GPIO_ROUTE);
-  regval &= _GPIO_ROUTE_SWLOCATION_MASK;
+  regval &= ~_GPIO_ROUTE_SWLOCATION_MASK;
   regval |= GPIO_ROUTE_SWOPEN;
   regval |= ((uint32_t)BOARD_SWOPORT_LOCATION << _GPIO_ROUTE_SWLOCATION_SHIFT);
   putreg32(regval, EFM32_GPIO_ROUTE);

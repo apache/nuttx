@@ -118,5 +118,6 @@ int tcsetattr(int fd, int options, FAR const struct termios *termiosp)
     {
       return ioctl(fd, TCSETS, (unsigned long)termiosp);
     }
+
   return -ENOSYS;
 }
