@@ -65,7 +65,12 @@
  * Included Files
  *******************************************************************************************************************************/
 
+#include <nuttx/config.h>
 #include "chip/efm32_memorymap.h"
+
+#if !defined(CONFIG_EFM32_EFM32GG) && !defined(CONFIG_EFM32_EFM32G)
+#  warning This is the EFM32GG/G header file; Review/modification needed for this archtecture
+#endif
 
 /*******************************************************************************************************************************
  * Pre-processor Definitions
