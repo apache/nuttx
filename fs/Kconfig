@@ -75,6 +75,12 @@ config SYSLOG
 
 if SYSLOG
 
+config SYSLOG_TIMESTAMP
+	bool "Prepend timestamp to syslog message"
+	default y
+	---help---
+		Prepend timestamp to syslog message.
+
 config SYSLOG_CHAR
 	bool "System log character device support"
 	default y
