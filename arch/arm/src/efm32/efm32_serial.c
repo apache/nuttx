@@ -240,7 +240,9 @@ static inline void efm32_serialout(struct efm32_usart_s *priv, int offset,
 static inline void efm32_setuartint(struct efm32_usart_s *priv);
 
 static void efm32_restoreuartint(struct efm32_usart_s *priv, uint32_t ien);
+#ifdef HAVE_UART_CONSOLE
 static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien);
+#endif
 static int  efm32_setup(struct uart_dev_s *dev);
 static void efm32_shutdown(struct uart_dev_s *dev);
 static int  efm32_attach(struct uart_dev_s *dev);
@@ -574,6 +576,7 @@ static void efm32_restoreuartint(struct efm32_usart_s *priv, uint32_t ien)
  * Name: efm32_disableuartint
  ****************************************************************************/
 
+#ifdef HAVE_UART_CONSOLE
 static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
 {
   irqstate_t flags;
@@ -587,6 +590,7 @@ static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
   efm32_restoreuartint(priv, 0);
   irqrestore(flags);
 }
+#endif
 
 /****************************************************************************
  * Name: efm32_setup
@@ -1125,6 +1129,7 @@ static bool efm32_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
   /* Disable interrupts from all UARTS.  The console is enabled in
@@ -1152,6 +1157,7 @@ void up_earlyserialinit(void)
   efm32_setup(&CONSOLE_DEV);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
