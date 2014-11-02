@@ -77,10 +77,15 @@
 #define LLONG_MAX   9223372036854775807LL
 #define ULLONG_MAX  18446744073709551615ULL
 
-/* A pointer is 4 bytes */
+/* A pointer is 4 or 8 bytes */
 
 #define PTR_MIN     (-PTR_MAX - 1)
-#define PTR_MAX     2147483647
-#define UPTR_MAX    4294967295U
+#if !defined(CONFIG_HOST_X86_64) || defined(CONFIG_SIM_M32)
+#  define PTR_MAX   2147483647
+#  define UPTR_MAX  4294967295U
+#else
+#  define PTR_MAX   9223372036854775807LL
+#  define UPTR_MAX  18446744073709551615ULL
+#endif
 
 #endif /* __ARCH_SIM_INCLUDE_LIMITS_H  */
