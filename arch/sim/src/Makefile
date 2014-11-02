@@ -213,7 +213,7 @@ nuttx$(EXEEXT): cleanrel nuttx.rel $(HOSTOBJS)
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
-	$(Q) rm -f nuttx.rel
+	#$(Q) rm -f nuttx.rel
 
 # This is part of the top-level export target
 
