@@ -12,6 +12,7 @@ fwrite         NXfwrite
 fsync          NXfsync
 gettimeofday   NXgettimeofday
 ioctl          NXioctl
+isatty         NXisatty
 lseek          NXlseek
 malloc         NXmalloc
 malloc_init    NXmalloc_init
@@ -32,8 +33,11 @@ socket         NXsocket
 stat           NXstat
 statfs         NXstatfs
 system         NXsystem
+tcgetattr      NXtcgetattr
+tcsetattr      NXtcsetattr
 umount         NXumount
 unlink         NXunlink
 usleep         NXusleep
+vfork          NXvfork
 write          NXwrite
 zmalloc        NXzmalloc
