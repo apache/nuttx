@@ -112,24 +112,44 @@
 /* These definitions define the characteristics of allocator
  *
  * MM_MIN_SHIFT is used to define MM_MIN_CHUNK.
- * MM_MIN_CHUNK - is the smallest physical chunk that can
- *   be allocated.  It must be at least a large as
- *   sizeof(struct mm_freenode_s).  Larger values may
- *   improve performance slightly, but will waste memory
- *   due to quantization losses.
+ * MM_MIN_CHUNK - is the smallest physical chunk that can be allocated.  It
+ *   must be at least a large as sizeof(struct mm_freenode_s).  Larger values
+ *   may improve performance slightly, but will waste memory due to
+ *   quantization losses.
  *
  * MM_MAX_SHIFT is used to define MM_MAX_CHUNK
- * MM_MAX_CHUNK is the largest, contiguous chunk of memory
- *   that can be allocated.  It can range from 16-bytes to
- *   4Gb.  Larger values of MM_MAX_SHIFT can cause larger
- *   data structure sizes and, perhaps, minor performance
- *   losses.
+ * MM_MAX_CHUNK is the largest, contiguous chunk of memory that can be
+ *   allocated.  It can range from 16-bytes to 4Gb.  Larger values of
+ *   MM_MAX_SHIFT can cause larger data structure sizes and, perhaps,
+ *   minor performance losses.
  */
 
-#ifdef CONFIG_MM_SMALL
+#if defined(CONFIG_MM_SMALL) && UINTPTR_MAX <= UINT32_MAX
+/* Two byte offsets; Pointers may be 2 or 4 bytes;
+ * sizeof(struct mm_freenode_s) is 8 or 12 bytes.
+ * REVISIT: We could do better on machines with 16-bit addressing.
+ */
+
 #  define MM_MIN_SHIFT    4  /* 16 bytes */
 #  define MM_MAX_SHIFT   15  /* 32 Kb */
+
+#elif defined(CONFIG_HAVE_LONG_LONG)
+/* Four byte offsets; Pointers may be 4 or 8 bytes
+ * sizeof(struct mm_freenode_s) is 16 or 24 bytes.
+ */
+  
+#  if UINTPTR_MAX <= UINT32_MAX
+#    define MM_MIN_SHIFT  4  /* 16 bytes */
+#  elif UINTPTR_MAX <= UINT64_MAX
+#    define MM_MIN_SHIFT  5  /* 32 bytes */
+#  endif
+#  define MM_MAX_SHIFT   22  /*  4 Mb */
+
 #else
+/* Four byte offsets; Pointers must be 4 bytes.
+ * sizeof(struct mm_freenode_s) is 16 bytes.
+ */
+
 #  define MM_MIN_SHIFT    4  /* 16 bytes */
 #  define MM_MAX_SHIFT   22  /*  4 Mb */
 #endif
