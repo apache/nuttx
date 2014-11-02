@@ -107,7 +107,7 @@ int open(const char *path, int oflags, ...)
 
   /* If the file is opened for creation, then get the mode bits */
 
-  if (oflags & (O_WRONLY|O_CREAT) != 0)
+  if ((oflags & (O_WRONLY|O_CREAT)) != 0)
     {
       va_list ap;
       va_start(ap, oflags);
