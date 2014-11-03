@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/efm32-g8xx-stk/src/efm32-g8xx-stk.h
+ * configs/efm32gg-stk3700/include/efm32gg-stk3700.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_EFM32_G8XX_STK_SRC_EFM32_G8XX_STK_H
-#define __CONFIGS_EFM32_G8XX_STK_SRC_EFM32_G8XX_STK_H
+#ifndef __CONFIGS_EFM32GG_STK3700_SRC_EFM32GG_STK3700_H
+#define __CONFIGS_EFM32GG_STK3700_SRC_EFM32GG_STK3700_H
 
 /****************************************************************************
  * Included Files
@@ -45,47 +45,45 @@
  ****************************************************************************/
 /* UART0
  *
- *   The control MCU acts as a board controller (BC). There is a UART
- *   connection between the EFM and the BC. The connection is made by
- *   setting the EFM_BC_EN (PD13) line high. The EFM can then use the BSP to
- *   send commands to the BC. When EFM_BC_EN is low, EFM_BC_TX and EFM_BC_RX
- *   can be used by other applications.
+ * The kit contains a board controller that is responsible for performing
+ * various board level tasks, such as handling the debugger and the Advanced
+ * Energy Monitor. An interface is provided between the EFM32 and the board
+ * controller in the form of a UART connection. The connection is enabled by
+ * setting the EFM_BC_EN (PF7) line high, and using the lines EFM_BC_TX
+ * (PE0) and EFM_BC_RX (PE1) for communicating.
  */
 
-#ifdef CONFIG_EFM32G8STK_BCEN
+#ifdef CONFIG_EFM32GG_STK3700_BCEN
 #  define GPIO_BC_EN  (GPIO_OUTPUT_PUSHPULL|GPIO_OUTPUT_SET|\
-                       GPIO_PORTD|GPIO_PIN13)
+                       GPIO_PORTF|GPIO_PIN7)
 #else
 #  define GPIO_BC_EN  (GPIO_OUTPUT_PUSHPULL|GPIO_OUTPUT_CLEAR|\
-                       GPIO_PORTD|GPIO_PIN13)
+                       GPIO_PORTF|GPIO_PIN7)
 #endif
 
- /* LEDs
-  *
-  * The EFM32 Gecko Start Kit has four yellow LEDs.  These LEDs are connected
-  * as follows:
-  *
-  *   ------------------------------------- --------------------
-  *   EFM32 PIN                             BOARD SIGNALS
-  *   ------------------------------------- --------------------
-  *   C0/USART1_TX#0/PCNT0_S0IN#2/ACMP0_CH0  MCU_PC0  UIF_LED0
-  *   C1/USART1_RX#0/PCNT0_S1IN#2/ACMP0_CH1  MCU_PC1  UIF_LED1
-  *   C2/USART2_TX#0/ACMP0_CH2               MCU_PC2  UIF_LED2
-  *   C3/USART2_RX#0/ACMP0_CH3               MCU_PC3  UIF_LED3
-  *   ------------------------------------- --------------------
-  *
-  * All LEDs are grounded and so are illuminated by outputting a high
-  * value to the LED.
-  */
+/* LEDs
+ *
+ * The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
+ * These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
+ * connected to pins PE2 and PE3 in an active high configuration:
+ *
+ * ------------------------------------- --------------------
+ * EFM32 PIN                             BOARD SIGNALS
+ * ------------------------------------- --------------------
+ * E2/BCK_VOUT/EBI_A09 #0/               MCU_PE2 UIF_LED0
+ *   TIM3_CC2 #1/U1_TX #3/ACMP0_O #1
+ * E3/BCK_STAT/EBI_A10 #0/U1_RX #3/      MCU_PE3 UIF_LED1
+ *   ACMP1_O #1
+ * ------------------------------------- --------------------
+ *
+ * All LEDs are grounded and so are illuminated by outputting a high
+ * value to the LED.
+ */
 
-#define GPIO_LED0       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN0)
-#define GPIO_LED1       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN1)
-#define GPIO_LED2       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN2)
-#define GPIO_LED3       (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN3)
+#define GPIO_LED0     (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+                       GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN2)
+#define GPIO_LED1     (GPIO_OUTPUT_WIREDOR_PULLDOWN|\
+                       GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN3)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -99,4 +97,4 @@
 void board_led_initialize(void);
 #endif
 
-#endif /* __CONFIGS_EFM32_G8XX_STK_SRC_EFM32_G8XX_STK_H */
+#endif /* __CONFIGS_EFM32GG_STK3700_SRC_EFM32GG_STK3700_H */
