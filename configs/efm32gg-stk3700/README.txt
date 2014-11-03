@@ -26,9 +26,9 @@ README
 STATUS
 ======
 
-  This README now exists only as some analysis for a port to the EFM32 Giant
-  Gecko Starter Kit.  That port has not yet been developed and I do not now
-  have hardware in hand.  So the status is partially analyzed, but not yet implemented.
+  2014-11-02:  Completed the basic NSH configuration for the EFM32 Giant Gecko
+    Starter Kit.  The hardware is on order and the port will be verified sometime
+    thereafter.
 
 LEDs and Buttons
 ================
@@ -98,7 +98,12 @@ Serial Console
 
    Default Serial Console
    ----------------------
-   UART0 is configured as the default serial console at 115200 8N1
+   LEUART0 is configured as the default serial console at 2400 8N1
+   on pins PD5 and PD4.  It certainly be possible to go to 4800 baud
+   and the documentation claims that 9600 baud is possible (although
+   I am not sure how).
+
+   It should also be possible to use UART0 is configured at 115200 8N1
    on pins PE0 and PE1.
 
    Communication through the Board Controller
@@ -130,7 +135,7 @@ Configurations
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART0.  Support for
+    Configuration enables the serial interfaces on LEUART0.  Support for
     built-in applications is enabled, but in the base configuration no
     built-in applications are selected (see NOTES below).
 
