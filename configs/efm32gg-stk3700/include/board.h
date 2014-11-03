@@ -240,7 +240,15 @@
 /* Pin routing **************************************************************/
 /* UART0:
  *
- *   To be provided
+ *   The kit contains a board controller that is responsible for performing
+ *   various board level tasks, such as handling the debugger and the Advanced
+ *   Energy Monitor. An interface is provided between the EFM32 and the board
+ *   controller in the form of a UART connection. The connection is enabled by
+ *   setting the EFM_BC_EN (PF7) line high, and using the lines EFM_BC_TX
+ *   (PE0) and EFM_BC_RX (PE1) for communicating.
+ *
+ *   U0_TX #1 PE0 MCU_PE0, UART0_TX #0, EFM_BC_RX, BC_UART_RX
+ *   U0_RX #1 PE1 MCU_PE1, UART0_TX #1, EFM_BC_TX, BC_UART_TX
  */
 
 #define BOARD_UART0_RX_GPIO        (GPIO_PORTE|GPIO_PIN1)
@@ -249,12 +257,13 @@
 
 /* LEUART0:
  *
- *   To be provided
+ *   LEU0_RX #0 PD4 Available on TP121 and EXP pin 12
+ *   LEU0_TX #0 PD5 Available on TP122 and EXP pin 14
  */
 
-#define BOARD_LEUART0_RX_GPIO
-#define BOARD_LEUART0_TX_GPIO
-#define BOARD_LEUART0_ROUTE_LOCATION
+#define BOARD_LEUART0_RX_GPIO        (GPIO_PORTD|GPIO_PIN4)
+#define BOARD_LEUART0_TX_GPIO        (GPIO_PORTD|GPIO_PIN5)
+#define BOARD_LEUART0_ROUTE_LOCATION _LEUART_ROUTE_LOCATION_LOC0
 
 /****************************************************************************
  * Public Function Prototypes
