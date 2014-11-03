@@ -8902,4 +8902,7 @@
 	  PDC or DMAC support is required (2014-10-29).
 	* configs/sam4e-ek/src/sam4e-ek.h: Fix an error in a USART1 pin number
 	  (2014-10-29).
+	* configs/efm32gg-stk3700:  Board support for the SiLbas EFM32GG
+	  Giant Gecko Starter kit.  Current with basic NSH configuration only.
+	  Testing is on hold until I receive hardware (20145-11-03).
 
