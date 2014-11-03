@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* EFM32 EnergyMicro ************************************************************/
+/* EFM32 EnergyMicro ****************************************************************/
 
 /* Tiny Gecko with 32KiB FLASH and 4KiB RAM in a QFN64 package */
 
@@ -59,9 +59,12 @@
 #elif defined(CONFIG_ARCH_CHIP_EFM32G880F128) || \
       defined(CONFIG_ARCH_CHIP_EFM32G890F128)
 
-/* Giant Gecko with 1024KiB FLASH and 128KiB RAM in a QFP64 package */
+/* Giant Gecko with 1024KiB FLASH and 128KiB RAM in a QFP64 package
+ * (EFM32GG332F1024) or BGA112 (EFM32GG990F1024) package
+ */
 
-#elif defined(CONFIG_ARCH_CHIP_EFM32GG332F1024)
+#elif defined(CONFIG_ARCH_CHIP_EFM32GG332F1024) || \
+      defined(CONFIG_ARCH_CHIP_EFM32GG990F1024)
 
 #else
 #  error "Unsupported EFM32 chip"

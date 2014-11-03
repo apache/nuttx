@@ -42,6 +42,14 @@ config ARCH_CHIP_EFM32GG332F1024
 		This chip is a Giant Gecko with 1024KiB flash and 128KiB RAM in a
 		QFP64 package.
 
+config ARCH_CHIP_EFM32GG990F1024
+	bool "EFM32GG990F1024"
+	select EFM32_EFM32GG
+	select ARCH_CORTEXM3
+	---help---
+		This chip is a Giant Gecko with 1024KiB flash and 128KiB RAM in a
+		BGA112 package.
+
 endchoice
 
 # These hidden selections represent automatically selected MCU families and,
