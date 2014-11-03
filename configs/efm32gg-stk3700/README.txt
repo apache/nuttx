@@ -35,7 +35,7 @@ LEDs and Buttons
 
   LEDs
   ----
-  The EFM32 Giant Gecko Start Kit has two yellow LEDs marke LED0 and LED1.
+  The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
   These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
   connected to pins PE2 and PE3 in an active high configuration:
 
@@ -73,6 +73,10 @@ LEDs and Buttons
     LED_ASSERTION        An assertion failed          No change
     LED_PANIC            The system has crashed     OFF      Blinking
     LED_IDLE             STM32 is is sleep mode       Not used
+
+  Thus if LED0 statically on, NuttX has successfully booted and is,
+  apparently, running normally.  If LED1 is flashing at approximately
+  2Hz, then a fatal error has been detected and the system has halted.
 
   Buttons
   -------

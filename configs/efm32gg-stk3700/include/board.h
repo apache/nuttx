@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/efm32-g8xx-stk/include/board.h
+ * configs/efm32gg-stk3700/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_EFM32_G8XX_STK_INCLUDE_BOARD_H
-#define __CONFIGS_EFM32_G8XX_STK_INCLUDE_BOARD_H
+#ifndef __CONFIGS_EFM32GG_STK3700_INCLUDE_BOARD_H
+#define __CONFIGS_EFM32GG_STK3700_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -65,7 +65,7 @@
 #define BOARD_HAVE_LFXO        1        /* Have Loq frequency crystal oscillator */
 
 #define BOARD_HFRCO_FREQUENCY  14000000 /* 14MHz on reset */
-#define BOARD_HFXO_FREQUENCY   32000000 /* 32MHz crystal on board */
+#define BOARD_HFXO_FREQUENCY   48000000 /* 48MHz crystal on board */
 #define BOARD_LFRCO_FREQUENCY  32768    /* Low frequency oscillator */
 #define BOARD_LFXO_FREQUENCY   32768    /* 32MHz crystal on board */
 #define BOARD_ULFRCO_FREQUNCY  1000     /* Ultra low frequency oscillator */
@@ -117,9 +117,15 @@
  * ULFRCO is a special case.
  */
 
-#define BOARD_LFACLKSEL           _CMU_LFCLKSEL_LFA_LFXO
-#undef  BOARD_LFACLK_ULFRCO
-#define BOARD_LFACLK_FREQUENCY    BOARD_LFXO_FREQUENCY
+#if BOARD_HAVE_LFXO
+#   define BOARD_LFACLKSEL           _CMU_LFCLKSEL_LFA_LFXO
+#   undef  BOARD_LFACLK_ULFRCO
+#   define BOARD_LFACLK_FREQUENCY    BOARD_LFXO_FREQUENCY
+#else
+#   define BOARD_LFACLKSEL           _CMU_LFCLKSEL_LFA_LFRCO
+#   undef  BOARD_LFACLK_ULFRCO
+#   define BOARD_LFACLK_FREQUENCY    BOARD_LFRCO_FREQUENCY
+#endif
 
 /* LFBCLK - Low Frequency B Clock
  *
@@ -130,7 +136,7 @@
  * field in CMU_LFCLKSEL. The HFCORECLK/2 setting allows the Low Energy B
  * Peripherals to be used as high-frequency peripherals.
  *
- * Use _CMU_LFCLKSEL_LFA_DISABLED to disable
+ * Use _CMU_LFCLKSEL_LFA_DISABLED to disable.
  * ULFRCO is a special case.
  */
 
@@ -163,47 +169,78 @@
  */
 
 /* LEDs *********************************************************************/
-/* The EFM32 Gecko Starter Kit supports 4 yellow LEDs.  One side is grounded
- * so these LEDs are illuminated by outputting a high value.
+/* The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
+ * These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
+ * connected to pins PE2 and PE3 in an active high configuration:
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
- * any way.  The following definitions are used to access individual LEDs.
+ * ------------------------------------- --------------------
+ * EFM32 PIN                             BOARD SIGNALS
+ * ------------------------------------- --------------------
+ * E2/BCK_VOUT/EBI_A09 #0/               MCU_PE2 UIF_LED0
+ *   TIM3_CC2 #1/U1_TX #3/ACMP0_O #1
+ * E3/BCK_STAT/EBI_A10 #0/U1_RX #3/      MCU_PE3 UIF_LED1
+ *   ACMP1_O #1
+ * ------------------------------------- --------------------
+ *
+ * All LEDs are grounded and so are illuminated by outputting a high
+ * value to the LED.
  */
 
 /* LED index values for use with efm32_setled() */
 
 #define BOARD_LED0        0
 #define BOARD_LED1        1
-#define BOARD_LED2        2
-#define BOARD_LED3        3
-#define BOARD_NLEDS       4
+#define BOARD_NLEDS       2
 
 /* LED bits for use with efm32_setleds() */
 
 #define BOARD_LED0_BIT    (1 << BOARD_LED0)
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
-#define BOARD_LED2_BIT    (1 << BOARD_LED2)
-#define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
- * board the EFM32 Gecko Starter Kit.  The following definitions describe
- * how NuttX controls the LEDs in this configuration:
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/efm32_autoleds.c.  The LEDs are used to
+ * encode OS-related events as follows:
+ *
+ *      SYMBOL            Val    Meaning                     LED state
+ *                                                         LED0     LED1
+ *      ----------------- ---   -----------------------  -------- --------   */
+#define LED_STARTED       0  /* NuttX has been started     OFF      OFF      */
+#define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      */
+#define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      */
+#define LED_STACKCREATED  1  /* Idle stack created         ON       OFF      */
+#define LED_INIRQ         2  /* In an interrupt              No change       */
+#define LED_SIGNAL        2  /* In a signal handler          No change       */
+#define LED_ASSERTION     2  /* An assertion failed          No change       */
+#define LED_PANIC         3  /* The system has crashed     OFF      Blinking */
+#undef  LED_IDLE             /* MCU is is sleep mode         Not used        */
+
+/* Buttons ******************************************************************/
+/* The EFM32 Giant Gecko Start Kit has two buttons marked PB0 and PB1. They
+ * are connected to the EFM32, and are debounced by RC filters with a time
+ * constant of 1ms. The buttons are connected to pins PB9 and PB10:
+ *
+ * ------------------------------------- --------------------
+ * EFM32 PIN                             BOARD SIGNALS
+ * ------------------------------------- --------------------
+ * B9/EBI_A03/U1_TX #2                   MCU_PB9  UIF_PB0
+ * B10/EBI_A04/U1_RX #2                  MCU_PB10 UIF_PB1
+ * ------------------------------------- --------------------
+ *
+ * Buttons are connected to ground so they will read low when closed.
  */
 
-#define LED_STARTED       0  /* LED0 */
-#define LED_HEAPALLOCATE  1  /* LED1 */
-#define LED_IRQSENABLED   2  /* LED0 + LED1 */
-#define LED_STACKCREATED  3  /* LED2 */
-#define LED_INIRQ         4  /* LED0 + LED2 */
-#define LED_SIGNAL        5  /* LED1 + LED3 */
-#define LED_ASSERTION     6  /* LED0 + LED2 + LED2 */
-#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED3 */
+#define BUTTON_PB0        0
+#define BUTTON_PB1        1
+#define NUM_BUTTONS       2
+
+#define BUTTON_PB0_BIT    (1 << BUTTON_PB0)
+#define BUTTON_PB1_BIT    (1 << BUTTON_PB1)
 
 /* Pin routing **************************************************************/
 /* UART0:
  *
- *   U0_RX #1 PE1  **AVAILABLE at TP130**
- *   U0_TX #1 PE0  **AVAILABLE at TP129**
+ *   To be provided
  */
 
 #define BOARD_UART0_RX_GPIO        (GPIO_PORTE|GPIO_PIN1)
@@ -212,13 +249,12 @@
 
 /* LEUART0:
  *
- *   LEU0_RX #0 PD5  **AVAILABLE at TP123 and EXP port pin 14**
- *   LEU0_TX #0 PD4  **AVAILABLE at TP122 and EXP port pin 12**
+ *   To be provided
  */
 
-#define BOARD_LEUART0_RX_GPIO        (GPIO_PORTD|GPIO_PIN5)
-#define BOARD_LEUART0_TX_GPIO        (GPIO_PORTD|GPIO_PIN4)
-#define BOARD_LEUART0_ROUTE_LOCATION _LEUART_ROUTE_LOCATION_LOC0
+#define BOARD_LEUART0_RX_GPIO
+#define BOARD_LEUART0_TX_GPIO
+#define BOARD_LEUART0_ROUTE_LOCATION
 
 /****************************************************************************
  * Public Function Prototypes
@@ -240,4 +276,4 @@ void efm32_setled(int led, bool ledon);
 void efm32_setleds(uint8_t ledset);
 #endif
 
-#endif /* __CONFIGS_EFM32_G8XX_STK_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_EFM32GG_STK3700_INCLUDE_BOARD_H */
