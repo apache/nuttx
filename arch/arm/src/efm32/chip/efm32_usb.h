@@ -2010,6 +2010,11 @@
 #define _USB_DSTS_SOFFN_MASK                       0x3FFF00UL                         /* Bit mask for USB_SOFFN */
 #define _USB_DSTS_SOFFN_DEFAULT                    0x00000000UL                       /* Mode DEFAULT for USB_DSTS */
 #define USB_DSTS_SOFFN_DEFAULT                     (_USB_DSTS_SOFFN_DEFAULT << 8)     /* Shifted mode DEFAULT for USB_DSTS */
+#define _USB_DSTS_SOFFN_EVENODD_MASK               0x000100UL                         /* Bit mask for USB_SOFFN even/odd bit*/
+#define _USB_DSTS_SOFFN_EVEN                       0                                  /*   Frame number even */
+#define _USB_DSTS_SOFFN_ODD                        1                                  /*   Frame number odd  */
+#define USB_DSTS_SOFFN_EVEN                        (_USB_DSTS_SOFFN_EVEN << 8)        /*   Frame number even */
+#define USB_DSTS_SOFFN_ODD                         (_USB_DSTS_SOFFN_ODD << 8)         /*   Frame number odd  */
 
 /* Bit fields for USB DIEPMSK */
 
