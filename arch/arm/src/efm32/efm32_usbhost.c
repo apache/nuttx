@@ -809,7 +809,7 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 
   /* Make sure host channel interrupts are enabled. */
 
-  efm32_modifyreg(EFM32_USB_GINTMSK, 0, USB_GINT_HC);
+  efm32_modifyreg(EFM32_USB_GINTMSK, 0, USB_GINTMSK_HC);
 
   /* Program the HCCHAR register */
 
@@ -2301,7 +2301,7 @@ static inline void efm32_gint_sofisr(FAR struct efm32_usbhost_s *priv)
 
   /* Clear pending SOF interrupt */
 
-  efm32_putreg(EFM32_USB_GINTSTS, USB_GINT_SOF);
+  efm32_putreg(EFM32_USB_GINTSTS, USB_GINTSTS_SOF);
 }
 #endif
 
@@ -2329,7 +2329,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
   /* Disable the RxFIFO non-empty interrupt */
 
   intmsk  = efm32_getreg(EFM32_USB_GINTMSK);
-  intmsk &= ~USB_GINT_RXFLVL;
+  intmsk &= ~USB_GINTMSK_RXFLVL;
   efm32_putreg(EFM32_USB_GINTMSK, intmsk);
 
   /* Read and pop the next status from the Rx FIFO */
@@ -2402,7 +2402,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
 
   /* Re-enable the RxFIFO non-empty interrupt */
 
-  intmsk |= USB_GINT_RXFLVL;
+  intmsk |= USB_GINTMSK_RXFLVL;
   efm32_putreg(EFM32_USB_GINTMSK, intmsk);
 }
 
@@ -2446,7 +2446,7 @@ static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
     {
       /* Disable further Tx FIFO empty interrupts and bail. */
 
-      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINT_NPTXFE, 0);
+      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINTMSK_NPTXFE, 0);
       return;
     }
 
@@ -2484,7 +2484,7 @@ static inline void efm32_gint_nptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   else
     {
-      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINT_NPTXFE, 0);
+      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINTMSK_NPTXFE, 0);
     }
 
   /* Write the next group of packets into the Tx FIFO */
@@ -2535,7 +2535,7 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
     {
       /* Disable further Tx FIFO empty interrupts and bail. */
 
-      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINT_PTXFE, 0);
+      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINTMSK_PTXFE, 0);
       return;
     }
 
@@ -2573,7 +2573,7 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   else
     {
-      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINT_PTXFE, 0);
+      efm32_modifyreg(EFM32_USB_GINTMSK, USB_GINTMSK_PTXFE, 0);
     }
 
   /* Write the next group of packets into the Tx FIFO */
@@ -2647,6 +2647,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
   uint32_t hcfg;
 
   usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT, 0);
+
   /* Read the port status and control register (HPRT) */
 
   hprt = efm32_getreg(EFM32_USB_HPRT);
@@ -2781,7 +2782,7 @@ static inline void efm32_gint_discisr(FAR struct efm32_usbhost_s *priv)
 
   /* Clear the dicsonnect interrupt */
 
-  efm32_putreg(EFM32_USB_GINTSTS, USB_GINT_DISC);
+  efm32_putreg(EFM32_USB_GINTSTS, USB_GINTSTS_DISC);
 }
 
 /*******************************************************************************
@@ -2806,7 +2807,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
 
   /* Clear the incomplete isochronous OUT interrupt */
 
-  efm32_putreg(EFM32_USB_GINTSTS, USB_GINT_IPXFR);
+  efm32_putreg(EFM32_USB_GINTSTS, USB_GINTSTS_IPXFR);
 }
 
 /*******************************************************************************
@@ -2859,7 +2860,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
       /* Handle the start of frame interrupt */
 
 #ifdef CONFIG_EFM32_OTGFS_SOFINTR
-      if ((pending & USB_GINT_SOF) != 0)
+      if ((pending & USB_GINTSTS_SOF) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_SOF, 0);
           efm32_gint_sofisr(priv);
@@ -2868,7 +2869,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       /* Handle the RxFIFO non-empty interrupt */
 
-      if ((pending & USB_GINT_RXFLVL) != 0)
+      if ((pending & USB_GINTSTS_RXFLVL) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_RXFLVL, 0);
           efm32_gint_rxflvlisr(priv);
@@ -2876,7 +2877,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       /* Handle the non-periodic TxFIFO empty interrupt */
 
-      if ((pending & USB_GINT_NPTXFE) != 0)
+      if ((pending & USB_GINTSTS_NPTXFE) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_NPTXFE, 0);
           efm32_gint_nptxfeisr(priv);
@@ -2884,7 +2885,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       /* Handle the periodic TxFIFO empty interrupt */
 
-      if ((pending & USB_GINT_PTXFE) != 0)
+      if ((pending & USB_GINTSTS_PTXFE) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_PTXFE, 0);
           efm32_gint_ptxfeisr(priv);
@@ -2892,7 +2893,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       /* Handle the host channels interrupt */
 
-      if ((pending & USB_GINT_HC) != 0)
+      if ((pending & USB_GINTSTS_HC) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_HC, 0);
           efm32_gint_hcisr(priv);
@@ -2900,14 +2901,14 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       /* Handle the host port interrupt */
 
-      if ((pending & USB_GINT_HPRT) != 0)
+      if ((pending & USB_GINTSTS_HPRT) != 0)
         {
           efm32_gint_hprtisr(priv);
         }
 
       /* Handle the disconnect detected interrupt */
 
-      if ((pending & USB_GINT_DISC) != 0)
+      if ((pending & USB_GINTSTS_DISC) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_DISC, 0);
           efm32_gint_discisr(priv);
@@ -2915,7 +2916,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       /* Handle the incomplete periodic transfer */
 
-      if ((pending & USB_GINT_IPXFR) != 0)
+      if ((pending & USB_GINTSTS_IPXFR) != 0)
         {
           usbhost_vtrace1(OTGFS_VTRACE1_GINT_IPXFR, 0);
           efm32_gint_ipxfrisr(priv);
@@ -3000,35 +3001,35 @@ static inline void efm32_hostinit_enable(void)
   /* Enable the host interrupts */
   /* Common interrupts:
    *
-   *   USB_GINT_WKUP     : Resume/remote wakeup detected interrupt
-   *   USB_GINT_USBSUSP  : USB suspend
+   *   USB_GINTMSK_WKUP     : Resume/remote wakeup detected interrupt
+   *   USB_GINTMSK_USBSUSP  : USB suspend
    */
 
-  regval = (USB_GINT_WKUP | USB_GINT_USBSUSP);
+  regval = (USB_GINTMSK_WKUP | USB_GINTMSK_USBSUSP);
 
   /* If OTG were supported, we would need to enable the following as well:
    *
-   *   USB_GINT_OTG      : OTG interrupt
-   *   USB_GINT_SRQ      : Session request/new session detected interrupt
-   *   USB_GINT_CIDSCHG  : Connector ID status change
+   *   USB_GINTMSK_OTG      : OTG interrupt
+   *   USB_GINTMSK_SRQ      : Session request/new session detected interrupt
+   *   USB_GINTMSK_CIDSCHG  : Connector ID status change
    */
 
   /* Host-specific interrupts
    *
-   *   USB_GINT_SOF      : Start of frame
-   *   USB_GINT_RXFLVL   : RxFIFO non-empty
-   *   USB_GINT_IISOOXFR : Incomplete isochronous OUT transfer
-   *   USB_GINT_HPRT     : Host port interrupt
-   *   USB_GINT_HC       : Host channels interrupt
-   *   USB_GINT_DISC     : Disconnect detected interrupt
+   *   USB_GINTMSK_SOF      : Start of frame
+   *   USB_GINTMSK_RXFLVL   : RxFIFO non-empty
+   *   USB_GINTMSK_IISOOXFR : Incomplete isochronous OUT transfer
+   *   USB_GINTMSK_HPRT     : Host port interrupt
+   *   USB_GINTMSK_HC       : Host channels interrupt
+   *   USB_GINTMSK_DISC     : Disconnect detected interrupt
    */
 
 #ifdef CONFIG_EFM32_OTGFS_SOFINTR
-  regval |= (USB_GINT_SOF    | USB_GINT_RXFLVL   | USB_GINT_IISOOXFR |
-             USB_GINT_HPRT   | USB_GINT_HC       | USB_GINT_DISC);
+  regval |= (USB_GINTMSK_SOF    | USB_GINTMSK_RXFLVL   | USB_GINTMSK_IISOOXFR |
+             USB_GINTMSK_HPRT   | USB_GINTMSK_HC       | USB_GINTMSK_DISC);
 #else
-  regval |= (USB_GINT_RXFLVL | USB_GINT_IPXFR    | USB_GINT_HPRT     |
-             USB_GINT_HC     | USB_GINT_DISC);
+  regval |= (USB_GINTMSK_RXFLVL | USB_GINTMSK_IPXFR    | USB_GINTMSK_HPRT     |
+             USB_GINTMSK_HC     | USB_GINTMSK_DISC);
 #endif
   efm32_putreg(EFM32_USB_GINTMSK, regval);
 }
@@ -3075,12 +3076,12 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
     default:
     case OTGFS_EPTYPE_CTRL: /* Non periodic transfer */
     case OTGFS_EPTYPE_BULK:
-      regval |= USB_GINT_NPTXFE;
+      regval |= USB_GINTMSK_NPTXFE;
       break;
 
     case OTGFS_EPTYPE_INTR: /* Periodic transfer */
     case OTGFS_EPTYPE_ISOC:
-      regval |= USB_GINT_PTXFE;
+      regval |= USB_GINTMSK_PTXFE;
       break;
     }
 
