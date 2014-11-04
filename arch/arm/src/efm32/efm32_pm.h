@@ -79,8 +79,8 @@ extern "C"
  *   Enter STOP mode.
  *
  *   REVISIT: This power management interface was taken with no modification
- *   from the STM32 implementation and needs to be reviewed against EFM32
- *   reduced power modes.  Comments here apply to the STM32!
+ *   from the EFM32 implementation and needs to be reviewed against EFM32
+ *   reduced power modes.  Comments here apply to the EFM32!
  *
  * Input Parameters:
  *   lpds - true: To further reduce power consumption in Stop mode, put the
@@ -104,8 +104,8 @@ int efm32_pmstop(bool lpds);
  *   Enter STANDBY mode.
  *
  *   REVISIT: This power management interface was taken with no modification
- *   from the STM32 implementation and needs to be reviewed against EFM32
- *   reduced power modes.  Comments here apply to the STM32!
+ *   from the EFM32 implementation and needs to be reviewed against EFM32
+ *   reduced power modes.  Comments here apply to the EFM32!
  *
  * Input Parameters:
  *   None
@@ -127,8 +127,8 @@ int efm32_pmstandby(void);
  *   Enter SLEEP mode.
  *
  *   REVISIT: This power management interface was taken with no modification
- *   from the STM32 implementation and needs to be reviewed against EFM32
- *   reduced power modes.  Comments here apply to the STM32!
+ *   from the EFM32 implementation and needs to be reviewed against EFM32
+ *   reduced power modes.  Comments here apply to the EFM32!
  *
  * Input Parameters:
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
