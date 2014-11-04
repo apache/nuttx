@@ -126,3 +126,12 @@ endif
 ifeq ($(CONFIG_EFM32_DMA),y)
 CHIP_CSRCS += efm32_dma.c
 endif
+
+ifeq ($(CONFIG_EFM32_USBFSOTG),y)
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += efm32_usbdev.c
+endif
+ifeq ($(CONFIG_USBHOST),y)
+CHIP_CSRCS += efm32_usbhost.c
+endif
+endif

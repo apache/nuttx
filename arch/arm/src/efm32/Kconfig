@@ -73,6 +73,7 @@ config EFM32_EFM32GG
 	select EFM32_HAVE_UART0
 	select EFM32_HAVE_UART1
 	select EFM32_HAVE_LEUART1
+	select EFM32_HAVE_USBFSOTG
 
 menu "EFM32 Peripheral Support"
 
@@ -92,6 +93,10 @@ config EFM32_HAVE_UART1
 	default n
 
 config EFM32_HAVE_LEUART1
+	bool
+	default n
+
+config EFM32_HAVE_USBFSOTG
 	bool
 	default n
 
@@ -163,6 +168,11 @@ config EFM32_LEUART1
 	depends on EFM32_HAVE_LEUART1
 	select ARCH_HAVE_OTHER_UART
 	select EFM32_LEUART
+
+config EFM32_USBFSOTG
+	bool "USB Full-Speed OTG"
+	default n
+	depends on EFM32_HAVE_USBFSOTG && EXPERIMENTAL
 
 endmenu # EFM32 Peripheral Support
 

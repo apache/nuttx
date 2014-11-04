@@ -82,7 +82,7 @@
  *   Perform IDLE state power management.
  *
  *   REVISIT: These power management hooks were taken with no modification
- *   from the STM32 implementation and need review against EFM32 reduced
+ *   from the EFM32 implementation and need review against EFM32 reduced
  *   power modes.
  *
  ****************************************************************************/
