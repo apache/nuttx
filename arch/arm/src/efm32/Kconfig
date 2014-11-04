@@ -73,7 +73,7 @@ config EFM32_EFM32GG
 	select EFM32_HAVE_UART0
 	select EFM32_HAVE_UART1
 	select EFM32_HAVE_LEUART1
-	select EFM32_HAVE_USBFSOTG
+	select EFM32_HAVE_OTGFS
 
 menu "EFM32 Peripheral Support"
 
@@ -96,7 +96,7 @@ config EFM32_HAVE_LEUART1
 	bool
 	default n
 
-config EFM32_HAVE_USBFSOTG
+config EFM32_HAVE_OTGFS
 	bool
 	default n
 
@@ -169,10 +169,10 @@ config EFM32_LEUART1
 	select ARCH_HAVE_OTHER_UART
 	select EFM32_LEUART
 
-config EFM32_USBFSOTG
+config EFM32_OTGFS
 	bool "USB Full-Speed OTG"
 	default n
-	depends on EFM32_HAVE_USBFSOTG && EXPERIMENTAL
+	depends on EFM32_HAVE_OTGFS && EXPERIMENTAL
 
 endmenu # EFM32 Peripheral Support
 
@@ -391,5 +391,40 @@ config EFM32_SPI_DMA_MINSIZE
 endif # EFM32_SPI_DMA
 endmenu # SPI Configuration
 endif # EFM32_USART_ISSPI
+
+menu "USB FS Host Configuration"
+	depends on USBHOST && EFM32_OTGFS
+
+config EFM32_OTGFS_RXFIFO_SIZE
+	int "Rx Packet Size"
+	default 128
+	---help---
+		Size of the RX FIFO in 32-bit words. Default 128 (512 bytes)
+
+config EFM32_OTGFS_NPTXFIFO_SIZE
+	int "Non-periodic Tx FIFO Size"
+	default 96
+	---help---
+		Size of the non-periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config EFM32_OTGFS_PTXFIFO_SIZE
+	int "Periodic Tx FIFO size"
+	default 128
+	---help---
+		Size of the periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config EFM32_OTGFS_DESCSIZE
+	int "Descriptor Size"
+	default 128
+	---help---
+		Maximum size to allocate for descriptor memory descriptor.  Default: 128
+
+config EFM32_OTGFS_SOFINTR
+	bool "Enable SOF interrupts"
+	default n
+	---help---
+		Enable SOF interrupts.  Why would you ever want to do that?
+
+endmenu
 
 endif # ARCH_CHIP_EFM32
