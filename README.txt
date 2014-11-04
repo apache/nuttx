@@ -1266,7 +1266,7 @@ apps
  |   `- tiff/README.txt
  |- interpreters/
  |   |- bas
- |   |  `- README
+ |   |  `- README.txt
  |   |- ficl
  |   |  `- README.txt
  |   `- README.txt
