@@ -158,53 +158,53 @@
 #define EFM32_USB_DIEP5_OFFSET                     0x3c9a0   /* Device IN Endpoint 5 */
 #define EFM32_USB_DIEP6_OFFSET                     0x3c9c0   /* Device IN Endpoint 6 */
 
-#define EFM32_USB_DIEPn_CTL_OFFSET                 0x00000  /* Device IN Endpoint n Control Register */
-#define EFM32_USB_DIEPn_INT_OFFSET                 0x00008  /* Device IN Endpoint n Interrupt Register */
-#define EFM32_USB_DIEPn_TSIZ_OFFSET                0x00010  /* Device IN Endpoint n Transfer Size Register */
-#define EFM32_USB_DIEPn_DMAADDR_OFFSET             0x00014  /* Device IN Endpoint n DMA Address Register */
-#define EFM32_USB_DIEPn_TXFSTS_OFFSET              0x00018  /* Device IN Endpoint n Transmit FIFO Status Register */
+#define EFM32_USB_DIEPnCTL_OFFSET                  0x00000  /* Device IN Endpoint n Control Register */
+#define EFM32_USB_DIEPnINT_OFFSET                  0x00008  /* Device IN Endpoint n Interrupt Register */
+#define EFM32_USB_DIEPnTSIZ_OFFSET                 0x00010  /* Device IN Endpoint n Transfer Size Register */
+#define EFM32_USB_DIEPnDMAADDR_OFFSET              0x00014  /* Device IN Endpoint n DMA Address Register */
+#define EFM32_USB_DIEPnTXFSTS_OFFSET               0x00018  /* Device IN Endpoint n Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP0_CTL_OFFSET                 0x3c900  /* Device IN Endpoint 0 Control Register */
-#define EFM32_USB_DIEP0_INT_OFFSET                 0x3c908  /* Device IN Endpoint 0 Interrupt Register */
-#define EFM32_USB_DIEP0_TSIZ_OFFSET                0x3c910  /* Device IN Endpoint 0 Transfer Size Register */
-#define EFM32_USB_DIEP0_DMAADDR_OFFSET             0x3c914  /* Device IN Endpoint 0 DMA Address Register */
-#define EFM32_USB_DIEP0_TXFSTS_OFFSET              0x3c918  /* Device IN Endpoint 0 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP0CTL_OFFSET                  0x3c900  /* Device IN Endpoint 0 Control Register */
+#define EFM32_USB_DIEP0INT_OFFSET                  0x3c908  /* Device IN Endpoint 0 Interrupt Register */
+#define EFM32_USB_DIEP0TSIZ_OFFSET                 0x3c910  /* Device IN Endpoint 0 Transfer Size Register */
+#define EFM32_USB_DIEP0DMAADDR_OFFSET              0x3c914  /* Device IN Endpoint 0 DMA Address Register */
+#define EFM32_USB_DIEP0TXFSTS_OFFSET               0x3c918  /* Device IN Endpoint 0 Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP1_CTL_OFFSET                 0x3c920  /* Device IN Endpoint 1 Control Register */
-#define EFM32_USB_DIEP1_INT_OFFSET                 0x3c928  /* Device IN Endpoint 1 Interrupt Register */
-#define EFM32_USB_DIEP1_TSIZ_OFFSET                0x3c930  /* Device IN Endpoint 1 Transfer Size Register */
-#define EFM32_USB_DIEP1_DMAADDR_OFFSET             0x3c934  /* Device IN Endpoint 1 DMA Address Register */
-#define EFM32_USB_DIEP1_TXFSTS_OFFSET              0x3c938  /* Device IN Endpoint 1 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP1CTL_OFFSET                  0x3c920  /* Device IN Endpoint 1 Control Register */
+#define EFM32_USB_DIEP1INT_OFFSET                  0x3c928  /* Device IN Endpoint 1 Interrupt Register */
+#define EFM32_USB_DIEP1TSIZ_OFFSET                 0x3c930  /* Device IN Endpoint 1 Transfer Size Register */
+#define EFM32_USB_DIEP1DMAADDR_OFFSET              0x3c934  /* Device IN Endpoint 1 DMA Address Register */
+#define EFM32_USB_DIEP1TXFSTS_OFFSET               0x3c938  /* Device IN Endpoint 1 Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP2_CTL_OFFSET                 0x3c940  /* Device IN Endpoint 2 Control Register */
-#define EFM32_USB_DIEP2_INT_OFFSET                 0x3c948  /* Device IN Endpoint 2 Interrupt Register */
-#define EFM32_USB_DIEP2_TSIZ_OFFSET                0x3c950  /* Device IN Endpoint 2 Transfer Size Register */
-#define EFM32_USB_DIEP2_DMAADDR_OFFSET             0x3c954  /* Device IN Endpoint 2 DMA Address Register */
-#define EFM32_USB_DIEP2_TXFSTS_OFFSET              0x3c958  /* Device IN Endpoint 2 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP2CTL_OFFSET                  0x3c940  /* Device IN Endpoint 2 Control Register */
+#define EFM32_USB_DIEP2INT_OFFSET                  0x3c948  /* Device IN Endpoint 2 Interrupt Register */
+#define EFM32_USB_DIEP2TSIZ_OFFSET                 0x3c950  /* Device IN Endpoint 2 Transfer Size Register */
+#define EFM32_USB_DIEP2DMAADDR_OFFSET              0x3c954  /* Device IN Endpoint 2 DMA Address Register */
+#define EFM32_USB_DIEP2TXFSTS_OFFSET               0x3c958  /* Device IN Endpoint 2 Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP3_CTL_OFFSET                 0x3c960  /* Device IN Endpoint 3 Control Register */
-#define EFM32_USB_DIEP3_INT_OFFSET                 0x3c968  /* Device IN Endpoint 3 Interrupt Register */
-#define EFM32_USB_DIEP3_TSIZ_OFFSET                0x3c970  /* Device IN Endpoint 3 Transfer Size Register */
-#define EFM32_USB_DIEP3_DMAADDR_OFFSET             0x3c974  /* Device IN Endpoint 3 DMA Address Register */
-#define EFM32_USB_DIEP3_TXFSTS_OFFSET              0x3c978  /* Device IN Endpoint 3 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP3CTL_OFFSET                  0x3c960  /* Device IN Endpoint 3 Control Register */
+#define EFM32_USB_DIEP3INT_OFFSET                  0x3c968  /* Device IN Endpoint 3 Interrupt Register */
+#define EFM32_USB_DIEP3TSIZ_OFFSET                 0x3c970  /* Device IN Endpoint 3 Transfer Size Register */
+#define EFM32_USB_DIEP3DMAADDR_OFFSET              0x3c974  /* Device IN Endpoint 3 DMA Address Register */
+#define EFM32_USB_DIEP3TXFSTS_OFFSET               0x3c978  /* Device IN Endpoint 3 Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP4_CTL_OFFSET                 0x3c980  /* Device IN Endpoint 4 Control Register */
-#define EFM32_USB_DIEP4_INT_OFFSET                 0x3c988  /* Device IN Endpoint 4 Interrupt Register */
-#define EFM32_USB_DIEP4_TSIZ_OFFSET                0x3c990  /* Device IN Endpoint 4 Transfer Size Register */
-#define EFM32_USB_DIEP4_DMAADDR_OFFSET             0x3c994  /* Device IN Endpoint 4 DMA Address Register */
-#define EFM32_USB_DIEP4_TXFSTS_OFFSET              0x3c998  /* Device IN Endpoint 4 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP4CTL_OFFSET                  0x3c980  /* Device IN Endpoint 4 Control Register */
+#define EFM32_USB_DIEP4INT_OFFSET                  0x3c988  /* Device IN Endpoint 4 Interrupt Register */
+#define EFM32_USB_DIEP4TSIZ_OFFSET                 0x3c990  /* Device IN Endpoint 4 Transfer Size Register */
+#define EFM32_USB_DIEP4DMAADDR_OFFSET              0x3c994  /* Device IN Endpoint 4 DMA Address Register */
+#define EFM32_USB_DIEP4TXFSTS_OFFSET               0x3c998  /* Device IN Endpoint 4 Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP5_CTL_OFFSET                 0x3c9a0  /* Device IN Endpoint 5 Control Register */
-#define EFM32_USB_DIEP5_INT_OFFSET                 0x3c9a8  /* Device IN Endpoint 5 Interrupt Register */
-#define EFM32_USB_DIEP5_TSIZ_OFFSET                0x3c9b0  /* Device IN Endpoint 5 Transfer Size Register */
-#define EFM32_USB_DIEP5_DMAADDR_OFFSET             0x3c9b4  /* Device IN Endpoint 5 DMA Address Register */
-#define EFM32_USB_DIEP5_TXFSTS_OFFSET              0x3c9b8  /* Device IN Endpoint 5 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP5CTL_OFFSET                  0x3c9a0  /* Device IN Endpoint 5 Control Register */
+#define EFM32_USB_DIEP5INT_OFFSET                  0x3c9a8  /* Device IN Endpoint 5 Interrupt Register */
+#define EFM32_USB_DIEP5TSIZ_OFFSET                 0x3c9b0  /* Device IN Endpoint 5 Transfer Size Register */
+#define EFM32_USB_DIEP5DMAADDR_OFFSET              0x3c9b4  /* Device IN Endpoint 5 DMA Address Register */
+#define EFM32_USB_DIEP5TXFSTS_OFFSET               0x3c9b8  /* Device IN Endpoint 5 Transmit FIFO Status Register */
 
-#define EFM32_USB_DIEP6_CTL_OFFSET                 0x3c9c0  /* Device IN Endpoint 6 Control Register */
-#define EFM32_USB_DIEP6_INT_OFFSET                 0x3c9c8  /* Device IN Endpoint 6 Interrupt Register */
-#define EFM32_USB_DIEP6_TSIZ_OFFSET                0x3c9d0  /* Device IN Endpoint 6 Transfer Size Register */
-#define EFM32_USB_DIEP6_DMAADDR_OFFSET             0x3c9d4  /* Device IN Endpoint 6 DMA Address Register */
-#define EFM32_USB_DIEP6_TXFSTS_OFFSET              0x3c9d8  /* Device IN Endpoint 6 Transmit FIFO Status Register */
+#define EFM32_USB_DIEP6CTL_OFFSET                  0x3c9c0  /* Device IN Endpoint 6 Control Register */
+#define EFM32_USB_DIEP6INT_OFFSET                  0x3c9c8  /* Device IN Endpoint 6 Interrupt Register */
+#define EFM32_USB_DIEP6TSIZ_OFFSET                 0x3c9d0  /* Device IN Endpoint 6 Transfer Size Register */
+#define EFM32_USB_DIEP6DMAADDR_OFFSET              0x3c9d4  /* Device IN Endpoint 6 DMA Address Register */
+#define EFM32_USB_DIEP6TXFSTS_OFFSET               0x3c9d8  /* Device IN Endpoint 6 Transmit FIFO Status Register */
 
 #define EFM32_USB_DOEP_OFFSET(n)                   (0x3c900 + ((n) << 5))
 #define EFM32_USB_DOEP0_OFFSET                     0x3c900   /* Device OUT Endpoint 0 */
@@ -215,45 +215,45 @@
 #define EFM32_USB_DOEP5_OFFSET                     0x3c9a0   /* Device OUT Endpoint 5 */
 #define EFM32_USB_DOEP6_OFFSET                     0x3c9c0   /* Device OUT Endpoint 6 */
 
-#define EFM32_USB_DOEPn_CTL_OFFSET                 0x00000  /* Device OUT Endpoint n Control Register */
-#define EFM32_USB_DOEPn_INT_OFFSET                 0x00008  /* Device OUT Endpoint n Interrupt Register */
-#define EFM32_USB_DOEPn_TSIZ_OFFSET                0x00010  /* Device OUT Endpoint n Transfer Size Register */
-#define EFM32_USB_DOEPn_DMAADDR_OFFSET             0x00014  /* Device OUT Endpoint n DMA Address Register */
+#define EFM32_USB_DOEPnCTL_OFFSET                  0x00000  /* Device OUT Endpoint n Control Register */
+#define EFM32_USB_DOEPnINT_OFFSET                  0x00008  /* Device OUT Endpoint n Interrupt Register */
+#define EFM32_USB_DOEPnTSIZ_OFFSET                 0x00010  /* Device OUT Endpoint n Transfer Size Register */
+#define EFM32_USB_DOEPnDMAADDR_OFFSET              0x00014  /* Device OUT Endpoint n DMA Address Register */
 
-#define EFM32_USB_DOEP0_CTL_OFFSET                 0x3cb00  /* Device OUT Endpoint 0 Control Register */
-#define EFM32_USB_DOEP0_INT_OFFSET                 0x3cb08  /* Device OUT Endpoint 0 Interrupt Register */
-#define EFM32_USB_DOEP0_TSIZ_OFFSET                0x3cb10  /* Device OUT Endpoint 0 Transfer Size Register */
-#define EFM32_USB_DOEP0_DMAADDR_OFFSET             0x3cb14  /* Device OUT Endpoint 0 DMA Address Register */
+#define EFM32_USB_DOEP0CTL_OFFSET                  0x3cb00  /* Device OUT Endpoint 0 Control Register */
+#define EFM32_USB_DOEP0INT_OFFSET                  0x3cb08  /* Device OUT Endpoint 0 Interrupt Register */
+#define EFM32_USB_DOEP0TSIZ_OFFSET                 0x3cb10  /* Device OUT Endpoint 0 Transfer Size Register */
+#define EFM32_USB_DOEP0DMAADDR_OFFSET              0x3cb14  /* Device OUT Endpoint 0 DMA Address Register */
 
-#define EFM32_USB_DOEP1_CTL_OFFSET                 0x3cb20  /* Device OUT Endpoint x Control Register */
-#define EFM32_USB_DOEP1_INT_OFFSET                 0x3cb28  /* Device OUT Endpoint x Interrupt Register */
-#define EFM32_USB_DOEP1_TSIZ_OFFSET                0x3cb30  /* Device OUT Endpoint x Transfer Size Register */
-#define EFM32_USB_DOEP1_DMAADDR_OFFSET             0x3cb34  /* Device OUT Endpoint x DMA Address Register */
+#define EFM32_USB_DOEP1CTL_OFFSET                  0x3cb20  /* Device OUT Endpoint x Control Register */
+#define EFM32_USB_DOEP1INT_OFFSET                  0x3cb28  /* Device OUT Endpoint x Interrupt Register */
+#define EFM32_USB_DOEP1TSIZ_OFFSET                 0x3cb30  /* Device OUT Endpoint x Transfer Size Register */
+#define EFM32_USB_DOEP1DMAADDR_OFFSET              0x3cb34  /* Device OUT Endpoint x DMA Address Register */
 
 #define EFM32_USB_DOEP2_CTL_OFFSET                 0x3cb40  /* Device OUT Endpoint x Control Register */
 #define EFM32_USB_DOEP2_INT_OFFSET                 0x3cb48  /* Device OUT Endpoint x Interrupt Register */
 #define EFM32_USB_DOEP2_TSIZ_OFFSET                0x3cb50  /* Device OUT Endpoint x Transfer Size Register */
 #define EFM32_USB_DOEP2_DMAADDR_OFFSET             0x3cb54  /* Device OUT Endpoint x DMA Address Register */
 
-#define EFM32_USB_DOEP3_CTL_OFFSET                 0x3cb60  /* Device OUT Endpoint x Control Register */
-#define EFM32_USB_DOEP3_INT_OFFSET                 0x3cb68  /* Device OUT Endpoint x Interrupt Register */
-#define EFM32_USB_DOEP3_TSIZ_OFFSET                0x3cb70  /* Device OUT Endpoint x Transfer Size Register */
-#define EFM32_USB_DOEP3_DMAADDR_OFFSET             0x3cb74  /* Device OUT Endpoint x DMA Address Register */
+#define EFM32_USB_DOEP3CTL_OFFSET                  0x3cb60  /* Device OUT Endpoint x Control Register */
+#define EFM32_USB_DOEP3INT_OFFSET                  0x3cb68  /* Device OUT Endpoint x Interrupt Register */
+#define EFM32_USB_DOEP3TSIZ_OFFSET                 0x3cb70  /* Device OUT Endpoint x Transfer Size Register */
+#define EFM32_USB_DOEP3DMAADDR_OFFSET              0x3cb74  /* Device OUT Endpoint x DMA Address Register */
 
-#define EFM32_USB_DOEP4_CTL_OFFSET                 0x3cb80  /* Device OUT Endpoint x Control Register */
-#define EFM32_USB_DOEP4_INT_OFFSET                 0x3cb88  /* Device OUT Endpoint x Interrupt Register */
-#define EFM32_USB_DOEP4_TSIZ_OFFSET                0x3cb90  /* Device OUT Endpoint x Transfer Size Register */
-#define EFM32_USB_DOEP4_DMAADDR_OFFSET             0x3cb94  /* Device OUT Endpoint x DMA Address Register */
+#define EFM32_USB_DOEP4CTL_OFFSET                  0x3cb80  /* Device OUT Endpoint x Control Register */
+#define EFM32_USB_DOEP4INT_OFFSET                  0x3cb88  /* Device OUT Endpoint x Interrupt Register */
+#define EFM32_USB_DOEP4TSIZ_OFFSET                 0x3cb90  /* Device OUT Endpoint x Transfer Size Register */
+#define EFM32_USB_DOEP4DMAADDR_OFFSET              0x3cb94  /* Device OUT Endpoint x DMA Address Register */
 
-#define EFM32_USB_DOEP5_CTL_OFFSET                 0x3cba0  /* Device OUT Endpoint x Control Register */
-#define EFM32_USB_DOEP5_INT_OFFSET                 0x3cba8  /* Device OUT Endpoint x Interrupt Register */
-#define EFM32_USB_DOEP5_TSIZ_OFFSET                0x3cbb0  /* Device OUT Endpoint x Transfer Size Register */
-#define EFM32_USB_DOEP5_DMAADDR_OFFSET             0x3cbb4  /* Device OUT Endpoint x DMA Address Register */
+#define EFM32_USB_DOEP5CTL_OFFSET                  0x3cba0  /* Device OUT Endpoint x Control Register */
+#define EFM32_USB_DOEP5INT_OFFSET                  0x3cba8  /* Device OUT Endpoint x Interrupt Register */
+#define EFM32_USB_DOEP5TSIZ_OFFSET                 0x3cbb0  /* Device OUT Endpoint x Transfer Size Register */
+#define EFM32_USB_DOEP5DMAADDR_OFFSET              0x3cbb4  /* Device OUT Endpoint x DMA Address Register */
 
-#define EFM32_USB_DOEP6_CTL_OFFSET                 0x3cbc0  /* Device OUT Endpoint x Control Register */
-#define EFM32_USB_DOEP6_INT_OFFSET                 0x3cbc8  /* Device OUT Endpoint x Interrupt Register */
-#define EFM32_USB_DOEP6_TSIZ_OFFSET                0x3cbd0  /* Device OUT Endpoint x Transfer Size Register */
-#define EFM32_USB_DOEP6_DMAADDR_OFFSET             0x3cbd4  /* Device OUT Endpoint x DMA Address Register */
+#define EFM32_USB_DOEP6CTL_OFFSET                  0x3cbc0  /* Device OUT Endpoint x Control Register */
+#define EFM32_USB_DOEP6INT_OFFSET                  0x3cbc8  /* Device OUT Endpoint x Interrupt Register */
+#define EFM32_USB_DOEP6TSIZ_OFFSET                 0x3cbd0  /* Device OUT Endpoint x Transfer Size Register */
+#define EFM32_USB_DOEP6DMAADDR_OFFSET              0x3cbd4  /* Device OUT Endpoint x DMA Address Register */
 
 #define EFM32_USB_PCGCCTL_OFFSET                   0x3ce00  /* Power and Clock Gating Control Register */
 
@@ -361,53 +361,53 @@
 #define EFM32_USB_DIEP5_BASE                       (EFM32_USB_BASE+EFM32_USB_DIEP5_OFFSET)
 #define EFM32_USB_DIEP6_BASE                       (EFM32_USB_BASE+EFM32_USB_DIEP6_OFFSET)
 
-#define EFM32_USB_DIEP_CTL(n)                      (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPn_CTL_OFFSET)
-#define EFM32_USB_DIEP_INT(n)                      (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPn_INT_OFFSET)
-#define EFM32_USB_DIEP_TSIZ(n)                     (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPn_TSIZ_OFFSET)
-#define EFM32_USB_DIEP_DMAADDR(n)                  (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPn_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP_TXFSTS(n)                   (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPn_TXFSTS_OFFSET)
+#define EFM32_USB_DIEPCTL(n)                       (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPnCTL_OFFSET)
+#define EFM32_USB_DIEPINT(n)                       (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPnINT_OFFSET)
+#define EFM32_USB_DIEPTSIZ(n)                      (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPnTSIZ_OFFSET)
+#define EFM32_USB_DIEPDMAADDR(n)                   (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPnDMAADDR_OFFSET)
+#define EFM32_USB_DIEPTXFSTS(n)                    (EFM32_USB_DIEP_BASE(n)+EFM32_USB_DIEPnTXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP0_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP0_CTL_OFFSET)
-#define EFM32_USB_DIEP0_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP0_INT_OFFSET)
-#define EFM32_USB_DIEP0_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP0_TSIZ_OFFSET)
-#define EFM32_USB_DIEP0_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP0_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP0_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP0_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP0CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP0CTL_OFFSET)
+#define EFM32_USB_DIEP0INT                         (EFM32_USB_BASE+EFM32_USB_DIEP0INT_OFFSET)
+#define EFM32_USB_DIEP0TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP0TSIZ_OFFSET)
+#define EFM32_USB_DIEP0DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP0DMAADDR_OFFSET)
+#define EFM32_USB_DIEP0TXFSTS                      (EFM32_USB_BASE+EFM32_USB_DIEP0TXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP1_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP1_CTL_OFFSET)
-#define EFM32_USB_DIEP1_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP1_INT_OFFSET)
-#define EFM32_USB_DIEP1_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP1_TSIZ_OFFSET)
-#define EFM32_USB_DIEP1_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP1_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP1_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP1_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP1CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP1CTL_OFFSET)
+#define EFM32_USB_DIEP1INT                         (EFM32_USB_BASE+EFM32_USB_DIEP1INT_OFFSET)
+#define EFM32_USB_DIEP1TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP1TSIZ_OFFSET)
+#define EFM32_USB_DIEP1DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP1DMAADDR_OFFSET)
+#define EFM32_USB_DIEP1TXFSTS                      (EFM32_USB_BASE+EFM32_USB_DIEP1TXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP2_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP2_CTL_OFFSET)
-#define EFM32_USB_DIEP2_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP2_INT_OFFSET)
-#define EFM32_USB_DIEP2_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP2_TSIZ_OFFSET)
-#define EFM32_USB_DIEP2_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP2_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP2_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP2_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP2CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP2CTL_OFFSET)
+#define EFM32_USB_DIEP2INT                         (EFM32_USB_BASE+EFM32_USB_DIEP2INT_OFFSET)
+#define EFM32_USB_DIEP2TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP2TSIZ_OFFSET)
+#define EFM32_USB_DIEP2DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP2DMAADDR_OFFSET)
+#define EFM32_USB_DIEP2TXFSTS                      (EFM32_USB_BASE+EFM32_USB_DIEP2TXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP3_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP3_CTL_OFFSET)
-#define EFM32_USB_DIEP3_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP3_INT_OFFSET)
-#define EFM32_USB_DIEP3_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP3_TSIZ_OFFSET)
-#define EFM32_USB_DIEP3_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP3_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP3_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP3_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP3CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP3CTL_OFFSET)
+#define EFM32_USB_DIEP3INT                         (EFM32_USB_BASE+EFM32_USB_DIEP3INT_OFFSET)
+#define EFM32_USB_DIEP3TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP3TSIZ_OFFSET)
+#define EFM32_USB_DIEP3DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP3DMAADDR_OFFSET)
+#define EFM32_USB_DIEP3_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP3TXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP4_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP4_CTL_OFFSET)
-#define EFM32_USB_DIEP4_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP4_INT_OFFSET)
-#define EFM32_USB_DIEP4_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP4_TSIZ_OFFSET)
-#define EFM32_USB_DIEP4_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP4_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP4_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP4_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP4CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP4CTL_OFFSET)
+#define EFM32_USB_DIEP4INT                         (EFM32_USB_BASE+EFM32_USB_DIEP4INT_OFFSET)
+#define EFM32_USB_DIEP4TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP4TSIZ_OFFSET)
+#define EFM32_USB_DIEP4DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP4DMAADDR_OFFSET)
+#define EFM32_USB_DIEP4TXFSTS                      (EFM32_USB_BASE+EFM32_USB_DIEP4TXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP5_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP5_CTL_OFFSET)
-#define EFM32_USB_DIEP5_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP5_INT_OFFSET)
-#define EFM32_USB_DIEP5_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP5_TSIZ_OFFSET)
-#define EFM32_USB_DIEP5_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP5_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP5_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP5_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP5CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP5CTL_OFFSET)
+#define EFM32_USB_DIEP5INT                         (EFM32_USB_BASE+EFM32_USB_DIEP5INT_OFFSET)
+#define EFM32_USB_DIEP5TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP5TSIZ_OFFSET)
+#define EFM32_USB_DIEP5DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP5DMAADDR_OFFSET)
+#define EFM32_USB_DIEP5_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP5TXFSTS_OFFSET)
 
-#define EFM32_USB_DIEP6_CTL                        (EFM32_USB_BASE+EFM32_USB_DIEP6_CTL_OFFSET)
-#define EFM32_USB_DIEP6_INT                        (EFM32_USB_BASE+EFM32_USB_DIEP6_INT_OFFSET)
-#define EFM32_USB_DIEP6_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DIEP6_TSIZ_OFFSET)
-#define EFM32_USB_DIEP6_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DIEP6_DMAADDR_OFFSET)
-#define EFM32_USB_DIEP6_TXFSTS                     (EFM32_USB_BASE+EFM32_USB_DIEP6_TXFSTS_OFFSET)
+#define EFM32_USB_DIEP6CTL                         (EFM32_USB_BASE+EFM32_USB_DIEP6_CTL_OFFSET)
+#define EFM32_USB_DIEP6INT                         (EFM32_USB_BASE+EFM32_USB_DIEP6_INT_OFFSET)
+#define EFM32_USB_DIEP6TSIZ                        (EFM32_USB_BASE+EFM32_USB_DIEP6_TSIZ_OFFSET)
+#define EFM32_USB_DIEP6DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DIEP6_DMAADDR_OFFSET)
+#define EFM32_USB_DIEP6TXFSTS                      (EFM32_USB_BASE+EFM32_USB_DIEP6_TXFSTS_OFFSET)
 
 #define EFM32_USB_DOEP_BASE(n)                     (EFM32_USB_BASE+EFM32_USB_DOEP_OFFSET(n))
 #define EFM32_USB_DOEP0_BASE                       (EFM32_USB_BASE+EFM32_USB_DOEP0_OFFSET)
@@ -418,45 +418,45 @@
 #define EFM32_USB_DOEP5_BASE                       (EFM32_USB_BASE+EFM32_USB_DOEP5_OFFSET)
 #define EFM32_USB_DOEP6_BASE                       (EFM32_USB_BASE+EFM32_USB_DOEP6_OFFSET)
 
-#define EFM32_USB_DOEP_CTL(n)                      (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPn_CTL_OFFSET)
-#define EFM32_USB_DOEP_INT(n)                      (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPn_INT_OFFSET)
-#define EFM32_USB_DOEP_TSIZ(n)                     (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPn_TSIZ_OFFSET)
-#define EFM32_USB_DOEP_DMAADDR(n)                  (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPn_DMAADDR_OFFSET)
+#define EFM32_USB_DOEPCTL(n)                       (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPnCTL_OFFSET)
+#define EFM32_USB_DOEPINT(n)                       (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPnINT_OFFSET)
+#define EFM32_USB_DOEPTSIZ(n)                      (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPnTSIZ_OFFSET)
+#define EFM32_USB_DOEPDMAADDR(n)                   (EFM32_USB_DOEP_BASE(n)+EFM32_USB_DOEPnDMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP0_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP0_CTL_OFFSET)
-#define EFM32_USB_DOEP0_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP0_INT_OFFSET)
-#define EFM32_USB_DOEP0_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP0_TSIZ_OFFSET)
-#define EFM32_USB_DOEP0_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP0_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP0CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP0CTL_OFFSET)
+#define EFM32_USB_DOEP0INT                         (EFM32_USB_BASE+EFM32_USB_DOEP0INT_OFFSET)
+#define EFM32_USB_DOEP0TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP0TSIZ_OFFSET)
+#define EFM32_USB_DOEP0DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP0DMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP1_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP1_CTL_OFFSET)
-#define EFM32_USB_DOEP1_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP1_INT_OFFSET)
-#define EFM32_USB_DOEP1_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP1_TSIZ_OFFSET)
-#define EFM32_USB_DOEP1_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP1_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP1CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP1CTL_OFFSET)
+#define EFM32_USB_DOEP1INT                         (EFM32_USB_BASE+EFM32_USB_DOEP1INT_OFFSET)
+#define EFM32_USB_DOEP1TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP1TSIZ_OFFSET)
+#define EFM32_USB_DOEP1DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP1DMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP2_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP2_CTL_OFFSET)
-#define EFM32_USB_DOEP2_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP2_INT_OFFSET)
-#define EFM32_USB_DOEP2_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP2_TSIZ_OFFSET)
-#define EFM32_USB_DOEP2_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP2_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP2CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP2CTL_OFFSET)
+#define EFM32_USB_DOEP2INT                         (EFM32_USB_BASE+EFM32_USB_DOEP2INT_OFFSET)
+#define EFM32_USB_DOEP2TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP2TSIZ_OFFSET)
+#define EFM32_USB_DOEP2DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP2DMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP3_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP3_CTL_OFFSET)
-#define EFM32_USB_DOEP3_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP3_INT_OFFSET)
-#define EFM32_USB_DOEP3_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP3_TSIZ_OFFSET)
-#define EFM32_USB_DOEP3_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP3_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP3CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP3CTL_OFFSET)
+#define EFM32_USB_DOEP3INT                         (EFM32_USB_BASE+EFM32_USB_DOEP3INT_OFFSET)
+#define EFM32_USB_DOEP3TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP3TSIZ_OFFSET)
+#define EFM32_USB_DOEP3DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP3DMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP4_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP4_CTL_OFFSET)
-#define EFM32_USB_DOEP4_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP4_INT_OFFSET)
-#define EFM32_USB_DOEP4_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP4_TSIZ_OFFSET)
-#define EFM32_USB_DOEP4_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP4_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP4CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP4CTL_OFFSET)
+#define EFM32_USB_DOEP4INT                         (EFM32_USB_BASE+EFM32_USB_DOEP4INT_OFFSET)
+#define EFM32_USB_DOEP4TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP4TSIZ_OFFSET)
+#define EFM32_USB_DOEP4DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP4DMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP5_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP5_CTL_OFFSET)
-#define EFM32_USB_DOEP5_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP5_INT_OFFSET)
-#define EFM32_USB_DOEP5_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP5_TSIZ_OFFSET)
-#define EFM32_USB_DOEP5_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP5_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP5CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP5CTL_OFFSET)
+#define EFM32_USB_DOEP5INT                         (EFM32_USB_BASE+EFM32_USB_DOEP5INT_OFFSET)
+#define EFM32_USB_DOEP5TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP5TSIZ_OFFSET)
+#define EFM32_USB_DOEP5DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP5DMAADDR_OFFSET)
 
-#define EFM32_USB_DOEP6_CTL                        (EFM32_USB_BASE+EFM32_USB_DOEP6_CTL_OFFSET)
-#define EFM32_USB_DOEP6_INT                        (EFM32_USB_BASE+EFM32_USB_DOEP6_INT_OFFSET)
-#define EFM32_USB_DOEP6_TSIZ                       (EFM32_USB_BASE+EFM32_USB_DOEP6_TSIZ_OFFSET)
-#define EFM32_USB_DOEP6_DMAADDR                    (EFM32_USB_BASE+EFM32_USB_DOEP6_DMAADDR_OFFSET)
+#define EFM32_USB_DOEP6CTL                         (EFM32_USB_BASE+EFM32_USB_DOEP6CTL_OFFSET)
+#define EFM32_USB_DOEP6INT                         (EFM32_USB_BASE+EFM32_USB_DOEP6INT_OFFSET)
+#define EFM32_USB_DOEP6TSIZ                        (EFM32_USB_BASE+EFM32_USB_DOEP6TSIZ_OFFSET)
+#define EFM32_USB_DOEP6DMAADDR                     (EFM32_USB_BASE+EFM32_USB_DOEP6DMAADDR_OFFSET)
 
 #define EFM32_USB_PCGCCTL                          (EFM32_USB_BASE+EFM32_USB_PCGCCTL_OFFSET)
 
@@ -2010,6 +2010,11 @@
 #define _USB_DSTS_SOFFN_MASK                       0x3FFF00UL                         /* Bit mask for USB_SOFFN */
 #define _USB_DSTS_SOFFN_DEFAULT                    0x00000000UL                       /* Mode DEFAULT for USB_DSTS */
 #define USB_DSTS_SOFFN_DEFAULT                     (_USB_DSTS_SOFFN_DEFAULT << 8)     /* Shifted mode DEFAULT for USB_DSTS */
+#define _USB_DSTS_SOFFN_EVENODD_MASK               0x000100UL                         /* Bit mask for USB_SOFFN even/odd bit*/
+#define _USB_DSTS_SOFFN_EVEN                       0                                  /*   Frame number even */
+#define _USB_DSTS_SOFFN_ODD                        1                                  /*   Frame number odd  */
+#define USB_DSTS_SOFFN_EVEN                        (_USB_DSTS_SOFFN_EVEN << 8)        /*   Frame number even */
+#define USB_DSTS_SOFFN_ODD                         (_USB_DSTS_SOFFN_ODD << 8)         /*   Frame number odd  */
 
 /* Bit fields for USB DIEPMSK */
 
@@ -2441,179 +2446,179 @@
 #define _USB_DIEP0TXFSTS_SPCAVAIL_DEFAULT          0x00000200UL                             /* Mode DEFAULT for USB_DIEP0TXFSTS */
 #define USB_DIEP0TXFSTS_SPCAVAIL_DEFAULT           (_USB_DIEP0TXFSTS_SPCAVAIL_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEP0TXFSTS */
 
-/* Bit fields for USB DIEP_CTL */
+/* Bit fields for USB DIEPCTL */
 
-#define _USB_DIEP_CTL_RESETVALUE                   0x00000000UL                             /* Default value for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_MASK                         0xFFEF87FFUL                             /* Mask for USB_DIEP_CTL */
+#define _USB_DIEPCTL_RESETVALUE                    0x00000000UL                            /* Default value for USB_DIEPCTL */
+#define _USB_DIEPCTL_MASK                          0xFFEF87FFUL                            /* Mask for USB_DIEPCTL */
 
-#define _USB_DIEP_CTL_MPS_SHIFT                    0                                        /* Shift value for USB_MPS */
-#define _USB_DIEP_CTL_MPS_MASK                     0x7FFUL                                  /* Bit mask for USB_MPS */
-#define _USB_DIEP_CTL_MPS_DEFAULT                  0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_MPS_DEFAULT                   (_USB_DIEP_CTL_MPS_DEFAULT << 0)         /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_USBACTEP                      (0x1UL << 15)                            /* USB Active Endpoint */
-#define _USB_DIEP_CTL_USBACTEP_SHIFT               15                                       /* Shift value for USB_USBACTEP */
-#define _USB_DIEP_CTL_USBACTEP_MASK                0x8000UL                                 /* Bit mask for USB_USBACTEP */
-#define _USB_DIEP_CTL_USBACTEP_DEFAULT             0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_USBACTEP_DEFAULT              (_USB_DIEP_CTL_USBACTEP_DEFAULT << 15)   /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_DPIDEOF                       (0x1UL << 16)                            /* Endpoint Data PID / Even or Odd Frame */
-#define _USB_DIEP_CTL_DPIDEOF_SHIFT                16                                       /* Shift value for USB_DPIDEOF */
-#define _USB_DIEP_CTL_DPIDEOF_MASK                 0x10000UL                                /* Bit mask for USB_DPIDEOF */
-#define _USB_DIEP_CTL_DPIDEOF_DEFAULT              0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_DPIDEOF_DATA0EVEN            0x00000000UL                             /* Mode DATA0EVEN for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_DPIDEOF_DATA1ODD             0x00000001UL                             /* Mode DATA1ODD for USB_DIEP_CTL */
-#define USB_DIEP_CTL_DPIDEOF_DEFAULT               (_USB_DIEP_CTL_DPIDEOF_DEFAULT << 16)    /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_DPIDEOF_DATA0EVEN             (_USB_DIEP_CTL_DPIDEOF_DATA0EVEN << 16)  /* Shifted mode DATA0EVEN for USB_DIEP_CTL */
-#define USB_DIEP_CTL_DPIDEOF_DATA1ODD              (_USB_DIEP_CTL_DPIDEOF_DATA1ODD << 16)   /* Shifted mode DATA1ODD for USB_DIEP_CTL */
-#define USB_DIEP_CTL_NAKSTS                        (0x1UL << 17)                            /* NAK Status */
-#define _USB_DIEP_CTL_NAKSTS_SHIFT                 17                                       /* Shift value for USB_NAKSTS */
-#define _USB_DIEP_CTL_NAKSTS_MASK                  0x20000UL                                /* Bit mask for USB_NAKSTS */
-#define _USB_DIEP_CTL_NAKSTS_DEFAULT               0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_NAKSTS_DEFAULT                (_USB_DIEP_CTL_NAKSTS_DEFAULT << 17)     /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_EPTYPE_SHIFT                 18                                       /* Shift value for USB_EPTYPE */
-#define _USB_DIEP_CTL_EPTYPE_MASK                  0xC0000UL                                /* Bit mask for USB_EPTYPE */
-#define _USB_DIEP_CTL_EPTYPE_DEFAULT               0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_EPTYPE_CONTROL               0x00000000UL                             /* Mode CONTROL for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_EPTYPE_ISO                   0x00000001UL                             /* Mode ISO for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_EPTYPE_BULK                  0x00000002UL                             /* Mode BULK for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_EPTYPE_INT                   0x00000003UL                             /* Mode INT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPTYPE_DEFAULT                (_USB_DIEP_CTL_EPTYPE_DEFAULT << 18)     /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPTYPE_CONTROL                (_USB_DIEP_CTL_EPTYPE_CONTROL << 18)     /* Shifted mode CONTROL for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPTYPE_ISO                    (_USB_DIEP_CTL_EPTYPE_ISO << 18)         /* Shifted mode ISO for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPTYPE_BULK                   (_USB_DIEP_CTL_EPTYPE_BULK << 18)        /* Shifted mode BULK for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPTYPE_INT                    (_USB_DIEP_CTL_EPTYPE_INT << 18)         /* Shifted mode INT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_STALL                         (0x1UL << 21)                            /* Handshake */
-#define _USB_DIEP_CTL_STALL_SHIFT                  21                                       /* Shift value for USB_STALL */
-#define _USB_DIEP_CTL_STALL_MASK                   0x200000UL                               /* Bit mask for USB_STALL */
-#define _USB_DIEP_CTL_STALL_DEFAULT                0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_STALL_DEFAULT                 (_USB_DIEP_CTL_STALL_DEFAULT << 21)      /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define _USB_DIEP_CTL_TXFNUM_SHIFT                 22                                       /* Shift value for USB_TXFNUM */
-#define _USB_DIEP_CTL_TXFNUM_MASK                  0x3c00000UL                              /* Bit mask for USB_TXFNUM */
-#define _USB_DIEP_CTL_TXFNUM_DEFAULT               0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_TXFNUM_DEFAULT                (_USB_DIEP_CTL_TXFNUM_DEFAULT << 22)     /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_CNAK                          (0x1UL << 26)                            /* Clear NAK */
-#define _USB_DIEP_CTL_CNAK_SHIFT                   26                                       /* Shift value for USB_CNAK */
-#define _USB_DIEP_CTL_CNAK_MASK                    0x4000000UL                              /* Bit mask for USB_CNAK */
-#define _USB_DIEP_CTL_CNAK_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_CNAK_DEFAULT                  (_USB_DIEP_CTL_CNAK_DEFAULT << 26)       /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_SNAK                          (0x1UL << 27)                            /* Set NAK */
-#define _USB_DIEP_CTL_SNAK_SHIFT                   27                                       /* Shift value for USB_SNAK */
-#define _USB_DIEP_CTL_SNAK_MASK                    0x8000000UL                              /* Bit mask for USB_SNAK */
-#define _USB_DIEP_CTL_SNAK_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_SNAK_DEFAULT                  (_USB_DIEP_CTL_SNAK_DEFAULT << 27)       /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_SETD0PIDEF                    (0x1UL << 28)                            /* Set DATA0 PID / Even Frame */
-#define _USB_DIEP_CTL_SETD0PIDEF_SHIFT             28                                       /* Shift value for USB_SETD0PIDEF */
-#define _USB_DIEP_CTL_SETD0PIDEF_MASK              0x10000000UL                             /* Bit mask for USB_SETD0PIDEF */
-#define _USB_DIEP_CTL_SETD0PIDEF_DEFAULT           0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_SETD0PIDEF_DEFAULT            (_USB_DIEP_CTL_SETD0PIDEF_DEFAULT << 28) /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_SETD1PIDOF                    (0x1UL << 29)                            /* Set DATA1 PID / Odd Frame */
-#define _USB_DIEP_CTL_SETD1PIDOF_SHIFT             29                                       /* Shift value for USB_SETD1PIDOF */
-#define _USB_DIEP_CTL_SETD1PIDOF_MASK              0x20000000UL                             /* Bit mask for USB_SETD1PIDOF */
-#define _USB_DIEP_CTL_SETD1PIDOF_DEFAULT           0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_SETD1PIDOF_DEFAULT            (_USB_DIEP_CTL_SETD1PIDOF_DEFAULT << 29) /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPDIS                         (0x1UL << 30)                            /* Endpoint Disable */
-#define _USB_DIEP_CTL_EPDIS_SHIFT                  30                                       /* Shift value for USB_EPDIS */
-#define _USB_DIEP_CTL_EPDIS_MASK                   0x40000000UL                             /* Bit mask for USB_EPDIS */
-#define _USB_DIEP_CTL_EPDIS_DEFAULT                0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPDIS_DEFAULT                 (_USB_DIEP_CTL_EPDIS_DEFAULT << 30)      /* Shifted mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPENA                         (0x1UL << 31)                            /* Endpoint Enable */
-#define _USB_DIEP_CTL_EPENA_SHIFT                  31                                       /* Shift value for USB_EPENA */
-#define _USB_DIEP_CTL_EPENA_MASK                   0x80000000UL                             /* Bit mask for USB_EPENA */
-#define _USB_DIEP_CTL_EPENA_DEFAULT                0x00000000UL                             /* Mode DEFAULT for USB_DIEP_CTL */
-#define USB_DIEP_CTL_EPENA_DEFAULT                 (_USB_DIEP_CTL_EPENA_DEFAULT << 31)      /* Shifted mode DEFAULT for USB_DIEP_CTL */
+#define _USB_DIEPCTL_MPS_SHIFT                     0                                       /* Shift value for USB_MPS */
+#define _USB_DIEPCTL_MPS_MASK                      0x7FFUL                                 /* Bit mask for USB_MPS */
+#define _USB_DIEPCTL_MPS_DEFAULT                   0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_MPS_DEFAULT                    (_USB_DIEPCTL_MPS_DEFAULT << 0)         /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_USBACTEP                       (0x1UL << 15)                           /* USB Active Endpoint */
+#define _USB_DIEPCTL_USBACTEP_SHIFT                15                                      /* Shift value for USB_USBACTEP */
+#define _USB_DIEPCTL_USBACTEP_MASK                 0x8000UL                                /* Bit mask for USB_USBACTEP */
+#define _USB_DIEPCTL_USBACTEP_DEFAULT              0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_USBACTEP_DEFAULT               (_USB_DIEPCTL_USBACTEP_DEFAULT << 15)   /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_DPIDEOF                        (0x1UL << 16)                           /* Endpoint Data PID / Even or Odd Frame */
+#define _USB_DIEPCTL_DPIDEOF_SHIFT                 16                                      /* Shift value for USB_DPIDEOF */
+#define _USB_DIEPCTL_DPIDEOF_MASK                  0x10000UL                               /* Bit mask for USB_DPIDEOF */
+#define _USB_DIEPCTL_DPIDEOF_DEFAULT               0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define _USB_DIEPCTL_DPIDEOF_DATA0EVEN             0x00000000UL                            /* Mode DATA0EVEN for USB_DIEPCTL */
+#define _USB_DIEPCTL_DPIDEOF_DATA1ODD              0x00000001UL                            /* Mode DATA1ODD for USB_DIEPCTL */
+#define USB_DIEPCTL_DPIDEOF_DEFAULT                (_USB_DIEPCTL_DPIDEOF_DEFAULT << 16)    /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_DPIDEOF_DATA0EVEN              (_USB_DIEPCTL_DPIDEOF_DATA0EVEN << 16)  /* Shifted mode DATA0EVEN for USB_DIEPCTL */
+#define USB_DIEPCTL_DPIDEOF_DATA1ODD               (_USB_DIEPCTL_DPIDEOF_DATA1ODD << 16)   /* Shifted mode DATA1ODD for USB_DIEPCTL */
+#define USB_DIEPCTL_NAKSTS                         (0x1UL << 17)                           /* NAK Status */
+#define _USB_DIEPCTL_NAKSTS_SHIFT                  17                                      /* Shift value for USB_NAKSTS */
+#define _USB_DIEPCTL_NAKSTS_MASK                   0x20000UL                               /* Bit mask for USB_NAKSTS */
+#define _USB_DIEPCTL_NAKSTS_DEFAULT                0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_NAKSTS_DEFAULT                 (_USB_DIEPCTL_NAKSTS_DEFAULT << 17)     /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define _USB_DIEPCTL_EPTYPE_SHIFT                  18                                      /* Shift value for USB_EPTYPE */
+#define _USB_DIEPCTL_EPTYPE_MASK                   0xC0000UL                               /* Bit mask for USB_EPTYPE */
+#define _USB_DIEPCTL_EPTYPE_DEFAULT                0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define _USB_DIEPCTL_EPTYPE_CONTROL                0x00000000UL                            /* Mode CONTROL for USB_DIEPCTL */
+#define _USB_DIEPCTL_EPTYPE_ISO                    0x00000001UL                            /* Mode ISO for USB_DIEPCTL */
+#define _USB_DIEPCTL_EPTYPE_BULK                   0x00000002UL                            /* Mode BULK for USB_DIEPCTL */
+#define _USB_DIEPCTL_EPTYPE_INT                    0x00000003UL                            /* Mode INT for USB_DIEPCTL */
+#define USB_DIEPCTL_EPTYPE_DEFAULT                 (_USB_DIEPCTL_EPTYPE_DEFAULT << 18)     /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_EPTYPE_CONTROL                 (_USB_DIEPCTL_EPTYPE_CONTROL << 18)     /* Shifted mode CONTROL for USB_DIEPCTL */
+#define USB_DIEPCTL_EPTYPE_ISO                     (_USB_DIEPCTL_EPTYPE_ISO << 18)         /* Shifted mode ISO for USB_DIEPCTL */
+#define USB_DIEPCTL_EPTYPE_BULK                    (_USB_DIEPCTL_EPTYPE_BULK << 18)        /* Shifted mode BULK for USB_DIEPCTL */
+#define USB_DIEPCTL_EPTYPE_INT                     (_USB_DIEPCTL_EPTYPE_INT << 18)         /* Shifted mode INT for USB_DIEPCTL */
+#define USB_DIEPCTL_STALL                          (0x1UL << 21)                           /* Handshake */
+#define _USB_DIEPCTL_STALL_SHIFT                   21                                      /* Shift value for USB_STALL */
+#define _USB_DIEPCTL_STALL_MASK                    0x200000UL                              /* Bit mask for USB_STALL */
+#define _USB_DIEPCTL_STALL_DEFAULT                 0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_STALL_DEFAULT                  (_USB_DIEPCTL_STALL_DEFAULT << 21)      /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define _USB_DIEPCTL_TXFNUM_SHIFT                  22                                      /* Shift value for USB_TXFNUM */
+#define _USB_DIEPCTL_TXFNUM_MASK                   0x3c00000UL                             /* Bit mask for USB_TXFNUM */
+#define _USB_DIEPCTL_TXFNUM_DEFAULT                0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_TXFNUM_DEFAULT                 (_USB_DIEPCTL_TXFNUM_DEFAULT << 22)     /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_CNAK                           (0x1UL << 26)                           /* Clear NAK */
+#define _USB_DIEPCTL_CNAK_SHIFT                    26                                      /* Shift value for USB_CNAK */
+#define _USB_DIEPCTL_CNAK_MASK                     0x4000000UL                             /* Bit mask for USB_CNAK */
+#define _USB_DIEPCTL_CNAK_DEFAULT                  0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_CNAK_DEFAULT                   (_USB_DIEPCTL_CNAK_DEFAULT << 26)       /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_SNAK                           (0x1UL << 27)                           /* Set NAK */
+#define _USB_DIEPCTL_SNAK_SHIFT                    27                                      /* Shift value for USB_SNAK */
+#define _USB_DIEPCTL_SNAK_MASK                     0x8000000UL                             /* Bit mask for USB_SNAK */
+#define _USB_DIEPCTL_SNAK_DEFAULT                  0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_SNAK_DEFAULT                   (_USB_DIEPCTL_SNAK_DEFAULT << 27)       /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_SETD0PIDEF                     (0x1UL << 28)                           /* Set DATA0 PID / Even Frame */
+#define _USB_DIEPCTL_SETD0PIDEF_SHIFT              28                                      /* Shift value for USB_SETD0PIDEF */
+#define _USB_DIEPCTL_SETD0PIDEF_MASK               0x10000000UL                            /* Bit mask for USB_SETD0PIDEF */
+#define _USB_DIEPCTL_SETD0PIDEF_DEFAULT            0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_SETD0PIDEF_DEFAULT             (_USB_DIEPCTL_SETD0PIDEF_DEFAULT << 28) /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_SETD1PIDOF                     (0x1UL << 29)                           /* Set DATA1 PID / Odd Frame */
+#define _USB_DIEPCTL_SETD1PIDOF_SHIFT              29                                      /* Shift value for USB_SETD1PIDOF */
+#define _USB_DIEPCTL_SETD1PIDOF_MASK               0x20000000UL                            /* Bit mask for USB_SETD1PIDOF */
+#define _USB_DIEPCTL_SETD1PIDOF_DEFAULT            0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_SETD1PIDOF_DEFAULT             (_USB_DIEPCTL_SETD1PIDOF_DEFAULT << 29) /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_EPDIS                          (0x1UL << 30)                           /* Endpoint Disable */
+#define _USB_DIEPCTL_EPDIS_SHIFT                   30                                      /* Shift value for USB_EPDIS */
+#define _USB_DIEPCTL_EPDIS_MASK                    0x40000000UL                            /* Bit mask for USB_EPDIS */
+#define _USB_DIEPCTL_EPDIS_DEFAULT                 0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_EPDIS_DEFAULT                  (_USB_DIEPCTL_EPDIS_DEFAULT << 30)      /* Shifted mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_EPENA                          (0x1UL << 31)                           /* Endpoint Enable */
+#define _USB_DIEPCTL_EPENA_SHIFT                   31                                      /* Shift value for USB_EPENA */
+#define _USB_DIEPCTL_EPENA_MASK                    0x80000000UL                            /* Bit mask for USB_EPENA */
+#define _USB_DIEPCTL_EPENA_DEFAULT                 0x00000000UL                            /* Mode DEFAULT for USB_DIEPCTL */
+#define USB_DIEPCTL_EPENA_DEFAULT                  (_USB_DIEPCTL_EPENA_DEFAULT << 31)      /* Shifted mode DEFAULT for USB_DIEPCTL */
 
-/* Bit fields for USB DIEP_INT */
+/* Bit fields for USB DIEPINT */
 
-#define _USB_DIEP_INT_RESETVALUE                   0x00000080UL                             /* Default value for USB_DIEP_INT */
-#define _USB_DIEP_INT_MASK                         0x000038DFUL                             /* Mask for USB_DIEP_INT */
+#define _USB_DIEPINT_RESETVALUE                    0x00000080UL                            /* Default value for USB_DIEPINT */
+#define _USB_DIEPINT_MASK                          0x000038DFUL                            /* Mask for USB_DIEPINT */
 
-#define USB_DIEP_INT_XFERCOMPL                     (0x1UL << 0)                             /* Transfer Completed Interrupt */
-#define _USB_DIEP_INT_XFERCOMPL_SHIFT              0                                        /* Shift value for USB_XFERCOMPL */
-#define _USB_DIEP_INT_XFERCOMPL_MASK               0x1UL                                    /* Bit mask for USB_XFERCOMPL */
-#define _USB_DIEP_INT_XFERCOMPL_DEFAULT            0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_XFERCOMPL_DEFAULT             (_USB_DIEP_INT_XFERCOMPL_DEFAULT << 0)   /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_EPDISBLD                      (0x1UL << 1)                             /* Endpoint Disabled Interrupt */
-#define _USB_DIEP_INT_EPDISBLD_SHIFT               1                                        /* Shift value for USB_EPDISBLD */
-#define _USB_DIEP_INT_EPDISBLD_MASK                0x2UL                                    /* Bit mask for USB_EPDISBLD */
-#define _USB_DIEP_INT_EPDISBLD_DEFAULT             0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_EPDISBLD_DEFAULT              (_USB_DIEP_INT_EPDISBLD_DEFAULT << 1)    /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_AHBERR                        (0x1UL << 2)                             /* AHB Error */
-#define _USB_DIEP_INT_AHBERR_SHIFT                 2                                        /* Shift value for USB_AHBERR */
-#define _USB_DIEP_INT_AHBERR_MASK                  0x4UL                                    /* Bit mask for USB_AHBERR */
-#define _USB_DIEP_INT_AHBERR_DEFAULT               0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_AHBERR_DEFAULT                (_USB_DIEP_INT_AHBERR_DEFAULT << 2)      /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_TIMEOUT                       (0x1UL << 3)                             /* Timeout Condition */
-#define _USB_DIEP_INT_TIMEOUT_SHIFT                3                                        /* Shift value for USB_TIMEOUT */
-#define _USB_DIEP_INT_TIMEOUT_MASK                 0x8UL                                    /* Bit mask for USB_TIMEOUT */
-#define _USB_DIEP_INT_TIMEOUT_DEFAULT              0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_TIMEOUT_DEFAULT               (_USB_DIEP_INT_TIMEOUT_DEFAULT << 3)     /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_INTKNTXFEMP                   (0x1UL << 4)                             /* IN Token Received When TxFIFO is Empty */
-#define _USB_DIEP_INT_INTKNTXFEMP_SHIFT            4                                        /* Shift value for USB_INTKNTXFEMP */
-#define _USB_DIEP_INT_INTKNTXFEMP_MASK             0x10UL                                   /* Bit mask for USB_INTKNTXFEMP */
-#define _USB_DIEP_INT_INTKNTXFEMP_DEFAULT          0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_INTKNTXFEMP_DEFAULT           (_USB_DIEP_INT_INTKNTXFEMP_DEFAULT << 4) /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_INEPNAKEFF                    (0x1UL << 6)                             /* IN Endpoint NAK Effective */
-#define _USB_DIEP_INT_INEPNAKEFF_SHIFT             6                                        /* Shift value for USB_INEPNAKEFF */
-#define _USB_DIEP_INT_INEPNAKEFF_MASK              0x40UL                                   /* Bit mask for USB_INEPNAKEFF */
-#define _USB_DIEP_INT_INEPNAKEFF_DEFAULT           0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_INEPNAKEFF_DEFAULT            (_USB_DIEP_INT_INEPNAKEFF_DEFAULT << 6)  /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_TXFEMP                        (0x1UL << 7)                             /* Transmit FIFO Empty */
-#define _USB_DIEP_INT_TXFEMP_SHIFT                 7                                        /* Shift value for USB_TXFEMP */
-#define _USB_DIEP_INT_TXFEMP_MASK                  0x80UL                                   /* Bit mask for USB_TXFEMP */
-#define _USB_DIEP_INT_TXFEMP_DEFAULT               0x00000001UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_TXFEMP_DEFAULT                (_USB_DIEP_INT_TXFEMP_DEFAULT << 7)      /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_PKTDRPSTS                     (0x1UL << 11)                            /* Packet Drop Status */
-#define _USB_DIEP_INT_PKTDRPSTS_SHIFT              11                                       /* Shift value for USB_PKTDRPSTS */
-#define _USB_DIEP_INT_PKTDRPSTS_MASK               0x800UL                                  /* Bit mask for USB_PKTDRPSTS */
-#define _USB_DIEP_INT_PKTDRPSTS_DEFAULT            0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_PKTDRPSTS_DEFAULT             (_USB_DIEP_INT_PKTDRPSTS_DEFAULT << 11)  /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_BBLEERR                       (0x1UL << 12)                            /* NAK Interrupt */
-#define _USB_DIEP_INT_BBLEERR_SHIFT                12                                       /* Shift value for USB_BBLEERR */
-#define _USB_DIEP_INT_BBLEERR_MASK                 0x1000UL                                 /* Bit mask for USB_BBLEERR */
-#define _USB_DIEP_INT_BBLEERR_DEFAULT              0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_BBLEERR_DEFAULT               (_USB_DIEP_INT_BBLEERR_DEFAULT << 12)    /* Shifted mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_NAKINTRPT                     (0x1UL << 13)                            /* NAK Interrupt */
-#define _USB_DIEP_INT_NAKINTRPT_SHIFT              13                                       /* Shift value for USB_NAKINTRPT */
-#define _USB_DIEP_INT_NAKINTRPT_MASK               0x2000UL                                 /* Bit mask for USB_NAKINTRPT */
-#define _USB_DIEP_INT_NAKINTRPT_DEFAULT            0x00000000UL                             /* Mode DEFAULT for USB_DIEP_INT */
-#define USB_DIEP_INT_NAKINTRPT_DEFAULT             (_USB_DIEP_INT_NAKINTRPT_DEFAULT << 13)  /* Shifted mode DEFAULT for USB_DIEP_INT */
+#define USB_DIEPINT_XFERCOMPL                      (0x1UL << 0)                            /* Transfer Completed Interrupt */
+#define _USB_DIEPINT_XFERCOMPL_SHIFT               0                                       /* Shift value for USB_XFERCOMPL */
+#define _USB_DIEPINT_XFERCOMPL_MASK                0x1UL                                   /* Bit mask for USB_XFERCOMPL */
+#define _USB_DIEPINT_XFERCOMPL_DEFAULT             0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_XFERCOMPL_DEFAULT              (_USB_DIEPINT_XFERCOMPL_DEFAULT << 0)   /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_EPDISBLD                       (0x1UL << 1)                            /* Endpoint Disabled Interrupt */
+#define _USB_DIEPINT_EPDISBLD_SHIFT                1                                       /* Shift value for USB_EPDISBLD */
+#define _USB_DIEPINT_EPDISBLD_MASK                 0x2UL                                   /* Bit mask for USB_EPDISBLD */
+#define _USB_DIEPINT_EPDISBLD_DEFAULT              0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_EPDISBLD_DEFAULT               (_USB_DIEPINT_EPDISBLD_DEFAULT << 1)    /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_AHBERR                         (0x1UL << 2)                            /* AHB Error */
+#define _USB_DIEPINT_AHBERR_SHIFT                  2                                       /* Shift value for USB_AHBERR */
+#define _USB_DIEPINT_AHBERR_MASK                   0x4UL                                   /* Bit mask for USB_AHBERR */
+#define _USB_DIEPINT_AHBERR_DEFAULT                0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_AHBERR_DEFAULT                 (_USB_DIEPINT_AHBERR_DEFAULT << 2)      /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_TIMEOUT                        (0x1UL << 3)                            /* Timeout Condition */
+#define _USB_DIEPINT_TIMEOUT_SHIFT                 3                                       /* Shift value for USB_TIMEOUT */
+#define _USB_DIEPINT_TIMEOUT_MASK                  0x8UL                                   /* Bit mask for USB_TIMEOUT */
+#define _USB_DIEPINT_TIMEOUT_DEFAULT               0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_TIMEOUT_DEFAULT                (_USB_DIEPINT_TIMEOUT_DEFAULT << 3)     /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_INTKNTXFEMP                    (0x1UL << 4)                            /* IN Token Received When TxFIFO is Empty */
+#define _USB_DIEPINT_INTKNTXFEMP_SHIFT             4                                       /* Shift value for USB_INTKNTXFEMP */
+#define _USB_DIEPINT_INTKNTXFEMP_MASK              0x10UL                                  /* Bit mask for USB_INTKNTXFEMP */
+#define _USB_DIEPINT_INTKNTXFEMP_DEFAULT           0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_INTKNTXFEMP_DEFAULT            (_USB_DIEPINT_INTKNTXFEMP_DEFAULT << 4) /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_INEPNAKEFF                     (0x1UL << 6)                            /* IN Endpoint NAK Effective */
+#define _USB_DIEPINT_INEPNAKEFF_SHIFT              6                                       /* Shift value for USB_INEPNAKEFF */
+#define _USB_DIEPINT_INEPNAKEFF_MASK               0x40UL                                  /* Bit mask for USB_INEPNAKEFF */
+#define _USB_DIEPINT_INEPNAKEFF_DEFAULT            0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_INEPNAKEFF_DEFAULT             (_USB_DIEPINT_INEPNAKEFF_DEFAULT << 6)  /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_TXFEMP                         (0x1UL << 7)                            /* Transmit FIFO Empty */
+#define _USB_DIEPINT_TXFEMP_SHIFT                  7                                       /* Shift value for USB_TXFEMP */
+#define _USB_DIEPINT_TXFEMP_MASK                   0x80UL                                  /* Bit mask for USB_TXFEMP */
+#define _USB_DIEPINT_TXFEMP_DEFAULT                0x00000001UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_TXFEMP_DEFAULT                 (_USB_DIEPINT_TXFEMP_DEFAULT << 7)      /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_PKTDRPSTS                      (0x1UL << 11)                           /* Packet Drop Status */
+#define _USB_DIEPINT_PKTDRPSTS_SHIFT               11                                      /* Shift value for USB_PKTDRPSTS */
+#define _USB_DIEPINT_PKTDRPSTS_MASK                0x800UL                                 /* Bit mask for USB_PKTDRPSTS */
+#define _USB_DIEPINT_PKTDRPSTS_DEFAULT             0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_PKTDRPSTS_DEFAULT              (_USB_DIEPINT_PKTDRPSTS_DEFAULT << 11)  /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_BBLEERR                        (0x1UL << 12)                           /* NAK Interrupt */
+#define _USB_DIEPINT_BBLEERR_SHIFT                 12                                      /* Shift value for USB_BBLEERR */
+#define _USB_DIEPINT_BBLEERR_MASK                  0x1000UL                                /* Bit mask for USB_BBLEERR */
+#define _USB_DIEPINT_BBLEERR_DEFAULT               0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_BBLEERR_DEFAULT                (_USB_DIEPINT_BBLEERR_DEFAULT << 12)    /* Shifted mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_NAKINTRPT                      (0x1UL << 13)                           /* NAK Interrupt */
+#define _USB_DIEPINT_NAKINTRPT_SHIFT               13                                      /* Shift value for USB_NAKINTRPT */
+#define _USB_DIEPINT_NAKINTRPT_MASK                0x2000UL                                /* Bit mask for USB_NAKINTRPT */
+#define _USB_DIEPINT_NAKINTRPT_DEFAULT             0x00000000UL                            /* Mode DEFAULT for USB_DIEPINT */
+#define USB_DIEPINT_NAKINTRPT_DEFAULT              (_USB_DIEPINT_NAKINTRPT_DEFAULT << 13)  /* Shifted mode DEFAULT for USB_DIEPINT */
 
-/* Bit fields for USB DIEP_TSIZ */
+/* Bit fields for USB DIEPTSIZ */
 
-#define _USB_DIEP_TSIZ_RESETVALUE                  0x00000000UL                           /* Default value for USB_DIEP_TSIZ */
-#define _USB_DIEP_TSIZ_MASK                        0x7FFFFFFFUL                           /* Mask for USB_DIEP_TSIZ */
+#define _USB_DIEPTSIZ_RESETVALUE                   0x00000000UL                          /* Default value for USB_DIEPTSIZ */
+#define _USB_DIEPTSIZ_MASK                         0x7FFFFFFFUL                          /* Mask for USB_DIEPTSIZ */
 
-#define _USB_DIEP_TSIZ_XFERSIZE_SHIFT              0                                      /* Shift value for USB_XFERSIZE */
-#define _USB_DIEP_TSIZ_XFERSIZE_MASK               0x7FFFFUL                              /* Bit mask for USB_XFERSIZE */
-#define _USB_DIEP_TSIZ_XFERSIZE_DEFAULT            0x00000000UL                           /* Mode DEFAULT for USB_DIEP_TSIZ */
-#define USB_DIEP_TSIZ_XFERSIZE_DEFAULT             (_USB_DIEP_TSIZ_XFERSIZE_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEP_TSIZ */
-#define _USB_DIEP_TSIZ_PKTCNT_SHIFT                19                                     /* Shift value for USB_PKTCNT */
-#define _USB_DIEP_TSIZ_PKTCNT_MASK                 0x1FF80000UL                           /* Bit mask for USB_PKTCNT */
-#define _USB_DIEP_TSIZ_PKTCNT_DEFAULT              0x00000000UL                           /* Mode DEFAULT for USB_DIEP_TSIZ */
-#define USB_DIEP_TSIZ_PKTCNT_DEFAULT               (_USB_DIEP_TSIZ_PKTCNT_DEFAULT << 19)  /* Shifted mode DEFAULT for USB_DIEP_TSIZ */
-#define _USB_DIEP_TSIZ_MC_SHIFT                    29                                     /* Shift value for USB_MC */
-#define _USB_DIEP_TSIZ_MC_MASK                     0x60000000UL                           /* Bit mask for USB_MC */
-#define _USB_DIEP_TSIZ_MC_DEFAULT                  0x00000000UL                           /* Mode DEFAULT for USB_DIEP_TSIZ */
-#define USB_DIEP_TSIZ_MC_DEFAULT                   (_USB_DIEP_TSIZ_MC_DEFAULT << 29)      /* Shifted mode DEFAULT for USB_DIEP_TSIZ */
+#define _USB_DIEPTSIZ_XFERSIZE_SHIFT               0                                     /* Shift value for USB_XFERSIZE */
+#define _USB_DIEPTSIZ_XFERSIZE_MASK                0x7FFFFUL                             /* Bit mask for USB_XFERSIZE */
+#define _USB_DIEPTSIZ_XFERSIZE_DEFAULT             0x00000000UL                          /* Mode DEFAULT for USB_DIEPTSIZ */
+#define USB_DIEPTSIZ_XFERSIZE_DEFAULT              (_USB_DIEPTSIZ_XFERSIZE_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEPTSIZ */
+#define _USB_DIEPTSIZ_PKTCNT_SHIFT                 19                                    /* Shift value for USB_PKTCNT */
+#define _USB_DIEPTSIZ_PKTCNT_MASK                  0x1FF80000UL                          /* Bit mask for USB_PKTCNT */
+#define _USB_DIEPTSIZ_PKTCNT_DEFAULT               0x00000000UL                          /* Mode DEFAULT for USB_DIEPTSIZ */
+#define USB_DIEPTSIZ_PKTCNT_DEFAULT                (_USB_DIEPTSIZ_PKTCNT_DEFAULT << 19)  /* Shifted mode DEFAULT for USB_DIEPTSIZ */
+#define _USB_DIEPTSIZ_MC_SHIFT                     29                                    /* Shift value for USB_MC */
+#define _USB_DIEPTSIZ_MC_MASK                      0x60000000UL                          /* Bit mask for USB_MC */
+#define _USB_DIEPTSIZ_MC_DEFAULT                   0x00000000UL                          /* Mode DEFAULT for USB_DIEPTSIZ */
+#define USB_DIEPTSIZ_MC_DEFAULT                    (_USB_DIEPTSIZ_MC_DEFAULT << 29)      /* Shifted mode DEFAULT for USB_DIEPTSIZ */
 
-/* Bit fields for USB DIEP_DMAADDR */
+/* Bit fields for USB DIEPDMAADDR */
 
-#define _USB_DIEP_DMAADDR_RESETVALUE               0x00000000UL                             /* Default value for USB_DIEP_DMAADDR */
-#define _USB_DIEP_DMAADDR_MASK                     0xFFFFFFFFUL                             /* Mask for USB_DIEP_DMAADDR */
+#define _USB_DIEPDMAADDR_RESETVALUE                0x00000000UL                            /* Default value for USB_DIEPDMAADDR */
+#define _USB_DIEPDMAADDR_MASK                      0xFFFFFFFFUL                            /* Mask for USB_DIEPDMAADDR */
 
-#define _USB_DIEP_DMAADDR_DMAADDR_SHIFT            0                                        /* Shift value for USB_DMAADDR */
-#define _USB_DIEP_DMAADDR_DMAADDR_MASK             0xFFFFFFFFUL                             /* Bit mask for USB_DMAADDR */
-#define _USB_DIEP_DMAADDR_DMAADDR_DEFAULT          0x00000000UL                             /* Mode DEFAULT for USB_DIEP_DMAADDR */
-#define USB_DIEP_DMAADDR_DMAADDR_DEFAULT           (_USB_DIEP_DMAADDR_DMAADDR_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEP_DMAADDR */
+#define _USB_DIEPDMAADDR_DMAADDR_SHIFT             0                                       /* Shift value for USB_DMAADDR */
+#define _USB_DIEPDMAADDR_DMAADDR_MASK              0xFFFFFFFFUL                            /* Bit mask for USB_DMAADDR */
+#define _USB_DIEPDMAADDR_DMAADDR_DEFAULT           0x00000000UL                            /* Mode DEFAULT for USB_DIEPDMAADDR */
+#define USB_DIEPDMAADDR_DMAADDR_DEFAULT            (_USB_DIEPDMAADDR_DMAADDR_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEPDMAADDR */
 
-/* Bit fields for USB DIEP_TXFSTS */
+/* Bit fields for USB DIEPTXFSTS */
 
-#define _USB_DIEP_TXFSTS_RESETVALUE                0x00000200UL                             /* Default value for USB_DIEP_TXFSTS */
-#define _USB_DIEP_TXFSTS_MASK                      0x0000FFFFUL                             /* Mask for USB_DIEP_TXFSTS */
+#define _USB_DIEPTXFSTS_RESETVALUE                 0x00000200UL                            /* Default value for USB_DIEPTXFSTS */
+#define _USB_DIEPTXFSTS_MASK                       0x0000FFFFUL                            /* Mask for USB_DIEPTXFSTS */
 
-#define _USB_DIEP_TXFSTS_SPCAVAIL_SHIFT            0                                        /* Shift value for USB_SPCAVAIL */
-#define _USB_DIEP_TXFSTS_SPCAVAIL_MASK             0xFFFFUL                                 /* Bit mask for USB_SPCAVAIL */
-#define _USB_DIEP_TXFSTS_SPCAVAIL_DEFAULT          0x00000200UL                             /* Mode DEFAULT for USB_DIEP_TXFSTS */
-#define USB_DIEP_TXFSTS_SPCAVAIL_DEFAULT           (_USB_DIEP_TXFSTS_SPCAVAIL_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEP_TXFSTS */
+#define _USB_DIEPTXFSTS_SPCAVAIL_SHIFT             0                                       /* Shift value for USB_SPCAVAIL */
+#define _USB_DIEPTXFSTS_SPCAVAIL_MASK              0xFFFFUL                                /* Bit mask for USB_SPCAVAIL */
+#define _USB_DIEPTXFSTS_SPCAVAIL_DEFAULT           0x00000200UL                            /* Mode DEFAULT for USB_DIEPTXFSTS */
+#define USB_DIEPTXFSTS_SPCAVAIL_DEFAULT            (_USB_DIEPTXFSTS_SPCAVAIL_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEPTXFSTS */
 
 /* Bit fields for USB DOEP0CTL */
 
@@ -2757,173 +2762,173 @@
 #define _USB_DOEP0DMAADDR_DOEP0DMAADDR_DEFAULT     0x00000000UL                                  /* Mode DEFAULT for USB_DOEP0DMAADDR */
 #define USB_DOEP0DMAADDR_DOEP0DMAADDR_DEFAULT      (_USB_DOEP0DMAADDR_DOEP0DMAADDR_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DOEP0DMAADDR */
 
-/* Bit fields for USB DOEP_CTL */
+/* Bit fields for USB DOEPCTL */
 
-#define _USB_DOEP_CTL_RESETVALUE                   0x00000000UL                             /* Default value for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_MASK                         0xFC3F87FFUL                             /* Mask for USB_DOEP_CTL */
+#define _USB_DOEPCTL_RESETVALUE                    0x00000000UL                            /* Default value for USB_DOEPCTL */
+#define _USB_DOEPCTL_MASK                          0xFC3F87FFUL                            /* Mask for USB_DOEPCTL */
 
-#define _USB_DOEP_CTL_MPS_SHIFT                    0                                        /* Shift value for USB_MPS */
-#define _USB_DOEP_CTL_MPS_MASK                     0x7FFUL                                  /* Bit mask for USB_MPS */
-#define _USB_DOEP_CTL_MPS_DEFAULT                  0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_MPS_DEFAULT                   (_USB_DOEP_CTL_MPS_DEFAULT << 0)         /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_USBACTEP                      (0x1UL << 15)                            /* USB Active Endpoint */
-#define _USB_DOEP_CTL_USBACTEP_SHIFT               15                                       /* Shift value for USB_USBACTEP */
-#define _USB_DOEP_CTL_USBACTEP_MASK                0x8000UL                                 /* Bit mask for USB_USBACTEP */
-#define _USB_DOEP_CTL_USBACTEP_DEFAULT             0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_USBACTEP_DEFAULT              (_USB_DOEP_CTL_USBACTEP_DEFAULT << 15)   /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_DPIDEOF                       (0x1UL << 16)                            /* Endpoint Data PID / Even-odd Frame */
-#define _USB_DOEP_CTL_DPIDEOF_SHIFT                16                                       /* Shift value for USB_DPIDEOF */
-#define _USB_DOEP_CTL_DPIDEOF_MASK                 0x10000UL                                /* Bit mask for USB_DPIDEOF */
-#define _USB_DOEP_CTL_DPIDEOF_DEFAULT              0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_DPIDEOF_DATA0EVEN            0x00000000UL                             /* Mode DATA0EVEN for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_DPIDEOF_DATA1ODD             0x00000001UL                             /* Mode DATA1ODD for USB_DOEP_CTL */
-#define USB_DOEP_CTL_DPIDEOF_DEFAULT               (_USB_DOEP_CTL_DPIDEOF_DEFAULT << 16)    /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_DPIDEOF_DATA0EVEN             (_USB_DOEP_CTL_DPIDEOF_DATA0EVEN << 16)  /* Shifted mode DATA0EVEN for USB_DOEP_CTL */
-#define USB_DOEP_CTL_DPIDEOF_DATA1ODD              (_USB_DOEP_CTL_DPIDEOF_DATA1ODD << 16)   /* Shifted mode DATA1ODD for USB_DOEP_CTL */
-#define USB_DOEP_CTL_NAKSTS                        (0x1UL << 17)                            /* NAK Status */
-#define _USB_DOEP_CTL_NAKSTS_SHIFT                 17                                       /* Shift value for USB_NAKSTS */
-#define _USB_DOEP_CTL_NAKSTS_MASK                  0x20000UL                                /* Bit mask for USB_NAKSTS */
-#define _USB_DOEP_CTL_NAKSTS_DEFAULT               0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_NAKSTS_DEFAULT                (_USB_DOEP_CTL_NAKSTS_DEFAULT << 17)     /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_EPTYPE_SHIFT                 18                                       /* Shift value for USB_EPTYPE */
-#define _USB_DOEP_CTL_EPTYPE_MASK                  0xC0000UL                                /* Bit mask for USB_EPTYPE */
-#define _USB_DOEP_CTL_EPTYPE_DEFAULT               0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_EPTYPE_CONTROL               0x00000000UL                             /* Mode CONTROL for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_EPTYPE_ISO                   0x00000001UL                             /* Mode ISO for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_EPTYPE_BULK                  0x00000002UL                             /* Mode BULK for USB_DOEP_CTL */
-#define _USB_DOEP_CTL_EPTYPE_INT                   0x00000003UL                             /* Mode INT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPTYPE_DEFAULT                (_USB_DOEP_CTL_EPTYPE_DEFAULT << 18)     /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPTYPE_CONTROL                (_USB_DOEP_CTL_EPTYPE_CONTROL << 18)     /* Shifted mode CONTROL for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPTYPE_ISO                    (_USB_DOEP_CTL_EPTYPE_ISO << 18)         /* Shifted mode ISO for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPTYPE_BULK                   (_USB_DOEP_CTL_EPTYPE_BULK << 18)        /* Shifted mode BULK for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPTYPE_INT                    (_USB_DOEP_CTL_EPTYPE_INT << 18)         /* Shifted mode INT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SNP                           (0x1UL << 20)                            /* Snoop Mode */
-#define _USB_DOEP_CTL_SNP_SHIFT                    20                                       /* Shift value for USB_SNP */
-#define _USB_DOEP_CTL_SNP_MASK                     0x100000UL                               /* Bit mask for USB_SNP */
-#define _USB_DOEP_CTL_SNP_DEFAULT                  0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SNP_DEFAULT                   (_USB_DOEP_CTL_SNP_DEFAULT << 20)        /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_STALL                         (0x1UL << 21)                            /* STALL Handshake */
-#define _USB_DOEP_CTL_STALL_SHIFT                  21                                       /* Shift value for USB_STALL */
-#define _USB_DOEP_CTL_STALL_MASK                   0x200000UL                               /* Bit mask for USB_STALL */
-#define _USB_DOEP_CTL_STALL_DEFAULT                0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_STALL_DEFAULT                 (_USB_DOEP_CTL_STALL_DEFAULT << 21)      /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_CNAK                          (0x1UL << 26)                            /* Clear NAK */
-#define _USB_DOEP_CTL_CNAK_SHIFT                   26                                       /* Shift value for USB_CNAK */
-#define _USB_DOEP_CTL_CNAK_MASK                    0x4000000UL                              /* Bit mask for USB_CNAK */
-#define _USB_DOEP_CTL_CNAK_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_CNAK_DEFAULT                  (_USB_DOEP_CTL_CNAK_DEFAULT << 26)       /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SNAK                          (0x1UL << 27)                            /* Set NAK */
-#define _USB_DOEP_CTL_SNAK_SHIFT                   27                                       /* Shift value for USB_SNAK */
-#define _USB_DOEP_CTL_SNAK_MASK                    0x8000000UL                              /* Bit mask for USB_SNAK */
-#define _USB_DOEP_CTL_SNAK_DEFAULT                 0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SNAK_DEFAULT                  (_USB_DOEP_CTL_SNAK_DEFAULT << 27)       /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SETD0PIDEF                    (0x1UL << 28)                            /* Set DATA0 PID / Even Frame */
-#define _USB_DOEP_CTL_SETD0PIDEF_SHIFT             28                                       /* Shift value for USB_SETD0PIDEF */
-#define _USB_DOEP_CTL_SETD0PIDEF_MASK              0x10000000UL                             /* Bit mask for USB_SETD0PIDEF */
-#define _USB_DOEP_CTL_SETD0PIDEF_DEFAULT           0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SETD0PIDEF_DEFAULT            (_USB_DOEP_CTL_SETD0PIDEF_DEFAULT << 28) /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SETD1PIDOF                    (0x1UL << 29)                            /* Set DATA1 PID / Odd Frame */
-#define _USB_DOEP_CTL_SETD1PIDOF_SHIFT             29                                       /* Shift value for USB_SETD1PIDOF */
-#define _USB_DOEP_CTL_SETD1PIDOF_MASK              0x20000000UL                             /* Bit mask for USB_SETD1PIDOF */
-#define _USB_DOEP_CTL_SETD1PIDOF_DEFAULT           0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_SETD1PIDOF_DEFAULT            (_USB_DOEP_CTL_SETD1PIDOF_DEFAULT << 29) /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPDIS                         (0x1UL << 30)                            /* Endpoint Disable */
-#define _USB_DOEP_CTL_EPDIS_SHIFT                  30                                       /* Shift value for USB_EPDIS */
-#define _USB_DOEP_CTL_EPDIS_MASK                   0x40000000UL                             /* Bit mask for USB_EPDIS */
-#define _USB_DOEP_CTL_EPDIS_DEFAULT                0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPDIS_DEFAULT                 (_USB_DOEP_CTL_EPDIS_DEFAULT << 30)      /* Shifted mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPENA                         (0x1UL << 31)                            /* Endpoint Enable */
-#define _USB_DOEP_CTL_EPENA_SHIFT                  31                                       /* Shift value for USB_EPENA */
-#define _USB_DOEP_CTL_EPENA_MASK                   0x80000000UL                             /* Bit mask for USB_EPENA */
-#define _USB_DOEP_CTL_EPENA_DEFAULT                0x00000000UL                             /* Mode DEFAULT for USB_DOEP_CTL */
-#define USB_DOEP_CTL_EPENA_DEFAULT                 (_USB_DOEP_CTL_EPENA_DEFAULT << 31)      /* Shifted mode DEFAULT for USB_DOEP_CTL */
+#define _USB_DOEPCTL_MPS_SHIFT                     0                                       /* Shift value for USB_MPS */
+#define _USB_DOEPCTL_MPS_MASK                      0x7FFUL                                 /* Bit mask for USB_MPS */
+#define _USB_DOEPCTL_MPS_DEFAULT                   0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_MPS_DEFAULT                    (_USB_DOEPCTL_MPS_DEFAULT << 0)         /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_USBACTEP                       (0x1UL << 15)                           /* USB Active Endpoint */
+#define _USB_DOEPCTL_USBACTEP_SHIFT                15                                      /* Shift value for USB_USBACTEP */
+#define _USB_DOEPCTL_USBACTEP_MASK                 0x8000UL                                /* Bit mask for USB_USBACTEP */
+#define _USB_DOEPCTL_USBACTEP_DEFAULT              0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_USBACTEP_DEFAULT               (_USB_DOEPCTL_USBACTEP_DEFAULT << 15)   /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_DPIDEOF                        (0x1UL << 16)                           /* Endpoint Data PID / Even-odd Frame */
+#define _USB_DOEPCTL_DPIDEOF_SHIFT                 16                                      /* Shift value for USB_DPIDEOF */
+#define _USB_DOEPCTL_DPIDEOF_MASK                  0x10000UL                               /* Bit mask for USB_DPIDEOF */
+#define _USB_DOEPCTL_DPIDEOF_DEFAULT               0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define _USB_DOEPCTL_DPIDEOF_DATA0EVEN             0x00000000UL                            /* Mode DATA0EVEN for USB_DOEPCTL */
+#define _USB_DOEPCTL_DPIDEOF_DATA1ODD              0x00000001UL                            /* Mode DATA1ODD for USB_DOEPCTL */
+#define USB_DOEPCTL_DPIDEOF_DEFAULT                (_USB_DOEPCTL_DPIDEOF_DEFAULT << 16)    /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_DPIDEOF_DATA0EVEN              (_USB_DOEPCTL_DPIDEOF_DATA0EVEN << 16)  /* Shifted mode DATA0EVEN for USB_DOEPCTL */
+#define USB_DOEPCTL_DPIDEOF_DATA1ODD               (_USB_DOEPCTL_DPIDEOF_DATA1ODD << 16)   /* Shifted mode DATA1ODD for USB_DOEPCTL */
+#define USB_DOEPCTL_NAKSTS                         (0x1UL << 17)                           /* NAK Status */
+#define _USB_DOEPCTL_NAKSTS_SHIFT                  17                                      /* Shift value for USB_NAKSTS */
+#define _USB_DOEPCTL_NAKSTS_MASK                   0x20000UL                               /* Bit mask for USB_NAKSTS */
+#define _USB_DOEPCTL_NAKSTS_DEFAULT                0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_NAKSTS_DEFAULT                 (_USB_DOEPCTL_NAKSTS_DEFAULT << 17)     /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define _USB_DOEPCTL_EPTYPE_SHIFT                  18                                      /* Shift value for USB_EPTYPE */
+#define _USB_DOEPCTL_EPTYPE_MASK                   0xC0000UL                               /* Bit mask for USB_EPTYPE */
+#define _USB_DOEPCTL_EPTYPE_DEFAULT                0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define _USB_DOEPCTL_EPTYPE_CONTROL                0x00000000UL                            /* Mode CONTROL for USB_DOEPCTL */
+#define _USB_DOEPCTL_EPTYPE_ISO                    0x00000001UL                            /* Mode ISO for USB_DOEPCTL */
+#define _USB_DOEPCTL_EPTYPE_BULK                   0x00000002UL                            /* Mode BULK for USB_DOEPCTL */
+#define _USB_DOEPCTL_EPTYPE_INT                    0x00000003UL                            /* Mode INT for USB_DOEPCTL */
+#define USB_DOEPCTL_EPTYPE_DEFAULT                 (_USB_DOEPCTL_EPTYPE_DEFAULT << 18)     /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_EPTYPE_CONTROL                 (_USB_DOEPCTL_EPTYPE_CONTROL << 18)     /* Shifted mode CONTROL for USB_DOEPCTL */
+#define USB_DOEPCTL_EPTYPE_ISO                     (_USB_DOEPCTL_EPTYPE_ISO << 18)         /* Shifted mode ISO for USB_DOEPCTL */
+#define USB_DOEPCTL_EPTYPE_BULK                    (_USB_DOEPCTL_EPTYPE_BULK << 18)        /* Shifted mode BULK for USB_DOEPCTL */
+#define USB_DOEPCTL_EPTYPE_INT                     (_USB_DOEPCTL_EPTYPE_INT << 18)         /* Shifted mode INT for USB_DOEPCTL */
+#define USB_DOEPCTL_SNP                            (0x1UL << 20)                           /* Snoop Mode */
+#define _USB_DOEPCTL_SNP_SHIFT                     20                                      /* Shift value for USB_SNP */
+#define _USB_DOEPCTL_SNP_MASK                      0x100000UL                              /* Bit mask for USB_SNP */
+#define _USB_DOEPCTL_SNP_DEFAULT                   0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SNP_DEFAULT                    (_USB_DOEPCTL_SNP_DEFAULT << 20)        /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_STALL                          (0x1UL << 21)                           /* STALL Handshake */
+#define _USB_DOEPCTL_STALL_SHIFT                   21                                      /* Shift value for USB_STALL */
+#define _USB_DOEPCTL_STALL_MASK                    0x200000UL                              /* Bit mask for USB_STALL */
+#define _USB_DOEPCTL_STALL_DEFAULT                 0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_STALL_DEFAULT                  (_USB_DOEPCTL_STALL_DEFAULT << 21)      /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_CNAK                           (0x1UL << 26)                           /* Clear NAK */
+#define _USB_DOEPCTL_CNAK_SHIFT                    26                                      /* Shift value for USB_CNAK */
+#define _USB_DOEPCTL_CNAK_MASK                     0x4000000UL                             /* Bit mask for USB_CNAK */
+#define _USB_DOEPCTL_CNAK_DEFAULT                  0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_CNAK_DEFAULT                   (_USB_DOEPCTL_CNAK_DEFAULT << 26)       /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SNAK                           (0x1UL << 27)                           /* Set NAK */
+#define _USB_DOEPCTL_SNAK_SHIFT                    27                                      /* Shift value for USB_SNAK */
+#define _USB_DOEPCTL_SNAK_MASK                     0x8000000UL                             /* Bit mask for USB_SNAK */
+#define _USB_DOEPCTL_SNAK_DEFAULT                  0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SNAK_DEFAULT                   (_USB_DOEPCTL_SNAK_DEFAULT << 27)       /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SETD0PIDEF                     (0x1UL << 28)                           /* Set DATA0 PID / Even Frame */
+#define _USB_DOEPCTL_SETD0PIDEF_SHIFT              28                                      /* Shift value for USB_SETD0PIDEF */
+#define _USB_DOEPCTL_SETD0PIDEF_MASK               0x10000000UL                            /* Bit mask for USB_SETD0PIDEF */
+#define _USB_DOEPCTL_SETD0PIDEF_DEFAULT            0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SETD0PIDEF_DEFAULT             (_USB_DOEPCTL_SETD0PIDEF_DEFAULT << 28) /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SETD1PIDOF                     (0x1UL << 29)                           /* Set DATA1 PID / Odd Frame */
+#define _USB_DOEPCTL_SETD1PIDOF_SHIFT              29                                      /* Shift value for USB_SETD1PIDOF */
+#define _USB_DOEPCTL_SETD1PIDOF_MASK               0x20000000UL                            /* Bit mask for USB_SETD1PIDOF */
+#define _USB_DOEPCTL_SETD1PIDOF_DEFAULT            0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_SETD1PIDOF_DEFAULT             (_USB_DOEPCTL_SETD1PIDOF_DEFAULT << 29) /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_EPDIS                          (0x1UL << 30)                           /* Endpoint Disable */
+#define _USB_DOEPCTL_EPDIS_SHIFT                   30                                      /* Shift value for USB_EPDIS */
+#define _USB_DOEPCTL_EPDIS_MASK                    0x40000000UL                            /* Bit mask for USB_EPDIS */
+#define _USB_DOEPCTL_EPDIS_DEFAULT                 0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_EPDIS_DEFAULT                  (_USB_DOEPCTL_EPDIS_DEFAULT << 30)      /* Shifted mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_EPENA                          (0x1UL << 31)                           /* Endpoint Enable */
+#define _USB_DOEPCTL_EPENA_SHIFT                   31                                      /* Shift value for USB_EPENA */
+#define _USB_DOEPCTL_EPENA_MASK                    0x80000000UL                            /* Bit mask for USB_EPENA */
+#define _USB_DOEPCTL_EPENA_DEFAULT                 0x00000000UL                            /* Mode DEFAULT for USB_DOEPCTL */
+#define USB_DOEPCTL_EPENA_DEFAULT                  (_USB_DOEPCTL_EPENA_DEFAULT << 31)      /* Shifted mode DEFAULT for USB_DOEPCTL */
 
-/* Bit fields for USB DOEP_INT */
+/* Bit fields for USB DOEPINT */
 
-#define _USB_DOEP_INT_RESETVALUE                   0x00000000UL                                /* Default value for USB_DOEP_INT */
-#define _USB_DOEP_INT_MASK                         0x0000385FUL                                /* Mask for USB_DOEP_INT */
+#define _USB_DOEPINT_RESETVALUE                    0x00000000UL                               /* Default value for USB_DOEPINT */
+#define _USB_DOEPINT_MASK                          0x0000385FUL                               /* Mask for USB_DOEPINT */
 
-#define USB_DOEP_INT_XFERCOMPL                     (0x1UL << 0)                                /* Transfer Completed Interrupt */
-#define _USB_DOEP_INT_XFERCOMPL_SHIFT              0                                           /* Shift value for USB_XFERCOMPL */
-#define _USB_DOEP_INT_XFERCOMPL_MASK               0x1UL                                       /* Bit mask for USB_XFERCOMPL */
-#define _USB_DOEP_INT_XFERCOMPL_DEFAULT            0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_XFERCOMPL_DEFAULT             (_USB_DOEP_INT_XFERCOMPL_DEFAULT << 0)      /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_EPDISBLD                      (0x1UL << 1)                                /* Endpoint Disabled Interrupt */
-#define _USB_DOEP_INT_EPDISBLD_SHIFT               1                                           /* Shift value for USB_EPDISBLD */
-#define _USB_DOEP_INT_EPDISBLD_MASK                0x2UL                                       /* Bit mask for USB_EPDISBLD */
-#define _USB_DOEP_INT_EPDISBLD_DEFAULT             0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_EPDISBLD_DEFAULT              (_USB_DOEP_INT_EPDISBLD_DEFAULT << 1)       /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_AHBERR                        (0x1UL << 2)                                /* AHB Error */
-#define _USB_DOEP_INT_AHBERR_SHIFT                 2                                           /* Shift value for USB_AHBERR */
-#define _USB_DOEP_INT_AHBERR_MASK                  0x4UL                                       /* Bit mask for USB_AHBERR */
-#define _USB_DOEP_INT_AHBERR_DEFAULT               0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_AHBERR_DEFAULT                (_USB_DOEP_INT_AHBERR_DEFAULT << 2)         /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_SETUP                         (0x1UL << 3)                                /* Setup Phase Done */
-#define _USB_DOEP_INT_SETUP_SHIFT                  3                                           /* Shift value for USB_SETUP */
-#define _USB_DOEP_INT_SETUP_MASK                   0x8UL                                       /* Bit mask for USB_SETUP */
-#define _USB_DOEP_INT_SETUP_DEFAULT                0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_SETUP_DEFAULT                 (_USB_DOEP_INT_SETUP_DEFAULT << 3)          /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_OUTTKNEPDIS                   (0x1UL << 4)                                /* OUT Token Received When Endpoint Disabled */
-#define _USB_DOEP_INT_OUTTKNEPDIS_SHIFT            4                                           /* Shift value for USB_OUTTKNEPDIS */
-#define _USB_DOEP_INT_OUTTKNEPDIS_MASK             0x10UL                                      /* Bit mask for USB_OUTTKNEPDIS */
-#define _USB_DOEP_INT_OUTTKNEPDIS_DEFAULT          0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_OUTTKNEPDIS_DEFAULT           (_USB_DOEP_INT_OUTTKNEPDIS_DEFAULT << 4)    /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_BACK2BACKSETUP                (0x1UL << 6)                                /* Back-to-Back SETUP Packets Received */
-#define _USB_DOEP_INT_BACK2BACKSETUP_SHIFT         6                                           /* Shift value for USB_BACK2BACKSETUP */
-#define _USB_DOEP_INT_BACK2BACKSETUP_MASK          0x40UL                                      /* Bit mask for USB_BACK2BACKSETUP */
-#define _USB_DOEP_INT_BACK2BACKSETUP_DEFAULT       0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_BACK2BACKSETUP_DEFAULT        (_USB_DOEP_INT_BACK2BACKSETUP_DEFAULT << 6) /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_PKTDRPSTS                     (0x1UL << 11)                               /* Packet Drop Status */
-#define _USB_DOEP_INT_PKTDRPSTS_SHIFT              11                                          /* Shift value for USB_PKTDRPSTS */
-#define _USB_DOEP_INT_PKTDRPSTS_MASK               0x800UL                                     /* Bit mask for USB_PKTDRPSTS */
-#define _USB_DOEP_INT_PKTDRPSTS_DEFAULT            0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_PKTDRPSTS_DEFAULT             (_USB_DOEP_INT_PKTDRPSTS_DEFAULT << 11)     /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_BBLEERR                       (0x1UL << 12)                               /* Babble Error */
-#define _USB_DOEP_INT_BBLEERR_SHIFT                12                                          /* Shift value for USB_BBLEERR */
-#define _USB_DOEP_INT_BBLEERR_MASK                 0x1000UL                                    /* Bit mask for USB_BBLEERR */
-#define _USB_DOEP_INT_BBLEERR_DEFAULT              0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_BBLEERR_DEFAULT               (_USB_DOEP_INT_BBLEERR_DEFAULT << 12)       /* Shifted mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_NAKINTRPT                     (0x1UL << 13)                               /* NAK Interrupt */
-#define _USB_DOEP_INT_NAKINTRPT_SHIFT              13                                          /* Shift value for USB_NAKINTRPT */
-#define _USB_DOEP_INT_NAKINTRPT_MASK               0x2000UL                                    /* Bit mask for USB_NAKINTRPT */
-#define _USB_DOEP_INT_NAKINTRPT_DEFAULT            0x00000000UL                                /* Mode DEFAULT for USB_DOEP_INT */
-#define USB_DOEP_INT_NAKINTRPT_DEFAULT             (_USB_DOEP_INT_NAKINTRPT_DEFAULT << 13)     /* Shifted mode DEFAULT for USB_DOEP_INT */
+#define USB_DOEPINT_XFERCOMPL                      (0x1UL << 0)                               /* Transfer Completed Interrupt */
+#define _USB_DOEPINT_XFERCOMPL_SHIFT               0                                          /* Shift value for USB_XFERCOMPL */
+#define _USB_DOEPINT_XFERCOMPL_MASK                0x1UL                                      /* Bit mask for USB_XFERCOMPL */
+#define _USB_DOEPINT_XFERCOMPL_DEFAULT             0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_XFERCOMPL_DEFAULT              (_USB_DOEPINT_XFERCOMPL_DEFAULT << 0)      /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_EPDISBLD                       (0x1UL << 1)                               /* Endpoint Disabled Interrupt */
+#define _USB_DOEPINT_EPDISBLD_SHIFT                1                                          /* Shift value for USB_EPDISBLD */
+#define _USB_DOEPINT_EPDISBLD_MASK                 0x2UL                                      /* Bit mask for USB_EPDISBLD */
+#define _USB_DOEPINT_EPDISBLD_DEFAULT              0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_EPDISBLD_DEFAULT               (_USB_DOEPINT_EPDISBLD_DEFAULT << 1)       /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_AHBERR                         (0x1UL << 2)                               /* AHB Error */
+#define _USB_DOEPINT_AHBERR_SHIFT                  2                                          /* Shift value for USB_AHBERR */
+#define _USB_DOEPINT_AHBERR_MASK                   0x4UL                                      /* Bit mask for USB_AHBERR */
+#define _USB_DOEPINT_AHBERR_DEFAULT                0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_AHBERR_DEFAULT                 (_USB_DOEPINT_AHBERR_DEFAULT << 2)         /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_SETUP                          (0x1UL << 3)                               /* Setup Phase Done */
+#define _USB_DOEPINT_SETUP_SHIFT                   3                                          /* Shift value for USB_SETUP */
+#define _USB_DOEPINT_SETUP_MASK                    0x8UL                                      /* Bit mask for USB_SETUP */
+#define _USB_DOEPINT_SETUP_DEFAULT                 0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_SETUP_DEFAULT                  (_USB_DOEPINT_SETUP_DEFAULT << 3)          /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_OUTTKNEPDIS                    (0x1UL << 4)                               /* OUT Token Received When Endpoint Disabled */
+#define _USB_DOEPINT_OUTTKNEPDIS_SHIFT             4                                          /* Shift value for USB_OUTTKNEPDIS */
+#define _USB_DOEPINT_OUTTKNEPDIS_MASK              0x10UL                                     /* Bit mask for USB_OUTTKNEPDIS */
+#define _USB_DOEPINT_OUTTKNEPDIS_DEFAULT           0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_OUTTKNEPDIS_DEFAULT            (_USB_DOEPINT_OUTTKNEPDIS_DEFAULT << 4)    /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_BACK2BACKSETUP                 (0x1UL << 6)                               /* Back-to-Back SETUP Packets Received */
+#define _USB_DOEPINT_BACK2BACKSETUP_SHIFT          6                                          /* Shift value for USB_BACK2BACKSETUP */
+#define _USB_DOEPINT_BACK2BACKSETUP_MASK           0x40UL                                     /* Bit mask for USB_BACK2BACKSETUP */
+#define _USB_DOEPINT_BACK2BACKSETUP_DEFAULT        0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_BACK2BACKSETUP_DEFAULT         (_USB_DOEPINT_BACK2BACKSETUP_DEFAULT << 6) /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_PKTDRPSTS                      (0x1UL << 11)                              /* Packet Drop Status */
+#define _USB_DOEPINT_PKTDRPSTS_SHIFT               11                                         /* Shift value for USB_PKTDRPSTS */
+#define _USB_DOEPINT_PKTDRPSTS_MASK                0x800UL                                    /* Bit mask for USB_PKTDRPSTS */
+#define _USB_DOEPINT_PKTDRPSTS_DEFAULT             0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_PKTDRPSTS_DEFAULT              (_USB_DOEPINT_PKTDRPSTS_DEFAULT << 11)     /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_BBLEERR                        (0x1UL << 12)                              /* Babble Error */
+#define _USB_DOEPINT_BBLEERR_SHIFT                 12                                         /* Shift value for USB_BBLEERR */
+#define _USB_DOEPINT_BBLEERR_MASK                  0x1000UL                                   /* Bit mask for USB_BBLEERR */
+#define _USB_DOEPINT_BBLEERR_DEFAULT               0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_BBLEERR_DEFAULT                (_USB_DOEPINT_BBLEERR_DEFAULT << 12)       /* Shifted mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_NAKINTRPT                      (0x1UL << 13)                              /* NAK Interrupt */
+#define _USB_DOEPINT_NAKINTRPT_SHIFT               13                                         /* Shift value for USB_NAKINTRPT */
+#define _USB_DOEPINT_NAKINTRPT_MASK                0x2000UL                                   /* Bit mask for USB_NAKINTRPT */
+#define _USB_DOEPINT_NAKINTRPT_DEFAULT             0x00000000UL                               /* Mode DEFAULT for USB_DOEPINT */
+#define USB_DOEPINT_NAKINTRPT_DEFAULT              (_USB_DOEPINT_NAKINTRPT_DEFAULT << 13)     /* Shifted mode DEFAULT for USB_DOEPINT */
 
-/* Bit fields for USB DOEP_TSIZ */
+/* Bit fields for USB DOEPTSIZ */
 
-#define _USB_DOEP_TSIZ_RESETVALUE                  0x00000000UL                                /* Default value for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_MASK                        0x7FFFFFFFUL                                /* Mask for USB_DOEP_TSIZ */
+#define _USB_DOEPTSIZ_RESETVALUE                   0x00000000UL                               /* Default value for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_MASK                         0x7FFFFFFFUL                               /* Mask for USB_DOEPTSIZ */
 
-#define _USB_DOEP_TSIZ_XFERSIZE_SHIFT              0                                           /* Shift value for USB_XFERSIZE */
-#define _USB_DOEP_TSIZ_XFERSIZE_MASK               0x7FFFFUL                                   /* Bit mask for USB_XFERSIZE */
-#define _USB_DOEP_TSIZ_XFERSIZE_DEFAULT            0x00000000UL                                /* Mode DEFAULT for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_XFERSIZE_DEFAULT             (_USB_DOEP_TSIZ_XFERSIZE_DEFAULT << 0)      /* Shifted mode DEFAULT for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_PKTCNT_SHIFT                19                                          /* Shift value for USB_PKTCNT */
-#define _USB_DOEP_TSIZ_PKTCNT_MASK                 0x1FF80000UL                                /* Bit mask for USB_PKTCNT */
-#define _USB_DOEP_TSIZ_PKTCNT_DEFAULT              0x00000000UL                                /* Mode DEFAULT for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_PKTCNT_DEFAULT               (_USB_DOEP_TSIZ_PKTCNT_DEFAULT << 19)       /* Shifted mode DEFAULT for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_SHIFT          29                                          /* Shift value for USB_RXDPIDSUPCNT */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_MASK           0x60000000UL                                /* Bit mask for USB_RXDPIDSUPCNT */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_DEFAULT        0x00000000UL                                /* Mode DEFAULT for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA0          0x00000000UL                                /* Mode DATA0 for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA2          0x00000001UL                                /* Mode DATA2 for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA1          0x00000002UL                                /* Mode DATA1 for USB_DOEP_TSIZ */
-#define _USB_DOEP_TSIZ_RXDPIDSUPCNT_MDATA          0x00000003UL                                /* Mode MDATA for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_RXDPIDSUPCNT_DEFAULT         (_USB_DOEP_TSIZ_RXDPIDSUPCNT_DEFAULT << 29) /* Shifted mode DEFAULT for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA0           (_USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA0 << 29)   /* Shifted mode DATA0 for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA2           (_USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA2 << 29)   /* Shifted mode DATA2 for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA1           (_USB_DOEP_TSIZ_RXDPIDSUPCNT_DATA1 << 29)   /* Shifted mode DATA1 for USB_DOEP_TSIZ */
-#define USB_DOEP_TSIZ_RXDPIDSUPCNT_MDATA           (_USB_DOEP_TSIZ_RXDPIDSUPCNT_MDATA << 29)   /* Shifted mode MDATA for USB_DOEP_TSIZ */
+#define _USB_DOEPTSIZ_XFERSIZE_SHIFT               0                                          /* Shift value for USB_XFERSIZE */
+#define _USB_DOEPTSIZ_XFERSIZE_MASK                0x7FFFFUL                                  /* Bit mask for USB_XFERSIZE */
+#define _USB_DOEPTSIZ_XFERSIZE_DEFAULT             0x00000000UL                               /* Mode DEFAULT for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_XFERSIZE_DEFAULT              (_USB_DOEPTSIZ_XFERSIZE_DEFAULT << 0)      /* Shifted mode DEFAULT for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_PKTCNT_SHIFT                 19                                         /* Shift value for USB_PKTCNT */
+#define _USB_DOEPTSIZ_PKTCNT_MASK                  0x1FF80000UL                               /* Bit mask for USB_PKTCNT */
+#define _USB_DOEPTSIZ_PKTCNT_DEFAULT               0x00000000UL                               /* Mode DEFAULT for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_PKTCNT_DEFAULT                (_USB_DOEPTSIZ_PKTCNT_DEFAULT << 19)       /* Shifted mode DEFAULT for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_SHIFT           29                                         /* Shift value for USB_RXDPIDSUPCNT */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_MASK            0x60000000UL                               /* Bit mask for USB_RXDPIDSUPCNT */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_DEFAULT         0x00000000UL                               /* Mode DEFAULT for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_DATA0           0x00000000UL                               /* Mode DATA0 for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_DATA2           0x00000001UL                               /* Mode DATA2 for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_DATA1           0x00000002UL                               /* Mode DATA1 for USB_DOEPTSIZ */
+#define _USB_DOEPTSIZ_RXDPIDSUPCNT_MDATA           0x00000003UL                               /* Mode MDATA for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_RXDPIDSUPCNT_DEFAULT          (_USB_DOEPTSIZ_RXDPIDSUPCNT_DEFAULT << 29) /* Shifted mode DEFAULT for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_RXDPIDSUPCNT_DATA0            (_USB_DOEPTSIZ_RXDPIDSUPCNT_DATA0 << 29)   /* Shifted mode DATA0 for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_RXDPIDSUPCNT_DATA2            (_USB_DOEPTSIZ_RXDPIDSUPCNT_DATA2 << 29)   /* Shifted mode DATA2 for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_RXDPIDSUPCNT_DATA1            (_USB_DOEPTSIZ_RXDPIDSUPCNT_DATA1 << 29)   /* Shifted mode DATA1 for USB_DOEPTSIZ */
+#define USB_DOEPTSIZ_RXDPIDSUPCNT_MDATA            (_USB_DOEPTSIZ_RXDPIDSUPCNT_MDATA << 29)   /* Shifted mode MDATA for USB_DOEPTSIZ */
 
-/* Bit fields for USB DOEP_DMAADDR */
+/* Bit fields for USB DOEPDMAADDR */
 
-#define _USB_DOEP_DMAADDR_RESETVALUE               0x00000000UL                             /* Default value for USB_DOEP_DMAADDR */
-#define _USB_DOEP_DMAADDR_MASK                     0xFFFFFFFFUL                             /* Mask for USB_DOEP_DMAADDR */
+#define _USB_DOEPDMAADDR_RESETVALUE                0x00000000UL                            /* Default value for USB_DOEPDMAADDR */
+#define _USB_DOEPDMAADDR_MASK                      0xFFFFFFFFUL                            /* Mask for USB_DOEPDMAADDR */
 
-#define _USB_DOEP_DMAADDR_DMAADDR_SHIFT            0                                        /* Shift value for USB_DMAADDR */
-#define _USB_DOEP_DMAADDR_DMAADDR_MASK             0xFFFFFFFFUL                             /* Bit mask for USB_DMAADDR */
-#define _USB_DOEP_DMAADDR_DMAADDR_DEFAULT          0x00000000UL                             /* Mode DEFAULT for USB_DOEP_DMAADDR */
-#define USB_DOEP_DMAADDR_DMAADDR_DEFAULT           (_USB_DOEP_DMAADDR_DMAADDR_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DOEP_DMAADDR */
+#define _USB_DOEPDMAADDR_DMAADDR_SHIFT             0                                       /* Shift value for USB_DMAADDR */
+#define _USB_DOEPDMAADDR_DMAADDR_MASK              0xFFFFFFFFUL                            /* Bit mask for USB_DMAADDR */
+#define _USB_DOEPDMAADDR_DMAADDR_DEFAULT           0x00000000UL                            /* Mode DEFAULT for USB_DOEPDMAADDR */
+#define USB_DOEPDMAADDR_DMAADDR_DEFAULT            (_USB_DOEPDMAADDR_DMAADDR_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DOEPDMAADDR */
 
 /* Bit fields for USB PCGCCTL */
 
