@@ -61,6 +61,16 @@ source fs/smartfs/Kconfig
 source fs/binfs/Kconfig
 source fs/procfs/Kconfig
 
+config LIBC_TMPDIR
+	string "Temporary file directory"
+	default "/tmp"
+	depends on FS_WRITABLE
+		---help---
+		If a write-able file system is selected, this string will be
+		provided to specify the full path to a directory where temporary
+		files can be created.  This would be a good application of RAM disk:
+		To provide temporary storage for application data.
+
 comment "System Logging"
 
 config SYSLOG
