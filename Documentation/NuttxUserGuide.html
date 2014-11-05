@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: October 4, 2014</p>
+      <p>Last Updated: November 5, 2014</p>
     </td>
   </tr>
 </table>
@@ -7629,11 +7629,12 @@ interface of the same name.
   <li><a href="#directoryoperations">2.10.3 Directory Operations</a></li>
   <li><a href="#dirunistdops">2.10.4 UNIX Standard Operations</a></li>
   <li><a href="#standardio">2.10.5 Standard I/O</a></li>
-  <li><a href="#aio">2.10.6 Asynchronous I/O</a></li>
-  <li><a href="#stdstrings">2.10.7 Standard String Operations</a></li>
-  <li><a href="#PipesNFifos">2.10.8 Pipes and FIFOs</a></li>
-  <li><a href="#fatsupport">2.10.9 FAT File System Support</a></li>
-  <li><a href="#mmapxip">2.10.10 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
+  <li><a href="#standardlib">2.10.6 Standard Library</a></li>
+  <li><a href="#aio">2.10.7 Asynchronous I/O</a></li>
+  <li><a href="#stdstrings">2.10.8 Standard String Operations</a></li>
+  <li><a href="#PipesNFifos">2.10.9 Pipes and FIFOs</a></li>
+  <li><a href="#fatsupport">2.10.10 FAT File System Support</a></li>
+  <li><a href="#mmapxip">2.10.11 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
 </ul>
 
 <h3><a name="FileSystemOverview">2.10.1 NuttX File System Overview</a></h3>
@@ -7953,6 +7954,8 @@ int    dprintf(int fd, FAR const char *fmt, ...);
 int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 
 int    statfs(FAR const char *path, FAR struct statfs *buf);
+FAR char *tmpnam(FAR char *s);
+FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 
 #include &lt;sys/stat.h&gt;
 
@@ -7967,7 +7970,19 @@ int statfs(const char *path, struct statfs *buf);
 int fstatfs(int fd, struct statfs *buf);
 </pre></ul>
 
-<h3><a name="aio">2.10.6 Asynchronous I/O</a></h3>
+<h3><a name="standardlib">2.10.6 Standard Library</a></h3>
+<p>
+  <code>stdlib.h</code> generally addresses other operating system interfaces.
+  However, the following may also be considered as file system interfaces:
+</p>
+<ul><pre>
+#include &lt;stdlib.h&gt;
+
+int mktemp(FAR char *template);
+int mkstemp(FAR char *template);
+</pre></ul>
+
+<h3><a name="aio">2.10.7 Asynchronous I/O</a></h3>
 <ul><pre>
 #include &lt;aio.h&gt;
 
@@ -7983,7 +7998,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
                FAR struct sigevent *sig);
 </pre></ul>
 
-<h3><a name="stdstrings">2.10.7 Standard String Operations</a></h3>
+<h3><a name="stdstrings">2.10.8 Standard String Operations</a></h3>
 <ul><pre>
 #include &lt;string.h&gt;
 
@@ -8017,9 +8032,9 @@ void  *memmove(void *dest, const void *src, size_t count);
 # define bzero(s,n) (void)memset(s,0,n)
 </pre></ul>
 
-<h3><a name="PipesNFifos">2.10.8 Pipes and FIFOs</a></h3>
+<h3><a name="PipesNFifos">2.10.9 Pipes and FIFOs</a></h3>
 
-<h3>2.10.8.1 <a name="pipe"><code>pipe</code></a></h3>
+<h3>2.10.9.1 <a name="pipe"><code>pipe</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8053,7 +8068,7 @@ int pipe(int fd[2]);
   </ul>
 </p>
 
-<h3>2.10.8.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
+<h3>2.10.9.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8100,8 +8115,8 @@ int mkfifo(FAR const char *pathname, mode_t mode);
   </ul>
 </p>
 
-<h3><a name="fatsupport">2.10.9 FAT File System Support</a></h3>
-<h3>2.10.9.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
+<h3><a name="fatsupport">2.10.10 FAT File System Support</a></h3>
+<h3>2.10.10.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8178,7 +8193,7 @@ struct fat_format_s
   </ul>
 </p>
 
-<h3><a name="mmapxip">2.10.10 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
+<h3><a name="mmapxip">2.10.11 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
 <p>
   NuttX operates in a flat open address space and is focused on MCUs that do
   support Memory Management Units (MMUs).  Therefore, NuttX generally does not
@@ -8307,7 +8322,7 @@ struct fat_format_s
   </li>
 </ol>
 
-<h3><a name="mmap">2.10.10.1 <code>mmap</code></a></h3>
+<h3><a name="mmap">2.10.11.1 <code>mmap</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
