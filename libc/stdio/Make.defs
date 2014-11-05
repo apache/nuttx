@@ -66,6 +66,10 @@ CSRCS += lib_stdoutstream.c lib_stdsistream.c lib_stdsostream.c lib_perror.c
 CSRCS += lib_feof.c lib_ferror.c lib_clearerr.c
 
 endif
+
+ifeq ($(CONFIG_FS_WRITABLE),y)
+CSRCS += lib_tempnam.c lib_tmpnam.c
+endif
 endif
 
 # Other support that depends on specific, configured features.
