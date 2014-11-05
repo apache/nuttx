@@ -970,7 +970,7 @@ int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
 #endif
 
 #ifdef CONFIG_DRVR_READAHEAD
-  if (rhmaxblocks > 0)
+  if (rwb->rhmaxblocks > 0)
     {
       rwb_semtake(&rwb->rhsem);
       rwb_resetrhbuffer(rwb);
