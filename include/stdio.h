@@ -78,6 +78,26 @@
 #define getchar()  fgetc(stdin)
 #define rewind(s)  ((void)fseek((s),0,SEEK_SET))
 
+/* Path to the directory where temporary files can be created */
+
+#ifndef CONFIG_LIBC_TMPDIR
+#  define CONFIG_LIBC_TMPDIR "/tmp"
+#endif
+
+#define P_tmpdir CONFIG_LIBC_TMPDIR
+
+/* Maximum size of character array to hold tmpnam() output. */
+
+#ifndef CONFIG_LIBC_MAX_TMPFILE
+#  define CONFIG_LIBC_MAX_TMPFILE 32
+#endif
+
+#define L_tmpnam CONFIG_LIBC_MAX_TMPFILE
+
+/* the maximum number of unique temporary file names that can be generated */
+
+#define TMP_MAX 56800235584ull
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -161,6 +181,8 @@ int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 /* Operations on paths */
 
 int    statfs(FAR const char *path, FAR struct statfs *buf);
+FAR char *tmpnam(FAR char *s);
+FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 
 #undef EXTERN
 #if defined(__cplusplus)

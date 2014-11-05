@@ -8904,5 +8904,9 @@
 	  (2014-10-29).
 	* configs/efm32gg-stk3700:  Board support for the SiLbas EFM32GG
 	  Giant Gecko Starter kit.  Current with basic NSH configuration only.
-	  Testing is on hold until I receive hardware (20145-11-03).
-
+	  Testing is on hold until I receive hardware (2014-11-03).
+	* libc/Kconfig: Move CONFIG_NSH_TMPDIR to CONFIG_LIBC_TMPDIR (2014-11-05).
+	* libc/stdlib/lib_mkstemp.c, lib_mktemp.c, Make.defs and include/stdlib.h:
+	  Add mktemp() and mkstemp() (2014-11-05).
+	* libc/stdio/lib_tempnam.c, lib_tmpnam.c, Kconfig, Make.defs and
+	  include/stdio.h: Add tmpnam() and tempnam() (2014-11-05).
