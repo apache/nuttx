@@ -40,6 +40,10 @@ CSRCS += lib_llabs.c lib_rand.c lib_qsort.c
 CSRCS += lib_strtol.c lib_strtoll.c lib_strtoul.c lib_strtoull.c
 CSRCS += lib_strtod.c lib_checkbase.c
 
+ifeq ($(CONFIG_FS_WRITABLE),y)
+CSRCS += lib_mktemp.c lib_mkstemp.c
+endif
+
 # Add the stdlib directory to the build
 
 DEPPATH += --dep-path stdlib
