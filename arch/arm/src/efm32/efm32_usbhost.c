@@ -809,7 +809,7 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 
   /* Make sure host channel interrupts are enabled. */
 
-  efm32_modifyreg(EFM32_USB_GINTMSK, 0, USB_GINTMSK_HC);
+  efm32_modifyreg(EFM32_USB_GINTMSK, 0, USB_GINTMSK_HCHINTMSK);
 
   /* Program the HCCHAR register */
 
@@ -2329,7 +2329,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
   /* Disable the RxFIFO non-empty interrupt */
 
   intmsk  = efm32_getreg(EFM32_USB_GINTMSK);
-  intmsk &= ~USB_GINTMSK_RXFLVL;
+  intmsk &= ~USB_GINTMSK_RXFLVLMSK;
   efm32_putreg(EFM32_USB_GINTMSK, intmsk);
 
   /* Read and pop the next status from the Rx FIFO */
@@ -2402,7 +2402,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
 
   /* Re-enable the RxFIFO non-empty interrupt */
 
-  intmsk |= USB_GINTMSK_RXFLVL;
+  intmsk |= USB_GINTMSK_RXFLVLMSK;
   efm32_putreg(EFM32_USB_GINTMSK, intmsk);
 }
 
@@ -2949,7 +2949,7 @@ static void efm32_gint_enable(void)
   /* Set the GINTMSK bit to unmask the interrupt */
 
   regval  = efm32_getreg(EFM32_USB_GAHBCFG);
-  regval |= USB_GAHBCFG_GINTMSK;
+  regval |= USB_GAHBCFG_GLBLINTRMSK;
   efm32_putreg(EFM32_USB_GAHBCFG, regval);
 }
 
@@ -2960,7 +2960,7 @@ static void efm32_gint_disable(void)
   /* Clear the GINTMSK bit to mask the interrupt */
 
   regval  = efm32_getreg(EFM32_USB_GAHBCFG);
-  regval &= ~USB_GAHBCFG_GINTMSK;
+  regval &= ~USB_GAHBCFG_GLBLINTRMSK;
   efm32_putreg(EFM32_USB_GAHBCFG, regval);
 }
 
@@ -3001,35 +3001,35 @@ static inline void efm32_hostinit_enable(void)
   /* Enable the host interrupts */
   /* Common interrupts:
    *
-   *   USB_GINTMSK_WKUP     : Resume/remote wakeup detected interrupt
-   *   USB_GINTMSK_USBSUSP  : USB suspend
+   *   USB_GINTMSK_WKUPINTMSK      : Resume/remote wakeup detected interrupt
+   *   USB_GINTMSK_USBSUSPMSK      : USB suspend
    */
 
-  regval = (USB_GINTMSK_WKUP | USB_GINTMSK_USBSUSP);
+  regval = (USB_GINTMSK_WKUPINTMSK | USB_GINTMSK_USBSUSPMSK);
 
   /* If OTG were supported, we would need to enable the following as well:
    *
-   *   USB_GINTMSK_OTG      : OTG interrupt
-   *   USB_GINTMSK_SRQ      : Session request/new session detected interrupt
-   *   USB_GINTMSK_CIDSCHG  : Connector ID status change
+   *   USB_GINTMSK_OTGINTMSK       : OTG interrupt
+   *   USB_GINTMSK_SESSREQINTMSK   : Session request/new session detected interrupt
+   *   USB_GINTMSK_CONIDSTSCHNGMSK : Connector ID status change
    */
 
   /* Host-specific interrupts
    *
-   *   USB_GINTMSK_SOF      : Start of frame
-   *   USB_GINTMSK_RXFLVL   : RxFIFO non-empty
-   *   USB_GINTMSK_IISOOXFR : Incomplete isochronous OUT transfer
-   *   USB_GINTMSK_HPRT     : Host port interrupt
-   *   USB_GINTMSK_HC       : Host channels interrupt
-   *   USB_GINTMSK_DISC     : Disconnect detected interrupt
+   *   USB_GINTMSK_SOFMSK          : Start of frame
+   *   USB_GINTMSK_RXFLVLMSK       : RxFIFO non-empty
+   *   USB_GINTMSK_INCOMPLPMSK     : Incomplete isochronous OUT transfer
+   *   USB_GINTMSK_PRTINTMSK       : Host port interrupt
+   *   USB_GINTMSK_HCHINTMSK       : Host channels interrupt
+   *   USB_GINTMSK_DISCONNINTMSK   : Disconnect detected interrupt
    */
 
 #ifdef CONFIG_EFM32_OTGFS_SOFINTR
-  regval |= (USB_GINTMSK_SOF    | USB_GINTMSK_RXFLVL   | USB_GINTMSK_IISOOXFR |
-             USB_GINTMSK_HPRT   | USB_GINTMSK_HC       | USB_GINTMSK_DISC);
+  regval |= (USB_GINTMSK_SOFMSK    | USB_GINTMSK_RXFLVLMSK | USB_GINTMSK_INCOMPLPMSK |
+             USB_GINTMSK_PRTINTMSK | USB_GINTMSK_HCHINTMSK | USB_GINTMSK_DISCONNINTMSK);
 #else
-  regval |= (USB_GINTMSK_RXFLVL | USB_GINTMSK_IPXFR    | USB_GINTMSK_HPRT     |
-             USB_GINTMSK_HC     | USB_GINTMSK_DISC);
+  regval |= (USB_GINTMSK_RXFLVLMSK | USB_GINTMSK_IPXFR     | USB_GINTMSK_PRTINTMSK |
+             USB_GINTMSK_HCHINTMSK | USB_GINTMSK_DISCONNINTMSK);
 #endif
   efm32_putreg(EFM32_USB_GINTMSK, regval);
 }
