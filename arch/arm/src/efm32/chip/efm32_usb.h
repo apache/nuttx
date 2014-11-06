@@ -2118,6 +2118,10 @@
 #define _USB_DAINT_RESETVALUE                      0x00000000UL                         /* Default value for USB_DAINT */
 #define _USB_DAINT_MASK                            0x007F007FUL                         /* Mask for USB_DAINT */
 
+#define _USB_DAINT_INEPINT_SHIFT                   0                                    /* Shift value for IN endpoint interrupt bits */
+#define _USB_DAINT_INEPINT_MASK                    0x7FUL                               /* Mask of all IN endpoint interrupt bits */
+#define USB_DAINT_INEPINT(n)                       (0x1UL << ((n)+_USB_DAINT_INEPINT_SHIFT))
+
 #define USB_DAINT_INEPINT0                         (0x1UL << 0)                         /* IN Endpoint 0 Interrupt Bit */
 #define _USB_DAINT_INEPINT0_SHIFT                  0                                    /* Shift value for USB_INEPINT0 */
 #define _USB_DAINT_INEPINT0_MASK                   0x1UL                                /* Bit mask for USB_INEPINT0 */
@@ -2153,6 +2157,11 @@
 #define _USB_DAINT_INEPINT6_MASK                   0x40UL                               /* Bit mask for USB_INEPINT6 */
 #define _USB_DAINT_INEPINT6_DEFAULT                0x00000000UL                         /* Mode DEFAULT for USB_DAINT */
 #define USB_DAINT_INEPINT6_DEFAULT                 (_USB_DAINT_INEPINT6_DEFAULT << 6)   /* Shifted mode DEFAULT for USB_DAINT */
+
+#define _USB_DAINT_OUTEPINT_SHIFT                  16                                   /* Shift value for all IN endpoint interrupt bits */
+#define _USB_DAINT_OUTEPINT_MASK                   0x7F0000UL                           /* Mask of OUT IN endpoint interrupt bits */
+#define USB_DAINT_OUTEPINT(n)                      (0x1UL << ((n)+_USB_DAINT_OUTEPINT_SHIFT))
+
 #define USB_DAINT_OUTEPINT0                        (0x1UL << 16)                        /* OUT Endpoint 0 Interrupt Bit */
 #define _USB_DAINT_OUTEPINT0_SHIFT                 16                                   /* Shift value for USB_OUTEPINT0 */
 #define _USB_DAINT_OUTEPINT0_MASK                  0x10000UL                            /* Bit mask for USB_OUTEPINT0 */
