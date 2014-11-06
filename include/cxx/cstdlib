@@ -49,16 +49,23 @@
 
 namespace std
 {
+  // Random number generation
+
   using ::srand;
   using ::rand;
 
+  // Environment variable support
+
 #ifndef CONFIG_DISABLE_ENIVRON
+  using ::get_environ_ptr;
   using ::getenv;
   using ::putenv;
   using ::clearenv;
   using ::setenv;
   using ::unsetenv;
 #endif
+
+  // Process exit functions
 
   using ::exit;
   using ::abort;
@@ -69,9 +76,21 @@ namespace std
   using ::on_exit;
 #endif
 
+  // String to binary conversions
+
   using ::strtol;
   using ::strtoul;
+#ifdef CONFIG_HAVE_LONG_LONG
+  using ::strtoll;
+  using ::strtoull;
+#endif
   using ::strtod;
+
+  // Binary to string conversions
+
+  using ::itoa;
+
+  // Memory Management
 
   using ::malloc;
   using ::free;
@@ -80,6 +99,17 @@ namespace std
   using ::zalloc;
   using ::calloc;
   using ::mallinfo;
+
+  // Misc.
+
+  using ::abs;
+  using ::labs;
+#ifdef CONFIG_HAVE_LONG_LONG
+  using ::llabs;
+#endif
+  using ::mktemp;
+  using ::mkstemp;
+  using ::qsort;
 }
 
 #endif // __INCLUDE_CXX_CSTDLIB

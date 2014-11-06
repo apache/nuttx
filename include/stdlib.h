@@ -182,8 +182,8 @@ long int labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
 #endif
-int      mktemp(FAR char *template);
-int      mkstemp(FAR char *template);
+int      mktemp(FAR char *path_template);
+int      mkstemp(FAR char *path_template);
 
 /* Sorting */
 
