@@ -8910,3 +8910,5 @@
 	  Add mktemp() and mkstemp() (2014-11-05).
 	* libc/stdio/lib_tempnam.c, lib_tmpnam.c, Kconfig, Make.defs and
 	  include/stdio.h: Add tmpnam() and tempnam() (2014-11-05).
+	* drivers/rwbuffer.c: Fix typo that can cause compiler error (2014-11-05).
+

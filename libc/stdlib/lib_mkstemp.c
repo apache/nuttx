@@ -195,18 +195,18 @@ static void copy_base62(FAR char *dest, int len)
  *
  * Description:
  *   The mkstemp() function replaces the contents of the string pointed to
- *   by template by a unique filename, and returns a file descriptor for the
- *   file open for reading and writing. The function thus prevents any
- *   possible race condition between testing whether the file exists and
- *   opening it for use. The string in template should look like a filename
- *   with six trailing 'X' s; mkstemp() replaces each 'X' with a character
- *   from the portable filename character set. The characters are chosen
- *   such that the resulting name does not duplicate the name of an existing
- *   file at the time of a call to mkstemp().
+ *   by path_template by a unique filename, and returns a file descriptor
+ *   for the file open for reading and writing. The function thus prevents
+ *   any possible race condition between testing whether the file exists and
+ *   opening it for use. The string in path_template should look like a
+ *   filename with six trailing 'X' s; mkstemp() replaces each 'X' with a
+ *   character from the portable filename character set. The characters are
+ *   chosen such that the resulting name does not duplicate the name of an
+ *   existing file at the time of a call to mkstemp().
  *
  * Input Parameters:
- *   template - The base file name that will be modified to produce the
- *     unique file name.  This must be a full path beginning with /tmp.
+ *   path_template - The base file name that will be modified to produce
+ *     the unique file name.  This must be a full path beginning with /tmp.
  *     This function will modify only the first XXXXXX characters within
  *     that full path.
  *
@@ -217,7 +217,7 @@ static void copy_base62(FAR char *dest, int len)
  *
  ****************************************************************************/
 
-int mkstemp(FAR char *template)
+int mkstemp(FAR char *path_template)
 {
   uint8_t base62[MAX_XS];
   uint32_t retries;
@@ -229,12 +229,12 @@ int mkstemp(FAR char *template)
 
   /* Count the number of X's at the end of the template */
 
-  xptr = strchr(template, 'X');
+  xptr = strchr(path_template, 'X');
   if (!xptr)
     {
       /* No Xs?  There should always really be 6 */
 
-      return open(template, O_RDWR | O_CREAT | O_EXCL, 0666);
+      return open(path_template, O_RDWR | O_CREAT | O_EXCL, 0666);
     }
 
   /* There is at least one.. count all of them */
@@ -279,7 +279,7 @@ int mkstemp(FAR char *template)
        * directories
        */
 
-      fd = open(template, O_RDWR | O_CREAT | O_EXCL, 0666);
+      fd = open(path_template, O_RDWR | O_CREAT | O_EXCL, 0666);
       if (fd >= 0)
         {
           /* We have it... return the file descriptor */

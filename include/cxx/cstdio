@@ -53,11 +53,14 @@ namespace std
   using ::fpos_t;
   using ::size_t;
 
+  // Operations on streams (FILE)
+
   using ::clearerr;
   using ::fclose;
   using ::fflush;
   using ::feof;
   using ::ferror;
+  using ::fileno;
   using ::fgetc;
   using ::fgetpos;
   using ::fgets;
@@ -71,7 +74,10 @@ namespace std
   using ::ftell;
   using ::fwrite;
   using ::gets;
+  using ::gets_s;
   using ::ungetc;
+
+  // Operations on the stdout stream, buffers, paths, and the whole printf-family
 
   using ::printf;
   using ::puts;
@@ -89,9 +95,17 @@ namespace std
   using ::vsnprintf;
   using ::vsscanf;
 
+  // Operations on file descriptors including:
+
   using ::fdopen;
+  using ::dprintf;
+  using ::vdprintf;
+
+  // Operations on paths
+
   using ::statfs;
+  using ::tmpnam;
+  using ::tempnam;
 }
 
 #endif // __INCLUDE_CXX_CSTDIO
-

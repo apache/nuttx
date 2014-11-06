@@ -2002,7 +2002,7 @@ static void efm32_usbreset(struct efm32_usbdev_s *priv)
 
   /* Mask all device endpoint interrupts except EP0 */
 
-  regval = (USB_DAINT_IEP(EP0) | USB_DAINT_OEP(EP0));
+  regval = (USB_DAINT_INEPINT(EP0) | USB_DAINT_OUTEPINT(EP0));
   efm32_putreg(regval, EFM32_USB_DAINTMSK);
 
   /* Unmask OUT interrupts */
@@ -2600,7 +2600,7 @@ static inline void efm32_epout_interrupt(FAR struct efm32_usbdev_s *priv)
 
   regval  = efm32_getreg(EFM32_USB_DAINT);
   regval &= efm32_getreg(EFM32_USB_DAINTMSK);
-  daint   = (regval & _USB_DAINT_OEP_MASK) >> _USB_DAINT_OEP_SHIFT;
+  daint   = (regval & _USB_DAINT_OUTEPINT_MASK) >> _USB_DAINT_OUTEPINT_SHIFT;
 
   if (daint == 0)
     {
@@ -2615,7 +2615,7 @@ static inline void efm32_epout_interrupt(FAR struct efm32_usbdev_s *priv)
        */
 
       regval  = efm32_getreg(EFM32_USB_DAINT);
-      daint   = (regval & _USB_DAINT_OEP_MASK) >> _USB_DAINT_OEP_SHIFT;
+      daint   = (regval & _USB_DAINT_OUTEPINT_MASK) >> _USB_DAINT_OUTEPINT_SHIFT;
 
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_EPOUTUNEXPECTED),
                (uint16_t)regval);
@@ -2831,7 +2831,7 @@ static inline void efm32_epin_interrupt(FAR struct efm32_usbdev_s *priv)
 
   daint  = efm32_getreg(EFM32_USB_DAINT);
   daint &= efm32_getreg(EFM32_USB_DAINTMSK);
-  daint &= _USB_DAINT_IEP_MASK;
+  daint &= _USB_DAINT_INEPINT_MASK;
 
   if (daint == 0)
     {
@@ -2849,7 +2849,7 @@ static inline void efm32_epin_interrupt(FAR struct efm32_usbdev_s *priv)
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_EPINUNEXPECTED),
                (uint16_t)daint);
 
-      daint &= _USB_DAINT_IEP_MASK;
+      daint &= _USB_DAINT_INEPINT_MASK;
       epno = 0;
 
       while (daint)
@@ -3125,12 +3125,12 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
 
   /* Decode status fields */
 
-  epphy  = (regval & _USB_GRXSTSD_EPNUM_MASK) >> _USB_GRXSTSD_EPNUM_SHIFT;
+  epphy  = (regval & _USB_GRXSTSP_CHEPNUM_MASK) >> _USB_GRXSTSP_CHEPNUM_SHIFT;
   privep = &priv->epout[epphy];
 
   /* Handle the RX event according to the packet status field */
 
-  switch (regval & _USB_GRXSTSD_PKTSTS_MASK)
+  switch (regval & _USB_GRXSTSP_PKTSTS_MASK)
     {
     /* Global OUT NAK.  This indicate that the global OUT NAK bit has taken
      * effect.
@@ -3139,7 +3139,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
      * Care.
      */
 
-    case USB_GRXSTSD_PKTSTS_OUTNAK:
+    case USB_GRXSTSP_PKTSTS_GOUTNAK:
       {
         usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_OUTNAK), 0);
       }
@@ -3151,10 +3151,10 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
      * EPNUM = EPNUM on which the packet was received, DPID = Actual Data PID.
      */
 
-    case USB_GRXSTSD_PKTSTS_OUTRECVD:
+    case USB_GRXSTSP_PKTSTS_PKTRCV:
       {
         usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_OUTRECVD), epphy);
-        bcnt = (regval & _USB_GRXSTSD_BCNT_MASK) >> _USB_GRXSTSD_BCNT_SHIFT;
+        bcnt = (regval & _USB_GRXSTSP_BCNT_MASK) >> _USB_GRXSTSP_BCNT_SHIFT;
         if (bcnt > 0)
           {
             efm32_epout_receive(privep, bcnt);
@@ -3171,7 +3171,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
      * which the data transfer is complete, DPID = Don't Care.
      */
 
-    case USB_GRXSTSD_PKTSTS_OUTDONE:
+    case USB_GRXSTSP_PKTSTS_XFERCOMPL:
       {
         usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_OUTDONE), epphy);
       }
@@ -3187,7 +3187,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
      * DPID = Don't Care.
      */
 
-    case USB_GRXSTSD_PKTSTS_SETUPDONE:
+    case USB_GRXSTSP_PKTSTS_SETUPCOMPL:
       {
         usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_SETUPDONE), epphy);
       }
@@ -3199,7 +3199,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
      * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
      */
 
-    case USB_GRXSTSD_PKTSTS_SETUPRECVD:
+    case USB_GRXSTSP_PKTSTS_SETUPRCV:
       {
         uint16_t datlen;
 
@@ -3249,7 +3249,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
     default:
       {
         usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_INVALIDPARMS),
-                 (regval & _USB_GRXSTSD_PKTSTS_MASK) >> _USB_GRXSTSD_PKTSTS_SHIFT);
+                 (regval & _USB_GRXSTSP_PKTSTS_MASK) >> _USB_GRXSTSP_PKTSTS_SHIFT);
       }
       break;
     }
@@ -3257,7 +3257,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
   /* Enable the Rx Status Queue Level interrupt */
 
   regval  = efm32_getreg(EFM32_USB_GINTMSK);
-  regval |= USB_GINTMSK_RXFLVL;
+  regval |= USB_GINTMSK_RXFLVLMSK;
   efm32_putreg(regval, EFM32_USB_GINTMSK);
 }
 
@@ -3705,7 +3705,7 @@ static void efm32_enablegonak(FAR struct efm32_ep_s *privep)
   /* Enable Global OUT NAK mode in the core. */
 
   regval = efm32_getreg(EFM32_USB_DCTL);
-  regval |= USB_DCTL_SGONAK;
+  regval |= USB_DCTL_SGOUTNAK;
   efm32_putreg(regval, EFM32_USB_DCTL);
 
 #if 0
@@ -3726,7 +3726,7 @@ static void efm32_enablegonak(FAR struct efm32_ep_s *privep)
    * in OTGFS DCTL register?
    */
 
-  while ((efm32_getreg(EFM32_USB_DCTL) & USB_DCTL_GONSTS) == 0);
+  while ((efm32_getreg(EFM32_USB_DCTL) & USB_DCTL_GOUTNAKSTS) == 0);
 #endif
 }
 
@@ -3745,7 +3745,7 @@ static void efm32_disablegonak(FAR struct efm32_ep_s *privep)
   /* Set the "Clear the Global OUT NAK bit" to disable global OUT NAK mode */
 
   regval  = efm32_getreg(EFM32_USB_DCTL);
-  regval |= USB_DCTL_CGONAK;
+  regval |= USB_DCTL_CGOUTNAK;
   efm32_putreg(regval, EFM32_USB_DCTL);
 }
 
@@ -3839,7 +3839,7 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
   /* Enable the interrupt for this endpoint */
 
   regval = efm32_getreg(EFM32_USB_DAINTMSK);
-  regval |= USB_DAINT_OEP(privep->epphy);
+  regval |= USB_DAINT_OUTEPINT(privep->epphy);
   efm32_putreg(regval, EFM32_USB_DAINTMSK);
   return OK;
 }
@@ -3877,19 +3877,19 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
       switch (maxpacket)
         {
           case 8:
-            mpsiz = _USB_DIEP0CTL_MPS_8;
+            mpsiz = _USB_DIEP0CTL_MPS_8B;
             break;
 
           case 16:
-            mpsiz = _USB_DIEP0CTL_MPS_16;
+            mpsiz = _USB_DIEP0CTL_MPS_16B;
             break;
 
           case 32:
-            mpsiz = _USB_DIEP0CTL_MPS_32;
+            mpsiz = _USB_DIEP0CTL_MPS_32B;
             break;
 
           case 64:
-            mpsiz = _USB_DIEP0CTL_MPS_64;
+            mpsiz = _USB_DIEP0CTL_MPS_64B;
             break;
 
           default:
@@ -3936,7 +3936,7 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
   /* Enable the interrupt for this endpoint */
 
   regval = efm32_getreg(EFM32_USB_DAINTMSK);
-  regval |= USB_DAINT_IEP(privep->epphy);
+  regval |= USB_DAINT_INEPINT(privep->epphy);
   efm32_putreg(regval, EFM32_USB_DAINTMSK);
 
   return OK;
@@ -4066,7 +4066,7 @@ static void efm32_epout_disable(FAR struct efm32_ep_s *privep)
   /* Disable endpoint interrupts */
 
   regval  = efm32_getreg(EFM32_USB_DAINTMSK);
-  regval &= ~USB_DAINT_OEP(privep->epphy);
+  regval &= ~USB_DAINT_OUTEPINT(privep->epphy);
   efm32_putreg(regval, EFM32_USB_DAINTMSK);
 
   /* Cancel any queued read requests */
@@ -4161,7 +4161,7 @@ static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
   /* Disable endpoint interrupts */
 
   regval  = efm32_getreg(EFM32_USB_DAINTMSK);
-  regval &= ~USB_DAINT_IEP(privep->epphy);
+  regval &= ~USB_DAINT_INEPINT(privep->epphy);
   efm32_putreg(regval, EFM32_USB_DAINTMSK);
 
   /* Cancel any queued write requests */
@@ -4908,7 +4908,7 @@ static int efm32_pullup(struct usbdev_s *dev, bool enable)
        * register
        */
 
-      regval &= ~USB_DCTL_SDIS;
+      regval &= ~USB_DCTL_SFTDISCON;
     }
   else
     {
@@ -4916,7 +4916,7 @@ static int efm32_pullup(struct usbdev_s *dev, bool enable)
        * register
        */
 
-      regval |= USB_DCTL_SDIS;
+      regval |= USB_DCTL_SFTDISCON;
     }
 
   efm32_putreg(regval, EFM32_USB_DCTL);
@@ -5193,7 +5193,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
    * interrupts will occur when the TxFIFO is truly empty (not just half full).
    */
 
-  efm32_putreg(USB_GAHBCFG_TXFELVL, EFM32_USB_GAHBCFG);
+  efm32_putreg(USB_GAHBCFG_NPTXFEMPLVL_EMPTY, EFM32_USB_GAHBCFG);
 
   /* Common USB OTG core initialization */
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
@@ -5366,23 +5366,23 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Enable the interrupts in the INTMSK */
 
-  regval = (USB_GINTMSK_RXFLVL | USB_GINTMSK_USBSUSP | USB_GINTMSK_ENUMDNE |
-            USB_GINTMSK_IEP | USB_GINTMSK_OEP | USB_GINTMSK_USBRST);
+  regval = (USB_GINTMSK_RXFLVLMSK | USB_GINTMSK_USBSUSPMSK | USB_GINTMSK_ENUMDONEMSK |
+            USB_GINTMSK_IEPINTMSK | USB_GINTMSK_OEPINTMSK | USB_GINTMSK_USBRSTMSK);
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
-  regval |= (USB_GINTMSK_IISOIXFR | USB_GINTMSK_IISOOXFR);
+  regval |= (USB_GINTMSK_INCOMPISOINMSK | USB_GINTMSK_INCOMPLPMSK);
 #endif
 
 #ifdef CONFIG_USBDEV_SOFINTERRUPT
-  regval |= USB_GINTMSK_SOF;
+  regval |= USB_GINTMSK_SOFMSK;
 #endif
 
 #ifdef CONFIG_USBDEV_VBUSSENSING
-  regval |= (USB_GINTMSK_OTG | USB_GINTMSK_SRQ);
+  regval |= (USB_GINTMSK_OTGINTMSK | USB_GINTMSK_SESSREQINTMSK);
 #endif
 
 #ifdef CONFIG_DEBUG_USB
-  regval |= USB_GINTMSK_MMIS;
+  regval |= USB_GINTMSK_MODEMISMSK;
 #endif
 
   efm32_putreg(regval, EFM32_USB_GINTMSK);
@@ -5393,7 +5393,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
    * empty (not just half full).
    */
 
-  efm32_putreg(USB_GAHBCFG_GINTMSK | USB_GAHBCFG_TXFELVL,
+  efm32_putreg(USB_GAHBCFG_GLBLINTRMSK | USB_GAHBCFG_NPTXFEMPLVL_EMPTY,
                EFM32_USB_GAHBCFG);
 }
 
