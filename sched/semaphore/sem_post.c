@@ -94,9 +94,7 @@
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
- *   This function cannot be called from an interrupt handler.
- *   It assumes the currently executing task is the one that
- *   is performing the unlock.
+ *   This function may be called from an interrupt handler.
  *
  ****************************************************************************/
 
