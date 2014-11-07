@@ -8911,4 +8911,5 @@
 	* libc/stdio/lib_tempnam.c, lib_tmpnam.c, Kconfig, Make.defs and
 	  include/stdio.h: Add tmpnam() and tempnam() (2014-11-05).
 	* drivers/rwbuffer.c: Fix typo that can cause compiler error (2014-11-05).
-
+	* drivers/mtd/m25px.c: Extend MTD support to M25P16. From Sébastien
+	  Lorquet (2014-11-07).
