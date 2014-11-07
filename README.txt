@@ -1259,6 +1259,7 @@ nuttx
 
 apps
  |- examples/
+ |   |- bastest/README.txt
  |   |- json/README.txt
  |   |- pashello/README.txt
  |   `- README.txt
