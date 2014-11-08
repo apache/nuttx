@@ -295,7 +295,7 @@ void udp_free(FAR struct udp_conn_s *conn)
  *
  * Description:
  *   Find a connection structure that is the appropriate
- *   connection to be used within the provided TCP/IP header
+ *   connection to be used within the provided UDP header
  *
  * Assumptions:
  *   This function is called from UIP logic at interrupt level
