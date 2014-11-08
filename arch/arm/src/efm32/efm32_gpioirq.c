@@ -172,7 +172,7 @@ void efm32_gpioirqinitialize(void)
 
   /* Attach the even and odd interrupt handlers */
 
-  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_ODD, efm32_even_interrupt));
+  DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_EVEN, efm32_even_interrupt));
   DEBUGVERIFY(irq_attach(EFM32_IRQ_GPIO_ODD, efm32_odd_interrupt));
 
   /* Enable GPIO even and odd interrupts at the NVIC */
