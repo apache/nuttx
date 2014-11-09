@@ -159,6 +159,7 @@ struct efm32_spidev_s
 #endif
 
   uint8_t nbits;             /* Width of word in bits (4-16) */
+  bool lsbfirst;             /* True: Bit order is LSB first */
   bool initialized;          /* True: Already initialized */
 };
 
@@ -1007,32 +1008,50 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   const struct efm32_spiconfig_s *config;
   uint32_t regval;
   uint32_t setting;
-  unsigned int truebits;
+  bool lsbfirst;
 
   spivdbg("nbits=%d\n", nbits);
 
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
 
-  /* Has the number of bits changed? */
+  /* Bit order is encoded by the sign of nbits */
 
-  if (nbits != priv->nbits)
+  if (nbits < 0)
     {
+      /* LSB first */
+
+      lsbfirst = true;
+      nbits    = -nbits;
+    }
+  else
+    {
+      /* MSH first */
+
+      lsbfirst = false;
+    }
+
+  /* Has the number of bits or the bit order changed? */
+
+  if (nbits != priv->nbits || lsbfirst != priv->lsbfirst)
+    {
+      /* Set the new bit order */
+
       regval = spi_getreg(config, EFM32_USART_CTRL_OFFSET);
-      if (nbits < 0)
+      if (lsbfirst)
         {
           regval &= ~USART_CTRL_MSBF;
-          truebits = -nbits;
         }
       else
         {
           regval |= USART_CTRL_MSBF;
-          truebits = nbits;
         }
 
-      spi_putreg(config, EFM32_USART_CLKDIV_OFFSET, regval);
+      spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
-      switch (truebits)
+      /* Select the new number of bits */
+
+      switch (nbits)
         {
         case  4:
           setting = USART_FRAME_DATABITS_FOUR;
@@ -1099,7 +1118,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
        * faster
        */
 
-      priv->nbits = nbits;
+      priv->nbits    = nbits;
+      priv->lsbfirst = lsbfirst;
     }
 }
 
@@ -1556,9 +1576,9 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
             USART_CTRL_CLKPHA_SAMPLELEADING;
   spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
-  /* LSB First */
+  /* MSB First */
 
-  regval &= ~USART_CTRL_MSBF;
+  regval |= USART_CTRL_MSBF;
   spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -1566,6 +1586,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   priv->mode      = SPIDEV_MODE0;
 #endif
   priv->nbits     = 8;
+  priv->lsbfirst  = false;
 
   /* 8 bits */
 
