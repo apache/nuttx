@@ -1574,11 +1574,11 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   regval = _USART_CTRL_RESETVALUE | USART_CTRL_SYNC | USART_CTRL_CLKPOL_IDLELOW |
             USART_CTRL_CLKPHA_SAMPLELEADING;
-  spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
-  /* MSB First */
+  /* MSB First, 8 bits */
 
-  regval |= USART_CTRL_MSBF;
+  regval &= ~_USART_FRAME_DATABITS_MASK;
+  regval |= USART_FRAME_DATABITS_EIGHT | USART_CTRL_MSBF;
   spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -1587,12 +1587,6 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 #endif
   priv->nbits     = 8;
   priv->lsbfirst  = false;
-
-  /* 8 bits */
-
-  regval = USART_FRAME_DATABITS_EIGHT | USART_FRAME_STOPBITS_DEFAULT |
-           USART_FRAME_PARITY_DEFAULT;
-  spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
   /* Select a default frequency of approx. 400KHz */
 
