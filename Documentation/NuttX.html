@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 3, 2014</p>
+      <p>Last Updated: November 11, 2014</p>
     </td>
   </tr>
 </table>
@@ -2487,10 +2487,17 @@ nsh>
         </li>
         <li>
           <p>
-            <b>Generic Board Support</b>
+            <b>Generic Board Support (obsoleted)</b>
             This logic was extended to support the <i>high density</i> STM32F100RC chips by Freddie Chopin
             There is <i>generic</i> support for STM32F100RC boards.
-            Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f100rc_generic/README.txt">README</a> file for further information.
+            Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/configs/stm32f100rc_generic/README.txt">README</a> file for further information.
+          </p>
+          <p>
+            <b><i>Obsoleted</i></b>.
+            This generic board supported has been <i>obsoleted</i>.
+            The code has been moved out of the NuttX source tree but can still be found be found in <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/">Obsoleted</a> directory.
+            This support was obsoleted because of a decision to stop support of <i>generic</i> board configurations.
+            Generic board configurations do not provide support for any specific hardware but can be useful only if there are not other examples for the setup for a particular architecture.
           </p>
        </li>
        <li>
@@ -4153,7 +4160,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
       </p>
     <p>
       <b><i>Obsoleted</i></b>.
-      This architecture has been <i>obsoleted</i>.
+      This board support has been <i>obsoleted</i>.
       The code has been moved out of the NuttX source tree but can still be found be found in <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/">Obsoleted</a> directory.
       This support was obsoleted because of technical issues that make NuttX unusable on the board at least in the short term.  This configuration may return to the NuttX source tree at some time in the future.
     </p>
