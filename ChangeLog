@@ -8915,3 +8915,8 @@
 	  Lorquet (2014-11-07).
 	* arch/arm/src/stm32/Kconfig, chip.h, and include/stm32/chip.h: Support
 	  for the STM32F103RG.  From Murilo Ponte (2014-11-10).
+	* configs/stm32f100rc_generic:  Removed this generic board configuration.
+	  I have decided to stop support of generic board configurations.  Generic
+	  board configurations do not provide support for any specific hardware
+	  but can be useful only if there are not other examples for the setup
+	  for a particular architecture. Not the case here (2014-11-10).
