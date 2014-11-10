@@ -1167,8 +1167,6 @@ nuttx
  |   |   `- README.txt
  |   |- stm32_tiny/
  |   |   `- README.txt
- |   |- stm32f100rc_generic/
- |   |   `- README.txt
  |   |- stm32f3discovery/
  |   |   `- README.txt
  |   |- stm32f4discovery/
