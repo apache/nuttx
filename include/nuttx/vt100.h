@@ -89,7 +89,25 @@
 #define VT100_MODESOFF2      {ASCII_ESC, '[', '0', 'm'}       /* Turn off character attributes */
 #define VT100_BOLD           {ASCII_ESC, '[', '1', 'm'}       /* Turn bold mode on */
 #define VT100_LOWINT         {ASCII_ESC, '[', '2', 'm'}       /* Turn low intensity mode on */
+#define VT100_FORE_BLACK     {ASCII_ESC, '[', '3', '0', 'm'}  /* Set foreground to color #0 - black */
+#define VT100_FORE_RED       {ASCII_ESC, '[', '3', '1', 'm'}  /* Set foreground to color #1 - red */
+#define VT100_FORE_GREEN     {ASCII_ESC, '[', '3', '2', 'm'}  /* Set foreground to color #2 - green */
+#define VT100_FORE_YELLOW    {ASCII_ESC, '[', '3', '3', 'm'}  /* Set foreground to color #3 - yellow */
+#define VT100_FORE_BLUE      {ASCII_ESC, '[', '3', '4', 'm'}  /* Set foreground to color #4 - blue */
+#define VT100_FORE_MAGENTA   {ASCII_ESC, '[', '3', '5', 'm'}  /* Set foreground to color #5 - magenta */
+#define VT100_FORE_CYAN      {ASCII_ESC, '[', '3', '6', 'm'}  /* Set foreground to color #6 - cyan */
+#define VT100_FORE_WHITE     {ASCII_ESC, '[', '3', '7', 'm'}  /* Set foreground to color #7 - white */
+#define VT100_FORE_DEFAULT   {ASCII_ESC, '[', '3', '9', 'm'}  /* Set foreground to color #9 - default */
 #define VT100_UNDERLINE      {ASCII_ESC, '[', '4', 'm'}       /* Turn underline mode on */
+#define VT100_BACK_BLACK     {ASCII_ESC, '[', '4', '0', 'm'}  /* Set background to color #0 - black */
+#define VT100_BACK_RED       {ASCII_ESC, '[', '4', '1', 'm'}  /* Set background to color #1 - red */
+#define VT100_BACK_GREEN     {ASCII_ESC, '[', '4', '2', 'm'}  /* Set background to color #2 - green */
+#define VT100_BACK_YELLOW    {ASCII_ESC, '[', '4', '3', 'm'}  /* Set background to color #3 - yellow */
+#define VT100_BACK_BLUE      {ASCII_ESC, '[', '4', '4', 'm'}  /* Set background to color #4 - blue */
+#define VT100_BACK_MAGENTA   {ASCII_ESC, '[', '4', '5', 'm'}  /* Set background to color #5 - magenta */
+#define VT100_BACK_CYAN      {ASCII_ESC, '[', '4', '6', 'm'}  /* Set background to color #6 - cyan */
+#define VT100_BACK_WHITE     {ASCII_ESC, '[', '4', '7', 'm'}  /* Set background to color #7 - white */
+#define VT100_BACK_DEFAULT   {ASCII_ESC, '[', '4', '9', 'm'}  /* Set background to color #9 - default */
 #define VT100_BLINK          {ASCII_ESC, '[', '5', 'm'}       /* Turn blinking mode on */
 #define VT100_REVERSE        {ASCII_ESC, '[', '7', 'm'}       /* Turn reverse video on */
 #define VT100_INVISIBLE      {ASCII_ESC, '[', '8', 'm'}       /* Turn invisible text mode on */
@@ -192,6 +210,18 @@
 #define VT52_IDENTRESP       {ASCII_ESC, '/', 'Z'}            /* Correct response to ident */
 
 /* Format strings for VT100 sequences that require numeric arguments */
+
+#define VT100_BLACK          0                                /* Color #0 - black */
+#define VT100_RED            1                                /* Color #1 - red */
+#define VT100_GREEN          2                                /* Color #2 - green */
+#define VT100_YELLOW         3                                /* Color #3 - yellow */
+#define VT100_BLUE           4                                /* Color #4 - blue */
+#define VT100_MAGENTA        5                                /* Color #5 - magenta */
+#define VT100_CYAN           6                                /* Color #6 - cyan */
+#define VT100_WHITE          7                                /* Color #7 - white */
+#define VT100_DEFAULT        9                                /* Color #9 - default */
+#define VT100_FMT_FORE_COLOR "\033[3%dm"                      /* Set foreground to color #n, n=0-8,9*/
+#define VT100_FMT_BACK_COLOR "\033[4%dm"                      /* Color #n, n=0-8,9*/
 
 #define VT100_FMT_SETWIN     "\033[%d;%dr"                    /* Set top and bottom line#s of a window */
 #define VT100_FMT_CURSORUP   "\033[%dA"                       /* Move cursor up n lines */
