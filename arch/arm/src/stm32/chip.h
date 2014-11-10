@@ -83,7 +83,8 @@
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103RB) || \
         defined(CONFIG_ARCH_CHIP_STM32F103RC) || \
         defined(CONFIG_ARCH_CHIP_STM32F103RD) || \
-        defined(CONFIG_ARCH_CHIP_STM32F103RE)
+        defined(CONFIG_ARCH_CHIP_STM32F103RE) || \
+        defined(CONFIG_ARCH_CHIP_STM32F103RG)
 #    include "chip/stm32f103r_pinmap.h"
 
 /* STM32F103VC, STM32F103VD, and STM32F103VE are all provided in 100 pin packages and differ

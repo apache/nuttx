@@ -685,7 +685,7 @@
  */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RC) || defined(CONFIG_ARCH_CHIP_STM32F103RD) || \
-      defined(CONFIG_ARCH_CHIP_STM32F103RE)
+      defined(CONFIG_ARCH_CHIP_STM32F103RE) || defined(CONFIG_ARCH_CHIP_STM32F103RG)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
