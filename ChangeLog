@@ -8920,3 +8920,6 @@
 	  board configurations do not provide support for any specific hardware
 	  but can be useful only if there are not other examples for the setup
 	  for a particular architecture. Not the case here (2014-11-10).
+	* include/nuttx/vt100.h: Add foreground and background color commands
+	  (2014-11-10).
+
