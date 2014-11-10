@@ -8913,3 +8913,5 @@
 	* drivers/rwbuffer.c: Fix typo that can cause compiler error (2014-11-05).
 	* drivers/mtd/m25px.c: Extend MTD support to M25P16. From Sébastien
 	  Lorquet (2014-11-07).
+	* arch/arm/src/stm32/Kconfig, chip.h, and include/stm32/chip.h: Support
+	  for the STM32F103RG.  From Murilo Ponte (2014-11-10).
