@@ -543,12 +543,6 @@ configs/stm3240g-eval
   microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
   toolchain (such as CodeSourcery).
 
-configs/stm32f100rc_generic
-  STMicro STM32F100RC generic board based on STM32F100RC high-density value line
-  chip. This "generic" configuration is not very usable out-of-box, but can be
-  used as a starting point to creating new configs with similar STM32
-  high-density value line chips.
-
 configs/stm32f4discovery
   STMicro STM32F4-Discovery board based on the STMIcro STM32F407VGT6 MCU.
 

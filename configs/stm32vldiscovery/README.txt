@@ -170,7 +170,7 @@ NuttX EABI "buildroot" Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh stm32f100rc_generic/<sub-dir>
+     ./configure.sh stm32vldiscovery/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -256,7 +256,7 @@ LEDs
 
 It is asumed that STMicro STM32F100RC generic board board has one LED on PA0.
 You should configure the port and pin number in
-configs/stm32f100rc_generic/src/stm32f100rc_internal.h. This LED is not used by
+configs/stm32vldiscovery/src/stm32f100rc_internal.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by
 the board port is defined in include/board.h and src/up_leds.c. The LED is used
 to encode OS-related events as follows:
@@ -451,7 +451,7 @@ Each STMicro STM32F100RC generic configuration is maintained in a sub-directory
 and can be selected as follow:
 
     cd tools
-    ./configure.sh stm32f100rc_generic/<subdir>
+    ./configure.sh stm32vldiscovery/<subdir>
     cd -
     . ./setenv.sh
 
