@@ -35,7 +35,8 @@
 
 # Add the unistd C files to the build
 
-CSRCS += lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
+CSRCS += lib_access.c lib_getopt.c lib_getoptargp.c lib_getoptindp.c
+CSRCS += lib_getoptoptp.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)

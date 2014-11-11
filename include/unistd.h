@@ -167,8 +167,9 @@ FAR char *getcwd(FAR char *buf, size_t size);
 
 /* File path operations */
 
-int     unlink(FAR const char *pathname);
+int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
+int     unlink(FAR const char *pathname);
 
 /* Execution of programs from files */
 
@@ -189,8 +190,6 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 FAR char **getoptargp(void); /* Optional argument following option */
 int       *getoptindp(void); /* Index into argv */
 int       *getoptoptp(void); /* unrecognized option character */
-
-#define access(...) (0)
 
 #undef EXTERN
 #if defined(__cplusplus)
