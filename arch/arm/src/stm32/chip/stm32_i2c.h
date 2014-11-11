@@ -185,7 +185,7 @@
 #define I2C_SR2_SMBDEFAULT      (1 << 5)  /* Bit 5: SMBus Device Default Address (Slave mode) */
 #define I2C_SR2_SMBHOST         (1 << 6)  /* Bit 6: SMBus Host Header (Slave mode) */
 #define I2C_SR2_DUALF           (1 << 7)  /* Bit 7: Dual Flag (Slave mode) */
-#define I2C_SR2_PEC_SHIFT       (1)       /* Bits 15-8: Packet Error Checking Register */
+#define I2C_SR2_PEC_SHIFT       (8)       /* Bits 15-8: Packet Error Checking Register */
 #define I2C_SR2_PEC_MASK        (0xff << I2C_SR2_PEC_SHIFT)
 
 /* Clock control register */
