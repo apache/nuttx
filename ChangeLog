@@ -8924,4 +8924,10 @@
 	  (2014-11-10).
 	* sched/wdog/wd_create.c: Fix an important bug in the watchdog creation
 	  logic (2014-11-10).
-
+	* include/unistd.h, libc/unistd/lib_access.c and Make.defs: From Lorenz
+	  Meier: The implementation of access() as vararg macro has the issue that
+	  any function call with the same name (even in a C++ class) will match
+	  with it and result in a compile error. I have replaced it with a small
+	  function, and tried to have decent documentation as well. This resolves
+	  the compile issue, and shouldn’t have negative side effects for users
+	  of the function (2014-11-11).
