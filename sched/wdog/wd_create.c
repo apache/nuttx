@@ -107,7 +107,7 @@ WDOG_ID wd_create (void)
    * the head of the free list.
    */
 
-  if (g_wdnfree > CONFIG_WDOG_INTRESERVE || !up_interrupt_context())
+  if (g_wdnfree > CONFIG_WDOG_INTRESERVE || up_interrupt_context())
     {
       /* Remove the watchdog timer from the free list and decrement the
        * count of free timers all with interrupts disabled.
