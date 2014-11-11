@@ -51,6 +51,15 @@ fi
 # report that it does not exist.
 
 if [ -h "${dest}" ]; then
+
+	# If the link is already created (and matches the request) do nothing
+
+	if [ "$(readlink ${dest})" = "${src}" ]; then
+		exit 0
+	fi
+
+	# Otherwise, remove the link
+
 	rm -f "${dest}"
 else
 
