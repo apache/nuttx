@@ -8922,4 +8922,6 @@
 	  for a particular architecture. Not the case here (2014-11-10).
 	* include/nuttx/vt100.h: Add foreground and background color commands
 	  (2014-11-10).
+	* sched/wdog/wd_create.c: Fix an important bug in the watchdog creation
+	  logic (2014-11-10).
 
