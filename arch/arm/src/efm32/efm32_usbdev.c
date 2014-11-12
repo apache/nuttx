@@ -1,5 +1,5 @@
 /*******************************************************************************
- * arch/arm/src/efm32/efm32_otgfsdev.c
+ * arch/arm/src/efm32/efm32_usbdev.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -3351,7 +3351,7 @@ static inline void efm32_isocininterrupt(FAR struct efm32_usbdev_s *priv)
        */
 
       efm32_req_complete(privep, -EIO);
-#warning "Will clear USB_DIEPCTL_USBAEP too"
+#warning "Will clear USB_DIEPCTL_USBACTEP too"
       efm32_epin_disable(privep);
       break;
     }
@@ -3433,7 +3433,7 @@ static inline void efm32_isocoutinterrupt(FAR struct efm32_usbdev_s *priv)
        */
 
       efm32_req_complete(privep, -EIO);
-#warning "Will clear USB_DOEPCTL_USBAEP too"
+#warning "Will clear USB_DOEPCTL_USBACTEP too"
       efm32_epout_disable(privep);
       break;
     }
@@ -3816,17 +3816,17 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
 
   regaddr = EFM32_USB_DOEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
-  if ((regval & USB_DOEPCTL_USBAEP) == 0)
+  if ((regval & USB_DOEPCTL_USBACTEP) == 0)
     {
       if (regval & USB_DOEPCTL_NAKSTS)
         {
           regval |= USB_DOEPCTL_CNAK;
         }
 
-      regval &= ~(_USB_DOEPCTL_MPS_MASK | _USB_DOEPCTL_EPTYP_MASK);
+      regval &= ~(_USB_DOEPCTL_MPS_MASK | _USB_DOEPCTL_EPTYPE_MASK);
       regval |= mpsiz;
-      regval |= (eptype << _USB_DOEPCTL_EPTYP_SHIFT);
-      regval |= (USB_DOEPCTL_SD0PID | USB_DOEPCTL_USBAEP);
+      regval |= (eptype << _USB_DOEPCTL_EPTYPE_SHIFT);
+      regval |= (USB_DOEPCTL_SETD0PIDEF | USB_DOEPCTL_USBACTEP);
       efm32_putreg(regval, regaddr);
 
       /* Save the endpoint configuration */
@@ -3912,18 +3912,18 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
 
   regaddr = EFM32_USB_DIEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
-  if ((regval & USB_DIEPCTL_USBAEP) == 0)
+  if ((regval & USB_DIEPCTL_USBACTEP) == 0)
     {
       if (regval & USB_DIEPCTL_NAKSTS)
         {
           regval |= USB_DIEPCTL_CNAK;
         }
 
-      regval &= ~(_USB_DIEPCTL_MPS_MASK | _USB_DIEPCTL_EPTYP_MASK | _USB_DIEPCTL_TXFNUM_MASK);
+      regval &= ~(_USB_DIEPCTL_MPS_MASK | _USB_DIEPCTL_EPTYPE_MASK | _USB_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
-      regval |= (eptype << _USB_DIEPCTL_EPTYP_SHIFT);
+      regval |= (eptype << _USB_DIEPCTL_EPTYPE_SHIFT);
       regval |= (eptype << _USB_DIEPCTL_TXFNUM_SHIFT);
-      regval |= (USB_DIEPCTL_SD0PID | USB_DIEPCTL_USBAEP);
+      regval |= (USB_DIEPCTL_SETD0PIDEF | USB_DIEPCTL_USBACTEP);
       efm32_putreg(regval, regaddr);
 
       /* Save the endpoint configuration */
@@ -4037,7 +4037,7 @@ static void efm32_epout_disable(FAR struct efm32_ep_s *privep)
 
   regaddr = EFM32_USB_DOEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
-  regval &= ~USB_DOEPCTL_USBAEP;
+  regval &= ~USB_DOEPCTL_USBACTEP;
   regval |= (USB_DOEPCTL_EPDIS | USB_DOEPCTL_SNAK);
   efm32_putreg(regval, regaddr);
 
@@ -4098,7 +4098,7 @@ static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
 
   regaddr = EFM32_USB_DIEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
-  if ((regval & USB_DIEPCTL_USBAEP) == 0)
+  if ((regval & USB_DIEPCTL_USBACTEP) == 0)
     {
       return;
     }
@@ -4118,7 +4118,7 @@ static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
 
   regaddr = EFM32_USB_DIEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
-  regval &= ~USB_DIEPCTL_USBAEP;
+  regval &= ~USB_DIEPCTL_USBACTEP;
   regval |= (USB_DIEPCTL_EPDIS | USB_DIEPCTL_SNAK);
   efm32_putreg(regval, regaddr);
 
@@ -4139,7 +4139,7 @@ static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
   flags = irqsave();
   regaddr = EFM32_USB_DIEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
-  regval &= ~USB_DIEPCTL_USBAEP;
+  regval &= ~USB_DIEPCTL_USBACTEP;
   regval |= (USB_DIEPCTL_EPDIS | USB_DIEPCTL_SNAK);
   efm32_putreg(regval, regaddr);
 
@@ -4589,7 +4589,7 @@ static int efm32_ep_clrstall(FAR struct efm32_ep_s *privep)
 
       regaddr  = EFM32_USB_DIEPCTL(privep->epphy);
       stallbit = USB_DIEPCTL_STALL;
-      data0bit = USB_DIEPCTL_SD0PID;
+      data0bit = USB_DIEPCTL_SETD0PIDEF;
     }
   else
     {
@@ -4597,7 +4597,7 @@ static int efm32_ep_clrstall(FAR struct efm32_ep_s *privep)
 
       regaddr  = EFM32_USB_DOEPCTL(privep->epphy);
       stallbit = USB_DOEPCTL_STALL;
-      data0bit = USB_DOEPCTL_SD0PID;
+      data0bit = USB_DOEPCTL_SETD0PIDEF;
     }
 
   /* Clear the stall bit */
@@ -5272,29 +5272,29 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
   /* EP0 TX */
 
   address = EFM32_RXFIFO_WORDS;
-  regval  = (address << _USB_DIEPTXF0_TX0FD_SHIFT) |
-            (EFM32_EP0_TXFIFO_WORDS << _USB_DIEPTXF0_TX0FSA_SHIFT);
+  regval  = (address << _USB_DIEPTXF0_TXFSTADDR_SHIFT) |
+            (EFM32_EP0_TXFIFO_WORDS << _USB_DIEPTXF0_TXFINEPTXF0DEP_SHIFT);
   efm32_putreg(regval, EFM32_USB_DIEPTXF0);
 
   /* EP1 TX */
 
   address += EFM32_EP0_TXFIFO_WORDS;
-  regval   = (address << _USB_DIEPTXF_INEPTXSA_SHIFT) |
-             (EFM32_EP1_TXFIFO_WORDS << _USB_DIEPTXF_INEPTXFD_SHIFT);
+  regval   = (address << _USB_DIEPTXF1_INEPNTXFSTADDR_SHIFT) |
+             (EFM32_EP1_TXFIFO_WORDS << _USB_DIEPTXF1_INEPNTXFDEP_SHIFT);
   efm32_putreg(regval, EFM32_USB_DIEPTXF1);
 
   /* EP2 TX */
 
   address += EFM32_EP1_TXFIFO_WORDS;
-  regval   = (address << _USB_DIEPTXF_INEPTXSA_SHIFT) |
-             (EFM32_EP2_TXFIFO_WORDS << _USB_DIEPTXF_INEPTXFD_SHIFT);
+  regval   = (address << _USB_DIEPTXF2_INEPNTXFSTADDR_SHIFT) |
+             (EFM32_EP2_TXFIFO_WORDS << _USB_DIEPTXF2_INEPNTXFDEP_SHIFT);
   efm32_putreg(regval, EFM32_USB_DIEPTXF2);
 
   /* EP3 TX */
 
   address += EFM32_EP2_TXFIFO_WORDS;
-  regval   = (address << _USB_DIEPTXF_INEPTXSA_SHIFT) |
-             (EFM32_EP3_TXFIFO_WORDS << _USB_DIEPTXF_INEPTXFD_SHIFT);
+  regval   = (address << _USB_DIEPTXF3_INEPNTXFSTADDR_SHIFT) |
+             (EFM32_EP3_TXFIFO_WORDS << _USB_DIEPTXF3_INEPNTXFDEP_SHIFT);
   efm32_putreg(regval, EFM32_USB_DIEPTXF3);
 
   /* Flush the FIFOs */

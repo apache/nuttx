@@ -96,11 +96,12 @@
 #define EFM32_USB_GRXSTSP_OFFSET                   0x3c020  /* Receive Status Read and Pop Register */
 #define EFM32_USB_GRXFSIZ_OFFSET                   0x3c024  /* Receive FIFO Size Register */
 #define EFM32_USB_GNPTXFSIZ_OFFSET                 0x3c028  /* Non-periodic Transmit FIFO Size Register */
+#define EFM32_USB_DIEPTXF0_OFFSET                  0x3c028  /* Endpoint 0 Transmit FIFO size */
 #define EFM32_USB_GNPTXSTS_OFFSET                  0x3c02c  /* Non-periodic Transmit FIFO/Queue Status Register */
 #define EFM32_USB_GDFIFOCFG_OFFSET                 0x3c05c  /* Global DFIFO Configuration Register */
 #define EFM32_USB_HPTXFSIZ_OFFSET                  0x3c100  /* Host Periodic Transmit FIFO Size Register */
 
-#define EFM32_USB_DIEPTXF_OFFSET(n)                (0x3c104 + ((n) << 2))
+#define EFM32_USB_DIEPTXF_OFFSET(n)                (0x3c104 + (((n)-1) << 2))
 #define EFM32_USB_DIEPTXF1_OFFSET                  0x3c104  /* Device IN Endpoint Transmit FIFO 1 Size Register */
 #define EFM32_USB_DIEPTXF2_OFFSET                  0x3c108  /* Device IN Endpoint Transmit FIFO 2 Size Register */
 #define EFM32_USB_DIEPTXF3_OFFSET                  0x3c10c  /* Device IN Endpoint Transmit FIFO 3 Size Register */
@@ -299,17 +300,18 @@
 #define EFM32_USB_GRXSTSP                          (EFM32_USB_BASE+EFM32_USB_GRXSTSP_OFFSET)
 #define EFM32_USB_GRXFSIZ                          (EFM32_USB_BASE+EFM32_USB_GRXFSIZ_OFFSET)
 #define EFM32_USB_GNPTXFSIZ                        (EFM32_USB_BASE+EFM32_USB_GNPTXFSIZ_OFFSET)
+#define EFM32_USB_DIEPTXF0                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF0_OFFSET)
 #define EFM32_USB_GNPTXSTS                         (EFM32_USB_BASE+EFM32_USB_GNPTXSTS_OFFSET)
 #define EFM32_USB_GDFIFOCFG                        (EFM32_USB_BASE+EFM32_USB_GDFIFOCFG_OFFSET)
 #define EFM32_USB_HPTXFSIZ                         (EFM32_USB_BASE+EFM32_USB_HPTXFSIZ_OFFSET)
 
-#define EFM32_USB_DIEPTXF_BASE(n)                  (EFM32_USB_BASE+EFM32_USB_DIEPTXF_OFFSET(n))
-#define EFM32_USB_DIEPTXF1_BASE                    (EFM32_USB_BASE+EFM32_USB_DIEPTXF1_OFFSET)
-#define EFM32_USB_DIEPTXF2_BASE                    (EFM32_USB_BASE+EFM32_USB_DIEPTXF2_OFFSET)
-#define EFM32_USB_DIEPTXF3_BASE                    (EFM32_USB_BASE+EFM32_USB_DIEPTXF3_OFFSET)
-#define EFM32_USB_DIEPTXF4_BASE                    (EFM32_USB_BASE+EFM32_USB_DIEPTXF4_OFFSET)
-#define EFM32_USB_DIEPTXF5_BASE                    (EFM32_USB_BASE+EFM32_USB_DIEPTXF5_OFFSET)
-#define EFM32_USB_DIEPTXF6_BASE                    (EFM32_USB_BASE+EFM32_USB_DIEPTXF6_OFFSET)
+#define EFM32_USB_DIEPTXF(n)                       (EFM32_USB_BASE+EFM32_USB_DIEPTXF_OFFSET(n))
+#define EFM32_USB_DIEPTXF1                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF1_OFFSET)
+#define EFM32_USB_DIEPTXF2                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF2_OFFSET)
+#define EFM32_USB_DIEPTXF3                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF3_OFFSET)
+#define EFM32_USB_DIEPTXF4                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF4_OFFSET)
+#define EFM32_USB_DIEPTXF5                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF5_OFFSET)
+#define EFM32_USB_DIEPTXF6                         (EFM32_USB_BASE+EFM32_USB_DIEPTXF6_OFFSET)
 
 #define EFM32_USB_HCFG                             (EFM32_USB_BASE+EFM32_USB_HCFG_OFFSET)
 #define EFM32_USB_HFIR                             (EFM32_USB_BASE+EFM32_USB_HFIR_OFFSET)
@@ -1323,6 +1325,17 @@
 #define _USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_MASK       0xFFFF0000UL                                    /* Bit mask for USB_NPTXFINEPTXF0DEP */
 #define _USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_DEFAULT    0x00000200UL                                    /* Mode DEFAULT for USB_GNPTXFSIZ */
 #define USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_DEFAULT     (_USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_DEFAULT << 16) /* Shifted mode DEFAULT for USB_GNPTXFSIZ */
+
+/* Bit fields for USB DIEPTXF0 */
+
+#define _USB_DIEPTXF0_TXFSTADDR_SHIFT              0                                            /* Shift value for USB_NPTXFSTADDR */
+#define _USB_DIEPTXF0_TXFSTADDR_MASK               0x3FFUL                                      /* Bit mask for USB_NPTXFSTADDR */
+#define _USB_DIEPTXF0_TXFSTADDR_DEFAULT            0x00000200UL                                 /* Mode DEFAULT for USB_GNPTXFSIZ */
+#define USB_DIEPTXF0_TXFSTADDR_DEFAULT             (_USB_DIEPTXF0_TXFSTADDR_DEFAULT << 0)       /* Shifted mode DEFAULT for USB_GNPTXFSIZ */
+#define _USB_DIEPTXF0_TXFINEPTXF0DEP_SHIFT         16                                           /* Shift value for USB_NPTXFINEPTXF0DEP */
+#define _USB_DIEPTXF0_TXFINEPTXF0DEP_MASK          0xFFFF0000UL                                 /* Bit mask for USB_NPTXFINEPTXF0DEP */
+#define _USB_DIEPTXF0_TXFINEPTXF0DEP_DEFAULT       0x00000200UL                                 /* Mode DEFAULT for USB_GNPTXFSIZ */
+#define USB_DIEPTXF0_TXFINEPTXF0DEP_DEFAULT        (_USB_DIEPTXF0_TXFINEPTXF0DEP_DEFAULT << 16) /* Shifted mode DEFAULT for USB_GNPTXFSIZ */
 
 /* Bit fields for USB GNPTXSTS */
 

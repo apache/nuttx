@@ -1,5 +1,5 @@
 /*******************************************************************************
- * arch/arm/src/efm32/efm32_otgfshost.c
+ * arch/arm/src/efm32/efm32_usbhost.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
