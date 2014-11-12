@@ -167,7 +167,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
       if (blkinfo->verbose)
         {
-          syslog(LOG_DEBUG, g_format,
+          syslog(LOG_NOTICE, g_format,
                  blkinfo->block, offset, "INODE", "UNVERFD", datlen);
         }
 
@@ -194,7 +194,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (crc != ecrc)
    {
-      syslog(LOG_DEBUG, g_format,
+      syslog(LOG_NOTICE, g_format,
              blkinfo->block, offset, "INODE", "CRC BAD", datlen);
       return ERROR;
    }
@@ -205,7 +205,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       if (blkinfo->verbose)
         {
-          syslog(LOG_DEBUG, g_format,
+          syslog(LOG_NOTICE, g_format,
                  blkinfo->block, offset, "INODE", "OK     ", datlen);
         }
     }
@@ -213,13 +213,13 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       if (blkinfo->verbose)
         {
-          syslog(LOG_DEBUG, g_format,
+          syslog(LOG_NOTICE, g_format,
                  blkinfo->block, offset, "INODE", "DELETED", datlen);
         }
     }
   else
     {
-      syslog(LOG_DEBUG, g_format,
+      syslog(LOG_NOTICE, g_format,
              blkinfo->block, offset, "INODE", "CORRUPT", datlen);
     }
 
@@ -270,7 +270,7 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (crc != ecrc)
    {
-      syslog(LOG_DEBUG, g_format,
+      syslog(LOG_NOTICE, g_format,
              blkinfo->block, offset, "DATA ", "CRC BAD", datlen);
       return ERROR;
    }
@@ -279,7 +279,7 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (blkinfo->verbose)
     {
-      syslog(LOG_DEBUG, g_format,
+      syslog(LOG_NOTICE, g_format,
              blkinfo->block, offset, "DATA ", "OK     ", datlen);
     }
 
@@ -310,7 +310,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
   blkhdr = (FAR struct nxffs_block_s *)blkinfo->buffer;
   if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
     {
-      syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "NO FRMT",
+      syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "NO FRMT",
              blkinfo->geo.blocksize);
     }
   else if (blkhdr->state == BLOCK_STATE_GOOD)
@@ -321,7 +321,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
         {
           if (blkinfo->verbose)
             {
-              syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
+              syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
                      blkinfo->geo.blocksize);
             }
 
@@ -330,19 +330,19 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
 #if 0 /* Too much output, to little information */
       else
         {
-          syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "IN USE ",
+          syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "IN USE ",
                  blkinfo->geo.blocksize);
         }
 #endif
     }
   else if (blkhdr->state == BLOCK_STATE_BAD)
     {
-      syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "BAD    ",
+      syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "BAD    ",
              blkinfo->geo.blocksize);
     }
   else
     {
-      syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "CORRUPT",
+      syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "CORRUPT",
              blkinfo->geo.blocksize);
     }
 
@@ -449,8 +449,8 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 
   /* Now read every block on the device */
 
-  syslog(LOG_DEBUG, "NXFFS Dump:\n");
-  syslog(LOG_DEBUG, g_hdrformat);
+  syslog(LOG_NOTICE, "NXFFS Dump:\n");
+  syslog(LOG_NOTICE, g_hdrformat);
 
   blkinfo.nblocks = blkinfo.geo.erasesize * blkinfo.geo.neraseblocks / blkinfo.geo.blocksize;
   for (blkinfo.block = 0, blkinfo.offset = 0;
@@ -475,7 +475,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
            * just report the read error and continue.
            */
 
-          syslog(LOG_DEBUG, g_format, blkinfo.block, 0, "BLOCK", "RD FAIL",
+          syslog(LOG_NOTICE, g_format, blkinfo.block, 0, "BLOCK", "RD FAIL",
                blkinfo.geo.blocksize);
 #endif
         }
@@ -487,7 +487,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
         }
     }
 
-  syslog(LOG_DEBUG, "%d blocks analyzed\n", blkinfo.nblocks);
+  syslog(LOG_NOTICE, "%d blocks analyzed\n", blkinfo.nblocks);
 
   kmm_free(blkinfo.buffer);
   return OK;
