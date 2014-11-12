@@ -84,12 +84,12 @@ LEDs and Buttons
   are connected to the EFM32, and are debounced by RC filters with a time
   constant of 1ms. The buttons are connected to pins PB9 and PB10:
 
-  ------------------------------------- --------------------
-  EFM32 PIN                             BOARD SIGNALS
-  ------------------------------------- --------------------
-  B9/EBI_A03/U1_TX #2                   MCU_PB9  UIF_PB0
-  B10/EBI_A04/U1_RX #2                  MCU_PB10 UIF_PB1
-  ------------------------------------- --------------------
+    ------------------------------------- --------------------
+    EFM32 PIN                             BOARD SIGNALS
+    ------------------------------------- --------------------
+    B9/EBI_A03/U1_TX #2                   MCU_PB9  UIF_PB0
+    B10/EBI_A04/U1_RX #2                  MCU_PB10 UIF_PB1
+    ------------------------------------- --------------------
 
   Buttons are connected to ground so they will read low when closed.
 
@@ -103,6 +103,13 @@ Serial Console
    and the documentation claims that 9600 baud is possible (although
    I am not sure how).
 
+     ---------- ---- ----------- -----------
+     SIGNAL     PGIO EXP Header  Test Point
+     ---------- ---- ----------- -----------
+     LEUART0_TX PD4  Pin 12      TPJ122
+     LEUART0_RX PD5  Pin 14      TPJ123
+     ---------- ---- ----------- -----------
+
    It should also be possible to use UART0 is configured at 115200 8N1
    on pins PE0 and PE1.
 
@@ -114,6 +121,55 @@ Serial Console
    controller in the form of a UART connection. The connection is enabled by
    setting the EFM_BC_EN (PF7) line high, and using the lines EFM_BC_TX
    (PE0) and EFM_BC_RX (PE1) for communicating.
+
+USING THE J-LINK GDB SERVER
+===========================
+
+   1. Star the J-Link GDB server.  You should see the start-up configuration
+      window.  SelectL
+
+      a. Target device = EFM32GG990F1024
+      b. Select Target interface = SWD
+
+   2. Press OK.  The GDB server should start and the last message in the Log
+      output should be "Waiting for GDB connection".
+
+   3. In a terminal window, start GDB:
+
+      arm-none-eabi-gdb
+
+   4. Connect to the J-Link GDB server:
+
+     (gdb) target remote localhost:2331
+
+   5. Load and run nuttx
+
+     (gdb) mon halt
+     (gdb) load nuttx
+     (gdb) mon reset go
+
+   I had to tinker with the setup a few times repeating the same steps above
+   before things finally began to work.  Don't know why.
+
+   To debug code already burned into FLASH:
+
+   1. Start the GDB server as above.
+
+   2. In a terminal window, start GDB:
+
+      arm-none-eabi-gdb
+
+   3. Connect to the J-Link GDB serer:
+
+     (gdb) target remote local host
+
+   3. Load the nuttx symbol file, reset, and debug
+
+     (gdb) mon halt
+     (gdb) file nuttx
+     (gdb) mon reset
+     (gdb) s
+     ...
 
 Configurations
 ==============

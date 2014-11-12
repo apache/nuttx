@@ -251,18 +251,18 @@
  *   U0_RX #1 PE1 MCU_PE1, UART0_TX #1, EFM_BC_TX, BC_UART_TX
  */
 
-#define BOARD_UART0_RX_GPIO        (GPIO_PORTE|GPIO_PIN1)
-#define BOARD_UART0_TX_GPIO        (GPIO_PORTE|GPIO_PIN0)
-#define BOARD_UART0_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
+#define BOARD_UART0_RX_GPIO          (GPIO_PORTE|GPIO_PIN1)
+#define BOARD_UART0_TX_GPIO          (GPIO_PORTE|GPIO_PIN0)
+#define BOARD_UART0_ROUTE_LOCATION   _USART_ROUTE_LOCATION_LOC1
 
 /* LEUART0:
  *
- *   LEU0_RX #0 PD4 Available on TP121 and EXP pin 12
- *   LEU0_TX #0 PD5 Available on TP122 and EXP pin 14
+ *   LEU0_TX #0 PD4 Available on TP122 and EXP pin 12
+ *   LEU0_RX #0 PD5 Available on TP123 and EXP pin 14
  */
 
-#define BOARD_LEUART0_RX_GPIO        (GPIO_PORTD|GPIO_PIN4)
-#define BOARD_LEUART0_TX_GPIO        (GPIO_PORTD|GPIO_PIN5)
+#define BOARD_LEUART0_RX_GPIO        (GPIO_PORTD|GPIO_PIN5)
+#define BOARD_LEUART0_TX_GPIO        (GPIO_PORTD|GPIO_PIN4)
 #define BOARD_LEUART0_ROUTE_LOCATION _LEUART_ROUTE_LOCATION_LOC0
 
 /****************************************************************************
