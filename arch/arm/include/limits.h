@@ -67,9 +67,6 @@
 #define INT_MAX     2147483647
 #define UINT_MAX    4294967295U
 
-#define INT_FAST32_MIN INT_MIN
-#define INT_FAST32_MAX INT_MAX
-
 /* These change on 32-bit and 64-bit platforms */
 
 #define LONG_MIN    (-LONG_MAX - 1)
