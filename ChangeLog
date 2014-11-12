@@ -8951,3 +8951,6 @@
 	* arch/arm/include/limits.h:  Remove the definition of INT_FAST32_MIN
 	  which is already defined in stdint.h (the correct location).  From
 	  Lorenz Meier (2014-11-12).
+	* arch/arm/src/efm32/efm32_clockconfig.c, configs/efm32gg-stk3700/README.txt
+	  and include/board.h:  Fixes to get the EFM32GG-STK3700 basic NSH
+	  configuration running.  It works! (2014-11-12).
