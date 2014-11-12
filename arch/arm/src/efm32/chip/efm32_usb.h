@@ -846,6 +846,7 @@
 #define _USB_GUSBCFG_USBTRDTIM_MASK                0x3c00UL                                    /* Bit mask for USB_USBTRDTIM */
 #define _USB_GUSBCFG_USBTRDTIM_DEFAULT             0x00000005UL                                /* Mode DEFAULT for USB_GUSBCFG */
 #define USB_GUSBCFG_USBTRDTIM_DEFAULT              (_USB_GUSBCFG_USBTRDTIM_DEFAULT << 10)      /* Shifted mode DEFAULT for USB_GUSBCFG */
+#define USB_GUSBCFG_USBTRDTIM(n)                   ((uint32_t)(n) << 10)                       /* Variable setting for USB_GUSBCFG */
 #define USB_GUSBCFG_TERMSELDLPULSE                 (0x1UL << 22)                               /* TermSel DLine Pulsing Selection (device only) */
 #define _USB_GUSBCFG_TERMSELDLPULSE_SHIFT          22                                          /* Shift value for USB_TERMSELDLPULSE */
 #define _USB_GUSBCFG_TERMSELDLPULSE_MASK           0x400000UL                                  /* Bit mask for USB_TERMSELDLPULSE */
