@@ -3116,7 +3116,7 @@ static inline void efm32_rxinterrupt(FAR struct efm32_usbdev_s *priv)
   /* Disable the Rx status queue level interrupt */
 
   regval = efm32_getreg(EFM32_USB_GINTMSK);
-  regval &= ~USB_GINTMSK_RXFLVL;
+  regval &= ~USB_GINTMSK_RXFLVLMSK;
   efm32_putreg(regval, EFM32_USB_GINTMSK);
 
   /* Get the status from the top of the FIFO */
@@ -3280,8 +3280,8 @@ static inline void efm32_enuminterrupt(FAR struct efm32_usbdev_s *priv)
   /* Set USB turn-around time for the full speed device with internal PHY interface. */
 
   regval  = efm32_getreg(EFM32_USB_GUSBCFG);
-  regval &= ~_USB_GUSBCFG_TRDT_MASK;
-  regval |=  USB_GUSBCFG_TRDT(5);
+  regval &= ~_USB_GUSBCFG_USBTRDTIM_MASK;
+  regval |=  USB_GUSBCFG_USBTRDTIM(5);
   efm32_putreg(regval, EFM32_USB_GUSBCFG);
 }
 
@@ -3533,22 +3533,22 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
        * interrupt is pending on one of the OUT endpoints of the core.
        */
 
-      if ((regval & USB_GINTSTS_OEP) != 0)
+      if ((regval & USB_GINTSTS_OEPINT) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_EPOUT), (uint16_t)regval);
           efm32_epout_interrupt(priv);
-          efm32_putreg(USB_GINTSTS_OEP, EFM32_USB_GINTSTS);
+          efm32_putreg(USB_GINTSTS_OEPINT, EFM32_USB_GINTSTS);
         }
 
       /* IN endpoint interrupt.  The core sets this bit to indicate that
        * an interrupt is pending on one of the IN endpoints of the core.
        */
 
-      if ((regval & USB_GINTSTS_IEP) != 0)
+      if ((regval & USB_GINTSTS_IEPINT) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_EPIN), (uint16_t)regval);
           efm32_epin_interrupt(priv);
-          efm32_putreg(USB_GINTSTS_IEP, EFM32_USB_GINTSTS);
+          efm32_putreg(USB_GINTSTS_IEPINT, EFM32_USB_GINTSTS);
         }
 
       /* Host/device mode mismatch error interrupt */
@@ -3563,11 +3563,11 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
 
       /* Resume/remote wakeup detected interrupt */
 
-      if ((regval & USB_GINTSTS_WKUP) != 0)
+      if ((regval & USB_GINTSTS_WKUPINT) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_WAKEUP), (uint16_t)regval);
           efm32_resumeinterrupt(priv);
-          efm32_putreg(USB_GINTSTS_WKUP, EFM32_USB_GINTSTS);
+          efm32_putreg(USB_GINTSTS_WKUPINT, EFM32_USB_GINTSTS);
         }
 
      /* USB suspend interrupt */
@@ -3616,11 +3616,11 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
 
       /* Enumeration done interrupt */
 
-      if ((regval & USB_GINTSTS_ENUMDNE) != 0)
+      if ((regval & USB_GINTSTS_ENUMDONE) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_ENUMDNE), (uint16_t)regval);
           efm32_enuminterrupt(priv);
-          efm32_putreg(USB_GINTSTS_ENUMDNE, EFM32_USB_GINTSTS);
+          efm32_putreg(USB_GINTSTS_ENUMDONE, EFM32_USB_GINTSTS);
         }
 
       /* Incomplete isochronous IN transfer interrupt.  When the core finds
@@ -3782,19 +3782,19 @@ static int efm32_epout_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
       switch (maxpacket)
         {
           case 8:
-            mpsiz = USB_DOEP0CTL_MPS_8;
+            mpsiz = USB_DOEP0CTL_MPS_8B;
             break;
 
           case 16:
-            mpsiz = USB_DOEP0CTL_MPS_16;
+            mpsiz = USB_DOEP0CTL_MPS_16B;
             break;
 
           case 32:
-            mpsiz = USB_DOEP0CTL_MPS_32;
+            mpsiz = USB_DOEP0CTL_MPS_32B;
             break;
 
           case 64:
-            mpsiz = USB_DOEP0CTL_MPS_64;
+            mpsiz = USB_DOEP0CTL_MPS_64B;
             break;
 
           default:
@@ -5241,8 +5241,8 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
   /* Force Device Mode */
 
   regval  = efm32_getreg(EFM32_USB_GUSBCFG);
-  regval &= ~USB_GUSBCFG_FHMOD;
-  regval |= USB_GUSBCFG_FDMOD;
+  regval &= ~_USB_GUSBCFG_FORCEHSTMODE_MASK;
+  regval |= USB_GUSBCFG_FORCEDEVMODE;
   efm32_putreg(regval, EFM32_USB_GUSBCFG);
   up_mdelay(50);
 
