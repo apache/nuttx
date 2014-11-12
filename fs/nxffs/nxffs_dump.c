@@ -55,12 +55,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Re-define fdbg so that the output does not have so much diagnostic info.
- * This should still, however, always agree with the defintion in debug.h.
- */
-
-#undef  fdbg
-#define fdbg syslog
 
 /****************************************************************************
  * Private Types
@@ -173,7 +167,8 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
       if (blkinfo->verbose)
         {
-          fdbg(g_format, blkinfo->block, offset, "INODE", "UNVERFD", datlen);
+          syslog(LOG_DEBUG, g_format,
+                 blkinfo->block, offset, "INODE", "UNVERFD", datlen);
         }
 
       return ERROR;
@@ -199,7 +194,8 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (crc != ecrc)
    {
-      fdbg(g_format, blkinfo->block, offset, "INODE", "CRC BAD", datlen);
+      syslog(LOG_DEBUG, g_format,
+             blkinfo->block, offset, "INODE", "CRC BAD", datlen);
       return ERROR;
    }
 
@@ -209,19 +205,22 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       if (blkinfo->verbose)
         {
-          fdbg(g_format, blkinfo->block, offset, "INODE", "OK     ", datlen);
+          syslog(LOG_DEBUG, g_format,
+                 blkinfo->block, offset, "INODE", "OK     ", datlen);
         }
     }
   else if (state == INODE_STATE_DELETED)
     {
       if (blkinfo->verbose)
         {
-          fdbg(g_format, blkinfo->block, offset, "INODE", "DELETED", datlen);
+          syslog(LOG_DEBUG, g_format,
+                 blkinfo->block, offset, "INODE", "DELETED", datlen);
         }
     }
   else
     {
-      fdbg(g_format, blkinfo->block, offset, "INODE", "CORRUPT", datlen);
+      syslog(LOG_DEBUG, g_format,
+             blkinfo->block, offset, "INODE", "CORRUPT", datlen);
     }
 
   /* Return the block-relative offset to the next byte after the inode name */
@@ -271,7 +270,8 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (crc != ecrc)
    {
-      fdbg(g_format, blkinfo->block, offset, "DATA ", "CRC BAD", datlen);
+      syslog(LOG_DEBUG, g_format,
+             blkinfo->block, offset, "DATA ", "CRC BAD", datlen);
       return ERROR;
    }
 
@@ -279,7 +279,8 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (blkinfo->verbose)
     {
-      fdbg(g_format, blkinfo->block, offset, "DATA ", "OK     ", datlen);
+      syslog(LOG_DEBUG, g_format,
+             blkinfo->block, offset, "DATA ", "OK     ", datlen);
     }
 
   return SIZEOF_NXFFS_DATA_HDR + datlen;
@@ -309,8 +310,8 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
   blkhdr = (FAR struct nxffs_block_s *)blkinfo->buffer;
   if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
     {
-      fdbg(g_format, blkinfo->block, 0, "BLOCK", "NO FRMT",
-           blkinfo->geo.blocksize);
+      syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "NO FRMT",
+             blkinfo->geo.blocksize);
     }
   else if (blkhdr->state == BLOCK_STATE_GOOD)
     {
@@ -320,8 +321,8 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
         {
           if (blkinfo->verbose)
             {
-              fdbg(g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
-                   blkinfo->geo.blocksize);
+              syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
+                     blkinfo->geo.blocksize);
             }
 
           return;
@@ -329,20 +330,20 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
 #if 0 /* Too much output, to little information */
       else
         {
-          fdbg(g_format, blkinfo->block, 0, "BLOCK", "IN USE ",
-               blkinfo->geo.blocksize);
+          syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "IN USE ",
+                 blkinfo->geo.blocksize);
         }
 #endif
     }
   else if (blkhdr->state == BLOCK_STATE_BAD)
     {
-      fdbg(g_format, blkinfo->block, 0, "BLOCK", "BAD    ",
-           blkinfo->geo.blocksize);
+      syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "BAD    ",
+             blkinfo->geo.blocksize);
     }
   else
     {
-      fdbg(g_format, blkinfo->block, 0, "BLOCK", "CORRUPT",
-           blkinfo->geo.blocksize);
+      syslog(LOG_DEBUG, g_format, blkinfo->block, 0, "BLOCK", "CORRUPT",
+             blkinfo->geo.blocksize);
     }
 
   /* Serach for Inode and data block headers.  */
@@ -448,8 +449,8 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 
   /* Now read every block on the device */
 
-  fdbg("NXFFS Dump:\n");
-  fdbg(g_hdrformat);
+  syslog(LOG_DEBUG, "NXFFS Dump:\n");
+  syslog(LOG_DEBUG, g_hdrformat);
 
   blkinfo.nblocks = blkinfo.geo.erasesize * blkinfo.geo.neraseblocks / blkinfo.geo.blocksize;
   for (blkinfo.block = 0, blkinfo.offset = 0;
@@ -474,7 +475,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
            * just report the read error and continue.
            */
 
-          fdbg(g_format, blkinfo.block, 0, "BLOCK", "RD FAIL",
+          syslog(LOG_DEBUG, g_format, blkinfo.block, 0, "BLOCK", "RD FAIL",
                blkinfo.geo.blocksize);
 #endif
         }
@@ -486,7 +487,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
         }
     }
 
-  fdbg("%d blocks analyzed\n", blkinfo.nblocks);
+  syslog(LOG_DEBUG, "%d blocks analyzed\n", blkinfo.nblocks);
 
   kmm_free(blkinfo.buffer);
   return OK;
