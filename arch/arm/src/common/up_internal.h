@@ -192,12 +192,20 @@ typedef void (*up_vector_t)(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* This holds a references to the current interrupt level
  * register storage structure.  If is non-NULL only during
  * interrupt processing.
  */
 
-extern volatile uint32_t *current_regs;
+EXTERN volatile uint32_t *current_regs;
 
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded
@@ -205,13 +213,13 @@ extern volatile uint32_t *current_regs;
  * CONFIG_RAM_END
  */
 
-extern const uint32_t g_idle_topstack;
+EXTERN const uint32_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern uint32_t g_intstackalloc; /* Allocated stack base */
-extern uint32_t g_intstackbase;  /* Initial top of interrupt stack */
+EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
+EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #endif
 
 /* These 'addresses' of these values are setup by the linker script.  They are
@@ -226,13 +234,13 @@ extern uint32_t g_intstackbase;  /* Initial top of interrupt stack */
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
-extern uint32_t _stext;           /* Start of .text */
-extern uint32_t _etext;           /* End_1 of .text + .rodata */
-extern const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
-extern uint32_t _sdata;           /* Start of .data */
-extern uint32_t _edata;           /* End+1 of .data */
-extern uint32_t _sbss;            /* Start of .bss */
-extern uint32_t _ebss;            /* End+1 of .bss */
+EXTERN uint32_t _stext;           /* Start of .text */
+EXTERN uint32_t _etext;           /* End_1 of .text + .rodata */
+EXTERN const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
+EXTERN uint32_t _sdata;           /* Start of .data */
+EXTERN uint32_t _edata;           /* End+1 of .data */
+EXTERN uint32_t _sbss;            /* Start of .bss */
+EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
 /* Sometimes, functions must be executed from RAM.  In this case, the following
  * macro may be used (with GCC!) to specify a function that will execute from
@@ -256,9 +264,9 @@ extern uint32_t _ebss;            /* End+1 of .bss */
  * functions from flash to RAM.
  */
 
-extern const uint32_t _framfuncs; /* Copy source address in FLASH */
-extern uint32_t _sramfuncs;       /* Copy destination start address in RAM */
-extern uint32_t _eramfuncs;       /* Copy destination end address in RAM */
+EXTERN const uint32_t _framfuncs; /* Copy source address in FLASH */
+EXTERN uint32_t _sramfuncs;       /* Copy destination start address in RAM */
+EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
 
 #else /* CONFIG_ARCH_RAMFUNCS */
 
@@ -516,6 +524,10 @@ void up_rnginitialize(void);
 void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H */
