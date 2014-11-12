@@ -8931,3 +8931,23 @@
 	  function, and tried to have decent documentation as well. This resolves
 	  the compile issue, and shouldn’t have negative side effects for users
 	  of the function (2014-11-11).
+	* mm/mm_gran/mm_granrelease.c:  If the INTR granule allocator mode is
+	  enabled, there is no semaphore to destroy.  From Lorenz Meier (2014-11-12).
+	* fs/nxffs/nxffs_dump.c: Fix problems with redefinitions of fdb macro.
+	  With the fix to the syslog prototype, a LOG priority must now be the
+	  first parameter.  Fixed by replacing all occurrences of fdbg with
+	  syslog(LOG_DEBUG, and eliminating the macro redefinitions.  Noted by
+	  Sebastien Lorquet (2014-11-12).
+	* arch/arm/src/common/up_internal.h: Add protection from C++ name
+	  mangling in the ARM up_internal.h.  From Lorenz Meier (2014-11-12).
+	* include/nuttx/compiler.h:  Defines inline functions as not
+	  instrumented - this is relevant for anyone using instrumentation.  From
+	  Lorenz Meier (2014-11-12).
+	* libc/string/lib_strncpy.c:  The definition of strncpy() is that empty
+	  space should be zero-filled, the patch adds the zero filling (I didn’t
+	  know this, see e.g. the POSIX spec here:
+	 http://pubs.opengroup.org/onlinepubs/7908799/xsh/strncpy.html). From
+	  Lorenz Meier (2014-11-12).
+	* arch/arm/include/limits.h:  Remove the definition of INT_FAST32_MIN
+	  which is already defined in stdint.h (the correct location).  From
+	  Lorenz Meier (2014-11-12).
