@@ -16,7 +16,7 @@ CONFIG_HOST_LINUX=y
 #
 # Build Configuration
 #
-#CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
 CONFIG_BUILD_FLAT=y
 # CONFIG_BUILD_2PASS is not set
 
@@ -250,6 +250,13 @@ CONFIG_PREALLOC_MQ_MSGS=32
 CONFIG_MQ_MAXMSGSIZE=32
 
 #
+# Work Queue Support
+#
+# CONFIG_SCHED_WORKQUEUE is not set
+# CONFIG_SCHED_HPWORK is not set
+# CONFIG_SCHED_LPWORK is not set
+
+#
 # Stack and heap information
 #
 CONFIG_IDLETHREAD_STACKSIZE=4096
@@ -319,12 +326,14 @@ CONFIG_SERIAL=y
 # CONFIG_ARCH_HAVE_USART6 is not set
 # CONFIG_ARCH_HAVE_USART7 is not set
 # CONFIG_ARCH_HAVE_USART8 is not set
+# CONFIG_ARCH_HAVE_OTHER_UART is not set
 
 #
 # USART Configuration
 #
 # CONFIG_MCU_SERIAL is not set
 # CONFIG_STANDARD_SERIAL is not set
+# CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 # CONFIG_SERIAL_IFLOWCONTROL is not set
 # CONFIG_SERIAL_OFLOWCONTROL is not set
 # CONFIG_USBDEV is not set
@@ -377,8 +386,8 @@ CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 #
 # System Logging
 #
-
 # CONFIG_SYSLOG is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
 
 #
 # Graphics Support
@@ -399,7 +408,7 @@ CONFIG_MM_REGIONS=1
 # CONFIG_AUDIO is not set
 
 #
-# Binary Formats
+# Binary Loader
 #
 # CONFIG_BINFMT_DISABLE is not set
 # CONFIG_BINFMT_EXEPATH is not set
@@ -442,7 +451,6 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 # Non-standard Library Support
 #
-# CONFIG_SCHED_WORKQUEUE is not set
 # CONFIG_LIB_KBDCODEC is not set
 # CONFIG_LIB_SLCDCODEC is not set
 
