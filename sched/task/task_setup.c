@@ -490,9 +490,16 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
 
       while (argv[argc])
         {
-          /* Add the size of this argument (with NUL terminator) */
+          /* Add the size of this argument (with NUL terminator).
+           * Check each time if the accumulated size exceeds the
+           * size of the allocated stack.
+           */
 
           strtablen += (strlen(argv[argc]) + 1);
+          if (strtablen >= tcb->adj_stack_size)
+            {
+               return -ENAMETOOLONG;
+            }
 
           /* Increment the number of args.  Here is a sanity check to
            * prevent running away with an unterminated argv[] list.
