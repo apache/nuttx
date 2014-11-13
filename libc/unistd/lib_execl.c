@@ -40,7 +40,9 @@
 #include <nuttx/config.h>
 
 #include <stdarg.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 
@@ -155,7 +157,7 @@ int execl(FAR const char *path, ...)
   if (nargs > 0)
     {
       argv = (FAR char **)malloc((nargs + 1) * sizeof(FAR char *));
-      if (argv = (FAR char **)NULL)
+      if (argv == (FAR char **)NULL)
         {
           set_errno(ENOMEM);
           return ERROR;

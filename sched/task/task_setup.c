@@ -496,7 +496,7 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
            */
 
           strtablen += (strlen(argv[argc]) + 1);
-          if (strtablen >= tcb->adj_stack_size)
+          if (strtablen >= tcb->cmn.adj_stack_size)
             {
                return -ENAMETOOLONG;
             }
