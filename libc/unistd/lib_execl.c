@@ -124,7 +124,7 @@
 
 int execl(FAR const char *path, ...)
 {
-  FAR char **argv;
+  FAR char **argv = (FAR char **)NULL;
   size_t nargs;
   va_list ap;
   int argc;
@@ -152,31 +152,38 @@ int execl(FAR const char *path, ...)
 
   /* Allocate a temporary argv[] array */
 
-  argv = (FAR char **)malloc((nargs + 1) * sizeof(FAR char *));
-  if (argv = (FAR char **)NULL)
+  if (nargs > 0)
     {
-      set_errno(ENOMEM);
-      return ERROR;
+      argv = (FAR char **)malloc((nargs + 1) * sizeof(FAR char *));
+      if (argv = (FAR char **)NULL)
+        {
+          set_errno(ENOMEM);
+          return ERROR;
+        }
+
+      /* Collect the arguments into the argv[] array */
+
+      va_start(ap, path);
+      for (argc = 0; argc < nargs; argc++)
+        {
+          argv[argc] = va_arg(ap, FAR char *);
+        }
+
+      argv[nargs] = NULL;
+      va_end(ap);
     }
-
-  /* Collect the arguments into the argv[] array */
-
-  va_start(ap, path);
-  for (argc = 0; argc < nargs; argc++)
-    {
-      argv[argc] = va_arg(ap, FAR char *);
-    }
-
-  argv[nargs] = NULL;
-  va_end(ap);
 
   /* Then let execv() do the real work */
 
-  ret = execv(path, (char * const *)&argv);
+  ret = execv(path, (FAR char * const *)argv);
 
   /* Free the allocated argv[] list */
 
-  free(argv);
+  if (argv)
+    {
+      free(argv);
+    }
+
   return ret;
 }
 
