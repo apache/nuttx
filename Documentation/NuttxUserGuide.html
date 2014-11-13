@@ -271,8 +271,7 @@ int task_create(char *name, int priority, int stack_size, main_t entry, char * c
 </P>
 <p>
    Note that an arbitrary number of arguments may be passed to the
-   spawned functions.  The maximum umber of arguments is an OS
-   configuration parameter (<code>CONFIG_MAX_TASK_ARGS</code>).
+   spawned functions.
 </p>
 <p>
    The arguments are copied (via <code>strdup</code>) so that the
