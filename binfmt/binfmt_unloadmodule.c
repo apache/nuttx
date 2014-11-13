@@ -228,13 +228,19 @@ int unload_module(FAR struct binary_s *binp)
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 void binfmt_freeargv(FAR struct binary_s *binp)
 {
+  /* Is there an allocated argument buffer */
+
   if (binp->argbuffer)
     {
       /* Free the argument buffer */
 
       kmm_free(binp->argbuffer);
-      binp->argbuffer = NULL;
     }
+
+   /* Nullify the allocated argv[] array and the argument buffer pointers */
+
+   binp->argbuffer = (FAR char *)NULL;
+   binp->argv      = (FAR char **)NULL;
 }
 #endif
 

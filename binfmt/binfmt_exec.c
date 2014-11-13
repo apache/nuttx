@@ -53,6 +53,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* This is an artificial limit to detect error conditions where an argv[]
+ * list is not properly terminated.
+ */
+
+#define MAX_EXEC_ARGS 256
 
 /****************************************************************************
  * Private Function Prototypes
@@ -80,31 +85,51 @@ static inline int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *ar
 {
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR char *ptr;
+  size_t argvsize;
   size_t argsize;
+  int nargs;
   int i;
 
-  /* Get the size of the argument list */
+  /* Get the number of arguments and the size of the argument list */
 
+  bin->argv      = (FAR char **)NULL;
   bin->argbuffer = (FAR char *)NULL;
   i = 0;
 
   if (argv)
     {
       argsize = 0;
-      for (i = 0; i < CONFIG_MAX_TASK_ARGS && argv[i]; i++)
+      nargs   = 0;
+
+      for (i = 0; argv[i]; i++)
         {
+          /* Increment the size of the allocation with the size of the next string */
+
           argsize += (strlen(argv[i]) + 1);
+          nargs++;
+
+          /* This is a sanity check to prevent running away with an unterminated
+           * argv[] list.  MAX_EXEC_ARGS should be sufficiently large that this
+           * never happens in normal usage.
+           */
+
+          if (nargs > MAX_EXEC_ARGS)
+            {
+              bdbg("ERROR: Too many arguments: %lu\n", (unsigned long)argvsize);
+              return -E2BIG;
+            }
         }
 
       bvdbg("args=%d argsize=%lu\n", i, (unsigned long)argsize);
 
-      /* Allocate a temporary argument buffer */
+      /* Allocate the argv array and an argument buffer */
 
       i = 0;
 
       if (argsize > 0)
         {
-          bin->argbuffer = (FAR char *)kmm_malloc(argsize);
+          argvsize  = (nargs + 1) * sizeof(FAR char *);
+          bin->argbuffer = (FAR char *)kmm_malloc(argvsize + argsize);
           if (!bin->argbuffer)
             {
               bdbg("ERROR: Failed to allocate the argument buffer\n");
@@ -113,22 +138,20 @@ static inline int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *ar
 
           /* Copy the argv list */
 
-          ptr = bin->argbuffer;
-          for (; i < CONFIG_MAX_TASK_ARGS && argv[i]; i++)
+          binp->argv = (FAR char **)bin->argbuffer;
+          ptr        = bin->argbuffer + argvsize;
+          for (; i < argv[i]; i++)
             {
               bin->argv[i] = ptr;
               argsize      = strlen(argv[i]) + 1;
               memcpy(ptr, argv[i], argsize);
               ptr         += argsize;
             }
+
+          /* Terminate the argv[] list */
+
+          bin->argv[i] = (FAR char *)NULL;
         }
-    }
-
-  /* Nullify the remainder of the list */
-
-  for (; i <= CONFIG_MAX_TASK_ARGS; i++)
-    {
-      bin->argv[i] = NULL;
     }
 
   return OK;
