@@ -8965,3 +8965,6 @@
 	  task_setup(), and vfork() (2014-11-13).
 	* arch/arm/src/stm32/chip/stm32_otgfs.h: Correct a typo in the STM32 OTGFS
 	  register bit definitions (2014-11-13).
+	* drivers/lcd/st7565.c/.h and include/nuttx/lcd/st7565.h: Add driver for
+	  ST7565 that works with NHD‐C12864KGZ display.  From Pierre-noel
+	  Bouteville (2014-11-13).
