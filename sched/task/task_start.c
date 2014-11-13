@@ -52,6 +52,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* This is an artificial limit to detect error conditions where an argv[]
+ * list is not properly terminated.
+ */
+
+#define MAX_START_ARGS 256
 
 /****************************************************************************
  * Private Type Declarations
