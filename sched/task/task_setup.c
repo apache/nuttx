@@ -56,6 +56,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* This is an artificial limit to detect error conditions where an argv[]
+ * list is not properly terminated.
+ */
+
+#define MAX_STACK_ARGS 256
 
 /****************************************************************************
  * Private Type Declarations
@@ -481,18 +486,24 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
   argc = 0;
   if (argv)
     {
-      for (; argc <= CONFIG_MAX_TASK_ARGS; argc++)
+      /* A NULL argument terminates the list */
+
+      while (argv[argc])
         {
-          /* A NULL argument terminates the list */
-
-          if (!argv[argc])
-            {
-              break;
-            }
-
           /* Add the size of this argument (with NUL terminator) */
 
           strtablen += (strlen(argv[argc]) + 1);
+
+          /* Increment the number of args.  Here is a sanity check to
+           * prevent running away with an unterminated argv[] list.
+           * MAX_STACK_ARGS should be sufficiently large that this never
+           * happens in normal usage.
+           */
+
+          if (++argc > MAX_STACK_ARGS)
+            {
+              return -E2BIG;
+            }
         }
     }
 
