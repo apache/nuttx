@@ -8954,3 +8954,5 @@
 	* arch/arm/src/efm32/efm32_clockconfig.c, configs/efm32gg-stk3700/README.txt
 	  and include/board.h:  Fixes to get the EFM32GG-STK3700 basic NSH
 	  configuration running.  It works! (2014-11-12).
+	* drivers/bch/bchdev_driver.c: Add support for seeking in BCH.  From
+	  Sébastien Lorquet. (2014-11-13).

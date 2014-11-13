@@ -70,6 +70,7 @@
 
 static int     bch_open(FAR struct file *filep);
 static int     bch_close(FAR struct file *filep);
+static off_t   bch_seek(FAR struct file *filep, off_t offset, int whence);
 static ssize_t bch_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
@@ -87,7 +88,7 @@ const struct file_operations bch_fops =
   bch_close, /* close */
   bch_read,  /* read */
   bch_write, /* write */
-  0,         /* seek */
+  bch_seek,  /* seek */
   bch_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , 0        /* poll */
@@ -168,7 +169,73 @@ static int bch_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name:bch_read
+ * Name: bch_seek
+ ****************************************************************************/
+
+static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct bchlib_s *bch;
+  off_t newpos;
+  int ret;
+
+  DEBUGASSERT(inode && inode->i_private);
+
+  bch = (FAR struct bchlib_s *)inode->i_private;
+  bchlib_semtake(bch);
+
+  /* Determine the new, requested file position */
+
+  switch (whence)
+    {
+    case SEEK_CUR:
+      newpos = filep->f_pos + offset;
+      break;
+
+    case SEEK_SET:
+      newpos = offset;
+      break;
+
+    case SEEK_END:
+      newpos = bch->sectsize * bch->nsectors + offset;
+      break;
+
+    default:
+      /* Return EINVAL if the whence argument is invalid */
+
+      bchlib_semgive(bch);
+      return -EINVAL;
+    }
+
+  /* Opengroup.org:
+   *
+   *  "The lseek() function shall allow the file offset to be set beyond the end
+   *   of the existing data in the file. If data is later written at this point,
+   *   subsequent reads of data in the gap shall return bytes with the value 0
+   *   until data is actually written into the gap."
+   *
+   * We can conform to the first part, but not the second.  But return EINVAL if
+   *
+   *  "...the resulting file offset would be negative for a regular file, block
+   *   special file, or directory."
+   */
+
+  if (newpos >= 0)
+    {
+      filep->f_pos = newpos;
+      ret = newpos;
+    }
+  else
+    {
+      ret = -EINVAL;
+    }
+
+  bchlib_semgive(bch);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: bch_read
  ****************************************************************************/
 
 static ssize_t bch_read(FAR struct file *filep, FAR char *buffer, size_t len)
