@@ -60,6 +60,12 @@
 
 #if defined(CONFIG_ARCH_HAVE_VFORK) && defined(CONFIG_SCHED_WAITPID)
 
+/* This is an artificial limit to detect error conditions where an argv[]
+ * list is not properly terminated.
+ */
+
+#define MAX_VFORK_ARGS 256
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -103,12 +109,12 @@ static inline void vfork_namesetup(FAR struct tcb_s *parent,
  *   child  - Address of the child task's TCB
  *
  * Return Value:
- *  Zero (OK) on success; a negated errno on failure.
+ *   Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/
 
-static inline void vfork_stackargsetup(FAR struct tcb_s *parent,
-                                       FAR struct task_tcb_s *child)
+static inline int vfork_stackargsetup(FAR struct tcb_s *parent,
+                                      FAR struct task_tcb_s *child)
 {
   /* Is the parent a task? or a pthread? */
 
@@ -117,7 +123,7 @@ static inline void vfork_stackargsetup(FAR struct tcb_s *parent,
     {
       FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
       uintptr_t offset;
-      int i;
+      int argc;
 
       /* Get the address correction */
 
@@ -131,15 +137,27 @@ static inline void vfork_stackargsetup(FAR struct tcb_s *parent,
 
       /* Copy the adjusted address for each argument */
 
-      for (i = 0; i < CONFIG_MAX_TASK_ARGS && ptcb->argv[i]; i++)
+      argc = 0;
+      while (ptcb->argv[argc])
         {
-          uintptr_t newaddr = (uintptr_t)ptcb->argv[i] + offset;
-          child->argv[i] = (FAR char *)newaddr;
+          uintptr_t newaddr = (uintptr_t)ptcb->argv[argc] + offset;
+          child->argv[argc] = (FAR char *)newaddr;
+
+          /* Increment the number of args.  Here is a sanity check to
+           * prevent running away with an unterminated argv[] list.
+           * MAX_VFORK_ARGS should be sufficiently large that this never
+           * happens in normal usage.
+           */
+
+          if (++argc > MAX_VFORK_ARGS)
+            {
+              return -E2BIG;
+            }
         }
 
       /* Put a terminator entry at the end of the child argv[] array. */
 
-      child->argv[i] = NULL;
+      child->argv[argc] = NULL;
     }
 }
 
@@ -154,12 +172,12 @@ static inline void vfork_stackargsetup(FAR struct tcb_s *parent,
  *   child  - Address of the child task's TCB
  *
  * Return Value:
- *    OK
+ *   Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/
 
-static inline void vfork_argsetup(FAR struct tcb_s *parent,
-                                  FAR struct task_tcb_s *child)
+static inline int vfork_argsetup(FAR struct tcb_s *parent,
+                                 FAR struct task_tcb_s *child)
 {
   /* Clone the task name */
 
@@ -167,8 +185,9 @@ static inline void vfork_argsetup(FAR struct tcb_s *parent,
 
   /* Adjust and copy the argv[] array. */
 
-  vfork_stackargsetup(parent, child);
+  return vfork_stackargsetup(parent, child);
 }
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -349,7 +368,14 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
   svdbg("Starting Child TCB=%p, parent=%p\n", child, g_readytorun.head);
   DEBUGASSERT(child);
 
-  vfork_argsetup(parent, child);
+  /* Duplicate the original argument list in the forked child TCB */
+
+  ret = vfork_argsetup(parent, child);
+  if (ret < 0)
+    {
+      task_vforkabort(child, -ret);
+      return ERROR;
+    }
 
   /* Now we have enough in place that we can join the group */
 
