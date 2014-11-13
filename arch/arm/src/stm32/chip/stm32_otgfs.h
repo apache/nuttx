@@ -75,7 +75,7 @@
 #define STM32_OTGFS_HNPTXFSIZ_OFFSET    0x0028 /* Host non-periodic transmit FIFO size register */
 #define STM32_OTGFS_DIEPTXF0_OFFSET     0x0028 /* Endpoint 0 Transmit FIFO size */
 #define STM32_OTGFS_HNPTXSTS_OFFSET     0x002c /* Non-periodic transmit FIFO/queue status register */
-#define STM32_OTGFS_GCCFG_OFFSET        0x0038 /* general core configuration register */
+#define STM32_OTGFS_GCCFG_OFFSET        0x0038 /* General core configuration register */
 #define STM32_OTGFS_CID_OFFSET          0x003c /* Core ID register  */
 #define STM32_OTGFS_HPTXFSIZ_OFFSET     0x0100 /* Host periodic transmit FIFO size register */
 
@@ -444,7 +444,7 @@
                                                   /* Bit 3 Reserved, must be kept at reset value */
 #define OTGFS_GRSTCTL_RXFFLSH           (1 << 4)  /* Bit 4: RxFIFO flush */
 #define OTGFS_GRSTCTL_TXFFLSH           (1 << 5)  /* Bit 5: TxFIFO flush */
-#define OTGFS_GRSTCTL_TXFNUM_SHIFT      (10)      /* Bits 6-10: TxFIFO number */
+#define OTGFS_GRSTCTL_TXFNUM_SHIFT      (6)       /* Bits 6-10: TxFIFO number */
 #define OTGFS_GRSTCTL_TXFNUM_MASK       (31 << OTGFS_GRSTCTL_TXFNUM_SHIFT)
 #  define OTGFS_GRSTCTL_TXFNUM_HNONPER  (0 << OTGFS_GRSTCTL_TXFNUM_SHIFT)   /* Non-periodic TxFIFO flush in host mode */
 #  define OTGFS_GRSTCTL_TXFNUM_HPER     (1 << OTGFS_GRSTCTL_TXFNUM_SHIFT)   /* Periodic TxFIFO flush in host mode */
