@@ -1317,7 +1317,7 @@ static void efm32_epin_request(FAR struct efm32_usbdev_s *priv,
        */
 
       regval = efm32_getreg(regaddr);
-      if ((int)(regval & _USB_DTXFSTS_MASK) < nwords)
+      if ((int)(regval & _USB_DIEPTXFSTS_MASK) < nwords)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_EPIN_EMPWAIT), (uint16_t)regval);
 
@@ -3972,7 +3972,7 @@ static int efm32_ep_configure(FAR struct usbdev_ep_s *ep,
   /* Initialize EP capabilities */
 
   maxpacket = GETUINT16(desc->mxpacketsize);
-  eptype    = desc->attr & _USB_EP_ATTR_XFERTYPE_MASK;
+  eptype    = desc->attr & USB_EP_ATTR_XFERTYPE_MASK;
 
   /* Setup Endpoint Control Register */
 
@@ -4939,8 +4939,8 @@ static void efm32_setaddress(struct efm32_usbdev_s *priv, uint16_t address)
   /* Set the device address in the DCFG register */
 
   regval = efm32_getreg(EFM32_USB_DCFG);
-  regval &= ~_USB_DCFG_DAD_MASK;
-  regval |= ((uint32_t)address << _USB_DCFG_DAD_SHIFT);
+  regval &= ~_USB_DCFG_DEVADDR_MASK;
+  regval |= ((uint32_t)address << _USB_DCFG_DEVADDR_SHIFT);
   efm32_putreg(regval, EFM32_USB_DCFG);
 
   /* Are we now addressed?  (i.e., do we have a non-NULL device
@@ -5204,7 +5204,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
     {
       up_udelay(3);
       regval = efm32_getreg(EFM32_USB_GRSTCTL);
-      if ((regval & USB_GRSTCTL_AHBIDL) != 0)
+      if ((regval & USB_GRSTCTL_AHBIDLE) != 0)
         {
           break;
         }
@@ -5212,11 +5212,11 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Then perform the core soft reset. */
 
-  efm32_putreg(USB_GRSTCTL_CSRST, EFM32_USB_GRSTCTL);
+  efm32_putreg(USB_GRSTCTL_CSFTRST, EFM32_USB_GRSTCTL);
   for (timeout = 0; timeout < EFM32_READY_DELAY; timeout++)
     {
       regval = efm32_getreg(EFM32_USB_GRSTCTL);
-      if ((regval & USB_GRSTCTL_CSRST) == 0)
+      if ((regval & USB_GRSTCTL_CSFTRST) == 0)
         {
           break;
         }
@@ -5225,18 +5225,6 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
   /* Wait for 3 PHY Clocks */
 
   up_udelay(3);
-
-  /* Deactivate the power down */
-
-  regval  = (USB_GCCFG_PWRDWN | USB_GCCFG_VBUSASEN | USB_GCCFG_VBUSBSEN);
-#ifndef CONFIG_USBDEV_VBUSSENSING
-  regval |= USB_GCCFG_NOVBUSSENS;
-#endif
-#ifdef CONFIG_EFM32_OTGFS_SOFOUTPUT
-  regval |= USB_GCCFG_SOFOUTEN;
-#endif
-  efm32_putreg(regval, EFM32_USB_GCCFG);
-  up_mdelay(20);
 
   /* Force Device Mode */
 
@@ -5254,15 +5242,15 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
   /* Device configuration register */
 
   regval = efm32_getreg(EFM32_USB_DCFG);
-  regval &= ~_USB_DCFG_PFIVL_MASK;
-  regval |= USB_DCFG_PFIVL_80PCT;
+  regval &= ~_USB_DCFG_PERFRINT_MASK;
+  regval |= USB_DCFG_PERFRINT_80PCNT;
   efm32_putreg(regval, EFM32_USB_DCFG);
 
   /* Set full speed PHY */
 
   regval = efm32_getreg(EFM32_USB_DCFG);
-  regval &= ~_USB_DCFG_DSPD_MASK;
-  regval |= USB_DCFG_DSPD_FS;
+  regval &= ~_USB_DCFG_DEVSPD_MASK;
+  regval |= USB_DCFG_DEVSPD_FS;
   efm32_putreg(regval, EFM32_USB_DCFG);
 
   /* Set Rx FIFO size */
@@ -5299,7 +5287,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Flush the FIFOs */
 
-  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_DALL);
+  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_FALL);
   efm32_rxfifo_flush();
 
   /* Clear all pending Device Interrupts */
@@ -5559,7 +5547,7 @@ void up_usbuninitialize(void)
 
   /* Flush the FIFOs */
 
-  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_DALL);
+  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_FALL);
   efm32_rxfifo_flush();
 
   /* TODO: Turn off USB power and clocking */

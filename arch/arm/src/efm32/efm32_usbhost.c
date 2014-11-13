@@ -1663,7 +1663,7 @@ static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
            * data in the FIFO when the NAK occurs?  Does it discard it?
            */
 
-          efm32_flush_txfifos(USB_GRSTCTL_TXFNUM_HALL);
+          efm32_flush_txfifos(USB_GRSTCTL_TXFNUM_FALL);
 
           /* Get the device a little time to catch up.  Then retry the transfer
            * using the same buffer pointer and length.
@@ -4156,18 +4156,18 @@ static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv)
   efm32_putreg(EFM32_USB_HNPTXFSIZ, regval);
   offset += CONFIG_EFM32_OTGFS_NPTXFIFO_SIZE;
 
-  /* Set up the host periodic Tx fifo size register (HPTXFSIZ) */
+  /* Set up the host periodic Tx FIFO size register (HPTXFSIZ) */
 
   regval = (offset | (CONFIG_EFM32_OTGFS_PTXFIFO_SIZE << _OTGFS_HPTXFSIZ_PTXFD_SHIFT));
   efm32_putreg(EFM32_USB_HPTXFSIZ, regval);
 
-  /* If OTG were supported, we sould need to clear HNP enable bit in the
+  /* If OTG were supported, we would need to clear HNP enable bit in the
    * USB_OTG control register about here.
    */
 
   /* Flush all FIFOs */
 
-  efm32_flush_txfifos(USB_GRSTCTL_TXFNUM_HALL);
+  efm32_flush_txfifos(USB_GRSTCTL_TXFNUM_FALL);
   efm32_flush_rxfifo();
 
   /* Clear all pending HC Interrupts */
@@ -4299,11 +4299,11 @@ static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv)
 
   /* Then perform the core soft reset. */
 
-  efm32_putreg(EFM32_USB_GRSTCTL, USB_GRSTCTL_CSRST);
+  efm32_putreg(EFM32_USB_GRSTCTL, USB_GRSTCTL_CSFTRST);
   for (timeout = 0; timeout < EFM32_READY_DELAY; timeout++)
     {
       regval = efm32_getreg(EFM32_USB_GRSTCTL);
-      if ((regval & USB_GRSTCTL_CSRST) == 0)
+      if ((regval & USB_GRSTCTL_CSFTRST) == 0)
         {
           break;
         }
