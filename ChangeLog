@@ -8946,7 +8946,7 @@
 	* libc/string/lib_strncpy.c:  The definition of strncpy() is that empty
 	  space should be zero-filled, the patch adds the zero filling (I didn’t
 	  know this, see e.g. the POSIX spec here:
-	 http://pubs.opengroup.org/onlinepubs/7908799/xsh/strncpy.html). From
+	  http://pubs.opengroup.org/onlinepubs/7908799/xsh/strncpy.html). From
 	  Lorenz Meier (2014-11-12).
 	* arch/arm/include/limits.h:  Remove the definition of INT_FAST32_MIN
 	  which is already defined in stdint.h (the correct location).  From
