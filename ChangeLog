@@ -8963,3 +8963,5 @@
 	* libc/unistd:  Remove use of CONFIG_MAX_TASK_ARGS in execl() (2014-11-13).
 	* sched/: Remove some misc. usage of CONFIG_MAX_TASK_ARGS in task_start(),
 	  task_setup(), and vfork() (2014-11-13).
+	* arch/arm/src/stm32/chip/stm32_otgfs.h: Correct a typo in the STM32 OTGFS
+	  register bit definitions (2014-11-13).
