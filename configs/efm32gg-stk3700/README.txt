@@ -27,8 +27,9 @@ STATUS
 ======
 
   2014-11-02:  Completed the basic NSH configuration for the EFM32 Giant Gecko
-    Starter Kit.  The hardware is on order and the port will be verified sometime
-    thereafter.
+    Starter Kit.
+  2014-11-12:  The basic NSH configuration is functional with a serial console
+    on LEUART0.
 
 LEDs and Buttons
 ================
