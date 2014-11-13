@@ -303,13 +303,6 @@ config TASK_NAME_SIZE
 		Useful if scheduler instrumentation is selected.  Set to zero to
 		disable.
 
-config MAX_TASK_ARGS
-	int "Maximum number of task arguments"
-	default 4
-	---help---
-		This controls the maximum number of of parameters that a task may
-		receive (i.e., maxmum value of 'argc')
-
 config MAX_TASKS
 	int "Max number of tasks"
 	default 32
