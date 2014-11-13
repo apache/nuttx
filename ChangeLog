@@ -8956,3 +8956,10 @@
 	  configuration running.  It works! (2014-11-12).
 	* drivers/bch/bchdev_driver.c: Add support for seeking in BCH.  From
 	  Sébastien Lorquet. (2014-11-13).
+	* sched/Kconfigs and configs/*/*/defconfig:  Remove CONFIG_MAX_TASK_ARGS
+	  (2014-11-13).
+	* binfmt/: Remove use of CONFIG_MAX_TASK_ARGS in exec() and unload_module()
+	  (2014-11-13).
+	* libc/unistd:  Remove use of CONFIG_MAX_TASK_ARGS in execl() (2014-11-13).
+	* sched/: Remove some misc. usage of CONFIG_MAX_TASK_ARGS in task_start(),
+	  task_setup(), and vfork() (2014-11-13).
