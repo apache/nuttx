@@ -75,6 +75,19 @@
 /*******************************************************************************************************************************
  * Pre-processor Definitions
  *******************************************************************************************************************************/
+/* General definitions */
+
+#define USB_EPTYPE_CTRL                            (0)      /* Control */
+#define USB_EPTYPE_ISOC                            (1)      /* Isochronous */
+#define USB_EPTYPE_BULK                            (2)      /* Bulk */
+#define USB_EPTYPE_INTR                            (3)      /* Interrupt */
+
+#define USB_PID_DATA0                              (0)
+#define USB_PID_DATA2                              (1)
+#define USB_PID_DATA1                              (2)
+#define USB_PID_MDATA                              (3)      /* Non-control */
+#define USB_PID_SETUP                              (3)      /* Control */
+
 /* USB Register Offsets ********************************************************************************************************/
 
 #define EFM32_USB_CTRL_OFFSET                      0x00000  /* System Control Register */
