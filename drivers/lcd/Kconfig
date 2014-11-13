@@ -330,6 +330,47 @@ config SSD1306_FREQUENCY
 
 endif
 
+config LCD_ST7565
+	bool "ST7565 LCD Display Module"
+	default n
+	---help---
+		LCD Display Module, ST7565, Univision Technology Inc.
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+
+if LCD_ST7565
+
+choice
+	prompt "LCD Display Module initialization sequence"
+	default NHD_C12864KGZ
+
+config NHD_C12864KGZ
+	bool "like NHD C12864KGZ"
+
+endchoice
+
+config ST7565_NINTERFACES
+	int "Number of ST7565 Devices"
+	default 1
+	---help---
+		Specifies the number of physical ST7565 devices that will be
+		supported.  NOTE:  At present, this must be undefined or defined to be 1.
+
+config ST7565_XRES
+	int "ST7565 X Resolution"
+	default 128
+	---help---
+		Specifies the X resolution of the LCD.
+
+config ST7565_YRES
+	int "ST7565 Y Resolution"
+	default 64
+	---help---
+		Specifies the Y resolution of the LCD.
+
+endif # LCD_ST7565
+
 config LCD_ST7567
 	bool "ST7567 LCD Display Module"
 	default n
@@ -386,7 +427,7 @@ config ST7567_YRES
 	---help---
 		Specifies the Y resolution of the LCD.
 
-endif
+endif # LCD_ST7567
 
 config LCD_UG2864AMBAG01
 	bool "UG-2864AMBAG01 OLED Display Module"
