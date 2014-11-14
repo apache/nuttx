@@ -77,16 +77,16 @@
  *******************************************************************************************************************************/
 /* General definitions */
 
-#define USB_EPTYPE_CTRL                            (0)      /* Control */
-#define USB_EPTYPE_ISOC                            (1)      /* Isochronous */
-#define USB_EPTYPE_BULK                            (2)      /* Bulk */
-#define USB_EPTYPE_INTR                            (3)      /* Interrupt */
+#define EFM32_USB_EPTYPE_CTRL                      (0)      /* Control */
+#define EFM32_USB_EPTYPE_ISOC                      (1)      /* Isochronous */
+#define EFM32_USB_EPTYPE_BULK                      (2)      /* Bulk */
+#define EFM32_USB_EPTYPE_INTR                      (3)      /* Interrupt */
 
-#define USB_PID_DATA0                              (0)
-#define USB_PID_DATA2                              (1)
-#define USB_PID_DATA1                              (2)
-#define USB_PID_MDATA                              (3)      /* Non-control */
-#define USB_PID_SETUP                              (3)      /* Control */
+#define EFM32_USB_PID_DATA0                        (0)
+#define EFM32_USB_PID_DATA2                        (1)
+#define EFM32_USB_PID_DATA1                        (2)
+#define EFM32_USB_PID_MDATA                        (3)      /* Non-control */
+#define EFM32_USB_PID_SETUP                        (3)      /* Control */
 
 /* USB Register Offsets ********************************************************************************************************/
 
@@ -936,6 +936,7 @@
 #define USB_GRSTCTL_TXFNUM_F4                      (_USB_GRSTCTL_TXFNUM_F4 << 6)          /* Shifted mode F4 for USB_GRSTCTL */
 #define USB_GRSTCTL_TXFNUM_F5                      (_USB_GRSTCTL_TXFNUM_F5 << 6)          /* Shifted mode F5 for USB_GRSTCTL */
 #define USB_GRSTCTL_TXFNUM_F6                      (_USB_GRSTCTL_TXFNUM_F6 << 6)          /* Shifted mode F6 for USB_GRSTCTL */
+#define USB_GRSTCTL_TXFNUM_F(n)                    ((uint32_t)(n) << 6)                   /* TXFIFO n flush, n=0-15 */
 #define USB_GRSTCTL_TXFNUM_FALL                    (_USB_GRSTCTL_TXFNUM_FALL << 6)        /* Shifted mode FALL for USB_GRSTCTL */
 #define USB_GRSTCTL_DMAREQ                         (0x1UL << 30)                          /* DMA Request Signal (host and device) */
 #define _USB_GRSTCTL_DMAREQ_SHIFT                  30                                     /* Shift value for USB_DMAREQ */
@@ -1570,13 +1571,14 @@
 
 /* Bit fields for USB HAINT */
 
-#define _USB_HAINT_RESETVALUE                      0x00000000UL                    /* Default value for USB_HAINT */
-#define _USB_HAINT_MASK                            0x00003FFFUL                    /* Mask for USB_HAINT */
+#define _USB_HAINT_RESETVALUE                      0x00000000UL                            /* Default value for USB_HAINT */
+#define _USB_HAINT_MASK                            0x00003FFFUL                            /* Mask for USB_HAINT */
 
-#define _USB_HAINT_HAINT_SHIFT                     0                               /* Shift value for USB_HAINT */
-#define _USB_HAINT_HAINT_MASK                      0x3FFFUL                        /* Bit mask for USB_HAINT */
-#define _USB_HAINT_HAINT_DEFAULT                   0x00000000UL                    /* Mode DEFAULT for USB_HAINT */
-#define USB_HAINT_HAINT_DEFAULT                    (_USB_HAINT_HAINT_DEFAULT << 0) /* Shifted mode DEFAULT for USB_HAINT */
+#define _USB_HAINT_HAINT_SHIFT                     0                                       /* Shift value for USB_HAINT */
+#define _USB_HAINT_HAINT_MASK                      0x3FFFUL                                /* Bit mask for USB_HAINT */
+#define _USB_HAINT_HAINT_DEFAULT                   0x00000000UL                            /* Mode DEFAULT for USB_HAINT */
+#define USB_HAINT_HAINT_DEFAULT                    (_USB_HAINT_HAINT_DEFAULT << 0)         /* Shifted mode DEFAULT for USB_HAINT */
+#define USB_HAINT(n)                               (1UL << ((n) + _USB_HAINT_HAINT_SHIFT)) /* Channel n interrupt */
 
 /* Bit fields for USB HAINTMSK */
 
@@ -2330,6 +2332,7 @@
 #define _USB_DIEPEMPMSK_DIEPEMPMSK_MASK            0xFFFFUL                                  /* Bit mask for USB_DIEPEMPMSK */
 #define _USB_DIEPEMPMSK_DIEPEMPMSK_DEFAULT         0x00000000UL                              /* Mode DEFAULT for USB_DIEPEMPMSK */
 #define USB_DIEPEMPMSK_DIEPEMPMSK_DEFAULT          (_USB_DIEPEMPMSK_DIEPEMPMSK_DEFAULT << 0) /* Shifted mode DEFAULT for USB_DIEPEMPMSK */
+#define USB_DIEPEMPMSK(n)                          (1UL << ((n) + _USB_DIEPEMPMSK_DIEPEMPMSK_SHIFT))
 
 /* Bit fields for USB DIEP0CTL */
 
