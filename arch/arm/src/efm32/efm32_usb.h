@@ -73,7 +73,7 @@ extern "C"
 #endif
 
 /*******************************************************************************
- * Name: efm32_otgfshost_initialize
+ * Name: efm32_usbhost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -99,7 +99,27 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *efm32_otgfshost_initialize(int controller);
+FAR struct usbhost_connection_s *efm32_usbhost_initialize(int controller);
+#endif
+
+/***********************************************************************************
+ * Name: efm32_usbhost_vbusdrive
+ *
+ * Description:
+ *   Enable/disable driving of VBUS 5V output.  This function must be provided be
+ *   each platform that implements the EFM32 OTG FS host interface
+ *
+ * Input Parameters:
+ *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   enable - true: enable VBUS power; false: disable VBUS power
+ *
+ * Returned Value:
+ *   None
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_USBHOST
+void efm32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
 /************************************************************************************
@@ -113,7 +133,10 @@ FAR struct usbhost_connection_s *efm32_otgfshost_initialize(int controller);
  *
  ************************************************************************************/
 
+#ifdef CONFIG_USBDEV
+struct usbdev_s;
 void efm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

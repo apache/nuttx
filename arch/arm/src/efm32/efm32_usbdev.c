@@ -1035,7 +1035,7 @@ static void efm32_txfifo_write(FAR struct efm32_ep_s *privep,
 
   /* Get the TxFIFO for this endpoint (same as the endpoint number) */
 
-  regaddr = EFM32_USB_DFIFO_DEP(privep->epphy);
+  regaddr = EFM32_USB_FIFO_BASE(privep->epphy);
 
   /* Then transfer each word to the TxFIFO */
 
@@ -1309,7 +1309,7 @@ static void efm32_epin_request(FAR struct efm32_usbdev_s *priv,
        *   n: n words available
        */
 
-      regaddr = EFM32_USB_DTXFSTS(privep->epphy);
+      regaddr = EFM32_USB_DIEPTXFSTS(privep->epphy);
 
       /* Check for space in the TxFIFO.  If space in the TxFIFO is not
        * available, then set up an interrupt to resume the transfer when
@@ -1394,7 +1394,7 @@ static void efm32_rxfifo_read(FAR struct efm32_ep_s *privep,
    * we might as well use the addess associated with EP0.
    */
 
-  regaddr = EFM32_USB_DFIFO_DEP(EP0);
+  regaddr = EFM32_USB_FIFO_BASE(EP0);
 
   /* Read 32-bits and write 4 x 8-bits at time (to avoid unaligned accesses) */
 
@@ -1435,10 +1435,10 @@ static void efm32_rxfifo_discard(FAR struct efm32_ep_s *privep, int len)
       int i;
 
       /* Get the address of the RxFIFO  Note:  there is only one RxFIFO so
-       * we might as well use the addess associated with EP0.
+       * we might as well use the address associated with EP0.
        */
 
-      regaddr = EFM32_USB_DFIFO_DEP(EP0);
+      regaddr = EFM32_USB_FIFO_BASE(EP0);
 
       /* Read 32-bits at time */
 
@@ -1790,7 +1790,7 @@ static void efm32_ep_flush(struct efm32_ep_s *privep)
 {
   if (privep->isin)
     {
-      efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_D(privep->epphy));
+      efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_F(privep->epphy));
     }
   else
     {
@@ -1954,7 +1954,7 @@ static void efm32_usbreset(struct efm32_usbdev_s *priv)
 
   /* Flush the EP0 Tx FIFO */
 
-  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_D(EP0));
+  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_F(EP0));
 
   /* Tell the class driver that we are disconnected. The class
    * driver should then accept any new configurations.
@@ -4156,7 +4156,7 @@ static void efm32_epin_disable(FAR struct efm32_ep_s *privep)
 
   /* Flush any data remaining in the TxFIFO */
 
-  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_D(privep->epphy));
+  efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_F(privep->epphy));
 
   /* Disable endpoint interrupts */
 
