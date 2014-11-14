@@ -124,8 +124,6 @@ static inline int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *ar
 
       /* Allocate the argv array and an argument buffer */
 
-      i = 0;
-
       if (argsize > 0)
         {
           argvsize  = (nargs + 1) * sizeof(FAR char *);
@@ -140,7 +138,7 @@ static inline int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *ar
 
           bin->argv = (FAR char **)bin->argbuffer;
           ptr       = bin->argbuffer + argvsize;
-          for (; argv[i]; i++)
+          for (i = 0; argv[i]; i++)
             {
               bin->argv[i] = ptr;
               argsize      = strlen(argv[i]) + 1;
