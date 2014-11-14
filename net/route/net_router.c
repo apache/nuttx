@@ -146,9 +146,9 @@ int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
       /* We found a route.  Return the router address. */
 
 #ifdef CONFIG_NET_IPv6
-      net_ipaddr_copy(router, match.target);
+      net_ipaddr_copy(router, match.router);
 #else
-      net_ipaddr_copy(*router, match.target);
+      net_ipaddr_copy(*router, match.router);
 #endif
       ret = OK;
     }
