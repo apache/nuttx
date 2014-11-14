@@ -811,34 +811,34 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 
   /* Make sure host channel interrupts are enabled. */
 
-  efm32_modifyreg(EFM32_USB_GINTMSK, 0, USB_GINTMSK_PTXFEMPMSKHCHINTMSK);
+  efm32_modifyreg(EFM32_USB_GINTMSK, 0, USB_GINTMSK_HCHINTMSK);
 
   /* Program the HCCHAR register */
 
-  regval = ((uint32_t)priv->chan[chidx].maxpacket << _USB_HCCHAR_MPSIZ_SHIFT) |
-           ((uint32_t)priv->chan[chidx].epno << _USB_HCCHAR_EPNUM_SHIFT) |
-           ((uint32_t)priv->chan[chidx].eptype << _USB_HCCHAR_EPTYP_SHIFT) |
-           ((uint32_t)priv->devaddr << _USB_HCCHAR_DAD_SHIFT);
+  regval = ((uint32_t)priv->chan[chidx].maxpacket << _USB_HC_CHAR_MPS_SHIFT) |
+           ((uint32_t)priv->chan[chidx].epno << _USB_HC_CHAR_EPNUM_SHIFT) |
+           ((uint32_t)priv->chan[chidx].eptype << _USB_HC_CHAR_EPTYPE_SHIFT) |
+           ((uint32_t)priv->devaddr << _USB_HC_CHAR_DEVADDR_SHIFT);
 
   /* Special case settings for low speed devices */
 
   if (priv->lowspeed)
     {
-      regval |= USB_HCCHAR_LSDEV;
+      regval |= USB_HC_CHAR_LSPDDEV;
     }
 
   /* Special case settings for IN endpoints */
 
   if (priv->chan[chidx].in)
     {
-      regval |= USB_HCCHAR_EPDIR_IN;
+      regval |= USB_HC_CHAR_EPDIR_IN;
     }
 
   /* Special case settings for INTR endpoints */
 
   if (priv->chan[chidx].eptype == USB_EPTYPE_INTR)
     {
-      regval |= USB_HCCHAR_ODDFRM;
+      regval |= USB_HC_CHAR_ODDFRM;
     }
 
   /* Write the channel configuration */
@@ -881,11 +881,11 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
    */
 
   hcchar  = efm32_getreg(EFM32_USB_HCCHAR(chidx));
-  hcchar |= (USB_HCCHAR_CHDIS | USB_HCCHAR_CHENA);
+  hcchar |= (USB_HC_CHAR_CHDIS | USB_HC_CHAR_CHENA);
 
   /* Get the endpoint type from the HCCHAR register */
 
-  eptype = hcchar & _USB_HCCHAR_EPTYP_MASK;
+  eptype = hcchar & _USB_HC_CHAR_EPTYPE_MASK;
 
   /* Check for space in the Tx FIFO to issue the halt.
    *
@@ -898,13 +898,13 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
    *  set to 1, and the CHENA bit cleared to 0.
    */
 
-  if (eptype == USB_HCCHAR_EPTYP_CTRL || eptype == USB_HCCHAR_EPTYP_BULK)
+  if (eptype == USB_HC_CHAR_EPTYPE_CONTROL || eptype == USB_HC_CHAR_EPTYPE_BULK)
     {
       /* Get the number of words available in the non-periodic Tx FIFO. */
 
       avail = efm32_getreg(EFM32_USB_HNPTXSTS) & _USB_HNPTXSTS_NPTXFSAV_MASK;
     }
-  else /* if (eptype == USB_HCCHAR_EPTYP_ISOC || eptype == USB_HCCHAR_EPTYP_INTR) */
+  else /* if (eptype == USB_HCCHAR_EPTYP_ISOC || eptype == USB_HC_CHAR_EPTYPE_INT) */
     {
       /* Get the number of words available in the non-periodic Tx FIFO. */
 
@@ -917,7 +917,7 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
     {
       /* The Tx FIFO is full... disable the channel to flush the requests */
 
-      hcchar &= ~USB_HCCHAR_CHENA;
+      hcchar &= ~USB_HC_CHAR_CHENA;
     }
 
   /* Unmask the CHannel Halted (CHH) interrupt */
@@ -1154,15 +1154,15 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
 
   if ((efm32_getreg(EFM32_USB_HFNUM) & 1) == 0)
     {
-      regval |= USB_HCCHAR_ODDFRM;
+      regval |= USB_HC_CHAR_ODDFRM;
     }
   else
     {
-      regval &= ~USB_HCCHAR_ODDFRM;
+      regval &= ~USB_HC_CHAR_ODDFRM;
     }
 
-  regval &= ~USB_HCCHAR_CHDIS;
-  regval |= USB_HCCHAR_CHENA;
+  regval &= ~USB_HC_CHAR_CHDIS;
+  regval |= USB_HC_CHAR_CHENA;
   efm32_putreg(EFM32_USB_HCCHAR(chidx), regval);
 
   /* If this is an out transfer, then we need to do more.. we need to copy
@@ -1849,7 +1849,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
           /* Force the next transfer on an ODD frame */
 
           regval = efm32_getreg(EFM32_USB_HCCHAR(chidx));
-          regval |= USB_HCCHAR_ODDFRM;
+          regval |= USB_HC_CHAR_ODDFRM;
           efm32_putreg(EFM32_USB_HCCHAR(chidx), regval);
 
           /* Set the request done state */
@@ -1896,7 +1896,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
            */
 
           regval = efm32_getreg(EFM32_USB_HCCHAR(chidx));
-          if ((regval & _USB_HCCHAR_EPTYP_MASK) == USB_HCCHAR_EPTYP_INTR)
+          if ((regval & _USB_HC_CHAR_EPTYPE_MASK) == USB_HC_CHAR_EPTYPE_INT)
             {
               /* Toggle the IN data toggle (Used by Bulk and INTR only) */
 
@@ -1964,8 +1964,8 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
            */
 
           regval  = efm32_getreg(EFM32_USB_HCCHAR(chidx));
-          regval |= USB_HCCHAR_CHENA;
-          regval &= ~USB_HCCHAR_CHDIS;
+          regval |= USB_HC_CHAR_CHENA;
+          regval &= ~USB_HC_CHAR_CHDIS;
           efm32_putreg(EFM32_USB_HCCHAR(chidx), regval);
         }
 #else
@@ -2149,7 +2149,7 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
            * transferred?
            */
 
-          if ((regval & _USB_HCCHAR_EPTYP_MASK) == USB_HCCHAR_EPTYP_BULK &&
+          if ((regval & _USB_HC_CHAR_EPTYPE_MASK) == USB_HC_CHAR_EPTYPE_BULK &&
               (chan->npackets & 1) != 0)
             {
               /* Yes to both... toggle the data out PID */
@@ -2326,7 +2326,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
 
   /* Isolate the channel number/index in the status word */
 
-  chidx = (grxsts & _USB_GRXSTSH_CHNUM_MASK) >> _USB_GRXSTSH_CHNUM_SHIFT;
+  chidx = (grxsts & _USB_GRXSTSP_CHEPNUM_MASK) >> _USB_GRXSTSP_CHEPNUM_SHIFT;
 
   /* Get the host channel characteristics register (HCCHAR) for this channel */
 
@@ -2334,13 +2334,13 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
 
   /* Then process the interrupt according to the packet status */
 
-  switch (grxsts & _USB_GRXSTSH_PKTSTS_MASK)
+  switch (grxsts & _USB_GRXSTSP_PKTSTS_MASK)
     {
-    case USB_GRXSTSH_PKTSTS_INRECVD: /* IN data packet received */
+    case USB_GRXSTSP_PKTSTS_PKTRCV: /* IN data packet received */
       {
         /* Read the data into the host buffer. */
 
-        bcnt = (grxsts & _USB_GRXSTSH_BCNT_MASK) >> _USB_GRXSTSH_BCNT_SHIFT;
+        bcnt = (grxsts & _USB_GRXSTSP_BCNT_MASK) >> _USB_GRXSTSP_BCNT_SHIFT;
         if (bcnt > 0 && priv->chan[chidx].buffer != NULL)
           {
             /* Transfer the packet from the Rx FIFO into the user buffer */
@@ -2372,17 +2372,17 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
               {
                 /* Re-activate the channel when more packets are expected */
 
-                hcchar |= USB_HCCHAR_CHENA;
-                hcchar &= ~USB_HCCHAR_CHDIS;
+                hcchar |= USB_HC_CHAR_CHENA;
+                hcchar &= ~USB_HC_CHAR_CHDIS;
                 efm32_putreg(EFM32_USB_HCCHAR(chidx), hcchar);
               }
           }
       }
       break;
 
-    case USB_GRXSTSH_PKTSTS_INDONE:  /* IN transfer completed */
-    case USB_GRXSTSH_PKTSTS_DTOGERR: /* Data toggle error */
-    case USB_GRXSTSH_PKTSTS_HALTED:  /* Channel halted */
+    case USB_GRXSTSP_PKTSTS_XFERCOMPL:  /* IN transfer completed */
+    case USB_GRXSTSP_PKTSTS_TGLERR:     /* Data toggle error */
+    case USB_GRXSTSP_PKTSTS_CHLT:       /* Channel halted */
     default:
       break;
     }
@@ -2603,7 +2603,7 @@ static inline void efm32_gint_hcisr(FAR struct efm32_usbhost_s *priv)
 
           /* Was this an interrupt on an IN or an OUT channel? */
 
-          if ((hcchar & USB_HCCHAR_EPDIR) != 0)
+          if ((hcchar & _USB_HC_CHAR_EPDIR_MASK) != _USB_HC_CHAR_EPDIR_OUT)
             {
               /* Handle the HC IN channel interrupt */
 
@@ -2644,47 +2644,47 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
    * status bits in the HPRT register are cleared.
    */
 
-  newhprt = hprt & ~(USB_HPRT_PENA    | USB_HPRT_PCDET  |
-                     USB_HPRT_PENCHNG | USB_HPRT_POCCHNG);
+  newhprt = hprt & ~(USB_HPRT_PRTENA | USB_HPRT_PRTCONNDET | USB_HPRT_PRTENCHNG |
+                     USB_HPRT_PRTOVRCURRCHNG);
 
   /* Check for Port Overcurrent CHaNGe (POCCHNG) */
 
-  if ((hprt & USB_HPRT_POCCHNG) != 0)
+  if ((hprt & USB_HPRT_PRTOVRCURRCHNG) != 0)
     {
       /* Set up to clear the POCCHNG status in the new HPRT contents. */
 
       usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_POCCHNG, 0);
-      newhprt |= USB_HPRT_POCCHNG;
+      newhprt |= USB_HPRT_PRTOVRCURRCHNG;
     }
 
   /* Check for Port Connect DETected (PCDET).  The core sets this bit when a
    * device connection is detected.
    */
 
-  if ((hprt & USB_HPRT_PCDET) != 0)
+  if ((hprt & USB_HPRT_PRTCONNDET) != 0)
     {
       /* Set up to clear the PCDET status in the new HPRT contents. Then
        * process the new connection event.
        */
 
       usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PCDET, 0);
-      newhprt |= USB_HPRT_PCDET;
+      newhprt |= USB_HPRT_PRTCONNDET;
       efm32_portreset(priv);
       efm32_gint_connected(priv);
     }
 
   /* Check for Port Enable CHaNGed (PENCHNG) */
 
-  if ((hprt & USB_HPRT_PENCHNG) != 0)
+  if ((hprt & USB_HPRT_PRTENCHNG) != 0)
     {
       /* Set up to clear the PENCHNG status in the new HPRT contents. */
 
       usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PENCHNG, 0);
-      newhprt |= USB_HPRT_PENCHNG;
+      newhprt |= USB_HPRT_PRTENCHNG;
 
       /* Was the port enabled? */
 
-      if ((hprt & USB_HPRT_PENA) != 0)
+      if ((hprt & USB_HPRT_PRTENA) != 0)
         {
           /* Yes.. handle the new connection event */
 
@@ -2698,7 +2698,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
            * support high speed)
            */
 
-          if ((hprt & _USB_HPRT_PSPD_MASK) == USB_HPRT_PSPD_LS)
+          if ((hprt & _USB_HPRT_PRTSPD_MASK) == USB_HPRT_PRTSPD_LS)
             {
               /* Set the Host Frame Interval Register for the 6KHz speed */
 
@@ -2722,7 +2722,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
                   efm32_portreset(priv);
                 }
             }
-          else /* if ((hprt & _USB_HPRT_PSPD_MASK) == USB_HPRT_PSPD_FS) */
+          else /* if ((hprt & _USB_HPRT_PRTSPD_MASK) == USB_HPRT_PSPD_FS) */
             {
 
               usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSDEV, 0);
@@ -2789,7 +2789,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
    */
 
   regval = efm32_getreg(EFM32_USB_HCCHAR(0));
-  regval |= (USB_HCCHAR_CHDIS | USB_HCCHAR_CHENA);
+  regval |= (USB_HC_CHAR_CHDIS | USB_HC_CHAR_CHENA);
   efm32_putreg(EFM32_USB_HCCHAR(0), regval);
 
   /* Clear the incomplete isochronous OUT interrupt */
@@ -3218,7 +3218,7 @@ static int efm32_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
   /* Get the current device speed */
 
   regval = efm32_getreg(EFM32_USB_HPRT);
-  priv->lowspeed = ((regval & _USB_HPRT_PSPD_MASK) == USB_HPRT_PSPD_LS);
+  priv->lowspeed = ((regval & _USB_HPRT_PRTSPD_MASK) == USB_HPRT_PRTSPD_LS);
 
   /* Configure control channels */
 
@@ -3953,13 +3953,14 @@ static void efm32_portreset(FAR struct efm32_usbhost_s *priv)
   uint32_t regval;
 
   regval  = efm32_getreg(EFM32_USB_HPRT);
-  regval &= ~(USB_HPRT_PENA|USB_HPRT_PCDET|USB_HPRT_PENCHNG|USB_HPRT_POCCHNG);
-  regval |= USB_HPRT_PRST;
+  regval &= ~(USB_HPRT_PRTENA | USB_HPRT_PRTCONNDET | USB_HPRT_PRTENCHNG |
+              USB_HPRT_PRTOVRCURRCHNG);
+  regval |= USB_HPRT_PRTRST;
   efm32_putreg(EFM32_USB_HPRT, regval);
 
   up_mdelay(20);
 
-  regval &= ~USB_HPRT_PRST;
+  regval &= ~USB_HPRT_PRTRST;
   efm32_putreg(EFM32_USB_HPRT, regval);
 
   up_mdelay(20);
@@ -4070,17 +4071,18 @@ static void efm32_vbusdrive(FAR struct efm32_usbhost_s *priv, bool state)
   /* Turn on the Host port power. */
 
   regval = efm32_getreg(EFM32_USB_HPRT);
-  regval &= ~(USB_HPRT_PENA|USB_HPRT_PCDET|USB_HPRT_PENCHNG|USB_HPRT_POCCHNG);
+  regval &= ~(USB_HPRT_PRTENA | USB_HPRT_PRTCONNDET | USB_HPRT_PRTENCHNG |
+              USB_HPRT_PRTOVRCURRCHNG);
 
-  if (((regval & USB_HPRT_PPWR) == 0) && state)
+  if (((regval & USB_HPRT_PRTPWR) == 0) && state)
     {
-      regval |= USB_HPRT_PPWR;
+      regval |= USB_HPRT_PRTPWR;
       efm32_putreg(EFM32_USB_HPRT, regval);
     }
 
-  if (((regval & USB_HPRT_PPWR) != 0) && !state)
+  if (((regval & USB_HPRT_PRTPWR) != 0) && !state)
     {
-      regval &= ~USB_HPRT_PPWR;
+      regval &= ~USB_HPRT_PRTPWR;
       efm32_putreg(EFM32_USB_HPRT, regval);
     }
 
@@ -4262,14 +4264,6 @@ static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv)
    */
 #warning Review for missing logic
 
- /* Set the PHYSEL bit in the GUSBCFG register to select the OTG FS serial
-   * transceiver: "This bit is always 1 with write-only access"
-   */
-
-  regval = efm32_getreg(EFM32_USB_GUSBCFG);;
-  regval |= USB_GUSBCFG_PHYSEL;
-  efm32_putreg(EFM32_USB_GUSBCFG, regval);
-
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
    * IDLE state.
    */
@@ -4278,7 +4272,7 @@ static inline int efm32_hw_initialize(FAR struct efm32_usbhost_s *priv)
     {
       up_udelay(3);
       regval = efm32_getreg(EFM32_USB_GRSTCTL);
-      if ((regval & USB_GRSTCTL_AHBIDL) != 0)
+      if ((regval & USB_GRSTCTL_AHBIDLE) != 0)
         {
           break;
         }
