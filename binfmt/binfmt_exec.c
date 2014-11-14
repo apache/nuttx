@@ -138,9 +138,9 @@ static inline int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *ar
 
           /* Copy the argv list */
 
-          binp->argv = (FAR char **)bin->argbuffer;
-          ptr        = bin->argbuffer + argvsize;
-          for (; i < argv[i]; i++)
+          bin->argv = (FAR char **)bin->argbuffer;
+          ptr       = bin->argbuffer + argvsize;
+          for (; argv[i]; i++)
             {
               bin->argv[i] = ptr;
               argsize      = strlen(argv[i]) + 1;

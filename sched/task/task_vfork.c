@@ -116,7 +116,9 @@ static inline void vfork_namesetup(FAR struct tcb_s *parent,
 static inline int vfork_stackargsetup(FAR struct tcb_s *parent,
                                       FAR struct task_tcb_s *child)
 {
-  /* Is the parent a task? or a pthread? */
+  /* Is the parent a task? or a pthread?  Only tasks (and kernel threads)
+   * have command line arguments.
+   */
 
   child->argv = NULL;
   if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
@@ -159,6 +161,8 @@ static inline int vfork_stackargsetup(FAR struct tcb_s *parent,
 
       child->argv[argc] = NULL;
     }
+
+  return OK;
 }
 
 /****************************************************************************
