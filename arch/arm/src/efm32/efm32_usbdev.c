@@ -5241,14 +5241,14 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Device configuration register */
 
-  regval = efm32_getreg(EFM32_USB_DCFG);
+  regval  = efm32_getreg(EFM32_USB_DCFG);
   regval &= ~_USB_DCFG_PERFRINT_MASK;
   regval |= USB_DCFG_PERFRINT_80PCNT;
   efm32_putreg(regval, EFM32_USB_DCFG);
 
   /* Set full speed PHY */
 
-  regval = efm32_getreg(EFM32_USB_DCFG);
+  regval  = efm32_getreg(EFM32_USB_DCFG);
   regval &= ~_USB_DCFG_DEVSPD_MASK;
   regval |= USB_DCFG_DEVSPD_FS;
   efm32_putreg(regval, EFM32_USB_DCFG);
@@ -5354,8 +5354,8 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Enable the interrupts in the INTMSK */
 
-  regval = (USB_GINTMSK_RXFLVLMSK | USB_GINTMSK_USBSUSPMSK | USB_GINTMSK_ENUMDONEMSK |
-            USB_GINTMSK_IEPINTMSK | USB_GINTMSK_OEPINTMSK | USB_GINTMSK_USBRSTMSK);
+  regval  = (USB_GINTMSK_RXFLVLMSK | USB_GINTMSK_USBSUSPMSK | USB_GINTMSK_ENUMDONEMSK |
+             USB_GINTMSK_IEPINTMSK | USB_GINTMSK_OEPINTMSK | USB_GINTMSK_USBRSTMSK);
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
   regval |= (USB_GINTMSK_INCOMPISOINMSK | USB_GINTMSK_INCOMPLPMSK);
