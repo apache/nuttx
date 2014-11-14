@@ -3770,7 +3770,11 @@ Configurations
         CONFIG_GRAN=n                          : Disable the granule allocator
         CONFIG_MM_PGALLOC=n                    : Disable the page allocator
 
-    4. A system call interface is enabled and the ELF test programs interface with the base RTOS code system calls.  This eliminates the need for symbol tables to link with the base RTOS (symbol tables are still used, however, to interface with the common C library instaniation).  Relevant configuration settings:
+    4. A system call interface is enabled and the ELF test programs interface
+       with the base RTOS code system calls.  This eliminates the need for symbol
+       tables to link with the base RTOS (symbol tables are still used, however,
+       to interface with the common C library instaniation).  Relevant
+       configuration settings:
 
       RTOS Features -> System call support
         CONFIG_LIB_SYSCALL=y                   : Enable system call support
@@ -3796,7 +3800,6 @@ Configurations
 
   knsh:
     An NSH configuration used to test the SAMA5D kenel build configuration.
-    More to come... this is still a work in progress as of this writing.
 
     NOTES:
 
@@ -3853,7 +3856,8 @@ Configurations
        build out-of-the-box.  You have to take special steps in the build
        process as described below.
 
-       Assuming that you will want to reconfigure to use the ROMFS (rather than debugging HSCMI), you will need to disable all of these settings:
+       Assuming that you will want to reconfigure to use the ROMFS (rather
+       than debugging HSCMI), you will need to disable all of these settings:
 
        System Type->ATSAMA5 Peripheral Support
          CONFIG_SAMA5_HSMCI0=n           : Disable HSMCI0 support
