@@ -8968,3 +8968,6 @@
 	* drivers/lcd/st7565.c/.h and include/nuttx/lcd/st7565.h: Add driver for
 	  ST7565 that works with NHD‐C12864KGZ display.  From Pierre-noel
 	  Bouteville (2014-11-13).
+	* net/route/net_router.c:  I don't think that the net_route function has
+	  ever worked correctly.  The source ip was updated in the match struct
+	  instead of the route ip.  From Brennan Ashton (2014-11-14).
