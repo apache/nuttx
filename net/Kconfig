@@ -96,7 +96,8 @@ config NET_MULTILINK
 
 config NET_ETHERNET
 	bool "Ethernet support"
-	default y
+	default y if !NET_SLIP
+	default n if NET_SLIP
 	select NETDEV_MULTINIC if NET_SLIP
 	select NET_MULTILINK if NET_SLIP
 	---help---
