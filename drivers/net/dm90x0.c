@@ -1803,7 +1803,7 @@ int dm9x_initialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_dm9x[0].dm_dev);
+  (void)netdev_register(&g_dm9x[0].dm_dev, NET_LL_ETHERNET);
   return OK;
 }
 

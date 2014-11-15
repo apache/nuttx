@@ -96,17 +96,26 @@ struct net_driver_s
 
   uint8_t d_flags;
 
-  /* Ethernet device identity */
+#ifdef CONFIG_NET_MULTILINK
+  /* Multi network devices using multiple data links protocols are selected */
+
+  uint8_t d_lltype;         /* See enum net_datalink_e */
+#if 0 /* Not yet */
+  uint8_t d_llhdrlen;       /* Link layer header size */
+#endif
+#endif
 
 #ifdef CONFIG_NET_ETHERNET
+  /* Ethernet device identity */
+
   struct ether_addr d_mac;  /* Device MAC address */
 #endif
 
   /* Network identity */
 
-  net_ipaddr_t d_ipaddr;  /* Host IP address assigned to the network interface */
-  net_ipaddr_t d_draddr;  /* Default router IP address */
-  net_ipaddr_t d_netmask; /* Network subnet mask */
+  net_ipaddr_t d_ipaddr;    /* Host IP address assigned to the network interface */
+  net_ipaddr_t d_draddr;    /* Default router IP address */
+  net_ipaddr_t d_netmask;   /* Network subnet mask */
 
   /* The d_buf array is used to hold incoming and outgoing packets. The device
    * driver should place incoming data into this buffer. When sending data,
@@ -171,9 +180,9 @@ struct net_driver_s
 
   uint16_t d_sndlen;
 
+#ifdef CONFIG_NET_IGMP
   /* IGMP group list */
 
-#ifdef CONFIG_NET_IGMP
   sq_queue_t grplist;
 #endif
 

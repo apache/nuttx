@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_register.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <net/if.h>
 #include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/arp.h>
 
 #include "netdev/netdev.h"
 #include "igmp/igmp.h"
@@ -99,7 +100,9 @@ struct net_driver_s *g_netdevices = NULL;
  *   be found in subsequent network ioctl operations on the device.
  *
  * Parameters:
- *   dev - The device driver structure to register
+ *   dev    - The device driver structure to be registered.
+ *   lltype - Link level protocol used by the driver (Ethernet, SLIP, PPP, ...
+ *              ...
  *
  * Returned Value:
  *   0:Success; negated errno on failure
@@ -109,15 +112,62 @@ struct net_driver_s *g_netdevices = NULL;
  *
  ****************************************************************************/
 
-int netdev_register(FAR struct net_driver_s *dev)
+int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 {
+  int devnum;
+
   if (dev)
     {
-      int devnum;
-      netdev_semtake();
+#ifdef CONFIG_NET_MULTILINK
+      /* We are supporting multiple network devices and using different link
+       * level protocols.  Set the protocol usd by the device and the size
+       * of the link header used by this protocol.
+       */
+
+      switch (lltype)
+        {
+#ifdef CONFIG_NET_ETHERNET
+          case NET_LL_ETHERNET:  /* Ethernet */
+#if 0                            /* REVISIT: Not yet supported */
+            dev->d_llhdrlen = ETH_HDRLEN;
+#endif
+            break;
+#endif
+
+#ifdef CONFIG_NET_SLIP
+          case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
+#if 0                            /* REVISIT: Not yet supported */
+            dev->d_llhdrlen = 0;
+#endif
+            break;
+#endif
+
+#if 0                            /* REVISIT: Not yet supported */
+          case NET_LL_PPP:       /* Point-to-Point Protocol (PPP) */
+            dev->d_llhdrlen = 0;
+            break;
+#endif
+            break;
+
+            /* REVISIT:  Here we must also set the size of the link header
+             * header the precedes network layer headers.
+             */
+
+            break;
+
+          default:
+            nlldbg("ERROR: Unrecognized link type: %d\n", lltype);
+            return -EINVAL;
+        }
+
+      /* Remember the verified link type */
+
+      dev->d_lltype = (uint8_t)lltype
+#endif
 
       /* Assign a device name to the interface */
 
+      netdev_semtake();
       devnum = g_next_devnum++;
       snprintf(dev->d_ifname, IFNAMSIZ, NETDEV_FORMAT, devnum );
 
@@ -144,6 +194,7 @@ int netdev_register(FAR struct net_driver_s *dev)
 #endif
       return OK;
     }
+
   return -EINVAL;
 }
 

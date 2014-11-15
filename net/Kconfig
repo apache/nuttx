@@ -114,13 +114,18 @@ config NET_MULTICAST
 	---help---
 		Outgoing multi-cast address support
 
-# Select Transport (should be a choice)
+# Select Data Link
+
+config NET_MULTILINK
+	bool
+	default n
 
 config NET_ETHERNET
 	bool
 	default y if !NET_SLIP
 	default n if NET_SLIP
 	select NETDEV_MULTINIC if NET_SLIP
+	select NET_MULTILINK if NET_SLIP
 	---help---
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
@@ -130,6 +135,7 @@ config NET_SLIP
 	bool "SLIP support"
 	default n
 	select NETDEV_MULTINIC if NET_ETHERNET
+	select NET_MULTILINK if NET_ETHERNET
 	---help---
 		Enables building of the SLIP driver. SLIP requires
 		at least one IP protocol selected and the following additional

@@ -1448,7 +1448,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->ld_dev);
+  (void)netdev_register(&priv->ld_dev, NET_LL_ETHERNET);
   return OK;
 }
 

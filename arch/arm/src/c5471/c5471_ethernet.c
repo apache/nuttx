@@ -2156,7 +2156,7 @@ void up_netinitialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_c5471[0].c_dev);
+  (void)netdev_register(&g_c5471[0].c_dev, NET_LL_ETHERNET);
 }
 
 #endif /* CONFIG_NET */

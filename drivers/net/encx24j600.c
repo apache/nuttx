@@ -2859,7 +2859,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  return netdev_register(&priv->dev);
+  return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 
 /****************************************************************************

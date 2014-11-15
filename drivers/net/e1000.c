@@ -1097,7 +1097,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  err = netdev_register(&dev->netdev);
+  err = netdev_register(&dev->netdev, NET_LL_ETHERNET);
   if (err)
     {
       goto err2;

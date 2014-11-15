@@ -3851,7 +3851,7 @@ int sam_emac_initialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  ret = netdev_register(&priv->dev);
+  ret = netdev_register(&priv->dev, NET_LL_ETHERNET);
   if (ret >= 0)
     {
       return ret;

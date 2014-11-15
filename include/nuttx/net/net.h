@@ -67,6 +67,14 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* Data link layer type */
+
+enum net_lltype_e
+{
+  NET_LL_ETHERNET = 0, /* Ethernet */
+  NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
+  NET_LL_PPP           /* Point-to-Point Protocol (PPP) */
+};
 
 /* This defines a bitmap big enough for one bit for each socket option */
 
@@ -1003,7 +1011,8 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  *   be found in subsequent network ioctl operations on the device.
  *
  * Parameters:
- *   dev - The device driver structure to register
+ *   dev    - The device driver structure to be registered.
+ *   lltype - Link level protocol used by the driver (Ethernet, SLIP, PPP, ...
  *
  * Returned Value:
  *   0:Success; negated errno on failure
@@ -1013,7 +1022,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  *
  ****************************************************************************/
 
-int netdev_register(FAR struct net_driver_s *dev);
+int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
 
 /****************************************************************************
  * Function: netdev_unregister

@@ -951,7 +951,7 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&cs89x0->cs_dev);
+  (void)netdev_register(&cs89x0->cs_dev, NET_LL_ETHERNET);
   return OK;
 }
 
