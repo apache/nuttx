@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 14, 2014)
+NuttX TODO List (Last updated November 15, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (11)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -729,14 +729,6 @@ o Binary loaders (binfmt/)
 
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       SENDTO() AND MULTIPLE NETWORK INTERFACE SUPPORT
-  Description: sendto() and multiple network interface support:
-               When polled, would have to assure that the destination IP
-               is on the subnet served by the polling driver.
-  Status:      Open.  This is really part of the above issue.
-  Priority:    Medium, The feature is not important, but it is important
-               for NuttX to resolve the architectural issues.
 
   Title:       IPv6
   Description: IPv6 support is incomplete.  Adam Dunkels has recently announced
