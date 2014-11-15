@@ -147,7 +147,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = 0;
             break;
 #endif
-            break;
 
             /* REVISIT:  Here we must also set the size of the link header
              * header the precedes network layer headers.
@@ -162,7 +161,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       /* Remember the verified link type */
 
-      dev->d_lltype = (uint8_t)lltype
+      dev->d_lltype = (uint8_t)lltype;
 #endif
 
       /* Assign a device name to the interface */

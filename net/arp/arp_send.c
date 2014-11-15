@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <string.h>
 #include <semaphore.h>
 #include <time.h>
 #include <debug.h>
@@ -97,7 +98,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NETDEV_MULTINIC
       /* Is this the device that we need to route this request? */
 
-      if (strncmp(dev->d_ifname, state->snd_ifname, IFNAMSIZ) != 0)
+      if (strncmp((FAR const char *)dev->d_ifname, (FAR const char *)state->snd_ifname, IFNAMSIZ) != 0)
         {
           /* No... pass on this one and wait for the device that we want */
 
@@ -295,7 +296,7 @@ int arp_send(in_addr_t ipaddr)
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Remember the routing device name */
 
-  strncpy(state->snd_ifname, dev->d_ifname, IFNAMSIZ);
+  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname, IFNAMSIZ);
 #endif
 
   /* Now loop, testing if the address mapping is in the ARP table and re-sending the ARP request if it is not.

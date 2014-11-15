@@ -961,7 +961,8 @@ int slip_initialize(int intf, FAR const char *devname)
   argv[1] = NULL;
 
   priv->rxpid = task_create("rxslip", CONFIG_SLIP_DEFPRIO,
-                          CONFIG_SLIP_STACKSIZE, (main_t)slip_rxtask, argv);
+                          CONFIG_SLIP_STACKSIZE, (main_t)slip_rxtask,
+                          (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
       ndbg("ERROR: Failed to start receiver task\n");
@@ -975,7 +976,8 @@ int slip_initialize(int intf, FAR const char *devname)
   /* Start the SLIP transmitter task */
 
   priv->txpid = task_create("txslip", CONFIG_SLIP_DEFPRIO,
-                            CONFIG_SLIP_STACKSIZE, (main_t)slip_txtask, argv);
+                            CONFIG_SLIP_STACKSIZE, (main_t)slip_txtask,
+                            (FAR char * const *)argv);
   if (priv->txpid < 0)
     {
       ndbg("ERROR: Failed to start receiver task\n");

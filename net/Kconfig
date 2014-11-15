@@ -88,42 +88,15 @@ config NET_GUARDSIZE
 		packet size will be chopped down to the size indicated in the TCP
 		header.
 
-source "net/socket/Kconfig"
-source "net/netdev/Kconfig"
-source "net/ipv6/Kconfig"
-source "net/pkt/Kconfig"
-source "net/tcp/Kconfig"
-source "net/udp/Kconfig"
-source "net/icmp/Kconfig"
-source "net/igmp/Kconfig"
-source "net/arp/Kconfig"
-source "net/iob/Kconfig"
-source "net/utils/Kconfig"
-
-config NET_STATISTICS
-	bool "Collect network statistics"
-	default n
-	---help---
-		uIP statistics on or off
-
-source "net/route/Kconfig"
-
-config NET_MULTICAST
-	bool "Multi-cast Tx support"
-	default n
-	---help---
-		Outgoing multi-cast address support
-
-# Select Data Link
+menu "Data link support"
 
 config NET_MULTILINK
 	bool
 	default n
 
 config NET_ETHERNET
-	bool
-	default y if !NET_SLIP
-	default n if NET_SLIP
+	bool "Ethernet support"
+	default y
 	select NETDEV_MULTINIC if NET_SLIP
 	select NET_MULTILINK if NET_SLIP
 	---help---
@@ -182,4 +155,32 @@ config SLIP_DEFPRIO
 		The priority of the SLIP RX and TX tasks. Default: 128
 
 endif # NET_SLIP
+endmenu # Data link support
+
+source "net/socket/Kconfig"
+source "net/netdev/Kconfig"
+source "net/ipv6/Kconfig"
+source "net/pkt/Kconfig"
+source "net/tcp/Kconfig"
+source "net/udp/Kconfig"
+source "net/icmp/Kconfig"
+source "net/igmp/Kconfig"
+source "net/arp/Kconfig"
+source "net/iob/Kconfig"
+source "net/utils/Kconfig"
+
+config NET_STATISTICS
+	bool "Collect network statistics"
+	default n
+	---help---
+		uIP statistics on or off
+
+source "net/route/Kconfig"
+
+config NET_MULTICAST
+	bool "Multi-cast Tx support"
+	default n
+	---help---
+		Outgoing multi-cast address support
+
 endif # NET
