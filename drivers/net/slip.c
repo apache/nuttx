@@ -74,10 +74,6 @@
 
 /* Configuration ************************************************************/
 
-#if NET_LL_HDRLEN > 0
-#  error "NET_LL_HDRLEN must be set to zero"
-#endif
-
 #ifndef CONFIG_NET_NOINTS
 #  warning "CONFIG_NET_NOINTS must be set"
 #endif

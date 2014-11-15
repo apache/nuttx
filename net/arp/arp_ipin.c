@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 #define ETHBUF ((struct eth_hdr_s *)&dev->d_buf[0])
-#define IPBUF  ((struct arp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define IPBUF  ((struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
 
 /****************************************************************************
  * Private Types
