@@ -2148,7 +2148,7 @@ int up_netinitialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev);
+  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
   return OK;
 
 errout:
