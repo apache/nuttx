@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: October 14, 2014</p>
+      <p>Last Updated: November 15, 2014</p>
     </td>
   </tr>
 </table>
@@ -4315,7 +4315,7 @@ void board_led_off(int led);
   </li>
   <li>
     <p>
-    <b><code>int netdev_register(FAR struct net_driver_s *dev);</code></b>.
+    <b><code>int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);</code></b>.
     Each Ethernet driver registers itself by calling <code>netdev_register()</code>.
     </p>
   </li>
