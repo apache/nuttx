@@ -7,8 +7,8 @@ menu "ARP Configuration"
 
 config NET_ARP
 	bool
-	default y if !NET_SLIP
-	default n if NET_SLIP
+	default y
+	depends on NET_ETHERNET
 	---help---
 		This setting is currently overridden by logic in include/nuttx/net
 

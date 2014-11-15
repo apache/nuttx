@@ -89,11 +89,11 @@
 #  ifdef CONFIG_NET_IPv6
 #    error "SLIP is not implemented for IPv6"
 #  endif
-#  define NET_LL_HDRLEN         0
+#  define NET_LL_HDRLEN       0
 #else
 #  define CONFIG_NET_ETHERNET 1
 #  define CONFIG_NET_ARP      1
-#  define NET_LL_HDRLEN         14
+#  define NET_LL_HDRLEN       14
 #endif
 
 /* Layer 3/4 Configuration Options ******************************************/
