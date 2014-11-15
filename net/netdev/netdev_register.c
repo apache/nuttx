@@ -60,10 +60,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_SLIP
-#  define NETDEV_FORMAT "sl%d"
-#else
-#  define NETDEV_FORMAT "eth%d"
+#define NETDEV_SLIP_FORMAT      "sl%d"
+#define NETDEV_ETH_FORMAT       "eth%d"
+
+#if defined(CONFIG_NET_SLIP)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
+#elif defined(CONFIG_NET_ETHERNET)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
 #endif
 
 /****************************************************************************
@@ -114,6 +117,7 @@ struct net_driver_s *g_netdevices = NULL;
 
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 {
+  FAR const char *devfmt;
   int devnum;
 
   if (dev)
@@ -130,18 +134,21 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_ETHERNET
           case NET_LL_ETHERNET:  /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;
+            devfmt          = NETDEV_ETH_FORMAT;
             break;
 #endif
 
 #ifdef CONFIG_NET_SLIP
           case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
             dev->d_llhdrlen = 0;
+            devfmt          = NETDEV_SLIP_FORMAT;
             break;
 #endif
 
 #if 0                            /* REVISIT: Not yet supported */
           case NET_LL_PPP:       /* Point-to-Point Protocol (PPP) */
             dev->d_llhdrlen = 0;
+            devfmt          = NETDEV_PPP_FORMAT;
             break;
 #endif
 
@@ -159,13 +166,18 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       /* Remember the verified link type */
 
       dev->d_lltype = (uint8_t)lltype;
+
+#else
+     /* Use the default device name */
+
+     devfmt = NETDEV_DEFAULT_FORMAT;
 #endif
 
       /* Assign a device name to the interface */
 
       netdev_semtake();
       devnum = g_next_devnum++;
-      snprintf(dev->d_ifname, IFNAMSIZ, NETDEV_FORMAT, devnum );
+      snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum );
 
       /* Add the device to the list of known network devices */
 
