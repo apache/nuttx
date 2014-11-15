@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 #define ETHBUF  ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ARPBUF  ((struct arp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define ARPBUF  ((struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -115,7 +115,7 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr)
   arp->ah_protolen = 4;
 
   eth->type        = HTONS(ETHTYPE_ARP);
-  dev->d_len       = sizeof(struct arp_hdr_s) + NET_LL_HDRLEN;
+  dev->d_len       = sizeof(struct arp_hdr_s) + ETH_HDRLEN;
 }
 
 #endif /* CONFIG_NET_ARP */
