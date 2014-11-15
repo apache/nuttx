@@ -100,9 +100,7 @@ struct net_driver_s
   /* Multi network devices using multiple data links protocols are selected */
 
   uint8_t d_lltype;         /* See enum net_datalink_e */
-#if 0 /* Not yet */
   uint8_t d_llhdrlen;       /* Link layer header size */
-#endif
 #endif
 
 #ifdef CONFIG_NET_ETHERNET

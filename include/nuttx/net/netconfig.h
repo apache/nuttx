@@ -80,15 +80,33 @@
  * The "link level header" is the offset into the d_buf where the IP header
  * can be found. For Ethernet, this should be set to 14. For SLIP, this
  * should be set to 0.
+ *
+ * If CONFIG_NET_MULTILINK is defined, then mutliple link protocols are
+ * supported concurrently.  In this case, the size of link layer header
+ * varies and is obtained from the network device structure.
  */
 
-#ifdef CONFIG_NET_SLIP
+#ifdef CONFIG_NET_MULTILINK
+/* We are supporting multiple network devices and using different link
+ * level protocols.  Get the size of the link layer header from the
+ * device structure.
+ */
+
+#  define NET_LL_HDRLEN(d) ((d)->d_llhdrlen)
+
+#if defined(CONFIG_NET_SLIP)
+/* There is no link layer header with SLIP */
+
 #  ifdef CONFIG_NET_IPv6
 #    error SLIP is not available for IPv6
 #  endif
-#  define NET_LL_HDRLEN       0
-#else
-#  define NET_LL_HDRLEN       14
+#  define NET_LL_HDRLEN(d) 0
+
+#else /* if defined(CONFIG_NET_ETHERNET) */
+/* Assume standard Ethernet header */
+
+#  define NET_LL_HDRLEN(d) 14
+
 #endif
 
 /* Layer 3/4 Configuration Options ******************************************/
@@ -136,18 +154,18 @@
 /* The maximum amount of concurrent UDP connection, Default: 10 */
 
 #ifndef CONFIG_NET_UDP_CONNS
-# ifdef CONFIG_NET_UDP
-#  define CONFIG_NET_UDP_CONNS 10
-# else
-#  define CONFIG_NET_UDP_CONNS  0
-# endif
+#  ifdef CONFIG_NET_UDP
+#    define CONFIG_NET_UDP_CONNS 10
+#  else
+#    define CONFIG_NET_UDP_CONNS  0
+#  endif
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
  * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPUDP_HDRLEN.
  */
 
-#define UDP_MSS (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPUDP_HDRLEN)
+#define UDP_MSS(d) (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
 
 /* TCP configuration options */
 
@@ -159,11 +177,11 @@
  */
 
 #ifndef CONFIG_NET_TCP_CONNS
-# ifdef CONFIG_NET_TCP
-#  define CONFIG_NET_TCP_CONNS 10
-# else
-#  define CONFIG_NET_TCP_CONNS  0
-# endif
+#  ifdef CONFIG_NET_TCP
+#   define CONFIG_NET_TCP_CONNS 10
+#  else
+#   define CONFIG_NET_TCP_CONNS  0
+#  endif
 #endif
 
 /* The maximum number of simultaneously listening TCP ports.
@@ -172,7 +190,7 @@
  */
 
 #ifndef CONFIG_NET_MAX_LISTENPORTS
-# define CONFIG_NET_MAX_LISTENPORTS 20
+#  define CONFIG_NET_MAX_LISTENPORTS 20
 #endif
 
 /* Define the maximum number of concurrently active UDP and TCP
@@ -181,7 +199,7 @@
  */
 
 #ifndef CONFIG_NET_NACTIVESOCKETS
-# define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_CONNS + CONFIG_NET_UDP_CONNS)
+#  define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_CONNS + CONFIG_NET_UDP_CONNS)
 #endif
 
 /* The initial retransmission timeout counted in timer pulses.
@@ -222,7 +240,7 @@
  */
 
 #ifndef CONFIG_NET_RECEIVE_WINDOW
-# define CONFIG_NET_RECEIVE_WINDOW TCP_MSS
+#  define CONFIG_NET_RECEIVE_WINDOW TCP_MSS
 #endif
 
 /* How long a connection should stay in the TIME_WAIT state.
@@ -242,7 +260,7 @@
  * have many connections from the local network.
  */
 
-# define CONFIG_NET_ARPTAB_SIZE 8
+#  define CONFIG_NET_ARPTAB_SIZE 8
 #endif
 
 #ifndef CONFIG_NET_ARP_MAXAGE
@@ -265,7 +283,7 @@
  */
 
 #ifndef CONFIG_NET_BUFSIZE
-# define CONFIG_NET_BUFSIZE 400
+#  define CONFIG_NET_BUFSIZE 400
 #endif
 
 /* Delay after receive to catch a following packet.  No delay should be
@@ -293,3 +311,4 @@
 typedef uint16_t net_stats_t;
 
 #endif /* __INCLUDE_NUTTX_NET_NETCONFG_H */
+

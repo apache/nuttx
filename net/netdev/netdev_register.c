@@ -121,6 +121,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_MULTILINK
       /* We are supporting multiple network devices and using different link
        * level protocols.  Set the protocol usd by the device and the size
+       * level protocols.  Set the protocol used by the device and the size
        * of the link header used by this protocol.
        */
 
@@ -128,17 +129,13 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
         {
 #ifdef CONFIG_NET_ETHERNET
           case NET_LL_ETHERNET:  /* Ethernet */
-#if 0                            /* REVISIT: Not yet supported */
             dev->d_llhdrlen = ETH_HDRLEN;
-#endif
             break;
 #endif
 
 #ifdef CONFIG_NET_SLIP
           case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
-#if 0                            /* REVISIT: Not yet supported */
             dev->d_llhdrlen = 0;
-#endif
             break;
 #endif
 
