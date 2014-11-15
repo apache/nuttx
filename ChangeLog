@@ -8985,3 +8985,7 @@
 	  Use ETH_HDRLEN instead (2014-11-15).
 	* net/arp/: Remove use of NET_LL_HDRLEN from net/arp logic.  Use
 	  ETH_HDRLEN instead (2014-11-15).
+	* net/ and include/nuttx/net:  All network logic will now handle
+	  variable length link layer protocol headers within incoming packets.
+	  This permits use of multiple network interfaces with differing data
+	  links.  For example, ETHERNET + SLIP (2014-11-15).
