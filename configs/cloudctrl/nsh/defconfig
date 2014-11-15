@@ -422,6 +422,12 @@ CONFIG_IOB_NCHAINS=8
 CONFIG_IOB_THROTTLE=0
 
 #
+# Routing Table Configuration
+#
+# CONFIG_NET_ROUTE is not set
+CONFIG_NET_ETHERNET=y
+
+#
 # File Systems
 #
 
