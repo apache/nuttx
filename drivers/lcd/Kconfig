@@ -369,6 +369,24 @@ config ST7565_YRES
 	---help---
 		Specifies the Y resolution of the LCD.
 
+config ST7565_MIRROR_X
+	bool "ST7565 apply mirror on X"
+	default n
+	---help---
+		Mirror X on LCD.
+
+config ST7565_MIRROR_Y
+	bool "ST7565 apply mirror on Y"
+	default n
+	---help---
+		Mirror Y on LCD.
+
+config ST7565_INVERSE_VIDEO
+	bool "ST7565 Inverse video"
+	default n
+	---help---
+		Inverse video on LCD.
+
 endif # LCD_ST7565
 
 config LCD_ST7567

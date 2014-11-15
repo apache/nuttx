@@ -1013,17 +1013,18 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   (void)st7565_send_one_data(priv, ST7565_EXIT_SOFTRST);
 
-  /* Follow NHD‐C12864KGZ DISPLAY INITIALIZATION...  */
+  /* Follow NHD-C12864KGZ DISPLAY INITIALIZATION...  */
 
 #ifdef CONFIG_NHD_C12864KGZ
+
   (void)st7565_send_one_data(priv, ST7565_BIAS_1_9);
-  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
-  (void)st7565_send_one_data(priv, ST7565_SETCOMNORMAL);
+
   (void)st7565_send_one_data(priv, ST7565_REG_RES_5_5);
   (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
   (void)st7565_send_one_data(priv, ST7565_SETEVREG(15));
   (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
   (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+
 #else
 #  error "No initialization sequence selected"
 #endif
@@ -1041,6 +1042,24 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   (void)st7565_send_one_data(priv, ST7565_SETCOLL);
   (void)st7565_send_one_data(priv, ST7565_DISPON);
   (void)st7565_send_one_data(priv, ST7565_DISPRAM);
+#endif
+
+#ifdef CONFIG_ST7565_MIRROR_X
+  (void)st7565_send_one_data(priv, ST7565_ADCINVERSE);
+#else
+  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
+#endif
+
+#ifdef CONFIG_ST7565_MIRROR_Y
+  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+#else
+  (void)st7565_send_one_data(priv, ST7565_SETCOMNORMAL);
+#endif
+
+#ifdef CONFIG_ST7565_INVERSE_VIDEO
+  (void)st7565_send_one_data(priv, ST7565_DISPINVERSE);
+#else
+  (void)st7565_send_one_data(priv, ST7565_DISPNORMAL);
 #endif
 
   /* Let go of the SPI lock and de-select the device */
