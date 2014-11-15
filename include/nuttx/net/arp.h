@@ -67,7 +67,7 @@
 
 /* Size of the Ethernet header */
 
-#define ETH_HDRLEN      14      /* Minimum size: 2*6 + 2 */
+#define ETH_HDRLEN      14     /* Minimum size: 2*6 + 2 */
 
 /****************************************************************************
  * Public Types

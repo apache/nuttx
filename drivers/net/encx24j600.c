@@ -1656,7 +1656,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       /* Check for a usable packet length (4 added for the CRC) */
 
-      else if (pktlen > (CONFIG_NET_BUFSIZE + 4) || pktlen <= (NET_LL_HDRLEN + 4))
+      else if (pktlen > (CONFIG_NET_BUFSIZE + 4) || pktlen <= (ETH_HDRLEN + 4))
         {
           nlldbg("Bad packet size dropped (%d)\n", pktlen);
 
