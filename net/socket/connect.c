@@ -51,6 +51,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
+#include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
 #include "tcp/tcp.h"
@@ -257,8 +258,8 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
        * determine the correct initial MSS.
        */
 
-      DEBUGASSERT(psock->s_conn);
-      psock->s_conn->mss = TCP_INITIAL_MSS(dev);
+      DEBUGASSERT(pstate->tc_conn);
+      pstate->tc_conn->mss = TCP_INITIAL_MSS(dev);
 #endif
 
       /* Wake up the waiting thread */
