@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 11, 2014)
+NuttX TODO List (Last updated November 14, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -729,30 +729,6 @@ o Binary loaders (binfmt/)
 
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       MULTIPLE NETWORK INTERFACE SUPPORT
-  Description: uIP polling issues / Multiple network interface support:
-
-               (1) Current logic will not support multiple Ethernet drivers.
-                  Each driver should poll on TCP connections connect on the
-                  network supported by the driver; UDP polling should respond
-                  with TX data only if the UDP packet is intended for the
-                  the network supported by the driver.
-
-               (2) If there were multiple drivers, polling would occur at
-                  double the rate.  Fix by using bound IP address in TCP
-                  connection (lipaddr) and verifying that it is in the subnet
-                  served by the driver.
-
-               Another issue:  When sending packets to another subnet, the
-               current logic falls back and uses ETH0 if it cannot find the
-               device for the subnet.  That lookup would need to be smarter...
-               perhaps it needs a routing table.
-
-  Status:      Open.  Nothing will probably be done until I have a platform
-               with two network interfaces that I need to support.
-  Priority:    Medium, The feature is not important, but it is important
-               for NuttX to resolve the architectural issues.
 
   Title:       SENDTO() AND MULTIPLE NETWORK INTERFACE SUPPORT
   Description: sendto() and multiple network interface support:
