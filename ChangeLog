@@ -8974,3 +8974,11 @@
 	* net/Kconfig arp/Make.defs, arp_send.c, and drivers/net/slip.c: ARP:
 	  Add support for the case where there are multiple networks:  One being
 	  Ethernet and the other not.  Suggested by Brennan Ashton (2014-11-14).
+	* net/Kconfig, netdev/netdev_register.c, arp/arp_send.c,
+	  include/nuttx/net/net.h, netdev.h and several network drivers in arch/
+	  and drivers/: Add a parameter to netdev_register() to indicate the
+	  link protocol supported by the driver.  Use this value to replace some
+	  logic commited yesterday (2014-11-15).
+	* configs/stm32f4discovery/netnsh/defconfig:  Needs to set MAC address
+	  (2014-11-15).
+
