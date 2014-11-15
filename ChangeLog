@@ -8971,3 +8971,6 @@
 	* net/route/net_router.c:  I don't think that the net_route function has
 	  ever worked correctly.  The source ip was updated in the match struct
 	  instead of the route ip.  From Brennan Ashton (2014-11-14).
+	* net/Kconfig arp/Make.defs, arp_send.c, and drivers/net/slip.c: ARP:
+	  Add support for the case where there are multiple networks:  One being
+	  Ethernet and the other not.  Suggested by Brennan Ashton (2014-11-14).
