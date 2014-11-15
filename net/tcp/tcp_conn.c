@@ -508,7 +508,8 @@ FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
  *
  ****************************************************************************/
 
-FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
+FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
+                                        FAR struct tcp_iphdr_s *buf)
 {
   FAR struct tcp_conn_s *conn = tcp_alloc();
   if (conn)
@@ -522,7 +523,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
       conn->nrtx          = 0;
       conn->lport         = buf->destport;
       conn->rport         = buf->srcport;
-      conn->mss           = TCP_INITIAL_MSS;
+      conn->mss           = TCP_INITIAL_MSS(dev);
       net_ipaddr_copy(conn->ripaddr, net_ip4addr_conv32(buf->srcipaddr));
       conn->tcpstateflags = TCP_SYN_RCVD;
 
@@ -670,12 +671,16 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
       return port;
     }
 
-  /* Initialize and return the connection structure, bind it to the port number */
+  /* Initialize and return the connection structure, bind it to the port
+   * number.  At this point, we do not know the size of the initial MSS We
+   * know the total size of the packet buffer, but we don't yet know the
+   * size of link layer header.
+   */
 
   conn->tcpstateflags = TCP_SYN_SENT;
   tcp_initsequence(conn->sndseq);
 
-  conn->mss        = TCP_INITIAL_MSS;
+  conn->mss        = MIN_TCP_INITIAL_MSS;
   conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */

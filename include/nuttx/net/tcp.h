@@ -56,6 +56,7 @@
 #include <stdint.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
 
 /****************************************************************************
@@ -117,11 +118,10 @@
  * This is a long established rule.
  */
 
-#if TCP_MSS > 576
-#  define TCP_INITIAL_MSS 576
-#else
-#  define TCP_INITIAL_MSS TCP_MSS
-#endif
+#define TCP_INITIAL_MSS(d)  (TCP_MSS(d) > 576 ? 576 : TCP_MSS(d))
+
+#define MIN_TCP_INITIAL_MSS (MIN_TCP_MSS > 576 ? 576 : MIN_TCP_MSS)
+#define MAX_TCP_INITIAL_MSS (MAX_TCP_MSS > 576 ? 576 : MAX_TCP_MSS)
 
 /****************************************************************************
  * Public Type Definitions

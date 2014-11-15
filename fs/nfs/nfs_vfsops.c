@@ -1713,11 +1713,17 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       buflen = tmp;
     }
 
-  /* But don't let the buffer size exceed the MSS of the socket type */
+  /* But don't let the buffer size exceed the MSS of the socket type.
+   *
+   * In the case where there are multiple network devices with different
+   * link layer protocols (CONFIG_NET_MULTILINK), each network device
+   * may support a different UDP MSS value.  Here we arbitrarily select
+   * the minimum MSS for that case.
+   */
 
-  if (buflen > UDP_MSS)
+  if (buflen > MIN_UDP_MSS)
     {
-      buflen = UDP_MSS;
+      buflen = MIN_UDP_MSS;
     }
 
   /* Create an instance of the mountpt state structure */

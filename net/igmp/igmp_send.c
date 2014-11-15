@@ -76,7 +76,7 @@
 /* Buffer layout */
 
 #define RASIZE      (4)
-#define IGMPBUF     ((struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define IGMPBUF     ((struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Variables

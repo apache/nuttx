@@ -65,8 +65,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
-#define ICMPDAT (&dev->d_buf[NET_LL_HDRLEN + sizeof(struct icmp_iphdr_s)])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPDAT (&dev->d_buf[NET_LL_HDRLEN(dev) + sizeof(struct icmp_iphdr_s)])
 
 /* Allocate a new ICMP data callback */
 

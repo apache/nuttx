@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Variables
@@ -114,7 +114,7 @@ int udp_input(FAR struct net_driver_s *dev)
 
   dev->d_len    -= IPUDP_HDRLEN;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN + IPUDP_HDRLEN];
+  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPUDP_HDRLEN];
   if (pbuf->udpchksum != 0 && udp_chksum(dev) != 0xffff)
     {
 #ifdef CONFIG_NET_STATISTICS
@@ -136,8 +136,8 @@ int udp_input(FAR struct net_driver_s *dev)
 
           /* Set-up for the application callback */
 
-          dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN + IPUDP_HDRLEN];
-          dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN + IPUDP_HDRLEN];
+          dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPUDP_HDRLEN];
+          dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPUDP_HDRLEN];
           dev->d_sndlen  = 0;
 
           /* Perform the application callback */

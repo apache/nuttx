@@ -79,7 +79,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /* Debug */
 

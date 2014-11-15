@@ -54,8 +54,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
-#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define BUF ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Data
@@ -145,7 +145,7 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Sum TCP header and data. */
 
-  sum = chksum(sum, &dev->d_buf[IP_HDRLEN + NET_LL_HDRLEN], upper_layer_len);
+  sum = chksum(sum, &dev->d_buf[IP_HDRLEN + NET_LL_HDRLEN(dev)], upper_layer_len);
 
   return (sum == 0) ? 0xffff : htons(sum);
 }
@@ -285,7 +285,7 @@ uint16_t ip_chksum(FAR struct net_driver_s *dev)
 {
   uint16_t sum;
 
-  sum = chksum(0, &dev->d_buf[NET_LL_HDRLEN], IP_HDRLEN);
+  sum = chksum(0, &dev->d_buf[NET_LL_HDRLEN(dev)], IP_HDRLEN);
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */

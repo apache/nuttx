@@ -107,13 +107,13 @@
 
 /* Macros */
 
-#define BUF                  ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define BUF                  ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define FBUF                 ((FAR struct net_iphdr_s *)&g_reassembly_buffer[0])
 
 /* IP fragment re-assembly */
 
 #define IP_MF                0x20
-#define TCP_REASS_BUFSIZE    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN)
+#define TCP_REASS_BUFSIZE    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(dev))
 #define TCP_REASS_LASTFRAG   0x01
 
 /****************************************************************************

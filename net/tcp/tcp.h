@@ -358,7 +358,8 @@ FAR struct tcp_conn_s *tcp_listener(uint16_t portno);
  *
  ****************************************************************************/
 
-FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf);
+FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
+                                        FAR struct tcp_iphdr_s *buf);
 
 /****************************************************************************
  * Name: tcp_bind()

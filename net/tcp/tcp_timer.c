@@ -100,8 +100,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t result;
 
-  dev->d_snddata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
-  dev->d_appdata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
+  dev->d_snddata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev)];
+  dev->d_appdata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev)];
 
   /* Increase the TCP sequence number */
 

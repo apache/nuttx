@@ -169,7 +169,7 @@ static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *   connection operation via by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -250,6 +250,17 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
       psock_teardown_callbacks(pstate, pstate->tc_result);
 
+#ifdef CONFIG_NET_MULTILINK
+      /* When we set up the connection structure, we did not know the size
+       * of the initial MSS.  Now that the connection is associated with a
+       * network device, we now know the size of link layer header and can
+       * determine the correct initial MSS.
+       */
+
+      DEBUGASSERT(psock->s_conn);
+      psock->s_conn->mss = TCP_INITIAL_MSS(dev);
+#endif
+
       /* Wake up the waiting thread */
 
       sem_post(&pstate->tc_sem);
@@ -305,7 +316,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
     }
   else
     {
-      /* Perform the uIP connection operation */
+      /* Perform the TCP connection operation */
 
       ret = tcp_connect(psock->s_conn, inaddr);
     }

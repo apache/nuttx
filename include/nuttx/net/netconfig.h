@@ -86,16 +86,16 @@
  * varies and is obtained from the network device structure.
  */
 
-#ifdef CONFIG_NET_MULTILINK
-/* We are supporting multiple network devices and using different link
- * level protocols.  Get the size of the link layer header from the
- * device structure.
- */
+#if defined(CONFIG_NET_MULTILINK)
+   /* We are supporting multiple network devices using different link layer
+    * protocols.  Get the size of the link layer header from the device
+    * structure.
+    */
 
 #  define NET_LL_HDRLEN(d) ((d)->d_llhdrlen)
 
-#if defined(CONFIG_NET_SLIP)
-/* There is no link layer header with SLIP */
+#elif defined(CONFIG_NET_SLIP)
+   /* There is no link layer header with SLIP */
 
 #  ifdef CONFIG_NET_IPv6
 #    error SLIP is not available for IPv6
@@ -103,11 +103,11 @@
 #  define NET_LL_HDRLEN(d) 0
 
 #else /* if defined(CONFIG_NET_ETHERNET) */
-/* Assume standard Ethernet header */
+   /* Assume standard Ethernet link layer header */
 
 #  define NET_LL_HDRLEN(d) 14
 
-#endif
+#endif /* MULTILINK or SLIP or ETHERNET */
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -162,10 +162,22 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPUDP_HDRLEN.
+ * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
  */
 
-#define UDP_MSS(d) (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
+#define UDP_MSS(d)    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
+
+#ifdef CONFIG_NET_ETHERNET
+#  define MIN_UDP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPUDP_HDRLEN)
+#else /* if defined(CONFIG_NET_SLIP) */
+#  define MIN_UDP_MSS (CONFIG_NET_BUFSIZE - IPUDP_HDRLEN)
+#endif
+
+#ifdef CONFIG_NET_SLIP
+#  define MAX_UDP_MSS (CONFIG_NET_BUFSIZE - IPUDP_HDRLEN)
+#else /* if defined(CONFIG_NET_ETHERNET) */
+#  define MAX_UDP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPUDP_HDRLEN)
+#endif
 
 /* TCP configuration options */
 
@@ -227,20 +239,39 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPTCP_HDRLEN.
+ * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
+ *
+ * In the case where there are multiple network devices with different
+ * link layer protocols (CONFIG_NET_MULTILINK), each network device
+ * may support a different UDP MSS value.  Here we arbitrarily select
+ * the minimum MSS for that case.
  */
 
-#define TCP_MSS (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPTCP_HDRLEN)
+#define TCP_MSS(d)    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
+
+#ifdef CONFIG_NET_ETHERNET
+#  define MIN_TCP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPTCP_HDRLEN)
+#else /* if defined(CONFIG_NET_SLIP) */
+#  define MIN_TCP_MSS (CONFIG_NET_BUFSIZE - IPTCP_HDRLEN)
+#endif
+
+#ifdef CONFIG_NET_SLIP
+#  define MAX_TCP_MSS (CONFIG_NET_BUFSIZE - IPTCP_HDRLEN)
+#else /* if defined(CONFIG_NET_ETHERNET) */
+#  define MAX_TCP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPTCP_HDRLEN)
+#endif
 
 /* The size of the advertised receiver's window.
  *
  * Should be set low (i.e., to the size of the d_buf buffer) is the
  * application is slow to process incoming data, or high (32768 bytes)
  * if the application processes data quickly.
+ *
+ * See the note above regarding the TCP MSS and CONFIG_NET_MULTILINK.
  */
 
 #ifndef CONFIG_NET_RECEIVE_WINDOW
-#  define CONFIG_NET_RECEIVE_WINDOW TCP_MSS
+#  define CONFIG_NET_RECEIVE_WINDOW MIN_TCP_MSS
 #endif
 
 /* How long a connection should stay in the TIME_WAIT state.

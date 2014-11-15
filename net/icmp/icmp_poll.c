@@ -90,8 +90,8 @@ void icmp_poll(FAR struct net_driver_s *dev)
 {
   /* Setup for the application callback */
 
-  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN + IPICMP_HDRLEN];
-  dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN + IPICMP_HDRLEN];
+  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPICMP_HDRLEN];
+  dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPICMP_HDRLEN];
 
   dev->d_len     = 0;
   dev->d_sndlen  = 0;
