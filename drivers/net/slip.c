@@ -935,6 +935,17 @@ int slip_initialize(int intf, FAR const char *devname)
 #endif
   priv->dev.d_private = priv;          /* Used to recover private state from dev */
 
+#ifdef CONFIG_NET_ETHERNET
+  /* If ARP is supported, indicate that it is not required for this interface.
+   * ARP is only built of CONFIG_NET_ETHERNET is enabled which always
+   * requires ARP support.  The following can happening only there multiple
+   * network interfaces enabled (CONFIG_NET_MULTINIC) and one of the
+   * interfaces is Ethernet and another is SLIP.
+   */
+
+  priv->dev.d_flags   = IFF_NOARP;
+#endif
+
   /* Open the device */
 
   priv->fd            = open(devname, O_RDWR, 0666);

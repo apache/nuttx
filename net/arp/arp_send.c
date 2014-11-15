@@ -229,6 +229,22 @@ int arp_send(in_addr_t ipaddr)
       goto errout;
     }
 
+  /* If this device does not require ARP bail out.  ARP is only built of
+   * CONFIG_NET_ETHERNET is enabled which always requires ARP support.  The
+   * following can happening only there multiple network interfaces enabled
+   * (CONFIG_NET_MULTINIC) and one of the interfaces is not Ethernet.  At
+   * present, this is possible only if one of the interfaces is SLIP.
+   *
+   * REVISIT:  This will need to be extended if PPP is ever incorporated.
+   */
+
+#ifdef CONFIG_NET_SLIP
+  if (dev->d_flags & IFF_NOARP)
+    {
+      return OK;
+    }
+#endif
+
   /* Check if the destination address is on the local network. */
 
   if (!net_ipaddr_maskcmp(ipaddr, dev->d_ipaddr, dev->d_netmask))

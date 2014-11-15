@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-# ARP supported is not provided for SLIP (Ethernet only)
+# ARP support is available for Ethernet only
 
-ifneq ($(CONFIG_NET_SLIP),y)
+ifeq ($(CONFIG_NET_ETHERNET),y)
 NET_CSRCS +=arp_arpin.c arp_out.c arp_format.c arp_table.c arp_timer.c
 
 ifeq ($(CONFIG_NET_ARP_IPIN),y)
@@ -55,4 +55,4 @@ endif
 DEPPATH += --dep-path arp
 VPATH += :arp
 
-endif
+endif # CONFIG_NET_ETHERNET
