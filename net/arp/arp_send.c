@@ -229,6 +229,7 @@ int arp_send(in_addr_t ipaddr)
       goto errout;
     }
 
+#ifdef CONFIG_NET_SLIP
   /* If this device does not require ARP bail out.  ARP is only built of
    * CONFIG_NET_ETHERNET is enabled which always requires ARP support.  The
    * following can happening only there multiple network interfaces enabled
@@ -238,7 +239,6 @@ int arp_send(in_addr_t ipaddr)
    * REVISIT:  This will need to be extended if PPP is ever incorporated.
    */
 
-#ifdef CONFIG_NET_SLIP
   if (dev->d_flags & IFF_NOARP)
     {
       return OK;
