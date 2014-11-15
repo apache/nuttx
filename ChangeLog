@@ -8981,4 +8981,7 @@
 	  logic commited yesterday (2014-11-15).
 	* configs/stm32f4discovery/netnsh/defconfig:  Needs to set MAC address
 	  (2014-11-15).
-
+	* arch/ and drivers/: Remove use of NET_LL_HDRLEN from Ethernet drivers.
+	  Use ETH_HDRLEN instead (2014-11-15).
+	* net/arp/: Remove use of NET_LL_HDRLEN from net/arp logic.  Use
+	  ETH_HDRLEN instead (2014-11-15).
