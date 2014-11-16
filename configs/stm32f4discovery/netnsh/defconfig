@@ -737,6 +737,12 @@ CONFIG_NET_RECEIVE_WINDOW=536
 CONFIG_NET_GUARDSIZE=2
 
 #
+# Data link support
+#
+# CONFIG_NET_MULTILINK is not set
+CONFIG_NET_ETHERNET=y
+
+#
 # Socket Support
 #
 CONFIG_NSOCKET_DESCRIPTORS=8
@@ -816,8 +822,6 @@ CONFIG_IOB_THROTTLE=8
 # Routing Table Configuration
 #
 # CONFIG_NET_ROUTE is not set
-# CONFIG_NET_MULTILINK is not set
-CONFIG_NET_ETHERNET=y
 
 #
 # Crypto API
