@@ -94,7 +94,7 @@
 
 #ifdef CONFIG_NET_SLIP
 #  ifndef CONFIG_NET_SLIP_MTU
-#    define CONFIG_NET_SLIP_MTU 590
+#    define CONFIG_NET_SLIP_MTU 296
 #  endif
 #endif
 
@@ -209,16 +209,16 @@
  * than NET_LL_MTU(d) - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
  */
 
-#define UDP_MSS(d)    (CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
+#define UDP_MSS(d)    (NET_LL_MTU(d) - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
 #  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
 #else /* if defined(CONFIG_NET_SLIP) */
-#  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - IPUDP_HDRLEN)
+#  define MIN_UDP_MSS (CONFIG_NET_SLIP_MTU - IPUDP_HDRLEN)
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define MAX_UDP_MSS (CONFIG_NET_ETH_MTU - IPUDP_HDRLEN)
+#  define MAX_UDP_MSS (CONFIG_NET_SLIP_MTU - IPUDP_HDRLEN)
 #else /* if defined(CONFIG_NET_ETHERNET) */
 #  define MAX_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
 #endif
@@ -283,7 +283,7 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
+ * than NET_LL_MTU(dev) - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
  * link layer protocols (CONFIG_NET_MULTILINK), each network device
@@ -291,16 +291,16 @@
  * the minimum MSS for that case.
  */
 
-#define TCP_MSS(d)    (CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
+#define TCP_MSS(d)    (NET_LL_MTU(d) - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
 #  define MIN_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
 #else /* if defined(CONFIG_NET_SLIP) */
-#  define MIN_TCP_MSS (CONFIG_NET_ETH_MTU - IPTCP_HDRLEN)
+#  define MIN_TCP_MSS (CONFIG_NET_SLIP_MTU - IPTCP_HDRLEN)
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define MAX_TCP_MSS (CONFIG_NET_ETH_MTU - IPTCP_HDRLEN)
+#  define MAX_TCP_MSS (CONFIG_NET_SLIP_MTU - IPTCP_HDRLEN)
 #else /* if defined(CONFIG_NET_ETHERNET) */
 #  define MAX_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
 #endif
