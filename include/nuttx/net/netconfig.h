@@ -81,10 +81,28 @@
  * can be found. For Ethernet, this should be set to 14. For SLIP, this
  * should be set to 0.
  *
- * If CONFIG_NET_MULTILINK is defined, then mutliple link protocols are
+ * If CONFIG_NET_MULTILINK is defined, then multiple link protocols are
  * supported concurrently.  In this case, the size of link layer header
  * varies and is obtained from the network device structure.
+ *
+ * Support is also provided to select different MTU sizes for each different
+ * link layer protocol.  A better solution would be to support device-by-
+ * device MTU sizes.  This minimum support is require to support the
+ * optimal SLIP MTU of 296 bytes and the standard Ethernet MTU of 1500
+ * bytes.
  */
+
+#ifdef CONFIG_NET_SLIP
+#  ifndef CONFIG_NET_SLIP_MTU
+#    define CONFIG_NET_SLIP_MTU 590
+#  endif
+#endif
+
+#ifdef CONFIG_NET_ETHERNET
+#  ifndef CONFIG_NET_ETH_MTU
+#    define CONFIG_NET_ETH_MTU 590
+#  endif
+#endif
 
 #if defined(CONFIG_NET_MULTILINK)
    /* We are supporting multiple network devices using different link layer
@@ -188,7 +206,7 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
+ * than NET_LL_MTU(d) - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
  */
 
 #define UDP_MSS(d)    (CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
@@ -331,17 +349,6 @@
 #endif
 
 /* General configuration options */
-
-/* The size of the uIP packet buffer.
- *
- * The uIP packet buffer should not be smaller than 60 bytes, and does
- * not need to be larger than 1500 bytes. Lower size results in lower
- * TCP throughput, larger size results in higher TCP throughput.
- */
-
-#ifndef CONFIG_NET_BUFSIZE
-#  define CONFIG_NET_BUFSIZE 400
-#endif
 
 /* Delay after receive to catch a following packet.  No delay should be
  * required if TCP/IP read-ahead buffering is enabled.

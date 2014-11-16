@@ -31,7 +31,7 @@ config NET_TCP_REASSEMBLY
 		This features requires an additional amount of RAM to hold the
 		reassembly buffer and the reassembly code size is approximately 700
 		bytes.  The reassembly buffer is of the same size as the d_buf buffer
-		(configured by CONFIG_NET_BUFSIZE).
+		(configured by CONFIG_NET_xxx_MTU).
 
 		Note: IP packet reassembly is not heavily tested (and, hence,
 		EXPERIMENTAL).

@@ -128,7 +128,7 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Verify some minimal assumptions */
 
-  if (upper_layer_len > CONFIG_NET_BUFSIZE)
+  if (upper_layer_len > NET_LL_MTU(dev))
     {
       return 0;
     }

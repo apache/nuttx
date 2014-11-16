@@ -99,7 +99,7 @@
 void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len)
 {
-  DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
+  DEBUGASSERT(dev && len > 0 && len < NET_LL_MTU(dev));
 
   /* Copy the data into the device packet buffer */
 

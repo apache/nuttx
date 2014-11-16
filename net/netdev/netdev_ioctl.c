@@ -316,8 +316,12 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGIFMTU:  /* Get MTU size */
         {
-          req->ifr_mtu = CONFIG_NET_BUFSIZE;
-          ret = OK;
+          dev = netdev_ifrdev(req);
+          if (dev)
+            {
+              req->ifr_mtu = NET_LL_MTU(dev);
+              ret = OK;
+            }
         }
         break;
 
