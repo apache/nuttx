@@ -286,7 +286,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 
       /* Check if the packet is a valid size for the uIP buffer configuration */
 
-      if (len > CONFIG_NET_BUFSIZE || len < 14)
+      if (len > CONFIG_NET_ETH_MTU || len < 14)
         {
 #ifdef CONFIG_DEBUG
           cprintf("VNET: receive invalid packet of size %d\n", len);

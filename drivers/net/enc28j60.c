@@ -104,10 +104,10 @@
 #  define CONFIG_ENC28J60_NINTERFACES 1
 #endif
 
-/* CONFIG_NET_BUFSIZE must always be defined */
+/* CONFIG_NET_ETH_MTU must always be defined */
 
-#if !defined(CONFIG_NET_BUFSIZE) && (CONFIG_NET_BUFSIZE <= MAX_FRAMELEN)
-#  error "CONFIG_NET_BUFSIZE is not valid for the ENC28J60"
+#if !defined(CONFIG_NET_ETH_MTU) && (CONFIG_NET_ETH_MTU <= MAX_FRAMELEN)
+#  error "CONFIG_NET_ETH_MTU is not valid for the ENC28J60"
 #endif
 
 /* We need to have the work queue to handle SPI interrupts */
@@ -155,7 +155,7 @@
 
 /* Packet memory layout */
 
-#define ALIGNED_BUFSIZE ((CONFIG_NET_BUFSIZE + 255) & ~255)
+#define ALIGNED_BUFSIZE ((CONFIG_NET_ETH_MTU + 255) & ~255)
 
 /* Work around Errata #5 (spurious reset of ERXWRPT to 0) by placing the RX
  * FIFO at the beginning of packet memory.
@@ -1487,7 +1487,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   /* Check for a usable packet length (4 added for the CRC) */
 
-  else if (pktlen > (CONFIG_NET_BUFSIZE + 4) || pktlen <= (ETH_HDRLEN + 4))
+  else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
     {
       nlldbg("Bad packet size dropped (%d)\n", pktlen);
 #ifdef CONFIG_ENC28J60_STATS
@@ -2504,8 +2504,8 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   /* Set the maximum packet size which the controller will accept */
 
-  enc_wrbreg(priv, ENC_MAMXFLL, CONFIG_NET_BUFSIZE & 0xff);
-  enc_wrbreg(priv, ENC_MAMXFLH, CONFIG_NET_BUFSIZE >> 8);
+  enc_wrbreg(priv, ENC_MAMXFLL, CONFIG_NET_ETH_MTU & 0xff);
+  enc_wrbreg(priv, ENC_MAMXFLH, CONFIG_NET_ETH_MTU >> 8);
 
   /* Configure LEDs (No, just use the defaults for now) */
   /* enc_wrphy(priv, ENC_PHLCON, ??); */

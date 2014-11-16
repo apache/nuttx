@@ -550,7 +550,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 
       cnt = e1000->rx_ring.desc[head].packet_length;
 
-      if (cnt > CONFIG_NET_BUFSIZE || cnt < 14)
+      if (cnt > CONFIG_NET_ETH_MTU || cnt < 14)
         {
           cprintf("NIC READ: invalid package size\n");
           goto next;
