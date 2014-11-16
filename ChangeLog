@@ -8989,3 +8989,6 @@
 	  variable length link layer protocol headers within incoming packets.
 	  This permits use of multiple network interfaces with differing data
 	  links.  For example, ETHERNET + SLIP (2014-11-15).
+	* arch/arm/src/sam34/sam4s_periphclks.h: Add missing SPI0 clock
+	  configuration macro for the SAM4S" sam4s_periphclks.h.  From
+	  spasbyspas (2014-11-16).
