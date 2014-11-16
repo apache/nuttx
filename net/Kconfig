@@ -29,6 +29,15 @@ config NET_NOINTS
 		Otherwise, it assumed that uIP will be called from interrupt level handling
 		and critical sections will be managed by enabling and disabling interrupts.
 
+config NET_PROMISCUOUS
+	bool "Promiscuous mode"
+	default n
+	---help---
+		Force the Ethernet driver to operate in promiscuous mode (if supported
+		by the Ethernet driver).
+
+menu "Driver buffer configuration"
+
 config NET_MULTIBUFFER
 	bool "Use multiple device-side I/O buffers"
 	default n
@@ -39,13 +48,6 @@ config NET_MULTIBUFFER
 		be filling one input buffer while sending another output buffer.
 		Or, as another example, the driver may support queuing of concurrent
 		input/ouput and output transfers for better performance.
-
-config NET_PROMISCUOUS
-	bool "Promiscuous mode"
-	default n
-	---help---
-		Force the Ethernet driver to operate in promiscuous mode (if supported
-		by the Ethernet driver).
 
 config NET_ETH_MTU
 	int "Ethernet packet buffer size (MTU)"
@@ -66,6 +68,17 @@ config NET_ETH_MTU
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
 		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
+config NET_ETH_TCP_RECVWNDO
+	int "Ethernet receive window size"
+	default 1220 if NET_IPv6
+	default 536 if !NET_IPv6
+	depends on NET_ETHERNET && NET_TCP
+	---help---
+		The size of the advertised receiver's window.   Should be set low
+		(i.e., to the size of the MSS) if the application is slow to process
+		incoming data, or high (32768 bytes) if the application processes
+		data quickly.
+
 config NET_SLIP_MTU
 	int # "SLIP packet buffer size (MTU)"
 	default 296
@@ -79,11 +92,10 @@ config NET_SLIP_MTU
 		support at lest 256+20+20 = 296.  Values other than 296 are not
 		recommended.
 
-config NET_RECEIVE_WINDOW
-	int "Receive window size"
-	default 1220 if !NET_SLIP && NET_IPv6
-	default 536 if !NET_SLIP && !NET_IPv6
-	default 256 if NET_SLIP && !NET_IPv6
+config NET_SLIP_TCP_RECVWNDO
+	int "SLIP receive window size"
+	default 256
+	depends on NET_SLIP && NET_TCP
 	---help---
 		The size of the advertised receiver's window.   Should be set low
 		(i.e., to the size of the MSS) if the application is slow to process
@@ -100,6 +112,8 @@ config NET_GUARDSIZE
 		amount to allocate slightly oversize packets.  After receipt, the
 		packet size will be chopped down to the size indicated in the TCP
 		header.
+
+end menu # Driver buffer configuration
 
 menu "Data link support"
 

@@ -88,7 +88,7 @@
  * There are other device-specific features that at tied to the link layer:
  *
  *   - Maximum Transfer Unit (MTU)
- *   - TCP Receive Window size
+ *   - TCP Receive Window size (See TCP configuration options below)
  * 
  * A better solution would be to support device-by-device MTU and receive
  * window sizes.  This minimum support is require to support the optimal
@@ -298,15 +298,17 @@
 #define TCP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
-#  define MIN_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
-#else /* if defined(CONFIG_NET_SLIP) */
-#  define MIN_TCP_MSS (CONFIG_NET_SLIP_MTU - IPTCP_HDRLEN)
+#  define ETH_TCP_MSS  (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
+#  define MIN_TCP_MSS  ETH_TCP_MSS
+#elif defined(CONFIG_NET_SLIP)
+#  define SLIP_TCP_MSS (CONFIG_NET_SLIP_MTU - IPTCP_HDRLEN)
+#  define MIN_TCP_MSS  SLIP_TCP_MSS
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define MAX_TCP_MSS (CONFIG_NET_SLIP_MTU - IPTCP_HDRLEN)
-#else /* if defined(CONFIG_NET_ETHERNET) */
-#  define MAX_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
+#  define MAX_TCP_MSS  SLIP_TCP_MSS
+#elif defined(CONFIG_NET_ETHERNET)
+#  define MAX_TCP_MSS  ETH_TCP_MSS
 #endif
 
 /* The size of the advertised receiver's window.
@@ -318,9 +320,36 @@
  * See the note above regarding the TCP MSS and CONFIG_NET_MULTILINK.
  */
 
-#ifndef CONFIG_NET_RECEIVE_WINDOW
-#  define CONFIG_NET_RECEIVE_WINDOW MIN_TCP_MSS
+#ifdef CONFIG_NET_SLIP
+#  ifndef CONFIG_NET_SLIP_TCP_RECVWNDO
+#    define CONFIG_NET_SLIP_TCP_RECVWNDO SLIP_TCP_MSS
+#  endif
 #endif
+
+#ifdef CONFIG_NET_ETHERNET
+#  ifndef CONFIG_NET_ETH_TCP_RECVWNDO
+#    define CONFIG_NET_ETH_TCP_RECVWNDO ETH_TCP_MSS
+#  endif
+#endif
+
+#if defined(CONFIG_NET_MULTILINK)
+   /* We are supporting multiple network devices using different link layer
+    * protocols.  Get the size of the receive window from the device structure.
+    */
+
+#  define NET_DEV_RCVWNDO(d)  ((d)->d_recvwndo)
+
+#elif defined(CONFIG_NET_SLIP)
+   /* Only SLIP.. use the configured SLIP receive window size */
+
+#  define NET_DEV_RCVWNDO(d)  CONFIG_NET_SLIP_TCP_RECVWNDO
+
+#else /* if defined(CONFIG_NET_ETHERNET) */
+   /* Only Ethernet.. use the configured SLIP receive window size */
+
+#  define NET_DEV_RCVWNDO(d)  CONFIG_NET_ETH_TCP_RECVWNDO
+
+#endif /* MULTILINK or SLIP or ETHERNET */
 
 /* How long a connection should stay in the TIME_WAIT state.
  *

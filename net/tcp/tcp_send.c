@@ -201,8 +201,8 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     }
   else
     {
-      pbuf->wnd[0] = ((CONFIG_NET_RECEIVE_WINDOW) >> 8);
-      pbuf->wnd[1] = ((CONFIG_NET_RECEIVE_WINDOW) & 0xff);
+      pbuf->wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
+      pbuf->wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
     }
 
   /* Finish the IP portion of the message, calculate checksums and send

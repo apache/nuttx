@@ -135,6 +135,9 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_ETHERNET:  /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_mtu      = CONFIG_NET_ETH_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_ETH_RECVWNDO;
+#endif
             devfmt          = NETDEV_ETH_FORMAT;
             break;
 #endif
@@ -143,6 +146,9 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_SLIP_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_SLIP_RECVWNDO;
+#endif
             devfmt          = NETDEV_SLIP_FORMAT;
             break;
 #endif
@@ -151,15 +157,12 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_PPP:       /* Point-to-Point Protocol (PPP) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_PPP_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_PPP_RECVWNDO;
+#endif
             devfmt          = NETDEV_PPP_FORMAT;
             break;
 #endif
-
-            /* REVISIT:  Here we must also set the size of the link header
-             * header the precedes network layer headers.
-             */
-
-            break;
 
           default:
             nlldbg("ERROR: Unrecognized link type: %d\n", lltype);
