@@ -206,15 +206,18 @@ static void efm32_uart_setbaud(uintptr_t base,  uint32_t baud)
       clkdiv = 0;
     }
 
-  /* Set up the selected oversampling and baud divisor */
+  /* Set up the selected oversampling */
 
   regval  = getreg32(base + EFM32_USART_CTRL_OFFSET);
   regval &= ~_USART_CTRL_OVS_MASK;
   regval |= ovs;
   putreg32(regval, base + EFM32_USART_CTRL_OFFSET);
 
-  regval = (uint32_t)clkdiv << _USART_CLKDIV_DIV_SHIFT;
-  DEBUGASSERT((regval & _USART_CLKDIV_MASK) == regval);
+  /* Set up the selected baud divisor.   The computation above already took
+   * in account of _USART_CLKDIV_DIV_SHIFT
+   */
+
+  regval = (uint32_t)clkdiv & _USART_CLKDIV_MASK;
   putreg32(regval, base + EFM32_USART_CLKDIV_OFFSET);
 }
 #endif
