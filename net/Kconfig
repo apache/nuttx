@@ -69,7 +69,7 @@ config NET_ETH_MTU
 		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
 config NET_ETH_TCP_RECVWNDO
-	int "Ethernet receive window size"
+	int "Ethernet TCP receive window size"
 	default 1220 if NET_IPv6
 	default 536 if !NET_IPv6
 	depends on NET_ETHERNET && NET_TCP
@@ -93,7 +93,7 @@ config NET_SLIP_MTU
 		recommended.
 
 config NET_SLIP_TCP_RECVWNDO
-	int "SLIP receive window size"
+	int "SLIP TCP receive window size"
 	default 256
 	depends on NET_SLIP && NET_TCP
 	---help---
@@ -113,7 +113,7 @@ config NET_GUARDSIZE
 		packet size will be chopped down to the size indicated in the TCP
 		header.
 
-end menu # Driver buffer configuration
+endmenu # Driver buffer configuration
 
 menu "Data link support"
 

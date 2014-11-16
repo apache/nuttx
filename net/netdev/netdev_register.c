@@ -136,7 +136,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_mtu      = CONFIG_NET_ETH_MTU;
 #ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_ETH_RECVWNDO;
+            dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_ETH_FORMAT;
             break;
@@ -147,7 +147,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_SLIP_MTU;
 #ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_SLIP_RECVWNDO;
+            dev->d_recvwndo = CONFIG_NET_SLIP_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_SLIP_FORMAT;
             break;
@@ -158,7 +158,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_PPP_MTU;
 #ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_PPP_RECVWNDO;
+            dev->d_recvwndo = CONFIG_NET_PPP_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_PPP_FORMAT;
             break;
