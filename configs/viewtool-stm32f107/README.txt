@@ -372,7 +372,7 @@ ViewTool DP83848 Ethernet Module
       CONFIG_NET_SOCKOPTS=y
 
       CONFIG_NET_ETH_MTU=650                 : Maximum packet size
-      CONFIG_NET_RECEIVE_WINDOW=650
+      CONFIG_NET_ETH_TCP_RECVWNDO=650
       CONFIG_NET_TCP_READAHEAD=y             : Enable read-ahead buffering
       CONFIG_NET_TCP_READAHEAD_BUFSIZE=650
 

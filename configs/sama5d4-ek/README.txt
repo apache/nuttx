@@ -1336,7 +1336,7 @@ Networking
     CONFIG_NET=y                         : Enable Neworking
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
     CONFIG_NET_ETH_MTU=562               : Maximum packet size (MTU) 1518 is more standard
-    CONFIG_NET_RECEIVE_WINDOW=562        : Should be the same as CONFIG_NET_ETH_MTU
+    CONFIG_NET_ETH_TCP_RECVWNDO=562      : Should be the same as CONFIG_NET_ETH_MTU
     CONFIG_NET_ARP=y                     : ARP support should be enabled
     CONFIG_NET_ARP_IPIN=y                : IP address harvesting (optional)
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
