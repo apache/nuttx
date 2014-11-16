@@ -85,10 +85,14 @@
  * supported concurrently.  In this case, the size of link layer header
  * varies and is obtained from the network device structure.
  *
- * Support is also provided to select different MTU sizes for each different
- * link layer protocol.  A better solution would be to support device-by-
- * device MTU sizes.  This minimum support is require to support the
- * optimal SLIP MTU of 296 bytes and the standard Ethernet MTU of 1500
+ * There are other device-specific features that at tied to the link layer:
+ *
+ *   - Maximum Transfer Unit (MTU)
+ *   - TCP Receive Window size
+ * 
+ * A better solution would be to support device-by-device MTU and receive
+ * window sizes.  This minimum support is require to support the optimal
+ * SLIP MTU of 296 bytes and the standard Ethernet MTU of 1500
  * bytes.
  */
 
@@ -111,14 +115,14 @@
     */
 
 #  define NET_LL_HDRLEN(d) ((d)->d_llhdrlen)
-#  define NET_LL_MTU(d)    ((d)->d_llmtu)
+#  define NET_DEV_MTU(d)   ((d)->d_mtu)
 
 #  ifdef CONFIG_NET_ETHERNET
-#    define _MIN_ETH_MTU  CONFIG_NET_ETH_MTU
-#    define _MAX_ETH_MTU  CONFIG_NET_ETH_MTU
+#    define _MIN_ETH_MTU   CONFIG_NET_ETH_MTU
+#    define _MAX_ETH_MTU   CONFIG_NET_ETH_MTU
 #  else
-#    define _MIN_ETH_MTU  UINT16_MAX
-#    define _MAX_ETH_MTU  0
+#    define _MIN_ETH_MTU   UINT16_MAX
+#    define _MAX_ETH_MTU   0
 #  endif
 
 #  ifdef CONFIG_NET_SLIP
@@ -129,8 +133,8 @@
 #    define _MAX_SLIP_MTU  _MAX_ETH_MTU
 #  endif
 
-#  define MIN_NET_LL_MTU   _MIN_SLIP_MTU
-#  define MAX_NET_LL_MTU   _MAX_SLIP_MTU
+#  define MIN_NET_DEV_MTU  _MIN_SLIP_MTU
+#  define MAX_NET_DEV_MTU  _MAX_SLIP_MTU
 
 #elif defined(CONFIG_NET_SLIP)
    /* There is no link layer header with SLIP */
@@ -138,18 +142,18 @@
 #  ifdef CONFIG_NET_IPv6
 #    error SLIP is not available for IPv6
 #  endif
-#  define NET_LL_HDRLEN(d) 0
-#  define NET_LL_MTU(d)    CONFIG_NET_SLIP_MTU
-#  define MIN_NET_LL_MTU   CONFIG_NET_SLIP_MTU
-#  define MAX_NET_LL_MTU   CONFIG_NET_SLIP_MTU
+#  define NET_LL_HDRLEN(d)  0
+#  define NET_DEV_MTU(d)    CONFIG_NET_SLIP_MTU
+#  define MIN_NET_DEV_MTU   CONFIG_NET_SLIP_MTU
+#  define MAX_NET_DEV_MTU   CONFIG_NET_SLIP_MTU
 
 #else /* if defined(CONFIG_NET_ETHERNET) */
    /* Assume standard Ethernet link layer header */
 
-#  define NET_LL_HDRLEN(d) 14
-#  define NET_LL_MTU(d)    CONFIG_NET_ETH_MTU
-#  define MIN_NET_LL_MTU   CONFIG_NET_ETH_MTU
-#  define MAX_NET_LL_MTU   CONFIG_NET_ETH_MTU
+#  define NET_LL_HDRLEN(d)  14
+#  define NET_DEV_MTU(d)    CONFIG_NET_ETH_MTU
+#  define MIN_NET_DEV_MTU   CONFIG_NET_ETH_MTU
+#  define MAX_NET_DEV_MTU   CONFIG_NET_ETH_MTU
 
 #endif /* MULTILINK or SLIP or ETHERNET */
 
@@ -206,10 +210,10 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than NET_LL_MTU(d) - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
+ * than NET_DEV_MTU(d) - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
  */
 
-#define UDP_MSS(d)    (NET_LL_MTU(d) - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
+#define UDP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
 #  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
@@ -283,7 +287,7 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than NET_LL_MTU(dev) - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
+ * than NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
  * link layer protocols (CONFIG_NET_MULTILINK), each network device
@@ -291,7 +295,7 @@
  * the minimum MSS for that case.
  */
 
-#define TCP_MSS(d)    (NET_LL_MTU(d) - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
+#define TCP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
 #  define MIN_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)

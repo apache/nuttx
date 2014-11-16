@@ -101,7 +101,7 @@ struct net_driver_s
 
   uint8_t d_lltype;         /* See enum net_datalink_e */
   uint8_t d_llhdrlen;       /* Link layer header size */
-  uint16_t d_llmtu;         /* Maximum packet size */
+  uint16_t d_mtu;           /* Maximum packet size */
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
@@ -131,7 +131,7 @@ struct net_driver_s
 #ifdef CONFIG_NET_MULTIBUFFER
   uint8_t *d_buf;
 #else
-  uint8_t d_buf[MAX_NET_LL_MTU + CONFIG_NET_GUARDSIZE];
+  uint8_t d_buf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 #endif
 
   /* d_appdata points to the location where application data can be read from

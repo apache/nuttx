@@ -319,7 +319,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              req->ifr_mtu = NET_LL_MTU(dev);
+              req->ifr_mtu = NET_DEV_MTU(dev);
               ret = OK;
             }
         }
