@@ -198,7 +198,7 @@ struct kinetis_driver_s
    * requirements.
    */
 
-  uint8_t buffers[NENET_NBUFFERS * CONFIG_NET_BUFSIZE + 16];
+  uint8_t buffers[NENET_NBUFFERS * CONFIG_NET_ETH_MTU + 16];
 };
 
 /****************************************************************************
@@ -833,7 +833,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set the RX buffer size */
 
-  putreg32(CONFIG_NET_BUFSIZE, KINETIS_ENET_MRBR);
+  putreg32(CONFIG_NET_ETH_MTU, KINETIS_ENET_MRBR);
 
   /* Point to the start of the circular RX buffer descriptor queue */
 
@@ -1247,10 +1247,10 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 
 #if CONFIG_ENET_USEMII
   rcr = ENET_RCR_MII_MODE | ENET_RCR_CRCFWD |
-        CONFIG_NET_BUFSIZE << ENET_RCR_MAX_FL_SHIFT;
+        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT;
 #else
   rcr = ENET_RCR_RMII_MODE | ENET_RCR_CRCFWD |
-        CONFIG_NET_BUFSIZE << ENET_RCR_MAX_FL_SHIFT;
+        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT;
 #endif
   tcr = 0;
 
@@ -1328,7 +1328,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
 #ifdef CONFIG_ENET_ENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
-      addr                   += CONFIG_NET_BUFSIZE;
+      addr                   += CONFIG_NET_ETH_MTU;
     }
 
   /* Then fill in the RX descriptors */
@@ -1342,7 +1342,7 @@ static void kinetis_initbuffers(struct kinetis_driver_s *priv)
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
 #endif
-      addr                   += CONFIG_NET_BUFSIZE;
+      addr                   += CONFIG_NET_ETH_MTU;
     }
 
   /* Set the wrap bit in the last descriptors to form a ring */

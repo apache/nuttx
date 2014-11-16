@@ -95,7 +95,7 @@ endif
 
 ifeq ($(CONFIG_NET),y)
 CSRCS += up_netdriver.c
-HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_BUFSIZE)
+HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
 ifneq ($(HOSTOS),Cygwin)
 HOSTSRCS += up_tapdev.c up_netdev.c
 else

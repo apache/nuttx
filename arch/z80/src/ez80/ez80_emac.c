@@ -75,7 +75,7 @@
 #  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM
 #endif
 
-#if CONFIG_NET_BUFSIZE > 1518
+#if CONFIG_NET_ETH_MTU > 1518
 #  error "MAXF size too big for this device"
 #endif
 
@@ -1202,10 +1202,10 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
        * for the uIP buffer configuration (I routinely see
        */
 
-      if (rxdesc->pktsize > CONFIG_NET_BUFSIZE)
+      if (rxdesc->pktsize > CONFIG_NET_ETH_MTU)
         {
-          nvdbg("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_BUFSIZE);
-          pktlen = CONFIG_NET_BUFSIZE;
+          nvdbg("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_ETH_MTU);
+          pktlen = CONFIG_NET_ETH_MTU;
         }
       else
         {
