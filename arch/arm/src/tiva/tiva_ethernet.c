@@ -677,7 +677,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
        * and 4 byte FCS that are not copied into the uIP packet.
        */
 
-      if (pktlen > (CONFIG_NET_BUFSIZE + 6) || pktlen <= (ETH_HDRLEN + 6))
+      if (pktlen > (CONFIG_NET_ETH_MTU + 6) || pktlen <= (ETH_HDRLEN + 6))
         {
           int wordlen;
 

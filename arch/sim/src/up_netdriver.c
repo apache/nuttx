@@ -141,7 +141,7 @@ void netdriver_loop(void)
 {
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
-  g_sim_dev.d_len = netdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_BUFSIZE);
+  g_sim_dev.d_len = netdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_ETH_MTU);
 
   /* Disable preemption through to the following so that it behaves a little more
    * like an interrupt (otherwise, the following logic gets pre-empted an behaves

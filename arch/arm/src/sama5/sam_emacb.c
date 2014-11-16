@@ -300,7 +300,7 @@
 #endif
 
 #define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
-#define EMAC_TX_UNITSIZE CONFIG_NET_BUFSIZE  /* MAX size for Ethernet packet */
+#define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
 
 /* Timing *******************************************************************/
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
@@ -1359,9 +1359,9 @@ static int sam_recvframe(struct sam_emac_s *priv)
           /* Get the number of bytes to copy from the buffer */
 
           copylen = EMAC_RX_UNITSIZE;
-          if ((pktlen + copylen) > CONFIG_NET_BUFSIZE)
+          if ((pktlen + copylen) > CONFIG_NET_ETH_MTU)
             {
-              copylen = CONFIG_NET_BUFSIZE - pktlen;
+              copylen = CONFIG_NET_ETH_MTU - pktlen;
             }
 
           /* Get the data source.  Invalidate the source memory region to
@@ -1499,7 +1499,7 @@ static void sam_receive(struct sam_emac_s *priv)
        * (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_BUFSIZE)
+      if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
         }
