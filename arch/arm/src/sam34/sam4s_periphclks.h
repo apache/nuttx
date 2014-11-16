@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam34/sam4s_periphclks.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,7 @@
 #define sam_twi0_enableclk()       sam_enableperiph0(SAM_PID_TWI0)
 #define sam_twi1_enableclk()       sam_enableperiph0(SAM_PID_TWI1)
 #define sam_ssc_enableclk()        sam_enableperiph0(SAM_PID_SSC)
+#define sam_spi0_enableclk()       sam_enableperiph0(SAM_PID_SPI0)
 #define sam_tc0_enableclk()        sam_enableperiph0(SAM_PID_TC0)
 #define sam_tc1_enableclk()        sam_enableperiph0(SAM_PID_TC1)
 #define sam_tc2_enableclk()        sam_enableperiph0(SAM_PID_TC2)
@@ -107,6 +108,7 @@
 #define sam_hsmci_disableclk()     sam_disableperiph0(SAM_PID_HSMCI)
 #define sam_twi0_disableclk()      sam_disableperiph0(SAM_PID_TWI0)
 #define sam_twi1_disableclk()      sam_disableperiph0(SAM_PID_TWI1)
+#define sam_spi0_disableclk()      sam_disableperiph0(SAM_PID_SPI0)
 #define sam_ssc_disableclk()       sam_disableperiph0(SAM_PID_SSC)
 #define sam_tc0_disableclk()       sam_disableperiph0(SAM_PID_TC0)
 #define sam_tc1_disableclk()       sam_disableperiph0(SAM_PID_TC1)
