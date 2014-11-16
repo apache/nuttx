@@ -2605,7 +2605,7 @@ nsh>
   <tr>
     <td><b><code>get</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
-        <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
+        <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <i>MTU</i> &gt;= 558<sup>1</sup></td>
     <td><code>CONFIG_NSH_DISABLE_GET</code></td>
   </tr>
   <tr>
@@ -2711,7 +2711,7 @@ nsh>
   <tr>
     <td><b><code>put</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
-    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1,2</sup></td>
+    <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <i>MTU</i> &gt;= 558<sup>1,2</sup></td>
     <td><code>CONFIG_NSH_DISABLE_PUT</code></td>
   </tr>
   <tr>
@@ -3254,10 +3254,12 @@ set FOOBAR ABC_${FOO}_${BAR}
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_NET_BUFSIZE=650</code></b> (or larger)</td>
+    <td valign="top"><b><code>CONFIG_NET_ETH_MTU=650</code></b> (or larger)</td>
     <td>
       Per RFC2131 (p. 9), the DHCP client must be prepared to receive DHCP messages of up to
       576 bytes (excluding Ethernet, IP, or UDP headers and FCS).
+      NOTE: Note that the actual MTU setting will depend upon the specific link protocol.
+      Here Ethernet is indicated.
     </td>
   </tr>
 </table></center>
