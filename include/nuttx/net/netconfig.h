@@ -93,6 +93,26 @@
     */
 
 #  define NET_LL_HDRLEN(d) ((d)->d_llhdrlen)
+#  define NET_LL_MTU(d)    ((d)->d_llmtu)
+
+#  ifdef CONFIG_NET_ETHERNET
+#    define _MIN_ETH_MTU  CONFIG_NET_ETH_MTU
+#    define _MAX_ETH_MTU  CONFIG_NET_ETH_MTU
+#  else
+#    define _MIN_ETH_MTU  UINT16_MAX
+#    define _MAX_ETH_MTU  0
+#  endif
+
+#  ifdef CONFIG_NET_SLIP
+#    define _MIN_SLIP_MTU  MIN(_MIN_ETH_MTU,CONFIG_NET_SLIP_MTU)
+#    define _MAX_SLIP_MTU  MAX(_MAX_ETH_MTU,CONFIG_NET_SLIP_MTU)
+#  else
+#    define _MIN_SLIP_MTU  _MIN_ETH_MTU
+#    define _MAX_SLIP_MTU  _MAX_ETH_MTU
+#  endif
+
+#  define MIN_NET_LL_MTU   _MIN_SLIP_MTU
+#  define MAX_NET_LL_MTU   _MAX_SLIP_MTU
 
 #elif defined(CONFIG_NET_SLIP)
    /* There is no link layer header with SLIP */
@@ -101,11 +121,17 @@
 #    error SLIP is not available for IPv6
 #  endif
 #  define NET_LL_HDRLEN(d) 0
+#  define NET_LL_MTU(d)    CONFIG_NET_SLIP_MTU
+#  define MIN_NET_LL_MTU   CONFIG_NET_SLIP_MTU
+#  define MAX_NET_LL_MTU   CONFIG_NET_SLIP_MTU
 
 #else /* if defined(CONFIG_NET_ETHERNET) */
    /* Assume standard Ethernet link layer header */
 
 #  define NET_LL_HDRLEN(d) 14
+#  define NET_LL_MTU(d)    CONFIG_NET_ETH_MTU
+#  define MIN_NET_LL_MTU   CONFIG_NET_ETH_MTU
+#  define MAX_NET_LL_MTU   CONFIG_NET_ETH_MTU
 
 #endif /* MULTILINK or SLIP or ETHERNET */
 
@@ -165,18 +191,18 @@
  * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
  */
 
-#define UDP_MSS(d)    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
+#define UDP_MSS(d)    (CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
-#  define MIN_UDP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPUDP_HDRLEN)
+#  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
 #else /* if defined(CONFIG_NET_SLIP) */
-#  define MIN_UDP_MSS (CONFIG_NET_BUFSIZE - IPUDP_HDRLEN)
+#  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - IPUDP_HDRLEN)
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define MAX_UDP_MSS (CONFIG_NET_BUFSIZE - IPUDP_HDRLEN)
+#  define MAX_UDP_MSS (CONFIG_NET_ETH_MTU - IPUDP_HDRLEN)
 #else /* if defined(CONFIG_NET_ETHERNET) */
-#  define MAX_UDP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPUDP_HDRLEN)
+#  define MAX_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
 #endif
 
 /* TCP configuration options */
@@ -239,7 +265,7 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
+ * than CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
  * link layer protocols (CONFIG_NET_MULTILINK), each network device
@@ -247,18 +273,18 @@
  * the minimum MSS for that case.
  */
 
-#define TCP_MSS(d)    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
+#define TCP_MSS(d)    (CONFIG_NET_ETH_MTU - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
-#  define MIN_TCP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPTCP_HDRLEN)
+#  define MIN_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
 #else /* if defined(CONFIG_NET_SLIP) */
-#  define MIN_TCP_MSS (CONFIG_NET_BUFSIZE - IPTCP_HDRLEN)
+#  define MIN_TCP_MSS (CONFIG_NET_ETH_MTU - IPTCP_HDRLEN)
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define MAX_TCP_MSS (CONFIG_NET_BUFSIZE - IPTCP_HDRLEN)
+#  define MAX_TCP_MSS (CONFIG_NET_ETH_MTU - IPTCP_HDRLEN)
 #else /* if defined(CONFIG_NET_ETHERNET) */
-#  define MAX_TCP_MSS (CONFIG_NET_BUFSIZE - ETH_HDRLEN - IPTCP_HDRLEN)
+#  define MAX_TCP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
 #endif
 
 /* The size of the advertised receiver's window.

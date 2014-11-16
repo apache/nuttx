@@ -83,7 +83,7 @@ static int g_next_devnum = 0;
  * Public Data
  ****************************************************************************/
 
-/* List of registered ethernet device drivers */
+/* List of registered Ethernet device drivers */
 
 struct net_driver_s *g_netdevices = NULL;
 
@@ -134,6 +134,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_ETHERNET
           case NET_LL_ETHERNET:  /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;
+            dev->d_llmtu    = CONFIG_NET_ETH_MTU;
             devfmt          = NETDEV_ETH_FORMAT;
             break;
 #endif
@@ -141,6 +142,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_SLIP
           case NET_LL_SLIP:      /* Serial Line Internet Protocol (SLIP) */
             dev->d_llhdrlen = 0;
+            dev->d_llmtu    = CONFIG_NET_SLIP_MTU;
             devfmt          = NETDEV_SLIP_FORMAT;
             break;
 #endif
@@ -148,6 +150,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #if 0                            /* REVISIT: Not yet supported */
           case NET_LL_PPP:       /* Point-to-Point Protocol (PPP) */
             dev->d_llhdrlen = 0;
+            dev->d_llmtu    = CONFIG_NET_PPP_MTU;
             devfmt          = NETDEV_PPP_FORMAT;
             break;
 #endif

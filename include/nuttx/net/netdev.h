@@ -101,6 +101,7 @@ struct net_driver_s
 
   uint8_t d_lltype;         /* See enum net_datalink_e */
   uint8_t d_llhdrlen;       /* Link layer header size */
+  uint16_t d_llmtu;         /* Maximum packet size */
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
