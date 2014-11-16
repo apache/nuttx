@@ -1044,7 +1044,7 @@ Configuration Sub-Directories
        use the UART1 hardware flow control yet.
 
        NOTE: The Linux slip module hard-codes its MTU size to 296.  So you
-       might as well set CONFIG_NET_BUFSIZE to 296 as well.
+       might as well set CONFIG_NET_ETH_MTU to 296 as well.
 
     4. After turning over the line to the SLIP driver, you must configure
        the network interface. Again, you do this using the standard

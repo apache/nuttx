@@ -634,9 +634,9 @@ TWR-K60N512-specific Configuration Options
   Kenetis ethernet controller settings
 
     CONFIG_ENET_NRXBUFFERS - Number of RX buffers.  The size of one
-        buffer is determined by CONFIG_NET_BUFSIZE.  Default: 6
+        buffer is determined by CONFIG_NET_ETH_MTU.  Default: 6
     CONFIG_ENET_NTXBUFFERS - Number of TX buffers.  The size of one
-        buffer is determined by CONFIG_NET_BUFSIZE.  Default: 2
+        buffer is determined by CONFIG_NET_ETH_MTU.  Default: 2
     CONFIG_ENET_USEMII - Use MII mode.  Default: RMII mode.
     CONFIG_ENET_PHYADDR - PHY address
 
