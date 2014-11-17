@@ -136,8 +136,8 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
       ++g_ipid;
       picmp->ipid[0]     = g_ipid >> 8;
       picmp->ipid[1]     = g_ipid & 0xff;
-      picmp->ipoffset[0] = TCPFLAG_DONTFRAG >> 8;
-      picmp->ipoffset[1] = TCPFLAG_DONTFRAG & 0xff;
+      picmp->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
+      picmp->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
       picmp->ttl         = IP_TTL;
       picmp->proto       = IP_PROTO_ICMP;
 

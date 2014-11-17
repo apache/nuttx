@@ -150,8 +150,8 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   ++g_ipid;
   IGMPBUF->ipid[0]     = g_ipid >> 8;
   IGMPBUF->ipid[1]     = g_ipid & 0xff;
-  IGMPBUF->ipoffset[0] = TCPFLAG_DONTFRAG >> 8;
-  IGMPBUF->ipoffset[1] = TCPFLAG_DONTFRAG & 0xff;
+  IGMPBUF->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
+  IGMPBUF->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
   IGMPBUF->ttl         = IGMP_TTL;
   IGMPBUF->proto       = IP_PROTO_IGMP;
 

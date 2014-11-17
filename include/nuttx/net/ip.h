@@ -64,18 +64,24 @@
  ****************************************************************************/
 /* Values for the IP protocol field */
 
-#define IP_PROTO_ICMP  1
-#define IP_PROTO_IGMP  2
-#define IP_PROTO_TCP   6
-#define IP_PROTO_UDP   17
-#define IP_PROTO_ICMP6 58
+#define IP_PROTO_ICMP     1
+#define IP_PROTO_IGMP     2
+#define IP_PROTO_TCP      6
+#define IP_PROTO_UDP      17
+#define IP_PROTO_ICMP6    58
+
+/* Flag bits in 16-bit flags + fragment offset IPv4 header field */
+
+#define IP_FLAG_RESERVED  0x8000
+#define IP_FLAG_DONTFRAG  0x4000
+#define IP_FLAG_MOREFRAGS 0x2000
 
 /* Header sizes */
 
 #ifdef CONFIG_NET_IPv6
-# define IP_HDRLEN     40    /* Size of IP header */
+# define IP_HDRLEN        40    /* Size of IP header */
 #else
-# define IP_HDRLEN     20    /* Size of IP header */
+# define IP_HDRLEN        20    /* Size of IP header */
 #endif
 
 /****************************************************************************

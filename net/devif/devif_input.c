@@ -112,7 +112,7 @@
 
 /* IP fragment re-assembly */
 
-#define IP_MF                0x20
+#define IP_MF                0x20  /* See IP_FLAG_MOREFRAGS */
 #define TCP_REASS_BUFSIZE    (NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev))
 #define TCP_REASS_LASTFRAG   0x01
 

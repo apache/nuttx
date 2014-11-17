@@ -95,12 +95,6 @@
 #  define TCP_STOPPED     0x10 /* Bit 4: stopped */
                                /* Bit 5-7: Unused, but not available */
 
-/* Flag bits in 16-bit flags+ipoffset IPv4 TCP header field */
-
-#define TCPFLAG_RESERVED  0x8000
-#define TCPFLAG_DONTFRAG  0x4000
-#define TCPFLAG_MOREFRAGS 0x2000
-
 /* TCP header sizes */
 
 #define TCP_HDRLEN        20                       /* Size of TCP header */
