@@ -9003,3 +9003,6 @@
 	  CONFIG_NET_ETH_TCP_RECVWNDO and CONFIG_NET_SLIP_TCP_RECVWNDO.  Add
 	  data structures and logic to handler different TCP receive windows
 	  when both Ethernet and SLIP are enabled (2014-11-16).
+	* configs/sama5d4-ek/bridge: Add a simple test for the dual EMACs on
+	  the SAMA5D4 (2014-11-17).
+
