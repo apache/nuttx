@@ -3668,8 +3668,21 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
-    3. This configuration executes from DRAM and must be loaded via some
-       bootloader.  I use DRAMBOOT as described above.
+     3. EMAC0 and EMAC1 connect KSZ8081RNB PHYs and are available at the
+        ETH0 and ETH1 connector, respectively.
+
+        The ETH1 signals go through line drivers that are enabled via the
+        board LCD_ETH1_CONFIG signal.  Jumper JP2 selects either the EMAC1
+        or the LCD by controlling the the LCD_ETH1_CONFIG signal on the
+        board.
+
+        - JP2 open, LCD_ETH1_CONFIG pulled high:
+
+          LCD_ETH1_CONFIG=1: LCD 5v enable(LCD_DETECT#=0); ETH1 disable
+
+        - JP2 closed, LCD_ETH1_CONFIG grounded:
+
+          LCD_ETH1_CONFIG=0: LCD 5v disable; ETH1 enable
 
     STATUS:
 

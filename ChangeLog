@@ -9005,4 +9005,6 @@
 	  when both Ethernet and SLIP are enabled (2014-11-16).
 	* configs/sama5d4-ek/bridge: Add a simple test for the dual EMACs on
 	  the SAMA5D4 (2014-11-17).
+	* arch/arm/src/sama5/sam_emacb.c:  Fix several typos that will prevent
+	  EMAC1 from initializing properly (2014-11-17).
 
