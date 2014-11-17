@@ -3668,6 +3668,9 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
+    3. This configuration executes from DRAM and must be loaded via some
+       bootloader.  I use DRAMBOOT as described above.
+
     STATUS:
 
       2014-11-17:  Configuration created.  Not yet verified.
