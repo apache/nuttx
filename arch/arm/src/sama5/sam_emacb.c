@@ -266,7 +266,7 @@
 #  else
 #    error EMAC PHY unrecognized
 #  endif
-#endif /* CONFIG_SAMA5_EMAC0 */
+#endif /* CONFIG_SAMA5_EMAC1 */
 
 /* Common Configuration *****************************************************/
 
@@ -587,7 +587,7 @@ static struct emac_rxdesc_s g_emac1_rxdesc[CONFIG_SAMA5_EMAC1_NRXBUFFERS]
 static uint8_t g_emac1_txbuffer[CONFIG_SAMA5_EMAC1_NTXBUFFERS * EMAC_TX_UNITSIZE];
                __attribute__((aligned(8)))
 
-/* EMAC0 Receive Buffers */
+/* EMAC1 Receive Buffers */
 
 static uint8_t g_emac1_rxbuffer[CONFIG_SAMA5_EMAC1_NRXBUFFERS * EMAC_RX_UNITSIZE]
                __attribute__((aligned(8)));
@@ -641,8 +641,8 @@ static const struct sam_emacattr_s g_emac0_attr =
     .std        =
     {
       .stdmask  = (CONFIG_SAMA5_EMAC0_PHYSR_SPEED | CONFIG_SAMA5_EMAC0_PHYSR_MODE),
-      .speed100 = CONFIG_SAMA5_EMAC1_PHYSR_100MBPS,
-      .fduplex  = CONFIG_SAMA5_EMAC1_PHYSR_FULLDUPLEX,
+      .speed100 = CONFIG_SAMA5_EMAC0_PHYSR_100MBPS,
+      .fduplex  = CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX,
     },
 #endif
   },
@@ -672,7 +672,7 @@ static const struct sam_emacattr_s g_emac1_attr =
 
   .base         = SAM_EMAC1_VBASE,
   .handler      = sam_emac1_interrupt,
-  .emac         = 0,
+  .emac         = 1,
   .irq          = SAM_IRQ_EMAC1,
 
   /* PHY Configuration */
@@ -3279,7 +3279,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
     }
 #endif
 
-#if defined(CONFIG_SAMA5_EMAC0)
+#if defined(CONFIG_SAMA5_EMAC1)
   /* Configure EMAC0 PIO pins */
 
   if (priv->attr->emac == 1)
