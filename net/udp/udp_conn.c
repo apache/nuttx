@@ -129,7 +129,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
     {
       if (g_udp_connections[ i ].lport == portno)
         {
-          return &g_udp_connections[ i ];
+          return &g_udp_connections[i];
         }
     }
 
@@ -365,7 +365,7 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
  * Name: udp_bind()
  *
  * Description:
- *   This function implements the UIP specific parts of the standard UDP
+ *   This function implements the low level parts of the standard UDP
  *   bind() operation.
  *
  * Assumptions:
@@ -397,7 +397,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 
       flags = net_lock();
 
-      /* Is any other UDP connection bound to this port? */
+      /* Is any other UDP connection already bound to this port? */
 
       if (!udp_find_conn(addr->sin_port))
         {
@@ -417,14 +417,19 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
  * Name: udp_connect()
  *
  * Description:
- *   This function sets up a new UDP connection. The function will
- *   automatically allocate an unused local port for the new
- *   connection. However, another port can be chosen by using the
- *   udp_bind() call, after the udp_connect() function has been
- *   called.
+ *   This function simply assigns a remote address to UDP "connection"
+ *   structure.  This function is called as part of the implementation of:
  *
- *   This function is called as part of the implementation of sendto
- *   and recvfrom.
+ *   - connect().  If connect() is called for a SOCK_DGRAM socket, then
+ *       this logic performs the moral equivalent of connec() operation
+ *       for the UDP socket.
+ *   - recvfrom() and sendto().  This function is called to set the
+ *       remote address of the peer.
+ *
+ *   The function will automatically allocate an unused local port for the
+ *   new connection if the socket is not yet bound to a local address.
+ *   However, another port can be chosen by using the udp_bind() call,
+ *   after the udp_connect() function has been called.
  *
  * Input Parameters:
  *   conn - A reference to UDP connection structure

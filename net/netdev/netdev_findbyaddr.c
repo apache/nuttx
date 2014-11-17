@@ -166,7 +166,7 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
   /* No.. The address lies on an external network */
 
 #ifdef CONFIG_NET_ROUTE
-  /* If we have a routing table, then perhaps we can find the the local
+  /* If we have a routing table, then perhaps we can find the local
    * address of a router that can forward packets to the external network.
    */
 
@@ -202,6 +202,7 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
     {
       dev = g_netdevices;
     }
+
   netdev_semgive();
 
   /* If we will did not find the network device, then we might as well fail
