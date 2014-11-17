@@ -9007,4 +9007,9 @@
 	  the SAMA5D4 (2014-11-17).
 	* arch/arm/src/sama5/sam_emacb.c:  Fix several typos that will prevent
 	  EMAC1 from initializing properly (2014-11-17).
+	* include/nuttx/net/ip.h and tcp.h, net/icmp/icmp_send.c and
+	  igmp/igmp_send.c: Move IP header flags from tcp.h to ip.h and rename
+	  IP_FLAGS vs TCPFLAGS.  The problem fixed here is that there IP flags
+	  were not available when TCP was disabled.  The IP flags are used in
+	  ICMP and IGMP (2014-11-17).
 
