@@ -3686,7 +3686,10 @@ Configurations
 
     STATUS:
 
-      2014-11-17:  Configuration created.  Not yet verified.
+      2014-11-17:  Configuration created.  Only partially verified.  EMAC0
+        seems functional, but EMAC1 does not respond to pings.  Cannot perform
+        the full bridge test yet anyway because there still is no host-side
+        test driver in apps/examples/bridge.
 
   dramboot:
 
