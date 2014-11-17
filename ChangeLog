@@ -8999,3 +8999,7 @@
 	  CONFIG_NET_BUFSIZE to CONFIG_NET_ETH_MTU; Add CONFIG_NET_SLIP_MTU.
 	  Add data structures and logic to handle different MTUs when both
 	  Ethernet and SLIP are enabled (2014-11-16).
+	* net/, include/, various files:  Rename CONFIG_NET_RECEIVE_WINDOW to
+	  CONFIG_NET_ETH_TCP_RECVWNDO and CONFIG_NET_SLIP_TCP_RECVWNDO.  Add
+	  data structures and logic to handler different TCP receive windows
+	  when both Ethernet and SLIP are enabled (2014-11-16).
