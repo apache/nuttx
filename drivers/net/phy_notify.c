@@ -48,6 +48,7 @@
 #  define CONFIG_DEBUG_NET 1
 #endif
 
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
@@ -198,7 +199,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
           client->signo    = 0;
           client->index    = i;
 #ifdef CONFIG_NETDEV_MULTINIC
-          client->intf  = '\0';
+          client->intf[0]  = '\0';
 #endif
           client->pid      = -1;
           client->arg      = NULL;
