@@ -3588,6 +3588,8 @@ Configurations
       AT25 serial FLASH (in particular, dramboot).  See the description
       below and the section above entitled "Creating and Using AT25BOOT"
       for more information
+    bridge:  This is a simple testing that exercises EMAC0 and EMAC1 for
+      a simple UDP relay bridge test.
     dramboot: This is a little program to help debug of code in DRAM.  See
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
@@ -3634,6 +3636,41 @@ Configurations
     the binary image onto the AT25 Serial FLASH, the RomBOOT loader will
     not boot it!  I believe that is because the secure boot loader has some
     undocumented requirements that I am unaware of. (2014-6-28)
+
+  bridge:
+  
+    This is a simple testing that exercises EMAC0 and EMAC1 for a simple
+    UDP relay bridge test using apps/examples/bridge.  See
+    apps/examples/README.txt for more information about this test.
+
+
+    NOTES:
+
+    1. This configuration uses the the USART3 for the serial console
+       which is available at the "DBGU" RS-232 connector (J24).  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
+
+    STATUS:
+
+      2014-11-17:  Configuration created.  Not yet verified.
 
   dramboot:
 
