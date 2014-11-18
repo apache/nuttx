@@ -604,7 +604,7 @@ static const struct sam_emacattr_s g_emac0_attr =
 
   .base         = SAM_EMAC0_VBASE,
   .handler      = sam_emac0_interrupt,
-  .emac         = 0,
+  .emac         = EMAC0_INTF,
   .irq          = SAM_IRQ_EMAC0,
 
   /* PHY Configuration */
@@ -672,7 +672,7 @@ static const struct sam_emacattr_s g_emac1_attr =
 
   .base         = SAM_EMAC1_VBASE,
   .handler      = sam_emac1_interrupt,
-  .emac         = 1,
+  .emac         = EMAC1_INTF,
   .irq          = SAM_IRQ_EMAC1,
 
   /* PHY Configuration */
@@ -3248,7 +3248,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 #if defined(CONFIG_SAMA5_EMAC0)
   /* Configure EMAC0 PIO pins */
 
-  if (priv->attr->emac == 0)
+  if (priv->attr->emac == EMAC0_INTF)
     {
       /* Configure PIO pins common to RMII and MII mode*/
 
@@ -3277,12 +3277,13 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
           sam_configpio(PIO_EMAC0_COL);  /* Collision Detect */
         }
     }
+ else
 #endif
 
 #if defined(CONFIG_SAMA5_EMAC1)
   /* Configure EMAC0 PIO pins */
 
-  if (priv->attr->emac == 1)
+  if (priv->attr->emac == EMAC1_INTF)
     {
       /* Configure PIO pins common to RMII and MII mode*/
 
@@ -3311,7 +3312,11 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
           sam_configpio(PIO_EMAC1_COL);  /* Collision Detect */
         }
     }
+  else
 #endif
+   {
+     nvdbg("ERROR: emac=%d\n", priv->attr->emac);
+   }
 }
 
 /****************************************************************************
@@ -3463,7 +3468,7 @@ static void sam_emac_enableclk(struct sam_emac_s *priv)
 #if defined(CONFIG_SAMA5_EMAC0) && defined(CONFIG_SAMA5_EMAC1)
   /* Both EMAC blocks are selected, which are we enabling? */
 
-  if (priv->attr->emac == 0)
+  if (priv->attr->emac == EMAC0_INTF)
     {
       sam_emac0_enableclk();
     }
@@ -3506,7 +3511,7 @@ static void sam_emac_disableclk(struct sam_emac_s *priv)
 #if defined(CONFIG_SAMA5_EMAC0) && defined(CONFIG_SAMA5_EMAC1)
   /* Both EMAC blocks are selected, which are we disabling? */
 
-  if (priv->attr->emac == 0)
+  if (priv->attr->emac == EMAC0_INTF)
     {
       sam_emac0_disableclk();
     }
