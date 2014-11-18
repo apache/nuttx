@@ -3183,7 +3183,7 @@ int sam_gmac_initialize(void)
     }
 
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
-  if (!priv->txpoll)
+  if (!priv->txtimeout)
     {
       nlldbg("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;

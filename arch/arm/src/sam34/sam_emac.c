@@ -3063,7 +3063,7 @@ void up_netinitialize(void)
     }
 
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
-  if (!priv->txpoll)
+  if (!priv->txtimeout)
     {
       nlldbg("ERROR: Failed to create periodic poll timer\n");
       goto errout_with_txpoll;
