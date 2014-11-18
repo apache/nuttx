@@ -3271,8 +3271,8 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
           sam_configpio(PIO_EMAC0_TX3);  /* Transmit data TXD3 */
           sam_configpio(PIO_EMAC0_TXER); /* Transmit Coding Error */
           sam_configpio(PIO_EMAC0_RXCK); /* Receive Clock */
-          sam_configpio(PIO_EMAC0_RX2);  /* Receive data RXD0 */
-          sam_configpio(PIO_EMAC0_RX3);  /* Receive data RXD0 */
+          sam_configpio(PIO_EMAC0_RX2);  /* Receive data RXD2 */
+          sam_configpio(PIO_EMAC0_RX3);  /* Receive data RXD3 */
           sam_configpio(PIO_EMAC0_CRS);  /* Carrier Sense and Data Valid */
           sam_configpio(PIO_EMAC0_COL);  /* Collision Detect */
         }
@@ -3305,8 +3305,8 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
           sam_configpio(PIO_EMAC1_TX3);  /* Transmit data TXD3 */
           sam_configpio(PIO_EMAC1_TXER); /* Transmit Coding Error */
           sam_configpio(PIO_EMAC1_RXCK); /* Receive Clock */
-          sam_configpio(PIO_EMAC1_RX2);  /* Receive data RXD0 */
-          sam_configpio(PIO_EMAC1_RX3);  /* Receive data RXD0 */
+          sam_configpio(PIO_EMAC1_RX2);  /* Receive data RXD2 */
+          sam_configpio(PIO_EMAC1_RX3);  /* Receive data RXD3 */
           sam_configpio(PIO_EMAC1_CRS);  /* Carrier Sense and Data Valid */
           sam_configpio(PIO_EMAC1_COL);  /* Collision Detect */
         }
