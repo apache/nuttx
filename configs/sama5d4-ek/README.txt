@@ -864,7 +864,7 @@ SAMA4D44-MB RevC PIO Usage
   ------------------------------ ------------------- -------------------------
   PA0/LCDDAT0/TMS                PA0                 LCDDAT0, TMS
   PA1/LCDDAT1                    PA1                 LCDDAT1
-  PA2/LCDDAT2/G1_TXCK            PA                  LCDDAT2, G1_TXCK
+  PA2/LCDDAT2/G1_TXCK            PA2                 LCDDAT2, G1_TXCK
   PA3/LCDDAT3/G1_RXCK            PA3                 LCDDAT3
   PA4/LCDDAT4/G1_TXEN            PA4                 LCDDAT4, G1_TXEN
   PA5/LCDDAT5/G1_TXER            PA5                 LCDDAT5

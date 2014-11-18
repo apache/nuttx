@@ -3810,7 +3810,7 @@ int sam_emac_initialize(int intf)
     }
 
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
-  if (!priv->txpoll)
+  if (!priv->txtimeout)
     {
       ndbg("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
