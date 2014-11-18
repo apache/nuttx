@@ -1793,7 +1793,7 @@ config SAMA5_EMAC0_ISETH0
 	bool "EMAC0 is eth0"
 	depends on SAMA5_EMAC0
 
-config SAMA5_EMAC0_ISETH1
+config SAMA5_EMAC1_ISETH0
 	bool "EMAC1 is eth0"
 	depends on SAMA5_EMAC1
 
