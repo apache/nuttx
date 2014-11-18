@@ -3690,6 +3690,13 @@ Configurations
         seems functional, but EMAC1 does not respond to pings.  Cannot perform
         the full bridge test yet anyway because there still is no host-side
         test driver in apps/examples/bridge.
+      2014-11-18:  Continued working with EMAC1:  It does not work.  No
+        errors are reported, link auto-negotiation works without error but I
+        cannot send or receive anything on EMAC1:  TX transfers all timeout
+        with no interrupts and nothing appearing on the line; RX transfers
+        are not received... no RX interrupts and no RX status gets set.  This
+        appears to be some very low-level issue, perhaps a pin configuration
+        program.  But I am not seeing it yet.
 
   dramboot:
 
