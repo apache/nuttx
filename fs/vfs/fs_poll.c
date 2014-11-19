@@ -74,22 +74,16 @@ static int poll_semtake(FAR sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(sem) < 0)
+  if (sem_wait(sem) < 0)
     {
       int err = get_errno();
 
-      /* The only case that an error should occur here is if the wait was
+      /* The only case that an error should occur here is if the wait were
        * awakened by a signal.
        */
 
-      ASSERT(err == EINTR);
-
-      /* Received signal, break from poll wait. */
-
-      if (err == EINTR)
-        {
-          return -EINTR;
-        }
+      DEBUGASSERT(err == EINTR);
+      return -err;
     }
 
   return OK;
