@@ -70,18 +70,29 @@
  * Name: poll_semtake
  ****************************************************************************/
 
-static void poll_semtake(FAR sem_t *sem)
+static int poll_semtake(FAR sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(sem) != 0)
+  while (sem_wait(sem) < 0)
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      int err = get_errno();
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      ASSERT(err == EINTR);
+
+      /* Received signal, break from poll wait. */
+
+      if (err == EINTR)
+        {
+          return -EINTR;
+        }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -204,11 +215,11 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
+static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
+                                int ret)
 {
   unsigned int i;
   int status;
-  int ret = OK;
 
   /* Process each descriptor in the list */
 
@@ -294,14 +305,16 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
       if (timeout == 0)
         {
           /* Poll returns immediately whether we have a poll event or not. */
+
+          ret = OK;
         }
       else if (timeout > 0)
         {
           time_t   sec;
           uint32_t nsec;
 
-          /* Either wait for either a poll event(s) to occur or for the
-           * specified timeout to elapse with no event.
+          /* Either wait for either a poll event(s), for a signal to occur,
+           * or for the specified timeout to elapse with no event.
            *
            * NOTE: If a poll event is pending (i.e., the semaphore has already
            * been incremented), sem_timedwait() will not wait, but will return
@@ -326,21 +339,21 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
                abstime.tv_nsec -= NSEC_PER_SEC;
              }
 
-           (void)sem_timedwait(&sem, &abstime);
+           ret = sem_timedwait(&sem, &abstime);
            irqrestore(flags);
         }
       else
         {
-          /* Wait for the poll event with no timeout */
+          /* Wait for the poll event or signal with no timeout */
 
-          poll_semtake(&sem);
+          ret = poll_semtake(&sem);
         }
 
       /* Teardown the poll operation and get the count of events.  Zero will be
        * returned in the case of a timeout.
        */
 
-      ret = poll_teardown(fds, nfds, &count);
+      ret = poll_teardown(fds, nfds, &count, ret);
     }
 
   sem_destroy(&sem);
