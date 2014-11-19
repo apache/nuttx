@@ -1,7 +1,7 @@
 ############################################################################
 # configs/freedom-kl25z/src/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@ ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = kl_boardinitialize.c
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += kl_nsh.c
+endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
 CSRCS += kl_wifi.c
