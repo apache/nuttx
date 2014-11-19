@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/clock/clock_abstime2ticks.c
  *
- *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,32 @@
  ********************************************************************************/
 
 /********************************************************************************
+ * Name: compare_timespec
+ *
+ * Description:
+ *    Return < 0 if time a is before time b
+ *    Return > 0 if time b is before time a
+ *    Return 0 if time a is the same as time b
+ *
+ ********************************************************************************/
+
+static long compare_timespec(FAR const struct timespec *a,
+                             FAR const struct timespec *b)
+{
+  if (a->tv_sec < b->tv_sec)
+    {
+      return -1;
+    }
+
+  if (a->tv_sec > b->tv_sec)
+    {
+      return 1;
+     }
+
+  return (long)a->tv_nsec -(long)b->tv_nsec;
+}
+
+/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
@@ -100,9 +126,20 @@ int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
    */
 
   ret = clock_gettime(clockid, &currtime);
-  if (ret)
+  if (ret != OK)
     {
       return EINVAL;
+    }
+
+  if (compare_timespec(abstime, &currtime) < 0)
+    {
+      /* Every caller of clock_abstime2ticks check 'ticks < 0' to see if
+       * absolute time is in the past. So lets just return negative tick
+       * here.
+       */
+
+      *ticks = -1;
+      return OK;
     }
 
   /* The relative time to wait is the absolute time minus the current time. */
