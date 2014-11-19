@@ -9012,4 +9012,14 @@
 	  IP_FLAGS vs TCPFLAGS.  The problem fixed here is that there IP flags
 	  were not available when TCP was disabled.  The IP flags are used in
 	  ICMP and IGMP (2014-11-17).
-
+	* sched/clock/clock_abstime2ticks.c: Calling mq_timedreceived() with
+	  immediate timeout was getting stuck and not timing out. Immediate
+	  timeout is achieved by setting absolute timeout value to past time,
+	  for example abstime={ .tv_sec=0, .tv_nsec=0 }. However absolute
+	  time was converted to relative time using unsigned integer arithmetic
+	  and resulted large ticks count by clock_abstime2ticks, instead of
+	  expected negative ticks value.  Change corrects clock_abstime2ticks()
+	  to return negative ticks, if absolute time is in the past.  From
+	  Jussi Kivilinna (2014-11-19).
+	* fs/vfs/fs_poll.c: poll() was not waking up from signals (for example
+	  mq_notify() events).  From Jussi Kivilinna (2014-11-19).
