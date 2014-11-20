@@ -9028,3 +9028,6 @@
 	  device controller driver from Brennan Ashton (2014-11-20).
 	* configs/sama5d3-xplained/bridge: Add a simple test for the the EMAC
 	  and GMAC on the SAMA5D3 working together (2014-11-20).
+	* libnx/nxtk/nxtk_drawframe.c: Remove warnings when CONFIG_NXTK_BORDERWIDTH
+	  is set to zero.  From Pierre-Noel Bouteville (2014-11-20).
+
