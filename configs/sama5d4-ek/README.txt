@@ -3638,7 +3638,7 @@ Configurations
     undocumented requirements that I am unaware of. (2014-6-28)
 
   bridge:
-  
+
     This is a simple testing that exercises EMAC0 and EMAC1 for a simple
     UDP relay bridge test using apps/examples/bridge.  See
     apps/examples/README.txt for more information about this test.
