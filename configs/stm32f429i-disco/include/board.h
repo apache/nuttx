@@ -218,7 +218,7 @@
 
 #define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
 
-/* SPI - There is a MEMS device on SPI1 using these pins: */
+/* SPI - There is a MEMS device on SPI5 using these pins: */
 
 #define GPIO_SPI5_MISO GPIO_SPI5_MISO_1
 #define GPIO_SPI5_MOSI GPIO_SPI5_MOSI_1
