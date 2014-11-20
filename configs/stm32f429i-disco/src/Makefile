@@ -68,7 +68,7 @@ ifeq ($(CONFIG_STM32_FSMC),y)
 CSRCS += stm32_extmem.c
 endif
 
-ifeq ($(CONFIG_STM32_OTGFHS),y)
+ifeq ($(CONFIG_STM32_OTGHS),y)
 CSRCS += stm32_usb.c
 endif
 
