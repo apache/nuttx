@@ -241,6 +241,7 @@ config SAMA5_AESB
 config SAMA5_DBGU
 	bool "Debug Unit (DBGU)"
 	default n
+	select ARCH_HAVE_OTHER_UART
 
 config SAMA5_PIT
 	bool "Periodic Interval Timer (PIT)"

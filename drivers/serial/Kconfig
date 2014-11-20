@@ -437,6 +437,7 @@ config ARCH_HAVE_USART8
 config ARCH_HAVE_OTHER_UART
 	bool
 	default n
+	select MCU_SERIAL
 
 #
 # USARTn configuration.  Is the USART configured to behave like a UART?
