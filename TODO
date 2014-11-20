@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 15, 2014)
+NuttX TODO List (Last updated November 20, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -850,6 +850,16 @@ o Network (net/, drivers/net)
   Priority:    Very low if you have only a single network interface.  Higher if you
                have more than one.  Very high if you need to have the same port numbers
                on each network served by the device.
+
+  Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
+  Description: Too many Ethernet drivers do interrupt-level processing with the network
+               stack.  The network stack supports either interrupt level processing or
+               normal task level processing (depending on CONFIG_NET_NOINTS).  This is
+               really a very bad use of CPU resources;  All of the network stack processing
+               should be more to a work queue (and, all use of CONFIG_NET_NOINTS=n should
+               be eliminated).
+  Status:      Open
+  Priority:    Pretty high if you want a well behaved system.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
