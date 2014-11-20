@@ -534,6 +534,12 @@ void os_start(void)
        * BUT the idle task cannot wait on a semaphore.  So we only do
        * the cleanup now if we can get the semaphore -- this should be
        * possible because if the IDLE thread is running, no other task is!
+       *
+       * WARNING: This logic could have undesirable side-effects if priority
+       * inheritance is enabled.  Imaginee the possible issues if the
+       * priority of the IDLE thread were to get boosted!  Moral: If you
+       * use priority inheritance, then you should also enable the work
+       * queue so that is done in a safer context.
        */
 
       if (kmm_trysemaphore() == 0)
