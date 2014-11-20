@@ -9026,3 +9026,5 @@
 	* arch/arm/src/stm32/stm32_otghs.c, Make.defs,
 	  configs/stm32f429i-disco/src/stm32_usb.c and Makefile: STM32 F4 OTGHS
 	  device controller driver from Brennan Ashton (2014-11-20).
+	* configs/sama5d3-xplained/bridge: Add a simple test for the the EMAC
+	  and GMAC on the SAMA5D3 working together (2014-11-20).
