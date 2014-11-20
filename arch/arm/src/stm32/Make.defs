@@ -130,6 +130,9 @@ endif
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CHIP_CSRCS += stm32_otgfsdev.c
 endif
+ifeq ($(CONFIG_STM32_OTGHS),y)
+CHIP_CSRCS += stm32_otghsdev.c
+endif
 endif
 
 ifeq ($(CONFIG_USBHOST),y)
