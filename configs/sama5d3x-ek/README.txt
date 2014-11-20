@@ -11,8 +11,16 @@ README
     - SAMA5D35-EK with the ATSAMA5D35 (http://www.atmel.com/devices/sama5d35.aspx)
 
   The each consist of an identical base board with different plug-in
-  modules for each CPU.  I also have a 7 inch LCD for my SAMA5D3x-EK, but this
-  is not yet generally available..
+  modules for each CPU.  I also have a 5 inch LCD for my SAMA5D3x-EK,
+  Atmel 5.0_WVGA_R_AEA_DM, Rev. B, but this LCD is not yet generally available
+  as of this writing.
+
+  I have seen SAMA5D3x-EK boards with different LCDs attached.  One of the more
+  common LCDS is the 7 inch TM0000 TFT LCD controller with MaXTouch multi-touch,
+  capacitive touchscreen (http://www.pdaatl.com/doc/tm7000.pdf).  That is NOT the
+  LCD supported by this configuration; the LCD used here is smaller and has a
+  resistive touchscreen that interfaces via the SAMA5D3 ADC interface.  Refer to
+  the SAMA5D4-EK for TM0000 support that can be back-ported to the SAMA5D3x-EK.
 
     SAMA5D3 Family
 
