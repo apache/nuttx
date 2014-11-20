@@ -9023,3 +9023,6 @@
 	  Jussi Kivilinna (2014-11-19).
 	* fs/vfs/fs_poll.c: poll() was not waking up from signals (for example
 	  mq_notify() events).  From Jussi Kivilinna (2014-11-19).
+	* arch/arm/src/stm32/stm32_otghs.c, Make.defs,
+	  configs/stm32f429i-disco/src/stm32_usb.c and Makefile: STM32 F4 OTGHS
+	  device controller driver from Brennan Ashton (2014-11-20).
