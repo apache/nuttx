@@ -73,6 +73,7 @@
  * Name: nxtk_drawframeside
  ****************************************************************************/
 
+#if CONFIG_NXTK_BORDERWIDTH > 0
 static void nxtk_drawframeside(FAR struct nxtk_framedwindow_s *fwnd,
                                FAR const struct nxgl_rect_s *side,
                                FAR const struct nxgl_rect_s *bounds,
@@ -85,6 +86,7 @@ static void nxtk_drawframeside(FAR struct nxtk_framedwindow_s *fwnd,
       nx_fill((NXWINDOW)fwnd, &intersection, color);
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -110,10 +112,14 @@ static void nxtk_drawframeside(FAR struct nxtk_framedwindow_s *fwnd,
 int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
                    FAR const struct nxgl_rect_s *bounds)
 {
+#if CONFIG_NXTK_BORDERWIDTH > 0
   struct nxgl_rect_s frame;
+#endif
   struct nxgl_size_s wndsize;
   struct nxgl_size_s tbsize;
+#if CONFIG_NXTK_BORDERWIDTH > 0
   nxgl_coord_t thickness;
+#endif
 
   /* Shiny edge:
    *   Thickness: 1
@@ -133,7 +139,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   thickness = CONFIG_NXTK_BORDERWIDTH - 2;
 #elif CONFIG_NXTK_BORDERWIDTH > 1
   thickness = CONFIG_NXTK_BORDERWIDTH - 1;
-#else
+#elif CONFIG_NXTK_BORDERWIDTH > 0
   thickness = CONFIG_NXTK_BORDERWIDTH;
 #endif
 
