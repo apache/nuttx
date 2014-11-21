@@ -32,6 +32,11 @@ STATUS
     on LEUART0.
   2014-11-14:  LEUART0 BAUD increased from 2400 to 9600.  Calibrated delay
     loop.
+  2014-11-18:  Added basic drivers for USB device and host.  The initial port
+    is a simple leverage from the STM32 which appears to use the same IP.
+    The current state is just the STM32 USB drivers with the appropriate.
+    The USB drivers still lack EFM32 initialization logic and are, of course,
+    completely untested.
 
 LEDs and Buttons
 ================
