@@ -66,9 +66,12 @@ struct devif_callback_s;  /* Forward reference */
 struct udp_conn_s
 {
   dq_entry_t node;        /* Supports a doubly linked list */
-  net_ipaddr_t ripaddr;   /* The IP address of the remote peer */
-  uint16_t lport;         /* The local port number in network byte order */
-  uint16_t rport;         /* The remote port number in network byte order */
+#ifdef CONFIG_NETDEV_MULTINIC
+  net_ipaddr_t lipaddr;   /* Bound local IP address (network byte order) */
+#endif
+  net_ipaddr_t ripaddr;   /* IP address of remote peer (network byte order) */
+  uint16_t lport;         /* Bound local port number (network byte order) */
+  uint16_t rport;         /* Remote port number (network byte order) */
   uint8_t  ttl;           /* Default time-to-live */
   uint8_t  crefs;         /* Reference counts on this instance */
 

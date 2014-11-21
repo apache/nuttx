@@ -59,7 +59,9 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "udp/udp.h"
+#include "ipv6/ipv6.h"
 
 /****************************************************************************
  * Private Data
@@ -119,18 +121,42 @@ static inline void _udp_semtake(FAR sem_t *sem)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_MULTINIC
+static FAR struct udp_conn_s *udp_find_conn(net_ipaddr_t ipaddr,
+                                            uint16_t portno)
+#else
 static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
+#endif
 {
+  FAR struct udp_conn_s *conn;
   int i;
 
   /* Now search each connection structure.*/
 
   for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
     {
-      if (g_udp_connections[ i ].lport == portno)
+      conn = &g_udp_connections[i];
+
+#ifdef CONFIG_NETDEV_MULTINIC
+      /* If the port local port number assigned to the connections matches
+       * AND the IP address of the connection matches, then return a
+       * reference to the connection structure.
+       */
+
+      if (conn->lport == portno && net_ipaddr_cmp(conn->lipaddr, ipaddr))
         {
-          return &g_udp_connections[i];
+          return conn;
         }
+#else
+      /* If the port local port number assigned to the connections matches,
+       * then return a reference to the connection structure.
+       */
+
+      if (conn->lport == portno)
+        {
+          return conn;
+        }
+#endif
     }
 
   return NULL;
@@ -156,7 +182,11 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_MULTINIC
+static uint16_t udp_select_port(net_ipaddr_t ipaddr)
+#else
 static uint16_t udp_select_port(void)
+#endif
 {
   uint16_t portno;
 
@@ -180,7 +210,11 @@ static uint16_t udp_select_port(void)
           g_last_udp_port = 4096;
         }
     }
+#ifdef CONFIG_NETDEV_MULTINIC
+  while (udp_find_conn(ipaddr, htons(g_last_udp_port)));
+#else
   while (udp_find_conn(htons(g_last_udp_port)));
+#endif
 
   /* Initialize and return the connection structure, bind it to the
    * port number
@@ -379,16 +413,65 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in6 *addr)
 int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 #endif
 {
-  int ret = -EADDRINUSE;
+  FAR struct net_driver_s *dev;
+  net_ipaddr_t ipaddr;
   net_lock_t flags;
+  int ret;
+
+#ifdef CONFIG_NET_IPv6
+  /* Get the IPv6 address that we are binding to */
+
+  ipaddr = addr->sin6_addr.in6_u.u6_addr16;
+
+  /* Is the address IN6ADDR_ANY? */
+
+  if (net_ipaddr_cmp(ipaddr, g_in6addr_any))
+#else
+  /* Get the IPv4 address that we are binding to */
+
+  ipaddr = addr->sin_addr.s_addr;
+
+  /* Is the address INADDR_ANY? */
+
+  if (net_ipaddr_cmp(ipaddr, INADDR_ANY))
+#endif
+    {
+      /* Get the default device */
+
+      dev = netdev_default();
+      if (dev == NULL)
+        {
+          return -EADDRNOTAVAIL;
+        }
+
+      /* Use the IP address assigned to the default device */
+
+      ipaddr = dev->d_ipaddr;
+    }
+  else
+    {
+      /* We cannot bind the socket to an IP address if it cannot be routed
+       * by a registered network device.
+       */
+
+      dev = netdev_findbyaddr(ipaddr);
+      if (!dev)
+        {
+          return -EADDRNOTAVAIL;
+        }
+    }
 
   /* Is the user requesting to bind to any port? */
 
   if (!addr->sin_port)
     {
-      /* Yes.. Find an unused local port number */
+      /* Yes.. Select any unused local port number */
 
+#ifdef CONFIG_NETDEV_MULTINIC
+      conn->lport = htons(udp_select_port(ipaddr));
+#else
       conn->lport = htons(udp_select_port());
+#endif
       ret         = OK;
     }
   else
@@ -397,9 +480,13 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 
       flags = net_lock();
 
-      /* Is any other UDP connection already bound to this port? */
+      /* Is any other UDP connection already bound to this address and port? */
 
+#ifdef CONFIG_NETDEV_MULTINIC
+      if (!udp_find_conn(ipaddr, addr->sin_port))
+#else
       if (!udp_find_conn(addr->sin_port))
+#endif
         {
           /* No.. then bind the socket to the port */
 
@@ -448,6 +535,39 @@ int udp_connect(FAR struct udp_conn_s *conn,
                 FAR const struct sockaddr_in *addr)
 #endif
 {
+#ifdef CONFIG_NETDEV_MULTINIC
+  FAR struct net_driver_s *dev;
+
+  /* Has this connection already been bound to a local IP address (lipaddr)? */
+
+#ifdef CONFIG_NET_IPv6
+  /* Is the address IN6ADDR_ANY? */
+
+  if (net_ipaddr_cmp(conn->lipaddr, g_in6addr_any))
+#else
+  /* Is the address INADDR_ANY? */
+
+  if (net_ipaddr_cmp(conn->lipaddr, INADDR_ANY))
+#endif
+    {
+      /* Get the default device */
+
+      dev = netdev_default();
+      if (dev == NULL)
+        {
+          return -EADDRNOTAVAIL;
+        }
+
+      /* Use the IP address assigned to the default device */
+
+      net_ipaddr_copy(conn->lipaddr, dev->d_ipaddr);
+
+      /* Make sure that we re-assign a valid port on this IP address */
+
+      conn->lport = 0;
+    }
+#endif /* CONFIG_NETDEV_MULTINIC */
+
   /* Has this address already been bound to a local port (lport)? */
 
   if (!conn->lport)
@@ -456,10 +576,14 @@ int udp_connect(FAR struct udp_conn_s *conn,
        * connection structure.
        */
 
+#ifdef CONFIG_NETDEV_MULTINIC
+      conn->lport = htons(udp_select_port(conn->lipaddr));
+#else
       conn->lport = htons(udp_select_port());
+#endif
     }
 
-  /* Is there a remote port (rport) */
+  /* Is there a remote port (rport)? */
 
   if (addr)
     {
