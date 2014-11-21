@@ -350,6 +350,10 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
        *   number in the received packet.
        * - The remote port number is checked if the connection is bound
        *   to a remote port.
+       * - If multiple network interfaces are supported, then the local
+       *   IP address is available and we will insist that the
+       *   destination IP matches the bound address (or the destination
+       *   IP address is a broadcase address).
        * - Finally, if the connection is bound to a remote IP address,
        *   the source IP address of the packet is checked. Broadcast
        *   addresses are also accepted.
@@ -360,6 +364,10 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
 
       if (conn->lport != 0 && buf->destport == conn->lport &&
           (conn->rport == 0 || buf->srcport == conn->rport) &&
+#ifdef CONFIG_NETDEV_MULTINIC
+          (net_ipaddr_hdrcmp(buf->destipaddr, &g_alloneaddr) ||
+           net_ipaddr_hdrcmp(buf->destipaddr, &conn->lipaddr)) &&
+#endif
           (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
            net_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
            net_ipaddr_hdrcmp(buf->srcipaddr, &conn->ripaddr)))
