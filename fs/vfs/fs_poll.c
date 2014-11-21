@@ -334,6 +334,22 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
              }
 
            ret = sem_timedwait(&sem, &abstime);
+           if (ret < 0)
+             {
+               int err = get_errno();
+
+               if (err == ETIMEDOUT)
+                 {
+                   /* Return zero (OK) in the event of a timeout */
+
+                   ret = OK;
+                 }
+               else
+                 {
+                   ret = -err;
+                 }
+             }
+
            irqrestore(flags);
         }
       else
