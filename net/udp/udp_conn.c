@@ -344,19 +344,25 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
   while (conn)
     {
       /* If the local UDP port is non-zero, the connection is considered
-       * to be used. If so, the local port number is checked against the
-       * destination port number in the received packet. If the two port
-       * numbers match, the remote port number is checked if the
-       * connection is bound to a remote port. Finally, if the
-       * connection is bound to a remote IP address, the source IP
-       * address of the packet is checked.
+       * to be used. If so, then the following checks are performed:
+       *
+       * - The local port number is checked against the destination port
+       *   number in the received packet.
+       * - The remote port number is checked if the connection is bound
+       *   to a remote port.
+       * - Finally, if the connection is bound to a remote IP address,
+       *   the source IP address of the packet is checked. Broadcast
+       *   addresses are also accepted.
+       *
+       * If all of the above are true then the newly received UDP packet
+       * is destined for this UDP connection.
        */
 
       if (conn->lport != 0 && buf->destport == conn->lport &&
           (conn->rport == 0 || buf->srcport == conn->rport) &&
-            (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
-             net_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
-             net_ipaddr_hdrcmp(buf->srcipaddr, &conn->ripaddr)))
+          (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
+           net_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
+           net_ipaddr_hdrcmp(buf->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
 
@@ -413,10 +419,12 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in6 *addr)
 int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 #endif
 {
-  FAR struct net_driver_s *dev;
-  net_ipaddr_t ipaddr;
   net_lock_t flags;
   int ret;
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  FAR struct net_driver_s *dev;
+  net_ipaddr_t ipaddr;
 
 #ifdef CONFIG_NET_IPv6
   /* Get the IPv6 address that we are binding to */
@@ -448,18 +456,11 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 
       ipaddr = dev->d_ipaddr;
     }
-  else
-    {
-      /* We cannot bind the socket to an IP address if it cannot be routed
-       * by a registered network device.
-       */
 
-      dev = netdev_findbyaddr(ipaddr);
-      if (!dev)
-        {
-          return -EADDRNOTAVAIL;
-        }
-    }
+  /* Bind the local IP address to the connection */
+
+  net_ipaddr_copy(conn->lipaddr, ipaddr);
+#endif
 
   /* Is the user requesting to bind to any port? */
 
@@ -561,10 +562,6 @@ int udp_connect(FAR struct udp_conn_s *conn,
       /* Use the IP address assigned to the default device */
 
       net_ipaddr_copy(conn->lipaddr, dev->d_ipaddr);
-
-      /* Make sure that we re-assign a valid port on this IP address */
-
-      conn->lport = 0;
     }
 #endif /* CONFIG_NETDEV_MULTINIC */
 
