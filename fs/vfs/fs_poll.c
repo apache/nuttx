@@ -346,6 +346,8 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
                  }
                else
                  {
+                   /* EINTR is the only other error expected in normal operation */
+
                    ret = -err;
                  }
              }
