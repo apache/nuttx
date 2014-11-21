@@ -1350,7 +1350,9 @@ Configurations
 
        This delay will be especially long if the board is not connected to
        a network because additional time will be required to fail with
-       timeout errors.  This delay can be eliminated, however, if you enable an NSH initialization option as described above in a paragraph entitled, "Network Initialization Thread."
+       timeout errors.  This delay can be eliminated, however, if you enable
+       an NSH initialization option as described above in a paragraph
+       entitled, "Network Initialization Thread."
 
        STATUS:
        2014-3-13: The basic NSH serial console is working.  Network support
