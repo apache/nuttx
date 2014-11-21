@@ -96,7 +96,7 @@
 
 static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t addr)
 {
-  struct net_driver_s *dev;
+  FAR struct net_driver_s *dev;
 
   /* Examine each registered network device */
 

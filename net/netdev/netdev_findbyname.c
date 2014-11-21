@@ -103,8 +103,10 @@ FAR struct net_driver_s *netdev_findbyname(const char *ifname)
               return dev;
             }
         }
+
       netdev_semgive();
     }
+
   return NULL;
 }
 
