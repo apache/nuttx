@@ -2907,12 +2907,26 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
+    3. You will almost certainly need to adapt this configuration to
+       work in your network environment.  I did all testing with a
+       single 10.0.0.xx network and a 4+1 port switch:
+
+       - Host PC IP 10.0.0.1
+       - Target GMAC IP: 10.0.0.2
+       - Target EMAC IP: 10.0.0.3
+
+       Host, EMAC, and GMAC were all connected using a switch.
+
     STATUS:
 
       2014-11-20:  Configuration created.  Partially verified.  Both the
         EMAC and GMAC appear to be function; both respond to pings from
         the host PC.  But I cannot perform the full bridge test yet
         because there still is no host-side test driver in apps/examples/bridge.
+      2014-11-21:  Added the host-side test driver and correct a number
+        of errors in the test logic.  The testing is working (according
+        to WireShark), but I an having some procedural issues related to
+        the Windows firewall.
 
   nsh:
 
