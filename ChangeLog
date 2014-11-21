@@ -9032,4 +9032,9 @@
 	  is set to zero.  From Pierre-Noel Bouteville (2014-11-20).
 	* fs/vfs/fs_poll.c: Add proper handling for sem_timedwait errnos.
 	  From Jussi Kivilinna (2014-11-21).
+	* net/udp/udp_conn.c and udp.h:  Extensions to UDP "connectin" structure
+	  for the case of multiple networks.  In this case, assigned port numbers
+	  only have to be unique with response to the IP address.  So, for
+	  example, you could have multiple port 80's, one on each network
+	  (2014-11-21).
 
