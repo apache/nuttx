@@ -332,20 +332,6 @@ FAR struct tcp_conn_s *tcp_active(struct tcp_iphdr_s *buf);
 FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
- * Name: tcp_listener()
- *
- * Description:
- *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this this port.
- *
- *   Primary uses: (1) to determine if a port number is available, (2) to
- *   To identify the socket that will accept new connections on a local port.
- *
- ****************************************************************************/
-
-FAR struct tcp_conn_s *tcp_listener(uint16_t portno);
-
-/****************************************************************************
  * Name: tcp_alloc_accept()
  *
  * Description:

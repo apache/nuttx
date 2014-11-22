@@ -83,7 +83,7 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
   FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
 
   /* To match, the masked target addresses must be the same.  In the event
-   * of multiple matches, only the first is returned.  There not (yet) any
+   * of multiple matches, only the first is returned.  There is not (yet) any
    * concept for the precedence of networks.
    */
 

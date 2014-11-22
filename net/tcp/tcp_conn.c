@@ -61,10 +61,6 @@
 #include "tcp/tcp.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -87,6 +83,39 @@ static uint16_t g_last_tcp_port;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_listener()
+ *
+ * Description:
+ *   Given a local port number (in network byte order), find the TCP
+ *   connection that listens on this this port.
+ *
+ *   Primary uses: (1) to determine if a port number is available, (2) to
+ *   To identify the socket that will accept new connections on a local port.
+ *
+ ****************************************************************************/
+
+static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
+{
+  FAR struct tcp_conn_s *conn;
+  int i;
+
+  /* Check if this port number is in use by any active UIP TCP connection */
+
+  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
+    {
+      conn = &g_tcp_connections[i];
+      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno)
+        {
+          /* The port number is in use, return the connection */
+
+          return conn;
+        }
+    }
+
+  return NULL;
+}
 
 /****************************************************************************
  * Name: tcp_selectport()
@@ -460,39 +489,6 @@ FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn)
     {
       return (FAR struct tcp_conn_s *)conn->node.flink;
     }
-}
-
-/****************************************************************************
- * Name: tcp_listener()
- *
- * Description:
- *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this this port.
- *
- *   Primary uses: (1) to determine if a port number is available, (2) to
- *   To identify the socket that will accept new connections on a local port.
- *
- ****************************************************************************/
-
-FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
-{
-  FAR struct tcp_conn_s *conn;
-  int i;
-
-  /* Check if this port number is in use by any active UIP TCP connection */
-
-  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
-    {
-      conn = &g_tcp_connections[i];
-      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno)
-        {
-          /* The port number is in use, return the connection */
-
-          return conn;
-        }
-    }
-
-  return NULL;
 }
 
 /****************************************************************************
