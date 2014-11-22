@@ -140,10 +140,17 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
 #ifdef CONFIG_NETDEV_MULTINIC
       /* If the port local port number assigned to the connections matches
        * AND the IP address of the connection matches, then return a
-       * reference to the connection structure.
+       * reference to the connection structure.  INADDR_ANY is a special
+       * case:  There can only be instance of a port number with INADDR_ANY.
        */
 
-      if (conn->lport == portno && net_ipaddr_cmp(conn->lipaddr, ipaddr))
+      if (conn->lport == portno &&
+          (net_ipaddr_cmp(conn->lipaddr, ipaddr) ||
+#ifdef CONFIG_NET_IPv6
+           net_ipaddr_cmp(conn->lipaddr, g_allzeroaddr)))
+#else
+           net_ipaddr_cmp(conn->lipaddr, INADDR_ANY)))
+#endif
         {
           return conn;
         }
@@ -353,7 +360,9 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
        * - If multiple network interfaces are supported, then the local
        *   IP address is available and we will insist that the
        *   destination IP matches the bound address (or the destination
-       *   IP address is a broadcase address).
+       *   IP address is a broadcast address). If a socket is bound to
+       *   INADDRY_ANY (lipaddr), then it should receive all packets
+       *   directed to the port.
        * - Finally, if the connection is bound to a remote IP address,
        *   the source IP address of the packet is checked. Broadcast
        *   addresses are also accepted.
@@ -365,7 +374,8 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
       if (conn->lport != 0 && buf->destport == conn->lport &&
           (conn->rport == 0 || buf->srcport == conn->rport) &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipaddr_hdrcmp(buf->destipaddr, &g_alloneaddr) ||
+          (net_ipaddr_hdrcmp(buf->destipaddr, &g_allzeroaddr) ||
+           net_ipaddr_hdrcmp(buf->destipaddr, &g_alloneaddr) ||
            net_ipaddr_hdrcmp(buf->destipaddr, &conn->lipaddr)) &&
 #endif
           (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
@@ -431,7 +441,6 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
   int ret;
 
 #ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
   net_ipaddr_t ipaddr;
 
 #ifdef CONFIG_NET_IPv6
@@ -439,33 +448,17 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 
   ipaddr = addr->sin6_addr.in6_u.u6_addr16;
 
-  /* Is the address IN6ADDR_ANY? */
-
-  if (net_ipaddr_cmp(ipaddr, g_in6addr_any))
 #else
   /* Get the IPv4 address that we are binding to */
 
   ipaddr = addr->sin_addr.s_addr;
 
-  /* Is the address INADDR_ANY? */
-
-  if (net_ipaddr_cmp(ipaddr, INADDR_ANY))
 #endif
-    {
-      /* Get the default device */
 
-      dev = netdev_default();
-      if (dev == NULL)
-        {
-          return -EADDRNOTAVAIL;
-        }
-
-      /* Use the IP address assigned to the default device */
-
-      ipaddr = dev->d_ipaddr;
-    }
-
-  /* Bind the local IP address to the connection */
+  /* Bind the local IP address to the connection.  NOTE this address may be
+   * INADDR_ANY meaning, essentially, that we are binding to all interfaces
+   * for receiving (Sending will use the default port).
+   */
 
   net_ipaddr_copy(conn->lipaddr, ipaddr);
 #endif
@@ -544,35 +537,6 @@ int udp_connect(FAR struct udp_conn_s *conn,
                 FAR const struct sockaddr_in *addr)
 #endif
 {
-#ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
-
-  /* Has this connection already been bound to a local IP address (lipaddr)? */
-
-#ifdef CONFIG_NET_IPv6
-  /* Is the address IN6ADDR_ANY? */
-
-  if (net_ipaddr_cmp(conn->lipaddr, g_in6addr_any))
-#else
-  /* Is the address INADDR_ANY? */
-
-  if (net_ipaddr_cmp(conn->lipaddr, INADDR_ANY))
-#endif
-    {
-      /* Get the default device */
-
-      dev = netdev_default();
-      if (dev == NULL)
-        {
-          return -EADDRNOTAVAIL;
-        }
-
-      /* Use the IP address assigned to the default device */
-
-      net_ipaddr_copy(conn->lipaddr, dev->d_ipaddr);
-    }
-#endif /* CONFIG_NETDEV_MULTINIC */
-
   /* Has this address already been bound to a local port (lport)? */
 
   if (!conn->lport)
