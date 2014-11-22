@@ -195,6 +195,10 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
    * However, if there is only a single, registered network interface, then
    * the decision is pretty easy.  Use that device and its default router
    * address.
+   *
+   * REVISIT: This logic is lame.  Also, in the case where the socket is
+   * bound to INADDRY_ANY, we should return the default network device
+   * (from netdev_default()).
    */
 
   netdev_semtake();
