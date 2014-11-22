@@ -374,8 +374,8 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
       if (conn->lport != 0 && buf->destport == conn->lport &&
           (conn->rport == 0 || buf->srcport == conn->rport) &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipaddr_hdrcmp(buf->destipaddr, &g_allzeroaddr) ||
-           net_ipaddr_hdrcmp(buf->destipaddr, &g_alloneaddr) ||
+          (net_ipaddr_cmp(conn->lipaddr, g_allzeroaddr) ||
+           net_ipaddr_cmp(conn->lipaddr, g_alloneaddr) ||
            net_ipaddr_hdrcmp(buf->destipaddr, &conn->lipaddr)) &&
 #endif
           (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
