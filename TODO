@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 20, 2014)
+NuttX TODO List (Last updated November 21, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -845,6 +845,14 @@ o Network (net/, drivers/net)
                The solution is is move the TCP and UDP port related resources:  They
                should not be global but shoud, instead, by a part of the device structure,
                struct net_drivers_s.
+
+               STATUS: 2014-11-21:  Fixed for the case of UDP.  Added the local bound
+               IP address to UDP "connection" structure.  This essential extends all
+               local addresses so they now only have to be unique for a give IP address +
+               port number pair.  It was not necessary to move global resources into
+               the device structure as suggested above.  Rather, the global structures
+               to extended to support uniqueness.  This is also really necessary to
+               properly support broadcast addresses anyway.
 
   Status:      Open
   Priority:    Very low if you have only a single network interface.  Higher if you
