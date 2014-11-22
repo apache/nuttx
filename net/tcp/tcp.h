@@ -107,6 +107,9 @@ struct tcp_backlog_s;     /* Forward reference */
 struct tcp_conn_s
 {
   dq_entry_t node;        /* Implements a doubly linked list */
+#ifdef CONFIG_NETDEV_MULTINIC
+  net_ipaddr_t lipaddr;   /* The bound local IP address */
+#endif
   net_ipaddr_t ripaddr;   /* The IP address of the remote host */
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
