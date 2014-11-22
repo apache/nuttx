@@ -61,7 +61,6 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "udp/udp.h"
-#include "ipv6/ipv6.h"
 
 /****************************************************************************
  * Private Data
