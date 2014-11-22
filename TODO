@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 21, 2014)
+NuttX TODO List (Last updated November 22, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -828,36 +828,6 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
-
-  Title:       PER DEVICE PORT NUMBERS
-  Description: TCP and UDP ports numbers are assigned as separater but global resources.
-               Separate meaning that a UDP and TCP socket with the same port number are
-               distinct.  But global in the since that each TCP port number must be unique
-               and TCP sockets.  UDP port numbers must be similarly unique.
-
-               This causes prorblems for the case where there multiple network devices
-               configured into the system.  In that case, it should be possible to assign
-               the same TCP (or UDP) port number if the connection is associated with
-               different network devices.  For example, if there are two instances of
-               a webserver, each listening for connections on a different device, each
-               should be able to use port 80 to listen for connections.
-
-               The solution is is move the TCP and UDP port related resources:  They
-               should not be global but shoud, instead, by a part of the device structure,
-               struct net_drivers_s.
-
-               STATUS: 2014-11-21:  Fixed for the case of UDP.  Added the local bound
-               IP address to UDP "connection" structure.  This essential extends all
-               local addresses so they now only have to be unique for a give IP address +
-               port number pair.  It was not necessary to move global resources into
-               the device structure as suggested above.  Rather, the global structures
-               to extended to support uniqueness.  This is also really necessary to
-               properly support broadcast addresses anyway.
-
-  Status:      Open
-  Priority:    Very low if you have only a single network interface.  Higher if you
-               have more than one.  Very high if you need to have the same port numbers
-               on each network served by the device.
 
   Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
   Description: Too many Ethernet drivers do interrupt-level processing with the network
