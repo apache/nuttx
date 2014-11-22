@@ -9037,4 +9037,6 @@
 	  only have to be unique with response to the IP address.  So, for
 	  example, you could have multiple port 80's, one on each network
 	  (2014-11-21).
+	* net/tcp/tcp_conn.c and tcp.h: Make tcp_listener static scope; it is
+	  not used outside of tcp_conn.c (2014-11-22).
 
