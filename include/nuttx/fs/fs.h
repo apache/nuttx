@@ -100,7 +100,7 @@ struct file_operations
 
 /* This structure provides information about the state of a block driver */
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 struct geometry
 {
   bool   geo_available;    /* true: The device is vailable */
