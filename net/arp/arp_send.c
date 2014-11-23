@@ -222,7 +222,11 @@ int arp_send(in_addr_t ipaddr)
 
   /* Get the device that can route this request */
 
+#ifdef CONFIG_NET_MULTILINK
+  dev = netdev_findbyaddr(g_allzeroaddr, ipaddr);
+#else
   dev = netdev_findbyaddr(ipaddr);
+#endif
   if (!dev)
     {
       ndbg("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);

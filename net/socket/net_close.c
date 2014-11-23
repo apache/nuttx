@@ -357,7 +357,11 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 
       /* Notify the device driver of the availability of TX data */
 
+#ifdef CONFIG_NET_MULTILINK
+      netdev_txnotify(conn->lipaddr, conn->ripaddr);
+#else
       netdev_txnotify(conn->ripaddr);
+#endif
 
 #ifdef CONFIG_NET_SOLINGER
       /* Wait only if we are lingering */

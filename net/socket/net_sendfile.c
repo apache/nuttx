@@ -562,10 +562,13 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       state.snd_datacb->priv  = (void*)&state;
       state.snd_datacb->event = sendfile_interrupt;
 
-      /* Notify the device driver of the availaibilty of TX data */
+      /* Notify the device driver of the availability of TX data */
 
+#ifdef CONFIG_NET_MULTILINK
+      netdev_txnotify(conn->lipaddr, conn->ripaddr);
+#else
       netdev_txnotify(conn->ripaddr);
-
+#endif
       net_lockedwait(&state.snd_sem);
     }
   while (state.snd_sent >= 0 && state.snd_acked < state.snd_flen);

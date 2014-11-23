@@ -1090,7 +1090,13 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Notify the device driver of the receive call */
 
-      /* netdev_rxnotify(conn->ripaddr); */
+#if 0 /* No */
+#ifdef CONFIG_NET_MULTILINK
+      netdev_rxnotify(conn->lipaddr, conn->ripaddr);
+#else
+      netdev_rxnotify(conn->ripaddr);
+#endif
+#endif
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
@@ -1184,7 +1190,11 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Notify the device driver of the receive call */
 
+#ifdef CONFIG_NET_MULTILINK
+      netdev_rxnotify(conn->lipaddr, conn->ripaddr);
+#else
       netdev_rxnotify(conn->ripaddr);
+#endif
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)

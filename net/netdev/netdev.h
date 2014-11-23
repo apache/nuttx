@@ -94,7 +94,12 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 /* netdev_findbyaddr.c *******************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr);
+#ifdef CONFIG_NET_MULTILINK
+FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t lipaddr,
+                                           const net_ipaddr_t ripaddr);
+#else
+FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t ripaddr);
+#endif
 #endif
 
 /* netdev_default.c ***********************************************************/
@@ -106,15 +111,27 @@ FAR struct net_driver_s *netdev_default(void);
 /* netdev_txnotify.c *********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_txnotify(const net_ipaddr_t addr);
+#  ifdef CONFIG_NET_MULTILINK
+void netdev_txnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr);
+#  else
+void netdev_txnotify(const net_ipaddr_t ripaddr);
+#  endif
 #endif
 
 /* netdev_rxnotify.c *********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
-void netdev_rxnotify(const net_ipaddr_t addr);
+#  ifdef CONFIG_NET_MULTILINK
+void netdev_rxnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr);
+#  else
+void netdev_rxnotify(const net_ipaddr_t ripaddr);
+#  endif
 #else
-#  define netdev_rxnotify(addr)
+#  ifdef CONFIG_NET_MULTILINK
+#    define netdev_rxnotify(lipaddr,ripaddr)
+#  else
+#    define netdev_rxnotify(ripaddr)
+#  endif
 #endif
 
 /* netdev_count.c ************************************************************/

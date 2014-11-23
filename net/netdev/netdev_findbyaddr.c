@@ -49,6 +49,7 @@
 #include <nuttx/net/ip.h>
 
 #include "netdev/netdev.h"
+#include "devif/devif.h"
 #include "route/route.h"
 
 /****************************************************************************
@@ -72,10 +73,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_maskcmp
- ****************************************************************************/
-
-/****************************************************************************
  * Function: netdev_finddevice
  *
  * Description:
@@ -84,7 +81,7 @@
  *   (since a "down" device has no meaningful address).
  *
  * Parameters:
- *   addr - Pointer to the remote address of a connection
+ *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -94,7 +91,7 @@
  *
  ****************************************************************************/
 
-static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t addr)
+static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
 
@@ -109,7 +106,7 @@ static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t addr)
         {
           /* Yes.. check for an address match (under the netmask) */
 
-          if (net_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
+          if (net_ipaddr_maskcmp(dev->d_ipaddr, ripaddr, dev->d_netmask))
             {
               /* Its a match */
 
@@ -137,7 +134,9 @@ static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t addr)
  *   IP address.
  *
  * Parameters:
- *   addr - Pointer to the remote address of a connection
+ *   lipaddr - Local, bound address of a connection.  Used only if ripaddr
+ *     is the broadcast address.  Used only if CONFIG_NET_MULTILINK.
+ *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -147,7 +146,12 @@ static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t addr)
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
+#ifdef CONFIG_NET_MULTILINK
+FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t lipaddr,
+                                           const net_ipaddr_t ripaddr)
+#else
+FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t ripaddr)
+#endif
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
@@ -155,9 +159,42 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
   int ret;
 #endif
 
-  /* First, see if the address maps to the a local network */
+  /* First, check if this is the broadcast IP address */
 
-  dev = netdev_finddevice(addr);
+  if (net_ipaddr_cmp(ripaddr, g_alloneaddr))
+    {
+#ifdef CONFIG_NET_MULTILINK
+      /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
+
+      if (net_ipaddr_cmp(lipaddr, g_allzeroaddr))
+        {
+          /* Yes.. In this case, I think we are supposed to send the
+           * broadcast packet out ALL local networks.  I am not sure
+           * of that and, in any event, there is nothing we can do
+           * about that here.
+           */
+
+          return NULL;
+        }
+      else
+        {
+          /* Return the device associated with the local address */
+
+          return netdev_finddevice(lipaddr);
+        }
+#else
+      /* If there is only a single, registered network interface, then the
+       * decision is pretty easy.  Use that device and its default router
+       * address.
+       */
+
+      return g_netdevices;
+#endif
+    }
+
+  /* Check if the address maps to a local network */
+
+  dev = netdev_finddevice(ripaddr);
   if (dev)
     {
       return dev;
@@ -171,9 +208,9 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
    */
 
 #ifdef CONFIG_NET_IPv6
-  ret = net_router(addr, router);
+  ret = net_router(ripaddr, router);
 #else
-  ret = net_router(addr, &router);
+  ret = net_router(ripaddr, &router);
 #endif
   if (ret >= 0)
     {
@@ -191,27 +228,20 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
 
   /* The above lookup will fail if the packet is being sent out of our
    * out subnet to a router and there is no routing information.
-   *
-   * However, if there is only a single, registered network interface, then
-   * the decision is pretty easy.  Use that device and its default router
-   * address.
-   *
-   * REVISIT: This logic is lame.  Also, in the case where the socket is
-   * bound to INADDRY_ANY, we should return the default network device
-   * (from netdev_default()).
    */
 
-  netdev_semtake();
-  if (g_netdevices && !g_netdevices->flink)
-    {
-      dev = g_netdevices;
-    }
+#ifndef CONFIG_NET_MULTILINK
+   /* If there is only a single, registered network interface, then the
+    * decision is pretty easy.  Use that device and its default router
+    * address.  Hmmm... it is almost certainly wrong, however.
+    */
 
-  netdev_semgive();
+   dev = g_netdevices;
+#endif
 
   /* If we will did not find the network device, then we might as well fail
    * because we are not configured properly to determine the route to the
-   * target.
+   * destination.
    */
 
   return dev;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_rxnotify.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@
  *   Notify the device driver that the application waits for RX data.
  *
  * Parameters:
- *   raddr - The remote address to send the data
+ *   ripaddr - The remote address to send the data
  *
  * Returned Value:
  *  None
@@ -91,12 +91,21 @@
  *
  ****************************************************************************/
 
-void netdev_rxnotify(const net_ipaddr_t raddr)
+#ifdef CONFIG_NET_MULTILINK
+void netdev_rxnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr)
+#else
+void netdev_rxnotify(const net_ipaddr_t ripaddr)
+#endif
 {
+  FAR struct net_driver_s *dev;
 
   /* Find the device driver that serves the subnet of the remote address */
 
-  struct net_driver_s *dev = netdev_findbyaddr(raddr);
+#ifdef CONFIG_NET_MULTILINK
+  dev = netdev_findbyaddr(lipaddr, ripaddr);
+#else
+  dev = netdev_findbyaddr(ripaddr);
+#endif
 
   if (dev && dev->d_rxavail)
     {

@@ -417,9 +417,13 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       state.st_cb->priv    = (void*)&state;
       state.st_cb->event   = sendto_interrupt;
 
-      /* Notify the device driver of the availabilty of TX data */
+      /* Notify the device driver of the availability of TX data */
 
+#ifdef CONFIG_NET_MULTILINK
+      netdev_txnotify(conn->lipaddr, conn->ripaddr);
+#else
       netdev_txnotify(conn->ripaddr);
+#endif
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)

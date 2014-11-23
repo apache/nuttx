@@ -596,7 +596,11 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           /* Notify the device driver of the availability of TX data */
 
+#ifdef CONFIG_NET_MULTILINK
+          netdev_txnotify(conn->lipaddr, conn->ripaddr);
+#else
           netdev_txnotify(conn->ripaddr);
+#endif
 
           /* Wait for the send to complete or an error to occur:  NOTES: (1)
            * net_lockedwait will also terminate if a signal is received, (2) interrupts

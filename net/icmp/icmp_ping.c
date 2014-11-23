@@ -371,7 +371,11 @@ int icmp_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
 
       /* Notify the device driver of the availability of TX data */
 
+#ifdef CONFIG_NET_MULTILINK
+      netdev_txnotify(g_allzeroaddr, state.png_addr);
+#else
       netdev_txnotify(state.png_addr);
+#endif
 
       /* Wait for either the full round trip transfer to complete or
        * for timeout to occur. (1) net_lockedwait will also terminate if a
