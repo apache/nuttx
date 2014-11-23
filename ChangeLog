@@ -9044,3 +9044,11 @@
 	  change for UDP above (2014-11-22).
 	* net/route/net_router.c:  Refuse to perform routing table lookups for
 	  the Broadcast IP address.  From Brennan Ashton.
+	* net/netdev/netdev_findbyaddr.c and netdev:  Add logic to netdev_findbyaddr()
+	  to return the correct network device for the case where a broadcast
+	  address is used.  This change caused trivial ripples through other
+	  files because additional parameters are required for netdev_findbyaddr()
+	  when CONFIG_NET_MULTINIC.  Those other file include net/netdev/netdev_rxnotify.c,
+	  netdev_txnotify.c which, in turn, for changes to arp/arp_send.c,
+	  icmp/icmp_ping.c, socket/net_sendfile.c, recvfrom.c, sendto.c,
+	  tcp/tcp_send_buffered.c, and tcp_send_unbuffered.c (2014-11-23).
