@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 22, 2014)
+NuttX TODO List (Last updated November 23, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (12)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -830,14 +830,31 @@ o Network (net/, drivers/net)
                connections promptly.
 
   Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
-  Description: Too many Ethernet drivers do interrupt-level processing with the network
-               stack.  The network stack supports either interrupt level processing or
-               normal task level processing (depending on CONFIG_NET_NOINTS).  This is
-               really a very bad use of CPU resources;  All of the network stack processing
-               should be more to a work queue (and, all use of CONFIG_NET_NOINTS=n should
+  Description: Too many Ethernet drivers do interrupt-level processing with
+               the network stack.  The network stack supports either interrupt
+               level processing or normal task level processing (depending on
+               CONFIG_NET_NOINTS).  This is really a very bad use of CPU
+               resources;  All of the network stack processing should be more
+               to a work queue (and, all use of CONFIG_NET_NOINTS=n should
                be eliminated).
   Status:      Open
   Priority:    Pretty high if you want a well behaved system.
+
+  Title:       UDP MULTICAST RECEPTION
+  Description: The logic in udp_input() expects either a single receive socket or
+               none at all.  However, multiple sockets should be capable of
+               receiving a UDP datagram (multicast reception).  This could be
+               handled easily by something like:
+
+                for (conn = NULL; conn = udp_active (pbuf, conn); )
+
+               If the callback logic that receives a packet responds with an
+               outgoing packet, then it will over-write the received buffer,
+               however.  recvfrom() will not do that, however.  We would have
+               to make that the rule: Recipients of a UDP packet must treat
+               the packet as read-only.
+  Status:      Open
+  Priority:    Low, unless your logic depends on that behavior.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

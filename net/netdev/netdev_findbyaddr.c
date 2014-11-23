@@ -233,7 +233,7 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t ripaddr)
 #ifndef CONFIG_NET_MULTILINK
    /* If there is only a single, registered network interface, then the
     * decision is pretty easy.  Use that device and its default router
-    * address.  Hmmm... it is almost certainly wrong, however.
+    * address.
     */
 
    dev = g_netdevices;

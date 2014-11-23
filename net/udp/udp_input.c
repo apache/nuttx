@@ -127,7 +127,21 @@ int udp_input(FAR struct net_driver_s *dev)
   else
 #endif
     {
-      /* Demultiplex this UDP packet between the UDP "connections". */
+      /* Demultiplex this UDP packet between the UDP "connections".
+       *
+       * REVISIT:  The logic here expects either a single receive socket or
+       * none at all.  However, multiple sockets should be capable of
+       * receiving a UDP datagram (multicast reception).  This could be
+       * handled easily by something like:
+       *
+       *   for (conn = NULL; conn = udp_active (pbuf, conn); )
+       *
+       * If the callback logic that receives a packet responds with an
+       * outgoing packet, then it will over-write the received buffer,
+       * however.  recvfrom() will not do that, however.  We would have to
+       * make that the rule: Recipients of a UDP packet must treat the
+       * packet as read-only.
+       */
 
       conn = udp_active(pbuf);
       if (conn)
