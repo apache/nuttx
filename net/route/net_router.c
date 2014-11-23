@@ -45,6 +45,7 @@
 
 #include <nuttx/net/ip.h>
 
+#include "devif/devif.h"
 #include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
@@ -130,6 +131,13 @@ int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
 {
   struct route_match_s match;
   int ret;
+
+  /* Do not route the special broadcast IP address */
+
+  if (net_ipaddr_cmp(target, g_alloneaddr))
+    {
+      return -ENOENT;
+    }
 
   /* Set up the comparison structure */
 
