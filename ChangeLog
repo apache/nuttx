@@ -9042,3 +9042,5 @@
 	* net/udp/tcp_conn.c and tcp.h:  Extensions to TCP connection structure
 	  for the case of multiple networks.  See the description of the similar
 	  change for UDP above (2014-11-22).
+	* net/route/net_router.c:  Refuse to perform routing table lookups for
+	  the Broadcast IP address.  From Brennan Ashton.
