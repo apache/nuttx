@@ -2907,7 +2907,17 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
-    3. You will almost certainly need to adapt this configuration to
+    3. This configuration executes out of SDRAM flash and is loaded into
+       SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
+       U-Boot or BareBox.  Data also is positioned in SDRAM.
+
+       I did most testing with nuttx.bin on an SD card.  These are the
+       commands that I used to boot NuttX from the SD card:
+
+         U-Boot> fatload mmc 0 0x20008000 nuttx.bin
+         U-Boot> go 0x20008040
+
+    4. You will almost certainly need to adapt this configuration to
        work in your network environment.  I did all testing with a
        single 10.0.0.xx network and a 4+1 port switch:
 
@@ -2915,7 +2925,8 @@ Configurations
        - Target GMAC IP: 10.0.0.2
        - Target EMAC IP: 10.0.0.3
 
-       Host, EMAC, and GMAC were all connected using a switch.
+       Host PC, EMAC, and GMAC were all connected using an Ethernet
+       switch to the same 255.255.255.0 network.
 
     STATUS:
 
