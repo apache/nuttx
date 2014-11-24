@@ -91,7 +91,7 @@
 #include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_IPv6
-#  include "net_neighbor.h"
+#  include "ipv6/ipv6.h"
 #endif /* CONFIG_NET_IPv6 */
 
 #include "devif/devif.h"
