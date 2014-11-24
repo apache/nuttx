@@ -1670,7 +1670,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
                  (privep = lpc214x_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
-            ret = lpc214x_epstall(&privep->ep, true);
+            (void)lpc214x_epstall(&privep->ep, true);
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
           }
@@ -2067,6 +2067,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           errcode  = (uint8_t)lpc214x_usbcmd(CMD_USB_DEV_READERRORSTATUS, 0) & 0x0f;
           usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPRINT), (uint16_t)errcode);
+          UNUSED(errcode);
         }
 #endif
 

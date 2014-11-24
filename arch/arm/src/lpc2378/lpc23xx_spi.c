@@ -247,14 +247,18 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
+#ifndef CONFIG_SPI_OWNBUS
   FAR struct lpc23xx_spidev_s *priv = (FAR struct lpc23xx_spidev_s *)dev;
+#endif
   uint32_t divisor;
   uint32_t actual;
 
-  /* Check if the requested frequence is the same as the frequency selection */
+  DEBUGASSERT(frequency <= SPI_CLOCK / 2);
 
-  DEBUGASSERT(priv && frequency <= SPI_CLOCK / 2);
 #ifndef CONFIG_SPI_OWNBUS
+  /* Check if the requested frequency is the same as the frequency selection */
+
+  DEBUGASSERT(priv);
   if (priv->frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
@@ -316,12 +320,15 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
+#ifndef CONFIG_SPI_OWNBUS
   FAR struct lpc23xx_spidev_s *priv = (FAR struct lpc23xx_spidev_s *)dev;
+#endif
   uint32_t regval;
 
+#ifndef CONFIG_SPI_OWNBUS
   /* Has the mode changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
+  DEBUGASSERT(priv);
   if (mode != priv->mode)
     {
 #endif
@@ -379,24 +386,27 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
+#ifndef CONFIG_SPI_OWNBUS
   FAR struct lpc23xx_spidev_s *priv = (FAR struct lpc23xx_spidev_s *)dev;
+#endif
   uint32_t regval;
 
-  /* Has the number of bits changed? */
-
-  DEBUGASSERT(priv && nbits > 7 && nbits < 17);
+  DEBUGASSERT(nbits > 7 && nbits < 17);
 
 #ifndef CONFIG_SPI_OWNBUS
+  /* Has the number of bits changed? */
+
+  DEBUGASSERT(priv);
   if (nbits != priv->nbits)
     {
 #endif
       /* Yes... Set CR appropriately */
 
-      regval = getreg32(SPI_CR);
+      regval  = getreg32(SPI_CR);
       regval &= ~SPI_CR_BITS_MASK;
       regval |= (nbits << SPI_CR_BITS_SHIFT) & SPI_CR_BITS_MASK;
       regval |= SPI_CR_BITENABLE;
-      regval = getreg32(SPI_CR);
+      putreg32(regval, SPI_CR);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 

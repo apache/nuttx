@@ -1089,7 +1089,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
 
       /* Save the new minimum interval */
 
-      if ((ed->hw.ctrl && ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
+      if ((ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
         {
           priv->ininterval  = interval;
         }

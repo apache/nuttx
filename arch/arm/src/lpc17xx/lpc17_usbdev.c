@@ -1713,7 +1713,7 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
                  (privep = lpc17_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
-            ret = lpc17_epstall(&privep->ep, true);
+            (void)lpc17_epstall(&privep->ep, true);
             lpc17_epwrite(LPC17_EP0_IN, NULL, 0);
             priv->ep0state = LPC17_EP0STATUSIN;
           }
