@@ -99,7 +99,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   for (i = 0; i < nwords; i++)
     {
-      spi_xfer(0, priv->nbits, txbuffer+i, rxbuffer+i);
+      spi_xfer(0, priv->nbits, txbuffer + i, rxbuffer + i);
     }
 }
 

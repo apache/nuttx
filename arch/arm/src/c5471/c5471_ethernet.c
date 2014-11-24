@@ -1600,6 +1600,7 @@ static int c5471_ifup(struct net_driver_s *dev)
   /* Clear pending interrupts by reading the EIM status register */
 
   clearbits = getreg32(EIM_STATUS);
+  UNUSED(clearbits);
 
   /* Enable interrupts going from EIM Module to Interrupt Module. */
 

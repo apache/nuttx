@@ -71,7 +71,7 @@ void hwtimer_enable(int num, int on)
 	uint8_t ctl;
 
 	if (num < 1 || num > 2) {
-		printf("Unknown timer %u\n", num);
+		printf("Unknown timer %d\n", num);
 		return;
 	}
 

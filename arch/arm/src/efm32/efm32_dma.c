@@ -689,7 +689,7 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   flags   = irqsave();
   regval  = getreg32(EFM32_DMA_IEN);
   regval |= bit;
-  putreg32(bit, EFM32_DMA_IEN);
+  putreg32(regval, EFM32_DMA_IEN);
 
   /* Enable the channel */
 
@@ -729,7 +729,7 @@ void efm32_dmastop(DMA_HANDLE handle)
 
   regval  = getreg32(EFM32_DMA_IEN);
   regval |= bit;
-  putreg32(bit, EFM32_DMA_IEN);
+  putreg32(regval, EFM32_DMA_IEN);
   irqrestore(flags);
 }
 
@@ -747,7 +747,7 @@ void efm32_dmastop(DMA_HANDLE handle)
 #ifdef CONFIG_DEBUG_DMA
 void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 {
-  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
   uintptr_t regaddr;
   irqstate_t flags;
 
@@ -801,8 +801,7 @@ void efm32_dmasample(DMA_HANDLE handle, struct efm32_dmaregs_s *regs)
 void efm32_dmadump(DMA_HANDLE handle, const struct efm32_dmaregs_s *regs,
                    const char *msg)
 {
-  struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
-  struct sam_xdmac_s *xdmac = sam_controller(xdmach);
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
 
   dmadbg("%s\n", msg);
   dmadbg("  DMA Registers:\n");
