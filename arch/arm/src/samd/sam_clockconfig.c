@@ -441,7 +441,7 @@ static inline void sam_osc32k_config(void)
 
   /* Recover OSC32K calibration data from OTP "fuse" memory */
 
-  regval  = getreg32(SYSCTRL_FUSES_OSC32KCAL_ADDR)
+  regval  = getreg32(SYSCTRL_FUSES_OSC32KCAL_ADDR);
   calib   = (regval & SYSCTRL_FUSES_OSC32KCAL_MASK) >> SYSCTRL_FUSES_OSC32KCAL_SHIFT;
   regval  = calib << SYSCTRL_OSC32K_CALIB_SHIFT;
 
