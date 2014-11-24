@@ -334,7 +334,7 @@ retry:
  *   posts keypad semaphore
  ****************************************************************************/
 
-inline int calypso_kbd_irq(int irq, uint32_t * regs)
+int calypso_kbd_irq(int irq, uint32_t * regs)
 {
   register uint16_t reg;
 

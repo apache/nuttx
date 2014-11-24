@@ -1881,6 +1881,7 @@ static int dm320_epconfigure(FAR struct usbdev_ep_s *ep,
   /* Retain what we need from the descriptor */
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
+  UNUSED(privep);
   DEBUGASSERT(desc->addr == ep->eplog);
   return OK;
 }
@@ -2227,6 +2228,7 @@ static void dm320_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
 {
   FAR struct dm320_ep_s *privep = (FAR struct dm320_ep_s *)ep;
   usbtrace(TRACE_DEVFREEEP, (uint16_t)privep->epphy);
+  UNUSED(privep);
 
   /* Nothing needs to be done */
 }
