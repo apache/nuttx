@@ -9052,7 +9052,7 @@
 	  netdev_txnotify.c which, in turn, for changes to arp/arp_send.c,
 	  icmp/icmp_ping.c, socket/net_sendfile.c, recvfrom.c, sendto.c,
 	  tcp/tcp_send_buffered.c, and tcp_send_unbuffered.c (2014-11-23).
-	* arch/arm/src/kl/chip/kl_i2c.h: "I2C header file for the Freescale KL
+	* arch/arm/src/kl/chip/kl_i2c.h:  I2C header file for the Freescale KL
 	  family.  From Alan Carvalho de Assis (2014-11-23).
-	* include/nuttx/fs/fs.h: Fix typo in confiditional compilation.  From
+	* include/nuttx/fs/fs.h: Fix typo in conditional compilation.  From
 	  Alan Carvalho de Assis (2014-11-23).

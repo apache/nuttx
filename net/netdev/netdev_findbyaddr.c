@@ -184,8 +184,7 @@ FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t ripaddr)
         }
 #else
       /* If there is only a single, registered network interface, then the
-       * decision is pretty easy.  Use that device and its default router
-       * address.
+       * decision is pretty easy.
        */
 
       return g_netdevices;
