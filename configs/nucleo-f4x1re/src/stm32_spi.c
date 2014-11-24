@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
@@ -110,8 +111,7 @@ void weak_function stm32_spiinitialize(void)
   g_spi1 = up_spiinitialize(1);
   if (!g_spi1)
     {
-      message("[boot] FAILED to initialize SPI port 1\n");
-      return -ENODEV;
+      spidbg("[boot] FAILED to initialize SPI port 1\n");
     }
 
 #ifdef CONFIG_WL_CC3000
