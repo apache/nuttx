@@ -206,7 +206,6 @@ static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct ccm_file_s *priv;
-  ssize_t ret = 0;
   size_t linesize;
   size_t copysize;
   size_t remaining;
