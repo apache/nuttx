@@ -167,6 +167,7 @@ CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
 # CONFIG_ARCH_CHIP_STM32F103RC is not set
 # CONFIG_ARCH_CHIP_STM32F103RD is not set
 # CONFIG_ARCH_CHIP_STM32F103RE is not set
+# CONFIG_ARCH_CHIP_STM32F103RG is not set
 # CONFIG_ARCH_CHIP_STM32F103V8 is not set
 # CONFIG_ARCH_CHIP_STM32F103VB is not set
 # CONFIG_ARCH_CHIP_STM32F103VC is not set
@@ -684,6 +685,7 @@ CONFIG_FS_MQUEUE_MPATH="/var/mqueue"
 # System Logging
 #
 # CONFIG_SYSLOG is not set
+# CONFIG_SYSLOG_TIMESTAMP is not set
 
 #
 # Graphics Support
@@ -997,7 +999,6 @@ CONFIG_NSH_CONSOLE=y
 #
 # NxPlayer media player library / command Line
 #
-# CONFIG_SYSTEM_NXPLAYER is not set
 
 #
 # RAM test
