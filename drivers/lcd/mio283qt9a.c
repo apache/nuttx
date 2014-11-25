@@ -719,11 +719,13 @@ static int mio283qt9a_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contra
 static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
 {
   FAR struct mio283qt9a_lcd_s *lcd  = priv->lcd;
-#ifndef CONFIG_LCD_NOGETRUN
+#if !defined(CONFIG_LCD_NOGETRUN) || defined(CONFIG_DEBUG_LCD)
   uint16_t id_a;
   uint16_t id_b;
   uint16_t id_c;
   uint16_t id_d;
+#endif
+#ifdef CONFIG_DEBUG_LCD
   uint16_t id_e;
 #endif
   int ret;
@@ -741,6 +743,8 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
   id_d = lcd->read(lcd);
 
   lcdvdbg("LCD ID: %04x %04x %04x %04x\n", id_a, id_b, id_c, id_d);
+  UNUSED(id_a);
+  UNUSED(id_b);
 
   /* Check if the ID is for the ILI9341 */
 
@@ -773,6 +777,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
       mio283qt9a_putreg(lcd, 0x11, 0);      /* Sleep out mode */
       up_mdelay(25);
 
+#ifdef CONFIG_DEBUG_LCD
       /* Read back some info from the panel */
 
       id_a = mio283qt9a_readreg(lcd, 0x04); /* Read display information */
@@ -811,6 +816,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
       id_a = mio283qt9a_readreg(lcd, 0x0f);  /* read self diag */
       id_b = lcd->read(lcd);
       lcdvdbg("Self diag %02x, %02x\n", id_a, id_b);
+#endif
       ret = OK;
     }
 #ifndef CONFIG_LCD_NOGETRUN

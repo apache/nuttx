@@ -836,11 +836,11 @@ static int smart_scan(struct smart_struct_s *dev)
 
               rootdirdev->dev = dev;
               rootdirdev->rootdirnum = x;
-              ret = register_blockdriver(dev->rwbuffer, &g_bops, 0, rootdirdev);
+              (void)register_blockdriver(dev->rwbuffer, &g_bops, 0, rootdirdev);
 
               /* Inode private data is a reference to the SMART device structure */
 
-              ret = register_blockdriver(devname, &g_bops, 0, rootdirdev);
+              (void)register_blockdriver(devname, &g_bops, 0, rootdirdev);
             }
 #endif
         }
@@ -1359,7 +1359,7 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
 
               /* Write the data to the new physical sector location */
 
-              ret = MTD_BWRITE(dev->mtd, newsector * dev->mtdBlksPerSector,
+              (void)MTD_BWRITE(dev->mtd, newsector * dev->mtdBlksPerSector,
                                dev->mtdBlksPerSector, (uint8_t *) dev->rwbuffer);
 
               /* Commit the sector */

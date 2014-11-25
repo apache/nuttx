@@ -359,13 +359,12 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t buflen)
 {
   FAR const uint8_t *ptr = (FAR const uint8_t*)buffer;
-  uint8_t response;
 
   /* Loop while there are bytes remaining to be sent */
 
   while (buflen-- > 0)
     {
-      response = spi_transfer(*ptr++);
+      (void)spi_transfer(*ptr++);
     }
 }
 

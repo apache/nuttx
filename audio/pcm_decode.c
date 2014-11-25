@@ -442,8 +442,8 @@ static void pcm_subsample_configure(FAR struct pcm_decode_s *priv,
 
   if (priv->subsample == AUDIO_SUBSAMPLE_NONE)
     {
-      /* Ignore request to stop fast forwarding if we are already
-       * fast forwarding.
+      /* Ignore request to stop fast forwarding if we are already playing
+       * normally.
        */
 
       if (subsample != AUDIO_SUBSAMPLE_NONE)
@@ -460,24 +460,11 @@ static void pcm_subsample_configure(FAR struct pcm_decode_s *priv,
         }
     }
 
-  /* 2. Were already fast forwarding and we have been asked to change the
-   *    sub-sampling rate.
-   */
-
-  else if (subsample != AUDIO_SUBSAMPLE_NONE)
-    {
-      /* Just save the current subsample setting.  It will take effect
-       * on the next audio buffer that we receive.
-       */
-
-       priv->subsample = subsample;
-    }
-
-  /* 3. We were already fast forwarding and we have been asked to return to
+  /* 2. We were already fast forwarding and we have been asked to return to
    *    normal play.
    */
 
-  else if (subsample != AUDIO_SUBSAMPLE_NONE)
+  else if (subsample == AUDIO_SUBSAMPLE_NONE)
     {
       audvdbg("Stop sub-sampling\n");
 
@@ -488,6 +475,19 @@ static void pcm_subsample_configure(FAR struct pcm_decode_s *priv,
       priv->npartial  = 0;
       priv->skip      = 0;
       priv->subsample = AUDIO_SUBSAMPLE_NONE;
+    }
+
+  /* 3. Were already fast forwarding and we have been asked to change the
+   *    sub-sampling rate.
+   */
+
+  else if (priv->subsample != subsample)
+    {
+      /* Just save the new subsample setting.  It will take effect on the
+       * next audio buffer that we receive.
+       */
+
+       priv->subsample = subsample;
     }
 }
 #endif

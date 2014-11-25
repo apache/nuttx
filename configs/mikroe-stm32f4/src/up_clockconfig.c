@@ -146,5 +146,5 @@ void stm32_board_clockconfig(void)
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
     ;
-#endif
 }
+#endif

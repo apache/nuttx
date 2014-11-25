@@ -951,7 +951,6 @@ static int ssi_interrupt(int irq, void *context)
 {
   struct tiva_ssidev_s *priv = ssi_mapirq(irq);
   uint32_t regval;
-  int ntxd;
 
   DEBUGASSERT(priv != NULL);
 
@@ -975,7 +974,7 @@ static int ssi_interrupt(int irq, void *context)
 
   /* Handle outgoing Tx FIFO transfers */
 
-  ntxd = ssi_performtx(priv);
+  (void)ssi_performtx(priv);
 
   /* Handle incoming Rx FIFO transfers */
 

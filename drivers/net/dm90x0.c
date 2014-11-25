@@ -891,8 +891,6 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 {
   union rx_desc_u rx;
   bool bchecksumready;
-  uint8_t mdrah;
-  uint8_t mdral;
   uint8_t rxbyte;
 
   nvdbg("Packet received\n");
@@ -901,8 +899,8 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
     {
       /* Store the value of memory data read address register */
 
-      mdrah = getreg(DM9X_MDRAH);
-      mdral = getreg(DM9X_MDRAL);
+      (void)getreg(DM9X_MDRAH);
+      (void)getreg(DM9X_MDRAL);
 
       getreg(DM9X_MRCMDX);         /* Dummy read */
       rxbyte = (uint8_t)DM9X_DATA; /* Get the most up-to-date data */

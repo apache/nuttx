@@ -270,7 +270,7 @@ void e1000_turn_off(struct e1000_dev *dev)
 
 void e1000_init(struct e1000_dev *dev)
 {
-  uint32_t rxd_phy;
+  uint32_t rxd_phys;
   uint32_t txd_phys;
   uint32_t kmem_phys;
   uint32_t rx_control;
@@ -570,35 +570,33 @@ static void e1000_receive(struct e1000_dev *e1000)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
 #else
-        {
-          if (BUF->type == HTONS(ETHTYPE_IP))
+      if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
+        {
+          arp_ipin(&e1000->netdev);
+          devif_input(&e1000->netdev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (e1000->netdev.d_len > 0)
             {
-              arp_ipin(&e1000->netdev);
-              devif_input(&e1000->netdev);
-
-              /* If the above function invocation resulted in data that should be
-               * sent out on the network, the field  d_len will set to a value > 0.
-               */
-
-              if (e1000->netdev.d_len > 0)
-                {
-                  arp_out(&e1000->netdev);
-                  e1000_transmit(e1000);
-                }
+              arp_out(&e1000->netdev);
+              e1000_transmit(e1000);
             }
-          else if (BUF->type == htons(ETHTYPE_ARP))
+        }
+      else if (BUF->type == htons(ETHTYPE_ARP))
+        {
+          arp_arpin(&e1000->netdev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (e1000->netdev.d_len > 0)
             {
-              arp_arpin(&e1000->netdev);
-
-              /* If the above function invocation resulted in data that should be
-               * sent out on the network, the field  d_len will set to a value > 0.
-               */
-
-              if (e1000->netdev.d_len > 0)
-                {
-                  e1000_transmit(e1000);
-                }
+              e1000_transmit(e1000);
             }
         }
 

@@ -156,7 +156,7 @@ void pm_activity(int priority)
            * controlled priority.
            */
 
-          (void)pm_update(accum);
+          (void)pm_update(tmp);
         }
 
       irqrestore(flags);

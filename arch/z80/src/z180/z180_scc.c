@@ -575,8 +575,6 @@ static bool z180_txempty(struct uart_dev_s *dev)
 
 void up_serialinit(void)
 {
-  uint8_t regval;
-
   /* Make sure that all UART interrupts are disabled */
 #warning "Missing logic"
 

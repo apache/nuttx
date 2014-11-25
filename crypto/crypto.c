@@ -66,21 +66,31 @@
 
 void up_cryptoinitialize(void)
 {
-  int res = OK;
+#if defined(CONFIG_CRYPTO_AES) || defined(CONFIG_CRYPTO_ALGTEST)
+  int res;
 
-#if defined(CONFIG_CRYPTO_AES)
+#ifdef CONFIG_CRYPTO_AES
   res = up_aesinitialize();
   if (res)
-    return res;
+    {
+      return res;
+    }
 #endif
 
-#if defined(CONFIG_CRYPTO_ALGTEST)
+#if CONFIG_CRYPTO_ALGTEST
   res = crypto_test();
   if (res)
-    cryptlldbg("crypto test failed\n");
+    {
+      cryptlldbg("crypto test failed\n");
+    }
   else
-    cryptllvdbg("crypto test OK\n");
+    {
+      cryptllvdbg("crypto test OK\n");
+    }
 #endif
 
   return res;
+#else
+  return OK;
+#endif
 }

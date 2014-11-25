@@ -267,6 +267,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           actual = BOARD_CPU_CLOCK / 128;
         }
 
+#warning REVIST: spcr/spsr are never used
+
       /* Save the frequency setting */
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -531,6 +533,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
 #endif
+
+  irqrestore(flags);
   return &priv->spidev;
 }
 #endif /* CONFIG_AVR_SPI */

@@ -170,7 +170,10 @@ void stm32_usbinitialize(void)
 int stm32_usbhost_initialize(void)
 {
   int pid;
+#if defined(CONFIG_USBHOST_MSC) || defined(CONFIG_USBHOST_HIDKBD) || \
+    defined(CONFIG_USBHOST_HIDMOUSE)
   int ret;
+#endif
 
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:

@@ -750,6 +750,8 @@ static void mxt_button_event(FAR struct mxt_dev_s *priv,
           button = (msg->body[0] & mask) == 0;
 
           /* Now what? */
+
+          UNUSED(button);
         }
     }
 }

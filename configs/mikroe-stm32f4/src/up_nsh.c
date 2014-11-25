@@ -169,7 +169,11 @@ int nsh_archinitialize(void)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #endif
+#if defined(NSH_HAVEMMCSD) || defined(HAVE_USBHOST) || \
+    defined(HAVE_USBMONITOR) || defined(CONFIG_LCD_MIO283QT2) || \
+    defined(CONFIG_LCD_MIO283QT9A)
   int ret;
+#endif
 
   /* Configure SPI-based devices */
 

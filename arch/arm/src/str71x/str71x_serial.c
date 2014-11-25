@@ -631,8 +631,8 @@ static int up_attach(struct uart_dev_s *dev)
        /* Set the uart interrupt priority (the default value is one) */
 
        up_prioritize_irq(priv->irq, CONFIG_UART_PRI);
-    }
 #endif
+    }
 
   return ret;
 }

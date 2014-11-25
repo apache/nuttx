@@ -76,16 +76,14 @@
 
 int up_timerisr(int irq, chipreg_t *regs)
 {
-  volatile uint8_t reg;
-
-  /* Read the appropropriate timer0 registr to clear the interrupt */
+  /* Read the appropriate timer0 register to clear the interrupt */
 
 #ifdef _EZ80F91
-  reg = inp(EZ80_TMR0_IIR);
+  (void)inp(EZ80_TMR0_IIR);
 #else
   /* _EZ80190, _EZ80L92, _EZ80F92, _EZ80F93 */
 
-  reg = inp(EZ80_TMR0_CTL);
+  (void)inp(EZ80_TMR0_CTL);
 #endif
 
   /* Process timer interrupt */
@@ -113,7 +111,6 @@ int up_timerisr(int irq, chipreg_t *regs)
 void up_timer_initialize(void)
 {
   uint16_t reload;
-  uint8_t  reg;
 
   /* Disable the timer */
 
@@ -149,9 +146,9 @@ void up_timer_initialize(void)
   /* Clear any pending timer interrupts */
 
 #if defined(_EZ80F91)
-  reg = inp(EZ80_TMR0_IIR);
+  (void)inp(EZ80_TMR0_IIR);
 #elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)
-  reg = inp(EZ80_TMR0_CTL);
+  (void)inp(EZ80_TMR0_CTL);
 #endif
 
   /* Configure and enable the timer */

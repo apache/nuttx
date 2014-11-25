@@ -365,7 +365,7 @@ static void usbmsc_putle32(uint8_t *buf, uint32_t val)
 
 static void usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags;
   int ret;
 
   /* We must hold the SCSI lock to call this function */
@@ -2802,7 +2802,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
 
 void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv)
 {
-  irqstate_t flags = irqsave();
+  irqstate_t flags;
 
   /* A flag is used to prevent driving up the semaphore count.  This function
    * is called (primarily) from interrupt level logic so we must disable

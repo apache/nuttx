@@ -714,7 +714,7 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
        * we are finished.
        */
 
-      if (nwords <= 0)
+      if (nwords < 1)
         {
           return;
         }

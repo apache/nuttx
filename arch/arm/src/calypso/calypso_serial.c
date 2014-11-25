@@ -94,23 +94,23 @@ struct uart_regs_s
 
 struct up_dev_s
 {
-  unsigned int         uartbase;	/* Base address of UART registers */
-  unsigned int         baud_base;	/* Base baud for conversions */
-  unsigned int         baud;		/* Configured baud */
-  uint8_t              xmit_fifo_size;	/* Size of transmit FIFO */
-  uint8_t              irq;			/* IRQ associated with this UART */
-  uint8_t              parity;		/* 0=none, 1=odd, 2=even */
-  uint8_t              bits;		/* Number of bits (7 or 8) */
+  unsigned int         uartbase;    /* Base address of UART registers */
+  unsigned int         baud_base;   /* Base baud for conversions */
+  unsigned int         baud;        /* Configured baud */
+  uint8_t              xmit_fifo_size; /* Size of transmit FIFO */
+  uint8_t              irq;         /* IRQ associated with this UART */
+  uint8_t              parity;      /* 0=none, 1=odd, 2=even */
+  uint8_t              bits;        /* Number of bits (7 or 8) */
 #ifdef CONFIG_UART_HWFLOWCONTROL
-  bool                 flowcontrol;	/* true: Hardware flow control
-									 * is enabled. */
+  bool                 flowcontrol; /* true: Hardware flow control
+                                     * is enabled. */
 #endif
-  bool                 stopbits2;	/* true: Configure with 2
-									 * stop bits instead of 1 */
-  struct uart_regs_s   regs;		/* Shadow copy of readonly regs */
+  bool                 stopbits2;   /* true: Configure with 2
+                                     * stop bits instead of 1 */
+  struct uart_regs_s   regs;        /* Shadow copy of readonly regs */
 
 #ifdef CONFIG_SERCOMM_CONSOLE
-  bool                 sercomm;		/* Call sercomm in interrupt if true */
+  bool                 sercomm;     /* Call sercomm in interrupt if true */
 #endif
 };
 

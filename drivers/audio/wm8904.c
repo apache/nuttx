@@ -1685,7 +1685,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
   struct audio_msg_s  term_msg;
-  int ret = -EAGAIN;
+  int ret;
 
   audvdbg("Enqueueing: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
           apb, apb->curbyte, apb->nbytes, apb->flags);

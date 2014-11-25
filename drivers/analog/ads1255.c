@@ -168,23 +168,25 @@ static uint8_t getspsreg(uint16_t sps)
 {
   static const unsigned short sps_tab[]=
   {
-    3,7,12,20,27,40,55,80,300,750,1500,3000,5000,10000,20000,65535,
+      3,     7,     12,    20,    27,    40,    55,    80,
+    300,   750,   1500,  3000,  5000, 10000, 20000, 65535,
   };
   static const unsigned char sps_reg[]=
   {
-    0x03,0x13,0x23,0x33,0x43,0x53,0x63,0x72,0x82,0x92,0xa1,0xb0,0xc0,0xd0,0xe0,0xf0,
+    0x03,  0x13,  0x23,  0x33,  0x43,  0x53,  0x63,  0x72,
+    0x82,  0x92,  0xa1,  0xb0,  0xc0,  0xd0,  0xe0,  0xf0,
   };
   int i;
 
-  for (i=0; i<16; i++)
+  for (i = 0; i < 16; i++)
     {
-      if (sps<sps_tab[i])
+      if (sps < sps_tab[i])
         {
-          break;
+          return sps_reg[i];
         }
     }
 
-  return sps_reg[i];
+  return sps_reg[15];
 }
 
 /****************************************************************************

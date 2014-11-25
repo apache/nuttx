@@ -453,7 +453,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   /* Force the size to be an even number of the erase block size */
 
   nblocks = size / CONFIG_RAMMTD_ERASESIZE;
-  if (nblocks <= 0)
+  if (nblocks < 1)
     {
       fdbg("Need to provide at least one full erase block\n");
       return NULL;

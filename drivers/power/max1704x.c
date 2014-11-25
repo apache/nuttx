@@ -271,7 +271,6 @@ static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
   /* Return the 16-bit value */
 
   return (uint16_t)buffer[0] << 8 | (uint16_t)buffer[1];
-  return OK;
 }
 
 /****************************************************************************
