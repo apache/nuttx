@@ -630,6 +630,7 @@ config ARCH_BOARD_SAM4EEK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT if NETDEVICES
 	---help---
 		The port of NuttX to the Atmel SAM4E-EK development board.  This
 		board features the SAM4E16 MCU running at up to 120MHz.
