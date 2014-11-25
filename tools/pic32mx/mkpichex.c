@@ -239,6 +239,7 @@ int main(int argc, char **argv, char **envp)
   char *destfile;
   FILE *src;
   FILE *dest;
+  int err;
 
   if (argc != 2)
     {
@@ -257,21 +258,24 @@ int main(int argc, char **argv, char **envp)
   if (!destfile)
     {
       fprintf(stderr, "getfilepath failed\n");
-      exit(2);
+      err = 2;
+      goto errout_with_srcfile;
     }
 
   src = fopen(srcfile, "r");
   if (!src)
     {
       fprintf(stderr, "open %s failed: %s\n", srcfile, strerror(errno));
-      exit(3);
+      err = 3;
+      goto errout_with_destfile;
     }
 
   dest = fopen(destfile, "w");
   if (!dest)
     {
       fprintf(stderr, "open %s failed: %s\n", destfile, strerror(errno));
-      exit(3);
+      err = 3;
+      goto errout_with_destfile;
     }
 
   /* Read each line from the source file */
@@ -281,7 +285,8 @@ int main(int argc, char **argv, char **envp)
       if (parse_line(&hexline))
         {
           fprintf(stderr, "Failed to parse line\n");
-          exit(1);
+          err = 1;
+          goto errout_with_destfile;
         }
 
       /* Adjust 'Extended Segment Address Records'. */
@@ -290,6 +295,7 @@ int main(int argc, char **argv, char **envp)
         {
           adjust_extlin(&hexline);
         }
+
       fputs(line, dest);
     }
 
@@ -314,4 +320,10 @@ int main(int argc, char **argv, char **envp)
   /* Exit (without bothering to clean up allocations) */
 
   return 0;
+
+errout_with_destfile:
+  free(destfile);
+errout_with_srcfile:
+  free(srcfile);
+  return err;
 }

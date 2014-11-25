@@ -283,5 +283,6 @@ int main(int argc, char **argv, char **envp)
 
   /* Exit (without bothering to clean up allocations) */
 
+  free(filepath);
   return 0;
 }
