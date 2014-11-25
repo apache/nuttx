@@ -137,7 +137,6 @@ static uint32_t lpc31_ns2clk(uint32_t ns, uint32_t hclk2)
 
 static inline void lpc31_sdraminitialize(void)
 {
-  uint32_t tmp;
   uint32_t regval;
 
   /* These run-time calculations can be reduced dramatically if hclk is
@@ -254,7 +253,7 @@ static inline void lpc31_sdraminitialize(void)
    * 16bit mode
    */
 
-  tmp = getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 12));
+  (void)getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 12));
 
   /* Select normal operating mode */
 

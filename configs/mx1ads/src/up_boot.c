@@ -101,7 +101,7 @@ void imx_boardinitialize(void)
   imxgpio_configprimary(GPIOA, 21);
   imxgpio_configprimary(GPIOA, 22);
 
-  regval = getreg32(IMX_CS4_VSECTION + 0x0c);
-  regval = getreg32(IMX_CS4_VSECTION + 0x0c);
+  (void)getreg32(IMX_CS4_VSECTION + 0x0c);
+  (void)getreg32(IMX_CS4_VSECTION + 0x0c);
 #endif
 }

@@ -109,11 +109,6 @@
 void open1788_sdram_initialize(void)
 {
   uint32_t regval;
-#ifdef CONFIG_LPC17_SDRAM_16BIT
-  volatile uint16_t dummy;
-#else
-  volatile uint32_t dummy;
-#endif
   int i;
 
   /* Reconfigure delays:
@@ -211,9 +206,9 @@ void open1788_sdram_initialize(void)
            LPC17_EMC_DYNAMICCONTROL);
 
 #ifdef CONFIG_LPC17_SDRAM_16BIT
-  dummy = getreg16(SDRAM_BASE | (0x33 << 12));  /* 8 burst, 3 CAS latency */
+  (void)getreg16(SDRAM_BASE | (0x33 << 12));  /* 8 burst, 3 CAS latency */
 #elif defined CONFIG_LPC17_SDRAM_32BIT
-  dummy = getreg32(SDRAM_BASE | (0x32 << 13)); /* 4 burst, 3 CAS latency */
+  (void)getreg32(SDRAM_BASE | (0x32 << 13)); /* 4 burst, 3 CAS latency */
 #endif
 
   /* Issue NORMAL command */

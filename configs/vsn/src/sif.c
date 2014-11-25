@@ -577,7 +577,8 @@ int sif_main(int argc, char *argv[])
                 }
                 else if (status != 0) {
                     if (stpage != 0xFFFF) {
-                        printf("Free Range:\t%d\t-\t%d\n", stpage, page-2);
+                        printf("Free Range:\t%lu\t-\t%lu\n",
+                               (unsigned long)stpage, (unsigned long)(page-2));
                         stpage = 0xFFFF;
                     }
                 }
@@ -594,8 +595,8 @@ int sif_main(int argc, char *argv[])
             size_t page = atoi(argv[2]);
             size_t addr = page * up_progmem_pagesize(page);
 
-            printf("Write result: %d (writing to address %xh)\n",
-                up_progmem_write(addr, "Test", 4), addr);
+            printf("Write result: %d (writing to address %lxh)\n",
+                up_progmem_write(addr, "Test", 4), (unsigned long)addr);
             return 0;
         }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {

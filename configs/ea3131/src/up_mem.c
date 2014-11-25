@@ -157,7 +157,6 @@
 
 static void lpc31_sdraminitialize(void)
 {
-  uint32_t tmp;
   uint32_t regval;
 
   /* These run-time calculations can be reduced dramatically if hclk is
@@ -266,7 +265,7 @@ static void lpc31_sdraminitialize(void)
    * 16bit mode
    */
 
-  tmp = getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
+  (void)getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
 
   putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
            LPC31_MPMC_DYNCONFIG0);

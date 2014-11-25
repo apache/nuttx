@@ -59,6 +59,10 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
+#  undef CONFIG_CAN
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -84,7 +88,7 @@ int nsh_archinitialize(void)
   int ret;
 #endif
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
+#ifdef CONFIG_CAN
   /* Configure on-board CAN if CAN support has been selected. */
 
   ret = stm32_can_initialize();

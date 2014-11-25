@@ -1197,14 +1197,14 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
       else
 #endif
 #ifndef CONFIG_STM32_ILI9320_DISABLE
-      if (priv->type == LCD_TYPE_ILI9300)
+      if (priv->type == LCD_TYPE_ILI9320)
         {
           stm32_writereg(priv, LCD_REG_7, 0x0173);
         }
       else
 #endif
 #ifndef CONFIG_STM32_ILI9321_DISABLE
-      if (priv->type == LCD_TYPE_ILI9300)
+      if (priv->type == LCD_TYPE_ILI9321)
         {
           stm32_writereg(priv, LCD_REG_7, 0x0173);
         }

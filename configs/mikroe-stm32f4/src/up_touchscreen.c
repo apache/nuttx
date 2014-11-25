@@ -435,7 +435,6 @@ static void tc_adc_init(void)
   regval = tc_adc_getreg(STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
   regval |= LCD_YD_CHANNEL;
   tc_adc_putreg(STM32_ADC_SQR3_OFFSET, regval);
-  regval = tc_adc_getreg(STM32_ADC_SQR3_OFFSET);
 
   /* Set the number of conversions = 1 */
 
