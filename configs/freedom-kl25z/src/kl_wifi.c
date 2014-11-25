@@ -81,37 +81,34 @@
  * Public Functions
  ****************************************************************************/
 
-/*
- * Used by CC3000 driver to read status of WIFI_IRQ
- */
+/* Used by CC3000 driver to read status of WIFI_IRQ */
+
 inline long ReadWlanInterruptPin(void)
 {
-        // Return the status of WIFI_IRQ pin
-        return kl_gpioread(GPIO_WIFI_IRQ);
+  /* Return the status of WIFI_IRQ pin */
+
+   return kl_gpioread(GPIO_WIFI_IRQ);
 }
 
-/*
- * Enable/Disable WiFi
- */
+/* Enable/Disable WiFi */
+
 void WriteWlanEnablePin(uint8_t val)
 {
-	kl_gpiowrite(GPIO_WIFI_EN, val);
+  kl_gpiowrite(GPIO_WIFI_EN, val);
 }
 
-/*
- * Assert CC3000 CS
- */
+/* Assert CC3000 CS */
+
 void AssertWlanCS(void)
 {
-	kl_gpiowrite(GPIO_WIFI_CS, false);
+  kl_gpiowrite(GPIO_WIFI_CS, false);
 }
 
-/*
- * Deassert CC3000 CS
- */
+/* Deassert CC3000 CS */
+
 void DeassertWlanCS(void)
 {
-	kl_gpiowrite(GPIO_WIFI_CS, true);
+  kl_gpiowrite(GPIO_WIFI_CS, true);
 }
 
 /****************************************************************************
@@ -130,21 +127,27 @@ void Wlan_Setup(void)
   printf("\nExecuting kl_irq_initialize!\n");
 
   /* Configure the PIN used to enable the chip */
+
   kl_configgpio(GPIO_WIFI_EN);
 
   /* Configure PIN to detect interrupts */
+
   kl_configgpio(GPIO_WIFI_IRQ);
 
   /* Configure PIN used as SPI CS */
+
   kl_configgpio(GPIO_WIFI_CS);
 
   /* Make sure the chip is OFF before we start */
+
   WriteWlanEnablePin(false);
 
   /* Make sure the SPI CS pin is deasserted */
+
   DeassertWlanCS();
 
   /* Configure pin to detect interrupt on falling edge */
+
   regval = getreg32(KL_PORTA_PCR16);
   regval |= PORT_PCR_IRQC_FALLING;
   putreg32(regval, KL_PORTA_PCR16);
@@ -152,8 +155,6 @@ void Wlan_Setup(void)
   ret = irq_attach(KL_IRQ_PORTA, CC3000InterruptHandler);
   if (ret == OK)
     {
-	up_enable_irq(KL_IRQ_PORTA);
+      up_enable_irq(KL_IRQ_PORTA);
     }
-
 }
-

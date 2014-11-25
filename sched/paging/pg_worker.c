@@ -526,10 +526,8 @@ static inline void pg_fillcomplete(void)
 
 int pg_worker(int argc, char *argv[])
 {
-  irqstate_t flags;
-
-  /* Loop forever -- Notice that interrupts will be disable at all times that
-   * this thread runs.  That is so that we con't lose signals or have
+  /* Loop forever -- Notice that interrupts will be disabled at all times that
+   * this thread runs.  That is so that we can't lose signals or have
    * asynchronous page faults.
    *
    * All interrupt logic as well as all page fill worker thread logic must
@@ -539,7 +537,7 @@ int pg_worker(int argc, char *argv[])
    */
 
   pglldbg("Started\n");
-  flags = irqsave();
+  (void)irqsave();
   for (;;)
     {
       /* Wait awhile.  We will wait here until either the configurable timeout
