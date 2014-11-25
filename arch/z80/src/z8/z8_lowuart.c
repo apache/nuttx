@@ -75,9 +75,12 @@ extern uint32_t get_freq(void);
 
 void up_lowserialinit(void)
 {
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) || \
+   (defined(EZ8_UART1) && defined(CONFIG_UART1_SERIAL_CONSOLE))
   uint32_t freq = get_freq();
   uint16_t brg;
   uint8_t  val;
+#endif
 
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
   /* Set the baudrate */

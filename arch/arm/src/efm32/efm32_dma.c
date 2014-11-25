@@ -717,7 +717,7 @@ void efm32_dmastop(DMA_HANDLE handle)
   uint32_t regval;
   uint32_t bit;
 
-  DEBUGASSERT(dmach && dmach);
+  DEBUGASSERT(dmach);
   bit = 1 << dmach->chan;
 
   /* Disable the channel */
