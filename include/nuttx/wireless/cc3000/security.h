@@ -134,5 +134,9 @@ signed long aes_read_key(uint8_t *key);
 
 signed long aes_write_key(uint8_t *key);
 
+#ifdef  __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif /* CC3000_UNENCRYPTED_SMART_CONFIG */
 #endif /* _INCLUDE_NUTTX_WIRELESS_CC3000_SECURITY_H */
