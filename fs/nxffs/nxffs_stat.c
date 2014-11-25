@@ -151,7 +151,6 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   memset(buf, 0, sizeof(struct stat));
   buf->st_blksize = volume->geo.blocksize;
-  buf->st_blocks  = entry.datlen / (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
 
   /* The requested directory must be the volume-relative "root" directory */
 
@@ -166,6 +165,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
           goto errout_with_semaphore;
         }
 
+      buf->st_blocks  = entry.datlen / (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
       buf->st_mode    = S_IFREG|S_IXOTH|S_IXGRP|S_IXUSR;
       buf->st_size    = entry.datlen;
       buf->st_atime   = entry.utc;

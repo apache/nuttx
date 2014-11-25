@@ -452,7 +452,7 @@ unsigned int wd_timer(int ticks)
       /* There are.  Decrement the lag counter */
 
       wdog->lag -= decr;
-      ticks     -= ticks;
+      ticks     -= decr;
 
       /* Check if the watchdog at the head of the list is ready to run */
 

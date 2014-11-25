@@ -108,7 +108,7 @@ static inline int vsyslog_internal(FAR const char *fmt, va_list ap)
 
   /* Get the current time */
 
-  ret = clock_systimespec(&ts);
+  (void)clock_systimespec(&ts);
 #endif
 
 #if defined(CONFIG_SYSLOG)

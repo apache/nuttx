@@ -163,7 +163,6 @@ void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
 #else
       net_ipaddr_copy(*router, match.target);
 #endif
-      ret = OK;
     }
   else
     {

@@ -176,9 +176,11 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 {
   FAR struct tcb_s *wtcb;
+#if CONFIG_SEM_NNESTPRIO > 0
   uint8_t wpriority;
   int index;
   int selected;
+#endif
 
   /* Get the TCB of the low priority worker thread from the process ID. */
 

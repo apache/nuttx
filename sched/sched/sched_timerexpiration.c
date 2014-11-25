@@ -467,12 +467,9 @@ static void sched_timer_start(unsigned int ticks)
        ret = up_timer_start(&ts);
 #endif
 
-      /* [Re-]start the interval timer */
-
-      ret = up_timer_start(&ts);
       if (ret < 0)
         {
-          slldbg("ERROR: up_timer_start failed: %d\n");
+          slldbg("ERROR: up_timer_start/up_alarm_start failed: %d\n");
           UNUSED(ret);
         }
     }

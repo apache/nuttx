@@ -86,7 +86,6 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
   FAR struct iob_s *entry;
   FAR struct iob_s *penultimate;
   FAR struct iob_s *last;
-  unsigned int iosize;
   int len;
 
   nlldbg("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
@@ -105,14 +104,9 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 
           penultimate = NULL;
           last = NULL;
-          iosize = 0;
 
           for (entry = iob; entry; entry = entry->io_flink)
             {
-              /* Accumulate the total size of all buffers in the list */
-
-              iosize += entry->io_len;
-
               /* Remember the last and the next to the last in the chain */
 
               penultimate = last;

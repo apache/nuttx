@@ -341,6 +341,7 @@ void os_start(void)
 
   sem_initialize();
 
+#if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */
 
   {
@@ -375,6 +376,7 @@ void os_start(void)
     mm_pginitialize(heap_start, heap_size);
 #endif
   }
+#endif
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Initialize tasking data structures */

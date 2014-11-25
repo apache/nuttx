@@ -146,6 +146,7 @@ int execl(FAR const char *path, ...)
       if (++nargs > MAX_EXECL_ARGS)
         {
           set_errno(E2BIG);
+          va_end(ap);
           return ERROR;
         }
     }
