@@ -410,7 +410,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
 
   if (!noinodes)
     {
-      while ((ret = nxffs_nextentry(volume, offset, &entry)) == OK)
+      while (nxffs_nextentry(volume, offset, &entry) == OK)
         {
           /* Discard the entry and guess the next offset. */
 

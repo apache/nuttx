@@ -96,7 +96,7 @@ static void aio_read_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t prio;
 #endif
-  ssize_t nread;
+  ssize_t nread = 0;
 
   /* Get the information from the container, decant the AIO control block,
    * and free the container before starting any I/O.  That will minimize

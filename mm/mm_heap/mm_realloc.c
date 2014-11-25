@@ -101,7 +101,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* If size is zero, then realloc is equivalent to free */
 
-  if (size <= 0)
+  if (size < 1)
     {
       mm_free(heap, oldmem);
       return NULL;
@@ -170,7 +170,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        * previous chunk is smaller than the next chunk.
        */
 
-      if (prevsize > 0 && (nextsize >= prevsize || nextsize <= 0))
+      if (prevsize > 0 && (nextsize >= prevsize || nextsize < 1))
         {
           /* Can we get everything we need from the previous chunk? */
 

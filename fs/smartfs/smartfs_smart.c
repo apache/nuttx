@@ -1441,7 +1441,7 @@ static int smartfs_unbind(void *handle, FAR struct inode **blkdriver)
 static int smartfs_statfs(struct inode *mountpt, struct statfs *buf)
 {
   struct smartfs_mountpt_s *fs;
-  int                   ret = OK;
+  int ret;
 
   /* Sanity checks */
 
@@ -1483,11 +1483,11 @@ static int smartfs_statfs(struct inode *mountpt, struct statfs *buf)
 
 static int smartfs_unlink(struct inode *mountpt, const char *relpath)
 {
-  struct smartfs_mountpt_s       *fs;
-  int                             ret = OK;
-  struct smartfs_entry_s          entry;
-  const char                     *filename;
-  uint16_t                        parentdirsector;
+  struct smartfs_mountpt_s *fs;
+  int                       ret;
+  struct smartfs_entry_s    entry;
+  const char               *filename;
+  uint16_t                  parentdirsector;
 
   /* Sanity checks */
 
@@ -1627,11 +1627,11 @@ errout_with_semaphore:
 
 int smartfs_rmdir(struct inode *mountpt, const char *relpath)
 {
-  struct smartfs_mountpt_s       *fs;
-  int                             ret = OK;
-  struct smartfs_entry_s          entry;
-  const char                     *filename;
-  uint16_t                        parentdirsector;
+  struct smartfs_mountpt_s *fs;
+  int                       ret;
+  struct smartfs_entry_s    entry;
+  const char               *filename;
+  uint16_t                  parentdirsector;
 
   /* Sanity checks */
 
@@ -1916,7 +1916,7 @@ static int smartfs_stat(struct inode *mountpt, const char *relpath, struct stat 
 {
   struct smartfs_mountpt_s *fs;
   struct smartfs_entry_s    entry;
-  int                       ret = -ENOENT;
+  int                       ret;
   uint16_t                  parentdirsector;
   const char               *filename;
 

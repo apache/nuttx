@@ -709,7 +709,9 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
   FAR struct smartfs_file_s *priv;
   int       ret;
   size_t    len;
+#if 0 /* Not used */
   int       utilization;
+#endif
 
   priv = (FAR struct smartfs_file_s *) filep->f_priv;
 
@@ -729,6 +731,7 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
 
       if (ret == OK)
         {
+#if 0 /* Not used */
           /* Calculate the sector utilization percentage */
 
           if (procfs_data.blockerases == 0)
@@ -741,6 +744,7 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
                 procfs_data.unusedsectors) / (procfs_data.blockerases *
                 procfs_data.sectorsperblk);
             }
+#endif
 
           /* Format and return data in the buffer */
 
@@ -756,8 +760,10 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
                   procfs_data.formatsector, procfs_data.dirsector,
                   procfs_data.freesectors, procfs_data.releasesectors,
                   procfs_data.sectorsperblk);
-                  //procfs_data.unusedsectors, procfs_data.blockerases,
-                  //procfs_data.sectorsperblk, utilization);
+#if 0 /* Not used */
+                  procfs_data.unusedsectors, procfs_data.blockerases,
+                  procfs_data.sectorsperblk, utilization);
+#endif
         }
 
       /* Indicate we have already provided all the data */

@@ -147,7 +147,7 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
               break;
             }
 
-          if (numoffset <= 0)
+          if (numoffset < 1)
             {
               /* Empty numeric string */
 
@@ -245,7 +245,7 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
               break;
             }
 
-          if (ch != '\0' && numoffset <= 0)
+          if (ch != '\0' && numoffset < 1)
             {
               /* Empty numeric string */
 

@@ -113,8 +113,10 @@ static void aio_write_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t prio;
 #endif
-  ssize_t nwritten;
+  ssize_t nwritten = 0;
+#ifdef AIO_HAVE_FILEP
   int oflags;
+#endif
 
   /* Get the information from the container, decant the AIO control block,
    * and free the container before starting any I/O.  That will minimize

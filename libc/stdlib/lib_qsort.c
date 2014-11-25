@@ -213,6 +213,7 @@ loop:
               swap(pl, pl - size);
             }
         }
+
       return;
     }
 
@@ -230,6 +231,7 @@ loop:
   if ((r = pd - pc) > size)
     {
       /* Iterate rather than recurse to save stack space */
+
       base = pn - r;
       nmemb = r / size;
       goto loop;

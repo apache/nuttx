@@ -149,9 +149,7 @@ static void incr_base62(void)
 
 static void get_base62(FAR uint8_t *ptr)
 {
-  int ret;
-
-  while ((ret = sem_wait(&g_b62sem)) < 0)
+  while (sem_wait(&g_b62sem) < 0)
     {
       DEBUGASSERT(errno == EINTR);
     }

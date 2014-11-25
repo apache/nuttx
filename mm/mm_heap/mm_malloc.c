@@ -91,7 +91,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Handle bad sizes */
 
-  if (size <= 0)
+  if (size < 1)
     {
       return NULL;
     }

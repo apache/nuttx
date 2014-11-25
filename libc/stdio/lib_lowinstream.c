@@ -65,7 +65,7 @@ static int lowinstream_getc(FAR struct lib_instream_s *this)
 
   /* Get the next character from the incoming stream */
 
-  ret = up_getc(ch)
+  ret = up_getc(ch);
   if (ret != EOF)
     {
       this->nget++;

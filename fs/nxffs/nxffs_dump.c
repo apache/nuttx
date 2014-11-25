@@ -67,7 +67,9 @@ struct nxffs_blkinfo_s
   off_t nblocks;
   off_t block;
   off_t offset;
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
   bool verbose;
+#endif
 };
 
 /****************************************************************************
