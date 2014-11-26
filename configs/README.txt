@@ -283,9 +283,9 @@ configs/lpc4330-xplorer
   the NXP LPC4330FET100 MCU
 
 configs/lpc4357-evb
-  NuttX port to the LPC4357-EVB board from NGX Technologies featuring
-  the NXP LPC4357FET256 MCU.  Based on the LPC4300 Xplorer port and
-  provided by Toby Duckworth.
+  NuttX port to the LPC4357-EVB board from Embest featuring the NXP
+  LPC4357FET256 MCU.  Based on the LPC4300 Xplorer port and provided by
+  Toby Duckworth.
 
 configs/maple
   NuttX support for the LeafLab's Maple and Maple Mini boards. These boards
