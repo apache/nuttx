@@ -33,11 +33,15 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_SPI_EE_25XX),0)
+# Include SPI EEPROM support
+
+ifeq ($(CONFIG_SPI_EEPROM),y)
 
 # Include the Microchip/Atmel xx25xx driver
 
+ifeq ($(CONFIG_SPI_EE_25XX),y)
 CSRCS += spi_xx25xx.c
+endif
 
 # Include build support
 
