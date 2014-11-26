@@ -2,8 +2,8 @@ MTD README
 ==========
 
   MTD stands for "Memory Technology Devices".  This directory contains
-  drivers that operate on various memory technoldogy devices and provide an
-  MTD interface.  That MTD interface may then by use by higher level logic
+  drivers that operate on various memory technology devices and provide an
+  MTD interface.  That MTD interface may then be used by higher level logic
   to control access to the memory device.
 
   See include/nuttx/mtd/mtd.h for additional information.

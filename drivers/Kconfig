@@ -207,6 +207,17 @@ menuconfig SPI
 
 if SPI
 source drivers/spi/Kconfig
+
+menuconfig SPI_EEPROM
+	bool "SPI EEPROM support"
+	default n
+	---help---
+		This directory holds implementations of SPI EEPROM drivers
+
+if SPI_EEPROM
+source drivers/eeprom/Kconfig
+endif
+
 endif # SPI
 
 menuconfig I2S
