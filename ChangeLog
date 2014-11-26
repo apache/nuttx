@@ -9057,3 +9057,7 @@
 	  Alan Carvalho de Assis (2014-11-23).
 
 7.7 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* nuttx/drivers/eeprom and include/nuttx/eeprom/: Add support for generic
+	  EEPROM access via a character driver.  Add also the EEPROM driver itself.
+	  From Sébastien Lorquet (2014-11-26).
