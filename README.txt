@@ -1069,6 +1069,8 @@ nuttx
  |   |   `- README.txt
  |   |- lpc4330-xplorer/
  |   |   `- README.txt
+ |   |- lpc4357-evb/
+ |   |   `- README.txt
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
  |   |- maple/
