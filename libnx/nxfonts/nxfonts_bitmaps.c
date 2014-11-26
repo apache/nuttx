@@ -82,6 +82,10 @@
 #  include "nxfonts_sans20x27b.h"
 #elif NXFONTS_FONTID == 18
 #  include "nxfonts_mono5x8.h"
+#elif NXFONTS_FONTID == 19
+#  include "nxfonts_pixel-unicode.h"
+#elif NXFONTS_FONTID == 20
+#  include "nxfonts_pixel-lcd-machine.h"
 #else
 #  error "No font ID specified"
 #endif

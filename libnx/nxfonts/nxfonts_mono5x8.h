@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXFONTS_NXFONTS_MONO5X8_H
-#define __GRAPHICS_NXFONTS_NXFONTS_MONO5X8_H
+#ifndef __LIBNX_NXFONTS_NXFONTS_MONO5X8_H
+#define __LIBNX_NXFONTS_NXFONTS_MONO5X8_H
 
 #define NXFONT_ID         FONTID_MONO5X8
 

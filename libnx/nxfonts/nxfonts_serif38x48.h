@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXFONTS_NXFONTS_SERIF38X48_H
-#define __GRAPHICS_NXFONTS_NXFONTS_SERIF38X48_H
+#ifndef __LIBNX_NXFONTS_NXFONTS_SERIF38X48_H
+#define __LIBNX_NXFONTS_NXFONTS_SERIF38X48_H
 
 /****************************************************************************
  * Included Files
@@ -846,4 +846,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __GRAPHICS_NXFONTS_NXFONTS_SERIF38X48_H */
+#endif /* __LIBNX_NXFONTS_NXFONTS_SERIF38X48_H */

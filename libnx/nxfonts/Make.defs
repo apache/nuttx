@@ -125,6 +125,16 @@ ifeq ($(CONFIG_NXFONT_SERIF38X49B),y)
 CSRCS += nxfonts_bitmaps_serif38x49b.c
 endif
 
+# Pixel fonts
+
+ifeq ($(CONFIG_NXFONT_PIXEL_UNICODE),y)
+CSRCS += nxfonts_bitmaps_pixel-unicode.c
+endif
+
+ifeq ($(CONFIG_NXFONT_PIXEL_LCD_MACHINE),y)
+CSRCS += nxfonts_bitmaps_pixel-lcd-machine.c
+endif
+
 # Add the nxfont/ directory to the build
 
 DEPPATH += --dep-path nxfonts

@@ -113,6 +113,14 @@
 #elif defined(CONFIG_NXFONT_SERIF38X49B)
 # define NXFONT_DEFAULT FONTID_SERIF38X49B
 
+/* Pixel fonts */
+
+#elif defined(CONFIG_NXFONT_PIXEL_UNICODE)
+# define NXFONT_DEFAULT FONTID_PIXEL_UNICODE
+
+#elif defined(CONFIG_NXFONT_PIXEL_LCD_MACHINE)
+# define NXFONT_DEFAULT FONTID_PIXEL_LCD_MACHINE
+
 /* Mono-space fonts */
 
 #elif defined(CONFIG_NXFONT_MONO5X8)
@@ -210,6 +218,16 @@ enum nx_fontid_e
 
 #ifdef CONFIG_NXFONT_SERIF38X49B
   , FONTID_SERIF38X49B = 13      /* The 38x49 serif bold font */
+#endif
+
+/* Pixel fonts */
+
+#ifdef CONFIG_NXFONT_PIXEL_UNICODE
+  , FONTID_PIXEL_UNICODE = 19      /* Pixel UniCode font */
+#endif
+
+#ifdef CONFIG_NXFONT_PIXEL_LCD_MACHINE
+  , FONTID_PIXEL_LCD_MACHINE = 20  /* Pixel lcd machine font */
 #endif
 };
 

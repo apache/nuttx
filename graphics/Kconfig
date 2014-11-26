@@ -355,6 +355,20 @@ config NXFONT_SERIF38X49B
 		This option enables support for a large, 38x49 bold font (with serifs)
 		(font ID FONTID_SERIF38X49B == 13).
 
+config NXFONT_PIXEL_UNICODE
+	bool "Pixel UniCode"
+	default n
+	---help---
+		This option enables support for a small LCD, The "Pixel UniCode"
+		(font ID FONTID_PIXEL_UNICODE == 19).
+
+config NXFONT_PIXEL_LCD_MACHINE
+	bool "Pixel lcd machine"
+	default n
+	---help---
+		This option enables support for a small LCD, The "Pixel lcd machine"
+		(font ID FONTID_PIXEL_LCD_MACHINE == 20).
+
 endmenu
 
 menuconfig NXTERM

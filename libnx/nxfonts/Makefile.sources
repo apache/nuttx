@@ -172,6 +172,18 @@ NXFONTS_PREFIX := g_serif38x49b_
 GEN_CSRC = nxfonts_bitmaps_serif38x49b.c
 endif
 
+# Pixel fonts
+
+ifeq ($(NXFONTS_FONTID),19)
+NXFONTS_PREFIX := g_pixel_unicode_
+GEN_CSRC = nxfonts_bitmaps_pixel-unicode.c
+endif
+
+ifeq ($(NXFONTS_FONTID),20)
+NXFONTS_PREFIX := g_pixel_lcd_machine_
+GEN_CSRC = nxfonts_bitmaps_pixel-lcd-machine.c
+endif
+
 DEPENDENCY := nxfonts_bitmaps.c
 CPPFLAGS += -DNXFONTS_FONTID=$(NXFONTS_FONTID)
 CPPFLAGS += -DNXFONTS_PREFIX=$(NXFONTS_PREFIX)

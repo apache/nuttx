@@ -152,6 +152,12 @@ endif
 ifeq ($(CONFIG_NXFONT_SANS20X26),y)
 	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=15 EXTRADEFINES=$(EXTRADEFINES)
 endif
+ifeq ($(CONFIG_NXFONT_PIXEL_UNICODE),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=19 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_PIXEL_LCD_MACHINE),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=20 EXTRADEFINES=$(EXTRADEFINES)
+endif
 
 gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources
 
