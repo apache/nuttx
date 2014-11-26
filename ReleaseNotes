@@ -7385,7 +7385,7 @@ Additional new features and extended functionality:
         predetermined limit on the number of arguments that may be passed
         to a new task on start-up.
 
-    * Work queues
+    * Work queues:
 
       - Add support for priority inheritance on the low priority worker
         queue.  That is, if a higher priority thread has scheduled work, the
@@ -7459,7 +7459,7 @@ Additional new features and extended functionality:
         Bouteville.
       - Add ARMv7-M CMSIS DWT and TPI header files. From Pierre-noel
         Bouteville.
-      - Add ARMv7.M support to use ITM for SYSLOG debug output. Includes
+      - Add ARMv7-M support to use ITM for SYSLOG debug output. Includes
         logic from Pierre-noel Bouteville.
 
     * Atmel SAM3/4 Drivers:
@@ -7476,7 +7476,7 @@ Additional new features and extended functionality:
 
       - SAMA5D3-Xplained:  Add a configuration that provides a simple test
         for the EMAC and GMAC on the SAMA5D3 working together.
-      - SAMA5D4-EK:  Add a configuration that provides a simple test for th
+      - SAMA5D4-EK:  Add a configuration that provides a simple test for the
         EMAC0 and EMAC1 on the SAMA5D4 working together.
 
     * Freescale KL:
@@ -7484,7 +7484,7 @@ Additional new features and extended functionality:
       - Add an I2C header file for the Freescale KL family.  From Alan
         Carvalho de Assis.
 
-    * NXP LPC32xx.
+    * NXP LPC32xx:
 
       - Add support for tickless operation using the NXP LPC43xx.  From
         Brandon Warhurst.
@@ -7589,7 +7589,7 @@ operation.  My thanks to the developers of cppcheck!  I am impressed!
         This bug has always been present, but was not visible with the
         old strdup() way of passing arguments.
       - vfork() problem: If we get to vfork() via system call, then we 
-        eed to clone some system call information so that the return form
+        need to clone some system call information so that the return form
         the cloned system call works correctly.
       - Fixes to tickless operation code, especially in alarm mode.  From
         Brandon Warhurst.
@@ -7686,7 +7686,7 @@ operation.  My thanks to the developers of cppcheck!  I am impressed!
       - ARM up_internal.h: Add protection from C++ name mangling in the
         ARM up_internal.h.  From Lorenz Meier.
 
-    * MicroChip PIC32MX
+    * MicroChip PIC32MX:
 
       - PIC32MX7: DEVCFG0 bit 2 must be set.  Writing bit 2 as zero can
         brick the CPU on some versions.  From Cris Kvist.
@@ -7713,7 +7713,7 @@ operation.  My thanks to the developers of cppcheck!  I am impressed!
       - NSH: Fix reversed in/out file closing in DD command when an error
         occurs.  From Ken Pettit.
       - NSH:  Add logic to restart the console wait if an error occurs
-        while reading from the console.  In USB console startup, the logi
+        while reading from the console.  In USB console startup, the logic
         must be able to open the USB serial and receive 3 newlines.
         However, it the USB driver is disconnected or otherwise fails before
         the 3 newlines are received, the receive loop becomes a killer,
