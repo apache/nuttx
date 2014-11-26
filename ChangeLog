@@ -9064,3 +9064,9 @@
 	* libnx/nxfonts/nxfonts_pixel-lcd-machine.h and nxfonts_pixel-unicode.h,
 	  include/nuttx/nx/nxfonts.h, graphpics/Kconfig, and build-related files
 	  in libnx/nxfonts: Two new fonts from Pierre-noel Bouteville (2014-11-26).
+	* configs/lpc4357-evb, arch/arm/src/pc43xx/chip/, configs/Kconfig, and
+	  and other related files:  A port of NuttX to the LPC4357-EVB from
+	  Toby Duckworth.  This port is a leverage of the LPC3330-Xplorer port
+	  and still have a some misinformation from that port that needs to be
+	  updated for the LPC4357-EVB (2014-11-26).
+ 
