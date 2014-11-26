@@ -9061,3 +9061,6 @@
 	* nuttx/drivers/eeprom and include/nuttx/eeprom/: Add support for generic
 	  EEPROM access via a character driver.  Add also the EEPROM driver itself.
 	  From Sébastien Lorquet (2014-11-26).
+	* libnx/nxfonts/nxfonts_pixel-lcd-machine.h and nxfonts_pixel-unicode.h,
+	  include/nuttx/nx/nxfonts.h, graphpics/Kconfig, and build-related files
+	  in libnx/nxfonts: Two new fonts from Pierre-noel Bouteville (2014-11-26).
