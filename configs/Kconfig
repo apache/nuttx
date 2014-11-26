@@ -254,8 +254,18 @@ config ARCH_BOARD_LPC4330_XPLORER
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		NXG Technologoies LPC4330 Xplorer board.  This board is based on the
+		NXG Technologies LPC4330 Xplorer board.  This board is based on the
 		LPC4330FET100.  The Code Red toolchain is used by default.
+
+config ARCH_BOARD_LPC4357_EVB
+	bool "NXP LPC4357-EVB"
+	depends on ARCH_CHIP_LPC4357FET256
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		NXP Technologies LPC4357 EVB board.  This board is based on the
+		LPC4357FET256.
 
 config ARCH_BOARD_MBED
 	bool "mbed LCP1768"
@@ -1031,6 +1041,7 @@ config ARCH_BOARD
 	default "lm3s8962-ek"              if ARCH_BOARD_LM3S8962EK
 	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
+	default "lpc4357-evb"              if ARCH_BOARD_LPC4357_EVB
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "mbed"                     if ARCH_BOARD_MBED
@@ -1230,6 +1241,9 @@ source "configs/lm4f120-launchpad/Kconfig"
 endif
 if ARCH_BOARD_LPC4330_XPLORER
 source "configs/lpc4330-xplorer/Kconfig"
+endif
+if ARCH_BOARD_LPC4357_EVB
+source "configs/lpc4357-evb/Kconfig"
 endif
 if ARCH_BOARD_LPCXPRESSO
 source "configs/lpcxpresso-lpc1768/Kconfig"
