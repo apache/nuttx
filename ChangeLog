@@ -28,7 +28,7 @@
 	* Added strtok() and strtok_r()
 	* Added a simple shell called nsh (see examples/nsh).
 	* Platform support for 8052 is complete but not stable
-	  when the timer interrupt is enabled.	Seems to be an
+	  when the timer interrupt is enabled.  Seems to be an
 	  issue when SP enters indirect address space.
 	* Documentation updates
 
@@ -8684,7 +8684,7 @@
 	* fs/fs_poll.c:  Re-implemented poll() delay using sem_timedwait()
 	  (2014-9-26).
 
-7.6 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.6 2014-11-26 Gregory Nutt <gnutt@nuttx.org>
 
 	* fs/fs.h and other files:  Rename fs/fs_internal.h to fs/fs.h (2014-9-28).
 	* include/nuttx/semaphore.h and fs/fs.h:  Add data structures that will
@@ -8699,7 +8699,7 @@
 	* fs/semaphore: Create a build structure that will (eventually) support
 	  using the VFS to manage named semaphores (2014-9-23).
 	* configs/stm32f4discovery/include/board.h: STM32F4-Discovery: Fix some
-	  backward conditional compilation"(2104-9-29).
+	  backward conditional compilation (2104-9-29).
 	* nuttx/sched/init/os_start.c, semaphore/Make.defs, sem_initialize.c,
 	  and semaphore.h: Semaphore initialization is now only required if
 	  priority inheritance is enabled (2014-9-29).
@@ -8726,7 +8726,7 @@
 	  NuttX via standard NuttX domain IPCs (2014-9-30).
 	* arch/sim/src/up_setjmp32.S, up_setjmp64.S, Kconfig, Makefile,
 	  up_initialstate.c, up_internal.h, up_stackframe.c, and include/irq.h:
-	  Add support for 64-bit lonjmp/setjmp in simulator platform.  This
+	  Add support for 64-bit longjmp/setjmp in simulator platform.  This
 	  will permit operation of the simulation natively on a 64-bit platform
 	  (2014-10-2).
 	* include/fcntl.h: Implement create() as a macro (2014-10-4).
@@ -8766,12 +8766,12 @@
 	  Modify FS initialization logic to handle AIO container
 	  initialization (2014-10-6).
 	* Too many files to list:  Major structuring of file system functions
-	  to better support asynchronous I/O.  Respository should not be
+	  to better support asynchronous I/O.  Repository should not be
 	  trusted until I have a chance to verify everything (2014-10-6).
 	* include/nuttx/mm/mm.h: Fix a place in the memory manager where it
-	  explicitly assumed that the size of a point is 4 bytes.  That is OK
-	  if the actually size is smaller but makes the heap unstable when
-	  used with the x86_64 host simulation (2014-10-6).
+	  explicitly assumed that the size of a pointer is 4 bytes.  That is OK
+	  if the actual size is smaller but makes the heap unstable when used
+	  with the x86_64 host simulation (2014-10-6).
 	* sched/wqueue, include/nuttx/wqueue.h,  and libc/Kconfig sched/Makefile:
 	  Add support for priority inheritance on the low priority worker queue
 	  (2014-10-7).
@@ -8833,7 +8833,7 @@
 	  Fix watchdog stop bit usage.  From Lazlo (2014-10-10).
 	* sched/wqueue/, libc/wqueue, and include/nuttx/wqueue.h:  Add support
 	  for multiple low-priority worker threads.  This is a necessary
-	  piece of the support for asynchonous I/O (2014-10-10).
+	  piece of the support for asynchronous I/O (2014-10-10).
 	* sched/wqueue/work_inherit.c:  Add logic for priority inheritance with
 	  multiple worker threads.  How should this work?  Tentatively, the all
 	  get reprioritized together.  It would be best to just reprioritize the
@@ -8847,7 +8847,7 @@
 	* configs/Kconfig, README.txt, and nucleo-f401re:  Extend this board
 	  configuration to also support the Nucleo-F411RE.  From Serg Podtynnyi
 	  (2014-10-14).
-	* tools/Config.mk: "Add a PRELINK macro to Config.mk.  From Kriegleder
+	* tools/Config.mk:  Add a PRELINK macro to Config.mk.  From Kriegleder
 	  (2014-10-17).
 	* arch/arm/src/efm32 and arch/arm/include/efm32: Add a basic port for
 	  the SiLabs EFM32 family.  Includes many files contributed by Pierre-noel
@@ -8862,7 +8862,7 @@
 	  STM32F429i Discovery's LCD.  From Marco Krahl (2014-10-20).
 	* arch/arm/src/lpc43xx/lpc43_gpioint.c, .h, lpc43_irq.c, and
 	  chip/lpc43_gpio.h: Fixes to allow compile of lpc43_gpioint.c.  It
-	  likely doesn't work.  From Brandon warhurst_002 (2014-10-21).
+	  likely doesn't work.  From Brandon Warhurst (2014-10-21).
 	* arch/arm/src/stm32/chip/stm32f103r_pinmap.h: Add ADC pinmap
 	  definitions for the STM32 F103R from Martin Lederhilger  (2014-10-21).
 	* arch/arm/src/armv7-m/up_itm.c and itm.h: Add CMSIS ITM header file and
@@ -8888,16 +8888,16 @@
 	  compilation errors in up_itm_syslog.c.  From  Pierre-Noel Bouteville
 	  (2014-10-23).
 	* configs/sam4e-ek/src/sam_ethernet.c (and other files):SAM4E-EK: Add
-	  support for PHY insterrupt (2014-10-24).
+	  support for PHY interrupt (2014-10-24).
 	* include/wchar.h:  Add a mostly bogus wchar.h header file.  This file
-	  is mostly bogus because noneo of the wide character operations are
+	  is mostly bogus because none of the wide character operations are
 	  currently supported in the Nuttx C library (2014-10-27).
 	* include/termios.h, libc/termios/lib_isatty.c, and Make.defs: Add
 	  isatty() function. From  Alan Carvalho de Assis (2014-10-27).
 	* arch/arm/include/efm32, src/efm32, and configs/efm32-gxxx-stk:
 	  The EFM32 Gecko Starter Kit port is now functional.  At least
 	  NSH is running over LEUART0 on the board (2014-10-29).
-	* arch/arm/src/sm34/sam_serial.c and Kconfig:  Add support for SAM3/4
+	* arch/arm/src/sam34/sam_serial.c and Kconfig:  Add support for SAM3/4
 	  basic TERMIOS and flow control.  There are issues with IFLOW control:
 	  PDC or DMAC support is required (2014-10-29).
 	* configs/sam4e-ek/src/sam4e-ek.h: Fix an error in a USART1 pin number
@@ -8978,7 +8978,7 @@
 	  include/nuttx/net/net.h, netdev.h and several network drivers in arch/
 	  and drivers/: Add a parameter to netdev_register() to indicate the
 	  link protocol supported by the driver.  Use this value to replace some
-	  logic commited yesterday (2014-11-15).
+	  logic committed yesterday (2014-11-15).
 	* configs/stm32f4discovery/netnsh/defconfig:  Needs to set MAC address
 	  (2014-11-15).
 	* arch/ and drivers/: Remove use of NET_LL_HDRLEN from Ethernet drivers.
@@ -8989,9 +8989,8 @@
 	  variable length link layer protocol headers within incoming packets.
 	  This permits use of multiple network interfaces with differing data
 	  links.  For example, ETHERNET + SLIP (2014-11-15).
-	* arch/arm/src/sam34/sam4s_periphclks.h: Add missing SPI0 clock
-	  configuration macro for the SAM4S" sam4s_periphclks.h.  From
-	  spasbyspas (2014-11-16).
+	* arch/arm/src/sam34/sam4s_periphclks.h:  Add missing SPI0 clock
+	  configuration macro for the SAM4S.  From spasbyspas (2014-11-16).
 	* arch/arm/src/efm32/efm32_lowputc.c: EFM32 USART setup: Computation of
 	  BAUD includes shift; Eliminate additional shift.  From  Pierre-noel
 	  Bouteville (2014-11-16).
@@ -9034,7 +9033,7 @@
 	  From Jussi Kivilinna (2014-11-21).
 	* net/udp/udp_conn.c and udp.h:  Extensions to UDP "connection" structure
 	  for the case of multiple networks.  In this case, assigned port numbers
-	  only have to be unique with response to the IP address.  So, for
+	  only have to be unique with respect to the IP address.  So, for
 	  example, you could have multiple port 80's, one on each network
 	  (2014-11-21).
 	* net/tcp/tcp_conn.c and tcp.h: Make tcp_listener static scope; it is
@@ -9056,3 +9055,5 @@
 	  family.  From Alan Carvalho de Assis (2014-11-23).
 	* include/nuttx/fs/fs.h: Fix typo in conditional compilation.  From
 	  Alan Carvalho de Assis (2014-11-23).
+
+7.7 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
