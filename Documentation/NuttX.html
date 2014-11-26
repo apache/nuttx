@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 11, 2014</p>
+      <p>Last Updated: November 26, 2014</p>
     </td>
   </tr>
 </table>
@@ -572,6 +572,14 @@
   <td><br></td>
   <td>
     <p>
+      <li>Asynchronous I/O (AIO)</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>
         Network, USB (host), USB (device), serial, I2C, I2S, NAND, CAN, ADC, DAC, PWM, Quadrature Encoder, Wireless, and watchdog timer driver architectures.
       </li>
@@ -678,8 +686,23 @@
   <td><br></td>
   <td>
     <p>
+      <li>Multiple network interface support; multiple network link layer support.</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>TCP/IP, UDP, ICMP, IGMPv2 (client) stacks.</li>
-      <li>Raw socket support</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Raw socket support.</li>
     </p>
   </td>
 </tr>
@@ -1023,6 +1046,29 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
+    <b>BAS 2.4</b>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Seamless integration of Michael Haardt's BAS 2.4:
+      &quot;Bas is an interpreter for the classic dialect of the programming language
+      BASIC.  It is pretty compatible to typical BASIC interpreters of the 1980s,
+      unlike some other UNIX BASIC interpreters, that implement a different
+      syntax, breaking compatibility to existing programs.  Bas offers many ANSI
+      BASIC statements for structured programming, such as procedures, local
+      variables and various loop types.  Further there are matrix operations,
+      automatic LIST indentation and many statements and functions found in
+      specific classic dialects.  Line numbers are not required.&quot;</li>
+    </p>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
     <b>Pascal Compiler with NuttX runtime P-Code interpreter add-on</b>
   </td>
 </tr>
@@ -1187,11 +1233,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.5.
-  NuttX 7.5 is the 105<sup>th</sup> release of NuttX.
-  It was released on September 28, 2014, and is available for download from the
+  The current release is NuttX 7.6.
+  NuttX 7.6 is the 106<sup>th</sup> release of NuttX.
+  It was released on November 26, 2014, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.5.tar.gz</code> and <code>apps-7.5.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.6.tar.gz</code> and <code>apps-7.6.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1200,7 +1246,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.5 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.5/">here</a>;
+      Release notes for NuttX 7.6 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.6/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1208,7 +1254,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.5 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.5/">here</a>;
+      Release notes for NuttX 7.6 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.6/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
       The ChangeLog for the all releases of apps is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.

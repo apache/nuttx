@@ -7366,8 +7366,8 @@ NuttX-7.6
 
 The 106th release of NuttX, Version 7.6, was made on November 26, 2014,
 and is available for download from the SourceForge website.  Note
-that release consists of two tarballs:  nuttx-7.5.tar.gz and
-apps-7.5.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+that release consists of two tarballs:  nuttx-7.6.tar.gz and
+apps-7.6.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
 file for build information).
 
 Additional new features and extended functionality:
@@ -7419,7 +7419,7 @@ Additional new features and extended functionality:
 
     * Drivers:
 
-      - BCH (Block-to-Charchter): Add support for seeking in BCH.  From
+      - BCH (Block-to-Character): Add support for seeking in BCH.  From
         Sébastien Lorquet.
 
     * Graphics Support/Graphics-Related Drivers:
