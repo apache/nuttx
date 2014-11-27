@@ -52,11 +52,11 @@ VPATH = .
 include analog$(DELIM)Make.defs
 include audio$(DELIM)Make.defs
 include bch$(DELIM)Make.defs
-include eeprom$(DELIM)Make.defs
 include input$(DELIM)Make.defs
 include lcd$(DELIM)Make.defs
 include mmcsd$(DELIM)Make.defs
 include mtd$(DELIM)Make.defs
+include eeprom$(DELIM)Make.defs
 include net$(DELIM)Make.defs
 include pipes$(DELIM)Make.defs
 include power$(DELIM)Make.defs

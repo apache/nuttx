@@ -3,10 +3,11 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+if EEPROM
 config SPI_EE_25XX
 	bool "Microchip 25xxNNN / Atmel AT25NNN EEPROM devices"
 	default n
-	depends on SPI_EEPROM
+	depends on SPI
 	---help---
 		This selection enables support for the Microchip/Atmel SPI EEPROM
 		devices
@@ -18,4 +19,5 @@ config EE25XX_SPIMODE
 	default 0
 	depends on SPI_EE_25XX
 
-endif
+endif # SPI_EE_25XX
+endif # EEPROM

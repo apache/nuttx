@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-# Include SPI EEPROM support
+# Include EEPROM support
 
-ifeq ($(CONFIG_SPI_EEPROM),y)
+ifeq ($(CONFIG_EEPROM),y)
 
 # Include the Microchip/Atmel xx25xx driver
 

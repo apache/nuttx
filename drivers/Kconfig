@@ -207,18 +207,7 @@ menuconfig SPI
 
 if SPI
 source drivers/spi/Kconfig
-
-menuconfig SPI_EEPROM
-	bool "SPI EEPROM support"
-	default n
-	---help---
-		This directory holds implementations of SPI EEPROM drivers
-
-if SPI_EEPROM
-source drivers/eeprom/Kconfig
 endif
-
-endif # SPI
 
 menuconfig I2S
 	bool "I2S Driver Support"
@@ -421,6 +410,16 @@ menuconfig MTD
 if MTD
 source drivers/mtd/Kconfig
 endif # MTD
+
+menuconfig EEPROM
+	bool "EEPROM support"
+	default n
+	---help---
+		This directory holds implementations of EEPROM drivers.
+
+if EEPROM
+source drivers/eeprom/Kconfig
+endif
 
 menuconfig NETDEVICES
 	bool "Network Device/PHY Support"
