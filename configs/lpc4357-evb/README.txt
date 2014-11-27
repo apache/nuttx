@@ -970,4 +970,7 @@ STATUS
   1. This configuration derives from the LPC4330 Xplorer configuration.  In
      many cases there have been global substitutions for naming to the
      LPC4357 EVB without corresponding updates to the technical description.
-     Thus all technical details should be taken with a grain of salt.
+     Thus all technical details should be taken with a grain of salt.  Things
+     like LEDs and buttons actually are remnants of the LPC4330-Xplorer that
+     still need clean-up.
+
