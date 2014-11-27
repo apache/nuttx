@@ -58,8 +58,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
- * the BUTTON_* and JOYSTICK_* definitions in board.h
+/* Pin configuration for each LPC4330 Xplorer button.  This array is indexed
+ * by the BUTTON_* definitions in board.h
  */
 
 static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
@@ -67,7 +67,7 @@ static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
   LPC4330_XPLORER_BUT1
 };
 
-/* This array defines all of the interupt handlers current attached to
+/* This array defines all of the interrupt handlers current attached to
  * button events.
  */
 
