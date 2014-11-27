@@ -69,6 +69,10 @@
 #  if defined(CONFIG_STM32_VALUELINE)
 #    include "chip/stm32f100_pinmap.h"
 
+/* STM32 F102 USB Access Medium Density Family */
+#  elif defined(CONFIG_ARCH_CHIP_STM32F102CB)
+#    include "chip/stm32f102_pinmap.h"
+
 /* STM32 F103 Low / Medium Density Family */
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103C4) || \
         defined(CONFIG_ARCH_CHIP_STM32F103C8) || \
