@@ -1,5 +1,5 @@
 ############################################################################
-# configs/lpx4357-evb/src/Makefile
+# configs/lpc4357-evb/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/lpx4357-evb/src/lpc43_boot.c
+ * configs/lpc4357-evb/src/lpc43_boot.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "lpx4357-evb.h"
+#include "lpc4357-evb.h"
 
 /************************************************************************************
  * Definitions
