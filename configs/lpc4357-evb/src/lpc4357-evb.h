@@ -49,56 +49,33 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/****************************************************************************
- *  LEDs GPIO                         PIN     SIGNAL NAME
- *  -------------------------------- ------- --------------
- *  gpio1[12] - LED D2                J10-20  LED1
- *  gpio1[11] - LED D3                J10-17  LED2
- ****************************************************************************/
-
-/* Definitions to configure LED pins as GPIOs:
+/* LED definitions **********************************************************/
+/* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by
+ * the signal LED_3V3:
+ *
+ *  ---- ------- -------------
+ *  LED  SIGNAL  MCU
+ *  ---- ------- -------------
+ *   D6  LED_3V3 PE_7 GPIO7[7]
+ *  ---- ------- -------------
+ *
+ * LED is grounded and a high output illuminates the LED.
+ *
+ * Definitions to configure LED pins as GPIOs:
  *
  * - Floating
  * - Normal drive
  * - No buffering, glitch filtering, slew=slow
  */
 
-#define PINCONFIG_LED1 PINCONF_GPIO1p12
-#define PINCONFIG_LED2 PINCONF_GPIO1p11
+#define PINCONFIG_LED  PINCONF_GPIO7p7
 
-/* Definitions to configure LED GPIOs as outputs */
+/* Definitions to configure LED GPIO as outputs */
 
-#define GPIO_LED1      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN12)
-#define GPIO_LED2      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN11)
+#define GPIO_LED       (GPIO_MODE_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT7 | GPIO_PIN7)
 
-/****************************************************************************
- *  Buttons GPIO                      PIN     SIGNAL NAME
- *  -------------------------------- ------- --------------
- *  gpio0[7]  - User Button SW2       J8-25   BTN1
- ****************************************************************************/
-
-#define LPC4357EVB_BUT1 (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN7)
-
-/* Button IRQ numbers */
-
-#define LPC4357EVB_BUT1_IRQ  LPC43_IRQ_P0p23
-
-#define GPIO_SSP0_SCK  GPIO_SSP0_SCK_1
-#define GPIO_SSP0_SSEL GPIO_SSP0_SSEL_1
-#define GPIO_SSP0_MISO GPIO_SSP0_MISO_1
-#define GPIO_SSP0_MOSI GPIO_SSP0_MOSI_1
-
-/* We need to redefine USB_PWRD as GPIO to get USB Host working
- * Also remember to add 2 resistors of 15K to D+ and D- pins.
- */
-
-#ifdef CONFIG_USBHOST
-#  ifdef GPIO_USB_PWRD
-#    undef  GPIO_USB_PWRD
-#    define GPIO_USB_PWRD  (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
-#  endif
-#endif
+/* Button definitions *******************************************************/
+/* to be provided */
 
 /****************************************************************************
  * Public Types
@@ -113,16 +90,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc43_sspinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the Lincoln 80 board.
- *
- ****************************************************************************/
-
-extern void weak_function lpc43_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPC4357_EVB_SRC_LPC3257_EVB_H */

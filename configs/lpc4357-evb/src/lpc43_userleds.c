@@ -57,13 +57,24 @@
  * Definitions
  ****************************************************************************/
 /* LED definitions **********************************************************/
-/* The LPC4357-EVB has 2 user-controllable LEDs labeled D2 an D3 in the
- * schematic and on but referred to has LED1 and LED2 here, respectively.
+/* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by
+ * the signal LED_3V3:
  *
- *  LED1   D2  GPIO1[12]
- *  LED2   D3  GPIO1[11]
+ *  ---- ------- -------------
+ *  LED  SIGNAL  MCU
+ *  ---- ------- -------------
+ *   D6  LED_3V3 PE_7 GPIO7[7]
+ *  ---- ------- -------------
  *
- * LEDs are pulled high to a low output illuminates the LED.
+ * LED is grounded and a high output illuminates the LED.
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
+ * control of the application.  The following interfaces are then available
+ * for application control of the LEDs:
+ *
+ *  void lpc43_ledinit(void);
+ *  void lpc43_setled(int led, bool ledon);
+ *  void lpc43_setleds(uint8_t ledset);
  */
 
 /* Debug definitions ********************************************************/
@@ -101,8 +112,8 @@
 #ifdef LED_VERBOSE
 static void led_dumppins(FAR const char *msg)
 {
-  lpc43_pin_dump(PINCONFIG_LED1, msg);
-  lpc43_gpio_dump(GPIO_LED2, msg);
+  lpc43_pin_dump(PINCONFIG_LED, msg);
+  lpc43_gpio_dump(GPIO_LED, msg);
 }
 #else
 #  define led_dumppins(m)
@@ -118,19 +129,16 @@ static void led_dumppins(FAR const char *msg)
 
 void lpc43_ledinit(void)
 {
-  /* Configure all LED GPIO lines */
+  /* Configure LED pin as a GPIO outputs */
 
-  led_dumppins("lpc43_ledinit() Entry)");
+  led_dumppins("board_led_initialize() Entry)");
 
-  /* Configure LED pins as GPIOs, then configure GPIOs as outputs */
+  /* Configure LED pin as a GPIO, then configure GPIO as an outputs */
 
-  lpc43_pin_config(PINCONFIG_LED1);
-  lpc43_gpio_config(GPIO_LED1);
+  lpc43_pin_config(PINCONFIG_LED);
+  lpc43_gpio_config(GPIO_LED);
 
-  lpc43_pin_config(PINCONFIG_LED2);
-  lpc43_gpio_config(GPIO_LED2);
-
-  led_dumppins("lpc43_ledinit() Exit");
+  led_dumppins("board_led_initialize() Exit");
 }
 
 /****************************************************************************
@@ -139,8 +147,10 @@ void lpc43_ledinit(void)
 
 void lpc43_setled(int led, bool ledon)
 {
-  uint16_t gpiocfg = (led == BOARD_LED1 ? GPIO_LED1 : GPIO_LED2);
-  lpc43_gpio_write(gpiocfg, !ledon);
+  if (led == BOARD_LED)
+    {
+      lpc43_gpio_write(GPIO_LED, ledon);
+    }
 }
 
 /****************************************************************************
@@ -149,8 +159,7 @@ void lpc43_setled(int led, bool ledon)
 
 void lpc43_setleds(uint8_t ledset)
 {
-  lpc43_gpio_write(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  lpc43_gpio_write(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
+  lpc43_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

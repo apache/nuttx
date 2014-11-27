@@ -198,29 +198,41 @@
 #define BOARD_USART3_BASEFREQ       BOARD_XTAL_FREQUENCY
 
 /* LED definitions *********************************************************/
-/* The LPC4357-EVB has 2 user-controllable LEDs labeled D2 an D3 in the
- * schematic and on but referred to has LED1 and LED2 here, respectively.
+/* The LPC4357-EVB has one user-controllable LED labelled D6 controlled
+ * by the signal LED_3V3:
  *
- *  LED1   D2  GPIO1[12]
- *  LED2   D3  GPIO1[11]
+ *  ---- ------- -------------
+ *  LED  SIGNAL  MCU
+ *  ---- ------- -------------
+ *   D6  LED_3V3 PE_7 GPIO7[7]
+ *  ---- ------- -------------
  *
- * LEDs are pulled high to a low output illuminates the LED.
+ * LED is grounded and a high output illuminates the LED.
  *
  * LED index values for use with lpc43_setled()
  */
 
-#define BOARD_LED1        0
-#define BOARD_LED2        1
-#define BOARD_NLEDS       2
+#define BOARD_LED         0
+#define BOARD_NLEDS       1
 
 /* LED bits for use with lpc43_setleds() */
 
-#define BOARD_LED1_BIT    (1 << BOARD_LED1)
-#define BOARD_LED2_BIT    (1 << BOARD_LED2)
+#define BOARD_LED _BIT    (1 << BOARD_LED)
 
-/* If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
- * for NuttX debug functionality (where NC means "No Change"). If
- * CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
+/* If CONFIG_ARCH_LEDS is defined, the LED will be controlled as follows
+ * for NuttX debug functionality (where NC means "No Change").
+ */
+                                      /* LED      */
+#define LED_STARTED                0  /* OFF      */
+#define LED_HEAPALLOCATE           0  /* OFF      */
+#define LED_IRQSENABLED            0  /* OFF      */
+#define LED_STACKCREATED           1  /* ON       */
+#define LED_INIRQ                  2  /* NC       */
+#define LED_SIGNAL                 2  /* NC       */
+#define LED_ASSERTION              2  /* NC       */
+#define LED_PANIC                  3  /* Flashing */
+
+/* If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
@@ -228,18 +240,12 @@
  *  void lpc43_setled(int led, bool ledon);
  *  void lpc43_setleds(uint8_t ledset);
  */
-                                      /*     ON            OFF     */
-                                      /* LED1   LED2   LED1   LED2 */
-#define LED_STARTED                0  /* OFF    OFF     -      -   */
-#define LED_HEAPALLOCATE           1  /* ON     OFF     -      -   */
-#define LED_IRQSENABLED            1  /* ON     OFF     -      -   */
-#define LED_STACKCREATED           1  /* ON     OFF     -      -   */
-#define LED_INIRQ                  2  /* NC     ON      NC     OFF */
-#define LED_SIGNAL                 2  /* NC     ON      NC     OFF */
-#define LED_ASSERTION              2  /* NC     ON      NC     OFF */
-#define LED_PANIC                  2  /* NC     ON      NC     OFF */
+
+/* Button definitions *******************************************************/
+/* To be provided */
 
 /* UART Pins ****************************************************************/
+/* REVISIT: Thee are most likely left over from the LPC4330-Xplorer */
 /* The LPC4357-EVB does not have RS-232 drivers or serial connectors on
  * board. USART0 and UART1 are available on J8 as follows:
  *

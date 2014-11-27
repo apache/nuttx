@@ -57,35 +57,32 @@
  * Definitions
  ****************************************************************************/
 /* LED definitions **********************************************************/
-/* The LPC4357-EVB has 2 user-controllable LEDs labeled D2 an D3 in the
- * schematic and on but referred to has LED1 and LED2 here, respectively.
+/* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by
+ * the signal LED_3V3:
  *
- *  LED1   D2  GPIO1[12]
- *  LED2   D3  GPIO1[11]
+ *  ---- ------- -------------
+ *  LED  SIGNAL  MCU
+ *  ---- ------- -------------
+ *   D6  LED_3V3 PE_7 GPIO7[7]
+ *  ---- ------- -------------
  *
- * LEDs are pulled high to a low output illuminates the LED.
+ * LED is grounded and a high output illuminates the LED.
  *
- * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
+ * If CONFIG_ARCH_LEDS is defined, the LED will be controlled as follows
  * for NuttX debug functionality (where NC means "No Change").
  *
- *                                      ON            OFF
- *                                  LED1   LED2   LED1   LED2
- *   LED_STARTED                0   OFF    OFF     -      -
- *   LED_HEAPALLOCATE           1   ON     OFF     -      -
- *   LED_IRQSENABLED            1   ON     OFF     -      -
- *   LED_STACKCREATED           1   ON     OFF     -      -
- *   LED_INIRQ                  2   NC     ON      NC     OFF
- *   LED_SIGNAL                 2   NC     ON      NC     OFF
- *   LED_ASSERTION              2   NC     ON      NC     OFF
- *   LED_PANIC                  2   NC     ON      NC     OFF
- *
- * If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
- * control of the application.  The following interfaces are then available
- * for application control of the LEDs:
- *
- *  void lpc43_ledinit(void);
- *  void lpc43_setled(int led, bool ledon);
- *  void lpc43_setleds(uint8_t ledset);
+ *   -------------------------- --------
+ *                              LED
+ *   -------------------------- --------
+ *   LED_STARTED                OFF
+ *   LED_HEAPALLOCATE           OFF
+ *   LED_IRQSENABLED            OFF
+ *   LED_STACKCREATED           ON
+ *   LED_INIRQ                  NC
+ *   LED_SIGNAL                 NC
+ *   LED_ASSERTION              NC
+ *   LED_PANIC                  Flashing
+ *   -------------------------- --------
  */
 
 /* Debug definitions ********************************************************/
@@ -123,8 +120,8 @@
 #ifdef LED_VERBOSE
 static void led_dumppins(FAR const char *msg)
 {
-  lpc43_pin_dump(PINCONFIG_LED1, msg);
-  lpc43_gpio_dump(GPIO_LED2, msg);
+  lpc43_pin_dump(PINCONFIG_LED, msg);
+  lpc43_gpio_dump(GPIO_LED, msg);
 }
 #else
 #  define led_dumppins(m)
@@ -140,17 +137,14 @@ static void led_dumppins(FAR const char *msg)
 
 void board_led_initialize(void)
 {
-  /* Configure all LED pins as GPIO outputs */
+  /* Configure LED pin as a GPIO outputs */
 
   led_dumppins("board_led_initialize() Entry)");
 
-  /* Configure LED pins as GPIOs, then configure GPIOs as outputs */
+  /* Configure LED pin as a GPIO, then configure GPIO as an outputs */
 
-  lpc43_pin_config(PINCONFIG_LED1);
-  lpc43_gpio_config(GPIO_LED1);
-
-  lpc43_pin_config(PINCONFIG_LED2);
-  lpc43_gpio_config(GPIO_LED2);
+  lpc43_pin_config(PINCONFIG_LED);
+  lpc43_gpio_config(GPIO_LED);
 
   led_dumppins("board_led_initialize() Exit");
 }
@@ -165,17 +159,15 @@ void board_led_on(int led)
     {
       default:
       case 0:
-        lpc43_gpio_write(GPIO_LED1, true);   /* LED1 OFF */
-        lpc43_gpio_write(GPIO_LED2, true);   /* LED2 OFF */
+        lpc43_gpio_write(GPIO_LED, false);  /* LED OFF */
+        break;
+
+      case 2:                               /* LED no change */
         break;
 
       case 1:
-        lpc43_gpio_write(GPIO_LED1, false);  /* LED1 ON */
-        lpc43_gpio_write(GPIO_LED2, true);   /* LED2 OFF */
-        break;
-
-      case 2:
-        lpc43_gpio_write(GPIO_LED2, false);  /* LED2 ON */
+      case 3:
+        lpc43_gpio_write(GPIO_LED, true);   /* LED ON */
         break;
     }
 }
@@ -191,10 +183,11 @@ void board_led_off(int led)
       default:
       case 0:
       case 1:
-        break;
-
       case 2:
-        lpc43_gpio_write(GPIO_LED2, true);  /* LED2 OFF */
+        break;                              /* LED no change */
+
+      case 3:
+        lpc43_gpio_write(GPIO_LED, false);  /* LED OFF */
         break;
     }
 }

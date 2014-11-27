@@ -52,22 +52,22 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
- * the BUTTON_* and JOYSTICK_* definitions in board.h
+/* Pin configuration for each LPC4357-EVB button.  This array is indexed by
+ * the BUTTON_* definitions in board.h
  */
 
+#if 0 /* Not yet used */
 static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
 {
-  LPC4357EVB_BUT1
 };
 
-/* This array defines all of the interupt handlers current attached to
+/* This array defines all of the interrupt handlers current attached to
  * button events.
  */
 
@@ -80,9 +80,9 @@ static xcpt_t g_buttonisr[BOARD_NUM_BUTTONS];
 
 static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
 {
-  LPC4357EVB_BUT1_IRQ
 };
 #endif
+#endif /* Not yet used */
 
 /****************************************************************************
  * Private Functions
@@ -105,6 +105,7 @@ static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
 
 void board_button_initialize(void)
 {
+#if 0 /* Not yet implemented */
   int i;
 
   /* Configure the GPIO pins as interrupting inputs. */
@@ -113,6 +114,7 @@ void board_button_initialize(void)
     {
       lpc43_configgpio(g_buttoncfg[i]);
     }
+#endif
 }
 
 /****************************************************************************
@@ -133,6 +135,7 @@ void board_button_initialize(void)
 
 uint8_t board_buttons(void)
 {
+#if 0 /* Not yet implemented */
   uint8_t ret = 0;
   int i;
 
@@ -153,6 +156,9 @@ uint8_t board_buttons(void)
     }
 
   return ret;
+#else
+  return 0;
+#endif /* Not yet implemented */
 }
 
 /****************************************************************************
@@ -179,6 +185,7 @@ uint8_t board_buttons(void)
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
+#if 0 /* Not yet implemented */
   xcpt_t oldhandler = NULL;
   irqstate_t flags;
   int irq;
@@ -217,7 +224,11 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         }
       irqrestore(flags);
     }
+
   return oldhandler;
+#else
+  return NULL;
+#endif /* Not yet implemented */
 }
 #endif
 

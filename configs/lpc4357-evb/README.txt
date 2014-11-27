@@ -23,6 +23,7 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
+  - LED and Pushbuttons
   - Serial Console
   - FPU
   - LPC4357-EVB Configuration Options
@@ -543,6 +544,47 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
+LED and Pushbuttons
+===================
+
+  LED
+  ---
+  The LPC4357-EVB has one user-controllable LED labelled D6 controlled
+  by the signal LED_3V3:
+
+    LED SIGNAL  MCU
+    D6 LED_3V3 PE_& GPIO7[7]
+
+  LED is grounded and a high output illuminates the LED.
+
+  If CONFIG_ARCH_LEDS is defined, the LED will be controlled as follows
+  for NuttX debug functionality (where NC means "No Change").
+
+    -------------------------- ---------
+                               LED
+    -------------------------- ---------
+    LED_STARTED                OFF
+    LED_HEAPALLOCATE           OFF
+    LED_IRQSENABLED            OFF
+    LED_STACKCREATED           ON
+    LED_INIRQ                  NC
+    LED_SIGNAL                 NC
+    LED_ASSERTION              NC
+    LED_PANIC                  Flashing
+    -------------------------- ---------
+
+  If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
+  control of the application.  The following interfaces are then available
+  for application control of the LEDs:
+
+    void lpc43_ledinit(void);
+    void lpc43_setled(int led, bool ledon);
+    void lpc43_setleds(uint8_t ledset);
+
+  Pushbuttons
+  -----------
+  To be provided
+
 Serial Console
 ==============
 
@@ -970,7 +1012,7 @@ STATUS
   1. This configuration derives from the LPC4330 Xplorer configuration.  In
      many cases there have been global substitutions for naming to the
      LPC4357 EVB without corresponding updates to the technical description.
-     Thus all technical details should be taken with a grain of salt.  Things
-     like LEDs and buttons actually are remnants of the LPC4330-Xplorer that
-     still need clean-up.
+     Thus all technical details should be taken with a grain of salt.  GPIO
+     definitions may actually are remnants of the LPC4330-Xplorer that still
+     need clean-up.
 
