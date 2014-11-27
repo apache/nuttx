@@ -59,7 +59,7 @@
  *   D6  LED_3V3 PE_7 GPIO7[7]
  *  ---- ------- -------------
  *
- * LED is grounded and a high output illuminates the LED.
+ * A low output illuminates the LED.
  *
  * Definitions to configure LED pins as GPIOs:
  *
@@ -72,7 +72,7 @@
 
 /* Definitions to configure LED GPIO as outputs */
 
-#define GPIO_LED       (GPIO_MODE_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT7 | GPIO_PIN7)
+#define GPIO_LED       (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT7 | GPIO_PIN7)
 
 /* Button definitions *******************************************************/
 /* to be provided */

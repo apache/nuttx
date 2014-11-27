@@ -555,7 +555,7 @@ LED and Pushbuttons
     LED SIGNAL  MCU
     D6 LED_3V3 PE_& GPIO7[7]
 
-  LED is grounded and a high output illuminates the LED.
+  A low output illuminates the LED.
 
   If CONFIG_ARCH_LEDS is defined, the LED will be controlled as follows
   for NuttX debug functionality (where NC means "No Change").

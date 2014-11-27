@@ -155,21 +155,26 @@ void board_led_initialize(void)
 
 void board_led_on(int led)
 {
+  bool ledon = true;   /* OFF. Low illuminates */
+
   switch (led)
     {
       default:
       case 0:
-        lpc43_gpio_write(GPIO_LED, false);  /* LED OFF */
-        break;
+        break;          /* LED OFF until state 1 */
 
-      case 2:                               /* LED no change */
-        break;
+      case 2:
+        return;         /* LED no change */
 
       case 1:
       case 3:
-        lpc43_gpio_write(GPIO_LED, true);   /* LED ON */
+        ledon = false;  /* LED ON.  Low illuminates */
         break;
     }
+
+  /* Turn LED on or off, depending on state */
+
+  lpc43_gpio_write(GPIO_LED, ledon);
 }
 
 /****************************************************************************
@@ -183,13 +188,16 @@ void board_led_off(int led)
       default:
       case 0:
       case 1:
-      case 2:
-        break;                              /* LED no change */
-
       case 3:
-        lpc43_gpio_write(GPIO_LED, false);  /* LED OFF */
-        break;
+        break;  /* LED OFF */
+
+      case 2:
+        return; /* LED no change */
     }
+
+  /* LED OFF, Low illuminates */
+
+  lpc43_gpio_write(GPIO_LED, true);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

@@ -83,12 +83,12 @@ File Systems
     int losetup(FAR const char *devname, FAR const char *filename,
                 uint16_t sectsize, off_t offset, bool readonly);
 
-  Give a file or character devices at 'filename', losetup will create the
+  Given a file or character devices at 'filename', losetup will create the
   block device 'devname' using a bogus sector size of sectsize.  'offset' is
   normally zero but can be used to provide an offset into the EEPROM where
   the block driver data starts;  The EEPROM block driver can also be read-
   only.
 
-  There is a corresponding function that will destory the loop device:
+  There is a corresponding function that will destroy the loop device:
 
     int loteardown(FAR const char *devname);
