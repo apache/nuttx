@@ -9069,4 +9069,6 @@
 	  Toby Duckworth.  This port is a leverage of the LPC3330-Xplorer port
 	  and still have a some misinformation from that port that needs to be
 	  updated for the LPC4357-EVB (2014-11-26).
- 
+	* arch/arm/include/stm32/chip.h, src/stm32/Kconfig, chip.h, and
+	  chip/stm32f102_pinmap.h:  Enable support for the STM32 F102.  From
+	  https://github.com/PX4/NuttX/pull/28.diff (2014-11-27).
