@@ -207,7 +207,7 @@
  *   D6  LED_3V3 PE_7 GPIO7[7]
  *  ---- ------- -------------
  *
- * LED is grounded and a high output illuminates the LED.
+ * A low output illuminates the LED.
  *
  * LED index values for use with lpc43_setled()
  */
