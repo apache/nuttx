@@ -642,6 +642,13 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
+  /* Forbid writes past the end of the device */
+
+  if (filep->f_pos >= eedev->size)
+    {
+      return -EFBIG;
+    }
+
   /* Clamp len to avoid crossing the end of the memory */
 
   if ( (len + filep->f_pos) > eedev->size)
