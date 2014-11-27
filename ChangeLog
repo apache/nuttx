@@ -9074,4 +9074,7 @@
 	  https://github.com/PX4/NuttX/pull/28.diff (2014-11-27).
 	* drivers/loop.c:  Loop device should return -EINTR is interrupt by a
 	  signal (2014-11-27).
-
+	* drivers/input/djoystick.c and include/nuttx/input/djoystick.h.  Also
+	  drivers/input/Kconfig and Make.defs, and include/nuttx/fs/ioctl.h: Add
+	  an interface definition and upper half driver for a discrete joystick
+	  device (2014-11-27).
