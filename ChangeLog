@@ -9072,3 +9072,6 @@
 	* arch/arm/include/stm32/chip.h, src/stm32/Kconfig, chip.h, and
 	  chip/stm32f102_pinmap.h:  Enable support for the STM32 F102.  From
 	  https://github.com/PX4/NuttX/pull/28.diff (2014-11-27).
+	* drivers/loop.c:  Loop device should return -EINTR is interrupt by a
+	  signal (2014-11-27).
+
