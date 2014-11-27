@@ -54,7 +54,7 @@
  *
  * In this case, we do not reconfigure the clocking.  Rather, we need to query
  * the register settings to determine the clock frequencies.  We can only assume that
- * the Main clock source in the on-board 12MHz crystal.
+ * the Main clock source is the on-board 12MHz crystal.
  */
 
 #define BOARD_MAINCK_FREQUENCY     BOARD_MAINOSC_FREQUENCY
