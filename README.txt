@@ -1216,6 +1216,8 @@ nuttx
  |   |   `- README.txt
  |   `- README.txt
  |- drivers/
+ |   |- eeprom/
+ |   |   `- README.txt
  |   |- lcd/
  |   |   `- README.txt
  |   |- mtd/

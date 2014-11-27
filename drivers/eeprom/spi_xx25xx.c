@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* This is a driver for SPI EEPROMs that uses the same commands as the
+/* This is a driver for SPI EEPROMs that use the same commands as the
  * 25AA160.
  *
  * Write time 5ms, 6ms for 25xx1025 (determined automatically with polling)
