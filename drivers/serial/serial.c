@@ -1123,10 +1123,10 @@ static int uart_close(FAR struct file *filep)
 
 static int uart_open(FAR struct file *filep)
 {
-  struct inode *inode = filep->f_inode;
-  uart_dev_t   *dev   = inode->i_private;
-  uint8_t       tmp;
-  int           ret;
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  uint8_t           tmp;
+  int               ret;
 
   /* If the port is the middle of closing, wait until the close is finished.
    * If a signal is received while we are waiting, then return EINTR.

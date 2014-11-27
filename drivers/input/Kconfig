@@ -320,4 +320,23 @@ config STMPE811_REGDEBUG
 	---help---
 		Enable very low register-level debug output.
 
-endif
+endif # INPUT_STMPE811
+
+config DJOYSTICK
+	bool "Discrete Joystick"
+	default n
+	---help---
+		Enable standard discrete joystick upper half driver.  A discrete
+		joystick refers to a joystick that could be implemented entirely
+		with GPIO input pins.  So up, down, left, and right are all discrete
+		values like buttons (as opposed to integer values like you might
+		obtain from an analog joystick).
+
+if DJOYSTICK
+
+config DJOYSTICK_NPOLLWAITERS
+	int "Max Number of Poll Waiters
+	default 2
+	depends on !DISABLE_POLL
+
+endif # DJOYSTICK

@@ -71,6 +71,10 @@ ifneq ($(CONFIG_INPUT_STMPE811_TEMP_DISABLE),y)
 endif
 endif
 
+ifeq ($(CONFIG_DJOYSTICK),y)
+  CSRCS += djoystick.c
+endif
+
 # Include input device driver build support
 
 DEPPATH += --dep-path input

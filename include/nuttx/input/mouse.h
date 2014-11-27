@@ -34,7 +34,7 @@
  ************************************************************************************/
 
 /* The mouse driver exports a standard character driver interface. By
- * convention, the mouse driver is registers as an input device at
+ * convention, the mouse driver is registered as an input device at
  * /dev/mouseN where N uniquely identifies the driver instance.
  *
  * This header file documents the generic interface that all NuttX
