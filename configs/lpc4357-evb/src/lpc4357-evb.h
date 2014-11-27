@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpx4357-evb/src/lpx4357-evb.h
+ * configs/lpc4357-evb/src/lpc4357-evb.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

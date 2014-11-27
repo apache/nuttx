@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpx4357-evb/src/board_buttons.c
+ * configs/lpc4357-evb/src/board_buttons.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 
 #include <arch/board/board.h>
 
-#include "lpx4357-evb.h"
+#include "lpc4357-evb.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

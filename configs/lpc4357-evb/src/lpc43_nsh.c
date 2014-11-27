@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpx4357-evb/src/lpc43_nsh.c
+ * config/lpc4357-evb/src/lpc43_nsh.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
