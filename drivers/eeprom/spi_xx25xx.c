@@ -33,7 +33,9 @@
  *
  ****************************************************************************/
 
-/* This is a driver for SPI EEPROMos that uses the same commands as the 25AA160.
+/* This is a driver for SPI EEPROMs that uses the same commands as the
+ * 25AA160.
+ *
  * Write time 5ms, 6ms for 25xx1025 (determined automatically with polling)
  * Max SPI speed is :
  * 10 MHz for -A/B/C/D/E/UID versions
