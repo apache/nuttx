@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/loop.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,16 +87,18 @@ struct loop_struct_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void    loop_semtake(FAR struct loop_struct_s *dev);
+static int     loop_semtake(FAR struct loop_struct_s *dev);
 static int     loop_open(FAR struct inode *inode);
 static int     loop_close(FAR struct inode *inode);
-static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
+static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
                        size_t start_sector, unsigned int nsectors);
 #ifdef CONFIG_FS_WRITABLE
-static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, unsigned int nsectors);
+static ssize_t loop_write(FAR struct inode *inode,
+                          FAR const unsigned char *buffer,
+                          size_t start_sector, unsigned int nsectors);
 #endif
-static int     loop_geometry(FAR struct inode *inode, struct geometry *geometry);
+static int     loop_geometry(FAR struct inode *inode,
+                             FAR struct geometry *geometry);
 
 /****************************************************************************
  * Private Data
@@ -124,18 +126,26 @@ static const struct block_operations g_bops =
  * Name: loop_semtake
  ****************************************************************************/
 
-static void loop_semtake(FAR struct loop_struct_s *dev)
+static int loop_semtake(FAR struct loop_struct_s *dev)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&dev->sem) != 0)
+  ret = sem_wait(&dev->sem);
+  if (ret < 0)
     {
+      int errcode = get_errno();
+
       /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      ASSERT(errcode == EINTR);
+      return -ret;
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -148,26 +158,30 @@ static void loop_semtake(FAR struct loop_struct_s *dev)
 static int loop_open(FAR struct inode *inode)
 {
   FAR struct loop_struct_s *dev;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
   /* Make sure we have exclusive access to the state structure */
 
-  loop_semtake(dev);
-  if (dev->opencnt == MAX_OPENCNT)
+  ret = loop_semtake(dev);
+  if (ret == OK)
     {
-      return -EMFILE;
-    }
-  else
-    {
-      /* Increment the open count */
+      if (dev->opencnt == MAX_OPENCNT)
+        {
+          ret = -EMFILE;
+        }
+      else
+        {
+          /* Increment the open count */
 
-      dev->opencnt++;
+          dev->opencnt++;
+        }
+
+      loop_semgive(dev);
     }
 
-  loop_semgive(dev);
   return ret;
 }
 
@@ -181,38 +195,42 @@ static int loop_open(FAR struct inode *inode)
 static int loop_close(FAR struct inode *inode)
 {
   FAR struct loop_struct_s *dev;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
   /* Make sure we have exclusive access to the state structure */
 
-  loop_semtake(dev);
-  if (dev->opencnt == 0)
+  ret = loop_semtake(dev);
+  if (ret == OK)
     {
-      return -EIO;
-    }
-  else
-    {
-      /* Decrement the open count */
+      if (dev->opencnt == 0)
+        {
+          ret = -EIO;
+        }
+      else
+        {
+          /* Decrement the open count */
 
-      dev->opencnt--;
+          dev->opencnt--;
+        }
+
+      loop_semgive(dev);
     }
 
-  loop_semgive(dev);
   return ret;
 }
 
 /****************************************************************************
  * Name: loop_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
-static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
-                       size_t start_sector, unsigned int nsectors)
+static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
+                         size_t start_sector, unsigned int nsectors)
 {
   FAR struct loop_struct_s *dev;
   ssize_t nbytesread;
@@ -264,8 +282,9 @@ static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
-static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, unsigned int nsectors)
+static ssize_t loop_write(FAR struct inode *inode,
+                          FAR const unsigned char *buffer,
+                          size_t start_sector, unsigned int nsectors)
 {
   FAR struct loop_struct_s *dev;
   ssize_t nbyteswritten;
@@ -310,7 +329,8 @@ static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
  *
  ****************************************************************************/
 
-static int loop_geometry(FAR struct inode *inode, struct geometry *geometry)
+static int loop_geometry(FAR struct inode *inode,
+                         FAR struct geometry *geometry)
 {
   FAR struct loop_struct_s *dev;
 
@@ -346,8 +366,8 @@ static int loop_geometry(FAR struct inode *inode, struct geometry *geometry)
  *
  ****************************************************************************/
 
-int losetup(const char *devname, const char *filename, uint16_t sectsize,
-            off_t offset, bool readonly)
+int losetup(FAR const char *devname, FAR const char *filename,
+            uint16_t sectsize, off_t offset, bool readonly)
 {
   FAR struct loop_struct_s *dev;
   struct stat sb;
@@ -453,7 +473,7 @@ errout_with_dev:
  *
  ****************************************************************************/
 
-int loteardown(const char *devname)
+int loteardown(FAR const char *devname)
 {
   FAR struct loop_struct_s *dev;
   FAR struct inode *inode;
@@ -479,7 +499,7 @@ int loteardown(const char *devname)
       return ret;
     }
 
-  /* Inode private data is a reference to the loop device stgructure */
+  /* Inode private data is a reference to the loop device structure */
 
   dev = (FAR struct loop_struct_s *)inode->i_private;
   close_blockdriver(inode);
