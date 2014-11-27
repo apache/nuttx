@@ -63,10 +63,9 @@ EEPROM Device Support
 
   drivers/mtd/at24xx.c
   ---------------------
-  This is drier for I2C-based at24cxx EEPROM (at24c32 ,at24c64, at24c128,
-  at24c256, at24c512).  This driver driver is currently provided as an
-  MTD driver but could easily be modified to support the character driver
-  interface
+  This is a driver for I2C-based at24cxx EEPROM (at24c32, at24c64, at24c128,
+  at24c256, at24c512).  This driver is currently provided as an MTD driver
+  but could easily be modified to support the character driver interface.
 
 File Systems
 ============
