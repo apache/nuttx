@@ -232,24 +232,6 @@ static inline int cc3000_devgive(FAR struct cc3000_dev_s *priv)
   return sem_post(&priv->devsem);
 }
 
-/************************************************************************************
- * Name: usdelay()
- *
- * Description:
- *   timeout = the time out is uS
- *
- ************************************************************************************/
-
-static void usdelay(long ustimeout)
-{
-  volatile int j;
-
-  ustimeout = 1 + (ustimeout * CONFIG_BOARD_LOOPSPERMSEC)/1000;
-  for (j = 0; j < ustimeout; j++)
-    {
-    }
-}
-
 /****************************************************************************
  * Function: cc3000_configspi
  *
@@ -1223,9 +1205,9 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
   if (priv->state  == eSPI_STATE_INITIALIZED)
     {
       cc3000_lock_and_select(priv->spi); /* Assert CS */
-      usdelay(55);
+      usleep(55);
       SPI_SNDBLOCK(priv->spi, buffer, 4);
-      usdelay(55);
+      usleep(55);
       SPI_SNDBLOCK(priv->spi, buffer+4, tx_len-4);
     }
   else
