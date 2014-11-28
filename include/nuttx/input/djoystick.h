@@ -82,6 +82,13 @@
 #define DJOY_BUTTON_3       (1 << 7) /* Bit 7: True = Button 4 pressed */
 #define DJOY_BUTTONS_ALL    0xff     /* The set of all buttons */
 
+/* Typical usage */
+
+#define DJOY_BUTTON_SELECT   DJOY_BUTTON_1
+#define DJOY_BUTTON_FIRE     DJOY_BUTTON_2
+#define DJOY_BUTTON_JUMP     DJOY_BUTTON_3
+#define DJOY_BUTTON_RUN      DJOY_BUTTON_4
+
 /* IOCTL commands
  *
  * Discrete joystick drivers do not support the character driver write() or
@@ -185,7 +192,7 @@ struct djoy_lowerhalf_s
    */
 
   CODE void (*dl_enable)(FAR const struct djoy_lowerhalf_s *lower,
-                         djoy_buttonset_t buttons,
+                         djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
 };
 

@@ -190,7 +190,8 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 {
   FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
   FAR struct djoy_open_s *opriv;
-  djoy_buttonset_t intmask;
+  djoy_buttonset_t press;
+  djoy_buttonset_t release;
   irqstate_t flags;
 #ifndef CONFIG_DISABLE_POLL
   int i;
@@ -207,7 +208,9 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 
   /* Visit each opened reference to the device */
 
-  intmask = 0;
+  press   = 0;
+  release = 0;
+
   for (opriv = priv->du_open; opriv; opriv = opriv->do_flink)
     {
 #ifndef CONFIG_DISABLE_POLL
@@ -219,8 +222,8 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
             {
               /* Yes.. OR in the poll event buttons */
 
-              intmask |= (opriv->do_pollevents.dp_press |
-                          opriv->do_pollevents.dp_release);
+              press   |= opriv->do_pollevents.dp_press;
+              release |= opriv->do_pollevents.dp_release;
               break;
             }
         }
@@ -229,24 +232,26 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 #ifndef CONFIG_DISABLE_SIGNALS
       /* OR in the signal events */
 
-      intmask |= (opriv->do_notify.dn_press | opriv->do_notify.dn_release);
+      press   |= opriv->do_notify.dn_press;
+      release |= opriv->do_notify.dn_release;
 #endif
     }
 
   /* Enable/disable button interrupts */
 
   DEBUGASSERT(lower->dl_enable);
-  if (intmask != 0)
+  if (press != 0 || release != 0)
     {
       /* Enable interrupts with the new button set */
 
-      lower->dl_enable(lower, intmask, (djoy_interrupt_t)djoy_interrupt, priv);
+      lower->dl_enable(lower, press, release,
+                       (djoy_interrupt_t)djoy_interrupt, priv);
     }
   else
     {
       /* Disable further interrupts */
 
-      lower->dl_enable(lower, 0, NULL, NULL);
+      lower->dl_enable(lower, 0, 0, NULL, NULL);
     }
 
   irqrestore(flags);
@@ -812,7 +817,7 @@ int djoy_register(FAR const char *devname,
   /* Make sure that all djoystick interrupts are disabled */
 
   DEBUGASSERT(lower->dl_enable);
-  lower->dl_enable(lower, (djoy_buttonset_t)0, NULL, NULL);
+  lower->dl_enable(lower, 0, 0, NULL, NULL);
 
   /* Initialize the new djoystick driver instance */
 
