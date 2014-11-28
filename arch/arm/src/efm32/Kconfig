@@ -132,17 +132,20 @@ config EFM32_USART0
 	bool "USART0"
 	default n
 	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config EFM32_USART1
 	bool "USART1"
 	default n
 	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config EFM32_USART2
 	bool "USART2"
 	default n
 	depends on EFM32_HAVE_USART2
 	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config EFM32_UART0
 	bool "UART0"
