@@ -1369,6 +1369,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   epno = USB_EPNO(privep->ep.eplog);
   ullvdbg("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
           epno, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  UNUSED(epno);
 
   /* Get the number of bytes left to be sent in the packet */
 
@@ -1749,7 +1750,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   ep0->stalled  = 0;
   ep0->txbusy   = 0;
 
-  /* Check to see if called from the DATA phase  of a SETUP Trasfer */
+  /* Check to see if called from the DATA phase of a SETUP Transfer */
 
   if (priv->ep0state != EP0STATE_SETUP_READY)
     {
@@ -1783,7 +1784,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
         {
           priv->ep0state = EP0STATE_SETUP_READY;
         }
-  }
+    }
 
   /* Dispatch any non-standard requests */
 
