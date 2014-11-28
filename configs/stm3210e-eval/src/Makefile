@@ -40,7 +40,7 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = stm32_boot.c stm32_leds.c stm32_buttons.c stm32_spi.c stm32_usbdev.c
+CSRCS = stm32_boot.c stm32_leds.c stm32_spi.c stm32_usbdev.c
 
 ifeq ($(CONFIG_STM32_FSMC),y)
 CSRCS += stm32_lcd.c stm32_extcontext.c stm32_extmem.c stm32_selectnor.c
@@ -80,8 +80,16 @@ ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CSRCS += stm32_pm.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
+
 ifeq ($(CONFIG_PM_BUTTONS),y)
 CSRCS += stm32_pmbuttons.c
+endif
+endif
+
+ifeq ($(CONFIG_DJOYSTICK),y)
+CSRCS += stm32_djoystick.c
 endif
 
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)

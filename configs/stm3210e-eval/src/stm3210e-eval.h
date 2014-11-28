@@ -323,6 +323,17 @@ void stm32_ledpminitialize(void);
 void stm32_pmbuttons(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_djoy_initialization
+ *
+ * Description:
+ *   Initialize and register the discrete joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DJOYSTICK
+int stm32_djoy_initialization(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM3210E_EVAL_SRC_STM3210E_EVAL_H */
-
