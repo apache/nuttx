@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3210e_eval/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/stm3210e_eval/src/stm32_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 

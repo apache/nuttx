@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/stm3210e_eval/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/stm3210e_eval/src/stm32_nsh.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3210e_eval/src/stm3210e_internal.h
- * arch/arm/src/board/stm3210e_internal.n
+ * configs/stm3210e_eval/src/stm3210e-eval.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_STM3210E_EVAL_SRC_STM3210E_INTERNAL_H
-#define __CONFIGS_STM3210E_EVAL_SRC_STM3210E_INTERNAL_H
+#ifndef __CONFIGS_STM3210E_EVAL_SRC_STM3210E_EVAL_H
+#define __CONFIGS_STM3210E_EVAL_SRC_STM3210E_EVAL_H
 
 /************************************************************************************
  * Included Files
@@ -46,7 +45,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SPI modules does this chip support? Most support 2 SPI modules (others
@@ -293,7 +292,7 @@ void stm32_deselectlcd(void);
 #endif /* CONFIG_STM32_FSMC */
 
 /************************************************************************************
- * Name: up_ledpminitialize
+ * Name: stm32_ledpminitialize
  *
  * Description:
  *   Register the LEDs to receive power management event callbacks
@@ -301,11 +300,11 @@ void stm32_deselectlcd(void);
  ************************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_ARCH_LEDS)
-void up_ledpminitialize(void);
+void stm32_ledpminitialize(void);
 #endif
 
 /************************************************************************************
- * Name: up_pmbuttons
+ * Name: stm32_pmbuttons
  *
  * Description:
  *   Configure all the buttons of the STM3210e-eval board as EXTI, so any button is
@@ -314,9 +313,9 @@ void up_ledpminitialize(void);
  ************************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
-void up_pmbuttons(void);
+void stm32_pmbuttons(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM3210E_EVAL_SRC_STM3210E_INTERNAL_H */
+#endif /* __CONFIGS_STM3210E_EVAL_SRC_STM3210E_EVAL_H */
 

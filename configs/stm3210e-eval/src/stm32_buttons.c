@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3210e-eval/src/board_buttons.c
+ * configs/stm3210e-eval/src/stm32_buttons.c
  *
  *   Copyright (C) 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

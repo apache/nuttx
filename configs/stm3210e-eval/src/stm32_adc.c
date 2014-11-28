@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_deselectsram.c
- * arch/arm/src/board/up_deselectsram.c
+ * configs/stm3210e-eval/src/stm32_adc.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,25 +39,60 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/analog/adc.h>
+#include <arch/board/board.h>
+
+#include "chip.h"
 #include "up_arch.h"
-#include "stm32_fsmc.h"
-#include "stm3210e-internal.h"
 
-#ifdef CONFIG_STM32_FSMC
+#include "stm32_pwm.h"
+#include "stm3210e-eval.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+#ifdef CONFIG_ADC
 
 /************************************************************************************
- * Public Data
+ * Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+/* Up to 3 ADC interfaces are supported */
+
+#if STM32_NADC < 3
+#  undef CONFIG_STM32_ADC3
+#endif
+
+#if STM32_NADC < 2
+#  undef CONFIG_STM32_ADC2
+#endif
+
+#if STM32_NADC < 1
+#  undef CONFIG_STM32_ADC1
+#endif
+
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+#ifndef CONFIG_STM32_ADC1
+#  warning "Channel information only available for ADC1"
+#endif
+
+/* The number of ADC channels in the conversion list */
+
+#define ADC1_NCHANNELS 1
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+
+/* Identifying number of each ADC channel: Variable Resistor */
+
+#ifdef CONFIG_STM32_ADC1
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {14};
+
+/* Configurations of pins used byte each ADC channels */
+
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN14};
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -69,29 +103,61 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_deselectsram
+ * Name: adc_devinit
  *
  * Description:
- *   Disable NOR FLASH
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/adc.
  *
  ************************************************************************************/
 
-void stm32_deselectsram(void)
+int adc_devinit(void)
 {
-  /* Restore registers to their power up settings */
+#ifdef CONFIG_STM32_ADC1
+  static bool initialized = false;
+  struct adc_dev_s *adc;
+  int ret;
+  int i;
 
-  putreg32(0x000030d2, STM32_FSMC_BCR3);
+  /* Check if we have already initialized */
 
-  /* Bank1 NOR/SRAM timing register configuration */
+  if (!initialized)
+    {
+      /* Configure the pins as analog inputs for the selected channels */
 
-  putreg32(0x0fffffff, STM32_FSMC_BTR3);
+      for (i = 0; i < ADC1_NCHANNELS; i++)
+        {
+          stm32_configgpio(g_pinlist[i]);
+        }
 
-  /* Disable AHB clocking to the FSMC */
+      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-  stm32_disablefsmc();
+      adc = stm32_adcinitialize(1, g_chanlist, ADC1_NCHANNELS);
+      if (adc == NULL)
+        {
+          adbg("ERROR: Failed to get ADC interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the ADC driver at "/dev/adc0" */
+
+      ret = adc_register("/dev/adc0", adc);
+      if (ret < 0)
+        {
+          adbg("adc_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
+#else
+  return -ENOSYS;
+#endif
 }
 
-#endif /* CONFIG_STM32_FSMC */
-
-
-
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
+#endif /* CONFIG_ADC */

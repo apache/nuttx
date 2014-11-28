@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_can.c
- * arch/arm/src/board/up_can.c
+ * configs/stm3210e-eval/src/stm32_deselectsram.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,43 +39,25 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/can.h>
-#include <arch/board/board.h>
-
-#include "chip.h"
 #include "up_arch.h"
+#include "stm32_fsmc.h"
+#include "stm3210e-eval.h"
 
-#include "stm32.h"
-#include "stm32_can.h"
-#include "stm3210e-internal.h"
-
-#if defined(CONFIG_CAN) && defined(CONFIG_STM32_CAN1)
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
-/* The STM32F103ZE supports only CAN1 */
 
-#define CAN_PORT 1
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -87,48 +68,29 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: can_devinit
+ * Name: stm32_deselectsram
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/can.
+ *   Disable NOR FLASH
  *
  ************************************************************************************/
 
-int can_devinit(void)
+void stm32_deselectsram(void)
 {
-  static bool initialized = false;
-  struct can_dev_s *can;
-  int ret;
+  /* Restore registers to their power up settings */
 
-  /* Check if we have already initialized */
+  putreg32(0x000030d2, STM32_FSMC_BCR3);
 
-  if (!initialized)
-    {
-      /* Call stm32_caninitialize() to get an instance of the CAN interface */
+  /* Bank1 NOR/SRAM timing register configuration */
 
-      can = stm32_caninitialize(CAN_PORT);
-      if (can == NULL)
-        {
-          candbg("ERROR:  Failed to get CAN interface\n");
-          return -ENODEV;
-        }
+  putreg32(0x0fffffff, STM32_FSMC_BTR3);
 
-      /* Register the CAN driver at "/dev/can0" */
+  /* Disable AHB clocking to the FSMC */
 
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          candbg("ERROR: can_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
-    }
-
-  return OK;
+  stm32_disablefsmc();
 }
 
-#endif /* CONFIG_CAN && CONFIG_STM32_CAN1 */
+#endif /* CONFIG_STM32_FSMC */
+
+
+

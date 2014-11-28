@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm3210e-eval/src/up_pmbuttons.c
- * arch/arm/src/board/up_pmbuttons.c
+ * configs/stm3210e-eval/src/stm32_pmbuttons.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "nvic.h"
 #include "stm32_pwr.h"
 #include "stm32_pm.h"
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 #if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
 
@@ -286,7 +285,7 @@ static int button7_handler(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_pmbuttons
+ * Name: stm32_pmbuttons
  *
  * Description:
  *   Configure all the buttons of the STM3210e-eval board as EXTI,
@@ -294,7 +293,7 @@ static int button7_handler(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-void up_pmbuttons(void)
+void stm32_pmbuttons(void)
 {
   /* Initialize the button GPIOs */
 

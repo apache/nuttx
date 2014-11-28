@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3210e-eval/src/up_composite.c
+ * configs/stm3210e-eval/src/stm32_composite.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -90,7 +90,7 @@
 int composite_archinitialize(void)
 {
   /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initialized in nsh_archinitialize() (see up_nsh.c).  In
+   * already have been initialized in nsh_archinitialize() (see stm32_nsh.c).  In
    * this case, there is nothing further to be done here.
    *
    * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH

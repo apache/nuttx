@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_lm75.c
- * arch/arm/src/board/up_lm75.c
+ * configs/stm3210e-eval/src/stm32_deselectlcd.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,19 +39,24 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <debug.h>
 
-#include <nuttx/i2c.h>
-#include <nuttx/sensors/lm75.h>
+#include "up_arch.h"
+#include "stm32_fsmc.h"
+#include "stm3210e-eval.h"
 
-#include "stm32.h"
-#include "stm32_i2c.h"
-#include "stm3210e-internal.h"
-
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
  ************************************************************************************/
 
 /************************************************************************************
@@ -64,65 +68,29 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_lm75initialize
+ * Name: stm32_deselectlcd
  *
  * Description:
- *   Initialize and register the LM-75 Temperature Sensor driver.
- *
- * Input parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Disable the LCD
  *
  ************************************************************************************/
 
-int stm32_lm75initialize(FAR const char *devpath)
+void stm32_deselectlcd(void)
 {
-  FAR struct i2c_dev_s *i2c;
-  int ret;
+  /* Restore registers to their power up settings */
 
-  /* Configure PB.5 as Input pull-up.  This pin can be used as a temperature
-   * sensor interrupt (not fully implemented).
-   */
+  putreg32(0xffffffff, STM32_FSMC_BCR4);
 
-  stm32_configgpio(GPIO_LM75_OSINT);
+  /* Bank1 NOR/SRAM timing register configuration */
 
-  /* Get an instance of the I2C1 interface */
+  putreg32(0x0fffffff, STM32_FSMC_BTR4);
 
-  i2c =  up_i2cinitialize(1);
-  if (!i2c)
-    {
-      return -ENODEV;
-    }
+  /* Disable AHB clocking to the FSMC */
 
-  /* Then register the temperature sensor */
-
-  ret = lm75_register(devpath, i2c, 0x48);
-  if (ret < 0)
-    {
-      (void)up_i2cuninitialize(i2c);
-    }
-  return ret;
+  stm32_disablefsmc();
 }
 
-/************************************************************************************
- * Name: stm32_lm75attach
- *
- * Description:
- *   Attach the LM-75 interrupt handler
- *
- * Input parameters:
- *   irqhandler - the LM-75 interrupt handler
- *
- * Returned Value:
- *   The previous LM-75 interrupt handler
- *
- ************************************************************************************/
+#endif /* CONFIG_STM32_FSMC */
 
-xcpt_t stm32_lm75attach(xcpt_t irqhandler)
-{
-  return stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler);
-}
 
-#endif /* CONFIG_I2C && CONFIG_I2C_LM75 && CONFIG_STM32_I2C1 */
+

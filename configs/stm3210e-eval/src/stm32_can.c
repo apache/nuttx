@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_deselectlcd.c
- * arch/arm/src/board/up_deselectlcd.c
+ * configs/stm3210e-eval/src/stm32_can.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,25 +39,43 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include "up_arch.h"
-#include "stm32_fsmc.h"
-#include "stm3210e-internal.h"
+#include <nuttx/can.h>
+#include <arch/board/board.h>
 
-#ifdef CONFIG_STM32_FSMC
+#include "chip.h"
+#include "up_arch.h"
+
+#include "stm32.h"
+#include "stm32_can.h"
+#include "stm3210e-eval.h"
+
+#if defined(CONFIG_CAN) && defined(CONFIG_STM32_CAN1)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+/* The STM32F103ZE supports only CAN1 */
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#define CAN_PORT 1
 
-/************************************************************************************
- * Private Data
- ************************************************************************************/
+/* Debug ***************************************************************************/
+/* Non-standard debug that may be enabled just for testing CAN */
+
+#ifdef CONFIG_DEBUG_CAN
+#  define candbg    dbg
+#  define canvdbg   vdbg
+#  define canlldbg  lldbg
+#  define canllvdbg llvdbg
+#else
+#  define candbg(x...)
+#  define canvdbg(x...)
+#  define canlldbg(x...)
+#  define canllvdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -69,29 +86,48 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_deselectlcd
+ * Name: can_devinit
  *
  * Description:
- *   Disable the LCD
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/can.
  *
  ************************************************************************************/
 
-void stm32_deselectlcd(void)
+int can_devinit(void)
 {
-  /* Restore registers to their power up settings */
+  static bool initialized = false;
+  struct can_dev_s *can;
+  int ret;
 
-  putreg32(0xffffffff, STM32_FSMC_BCR4);
+  /* Check if we have already initialized */
 
-  /* Bank1 NOR/SRAM timing register configuration */
+  if (!initialized)
+    {
+      /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-  putreg32(0x0fffffff, STM32_FSMC_BTR4);
+      can = stm32_caninitialize(CAN_PORT);
+      if (can == NULL)
+        {
+          candbg("ERROR:  Failed to get CAN interface\n");
+          return -ENODEV;
+        }
 
-  /* Disable AHB clocking to the FSMC */
+      /* Register the CAN driver at "/dev/can0" */
 
-  stm32_disablefsmc();
+      ret = can_register("/dev/can0", can);
+      if (ret < 0)
+        {
+          candbg("ERROR: can_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
 }
 
-#endif /* CONFIG_STM32_FSMC */
-
-
-
+#endif /* CONFIG_CAN && CONFIG_STM32_CAN1 */

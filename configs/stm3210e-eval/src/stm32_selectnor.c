@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_selectnor.c
- * arch/arm/src/board/up_selectnor.c
+ * configs/stm3210e-eval/src/stm32_selectnor.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +46,7 @@
 #include "up_arch.h"
 
 #include "stm32.h"
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 #ifdef CONFIG_STM32_FSMC
 
