@@ -42,7 +42,8 @@
 
 #include <ctype.h>
 
-// Remove macros in favor of real functions
+// Remove macros in favor of builtin implementations
+
 #undef isalnum
 #undef isalpha
 #undef iscntrl
