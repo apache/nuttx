@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/stm3240g_eval/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/stm3240g_eval/src/stm32_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,7 +59,7 @@
 #endif
 
 #include "stm32.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

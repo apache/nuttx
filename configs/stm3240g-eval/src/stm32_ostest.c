@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_can.c
- * arch/arm/src/board/up_can.c
+ * configs/stm3240g-eval/src/stm32_ostest.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,51 +39,41 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
 #include <debug.h>
 
-#include <nuttx/can.h>
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
-
-#include "stm32.h"
-#include "stm32_can.h"
-#include "stm3240g-internal.h"
-
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
+#include "up_internal.h"
+#include "stm3240g-eval.h"
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
-#  undef CONFIG_STM32_CAN2
+#undef HAVE_FPU
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_EXAMPLES_OSTEST_FPUSIZE) && \
+    defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_DISABLE_SIGNALS) && \
+   !defined(CONFIG_ARMV7M_CMNVECTOR)
+#    define HAVE_FPU 1
 #endif
 
-#ifdef CONFIG_STM32_CAN1
-#  define CAN_PORT 1
-#else
-#  define CAN_PORT 2
+#ifdef HAVE_FPU
+
+#if CONFIG_EXAMPLES_OSTEST_FPUSIZE != (4*SW_FPU_REGS)
+#  error "CONFIG_EXAMPLES_OSTEST_FPUSIZE has the wrong size"
 #endif
 
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
+static uint32_t g_saveregs[XCPTCONTEXT_REGS];
 
 /************************************************************************************
  * Private Functions
@@ -93,50 +82,32 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+/* Given an array of size CONFIG_EXAMPLES_OSTEST_FPUSIZE, this function will return
+ * the current FPU registers.
+ */
 
-/************************************************************************************
- * Name: can_devinit
- *
- * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/can.
- *
- ************************************************************************************/
-
-int can_devinit(void)
+void arch_getfpu(FAR uint32_t *fpusave)
 {
-  static bool initialized = false;
-  struct can_dev_s *can;
-  int ret;
+  irqstate_t flags;
 
-  /* Check if we have already initialized */
+  /* Take a snapshot of the thread context right now */
 
-  if (!initialized)
-    {
-      /* Call stm32_caninitialize() to get an instance of the CAN interface */
+  flags = irqsave();
+  up_saveusercontext(g_saveregs);
 
-      can = stm32_caninitialize(CAN_PORT);
-      if (can == NULL)
-        {
-          candbg("ERROR:  Failed to get CAN interface\n");
-          return -ENODEV;
-        }
+  /* Return only the floating register values */
 
-      /* Register the CAN driver at "/dev/can0" */
-
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          candbg("ERROR: can_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
-    }
-
-  return OK;
+  memcpy(fpusave, &g_saveregs[REG_S0], (4*SW_FPU_REGS));
+  irqrestore(flags);
 }
 
-#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */
+/* Given two arrays of size CONFIG_EXAMPLES_OSTEST_FPUSIZE this function
+ * will compare them and return true if they are identical.
+ */
+
+bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
+{
+  return memcmp(fpusave1, fpusave2, (4*SW_FPU_REGS)) == 0;
+}
+
+#endif /* HAVE_FPU */

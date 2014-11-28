@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_watchdog.c
- * arch/arm/src/board/up_watchdog.c
+ * configs/stm3240g-eval/src/stm32_deselectsram.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,65 +39,25 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/watchdog.h>
-#include <arch/board/board.h>
+#include "up_arch.h"
+#include "stm32_fsmc.h"
+#include "stm3240g-eval.h"
 
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
 
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
-#endif
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
-/* Select the path to the registered watchdog timer device */
-
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
-
-/* Use the un-calibrated LSI frequency if we have nothing better */
-
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -108,29 +67,30 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
+/************************************************************************************
+ * Name: stm32_deselectsram
  *
  * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
+ *   Disable SRAM
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int up_wdginitialize(void)
+void stm32_deselectsram(void)
 {
-  /* Initialize tha register the watchdog timer device */
+  /* Restore registers to their power up settings */
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
-#else
-  return -ENODEV;
-#endif
+  putreg32(FSMC_BCR_RSTVALUE, STM32_FSMC_BCR2);
+
+  /* Bank1 NOR/SRAM timing register configuration */
+
+  putreg32(FSMC_BTR_RSTVALUE, STM32_FSMC_BTR2);
+
+  /* Disable AHB clocking to the FSMC */
+
+  stm32_disablefsmc();
 }
 
-#endif /* CONFIG_WATCHDOG */
+#endif /* CONFIG_STM32_FSMC */
+
+
+

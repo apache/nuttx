@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_touchscreen.c
- * arch/arm/src/board/up_touchscreen.c
+ * configs/stm3240g-eval/src/stm32_stmpe811.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,7 @@
 #include <arch/irq.h>
 
 #include "stm32.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

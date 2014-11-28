@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3240g_eval/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/stm3240g_eval/src/stm32_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 

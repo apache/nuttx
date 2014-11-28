@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_ostest.c
- * arch/arm/src/board/up_ostest.c
+ * configs/stm3240g-eval/src/stm32_pwm.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,41 +39,29 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/pwm.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
-#include "up_internal.h"
-#include "stm3240g-internal.h"
+#include "stm32_pwm.h"
+#include "stm3240g-eval.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
+/* Configuration *******************************************************************/
+/* PWM
+ *
+ * The STM3240G-Eval has no real on-board PWM devices, but the board can be
+ * configured to output a pulse train using variously unused pins on the board for
+ * PWM output (see board.h for details of pins).
+ */
 
-#undef HAVE_FPU
-#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_EXAMPLES_OSTEST_FPUSIZE) && \
-    defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_DISABLE_SIGNALS) && \
-   !defined(CONFIG_ARMV7M_CMNVECTOR)
-#    define HAVE_FPU 1
-#endif
-
-#ifdef HAVE_FPU
-
-#if CONFIG_EXAMPLES_OSTEST_FPUSIZE != (4*SW_FPU_REGS)
-#  error "CONFIG_EXAMPLES_OSTEST_FPUSIZE has the wrong size"
-#endif
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-static uint32_t g_saveregs[XCPTCONTEXT_REGS];
+#ifdef CONFIG_PWM
 
 /************************************************************************************
  * Private Functions
@@ -83,32 +70,50 @@ static uint32_t g_saveregs[XCPTCONTEXT_REGS];
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
-/* Given an array of size CONFIG_EXAMPLES_OSTEST_FPUSIZE, this function will return
- * the current FPU registers.
- */
 
-void arch_getfpu(FAR uint32_t *fpusave)
+/************************************************************************************
+ * Name: pwm_devinit
+ *
+ * Description:
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/pwm.
+ *
+ ************************************************************************************/
+
+int pwm_devinit(void)
 {
-  irqstate_t flags;
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-  /* Take a snapshot of the thread context right now */
+  /* Have we already initialized? */
 
-  flags = irqsave();
-  up_saveusercontext(g_saveregs);
+  if (!initialized)
+    {
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-  /* Return only the floating register values */
+      pwm = stm32_pwminitialize(STM3240G_EVAL_PWMTIMER);
+      if (!pwm)
+        {
+          dbg("Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
 
-  memcpy(fpusave, &g_saveregs[REG_S0], (4*SW_FPU_REGS));
-  irqrestore(flags);
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          adbg("pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
 }
 
-/* Given two arrays of size CONFIG_EXAMPLES_OSTEST_FPUSIZE this function
- * will compare them and return true if they are identical.
- */
-
-bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
-{
-  return memcmp(fpusave1, fpusave2, (4*SW_FPU_REGS)) == 0;
-}
-
-#endif /* HAVE_FPU */
+#endif /* CONFIG_PWM */

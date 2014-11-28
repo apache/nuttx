@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_selectsram.c
- * arch/arm/src/board/up_selectsram.c
+ * configs/stm3240g-eval/src/stm32_selectsram.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +46,7 @@
 #include "up_arch.h"
 
 #include "stm32.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #ifdef CONFIG_STM32_FSMC
 
