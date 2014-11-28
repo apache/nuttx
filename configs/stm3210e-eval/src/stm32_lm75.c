@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/stm3210e-eval/src/stm32_lm75.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,12 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <errno.h>
 
-#include <arch/board/board.h>
+#include <nuttx/i2c.h>
+#include <nuttx/sensors/lm75.h>
 
-#include "up_arch.h"
-#include "stm3210e-internal.h"
+#include "stm32.h"
+#include "stm32_i2c.h"
+#include "stm3210e-eval.h"
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
 
 /************************************************************************************
  * Definitions
@@ -60,49 +63,65 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_lm75initialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Initialize and register the LM-75 Temperature Sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+int stm32_lm75initialize(FAR const char *devpath)
 {
-  /* If the FSMC and FSMC_SRAM are selected, then enable SRAM access */
+  FAR struct i2c_dev_s *i2c;
+  int ret;
 
-#if defined(CONFIG_STM32_FSMC) && defined(CONFIG_STM32_FSMC_SRAM)
-  stm32_selectsram();
-#endif
-
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
+  /* Configure PB.5 as Input pull-up.  This pin can be used as a temperature
+   * sensor interrupt (not fully implemented).
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
-  if (stm32_spiinitialize)
+  stm32_configgpio(GPIO_LM75_OSINT);
+
+  /* Get an instance of the I2C1 interface */
+
+  i2c =  up_i2cinitialize(1);
+  if (!i2c)
     {
-      stm32_spiinitialize();
+      return -ENODEV;
     }
-#endif
 
-  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build.
-   */
+  /* Then register the temperature sensor */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  if (stm32_usbinitialize)
+  ret = lm75_register(devpath, i2c, 0x48);
+  if (ret < 0)
     {
-      stm32_usbinitialize();
+      (void)up_i2cuninitialize(i2c);
     }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+  return ret;
 }
+
+/************************************************************************************
+ * Name: stm32_lm75attach
+ *
+ * Description:
+ *   Attach the LM-75 interrupt handler
+ *
+ * Input parameters:
+ *   irqhandler - the LM-75 interrupt handler
+ *
+ * Returned Value:
+ *   The previous LM-75 interrupt handler
+ *
+ ************************************************************************************/
+
+xcpt_t stm32_lm75attach(xcpt_t irqhandler)
+{
+  return stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler);
+}
+
+#endif /* CONFIG_I2C && CONFIG_I2C_LM75 && CONFIG_STM32_I2C1 */

@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/stm3210e-eval/src/stm32_selectsram.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,60 +39,63 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <stdint.h>
 #include <debug.h>
-
-#include <nuttx/analog/adc.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_pwm.h"
-#include "stm3210e-internal.h"
+#include "stm32.h"
+#include "stm3210e-eval.h"
 
-#ifdef CONFIG_ADC
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
-/* Up to 3 ADC interfaces are supported */
 
-#if STM32_NADC < 3
-#  undef CONFIG_STM32_ADC3
+#if STM32_NGPIO_PORTS < 6
+#  error "Required GPIO ports not enabled"
 #endif
 
-#if STM32_NADC < 2
-#  undef CONFIG_STM32_ADC2
-#endif
-
-#if STM32_NADC < 1
-#  undef CONFIG_STM32_ADC1
-#endif
-
-#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
-#ifndef CONFIG_STM32_ADC1
-#  warning "Channel information only available for ADC1"
-#endif
-
-/* The number of ADC channels in the conversion list */
-
-#define ADC1_NCHANNELS 1
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
 
-/* Identifying number of each ADC channel: Variable Resistor */
+/* 512Kx16 SRAM is connected to bank2 of the FSMC interface and both 8- and 16-bit
+ * accesses are allowed by BLN0 and BLN1 connected to BLE and BHE of SRAM,
+ * respectively.
+ *
+ * Pin Usage (per schematic)
+ *                         FLASH   SRAM    NAND    LCD
+ *   D[0..15]              [0..15] [0..15] [0..7]  [0..15]
+ *   A[0..23]              [0..22] [0..18] [16,17] [0]
+ *   FSMC_NBL0  PE0   OUT  ~BLE    ---     ---     ---
+ *   FSMC_NBL1  PE1   OUT  ~BHE    ---     ---     ---
+ *   FSMC_NE2   PG9   OUT  ---     ~E      ---     ---
+ *   FSMC_NE3   PG10  OUT  ~CE     ---     ---     ---
+ *   FSMC_NE4   PG12  OUT  ---     ---     ---     ~CS
+ *   FSMC_NWE   PD5   OUT  ~WE     ~W      ~W      ~WR/SCL
+ *   FSMC_NOE   PD4   OUT  ~OE     ~G      ~R      ~RD
+ *   FSMC_NWAIT PD6   IN   ---     R~B     ---     ---
+ *   FSMC_INT2  PG6*  IN   ---     ---     R~B     ---
+ *
+ *   *JP7 will switch to PD6
+ */
 
-#ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {14};
+/* GPIO configurations unique to SRAM  */
 
-/* Configurations of pins used byte each ADC channels */
+static const uint16_t g_sramconfig[] =
+{
+  /* NE3, NBL0, NBL1,  */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN14};
-#endif
+  GPIO_NPS_NE3, GPIO_NPS_NBL0, GPIO_NPS_NBL1
+};
+#define NSRAM_CONFIG (sizeof(g_sramconfig)/sizeof(uint16_t))
 
 /************************************************************************************
  * Private Functions
@@ -104,61 +106,40 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN14};
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: stm32_selectsram
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize to access external SRAM
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+void stm32_selectsram(void)
 {
-#ifdef CONFIG_STM32_ADC1
-  static bool initialized = false;
-  struct adc_dev_s *adc;
-  int ret;
-  int i;
+  /* Configure new GPIO state */
 
-  /* Check if we have already initialized */
+  stm32_extmemgpios(g_commonconfig, NCOMMON_CONFIG);
+  stm32_extmemgpios(g_sramconfig, NSRAM_CONFIG);
 
-  if (!initialized)
-    {
-      /* Configure the pins as analog inputs for the selected channels */
+  /* Enable AHB clocking to the FSMC */
 
-      for (i = 0; i < ADC1_NCHANNELS; i++)
-        {
-          stm32_configgpio(g_pinlist[i]);
-        }
+  stm32_enablefsmc();
 
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+  /* Bank1 NOR/SRAM control register configuration */
 
-      adc = stm32_adcinitialize(1, g_chanlist, ADC1_NCHANNELS);
-      if (adc == NULL)
-        {
-          adbg("ERROR: Failed to get ADC interface\n");
-          return -ENODEV;
-        }
+  putreg32(FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
 
-      /* Register the ADC driver at "/dev/adc0" */
+  /* Bank1 NOR/SRAM timing register configuration */
 
-      ret = adc_register("/dev/adc0", adc);
-      if (ret < 0)
-        {
-          adbg("adc_register failed: %d\n", ret);
-          return ret;
-        }
+  putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(1)|FSMC_BTR_DATAST(3)|FSMC_BTR_BUSTRUN(1)|
+           FSMC_BTR_CLKDIV(1)|FSMC_BTR_DATLAT(2)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
 
-      /* Now we are initialized */
+  putreg32(0xffffffff, STM32_FSMC_BWTR3);
 
-      initialized = true;
-    }
+  /* Enable the bank */
 
-  return OK;
-#else
-  return -ENOSYS;
-#endif
+  putreg32(FSMC_BCR_MBKEN|FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
 }
 
-#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_STM32_FSMC */
+
+

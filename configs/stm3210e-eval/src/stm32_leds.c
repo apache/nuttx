@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm3210e_eval/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/stm3210e_eval/src/stm32_leds.c
  *
  *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 /****************************************************************************
  * Definitions
@@ -380,11 +379,11 @@ void board_led_off(int led)
 }
 
 /****************************************************************************
- * Name: up_ledpminitialize
+ * Name: stm32_ledpminitialize
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void up_ledpminitialize(void)
+void stm32_ledpminitialize(void)
 {
   /* Register to receive power management callbacks */
 

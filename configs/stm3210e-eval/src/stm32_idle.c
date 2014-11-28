@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm3210e-eval/src/up_idle.c
- * arch/arm/src/board/up_idle.c
+ * configs/stm3210e-eval/src/stm32_idle.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +56,7 @@
 #include "stm32_rcc.h"
 #include "stm32_exti.h"
 
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,7 +134,7 @@ static volatile bool g_alarmwakeup;               /* Wakeup Alarm indicator */
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_alarmcb
+ * Name: stm32_alarmcb
  *
  * Description:
  *    RTC alarm callback
@@ -143,7 +142,7 @@ static volatile bool g_alarmwakeup;               /* Wakeup Alarm indicator */
  ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
-static void up_alarmcb(void)
+static void stm32_alarmcb(void)
 {
   /* Note that we were awaken by an alarm */
 
@@ -152,7 +151,7 @@ static void up_alarmcb(void)
 #endif
 
 /****************************************************************************
- * Name: up_alarm_exti
+ * Name: stm32_alarm_exti
  *
  * Description:
  *    RTC alarm EXTI interrupt service routine
@@ -160,15 +159,15 @@ static void up_alarmcb(void)
  ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
-static int up_alarm_exti(int irq, FAR void *context)
+static int stm32_alarm_exti(int irq, FAR void *context)
 {
-  up_alarmcb();
+  stm32_alarmcb();
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: up_exti_cancel
+ * Name: stm32_exti_cancel
  *
  * Description:
  *    Disable the ALARM EXTI interrupt
@@ -176,14 +175,14 @@ static int up_alarm_exti(int irq, FAR void *context)
  ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
-static void up_exti_cancel(void)
+static void stm32_exti_cancel(void)
 {
   (void)stm32_exti_alarm(false, false, false, NULL);
 }
 #endif
 
 /****************************************************************************
- * Name: up_rtc_alarm
+ * Name: stm32_rtc_alarm
  *
  * Description:
  *   Set the alarm
@@ -191,7 +190,7 @@ static void up_exti_cancel(void)
  ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
-static int up_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
+static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
 {
   struct timespec alarmtime;
   int ret;
@@ -202,7 +201,7 @@ static int up_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
     {
       /* TODO: Make sure that that is no pending EXTI interrupt */
 
-      (void)stm32_exti_alarm(true, true, true, up_alarm_exti);
+      (void)stm32_exti_alarm(true, true, true, stm32_alarm_exti);
     }
 
   /* Configure the RTC alarm to Auto Wake the system */
@@ -227,7 +226,7 @@ static int up_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
   /* Set the alarm */
 
   g_alarmwakeup = false;
-  ret = up_rtc_setalarm(&alarmtime, up_alarmcb);
+  ret = up_rtc_setalarm(&alarmtime, stm32_alarmcb);
   if (ret < 0)
     {
       lldbg("Warning: The alarm is already set\n");
@@ -238,7 +237,7 @@ static int up_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
 #endif
 
 /****************************************************************************
- * Name: up_idlepm
+ * Name: stm32_idlepm
  *
  * Description:
  *   Perform IDLE state power management.
@@ -246,7 +245,7 @@ static int up_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void up_idlepm(void)
+static void stm32_idlepm(void)
 {
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
@@ -363,7 +362,7 @@ static void up_idlepm(void)
              */
 
 #ifdef CONFIG_RTC_ALARM
-            up_exti_cancel();
+            stm32_exti_cancel();
             ret = up_rtc_cancelalarm();
             if (ret < 0)
               {
@@ -411,7 +410,7 @@ errout:
     }
 }
 #else
-#  define up_idlepm()
+#  define stm32_idlepm()
 #endif /* CONFIG_PM */
 
 /****************************************************************************
@@ -444,7 +443,7 @@ void up_idle(void)
   /* Perform IDLE mode power management */
 
   BEGIN_IDLE();
-  up_idlepm();
+  stm32_idlepm();
   END_IDLE();
 #endif
 }

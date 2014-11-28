@@ -1,6 +1,5 @@
 /**************************************************************************************
- * configs/stm3210e-eval/src/up_lcd.c
- * arch/arm/src/board/up_lcd.c
+ * configs/stm3210e-eval/src/stm32_lcd.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -76,7 +75,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm3210e-internal.h"
+#include "stm3210e-eval.h"
 
 /**************************************************************************************
  * Pre-processor Definitions

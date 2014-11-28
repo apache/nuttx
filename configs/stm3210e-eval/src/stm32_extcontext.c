@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_deselectnor.c
- * arch/arm/src/board/up_deselectnor.c
+ * configs/stm3210e-eval/src/stm32_extcontext.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +39,13 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "up_arch.h"
-#include "stm32_fsmc.h"
-#include "stm3210e-internal.h"
+#include "stm32.h"
+#include "stm3210e-eval.h"
 
 #ifdef CONFIG_STM32_FSMC
 
@@ -52,9 +53,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#if STM32_NGPIO_PORTS < 6
+#  error "Required GPIO ports not enabled"
+#endif
 
 /************************************************************************************
  * Private Data
@@ -69,27 +70,47 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_deselectnor
+ * Name: stm32_extcontextsave
  *
  * Description:
- *   Disable NOR FLASH
+ *  Save current GPIOs that will used by external memory configurations
  *
  ************************************************************************************/
 
-void stm32_deselectnor(void)
+void stm32_extcontextsave(struct extmem_save_s *save)
 {
-  /* Restore registers to their power up settings */
+  DEBUGASSERT(save != NULL);
+  save->gpiod_crl = getreg32(STM32_GPIOE_CRL);
+  save->gpiod_crh = getreg32(STM32_GPIOE_CRH);
+  save->gpioe_crl = getreg32(STM32_GPIOD_CRL);
+  save->gpioe_crh = getreg32(STM32_GPIOD_CRH);
+  save->gpiof_crl = getreg32(STM32_GPIOF_CRL);
+  save->gpiof_crh = getreg32(STM32_GPIOF_CRH);
+  save->gpiog_crl = getreg32(STM32_GPIOG_CRL);
+  save->gpiog_crh = getreg32(STM32_GPIOG_CRH);
+}
 
-  putreg32(0x000030d2, STM32_FSMC_BCR2);
+/************************************************************************************
+ * Name: stm32_extcontextrestore
+ *
+ * Description:
+ *  Restore GPIOs that were used by external memory configurations
+ *
+ ************************************************************************************/
 
-  /* Bank1 NOR/SRAM timing register configuration */
-
-  putreg32(0x0fffffff, STM32_FSMC_BTR2);
-
-  /* Disable AHB clocking to the FSMC */
-
-  stm32_disablefsmc();
+void stm32_extcontextrestore(struct extmem_save_s *restore)
+{
+  DEBUGASSERT(restore != NULL);
+  putreg32(restore->gpiod_crl, STM32_GPIOE_CRL);
+  putreg32(restore->gpiod_crh, STM32_GPIOE_CRH);
+  putreg32(restore->gpioe_crl, STM32_GPIOD_CRL);
+  putreg32(restore->gpioe_crh, STM32_GPIOD_CRH);
+  putreg32(restore->gpiof_crl, STM32_GPIOF_CRL);
+  putreg32(restore->gpiof_crh, STM32_GPIOF_CRH);
+  putreg32(restore->gpiog_crl, STM32_GPIOG_CRL);
+  putreg32(restore->gpiog_crh, STM32_GPIOG_CRH);
 }
 
 #endif /* CONFIG_STM32_FSMC */
+
 
