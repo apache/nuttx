@@ -163,6 +163,7 @@ static int cc3000_accept_socket(FAR struct cc3000_dev_s *priv, int sd,
                                 socklen_t *addrlen);
 static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd);
 static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd);
+static int cc3000_remote_closed_socket(FAR struct cc3000_dev_s *priv, int sd);
 
 /****************************************************************************
  * Private Data
@@ -488,6 +489,7 @@ static void * select_thread_func(FAR void *arg)
   FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
   struct timeval timeout;
   TICC3000fd_set readsds;
+  TICC3000fd_set exceptsds;
   int ret = 0;
   int maxFD = 0;
   int s = 0;
@@ -506,7 +508,9 @@ static void * select_thread_func(FAR void *arg)
 
       sem_post(&priv->selectsem);
 
+      maxFD = -1;
       CC3000_FD_ZERO(&readsds);
+      CC3000_FD_ZERO(&exceptsds);
 
       /* Ping correct socket descriptor param for select */
 
@@ -536,6 +540,7 @@ static void * select_thread_func(FAR void *arg)
                 }
 
               CC3000_FD_SET(priv->sockets[s].sd, &readsds);
+              CC3000_FD_SET(priv->sockets[s].sd, &exceptsds);
               if (maxFD <= priv->sockets[s].sd)
                 {
                   maxFD = priv->sockets[s].sd + 1;
@@ -543,9 +548,18 @@ static void * select_thread_func(FAR void *arg)
             }
         }
 
+      if (maxFD < 0)
+        {
+          /* Handled only socket close. */
+
+          continue;
+        }
+
       /* Polling instead of blocking here to process "accept" below */
 
-      ret = cc3000_select(maxFD, (fd_set *) &readsds, NULL, NULL, &timeout);
+      ret = cc3000_select(maxFD, (fd_set *) &readsds, NULL,
+                         (fd_set *) &exceptsds, &timeout);
+
       if (priv->selecttid == -1)
         {
           /* driver close will terminate the thread and by that all sync
@@ -555,16 +569,26 @@ static void * select_thread_func(FAR void *arg)
           return OK;
         }
 
-      if (ret > 0)
+      for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
         {
-          for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
+          if ((priv->sockets[s].sd != FREE_SLOT ||
+               priv->sockets[s].sd != CLOSE_SLOT) &&                         /* Check that the socket is valid */
+               priv->sockets[s].sd != priv->accepting_socket.acc.sd)         /* Verify this is not an accept socket */
             {
-              if ((priv->sockets[s].sd != FREE_SLOT ||
-                   priv->sockets[s].sd != CLOSE_SLOT) &&                      /* Check that the socket is valid */
-                   priv->sockets[s].sd  != priv->accepting_socket.acc.sd  &&  /* Verify this is not an accept socket */
-                   CC3000_FD_ISSET(priv->sockets[s].sd, &readsds))            /* and has pending data */
+              if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &readsds)) /* and has pending data */
                 {
-                  waitlldbg("Signaled %d\n",priv->sockets[s].sd);
+                  waitlldbg("Signaled %d\n", priv->sockets[s].sd);
+                  sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
+                }
+              else if (ret > 0 && CC3000_FD_ISSET(priv->sockets[s].sd, &exceptsds)) /* or has pending exception */
+                {
+                  waitlldbg("Signaled %d (exception)\n", priv->sockets[s].sd);
+                  sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
+                }
+              else if (priv->sockets[s].received_closed_event)               /* or remote has closed connection and we have now read all of HW buffer. */
+                {
+                  waitlldbg("Signaled %d (closed & empty)\n", priv->sockets[s].sd);
+                  priv->sockets[s].emptied_and_remotely_closed = true;
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
             }
@@ -775,11 +799,15 @@ static int cc3000_open(FAR struct file *filep)
   FAR struct inode *inode;
   struct mq_attr attr;
   pthread_attr_t tattr;
+  pthread_t threadid;
   struct sched_param param;
   char queuename[QUEUE_NAMELEN];
   FAR struct cc3000_dev_s *priv;
   uint8_t tmp;
   int ret;
+#ifdef CONFIG_CC3000_MT
+  int s;
+#endif
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -807,7 +835,7 @@ static int cc3000_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto out_with_sem;
     }
 
   /* When the reference increments to 1, this is the first open event
@@ -816,6 +844,22 @@ static int cc3000_open(FAR struct file *filep)
 
   if (tmp == 1)
     {
+      sem_init(&priv->waitsem, 0, 0);  /* Initialize event wait semaphore */
+      sem_init(&priv->irqsem, 0, 0);   /* Initialize IRQ Ready semaphore */
+      sem_init(&priv->readysem, 0, 0); /* Initialize Device Ready semaphore */
+
+#ifdef CONFIG_CC3000_MT
+      priv->accepting_socket.acc.sd = FREE_SLOT;
+      sem_init(&priv->accepting_socket.acc.semwait, 0, 0);
+      for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
+        {
+          priv->sockets[s].sd = FREE_SLOT;
+          priv->sockets[s].received_closed_event = false;
+          priv->sockets[s].emptied_and_remotely_closed = false;
+          sem_init(&priv->sockets[s].semwait, 0, 0);
+        }
+#endif
+
       /* Ensure the power is off  so we get the falling edge of IRQ*/
 
       priv->config->power_enable(priv->config, false);
@@ -839,9 +883,8 @@ static int cc3000_open(FAR struct file *filep)
       priv->queue = mq_open(queuename,O_WRONLY|O_CREAT, 0666, &attr);
       if (priv->queue < 0)
         {
-          priv->crefs--;
           ret = -errno;
-          goto errout_with_sem;
+          goto errout_sem_destroy;
         }
 
       pthread_attr_init(&tattr);
@@ -853,27 +896,22 @@ static int cc3000_open(FAR struct file *filep)
                            (pthread_addr_t)priv);
       if (ret != 0)
         {
-          mq_close(priv->queue);
-          priv->queue = 0;
-          ret = -errno;
-          goto errout_with_sem;
+          ret = -ret; /* pthread_create does not modify errno. */
+          goto errout_mq_close;
         }
 
       pthread_attr_init(&tattr);
       tattr.stacksize = CONFIG_CC3000_SELECT_STACKSIZE;
       param.sched_priority = CONFIG_CC3000_SELECT_THREAD_PRIORITY;
       pthread_attr_setschedparam(&tattr, &param);
+
+      sem_init(&priv->selectsem, 0, 0);
       ret = pthread_create(&priv->selecttid, &tattr, select_thread_func,
                            (pthread_addr_t)priv);
       if (ret != 0)
         {
-          pthread_t workertid = priv->workertid;
-          priv->workertid = -1;
-          pthread_cancel(workertid);
-          mq_close(priv->queue);
-          priv->queue = 0;
-          ret = -errno;
-          goto errout_with_sem;
+          ret = -ret; /* pthread_create does not modify errno. */
+          goto errout_worker_cancel;
         }
 
       /* Do late allocation with hopes of realloc not fragmenting */
@@ -882,9 +920,8 @@ static int cc3000_open(FAR struct file *filep)
       DEBUGASSERT(priv->rx_buffer.pbuffer);
       if (!priv->rx_buffer.pbuffer)
         {
-          priv->crefs--;
           ret = -errno;
-          goto errout_with_sem;
+          goto errout_select_cancel;
         }
 
       priv->state = eSPI_STATE_POWERUP;
@@ -903,8 +940,43 @@ static int cc3000_open(FAR struct file *filep)
   /* Save the new open count on success */
 
   priv->crefs = tmp;
+  ret = OK;
 
-errout_with_sem:
+  goto out_with_sem;
+
+errout_select_cancel:
+  threadid = priv->selecttid;
+  priv->selecttid = -1;
+  pthread_cancel(threadid);
+  pthread_join(threadid, NULL);
+  sem_destroy(&priv->selectsem);
+
+errout_worker_cancel:
+  threadid = priv->workertid;
+  priv->workertid = -1;
+  pthread_cancel(threadid);
+  pthread_join(threadid, NULL);
+
+errout_mq_close:
+  mq_close(priv->queue);
+  priv->queue = 0;
+
+errout_sem_destroy:
+#ifdef CONFIG_CC3000_MT
+  sem_destroy(&priv->accepting_socket.acc.semwait);
+
+  for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
+    {
+      priv->sockets[s].sd = FREE_SLOT;
+      sem_destroy(&priv->sockets[s].semwait);
+    }
+#endif
+
+  sem_destroy(&priv->waitsem);
+  sem_destroy(&priv->irqsem);
+  sem_destroy(&priv->readysem);
+
+out_with_sem:
   cc3000_devgive(priv);
   return ret;
 }
@@ -918,6 +990,9 @@ static int cc3000_close(FAR struct file *filep)
   FAR struct inode         *inode;
   FAR struct cc3000_dev_s *priv;
   int                       ret;
+#ifdef CONFIG_CC3000_MT
+  int s;
+#endif
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -954,6 +1029,7 @@ static int cc3000_close(FAR struct file *filep)
       priv->selecttid = -1;
       pthread_cancel(id);
       pthread_join(id, NULL);
+      sem_destroy(&priv->selectsem);
 
       priv->config->irq_enable(priv->config, false);
       priv->config->irq_clear(priv->config);
@@ -970,6 +1046,19 @@ static int cc3000_close(FAR struct file *filep)
       kmm_free(priv->rx_buffer.pbuffer);
       priv->rx_buffer.pbuffer = 0;
 
+#ifdef CONFIG_CC3000_MT
+      sem_destroy(&priv->accepting_socket.acc.semwait);
+
+      for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
+        {
+          priv->sockets[s].sd = FREE_SLOT;
+          sem_destroy(&priv->sockets[s].semwait);
+        }
+#endif
+
+      sem_destroy(&priv->waitsem);
+      sem_destroy(&priv->irqsem);
+      sem_destroy(&priv->readysem);
     }
 
   cc3000_devgive(priv);
@@ -1301,6 +1390,14 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           break;
         }
 
+      case CC3000IOC_REMOTECLOSEDSOCKET:
+        {
+          FAR int *pfd = (FAR int *)(arg);
+          DEBUGASSERT(pfd != NULL);
+          *pfd = cc3000_remote_closed_socket(priv, *pfd);
+          break;
+        }
+
       case CC3000IOC_SELECTDATA:
         {
           FAR int *pfd = (FAR int *)(arg);
@@ -1465,10 +1562,6 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   FAR struct cc3000_dev_s *priv;
   char drvname[DEV_NAMELEN];
   char semname[SEM_NAMELEN];
-#ifdef CONFIG_CC3000_MT
-  int s;
-#endif
-
 #ifdef CONFIG_CC3000_MULTIPLE
   irqstate_t flags;
 #endif
@@ -1504,22 +1597,12 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   priv->rx_buffer_max_len = config->max_rx_size;
 
   sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
-  sem_init(&priv->waitsem, 0, 0);    /* Initialize  event wait semaphore */
-  sem_init(&priv->irqsem, 0, 0);     /* Initialize  IRQ Ready semaphore */
-  sem_init(&priv->readysem, 0, 0);   /* Initialize  Device Ready semaphore */
 
   (void)snprintf(semname, SEM_NAMELEN, SEM_FORMAT, minor);
   priv->wrkwaitsem = sem_open(semname,O_CREAT,0,0); /* Initialize  Worker Wait semaphore */
 
 #ifdef CONFIG_CC3000_MT
   pthread_mutex_init(&g_cc3000_mut, NULL);
-  priv->accepting_socket.acc.sd = FREE_SLOT;
-  sem_init(&priv->accepting_socket.acc.semwait, 0, 0);
-  for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
-    {
-      priv->sockets[s].sd = FREE_SLOT;
-      sem_init(&priv->sockets[s].semwait, 0, 0);
-    }
 #endif
 
   /* Make sure that interrupts are disabled */
@@ -1565,20 +1648,11 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 
 errout_with_priv:
   sem_destroy(&priv->devsem);
-  sem_destroy(&priv->waitsem);
-  sem_destroy(&priv->irqsem);
-  sem_destroy(&priv->readysem);
   sem_close(priv->wrkwaitsem);
   sem_unlink(semname);
 
 #ifdef CONFIG_CC3000_MT
   pthread_mutex_destroy(&g_cc3000_mut);
-  sem_destroy(&priv->accepting_socket.acc.semwait);
-
-  for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
-    {
-      sem_destroy(&priv->sockets[s].semwait);
-    }
 #endif
 
 #ifdef CONFIG_CC3000_MULTIPLE
@@ -1605,7 +1679,7 @@ errout_with_priv:
 
 static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd)
 {
- int s;
+  int s;
 
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
@@ -1618,7 +1692,18 @@ static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd)
           sem_wait(&priv->selectsem);           /* Sleep select thread */
           cc3000_devtake(priv);
           sched_unlock();
-          return priv->sockets[s].sd == sockfd ? OK : -1;
+
+          if (!priv->sockets[s].sd == sockfd)
+            {
+              return -1;
+            }
+
+          if (priv->sockets[s].emptied_and_remotely_closed)
+            {
+              return -ECONNABORTED;
+            }
+
+          return OK;
         }
     }
 
@@ -1697,6 +1782,8 @@ static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd)
     {
       if (priv->sockets[s].sd == FREE_SLOT)
         {
+          priv->sockets[s].received_closed_event = false;
+          priv->sockets[s].emptied_and_remotely_closed = false;
           priv->sockets[s].sd = sd;
           break;
         }
@@ -1744,6 +1831,8 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
     {
       if (priv->sockets[s].sd == sd)
         {
+          priv->sockets[s].received_closed_event = false;
+          priv->sockets[s].emptied_and_remotely_closed = false;
           priv->sockets[s].sd = CLOSE_SLOT;
           ps = &priv->sockets[s].semwait;
           break;
@@ -1761,6 +1850,45 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
       cc3000_devtake(priv);
       sched_unlock();
     }
+
+  return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
+}
+
+/****************************************************************************
+ * Name: cc3000_remote_closed_socket
+ *
+ * Description:
+ *   Mark socket as closed by remote host
+ *
+ * Input Parameters:
+ *   sd      cc3000 socket handle
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a -1 value is
+ *   returned to indicate socket not found.
+ *
+ ****************************************************************************/
+
+static int cc3000_remote_closed_socket(FAR struct cc3000_dev_s *priv, int sd)
+{
+  irqstate_t flags;
+  int s;
+
+  if (sd < 0)
+    {
+      return sd;
+    }
+
+  flags = irqsave();
+  for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
+    {
+      if (priv->sockets[s].sd == sd)
+        {
+          priv->sockets[s].received_closed_event = true;
+        }
+    }
+
+  irqrestore(flags);
 
   return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
 }

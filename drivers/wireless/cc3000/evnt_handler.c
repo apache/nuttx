@@ -576,6 +576,11 @@ long hci_unsol_event_handler(char *event_hdr)
 
   STREAM_TO_UINT16(event_hdr, HCI_EVENT_OPCODE_OFFSET,event_type);
 
+  if (event_type == HCI_EVNT_PATCHES_REQ)
+    {
+      hci_unsol_handle_patch_request(event_hdr);
+    }
+
   if (event_type & HCI_EVNT_UNSOL_BASE)
     {
       switch(event_type)
@@ -677,6 +682,14 @@ long hci_unsol_event_handler(char *event_hdr)
 
         case HCI_EVNT_BSD_TCP_CLOSE_WAIT:
           {
+            int sockfd;
+
+            data = (char*)(event_hdr) + HCI_EVENT_HEADER_SIZE;
+            STREAM_TO_UINT32(data, NETAPP_PING_PACKETS_SENT_OFFSET, sockfd);
+            data += 4;
+
+            (void)cc3000_remote_closed_socket(sockfd);
+
             if (tSLInformation.sWlanCB)
               {
                 tSLInformation.sWlanCB(event_type, NULL, 0);

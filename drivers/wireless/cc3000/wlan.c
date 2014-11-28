@@ -142,8 +142,13 @@ static void SimpleLink_Init_Start(uint16_t usPatchesAvailableAtHost)
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (uint8_t *)(ptr + HEADERS_SIZE_CMD);
 
-  UINT8_TO_STREAM(args, ((usPatchesAvailableAtHost) ?
-                  SL_PATCHES_REQUEST_FORCE_HOST : SL_PATCHES_REQUEST_DEFAULT));
+  if (usPatchesAvailableAtHost <= SL_PATCHES_REQUEST_DEFAULT ||
+      usPatchesAvailableAtHost > SL_PATCHES_REQUEST_FORCE_NONE)
+    {
+      usPatchesAvailableAtHost = SL_PATCHES_REQUEST_DEFAULT;
+    }
+
+  UINT8_TO_STREAM(args, usPatchesAvailableAtHost);
 
   /* IRQ Line asserted - send HCI_CMND_SIMPLE_LINK_START to CC3000 */
 
@@ -196,6 +201,8 @@ void wlan_init(size_t max_tx_len,
                tDriverPatches sDriverPatches,
                tBootLoaderPatches sBootLoaderPatches)
 {
+  void *old = NULL;
+
   cc3000_lib_lock();
   tSLInformation.sFWPatches = sFWPatches;
   tSLInformation.sDriverPatches = sDriverPatches;
@@ -203,10 +210,14 @@ void wlan_init(size_t max_tx_len,
 
   /* Allocate the memory for the RX/TX data transactions */
 
+  if (tSLInformation.pucTxCommandBuffer != NULL)
+    {
+      old = tSLInformation.pucTxCommandBuffer;
+    }
+
   tSLInformation.pucTxCommandBuffer = malloc(max_tx_len);
   tSLInformation.usrBuffer.pbuffer = &tSLInformation.pucTxCommandBuffer[MAX_HCI_CMD_LENGTH];
   tSLInformation.usrBuffer.len = max_tx_len - MAX_HCI_CMD_LENGTH;
-
 
   /* Init I/O callback */
   /* Init asynchronous events callback */
@@ -217,6 +228,11 @@ void wlan_init(size_t max_tx_len,
 
   tSLInformation.InformHostOnTxComplete = 1;
   cc3000_lib_unlock();
+
+  if (old)
+    {
+      free(old);
+    }
 }
 
 /*****************************************************************************

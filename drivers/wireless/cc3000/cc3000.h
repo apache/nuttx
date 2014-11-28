@@ -91,7 +91,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_CC3000_MT
-/* lock to serialze access to driver (spi protocol is window size 1) */
+/* lock to serialize access to driver (SPI protocol is window size 1) */
 
 extern pthread_mutex_t g_cc3000_mut;
 
@@ -101,6 +101,8 @@ typedef struct cc3000_socket_ent
 {
   volatile int sd;
   long status;
+  bool received_closed_event:1;
+  bool emptied_and_remotely_closed:1;
   sem_t semwait;
 } cc3000_socket_ent;
 
@@ -156,6 +158,7 @@ struct cc3000_dev_s
   cc3000_socket_ent sockets[CONFIG_WL_MAX_SOCKETS];
   cc3000_accept_ent accepting_socket;
 #endif
+
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
    * retained in the f_priv field of the 'struct file'.

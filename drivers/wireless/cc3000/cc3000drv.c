@@ -91,7 +91,10 @@ static struct
   mqd_t  queue;
   sem_t *done;
   sem_t unsoliced_thread_wakesem;
-} spiconf;
+} spiconf =
+{
+  -1,
+};
 
 /*****************************************************************************
  * Public Functions
@@ -113,7 +116,7 @@ static struct
 
 void cc3000_resume(void)
 {
-  DEBUGASSERT(spiconf.cc3000fd && spiconf.done);
+  DEBUGASSERT(spiconf.cc3000fd >= 0 && spiconf.done);
   sem_post(spiconf.done);
   nllvdbg("Done\n");
 }
@@ -134,7 +137,7 @@ void cc3000_resume(void)
 
 long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
   return write(spiconf.cc3000fd,pUserBuffer,usLength) == usLength ? 0 : -errno;
 }
 
@@ -143,7 +146,7 @@ long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
  *
  * Description:
  *   This function enter point for read flow. This function will block the
- *   caller untinlthere is data Available
+ *   caller until there is data available
  *
  * Input Parameters:
  *   pUserBuffer
@@ -155,7 +158,7 @@ long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
 
 long cc3000_read(uint8_t *pUserBuffer, uint16_t usLength)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
   return read(spiconf.cc3000fd,pUserBuffer,usLength);
 }
 
@@ -174,7 +177,7 @@ long cc3000_read(uint8_t *pUserBuffer, uint16_t usLength)
 
 uint8_t *cc3000_wait(void)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
 
   mq_receive(spiconf.queue, &spiconf.rx_buffer, sizeof(spiconf.rx_buffer), 0);
   return spiconf.rx_buffer.pbuffer;
@@ -185,7 +188,7 @@ uint8_t *cc3000_wait(void)
  *
  * Description:
  *   This is the thread for unsolicited events. This function will block the
- *   caller untinlthere is data Available
+ *   caller until there is data available
  *
  * Input Parameters:
  *   parameter
@@ -234,7 +237,7 @@ static void *unsoliced_thread_func(void *parameter)
  * Name: cc3000_open
  *
  * Description:
- *    Open the cc3000 driver
+ *   Open the cc3000 driver
  *
  * Input Parameters:
  *   pfRxHandler the Rx handler for messages
@@ -249,10 +252,10 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
   int status;
   int fd;
 
-  DEBUGASSERT(spiconf.cc3000fd == 0);
+  DEBUGASSERT(spiconf.cc3000fd == -1);
 
   fd = open("/dev/wireless0",O_RDWR|O_BINARY);
-  if (fd > 0)
+  if (fd >= 0)
     {
       spiconf.pfRxHandler = pfRxHandler;
       spiconf.cc3000fd = fd;
@@ -279,7 +282,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
         }
    }
 
-  DEBUGASSERT(spiconf.cc3000fd);
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
 }
 
 /*****************************************************************************
@@ -298,7 +301,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
 
 void cc3000_close(void)
 {
-  if (spiconf.cc3000fd)
+  if (spiconf.cc3000fd >= 0)
     {
       int status;
       spiconf.run = false;
@@ -307,7 +310,9 @@ void cc3000_close(void)
       pthread_join(spiconf.unsoliced_thread, (pthread_addr_t*)&status);
 
       close(spiconf.cc3000fd);
-      spiconf.cc3000fd = 0;
+
+      memset(&spiconf, 0, sizeof(spiconf));
+      spiconf.cc3000fd = -1;
     }
 }
 
@@ -328,8 +333,9 @@ void cc3000_close(void)
 
 int cc3000_wait_data(int sockfd)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
   int rv = sockfd;
+
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
   ioctl(spiconf.cc3000fd, CC3000IOC_SELECTDATA, (unsigned long)&rv);
   return rv;
 }
@@ -349,12 +355,13 @@ int cc3000_wait_data(int sockfd)
  *   returned to indicate socket not found.
  *
  ****************************************************************************/
+
 int to_cc3000_accept_socket(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
 int cc3000_accept_socket(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
   //return to_cc3000_accept_socket(sockfd, addr,addrlen);
-  DEBUGASSERT(spiconf.cc3000fd);
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
 
   cc3000_acceptcfg cfg;
   cfg.sockfd = sockfd;
@@ -382,8 +389,9 @@ int cc3000_accept_socket(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
 int cc3000_add_socket(int sockfd)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
   int rv = sockfd;
+
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
   ioctl(spiconf.cc3000fd, CC3000IOC_ADDSOCKET, (unsigned long)&rv);
   return rv;
 }
@@ -406,8 +414,33 @@ int cc3000_add_socket(int sockfd)
 
 int cc3000_remove_socket(int sockfd)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
   int rv = sockfd;
+
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
   ioctl(spiconf.cc3000fd, CC3000IOC_REMOVESOCKET, (unsigned long)&rv);
+  return rv;
+}
+
+/****************************************************************************
+ * Name: cc3000_remote_closed_socket
+ *
+ * Description:
+ *   Mark socket as closed by remote host
+ *
+ * Input Parameters:
+ *   sd        cc3000 socket handle
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a -1 value is
+ *   returned to indicate socket not found.
+ *
+ ****************************************************************************/
+
+int cc3000_remote_closed_socket(int sockfd)
+{
+  int rv = sockfd;
+
+  DEBUGASSERT(spiconf.cc3000fd >= 0);
+  ioctl(spiconf.cc3000fd, CC3000IOC_REMOTECLOSEDSOCKET, (unsigned long)&rv);
   return rv;
 }

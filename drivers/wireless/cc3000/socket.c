@@ -101,7 +101,7 @@ static const int bsd2ti_types[] =
 /*****************************************************************************
  * Name: socket
  *
- * Decription:
+ * Description:
  *   create an endpoint for communication. The socket function creates a
  *   socket that is bound to a specific transport service provider.  This
  *   function is called by the application layer to obtain a socket handle.
@@ -131,20 +131,22 @@ int cc3000_socket(int domain, int type, int protocol)
       return -1;
     }
 
-  switch(domain)
+  switch (domain)
     {
     case AF_INET:
       domain = CC3000_AF_INET;
       break;
+
     case AF_INET6:
       domain = CC3000_AF_INET6;
       break;
+
     default:
       errno = EAFNOSUPPORT;
       return -1;
     }
 
-  switch(protocol)
+  switch (protocol)
     {
       case CC3000_IPPROTO_IP:
       case CC3000_IPPROTO_ICMP:
@@ -152,6 +154,7 @@ int cc3000_socket(int domain, int type, int protocol)
       case CC3000_IPPROTO_UDP:
       case CC3000_IPPROTO_IPV6:
       case CC3000_IPPROTO_NONE:
+      case CC3000_IPPROTO_TX_TEST_RAW:
       case CC3000_IPPROTO_RAW:
       case CC3000_IPPROTO_MAX:
         break;
@@ -174,7 +177,7 @@ int cc3000_socket(int domain, int type, int protocol)
 /*****************************************************************************
  * Name: closesocket
  *
- * Decription:
+ * Description:
  *   The socket function closes a created socket.
  *
  * Input Parameters:
@@ -204,7 +207,7 @@ int cc3000_closesocket(int sockfd)
 /*****************************************************************************
  * Name: accept, cc3000_do_accept
  *
- * Decription:
+ * Description:
  *   accept a connection on a socket:
  *   This function is used with connection-based socket types
  *   (SOCK_STREAM). It extracts the first connection request on the
@@ -259,7 +262,7 @@ int cc3000_do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 #ifdef CONFIG_CC3000_MT
 {
-  short non_blocking=CC3000_SOCK_ON;
+  short non_blocking = CC3000_SOCK_ON;
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
                  &non_blocking, sizeof(non_blocking)) < 0)
    {
@@ -273,7 +276,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 #else
 {
   cc3000_accept_socket(sockfd,0);
-  short nonBlocking=CC3000_SOCK_OFF;
+  short nonBlocking = CC3000_SOCK_OFF;
 
   if (setsockopt(sockfd, CC3000_SOL_SOCKET, CC3000_SOCKOPT_ACCEPT_NONBLOCK,
                  &nonBlocking, sizeof(nonBlocking)) < 0)
@@ -289,7 +292,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 /*****************************************************************************
  * Name: bind
  *
- * Decription:
+ * Description:
  *   assign a name to a socket
  *   This function gives the socket the local address addr.
  *   addr is addrlen bytes long. Traditionally, this is called when a
@@ -322,7 +325,7 @@ int cc3000_bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 /*****************************************************************************
  * Name: listen
  *
- * Decription:
+ * Description:
  *   listen for connections on a socket
  *   The willingness to accept incoming connections and a queue
  *   limit for incoming connections are specified with listen(),
@@ -356,7 +359,7 @@ int cc3000_listen(int sockfd, int backlog)
 /*****************************************************************************
  * Name: connect
  *
- * Decription:
+ * Description:
  *   initiate a connection on a socket
  *   Function connects the socket referred to by the socket descriptor
  *   sd, to the address specified by addr. The addrlen argument
@@ -396,7 +399,7 @@ int cc3000_connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrle
 /*****************************************************************************
  * Name: select
  *
- * Decription:
+ * Description:
  *   Monitor socket activity
  *   Select allow a program to monitor multiple file descriptors,
  *   waiting until one or more of the file descriptors become
@@ -439,8 +442,8 @@ int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
 
   cc3000_lib_lock();
   ret = cc3000_select_impl(nfds, (TICC3000fd_set *)readfds,
-                          (TICC3000fd_set *)writefds,
-                          (TICC3000fd_set *)exceptfds, timeout);
+                           (TICC3000fd_set *)writefds,
+                           (TICC3000fd_set *)exceptfds, timeout);
   cc3000_lib_unlock();
   return ret;
 }
@@ -449,7 +452,7 @@ int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
 /*****************************************************************************
  * Name: setsockopt
  *
- * Decription:
+ * Description:
  *   set socket options
  *   This function manipulate the options associated with a socket.
  *   Options may exist at multiple protocol levels; they are always
@@ -509,7 +512,7 @@ int cc3000_setsockopt(int sockfd, int level, int option,
 /*****************************************************************************
  * Name: getsockopt
  *
- * Decription:
+ * Description:
  *   set socket options
  *   This function manipulate the options associated with a socket.
  *   Options may exist at multiple protocol levels; they are always
@@ -568,7 +571,7 @@ int cc3000_getsockopt(int sockfd, int level, int option, FAR void *value,
 /*****************************************************************************
  * Name: recv
  *
- * Decription:
+ * Description:
  *     function receives a message from a connection-mode socket
  *
  * NOTE: On this version, only blocking mode is supported.
@@ -595,7 +598,13 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
   waitlldbg("wait\n");
   ret = cc3000_wait_data(sockfd);
   waitlldbg("wait %d\n", ret);
-  if (ret != OK )
+
+  if (ret == -ECONNABORTED)
+    {
+      return 0;
+    }
+
+  if (ret != OK)
     {
       return -1;
     }
@@ -612,7 +621,7 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
 /*****************************************************************************
  * Name: recvfrom
  *
- * Decription:
+ * Description:
  *    read data from socket
  *    function receives a message from a connection-mode or
  *    connectionless-mode socket. Note that raw sockets are not
@@ -645,7 +654,12 @@ ssize_t cc3000_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
 #ifdef CONFIG_CC3000_MT
   ret = cc3000_wait_data(sockfd);
-  if (ret != OK )
+  if (ret == -ECONNABORTED)
+    {
+      return 0;
+    }
+
+  if (ret != OK)
     {
       return -1;
     }
@@ -660,7 +674,7 @@ ssize_t cc3000_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 /*****************************************************************************
  * Name: send
  *
- * Decription:
+ * Description:
  *     Write data to TCP socket
  *     This function is used to transmit a message to another
  *     socket.
@@ -692,7 +706,7 @@ ssize_t cc3000_send(int sockfd, FAR const void *buf, size_t len, int flags)
 /*****************************************************************************
  * Name: sendto
  *
- * Decription:
+ * Description:
  *     Write data to TCP socket
  *     This function is used to transmit a message to another
  *     socket.
@@ -729,7 +743,7 @@ ssize_t cc3000_sendto(int sockfd, FAR const void *buf, size_t len, int flags,
 /*****************************************************************************
  * Name: gethostbyname
  *
- * Decription:
+ * Description:
  *   Get host IP by name. Obtain the IP Address of machine on network,
  *   by its name.
  *
@@ -765,7 +779,7 @@ int cc3000_gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out
 /*****************************************************************************
  * Name: mdnsAdvertiser
  *
- * Decription:
+ * Description:
  *     Set CC3000 in mDNS advertiser mode in order to advertise itself.
  *
  * Input Parameters:

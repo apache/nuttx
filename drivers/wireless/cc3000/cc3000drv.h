@@ -79,6 +79,7 @@ int cc3000_accept_socket(int sockfd, struct sockaddr *addr,
                          socklen_t *addrlen);
 int cc3000_add_socket(int sockfd);
 int cc3000_remove_socket(int sockfd);
+int cc3000_remote_closed_socket(int sockfd);
 
 #undef EXTERN
 #ifdef __cplusplus

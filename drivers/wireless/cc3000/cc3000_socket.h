@@ -77,6 +77,7 @@
 #define CC3000_IPPROTO_UDP             17                       /* User datagram protocol */
 #define CC3000_IPPROTO_IPV6            41                       /* IPv6 in IPv6 */
 #define CC3000_IPPROTO_NONE            59                       /* No next header */
+#define CC3000_IPPROTO_TX_TEST_RAW     150                      /* Raw 802.11 Tx Test packet */
 #define CC3000_IPPROTO_RAW             255                      /* Raw IP packet */
 #define CC3000_IPPROTO_MAX             256
 

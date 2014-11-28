@@ -73,6 +73,7 @@
 #define CC3000IOC_SELECTDATA   _WLIOC_USER(0x0004) /* arg: Address of int for result*/
 #define CC3000IOC_SELECTACCEPT _WLIOC_USER(0x0005) /* arg: Address of struct cc3000_acceptcfg_s */
 #define CC3000IOC_SETRX_SIZE   _WLIOC_USER(0x0006) /* arg: Address of int for new size */
+#define CC3000IOC_REMOTECLOSEDSOCKET _WLIOC_USER(0x0007) /* arg: Address of int for result*/
 
 /****************************************************************************
  * Public Types
