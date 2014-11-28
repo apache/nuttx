@@ -335,7 +335,7 @@ config DJOYSTICK
 if DJOYSTICK
 
 config DJOYSTICK_NPOLLWAITERS
-	int "Max Number of Poll Waiters
+	int "Max Number of Poll Waiters"
 	default 2
 	depends on !DISABLE_POLL
 
