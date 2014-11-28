@@ -584,6 +584,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode *inode;
   FAR struct djoy_upperhalf_s *priv;
   FAR struct djoy_open_s *opriv;
+  FAR const struct djoy_lowerhalf_s *lower;
   int ret;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
@@ -606,6 +607,29 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = -EINVAL;
   switch (cmd)
     {
+    /* Command:     DJOYIOC_SUPPORTED
+     * Description: Report the set of button events supported by the hardware;
+     * Argument:    A pointer to writeable integer value in which to return the
+     *              set of supported buttons.
+     * Return:      Zero (OK) on success.  Minus one will be returned on failure
+     *              with the errno value set appropriately.
+     */
+
+    case DJOYIOC_SUPPORTED:
+      {
+        FAR int *supported = (FAR int *)((uintptr_t)arg);
+
+        if (supported)
+          {
+            lower = priv->du_lower;
+            DEBUGASSERT(lower && lower->dl_supported);
+
+            *supported = (int)lower->dl_supported(lower);
+            ret = OK;
+          }
+      }
+      break;
+
 #ifndef CONFIG_DISABLE_POLL
     /* Command:     DJOYIOC_POLLEVENTS
      * Description: Specify the set of button events that can cause a poll()
