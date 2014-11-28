@@ -42,6 +42,21 @@
 
 #include <ctype.h>
 
+// Remove macros in favor of real functions
+#undef isalnum
+#undef isalpha
+#undef iscntrl
+#undef isdigit
+#undef isgraph
+#undef islower
+#undef isprint
+#undef ispunct
+#undef isspace
+#undef isupper
+#undef isxdigit
+#undef tolower
+#undef toupper
+
 //***************************************************************************
 // Namespace
 //***************************************************************************
