@@ -9081,3 +9081,25 @@
 	* arch/arm/src/efm32/Kconfig and efm32_serial.c: Add support for serial
 	  termios TCGET and TCSET.  For the moment, only set/get speed is
 	  implemented.  From Pierre-noel Bouteville (2014-11-27).
+	* drivers/wireless/ and include/nuttx/wireless/cc3000.h:  A set of 11
+	  patches correcting issues with the CC3000 networking.  All from Jussi
+	  Kivilinna (2014-11-28).  Among these:
+	  03/11: CC3000 driver was getting stuck at recv() when remote host
+	    closed connection and application tried to read data from remotely
+	    shutdown socket. This patch adds proper handling for remotely closed
+	    socket event.
+	  07/11: Socket state initialization was done in 'register', while it
+	    should be initialized in 'open' and deinitialized in 'close'. Old
+	    way caused problems when device is closed, power-cycled and then
+	    reopened as old socket state was left enabled.
+	  08/11: Select thread was getting stuck after 'close, power-cycle,
+	    reopen', since selectsem was not properly setup and cleaned up.
+	  09/11: 'maxFD' was not properly reset in select worker and not checked
+	    for before calling cc3000_select().
+	  10/11: After wlan_stop()/cc3000_close(), irqsem was left with count
+	    '-1'. Therefore on next wlan_start()/cc3000_open(), initial value
+	    for irqsem was wrong. Additional repeated wlan_start()/wlan_stop()
+	    decreased irqsem value further. Obviously this causes driver not to
+	    function correctly and freeze. Patch moves initialization and
+	    destruction of waitsem, irqsem and readysem to
+	    cc3000_open/cc3000_close.
