@@ -61,8 +61,16 @@
 
 static const uint16_t g_buttons[NUM_BUTTONS] =
 {
-  GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_KEY,   GPIO_JOY_SEL,
-  GPIO_JOY_DOWN,   GPIO_JOY_LEFT,   GPIO_JOY_RIGHT, GPIO_JOY_UP
+  GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_KEY,
+
+  /* The Joystick is treated like the other buttons unless CONFIG_DJOYSTICK
+   * is defined, then it is assumed that they should be used by the discrete
+   * joystick driver.
+   */
+
+#ifndef CONFIG_DJOYSTICK
+  GPIO_JOY_SEL, GPIO_JOY_DOWN, GPIO_JOY_LEFT, GPIO_JOY_RIGHT, GPIO_JOY_UP
+#endif
 };
 
 /****************************************************************************
@@ -166,6 +174,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
     {
       oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
     }
+
   return oldhandler;
 }
 #endif

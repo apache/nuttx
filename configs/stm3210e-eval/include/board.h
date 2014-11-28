@@ -167,41 +167,51 @@
 
 /* The STM3210E-EVAL supports several buttons
  *
- * Reset           -- Connected to NRST
- * Wakeup          -- Connected to PA.0
- * Tamper          -- Connected to PC.13
- * Key             -- Connected to PG.8
+ *  Reset           -- Connected to NRST
+ *   Wakeup          -- Connected to PA.0
+ *   Tamper          -- Connected to PC.13
+ *   Key             -- Connected to PG.8
  *
  * And a Joystick
  *
- * Joystick center -- Connected to PG.7
- * Joystick down   -- Connected to PD.3
- * Joystick left   -- Connected to PG.14
- * Joystick right  -- Connected to PG.13
- * Joystick up     -- Connected to PG.15
+ *   Joystick center -- Connected to PG.7
+ *   Joystick down   -- Connected to PD.3
+ *   Joystick left   -- Connected to PG.14
+ *   Joystick right  -- Connected to PG.13
+ *   Joystick up     -- Connected to PG.15
+ *
+ * The Joystick is treated like the other buttons unless CONFIG_DJOYSTICK
+ * is defined, then it is assumed that they should be used by the discrete
+ * joystick driver.
  */
 
-#define BUTTON_WAKEUP      0
-#define BUTTON_TAMPER      1
-#define BUTTON_KEY         2
+#define BUTTON_WAKEUP        0
+#define BUTTON_TAMPER        1
+#define BUTTON_KEY           2
 
-#define JOYSTICK_SEL       3
-#define JOYSTICK_DOWN      4
-#define JOYSTICK_LEFT      5
-#define JOYSTICK_RIGHT     6
-#define JOYSTICK_UP        7
+#ifdef CONFIG_DJOYSTICK
+#  define NUM_BUTTONS        3
+#else
+#  define JOYSTICK_SEL       3
+#  define JOYSTICK_DOWN      4
+#  define JOYSTICK_LEFT      5
+#  define JOYSTICK_RIGHT     6
+#  define JOYSTICK_UP        7
 
-#define NUM_BUTTONS        8
+#  define NUM_BUTTONS        8
+#endif
 
-#define BUTTON_WAKEUP_BIT  (1 << BUTTON_WAKEUP)
-#define BUTTON_TAMPER_BIT  (1 << BUTTON_TAMPER)
-#define BUTTON_KEY_BIT     (1 << BUTTON_KEY)
+#define BUTTON_WAKEUP_BIT    (1 << BUTTON_WAKEUP)
+#define BUTTON_TAMPER_BIT    (1 << BUTTON_TAMPER)
+#define BUTTON_KEY_BIT       (1 << BUTTON_KEY)
 
-#define JOYSTICK_SEL_BIT   (1 << JOYSTICK_SEL)
-#define JOYSTICK_DOWN_BIT  (1 << JOYSTICK_DOWN)
-#define JOYSTICK_LEFT_BIT  (1 << JOYSTICK_LEFT)
-#define JOYSTICK_RIGHT_BIT (1 << JOYSTICK_RIGHT)
-#define JOYSTICK_UP_BIT    (1 << JOYSTICK_UP)
+#ifdef CONFIG_DJOYSTICK
+#  define JOYSTICK_SEL_BIT   (1 << JOYSTICK_SEL)
+#  define JOYSTICK_DOWN_BIT  (1 << JOYSTICK_DOWN)
+#  define JOYSTICK_LEFT_BIT  (1 << JOYSTICK_LEFT)
+#  define JOYSTICK_RIGHT_BIT (1 << JOYSTICK_RIGHT)
+#  define JOYSTICK_UP_BIT    (1 << JOYSTICK_UP)
+#endif
 
 /************************************************************************************
  * Public Data
