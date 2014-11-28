@@ -9108,3 +9108,5 @@
 	  (2014-11-28).
 	* configs/stm3210e-eval/src/stm32_djoystick.c:  Add a DJoystick driver
 	  for the STM3210E-EVAL (2014-11-28).
+	* drivers/input/djoystick.c include/nuttx/input/djoystick.h: Add a new
+	  ioctl to get the supported joystick discrete signals (2014-11-28).
