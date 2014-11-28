@@ -55,6 +55,7 @@
 #endif
 
 #include "stm32.h"
+#include "stm3210e-eval.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -123,6 +124,8 @@ int nsh_archinitialize(void)
 #endif
 #ifdef NSH_HAVEMMCSD
   FAR struct sdio_dev_s *sdio;
+#endif
+#if defined(NSH_HAVEMMCSD) || defined(CONFIG_DJOYSTICK)
   int ret;
 #endif
 
@@ -187,6 +190,7 @@ int nsh_archinitialize(void)
       syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
+
   syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then let's guess and say that there is a card in the slot.  I need to check to
@@ -196,5 +200,19 @@ int nsh_archinitialize(void)
 
    sdio_mediachange(sdio, true);
 #endif
+
+#ifdef CONFIG_DJOYSTICK
+  /* Initialize and register the joystick driver */
+
+  ret = stm32_djoy_initialization();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n", ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "Successfully registered the joystick driver\n");
+#endif
+
   return OK;
 }
