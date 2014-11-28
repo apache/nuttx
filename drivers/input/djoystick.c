@@ -475,12 +475,9 @@ static int djoy_close(FAR struct file *filep)
 
   flags = irqsave();
   closing = opriv->do_closing;
-  if (!closing)
-    {
-      opriv->do_closing = true;
-    }
-
+  opriv->do_closing = true;
   irqrestore(flags);
+
   if (closing)
     {
       /* Another thread is doing the close */
@@ -529,8 +526,7 @@ static int djoy_close(FAR struct file *filep)
   /* Enable/disable interrupt handling */
 
   djoy_enable(priv);
-  djoy_givesem(&priv->du_exclsem);
-  return OK;
+  ret = OK;
 
 errout_with_exclsem:
   djoy_givesem(&priv->du_exclsem);
@@ -853,7 +849,7 @@ int djoy_register(FAR const char *devname,
 
   /* And register the djoystick driver */
 
-  ret = register_driver(devname, &djoy_fops, 0666, NULL);
+  ret = register_driver(devname, &djoy_fops, 0666, priv);
   if (ret < 0)
     {
       ivdbg("ERROR: register_driver failed: %d\n", ret);
