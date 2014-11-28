@@ -9106,3 +9106,5 @@
 	* include/cxx/cctype: Undefine macros defined ctype.h so that builtin
 	  C++ implementations will be used intead.  From Lorenz Meier
 	  (2014-11-28).
+	* configs/stm3210e-eval/src/stm32_djoystick.c:  Add a DJoystick driver
+	  for the STM3210E-EVAL (2014-11-28).
