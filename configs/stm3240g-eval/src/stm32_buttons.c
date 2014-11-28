@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3240g-eval/src/board_buttons.c
+ * configs/stm3240g-eval/src/stm32_buttons.c
  *
  *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

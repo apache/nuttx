@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm3240g_eval/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * configs/stm3240g_eval/src/stm32_autoleds.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

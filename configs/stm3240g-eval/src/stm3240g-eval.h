@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/stm3240g_eval/src/stm3240g_internal.h
+ * configs/stm3240g_eval/src/stm3240g_eval.h
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM3240G_EVAL_SRC_STM3240G_INTERNAL_H
-#define __CONFIGS_STM3240G_EVAL_SRC_STM3240G_INTERNAL_H
+#ifndef __CONFIGS_STM3240G_EVAL_SRC_STM3240G_EVAL_H
+#define __CONFIGS_STM3240G_EVAL_SRC_STM3240G_EVAL_H
 
 /****************************************************************************************************
  * Included Files
@@ -400,4 +400,4 @@ int nsh_archinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM3240G_EVAL_SRC_STM3240G_INTERNAL_H */
+#endif /* __CONFIGS_STM3240G_EVAL_SRC_STM3240G_EVAL_H */

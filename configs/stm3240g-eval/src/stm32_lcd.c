@@ -1,6 +1,5 @@
 /**************************************************************************************
- * configs/stm3240g-eval/src/up_lcd.c
- * arch/arm/src/board/up_lcd.c
+ * configs/stm3240g-eval/src/stm32_lcd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +60,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #if !defined(CONFIG_STM3240G_ILI9320_DISABLE) || !defined(CONFIG_STM3240G_ILI9325_DISABLE)
 

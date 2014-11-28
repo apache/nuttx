@@ -1,9 +1,9 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_pwm.c
- * arch/arm/src/board/up_pwm.c
+ * configs/stm3210e-eval/src/stm32_deselectlcd.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,29 +40,25 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pwm.h>
-#include <arch/board/board.h>
-
-#include "chip.h"
 #include "up_arch.h"
-#include "stm32_pwm.h"
-#include "stm3240g-internal.h"
+#include "stm32_fsmc.h"
+#include "stm3240g-eval.h"
+
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* PWM
- *
- * The STM3240G-Eval has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using variously unused pins on the board for
- * PWM output (see board.h for details of pins).
- */
 
-#ifdef CONFIG_PWM
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -73,48 +69,29 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pwm_devinit
+ * Name: stm32_deselectlcd
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Disable the LCD
  *
  ************************************************************************************/
 
-int pwm_devinit(void)
+void stm32_deselectlcd(void)
 {
-  static bool initialized = false;
-  struct pwm_lowerhalf_s *pwm;
-  int ret;
+  /* Restore registers to their power up settings */
 
-  /* Have we already initialized? */
+  putreg32(0xffffffff, STM32_FSMC_BCR4);
 
-  if (!initialized)
-    {
-      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
+  /* Bank1 NOR/SRAM timing register configuration */
 
-      pwm = stm32_pwminitialize(STM3240G_EVAL_PWMTIMER);
-      if (!pwm)
-        {
-          dbg("Failed to get the STM32 PWM lower half\n");
-          return -ENODEV;
-        }
+  putreg32(0x0fffffff, STM32_FSMC_BTR4);
 
-      /* Register the PWM driver at "/dev/pwm0" */
+  /* Disable AHB clocking to the FSMC */
 
-      ret = pwm_register("/dev/pwm0", pwm);
-      if (ret < 0)
-        {
-          adbg("pwm_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
-    }
-
-  return OK;
+  stm32_disablefsmc();
 }
 
-#endif /* CONFIG_PWM */
+#endif /* CONFIG_STM32_FSMC */
+
+
+

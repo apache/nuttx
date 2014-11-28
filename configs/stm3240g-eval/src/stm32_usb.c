@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/stm3240g-eval/src/stm32_usbdev.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +53,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #ifdef CONFIG_STM32_OTGFS
 

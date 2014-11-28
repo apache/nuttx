@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/stm3240g-eval/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 
 #include "stm32_pwm.h"
-#include "stm3240g-internal.h"
+#include "stm3240g-eval.h"
 
 #ifdef CONFIG_ADC
 
