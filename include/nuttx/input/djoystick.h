@@ -72,22 +72,38 @@
  * reported in the djoy_buttonset_t bitset.
  */
 
-#define DJOY_UP             (1 << 0) /* Bit 0: True = Joystick UP */
-#define DJOY_DOWN           (1 << 1) /* Bit 1: True = Joystick DOWN */
-#define DJOY_LEFT           (1 << 2) /* Bit 2: True = Joystick LEFT */
-#define DJOY_RIGHT          (1 << 3) /* Bit 3: True = Joystick RIGHT */
-#define DJOY_BUTTON_1       (1 << 4) /* Bit 4: True = Button 1 pressed */
-#define DJOY_BUTTON_2       (1 << 5) /* Bit 5: True = Button 2 pressed */
-#define DJOY_BUTTON_3       (1 << 6) /* Bit 6: True = Button 3 pressed */
-#define DJOY_BUTTON_3       (1 << 7) /* Bit 7: True = Button 4 pressed */
-#define DJOY_BUTTONS_ALL    0xff     /* The set of all buttons */
+#define DJOY_UP              (0)                  /* Bit 0: Joystick UP */
+#define DJOY_DOWN            (1)                  /* Bit 1: Joystick DOWN */
+#define DJOY_LEFT            (2)                  /* Bit 2: Joystick LEFT */
+#define DJOY_RIGHT           (3)                  /* Bit 3: Joystick RIGHT */
+#define DJOY_BUTTON_1        (4)                  /* Bit 4: Button 1 */
+#define DJOY_BUTTON_2        (5)                  /* Bit 5: Button 2 */
+#define DJOY_BUTTON_3        (6)                  /* Bit 6: Button 3 */
+#define DJOY_BUTTON_4        (7)                  /* Bit 7: Button 4 */
+
+#define DJOY_UP_BIT          (1 << DJOY_UP)       /* 1:Joystick UP selected */
+#define DJOY_DOWN_BIT        (1 << DJOY_DOWN)     /* 1:Joystick DOWN selected */
+#define DJOY_LEFT_BIT        (1 << DJOY_LEFT)     /* 1:Joystick LEFT selected */
+#define DJOY_RIGHT_BIT       (1 << DJOY_RIGHT)    /* 1:Joystick RIGHT selected */
+#define DJOY_BUTTONS_JOYBITS 0x0f                 /* Set of all joystick directions */
+#define DJOY_BUTTON_1_BIT    (1 << DJOY_BUTTON_1) /* 1:Button 1 pressed */
+#define DJOY_BUTTON_2_BIT    (1 << DJOY_BUTTON_2) /* 1:Button 2 pressed */
+#define DJOY_BUTTON_3_BIT    (1 << DJOY_BUTTON_3) /* 1:Button 3 pressed */
+#define DJOY_BUTTON_4_BIT    (1 << DJOY_BUTTON_4) /* 1:Button 4 pressed */
+#define DJOY_BUTTONS_ALLBITS 0xf0                 /* Set of all buttons */
+#define DJOY_ALLBITS         0xff                 /* Set of all bits */
 
 /* Typical usage */
 
-#define DJOY_BUTTON_SELECT   DJOY_BUTTON_1
-#define DJOY_BUTTON_FIRE     DJOY_BUTTON_2
-#define DJOY_BUTTON_JUMP     DJOY_BUTTON_3
-#define DJOY_BUTTON_RUN      DJOY_BUTTON_4
+#define DJOY_BUTTON_SELECT     DJOY_BUTTON_1
+#define DJOY_BUTTON_FIRE       DJOY_BUTTON_2
+#define DJOY_BUTTON_JUMP       DJOY_BUTTON_3
+#define DJOY_BUTTON_RUN        DJOY_BUTTON_4
+
+#define DJOY_BUTTON_SELECT_BIT DJOY_BUTTON_1_BIT
+#define DJOY_BUTTON_FIRE_BIT   DJOY_BUTTON_2_BIT
+#define DJOY_BUTTON_JUMP_BIT   DJOY_BUTTON_3_BIT
+#define DJOY_BUTTON_RUN_BIT    DJOY_BUTTON_4_BIT
 
 /* IOCTL commands
  *
@@ -161,6 +177,7 @@ struct djoy_notify_s
  * the struct djoy_lowerhalf_s enable() method.
  */
 
+struct djoy_lowerhalf_s;
 typedef CODE void (*djoy_interrupt_t)
   (FAR const struct djoy_lowerhalf_s *lower, FAR void *arg);
 
