@@ -9103,3 +9103,6 @@
 	    function correctly and freeze. Patch moves initialization and
 	    destruction of waitsem, irqsem and readysem to
 	    cc3000_open/cc3000_close.
+	* include/cxx/cctgype: Undefine macros defined ctype.h so that builtin
+	  C++ implementations will be used intead.  From Lorenz Meier
+	  (2014-11-28).
