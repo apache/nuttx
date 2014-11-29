@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/djoystick.c
+ * drivers/ajoystick.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/input/djoystick.h>
+#include <nuttx/input/ajoystick.h>
 
 #include <arch/irq.h>
 
@@ -58,52 +58,52 @@
 
 /* This structure provides the state of one discrete joystick driver */
 
-struct djoy_upperhalf_s
+struct ajoy_upperhalf_s
 {
   /* Saved binding to the lower half discrete joystick driver */
 
-  FAR const struct djoy_lowerhalf_s *du_lower;
+  FAR const struct ajoy_lowerhalf_s *au_lower;
 
-  djoy_buttonset_t du_enabled; /* Set of currently enabled button interrupts */
-  djoy_buttonset_t du_sample;  /* Last sampled button states */
-  sem_t du_exclsem;            /* Supports exclusive access to the device */
+  ajoy_buttonset_t au_enabled; /* Set of currently enabled button interrupts */
+  ajoy_buttonset_t au_sample;  /* Last sampled button states */
+  sem_t au_exclsem;            /* Supports exclusive access to the device */
 
   /* The following is a singly linked list of open references to the
    * joystick device.
    */
 
-  FAR struct djoy_open_s *du_open;
+  FAR struct ajoy_open_s *au_open;
 };
 
 /* This structure describes the state of one open joystick driver instance */
 
-struct djoy_open_s
+struct ajoy_open_s
 {
   /* Supports a singly linked list */
 
-  FAR struct djoy_open_s *do_flink;
+  FAR struct ajoy_open_s *ao_flink;
 
   /* The following will be true if we are closing */
 
-  volatile bool do_closing;
+  volatile bool ao_closing;
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Joystick event notification information */
 
-  pid_t do_pid;
-  struct djoy_notify_s do_notify;
+  pid_t ao_pid;
+  struct ajoy_notify_s ao_notify;
 #endif
 
 #ifndef CONFIG_DISABLE_POLL
   /* Poll event information */
 
-  struct djoy_pollevents_s do_pollevents;
+  struct ajoy_pollevents_s ao_pollevents;
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
    */
 
-  FAR struct pollfd *do_fds[CONFIG_DJOYSTICK_NPOLLWAITERS];
+  FAR struct pollfd *ao_fds[CONFIG_AJOYSTICK_NPOLLWAITERS];
 #endif
 };
 
@@ -113,30 +113,30 @@ struct djoy_open_s
 
 /* Semaphore helpers */
 
-static inline int djoy_takesem(sem_t *sem);
-#define djoy_givesem(s) sem_post(s);
+static inline int ajoy_takesem(sem_t *sem);
+#define ajoy_givesem(s) sem_post(s);
 
 /* Sampling and Interrupt handling */
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
-static void    djoy_enable(FAR struct djoy_upperhalf_s *priv);
-static void    djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
+static void    ajoy_enable(FAR struct ajoy_upperhalf_s *priv);
+static void    ajoy_interrupt(FAR const struct ajoy_lowerhalf_s *lower,
                               FAR void *arg);
 #endif
 
 /* Sampling */
 
-static void    djoy_sample(FAR struct djoy_upperhalf_s *priv);
+static void    ajoy_sample(FAR struct ajoy_upperhalf_s *priv);
 
 /* Character driver methods */
 
-static int     djoy_open(FAR struct file *filep);
-static int     djoy_close(FAR struct file *filep);
-static ssize_t djoy_read(FAR struct file *, FAR char *, size_t);
-static int     djoy_ioctl(FAR struct file *filep, int cmd,
+static int     ajoy_open(FAR struct file *filep);
+static int     ajoy_close(FAR struct file *filep);
+static ssize_t ajoy_read(FAR struct file *, FAR char *, size_t);
+static int     ajoy_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int     djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
 #endif
 
@@ -144,16 +144,16 @@ static int     djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations djoy_fops =
+static const struct file_operations ajoy_fops =
 {
-  djoy_open,  /* open */
-  djoy_close, /* close */
-  djoy_read,  /* read */
+  ajoy_open,  /* open */
+  ajoy_close, /* close */
+  ajoy_read,  /* read */
   0,          /* write */
   0,          /* seek */
-  djoy_ioctl  /* ioctl */
+  ajoy_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , djoy_poll /* poll */
+  , ajoy_poll /* poll */
 #endif
 };
 
@@ -162,10 +162,10 @@ static const struct file_operations djoy_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: djoy_takesem
+ * Name: ajoy_takesem
  ****************************************************************************/
 
-static inline int djoy_takesem(sem_t *sem)
+static inline int ajoy_takesem(sem_t *sem)
 {
   /* Take a count from the semaphore, possibly waiting */
 
@@ -182,23 +182,23 @@ static inline int djoy_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: djoy_enable
+ * Name: ajoy_enable
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
-static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
+static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
 {
-  FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
-  FAR struct djoy_open_s *opriv;
-  djoy_buttonset_t press;
-  djoy_buttonset_t release;
+  FAR const struct ajoy_lowerhalf_s *lower = priv->au_lower;
+  FAR struct ajoy_open_s *opriv;
+  ajoy_buttonset_t press;
+  ajoy_buttonset_t release;
   irqstate_t flags;
 #ifndef CONFIG_DISABLE_POLL
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->du_lower);
-  lower = priv->du_lower;
+  DEBUGASSERT(priv && priv->au_lower);
+  lower = priv->au_lower;
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -211,19 +211,19 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
   press   = 0;
   release = 0;
 
-  for (opriv = priv->du_open; opriv; opriv = opriv->do_flink)
+  for (opriv = priv->au_open; opriv; opriv = opriv->ao_flink)
     {
 #ifndef CONFIG_DISABLE_POLL
       /* Are there any poll waiters? */
 
-      for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_AJOYSTICK_NPOLLWAITERS; i++)
         {
-          if (opriv->do_fds[i])
+          if (opriv->ao_fds[i])
             {
               /* Yes.. OR in the poll event buttons */
 
-              press   |= opriv->do_pollevents.dp_press;
-              release |= opriv->do_pollevents.dp_release;
+              press   |= opriv->ao_pollevents.ap_press;
+              release |= opriv->ao_pollevents.ap_release;
               break;
             }
         }
@@ -232,26 +232,26 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 #ifndef CONFIG_DISABLE_SIGNALS
       /* OR in the signal events */
 
-      press   |= opriv->do_notify.dn_press;
-      release |= opriv->do_notify.dn_release;
+      press   |= opriv->ao_notify.an_press;
+      release |= opriv->ao_notify.an_release;
 #endif
     }
 
   /* Enable/disable button interrupts */
 
-  DEBUGASSERT(lower->dl_enable);
+  DEBUGASSERT(lower->al_enable);
   if (press != 0 || release != 0)
     {
       /* Enable interrupts with the new button set */
 
-      lower->dl_enable(lower, press, release,
-                       (djoy_interrupt_t)djoy_interrupt, priv);
+      lower->al_enable(lower, press, release,
+                       (ajoy_handler_t)ajoy_interrupt, priv);
     }
   else
     {
       /* Disable further interrupts */
 
-      lower->dl_enable(lower, 0, 0, NULL, NULL);
+      lower->al_enable(lower, 0, 0, NULL, NULL);
     }
 
   irqrestore(flags);
@@ -259,44 +259,44 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 #endif
 
 /****************************************************************************
- * Name: djoy_interrupt
+ * Name: ajoy_interrupt
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
-static void djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
+static void ajoy_interrupt(FAR const struct ajoy_lowerhalf_s *lower,
                            FAR void *arg)
 {
-  FAR struct djoy_upperhalf_s *priv = (FAR struct djoy_upperhalf_s *)arg;
+  FAR struct ajoy_upperhalf_s *priv = (FAR struct ajoy_upperhalf_s *)arg;
 
   DEBUGASSERT(priv);
 
   /* Process the next sample */
 
-  djoy_sample(priv);
+  ajoy_sample(priv);
 }
 #endif
 
 /****************************************************************************
- * Name: djoy_sample
+ * Name: ajoy_sample
  ****************************************************************************/
 
-static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
+static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 {
-  FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
-  FAR struct djoy_open_s *opriv;
-  djoy_buttonset_t sample;
+  FAR const struct ajoy_lowerhalf_s *lower = priv->au_lower;
+  FAR struct ajoy_open_s *opriv;
+  ajoy_buttonset_t sample;
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
-  djoy_buttonset_t change;
-  djoy_buttonset_t press;
-  djoy_buttonset_t release;
+  ajoy_buttonset_t change;
+  ajoy_buttonset_t press;
+  ajoy_buttonset_t release;
 #endif
   irqstate_t flags;
 #ifndef CONFIG_DISABLE_POLL
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->du_lower);
-  lower = priv->du_lower;
+  DEBUGASSERT(priv && priv->au_lower);
+  lower = priv->au_lower;
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -306,41 +306,41 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
   /* Sample the new button state */
 
-  DEBUGASSERT(lower->dl_sample);
-  sample = lower->dl_sample(lower);
+  DEBUGASSERT(lower->al_buttons);
+  sample = lower->al_buttons(lower);
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
   /* Determine which buttons have been newly pressed and which have been
    * newly released.
    */
 
-  change  = sample ^ priv->du_sample;
+  change  = sample ^ priv->au_sample;
   press   = change & sample;
 
-  DEBUGASSERT(lower->dl_supported);
-  release = change & (lower->dl_supported(lower) & ~sample);
+  DEBUGASSERT(lower->al_supported);
+  release = change & (lower->al_supported(lower) & ~sample);
 
   /* Visit each opened reference to the device */
 
-  for (opriv = priv->du_open; opriv; opriv = opriv->do_flink)
+  for (opriv = priv->au_open; opriv; opriv = opriv->ao_flink)
     {
 #ifndef CONFIG_DISABLE_POLL
       /* Have any poll events occurred? */
 
-      if ((press & opriv->do_pollevents.dp_press)     != 0 ||
-          (release & opriv->do_pollevents.dp_release) != 0)
+      if ((press & opriv->ao_pollevents.ap_press)     != 0 ||
+          (release & opriv->ao_pollevents.ap_release) != 0)
         {
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
+          for (i = 0; i < CONFIG_AJOYSTICK_NPOLLWAITERS; i++)
             {
-              FAR struct pollfd *fds = opriv->do_fds[i];
+              FAR struct pollfd *fds = opriv->ao_fds[i];
               if (fds)
                 {
                   fds->revents |= (fds->events & POLLIN);
                   if (fds->revents != 0)
                     {
-                      illvdbg("Report events: %02x\n", fds->revents);
+                      ivdbg("Report events: %02x\n", fds->revents);
                       sem_post(fds->sem);
                     }
                 }
@@ -351,17 +351,17 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 #ifndef CONFIG_DISABLE_SIGNALS
       /* Have any signal events occurred? */
 
-      if ((press & opriv->do_notify.dn_press)     != 0 ||
-          (release & opriv->do_notify.dn_release) != 0)
+      if ((press & opriv->ao_notify.an_press)     != 0 ||
+          (release & opriv->ao_notify.an_release) != 0)
         {
           /* Yes.. Signal the waiter */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)sample;
-          (void)sigqueue(opriv->do_pid, opriv->do_notify.dn_signo, value);
+          (void)sigqueue(opriv->ao_pid, opriv->ao_notify.an_signo, value);
 #else
-          (void)sigqueue(opriv->do_pid, opriv->do_notify.dn.signo,
+          (void)sigqueue(opriv->ao_pid, opriv->ao_notify.dn.signo,
                          (FAR void *)sample);
 #endif
         }
@@ -370,45 +370,45 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
   /* Enable/disable interrupt handling */
 
-  djoy_enable(priv);
+  ajoy_enable(priv);
 #endif
 
-  priv->du_sample = sample;
+  priv->au_sample = sample;
   irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: djoy_open
+ * Name: ajoy_open
  ****************************************************************************/
 
-static int djoy_open(FAR struct file *filep)
+static int ajoy_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct djoy_upperhalf_s *priv;
-  FAR const struct djoy_lowerhalf_s *lower;
-  FAR struct djoy_open_s *opriv;
+  FAR struct ajoy_upperhalf_s *priv;
+  FAR const struct ajoy_lowerhalf_s *lower;
+  FAR struct ajoy_open_s *opriv;
 #ifndef CONFIG_DISABLE_POLL
-  djoy_buttonset_t supported;
+  ajoy_buttonset_t supported;
 #endif
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct djoy_upperhalf_s *)inode->i_private;
+  priv = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
-  ret = djoy_takesem(&priv->du_exclsem);
+  ret = ajoy_takesem(&priv->au_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ivdbg("ERROR: ajoy_takesem failed: %d\n", ret);
       return ret;
     }
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct djoy_open_s *)kmm_zalloc(sizeof(struct djoy_open_s));
+  opriv = (FAR struct ajoy_open_s *)kmm_zalloc(sizeof(struct ajoy_open_s));
   if (!opriv)
     {
       ivdbg("ERROR: Failled to allocate open structure\n");
@@ -419,18 +419,18 @@ static int djoy_open(FAR struct file *filep)
   /* Initialize the open structure */
 
 #ifndef CONFIG_DISABLE_POLL
-  lower = priv->du_lower;
-  DEBUGASSERT(lower && lower->dl_supported);
-  supported = lower->dl_supported(lower);
+  lower = priv->au_lower;
+  DEBUGASSERT(lower && lower->al_supported);
+  supported = lower->al_supported(lower);
 
-  opriv->do_pollevents.dp_press   = supported;
-  opriv->do_pollevents.dp_release = supported;
+  opriv->ao_pollevents.ap_press   = supported;
+  opriv->ao_pollevents.ap_release = supported;
 #endif
 
   /* Attach the open structure to the device */
 
-  opriv->do_flink = priv->du_open;
-  priv->du_open = opriv;
+  opriv->ao_flink = priv->au_open;
+  priv->au_open = opriv;
 
   /* Attach the open structure to the file structure */
 
@@ -438,21 +438,21 @@ static int djoy_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  djoy_givesem(&priv->du_exclsem);
+  ajoy_givesem(&priv->au_exclsem);
   return ret;
 }
 
 /****************************************************************************
- * Name: djoy_close
+ * Name: ajoy_close
  ****************************************************************************/
 
-static int djoy_close(FAR struct file *filep)
+static int ajoy_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct djoy_upperhalf_s *priv;
-  FAR struct djoy_open_s *opriv;
-  FAR struct djoy_open_s *curr;
-  FAR struct djoy_open_s *prev;
+  FAR struct ajoy_upperhalf_s *priv;
+  FAR struct ajoy_open_s *opriv;
+  FAR struct ajoy_open_s *curr;
+  FAR struct ajoy_open_s *prev;
   irqstate_t flags;
   bool closing;
   int ret;
@@ -461,7 +461,7 @@ static int djoy_close(FAR struct file *filep)
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct djoy_upperhalf_s *)inode->i_private;
+  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
   /* Handle an improbable race conditions with the following atomic test
    * and set.
@@ -474,8 +474,8 @@ static int djoy_close(FAR struct file *filep)
    */
 
   flags = irqsave();
-  closing = opriv->do_closing;
-  opriv->do_closing = true;
+  closing = opriv->ao_closing;
+  opriv->ao_closing = true;
   irqrestore(flags);
 
   if (closing)
@@ -487,18 +487,18 @@ static int djoy_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver structure */
 
-  ret = djoy_takesem(&priv->du_exclsem);
+  ret = ajoy_takesem(&priv->au_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ivdbg("ERROR: ajoy_takesem failed: %d\n", ret);
       return ret;
     }
 
   /* Find the open structure in the list of open structures for the device */
 
-  for (prev = NULL, curr = priv->du_open;
+  for (prev = NULL, curr = priv->au_open;
        curr && curr != opriv;
-       prev = curr, curr = curr->do_flink);
+       prev = curr, curr = curr->ao_flink);
 
   DEBUGASSERT(curr);
   if (!curr)
@@ -512,11 +512,11 @@ static int djoy_close(FAR struct file *filep)
 
   if (prev)
     {
-      prev->do_flink = opriv->do_flink;
+      prev->ao_flink = opriv->ao_flink;
     }
   else
     {
-      priv->du_open = opriv->do_flink;
+      priv->au_open = opriv->ao_flink;
     }
 
   /* And free the open structure */
@@ -525,36 +525,38 @@ static int djoy_close(FAR struct file *filep)
 
   /* Enable/disable interrupt handling */
 
-  djoy_enable(priv);
+  ajoy_enable(priv);
   ret = OK;
 
 errout_with_exclsem:
-  djoy_givesem(&priv->du_exclsem);
+  ajoy_givesem(&priv->au_exclsem);
   return ret;
 }
 
 /****************************************************************************
- * Name: djoy_read
+ * Name: ajoy_read
  ****************************************************************************/
 
-static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
                          size_t len)
 {
   FAR struct inode *inode;
-  FAR struct djoy_upperhalf_s *priv;
-  FAR const struct djoy_lowerhalf_s *lower;
+  FAR struct ajoy_upperhalf_s *priv;
+  FAR const struct ajoy_lowerhalf_s *lower;
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct djoy_upperhalf_s *)inode->i_private;
+  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
   /* Make sure that the buffer is sufficiently large to hold at least one
    * complete sample.
+   *
+   * REVISIT:  Should also check buffer alignment.
    */
 
-  if (len < sizeof(djoy_buttonset_t))
+  if (len < sizeof(struct ajoy_sample_s))
     {
       ivdbg("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
@@ -562,49 +564,51 @@ static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the driver structure */
 
-  ret = djoy_takesem(&priv->du_exclsem);
+  ret = ajoy_takesem(&priv->au_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ivdbg("ERROR: ajoy_takesem failed: %d\n", ret);
       return ret;
     }
 
   /* Read and return the current state of the joystick buttons */
 
-  lower = priv->du_lower;
-  DEBUGASSERT(lower && lower->dl_sample);
-  priv->du_sample = lower->dl_sample(lower);
-  *(djoy_buttonset_t*)buffer = priv->du_sample;
-  ret = sizeof(djoy_buttonset_t);
+  lower = priv->au_lower;
+  DEBUGASSERT(lower && lower->al_sample);
+  ret = lower->al_sample(lower, (FAR struct ajoy_sample_s *)buffer);
+  if (ret >= 0)
+    {
+      ret = sizeof(struct ajoy_sample_s);
+    }
 
-  djoy_givesem(&priv->du_exclsem);
+  ajoy_givesem(&priv->au_exclsem);
   return (ssize_t)ret;
 }
 
 /****************************************************************************
- * Name: djoy_ioctl
+ * Name: ajoy_ioctl
  ****************************************************************************/
 
-static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
-  FAR struct djoy_upperhalf_s *priv;
-  FAR struct djoy_open_s *opriv;
-  FAR const struct djoy_lowerhalf_s *lower;
+  FAR struct ajoy_upperhalf_s *priv;
+  FAR struct ajoy_open_s *opriv;
+  FAR const struct ajoy_lowerhalf_s *lower;
   int ret;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct djoy_upperhalf_s *)inode->i_private;
+  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
-  ret = djoy_takesem(&priv->du_exclsem);
+  ret = ajoy_takesem(&priv->au_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ivdbg("ERROR: ajoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -613,7 +617,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = -EINVAL;
   switch (cmd)
     {
-    /* Command:     DJOYIOC_SUPPORTED
+    /* Command:     AJOYIOC_SUPPORTED
      * Description: Report the set of button events supported by the hardware;
      * Argument:    A pointer to writeable integer value in which to return the
      *              set of supported buttons.
@@ -621,47 +625,47 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      *              with the errno value set appropriately.
      */
 
-    case DJOYIOC_SUPPORTED:
+    case AJOYIOC_SUPPORTED:
       {
         FAR int *supported = (FAR int *)((uintptr_t)arg);
 
         if (supported)
           {
-            lower = priv->du_lower;
-            DEBUGASSERT(lower && lower->dl_supported);
+            lower = priv->au_lower;
+            DEBUGASSERT(lower && lower->al_supported);
 
-            *supported = (int)lower->dl_supported(lower);
+            *supported = (int)lower->al_supported(lower);
             ret = OK;
           }
       }
       break;
 
 #ifndef CONFIG_DISABLE_POLL
-    /* Command:     DJOYIOC_POLLEVENTS
+    /* Command:     AJOYIOC_POLLEVENTS
      * Description: Specify the set of button events that can cause a poll()
      *              to awaken.  The default is all button depressions and
      *              all button releases (all supported buttons);
      * Argument:    A read-only pointer to an instance of struct
-     *              djoy_pollevents_s
+     *              ajoy_pollevents_s
      * Return:      Zero (OK) on success.  Minus one will be returned on
      *              failure with the errno value set appropriately.
      */
 
-    case DJOYIOC_POLLEVENTS:
+    case AJOYIOC_POLLEVENTS:
       {
-        FAR struct djoy_pollevents_s *pollevents =
-          (FAR struct djoy_pollevents_s *)((uintptr_t)arg);
+        FAR struct ajoy_pollevents_s *pollevents =
+          (FAR struct ajoy_pollevents_s *)((uintptr_t)arg);
 
         if (pollevents)
           {
             /* Save the poll events */
 
-            opriv->do_pollevents.dp_press   = pollevents->dp_press;
-            opriv->do_pollevents.dp_release = pollevents->dp_release;
+            opriv->ao_pollevents.ap_press   = pollevents->ap_press;
+            opriv->ao_pollevents.ap_release = pollevents->ap_release;
 
             /* Enable/disable interrupt handling */
 
-            djoy_enable(priv);
+            ajoy_enable(priv);
             ret = OK;
           }
       }
@@ -669,34 +673,34 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
-    /* Command:     DJOYIOC_REGISTER
+    /* Command:     AJOYIOC_REGISTER
      * Description: Register to receive a signal whenever there is a change
      *              in any of the joystick discrete inputs.  This feature,
      *              of course, depends upon interrupt GPIO support from the
      *              platform.
      * Argument:    A read-only pointer to an instance of struct
-     *              djoy_notify_s
+     *              ajoy_notify_s
      * Return:      Zero (OK) on success.  Minus one will be returned on
      *              failure with the errno value set appropriately.
      */
 
-    case DJOYIOC_REGISTER:
+    case AJOYIOC_REGISTER:
       {
-        FAR struct djoy_notify_s *notify =
-          (FAR struct djoy_notify_s *)((uintptr_t)arg);
+        FAR struct ajoy_notify_s *notify =
+          (FAR struct ajoy_notify_s *)((uintptr_t)arg);
 
         if (notify)
           {
             /* Save the notification events */
 
-            opriv->do_notify.dn_press   = notify->dn_press;
-            opriv->do_notify.dn_release = notify->dn_release;
-            opriv->do_notify.dn_signo  = notify->dn_signo;
-            opriv->do_pid               = getpid();
+            opriv->ao_notify.an_press   = notify->an_press;
+            opriv->ao_notify.an_release = notify->an_release;
+            opriv->ao_notify.an_signo  = notify->an_signo;
+            opriv->ao_pid               = getpid();
 
             /* Enable/disable interrupt handling */
 
-            djoy_enable(priv);
+            ajoy_enable(priv);
             ret = OK;
           }
       }
@@ -709,21 +713,21 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  djoy_givesem(&priv->du_exclsem);
+  ajoy_givesem(&priv->au_exclsem);
   return ret;
 }
 
 /****************************************************************************
- * Name: djoy_poll
+ * Name: ajoy_poll
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
                      bool setup)
 {
   FAR struct inode *inode;
-  FAR struct djoy_upperhalf_s *priv;
-  FAR struct djoy_open_s *opriv;
+  FAR struct ajoy_upperhalf_s *priv;
+  FAR struct ajoy_open_s *opriv;
   int ret;
   int i;
 
@@ -731,14 +735,14 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct djoy_upperhalf_s *)inode->i_private;
+  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
-  ret = djoy_takesem(&priv->du_exclsem);
+  ret = ajoy_takesem(&priv->au_exclsem);
   if (ret < 0)
     {
-      ivdbg("ERROR: djoy_takesem failed: %d\n", ret);
+      ivdbg("ERROR: ajoy_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -750,21 +754,21 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_AJOYSTICK_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
-          if (!opriv->do_fds[i])
+          if (!opriv->ao_fds[i])
             {
               /* Bind the poll structure and this slot */
 
-              opriv->do_fds[i] = fds;
-              fds->priv = &opriv->do_fds[i];
+              opriv->ao_fds[i] = fds;
+              fds->priv = &opriv->ao_fds[i];
               break;
             }
         }
 
-      if (i >= CONFIG_DJOYSTICK_NPOLLWAITERS)
+      if (i >= CONFIG_AJOYSTICK_NPOLLWAITERS)
         {
           ivdbg("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;
@@ -794,7 +798,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout_with_dusem:
-  djoy_givesem(&priv->du_exclsem);
+  ajoy_givesem(&priv->au_exclsem);
   return ret;
 }
 #endif
@@ -804,7 +808,7 @@ errout_with_dusem:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: djoy_register
+ * Name: ajoy_register
  *
  * Description:
  *   Bind the lower half discrete joystick driver to an instance of the
@@ -813,7 +817,7 @@ errout_with_dusem:
  *
  * Input Parameters:
  *   devname - The name of the discrete joystick device to be registers.
- *     This should be a string of the form "/priv/djoyN" where N is the the
+ *     This should be a string of the form "/priv/ajoyN" where N is the the
  *     minor device number.
  *   lower - An instance of the platform-specific discrete joystick lower
  *     half driver.
@@ -824,19 +828,19 @@ errout_with_dusem:
  *
  ****************************************************************************/
 
-int djoy_register(FAR const char *devname,
-                  FAR const struct djoy_lowerhalf_s *lower)
+int ajoy_register(FAR const char *devname,
+                  FAR const struct ajoy_lowerhalf_s *lower)
 
 {
-  FAR struct djoy_upperhalf_s *priv;
+  FAR struct ajoy_upperhalf_s *priv;
   int ret;
 
   DEBUGASSERT(devname && lower);
 
-  /* Allocate a new djoystick driver instance */
+  /* Allocate a new ajoystick driver instance */
 
-  priv = (FAR struct djoy_upperhalf_s *)
-    kmm_zalloc(sizeof(struct djoy_upperhalf_s));
+  priv = (FAR struct ajoy_upperhalf_s *)
+    kmm_zalloc(sizeof(struct ajoy_upperhalf_s));
 
   if (!priv)
     {
@@ -844,28 +848,32 @@ int djoy_register(FAR const char *devname,
       return -ENOMEM;
     }
 
-  /* Make sure that all djoystick interrupts are disabled */
+  /* Make sure that all ajoystick interrupts are disabled */
 
-  DEBUGASSERT(lower->dl_enable);
-  lower->dl_enable(lower, 0, 0, NULL, NULL);
+  DEBUGASSERT(lower->al_enable);
+  lower->al_enable(lower, 0, 0, NULL, NULL);
 
-  /* Initialize the new djoystick driver instance */
+  /* Initialize the new ajoystick driver instance */
 
-  priv->du_lower = lower;
-  sem_init(&priv->du_exclsem, 0, 1);
+  priv->au_lower = lower;
+  sem_init(&priv->au_exclsem, 0, 1);
 
-  DEBUGASSERT(lower->dl_sample);
-  priv->du_sample = lower->dl_sample(lower);
+  DEBUGASSERT(lower->al_buttons);
+  priv->au_sample = lower->al_buttons(lower);
 
-  /* And register the djoystick driver */
+  /* And register the ajoystick driver */
 
-  ret = register_driver(devname, &djoy_fops, 0666, priv);
+  ret = register_driver(devname, &ajoy_fops, 0666, priv);
   if (ret < 0)
     {
       ivdbg("ERROR: register_driver failed: %d\n", ret);
-      sem_destroy(&priv->du_exclsem);
-      kmm_free(priv);
+      goto errout_with_priv;
     }
 
+  return OK;
+
+errout_with_priv:
+  sem_destroy(&priv->au_exclsem);
+  kmm_free(priv);
   return ret;
 }

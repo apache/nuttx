@@ -108,7 +108,7 @@
  * seek() methods.  The remaining driver methods behave as follows:
  *
  * 1) The read() method will always return a single value of size
- *    struct ajoy_sample_s represent the current joystick positiona and the
+ *    struct ajoy_sample_s represent the current joystick positional and the
  *    state of all joystick buttons. read() never blocks.
  * 2) The poll() method can be used to notify a client if there is a change
  *    in any of the joystick button inputs.  This feature, of course,
@@ -185,6 +185,17 @@ struct ajoy_notify_s
   uint8_t          an_signo;   /* Signal number to use in the notification */
 };
 
+/* This structure is returned by read() and provides the sample state of the
+ * analog joystick.
+ */
+
+struct ajoy_sample_s
+{
+  int16_t          as_x;       /* X/horizontal position */
+  int16_t          as_y;       /* Y/vertical position */
+  ajoy_buttonset_t as_buttons; /* State of all buttons */
+};
+
 /* This is the type of the analog joystick interrupt handler used with
  * the struct ajoy_lowerhalf_s enable() method.
  */
@@ -198,7 +209,8 @@ typedef CODE void (*ajoy_handler_t)
  * 1) A common upper half driver that provides the common user interface to
  *    the joystick,
  * 2) Platform-specific lower half drivers that provide the interface
- *    between the common upper half and the platform analog inputs.
+ *    between the common upper half and the platform analog and discrete
+ *    inputs.
  *
  * This structure defines the interface between an instance of the lower
  * half driver and the common upper half driver.  Such an instance is
@@ -210,17 +222,22 @@ struct ajoy_lowerhalf_s
 {
   /* Return the set of buttons supported on the analog joystick device */
 
-  CODE ajoy_buttonset_t (*dl_supported)(FAR const struct ajoy_lowerhalf_s *lower);
+  CODE ajoy_buttonset_t (*al_supported)(FAR const struct ajoy_lowerhalf_s *lower);
 
-  /* Return the current state of all analog joystick buttons */
+  /* Return the current state of all analog joystick position and button data */
 
-  CODE ajoy_buttonset_t (*dl_sample)(FAR const struct ajoy_lowerhalf_s *lower);
+  CODE int (*al_sample)(FAR const struct ajoy_lowerhalf_s *lower,
+                        FAR struct ajoy_sample_s *sample);
 
-  /* Enable interrupts on the selecte set of joystick buttons.  And empty
+  /* Return the current state of button data (only) */
+
+  CODE ajoy_buttonset_t (*al_buttons)(FAR const struct ajoy_lowerhalf_s *lower);
+
+  /* Enable interrupts on the selected set of joystick buttons.  And empty
    * set will disable all interrupts.
    */
 
-  CODE void (*dl_enable)(FAR const struct ajoy_lowerhalf_s *lower,
+  CODE void (*al_enable)(FAR const struct ajoy_lowerhalf_s *lower,
                          ajoy_buttonset_t press, ajoy_buttonset_t release,
                          ajoy_handler_t handler, FAR void *arg);
 };
@@ -245,9 +262,9 @@ extern "C"
  * Name: ajoy_register
  *
  * Description:
- *   Bind the lower half analog joystick driver to an instance of the
- *   upper half analog joystick driver and register the composite character
- *   driver as the specific device.
+ *   Bind the lower half analog joystick driver to an instance of the upper
+ *   half analog joystick driver and register the composite character
+ *   driver as the specified device.
  *
  * Input Parameters:
  *   devname - The name of the analog joystick device to be registers.
