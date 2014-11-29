@@ -347,8 +347,9 @@ config AJOYSTICK
 	---help---
 		Enable standard analog joystick upper half driver.  An analog
 		joystick refers to a joystick that provides position data as an
-		integer value that might have been obtained through DACs.
-		Discrete button inputs are also supported.
+		integer value that might have been obtained through Analog-
+		to-Digital Conversion (ADC).  The analog positional data may also
+		be accompanied by discrete button data.
 
 if AJOYSTICK
 

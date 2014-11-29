@@ -35,8 +35,9 @@
 
 /* This header file provides definition for a standard analog joystick
  * interface.  An analog joystick refers to a joystick that provides X/Y
- * positional data as integer values such as might be provides by DACs.
- * The analog positional data may be accompanied by discrete button data.
+ * positional data as integer values such as might be provides by Analog-
+ * to-Digital Conversion (ADC).  The analog positional data may also be
+ * accompanied by discrete button data.
  *
  * The analog joystick driver exports a standard character driver
  * interface. By convention, the analog joystick is registered as an input
@@ -109,7 +110,9 @@
  *
  * 1) The read() method will always return a single value of size
  *    struct ajoy_sample_s represent the current joystick positional and the
- *    state of all joystick buttons. read() never blocks.
+ *    state of all joystick buttons. read() never blocks.  X an Y position
+ *    data is raw converted data.  Zeroing and scaling must be performed by
+ *    the application.
  * 2) The poll() method can be used to notify a client if there is a change
  *    in any of the joystick button inputs.  This feature, of course,
  *    depends upon interrupt GPIO support from the platform.  NOTE: that

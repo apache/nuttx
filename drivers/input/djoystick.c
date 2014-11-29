@@ -33,6 +33,17 @@
  *
  ****************************************************************************/
 
+/* This file provides a driver for a standard discrete joystick device.  A
+ * discrete joystick refers to a joystick that could be implemented entirely
+ * with GPIO input pins.  So up, down, left, and right are all discrete
+ * values like buttons (as opposed to integer values like you might obtain
+ * from an analog joystick).
+ *
+ * The discrete joystick driver exports a standard character driver
+ * interface. By convention, the discrete joystick is registered as an input
+ * device at /dev/djoyN where N uniquely identifies the driver instance.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/

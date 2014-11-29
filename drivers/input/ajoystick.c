@@ -33,6 +33,17 @@
  *
  ****************************************************************************/
 
+/* This file provides a driver for a standard analog joystick device.  An
+ * analog joystick refers to a joystick that provides X/Y positional data as
+ * integer values such as might be provides by Analog-to-Digital Conversion
+ * (ADC).  The analog positional data may also be accompanied by discrete
+ * button data.
+ *
+ * The analog joystick driver exports a standard character driver
+ * interface. By convention, the analog joystick is registered as an input
+ * device at /dev/ajoyN where N uniquely identifies the driver instance.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
