@@ -9110,3 +9110,7 @@
 	  for the STM3210E-EVAL (2014-11-28).
 	* drivers/input/djoystick.c include/nuttx/input/djoystick.h: Add a new
 	  ioctl to get the supported joystick discrete signals (2014-11-28).
+	* drivers/input/ajoystick.c and include/nuttx/input/ajoystick.h.  Also
+	  drivers/input/Kconfig and Make.defs, and include/nuttx/fs/ioctl.h: Add
+	  an interface definition and upper half driver for an analog joystick
+	  device (2014-11-27).
