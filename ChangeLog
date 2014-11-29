@@ -9115,3 +9115,13 @@
 	  an interface definition and upper half driver for an analog joystick
 	  device. Initial check-in is only a little more of a clone of the
 	  discrete joystick driver and is as-of-yet untested (2014-11-27).
+	* libc/Kconfig, misc/Make.defs, misc/lib_ioctl.c, fs/vfs/fs_ioctl.c,
+	  include/nuttx/fs/fs.h, include/sys/ioctl.h, syscall.h, and several
+	  files in syscall/: Add support for a variadic ioctl() function.  The
+	  ioctl() interface is a non-standard, Unix interface.  NuttX has always
+	  used the older, three-parameter version.  Most contemporary systems
+	  now, however, use a variadic form of the ioctl() function.  Added an
+	  option to insert a shim layer to adapt the three-parameter ioctl() to
+	  use the variadic interface form.  Internally, the ioctl handling is
+	  the same three-parameter logic.  The only real complexity to the shim
+	  is in how the system calls must be handled (2014-11-29).
