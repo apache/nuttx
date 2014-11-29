@@ -49,12 +49,15 @@
  *  - Instance: represents each individual access to the I2C driver, obtained by
  *      the i2c_init(); it extends the Device structure from the nuttx/i2c/i2c.h;
  *      Instance points to OPS, to common I2C Hardware private data and contains
- *      its own private data, as frequency, address, mode of operation (in the future)
+ *      its own private data, as frequency, address, mode of operation (in the
+ *      future)
  *  - Private: Private data of an I2C Hardware
  *
  * TODO
- *  - Check for all possible deadlocks (as BUSY='1' I2C needs to be reset in HW using the I2C_CR1_SWRST)
- *  - SMBus support (hardware layer timings are already supported) and add SMBA gpio pin
+ *  - Check for all possible deadlocks (as BUSY='1' I2C needs to be reset in HW
+ *    using the I2C_CR1_SWRST)
+ *  - SMBus support (hardware layer timings are already supported) and add SMBA
+ *    gpio pin
  *  - Slave support with multiple addresses (on multiple instances):
  *      - 2 x 7-bit address or
  *      - 1 x 10 bit addresses + 1 x 7 bit address (?)

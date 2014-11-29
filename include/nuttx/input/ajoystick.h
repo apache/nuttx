@@ -199,6 +199,7 @@ struct ajoy_notify_s
 struct ajoy_sample_s
 {
   ajoy_buttonset_t as_buttons; /* State of all buttons */
+                               /* Possibly padded with 1 byte here */
   int16_t          as_x;       /* X/horizontal position */
   int16_t          as_y;       /* Y/vertical position */
 };

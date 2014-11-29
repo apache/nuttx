@@ -74,6 +74,7 @@
 struct mouse_report_s
 {
   uint8_t  buttons;  /* See TOUCH_* definitions above */
+                     /* Possibly padded with 1 byte here */
   int16_t  x;        /* X coordinate of the mouse position */
   int16_t  y;        /* Y coordinate of the mouse position */
 #ifdef CONFIG_MOUSE_WHEEL
