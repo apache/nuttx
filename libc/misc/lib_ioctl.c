@@ -42,6 +42,7 @@
 #include <sys/ioctl.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -66,7 +67,7 @@
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure withi errno set properly:
+ *   -1 on failure with errno set properly:
  *
  *   EBADF
  *     'fd' is not a valid descriptor.
@@ -84,14 +85,25 @@
 
 int ioctl(int fd, int req, ...)
 {
-  va_list ap;
   unsigned long arg;
+  va_list ap;
 
   /* Get the unsigned long argument.
    *
-   * REVISIT:  This could cause of the crash down the road if the actual size
-   * of the argument is anything other than sizeof(unsigned long);
+   * REVISIT:  This could be the cause of the crash down the road if the
+   * actual size of the argument is anything other than sizeof(unsigned long).
+   * Most small integers will be promoted to 'int'.  ARM should pass the
+   * following test with all three types having sizeof(type) == 4 bytes.
+   * 'float' should also be tested.  But 'long long' and 'double' are out of
+   * the question!  Don't try to pass them.
+   *
+   * And what will happen if no third argument is passed?  In most cases,
+   * this should just result in a garbage value for arg.  But you may
+   * discover cases where something worse happens!
    */
+
+  DEBUGASSERT(sizeof(int)        == sizeof(unsigned long) &&
+              sizeof(FAR void *) == sizeof(unsigned long));
 
   va_start(ap, req);
   arg = va_arg(ap, unsigned long);

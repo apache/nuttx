@@ -76,7 +76,20 @@ config LIBC_IOCTL_VARIADIC
 
 		WARNING:  Use of this option could cause subtle system errors is
 		the third argument is omitted or if the sizeof the thread argument
-		is anything other than sizeof (unsigned long).
+		is anything other than sizeof (unsigned long).  Most small integers
+		will be promoted to 'int'.  The following assertion appears in ioctl():
+
+			DEBUGASSERT(sizeof(int)        == sizeof(unsigned long) &&
+			            sizeof(FAR void *) == sizeof(unsigned long));
+
+		Do not enable this option if the above is not true.  32-bit ARM
+		should pass this test with all three types having sizeof(type) == 4
+		bytes.  'float' should also be tested.  But 'long long' and 'double'
+		are out of the question!  Don't event try to pass them.
+
+		And what will happen if no third argument is passed?  In most cases,
+		this should just result in a garbage value for arg.  But you may
+		discover cases where something worse happens!
 
 config LIB_RAND_ORDER
 	int "Order of the random number generate"

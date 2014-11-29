@@ -638,7 +638,7 @@ int close_blockdriver(FAR struct inode *inode);
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure withi errno set properly:
+ *   -1 on failure with errno set properly:
  *
  *   EBADF
  *     'fd' is not a valid descriptor.
