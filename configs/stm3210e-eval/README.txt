@@ -898,6 +898,35 @@ Where <subdir> is one of the following:
         c. Others could be similar configured:  apps/examples/nxhello,
             nximage, ...
 
+    4. The nsh configuration was used to verify the discrete joystick
+       (DJoystick driver).  If you would like to duplicate this test, below
+       are the configuration changes needed to setup the DJoystick driver
+       (see nuttx/drivers/input/djoystick.c) and the DJoystick test (see
+       apps/examples/djoystick):
+
+          Pre-requisites:
+
+            CONFIG_DISABLE_POLL=n      # Don't disable poll()
+            CONFIG_BUILTIN=y           # Enable support for built-in applications
+            CONFIG_NSH_BUILTIN_APPS=y  # Enable NSH built-in applications
+
+          Enable the DJoystick driver:
+
+            CONFIG_INPUT=y             # Enable input driver support
+            CONFIG_DJOYSTICK=y         # Enable the joystick drivers
+                                       # (default parmeters should be okay)
+          Enable the DJoystick Example:
+
+           CONFIG_EXAMPLES_DJOYSTICK=y  # Enable the DJoystick example
+           CONFIG_EXAMPLES_DJOYSTICK_DEVNAME="/dev/djoy0"
+           CONFIG_EXAMPLES_DJOYSTICK_SIGNO=13
+
+       When running the configuration, you should see the built-in
+       application 'djoy'.  Just typo 'djoy' at the NSH command prompt.
+       The test will simply should the joystick position and will exect when
+       the joystick select indication is received (when the joystick button
+       is push downward).
+
   nxterm:
   ----------
     This is yet another NSH configuration.  This NSH configuration differs
