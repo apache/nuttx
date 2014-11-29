@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ioctl/fs_ioctl
+ * Name: ioctl
  *
  * Description:
  *   Perform device specific operations.
@@ -62,7 +62,7 @@
  * Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
- *   ...      One argument of type unsigned long is expected
+ *   ...      A third argument of type unsigned long is expected
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)

@@ -69,7 +69,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ioctl/fs_ioctl
+ * Name: ioctl
  *
  * Description:
  *   Perform device specific operations.
@@ -79,7 +79,8 @@ extern "C"
  * Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   arg      The argument of the ioctl cmd, OR
+ *   ...      A third argument of type unsigned long is still expected.
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)

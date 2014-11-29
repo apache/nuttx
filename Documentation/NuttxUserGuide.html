@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: November 5, 2014</p>
+      <p>Last Updated: November 29, 2014</p>
     </td>
   </tr>
 </table>
@@ -7733,7 +7733,11 @@ interface of the same name.
 
 <ul><pre>
   #include &lt;sys/ioctl.h&gt;
-  int     ioctl(int fd, int req, unsigned long arg);
+  #ifdef CONFIG_LIBC_IOCTL_VARIADIC
+  int ioctl(int fd, int req, ...);
+  #else
+  int ioctl(int fd, int req, unsigned long arg);
+  #endif
 </pre></ul>
 
 <h4><a name="drvrpollops">2.10.2.4 poll.h</a></h4>
