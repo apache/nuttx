@@ -48,6 +48,32 @@ config LIBC_FLOATINGPOINT
 		By default, floating point
 		support in printf, sscanf, etc. is disabled.
 
+config LIBC_IOCTL_VARIADIC
+	bool "Enable variadic ioctl()"
+	default n
+	---help---
+		By default, NuttX implements the "old style," three-parameter,
+		ioctl() interface with this function prototype:
+
+			int ioctl(int fd, int req, unsigned long arg);
+
+		That function is implemented as part of the VFS.  If
+		LIBC_IOCTL_VARIADIC is selected, then an additional compatibility
+		layer will be provided in the C library.  The enabled, then function
+		prototype will become:
+
+			int ioctl(int fd, int req, ...);
+
+		The ioctl() is not controlled by any standard so it is really
+		arbitrary which format you used.  You may select the variadic
+		function prototype with this option.  That will slightly increase
+		code size and ioctl() processing time.  It will not support a
+		variable number of arguments and it still always expects to see a
+		third argument of type 'unsigned long'.  The only benefit of this
+		alternative function signature is that it may provide greater
+		compatibility if you are porting code from other platforms that use
+		the variadic ioctl() function.
+
 config LIB_RAND_ORDER
 	int "Order of the random number generate"
 	default 1

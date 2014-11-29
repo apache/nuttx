@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/vfs/fs_ioctl.c
+ * libc/misc/lib_ioctl.c
  *
- *   Copyright (C) 2007-2010, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,20 +40,17 @@
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
-#include <sched.h>
+#include <stdarg.h>
 #include <errno.h>
-#include <assert.h>
 
-#include <net/if.h>
+#include <nuttx/fs/fs.h>
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-# include <nuttx/net/net.h>
-#endif
+#include "lib_internal.h"
 
-#include "inode/inode.h"
+#if defined(CONFIG_LIBC_IOCTL_VARIADIC) && CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,7 +62,7 @@
  * Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ...      One argument of type unsigned long is expected
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)
@@ -85,69 +82,20 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-int fs_ioctl(int fd, int req, unsigned long arg)
-#else
-int ioctl(int fd, int req, unsigned long arg)
-#endif
+int ioctl(int fd, int req, ...)
 {
-  int err;
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct file     *filep;
-  FAR struct inode    *inode;
-  int                  ret = OK;
+  va_list ap;
+  unsigned long arg;
 
-  /* Did we get a valid file descriptor? */
+  /* Get the unsigned long argument */
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
-    {
-      /* Perform the socket ioctl */
+  va_start(ap, req);
+  arg = va_arg(ap, unsigned long );
+  va_end(ap);
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return netdev_ioctl(fd, req, arg);
-        }
-      else
-#endif
-        {
-          err = EBADF;
-          goto errout;
-        }
-    }
+  /* Then let fs_ioctl() to the real work */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Get the file structure corresponding to the file descriptor. */
-
-  filep = fs_getfilep(fd);
-  if (!filep)
-    {
-      /* The errno value has already been set */
-
-      return ERROR;
-    }
-
-  /* Is a driver registered? Does it support the ioctl method? */
-
-  inode = filep->f_inode;
-  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
-    {
-      /* Yes, then let it perform the ioctl */
-
-      ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
-      if (ret < 0)
-        {
-          err = -ret;
-          goto errout;
-        }
-    }
-
-  return ret;
-#endif
-
-errout:
-  set_errno(err);
-  return ERROR;
+  return fs_ioctl(fd, req, arg);
 }
 
+#endif /* CONFIG_LIBC_IOCTL_VARIADIC && CONFIG_NFILE_DESCRIPTORS > 0 */

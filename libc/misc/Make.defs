@@ -42,16 +42,26 @@ CSRCS += lib_stream.c lib_filesem.c
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 CSRCS += lib_sendfile.c
+
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS += lib_streamsem.c
+endif
+
+ifeq ($(CONFIG_LIBC_IOCTL_VARIADIC),y)
+CSRCS += lib_ioctl.c
 endif
 
 else
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 CSRCS += lib_sendfile.c
+
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS += lib_streamsem.c
+endif
+
+ifeq ($(CONFIG_LIBC_IOCTL_VARIADIC),y)
+CSRCS += lib_ioctl.c
 endif
 
 endif

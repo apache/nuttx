@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 27, 2014)
+NuttX TODO List (Last updated November 29, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (12)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1171,44 +1171,6 @@ o File system / Generic drivers (fs/, drivers/)
                suspecting that some evil has crept in.
   Status:      Open
   Priority:    Medium
-
-  Title:       IOCTL() IS NO LONGER STANDARD
-  Description: The function prototype for ioctl() is no longer standard.  It
-               was more-or-less standard at one time.  The NuttX ioctl is the
-               historic System 7 Unix, three-parameter version.
-
-                 int ioctl(int fd, int req, unsigned long arg);
-
-               Current definitions now allow for the third parameter to be
-               optional (and, I suppose, could accept additional arguments).
-               For example, OpenGroup
-               (http://pubs.opengroup.org/onlinepubs/009695399/functions/ioctl.html):
-
-                 int ioctl(int fildes, int request, ... /* arg */);
-
-               Linux man page:
-
-                 int ioctl(int d, unsigned long request, ...);
-
-               FreeBSD:
-
-                 int ioctl(int fd, unsigned long request, ...);
-
-               I imagine that making the thread argument variadic, the logic
-               is rescued for the case with modern 64-bit computers where
-               sizeof(long) < sizeof(pointer).
-
-               Since NuttX relies on OpenGroup for interface definitions, the
-               current NuttX definition is incompatible with the standard in
-               any event.
-
-               Unfortunately, the change would be very extensive.  If the
-               type of the argument depends on the 'request', then the third
-               argument would have to be decoded by every device device
-               driver.  That would be an enormous job and will not happen soon.
-  Status:      Open
-  Priority:    Very low until I run into a machine with sizeof(long) <
-               sizeof(pointer)
 
 o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

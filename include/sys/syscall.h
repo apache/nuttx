@@ -229,7 +229,11 @@
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 #  define SYS_close                    (__SYS_descriptors+0)
-#  define SYS_ioctl                    (__SYS_descriptors+1)
+#  ifdef CONFIG_LIBC_IOCTL_VARIADIC
+#    define SYS_fs_ioctl               (__SYS_descriptors+1)
+#  else
+#    define SYS_ioctl                  (__SYS_descriptors+1)
+#  endif
 #  define SYS_read                     (__SYS_descriptors+2)
 #  define SYS_write                    (__SYS_descriptors+3)
 #  define SYS_pread                    (__SYS_descriptors+4)

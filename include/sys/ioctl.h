@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/ioctl.h
  *
- *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,14 +55,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -72,9 +64,46 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* ioctl() is a non-standard UNIX-like API */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
+/****************************************************************************
+ * Name: ioctl/fs_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ *   ioctl() is a non-standard UNIX-like API
+ *
+ * Parameters:
+ *   fd       File/socket descriptor of device
+ *   req      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   -1 on failure withi errno set properly:
+ *
+ *   EBADF
+ *     'fd' is not a valid descriptor.
+ *   EFAULT
+ *     'arg' references an inaccessible memory area.
+ *   EINVAL
+ *     'cmd' or 'arg' is not valid.
+ *   ENOTTY
+ *     'fd' is not associated with a character special device.
+ *   ENOTTY
+ *      The specified request does not apply to the kind of object that the
+ *      descriptor 'fd' references.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_IOCTL_VARIADIC
+int ioctl(int fd, int req, ...);
+#else
 int ioctl(int fd, int req, unsigned long arg);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

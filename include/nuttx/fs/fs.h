@@ -624,6 +624,40 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 int close_blockdriver(FAR struct inode *inode);
 #endif
 
+/* fs/vfs/fs_ioctl.c ********************************************************/
+/****************************************************************************
+ * Name: fs_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ * Parameters:
+ *   fd       File/socket descriptor of device
+ *   req      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   -1 on failure withi errno set properly:
+ *
+ *   EBADF
+ *     'fd' is not a valid descriptor.
+ *   EFAULT
+ *     'arg' references an inaccessible memory area.
+ *   EINVAL
+ *     'cmd' or 'arg' is not valid.
+ *   ENOTTY
+ *     'fd' is not associated with a character special device.
+ *   ENOTTY
+ *      The specified request does not apply to the kind of object that the
+ *      descriptor 'fd' references.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_IOCTL_VARIADIC
+int fs_ioctl(int fd, int req, unsigned long arg);
+#endif
+
 /* fs_fdopen.c **************************************************************/
 /****************************************************************************
  * Name: fs_fdopen
