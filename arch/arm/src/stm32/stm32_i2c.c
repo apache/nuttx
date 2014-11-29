@@ -628,6 +628,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
           abstime.tv_nsec -= 1000 * 1000 * 1000;
         }
 #endif
+
       /* Wait until either the transfer is complete or the timeout expires */
 
       ret = sem_timedwait(&priv->sem_isr, &abstime);
@@ -1149,7 +1150,7 @@ static inline uint32_t stm32_i2c_disablefsmc(FAR struct stm32_i2c_priv_s *priv)
  * Name: stm32_i2c_enablefsmc
  *
  * Description:
- *   Re-enabled the FSMC
+ *   Re-enable the FSMC
  *
  ************************************************************************************/
 
@@ -1193,36 +1194,56 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
     {
       stm32_i2c_traceevent(priv, I2CEVENT_SENDADDR, priv->msgc);
 
-      /* Get run-time data */
+      /* We check for msgc > 0 here as an unexpected interrupt with
+       * I2C_SR1_SB set due to noise on the I2C cable can otherwise cause
+       * msgc to wrap causing memory overwrite
+       */
 
-      priv->ptr   = priv->msgv->buffer;
-      priv->dcnt  = priv->msgv->length;
-      priv->flags = priv->msgv->flags;
-
-      /* Send address byte and define addressing mode */
-
-      stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET,
-                      (priv->flags & I2C_M_TEN) ?
-                       0 : ((priv->msgv->addr << 1) | (priv->flags & I2C_M_READ)));
-
-      /* Set ACK for receive mode */
-
-      if (priv->dcnt > 1 && (priv->flags & I2C_M_READ) != 0)
+      if (priv->msgc > 0 && priv->msgv != NULL)
         {
-          stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_ACK);
+          /* Get run-time data */
+
+          priv->ptr   = priv->msgv->buffer;
+          priv->dcnt  = priv->msgv->length;
+          priv->flags = priv->msgv->flags;
+
+          /* Send address byte and define addressing mode */
+
+          stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET,
+                           (priv->flags & I2C_M_TEN) ?
+                           0 : ((priv->msgv->addr << 1) | (priv->flags & I2C_M_READ)));
+
+          /* Set ACK for receive mode */
+
+          if (priv->dcnt > 1 && (priv->flags & I2C_M_READ) != 0)
+            {
+              stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_ACK);
+            }
+
+          /* Increment to next pointer and decrement message count */
+
+          priv->msgv++;
+          priv->msgc--;
         }
+      else
+        {
+          /* Clear ISR by writing to DR register */
 
-      /* Increment to next pointer and decrement message count */
-
-      priv->msgv++;
-      priv->msgc--;
+          stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, 0);
+        }
     }
 
   /* In 10-bit addressing mode, was first byte sent */
 
   else if ((status & I2C_SR1_ADD10) != 0)
     {
-       /* TODO: Finish 10-bit mode addressing */
+       /* TODO: Finish 10-bit mode addressing.
+        *
+        * For now just clear ISR by writing to DR register. As we don't do
+        * 10 bit addressing this must be a spurious ISR
+        */
+
+       stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, 0);
     }
 
   /* Was address sent, continue with either sending or reading data */
@@ -1283,6 +1304,37 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           irqrestore(state);
 #endif
         }
+      else
+        {
+          /* Throw away the unexpected byte */
+
+          stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
+        }
+    }
+  else if (status & I2C_SR1_TXE)
+    {
+      /* This should never happen, but it does happen occasionally with lots
+       * of noise on the bus. It means the peripheral is expecting more data
+       * bytes, but we don't have any to give.
+       */
+
+      stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, 0);
+    }
+  else if (status & I2C_SR1_BTF)
+    {
+      /* We should have handled all cases where this could happen above, but
+       * just to ensure it gets ACKed, lets clear it here
+       */
+
+      stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
+    }
+  else if (status & I2C_SR1_STOPF)
+    {
+      /* We should never get this, as we are a master not a slave. Write CR1
+       * with its current value to clear the error
+       */
+
+      stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, 0);
     }
 
   /* Do we have more bytes to send, enable/disable buffer interrupts
@@ -1601,13 +1653,13 @@ static int stm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
                              int count)
 {
-  struct stm32_i2c_inst_s     *inst = (struct stm32_i2c_inst_s *)dev;
+  struct stm32_i2c_inst_s *inst = (struct stm32_i2c_inst_s *)dev;
   FAR struct stm32_i2c_priv_s *priv = inst->priv;
-  uint32_t    status = 0;
+  uint32_t status = 0;
 #ifdef I2C1_FSMC_CONFLICT
-  uint32_t    ahbenr;
+  uint32_t ahbenr;
 #endif
-  int         errval = 0;
+  int errval = 0;
 
   ASSERT(count);
 
@@ -1639,6 +1691,13 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
   stm32_i2c_clrstart(priv);
 
   /* Old transfers are done */
+
+  /* Reset ptr and dcnt to ensure an unexpected data interrupt doesn't
+   * overwrite stale data.
+   */
+
+  priv->dcnt = 0;
+  priv->ptr = NULL;
 
   priv->msgv = msgs;
   priv->msgc = count;
@@ -1773,6 +1832,12 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
 
   stm32_i2c_enablefsmc(ahbenr);
 #endif
+
+  /* Ensure that any ISR happening after we finish can't overwrite any user data */
+
+  priv->dcnt = 0;
+  priv->ptr = NULL;
+
   stm32_i2c_sem_post(dev);
 
   return -errval;
