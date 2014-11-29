@@ -52,14 +52,18 @@
  *  - Instance: represents each individual access to the I2C driver, obtained by
  *      the i2c_init(); it extends the Device structure from the nuttx/i2c/i2c.h;
  *      Instance points to OPS, to common I2C Hardware private data and contains
- *      its own private data, as frequency, address, mode of operation (in the future)
+ *      its own private data, as frequency, address, mode of operation (in the
+ *      future)
  *  - Private: Private data of an I2C Hardware
  *
  * TODO
- *  - Trace events in polled operation fill trace table very quickly. Events 1111 and 1004 get traced
- *    in an alternate fashion during polling causing multiple entries.
- *  - Check for all possible deadlocks (as BUSY='1' I2C needs to be reset in HW using the I2C_CR1_SWRST)
- *  - SMBus support (hardware layer timings are already supported) and add SMBA gpio pin
+ *  - Trace events in polled operation fill trace table very quickly. Events 1111
+ *    and 1004 get traced in an alternate fashion during polling causing multiple
+ *    entries.
+ *  - Check for all possible deadlocks (as BUSY='1' I2C needs to be reset in HW
+ *    using the I2C_CR1_SWRST)
+ *  - SMBus support (hardware layer timings are already supported) and add SMBA
+ *    gpio pin
  *  - Slave support with multiple addresses (on multiple instances):
  *      - 2 x 7-bit address or
  *      - 1 x 10 bit addresses + 1 x 7 bit address (?)
@@ -163,7 +167,7 @@
                       GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 #endif
 
-#define MKI2C_OUTPUT(p)(((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
+#define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 /* Debug ****************************************************************************/
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
@@ -656,6 +660,7 @@ static int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
           abstime.tv_nsec -= 1000 * 1000 * 1000;
         }
 #endif
+
       /* Wait until either the transfer is complete or the timeout expires */
 
       ret = sem_timedwait(&priv->sem_isr, &abstime);
@@ -1177,7 +1182,7 @@ static inline uint32_t stm32_i2c_disablefsmc(FAR struct stm32_i2c_priv_s *priv)
  * Name: stm32_i2c_enablefsmc
  *
  * Description:
- *   Re-enabled the FSMC
+ *   Re-enable the FSMC
  *
  ************************************************************************************/
 
