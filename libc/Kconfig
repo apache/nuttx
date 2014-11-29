@@ -74,6 +74,10 @@ config LIBC_IOCTL_VARIADIC
 		compatibility if you are porting code from other platforms that use
 		the variadic ioctl() function.
 
+		WARNING:  Use of this option could cause subtle system errors is
+		the third argument is omitted or if the sizeof the thread argument
+		is anything other than sizeof (unsigned long).
+
 config LIB_RAND_ORDER
 	int "Order of the random number generate"
 	default 1

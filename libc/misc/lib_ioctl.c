@@ -87,10 +87,14 @@ int ioctl(int fd, int req, ...)
   va_list ap;
   unsigned long arg;
 
-  /* Get the unsigned long argument */
+  /* Get the unsigned long argument.
+   *
+   * REVISIT:  This could cause of the crash down the road if the actual size
+   * of the argument is anything other than sizeof(unsigned long);
+   */
 
   va_start(ap, req);
-  arg = va_arg(ap, unsigned long );
+  arg = va_arg(ap, unsigned long);
   va_end(ap);
 
   /* Then let fs_ioctl() to the real work */
