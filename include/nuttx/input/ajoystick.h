@@ -190,13 +190,17 @@ struct ajoy_notify_s
 
 /* This structure is returned by read() and provides the sample state of the
  * analog joystick.
+ *
+ * NOTE: that this structure is equivalent to the struct mouse_report_s
+ * structure (with no wheel) defined in include/nuttx/input/mouse.h and can
+ * be used interchangeably in certain contexts.
  */
 
 struct ajoy_sample_s
 {
+  ajoy_buttonset_t as_buttons; /* State of all buttons */
   int16_t          as_x;       /* X/horizontal position */
   int16_t          as_y;       /* Y/vertical position */
-  ajoy_buttonset_t as_buttons; /* State of all buttons */
 };
 
 /* This is the type of the analog joystick interrupt handler used with
