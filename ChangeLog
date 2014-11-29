@@ -9125,3 +9125,5 @@
 	  use the variadic interface form.  Internally, the ioctl handling is
 	  the same three-parameter logic.  The only real complexity to the shim
 	  is in how the system calls must be handled (2014-11-29).
+	* arch/arm/src/stm32/stm32_i2c.c: Port Tridge's I2C noise resilience
+	  logic from the PX4 repository (2014-11-29).
