@@ -859,7 +859,7 @@ done
     <li>
       By default, the contents of rcS script are:
 <ul><pre>
-# Create a RAMDISK and mount it at XXXRDMOUNTPOUNTXXX
+# Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 
 mkrd -m 1 -s 512 1024
 mkfatfs /dev/ram1
@@ -3425,11 +3425,11 @@ set FOOBAR ABC_${FOO}_${BAR}
       By default, this <code>rcS</code> start-up script contains the following logic:
     </p>
 <ul><pre>
-# Create a RAMDISK and mount it at XXXRDMOUNTPOUNTXXX
+# Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 
 mkrd -m XXXMKRDMINORXXX -s XXMKRDSECTORSIZEXXX XXMKRDBLOCKSXXX
 mkfatfs /dev/ramXXXMKRDMINORXXX
-mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOUNTXXX
+mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOINTXXX
 </pre></ul>
 
     <p>
@@ -3451,7 +3451,7 @@ mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOUNTXXX
         </p>
       <li>
         <p>
-          <code>XXXRDMOUNTPOUNTXXX</code> will become the configured mount point.
+          <code>XXXRDMOUNTPOINTXXX</code> will become the configured mount point.
           Default: <code>/etc</code>
         </p>
     </ul>
