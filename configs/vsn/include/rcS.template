@@ -1,9 +1,9 @@
 echo "Versatile Sensor Node V1.2, www.netClamps.com"
 
-# Create a RAMDISK and mount it at XXXRDMOUNTPOUNTXXX
+# Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 #mkrd -m XXXMKRDMINORXXX -s XXMKRDSECTORSIZEXXX XXMKRDBLOCKSXXX
 #mkfatfs /dev/ramXXXMKRDMINORXXX
-#mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOUNTXXX
+#mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOINTXXX
 
 mount -t binfs /dev/ram0 /sbin
 
