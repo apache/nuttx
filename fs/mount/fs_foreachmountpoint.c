@@ -51,7 +51,7 @@
 
 #include "inode/inode.h"
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 
 /****************************************************************************
  * Pre-processor Definitions

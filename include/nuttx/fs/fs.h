@@ -205,7 +205,7 @@ struct mountpt_operations
    * stats file stat(), file attributes, file truncation, etc.
    */
 };
-#endif /* CONFIG_DISABLE_MOUNTPOUNT */
+#endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 /* Named OS resources are also maintained by the VFS.  This includes:
  *
@@ -224,7 +224,7 @@ struct mountpt_operations
 union inode_ops_u
 {
   FAR const struct file_operations      *i_ops;    /* Driver operations for inode */
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR const struct block_operations     *i_bops;   /* Block driver operations */
   FAR const struct mountpt_operations   *i_mops;   /* Operations on a mountpoint */
 #endif
@@ -335,7 +335,7 @@ struct streamlist
  * pseudo-file system.
  */
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 struct statfs;                    /* Forward reference */
 typedef int (*foreach_mountpoint_t)(FAR const char *mountpoint,
                                     FAR struct statfs *statbuf,
@@ -388,7 +388,7 @@ void fs_initialize(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOUNT
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg);
 #endif
 

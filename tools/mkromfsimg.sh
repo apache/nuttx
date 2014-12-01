@@ -242,7 +242,7 @@ cat $rcstemplate | \
     sed -e "s,XXXMKRDMINORXXX,$fatdevno,g" | \
     sed -e "s,XXMKRDSECTORSIZEXXX,$fatsectsize,g" | \
     sed -e "s,XXMKRDBLOCKSXXX,$fatnsectors,g" | \
-    sed -e "s,XXXRDMOUNTPOUNTXXX,$fatmpt,g" >$rcsfile
+    sed -e "s,XXXRDMOUNTPOINTXXX,$fatmpt,g" >$rcsfile
 
 # And install it at the specified relative location
 
