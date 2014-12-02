@@ -9127,3 +9127,8 @@
 	  is in how the system calls must be handled (2014-11-29).
 	* arch/arm/src/stm32/stm32_i2c.c: Port Tridge's I2C noise resilience
 	  logic from the PX4 repository (2014-11-29).
+	* arch/arm/src/stm32/chip/stm32l15xxx_pinmap.h:  Fix a typo in the
+	  MCO pin definition.  From Jussi Kivilinna (2014-12-02).
+	* arch/arm/src/stm32/stm32_rcc.h:  Add missing MCO configuration for
+	  the STM32L1xxx.  From Jussi Kivilinna (2014-12-02).
+
