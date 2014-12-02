@@ -153,6 +153,42 @@ static inline void stm32_mcoconfig(uint32_t source)
 }
 #endif
 
+/************************************************************************************
+ * Name: stm32_mcodivconfig
+ *
+ * Description:
+ *   Selects the clock source to output and clock divider on MC pin (PA4) for
+ *   stm32l1xxx. PA4 should be configured in alternate function mode.
+ *
+ * Input Parameters:
+ *   source - One of the definitions for the RCC_CFGR_MCOSEL definitions from
+ *     chip/stm32l15xxx_rcc.h {RCC_CFGR_MCOSEL_DISABLED, RCC_CFGR_MCOSEL_SYSCLK,
+ *     RCC_CFGR_MCOSEL_HSICLK, RCC_CFGR_MCOSEL_MSICLK, RCC_CFGR_MCOSEL_HSECLK,
+ *     RCC_CFGR_MCOSEL_PLLCLK, RCC_CFGR_MCOSEL_LSICLK, RCC_CFGR_MCOSEL_LSECLK}
+ *   divider - One of the definitions for the RCC_CFGR_MCOPRE definitions from
+ *     chip/stm32l15xxx_rcc.h {RCC_CFGR_MCOPRE_DIV1, RCC_CFGR_MCOPRE_DIV2,
+ *     RCC_CFGR_MCOPRE_DIV4, RCC_CFGR_MCOPRE_DIV8, RCC_CFGR_MCOPRE_DIV16}
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32L15XX)
+static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
+{
+  uint32_t regval;
+
+  /* Set MCO source */
+
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~(RCC_CFGR_MCOSEL_MASK);
+  regval |= (source & RCC_CFGR_MCOSEL_MASK);
+  regval &= ~(RCC_CFGR_MCOPRE_MASK);
+  regval |= (divider & RCC_CFGR_MCOPRE_MASK);
+  putreg32(regval, STM32_RCC_CFGR);
+}
+#endif
 
 /************************************************************************************
  * Name: stm32_mco2config
