@@ -9106,8 +9106,8 @@
 	* include/cxx/cctype: Undefine macros defined ctype.h so that builtin
 	  C++ implementations will be used intead.  From Lorenz Meier
 	  (2014-11-28).
-	* configs/stm3210e-eval/src/stm32_djoystick.c:  Add a DJoystick driver
-	  for the STM3210E-EVAL (2014-11-28).
+	* configs/stm3210e-eval/src/stm32_djoystick.c:  Add a discrete Joystick
+	  supportfor the STM3210E-EVAL (2014-11-28).
 	* drivers/input/djoystick.c include/nuttx/input/djoystick.h: Add a new
 	  ioctl to get the supported joystick discrete signals (2014-11-28).
 	* drivers/input/ajoystick.c and include/nuttx/input/ajoystick.h.  Also
@@ -9131,4 +9131,5 @@
 	  MCO pin definition.  From Jussi Kivilinna (2014-12-02).
 	* arch/arm/src/stm32/stm32_rcc.h:  Add missing MCO configuration for
 	  the STM32L1xxx.  From Jussi Kivilinna (2014-12-02).
-
+	* configs/sama5d3-xplained/src/sam_ajoystick.c:  Add a analog Joystick
+	  support for the SAMA5D3 Xplained board (2014-12-3).
