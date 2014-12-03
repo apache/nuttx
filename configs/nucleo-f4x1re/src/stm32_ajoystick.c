@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sama5d3-xplained/src/sam_ajoystick.c
+ * configs/nucleo-f3x1re/src/stm32_ajoystick.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,10 +47,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/input/ajoystick.h>
 
-#include "sam_pio.h"
-#include "sam_adc.h"
-#include "chip/sam_adc.h"
-#include "sama5d3-xplained.h"
+#include "stm32_gpio.h"
+#include "stm32_adc.h"
+#include "chip/stm32_adc.h"
+#include "nucleo-f4x1re.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,25 +61,17 @@
 #  if !defined(CONFIG_ADC)
 #    error CONFIG_ADC is required for the Itead joystick
 #    undef CONFIG_AJOYSTICK
-#  elif !defined(CONFIG_SAMA5_ADC_CHAN0) || !defined(CONFIG_SAMA5_ADC_CHAN1)
-#    error CONFIG_SAMA5_ADC_CHAN0 and 1 are required for Itead joystick
-#  elif !defined(CONFIG_SAMA5_PIOC_IRQ)
-#    error CONFIG_SAMA5_PIOC_IRQ is required for the Itead joystick
+#  elif !defined(CONFIG_STM32_ADC1)
+#    error CONFIG_STM32_ADC1 is required for Itead joystick
 #    undef CONFIG_AJOYSTICK
-#  elif defined(CONFIG_SAMA5_EMACA)
-#    error EMAC conflicts with the Itead PIO usage
-#    undef CONFIG_AJOYSTICK
-#  elif defined(CONFIG_SAMA5_SSC0)
-#    error SSC0 conflicts with the Itead PIO usage
-#    undef CONFIG_AJOYSTICK
-#  elif defined(CONFIG_SAMA5_SPI1)
-#    warning SPI1 may conflict with the Itead PIO usage
-#  elif defined(CONFIG_SAMA5_ISI)
-#    warning ISI may conflict with the Itead PIO usage
 #  endif
 #endif /* CONFIG_AJOYSTICK */
 
 #ifdef CONFIG_AJOYSTICK
+
+/* Maximum number of ADC channels */
+
+#define MAX_ADC_CHANNELS 8
 
 /* Number of Joystick buttons */
 
@@ -118,16 +110,10 @@ static int ajoy_interrupt(int irq, FAR void *context);
  * button definitions in include/nuttx/input/ajoystick.h.
  */
 
-static const pio_pinset_t g_joypio[AJOY_NGPIOS] =
+static const uint32_t g_joygpio[AJOY_NGPIOS] =
 {
-  PIO_BUTTON_1, PIO_BUTTON_2, PIO_BUTTON_3, PIO_BUTTON_4,
-  PIO_BUTTON_5, PIO_BUTTON_6, PIO_BUTTON_6
-};
-
-static const uint8_t g_joyirq[AJOY_NGPIOS] =
-{
-  IRQ_BUTTON_1, IRQ_BUTTON_2, IRQ_BUTTON_3, IRQ_BUTTON_4,
-  IRQ_BUTTON_5, IRQ_BUTTON_6, IRQ_BUTTON_6
+  GPIO_BUTTON_1, GPIO_BUTTON_2, GPIO_BUTTON_3, GPIO_BUTTON_4,
+  GPIO_BUTTON_5, GPIO_BUTTON_6, GPIO_BUTTON_6
 };
 
 /* This is the button joystick lower half driver interface */
@@ -178,7 +164,7 @@ static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                        FAR struct ajoy_sample_s *sample)
 {
-  struct adc_msg_s adcmsg[SAM_ADC_NCHANNELS];
+  struct adc_msg_s adcmsg[MAX_ADC_CHANNELS];
   FAR struct adc_msg_s *ptr;
   ssize_t nread;
   ssize_t offset;
@@ -189,7 +175,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
    * channels are enabled).
    */
 
-  nread = read(g_adcfd, adcmsg, SAM_ADC_NCHANNELS * sizeof(struct adc_msg_s));
+  nread = read(g_adcfd, adcmsg, MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
   if (nread < 0)
     {
       int errcode = get_errno();
@@ -209,7 +195,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
   /* Sample and the raw analog inputs */
 
   for (i = 0, offset = 0, have = 0;
-       i < SAM_ADC_NCHANNELS && offset < nread && have != 3;
+       i < MAX_ADC_CHANNELS && offset < nread && have != 3;
        i++, offset += sizeof(struct adc_msg_s))
     {
       ptr = &adcmsg[i];
@@ -270,7 +256,7 @@ static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
        * button is pressed.
        */
 
-      if (!sam_pioread(g_joypio[i]))
+      if (!stm32_gpioread(g_joygpio[i]))
         {
           ret |= (1 << i);
         }
@@ -296,6 +282,8 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
   irqstate_t flags;
   ajoy_buttonset_t either = press | release;
   ajoy_buttonset_t bit;
+  bool rising;
+  bool falling;
   int i;
 
   /* Start with all interrupts disabled */
@@ -328,12 +316,18 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
            bit = (1 << i);
            if ((either & bit) != 0)
              {
-               /* REVISIT:  It would be better if we reconfigured for
-                * the edges of interest so that we do not get spurious
-                * interrupts.
+               /* Active low so a press corresponds to a falling edge and
+                * a release corresponds to a rising edge.
                 */
 
-               sam_pioirqenable(g_joyirq[i]);
+               falling = ((press & bit) != 0);
+               rising  = ((release & bit) != 0);
+               
+               illvdbg("GPIO %d: rising: %d falling: %d\n",
+                        i, rising, falling);
+
+               (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
+                                        true, ajoy_interrupt);
              }
         }
     }
@@ -359,7 +353,7 @@ static void ajoy_disable(void)
   flags = irqsave();
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
-      sam_pioirqdisable(g_joyirq[i]);
+      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL);
     }
 
   irqrestore(flags);
@@ -394,14 +388,14 @@ static int ajoy_interrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_ajoy_initialization
+ * Name: stm32_ajoy_initialization
  *
  * Description:
  *   Initialize and register the button joystick driver
  *
  ****************************************************************************/
 
-int sam_ajoy_initialization(void)
+int stm32_ajoy_initialization(void)
 {
   int ret;
   int i;
@@ -431,15 +425,7 @@ int sam_ajoy_initialization(void)
     {
       /* Configure the PIO as an input */
 
-      sam_configpio(g_joypio[i]);
-
-      /* Configure PIO interrupts, attach the interrupt handler, but leave
-       * the interrupt disabled.
-       */
-
-      sam_pioirq(g_joypio[i]);
-      (void)irq_attach(g_joyirq[i], ajoy_interrupt);
-      sam_pioirqdisable(g_joyirq[i]);
+      stm32_configgpio(g_joygpio[i]);
     }
 
   /* Register the joystick device as /dev/ajoy0 */

@@ -171,6 +171,75 @@
     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN9)
 #endif
 
+/* Itead Joystick Shield
+ *
+ * See http://imall.iteadstudio.com/im120417014.html for more information
+ * about this joystick.
+ *
+ *   --------- ----------------- ---------------------------------
+ *   ARDUINO   ITEAD             NUCLEO-F4x1
+ *   PIN NAME  SIGNAL            SIGNAL
+ *   --------- ----------------- ---------------------------------
+ *    D3       Button E Output   PB3
+ *    D4       Button D Output   PB5
+ *    D5       Button C Output   PB4
+ *    D6       Button B Output   PB10
+ *    D7       Button A Output   PA8
+ *    D8       Button F Output   PA9
+ *    D9       Button G Output   PC7
+ *    A0       Joystick Y Output PA0  ADC_IN0
+ *    A1       Joystick X Output PA1  ADC_IN1
+ *   --------- ----------------- ---------------------------------
+ *
+ *   All buttons are pulled on the shield.  A sensed low value indicates
+ *   when the button is pressed.
+ */
+
+#define ADC_XOUPUT   1 /* X output is on ADC channel 1 */
+#define ADC_YOUPUT   0 /* Y output is on ADC channel 0 */
+
+#define GPIO_BUTTON_A \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN3)
+#define GPIO_BUTTON_B \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN5)
+#define GPIO_BUTTON_C \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN4)
+#define GPIO_BUTTON_D \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN10)
+#define GPIO_BUTTON_E \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN8)
+#define GPIO_BUTTON_F \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN9)
+#define GPIO_BUTTON_G \
+  (GPIO_INPUT | GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN7)
+
+/* Itead Joystick Signal interpretation:
+ *
+ *   --------- ----------------------- ---------------------------
+ *   BUTTON     TYPE                    NUTTX ALIAS
+ *   --------- ----------------------- ---------------------------
+ *   Button A  Large button A          JUMP/BUTTON 3
+ *   Button B  Large button B          FIRE/BUTTON 2
+ *   Button C  Joystick select button  SELECT/BUTTON 1
+ *   Button D  Tiny Button D           BUTTON 6
+ *   Button E  Tiny Button E           BUTTON 7
+ *   Button F  Large Button F          BUTTON 4
+ *   Button G  Large Button G          BUTTON 5
+ *   --------- ----------------------- ---------------------------
+ */
+
+#define GPIO_BUTTON_1 GPIO_BUTTON_C
+#define GPIO_BUTTON_2 GPIO_BUTTON_B
+#define GPIO_BUTTON_3 GPIO_BUTTON_A
+#define GPIO_BUTTON_4 GPIO_BUTTON_F
+#define GPIO_BUTTON_5 GPIO_BUTTON_G
+#define GPIO_BUTTON_6 GPIO_BUTTON_D
+#define GPIO_BUTTON_7 GPIO_BUTTON_E
+
+#define GPIO_SELECT   GPIO_BUTTON_1
+#define GPIO_FIRE     GPIO_BUTTON_2
+#define GPIO_JUMP     GPIO_BUTTON_3
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -221,6 +290,18 @@ void stm32_usbinitialize(void);
 
 #ifdef CONFIG_ARCH_LEDS
 void board_led_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: board_adc_initialize
+ *
+ * Description:
+ *   Initialize and register the ADC driver(s)
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int board_adc_initialize(void);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_F401RE_SRC_NUCLEO_F401RE_H */

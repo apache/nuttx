@@ -63,6 +63,13 @@ CSRCS += stm32_io.c
 endif
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+ifeq ($(CONFIG_AJOYSTICK),y)
+CSRCS += stm32_ajoystick.c
+endif
+endif
+
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_nsh.c
 endif
