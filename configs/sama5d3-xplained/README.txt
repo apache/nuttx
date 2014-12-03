@@ -2684,6 +2684,16 @@ Shields
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
     CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13
 
+  STATUS:
+  2014-12-03:  As nearly I can tell, the Itead Joystick shield cannot be
+    used with the SAMA5D3-Xplained.  I believe that the EMAC PHY chip is
+    enableed and since it shares pins with the Joystick, it interferes with
+    the Joystick inputs.  There is probably more wrong than this; perhaps I
+    am not setting up the pins correctly.  But having seen the states of the
+    button output pins change when powering up the board, I have lost hope
+    of getting the shield to work on this board.  I leave the
+    implementation in place only for reference.
+
 SAMA5D3-Xplained Configuration Options
 =================================
 
