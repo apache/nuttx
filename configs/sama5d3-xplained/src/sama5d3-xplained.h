@@ -506,6 +506,9 @@
  *    A0       Joystick Y Output J17 pin 1  PC18  AD0 (function 4)
  *    A1       Joystick X Output J17 pin 2  PD21  AD1 (function 1)
  *   --------- ----------------- ---------- ----------------------
+ *
+ * All buttons are pulled on the shield.  A sensed low value indicates
+ * when the button is pressed.
  */
 
 #define ADC_XOUPUT   1 /* X output is on ADC channel 1 */
@@ -569,7 +572,6 @@
 #define IRQ_FIRE     IRQ_BUTTON_2
 #define PIO_JUMP     PIO_BUTTON_3
 #define IRQ_JUMP     IRQ_BUTTON_3
-
 
 /************************************************************************************
  * Public Types
@@ -697,7 +699,7 @@ bool sam_writeprotected(int slotno);
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup USB-related
+ *   Called from sam_usbinitialize very early in initialization to setup USB-related
  *   PIO pins for the SAMA5D3-Xplained board.
  *
  ************************************************************************************/

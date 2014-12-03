@@ -2605,6 +2605,9 @@ Shields
      A1       Joystick X Output J17 pin 2  PD21  AD1 (function 1)
     --------- ----------------- ---------- ----------------------
 
+    All buttons are pulled on the shield.  A sensed low value indicates
+    when the button is pressed.
+
   Possible conflicts:
 
     ---- ----- --------------------------------------------------
@@ -2672,8 +2675,11 @@ Shields
     Library routines
       CONFIG_SCHED_WORKQUEUE=y         : Work queue support is needed
 
-  This enables the analog joystick example at apps/examples/ajoystick:
+  There is nothing in the configuration that currently uses the joystick.
+  For testing, you can add the following configuration options to enable the
+  analog joystick example at apps/examples/ajoystick:
 
+    CONFIG_NSH_ARCHINIT=y
     CONFIG_EXAMPLES_AJOYSTICK=y
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
     CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13

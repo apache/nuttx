@@ -157,7 +157,7 @@ static FAR void *g_ajoyarg;
  * Name: ajoy_supported
  *
  * Description:
- *   Return the set of buttons supported on the button joystick device 
+ *   Return the set of buttons supported on the button joystick device
  *
  ****************************************************************************/
 
@@ -260,22 +260,19 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
 static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
 {
   ajoy_buttonset_t ret = 0;
-  ajoy_buttonset_t bit;
-  bool released;
   int i;
 
   /* Read each joystick GPIO value */
 
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
-      bit = (1 << i);
-      if ((bit & AJOY_SUPPORTED) != 0)
+      /* Button outputs are pulled high. So a sensed low level means that the
+       * button is pressed.
+       */
+
+      if (!sam_pioread(g_joypio[i]))
         {
-           released = sam_pioread(g_joypio[i]);
-           if (!released)
-             {
-                ret |= bit;
-             }
+          ret |= (1 << i);
         }
     }
 
@@ -336,7 +333,7 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                 * interrupts.
                 */
 
-               sam_pioirqenable(g_joypio[i]);
+               sam_pioirqenable(g_joyirq[i]);
              }
         }
     }
