@@ -2023,7 +2023,7 @@ struct adc_dev_s *sam_adc_initialize(void)
       regval |= PMC_PCR_PID(SAM_PID_ADC) | PMC_PCR_CMD | PMC_PCR_EN;
       sam_adc_putreg(priv, SAM_PMC_PCR, regval);
 
-      /* Enable the ADC peripheral clock*/
+      /* Enable the ADC peripheral clock */
 
       sam_adc_enableclk();
 
