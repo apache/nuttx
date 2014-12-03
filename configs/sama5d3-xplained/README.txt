@@ -79,6 +79,7 @@ Contents
   - TRNG and /dev/random
   - Tickless OS
   - I2S Audio Support
+  - Shields
   - SAMA5D3-Xplained Configuration Options
   - Configurations
   - To-Do List
@@ -2576,6 +2577,106 @@ I2S Audio Support
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
+
+Shields
+=======
+
+  Support is built in for the following shields:
+
+  Itead Joystick Shield
+  ---------------------
+  See http://imall.iteadstudio.com/im120417014.html for more information
+  about this joystick.
+
+  Itead Joystick Connection:
+
+    --------- ----------------- ---------------------------------
+    ARDUINO   ITEAD             SAMA5D3 XPLAINED
+    PIN NAME  SIGNAL            CONNECTOR  SIGNAL
+    --------- ----------------- ---------- ----------------------
+     D3       Button E Output   J18 pin 4  PC8
+     D4       Button D Output   J18 pin 5  PC28
+     D5       Button C Output   J18 pin 6  PC7
+     D6       Button B Output   J18 pin 7  PC6
+     D7       Button A Output   J18 pin 8  PC5
+     D8       Button F Output   J15 pin 1  PC4
+     D9       Button G Output   J15 pin 2  PC3
+     A0       Joystick Y Output J17 pin 1  PC18  AD0 (function 4)
+     A1       Joystick X Output J17 pin 2  PD21  AD1 (function 1)
+    --------- ----------------- ---------- ----------------------
+
+  Possible conflicts:
+
+    ---- ----- --------------------------------------------------
+    ARDU SAMA5 SAMA5D3 XPLAINED
+    PIN  GPIO  SIGNAL            FUNCTION
+    ---- ----- ----------------- --------------------------------
+     D3  PC8   EMDC              10/100Mbit Ethernet MAC
+     D4  PC28  SPI1_NPCS3/ISI_D9 SPI1/ISI
+     D5  PC7   EREFCK            10/100Mbit Ethernet MAC
+     D6  PC6   ECRSDV            10/100Mbit Ethernet MAC
+     D7  PC5   ECRSDV            10/100Mbit Ethernet MAC
+     D8  PC4   ETXEN             10/100Mbit Ethernet MAC
+     D9  PC3   ERX1              10/100Mbit Ethernet MAC
+     A0  PC18  RK0               SSC/Audio
+     A1  PC21  RD0               SSC/Audio
+    ---- ----- ----------------- --------------------------------
+
+  Itead Joystick Signal interpretation:
+
+    --------- ----------------------- ---------------------------
+    BUTTON     TYPE                    NUTTX ALIAS
+    --------- ----------------------- ---------------------------
+    Button A  Large button A          JUMP/BUTTON 3
+    Button B  Large button B          FIRE/BUTTON 2
+    Button C  Joystick select button  SELECT/BUTTON 1
+    Button D  Tiny Button D           BUTTON 6
+    Button E  Tiny Button E           BUTTON 7
+    Button F  Large Button F          BUTTON 4
+    Button G  Large Button G          BUTTON 5
+    --------- ----------------------- ---------------------------
+
+  Itead Joystick configuration settings:
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_ADC=y               : Enable ADC driver support
+      CONFIG_SAMA5_TC0=y               : Enable the Timer/counter library need for periodic sampling
+      CONFIG_SAMA5_EMACA=n             : 10/100Mbit Ethernet MAC conflicts
+      CONFIG_SAMA5_SSC0=n              : SSC0 Audio conflicts
+      CONFIG_SAMA5_SPI1=?              : SPI1 might conflict if PCS3 is used
+      CONFIG_SAMA5_ISI=?               : ISIS conflics if bit 9 is used
+
+    System Type -> PIO Interrupts
+      CONFIG_SAMA5_PIO_IRQ=y           : PIO interrupt support is required
+      CONFIG_SAMA5_PIOC_IRQ=y          : PIOC interrupt support is required
+
+    Drivers
+      CONFIG_ANALOG=y                  : Should be automatically selected
+      CONFIG_ADC=y                     : Should be automatically selected
+      CONFIG_INPUT=y                   : Select input device support
+      CONFIG_AJOYSTICK=y               : Select analog joystick support
+
+    System Type -> ADC Configuration
+      CONFIG_SAMA5_ADC_CHAN0=y         : These settings enable the sequencer to collect
+      CONFIG_SAMA5_ADC_CHAN1=y         : Samples from ADC channels 0-1 on each trigger
+      CONFIG_SAMA5_ADC_SEQUENCER=y
+      CONFIG_SAMA5_ADC_TIOA0TRIG=y     : Trigger on the TC0, channel 0 output A
+      CONFIG_SAMA5_ADC_TIOAFREQ=10     : At a frequency of 10Hz
+      CONFIG_SAMA5_ADC_TIOA_RISING=y   : Trigger on the rising edge
+
+    Default ADC settings (like gain and offset) may also be set if desired.
+
+    System Type -> Timer/counter Configuration
+      CONFIG_SAMA5_TC0_TIOA0=y         : Should be automatically selected
+
+    Library routines
+      CONFIG_SCHED_WORKQUEUE=y         : Work queue support is needed
+
+  This enables the analog joystick example at apps/examples/ajoystick:
+
+    CONFIG_EXAMPLES_AJOYSTICK=y
+    CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
+    CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13
 
 SAMA5D3-Xplained Configuration Options
 =================================

@@ -396,9 +396,9 @@ static int ajoy_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct ajoy_upperhalf_s *priv;
-  FAR const struct ajoy_lowerhalf_s *lower;
   FAR struct ajoy_open_s *opriv;
 #ifndef CONFIG_DISABLE_POLL
+  FAR const struct ajoy_lowerhalf_s *lower;
   ajoy_buttonset_t supported;
 #endif
   int ret;

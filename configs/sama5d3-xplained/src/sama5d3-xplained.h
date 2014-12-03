@@ -487,6 +487,90 @@
                         PIO_PORT_PIOD | PIO_PIN13)
 #define AT25_PORT      SPI0_CS0
 
+/* Itead Joystick Shield
+ *
+ * See http://imall.iteadstudio.com/im120417014.html for more information
+ * about this joystick.
+ *
+ *   --------- ----------------- ---------------------------------
+ *   ARDUINO   ITEAD             SAMA5D3 XPLAINED
+ *   PIN NAME  SIGNAL            CONNECTOR  SIGNAL
+ *   --------- ----------------- ---------- ----------------------
+ *    D3       Button E Output   J18 pin 4  PC8
+ *    D4       Button D Output   J18 pin 5  PC28
+ *    D5       Button C Output   J18 pin 6  PC7
+ *    D6       Button B Output   J18 pin 7  PC6
+ *    D7       Button A Output   J18 pin 8  PC5
+ *    D8       Button F Output   J15 pin 1  PC4
+ *    D9       Button G Output   J15 pin 2  PC3
+ *    A0       Joystick Y Output J17 pin 1  PC18  AD0 (function 4)
+ *    A1       Joystick X Output J17 pin 2  PD21  AD1 (function 1)
+ *   --------- ----------------- ---------- ----------------------
+ */
+
+#define ADC_XOUPUT   1 /* X output is on ADC channel 1 */
+#define ADC_YOUPUT   0 /* Y output is on ADC channel 0 */
+
+#define PIO_BUTTON_A (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN5)
+#define IRQ_BUTTON_A  SAM_IRQ_PC5
+#define PIO_BUTTON_B (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN6)
+#define IRQ_BUTTON_B  SAM_IRQ_PC6
+#define PIO_BUTTON_C (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN7)
+#define IRQ_BUTTON_C  SAM_IRQ_PC7
+#define PIO_BUTTON_D (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN28)
+#define IRQ_BUTTON_D  SAM_IRQ_PC28
+#define PIO_BUTTON_E (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN8)
+#define IRQ_BUTTON_E  SAM_IRQ_PC8
+#define PIO_BUTTON_F (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN4)
+#define IRQ_BUTTON_F  SAM_IRQ_PC4
+#define PIO_BUTTON_G (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOC | PIO_PIN3)
+#define IRQ_BUTTON_G  SAM_IRQ_PC3
+
+/* Itead Joystick Signal interpretation:
+ *
+ *   --------- ----------------------- ---------------------------
+ *   BUTTON     TYPE                    NUTTX ALIAS
+ *   --------- ----------------------- ---------------------------
+ *   Button A  Large button A          JUMP/BUTTON 3
+ *   Button B  Large button B          FIRE/BUTTON 2
+ *   Button C  Joystick select button  SELECT/BUTTON 1
+ *   Button D  Tiny Button D           BUTTON 6
+ *   Button E  Tiny Button E           BUTTON 7
+ *   Button F  Large Button F          BUTTON 4
+ *   Button G  Large Button G          BUTTON 5
+ *   --------- ----------------------- ---------------------------
+ */
+
+#define PIO_BUTTON_1 PIO_BUTTON_C
+#define IRQ_BUTTON_1 IRQ_BUTTON_C
+#define PIO_BUTTON_2 PIO_BUTTON_B
+#define IRQ_BUTTON_2 IRQ_BUTTON_B
+#define PIO_BUTTON_3 PIO_BUTTON_A
+#define IRQ_BUTTON_3 IRQ_BUTTON_A
+#define PIO_BUTTON_4 PIO_BUTTON_F
+#define IRQ_BUTTON_4 IRQ_BUTTON_F
+#define PIO_BUTTON_5 PIO_BUTTON_G
+#define IRQ_BUTTON_5 IRQ_BUTTON_G
+#define PIO_BUTTON_6 PIO_BUTTON_D
+#define IRQ_BUTTON_6 IRQ_BUTTON_D
+#define PIO_BUTTON_7 PIO_BUTTON_E
+#define IRQ_BUTTON_7 IRQ_BUTTON_E
+
+#define PIO_SELECT   PIO_BUTTON_1
+#define IRQ_SELECT   IRQ_BUTTON_1
+#define PIO_FIRE     PIO_BUTTON_2
+#define IRQ_FIRE     IRQ_BUTTON_2
+#define PIO_JUMP     PIO_BUTTON_3
+#define IRQ_JUMP     IRQ_BUTTON_3
+
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -671,6 +755,18 @@ void board_led_initialize(void);
 
 #ifdef CONFIG_NSH_LIBRARY
 int nsh_archinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: board_adc_initialize
+ *
+ * Description:
+ *   Initialize and register the ADC driver
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC
+int board_adc_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
