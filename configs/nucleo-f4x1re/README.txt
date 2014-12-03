@@ -499,7 +499,9 @@ Serial Consoles
 Shields
 =======
 
-  RS-232 from Cutedigi.com.  Supports a single RS-232 connected via
+  RS-232 from Cutedigi.com
+  ------------------------
+  Supports a single RS-232 connected via
 
     Nucleo CN9  STM32F4x1RE  Cutedigi
     ----------- ------------ --------
@@ -508,6 +510,65 @@ Shields
 
   Support for this shield is enabled by selecting USART2 and configuring
   SB13, 14, 62, and 63 as described above under "Serial Consoles"
+
+  Itead Joystick Shield
+  ---------------------
+  See http://imall.iteadstudio.com/im120417014.html for more information
+  about this joystick.
+
+  Itead Joystick Connection:
+
+    --------- ----------------- ---------------------------------
+    ARDUINO   ITEAD             NUCLEO-F4x1
+    PIN NAME  SIGNAL            SIGNAL
+    --------- ----------------- ---------------------------------
+     D3       Button E Output   PB3
+     D4       Button D Output   PB5
+     D5       Button C Output   PB4
+     D6       Button B Output   PB10
+     D7       Button A Output   PA8
+     D8       Button F Output   PA9
+     D9       Button G Output   PC7
+     A0       Joystick Y Output PA0  ADC_IN0
+     A1       Joystick X Output PA1  ADC_IN1
+    --------- ----------------- ---------------------------------
+
+    All buttons are pulled on the shield.  A sensed low value indicates
+    when the button is pressed.
+
+  Itead Joystick Signal interpretation:
+
+    --------- ----------------------- ---------------------------
+    BUTTON     TYPE                    NUTTX ALIAS
+    --------- ----------------------- ---------------------------
+    Button A  Large button A          JUMP/BUTTON 3
+    Button B  Large button B          FIRE/BUTTON 2
+    Button C  Joystick select button  SELECT/BUTTON 1
+    Button D  Tiny Button D           BUTTON 6
+    Button E  Tiny Button E           BUTTON 7
+    Button F  Large Button F          BUTTON 4
+    Button G  Large Button G          BUTTON 5
+    --------- ----------------------- ---------------------------
+
+  Itead Joystick configuration settings:
+
+    System Type -> STM32 Peripheral Support
+      CONFIG_STM32_ADC1=y              : Enable ADC1 driver support
+
+    Drivers
+      CONFIG_ANALOG=y                  : Should be automatically selected
+      CONFIG_ADC=y                     : Should be automatically selected
+      CONFIG_INPUT=y                   : Select input device support
+      CONFIG_AJOYSTICK=y               : Select analog joystick support
+
+  There is nothing in the configuration that currently uses the joystick.
+  For testing, you can add the following configuration options to enable the
+  analog joystick example at apps/examples/ajoystick:
+
+    CONFIG_NSH_ARCHINIT=y
+    CONFIG_EXAMPLES_AJOYSTICK=y
+    CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
+    CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13
 
 Configurations
 ==============
@@ -539,13 +600,13 @@ Configurations
     3. Although the default console is USART2 (which would correspond to
        the Virtual COM port) I have done all testing with the console
        device configured for USART1 (see instruction above under "Serial
-       Consoles).  I have been using a TTL-to-RS-232 converted connected
+       Consoles).  I have been using a TTL-to-RS-232 converter connected
        as shown below:
 
        Nucleo CN10 STM32F4x1RE
        ----------- ------------
-       Pin 21 PA9  USART2_RX
-       Pin 33 PA10 USART2_TX
+       Pin 21 PA9  USART1_RX
+       Pin 33 PA10 USART1_TX
        Pin 20 GND
        Pin 8  U5V
 
