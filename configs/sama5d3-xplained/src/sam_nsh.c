@@ -71,7 +71,7 @@
 int nsh_archinitialize(void)
 {
 #if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI) || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(CONFIG_AJOYSTICK)
   int ret;
 #endif
 
@@ -143,6 +143,17 @@ int nsh_archinitialize(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_AJOYSTICK
+  /* Initialize and register the joystick driver */
+
+  ret = sam_ajoy_initialization();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n", ret);
+      return ret;
     }
 #endif
 

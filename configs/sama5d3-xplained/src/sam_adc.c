@@ -47,12 +47,9 @@
 #include "sam_adc.h"
 #include "sama5d3-xplained.h"
 
-#ifdef CONFIG_ADC
-
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
 
 /************************************************************************************
  * Private Data
@@ -67,17 +64,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: board_adc_initialize
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Initialize and register the ADC driver
  *
  ************************************************************************************/
 
-int adc_devinit(void)
-{
 #ifdef CONFIG_SAMA5_ADC
+int board_adc_initialize(void)
+{
   static bool initialized = false;
   struct adc_dev_s *adc;
   int ret;
@@ -110,9 +106,25 @@ int adc_devinit(void)
     }
 
   return OK;
+}
+#endif /* CONFIG_ADC */
+
+/************************************************************************************
+ * Name: adc_devinit
+ *
+ * Description:
+ *   All SAMA5 architectures must provide the following interface to work with
+ *   examples/adc.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_ADC
+int adc_devinit(void)
+{
+#ifdef CONFIG_SAMA5_ADC
+  return board_adc_initialize();
 #else
   return -ENOSYS;
 #endif
 }
-
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_EXAMPLES_ADC */
