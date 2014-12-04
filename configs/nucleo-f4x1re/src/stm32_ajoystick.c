@@ -73,6 +73,14 @@
 
 #define MAX_ADC_CHANNELS 8
 
+/* Dual channel ADC support requires DMA */
+
+#ifdef CONFIG_ADC_DMA
+#  define NJOYSTICK_CHANNELS 2
+#else
+#  define NJOYSTICK_CHANNELS 1
+#endif
+
 /* Number of Joystick buttons */
 
 #define AJOY_NGPIOS  7
@@ -186,7 +194,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
 
       return -errcode;
     }
-  else if (nread < 2 * sizeof(struct adc_msg_s))
+  else if (nread < NJOYSTICK_CHANNELS * sizeof(struct adc_msg_s))
     {
       idbg("ERROR: read too small: %ld\n", (long)nread);
       return -EIO;
@@ -194,7 +202,17 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
 
   /* Sample and the raw analog inputs */
 
-  for (i = 0, offset = 0, have = 0;
+#ifdef CONFIG_ADC_DMA
+  have = 0;
+
+#else
+  /* If DMA is not supported, then we will have only a single ADC channel */
+
+  have = 2;
+  sample->as_y = 0;
+#endif
+
+  for (i = 0, offset = 0;
        i < MAX_ADC_CHANNELS && offset < nread && have != 3;
        i++, offset += sizeof(struct adc_msg_s))
     {
@@ -211,6 +229,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
           ivdbg("X sample: %ld -> %d\n", (long)tmp, (int)sample->as_x);
         }
 
+#ifdef CONFIG_ADC_DMA
       if ((have & 2) == 0 && ptr->am_channel == 1)
         {
           int32_t tmp = ptr->am_data;
@@ -219,6 +238,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
 
           ivdbg("Y sample: %ld -> %d\n", (long)tmp, (int)sample->as_y);
         }
+#endif
     }
 
   if (have != 3)
@@ -388,14 +408,14 @@ static int ajoy_interrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ajoy_initialization
+ * Name: board_ajoy_initialize
  *
  * Description:
  *   Initialize and register the button joystick driver
  *
  ****************************************************************************/
 
-int stm32_ajoy_initialization(void)
+int board_ajoy_initialize(void)
 {
   int ret;
   int i;

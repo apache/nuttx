@@ -94,7 +94,7 @@ void up_netinitialize(void)
 
 int nsh_archinitialize(void)
 {
-#ifdef HAVE_MMCSD
+#if defined(HAVE_MMCSD) || defined(CONFIG_AJOYSTICK)
   int ret;
 #endif
 
@@ -133,6 +133,19 @@ int nsh_archinitialize(void)
   sdio_mediachange(g_sdio, true);
 
   syslog(LOG_INFO, "[boot] Initialized SDIO\n");
+#endif
+
+#ifdef CONFIG_AJOYSTICK
+  /* Initialize and register the joystick driver */
+
+  ret = board_ajoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the joystick driver: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
   return OK;
