@@ -529,8 +529,8 @@ Shields
      D7       Button A Output   PA8
      D8       Button F Output   PA9
      D9       Button G Output   PC7
-     A0       Joystick Y Output PA0  ADC_IN0
-     A1       Joystick X Output PA1  ADC_IN1
+     A0       Joystick Y Output PA0  ADC1_0
+     A1       Joystick X Output PA1  ADC1_1
     --------- ----------------- ---------------------------------
 
     All buttons are pulled on the shield.  A sensed low value indicates
@@ -584,7 +584,8 @@ Shields
       default USART1 configuration.  I am currently running with USART1
       but with CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS to eliminate the
       conflict.
-    - Current showstopper: I am not getting joystick button interrupts.
+    - Current showstopper: I appear to be getting infinite interrupts as
+      soon as joystick button interrupts are enabled.
 
 Configurations
 ==============
