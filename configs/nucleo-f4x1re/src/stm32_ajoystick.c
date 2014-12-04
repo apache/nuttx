@@ -282,7 +282,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
   /* Sample the discrete button inputs */
 
   sample->as_buttons = ajoy_buttons(lower);
-  ivdbg("Returning: %02x\n", AJOY_SUPPORTED);
+  ivdbg("Returning: %02x\n", sample->as_buttons);
   return OK;
 }
 
@@ -426,6 +426,7 @@ static void ajoy_disable(void)
 static int ajoy_interrupt(int irq, FAR void *context)
 {
   DEBUGASSERT(g_ajoyhandler);
+
   if (g_ajoyhandler)
     {
       g_ajoyhandler(&g_ajoylower, g_ajoyarg);
