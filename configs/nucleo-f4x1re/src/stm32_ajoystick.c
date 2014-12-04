@@ -69,6 +69,10 @@
 
 #ifdef CONFIG_AJOYSTICK
 
+/* A no-ADC, buttons only version can be built for testing */
+
+#undef NO_JOYSTICK_ADC
+
 /* Maximum number of ADC channels */
 
 #define MAX_ADC_CHANNELS 8
@@ -121,7 +125,7 @@ static int ajoy_interrupt(int irq, FAR void *context);
 static const uint32_t g_joygpio[AJOY_NGPIOS] =
 {
   GPIO_BUTTON_1, GPIO_BUTTON_2, GPIO_BUTTON_3, GPIO_BUTTON_4,
-  GPIO_BUTTON_5, GPIO_BUTTON_6, GPIO_BUTTON_6
+  GPIO_BUTTON_5, GPIO_BUTTON_6, GPIO_BUTTON_7
 };
 
 /* This is the button joystick lower half driver interface */
@@ -134,9 +138,11 @@ static const struct ajoy_lowerhalf_s g_ajoylower =
   .al_enable     = ajoy_enable,
 };
 
+#ifndef NO_JOYSTICK_ADC
 /* Descriptor for the open ADC driver */
 
 static int g_adcfd = -1;
+#endif
 
 /* Current interrupt handler and argument */
 
@@ -172,6 +178,7 @@ static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                        FAR struct ajoy_sample_s *sample)
 {
+#ifndef NO_JOYSTICK_ADC
   struct adc_msg_s adcmsg[MAX_ADC_CHANNELS];
   FAR struct adc_msg_s *ptr;
   ssize_t nread;
@@ -243,10 +250,16 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
 
   if (have != 3)
     {
-      idbg("ERROR: Could not find joystack channels\n");
+      idbg("ERROR: Could not find joystick channels\n");
       return -EIO;
     }
 
+#else
+  /* ADC support is disabled */
+
+  sample->as_x = 0;
+  sample->as_y = 0;
+#endif
 
   /* Sample the discrete button inputs */
 
@@ -420,6 +433,9 @@ int board_ajoy_initialize(void)
   int ret;
   int i;
 
+#ifndef NO_JOYSTICK_ADC
+  ivdbg("Initialize ADC driver: /dev/adc0\n");
+
   /* Initialize ADC.  We will need this to read the ADC inputs */
 
   ret = board_adc_initialize();
@@ -438,6 +454,7 @@ int board_ajoy_initialize(void)
       idbg("ERROR: Failed to open /dev/adc0: %d\n", errcode);
       return -errcode;
     }
+#endif
 
   /* Configure the GPIO pins as interrupting inputs. */
 
@@ -450,12 +467,16 @@ int board_ajoy_initialize(void)
 
   /* Register the joystick device as /dev/ajoy0 */
 
+  ivdbg("Initialize joystick driver: /dev/ajoy0\n");
+
   ret = ajoy_register("/dev/ajoy0", &g_ajoylower);
   if (ret < 0)
     {
       idbg("ERROR: ajoy_register failed: %d\n", ret);
+#ifndef NO_JOYSTICK_ADC
       close(g_adcfd);
       g_adcfd = -1;
+#endif
     }
 
   return ret;
