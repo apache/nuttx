@@ -197,7 +197,8 @@
  *   NOTE: Button F cannot be used with the default USART1 configuration
  *   because PA9 is configured for USART1_RX by default.  Use select
  *   different USART1 pins in the board.h file or select a different
- *   USART
+ *   USART or select CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS which will
+ *   eliminate all but buttons A, B, and C.
  */
 
 #define ADC_XOUPUT   1 /* X output is on ADC channel 1 */

@@ -85,16 +85,27 @@
 #  define NJOYSTICK_CHANNELS 1
 #endif
 
+#ifdef CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS
 /* Number of Joystick buttons */
 
-#define AJOY_NGPIOS  7
+#  define AJOY_NGPIOS  3
 
 /* Bitset of supported Joystick buttons */
 
-#define AJOY_SUPPORTED (AJOY_BUTTON_1_BIT | AJOY_BUTTON_2_BIT | \
-                        AJOY_BUTTON_3_BIT | AJOY_BUTTON_4_BIT | \
-                        AJOY_BUTTON_5_BIT | AJOY_BUTTON_6_BIT | \
-                        AJOY_BUTTON_7_BIT )
+#  define AJOY_SUPPORTED (AJOY_BUTTON_1_BIT | AJOY_BUTTON_2_BIT | \
+                          AJOY_BUTTON_3_BIT)
+#else
+/* Number of Joystick buttons */
+
+#  define AJOY_NGPIOS  7
+
+/* Bitset of supported Joystick buttons */
+
+#  define AJOY_SUPPORTED (AJOY_BUTTON_1_BIT | AJOY_BUTTON_2_BIT | \
+                          AJOY_BUTTON_3_BIT | AJOY_BUTTON_4_BIT | \
+                          AJOY_BUTTON_5_BIT | AJOY_BUTTON_6_BIT | \
+                          AJOY_BUTTON_7_BIT )
+#endif
 
 /****************************************************************************
  * Private Types
@@ -122,11 +133,18 @@ static int ajoy_interrupt(int irq, FAR void *context);
  * button definitions in include/nuttx/input/ajoystick.h.
  */
 
+#ifdef CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS
+static const uint32_t g_joygpio[AJOY_NGPIOS] =
+{
+  GPIO_BUTTON_1, GPIO_BUTTON_2, GPIO_BUTTON_3
+};
+#else
 static const uint32_t g_joygpio[AJOY_NGPIOS] =
 {
   GPIO_BUTTON_1, GPIO_BUTTON_2, GPIO_BUTTON_3, GPIO_BUTTON_4,
   GPIO_BUTTON_5, GPIO_BUTTON_6, GPIO_BUTTON_7
 };
+#endif
 
 /* This is the button joystick lower half driver interface */
 
