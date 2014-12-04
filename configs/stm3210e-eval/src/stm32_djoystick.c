@@ -284,8 +284,8 @@ int stm32_djoy_initialization(void)
 {
   int i;
 
-  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
-   * configured for some pins but NOT yet set up.
+  /* Configure the GPIO pins as inputs.    NOTE: This is unnecessary for
+   * interrupting pins since it will also be done by stm32_gpiosetevent().
    */
 
   for (i = 0; i < DJOY_NGPIOS; i++)

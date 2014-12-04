@@ -474,7 +474,10 @@ int board_ajoy_initialize(void)
     }
 #endif
 
-  /* Configure the GPIO pins as interrupting inputs. */
+  /* Configure the GPIO pins as interrupting inputs.  NOTE: This is
+   * unnecessary for interrupting pins since it will also be done by
+   * stm32_gpiosetevent().
+   */
 
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
