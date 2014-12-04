@@ -304,4 +304,16 @@ void board_led_initialize(void);
 int board_adc_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: board_ajoy_initialize
+ *
+ * Description:
+ *   Initialize and register the button joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AJOYSTICK
+int board_ajoy_initialize(void);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_F401RE_SRC_NUCLEO_F401RE_H */

@@ -393,8 +393,8 @@ Serial Consoles
 
     Nucleo CN10 STM32F4x1RE
     ----------- ------------
-    Pin 21 PA9  USART2_RX
-    Pin 33 PA10 USART2_TX
+    Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
+    Pin 33 PA10 USART1_TX    some RS-232 converters
     Pin 20 GND
     Pin 8  U5V
 
@@ -425,8 +425,8 @@ Serial Consoles
 
     Nucleo CN9  STM32F4x1RE
     ----------- ------------
-    Pin 1  PA3  USART2_RX
-    Pin 2  PA2  USART2_TX
+    Pin 1  PA3  USART2_RX   *Warning you make need to reverse RX/TX on
+    Pin 2  PA2  USART2_TX    some RS-232 converters
 
   Solder Bridges.  This configuration requires:
 
@@ -605,8 +605,8 @@ Configurations
 
        Nucleo CN10 STM32F4x1RE
        ----------- ------------
-       Pin 21 PA9  USART1_RX
-       Pin 33 PA10 USART1_TX
+       Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
+       Pin 33 PA10 USART1_TX    some RS-232 converters
        Pin 20 GND
        Pin 8  U5V
 

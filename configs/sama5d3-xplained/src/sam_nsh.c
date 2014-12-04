@@ -152,7 +152,9 @@ int nsh_archinitialize(void)
   ret = sam_ajoy_initialization();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the joystick driver: %d\n",
+             ret);
       return ret;
     }
 #endif
