@@ -576,6 +576,16 @@ Shields
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
     CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13
 
+  STATUS:
+  2014-12-04:
+    - Without ADC DMA support, it is not possible to sample both X and Y
+      with a single ADC.  Right now, only one axis is being converted.
+    - There is conflicts with some of the Arduino data pins and the
+      default USART1 configuration.  I am currently running with USART1
+      but with CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS to eliminate the
+      conflict.
+    - Current showstopper: I am not getting joystick button interrupts.
+
 Configurations
 ==============
 
