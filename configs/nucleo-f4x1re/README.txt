@@ -536,6 +536,11 @@ Shields
     All buttons are pulled on the shield.  A sensed low value indicates
     when the button is pressed.
 
+    NOTE: Button F cannot be used with the default USART1 configuration
+    because PA9 is configured for USART1_RX by default.  Use select
+    different USART1 pins in the board.h file or select a different
+    USART
+
   Itead Joystick Signal interpretation:
 
     --------- ----------------------- ---------------------------
