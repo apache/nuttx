@@ -66,7 +66,11 @@ enum eeprom_25xx_e
   EEPROM_AT25020B,
   EEPROM_AT25040B,
 
-  /* Aliases (devices similar to previously defined ones)*/
+  /* STM geometries */
+
+  EEPROM_M95M02,
+
+  /* Aliases (devices similar to previously defined ones) */
 
   EEPROM_AT25080B  = EEPROM_25xx080B,
   EEPROM_AT25160B  = EEPROM_25xx160B,
@@ -76,6 +80,17 @@ enum eeprom_25xx_e
   EEPROM_AT225256B = EEPROM_25xx256,
   EEPROM_AT25512   = EEPROM_25xx512,
   EEPROM_AT25M02   = EEPROM_25xx1024,
+  EEPROM_M95010    = EEPROM_25xx010,
+  EEPROM_M95020    = EEPROM_25xx020,
+  EEPROM_M95040    = EEPROM_25xx040,
+  EEPROM_M95080    = EEPROM_25xx080B,
+  EEPROM_M95160    = EEPROM_25xx160B,
+  EEPROM_M95320    = EEPROM_25xx320,
+  EEPROM_M95640    = EEPROM_25xx640,
+  EEPROM_M95128    = EEPROM_25xx128,
+  EEPROM_M95256    = EEPROM_25xx256,
+  EEPROM_M95512    = EEPROM_25xx512,
+  EEPROM_M95M01    = EEPROM_25xx1024,
 };
 
 /****************************************************************************

@@ -46,6 +46,12 @@
  * 20 MHz for 25AA512, 25LC512, 25xx1024
  * 20 MHz for Atmel devices (>4.5V)
  * 10 MHz for Atmel devices (>2.5V)
+ * 20 MHz for <1Mbit STM devices (>4.5V)
+ * 16 MHz for 1Mbit  STM devices (>4.5V)
+ * 10 MHz for all    STM devices (>2.5V)
+ *  5 MHz for 1Mbit  STM devices (>1.8V)
+ *  2 MHz for 1Mbit  STM devices (>1.7V)
+ *  5 MHz for 2Mbit  STM devices
  * All devices have the same instruction set.
  *
  * The following devices should be supported:
@@ -89,6 +95,19 @@
  *              AT25256B   32768   64     2
  *              AT25512    65536  128     2
  *              AT25M01   131072  256     3
+ * ST Microelectronics
+ *              M95010       128   16     1
+ *              M95020       256   16     1
+ *              M95040       512   16     1+bit
+ *              M95080      1024   32     2
+ *              M95160      2048   32     2
+ *              M95320      4096   32     2
+ *              M95640      8192   32     2
+ *              M95128     16384   64     2
+ *              M95256     32768   64     2
+ *              M95512     65536  128     2
+ *              M95M01    131072  256     3
+ *              M95M02    262144  256     3
  */
 
 /****************************************************************************
@@ -125,11 +144,15 @@
 #define EE25XX_CMD_WREN  0x06
 
 /* Following commands will be available some day via IOCTLs
- * PE    0x42 Page erase (25xx512/1024)
- * SE    0xD8 Sector erase (25xx512/1024)
- * CE    0xC7 Chip erase (25xx512/1024)
- * RDID  0xAB Wake up and read electronic signature (25xx512/1024)
- * DPD   0xB9 Sleep (25xx512/1024)
+ *   PE        0x42 Page erase (25xx512/1024)
+ *   SE        0xD8 Sector erase (25xx512/1024)
+ *   CE        0xC7 Chip erase (25xx512/1024)
+ *   RDID      0xAB Wake up and read electronic signature (25xx512/1024)
+ *   DPD       0xB9 Sleep (25xx512/1024)
+ *
+ * Identification page access for ST devices
+ *   RDID/RDLS 0x83 Read identification page / Read ID page lock status
+ *   WRID/LID  0x82 Write identification page / Lock ID page
  */
 
 /* SR bits definitions */
@@ -160,7 +183,7 @@ struct ee25xx_geom_s
 
 struct ee25xx_dev_s
 {
-  struct spi_dev_s *spi;     /* spi device where the EEPROM is attached */
+  struct spi_dev_s *spi;     /* SPI device where the EEPROM is attached */
   uint32_t         size;     /* in bytes, expanded from geometry */
   uint16_t         pgsize;   /* write block size, in bytes, expanded from geometry */
   uint16_t         addrlen;  /* number of BITS in data addresses */
@@ -196,25 +219,29 @@ static const struct ee25xx_geom_s g_ee25xx_devices[] =
 {
   /* Microchip devices */
 
-  { 0, 1, 1, 0}, /*25xx010A     128   16     1*/
-  { 1, 1, 1, 0}, /*25xx020A     256   16     1*/
-  { 2, 1, 1, 1}, /*25xx040      512   16     1+bit*/
-  { 3, 1, 1, 0}, /*25xx080     1024   16     1*/
-  { 3, 2, 2, 0}, /*25xx080B    1024   32     2*/
-  { 4, 1, 2, 0}, /*25xx160     2048   16     2*/
-  { 4, 2, 2, 0}, /*25xx160B/D  2048   32     2*/
-  { 5, 2, 2, 0}, /*25xx320     4096   32     2*/
-  { 6, 2, 2, 0}, /*25xx640     8192   32     2*/
-  { 7, 3, 2, 0}, /*25xx128    16384   64     2*/
-  { 8, 3, 2, 0}, /*25xx256    32768   64     2*/
-  { 9, 4, 2, 0}, /*25xx512    65536  128     2*/
-  {10, 5, 3, 0}, /*25xx1024  131072  256     3*/
+  { 0, 1, 1, 0}, /* 25xx010A     128   16     1*/
+  { 1, 1, 1, 0}, /* 25xx020A     256   16     1*/
+  { 2, 1, 1, 1}, /* 25xx040      512   16     1+bit*/
+  { 3, 1, 1, 0}, /* 25xx080     1024   16     1*/
+  { 3, 2, 2, 0}, /* 25xx080B    1024   32     2*/
+  { 4, 1, 2, 0}, /* 25xx160     2048   16     2*/
+  { 4, 2, 2, 0}, /* 25xx160B/D  2048   32     2*/
+  { 5, 2, 2, 0}, /* 25xx320     4096   32     2*/
+  { 6, 2, 2, 0}, /* 25xx640     8192   32     2*/
+  { 7, 3, 2, 0}, /* 25xx128    16384   64     2*/
+  { 8, 3, 2, 0}, /* 25xx256    32768   64     2*/
+  { 9, 4, 2, 0}, /* 25xx512    65536  128     2*/
+  {10, 5, 3, 0}, /* 25xx1024  131072  256     3*/
 
   /* Atmel devices */
 
-  { 0, 0, 1, 0}, /*AT25010B     128    8     1*/
-  { 1, 0, 1, 0}, /*AT25020B     256    8     1*/
-  { 2, 0, 1, 1}, /*AT25040B     512    8     1+bit*/
+  { 0, 0, 1, 0}, /* AT25010B     128    8     1*/
+  { 1, 0, 1, 0}, /* AT25020B     256    8     1*/
+  { 2, 0, 1, 1}, /* AT25040B     512    8     1+bit*/
+
+  /* STM devices */
+
+  {11, 5, 3, 0}, /* M95M02    262144  256     3*/
 };
 
 /* Driver operations */
