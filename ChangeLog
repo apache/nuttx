@@ -9137,3 +9137,6 @@
 	  analog Joystick shield support for the Nucleo F4x1RE boards.  There
 	  are still some ADC issues to be worke through as of the initial
 	  commit (2014-12-3).
+	* /drivers/eeprom/spi_xx25xx.c and /include/nuttx/eeprom/spi_xx25xx.h:
+	  Add support for ST Micro EEPROM device geometries.  From Sebastien
+	  Lorquet (2014-12-5).
