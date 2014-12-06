@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <mqueue.h>
+#include <assert.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
@@ -77,16 +78,16 @@
  *
  * Description:
  *   This function implements a part of the POSIX message queue open logic.
- *   It allocates and initializes a structu mqueue_inode_s structure.
+ *   It allocates and initializes a struct mqueue_inode_s structure.
  *
  * Parameters:
  *   mode   - mode_t value is ignored
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of
- *             messages that may be placed in the message queue.
+ *            messages that may be placed in the message queue.
  *
  * Return Value:
- *   The allocated and initalized message queue structure or NULL in the
+ *   The allocated and initialized message queue structure or NULL in the
  *   event of a failure.
  *
  ****************************************************************************/
@@ -96,9 +97,21 @@ FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
 {
   FAR struct mqueue_inode_s *msgq;
 
+  /* Check if the caller is attempting to allocate a message for messages
+   * larger than the configured maximum message size.
+   */
+
+  DEBUGASSERT(!attr || attr->mq_msgsize <= MQ_MAX_BYTES);
+  if (attr && attr->mq_msgsize > MQ_MAX_BYTES)
+    {
+      return NULL;
+    }
+
   /* Allocate memory for the new message queue. */
 
-  msgq = (FAR struct mqueue_inode_s*)kmm_zalloc(sizeof(struct mqueue_inode_s));
+  msgq = (FAR struct mqueue_inode_s*)
+    kmm_zalloc(sizeof(struct mqueue_inode_s));
+
   if (msgq)
     {
       /* Initialize the new named message queue */
@@ -106,15 +119,8 @@ FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
       sq_init(&msgq->msglist);
       if (attr)
         {
-          msgq->maxmsgs = (int16_t)attr->mq_maxmsg;
-          if (attr->mq_msgsize <= MQ_MAX_BYTES)
-            {
-              msgq->maxmsgsize = (int16_t)attr->mq_msgsize;
-            }
-          else
-            {
-              msgq->maxmsgsize = MQ_MAX_BYTES;
-            }
+          msgq->maxmsgs    = (int16_t)attr->mq_maxmsg;
+          msgq->maxmsgsize = (int16_t)attr->mq_msgsize;
         }
       else
         {

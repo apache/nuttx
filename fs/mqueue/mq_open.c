@@ -52,17 +52,8 @@
 #include "inode/inode.h"
 #include "mqueue/mqueue.h"
 
-#if 0
-#include <sys/types.h>
-#include <stdint.h>
-#include <debug.h>
-
-
-#include "sched/sched.h"
-#endif
-
 /****************************************************************************
- * Pre-procesor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -220,7 +211,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
       msgq = (FAR struct mqueue_inode_s*)mq_msgqalloc(mode, attr);
       if (!msgq)
         {
-          errcode = ENOMEM;
+          errcode = ENOSPC;
           goto errout_with_inode;
         }
 

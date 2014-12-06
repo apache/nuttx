@@ -98,7 +98,7 @@ struct mqueue_msg_s
 #else
   uint16_t msglen;                /* Message data length */
 #endif
-  uint8_t mail[MQ_MAX_BYTES];     /* Message data */
+  char mail[MQ_MAX_BYTES];        /* Message data */
 };
 
 /****************************************************************************
