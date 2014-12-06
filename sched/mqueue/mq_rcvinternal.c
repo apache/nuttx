@@ -103,7 +103,7 @@
  *
  ****************************************************************************/
 
-int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
+int mq_verifyreceive(mqd_t mqdes, FAR char *msg, size_t msglen)
 {
   /* Verify the input parameters */
 
@@ -246,7 +246,7 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
  ****************************************************************************/
 
 ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                     FAR void *ubuffer, int *prio)
+                     FAR char *ubuffer, int *prio)
 {
   FAR struct tcb_s *btcb;
   irqstate_t saved_state;

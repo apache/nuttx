@@ -112,7 +112,8 @@
  *
  ************************************************************************/
 
-ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
+ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
+                   FAR int *prio)
 {
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t saved_state;
@@ -129,7 +130,7 @@ ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
       return ERROR;
     }
 
-  /* Get the next mesage from the message queue.  We will disable
+  /* Get the next message from the message queue.  We will disable
    * pre-emption until we have completed the message received.  This
    * is not too bad because if the receipt takes a long time, it will
    * be because we are blocked waiting for a message and pre-emption

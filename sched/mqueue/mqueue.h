@@ -90,15 +90,15 @@ enum mqalloc_e
 
 struct mqueue_msg_s
 {
-  FAR struct mqueue_msg_s  *next;    /* Forward link to next message */
-  uint8_t type;                      /* (Used to manage allocations) */
-  uint8_t priority;                  /* priority of message */
+  FAR struct mqueue_msg_s *next;  /* Forward link to next message */
+  uint8_t type;                   /* (Used to manage allocations) */
+  uint8_t priority;               /* priority of message */
 #if MQ_MAX_BYTES < 256
-  uint8_t msglen;                    /* Message data length */
+  uint8_t msglen;                 /* Message data length */
 #else
-  uint16_t msglen;                   /* Message data length */
+  uint16_t msglen;                /* Message data length */
 #endif
-  uint8_t mail[MQ_MAX_BYTES];        /* Message data */
+  uint8_t mail[MQ_MAX_BYTES];     /* Message data */
 };
 
 /****************************************************************************
@@ -150,18 +150,18 @@ void mq_waitirq(FAR struct tcb_s *wtcb, int errcode);
 
 /* mq_rcvinternal.c ********************************************************/
 
-int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen);
+int mq_verifyreceive(mqd_t mqdes, FAR char *msg, size_t msglen);
 FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes);
 ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                     FAR void *ubuffer, FAR int *prio);
+                     FAR char *ubuffer, FAR int *prio);
 
 /* mq_sndinternal.c ********************************************************/
 
-int mq_verifysend(mqd_t mqdes, FAR const void *msg, size_t msglen, int prio);
+int mq_verifysend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio);
 FAR struct mqueue_msg_s *mq_msgalloc(void);
 int mq_waitsend(mqd_t mqdes);
 int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-              FAR const void *msg, size_t msglen, int prio);
+              FAR const char *msg, size_t msglen, int prio);
 
 /* mq_release.c ************************************************************/
 

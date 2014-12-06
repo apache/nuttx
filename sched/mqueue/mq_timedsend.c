@@ -180,8 +180,8 @@ static void mq_sndtimeout(int argc, uint32_t pid)
  *
  ****************************************************************************/
 
-int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
-                 const struct timespec *abstime)
+int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
+                 FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct mqueue_inode_s *msgq;
@@ -318,4 +318,3 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
   rtcb->waitdog = NULL;
   return ret;
 }
-

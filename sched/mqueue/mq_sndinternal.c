@@ -108,7 +108,7 @@
  *
  ****************************************************************************/
 
-int mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen, int prio)
+int mq_verifysend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 {
   /* Verify the input parameters */
 
@@ -324,7 +324,7 @@ int mq_waitsend(mqd_t mqdes)
  *
  ****************************************************************************/
 
-int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const void *msg,
+int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
               size_t msglen, int prio)
 {
   FAR struct tcb_s *btcb;
@@ -345,7 +345,7 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const void *msg,
 
   /* Copy the message data into the message */
 
-  memcpy((void*)mqmsg->mail, (const void*)msg, msglen);
+  memcpy((void*)mqmsg->mail, (FAR const void*)msg, msglen);
 
   /* Insert the new message in the message queue */
 
@@ -438,4 +438,3 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const void *msg,
   sched_unlock();
   return OK;
 }
-

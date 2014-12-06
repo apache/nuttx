@@ -76,13 +76,13 @@
  * Name: mq_send
  *
  * Description:
- *   This function adds the specificied message (msg) to the message queue
+ *   This function adds the specified message (msg) to the message queue
  *   (mqdes).  The "msglen" parameter specifies the length of the message
  *   in bytes pointed to by "msg."  This length must not exceed the maximum
  *   message length from the mq_getattr().
  *
  *   If the message queue is not full, mq_send() place the message in the
- *   message queue at the position indicated by the "prio" argrument.
+ *   message queue at the position indicated by the "prio" argument.
  *   Messages with higher priority will be inserted before lower priority
  *   messages.  The value of "prio" must not exceed MQ_PRIO_MAX.
  *
@@ -115,7 +115,7 @@
  *
  ****************************************************************************/
 
-int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
+int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 {
   FAR struct mqueue_inode_s  *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;

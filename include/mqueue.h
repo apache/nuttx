@@ -69,33 +69,34 @@ struct mq_attr
 typedef FAR struct mq_des *mqd_t;
 
 /********************************************************************************
- * Global Variables
- ********************************************************************************/
-
-/********************************************************************************
- * Global Function Prototypes
+ * Public Data
  ********************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN mqd_t   mq_open(const char *mq_name, int oflags, ...);
-EXTERN int     mq_close(mqd_t mqdes );
-EXTERN int     mq_unlink(const char *mq_name);
-EXTERN int     mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio);
-EXTERN int     mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
-                            const struct timespec *abstime);
-EXTERN ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio);
-EXTERN ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
-                               int *prio, const struct timespec *abstime);
-EXTERN int     mq_notify(mqd_t mqdes, const struct sigevent *notification);
-EXTERN int     mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
-                  struct mq_attr *oldstat);
-EXTERN int     mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat);
+/********************************************************************************
+ * Public Function Prototypes
+ ********************************************************************************/
+
+mqd_t   mq_open(FAR const char *mq_name, int oflags, ...);
+int     mq_close(mqd_t mqdes );
+int     mq_unlink(FAR const char *mq_name);
+int     mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio);
+int     mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
+                     FAR const struct timespec *abstime);
+ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen, FAR int *prio);
+ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen, FAR int *prio,
+                        FAR const struct timespec *abstime);
+int     mq_notify(mqd_t mqdes, const struct sigevent *notification);
+int     mq_setattr(mqd_t mqdes, FAR const struct mq_attr *mq_stat,
+                   FAR struct mq_attr *oldstat);
+int     mq_getattr(mqd_t mqdes, FAR struct mq_attr *mq_stat);
 
 #undef EXTERN
 #ifdef __cplusplus

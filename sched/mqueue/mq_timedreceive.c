@@ -179,8 +179,8 @@ static void mq_rcvtimeout(int argc, uint32_t pid)
  *
  ****************************************************************************/
 
-ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
-                        int *prio, const struct timespec *abstime)
+ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
+                        FAR int *prio, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct mqueue_msg_s *mqmsg;
@@ -216,7 +216,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
       return ERROR;
     }
 
-  /* Get the next mesage from the message queue.  We will disable
+  /* Get the next message from the message queue.  We will disable
    * pre-emption until we have completed the message received.  This
    * is not too bad because if the receipt takes a long time, it will
    * be because we are blocked waiting for a message and pre-emption
