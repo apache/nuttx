@@ -9143,4 +9143,7 @@
 	* sched/mqueue: msg type should be char * not void * in mq_send,
 	  mq_timedsend, mq_receive, and mq_timedreceive.  Noted by  Pierre-Noel
 	  Bouteville (2014-12-05).
-
+	* fs/mqueue/mq_open.c and sched/mqueue/mq_msgqalloc.c: In message queue
+	  creation return ENOSPC error if size exceeds the configured size of
+	  pre-allocated messages; Use ENOSPC vs ENOMEM per OpenGroup.org.  From
+	  Pierre-Noel Bouteville (2014-12-6).
