@@ -9140,3 +9140,7 @@
 	* /drivers/eeprom/spi_xx25xx.c and /include/nuttx/eeprom/spi_xx25xx.h:
 	  Add support for ST Micro EEPROM device geometries.  From Sebastien
 	  Lorquet (2014-12-5).
+	* sched/mqueue: msg type should be char * not void * in mq_send,
+	  mq_timedsend, mq_receive, and mq_timedreceive.  Noted by  Pierre-Noel
+	  Bouteville (2014-12-05).
+
