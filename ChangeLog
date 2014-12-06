@@ -9147,3 +9147,7 @@
 	  creation return ENOSPC error if size exceeds the configured size of
 	  pre-allocated messages; Use ENOSPC vs ENOMEM per OpenGroup.org.  From
 	  Pierre-Noel Bouteville (2014-12-6).
+	* Add sys/custom_file.h.  Used when CUSTOM_FILE_IO is define and avoids
+	  re-definition errors about the FILE define.  From Thomas Gruber via
+	  the PX4 repository (2014-12-06).
+
