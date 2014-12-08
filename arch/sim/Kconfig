@@ -56,14 +56,15 @@ config SIM_LCDDRIVER
 config SIM_FRAMEBUFFER
 	bool "Build a simulated frame buffer driver"
 	default y
-	depends on NX && !NX_LCDDRIVER
+	depends on !NX_LCDDRIVER
 	---help---
 		Build a simulated frame buffer driver"
+
+if SIM_FRAMEBUFFER
 
 config SIM_X11FB
 	bool "Use X11 window"
 	default n
-	depends on NX
 	---help---
 		Use an X11 graphics window to simulate the graphics device"
 
@@ -77,7 +78,6 @@ config SIM_X11NOSHM
 config SIM_FBHEIGHT
 	int "Display height"
 	default 240
-	depends on NX
 	---help---
 		Simulated display height.  Default: 240
 
@@ -85,18 +85,18 @@ config SIM_FBWIDTH
 	int "Display width"
 	default 320 if SIM_LCDDRIVER
 	default 480 if SIM_FRAMEBUFFER
-	depends on NX
 	---help---
 		Simulated width of the display.  Default: 320 or 480
 
 config SIM_FBBPP
 	int "Pixel depth in bits"
 	default 8
-	depends on NX
 	---help---
 		Pixel depth in bits.  Valid choices are 4, 8, 16, 24, or 32.
 		If you use the X11 display emulation, the selected BPP must match the BPP
 		of your graphics hardware (probably 32 bits).  Default: 8
+
+endif # SIM_FRAMEBUFFER
 
 config SIM_TOUCHSCREEN
 	bool "Support an X11 mouse-based touchscreen emulation"
