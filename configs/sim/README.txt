@@ -641,3 +641,44 @@ touchscreen
 
   See apps/examples/README.txt for further information about build
   requirements and configuration settings.
+
+traveler
+
+  Configures to build the Traveler first person, 3-D ray casting game at
+  apps/graphics/traveler.  This configuration derives fromthe nx11
+  configuration and many of the comments there appear here as well.
+  This configuration defpends on X11 and, of course, can only be used in
+  environments that support X11!  (And it may not even be usable in all of
+  those environments without some "tweaking").
+
+  1. Special Framebuffer Configuration
+
+     This configuration uses the same special simulated framebuffer
+     configuration options as the nx configuration:
+
+       CONFIG_SIM_X11FB    - Use X11 window for framebuffer
+       CONFIG_SIM_FBHEIGHT - Height of the framebuffer in pixels
+       CONFIG_SIM_FBWIDTH  - Width of the framebuffer in pixels.
+       CONFIG_SIM_FBBPP    - Pixel depth in bits
+
+  2. X11 Configuration
+
+     But now, since CONFIG_SIM_X11FB is also selected the following
+     definitions are needed
+
+       CONFIG_SIM_FBBPP (must match the resolution of the display).
+       CONFIG_FB_CMAP=y
+
+     My system has 24-bit color, but packed into 32-bit words so
+     the correct setting of CONFIG_SIM_FBBPP is 32.
+
+  3. X11 Build Issues
+
+     To get the system to compile under various X11 installations
+     you may have to modify a few things.  For example, in order
+     to find libXext, I had to make the following change under
+     Ubuntu 9.09:
+
+       cd /usr/lib/
+       sudo ln -s libXext.so.6.4.0 libXext.so
+
