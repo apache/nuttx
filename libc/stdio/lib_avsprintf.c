@@ -47,6 +47,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* On some architectures, va_list is really a pointer to a structure on the
+ * stack.  And the va_arg builtin will modify that instance of va_list.  Since
+ * avsprintf traverse the parameters in the va_list twice, the va_list will
+ * be altered in this first cases and the second usage will fail.  So far, I
+ * have seen this only on the X86 family with GCC.
+ */
+
+#undef CLONE_APLIST
+#define ap1 ap
+#define ap2 ap
+
+#if defined(CONFIG_ARCH_X86)
+#  define CLONE_APLIST 1
+#  undef ap2
+#elif defined(CONFIG_ARCH_SIM) && (defined(CONFIG_HOST_X86) || defined(CONFIG_HOST_X86_64))
+#  define CLONE_APLIST 1
+#  undef ap2
+#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -98,17 +116,26 @@ int avsprintf(FAR char **ptr, const char *fmt, va_list ap)
 {
   struct lib_outstream_s nulloutstream;
   struct lib_memoutstream_s memoutstream;
+#ifdef CLONE_APLIST
+  va_list ap2;
+#endif
   FAR char *buf;
   int nbytes;
 
   DEBUGASSERT(ptr && fmt);
 
-  /* First, use a nullstream to get the size of the buffer.  The number
+#ifdef CLONE_APLIST
+  /* Clone the va_list so that the contents of the input values are not altered */
+
+  va_copy(ap2, ap);
+#endif
+
+/* First, use a nullstream to get the size of the buffer.  The number
    * of bytes returned may or may not include the null terminator.
    */
 
   lib_nulloutstream(&nulloutstream);
-  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap);
+  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap1);
 
   /* Then allocate a buffer to hold that number of characters, adding one
    * for the null terminator.
@@ -131,7 +158,7 @@ int avsprintf(FAR char **ptr, const char *fmt, va_list ap)
   /* Then let lib_vsprintf do it's real thing */
 
   nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
-                        fmt, ap);
+                        fmt, ap2);
 
   /* Return a pointer to the string to the caller.  NOTE: the memstream put()
    * method has already added the NUL terminator to the end of the string (not
