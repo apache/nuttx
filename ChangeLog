@@ -9162,3 +9162,9 @@
 	  all SPI and all F2 and F4 (let me know if this introduces any other
 	  issues).  Discovered and fixed by Sebastien Lorquet after much
 	  consternation (2014-12-8).
+	* libc/stdio/lib_avsprintf.c: avsprintf():  Fix a bug in usage of
+	  va_list on x86.  On x86, va_list is a pointer to a single copy on the
+	  stack.  avsprintf() calls lib_vsprintf() twice and so traverses the
+	  va_list twice using va_start.  va_start modifies that single copy on 
+	  he stack so that the second call to lib_vsprintf() fails.  This appears
+	  to be an issue with x86 only so far (2014-12-8).
