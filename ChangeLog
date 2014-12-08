@@ -9154,4 +9154,6 @@
 	  redefined strtok_r on some platforms (2014-12-8).
 	* arch/sim/Kconfig:  Allow building the simulated framebuffer driver
 	  even if NX is not enabled (12014-12-8).
+	* configs/sim/traveler and README.txt:  Add a configuration build and test
+	  the Traveler firt person game using the simualtor (2014-12-8).
 
