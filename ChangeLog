@@ -9150,4 +9150,8 @@
 	* Add sys/custom_file.h.  Used when CUSTOM_FILE_IO is define and avoids
 	  re-definition errors about the FILE define.  From Thomas Gruber via
 	  the PX4 repository (2014-12-06).
+	* tools/bfd-converter.c and mkdeps.c:  Eliminate a warnging about
+	  redefined strtok_r on some platforms (2014-12-8).
+	* arch/sim/Kconfig:  Allow building the simulated framebuffer driver
+	  even if NX is not enabled (12014-12-8).
 
