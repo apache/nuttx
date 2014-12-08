@@ -77,7 +77,7 @@ CSRCS += fs_unlink.c fs_write.c
 # Certain interfaces are not available if there is no mountpoint support
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-CSRCS += fs_fsync
+CSRCS += fs_fsync.c
 endif
 
 # Support for positional file access
