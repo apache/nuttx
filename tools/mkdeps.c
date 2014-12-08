@@ -183,6 +183,7 @@ static char *MY_strtok_r(char *str, const char *delim, char **saveptr)
   return pbegin;
 }
 
+#undef strtok_r
 #define strtok_r MY_strtok_r
 #endif
 
