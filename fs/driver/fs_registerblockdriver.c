@@ -46,6 +46,8 @@
 
 #include "inode/inode.h"
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+
 /****************************************************************************
  * Pre-processor oDefinitions
  ****************************************************************************/
@@ -121,4 +123,6 @@ int register_blockdriver(FAR const char *path,
   inode_semgive();
   return ret;
 }
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT */
 

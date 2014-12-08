@@ -49,6 +49,8 @@
 
 #include "inode/inode.h"
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -146,3 +148,5 @@ int fsync(int fd)
 
   return file_fsync(filep);
 }
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT */

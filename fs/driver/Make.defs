@@ -38,8 +38,14 @@
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 CSRCS += fs_registerdriver.c fs_unregisterdriver.c
+
+# Don't build-in block driver support if there are no mountpoints
+
+
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
 CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
+endif
 
 # System logging to a character device (or file)
 
