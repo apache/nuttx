@@ -41,9 +41,14 @@ ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS =
+
+ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+  CSRCS += sim_boot.c
+endif
+
 ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  CSRCS += up_touchscreen.c
+  CSRCS += sim_touchscreen.c
 endif
 endif
 COBJS = $(CSRCS:.c=$(OBJEXT))
