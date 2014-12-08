@@ -9168,3 +9168,6 @@
 	  va_list twice using va_start.  va_start modifies that single copy on 
 	  he stack so that the second call to lib_vsprintf() fails.  This appears
 	  to be an issue with x86 only so far (2014-12-8).
+	* stdint.h:  Don't use hex values to specify minimum values of fixed
+	  width, signed values.  Hex values are inherently unsigned and not
+	  usable for this purpose in all contexts (2014-12-8).
