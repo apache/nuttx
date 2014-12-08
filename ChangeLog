@@ -9156,4 +9156,9 @@
 	  even if NX is not enabled (12014-12-8).
 	* configs/sim/traveler and README.txt:  Add a configuration build and test
 	  the Traveler firt person game using the simualtor (2014-12-8).
-
+	* arch/arm/src/stm32/chip/stm32f20xxx_pinmap.h and stm32f40xxx_pinmap.h:
+	  Set the GPIO_SPEED_50MHz on all F2 and F4 SPI pin configurations.
+	  This is based on an F411 SPI1 errata but the fixed is generalized to
+	  all SPI and all F2 and F4 (let me know if this introduces any other
+	  issues).  Discovered and fixed by Sebastien Lorquet after much
+	  consternation (2014-12-8).
