@@ -1369,7 +1369,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list a
               ptmp = (char*)g_nullstring;
             }
 
-          /* Get the widith of the string and perform right-justification
+          /* Get the width of the string and perform right-justification
            * operations.
            */
 
