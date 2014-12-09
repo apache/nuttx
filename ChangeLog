@@ -9171,3 +9171,7 @@
 	* stdint.h:  Don't use hex values to specify minimum values of fixed
 	  width, signed values.  Hex values are inherently unsigned and not
 	  usable for this purpose in all contexts (2014-12-8).
+	* arch/arm/src/tiva/tiva_i2c.c, tiva_i2c.h, Kconfig, and Make.defs: Add
+	  build framework and skeleton files for Tiva I2C driver.  Initial
+	  commit is just the STM32 I2C driver with name changes and STM32-
+	  specific logic removed (2014-12-9).
