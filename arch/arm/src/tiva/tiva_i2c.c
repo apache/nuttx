@@ -320,7 +320,11 @@ static int tiva_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
 static const struct tiva_i2c_config_s tiva_i2c0_config =
 {
   .base       = TIVA_I2C0_BASE,
+#ifdef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGCI2C_R0,
+#else
   .rcgbit     = SYSCON_RCGC1_I2C0,
+#endif
   .scl_pin    = GPIO_I2C0_SCL,
   .sda_pin    = GPIO_I2C0_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -347,7 +351,11 @@ static struct tiva_i2c_priv_s tiva_i2c0_priv =
 static const struct tiva_i2c_config_s tiva_i2c1_config =
 {
   .base       = TIVA_I2C1_BASE,
+#ifdef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGCI2C_R1,
+#else
   .rcgbit     = SYSCON_RCGC1_I2C1,
+#endif
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -374,7 +382,11 @@ static struct tiva_i2c_priv_s tiva_i2c1_priv =
 static const struct tiva_i2c_config_s tiva_i2c2_config =
 {
   .base       = TIVA_I2C2_BASE,
+#ifdef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGCI2C_R2,
+#else
   .rcgbit     = SYSCON_RCGC1_I2C2,
+#endif
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -401,7 +413,11 @@ static struct tiva_i2c_priv_s tiva_i2c2_priv =
 static const struct tiva_i2c_config_s tiva_i2c3_config =
 {
   .base       = TIVA_I2C3_BASE,
+#ifdef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGCI2C_R3,
+#else
   .rcgbit     = SYSCON_RCGC1_I2C3,
+#endif
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -428,7 +444,11 @@ static struct tiva_i2c_priv_s tiva_i2c3_priv =
 static const struct tiva_i2c_config_s tiva_i2c4_config =
 {
   .base       = TIVA_I2C4_BASE,
+#ifdef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGCI2C_R4,
+#else
   .rcgbit     = SYSCON_RCGC1_I2C4,
+#endif
   .scl_pin    = GPIO_I2C4_SCL,
   .sda_pin    = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -455,7 +475,11 @@ static struct tiva_i2c_priv_s tiva_i2c4_priv =
 static const struct tiva_i2c_config_s tiva_i2c5_config =
 {
   .base       = TIVA_I2C5_BASE,
+#ifdef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGCI2C_R5,
+#else
   .rcgbit     = SYSCON_RCGC1_I2C5,
+#endif
   .scl_pin    = GPIO_I2C5_SCL,
   .sda_pin    = GPIO_I2C5_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -1369,7 +1393,11 @@ static int tiva_i2c_init(FAR struct tiva_i2c_priv_s *priv)
 
   /* Enable clocking to the I2C peripheral */
 
+#ifdef TIVA_SYSCON_RCGCI2C
+  up_modifyreg32(TIVA_SYSCON_RCGCI2C, 0, priv->rcgbit);
+#else
   up_modifyreg32(TIVA_SYSCON_RCGC1, 0, priv->rcgbit);
+#endif
 
   /* Configure pins */
 
