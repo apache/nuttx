@@ -198,8 +198,13 @@
 #define SMARTFS_SECTOR_TYPE_FILE  2
 
 #ifndef CONFIG_SMARTFS_DIRDEPTH
-#define   CONFIG_SMARTFS_DIRDEPTH 8
+#  define CONFIG_SMARTFS_DIRDEPTH 8
 #endif
+
+/* Buffer flags (when CRC enabled) */
+
+#define SMARTFS_BFLAG_DIRTY       0x01    /* Set if data changed in the sector */
+#define SMARTFS_BFLAG_NEWALLOC    0x02    /* Set if sector not written since alloc */
 
 #define SMARTFS_ERASEDSTATE_16BIT (uint16_t) ((CONFIG_SMARTFS_ERASEDSTATE << 8) | \
                                     CONFIG_SMARTFS_ERASEDSTATE)
@@ -210,6 +215,10 @@
 
 #define SMARTFS_NEXTSECTOR(h)    ( *((uint16_t *) h->nextsector))
 #define SMARTFS_USED(h)          ( *((uint16_t *) h->used))
+
+#ifdef CONFIG_MTD_SMART_ENABLE_CRC
+#define CONFIG_SMARTFS_USE_SECTOR_BUFFER
+#endif
 
 /****************************************************************************
  * Public Types
@@ -252,12 +261,28 @@ struct smartfs_entry_header_s
  * sector.  It manages the sector chain and used bytes in the sector.
  */
 
+#if defined(CONFIG_MTD_SMART_ENABLE_CRC) && defined(CONFIG_SMART_CRC_32)
+struct smartfs_chain_header_s
+{
+  uint8_t           nextsector[4];/* Next logical sector in the chain */
+  uint8_t           used[4];      /* Number of bytes used in this sector */
+  uint8_t           type;         /* Type of sector entry (file or dir) */
+};
+#elif defined(CONFIG_MTD_SMART_ENABLE_CRC) && defined(CONFIG_SMART_CRC_16)
 struct smartfs_chain_header_s
 {
   uint8_t           type;         /* Type of sector entry (file or dir) */
   uint8_t           nextsector[2];/* Next logical sector in the chain */
   uint8_t           used[2];      /* Number of bytes used in this sector */
 };
+#else
+struct smartfs_chain_header_s
+{
+  uint8_t           type;         /* Type of sector entry (file or dir) */
+  uint8_t           nextsector[2];/* Next logical sector in the chain */
+  uint8_t           used[2];      /* Number of bytes used in this sector */
+};
+#endif
 
 /* This structure describes the state of one open file.  This structure
  * is protected by the volume semaphore.
@@ -266,6 +291,10 @@ struct smartfs_chain_header_s
 struct smartfs_ofile_s
 {
   struct smartfs_ofile_s   *fnext;      /* Supports a singly linked list */
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  uint8_t*                  buffer;     /* Sector buffer to reduce writes */
+  uint8_t                   bflags;     /* Buffer flags */
+#endif
   int16_t                   crefs;      /* Reference count */
   mode_t                    oflags;     /* Open mode */
   struct smartfs_entry_s    entry;      /* Describes the SMARTFS inode entry */
@@ -331,7 +360,7 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
         uint16_t parentdirsector, const char* filename,
         uint16_t type,
         mode_t mode, struct smartfs_entry_s *direntry,
-        uint16_t sectorno);
+        uint16_t sectorno, FAR struct smartfs_ofile_s *sf);
 
 int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
         struct smartfs_entry_s *entry);
@@ -340,7 +369,19 @@ int smartfs_countdirentries(struct smartfs_mountpt_s *fs,
         struct smartfs_entry_s *entry);
 
 int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
-        struct smartfs_entry_s *entry);
+        struct smartfs_entry_s *entry, FAR struct smartfs_ofile_s *sf);
+
+uint16_t smartfs_rdle16(FAR const void *val);
+
+void smartfs_wrle16(void *dest, uint16_t val);
+
+uint32_t smartfs_rdle32(FAR const void *val);
+
+void smartfs_wrle32(uint8_t *dest, uint32_t val);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+struct smartfs_mountpt_s* smartfs_get_first_mount(void);
+#endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 struct smartfs_mountpt_s* smartfs_get_first_mount(void);

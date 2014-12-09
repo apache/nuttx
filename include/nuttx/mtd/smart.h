@@ -50,6 +50,9 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#define SMART_DEBUG_CMD_SET_DEBUG_LEVEL   1
+#define SMART_DEBUG_CMD_SHOW_LOGMAP       2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -91,6 +94,19 @@ struct mtd_smart_procfs_data_s
   FAR const struct smart_alloc_s  *allocs; /* Array of allocations */ 
   uint16_t            alloccount;       /* Number of items in the array */
 #endif
+#ifdef CONFIG_MTD_SMART_WEAR_LEVEL
+  uint32_t            uneven_wearcount; /* Number of uneven block erases */
+#endif
+};
+
+/* The following defines debug command data passed from the procfs layer to
+   the SMART MTD layer for debug purposes.
+ */
+
+struct mtd_smart_debug_data_s
+{
+  uint8_t             debugcmd;         /* Debug command */
+  uint32_t            debugdata;        /* Debug data */
 };
 
 /****************************************************************************

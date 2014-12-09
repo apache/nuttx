@@ -394,6 +394,117 @@ config MTD_SMART_READAHEAD
 	default n
 	depends on DRVR_READAHEAD
 
+config MTD_SMART_WEAR_LEVEL
+	bool "Support FLASH wear leveling"
+	depends on MTD_SMART
+	default y
+	---help---
+		Adds extra logic and RAM to guarantee equal wear leveling of the FLASH
+		device by recording and monitoring erase block operations and selecting
+		sector allocations to ensure all erase blocks are worn evenly.  This will
+		evenly wear both dynamic and static data on the device.
+
+if MTD_SMART_WEAR_LEVEL && !SMART_CRC_16
+
+config MTD_SMART_CONVERT_WEAR_FORMAT
+	bool "Convert existing non wear leveling FLASH to wear leveling"
+	default n
+	---help---
+		Adds a little extra code which detects an existing SMART format on a device
+		that was created prior to the wear leveling implementation.  This conversion
+		only works if either no CRC is being used or if CRC-8 is being used as other
+		CRC versions use a different header format and require a mksmartfs on the
+		device even if an existing format is there.
+
+endif
+
+config MTD_SMART_ENABLE_CRC
+	bool "Enable Sector CRC error detection"
+	depends on MTD_SMART
+	default n
+	---help---
+		Enables logic to compute and validate a CRC for logical sectors.  The
+		CRC is calculated for all bytes in the logical sector.  The CRC size is
+		selectable (8-bit, 16-bit, 32-bit).  For added protection, larger CRCs should
+		be used with larger (2K - 4K) sector sizes.  Enabling CRC protection will
+		cause increased sector relocation and increased erase block erasures since
+		directory and wear-level status updates can no longer be performed in-place
+		and mandate re-writing the information to a new sector.
+
+		An 8-bit CRC protection scheme can be added to an existing non-CRC formatted
+		SMART volume without needing to reformat the drive.  As sectors are re-written
+		or relocated, they will be converted to CRC protected sectors.
+
+choice
+	prompt "CRC level selection"
+	depends on MTD_SMART_ENABLE_CRC
+	default SMART_CRC_8
+	---help---
+		Select the level of CRC protection implemented in the SMART MTD layer.
+		Smaller CRC selection uses less overhead per logical sectors, but also has
+		a higher probability of not detecting multiple bit errors.  Devices with
+		larger logical sector sizes should use a larger CRC.
+
+config SMART_CRC_8
+	bool "CRC-8"
+
+config SMART_CRC_16
+	bool "CRC-16"
+
+endchoice
+
+config MTD_SMART_MINIMIZE_RAM
+	bool "Minimize SMART RAM usage using logical sector cache"
+	depends on MTD_SMART
+	default 0
+	---help---
+		Reduces RAM usage in the SMART MTD layer by replacing the 1-for-1 logical to
+		physical sector map with a smaller cache-based structure.  This can save a
+		considerable amount of RAM on devices with a large sector count, but at the
+		expense of increased read/write times when a cache miss occurs.  If the
+		requested logical sector has not been cached, then the device will need to be
+		scanned to located it on the physical medium.
+
+config MTD_SMART_SECTOR_CACHE_SIZE
+	int "Number of entries in the SMART logical sector cache"
+	depends on MTD_SMART_MINIMIZE_RAM
+	default 512
+	---help---
+		Sets the size of the cache used for logical to physical sector mapping.  A
+		larger number allows larger files to be "seek"ed randomly without encountering
+		cache misses.  Any files larger than CACH_SIZE * SECTOR_SIZE that are seeked
+		start to end will cause the cache to flush forcing manual scanning of the
+		MTD device to find the logical to physical mappings.
+
+config MTD_SMART_SECTOR_PACK_COUNTS
+	bool "Pack free and release counts when possible"
+	depends on MTD_SMART_MINIMIZE_RAM
+	default y
+	---help---
+		For volumes with 16 sectors per erase block or less, this option causes the
+		free sector and released sector counts used for allocation and garbage
+		collection to be packed such that two values are stored per byte.  For
+		volumes with 16 sectors per erase block, the 4 LSBs are packed and all of
+		the high-order bits are packed separately (8 per byte).  This squeezes even
+		more RAM out.
+
+config MTD_SMART_SECTOR_ERASE_DEBUG
+	bool "Track Erase Block erasure counts"
+	depends on MTD_SMART
+	default n
+	---help---
+		Allocates an Erase Block erase count array and keeps track of the number
+		of erases per erase block.  This data is then presented on the procfs
+		interface.
+
+config MTD_SMART_ALLOC_DEBUG
+	bool "RAM Allocation Debug"
+	depends on MTD_SMART
+	default n
+	---help---
+		Records all SMART MTD layer allocations for debug purposes and makes them
+		accessible from the ProcFS interface if it is enabled.
+
 endif # MTD_SMART
 
 config MTD_RAMTRON

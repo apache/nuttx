@@ -89,6 +89,20 @@ struct smart_read_write_s
   const uint8_t *buffer;  /* Pointer to the data to write */
 };
 
+/* The following defines the procfs data exchange interface between the
+ * SMART MTD and FS layers.
+ */
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+struct smart_procfs_data_s
+{
+#ifdef CONFIG_MTD_SMART_ERASE_DEBUG
+  const uint16_t  *erasecounts;   /* Pointer to the erase counts array */
+  uint16_t        erasesize;      /* Number of entries in the erase counts array */
+#endif
+};
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

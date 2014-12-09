@@ -200,6 +200,12 @@
                                            *      ProcFS data.
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
+#define BIOC_DEBUGCMD   _BIOC(0x000B)     /* Send driver specific debug command /
+                                           * data to the block device.
+                                           * IN:  Pointer to a struct defined for
+                                           *      the block with specific debug
+                                           *      command and data.
+                                           * OUT: None.  */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 

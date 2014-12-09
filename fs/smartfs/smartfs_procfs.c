@@ -108,6 +108,7 @@ struct smartfs_procfs_entry_s
 {
   const char  *name;                 /* Name of the directory entry */
   size_t (*read)(FAR struct file *filep, FAR char *buffer, size_t buflen);
+  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
   uint8_t type;
 };
 
@@ -121,6 +122,8 @@ static int      smartfs_open(FAR struct file *filep, FAR const char *relpath,
 static int      smartfs_close(FAR struct file *filep);
 static ssize_t  smartfs_read(FAR struct file *filep, FAR char *buffer,
                   size_t buflen);
+static ssize_t  smartfs_write(FAR struct file *filep, FAR const char *buffer,
+                  size_t buflen);
 
 static int      smartfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
@@ -132,6 +135,8 @@ static int      smartfs_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int      smartfs_stat(FAR const char *relpath, FAR struct stat *buf);
 
+static ssize_t  smartfs_debug_write(FAR struct file *filep, FAR const char *buffer,
+                  size_t buflen);
 static size_t   smartfs_status_read(FAR struct file *filep, FAR char *buffer,
                   size_t buflen);
 #ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
@@ -153,13 +158,14 @@ static size_t   smartfs_files_read(FAR struct file *filep, FAR char *buffer,
 
 static const struct smartfs_procfs_entry_s g_direntry[] =
 {
+  { "debuglevel", NULL, smartfs_debug_write, DTYPE_FILE },
 #ifdef CONFIG_MTD_SMART_SECTOR_ERASE_DEBUG
-  { "erasemap", smartfs_erasemap_read, DTYPE_FILE },
+  { "erasemap",   smartfs_erasemap_read, NULL, DTYPE_FILE },
 #endif
 #ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
-  { "mem",      smartfs_mem_read, DTYPE_FILE },
+  { "mem",        smartfs_mem_read, NULL, DTYPE_FILE },
 #endif
-  { "status",   smartfs_status_read, DTYPE_FILE }
+  { "status",     smartfs_status_read, NULL, DTYPE_FILE }
 };
 
 static const uint8_t g_direntrycount = sizeof(g_direntry) /
@@ -181,7 +187,7 @@ const struct procfs_operations smartfs_procfsoperations =
   smartfs_read,       /* read */
 
   /* No write supported */
-  NULL,               /* write */
+  smartfs_write,      /* write */
 
   smartfs_dup,        /* dup */
 
@@ -430,7 +436,50 @@ static ssize_t smartfs_read(FAR struct file *filep, FAR char *buffer,
     {
       if (priv->level1.direntry < g_direntrycount)
         {
-          ret = g_direntry[priv->level1.direntry].read(filep, buffer, buflen);
+          if (g_direntry[priv->level1.direntry].read)
+            {
+              ret = g_direntry[priv->level1.direntry].read(filep, buffer, buflen);
+            }
+        }
+    }
+
+  /* Update the file offset */
+
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: smartfs_write
+ ****************************************************************************/
+
+static ssize_t smartfs_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen)
+{
+  FAR struct smartfs_file_s *priv;
+  ssize_t ret;
+
+  /* Recover our private data from the struct file instance */
+
+  priv = (FAR struct smartfs_file_s *)filep->f_priv;
+  DEBUGASSERT(priv);
+
+  /* Perform the write based on the directory entry */
+
+  ret = 0;
+
+  if (priv->level1.base.level == 3)
+    {
+      if (priv->level1.direntry < g_direntrycount)
+        {
+          if (g_direntry[priv->level1.direntry].write)
+            {
+              ret = g_direntry[priv->level1.direntry].write(filep, buffer, buflen);
+            }
         }
     }
 
@@ -675,6 +724,8 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
         }
       else
         {
+          /* The entry being stat'ed is lowest level */
+
           if (g_direntry[level1.direntry].type == DTYPE_DIRECTORY)
             {
               buf->st_mode |= S_IFDIR;
@@ -682,6 +733,13 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
           else
             {
               buf->st_mode |= S_IFREG;
+            }
+
+          /* Test if the entry is writable */
+
+          if (g_direntry[level1.direntry].write != NULL)
+            {
+              buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
             }
         }
     }
@@ -693,6 +751,33 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
   buf->st_blocks  = 0;
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: smartfs_debug_write
+ *
+ * Description: Performs the write operation for the "debug" file
+ *
+ ****************************************************************************/
+
+static ssize_t smartfs_debug_write(FAR struct file *filep, FAR const char *buffer,
+                                  size_t buflen)
+{
+  struct mtd_smart_debug_data_s debug_data;
+  FAR struct smartfs_file_s *priv;
+
+  priv = (FAR struct smartfs_file_s *) filep->f_priv;
+
+  /* Populate the debug_data structure */
+
+  debug_data.debugcmd = SMART_DEBUG_CMD_SET_DEBUG_LEVEL;
+  debug_data.debugdata = atoi(buffer);
+
+  priv->level1.mount->fs_blkdriver->u.i_bops->ioctl(
+      priv->level1.mount->fs_blkdriver, BIOC_DEBUGCMD,
+      (unsigned long) &debug_data);
+
+  return buflen;
 }
 
 /****************************************************************************
@@ -709,9 +794,7 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
   FAR struct smartfs_file_s *priv;
   int       ret;
   size_t    len;
-#if 0 /* Not used */
   int       utilization;
-#endif
 
   priv = (FAR struct smartfs_file_s *) filep->f_priv;
 
@@ -731,7 +814,6 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
 
       if (ret == OK)
         {
-#if 0 /* Not used */
           /* Calculate the sector utilization percentage */
 
           if (procfs_data.blockerases == 0)
@@ -744,7 +826,6 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
                 procfs_data.unusedsectors) / (procfs_data.blockerases *
                 procfs_data.sectorsperblk);
             }
-#endif
 
           /* Format and return data in the buffer */
 
@@ -752,18 +833,22 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
                                          "Total Sectors:     %d\nSector Size:       %d\n"
                                          "Format Sector:     %d\nDir Sector:        %d\n"
                                          "Free Sectors:      %d\nReleased Sectors:  %d\n"
-                                         "Sectors Per Block: %d\n",
-                                         //"Unused Sectors:    %d\nBlock Erases:      %d\n"
-                                         //"Sectors Per Block: %d\nSector Utilization:%d%%\n",
+                                         "Unused Sectors:    %d\nBlock Erases:      %d\n"
+                                         "Sectors Per Block: %d\nSector Utilization:%d%%\n"
+#ifdef CONFIG_MTD_SMART_WEAR_LEVEL
+                                         "Uneven Wear Count: %d\n"
+#endif
+                  ,
                   procfs_data.formatversion, procfs_data.namelen,
                   procfs_data.totalsectors, procfs_data.sectorsize,
                   procfs_data.formatsector, procfs_data.dirsector,
                   procfs_data.freesectors, procfs_data.releasesectors,
-                  procfs_data.sectorsperblk);
-#if 0 /* Not used */
                   procfs_data.unusedsectors, procfs_data.blockerases,
-                  procfs_data.sectorsperblk, utilization);
+                  procfs_data.sectorsperblk, utilization
+#ifdef CONFIG_MTD_SMART_WEAR_LEVEL
+                  , procfs_data.uneven_wearcount
 #endif
+           );
         }
 
       /* Indicate we have already provided all the data */

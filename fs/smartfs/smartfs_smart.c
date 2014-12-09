@@ -196,11 +196,27 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
       goto errout_with_semaphore;
     }
 
+  /* Allocate a sector buffer if CRC enabled in the MTD layer */
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  sf->buffer = (uint8_t *) kmm_malloc(fs->fs_llformat.availbytes);
+  if (sf->buffer == NULL)
+    {
+      /* Error ... no memory */
+
+      kmm_free(sf);
+      ret = -ENOMEM;
+      goto errout_with_semaphore;
+    }
+
+  sf->bflags = 0;
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
   sf->entry.name = NULL;
   ret = smartfs_finddirentry(fs, &sf->entry, relpath, &parentdirsector,
                              &filename);
 
-  /* Three possibililities: (1) a node exists for the relpath and
+  /* Three possibilities: (1) a node exists for the relpath and
    * dirinfo describes the directory entry of the entity, (2) the
    * node does not exist, or (3) some error occurred.
    */
@@ -240,7 +256,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
             {
               /* Truncate the file as part of the open */
 
-              ret = smartfs_truncatefile(fs, &sf->entry);
+              ret = smartfs_truncatefile(fs, &sf->entry, sf);
               if (ret < 0)
                 {
                   goto errout_with_buffer;
@@ -268,7 +284,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
           ret = smartfs_createentry(fs, parentdirsector, filename,
                                     SMARTFS_DIRENT_TYPE_FILE, mode,
-                                    &sf->entry, 0xFFFF);
+                                    &sf->entry, 0xFFFF, sf);
           if (ret != OK)
             {
               goto errout_with_buffer;
@@ -426,6 +442,14 @@ static int smartfs_close(FAR struct file *filep)
       kmm_free(sf->entry.name);
       sf->entry.name = NULL;
     }
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  if (sf->buffer)
+    {
+      kmm_free(sf->buffer);
+    }
+#endif
+
   kmm_free(sf);
 
 okout:
@@ -573,6 +597,39 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
   struct smartfs_chain_header_s *header;
   int ret = OK;
 
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  if (sf->bflags & SMARTFS_BFLAG_DIRTY)
+    {
+      /* Update the header with the number of bytes written */
+
+      header = (struct smartfs_chain_header_s *) sf->buffer;
+      if (*((uint16_t *) header->used) == SMARTFS_ERASEDSTATE_16BIT)
+        {
+          *((uint16_t *) header->used) = sf->byteswritten;
+        }
+      else
+        {
+          *((uint16_t *) header->used) += sf->byteswritten;
+        }
+
+      /* Write the entire sector to FLASH */
+
+      readwrite.logsector = sf->currsector;
+      readwrite.offset = 0;
+      readwrite.count = fs->fs_llformat.availbytes;
+      readwrite.buffer = sf->buffer;
+      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          fdbg("Error %d writing used bytes for sector %d\n", ret, sf->currsector);
+          goto errout;
+        }
+
+      sf->byteswritten = 0;
+      sf->bflags = 0;
+    }
+#else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
   /* Test if we have written bytes to the current sector that
    * need to be recorded in the chain header's used bytes field. */
 
@@ -617,6 +674,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
 
       sf->byteswritten = 0;
     }
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
 errout:
   return ret;
@@ -761,6 +819,17 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
        * the current sector first.
        */
 
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+      readwrite.count = fs->fs_llformat.availbytes - sf->curroffset;
+      if (readwrite.count > buflen)
+        {
+          readwrite.count = buflen;
+        }
+
+      memcpy(&sf->buffer[sf->curroffset], &buffer[byteswritten], readwrite.count);
+      sf->bflags |= SMARTFS_BFLAG_DIRTY;
+
+#else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
       readwrite.offset = sf->curroffset;
       readwrite.logsector = sf->currsector;
       readwrite.buffer = (uint8_t *) &buffer[byteswritten];
@@ -782,24 +851,74 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
               fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
               goto errout_with_semaphore;
             }
-
-          /* Update our control variables */
-
-          sf->entry.datlen += readwrite.count;
-          sf->byteswritten += readwrite.count;
-          sf->filepos += readwrite.count;
-          sf->curroffset += readwrite.count;
-          buflen -= readwrite.count;
-          byteswritten += readwrite.count;
         }
 
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
+      /* Update our control variables */
+
+      sf->entry.datlen += readwrite.count;
+      sf->byteswritten += readwrite.count;
+      sf->filepos += readwrite.count;
+      sf->curroffset += readwrite.count;
+      buflen -= readwrite.count;
+      byteswritten += readwrite.count;
+
       /* Test if we wrote a full sector of data */
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+      if (sf->curroffset == fs->fs_llformat.availbytes && buflen)
+        {
+          /* First get a new chained sector */
+
+          ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
+          if (ret < 0)
+            {
+              fdbg("Error %d allocating new sector\n", ret);
+              goto errout_with_semaphore;
+            }
+
+          /* Copy the new sector to the old one and chain it */
+
+          header = (struct smartfs_chain_header_s *) sf->buffer;
+          *((uint16_t *) header->nextsector) = (uint16_t) ret;
+
+          /* Now sync the file to write this sector out */
+
+          ret = smartfs_sync_internal(fs, sf);
+          if (ret != OK)
+            {
+              goto errout_with_semaphore;
+            }
+
+          /* Record the new sector in our tracking variables and
+           * reset the offset to "zero".
+           */
+
+          if (sf->currsector == SMARTFS_NEXTSECTOR(header))
+            {
+              /* Error allocating logical sector! */
+
+              fdbg("Error - duplicate logical sector %d\n", sf->currsector);
+            }
+
+          sf->bflags = SMARTFS_BFLAG_DIRTY;
+          sf->currsector = SMARTFS_NEXTSECTOR(header);
+          sf->curroffset = sizeof(struct smartfs_chain_header_s);
+          memset(sf->buffer, CONFIG_SMARTFS_ERASEDSTATE, fs->fs_llformat.availbytes);
+          header->type = SMARTFS_DIRENT_TYPE_FILE;
+        }
+#else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
       if (sf->curroffset == fs->fs_llformat.availbytes)
         {
           /* Sync the file to write this sector out */
 
-          smartfs_sync_internal(fs, sf);
+          ret = smartfs_sync_internal(fs, sf);
+          if (ret != OK)
+            {
+              goto errout_with_semaphore;
+            }
 
           /* Allocate a new sector if needed */
 
@@ -833,10 +952,18 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
                * reset the offset to "zero".
                */
 
+              if (sf->currsector == SMARTFS_NEXTSECTOR(header))
+                {
+                  /* Error allocating logical sector! */
+
+                  fdbg("Error - duplicate logical sector %d\n", sf->currsector);
+                }
+
               sf->currsector = SMARTFS_NEXTSECTOR(header);
               sf->curroffset = sizeof(struct smartfs_chain_header_s);
             }
         }
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
     }
 
   ret = byteswritten;
@@ -967,6 +1094,27 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
       sf->currsector = SMARTFS_NEXTSECTOR(header);
       sf->filepos += SMARTFS_USED(header);
     }
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+
+  /* When using sector buffering, we must read in the last buffer to our
+   * sf->buffer in case any changes are made.
+   */
+
+  if (sf->currsector != SMARTFS_ERASEDSTATE_16BIT)
+    {
+      readwrite.logsector = sf->currsector;
+      readwrite.offset = 0;
+      readwrite.count = fs->fs_llformat.availbytes;
+      readwrite.buffer = (uint8_t *) sf->buffer;
+      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          fdbg("Error %d reading sector %d header\n", ret, sf->currsector);
+          goto errout;
+        }
+    }
+#endif
 
   /* Now calculate the offset */
 
@@ -1465,6 +1613,11 @@ static int smartfs_statfs(struct inode *mountpt, struct statfs *buf)
   buf->f_namelen = fs->fs_llformat.namesize;
   buf->f_bsize = fs->fs_llformat.sectorsize;
   buf->f_blocks = fs->fs_llformat.nsectors;
+  if (buf->f_blocks == 65535)
+    {
+      buf->f_blocks++;
+    }
+
   buf->f_bfree = fs->fs_llformat.nfreesectors;
   buf->f_bavail = fs->fs_llformat.nfreesectors;
   buf->f_files = 0;
@@ -1596,7 +1749,7 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
       /* Create the directory */
 
       ret = smartfs_createentry(fs, parentdirsector, filename,
-          SMARTFS_DIRENT_TYPE_DIR, mode, &entry, 0xFFFF);
+          SMARTFS_DIRENT_TYPE_DIR, mode, &entry, 0xFFFF, NULL);
       if (ret != OK)
         {
           goto errout_with_semaphore;
@@ -1840,7 +1993,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
       mode = oldentry.flags & SMARTFS_DIRENT_MODE;
       type = oldentry.flags & SMARTFS_DIRENT_TYPE;
       ret = smartfs_createentry(fs, newparentdirsector, newfilename,
-                                type, mode, &newentry, oldentry.firstsector);
+                                type, mode, &newentry, oldentry.firstsector, NULL);
       if (ret != OK)
         {
           goto errout_with_semaphore;

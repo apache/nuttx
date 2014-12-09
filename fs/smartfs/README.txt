@@ -20,11 +20,12 @@ Features
 
   This implementation is a full-feature file system from the perspective of
   file and directory access (i.e. not considering low-level details like the
-  lack of wear-leveling, etc.).  The SMART File System was designed specifically
+  lack of bad block management).  The SMART File System was designed specifically
   for small SPI based FLASH parts (1-8 Mbyte for example), though this is not
   a limitation.  It can certainly be used for any size FLASH and can work with
-  any MTD device by binding it with the SMART MTD layer.  The FS includes
-  support for:
+  any MTD device by binding it with the SMART MTD layer and has been tested with
+  devices as large as 128MByte (using a 2048 byte sector size with 65534 sectors).
+  The FS includes support for:
     - Multiple open files from different threads.
     - Open for read/write access with seek capability.
     - Appending to end of files in either write, append or read/write
@@ -32,6 +33,9 @@ Features
     - Directory support.
     - Support for multiple mount points on a single volume / partition (see
       details below).
+    - Selectable FLASH Wear leveling algorithym
+    - Selectable CRC-8 or CRC-16 error detection for sector data
+    - Reduced RAM model for FLASH geometries with large number of sectors (16K-64K)
 
 General operation
 =================
@@ -68,7 +72,7 @@ General operation
   erase state to non-erase state) to indicate the sector data is valid.  When
   a sector's data needs to be deleted, the RELEASED flag will be "set" to
   indicate the sector is no longer in use.  This is done because the erase
-  block continaing the sector cannot necessarly be erased until all sectors
+  block containing the sector cannot necessarily be erased until all sectors
   in that block have been "released".  This allows sectors in the erase
   block to remain active while others are inactive until a "garbage collection"
   operation is needed on the volume to reclaim released sectors.
@@ -85,10 +89,12 @@ General operation
   The SMART MTD block layer reserves some logical sector numbers for internal
   use, including
 
-    Sector 0:    The Format Sector.  Has a format signture, format version, etc.
-    Sector 1:    The 1st (or only) Root Directory entry
-    Sector 2-8:  Additional root directories when Multi-Mount points are supported.
-    Sector 9-11: Reserved (maybe for sector wear-leveling, etc.)
+    Sector 0:     The Format Sector.  Has a format signature, format version, etc.
+                  Also contains wear leveling information if enabled.
+    Sector 1-2:   Additional wear-leveling info storage if needed.
+    Sector 3:     The 1st (or only) Root Directory entry
+    Sector 4-10:  Additional root directories when Multi-Mount points are supported.
+    Sector 11-12: Reserved
 
   To perform allocations, the SMART MTD block layer searches each erase block
   on the device to identify the one with the most free sectors.  Free sectors
@@ -97,7 +103,8 @@ General operation
   sectors on the device can be allocated ... the SMART MTD block driver must
   reserve at least one erase-block worth of unused sectors to perform
   garbage collection, which will be performed automatically when no free
-  sectors are available.
+  sectors are available.  When wear leveling is enabled, the allocator also takes
+  into account the erase block erasure status to maintain level wearing.
 
   Garbage collection is performed by identifying the erase block with the most
   "released" sectors (those that were previously allocated but no longer being
@@ -132,6 +139,133 @@ General operation
   perform a full page read-modify-write operation on a 256 or even 512
   byte page.
 
+  Wear Leveling
+  =============
+
+  When wear leveling is enabled, the code automatically writes data across
+  the entire FLASH device in a manner that causes each erase block to be
+  worn (i.e. erased) evenly.  This is accomplished by maintaining a 4-bit
+  wear level count for each erase block and forcing less worn blocks to be
+  used for writing new data.  The code maintains each block's erase count
+  to be within 16 erases of each other, though through testing, the span
+  so far was never greater than 10 erases of each other.
+
+  As the data in a block is modified repeatedly, the erase count will
+  increase.  When the wear level reaches a value of 8 or higher, and the block
+  needs to be erased (because the data in it has been modified, etc.) the code
+  will select an erase block with the lowest wear count and relocate it to
+  this block (with the higher wear count).  The idea being that a block with
+  the lowest wear count contains more "static" data and should require fewer
+  additional erase operations.  This relocation process will continue on the
+  block (only when it needs to be erased again).
+
+
+  When the wear level of all erase blocks has increased to a level of
+  SMART_WEAR_MIN_LEVEL (currently set to 5), then the wear level counts
+  will all be reduced by this value.  This keeps the wear counts normalized
+  so they fit in a 4-bit value.  Note that theoretically, it *IS* possible to
+  write data to the flash in a manner that causes the wear count of a single
+  erase block to increment beyond it's maximum value of 15.  This would have
+  to be a very, very, very specific and un-predictable write sequence though
+  as data is always spread out across the sectors and relocated dynamically.
+  In the extremely rare event this does occur, the code will automatically
+  cap the maximum wear level at 15 an increment an "uneven wear count"
+  variable to indicate the number times this event has occurred.  So far, I
+  have not been able to get the wear count above 10 though my testing.
+
+  The wear level status bits are saved in the format sector (logical sector
+  number zero) with overflow saved in the reserved logical sectors one and
+  two.  Additionally, the uneven wear count (and total block erases if
+  PROCFS is enabled) are stored in the format sector.  When the PROCFS file
+  system is enabled and a SMARTFS volume is mounted, the SMART block driver
+  details and / or wear level details can be viewed with a command such as:
+
+     cat /proc/fs/smartfs/smart0/status
+        Format version:    1
+        Name Len:          16
+        Total Sectors:     2048
+        Sector Size:       512
+        Format Sector:     1487
+        Dir Sector:        8
+        Free Sectors:      67
+        Released Sectors:  572
+        Unused Sectors:    817
+        Block Erases:      5680
+        Sectors Per Block: 8
+        Sector Utilization:98%
+        Uneven Wear Count: 0
+
+     cat /proc/fs/smartfs/smart0/erasemap
+        DDDCGCCDDCDCCDCBDCCDDGBBDBCDCCDDDCDDDDCCDDCCCGCGDCCDBCDDGBDBDCDD
+        BCCCDDCCDDDCBCCDGCCCBDDCCGBBCBCCGDCCDCBDBCCCDCDDCDDGCDCGDCBCDBDG
+        BCDDCDCBGCCCDDCGBCCGBCCBDDBDDCGDCDDDCGCDDBCDCBDDBCDCGDDCCBCGBCCC
+        GCBCCGCCCDDDBGCCCCGDCCCCCDCDDGBBDACABDBBABCAABCCCDAACBADADDDAECB
+
+  Enabling wear leveling can increase the total number of block erases on the
+  device in favor of even wearing (erasing).  This is caused by writing /
+  moving sectors that otherwise don't need to be written to move static data
+  to the more highly worn blocks.  This additional write requirement is known
+  as write amplification.  To get an idea of the amount of write amplification
+  incurred by enabling wear leveling, I conducted the smart_test example using
+  four different configurations (wear, no wear, CRC-8, no CRC) and the results
+  are shown below.  This was done on a 1M Byte simulated FLASH with 4K erase
+  block size, 512 sectors per byte.  The smart_test creates a 700K file and
+  then performs 20,000 random seek, write, verify tests.  The seek write forces
+  a multitude of sector relocation operations (with or without CRC enabled),
+  causing a boatload of block erases.
+
+  Enabling wear leveling actually decreased the number of erase operations
+  with CRC enabled or disabled.  This is only a single test point based one
+  testing method ... results will likely vary based on the method the data
+  is written, the amount of static vs. dynamic data, the amount of free space
+  on the volume, and the volume geometry (erase block size, sector size, etc.).
+
+  The results of the tests are:
+
+    Case                          Total Block erases
+    ================================================
+    No wear leveling     CRC-8         6632
+    Wear leveling        CRC-8         5585
+
+    No wear leveling     no CRC        6658
+    Wear leveling        no CRC        5398
+
+
+  Reduced RAM model
+  =================
+
+  On devices with a larger number of logical sectors (i.e. a lot of erase
+  blocks with a small selected sector size), the RAM requirement can become
+  fairly significant.  This is caused by the in-memory sector map which
+  keeps track of the logical to physical mapping of all sectors.  This is
+  a RAM array which is 2 * totalsectors in size.  For a device with 64K
+  sectors, this means 128K of RAM is required just for the sector map, not
+  counting RAM for read/write buffers, erase block management, etc.
+
+  So a reduced RAM model has been added which only keeps track of which
+  logical sectors have been used (a table which is totalsectors / 8 in size)
+  and a configurable sized sector map cache.  Each entry in the sector map
+  cache is 6 bytes (logical sector, physical sector and cache entry age).
+  ON DEVICES WITH SMALLER TOTAL SECTOR COUNT, ENABLING THIS OPTION COULD
+  ACTUALLY INCREASE THE RAM FOOTPRINT INSTEAD OF REDUCE IT.
+
+  The sector map cache size should be selected to balance the desired RAM
+  usage and the file system performance.  When a logical to physical sector
+  mapping is not found in the cache, the code must perform a physical search
+  of the FLASH to find the requested logical sector.  This involves reading
+  the 5-byte header from each sector on the device until the sector is
+  found.  Performing a full read, seek or open for append on a large file
+  can cause the sector map cache to flush completely if the file is larger
+  than (cache entries * sector size).  For example, in a configuration with
+  256 cache entries and a 512 byte sector size, a full read, seek or open for
+  append on a 128K file will flush the cache.
+
+  An additional RAM savings is realized on FLASH parts that contain 16 or
+  fewer logical sectors per erase block by packing the free and released
+  sector counts into a single byte (plus a little extra for 16 sectors per
+  erase block).  A device with a 64K erase block size can benefit from this
+  savings by selecting a 4096 or 8192 byte logical sector size, for example.
+
   SMART FS Layer
   ==============
 
@@ -139,7 +273,7 @@ General operation
   logical sectors, create and destroy sector chains, and perform directory and
   file I/O operations.  Each directory and file on the volume is represented
   as a chain or "linked list" of logical sectors.  Thus the actual physical
-  sectors that a give file or directory uses does not need to be contigous
+  sectors that a give file or directory uses does not need to be contiguous
   and in fact can (and will) move around over time.  To manage the sector
   chains, the SMARTFS layer adds a "chain header" after the sector's "sector
   header".  This is a 5-byte header which contains the chain type (file or
@@ -287,35 +421,37 @@ SMARTFS Limitations
 This implementation has several limitations that you should be aware
 before opting to use SMARTFS:
 
-1. No wear leveling has been implemented.  The allocation scheme has a
-   bit of inherent wear-leveling since it automatically distributes
-   sector allocations across the device, but no provisions exist to
-   guarantee equal wearing.
-
-2. There is no CRC or checksum calculations performed on the data stored
-   to FLASH, so no error detection has been implemented.  This could be
-   added by "stealing" one of the sequence number bytes in the sector
-   header and incrementing the sector version number.
-
-3. There is currently no FLASH bad-block management code.  The reason for
+1. There is currently no FLASH bad-block management code.  The reason for
    this is that the FS was geared for Serial NOR FLASH parts.  To use
-   SMARTFS with a NAND FLASH, bad block management would need to be added.
+   SMARTFS with a NAND FLASH, bad block management would need to be added,
+   along with a few minor changes to eliminate single bit writes to release
+   a sector, etc.
 
-4. The released-sector garbage collection process occurs only during a write
+2. The implementation can support CRC-8 or CRC-16 error detection, and can
+   relocate a failed write operation to a new sector.  However with no bad
+   block management implementation, the code will continue it attempts at
+   using failing block / sector, reducing efficiency and possibly successfully
+   saving data in a block with questionable integrity.
+
+3. The released-sector garbage collection process occurs only during a write
    when there are no free FLASH sectors.  Thus, occasionally, file writing
-   may take a long time.  This typically isn't noticable unless the volume
+   may take a long time.  This typically isn't noticeable unless the volume
    is very full and multiple copy / erase cycles must be performed to
    complete the garbage collection.
 
-5. The total number of logical sectors on the device must be less than 65534.
+4. The total number of logical sectors on the device must be 65534 or less.
    The number of logical sectors is based on the total device / partition
    size and the selected sector size.  For larger flash parts, a larger
-   sector size would need to be used to meet this requirement. This
-   restriction exists because:
+   sector size would need to be used to meet this requirement. Creating a
+   geometry which results in 65536 sectors (a 32MByte FLASH with 512 byte
+   logical sector, for example) will cause the code to automatically reduce
+   the total sector count to 65534, thus "wasting" the last two logical
+   sectors on the device (they will never be used).
+
+   This restriction exists because:
 
    a. The logical sector number is a 16-bit field (i.e. 65535 is the max).
-   b. The SMART MTD layer reserves 1 logical sector for a format sector.
-   c. Logical sector number 65535 (0xFFFF) is reerved as this is typically
+   b. Logical sector number 65535 (0xFFFF) is reserved as this is typically
       the "erased state" of the FLASH.
 
 ioctls
@@ -339,7 +475,7 @@ ioctls
     it's erase block.
 
   BIOC_READSECT
-    Reads data from a logial sector.  This uses a structure to identify
+    Reads data from a logical sector.  This uses a structure to identify
     the offset and count of data to be read.
 
   BIOC_WRITESECT
@@ -356,8 +492,3 @@ Things to Do
 - Add reporting of actual FLASH usage for directories (each directory
   occupies one or more physical sectors, yet the size is reported as
   zero for directories).
-- Add sector aging to provide some degree of wear-leveling.
-- Possibly steal a byte from the sector header's sequence number and
-  implement a sector data verification scheme using a 1-byte CRC.
-
-
