@@ -9175,3 +9175,11 @@
 	  build framework and skeleton files for Tiva I2C driver.  Initial
 	  commit is just the STM32 I2C driver with name changes and STM32-
 	  specific logic removed (2014-12-9).
+	* fs/procfs/fs_procfs.c:  Add procfs write support.  From Ken Petit
+	  (2014-12-9).
+	* include/crc8.h, libc/misc/lib_crc8.c, and Make.defs: Add CRC8 support.
+	  From Ken Pettit (2014-12-9).
+	* drivers/mtd/smart.c, Kconfig, fs/smartfs/smartfs_smart.c,
+	  smartfs_procfs.c, smartfs_utils.c, smartfs.h, Kconfig,
+	  include/nuttx/fs/ioctl.h, smart.h, and mtd/smart.h: Implements wear-
+	  leveling in the SmartFS.  From Ken Pettit (2014-12-9).
