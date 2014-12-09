@@ -86,10 +86,14 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += tiva_userspace.c tiva_mpuinit.c
 endif
 
-ifdef CONFIG_NET
+ifeq ($(CONFIG_TIVA_I2C),y)
+CHIP_CSRCS += tiva_i2c.c
+endif
+
+ifeq ($(CONFIG_NET),y)
 CHIP_CSRCS += tiva_ethernet.c
 endif
 
-ifdef CONFIG_TIVA_FLASH
+ifeq ($(CONFIG_TIVA_FLASH),y)
 CHIP_CSRCS += tiva_flash.c
 endif
