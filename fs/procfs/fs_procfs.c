@@ -151,6 +151,8 @@ static int     procfs_open(FAR struct file *filep, FAR const char *relpath,
 static int     procfs_close(FAR struct file *filep);
 static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
+static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
 static int     procfs_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
 
@@ -193,7 +195,7 @@ const struct mountpt_operations procfs_operations =
   procfs_open,       /* open */
   procfs_close,      /* close */
   procfs_read,       /* read */
-  NULL,              /* write */
+  procfs_write,      /* write */
   NULL,              /* seek */
   procfs_ioctl,      /* ioctl */
 
@@ -356,6 +358,33 @@ static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
   /* Call the handler's read routine */
 
   ret = handler->procfsentry->ops->read(filep, buffer, buflen);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: procfs_write
+ ****************************************************************************/
+
+static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen)
+{
+  FAR struct procfs_file_s *handler;
+  ssize_t ret = 0;
+
+  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  /* Recover our private data from the struct file instance */
+
+  handler = (FAR struct procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(handler);
+
+  /* Call the handler's read routine */
+
+  if (handler->procfsentry->ops->write)
+    {
+      ret = handler->procfsentry->ops->write(filep, buffer, buflen);
+    }
 
   return ret;
 }
@@ -743,7 +772,10 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
            */
 
           while (dir->fd_dir.d_name[level1->lastlen - 1] == '*')
-            level1->lastlen--;
+            {
+              level1->lastlen--;
+            }
+
           dir->fd_dir.d_name[level1->lastlen] = '\0';
 
           if (name[level1->lastlen] == '/')
