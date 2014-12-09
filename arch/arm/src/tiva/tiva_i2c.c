@@ -58,6 +58,7 @@
 
 #include "up_arch.h"
 
+#include "chip/tiva_syscontrol.h"
 #include "tiva_i2c.h"
 
 /* At least one I2C peripheral must be enabled */
@@ -174,7 +175,8 @@ struct tiva_trace_s
 
 struct tiva_i2c_config_s
 {
-  uint32_t base;              /* I2C base address */
+  uintptr_t base;            /* I2C base address */
+  uint32_t rcgbit;            /* Bits in RCG1 register to enable clocking */
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
@@ -318,6 +320,7 @@ static int tiva_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
 static const struct tiva_i2c_config_s tiva_i2c0_config =
 {
   .base       = TIVA_I2C0_BASE,
+  .rcgbit     = SYSCON_RCGC1_I2C0,
   .scl_pin    = GPIO_I2C0_SCL,
   .sda_pin    = GPIO_I2C0_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -344,6 +347,7 @@ static struct tiva_i2c_priv_s tiva_i2c0_priv =
 static const struct tiva_i2c_config_s tiva_i2c1_config =
 {
   .base       = TIVA_I2C1_BASE,
+  .rcgbit     = SYSCON_RCGC1_I2C1,
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -370,6 +374,7 @@ static struct tiva_i2c_priv_s tiva_i2c1_priv =
 static const struct tiva_i2c_config_s tiva_i2c2_config =
 {
   .base       = TIVA_I2C2_BASE,
+  .rcgbit     = SYSCON_RCGC1_I2C2,
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -396,6 +401,7 @@ static struct tiva_i2c_priv_s tiva_i2c2_priv =
 static const struct tiva_i2c_config_s tiva_i2c3_config =
 {
   .base       = TIVA_I2C3_BASE,
+  .rcgbit     = SYSCON_RCGC1_I2C3,
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -422,6 +428,7 @@ static struct tiva_i2c_priv_s tiva_i2c3_priv =
 static const struct tiva_i2c_config_s tiva_i2c4_config =
 {
   .base       = TIVA_I2C4_BASE,
+  .rcgbit     = SYSCON_RCGC1_I2C4,
   .scl_pin    = GPIO_I2C4_SCL,
   .sda_pin    = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -448,6 +455,7 @@ static struct tiva_i2c_priv_s tiva_i2c4_priv =
 static const struct tiva_i2c_config_s tiva_i2c5_config =
 {
   .base       = TIVA_I2C5_BASE,
+  .rcgbit     = SYSCON_RCGC1_I2C5,
   .scl_pin    = GPIO_I2C5_SCL,
   .sda_pin    = GPIO_I2C5_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -503,9 +511,9 @@ static const struct i2c_ops_s tiva_i2c_ops =
  ************************************************************************************/
 
 static inline uint16_t tiva_i2c_getreg(FAR struct tiva_i2c_priv_s *priv,
-                                        uint8_t offset)
+                                       unsigned int offset)
 {
-  return getreg16(priv->config->base + offset);
+  return getreg32(priv->config->base + offset);
 }
 
 /************************************************************************************
@@ -516,10 +524,10 @@ static inline uint16_t tiva_i2c_getreg(FAR struct tiva_i2c_priv_s *priv,
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_putreg(FAR struct tiva_i2c_priv_s *priv, uint8_t offset,
-                                    uint16_t value)
+static inline void tiva_i2c_putreg(FAR struct tiva_i2c_priv_s *priv,
+                                   unsigned int offset, uint32_t regval)
 {
-  putreg16(value, priv->config->base + offset);
+  putreg32(regval, priv->config->base + offset);
 }
 
 /************************************************************************************
@@ -1357,10 +1365,11 @@ static int tiva_i2c5_isr(int irq, void *context)
 
 static int tiva_i2c_init(FAR struct tiva_i2c_priv_s *priv)
 {
-  /* Power-up and configure GPIOs */
+  uint32_t regval;
 
-  /* Enable power and reset the peripheral */
-#warning Missing logic
+  /* Enable clocking to the I2C peripheral */
+
+  up_modifyreg32(TIVA_SYSCON_RCGC1, 0, priv->rcgbit);
 
   /* Configure pins */
 
@@ -1375,23 +1384,25 @@ static int tiva_i2c_init(FAR struct tiva_i2c_priv_s *priv)
       return ERROR;
     }
 
-  /* Attach ISRs */
+  /* Enable the I2C master block */
+
+  regval = tiva_i2c_getreg(priv, TIVA_I2CM_CR_OFFSET);
+  regval |= I2CM_CR_MFE;
+  tiva_i2c_putreg(priv, TIVA_I2CM_CR_OFFSET, regval);
+
+  /* Configure the the initial I2C clock frequency. */
+#warning Missing logic
+
+  tiva_i2c_setclock(priv, 100000);
+
+  /* Attach interrupt handlers and enable interrupts at the NVIC (still
+   * disabled at the source)
+   */
 
 #ifndef CONFIG_I2C_POLLED
   irq_attach(priv->config->irq, priv->config->isr);
   up_enable_irq(priv->config->irq);
 #endif
-
-  /* Set peripheral frequency, where it must be at least 2 MHz  for 100 kHz
-   * or 4 MHz for 400 kHz.  This also disables all I2C interrupts.
-   */
-#warning Missing logic
-
-  tiva_i2c_setclock(priv, 100000);
-
-  /* Enable I2C */
-#warning Missing logic
-
   return OK;
 }
 
