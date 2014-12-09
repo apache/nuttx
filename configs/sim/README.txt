@@ -682,9 +682,3 @@ traveler
        cd /usr/lib/
        sudo ln -s libXext.so.6.4.0 libXext.so
 
-  4. Don't enable CONFIG_GRAPHICS_TRAVELER_PERFMON.  Timing is
-     really important on the target platform anyway.  But for the
-     simulation platform, timing works very strangely since there
-     are not timer interrupts.  So if this is enabled you will
-     most likely get divide-by-zero errors.
-
