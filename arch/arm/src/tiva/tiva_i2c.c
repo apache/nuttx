@@ -4,7 +4,8 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derives in spirit if nothing more from the NuttX STM32 I2C driver which has:
+ * The basic structure of this driver derives in spirit (if nothing more) from the
+ * NuttX STM32 I2C driver which has:
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -147,8 +148,9 @@
 enum tiva_intstate_e
 {
   INTSTATE_IDLE = 0,      /* No I2C activity */
-  INTSTATE_WAITING,       /* Waiting for completion of interrupt activity */
-  INTSTATE_DONE,          /* Interrupt activity complete */
+  INTSTATE_ADDRESS,       /* Address sent, waiting for completion */
+  INTSTATE_XFRWAIT,       /* Waiting for data transfer to complete */
+  INTSTATE_DONE           /* Interrupt activity complete */
 };
 
 /* Trace events */
@@ -156,16 +158,15 @@ enum tiva_intstate_e
 enum tiva_trace_e
 {
   I2CEVENT_NONE = 0,      /* No events have occurred with this status */
-  I2CEVENT_SENDADDR,      /* Start/Master bit set and address sent, param = msgc */
+  I2CEVENT_SENDADDRESS,   /* Address sent, param = address */
+  I2CEVENT_ERROR,         /* Error occurred, param = MCS */
+  I2CEVENT_BUSY,          /* Still busy, param = MCS */
+  I2CEVENT_XFRDONE,       /* Transfer completed without error, param = dcnt */
+  I2CEVENT_RECVSETUP,     /* Setup to receive the next byte, param = dcnt */
   I2CEVENT_SENDBYTE,      /* Send byte, param = dcnt */
-  I2CEVENT_ITBUFEN,       /* Enable buffer interrupts, param = 0 */
-  I2CEVENT_RCVBYTE,       /* Read more dta, param = dcnt */
-  I2CEVENT_REITBUFEN,     /* Re-enable buffer interrupts, param = 0 */
-  I2CEVENT_DISITBUFEN,    /* Disable buffer interrupts, param = 0 */
-  I2CEVENT_BTFNOSTART,    /* BTF on last byte with no restart, param = msgc */
-  I2CEVENT_BTFRESTART,    /* Last byte sent, re-starting, param = msgc */
-  I2CEVENT_BTFSTOP,       /* Last byte sten, send stop, param = 0 */
-  I2CEVENT_ERROR          /* Error occurred, param = 0 */
+  I2CEVENT_SPURIOUS,      /* Spurious interrupt received, param = msgc */
+  I2CEVENT_NEXTMSG,       /* Starting next message, param = msgc */
+  I2CEVENT_DONE           /* All messages transferred, param = intstate */
 };
 
 /* Trace data */
@@ -213,6 +214,7 @@ struct tiva_i2c_priv_s
   uint8_t *ptr;                /* Current message buffer */
   int dcnt;                    /* Current message length */
   uint16_t flags;              /* Current message flags */
+  uint32_t status;             /* MCS register at the end of the transfer */
 
   /* I2C trace support */
 
@@ -234,7 +236,7 @@ struct tiva_i2c_inst_s
   struct tiva_i2c_priv_s *priv; /* Common driver private data structure */
 
   uint32_t    frequency;   /* Frequency used in this instantiation */
-  int         address;     /* Address used in this instantiation */
+  uint16_t    address;     /* Address used in this instantiation */
   uint16_t    flags;       /* Flags used in this instantiation */
 };
 
@@ -256,7 +258,6 @@ static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_TIVA_I2C_DYNTIMEO */
 
 static inline int  tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv);
-static inline void tiva_i2c_sem_waitstop(struct tiva_i2c_priv_s *priv);
 static inline void tiva_i2c_sem_post(struct i2c_dev_s *dev);
 static inline void tiva_i2c_sem_init(struct i2c_dev_s *dev);
 static inline void tiva_i2c_sem_destroy(struct i2c_dev_s *dev);
@@ -269,10 +270,8 @@ static void tiva_i2c_traceevent(struct tiva_i2c_priv_s *priv,
 static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv);
 #endif /* CONFIG_I2C_TRACE */
 
-static inline void tiva_i2c_sendstart(struct tiva_i2c_priv_s *priv);
-static inline void tiva_i2c_clrstart(struct tiva_i2c_priv_s *priv);
-static inline void tiva_i2c_sendstop(struct tiva_i2c_priv_s *priv);
-
+static void tiva_i2c_sendaddress(struct tiva_i2c_priv_s *priv);
+static void tiva_i2c_nextxfr(struct tiva_i2c_priv_s *priv);
 static int tiva_i2c_interrupt(struct tiva_i2c_priv_s * priv, uint32_t status);
 
 #ifndef CONFIG_I2C_POLLED
@@ -565,24 +564,22 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 {
   struct timespec abstime;
   irqstate_t flags;
-  uint32_t regval;
   int ret;
 
   flags = irqsave();
 
-  /* Enable the master interrupt. The I2C master module generates an interrupt when
+  /* Enable the master interrupt.  The I2C master module generates an interrupt when
    * a transaction completes (either transmit or receive), when arbitration is lost,
    * or when an error occurs during a transaction.
    */
 
-  tiva_i2c_putreg(priv, TIVA_I2CM_IMR_OFFSET, I2CM_IMR_IM);
+  tiva_i2c_putreg(priv, TIVA_I2CM_IMR_OFFSET, I2CM_IMR_MIM);
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
    * are currently disabled but will be temporarily re-enabled below when
    * sem_timedwait() sleeps.
    */
 
-  priv->intstate = INTSTATE_WAITING;
   do
     {
       /* Get the current time */
@@ -665,7 +662,6 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
    * sem_timedwait() sleeps.
    */
 
-  priv->intstate = INTSTATE_WAITING;
   start = clock_systimer();
 
   do
@@ -699,60 +695,6 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
   return ret;
 }
 #endif
-
-/************************************************************************************
- * Name: tiva_i2c_sem_waitstop
- *
- * Description:
- *   Wait for a STOP to complete
- *
- ************************************************************************************/
-
-static inline void tiva_i2c_sem_waitstop(struct tiva_i2c_priv_s *priv)
-{
-  uint32_t start;
-  uint32_t elapsed;
-  uint32_t timeout;
-
-  /* Select a timeout */
-
-#ifdef CONFIG_TIVA_I2C_DYNTIMEO
-  timeout = USEC2TICK(CONFIG_TIVA_I2C_DYNTIMEO_STARTSTOP);
-#else
-  timeout = CONFIG_TIVA_I2CTIMEOTICKS;
-#endif
-
-  /* Wait as stop might still be in progress; but stop might also
-   * be set because of a timeout error: "The [STOP] bit is set and
-   * cleared by software, cleared by hardware when a Stop condition is
-   * detected, set by hardware when a timeout error is detected."
-   */
-
-  start = clock_systimer();
-  do
-    {
-      /* Check for STOP condition */
-#warning Missing logic
-
-      /* Check for timeout error */
-#warning Missing logic
-
-
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systimer() - start;
-    }
-
-  /* Loop until the stop is complete or a timeout occurs. */
-
-  while (elapsed < timeout);
-
-  /* If we get here then a timeout occurred with the STOP condition
-   * still pending.
-   */
-
-  i2cvdbg("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
-}
 
 /************************************************************************************
  * Name: tiva_i2c_sem_post
@@ -920,43 +862,115 @@ static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv)
 #endif /* CONFIG_I2C_TRACE */
 
 /************************************************************************************
- * Name: tiva_i2c_sendstart
+ * Name: tiva_i2c_sendaddress
  *
  * Description:
  *   Send the START conditions/force Master mode
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_sendstart(struct tiva_i2c_priv_s *priv)
+static void tiva_i2c_sendaddress(struct tiva_i2c_priv_s *priv)
 {
-  /* Disable ACK on receive by default and generate START */
-#warning Missing logic
+  struct i2c_msg_s *msg;
+  uint32_t regval;
+
+  DEBUGASSERT(priv && priv->msgc > 0);
+
+  /* Check for new trace setup, post the SENADDRESS event */
+
+  tiva_i2c_tracenew(priv, 0);
+
+  /* Get run-time data for the next message */
+
+  msg         = priv->msgv;
+  priv->ptr   = msg->buffer;
+  priv->dcnt  = msg->length;
+  priv->flags = msg->flags;
+
+  /* Set the Master Slave Address */
+
+  regval = (uint32_t)msg->addr << I2CM_SA_SA_SHIFT;
+  if ((msg->flags & I2C_M_READ) != 0)
+    {
+      regval |= I2CM_SA_RS;
+    }
+
+  tiva_i2c_putreg(priv, TIVA_I2CM_SA_OFFSET, regval);
+
+  /* Write the command to the control register */
+
+  regval = I2CM_CS_RUN;
+  if ((msg->flags & I2C_M_NORESTART) == 0)
+    {
+      regval |= I2CM_CS_START;
+    }
+
+  if (priv->dcnt < 1)
+    {
+      regval |= I2CM_CS_STOP;
+    }
+
+  tiva_i2c_putreg(priv, TIVA_I2CM_CS_OFFSET, regval);
+
+  tiva_i2c_traceevent(priv, I2CEVENT_SENDADDRESS, msg->addr);
+  priv->intstate = INTSTATE_ADDRESS;
 }
 
 /************************************************************************************
- * Name: tiva_i2c_clrstart
+ * Name: tiva_i2c_nextxfr
  *
  * Description:
- *   Clear the STOP, START or PEC condition on certain error recovery steps.
+ *  Common Interrupt Service Routine
  *
  ************************************************************************************/
 
-static inline void tiva_i2c_clrstart(struct tiva_i2c_priv_s *priv)
+static void tiva_i2c_nextxfr(struct tiva_i2c_priv_s *priv)
 {
-#warning Missing logic
-}
+  uint32_t cmd;
 
-/************************************************************************************
- * Name: tiva_i2c_sendstop
- *
- * Description:
- *   Send the STOP conditions
- *
- ************************************************************************************/
+  /* Set up the basic command.  The STOP bit should be set on the last transfer
+   * UNLESS this there is a repeated start.
+   */
 
-static inline void tiva_i2c_sendstop(struct tiva_i2c_priv_s *priv)
-{
-#warning Missing logic
+  cmd = I2CM_CS_RUN;
+  if (priv->msgc < 2 && priv->dcnt < 2)
+    {
+      /* This is the last byte of the last message... add the STOP bit */
+
+      cmd |= I2CM_CS_STOP;
+    }
+
+  /* Set up to transfer the next byte.  Are we sending or receiving? */
+
+  if ((priv->flags & I2C_M_READ) != 0)
+    {
+      /* We are receiving data.  Write the command to the control register to
+       * receive the next byte.
+       */
+
+      cmd |= I2CM_CS_ACK;
+
+      tiva_i2c_putreg(priv, TIVA_I2CM_CS_OFFSET, cmd);
+      tiva_i2c_traceevent(priv, I2CEVENT_RECVSETUP, priv->dcnt);
+    }
+  else
+    {
+      uint32_t dr;
+
+      /* We are sending data.  Write the data to be sent to the DR register. */
+
+      dr = (uint32_t)*priv->ptr++;
+      tiva_i2c_putreg(priv, TIVA_I2CM_DR_OFFSET, dr << I2CM_DR_SHIFT);
+
+      /* Write the command to the control register to send the byte in the DR
+       * register.
+       */
+
+      tiva_i2c_putreg(priv, TIVA_I2CM_CS_OFFSET, cmd);
+      tiva_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
+    }
+
+  priv->intstate = INTSTATE_XFRWAIT;
 }
 
 /************************************************************************************
@@ -973,216 +987,199 @@ static int tiva_i2c_interrupt(struct tiva_i2c_priv_s *priv, uint32_t status)
 
   tiva_i2c_tracenew(priv, status);
 
-  /* Was start bit sent */
-#warning Missing logic
-
-    {
-      tiva_i2c_traceevent(priv, I2CEVENT_SENDADDR, priv->msgc);
-
-      /* We check for msgc > 0 here as an unexpected interrupt with
-       * due to noise on the I2C cable can otherwise cause msgc to
-       * wrap causing memory overwrite
-       */
-
-      if (priv->msgc > 0 && priv->msgv != NULL)
-        {
-          /* Get run-time data */
-
-          priv->ptr   = priv->msgv->buffer;
-          priv->dcnt  = priv->msgv->length;
-          priv->flags = priv->msgv->flags;
-
-          /* Send address byte and define addressing mode */
-
-          tiva_i2c_putreg(priv, TIVA_I2CM_SA_OFFSET,
-                          (priv->msgv->addr << 1) | (priv->flags & I2C_M_READ));
-
-          /* Set ACK for receive mode */
-#warning Missing logic
-
-          /* Increment to next pointer and decrement message count */
-
-          priv->msgv++;
-          priv->msgc--;
-        }
-      else
-        {
-          /* Clear ISR by writing to DR register */
-#warning Missing logic
-        }
-    }
-
-  /* Was address sent, continue with either sending or reading data */
-#warning Missing logic
-
-  else if ((priv->flags & I2C_M_READ) == 0 && 0 /* ? */ )
-    {
-      if (priv->dcnt > 0)
-        {
-          /* Send a byte */
-#warning Missing logic
-          priv->dcnt--;
-        }
-    }
-
-  else if ((priv->flags & I2C_M_READ) != 0 && 0 /* ? */)
-    {
-      /* Enable in order to receive one or multiple bytes */
-#warning Missing logic
-    }
-
-  /* More bytes to read */
-#warning Missing logic
-
-    {
-      /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
-
-      if (priv->dcnt > 0)
-        {
-          tiva_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
-
-          /* No interrupts or context switches may occur in the following
-           * sequence.  Otherwise, additional bytes may be sent by the
-           * device.
-           */
-
-#ifdef CONFIG_I2C_POLLED
-          irqstate_t state = irqsave();
-#endif
-          /* Receive a byte */
-#warning Missing logic
-
-          /* Disable acknowledge when last byte is to be received */
-
-          priv->dcnt--;
-          if (priv->dcnt == 1)
-            {
-#warning Missing logic
-            }
-
-#ifdef CONFIG_I2C_POLLED
-          irqrestore(state);
-#endif
-        }
-      else
-        {
-          /* Throw away the unexpected byte */
-#warning Missing logic
-        }
-    }
-
-  /* Do we have more bytes to send, enable/disable buffer interrupts
-   * (these ISRs could be replaced by DMAs)
+  /* Check for a master interrupt?  The I2C master module generates an interrupt when
+   * a transaction completes (either transmit or receive), when arbitration is lost,
+   * or when an error occurs during a transaction.
    */
 
-#ifndef CONFIG_I2C_POLLED
-  if (priv->dcnt > 0)
+  if ((status & I2CM_RIS_MRIS) != 0)
     {
-      tiva_i2c_traceevent(priv, I2CEVENT_REITBUFEN, 0);
-#warning Missing logic
-    }
-  else if (priv->dcnt == 0)
-    {
-      tiva_i2c_traceevent(priv, I2CEVENT_DISITBUFEN, 0);
-#warning Missing logic
-    }
-#endif
+      uint32_t mcs;
 
-  /* Was last byte received or sent? */
+      /* Clear the pending master interrupt */
 
-  if (priv->dcnt <= 0 && 0 /* ? */)
-    {
-      /* Acknowledge the pending interrupt */
-#warning Missing logic
+      tiva_i2c_putreg(priv, TIVA_I2CM_ICR_OFFSET, I2CM_ICR_MIC);
+      status &= ~I2CM_RIS_MRIS;
 
-      /* Do we need to terminate or restart after this byte?
-       * If there are more messages to send, then we may:
-       *
-       *  - continue with repeated start
-       *  - or just continue sending writeable part
-       *  - or we close down by sending the stop bit
+      /* We need look at the Master Control/Status register to determine the cause
+       * of the master interrupt.
        */
 
-      if (priv->msgc > 0)
-        {
-          if (priv->msgv->flags & I2C_M_NORESTART)
-            {
-              tiva_i2c_traceevent(priv, I2CEVENT_BTFNOSTART, priv->msgc);
-              priv->ptr   = priv->msgv->buffer;
-              priv->dcnt  = priv->msgv->length;
-              priv->flags = priv->msgv->flags;
-              priv->msgv++;
-              priv->msgc--;
+      mcs = tiva_i2c_getreg(priv, TIVA_I2CM_CS_OFFSET);
 
-              /* Restart this ISR! */
+      /* If the busy bit is set, then the other bits are not valid */
+
+      if ((mcs & I2CM_CS_BUSY) != 0)
+        {
+          tiva_i2c_traceevent(priv, I2CEVENT_BUSY, mcs);
+        }
+
+      /* Check for errors, in which case, stop the transfer and return. */
+
+      else if ((mcs & I2CM_CS_ERROR) != 0)
+        {
+          tiva_i2c_traceevent(priv, I2CEVENT_ERROR, mcs);
+
+          /* Disable further interrupts */
+
+          tiva_i2c_putreg(priv, TIVA_I2CM_IMR_OFFSET, 0);
 
 #ifndef CONFIG_I2C_POLLED
-#warning Missing logic
-#endif
-            }
-          else
-            {
-              tiva_i2c_traceevent(priv, I2CEVENT_BTFRESTART, priv->msgc);
-              tiva_i2c_sendstart(priv);
-            }
-        }
-      else if (priv->msgv)
-        {
-          tiva_i2c_traceevent(priv, I2CEVENT_BTFSTOP, 0);
-          tiva_i2c_sendstop(priv);
-
           /* Is there a thread waiting for this event (there should be) */
 
-#ifndef CONFIG_I2C_POLLED
-          if (priv->intstate == INTSTATE_WAITING)
+          if (priv->intstate != INTSTATE_IDLE &&
+              priv->intstate != INTSTATE_DONE)
             {
               /* Yes.. inform the thread that the transfer is complete
                * and wake it up.
                */
 
               sem_post(&priv->waitsem);
+              priv->status   = mcs;
               priv->intstate = INTSTATE_DONE;
             }
 #else
+          priv->status   = mcs;
           priv->intstate = INTSTATE_DONE;
 #endif
-
-          /* Mark that we have stopped with this transaction */
-
-          priv->msgv = NULL;
         }
-    }
 
-  /* Check for errors, in which case, stop the transfer and return
-   * Note that in master reception mode AF becomes set on last byte
-   * since ACK is not returned. We should ignore this error.
-   */
-#warning Missing logic
+      /* Otherwise, the last transfer must have completed successfully */
 
-    {
-      tiva_i2c_traceevent(priv, I2CEVENT_ERROR, 0);
+      else
+        {
+          int dr;
 
-      /* Clear interrupt flags */
-#warning Missing logic
+          tiva_i2c_traceevent(priv, I2CEVENT_XFRDONE, priv->dcnt);
 
+          /* Read from the DR register */
 
-      /* Is there a thread waiting for this event (there should be) */
+          dr = tiva_i2c_getreg(priv, TIVA_I2CM_DR_OFFSET);
+
+         /* We check for msgc > 0 here as an unexpected interrupt with
+          * due to noise on the I2C cable can otherwise cause msgc to
+          * wrap causing memory overwrite
+          */
+
+         if (priv->msgc > 0 && priv->msgv != NULL)
+            {
+              /* Was this the completion of an address or of the data portion
+               * of the transfer?
+               */
+
+              DEBUGASSERT(priv->dcnt > 0);
+
+              if (priv->intstate == INTSTATE_XFRWAIT)
+                {
+                  /* Data transfer completed.  Are we sending or receiving data? */
+
+                  if ((priv->flags & I2C_M_READ) != 0)
+                    {
+                      /* We are receiving data.  Copy the received data to
+                       * the user buffer
+                       */
+
+                      *priv->ptr++ = (uint8_t)dr;
+                    }
+
+                  /* Decrement the count of bytes remaining to be sent */
+
+                  priv->dcnt--;
+                }
+
+              /* Was that the last byte of this message? */
+
+              if (priv->dcnt > 0)
+                {
+                  /* Send the next byte */
+
+                  tiva_i2c_nextxfr(priv);
+                }
+              else
+                {
+                  /* Increment to next pointer and decrement message count */
+
+                  priv->msgv++;
+                  priv->msgc--;
+
+                  /* Is there another message to be sent? */
+
+                  if (priv->msgc > 0)
+                    {
+                      /* Do we need to terminate or restart after this byte?
+                       * If there are more messages to send, then we may
+                       * continue with or without the (repeated) start bit.
+                       */
+
+                      tiva_i2c_traceevent(priv, I2CEVENT_NEXTMSG, priv->msgc);
+                      if (priv->msgv->flags & I2C_M_NORESTART)
+                        {
+                          /* Just continue transferring data.  In this case,
+                           * no STOP was sent at the end of the last message
+                           * and the there is no new address.
+                           *
+                           * REVISIT: In this case, the address or the
+                           * direction of the transfer cannot be permitted to
+                           * change
+                           */
+
+                          tiva_i2c_nextxfr(priv);
+                        }
+                      else
+                        {
+                          /* Set the repeated start.  No STOP was sent at the
+                           * end of the previous message.
+                           */
+
+                          tiva_i2c_sendaddress(priv);
+                        }
+                    }
+                  else
+                    {
+                      /* No.. then we are finished */
+
+                      tiva_i2c_traceevent(priv, I2CEVENT_DONE, priv->intstate);
+
+                      /* Disable further interrupts */
+
+                      tiva_i2c_putreg(priv, TIVA_I2CM_IMR_OFFSET, 0);
 
 #ifndef CONFIG_I2C_POLLED
-      if (priv->intstate == INTSTATE_WAITING)
-        {
-          /* Yes.. inform the thread that the transfer is complete
-           * and wake it up.
-           */
+                      /* Is there a thread waiting for this event (there
+                       * should be)
+                       */
 
-          sem_post(&priv->waitsem);
-          priv->intstate = INTSTATE_DONE;
-        }
+                      if (priv->intstate != INTSTATE_IDLE &&
+                          priv->intstate != INTSTATE_DONE)
+                        {
+                          /* Yes.. inform the thread that the transfer is
+                           * complete and wake it up.
+                           */
+
+                          sem_post(&priv->waitsem);
+                          priv->status   = mcs;
+                          priv->intstate = INTSTATE_DONE;
+                        }
 #else
-      priv->intstate = INTSTATE_DONE;
+                      priv->status   = mcs;
+                      priv->intstate = INTSTATE_DONE;
 #endif
+                    }
+                }
+            }
+
+          /* There is no pending message? Must be a spurious interrupt */
+
+          else
+            {
+              tiva_i2c_traceevent(priv, I2CEVENT_SPURIOUS, priv->msgc);
+            }
+        }
     }
 
+  /* Make sure that all pending interrupts were handled */
+
+  DEBUGASSERT(status == 0);
   return OK;
 }
 
@@ -1465,8 +1462,8 @@ static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequen
   regval = tiva_i2c_putreg(priv, TIVA_I2CSC_PP_OFFSET);
   if ((regval & I2CSC_PP_HS) != 0)
     {
-      regval = ((SYSCLK_FREQUENCY +
-                (2 * 3 * 3400000) - 1) / (2 * 3 * 3400000)) - 1;
+      tmp    = (2 * 3 * 3400000)
+      regval = (((SYSCLK_FREQUENCY + tmp - 1) / tmp) - 1) << I2CM_TPR_SHIFT;
 
       tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET,  I2CM_TPR_HS | regval);
     }
@@ -1535,31 +1532,9 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
 {
   struct tiva_i2c_inst_s *inst = (struct tiva_i2c_inst_s *)dev;
   struct tiva_i2c_priv_s *priv = inst->priv;
-  uint32_t status = 0;
   int errval = 0;
 
   ASSERT(count);
-
-  /* Wait for any STOP in progress.  NOTE:  If we have to disable the FSMC
-   * then we cannot do this at the top of the loop, unfortunately.  The STOP
-   * will not complete normally if the FSMC is enabled.
-   */
-
-  tiva_i2c_sem_waitstop(priv);
-
-  /* Clear any pending error interrupts */
-#warning Missing logic
-
-  /* "Note: When the STOP, START or PEC bit is set, the software must
-   *  not perform any write access to I2C_CR1 before this bit is
-   *  cleared by hardware. Otherwise there is a risk of setting a
-   *  second STOP, START or PEC request."  However, if the bits are
-   *  not cleared by hardware, then we will have to do that from hardware.
-   */
-
-  tiva_i2c_clrstart(priv);
-
-  /* Old transfers are done */
 
   /* Reset ptr and dcnt to ensure an unexpected data interrupt doesn't
    * overwrite stale data.
@@ -1571,6 +1546,8 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
   priv->msgv = msgs;
   priv->msgc = count;
 
+  priv->status = 0;
+
   /* Reset I2C trace logic */
 
   tiva_i2c_tracereset(priv);
@@ -1579,11 +1556,11 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
 
   tiva_i2c_setclock(priv, inst->frequency);
 
-  /* Trigger start condition, then the process moves into the ISR.  I2C
+  /* Send the address, then the process moves into the ISR.  I2C
    * interrupts will be enabled within tiva_i2c_waitdone().
    */
 
-  tiva_i2c_sendstart(priv);
+  tiva_i2c_sendaddress(priv);
 
   /* Wait for an ISR, if there was a timeout, fetch latest status to get
    * the BUSY flag.
@@ -1591,64 +1568,36 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
 
   if (tiva_i2c_sem_waitdone(priv) < 0)
     {
-      /* Read the raw interrupt status */
-
-      status = tiva_i2c_getreg(priv, TIVA_I2CM_RIS_OFFSET);
+      i2cdbg("ERROR: Timed out\n");
       errval = ETIMEDOUT;
-
-      i2cdbg("Timed out: status: 0x%08x\n", status);
-
-      /* "Note: When the STOP, START or PEC bit is set, the software must
-       *  not perform any write access to I2C_CR1 before this bit is
-       *  cleared by hardware. Otherwise there is a risk of setting a
-       *  second STOP, START or PEC request."
-       */
-
-      tiva_i2c_clrstart(priv);
     }
-
-  /* Check for error status conditions */
-#warning Missing logic
+  else if ((priv->status & I2CM_CS_ERROR) != 0)
     {
+      if ((priv->status & I2CM_CS_ARBLST) != 0)
         {
-          /* Bus Error */
-
-          errval = EIO;
-        }
-        {
-          /* Arbitration Lost (master mode) */
+          /* Arbitration Lost */
 
           errval = EAGAIN;
         }
+      else if ((priv->status & (I2CM_CS_ADRACK | I2CM_CS_DATACK)) != 0)
         {
           /* Acknowledge Failure */
 
           errval = ENXIO;
         }
+#ifdef I2CM_CS_CLKTO
+      else if ((priv->status & I2CM_CS_CLKTO) != 0)
         {
-          /* Overrun/Underrun */
-
-          errval = EIO;
-        }
-        {
-          /* PEC Error in reception */
-
-          errval = EPROTO;
-        }
-        {
-          /* Timeout or Tlow Error */
+          /* Timeout */
 
           errval = ETIME;
         }
-
-      /* This is not an error and should never happen since SMBus is not enabled */
-
+#endif
+      else
         {
-          /* SMBus alert is an optional signal with an interrupt line for devices
-           * that want to trade their ability to master for a pin.
-           */
+          /* Something else? */
 
-          errval = EINTR;
+          errval = EIO;
         }
     }
 
@@ -1657,7 +1606,8 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
    * NOTE:  We will only see this busy indication if tiva_i2c_sem_waitdone()
    * fails above;  Otherwise it is cleared.
    */
-#warning Missing logic
+
+   if ((tiva_i2c_getreg(priv, TIVA_I2CM_CS_OFFSET) & (I2CM_CS_BUSY | I2CM_CS_BUSBSY)) != 0)
     {
       /* I2C Bus is for some reason busy */
 
