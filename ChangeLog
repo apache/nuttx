@@ -9183,3 +9183,6 @@
 	  smartfs_procfs.c, smartfs_utils.c, smartfs.h, Kconfig,
 	  include/nuttx/fs/ioctl.h, smart.h, and mtd/smart.h: Implements wear-
 	  leveling in the SmartFS.  From Ken Pettit (2014-12-9).
+	* arch/arm/src/tiva/tiva_i2c.c: Drive is code complete but still
+	  untested (2014-12-10).
+
