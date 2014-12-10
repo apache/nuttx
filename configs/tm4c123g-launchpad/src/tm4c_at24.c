@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c123g-launchpad/src/tm4c_nsh.c
+ * config/sama5d3x-ek/src/tm4c_at24.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,40 +33,124 @@
  *
  ****************************************************************************/
 
+/* AT24 Serial EEPROM
+ *
+ * A AT24C512 Serial EEPPROM was used for tested I2C.  There are no I2C
+ * devices on-board the Launchpad, but an external serial EEPROM module 
+ * module was used.
+ *
+ * The Serial EEPROM was mounted on an external adaptor board and connected
+ * to the LaunchPad thusly:
+ *
+ *   - VCC -- VCC
+ *   - GND -- GND
+ *   - PB2 -- SCL
+ *   - PB3 -- SDA
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/i2c.h>
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/nxffs.h>
+
 #include "tm4c123g-launchpad.h"
+
+#ifdef HAVE_AT24
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: tm4c_at24_automount
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Initialize and configure the AT24 serial EEPROM
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int tm4c_at24_automount(int minor)
 {
-  /* If CONFIG_BOARD_INITIALIZE is selected then board initialization was
-   * already performed in board_initialize.
-   */
+  FAR struct i2c_dev_s *i2c;
+  FAR struct mtd_dev_s *mtd;
+  static bool initialized = false;
+  int ret;
 
-#ifndef CONFIG_BOARD_INITIALIZE
-  return tm4c_bringup();
-#else
-  return OK;
+  /* Have we already initialized? */
+
+  if (!initialized)
+    {
+      /* No.. Get the I2C bus driver */
+
+      i2c = up_i2cinitialize(AT24_BUS);
+      if (!i2c)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to initialize SPI%d\n", AT24_BUS);
+          return -ENODEV;
+        }
+
+      /* Now bind the I2C interface to the AT24 I2C EEPROM driver */
+
+      mtd = at24c_initialize(i2c);
+      if (!mtd)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind SPI%d to the AT24 EEPROM driver\n",
+                 AT24_BUS);
+          return -ENODEV;
+        }
+
+#if defined(CONFIG_TM4C123G_LAUNCHPAD_AT24_FTL)
+      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+      ret = ftl_initialize(AT24_MINOR, mtd);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#elif defined(CONFIG_TM4C123G_LAUNCHPAD_AT24_NXFFS)
+      /* Initialize to provide NXFFS on the MTD interface */
+
+      ret = nxffs_initialize(mtd);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: NXFFS initialization failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Mount the file system at /mnt/at24 */
+
+      ret = mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          return ret;
+        }
 #endif
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
 }
+
+#endif /* HAVE_AT24 */

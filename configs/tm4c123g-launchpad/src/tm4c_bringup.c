@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c123g-launchpad/src/tm4c_nsh.c
+ * config/tm4c123g-launchpad/src/tm4c_bringup.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <syslog.h>
+
 #include "tm4c123g-launchpad.h"
 
 /****************************************************************************
@@ -51,22 +53,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: tm4c_bringup
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Bring up board features
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int tm4c_bringup(void)
 {
-  /* If CONFIG_BOARD_INITIALIZE is selected then board initialization was
-   * already performed in board_initialize.
-   */
+#ifdef HAVE_AT24
+  int ret;
 
-#ifndef CONFIG_BOARD_INITIALIZE
-  return tm4c_bringup();
+  /* Initialize the AT24 driver */
+
+  ret = tm4c_at24_automount(AT24_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: tm4c_at24_automount failed: %d\n", ret);
+    }
+
+  return ret;
 #else
   return OK;
-#endif
+#endif /* HAVE_AT24 */
 }
