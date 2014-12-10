@@ -121,18 +121,10 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fbf: I2C Slave 0 */
-#  define TIVA_I2CSC0_BASE    (TIVA_PERIPH_BASE + 0x20f00)  /* -0x20fff: I2C Status and Control 0 */
-#  define TIVA_I2CM1_BASE     (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C Master 1 */
-#  define TIVA_I2CS1_BASE     (TIVA_PERIPH_BASE + 0x21800)  /* -0x21fbf: I2C Slave 1 */
-#  define TIVA_I2CSC1_BASE    (TIVA_PERIPH_BASE + 0x21f00)  /* -0x21fff: I2C Status and Control 1 */
-#  define TIVA_I2CM2_BASE     (TIVA_PERIPH_BASE + 0x22000)  /* -0x227ff: I2C Master 2 */
-#  define TIVA_I2CS2_BASE     (TIVA_PERIPH_BASE + 0x22800)  /* -0x22fbf: I2C Slave 2 */
-#  define TIVA_I2CSC2_BASE    (TIVA_PERIPH_BASE + 0x22f00)  /* -0x22fff: I2C Status and Control 2 */
-#  define TIVA_I2CM3_BASE     (TIVA_PERIPH_BASE + 0x23000)  /* -0x237ff: I2C Master 3 */
-#  define TIVA_I2CS3_BASE     (TIVA_PERIPH_BASE + 0x23800)  /* -0x23fbf: I2C Slave 3 */
-#  define TIVA_I2CSC3_BASE    (TIVA_PERIPH_BASE + 0x23f00)  /* -0x23fff: I2C Status and Control 3 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
+#  define TIVA_I2C1_BASE      (TIVA_PERIPH_BASE + 0x21000)  /* -0x21fff: I2C1 */
+#  define TIVA_I2C2_BASE      (TIVA_PERIPH_BASE + 0x22000)  /* -0x22fff: I2C2 */
+#  define TIVA_I2C3_BASE      (TIVA_PERIPH_BASE + 0x23000)  /* -0x23fff: I2C3 */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
 #  define TIVA_GPIOG_BASE     (TIVA_PERIPH_BASE + 0x26000)  /* -0x26fff: GPIO Port G */
@@ -181,12 +173,8 @@
                                                             /* -0xaefff: Reserved */
 #  define TIVA_EEPROM_BASE    (TIVA_PERIPH_BASE + 0xaf000)  /* -0xaffff: EEPROM and Key Locker */
                                                             /* -0xbffff: Reserved */
-#  define TIVA_I2CM4_BASE     (TIVA_PERIPH_BASE + 0xc0000)  /* -0x207ff: I2C Master 4 */
-#  define TIVA_I2CS4_BASE     (TIVA_PERIPH_BASE + 0xc0800)  /* -0x20fbf: I2C Slave 4 */
-#  define TIVA_I2CSC4_BASE    (TIVA_PERIPH_BASE + 0xc0f00)  /* -0x20fff: I2C Status and Control 4 */
-#  define TIVA_I2CM5_BASE     (TIVA_PERIPH_BASE + 0xc1000)  /* -0x207ff: I2C Master 5 */
-#  define TIVA_I2CS5_BASE     (TIVA_PERIPH_BASE + 0xc1800)  /* -0x20fbf: I2C Slave 5 */
-#  define TIVA_I2CSC5_BASE    (TIVA_PERIPH_BASE + 0xc1f00)  /* -0x20fff: I2C Status and Control 5 */
+#  define TIVA_I2C4_BASE      (TIVA_PERIPH_BASE + 0xc0000)  /* -0x20fff: I2C4 */
+#  define TIVA_I2C5_BASE      (TIVA_PERIPH_BASE + 0xc1000)  /* -0x21fff: I2C5 */
                                                             /* -0xf8fff: Reserved */
 #  define TIVA_SYSEXC_BASE    (TIVA_PERIPH_BASE + 0xf9000)  /* -0xf9fff: System Exception Control */
                                                             /* -0xfbfff: Reserved */
@@ -219,18 +207,10 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fbf: I2C Slave 0 */
-#  define TIVA_I2CSC0_BASE    (TIVA_PERIPH_BASE + 0x20f00)  /* -0x20fff: I2C Status and Control 0 */
-#  define TIVA_I2CM1_BASE     (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C Master 1 */
-#  define TIVA_I2CS1_BASE     (TIVA_PERIPH_BASE + 0x21800)  /* -0x21fbf: I2C Slave 1 */
-#  define TIVA_I2CSC1_BASE    (TIVA_PERIPH_BASE + 0x21f00)  /* -0x21fff: I2C Status and Control 1 */
-#  define TIVA_I2CM2_BASE     (TIVA_PERIPH_BASE + 0x22000)  /* -0x227ff: I2C Master 2 */
-#  define TIVA_I2CS2_BASE     (TIVA_PERIPH_BASE + 0x22800)  /* -0x22fbf: I2C Slave 2 */
-#  define TIVA_I2CSC2_BASE    (TIVA_PERIPH_BASE + 0x22f00)  /* -0x22fff: I2C Status and Control 2 */
-#  define TIVA_I2CM3_BASE     (TIVA_PERIPH_BASE + 0x23000)  /* -0x237ff: I2C Master 3 */
-#  define TIVA_I2CS3_BASE     (TIVA_PERIPH_BASE + 0x23800)  /* -0x23fbf: I2C Slave 3 */
-#  define TIVA_I2CSC3_BASE    (TIVA_PERIPH_BASE + 0x23f00)  /* -0x23fff: I2C Status and Control 3 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
+#  define TIVA_I2C1_BASE      (TIVA_PERIPH_BASE + 0x21000)  /* -0x21fff: I2C1 */
+#  define TIVA_I2C2_BASE      (TIVA_PERIPH_BASE + 0x22000)  /* -0x22fff: I2C2 */
+#  define TIVA_I2C3_BASE      (TIVA_PERIPH_BASE + 0x23000)  /* -0x23fff: I2C3 */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
 #  define TIVA_PWM0_BASE      (TIVA_PERIPH_BASE + 0x28000)  /* -0x28fff: PWM 0 */
@@ -297,18 +277,10 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fbf: I2C Slave 0 */
-#  define TIVA_I2CSC0_BASE    (TIVA_PERIPH_BASE + 0x20f00)  /* -0x20fff: I2C Status and Control 0 */
-#  define TIVA_I2CM1_BASE     (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C Master 1 */
-#  define TIVA_I2CS1_BASE     (TIVA_PERIPH_BASE + 0x21800)  /* -0x21fbf: I2C Slave 1 */
-#  define TIVA_I2CSC1_BASE    (TIVA_PERIPH_BASE + 0x21f00)  /* -0x21fff: I2C Status and Control 1 */
-#  define TIVA_I2CM2_BASE     (TIVA_PERIPH_BASE + 0x22000)  /* -0x227ff: I2C Master 2 */
-#  define TIVA_I2CS2_BASE     (TIVA_PERIPH_BASE + 0x22800)  /* -0x22fbf: I2C Slave 2 */
-#  define TIVA_I2CSC2_BASE    (TIVA_PERIPH_BASE + 0x22f00)  /* -0x22fff: I2C Status and Control 2 */
-#  define TIVA_I2CM3_BASE     (TIVA_PERIPH_BASE + 0x23000)  /* -0x237ff: I2C Master 3 */
-#  define TIVA_I2CS3_BASE     (TIVA_PERIPH_BASE + 0x23800)  /* -0x23fbf: I2C Slave 3 */
-#  define TIVA_I2CSC3_BASE    (TIVA_PERIPH_BASE + 0x23f00)  /* -0x23fff: I2C Status and Control 3 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
+#  define TIVA_I2C1_BASE      (TIVA_PERIPH_BASE + 0x21000)  /* -0x21fff: I2C1 */
+#  define TIVA_I2C2_BASE      (TIVA_PERIPH_BASE + 0x22000)  /* -0x22fff: I2C2 */
+#  define TIVA_I2C3_BASE      (TIVA_PERIPH_BASE + 0x23000)  /* -0x23fff: I2C3 */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
 #  define TIVA_PWM0_BASE      (TIVA_PERIPH_BASE + 0x28000)  /* -0x28fff: PWM 0 */

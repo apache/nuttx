@@ -116,10 +116,8 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fff: I2C Slave 0 */
-#  define TIVA_I2CM1_BASE     (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C Master 1 */
-#  define TIVA_I2CS1_BASE     (TIVA_PERIPH_BASE + 0x21800)  /* -0x21fff: I2C Slave 1 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
+#  define TIVA_I2C1_BASE      (TIVA_PERIPH_BASE + 0x21000)  /* -0x21fff: I2C1 */
                                                             /* -0x23fff: Reserved */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
@@ -157,8 +155,7 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fff: I2C Slave 0 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
                                                             /* -0x23fff: Reserved */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
@@ -198,10 +195,8 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fff: I2C Slave 0 */
-#  define TIVA_I2CM1_BASE     (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C Master 1 */
-#  define TIVA_I2CS1_BASE     (TIVA_PERIPH_BASE + 0x21800)  /* -0x21fff: I2C Slave 1 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
+#  define TIVA_I2C1_BASE      (TIVA_PERIPH_BASE + 0x21000)  /* -0x21fff: I2C1 */
                                                             /* -0x23fff: Reserved */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
@@ -243,8 +238,7 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fff: I2C Slave 0 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x20fff: I2C0 */
                                                             /* -0x23fff: Reserved */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
@@ -290,10 +284,8 @@
                                                            /* -0x1ffff: Reserved */
 /* Peripheral Base Addresses */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fff: I2C Slave 0 */
-#  define TIVA_I2CM1_BASE     (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C Master 1 */
-#  define TIVA_I2CS1_BASE     (TIVA_PERIPH_BASE + 0x21800)  /* -0x21fff: I2C Slave 1 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C0 */
+#  define TIVA_I2C1_BASE      (TIVA_PERIPH_BASE + 0x21000)  /* -0x217ff: I2C1 */
                                                             /* -0x23fff: Reserved */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
