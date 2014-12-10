@@ -35,32 +35,38 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		=
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= tm4c_boot.c tm4c_ssi.c
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+CSRCS = tm4c_boot.c tm4c_bringup.c tm4c_ssi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= tm4c_autoleds.c
+CSRCS += tm4c_autoleds.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= tm4c_nsh.c
+CSRCS += tm4c_nsh.c
 endif
 
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+ifeq ($(CONFIG_MTD_AT24XX),y)
+ifeq ($(CONFIG_TIVA_I2C0),y)
+CSRCS += tm4c_at24.c
+endif
+endif
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+COBJS = $(CSRCS:.c=$(OBJEXT))
+
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)

@@ -18,6 +18,8 @@ Contents
   LEDs
   Serial Console
   USB Device Controller Functions
+  AT24 Serial EEPROM
+  I2C Tool
   Using OpenOCD and GDB with an FT2232 JTAG emulator
   TM4C123G LaunchPad Configuration Options
   Configurations
@@ -78,6 +80,152 @@ PIN SIGNAL(S)                                LanchPad Function
  30 PF2/SSI1CLK/T1CCP0/TRD0                  LED_B, GPIO, J4 pin 1
  31 PF3/CAN0TX/SSI1FSS/T1CCP1/TRCLK          LED_G, GPIO, J4 pin 2
  05 PF4/T2CCP0                               USR_SW1 (Low when pressed), GPIO, J4 pin 10
+
+AT24 Serial EEPROM
+^^^^^^^^^^^^^^^^^^
+
+  AT24 Connections
+  ----------------
+
+  A AT24C512 Serial EEPPROM was used for tested I2C.  There are no I2C
+  devices on-board the Launchpad, but an external serial EEPROM module 
+  module was used.
+
+  The Serial EEPROM was mounted on an external adaptor board and connected
+  to the LaunchPad thusly:
+
+    - VCC -- VCC
+    - GND -- GND
+    - PB2 -- SCL
+    - PB3 -- SDA
+
+  Configuration Settings
+  ----------------------
+
+  The following configuration settings were used:
+
+    System Type -> Tiva/Stellaris Peripheral Support
+      CONFIG_TIVA_I2C0=y                    : Enable I2C
+
+    System Type -> I2C device driver options
+      TIVA_I2C_FREQUENCY=100000             : Select an I2C frequency
+
+    Device Drivers -> I2C Driver Support
+      CONFIG_I2C=y                          : Enable I2C support
+      CONFIG_I2C_TRANSFER=y                 : Driver supports the transfer() method
+      CONFIG_I2C_WRITEREAD=y                : Driver supports the writeread() method
+
+    Device Drivers -> Memory Technology Device (MTD) Support
+      CONFIG_MTD=y                          : Enable MTD support
+      CONFIG_MTD_AT24XX=y                   : Enable the AT24 driver
+      CONFIG_AT24XX_SIZE=512                : Specifies the AT 24C512 part
+      CONFIG_AT24XX_ADDR=0x53               : AT24 I2C address
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+    File systems
+      CONFIG_NXFFS=y                        : Enables the NXFFS file system
+      CONFIG_NXFFS_PREALLOCATED=y           : Required
+                                            : Other defaults are probably OK
+
+    Board Selection
+      CONFIG_TM4C123G_LAUNCHPAD_AT24_BLOCKMOUNT=y   : Mounts AT24 for NSH
+      CONFIG_TM4C123G_LAUNCHPAD_AT24_NXFFS=y        : Mount the AT24 using NXFFS
+
+  You can then format the AT24 EEPROM for a FAT file system and mount the
+  file system at /mnt/at24 using these NSH commands:
+
+    nsh> mkfatfs /dev/mtdblock0
+    nsh> mount -t vfat /dev/mtdblock0 /mnt/at24
+
+  Then you an use the FLASH as a normal FAT file system:
+
+    nsh> echo "This is a test" >/mnt/at24/atest.txt
+    nsh> ls -l /mnt/at24
+    /mnt/at24:
+     -rw-rw-rw-      16 atest.txt
+    nsh> cat /mnt/at24/atest.txt
+    This is a test
+
+I2C Tool
+========
+
+  I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be used
+  to peek and poke I2C devices.  That tool can be enabled by setting the
+  following:
+
+    System Type -> TIVA Peripheral Support
+      CONFIG_TIVA_I2C0=y                   : Enable I2C0
+      CONFIG_TIVA_I2C1=y                   : Enable I2C1
+      CONFIG_TIVA_I2C2=y                   : Enable I2C2
+      ...
+
+    System Type -> I2C device driver options
+      CONFIG_TIVA_I2C0_FREQUENCY=100000    : Select an I2C0 frequency
+      CONFIG_TIVA_I2C1_FREQUENCY=100000    : Select an I2C1 frequency
+      CONFIG_TIVA_I2C2_FREQUENCY=100000    : Select an I2C2 frequency
+      ...
+
+    Device Drivers -> I2C Driver Support
+      CONFIG_I2C=y                          : Enable I2C support
+      CONFIG_I2C_TRANSFER=y                 : Driver supports the transfer() method
+      CONFIG_I2C_WRITEREAD=y                : Driver supports the writeread() method
+
+    Application Configuration -> NSH Library
+      CONFIG_SYSTEM_I2CTOOL=y               : Enable the I2C tool
+      CONFIG_I2CTOOL_MINBUS=0               : I2C0 has the minimum bus number 0
+      CONFIG_I2CTOOL_MAXBUS=2               : I2C2 has the maximum bus number 2
+      CONFIG_I2CTOOL_DEFFREQ=100000         : Pick a consistent frequency
+
+    The I2C tool has extensive help that can be accessed as follows:
+
+    nsh> i2c help
+    Usage: i2c <cmd> [arguments]
+    Where <cmd> is one of:
+
+      Show help     : ?
+      List busses   : bus
+      List devices  : dev [OPTIONS] <first> <last>
+      Read register : get [OPTIONS] [<repititions>]
+      Show help     : help
+      Write register: set [OPTIONS] <value> [<repititions>]
+      Verify access : verf [OPTIONS] [<value>] [<repititions>]
+
+    Where common "sticky" OPTIONS include:
+      [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
+      [-b bus] is the I2C bus number (decimal).  Default: 0 Current: 0
+      [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
+      [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
+      [-s|n], send/don't send start between command and data.  Default: -n Current: -n
+      [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+      [-f freq] I2C frequency.  Default: 100000 Current: 100000
+
+    NOTES:
+    o Arguments are "sticky".  For example, once the I2C address is
+      specified, that address will be re-used until it is changed.
+
+    WARNING:
+    o The I2C dev command may have bad side effects on your I2C devices.
+      Use only at your own risk.
+
+    As an example, the I2C dev command can be used to list all devices
+    responding on I2C0 (the default) like this:
+
+      nsh> i2c dev 0x03 0x77
+          0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+      00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+      10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+      20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      30: -- -- -- -- -- -- -- -- -- 39 -- -- -- 3d -- --
+      40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      60: 60 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      70: -- -- -- -- -- -- -- --
+      nsh>
+
+    NOTE:  This is output from a different board and shows I2C
+    devices responding at addresses 0x1a, 0x39, 0x3d, and 0x60.
 
 Using OpenOCD and GDB with an FT2232 JTAG emulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
