@@ -9189,3 +9189,8 @@
 	  files:  Add initialization logic for an external AT24 EEPROM.  This
 	  is intended only to suppport testing of the Tiva I2C driver
 	  (2014-12-10).
+	* libnx/Makefile, libnx/nxfonts/nxfonts_x11-misc-fixed-*.h, Make.defs,
+	  Makefile.sources, nxfonts_bitmaps.c, graphics/Kconfig, and
+	  include/nuttx/nx/nxfonts.h:  Lots of fonts that derive from
+	  X11-misc-fixed-* fonts.  Converted for use by NuttX by Pierre-Noel
+	  Bouteville (2014-12-10).
