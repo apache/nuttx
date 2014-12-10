@@ -85,24 +85,24 @@
 
 /* Interrupt wait timeout in seconds and milliseconds */
 
-#if !defined(CONFIG_TIVA_I2CTIMEOSEC) && !defined(CONFIG_TIVA_I2CTIMEOMS)
-#  define CONFIG_TIVA_I2CTIMEOSEC 0
-#  define CONFIG_TIVA_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#elif !defined(CONFIG_TIVA_I2CTIMEOSEC)
-#  define CONFIG_TIVA_I2CTIMEOSEC 0     /* User provided milliseconds */
-#elif !defined(CONFIG_TIVA_I2CTIMEOMS)
-#  define CONFIG_TIVA_I2CTIMEOMS  0     /* User provided seconds */
+#if !defined(CONFIG_TIVA_I2C_TIMEOSEC) && !defined(CONFIG_TIVA_I2C_TIMEOMS)
+#  define CONFIG_TIVA_I2C_TIMEOSEC 0
+#  define CONFIG_TIVA_I2C_TIMEOMS  500   /* Default is 500 milliseconds */
+#elif !defined(CONFIG_TIVA_I2C_TIMEOSEC)
+#  define CONFIG_TIVA_I2C_TIMEOSEC 0     /* User provided milliseconds */
+#elif !defined(CONFIG_TIVA_I2C_TIMEOMS)
+#  define CONFIG_TIVA_I2C_TIMEOMS  0     /* User provided seconds */
 #endif
 
 /* Interrupt wait time timeout in system timer ticks */
 
-#ifndef CONFIG_TIVA_I2CTIMEOTICKS
-#  define CONFIG_TIVA_I2CTIMEOTICKS \
-    (SEC2TICK(CONFIG_TIVA_I2CTIMEOSEC) + MSEC2TICK(CONFIG_TIVA_I2CTIMEOMS))
+#ifndef CONFIG_TIVA_I2C_TIMEOTICKS
+#  define CONFIG_TIVA_I2C_TIMEOTICKS \
+    (SEC2TICK(CONFIG_TIVA_I2C_TIMEOSEC) + MSEC2TICK(CONFIG_TIVA_I2C_TIMEOMS))
 #endif
 
 #ifndef CONFIG_TIVA_I2C_DYNTIMEO_STARTSTOP
-#  define CONFIG_TIVA_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_TIVA_I2CTIMEOTICKS)
+#  define CONFIG_TIVA_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_TIVA_I2C_TIMEOTICKS)
 #endif
 
 /* Macros to convert a I2C pin to a GPIO output */
@@ -588,8 +588,8 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
       /* Calculate a time in the future */
 
-#if CONFIG_TIVA_I2CTIMEOSEC > 0
-      abstime.tv_sec += CONFIG_TIVA_I2CTIMEOSEC;
+#if CONFIG_TIVA_I2C_TIMEOSEC > 0
+      abstime.tv_sec += CONFIG_TIVA_I2C_TIMEOSEC;
 #endif
 
       /* Add a value proportional to the number of bytes in the transfer */
@@ -602,8 +602,8 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
           abstime.tv_nsec -= 1000 * 1000 * 1000;
         }
 
-#elif CONFIG_TIVA_I2CTIMEOMS > 0
-      abstime.tv_nsec += CONFIG_TIVA_I2CTIMEOMS * 1000 * 1000;
+#elif CONFIG_TIVA_I2C_TIMEOMS > 0
+      abstime.tv_nsec += CONFIG_TIVA_I2C_TIMEOMS * 1000 * 1000;
       if (abstime.tv_nsec > 1000 * 1000 * 1000)
         {
           abstime.tv_sec++;
@@ -654,7 +654,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
   timeout = USEC2TICK(tiva_i2c_tousecs(priv->msgc, priv->msgv));
 #else
-  timeout = CONFIG_TIVA_I2CTIMEOTICKS;
+  timeout = CONFIG_TIVA_I2C_TIMEOTICKS;
 #endif
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts

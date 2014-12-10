@@ -318,6 +318,46 @@ config TIVA_DISABLE_GPIOQ_IRQS
 
 endmenu
 
+if TIVA_I2C
+
+menu "I2C Configuration"
+
+config TIVA_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+
+if TIVA_I2C_DYNTIMEO
+
+config TIVA_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+
+config TIVA_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+
+endif # TIVA_I2C_DYNTIMEO
+
+config TIVA_I2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+if !TIVA_I2C_DYNTIMEO
+
+config TIVA_I2C_TIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on !TIVA_I2C_DYNTIMEO
+
+config TIVA_I2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on !TIVA_I2C_DYNTIMEO
+
+endif # !TIVA_I2C_DYNTIMEO
+endmenu # I2C Configuration
+endif # TIVA_I2C
+
 if TIVA_ETHERNET
 menu "Tiva/Stellaris Ethernet Configuration"
 
