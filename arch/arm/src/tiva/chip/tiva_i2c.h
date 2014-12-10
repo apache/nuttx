@@ -543,7 +543,7 @@
 
 /* I2C Master Interrupt Mask (I2CM_IMR) */
 
-#define I2CM_IMR_IM                    (1 << 0)  /* Bit 0:  Interrupt Mask */
+#define I2CM_IMR_MIM                  (1 << 0)  /* Bit 0:  Master Interrupt Mask */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || \
     defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
@@ -565,68 +565,68 @@
 
 /* I2C Master Raw Interrupt Status (I2CM_RIS) */
 
-#define I2CM_RIS_RIS                   (1 << 0)  /* Bit 0:  Raw Interrupt Status */
+#define I2CM_RIS_MRIS                 (1 << 0)  /* Bit 0:  Master Raw Interrupt Status */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || \
     defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
-#  define I2CM_RIS_CLKRIS              (1 << 1)  /* Bit 1:  Clock Timeout Raw Interrupt Status */
+#  define I2CM_RIS_CLKRIS             (1 << 1)  /* Bit 1:  Clock Timeout Raw Interrupt Status */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
-#  define I2CM_RIS_DMARXRIS           (1 << 2)  /* Bit 2:  Receive DMA Interrupt Mask */
-#  define I2CM_RIS_DMATXRIS           (1 << 3)  /* Bit 3:  Transmit DMA Interrupt Mask */
-#  define I2CM_RIS_NACKRIS            (1 << 4)  /* Bit 4:  Address/Data NACK Interrupt Mask */
-#  define I2CM_RIS_STARTRIS           (1 << 5)  /* Bit 5:  START Detection Interrupt Mask */
-#  define I2CM_RIS_STOPRIS            (1 << 6)  /* Bit 6:  STOP Detection Interrupt Mask */
-#  define I2CM_RIS_ARBLOSTRIS         (1 << 7)  /* Bit 7:  Arbitration Lost Interrupt Mask */
-#  define I2CM_RIS_TXRIS              (1 << 8)  /* Bit 8:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_RIS_RXRIS              (1 << 9)  /* Bit 9:  Receive FIFO Request Interrupt Mask */
-#  define I2CM_RIS_TXFERIS            (1 << 10) /* Bit 10: Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_RIS_RXFFRIS            (1 << 11) /* Bit 11: Receive FIFO Full Interrupt Mask */
+#  define I2CM_RIS_DMARXRIS           (1 << 2)  /* Bit 2:  Receive DMA Interrupt Status */
+#  define I2CM_RIS_DMATXRIS           (1 << 3)  /* Bit 3:  Transmit DMA Interrupt Status */
+#  define I2CM_RIS_NACKRIS            (1 << 4)  /* Bit 4:  Address/Data NACK Interrupt Status */
+#  define I2CM_RIS_STARTRIS           (1 << 5)  /* Bit 5:  START Detection Interrupt Status */
+#  define I2CM_RIS_STOPRIS            (1 << 6)  /* Bit 6:  STOP Detection Interrupt Status */
+#  define I2CM_RIS_ARBLOSTRIS         (1 << 7)  /* Bit 7:  Arbitration Lost Interrupt Status */
+#  define I2CM_RIS_TXRIS              (1 << 8)  /* Bit 8:  Transmit FIFO Request Interrupt Status */
+#  define I2CM_RIS_RXRIS              (1 << 9)  /* Bit 9:  Receive FIFO Request Interrupt Status */
+#  define I2CM_RIS_TXFERIS            (1 << 10) /* Bit 10: Transmit FIFO Empty Interrupt Status */
+#  define I2CM_RIS_RXFFRIS            (1 << 11) /* Bit 11: Receive FIFO Full Interrupt Status */
 #endif
 
 /* I2C Master Masked Interrupt Status (I2CM_MIS) */
 
-#define I2CM_MIS_MIS                   (1 << 0)  /* Bit 0:  Masked Interrupt Status */
+#define I2CM_MIS_MMIS                 (1 << 0)  /* Bit 0:  Maseter Masked Interrupt Status */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || \
     defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
-#  define I2CM_MIS_CLKMIS              (1 << 1)  /* Bit 1:  Clock Timeout Masked Interrupt Status */
+#  define I2CM_MIS_CLKMIS             (1 << 1)  /* Bit 1:  Clock Timeout Masked Interrupt Status */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
-#  define I2CM_MIS_DMARXMIS           (1 << 2)  /* Bit 2:  Receive DMA Interrupt Mask */
-#  define I2CM_MIS_DMATXMIS           (1 << 3)  /* Bit 3:  Transmit DMA Interrupt Mask */
-#  define I2CM_MIS_NACKMIS            (1 << 4)  /* Bit 4:  Address/Data NACK Interrupt Mask */
-#  define I2CM_MIS_STARTMIS           (1 << 5)  /* Bit 5:  START Detection Interrupt Mask */
-#  define I2CM_MIS_STOPMIS            (1 << 6)  /* Bit 6:  STOP Detection Interrupt Mask */
-#  define I2CM_MIS_ARBLOSTMIS         (1 << 7)  /* Bit 7:  Arbitration Lost Interrupt Mask */
-#  define I2CM_MIS_TXMIS              (1 << 8)  /* Bit 8:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_MIS_RXMIS              (1 << 9)  /* Bit 9:  Receive FIFO Request Interrupt Mask */
-#  define I2CM_MIS_TXFEMIS            (1 << 10) /* Bit 10: Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_MIS_RXFFMIS            (1 << 11) /* Bit 11: Receive FIFO Full Interrupt Mask */
+#  define I2CM_MIS_DMARXMIS           (1 << 2)  /* Bit 2:  Receive DMA Interrupt Status */
+#  define I2CM_MIS_DMATXMIS           (1 << 3)  /* Bit 3:  Transmit DMA Interrupt Status */
+#  define I2CM_MIS_NACKMIS            (1 << 4)  /* Bit 4:  Address/Data NACK Interrupt Status */
+#  define I2CM_MIS_STARTMIS           (1 << 5)  /* Bit 5:  START Detection Interrupt Status */
+#  define I2CM_MIS_STOPMIS            (1 << 6)  /* Bit 6:  STOP Detection Interrupt Status */
+#  define I2CM_MIS_ARBLOSTMIS         (1 << 7)  /* Bit 7:  Arbitration Lost Interrupt Status */
+#  define I2CM_MIS_TXMIS              (1 << 8)  /* Bit 8:  Transmit FIFO Request Interrupt Status */
+#  define I2CM_MIS_RXMIS              (1 << 9)  /* Bit 9:  Receive FIFO Request Interrupt Status */
+#  define I2CM_MIS_TXFEMIS            (1 << 10) /* Bit 10: Transmit FIFO Empty Interrupt Status */
+#  define I2CM_MIS_RXFFMIS            (1 << 11) /* Bit 11: Receive FIFO Full Interrupt Status */
 #endif
 
 /* I2C Master Masked Interrupt Status (I2CM_ICR) */
 
-#define I2CM_ICR_IC                    (1 << 0)  /* Bit 0:  Masked Interrupt Status */
+#define I2CM_ICR_MIC                  (1 << 0)  /* Bit 0:  Master Masked Interrupt Clear */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || \
     defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
-#  define I2CM_ICR_CLKIC               (1 << 1)  /* Bit 1:  Clock Timeout Interrupt Clear */
+#  define I2CM_ICR_CLKC               (1 << 1)  /* Bit 1:  Clock Timeout Interrupt Clear */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
-#  define I2CM_ICR_DMARXIC            (1 << 2)  /* Bit 2:  Receive DMA Interrupt Mask */
-#  define I2CM_ICR_DMATXIC            (1 << 3)  /* Bit 3:  Transmit DMA Interrupt Mask */
-#  define I2CM_ICR_NACKIC             (1 << 4)  /* Bit 4:  Address/Data NACK Interrupt Mask */
-#  define I2CM_ICR_STARTIC            (1 << 5)  /* Bit 5:  START Detection Interrupt Mask */
-#  define I2CM_ICR_STOPIC             (1 << 6)  /* Bit 6:  STOP Detection Interrupt Mask */
-#  define I2CM_ICR_ARBLOSTIC          (1 << 7)  /* Bit 7:  Arbitration Lost Interrupt Mask */
-#  define I2CM_ICR_TXIC               (1 << 8)  /* Bit 8:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_ICR_RXIC               (1 << 9)  /* Bit 9:  Receive FIFO Request Interrupt Mask */
+#  define I2CM_ICR_DMARXIC            (1 << 2)  /* Bit 2:  Receive DMA Interrupt Clear */
+#  define I2CM_ICR_DMATXIC            (1 << 3)  /* Bit 3:  Transmit DMA Interrupt Clear */
+#  define I2CM_ICR_NACKIC             (1 << 4)  /* Bit 4:  Address/Data NACK Interrupt Clear */
+#  define I2CM_ICR_STARTIC            (1 << 5)  /* Bit 5:  START Detection Interrupt Clear */
+#  define I2CM_ICR_STOPIC             (1 << 6)  /* Bit 6:  STOP Detection Interrupt Clear */
+#  define I2CM_ICR_ARBLOSTIC          (1 << 7)  /* Bit 7:  Arbitration Lost Interrupt Clear */
+#  define I2CM_ICR_TXIC               (1 << 8)  /* Bit 8:  Transmit FIFO Request Interrupt Clear */
+#  define I2CM_ICR_RXIC               (1 << 9)  /* Bit 9:  Receive FIFO Request Interrupt Clear */
 #  define I2CM_ICR_TXFEIC             (1 << 10) /* Bit 10: Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_ICR_RXFFIC             (1 << 11) /* Bit 11: Receive FIFO Full Interrupt Mask */
+#  define I2CM_ICR_RXFFIC             (1 << 11) /* Bit 11: Receive FIFO Full Interrupt Clear */
 #endif
 
 /* I2C Master Configuration (I2CM_CR) */
