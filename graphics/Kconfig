@@ -369,6 +369,160 @@ config NXFONT_PIXEL_LCD_MACHINE
 		This option enables support for a small LCD, The "Pixel lcd machine"
 		(font ID FONTID_PIXEL_LCD_MACHINE == 20).
 
+config NXFONT_X11_MISC_FIXED_4X6
+	bool "x11 misc fixed 4x6"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-4x6".
+		(font ID FONTID_X11_MISC_FIXED_4X6 == 21).
+
+config NXFONT_X11_MISC_FIXED_5X7
+	bool "x11 misc fixed 5x7"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-5x7".
+		(font ID FONTID_X11_MISC_FIXED_5X7 == 22).
+
+config NXFONT_X11_MISC_FIXED_5X8
+	bool "x11 misc fixed 5x8"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-5x8".
+		(font ID FONTID_X11_MISC_FIXED_5X8 == 23).
+
+config NXFONT_X11_MISC_FIXED_6X9
+	bool "x11 misc fixed 6x9"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-6x9".
+		(font ID FONTID_X11_MISC_FIXED_6X9 == 24).
+
+config NXFONT_X11_MISC_FIXED_6X10
+	bool "x11 misc fixed 6x10"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-6x10".
+		(font ID FONTID_X11_MISC_FIXED_6X10 == 25).
+
+config NXFONT_X11_MISC_FIXED_6X12
+	bool "x11 misc fixed 6x12"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-6x12".
+		(font ID FONTID_X11_MISC_FIXED_6X12 == 26).
+
+config NXFONT_X11_MISC_FIXED_6X13
+	bool "x11 misc fixed 6x13"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-6x13".
+		(font ID FONTID_X11_MISC_FIXED_6X13 == 27).
+
+config NXFONT_X11_MISC_FIXED_6X13B
+	bool "x11 misc fixed 6x13B"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-6x13B".
+		(font ID FONTID_X11_MISC_FIXED_6X13B == 28).
+
+config NXFONT_X11_MISC_FIXED_6X13O
+	bool "x11 misc fixed 6x13O"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-6x13O".
+		(font ID FONTID_X11_MISC_FIXED_6X13O == 29).
+
+config NXFONT_X11_MISC_FIXED_7X13
+	bool "x11 misc fixed 7x13"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-7x13".
+		(font ID FONTID_X11_MISC_FIXED_7X13 == 30).
+
+config NXFONT_X11_MISC_FIXED_7X13B
+	bool "x11 misc fixed 7x13B"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-7x13B".
+		(font ID FONTID_X11_MISC_FIXED_7X13B == 31).
+
+config NXFONT_X11_MISC_FIXED_7X13O
+	bool "x11 misc fixed 7x13O"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-7x13O".
+		(font ID FONTID_X11_MISC_FIXED_7X13O == 32).
+
+config NXFONT_X11_MISC_FIXED_7X14
+	bool "x11 misc fixed 7x14"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-7x14".
+		(font ID FONTID_X11_MISC_FIXED_7X14 == 33).
+
+config NXFONT_X11_MISC_FIXED_7X14B
+	bool "x11 misc fixed 7x14B"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-7x14B".
+		(font ID FONTID_X11_MISC_FIXED_7X14B == 34).
+
+config NXFONT_X11_MISC_FIXED_8X13
+	bool "x11 misc fixed 8x13"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-8x13".
+		(font ID FONTID_X11_MISC_FIXED_8X13 == 35).
+
+config NXFONT_X11_MISC_FIXED_8X13B
+	bool "x11 misc fixed 8x13B"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-8x13B".
+		(font ID FONTID_X11_MISC_FIXED_8X13B == 36).
+
+config NXFONT_X11_MISC_FIXED_8X13O
+	bool "x11 misc fixed 8x13O"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-8x13O".
+		(font ID FONTID_X11_MISC_FIXED_8X13O == 37).
+
+config NXFONT_X11_MISC_FIXED_9X15
+	bool "x11 misc fixed 9x15"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-9x15".
+		(font ID FONTID_X11_MISC_FIXED_9X15 == 38).
+
+config NXFONT_X11_MISC_FIXED_9X15B
+	bool "x11 misc fixed 9x15B"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-9x15B".
+		(font ID FONTID_X11_MISC_FIXED_9X15B == 39).
+
+config NXFONT_X11_MISC_FIXED_9X18
+	bool "x11 misc fixed 9x18"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-9x18".
+		(font ID FONTID_X11_MISC_FIXED_9X18 == 40).
+
+config NXFONT_X11_MISC_FIXED_9X18B
+	bool "x11 misc fixed 9x18B"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-9x18B".
+		(font ID FONTID_X11_MISC_FIXED_9X18B == 41).
+
+config NXFONT_X11_MISC_FIXED_10X20
+	bool "x11 misc fixed 10x20"
+	default n
+	---help---
+		This option enables support for a "x11-misc-fixed-10x20".
+		(font ID FONTID_X11_MISC_FIXED_10X20 == 42).
+
 endmenu
 
 menuconfig NXTERM

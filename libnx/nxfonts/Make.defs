@@ -135,6 +135,98 @@ ifeq ($(CONFIG_NXFONT_PIXEL_LCD_MACHINE),y)
 CSRCS += nxfonts_bitmaps_pixel-lcd-machine.c
 endif
 
+# X11 misc fixed fonts
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_4X6),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-4x6.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_5X7),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-5x7.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_5X8),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-5x8.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X9),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x9.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X10),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x10.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X12),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x12.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X13),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x13.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X13B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x13B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X13O),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x13O.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X13),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x13.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X13B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x13B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X13O),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x13O.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X14),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x14.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X14B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x14B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_8X13),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-8x13.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_8X13B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-8x13B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_8X13O),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-8x13O.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X15),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x15.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X15B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x15B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X18),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x18.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X18B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x18B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_10X20),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-10x20.c
+endif
+
+
+
 # Add the nxfont/ directory to the build
 
 DEPPATH += --dep-path nxfonts

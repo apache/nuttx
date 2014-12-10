@@ -184,6 +184,119 @@ NXFONTS_PREFIX := g_pixel_lcd_machine_
 GEN_CSRC = nxfonts_bitmaps_pixel-lcd-machine.c
 endif
 
+# X11-misc-fixed fonts
+
+ifeq ($(NXFONTS_FONTID),21)
+NXFONTS_PREFIX := g_x11_misc_fixed_4x6_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-4x6.c
+endif
+
+ifeq ($(NXFONTS_FONTID),22)
+NXFONTS_PREFIX := g_x11_misc_fixed_5x7_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-5x7.c
+endif
+
+ifeq ($(NXFONTS_FONTID),23)
+NXFONTS_PREFIX := g_x11_misc_fixed_5x8_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-5x8.c
+endif
+
+ifeq ($(NXFONTS_FONTID),24)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x9_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x9.c
+endif
+
+ifeq ($(NXFONTS_FONTID),25)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x10_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x10.c
+endif
+
+ifeq ($(NXFONTS_FONTID),26)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x12_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x12.c
+endif
+
+ifeq ($(NXFONTS_FONTID),27)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x13_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13.c
+endif
+
+ifeq ($(NXFONTS_FONTID),28)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x13B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),29)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x13O_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13O.c
+endif
+
+ifeq ($(NXFONTS_FONTID),30)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x13_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13.c
+endif
+
+ifeq ($(NXFONTS_FONTID),31)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x13B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),32)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x13O_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13O.c
+endif
+
+ifeq ($(NXFONTS_FONTID),33)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x14_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x14.c
+endif
+
+ifeq ($(NXFONTS_FONTID),34)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x14B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x14B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),35)
+NXFONTS_PREFIX := g_x11_misc_fixed_8x13_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13.c
+endif
+
+ifeq ($(NXFONTS_FONTID),36)
+NXFONTS_PREFIX := g_x11_misc_fixed_8x13B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),37)
+NXFONTS_PREFIX := g_x11_misc_fixed_8x13O_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13O.c
+endif
+
+ifeq ($(NXFONTS_FONTID),38)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x15_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x15.c
+endif
+
+ifeq ($(NXFONTS_FONTID),39)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x15B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x15B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),40)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x18_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x18.c
+endif
+
+ifeq ($(NXFONTS_FONTID),41)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x18B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x18B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),42)
+NXFONTS_PREFIX := g_x11_misc_fixed_10x20_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-10x20.c
+endif
+
+
 DEPENDENCY := nxfonts_bitmaps.c
 CPPFLAGS += -DNXFONTS_FONTID=$(NXFONTS_FONTID)
 CPPFLAGS += -DNXFONTS_PREFIX=$(NXFONTS_PREFIX)
