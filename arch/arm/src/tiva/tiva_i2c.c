@@ -996,10 +996,19 @@ static int tiva_i2c_interrupt(struct tiva_i2c_priv_s *priv, uint32_t status)
     {
       uint32_t mcs;
 
+#ifndef CONFIG_I2C_POLLED
       /* Clear the pending master interrupt */
 
       tiva_i2c_putreg(priv, TIVA_I2CM_ICR_OFFSET, I2CM_ICR_MIC);
       status &= ~I2CM_RIS_MRIS;
+
+      /* Workaround for I2C master interrupt clear errata for rev B Tiva
+       * devices.  For later devices, this write is ignored and therefore
+       * harmless (other than the slight performance hit).
+       */
+
+      (void)tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+#endif
 
       /* We need look at the Master Control/Status register to determine the cause
        * of the master interrupt.
@@ -1179,7 +1188,9 @@ static int tiva_i2c_interrupt(struct tiva_i2c_priv_s *priv, uint32_t status)
 
   /* Make sure that all pending interrupts were handled */
 
+#ifndef CONFIG_I2C_POLLED
   DEBUGASSERT(status == 0);
+#endif
   return OK;
 }
 
@@ -1571,7 +1582,11 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
       i2cdbg("ERROR: Timed out\n");
       errval = ETIMEDOUT;
     }
-  else if ((priv->status & I2CM_CS_ERROR) != 0)
+#ifdef I2CM_CS_CLKTO
+  else if ((priv->status & (I2CM_CS_ERROR | I2CM_CS_ARBLST | I2CM_CS_CLKTO)) != 0)
+#else
+  else if ((priv->status & (I2CM_CS_ERROR | I2CM_CS_ARBLST)) != 0)
+#endif
     {
       if ((priv->status & I2CM_CS_ARBLST) != 0)
         {
@@ -1609,7 +1624,9 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
 
    if ((tiva_i2c_getreg(priv, TIVA_I2CM_CS_OFFSET) & (I2CM_CS_BUSY | I2CM_CS_BUSBSY)) != 0)
     {
-      /* I2C Bus is for some reason busy */
+      /* I2C Bus is for some reason busy.  If I2CM_CS_BUSY then none of the
+       * other bits are valid.
+       */
 
       errval = EBUSY;
     }
