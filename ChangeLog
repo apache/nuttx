@@ -9185,4 +9185,7 @@
 	  leveling in the SmartFS.  From Ken Pettit (2014-12-9).
 	* arch/arm/src/tiva/tiva_i2c.c: Drive is code complete but still
 	  untested (2014-12-10).
-
+	* configs/tm4c123g-launchpad/src/tm4c_at24.c, tm4c_bringup.c, and other
+	  files:  Add initialization logic for an external AT24 EEPROM.  This
+	  is intended only to suppport testing of the Tiva I2C driver
+	  (2014-12-10).
