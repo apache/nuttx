@@ -40,7 +40,7 @@ PIN SIGNAL(S)                                LanchPad Function
 
  45 PB0/T2CCP0/U1Rx                          GPIO, J1 pin 3
  46 PB1/T2CCP1/U1Tx                          GPIO, J1 pin 4
- 47 PB2/I2C0SCL/T3CCP0                       GPIO, J2, pin 3
+ 47 PB2/I2C0SCL/T3CCP0                       GPIO, J2 pin 2
  48 PB3/I2C0SDA/T3CCP1                       GPIO, J4 pin 3
  58 PB4/AIN10/CAN0Rx/SSI2CLK/T1CCP0          GPIO, J1 pin 7
  57 PB5/AIN11/CAN0Tx/SSI2FSS/T1CCP1          GPIO, J1 pin 2
@@ -94,10 +94,12 @@ AT24 Serial EEPROM
   The Serial EEPROM was mounted on an external adaptor board and connected
   to the LaunchPad thusly:
 
-    - VCC -- VCC
-    - GND -- GND
-    - PB2 -- SCL
-    - PB3 -- SDA
+    - VCC  J1 pin 1  3.3V
+           J3 pin 1  5.0V
+    - GND  J2 pin 1  GND
+           J3 pin 2  GND
+    - PB2  J2 pin 2  SCL
+    - PB3  J4 pin 3  SDA
 
   Configuration Settings
   ----------------------
