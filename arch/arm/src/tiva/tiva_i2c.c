@@ -1462,7 +1462,7 @@ static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequen
   tmp = 2 * 10 * frequency;
   regval = (((SYSCLK_FREQUENCY + tmp - 1) / tmp) - 1) << I2CM_TPR_SHIFT;
 
-  DEBUGASSERT((regval & I2CM_TPR_MASK) == 0);
+  DEBUGASSERT((regval & I2CM_TPR_MASK) == regval);
   tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET, regval);
 
 #ifdef TIVA_I2CSC_PP_OFFSET
