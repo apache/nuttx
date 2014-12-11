@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NETINET_IP_H
-#define __INCLUDE_NETINET_IP_H
+#ifndef __INCLUDE_NETINET_IN_H
+#define __INCLUDE_NETINET_IN_H
 
 /****************************************************************************
  * Included Files
@@ -152,4 +152,4 @@ struct sockaddr_in6
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NETINET_IP_H */
+#endif /* __INCLUDE_NETINET_IN_H */
