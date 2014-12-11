@@ -355,6 +355,14 @@ config TIVA_I2C_TIMEOTICKS
 	depends on !TIVA_I2C_DYNTIMEO
 
 endif # !TIVA_I2C_DYNTIMEO
+
+config TIVA_I2C_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enables extremely detailed register access debug output.
+
 endmenu # I2C Configuration
 endif # TIVA_I2C
 
