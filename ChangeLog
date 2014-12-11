@@ -9194,3 +9194,6 @@
 	  include/nuttx/nx/nxfonts.h:  Lots of fonts that derive from
 	  X11-misc-fixed-* fonts.  Converted for use by NuttX by Pierre-Noel
 	  Bouteville (2014-12-10).
+	* nuttx/drivers/mtd/m25px.c; M25P serial flash driver:  Add subsector
+	  size of the M24P16 part.  From Lazlo (2014-12-10).
+
