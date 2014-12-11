@@ -85,77 +85,78 @@
 /* M25P Registers *******************************************************************/
 /* Indentification register values */
 
-#define M25P_MANUFACTURER         CONFIG_M25P_MANUFACTURER
-#define M25P_MEMORY_TYPE          CONFIG_M25P_MEMORY_TYPE
-#define M25P_RES_ID               0x13
-#define M25P_M25P1_CAPACITY       0x11 /* 1 M-bit */
-#define M25P_EN25F80_CAPACITY     0x14 /* 8 M-bit */
-#define M25P_M25P16_CAPACITY      0x15 /* 16 M-bit */
-#define M25P_M25P32_CAPACITY      0x16 /* 32 M-bit */
-#define M25P_M25P64_CAPACITY      0x17 /* 64 M-bit */
-#define M25P_M25P128_CAPACITY     0x18 /* 128 M-bit */
+#define M25P_MANUFACTURER          CONFIG_M25P_MANUFACTURER
+#define M25P_MEMORY_TYPE           CONFIG_M25P_MEMORY_TYPE
+#define M25P_RES_ID                0x13
+#define M25P_M25P1_CAPACITY        0x11 /* 1 M-bit */
+#define M25P_EN25F80_CAPACITY      0x14 /* 8 M-bit */
+#define M25P_M25P16_CAPACITY       0x15 /* 16 M-bit */
+#define M25P_M25P32_CAPACITY       0x16 /* 32 M-bit */
+#define M25P_M25P64_CAPACITY       0x17 /* 64 M-bit */
+#define M25P_M25P128_CAPACITY      0x18 /* 128 M-bit */
 
 /*  M25P1 capacity is 131,072 bytes:
  *  (4 sectors) * (32,768 bytes per sector)
  *  (512 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P1_SECTOR_SHIFT  15    /* Sector size 1 << 15 = 65,536 */
-#define M25P_M25P1_NSECTORS      4
-#define M25P_M25P1_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
-#define M25P_M25P1_NPAGES        512
+#define M25P_M25P1_SECTOR_SHIFT    15    /* Sector size 1 << 15 = 65,536 */
+#define M25P_M25P1_NSECTORS        4
+#define M25P_M25P1_PAGE_SHIFT      8     /* Page size 1 << 8 = 256 */
+#define M25P_M25P1_NPAGES          512
 
 /*  EN25F80 capacity is 1,048,576 bytes:
  *  (16 sectors) * (65,536 bytes per sector)
  *  (512 pages) * (256 bytes per page)
  */
 
-#define M25P_EN25F80_SECTOR_SHIFT 16    /* Sector size 1 << 15 = 65,536 */
-#define M25P_EN25F80_NSECTORS     16
-#define M25P_EN25F80_PAGE_SHIFT   8     /* Page size 1 << 8 = 256 */
-#define M25P_EN25F80_NPAGES       4096
+#define M25P_EN25F80_SECTOR_SHIFT  16    /* Sector size 1 << 15 = 65,536 */
+#define M25P_EN25F80_NSECTORS      16
+#define M25P_EN25F80_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
+#define M25P_EN25F80_NPAGES        4096
 #define M25P_EN25F80_SUBSECT_SHIFT 12   /* Sub-Sector size 1 << 12 = 4,096 */
-#define M25P_EN25F80_NSUBSECTORS  256
+#define M25P_EN25F80_NSUBSECTORS   256
 
 /*  M25P16 capacity is 2,097,152 bytes:
  *  (32 sectors) * (65,536 bytes per sector)
  *  (8192 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P16_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
-#define M25P_M25P16_NSECTORS      32
-#define M25P_M25P16_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
-#define M25P_M25P16_NPAGES        8192
+#define M25P_M25P16_SECTOR_SHIFT   16    /* Sector size 1 << 16 = 65,536 */
+#define M25P_M25P16_NSECTORS       32
+#define M25P_M25P16_PAGE_SHIFT     8     /* Page size 1 << 8 = 256 */
+#define M25P_M25P16_NPAGES         8192
+#define M25P_M25PX16_SUBSECT_SHIFT 12   /* Sub-Sector size 1 << 12 = 4,096 */
 
 /*  M25P32 capacity is 4,194,304 bytes:
  *  (64 sectors) * (65,536 bytes per sector)
  *  (16384 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P32_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
-#define M25P_M25P32_NSECTORS      64
-#define M25P_M25P32_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
-#define M25P_M25P32_NPAGES        16384
+#define M25P_M25P32_SECTOR_SHIFT   16    /* Sector size 1 << 16 = 65,536 */
+#define M25P_M25P32_NSECTORS       64
+#define M25P_M25P32_PAGE_SHIFT     8     /* Page size 1 << 8 = 256 */
+#define M25P_M25P32_NPAGES         16384
 
 /*  M25P64 capacity is 8,338,608 bytes:
  *  (128 sectors) * (65,536 bytes per sector)
  *  (32768 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P64_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
-#define M25P_M25P64_NSECTORS      128
-#define M25P_M25P64_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
-#define M25P_M25P64_NPAGES        32768
+#define M25P_M25P64_SECTOR_SHIFT   16    /* Sector size 1 << 16 = 65,536 */
+#define M25P_M25P64_NSECTORS       128
+#define M25P_M25P64_PAGE_SHIFT     8     /* Page size 1 << 8 = 256 */
+#define M25P_M25P64_NPAGES         32768
 
 /*  M25P128 capacity is 16,777,216 bytes:
  *  (64 sectors) * (262,144 bytes per sector)
  *  (65536 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P128_SECTOR_SHIFT 18    /* Sector size 1 << 18 = 262,144 */
-#define M25P_M25P128_NSECTORS     64
-#define M25P_M25P128_PAGE_SHIFT   8     /* Page size 1 << 8 = 256 */
-#define M25P_M25P128_NPAGES       65536
+#define M25P_M25P128_SECTOR_SHIFT  18    /* Sector size 1 << 18 = 262,144 */
+#define M25P_M25P128_NSECTORS      64
+#define M25P_M25P128_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
+#define M25P_M25P128_NPAGES        65536
 
 /* Instructions */
 /*      Command        Value      N Description             Addr Dummy Data   */
@@ -341,10 +342,10 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
         {
            /* Save the FLASH geometry */
 
-           priv->sectorshift = M25P_M25P1_SECTOR_SHIFT;
-           priv->nsectors    = M25P_M25P1_NSECTORS;
-           priv->pageshift   = M25P_M25P1_PAGE_SHIFT;
-           priv->npages      = M25P_M25P1_NPAGES;
+           priv->sectorshift    = M25P_M25P1_SECTOR_SHIFT;
+           priv->nsectors       = M25P_M25P1_NSECTORS;
+           priv->pageshift      = M25P_M25P1_PAGE_SHIFT;
+           priv->npages         = M25P_M25P1_NPAGES;
            return OK;
         }
       else if (capacity == M25P_EN25F80_CAPACITY)
@@ -364,40 +365,43 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
         {
            /* Save the FLASH geometry */
 
-           priv->sectorshift = M25P_M25P16_SECTOR_SHIFT;
-           priv->nsectors    = M25P_M25P16_NSECTORS;
-           priv->pageshift   = M25P_M25P16_PAGE_SHIFT;
-           priv->npages      = M25P_M25P16_NPAGES;
+           priv->sectorshift    = M25P_M25P16_SECTOR_SHIFT;
+           priv->nsectors       = M25P_M25P16_NSECTORS;
+           priv->pageshift      = M25P_M25P16_PAGE_SHIFT;
+           priv->npages         = M25P_M25P16_NPAGES;
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
+           priv->subsectorshift = M25P_M25PX16_SUBSECT_SHIFT;
+#endif
            return OK;
         }
       else if (capacity == M25P_M25P32_CAPACITY)
         {
            /* Save the FLASH geometry */
 
-           priv->sectorshift = M25P_M25P32_SECTOR_SHIFT;
-           priv->nsectors    = M25P_M25P32_NSECTORS;
-           priv->pageshift   = M25P_M25P32_PAGE_SHIFT;
-           priv->npages      = M25P_M25P32_NPAGES;
+           priv->sectorshift    = M25P_M25P32_SECTOR_SHIFT;
+           priv->nsectors       = M25P_M25P32_NSECTORS;
+           priv->pageshift      = M25P_M25P32_PAGE_SHIFT;
+           priv->npages         = M25P_M25P32_NPAGES;
            return OK;
         }
       else if (capacity == M25P_M25P64_CAPACITY)
         {
            /* Save the FLASH geometry */
 
-           priv->sectorshift = M25P_M25P64_SECTOR_SHIFT;
-           priv->nsectors    = M25P_M25P64_NSECTORS;
-           priv->pageshift   = M25P_M25P64_PAGE_SHIFT;
-           priv->npages      = M25P_M25P64_NPAGES;
+           priv->sectorshift    = M25P_M25P64_SECTOR_SHIFT;
+           priv->nsectors       = M25P_M25P64_NSECTORS;
+           priv->pageshift      = M25P_M25P64_PAGE_SHIFT;
+           priv->npages         = M25P_M25P64_NPAGES;
            return OK;
         }
       else if (capacity == M25P_M25P128_CAPACITY)
         {
            /* Save the FLASH geometry */
 
-           priv->sectorshift = M25P_M25P128_SECTOR_SHIFT;
-           priv->nsectors    = M25P_M25P128_NSECTORS;
-           priv->pageshift   = M25P_M25P128_PAGE_SHIFT;
-           priv->npages      = M25P_M25P128_NPAGES;
+           priv->sectorshift    = M25P_M25P128_SECTOR_SHIFT;
+           priv->nsectors       = M25P_M25P128_NSECTORS;
+           priv->pageshift      = M25P_M25P128_PAGE_SHIFT;
+           priv->npages         = M25P_M25P128_NPAGES;
            return OK;
         }
     }
