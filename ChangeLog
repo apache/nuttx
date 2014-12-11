@@ -9196,4 +9196,6 @@
 	  Bouteville (2014-12-10).
 	* nuttx/drivers/mtd/m25px.c; M25P serial flash driver:  Add subsector
 	  size of the M24P16 part.  From Lazlo (2014-12-10).
-
+	* libc/string/lib_strncpy.c:  Commit d0c76ccacf0dc8988f9617ad82bf4349f456bb08
+	  will trash a lot of memory if n == 0.  From Yasuhiro Osaki (2014-12-11).
+ 
