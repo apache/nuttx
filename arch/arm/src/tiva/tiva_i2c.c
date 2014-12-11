@@ -173,11 +173,11 @@ enum tiva_trace_e
 
 struct tiva_trace_s
 {
-  uint32_t status;             /* I2C 32-bit SR2|SR1 status */
-  uint32_t count;              /* Interrupt count when status change */
-  enum tiva_intstate_e event;  /* Last event that occurred with this status */
-  uint32_t parm;               /* Parameter associated with the event */
-  uint32_t time;               /* First of event or first status */
+  uint32_t status;          /* I2C 32-bit SR2|SR1 status */
+  uint32_t count;           /* Interrupt count when status change */
+  enum tiva_trace_e event;  /* Last event that occurred with this status */
+  uint32_t parm;            /* Parameter associated with the event */
+  uint32_t time;            /* First of event or first status */
 };
 
 /* I2C Device hardware configuration */
@@ -220,7 +220,9 @@ struct tiva_i2c_priv_s
 
 #ifdef CONFIG_I2C_TRACE
   int tndx;                    /* Trace array index */
-  uint32_t start_time;         /* Time when the trace was started */
+  int tcount;                  /* Number of events with this status */
+  uint32_t ttime;              /* Time when the trace was started */
+  uint32_t tstatus;            /* Last status read */
 
   /* The actual trace data */
 
@@ -771,8 +773,10 @@ static void tiva_i2c_tracereset(struct tiva_i2c_priv_s *priv)
 {
   /* Reset the trace info for a new data collection */
 
-  priv->tndx       = 0;
-  priv->start_time = clock_systimer();
+  priv->tndx    = 0;
+  priv->tcount  = 0;
+  priv->ttime   = clock_systimer();
+  priv->tstatus = 0;
   tiva_i2c_traceclear(priv);
 }
 
@@ -806,6 +810,11 @@ static void tiva_i2c_tracenew(struct tiva_i2c_priv_s *priv, uint32_t status)
       trace->status = status;
       trace->count  = 1;
       trace->time   = clock_systimer();
+
+      /* Save the status and reset the count */
+
+      priv->tstatus = status;
+      priv->tcount  = 1;
     }
   else
     {
@@ -823,22 +832,36 @@ static void tiva_i2c_traceevent(struct tiva_i2c_priv_s *priv,
   if (event != I2CEVENT_NONE)
     {
       trace = &priv->trace[priv->tndx];
-
-      /* Initialize the new trace entry */
-
-      trace->event  = event;
-      trace->parm   = parm;
-
-      /* Bump up the trace index (unless we are out of trace entries) */
-
-      if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
+      if (trace->event != event)
         {
-          i2cdbg("Trace table overflow\n");
-          return;
-        }
+          /* Initialize the new trace entry */
 
-      priv->tndx++;
-      tiva_i2c_traceclear(priv);
+          trace->event = event;
+          trace->parm  = parm;
+          trace->count = priv->tcount;
+          trace->time  = clock_systimer();
+
+          /* Bump up the trace index (unless we are out of trace entries) */
+
+          if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
+            {
+              i2cdbg("Trace table overflow\n");
+              return;
+            }
+
+          priv->tndx++;
+          priv->tcount++;
+          tiva_i2c_traceclear(priv);
+
+          trace         = &priv->trace[priv->tndx];
+          trace->status = priv->status;
+          trace->count  = priv->tcount;
+          trace->time   = clock_systimer();
+        }
+      else
+        {
+          priv->tcount++;
+        }
     }
 }
 
@@ -848,7 +871,7 @@ static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %d\n",
-         clock_systimer() - priv->start_time);
+         clock_systimer() - priv->ttime);
 
   for (i = 0; i <= priv->tndx; i++)
     {
@@ -856,7 +879,7 @@ static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv)
       syslog(LOG_DEBUG,
              "%2d. STATUS: %08x COUNT: %3d EVENT: %2d PARM: %08x TIME: %d\n",
              i+1, trace->status, trace->count,  trace->event, trace->parm,
-             trace->time - priv->start_time);
+             trace->time - priv->ttime);
     }
 }
 #endif /* CONFIG_I2C_TRACE */
@@ -875,10 +898,6 @@ static void tiva_i2c_sendaddress(struct tiva_i2c_priv_s *priv)
   uint32_t regval;
 
   DEBUGASSERT(priv && priv->msgc > 0);
-
-  /* Check for new trace setup, post the SENADDRESS event */
-
-  tiva_i2c_tracenew(priv, 0);
 
   /* Get run-time data for the next message */
 
@@ -1562,6 +1581,7 @@ static int tiva_i2c_process(struct i2c_dev_s *dev, struct i2c_msg_s *msgs,
   /* Reset I2C trace logic */
 
   tiva_i2c_tracereset(priv);
+  tiva_i2c_tracenew(priv, 0);
 
   /* Set I2C clock frequency  */
 
