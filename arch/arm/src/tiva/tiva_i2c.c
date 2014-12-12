@@ -1044,27 +1044,65 @@ static void tiva_i2c_startxfr(struct tiva_i2c_priv_s *priv)
 
 static void tiva_i2c_nextxfr(struct tiva_i2c_priv_s *priv, uint32_t cmd)
 {
-  /* Set up the basic command.  The STOP bit should be set on the last transfer
-   * UNLESS this there is a repeated start.
+  /* Set up the basic command.  The STOP bit should be set on the last byte transfer.
+   *
+   * - CASE 1: If this is the last message in the sequence, then the stop bit should
+   *   always be set.
+   * - CASE 2.1.1: The next message may be another read or write of the SAME
+   *   direction (read or write) and to the SAME address WITHOUT repeated start, in
+   *   which case this is really just a continuation of the message.  No STOP is
+   *   needed.
+   * - CASE 2.x.2: The next message may be to the SAME address WITH repeated start.
+   *   Because the repeated start, a direction change is possible.  This is still
+   *   a continuation of the same message sequence and so no STOP is needed.
+   * - CASE 2.2.x: The next message may be a DIFFERENT address WITHOUT repeated
+   *   start.  This would be an error; The STOP will be sent, the next message will
+   *   fail.
    */
 
   cmd |= I2CM_CS_RUN;
-  if (priv->msgc < 2 && priv->mcnt < 2)
+  if (priv->mcnt < 2)
     {
-      /* This is the last byte of the last message... add the STOP bit */
+      /* Are there more messages in this sequence? */
 
-      cmd |= I2CM_CS_STOP;
+      if (priv->msgc < 2)
+        {
+          /* No.. send the STOP */
+
+          cmd |= I2CM_CS_STOP;
+        }
+      else
+        {
+          /* Yes.. peek at the next message */
+
+          struct i2c_msg_s *curr = priv->msgv;
+          struct i2c_msg_s *next = curr + 1;
+
+          /* Same address as the current message? */
+
+          if (curr->addr != next->addr)
+            {
+              /* No.. send the STOP */
+
+              cmd |= I2CM_CS_STOP;
+            }
+        }
     }
 
   /* Set up to transfer the next byte.  Are we sending or receiving? */
 
   if ((priv->mflags & I2C_M_READ) != 0)
     {
-      /* We are receiving data.  Write the command to the control register to
-       * receive the next byte.
+      /* We are receiving data.  We need to ACK UNLESS we are going to send
+       * STOP.
        */
 
-      cmd |= I2CM_CS_ACK;
+      if ((cmd & I2CM_CS_STOP) == 0)
+        {
+          cmd |= I2CM_CS_ACK;
+        }
+
+      /* Write the command to the control register to receive the next byte. */
 
       tiva_i2c_putreg(priv, TIVA_I2CM_CS_OFFSET, cmd);
       tiva_i2c_traceevent(priv, I2CEVENT_RECVSETUP, priv->mcnt);
@@ -2078,6 +2116,7 @@ int up_i2cuninitialize(struct i2c_dev_s *dev)
       /* Yes.. Disable power and other HW resource (GPIO's) */
 
       tiva_i2c_uninitialize(priv);
+      priv->refs = 0;
 
       /* Release unused resources */
 
