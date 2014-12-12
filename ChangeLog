@@ -9202,3 +9202,5 @@
 	  working in FS mode.  From Ken Pettit (2014-12-12).
 	* libc/stdio/lib_sscanf.c: Accept %X as well as %x as a format
 	  specifier.  From Sébastien Lorquet (2014-12-12).
+	* libc/stdio/lib_sscanf.c: Also accept %F as well as %f (2014-12-12).
+
