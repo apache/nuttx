@@ -1028,7 +1028,7 @@ static void tiva_i2c_nextxfr(struct tiva_i2c_priv_s *priv, uint32_t cmd)
    */
 
   cmd |= I2CM_CS_RUN;
-  if (priv->msgc < 2 && priv->dcnt < 2)
+  if (/* priv->msgc < 2 && */ priv->dcnt < 2)
     {
       /* This is the last byte of the last message... add the STOP bit */
 

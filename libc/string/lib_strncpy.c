@@ -56,7 +56,11 @@ char *strncpy(FAR char *dest, FAR const char *src, size_t n)
   char *end = dest + n; /* End of dest buffer + 1 byte */
 
   while ((dest != end) && (*dest++ = *src++) != '\0');
-  while (dest != end) *dest++ = '\0';
+  while (dest != end)
+    {
+      *dest++ = '\0';
+    }
+
   return ret;
 }
 #endif
