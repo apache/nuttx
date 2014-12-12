@@ -430,6 +430,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       base = 10;
                       break;
 
+                    case 'X':
                     case 'x':
                       base = 16;
                       break;
