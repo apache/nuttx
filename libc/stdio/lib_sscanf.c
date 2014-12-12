@@ -515,7 +515,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           /* Process %f:  Floating point conversion */
 
-          else if (*fmt == 'f')
+          else if (*fmt == 'f' || *fmt == 'F')
             {
 #ifdef CONFIG_HAVE_DOUBLE
               FAR double_t *pd = NULL;
