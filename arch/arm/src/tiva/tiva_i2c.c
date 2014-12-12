@@ -194,7 +194,7 @@ struct tiva_i2c_config_s
 #ifndef TIVA_SYSCON_RCGCI2C
   uint32_t rcgbit;            /* Bit in the RCG1 register to enable clocking */
 #endif
-#ifndef TIVA_SYSCON_RCGCI2C
+#ifndef TIVA_SYSCON_SRI2C
   uint32_t rstbit;            /* Bit in the SRCR1 register to reset I2C */
 #endif
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
@@ -355,6 +355,9 @@ static const struct tiva_i2c_config_s tiva_i2c0_config =
 #ifndef TIVA_SYSCON_RCGCI2C
   .rcgbit     = SYSCON_RCGC1_I2C0,
 #endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C0,
+#endif
   .scl_pin    = GPIO_I2C0_SCL,
   .sda_pin    = GPIO_I2C0_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -373,6 +376,9 @@ static const struct tiva_i2c_config_s tiva_i2c1_config =
   .base       = TIVA_I2C1_BASE,
 #ifndef TIVA_SYSCON_RCGCI2C
   .rcgbit     = SYSCON_RCGC1_I2C1,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C1,
 #endif
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
@@ -393,6 +399,9 @@ static const struct tiva_i2c_config_s tiva_i2c2_config =
 #ifndef TIVA_SYSCON_RCGCI2C
   .rcgbit     = SYSCON_RCGC1_I2C2,
 #endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C2,
+#endif
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -411,6 +420,9 @@ static const struct tiva_i2c_config_s tiva_i2c3_config =
   .base       = TIVA_I2C3_BASE,
 #ifndef TIVA_SYSCON_RCGCI2C
   .rcgbit     = SYSCON_RCGC1_I2C3,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C3,
 #endif
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
@@ -431,6 +443,9 @@ static const struct tiva_i2c_config_s tiva_i2c4_config =
 #ifndef TIVA_SYSCON_RCGCI2C
   .rcgbit     = SYSCON_RCGC1_I2C4,
 #endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C4,
+#endif
   .scl_pin    = GPIO_I2C4_SCL,
   .sda_pin    = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -449,6 +464,9 @@ static const struct tiva_i2c_config_s tiva_i2c5_config =
   .base       = TIVA_I2C5_BASE,
 #ifndef TIVA_SYSCON_RCGCI2C
   .rcgbit     = SYSCON_RCGC1_I2C5,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C5,
 #endif
   .scl_pin    = GPIO_I2C5_SCL,
   .sda_pin    = GPIO_I2C5_SDA,
@@ -1483,7 +1501,7 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
   modifyreg32(TIVA_SYSCON_SRI2C, SYSCON_SRI2C(config->devno), 0);
 #else
   modifyreg32(TIVA_SYSCON_SRCR1, 0, priv->rstbit);
-  modifyreg32(TIVA_SYSCON_SRCR1, 0, priv->rstbit);
+  modifyreg32(TIVA_SYSCON_SRCR1, priv->rstbit, 0);
 #endif
 
   /* Configure pins */
