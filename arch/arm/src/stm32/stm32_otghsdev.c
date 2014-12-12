@@ -5132,6 +5132,14 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTGHS_GAHBCFG_TXFELVL, STM32_OTGHS_GAHBCFG);
 
+  /* Set the PHYSEL bit in the GUSBCFG register to select the OTG HS serial
+   * transceiver: "This bit is always 1 with write-only access"
+   */
+
+  regval  = stm32_getreg(STM32_OTGHS_GUSBCFG);
+  regval |= OTGHS_GUSBCFG_PHYSEL;
+  stm32_putreg(regval, STM32_OTGHS_GUSBCFG);
+
   /* Common USB OTG core initialization */
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
    * IDLE state.
