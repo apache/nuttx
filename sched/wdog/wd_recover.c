@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/semaphore/semaphore.h
+ * sched/wdog/wdog_recover.c
  *
- *   Copyright (C) 2007, 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,91 +33,83 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_SEMAPHORE_SEMAPHORE_H
-#define __SCHED_SEMAPHORE_SEMAPHORE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <semaphore.h>
-#include <sched.h>
-#include <queue.h>
+#include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/sched.h>
+
+#include "wdog/wdog.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Declarations
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Global Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Variables
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: wd_recover
+ *
+ * Description:
+ *   This function is called from task_recover() when a task is deleted via
+ *   task_delete() or via pthread_cancel(). It checks if the deleted task
+ *   is waiting for a timed event and if so cancels the timeout
+ *
+ * Inputs:
+ *   tcb - The TCB of the terminated task or thread
+ *
+ * Return Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function is called from task deletion logic in a safe context.
+ *
+ ****************************************************************************/
+
+void wd_recover(FAR struct tcb_s *tcb)
 {
-#else
-#define EXTERN extern
-#endif
+  irqstate_t flags;
 
-/* Common semaphore logic */
+  /* The task is being deleted.  If it is waiting for any timed event, then
+   * tcb->waitdog will be non-NULL.  Cancel the watchdog now so that no
+   * events occur after the watchdog expires.  Obviously there are lots of
+   * race conditions here so this will most certainly have to be revisited in
+   * the future.
+   */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-void sem_initialize(void);
-#else
-#  define sem_initialize()
-#endif
+  flags = irqsave();
+  if (tcb->waitdog)
+    {
+      (void)wd_cancel(tcb->waitdog);
+      (void)wd_delete(tcb->waitdog);
+      tcb->waitdog = NULL;
+    }
 
-#ifndef CONFIG_DISABLE_SIGNALS
-void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
-#endif
-
-/* Recover semaphore resources with a task or thread is destroyed  */
-
-void sem_recover(FAR struct tcb_s *tcb);
-
-/* Special logic needed only by priority inheritance to manage collections of
- * holders of semaphores.
- */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-void sem_initholders(void);
-void sem_destroyholder(FAR sem_t *sem);
-void sem_addholder(FAR sem_t *sem);
-void sem_boostpriority(FAR sem_t *sem);
-void sem_releaseholder(FAR sem_t *sem);
-void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
-#  ifndef CONFIG_DISABLE_SIGNALS
-void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
-#  else
-#    define sem_canceled(stcb, sem)
-#  endif
-#else
-#  define sem_initholders()
-#  define sem_destroyholder(sem)
-#  define sem_addholder(sem)
-#  define sem_boostpriority(sem)
-#  define sem_releaseholder(sem)
-#  define sem_restorebaseprio(stcb,sem)
-#  define sem_canceled(stcb, sem)
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  irqrestore(flags);
 }
-#endif
-
-#endif /* __SCHED_SEMAPHORE_SEMAPHORE_H */

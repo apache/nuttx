@@ -34,7 +34,7 @@
 ############################################################################
 
 CSRCS += wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
-CSRCS += wd_gettime.c
+CSRCS += wd_gettime.c wd_recover.c
 
 # Include wdog build support
 
