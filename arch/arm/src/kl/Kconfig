@@ -348,25 +348,9 @@ config KL_PORTAINTS
 	---help---
 		Enable support for 32 interrupts from GPIO port A pins
 
-config KL_PORTBINTS
-	bool "GPIOB interrupts"
-	---help---
-		Enable support for 32 interrupts from GPIO port B pins
-
-config KL_PORTCINTS
-	bool "GPIOC interrupts"
-	---help---
-		Enable support for 32 interrupts from GPIO port C pins
-
 config KL_PORTDINTS
 	bool "GPIOD interrupts"
 	---help---
 		Enable support for 32 interrupts from GPIO port D pins
 
-config KL_PORTEINTS
-	bool "GPIOE interrupts"
-	---help---
-		Enable support for 32 interrupts from GPIO port E pins
-
 endif
-
