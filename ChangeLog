@@ -9208,3 +9208,13 @@
 	  and the FS clock enable bits are set in FS mode, then the ARM never
 	  awakens from WFI due to a chip issue.  This is only an issue if you
 	  are using the internal PHY.  From Ken Pettit (2012-12-13).
+	* drivers/serial/serial.c: In case a thread is doing a blockingi
+	  operation (e.g. read()) on a serial device, while it is being
+	  terminated by pthread_cancel(), then uart_close() gets called, but
+	  the semaphore (dev->recv.sem in the above example) is still blocked.
+	  This means that once the serial device is opened next time, data will
+	  arrive on the serial port (and driver interrupts handled as normal),
+	  but the received characters never arrive in the reader thread.
+	  Th problem was fixed by re-initializing the semaphores on the last
+	  uart_close() on the device. From Harald Welte (2014-12-13).
+
