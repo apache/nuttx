@@ -9217,4 +9217,8 @@
 	  but the received characters never arrive in the reader thread.
 	  Th problem was fixed by re-initializing the semaphores on the last
 	  uart_close() on the device. From Harald Welte (2014-12-13).
-
+	* sched/semaphore/sem_recover.c, Make.defs, seamphore.c,
+	  sched/wdog/wd_recover.c, Make.defs, wdog.h, sched/task/task_recover.c:
+	  Add logic to clean up after task_delete() or pthread_cancel() if the
+	  task happens to be waiting on a semaphore when it is cancelled
+	  (2014-12-13).
