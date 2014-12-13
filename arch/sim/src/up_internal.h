@@ -42,9 +42,14 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <sys/types.h>
-#include <nuttx/irq.h>
-#include <arch/irq.h>
+
+#ifndef __ASSEMBLY__
+#  include <sys/types.h>
+#  include <stdbool.h>
+
+#  include <nuttx/irq.h>
+#  include <arch/irq.h>
+#endif
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -213,6 +218,7 @@ void up_registerblockdevice(void);
 void simuart_start(void);
 int simuart_putc(int ch);
 int simuart_getc(void);
+bool simuart_checkc(void);
 
 /* up_uartwait.c **********************************************************/
 
@@ -288,6 +294,7 @@ void netdriver_loop(void);
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH
+struct spi_dev_s;
 struct spi_dev_s *up_spiflashinitialize(void);
 #endif
 
