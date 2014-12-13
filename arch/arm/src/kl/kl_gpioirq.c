@@ -326,12 +326,20 @@ void kl_gpioirqenable(uint32_t pinset)
             regval |= PORT_PCR_IRQC_RISING;
             break;
 
-          case PIN_INT_BOTH : /* Interrupt on falling edge */
+          case PIN_INT_FALLING : /* Interrupt on falling edge */
             regval |= PORT_PCR_IRQC_FALLING;
             break;
 
-          case PIN_DMA_FALLING : /* nterrupt on either edge */
+          case PIN_INT_BOTH : /* Interrupt on either edge */
             regval |= PORT_PCR_IRQC_BOTH;
+            break;
+
+          case PIN_DMA_RISING : /* Interrupt on DMA rising */
+            regval |= PORT_PCR_IRQC_DMARISING;
+            break;
+
+          case PIN_DMA_FALLING : /* Interrupt on DMA falling */
+            regval |= PORT_PCR_IRQC_DMAFALLING;
             break;
 
           case PIN_INT_ONE : /* IInterrupt when logic one */

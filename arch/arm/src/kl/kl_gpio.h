@@ -354,6 +354,58 @@ void kl_gpiowrite(uint32_t pinset, bool value);
 
 bool kl_gpioread(uint32_t pinset);
 
+/************************************************************************************
+ * Name: kl_pinirqattach
+ *
+ * Description:
+ *   Attach a pin interrupt handler.  The normal initalization sequence is:
+ *
+ *   1. Call kl_configgpio() to configure the interrupting pin (pin interrupts
+ *      will be disabled.
+ *   2. Call kl_gpioirqattach() to attach the pin interrupt handling function.
+ *   3. Call kl_gpioirqenable() to enable interrupts on the pin.
+ *
+ * Parameters:
+ *  - pinset:  Pin configuration
+ *  - pinisr:  Pin interrupt service routine
+ *
+ * Returns:
+ *   The previous value of the interrupt handler function pointer.  This value may,
+ *   for example, be used to restore the previous handler when multiple handlers are
+ *   used.
+ *
+ ************************************************************************************/
+
+xcpt_t kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr);
+
+/************************************************************************************
+ * Name: kl_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified pin IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+void kl_gpioirqenable(uint32_t pinset);
+#else
+#  define kl_gpioirqenable(pinset)
+#endif
+
+/************************************************************************************
+ * Name: kl_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified pin
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+void kl_gpioirqdisable(uint32_t pinset);
+#else
+#  define kl_gpioirqdisable(pinset)
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
