@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <unistd.h>
 #include <termios.h>
 #include <pthread.h>
@@ -274,7 +275,6 @@ int simuart_getc(void)
           simuart_wait();
         }
 
-
       /* The UART buffer is non-empty...  Take the next byte from the tail
        * of the buffer.
        */
@@ -294,3 +294,13 @@ int simuart_getc(void)
       return ch;
     }
 }
+
+/****************************************************************************
+ * Name: simuart_getc
+ ****************************************************************************/
+
+bool simuart_checkc(void)
+{
+  return g_uarthead != g_uarttail;
+}
+

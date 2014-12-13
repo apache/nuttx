@@ -86,23 +86,41 @@ static const struct file_operations devconsole_fops =
 static ssize_t devconsole_read(struct file *filep, char *buffer, size_t len)
 {
   size_t remaining = len;
+  ssize_t nread;
   int ch;
 
   /* Loop until all requested bytes have been read.  No error checking */
 
-  for (remaining = len; remaining > 0; remaining--)
+  sched_lock();
+  for (remaining = len, nread = 0; remaining > 0; remaining--)
     {
+      /* Read the next character from the console, we should only wait
+       * on the first read.
+       */
+
       ch = simuart_getc();
       if (ch < 0)
         {
           set_errno(EIO);
+          sched_unlock();
           return ERROR;
         }
 
       *buffer++ = ch;
+	  nread++;
+
+      /* We have at least one character.  Return now if no further
+       * characters are available without waiting.
+       */
+
+      if (!simuart_checkc())
+        {
+          break;
+        }
     }
 
-  return len;
+  sched_unlock();
+  return nread;
 }
 
 /****************************************************************************
