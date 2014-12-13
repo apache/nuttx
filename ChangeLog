@@ -9222,3 +9222,8 @@
 	  Add logic to clean up after task_delete() or pthread_cancel() if the
 	  task happens to be waiting on a semaphore when it is cancelled
 	  (2014-12-13).
+	* arch/arm/src/kl/kl_gpioirq.c, Kconfig, Make.defs, and kl_irq.c: Add
+	  GPIO interrupt capability for the KL architecture. The patch is
+	  almost the same as kinetis_pinirq.c, just minor modifications and
+	  rename kl_pinirq to kl_gpioirq to make it more generic to developers.
+	  From Alan Carvalho de Assis (2014-12-13).
