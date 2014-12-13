@@ -8,7 +8,7 @@ board port.
 
 nuttx/
 
- (10)  Task/Scheduler (sched/)
+ (11)  Task/Scheduler (sched/)
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
@@ -172,6 +172,49 @@ o Task/Scheduler (sched/)
                apps/netutils/thttpd to kill CGI tasks that timeout.
   Status:      Open
   Priority:    Low and not easily removable.
+
+  Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
+  Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
+                case a thread is doing a blocking operation (e.g. read())
+                on a serial device, while it is being terminated by
+                pthread_cancel(), then uart_close() gets called, but
+                the semaphore (dev->recv.sem in the above example) is
+                still blocked.
+
+               "This means that once the serial device is opened next
+                time, data will arrive on the serial port (and driver
+                interrupts handled as normal), but the received characters
+                never arrive in the reader thread.
+
+                This patch addresses the problem by re-initializing the
+                semaphores on the last uart_close() on the device."
+
+               Yahoo! Groups message 7726: "I think that the system
+                should be required to handle pthread_cancel safely in
+                all cases.  In the NuttX model, a task is like a Unix
+                process and a pthread is like a Unix thread.  Cancelling
+                threads should always be safe (or at least as unsafe) as
+                under Unix because the model is complete for pthreads...
+
+               "So, in my opinion, this is a generic system issue, not 
+                specific to the serial driver.  I could also implement
+                logic to release all semaphores held by a thread when
+                it exits -- but only if priority inheritance is enabled;
+                because only in that case does the code have any memory
+                of which threads actually hold the semaphore.
+
+               "The patch I just incorporated is also insufficient.  It
+                works only if the serial driver is shut down when the
+                thread is cancelled.  But what if there are other open
+                references to the driver?  Then the driver will not be
+                shut down, the semaphores will not be re-initialized, and
+                the semaphore counts will still be off by one.
+
+               "I think that the system needs to automatically release any
+                semaphores held by a thread being killed asynchronously?
+                It seems necessary to me."
+  Status:      Open
+  Priority:    Medium-ish
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
