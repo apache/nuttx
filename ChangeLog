@@ -9203,4 +9203,8 @@
 	* libc/stdio/lib_sscanf.c: Accept %X as well as %x as a format
 	  specifier.  From Sébastien Lorquet (2014-12-12).
 	* libc/stdio/lib_sscanf.c: Also accept %F as well as %f (2014-12-12).
-
+	* arch/arm/src/stm32/stm32_otghsdev.c: For STM32 OTG HS DEV (in FS
+	  mode): Disable ULPI clock enable in RCC AHB1 Register.  If Both ULPI
+	  and the FS clock enable bits are set in FS mode, then the ARM never
+	  awakens from WFI due to a chip issue.  This is only an issue if you
+	  are using the internal PHY.  From Ken Pettit (2012-12-13).
