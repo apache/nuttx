@@ -276,7 +276,7 @@ struct stm32_ltdc_s
 
   /* Debug stuff */
 
-#ifdef CONFIG_STM32_LtDC_REGDEBUG
+#ifdef CONFIG_STM32_LTDC_REGDEBUG
    bool wrlast;                   /* True: Last access was a write */
    uintptr_t addrlast;            /* Last address accessed */
    uint32_t vallast;              /* Last value read or written */
