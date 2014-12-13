@@ -238,6 +238,14 @@ void up_irqinitialize(void)
 
   kl_dumpnvic("initial", NR_IRQS);
 
+  /* Initialize logic to support a second level of interrupt decoding for
+   * configured pin interrupts.
+   */
+
+#ifdef CONFIG_GPIO_IRQ
+  kl_gpioirqinitialize();
+#endif
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* And finally, enable interrupts */
