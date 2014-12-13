@@ -5309,6 +5309,16 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(0xbfffffff, STM32_OTGHS_GINTSTS);
 
+  /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must
+   * be done because if both the ULPI and the FS PHY clock enable bits
+   * are set at the same time, the ARM never awakens from WFI due to
+   * some bug / errata in the chip.
+   */
+
+  regval = stm32_getreg(STM32_RCC_AHB1LPENR);
+  regval &= ~RCC_AHB1ENR_OTGHSULPIEN;
+  stm32_putreg(regval, STM32_RCC_AHB1LPENR);
+
   /* Enable the interrupts in the INTMSK */
 
   regval = (OTGHS_GINT_RXFLVL | OTGHS_GINT_USBSUSP | OTGHS_GINT_ENUMDNE |
