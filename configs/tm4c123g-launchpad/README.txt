@@ -150,6 +150,12 @@ AT24 Serial EEPROM
     nsh> cat /mnt/at24/atest.txt
     This is a test
 
+  STATUS:
+  2014-12-12:  I was unsuccessful getting my AT24 module to work on the TM4C123G
+    LaunchPad.  I was unable to successuflly communication with the AT24 via
+    I2C.  I did verify I2C using the I2C tool and other I2C devices and I now
+    belive that my AT24 module is not fully functional.
+
 I2C Tool
 ========
 
