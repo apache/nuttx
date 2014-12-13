@@ -110,6 +110,16 @@ static const struct file_operations g_serialops =
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: sem_reinit
+ ************************************************************************************/
+
+static int sem_reinit(FAR sem_t *sem, int pshared, unsigned int value)
+{
+  sem_destroy(sem);
+  return sem_init(sem, pshared, value);
+}
+
+/************************************************************************************
  * Name: uart_takesem
  ************************************************************************************/
 
@@ -1108,6 +1118,19 @@ static int uart_close(FAR struct file *filep)
     }
 
   irqrestore(flags);
+
+  /* We need to re-initialize the semaphores if this is the last close
+   * of the device, as the close might be caused by pthread_cancel() of
+   * a thread currently blocking on any of them
+   */
+
+  sem_reinit(&dev->xmitsem,  0, 0);
+  sem_reinit(&dev->recvsem,  0, 0);
+  sem_reinit(&dev->xmit.sem, 0, 1);
+  sem_reinit(&dev->recv.sem, 0, 1);
+#ifndef CONFIG_DISABLE_POLL
+  sem_reinit(&dev->pollsem,  0, 1);
+#endif
 
   uart_givesem(&dev->closesem);
   return OK;
