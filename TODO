@@ -196,7 +196,7 @@ o Task/Scheduler (sched/)
                 threads should always be safe (or at least as unsafe) as
                 under Unix because the model is complete for pthreads...
 
-               "So, in my opinion, this is a generic system issue, not 
+               "So, in my opinion, this is a generic system issue, not
                 specific to the serial driver.  I could also implement
                 logic to release all semaphores held by a thread when
                 it exits -- but only if priority inheritance is enabled;
@@ -213,6 +213,22 @@ o Task/Scheduler (sched/)
                "I think that the system needs to automatically release any
                 semaphores held by a thread being killed asynchronously?
                 It seems necessary to me."
+
+               UPDATE; The logic enabled when priority inheritance is
+               enabled for this purpose is insufficient.  It provides
+               hooks so that given a semaphore it can traverse all
+               holders.  What is needed would be logic so that given
+               a task, you can traverse all semaphores held by the task,
+               releasing each semaphore cound held by the exiting task.
+               Nothing like this exists now so that solution is not
+               imminent.
+
+               UPDATE: The basic fix to release the semaphore count if
+               a thread is killed via pthread_cancel() or task_delete()
+               has been implemented (2014-12-13).  See the new file:
+               sched/semaphore/sem_recover.c  However, the general
+               issue of freeing semaphores when a thread exists still
+               exists.
   Status:      Open
   Priority:    Medium-ish
 
