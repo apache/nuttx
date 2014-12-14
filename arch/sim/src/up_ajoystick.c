@@ -91,11 +91,14 @@ static const struct ajoy_lowerhalf_s g_ajoylower =
 
 /* Driver state data */
 
-static volatile bool g_ajoy_valid;         /* True: Sample data is valid */
-static volatile bool g_ajoy_waiting;       /* True: Waiting for button data */
-static sem_t g_ajoy_waitsem;               /* Semaphore used to support waiting */
+static bool g_ajoy_valid;                  /* True: Sample data is valid */
 static struct ajoy_sample_s g_ajoy_sample; /* Last sample data */
 static ajoy_buttonset_t g_ajoy_buttons;    /* Last buttons set */
+
+static ajoy_handler_t g_ajoy_handler;      /* "Interrupt" handler */
+static void *g_ajoy_arg;                   /* Handler argument */
+static ajoy_buttonset_t g_ajoy_pset;       /* Set of press waited for */
+static ajoy_buttonset_t g_ajoy_rset;       /* Set of releases waited for */
 
 /****************************************************************************
  * Private Functions
@@ -156,45 +159,14 @@ static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
  ****************************************************************************/
 
 static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
-                         ajoy_buttonset_t pressset, ajoy_buttonset_t releaseset,
-                         ajoy_handler_t handler, FAR void *arg)
+                        ajoy_buttonset_t press, ajoy_buttonset_t release,
+                        ajoy_handler_t handler, FAR void *arg)
 {
-  if (handler)
-    {
-      ajoy_buttonset_t changed;
-      ajoy_buttonset_t pressed;
-      ajoy_buttonset_t released;
-
-      g_ajoy_waiting = true;
-      while (!g_ajoy_valid)
-        {
-           (void)sem_wait(&g_ajoy_waitsem);
-
-           if (g_ajoy_valid)
-             {
-               g_ajoy_valid = false;
-               changed = g_ajoy_buttons ^ g_ajoy_sample.as_buttons;
-
-               pressed = changed & (AJOY_SUPPORTED & g_ajoy_buttons);
-               if ((pressed & pressset) != 0 )
-                 {
-                   break;
-                 }
-
-               released = changed & (AJOY_SUPPORTED & ~g_ajoy_buttons);
-               if ((released & releaseset) != 0)
-                 {
-                   break;
-                 }
-             }
-         }
-
-      g_ajoy_waiting = false;
-
-      /* Call the interrupt handler */
-
-      handler(&g_ajoylower, arg);
-    }
+  g_ajoy_handler = NULL;
+  g_ajoy_pset    = press;
+  g_ajoy_rset    = release;
+  g_ajoy_arg     = arg;
+  g_ajoy_handler = handler;
 }
 
 /****************************************************************************
@@ -213,10 +185,6 @@ int sim_ajoy_initialize(void)
 {
   int ret;
 
-  /* Initialize the wait semaphore */
-
-  sem_init(&g_ajoy_waitsem, 0, 0);
-
   /* Register the joystick device as /dev/ajoy0 */
 
   ret = ajoy_register("/dev/ajoy0", &g_ajoylower);
@@ -226,6 +194,8 @@ int sim_ajoy_initialize(void)
 
       g_eventloop = 1;
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -234,6 +204,10 @@ int sim_ajoy_initialize(void)
 
 int up_buttonevent(int x, int y, int buttons)
 {
+  ajoy_buttonset_t changed;
+  ajoy_buttonset_t pressed;
+  ajoy_buttonset_t released;
+
   /* Same the positional data */
 
   g_ajoy_sample.as_x = x;
@@ -261,11 +235,22 @@ int up_buttonevent(int x, int y, int buttons)
 
   g_ajoy_valid = true;
 
-  /* Is there a task waiting for joystick input? */
+  /* Is there an "interrupt" handler attached? */
 
-  if (g_ajoy_waiting)
+  if (g_ajoy_handler)
     {
-      sem_post(&g_ajoy_waitsem);
+      /* Check button presses */
+
+       changed  = g_ajoy_buttons ^ g_ajoy_sample.as_buttons;
+       pressed  = changed & (AJOY_SUPPORTED & g_ajoy_buttons);
+       released = changed & (AJOY_SUPPORTED & ~g_ajoy_buttons);
+
+       if ((pressed & g_ajoy_pset) != 0 || (released & g_ajoy_rset) != 0)
+         {
+           /* Call the interrupt handler */
+
+           g_ajoy_handler(&g_ajoylower, g_ajoy_arg);
+         }
     }
 
   return OK;

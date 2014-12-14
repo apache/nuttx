@@ -131,8 +131,13 @@ static inline int up_x11createframe(void)
 
   /* Select window input events */
 
+#if defined(CONFIG_SIM_AJOYSTICK)
+  XSelectInput(g_display, g_window,
+               ButtonPressMask|ButtonReleaseMask|PointerMotionMask);
+#else
   XSelectInput(g_display, g_window,
                ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|KeyPressMask);
+#endif
 
   /* Release queued events on the display */
 
