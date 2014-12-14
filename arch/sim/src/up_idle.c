@@ -153,7 +153,7 @@ void up_idle(void)
 #ifdef CONFIG_SIM_X11FB
   if (g_x11initialized)
     {
-#ifdef CONFIG_SIM_TOUCHSCREEN
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
        /* Drive the X11 event loop */
 
       if (g_eventloop)

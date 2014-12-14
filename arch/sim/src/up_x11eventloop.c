@@ -83,9 +83,26 @@ volatile int g_eventloop;
 
 static int up_buttonmap(int state)
 {
-  /* Remove any X11 dependencies.  Just maps Button1Mask to bit 0. */
+  int buttons = 0;
 
-  return ((state & Button1Mask) != 0) ? 1 : 0;
+  /* Remove any X11 dependencies.  Just maps ButtonNMask to bit N. */
+
+  if ((state & Button1Mask) != 0)
+    {
+      buttons |= 1;
+    }
+
+  if ((state & Button2Mask) != 0)
+    {
+      buttons |= 2;
+    }
+
+  if ((state & Button3Mask) != 0)
+    {
+      buttons |= 4;
+    }
+
+  return buttons;
 }
 
 /****************************************************************************

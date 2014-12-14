@@ -77,6 +77,11 @@ ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += up_touchscreen.c
   HOSTSRCS += up_x11eventloop.c
+else
+ifeq ($(CONFIG_SIM_AJOYSTICK),y)
+  CSRCS += up_ajoystick.c
+  HOSTSRCS += up_x11eventloop.c
+endif
 endif
 endif
 endif

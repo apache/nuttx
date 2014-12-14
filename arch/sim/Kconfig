@@ -98,12 +98,27 @@ config SIM_FBBPP
 
 endif # SIM_FRAMEBUFFER
 
+if SIM_X11FB && INPUT
+choice
+	prompt "X11 Simulated Input Device"
+	default SIM_NOINPUT
+
 config SIM_TOUCHSCREEN
-	bool "Support an X11 mouse-based touchscreen emulation"
+	bool "X11 mouse-based touchscreen emulation"
 	default n
-	depends on SIM_X11FB && INPUT
 	---help---
 		Support an X11 mouse-based touchscreen emulation.  Also needs INPUT=y
+
+config SIM_AJOYSTICK
+	bool "X11 mouse-based analog joystick emulation"
+	---help---
+		Support an X11 mouse-based anallog joystick emulation.  Also needs INPUT=y`
+
+config SIM_NOINPUT
+	bool "No input device"
+
+endchoice # X11 Simulated Input Device
+endif # SIM_X11FB && INPUT
 
 config SIM_TCNWAITERS
 	bool "Maximum number poll() waiters"

@@ -36,6 +36,7 @@
 include $(TOPDIR)/Make.defs
 
 CFLAGS += -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/arch/sim/src
 
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))

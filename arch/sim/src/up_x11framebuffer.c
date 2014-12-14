@@ -136,7 +136,7 @@ static inline int up_x11createframe(void)
 
   /* Release queued events on the display */
 
-#ifdef CONFIG_SIM_TOUCHSCREEN
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
   (void)XAllowEvents(g_display, AsyncBoth, CurrentTime);
 
   /* Grab mouse button 1, enabling mouse-related events */
@@ -222,7 +222,7 @@ static void up_x11uninitX(void)
 
       /* Un-grab the mouse buttons */
 
-#ifdef CONFIG_SIM_TOUCHSCREEN
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
       XUngrabButton(g_display, Button1, AnyModifier, g_window);
 #endif
       g_x11initialized = 0;

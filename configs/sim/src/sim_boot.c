@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include "up_internal.h"
+
 #ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
 int trv_mount_world(int minor, FAR const char *mountpoint);
 #endif
@@ -80,6 +82,12 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+#ifdef CONFIG_AJOYSTICK
+  /* Initialize the simulated analog joystick input device */
+
+  sim_ajoy_initialize();
+#endif
+
 #ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
   /* Special initialization for the Traveler game simulation */
 
