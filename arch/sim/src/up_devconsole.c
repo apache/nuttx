@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <sched.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
