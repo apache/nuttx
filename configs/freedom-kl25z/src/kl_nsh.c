@@ -70,6 +70,15 @@
 
 int nsh_archinitialize(void)
 {
+#if defined(CONFIG_INPUT_ADXL345)
+  int ret;
+
+  ret = adxl345_archinitialize(0);
+  if (ret < 0)
+    {
+      dbg("ERROR: adxl345_archinitialize failed: %d\n", ret);
+    }
+#endif
   return OK;
 }
 

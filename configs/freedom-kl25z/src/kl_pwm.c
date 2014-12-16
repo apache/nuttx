@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/freedom-kl25z/src/up_pwm.c
+ * configs/freedom-kl25z/src/kl_pwm.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
