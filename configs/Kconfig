@@ -96,6 +96,16 @@ config ARCH_BOARD_DEMOS92S12NEC64
 	port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
 	is code complete but has not yet been verified.
 
+config ARCH_BOARD_DK_TM4C129X
+	bool "Tiva DK-TM4C129x Connected Development Kit"
+	depends on ARCH_CHIP_TM4C129XNCZAD
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Tiva DK-TM4C129x Connected Development Kit featuring the
+		TM4C129XNCZAD MCU.
+
 config ARCH_BOARD_EA3131
 	bool "Embedded Artists EA3131 Development board"
 	depends on ARCH_CHIP_LPC3131
@@ -1023,6 +1033,7 @@ config ARCH_BOARD
 	default "compal_e88"               if ARCH_BOARD_COMPALE88
 	default "compal_e99"               if ARCH_BOARD_COMPALE99
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
+	default "dk-tm4c129x"       if ARCH_BOARD_DK_TM4C129X
 	default "ea3131"                   if ARCH_BOARD_EA3131
 	default "ea3152"                   if ARCH_BOARD_EA3152
 	default "eagle100"                 if ARCH_BOARD_EAGLE100
@@ -1190,6 +1201,9 @@ source "configs/compal_e99/Kconfig"
 endif
 if ARCH_BOARD_DEMOS92S12NEC64
 source "configs/demo9s12ne64/Kconfig"
+endif
+if ARCH_BOARD_DK_TM4C129X
+source "configs/dk-tm4c129x/Kconfig"
 endif
 if ARCH_BOARD_EA3131
 source "configs/ea3131/Kconfig"
