@@ -29,9 +29,19 @@ Those custom SYSLOG drivers reside in this directory.
 ramlog.c
 --------
   The RAM logging driver is a driver that was intended to support debugging
-  output (syslogging) when the normal serial output is not available.  For
-  example, if you are using a telnet or USB serial console, the debug
-  output will get lost.
+  output (aka, syslogging).  It might be used when the normal serial output
+  is not available.  For example, if you are using a Telnet or USB serial
+  console, the debug output will get lost since the USB Telnet session does
+  not use the serial console.
+
+  The RAM logginc driver is also useful when debug output on the serial
+  console would interfere with performance or with usability.  The debug
+  output is write to RAM very quickly and so interferes less with realtime
+  performance.  And since the output does not appear on the serial console
+  until you want it to, it does not interfere with the usability of the
+  serial console.  The NuttShell (NSH), for eample, supports a 'dmesg'
+  command that can be used to dump the buffered output when you want to
+  see it.
 
   The RAM logging  driver is similar to a pipe in that it saves the
   debugging output in a FIFO in RAM.  It differs from a pipe in numerous

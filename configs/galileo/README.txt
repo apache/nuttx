@@ -15,9 +15,6 @@ LEDs and Buttons
 Serial Console
 ==============
 
-Serial Console
-==============
-
   Galileo provides two options for a Serial Console:
 
   1) UART TTL (5V/3.3V) serial communication is available on Arduino

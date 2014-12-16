@@ -36,22 +36,17 @@ ramdisk.c
   a block driver that can be mounted as a files system.  See
   include/nuttx/fs/ramdisk.h.
 
-ramlog.c
-  This is a driver that was intended to support debugging output,
-  aka syslogging, when the normal serial output is not available.
-  For example, if you are using a telnet or USB serial console,
-  the debug output will get lost.
-
-  This driver is similar to a pipe in that it saves the debugging
-  output in a FIFO in RAM.  It differs from a pipe in numerous
-  details as needed to support logging.
-
-  This driver is built when CONFIG_RAMLOG is defined in the Nuttx
-  configuration.
+timer.c
+  Provides the "upper half" for a generic timer driver.  See
+  include/nuttx/timer.h for more information.
 
 rwbuffer.c
   A facility that can be use by any block driver in-order to add
   writing buffering and read-ahead buffering.
+
+watchdog.c
+  Provides the "upper half" for a generic watchdog driver.  See
+  include/nuttx/watchdog.h for more information.
 
 Subdirectories of this directory:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -62,16 +57,35 @@ analog/
   well as drivers for Digital to Analog Conversion (DAC).
   See include/nuttx/analog/*.h for registration information.
 
+audio/
+  Audio device drivers.  See include/nuttx/audio/audio.h for interface
+  definitions.  See also the audio subsystem at nuttx/audio/.
+
 bch/
   Contains logic that may be used to convert a block driver into
   a character driver.  This is the complementary conversion as that
   performed by loop.c.  See include/nuttx/fs/fs.h for registration
   information.
 
+eeprom/
+  An EEPROM is a form of Memory Technology Device (see drivers/mtd).
+  EEPROMs are non-volatile memory like FLASH, but differ in underlying
+  memory technology and differ in usage in many respects: They may not
+  be organized into blocks (at least from the standpoint of the user)
+  and it is not necessary to erase the EEPROM memory before re-writing
+  it.  In addition, EEPROMs tend to be much smaller than FLASH parts,
+  usually only a few kilobytes vs megabytes for FLASH.  EEPROM tends to
+  be used to retain a small amount of device configuration information;
+  FLASH tends to be used for program or massive data storage. For these
+  reasons, it may not be convenient to use the more complex MTD
+  interface but instead use the simple character interface provided by
+  the EEPROM drivers.
+
 input/
-  This directory holds implementations of input device drivers.
-  This includes such things as touchscreen and keypad drivers.
-  See include/nuttx/input/*.h for registration information.
+  This directory holds implementations of human input device drivers.
+  This includes such things as mouse, touchscreen, joystick, keyboard
+  and keypad drivers.  See include/nuttx/input/*.h for registration
+  information.
 
 lcd/
   Drivers for parallel and serial LCD and OLED type devices.  These
@@ -106,7 +120,10 @@ power/
   drivers are not active.
 
 sensors/
-  Drivers for various sensors
+  Drivers for various sensors.  A sensor driver differs little from
+  other types of drivers other than they are use to provide measuresments
+  of things in envionment like temperatore, orientation, acceleration,
+  altitude, direction, position, etc.
 
 sercomm/
   Sercomm is the transport used by osmocom-bb that runs on top of serial.
@@ -123,11 +140,20 @@ serial/
   some TTY-like functionality and are commonly used (but not required for)
   the NuttX system console.  See also include/nuttx/serial/serial.h
 
+spi/
+  SPI drivers.  See include/nuttx/spi.h
+
+syslog/
+  System logging devices. See include/syslog.h and include/nuttx/syslog/syslog.h
+
 usbdev/
   USB device drivers.  See also include/nuttx/usb/usbdev.h
 
 usbhost/
   USB host drivers.  See also include/nuttx/usb/usbhost.h
+
+video/
+  Video-related drivers.  See inlude/nuttx/video/.
 
 wireless/
   Drivers for various wireless devices.
