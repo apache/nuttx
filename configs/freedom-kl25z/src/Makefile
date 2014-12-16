@@ -71,7 +71,7 @@ CSRCS += kl_usb.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += up_pwm.c
+CSRCS += kl_pwm.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)
@@ -84,6 +84,10 @@ endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += kl_nsh.c
+endif
+
+ifeq ($(CONFIG_INPUT_ADXL345),y)
+CSRCS += kl_adxl345.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

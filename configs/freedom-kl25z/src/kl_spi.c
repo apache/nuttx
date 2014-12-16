@@ -94,6 +94,7 @@ void weak_function kl_spiinitialize(void)
   /* Configure SPI0 chip selects */
 
 #ifdef CONFIG_KL_SPI0
+  kl_configgpio(GPIO_ADXL345_CS);
 #endif
 
   /* Configure SPI1 chip selects */
@@ -161,6 +162,14 @@ void kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 {
   spivdbg("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
+
+  if (devid == SPIDEV_GSENSOR)
+    {
+      /* Active low */
+
+      kl_gpiowrite(GPIO_ADXL345_CS, !selected);
+    }
+
 }
 #endif
 
