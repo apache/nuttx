@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/input/adxl345.h>
+#include <nuttx/sensors/adxl345.h>
 
 #include <arch/irq.h>
 
@@ -183,7 +183,7 @@ static int adxl345_attach(FAR struct adxl345_config_s *state,
 {
   FAR struct kl_adxl345config_s *priv = (FAR struct kl_adxl345config_s *)state;
 
-  snvdbg("Saving handler %p\n", isr);
+  snvdbg("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
 
   /* Just save the handler and its argument.  We will use it when interrupts
