@@ -153,9 +153,9 @@ static struct kl_adxl345config_s g_adxl345config =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-/* This is the ADX1345 Interupt handler */
+/* This is the ADXL345 Interupt handler */
 
-int adx1345_interrupt(int irq, FAR void *context)
+int adxl345_interrupt(int irq, FAR void *context)
 {
   /* Verify that we have a handler attached */
 
@@ -211,7 +211,7 @@ static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
       /* Configure the interrupt using the SAVED handler */
 
       kl_configgpio(GPIO_ADXL345_INT1);
-      (void)kl_gpioirqattach(GPIO_ADXL345_INT1, adx1345_interrupt);
+      (void)kl_gpioirqattach(GPIO_ADXL345_INT1, adxl345_interrupt);
       kl_gpioirqenable(GPIO_ADXL345_INT1); 
     }
   else
@@ -294,7 +294,7 @@ int adxl345_archinitialize(int minor)
       ret = adxl345_register(g_adxl345config.handle, CONFIG_ADXL345_DEVMINOR);
       if (ret < 0)
         {
-          sndbg("Failed to register ADX1345 driver: %d\n", ret);
+          sndbg("Failed to register ADXL345 driver: %d\n", ret);
           return ret;
         }
     }
