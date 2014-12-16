@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/debug.h
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,6 +248,18 @@
 # define illvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_SENSORS
+# define sndbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define snlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define snvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define snllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#else
+# define sndbg(x...)
+# define snlldbg(x...)
+# define snvdbg(x...)
+# define snllvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_ANALOG
 # define adbg(format, ...)    dbg(format, ##__VA_ARGS__)
 # define alldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
@@ -439,6 +451,18 @@
 # define illdbg      (void)
 # define ivdbg       (void)
 # define illvdbg     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_SENSORS
+# define sndbg        dbg
+# define snlldbg      lldbg
+# define snvdbg       vdbg
+# define snllvdbg     llvdbg
+#else
+# define sndbg        (void)
+# define snlldbg      (void)
+# define snvdbg       (void)
+# define snllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG

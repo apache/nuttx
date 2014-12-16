@@ -68,19 +68,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Debug ********************************************************************/
-/* Non-standard debug that may be enabled just for testing PWM */
-
-#ifdef CONFIG_DEBUG_QENCODER
-#  define qedbg    dbg
-#  define qevdbg   vdbg
-#  define qelldbg  lldbg
-#  define qellvdbg llvdbg
-#else
-#  define qedbg(x...)
-#  define qevdbg(x...)
-#  define qelldbg(x...)
-#  define qellvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Type Definitions
@@ -141,7 +128,7 @@ static int qe_open(FAR struct file *filep)
   uint8_t                     tmp;
   int                         ret;
 
-  qevdbg("crefs: %d\n", upper->crefs);
+  snvdbg("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -175,7 +162,7 @@ static int qe_open(FAR struct file *filep)
       /* Yes.. perform one time hardware initialization. */
 
       DEBUGASSERT(lower->ops->setup != NULL);
-      qevdbg("calling setup\n");
+      snvdbg("calling setup\n");
 
       ret = lower->ops->setup(lower);
       if (ret < 0)
@@ -210,7 +197,7 @@ static int qe_close(FAR struct file *filep)
   FAR struct qe_upperhalf_s *upper = inode->i_private;
   int                         ret;
 
-  qevdbg("crefs: %d\n", upper->crefs);
+  snvdbg("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -240,7 +227,7 @@ static int qe_close(FAR struct file *filep)
       /* Disable the PWM device */
 
       DEBUGASSERT(lower->ops->shutdown != NULL);
-      qevdbg("calling shutdown: %d\n");
+      snvdbg("calling shutdown: %d\n");
 
       lower->ops->shutdown(lower);
     }
@@ -298,7 +285,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct qe_lowerhalf_s *lower = upper->lower;
   int                        ret;
 
-  qevdbg("cmd: %d arg: %ld\n", cmd, arg);
+  snvdbg("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(upper && lower);
 
   /* Get exclusive access to the device structures */
@@ -340,7 +327,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          qevdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          snvdbg("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
           DEBUGASSERT(lower->ops->ioctl != NULL);
           ret = lower->ops->ioctl(lower, cmd, arg);
         }
@@ -385,7 +372,7 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
   upper = (FAR struct qe_upperhalf_s *)kmm_zalloc(sizeof(struct qe_upperhalf_s));
   if (!upper)
     {
-      qedbg("Allocation failed\n");
+      sndbg("Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -396,7 +383,7 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
 
   /* Register the PWM device */
 
-  qevdbg("Registering %s\n", devpath);
+  snvdbg("Registering %s\n", devpath);
   return register_driver(devpath, &g_qeops, 0666, upper);
 }
 

@@ -127,7 +127,7 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
   struct adxl345_sample_s   sample;
   int                       ret;
 
-  ivdbg("len=%d\n", len);
+  snvdbg("len=%d\n", len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -198,7 +198,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   char devname[DEV_NAMELEN];
   int ret;
 
-  ivdbg("handle=%p minor=%d\n", handle, minor);
+  snvdbg("handle=%p minor=%d\n", handle, minor);
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the device structure */
@@ -207,7 +207,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   if (ret < 0)
     {
       int errval = errno;
-      idbg("ERROR: sem_wait failed: %d\n", errval);
+      sndbg("ERROR: sem_wait failed: %d\n", errval);
       return -errval;
     }
 
@@ -223,7 +223,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   ret = register_driver(devname, &g_adxl345fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("ERROR: Failed to register driver %s: %d\n", devname, ret);
+      sndbg("ERROR: Failed to register driver %s: %d\n", devname, ret);
       sem_post(&priv->exclsem);
       return ret;
     }
@@ -313,7 +313,7 @@ static int adxl345_interrupt(int irq, FAR void *context)
       ret = work_queue(HPWORK, &priv->work, adxl345_worker, priv, 0);
       if (ret != 0)
         {
-          illdbg("Failed to queue work: %d\n", ret);
+          snlldbg("Failed to queue work: %d\n", ret);
         }
     }
 
@@ -338,7 +338,7 @@ static int adxl345_checkid(FAR struct adxl345_dev_s *priv)
   /* Read device ID  */
 
   devid = adxl345_getreg8(priv, ADXL345_DEVID);
-  ivdbg("devid: %04x\n", devid);
+  snvdbg("devid: %04x\n", devid);
 
   if (devid != (uint16_t) DEVID)
     {
@@ -444,7 +444,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
   ret = adxl345_checkid(priv);
   if (ret < 0)
     {
-      illdbg("Wrong Device ID!\n");
+      snlldbg("Wrong Device ID!\n");
       return NULL;
     }
 

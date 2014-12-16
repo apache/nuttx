@@ -630,6 +630,15 @@ config DEBUG_SDIO
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
+config DEBUG_SENSORS
+	bool "Sensor Debug Output"
+	default n
+	depends on SENSORS
+	---help---
+		Enable sensor driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
 config DEBUG_SPI
 	bool "SPI Debug Output"
 	default n

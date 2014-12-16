@@ -149,26 +149,16 @@
 /* Non-standard debug that may be enabled just for testing the quadrature encoder */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_QENCODER
+#  undef CONFIG_DEBUG_SENSORS
 #endif
 
-#ifdef CONFIG_DEBUG_QENCODER
-#  define qedbg                 dbg
-#  define qelldbg               lldbg
+#ifdef CONFIG_DEBUG_SENSORS
 #  ifdef CONFIG_DEBUG_VERBOSE
-#    define qevdbg              vdbg
-#    define qellvdbg            llvdbg
 #    define qe_dumpgpio(p,m)    stm32_dumpgpio(p,m)
 #  else
-#    define qevdbg(x...)
-#    define qellvdbg(x...)
 #    define qe_dumpgpio(p,m)
 #  endif
 #else
-#  define qedbg(x...)
-#  define qelldbg(x...)
-#  define qevdbg(x...)
-#  define qellvdbg(x...)
 #  define qe_dumpgpio(p,m)
 #endif
 
@@ -228,7 +218,7 @@ static void stm32_putreg16(struct stm32_lowerhalf_s *priv, int offset, uint16_t 
 static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset);
 static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value);
 
-#if defined(CONFIG_DEBUG_QENCODER) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_VERBOSE)
 static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
@@ -542,26 +532,26 @@ static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint3
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_QENCODER) && defined(CONFIG_DEBUG_VERBOSE)
+#if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_VERBOSE)
 static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg)
 {
-  qevdbg("%s:\n", msg);
-  qevdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
+  snvdbg("%s:\n", msg);
+  snvdbg("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
          stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CR2_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_SMCR_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET));
-  qevdbg("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
+  snvdbg("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
          stm32_getreg16(priv, STM32_GTIM_SR_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_EGR_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCMR1_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCMR2_OFFSET));
-  qevdbg(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
+  snvdbg(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
          stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CNT_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_PSC_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_ARR_OFFSET));
-  qevdbg(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
+  snvdbg(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
          stm32_getreg16(priv, STM32_GTIM_CCR1_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCR2_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCR3_OFFSET),
@@ -569,7 +559,7 @@ static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg)
 #if defined(CONFIG_STM32_TIM1_QENCODER) || defined(CONFIG_STM32_TIM8_QENCODER)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
-      qevdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
+      snvdbg("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
              stm32_getreg16(priv, STM32_ATIM_RCR_OFFSET),
              stm32_getreg16(priv, STM32_ATIM_BDTR_OFFSET),
              stm32_getreg16(priv, STM32_ATIM_DCR_OFFSET),
@@ -578,7 +568,7 @@ static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg)
   else
 #endif
     {
-      qevdbg("  DCR: %04x DMAR: %04x\n",
+      snvdbg("  DCR: %04x DMAR: %04x\n",
              stm32_getreg16(priv, STM32_GTIM_DCR_OFFSET),
              stm32_getreg16(priv, STM32_GTIM_DMAR_OFFSET));
     }
@@ -1036,7 +1026,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
   putreg32(regval, regaddr);
   irqrestore(flags);
 
-  qevdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  snvdbg("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   stm32_dumpregs(priv, "After stop");
 
   /* Put the TI1 GPIO pin back to its default state */
@@ -1128,7 +1118,7 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
 #ifdef HAVE_16BIT_TIMERS
   irqstate_t flags;
 
-  qevdbg("Resetting position to zero\n");
+  snvdbg("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);
 
   /* Reset the timer and the counter.  Interrupts are disabled to make this atomic
@@ -1140,7 +1130,7 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
   priv->position = 0;
   irqrestore(flags);
 #else
-  qevdbg("Resetting position to zero\n");
+  snvdbg("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);
 
   /* Reset the counter to zero */
@@ -1195,7 +1185,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
   priv = stm32_tim2lower(tim);
   if (!priv)
     {
-      qedbg("TIM%d support not configured\n", tim);
+      sndbg("TIM%d support not configured\n", tim);
       return -ENXIO;
     }
 
@@ -1203,7 +1193,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
 
   if (priv->inuse)
     {
-      qedbg("TIM%d is in-used\n", tim);
+      sndbg("TIM%d is in-used\n", tim);
       return -EBUSY;
     }
 
@@ -1212,7 +1202,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
   ret = qe_register(devpath, (FAR struct qe_lowerhalf_s *)priv);
   if (ret < 0)
     {
-      qedbg("qe_register failed: %d\n", ret);
+      sndbg("qe_register failed: %d\n", ret);
       return ret;
     }
 
