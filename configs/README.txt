@@ -202,6 +202,10 @@ configs/demo9s12ne64
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
   is code complete but has not yet been verified.
 
+configs/dk-tm4c129x
+  This is the port of NuttX to the Tiva® DK-TM4C129x Connected Development Kit.  The
+  Tiva® DK-TM4C129x features the TM4C129XNCZAD MCU.
+
 configs/ea3131
   Embedded Artists EA3131 Development board.  This board is based on the
   an NXP LPC3131 MCU. This OS is built with the arm-nuttx-elf toolchain*.
@@ -573,7 +577,7 @@ configs/teensy
   on an Atmel AT90USB1286 MCU.
 
 configs/tm4c123g-launchpad
-  This is the port of NuttX to the Tiva TM4C123G LaunchPad.  The
+  This is the port of NuttX to the Tiva® TM4C123G LaunchPad.  The
   Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
   platform for ARM® Cortex™-M4F-based microcontrollers from Texas
   Instruments.
