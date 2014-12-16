@@ -125,6 +125,10 @@ sensors/
   of things in envionment like temperatore, orientation, acceleration,
   altitude, direction, position, etc.
 
+  DACs might fit this definition of a sensor driver as well since they
+  measure and convert voltage levels.  DACs, however, are retained in
+  the analog/ sub-directory.
+
 sercomm/
   Sercomm is the transport used by osmocom-bb that runs on top of serial.
   See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed the usage
