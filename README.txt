@@ -1026,6 +1026,8 @@ nuttx
  |   |   `- README.txt
  |   |- demo0s12ne64/
  |   |   `- README.txt
+ |   |- dk-tm4c129x/
+ |   |   `- README.txt
  |   |- ea3131/
  |   |   `- README.txt
  |   |- ea3152/
