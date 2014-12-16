@@ -1438,9 +1438,9 @@ Where <subdir> is one of the following:
        CONFIG_STM32_TIM8_QE=y     : Use TIM8 as the quadrature encoder
        CONFIG_STM32_TIM2_QE=y     : (Or optionally TIM2)
 
-       See also apps/examples/README.tx. Special PWM-only debug options:
+       See also apps/examples/README.tx. Special debug options:
 
-       CONFIG_DEBUG_QENCODER
+       CONFIG_DEBUG_SENSORS
 
     6. This example supports the watchdog timer test (apps/examples/watchdog)
        but this must be manually enabled by selecting:
