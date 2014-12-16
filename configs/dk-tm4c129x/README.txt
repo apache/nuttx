@@ -356,7 +356,7 @@ DK-TM4129X Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_TM4C129XNCZAD
+       CONFIG_ARCH_CHIP_TM4C129XNC
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
