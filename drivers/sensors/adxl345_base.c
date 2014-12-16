@@ -442,6 +442,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
   if (ret < 0)
     {
       sndbg("Wrong Device ID!\n");
+      kmm_free(priv);
       return NULL;
     }
 
