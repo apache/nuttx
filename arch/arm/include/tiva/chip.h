@@ -208,7 +208,7 @@
 #  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
 #  define TIVA_NUSBOTGFS       1  /* One USB 2.0 OTG FS */
 #  define TIVA_NUSBOTGHS       0  /* No USB 2.0 OTG HS */
-#elif defined(CONFIG_ARCH_CHIP_TM4C129XNCZAD) || defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC) || defined(CONFIG_ARCH_CHIP_TM4C1294NC)
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
