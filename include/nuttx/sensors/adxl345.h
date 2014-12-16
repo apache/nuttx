@@ -292,7 +292,7 @@
  * handler but rather from the context of the worker thread with interrupts enabled.
  */
 
-typedef void (*adxl345_handler_t)(int pin);
+typedef void (*adxl345_handler_t)(FAR struct adxl345_config_s *config, FAR void *arg);
 
 /* A reference to a structure of this type must be passed to the ADXL345 driver when the
  * driver is instantiated. This structure provides information about the configuration of the
@@ -312,14 +312,6 @@ struct adxl345_config_s
 #endif
   uint32_t frequency;  /* I2C or SPI frequency */
 
-  /* If multiple ADXL345 devices are supported, then an IRQ number must
-   * be provided for each so that their interrupts can be distinguished.
-   */
-
-#ifdef CONFIG_ADXL345_MULTIPLE
-  int irq;             /* IRQ number received by interrupt handler. */
-#endif
-
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
    * callbacks to isolate the ADXL345 driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.
@@ -329,7 +321,8 @@ struct adxl345_config_s
    * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
-  int  (*attach)(FAR struct adxl345_config_s *state, xcpt_t isr);
+  int  (*attach)(FAR struct adxl345_config_s *state, adxl345_handler_t handler,
+                 FAR void *arg);
   void (*enable)(FAR struct adxl345_config_s *state, bool enable);
   void (*clear)(FAR struct adxl345_config_s *state);
 };

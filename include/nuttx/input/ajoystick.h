@@ -241,7 +241,7 @@ struct ajoy_lowerhalf_s
 
   CODE ajoy_buttonset_t (*al_buttons)(FAR const struct ajoy_lowerhalf_s *lower);
 
-  /* Enable interrupts on the selected set of joystick buttons.  And empty
+  /* Enable interrupts on the selected set of joystick buttons.  An empty
    * set will disable all interrupts.
    */
 

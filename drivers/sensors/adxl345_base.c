@@ -72,8 +72,6 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer,
  * Private Data
  ****************************************************************************/
 
-static struct adxl345_dev_s g_adxl345;
-
 /* This the vtable that supports the character driver interface */
 
 static const struct file_operations g_adxl345fops =
@@ -281,18 +279,12 @@ static void adxl345_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int adxl345_interrupt(int irq, FAR void *context)
+static void adxl345_interrupt(FAR struct adxl345_config_s *config, FAR void *arg)
 {
-  FAR struct adxl345_dev_s    *priv;
-  FAR struct adxl345_config_s *config;
-  int                          ret;
+  FAR struct adxl345_dev_s *priv = (FAR struct adxl345_dev_s *)arg;
+  int ret;
 
-  /* Get a pointer the callbacks for convenience (and so the code is not so
-   * ugly).
-   */
-
-  config = priv->config;
-  DEBUGASSERT(config != NULL);
+  DEBUGASSERT(priv && priv->config == config);
 
   /* Disable further interrupts */
 
@@ -320,7 +312,6 @@ static int adxl345_interrupt(int irq, FAR void *context)
   /* Clear any pending interrupts and return success */
 
   config->clear(config);
-  return OK;
 }
 
 /****************************************************************************
@@ -391,19 +382,24 @@ static void adxl345_reset(FAR struct adxl345_dev_s *priv)
 
 #ifdef CONFIG_ADXL345_SPI
 ADXL345_HANDLE adxl345_instantiate(FAR struct spi_dev_s *dev,
-                                     FAR struct adxl345_config_s *config)
+                                   FAR struct adxl345_config_s *config)
 #else
 ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
-                                     FAR struct adxl345_config_s *config)
+                                   FAR struct adxl345_config_s *config)
 #endif
 {
   FAR struct adxl345_dev_s *priv;
   uint8_t regval;
   int ret;
 
-  /* Use the one-and-only ADXL345 driver instance */
+  /* Allocate the ADXL345 driver instance */
 
-  priv = &g_adxl345;
+  priv = (FAR struct adxl345_dev_s *)kmm_zalloc(sizeof(struct adxl345_dev_s));
+  if (!priv)
+    {
+      sndbg("Failed to allocate the device structure!\n");
+      return NULL;
+    }
 
   /* Initialize the device state structure */
 
@@ -418,15 +414,16 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
    * then just configure before sending data.
    */
 
-  #ifdef CONFIG_SPI_OWNBUS
-    /* Configure SPI for the ADXL345 */
+#ifdef CONFIG_SPI_OWNBUS
+  /* Configure SPI for the ADXL345 */
 
-    SPI_SELECT(priv->spi, SPIDEV_GSENSOR, true);
-    SPI_SETMODE(priv->spi, SPIDEV_MODE3);
-    SPI_SETBITS(priv->spi, 8);
-    SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
-    SPI_SELECT(priv->spi, SPIDEV_GSENSOR, false);
-  #endif
+  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, true);
+  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
+  SPI_SETBITS(priv->spi, 8);
+  SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
+  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, false);
+#endif
+
 #else
   priv->i2c = dev;
 
@@ -444,7 +441,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
   ret = adxl345_checkid(priv);
   if (ret < 0)
     {
-      snlldbg("Wrong Device ID!\n");
+      sndbg("Wrong Device ID!\n");
       return NULL;
     }
 
@@ -464,7 +461,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
 
   /* Attach the ADXL345 interrupt handler. */
 
-  config->attach(config, adxl345_interrupt);
+  config->attach(config, (adxl345_handler_t)adxl345_interrupt, (FAR void *)priv);
 
   /* Leave standby mode */
 
@@ -478,6 +475,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
   adxl345_putreg8(priv, ADXL345_INT_ENABLE, INT_DATA_READY);
 
   /* Return our private data structure as an opaque handle */
+
   return (ADXL345_HANDLE)priv;
 }
 

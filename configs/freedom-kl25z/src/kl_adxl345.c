@@ -98,8 +98,9 @@ struct kl_adxl345config_s
 
   /* Additional private definitions only known to this driver */
 
-  ADXL345_HANDLE handle;   /* The ADXL345 driver handle */
-  xcpt_t         handler;  /* The ADXL345 interrupt handler */
+  ADXL345_HANDLE handle;      /* The ADXL345 driver handle */
+  adxl345_handler_t handler;  /* The ADXL345 interrupt handler */
+  FAR void *arg;              /* Argument to pass to the interrupt handler */
 };
 
 /****************************************************************************
@@ -115,7 +116,8 @@ struct kl_adxl345config_s
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  adxl345_attach(FAR struct adxl345_config_s *state, xcpt_t isr);
+static int  adxl345_attach(FAR struct adxl345_config_s *state,
+                           adxl345_handler_t handler, FAR void *arg);
 static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable);
 static void adxl345_clear(FAR struct adxl345_config_s *state);
 
@@ -146,12 +148,26 @@ static struct kl_adxl345config_s g_adxl345config =
     .enable    = adxl345_enable,
     .clear     = adxl345_clear,
   },
-  .handler     = NULL,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+/* This is the ADX1345 Interupt handler */
+
+int adx1345_interrupt(int irq, FAR void *context)
+{
+  /* Verify that we have a handler attached */
+
+  if (g_adxl345config.handler)
+    {
+      /* Yes.. forward with interrupt along with its argument */
+
+      g_adxl345config.handler(&g_adxl345config.config, g_adxl345config.arg);
+    }
+
+  return OK;
+}
 
 /* IRQ/GPIO access callbacks.  These operations all hidden behind
  * callbacks to isolate the ADXL345 driver from differences in GPIO
@@ -159,19 +175,23 @@ static struct kl_adxl345config_s g_adxl345config =
  *
  *   attach  - Attach the ADXL345 interrupt handler to the GPIO interrupt
  *   enable  - Enable or disable the GPIO interrupt
- *  clear   - Acknowledge/clear any pending GPIO interrupt
+ *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int adxl345_attach(FAR struct adxl345_config_s *state, xcpt_t isr)
+static int adxl345_attach(FAR struct adxl345_config_s *state,
+                           adxl345_handler_t handler, FAR void *arg)
 {
   FAR struct kl_adxl345config_s *priv = (FAR struct kl_adxl345config_s *)state;
 
-  ivdbg("Saving handler %p\n", isr);
+  snvdbg("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
 
-  /* Just save the handler.  We will use it when interrupts are enabled */
+  /* Just save the handler and its argument.  We will use it when interrupts
+   * are enabled
+   */
 
-  priv->handler = isr;
+  priv->handler = handler;
+  priv->arg = arg;
   return OK;
 }
 
@@ -191,7 +211,7 @@ static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
       /* Configure the interrupt using the SAVED handler */
 
       kl_configgpio(GPIO_ADXL345_INT1);
-      (void)kl_gpioirqattach(GPIO_ADXL345_INT1, priv->handler);
+      (void)kl_gpioirqattach(GPIO_ADXL345_INT1, adx1345_interrupt);
       kl_gpioirqenable(GPIO_ADXL345_INT1); 
     }
   else
@@ -237,14 +257,14 @@ int adxl345_archinitialize(int minor)
   FAR struct spi_dev_s *dev;
   int ret;
 
-  idbg("minor %d\n", minor);
+  sndbg("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
   /* Check if we are already initialized */
 
   if (!g_adxl345config.handle)
     {
-      ivdbg("Initializing\n");
+      snvdbg("Initializing\n");
 
       /* Configure the ADXL345 interrupt pin as an input */
 
@@ -255,7 +275,7 @@ int adxl345_archinitialize(int minor)
       dev = up_spiinitialize(CONFIG_ADXL345_SPIDEV);
       if (!dev)
         {
-          idbg("Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
+          sndbg("Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
           return -ENODEV;
         }
 
@@ -265,7 +285,7 @@ int adxl345_archinitialize(int minor)
         adxl345_instantiate(dev, (FAR struct adxl345_config_s *)&g_adxl345config);
       if (!g_adxl345config.handle)
         {
-          idbg("Failed to instantiate the ADXL345 driver\n");
+          sndbg("Failed to instantiate the ADXL345 driver\n");
           return -ENODEV;
         }
 
@@ -274,8 +294,8 @@ int adxl345_archinitialize(int minor)
       ret = adxl345_register(g_adxl345config.handle, CONFIG_ADXL345_DEVMINOR);
       if (ret < 0)
         {
-          idbg("Failed to register STMPE driver: %d\n", ret);
-          return -ENODEV;
+          sndbg("Failed to register ADX1345 driver: %d\n", ret);
+          return ret;
         }
     }
 
