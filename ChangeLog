@@ -9241,3 +9241,7 @@
 	  config/: Unify sensor debug.  ADX driver was using input debug; LM75
 	  and QENCODE that their own custom debug.  Now all use
 	  CONFIG_DEBUG_SENSOR, sndbg() (2014-12-16).
+	* configs/dk-tm4c129x:  Initial board support for the Tiva DK-TM4C129x
+	  Connected Development Kit.  The initial commit is just the Tiva
+	  TM4C123G-Launchpad board support with naming changes (2014-12-16).
+
