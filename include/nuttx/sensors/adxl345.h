@@ -53,7 +53,11 @@
  * Pre-Processor Definitions
  ********************************************************************************************/
 /* Configuration ****************************************************************************/
-/* Settings that effect the driver: CONFIG_DISABLE_POLL
+/* Prerequisites:
+ *
+ * CONFIG_SCHED_WORKQUEUE - Work queue support is required
+ *
+ * Settings that effect the driver: CONFIG_DISABLE_POLL
  *
  * CONFIG_SENSORS_ADXL345
  *   Enables support for the ADXL345 driver
@@ -61,34 +65,21 @@
  *   Enables support for the SPI interface (not currenly supported)
  * CONFIG_ADXL345_I2C
  *   Enables support for the I2C interface
- * CONFIG_ADXL345_MULTIPLE
- *   Can be defined to support multiple ADXL345 devices on board.
- * CONFIG_ADXL345_NPOLLWAITERS
- *   Maximum number of threads that can be waiting on poll() (ignored if
- *   CONFIG_DISABLE_POLL is set).
- * CONFIG_ADXL345_TSC_DISABLE
- *   Disable driver touchscreen functionality.
- * CONFIG_ADXL345_ADC_DISABLE
- *   Disable driver ADC functionality.
- * CONFIG_ADXL345_GPIO_DISABLE
- *   Disable driver GPIO functionality.
- * CONFIG_ADXL345_GPIOINT_DISABLE
- *   Disable driver GPIO interrupt functionlality (ignored if GPIO functionality is
- *   disabled).
- * CONFIG_ADXL345_SWAPXY
- *   Reverse the meaning of X and Y to handle different LCD orientations.
- * CONFIG_ADXL345_TEMP_DISABLE
- *   Disable driver temperature sensor functionality.
+ * CONFIG_ADXL345_ACTIVELOW
+ *    The ADXL345 interrupt will be inverted. Instead starting low and
+ *    going high, it will start high and will go low when an interrupt
+ *    is fired. Default:  Active high/rising edge.
  * CONFIG_ADXL345_REGDEBUG
  *   Enable very low register-level debug output.  Requires CONFIG_DEBUG.
- * CONFIG_ADXL345_THRESHX and CONFIG_ADXL345_THRESHY
- *   ADXL345 touchscreen data comes in a a very high rate.  New touch positions
- *   will only be reported when the X or Y data changes by these thresholds.
- *   This trades reduces data rate for some loss in dragging accuracy.  The
- *   ADXL345 is configure for 12-bit values so the raw ranges are 0-4095. So
- *   for example, if your display is 320x240, then THRESHX=13 and THRESHY=17
- *   would correspond to one pixel.  Default: 12
  */
+
+#ifdef CONFIG_DISABLE_SIGNALS
+#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
+#endif
 
 /* The ADXL345 interfaces with the target CPU via a I2C or SPI interface. The pin IN_1
  * allows the selection of interface protocol at reset state.
@@ -102,12 +93,6 @@
 #  error "Only one of CONFIG_ADXL345_SPI or CONFIG_ADXL345_I2C can be defined"
 #endif
 
-/* Maximum number of threads than can be waiting for POLL events */
-
-#ifndef CONFIG_ADXL345_NPOLLWAITERS
-#  define CONFIG_ADXL345_NPOLLWAITERS 2
-#endif
-
 /* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
  */
@@ -119,30 +104,6 @@
 #  ifndef CONFIG_I2C_TRANSFER
 #    error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
 #  endif
-#endif
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
-#endif
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
-#endif
-
-/* Thresholds */
-
-#ifndef CONFIG_ADXL345_THRESHX
-#  define CONFIG_ADXL345_THRESHX 12
-#endif
-
-#ifndef CONFIG_ADXL345_THRESHY
-#  define CONFIG_ADXL345_THRESHY 12
-#endif
-
-/* Debug output */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_ADXL345_REGDEBUG
 #endif
 
 /* I2C **************************************************************************************/

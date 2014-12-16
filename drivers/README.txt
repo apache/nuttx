@@ -82,10 +82,13 @@ eeprom/
   the EEPROM drivers.
 
 input/
-  This directory holds implementations of human input device drivers.
-  This includes such things as mouse, touchscreen, joystick, keyboard
-  and keypad drivers.  See include/nuttx/input/*.h for registration
-  information.
+  This directory holds implementations of human input device (HID)
+  drivers.  This includes such things as mouse, touchscreen, joystick,
+  keyboard and keypad drivers.  See include/nuttx/input/*.h for
+  registration information.
+
+  Note that USB HID devices are treated differently.  These can be
+  found under usbdev/ or usbhost/.
 
 lcd/
   Drivers for parallel and serial LCD and OLED type devices.  These
