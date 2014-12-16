@@ -65,7 +65,7 @@
 #  undef CONFIG_DEBUG_I2C
 #  undef CONFIG_DEBUG_CAN
 #  undef CONFIG_DEBUG_PWM
-#  undef CONFIG_DEBUG_QENCODER
+#  undef CONFIG_DEBUG_SENSORS
 #endif
 
 /* Peripherals **********************************************************************/
