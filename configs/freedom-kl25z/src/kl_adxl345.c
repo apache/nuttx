@@ -57,11 +57,7 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_INPUT_ADXL345
-#ifndef CONFIG_INPUT
-#  error "ADXL345 support requires CONFIG_INPUT"
-#endif
-
+#ifdef CONFIG_SENSORS_ADXL345
 #ifndef CONFIG_KL_SPI0
 #  error "ADXL345 support requires CONFIG_KL_SPI0"
 #endif
@@ -286,4 +282,4 @@ int adxl345_archinitialize(int minor)
   return OK;
 }
 
-#endif /* CONFIG_INPUT_ADXL345 */
+#endif /* CONFIG_SENSORS_ADXL345 */

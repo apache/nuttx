@@ -70,7 +70,7 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(CONFIG_INPUT_ADXL345)
+#if defined(CONFIG_SENSORS_ADXL345)
   int ret;
 
   ret = adxl345_archinitialize(0);
