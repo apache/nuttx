@@ -67,10 +67,24 @@ config ARCH_CHIP_TM4C123GH6PMI
 	select ARCH_CHIP_TM4C
 	select ARCH_HAVE_FPU
 
+config ARCH_CHIP_TM4C129XNCZAD
+	bool "TM4C129XNCZAD"
+	depends on ARCH_CHIP_TIVA
+	select ARCH_CORTEXM4
+	select ARCH_CHIP_TM4C
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_TM4C1294NCPDT
+	bool "TM4C1294NCPDT"
+	depends on ARCH_CHIP_TIVA
+	select ARCH_CORTEXM4
+	select ARCH_CHIP_TM4C
+	select ARCH_HAVE_FPU
+
 config ARCH_CHIP_CC3200
-       bool "CC3200"
-       depends on ARCH_CHIP_TIVA
-       select ARCH_CORTEXM4
+	bool "CC3200"
+	depends on ARCH_CHIP_TIVA
+	select ARCH_CORTEXM4
 
 endchoice
 

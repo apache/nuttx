@@ -120,7 +120,9 @@ CONFIG_ARMV7M_OABI_TOOLCHAIN=y
 # Tiva/Stellaris Configuration Options
 #
 # CONFIG_ARCH_CHIP_TM4C123GH6ZRB is not set
+# CONFIG_ARCH_CHIP_TM4C123GH6PMI is not set
 CONFIG_ARCH_CHIP_TM4C129XNCZAD=y
+# CONFIG_ARCH_CHIP_TM4C1294NCPDT is not set
 # CONFIG_ARCH_CHIP_CC3200 is not set
 CONFIG_ARCH_CHIP_TM4C=y
 # CONFIG_TIVA_BOARD_EARLYINIT is not set
@@ -633,6 +635,7 @@ CONFIG_EXAMPLES_NSH=y
 # Graphics Support
 #
 # CONFIG_TIFF is not set
+# CONFIG_GRAPHICS_TRAVELER is not set
 
 #
 # Interpreters
@@ -770,6 +773,11 @@ CONFIG_NSH_CONSOLE=y
 # EMACS-like Command Line Editor
 #
 # CONFIG_SYSTEM_CLE is not set
+
+#
+# CU Minimal Terminal
+#
+# CONFIG_SYSTEM_CUTERM is not set
 
 #
 # FLASH Program Installation
