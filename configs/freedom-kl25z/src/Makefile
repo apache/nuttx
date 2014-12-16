@@ -86,7 +86,7 @@ ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += kl_nsh.c
 endif
 
-ifeq ($(CONFIG_INPUT_ADXL345),y)
+ifeq ($(CONFIG_SENSORS_ADXL345),y)
 CSRCS += kl_adxl345.c
 endif
 

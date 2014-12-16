@@ -8,6 +8,49 @@ config LIS331DL
 	default n
 	select I2C
 
+config SENSORS_ADXL345
+	bool "AnalogDevices ADXL345 Driver"
+	default n
+	---help---
+		Enables support for the ADXL345 driver
+
+if SENSORS_ADXL345
+
+choice
+	prompt "ADXL345 Interface"
+	default ADXL345_SPI
+
+config ADXL345_SPI
+	bool "ADXL345 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface.
+
+config ADXL345_I2C
+	bool "ADXL345 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+endchoice
+
+config ADXL345_ACTIVELOW
+	bool "Active Low Interrupt"
+	default n
+	---help---
+		The ADXL345 interrupt will be inverted. Instead starting low and going
+		high, it will start high and will go low when an interrupt is fired.
+		Default:  Active high/rising edge.
+
+config ADXL345_REGDEBUG
+	bool "Enable Register-Level ADXL345 Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low register-level debug output.
+
+endif # SENSORS_ADXL345
+
 config I2C_LM75
 	bool
 	default y if LM75
@@ -31,3 +74,4 @@ config DEBUG_QENCODER
 	bool "Enable Qencoder Debug"
 	default n
 	depends on QENCODER
+

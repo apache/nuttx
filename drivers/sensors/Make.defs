@@ -34,6 +34,11 @@
 ############################################################################
 
 # Include sensor drivers
+
+ifeq ($(CONFIG_SENSORS_ADXL345),y)
+  CSRCS += adxl345_base.c
+endif
+
 # These drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
@@ -42,10 +47,22 @@ ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
 
+ifeq ($(CONFIG_ADXL345_I2C),y)
+  CSRCS += adxl345_i2c.c
+endif
+
 ifeq ($(CONFIG_I2C_LM75),y)
   CSRCS += lm75.c
 endif
+endif # CONFIG_I2C
+
+# These drivers depend on SPI support
+
+ifeq ($(CONFIG_SPI),y)
+ifeq ($(CONFIG_ADXL345_SPI),y)
+  CSRCS += adxl345_spi.c
 endif
+endif # CONFIG_SPI
 
 # Quadrature encoder upper half
 
