@@ -9231,3 +9231,13 @@
 	  up_internal.h, up_x11eventloop.c, up_x11framebuffer.c,
 	  configs/sim/src/Makefile, sim_boot.c, and traveler/defconfig: Add an
 	  X11 mouse-based simulation of an analog joystick device (2014-12-14).
+	* drivers/sensors/adxl345*, include/nuttx/sensors/adxl345.h and other
+	  files:  Add driver support for the ADXL345 accelerometer.  From  Alan
+	  Carvalho de Assis (2014-12-16).
+	* configs/freedom-kl25z: Add board support for the ADXL345 accelerometer.
+	  From  Alan Carvalho de Assis (2014-12-16).
+	* Kconfig, include/debug.h, drivers/sensors/*, and Qencoder logic in
+	  arch/arm/src/stm32 and various QEncoder board support files under
+	  config/: Unify sensor debug.  ADX driver was using input debug; LM75
+	  and QENCODE that their own custom debug.  Now all use
+	  CONFIG_DEBUG_SENSOR, sndbg() (2014-12-16).
