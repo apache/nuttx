@@ -1222,6 +1222,8 @@ nuttx
  |   |   `- README.txt
  |   |- mtd/
  |   |   `- README.txt
+ |   |- sensors/
+ |   |   `- README.txt
  |   |- sercomm/
  |   |   `- README.txt
  |   |- syslog/

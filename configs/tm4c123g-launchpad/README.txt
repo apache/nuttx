@@ -1,12 +1,12 @@
 README
-^^^^^^
+======
 
 README for NuttX port to the Tiva TM4C123G LaunchPad.  The Tiva TM4C123G
 LaunchPad Evaluation Board is a low-cost evaluation platform for ARM®
 Cortex™-M4F-based microcontrollers from Texas Instruments.
 
 Contents
-^^^^^^^^
+========
 
   On-Board GPIO Usage
   Development Environment
@@ -82,7 +82,7 @@ PIN SIGNAL(S)                                LanchPad Function
  05 PF4/T2CCP0                               USR_SW1 (Low when pressed), GPIO, J4 pin 10
 
 AT24 Serial EEPROM
-^^^^^^^^^^^^^^^^^^
+==================
 
   AT24 Connections
   ----------------
@@ -236,7 +236,7 @@ I2C Tool
     devices responding at addresses 0x1a, 0x39, 0x3d, and 0x60.
 
 Using OpenOCD and GDB with an FT2232 JTAG emulator
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==================================================
 
   Building OpenOCD under Cygwin:
 
@@ -340,7 +340,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     3. The 'monitor' command can be abbreviated as just 'mon'.
 
 Development Environment
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
@@ -348,7 +348,7 @@ Development Environment
   environment.
 
 GNU Toolchain Options
-^^^^^^^^^^^^^^^^^^^^^
+=====================
 
   The NuttX make system has been modified to support the following different
   toolchain options.
@@ -413,7 +413,7 @@ GNU Toolchain Options
   path or will get the wrong version of make.
 
 IDEs
-^^^^
+====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
@@ -443,7 +443,7 @@ IDEs
   is arch/arm/src/tiva/tiva_vectors.S.
 
 NuttX EABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
@@ -486,7 +486,7 @@ NuttX EABI "buildroot" Toolchain
   See instructions below.
 
 NuttX OABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   The older, OABI buildroot toolchain is also available.  To use the OABI
   toolchain:
@@ -505,7 +505,7 @@ NuttX OABI "buildroot" Toolchain
     -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 
 NXFLAT Toolchain
-^^^^^^^^^^^^^^^^
+================
 
   If you are *not* using the NuttX buildroot toolchain and you want to use
   the NXFLAT tools, then you will still have to build a portion of the buildroot
@@ -518,7 +518,7 @@ NXFLAT Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
+     ./configure.sh tm4c123g-launchpad/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -538,7 +538,7 @@ NXFLAT Toolchain
      the path to the newly builtNXFLAT binaries.
 
 LEDs
-^^^^
+====
   The TM4C123G has a single RGB LED.  If CONFIG_ARCH_LEDS is defined, then
   support for the LaunchPad LEDs will be included in the build.  See:
 
@@ -571,7 +571,7 @@ LEDs
     extinguished and the RED component will FLASH at a 2Hz rate.
 
 Serial Console
-^^^^^^^^^^^^^^
+==============
 
   By default, all configurations use UART0 which connects to the USB VCOM
   on the DEBUG port on the TM4C123G LaunchPad:
@@ -615,7 +615,7 @@ Serial Console
     UART7 TX - PE.1
 
 USB Device Controller Functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===============================
 
   Device Overview
 
@@ -654,7 +654,7 @@ USB Device Controller Functions
     driver is installed, Windows assigns a COM port number to the VCP channel.
 
 TM4C123G LaunchPad Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=======================================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -778,7 +778,7 @@ TM4C123G LaunchPad Configuration Options
     CONFIG_TIVA_DUMPPACKET - Dump each packet received/sent to the console.
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
 Each TM4C123G LaunchPad configuration is maintained in a
 sub-directory and can be selected as follow:
