@@ -192,6 +192,15 @@ static const uintptr_t g_gpiobase[TIVA_NPORTS] =
 #if TIVA_NPORTS > 14
   , TIVA_GPIOQ_BASE
 #endif
+#if TIVA_NPORTS > 15
+  , TIVA_GPIOR_BASE
+#endif
+#if TIVA_NPORTS > 16
+  , TIVA_GPIOS_BASE
+#endif
+#if TIVA_NPORTS > 17
+  , TIVA_GPIOT_BASE
+#endif
 };
 
 /****************************************************************************
