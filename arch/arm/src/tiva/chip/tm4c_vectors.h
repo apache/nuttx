@@ -388,6 +388,147 @@ VECTOR(tiva_pwm1_fault, TIVA_IRQ_PWM1_FAULT) /* Vector 154: PWM1 Fault */
 
 # endif /* CONFIG_ARMV7M_CMNVECTOR */
 
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC)
+
+/* If the common ARMv7-M vector handling is used, then all it needs is the following
+ * definition that provides the number of supported vectors.
+ */
+
+#  ifdef CONFIG_ARMV7M_CMNVECTOR
+
+/* Reserve 130 interrupt table entries for I/O interrupts. */
+
+ARMV7M_PERIPHERAL_INTERRUPTS 130
+
+#  else
+
+VECTOR(tiva_gpioa, TIVA_IRQ_GPIOA)           /* Vector 16: GPIO Port A */
+VECTOR(tiva_gpiob, TIVA_IRQ_GPIOB)           /* Vector 17: GPIO Port B */
+VECTOR(tiva_gpioc, TIVA_IRQ_GPIOC)           /* Vector 18: GPIO Port C */
+VECTOR(tiva_gpiod, TIVA_IRQ_GPIOD)           /* Vector 19: GPIO Port D */
+
+VECTOR(tiva_gpioe, TIVA_IRQ_GPIOE)           /* Vector 20: GPIO Port E */
+VECTOR(tiva_uart0, TIVA_IRQ_UART0)           /* Vector 21: UART 0 */
+VECTOR(tiva_uart1, TIVA_IRQ_UART1)           /* Vector 22: UART 1 */
+VECTOR(tiva_ssi0, TIVA_IRQ_SSI0)             /* Vector 23: SSI 0 */
+VECTOR(tiva_i2c0, TIVA_IRQ_I2C0)             /* Vector 24: I2C 0 */
+VECTOR(tiva_pwm0_fault, TIVA_IRQ_PWM0_FAULT) /* Vector 25: PWM0 Fault */
+VECTOR(tiva_pwm0_gen0, TIVA_IRQ_PWM0_GEN0)   /* Vector 26: PWM0 Generator 0 */
+VECTOR(tiva_pwm0_gen1, TIVA_IRQ_PWM0_GEN1)   /* Vector 27: PWM0 Generator 1 */
+VECTOR(tiva_pwm0_gen2, TIVA_IRQ_PWM0_GEN2)   /* Vector 28: PWM0 Generator 2 */
+VECTOR(tiva_qei0, TIVA_IRQ_QEI0)             /* Vector 29: QEI0 */
+
+VECTOR(tiva_adc0, TIVA_IRQ_ADC0)             /* Vector 30: ADC Sequence 0 */
+VECTOR(tiva_adc1, TIVA_IRQ_ADC1)             /* Vector 31: ADC Sequence 1 */
+VECTOR(tiva_adc2, TIVA_IRQ_ADC2)             /* Vector 32: ADC Sequence 2 */
+VECTOR(tiva_adc3, TIVA_IRQ_ADC3)             /* Vector 33: ADC Sequence 3 */
+VECTOR(tiva_wdog, TIVA_IRQ_WDOG)             /* Vector 34: Watchdog Timers 0 and 1 */
+VECTOR(tiva_timer0a, TIVA_IRQ_TIMER0A)       /* Vector 35: 16/32-Bit Timer 0 A */
+VECTOR(tiva_timer0b, TIVA_IRQ_TIMER0B)       /* Vector 36: 16/32-Bit Timer 0 B */
+VECTOR(tiva_timer1a, TIVA_IRQ_TIMER1A)       /* Vector 37: 16/32-Bit Timer 1 A */
+VECTOR(tiva_timer1b, TIVA_IRQ_TIMER1B)       /* Vector 38: 16/32-Bit Timer 1 B */
+VECTOR(tiva_timer2a, TIVA_IRQ_TIMER2A)       /* Vector 39: 16/32-Bit Timer 2 A */
+
+VECTOR(tiva_timer2b, TIVA_IRQ_TIMER2B)       /* Vector 40: 16/32-Bit Timer 2 B */
+VECTOR(tiva_compare0, TIVA_IRQ_COMPARE0)     /* Vector 41: Analog Comparator 0 */
+VECTOR(tiva_compare1, TIVA_IRQ_COMPARE1)     /* Vector 42: Analog Comparator 1 */
+VECTOR(tiva_compare2, TIVA_IRQ_COMPARE2)     /* Vector 43: Analog Comparator 2 */
+VECTOR(tiva_syscon, TIVA_IRQ_SYSCON)         /* Vector 44: System Control */
+VECTOR(tiva_flashcon, TIVA_IRQ_FLASHCON)     /* Vector 45: FLASH and EEPROM Control */
+VECTOR(tiva_gpiof, TIVA_IRQ_GPIOF)           /* Vector 46: GPIO Port F */
+VECTOR(tiva_gpiof, TIVA_IRQ_GPIOG)           /* Vector 47: GPIO Port G */
+VECTOR(tiva_gpiof, TIVA_IRQ_GPIOH)           /* Vector 48: GPIO Port H */
+VECTOR(tiva_uart2, TIVA_IRQ_UART2)           /* Vector 49: UART 2 */
+
+VECTOR(tiva_ssi1, TIVA_IRQ_SSI1)             /* Vector 50: SSI 1 */
+VECTOR(tiva_timer3a, TIVA_IRQ_TIMER3A)       /* Vector 51: 16/32-Bit Timer 3 A */
+VECTOR(tiva_timer3b, TIVA_IRQ_TIMER3B)       /* Vector 52: 16/32-Bit Timer 3 B */
+VECTOR(tiva_i2c1, TIVA_IRQ_I2C1)             /* Vector 53: I2C 1 */
+VECTOR(tiva_can0, TIVA_IRQ_CAN0)             /* Vector 54: CAN 0 */
+VECTOR(tiva_can1, TIVA_IRQ_CAN1)             /* Vector 55: CAN 1 */
+VECTOR(tiva_ethcon, TIVA_IRQ_ETHCON)         /* Vector 56:  Ethernet MAC */
+VECTOR(tiva_hibernate, TIVA_IRQ_HIBERNATE)   /* Vector 57: Hibernation Module */
+VECTOR(tiva_usb, TIVA_IRQ_USB)               /* Vector 58: USB MAC */
+VECTOR(tiva_pwm0_gen3, TIVA_IRQ_PWM0_GEN3)   /* Vector 59: PWM0 Generator 3 */
+
+VECTOR(tiva_udmasoft, TIVA_IRQ_UDMASOFT)     /* Vector 60: uDMA Software */
+VECTOR(tiva_udmaerro, TIVA_IRQ_UDMAERROR)    /* Vector 61: uDMA Error */
+VECTOR(tiva_adc1_0, TIVA_IRQ_ADC1_0)         /* Vector 62: ADC1 Sequence 0 */
+VECTOR(tiva_adc1_1, TIVA_IRQ_ADC1_1)         /* Vector 63: ADC1 Sequence 1 */
+VECTOR(tiva_adc1_2, TIVA_IRQ_ADC1_2)         /* Vector 64: ADC1 Sequence 2 */
+VECTOR(tiva_adc1_3, TIVA_IRQ_ADC1_3)         /* Vector 65: ADC1 Sequence 3 */
+VECTOR(tiva_epi0, TIVA_IRQ_EPI0)             /* Vector 66: ADC1 Sequence 3 */
+VECTOR(tiva_gpioj, TIVA_IRQ_GPIOJ)           /* Vector 67: GPIO Port J */
+VECTOR(tiva_gpiok, TIVA_IRQ_GPIOK)           /* Vector 68: GPIO Port K */
+VECTOR(tiva_gpiol, TIVA_IRQ_GPIOL)           /* Vector 69: GPIO Port L */
+
+VECTOR(tiva_ssi2, TIVA_IRQ_SSI2)             /* Vector 70: SSI 2 */
+VECTOR(tiva_ssi3, TIVA_IRQ_SSI3)             /* Vector 71: SSI 3 */
+VECTOR(tiva_uart3, TIVA_IRQ_UART3)           /* Vector 72: UART 3 */
+VECTOR(tiva_uart4, TIVA_IRQ_UART4)           /* Vector 73: UART 4 */
+VECTOR(tiva_uart5, TIVA_IRQ_UART5)           /* Vector 74: UART 5 */
+VECTOR(tiva_uart6, TIVA_IRQ_UART6)           /* Vector 75: UART 6 */
+VECTOR(tiva_uart7, TIVA_IRQ_UART7)           /* Vector 76: UART 7 */
+VECTOR(tiva_i2c2, TIVA_IRQ_I2C2)             /* Vector 77: I2C 2 */
+VECTOR(tiva_i2c3, TIVA_IRQ_I2C3)             /* Vector 78: I2C 3 */
+VECTOR(tiva_timer4a, TIVA_IRQ_TIMER4A)       /* Vector 79: 16/32-Bit Timer 4 A */
+
+VECTOR(tiva_timer4b, TIVA_IRQ_TIMER4B)       /* Vector 80: 16/32-Bit Timer 4 B */
+VECTOR(tiva_timer5a, TIVA_IRQ_TIMER5A)       /* Vector 81: 16/32-Bit Timer 5 A */
+VECTOR(tiva_timer5b, TIVA_IRQ_TIMER5B)       /* Vector 82: 16/32-Bit Timer 5 B */
+VECTOR(tiva_float, TIVA_IRQ_FLOAT)           /* Vector 83: Floating point exception */
+UNUSED(TIVA_RESERVED_84)                     /* Vector 84: Reserved */
+UNUSED(TIVA_RESERVED_85)                     /* Vector 85: Reserved */
+VECTOR(tiva_i2c4, TIVA_IRQ_I2C4)             /* Vector 86: I2C 2 */
+VECTOR(tiva_i2c5, TIVA_IRQ_I2C5)             /* Vector 87: I2C 3 */
+VECTOR(tiva_gpiom, TIVA_IRQ_GPIOM)           /* Vector 88: GPIO Port M */
+VECTOR(tiva_gpion, TIVA_IRQ_GPION)           /* Vector 89: GPIO Port N */
+
+UNUSED(TIVA_RESERVED_90)                     /* Vector 90: Reserved */
+VECTOR(tiva_tamper, TIVA_IRQ_TAMPER)         /* Vector 91: Tamper */
+VECTOR(tiva_gpiop, TIVA_IRQ_GPIOP)           /* Vector 92: GPIO Port P (Summary or P0) */
+VECTOR(tiva_gpiop1, TIVA_IRQ_GPIOP1)         /* Vector 93: GPIO Port P1 */
+VECTOR(tiva_gpiop2, TIVA_IRQ_GPIOP2)         /* Vector 94: GPIO Port P2 */
+VECTOR(tiva_gpiop3, TIVA_IRQ_GPIOP3)         /* Vector 95: GPIO Port P3 */
+VECTOR(tiva_gpiop4, TIVA_IRQ_GPIOP4)         /* Vector 96: GPIO Port P4 */
+VECTOR(tiva_gpiop5, TIVA_IRQ_GPIOP5)         /* Vector 97: GPIO Port P5 */
+VECTOR(tiva_gpiop6, TIVA_IRQ_GPIOP6)         /* Vector 98: GPIO Port P6 */
+VECTOR(tiva_gpiop7, TIVA_IRQ_GPIOP7)         /* Vector 99: GPIO Port P7 */
+
+VECTOR(tiva_gpioq, TIVA_IRQ_GPIOQ)           /* Vector 100: GPIO Port Q (Summary or Q0) */
+VECTOR(tiva_gpioq1, TIVA_IRQ_GPIOQ1)         /* Vector 101: GPIO Port Q1 */
+VECTOR(tiva_gpioq2, TIVA_IRQ_GPIOQ2)         /* Vector 102: GPIO Port Q2 */
+VECTOR(tiva_gpioq3, TIVA_IRQ_GPIOQ3)         /* Vector 103: GPIO Port Q3 */
+VECTOR(tiva_gpioq4, TIVA_IRQ_GPIOQ4)         /* Vector 104: GPIO Port Q4 */
+VECTOR(tiva_gpioq5, TIVA_IRQ_GPIOQ5)         /* Vector 105: GPIO Port Q5 */
+VECTOR(tiva_gpioq6, TIVA_IRQ_GPIOQ6)         /* Vector 106: GPIO Port Q6 */
+VECTOR(tiva_gpioq7, TIVA_IRQ_GPIOQ7)         /* Vector 107: GPIO Port Q7 */
+VECTOR(tiva_gpior, TIVA_IRQ_GPIOR)           /* Vector 108: GPIO Port R */
+VECTOR(tiva_gpios, TIVA_IRQ_GPIOS)           /* Vector 109: GPIO Port S */
+
+VECTOR(tiva_shamd5, TIVA_IRQ_SHAMD5)         /* Vector 110: SHA/MD5 */
+VECTOR(tiva_aes, TIVA_IRQ_AES)               /* Vector 111: AES */
+VECTOR(tiva_des, TIVA_IRQ_DES)               /* Vector 112: DES */
+VECTOR(tiva_lcd, TIVA_IRQ_LCD)               /* Vector 113: LCD */
+VECTOR(tiva_timer6a, TIVA_IRQ_TIMER6A)       /* Vector 114: 16/32-Bit Timer 6 A */
+VECTOR(tiva_timer6b, TIVA_IRQ_TIMER6B)       /* Vector 115: 16/32-Bit Timer 6 B */
+VECTOR(tiva_timer7a, TIVA_IRQ_TIMER7A)       /* Vector 116: 16/32-Bit Timer 7 A */
+VECTOR(tiva_timer7b, TIVA_IRQ_TIMER7B)       /* Vector 117: 16/32-Bit Timer 7 B */
+VECTOR(tiva_i2c6, TIVA_IRQ_I2C6)             /* Vector 118: I2C 6 */
+VECTOR(tiva_i2c7, TIVA_IRQ_I2C7)             /* Vector 119: I2C 7 */
+
+UNUSED(TIVA_RESERVED_120)                    /* Vector 120: Reserved */
+VECTOR(tiva_1wire, TIVA_IRQ_1WIRE)           /* Vector 121: I2C 7 */
+UNUSED(TIVA_RESERVED_122)                    /* Vector 122: Reserved */
+UNUSED(TIVA_RESERVED_123)                    /* Vector 123: Reserved */
+UNUSED(TIVA_RESERVED_124)                    /* Vector 124: Reserved */
+VECTOR(tiva_i2c8, TIVA_IRQ_I2C8)             /* Vector 125: I2C 8 */
+VECTOR(tiva_i2c9, TIVA_IRQ_I2C9)             /* Vector 126: I2C 9 */
+VECTOR(tiva_gpiot, TIVA_IRQ_GPIOT)           /* Vector 127: GPIO Port S */
+UNUSED(TIVA_RESERVED_128)                    /* Vector 128: Reserved */
+UNUSED(TIVA_RESERVED_129)                    /* Vector 129: Reserved */
+
+# endif /* CONFIG_ARMV7M_CMNVECTOR */
 #else
 #  error "Vectors not known for this Tiva chip"
 #endif
