@@ -118,8 +118,7 @@
 
 #  define TIVA_RESERVED_70    (70) /* Vector 70: Reserved */
 
-#  define NR_VECTORS          (71)
-#  define NR_IRQS             (60) /* (Really less because of reserved vectors) */
+#  define NR_IRQS             (71) /* (Really less because of reserved vectors) */
 
 #elif defined(CONFIG_ARCH_CHIP_LM3S6432)
 #  define TIVA_IRQ_GPIOA      (16) /* Vector 16: GPIO Port A */
@@ -184,8 +183,7 @@
 
 #  define TIVA_RESERVED_70    (70) /* Vector 70: Reserved */
 
-#  define NR_VECTORS          (71)
-#  define NR_IRQS             (60) /* (Really less because of reserved vectors) */
+#  define NR_IRQS             (71) /* (Really less because of reserved vectors) */
 
 #elif defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define TIVA_IRQ_GPIOA      (16) /* Vector 16: GPIO Port A */
@@ -250,8 +248,7 @@
 
 #  define TIVA_RESERVED_70    (70) /* Vector 70: Reserved */
 
-#  define NR_VECTORS          (71)
-#  define NR_IRQS             (60) /* (Really less because of reserved vectors) */
+#  define NR_IRQS             (71) /* (Really less because of reserved vectors) */
 
 #elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
 #  define TIVA_IRQ_GPIOA      (16) /* Vector 16: GPIO Port A */
@@ -317,8 +314,7 @@
 #  define TIVA_IRQ_GPIOJ      (70) /* Vector 70: GPIO Port J */
 #  define TIVA_RESERVED_71    (71) /* Vector 71: Reserved */
 
-#  define NR_VECTORS          (72)
-#  define NR_IRQS             (71) /* (Really less because of reserved vectors) */
+#  define NR_IRQS             (72) /* (Really less because of reserved vectors) */
 
 #elif defined(CONFIG_ARCH_CHIP_LM3S8962)
 #  define TIVA_IRQ_GPIOA      (16) /* Vector 16: GPIO Port A */
@@ -383,8 +379,7 @@
 
 #  define TIVA_RESERVED_70    (70) /* Vector 70: Reserved */
 
-#  define NR_VECTORS          (71)
-#  define NR_IRQS             (60) /* (Really less because of reserved vectors) */
+#  define NR_IRQS             (71) /* (Really less because of reserved vectors) */
 
 #else
 #  error "IRQ Numbers not specified for this Stellaris chip"

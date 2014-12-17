@@ -268,7 +268,6 @@
 #  define TIVA_RESERVED_194  (194) /* Vector 194: Reserved */
 
 #  define NR_IRQS            (195) /* (Really fewer because of reserved vectors) */
-#  define NR_VECTORS         (155)
 
 #else
 #  error "IRQ Numbers not known for this Tiva chip"

@@ -54,8 +54,8 @@
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
-#  define TIVA_NTIMERS         4  /* Four general purpose timers */
-#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NTIMERS         4  /* Four 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -78,8 +78,8 @@
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
-#  define TIVA_NTIMERS         3  /* Three general purpose timers */
-#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NTIMERS         3  /* Three 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -102,8 +102,8 @@
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
-#  define TIVA_NTIMERS         4  /* Four general purpose timers */
-#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NTIMERS         4  /* Four 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -126,8 +126,8 @@
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
-#  define TIVA_NTIMERS         4  /* Four general purpose timers */
-#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NTIMERS         4  /* Four 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -151,8 +151,8 @@
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
-#  define TIVA_NTIMERS         6  /* Four general purpose timers */
-#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NTIMERS         6  /* Four 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -174,8 +174,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  define LM4F                 1  /* LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
-#  define TIVA_NTIMERS         6  /* Six general purpose timers */
-#  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NTIMERS         6  /* Six 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     6  /* Six 32/64-bit timers */
 #  define TIVA_NWDT            2  /* Two watchdog timer timers */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -198,8 +198,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         6  /* Six general purpose timers */
-#  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NTIMERS         6  /* Six 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     6  /* Six 32/64-bit timers */
 #  define TIVA_NWDT            2  /* Two watchdog timers */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -221,8 +221,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         6  /* Six general purpose timers */
-#  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NTIMERS         6  /* Six 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     6  /* Six 32/64-bit timers */
 #  define TIVA_NWDT            2  /* Two watchdog timers */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -267,8 +267,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         16 /* Sixteen 16-bit timers OR */
-#  define TIVA_NWIDETIMERS     8  /* Eight 32-bit wide timers */
+#  define TIVA_NTIMERS         16 /* Sixteen 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     0  /* NO 32/64-bit timers */
 #  define TIVA_NWDT            2  /* Two watchdog timers */
 #  define TIVA_NETHCONTROLLERS 1  /* One 10/100Mbit Ethernet controller */
 #  define TIVA_NLCD            1  /* One LCD controller */
@@ -290,8 +290,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         4  /* Four general purpose timers */
-#  define TIVA_NWIDETIMERS     2  /* Two general purpose wide timers */
+#  define TIVA_NTIMERS         4  /* Four 16/32-bit timers */
+#  define TIVA_NWIDETIMERS     2  /* Two 32/64-bit timers */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
 #  define TIVA_NSSI            0  /* No SSI module */
