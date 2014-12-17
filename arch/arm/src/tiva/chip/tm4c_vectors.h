@@ -524,7 +524,7 @@ UNUSED(TIVA_RESERVED_123)                    /* Vector 123: Reserved */
 UNUSED(TIVA_RESERVED_124)                    /* Vector 124: Reserved */
 VECTOR(tiva_i2c8, TIVA_IRQ_I2C8)             /* Vector 125: I2C 8 */
 VECTOR(tiva_i2c9, TIVA_IRQ_I2C9)             /* Vector 126: I2C 9 */
-VECTOR(tiva_gpiot, TIVA_IRQ_GPIOT)           /* Vector 127: GPIO Port S */
+VECTOR(tiva_gpiot, TIVA_IRQ_GPIOT)           /* Vector 127: GPIO Port T */
 UNUSED(TIVA_RESERVED_128)                    /* Vector 128: Reserved */
 UNUSED(TIVA_RESERVED_129)                    /* Vector 129: Reserved */
 
