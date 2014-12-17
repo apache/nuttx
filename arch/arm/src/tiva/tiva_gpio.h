@@ -57,9 +57,9 @@
 
 /* Encoding:
  *
- * LM3S: FFFS SPPP III. .... .... .... VPPP PBBB
- * LM4F: FFFS SPPP III. AAAA .... .... VPPP PBBB
- * TM4C: FFFS SPPP III. AAAA .... .... VPPP PBBB
+ * LM3S: FFFS SPPP III. .... .... ...V PPPP PBBB
+ * LM4F: FFFS SPPP III. AAAA .... ...V PPPP PBBB
+ * TM4C: FFFS SPPP III. AAAA .... ...V PPPP PBBB
  *
  * TODO: The LM4F/TM4C also support configuration of pins to trigger ADC and/or uDMA.
  * That configuration is not addressed in this this encoding.
@@ -150,10 +150,10 @@
 #endif
 
 /* If the pin is an GPIO digital output, then this identifies the initial output value:
- * .... .... .... .... .... .... V... ....
+ * .... .... .... .... .... ...V .... ....
  */
 
-#define GPIO_VALUE_SHIFT              7                          /* Bit 7: If output, inital value of output */
+#define GPIO_VALUE_SHIFT              8                          /* Bit 8: If output, inital value of output */
 #define GPIO_VALUE_MASK               (1 << GPIO_VALUE_SHIFT)
 #  define GPIO_VALUE_ZERO             (0 << GPIO_VALUE_SHIFT)    /*   Initial value is zero */
 #  define GPIO_VALUE_ONE              (1 << GPIO_VALUE_SHIFT)    /*   Initial value is one */
@@ -162,8 +162,8 @@
  * .... .... .... .... .... .... .PPP P...
  */
 
-#define GPIO_PORT_SHIFT               3                          /* Bit 3-6:  Port number */
-#define GPIO_PORT_MASK                (15 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_SHIFT               3                          /* Bit 3-7:  Port number */
+#define GPIO_PORT_MASK                (31 << GPIO_PORT_SHIFT)
 #  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
 #  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
 #  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
@@ -179,6 +179,9 @@
 #  define GPIO_PORTN                  (12 << GPIO_PORT_SHIFT)    /*   GPION */
 #  define GPIO_PORTP                  (13 << GPIO_PORT_SHIFT)    /*   GPIOP */
 #  define GPIO_PORTQ                  (14 << GPIO_PORT_SHIFT)    /*   GPIOQ */
+#  define GPIO_PORTR                  (15 << GPIO_PORT_SHIFT)    /*   GPIOR */
+#  define GPIO_PORTS                  (16 << GPIO_PORT_SHIFT)    /*   GPIOS */
+#  define GPIO_PORTT                  (17 << GPIO_PORT_SHIFT)    /*   GPIOT */
 
 /* This identifies the pin number in the port:
  * .... .... .... .... .... .... .... .BBB
