@@ -536,7 +536,7 @@ struct tcb_s
   struct xcptcontext xcp;                /* Interrupt register save area        */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  char name[CONFIG_TASK_NAME_SIZE];      /* Task name                           */
+  char name[CONFIG_TASK_NAME_SIZE+1];    /* Task name (with NUL terminator)     */
 #endif
 };
 

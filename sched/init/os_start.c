@@ -307,7 +307,8 @@ void os_start(void)
   /* Set the IDLE task name */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  strncpy(g_idletcb.cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE-1);
+  strncpy(g_idletcb.cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
+  g_idletcb.cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* Configure the task name in the argument list.  The IDLE task does

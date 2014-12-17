@@ -115,6 +115,7 @@ static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb, pthread_addr_
   /* Copy the pthread name into the TCB */
 
   strncpy(tcb->cmn.name, g_pthreadname, CONFIG_TASK_NAME_SIZE);
+  tcb->cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* For pthreads, args are strictly pass-by-value; that actual

@@ -426,6 +426,7 @@ static void task_namesetup(FAR struct task_tcb_s *tcb, FAR const char *name)
   /* Copy the name into the TCB */
 
   strncpy(tcb->cmn.name, name, CONFIG_TASK_NAME_SIZE);
+  tcb->cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
 }
 #else
 #  define task_namesetup(t,n)

@@ -297,11 +297,13 @@ config RR_INTERVAL
 
 config TASK_NAME_SIZE
 	int "Maximum task name size"
-	default 32
+	default 31
 	---help---
 		Spcifies that maximum size of a task name to save in the TCB.
 		Useful if scheduler instrumentation is selected.  Set to zero to
-		disable.
+		disable.  Excludes the NUL terminator; the actual allocated size
+		willl be TASK_NAME_SIZE + 1.  The default of 31 then results in
+		a align-able 32-byte allocation.::
 
 config MAX_TASKS
 	int "Max number of tasks"
