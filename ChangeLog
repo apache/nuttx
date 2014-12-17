@@ -9244,4 +9244,15 @@
 	* configs/dk-tm4c129x:  Initial board support for the Tiva DK-TM4C129x
 	  Connected Development Kit.  The initial commit is just the Tiva
 	  TM4C123G-Launchpad board support with naming changes (2014-12-16).
-
+	* include/nuttx/sched.h, sched/Kconfig, sched/init/os_start.c,
+	  sched/pthread/pthread_create.c, sched/task/task_prctl.c,
+	  sched/task/task_setup.c: strncpy() will not copy the terminating \0
+	  into the destination if the source is larger than the size of the
+	  destination. Ensure that the last byte is always zero and let strncpy
+	  only copy CONFIG_TASK_NAME_SIZE bytes. The issue of unterminated names
+	  can be observed in ps when creating a pthread while
+	  CONFIG_TASK_NAME_SIZE is set to 8.  From  Daniel Willmann (2014-12-17).
+	* configs/*/*/defconfig: The previous change increased the task name
+	  size allocation by one to hold a NUL terminator.  This changes reduces
+	  the configured name size by one so that no additional memory is used
+	  (2014-12-17).
