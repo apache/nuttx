@@ -68,11 +68,9 @@ static inline void adxl345_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the ADXL345 */
 
-  SPI_SELECT(spi, SPIDEV_GSENSOR, true);
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
   SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
-  SPI_SELECT(spi, SPIDEV_GSENSOR, false);
 }
 #endif
 

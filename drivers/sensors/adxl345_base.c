@@ -417,11 +417,9 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_dev_s *dev,
 #ifdef CONFIG_SPI_OWNBUS
   /* Configure SPI for the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, true);
   SPI_SETMODE(priv->spi, SPIDEV_MODE3);
   SPI_SETBITS(priv->spi, 8);
   SPI_SETFREQUENCY(priv->spi, ADXL345_SPI_MAXFREQUENCY);
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, false);
 #endif
 
 #else
