@@ -9256,3 +9256,6 @@
 	  size allocation by one to hold a NUL terminator.  This changes reduces
 	  the configured name size by one so that no additional memory is used
 	  (2014-12-17).
+	* drivers/wireless/cc3000/cc3000.c: CC3000 Fix: Data can be unaligned.
+	  When dereferenced as an input ntosh(), a bad value is returned.
+	  Reported by Alan Carvalho de Assis (2014-12-18).
