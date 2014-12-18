@@ -152,18 +152,25 @@
 #define LED_PANIC         3     /* ON   OFF   OFF (flashing 2Hz) */
 
 /* Button definitions ***************************************************************/
-/* The TMC4C123G LaunchPad has a two buttons:
+/* There are three push buttons on the board.
  *
- *   BOARD_SW1    -- Connected to PF4
- *   BOARD_SW2    -- Connected to PF0
+ *   --- ------------ -----------------
+ *   Pin Pin Function Jumper
+ *   --- ------------ -----------------
+ *   PP1 Select SW4   J37 pins 1 and 2
+ *   PN3 Up SW2       J37 pins 3 and 4
+ *   PE5 Down SW3     J37 pins 5 and 6
+ *   --- ------------ -----------------
  */
 
-#define BUTTON_SW1        0
-#define BUTTON_SW2        1
-#define NUM_BUTTONS       2
+#define BUTTON_SW2        0
+#define BUTTON_SW3        1
+#define BUTTON_SW4        2
+#define NUM_BUTTONS       3
 
-#define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
+#define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
+#define BUTTON_SW4_BIT    (1 << BUTTON_SW4)
 
 /* Pin Multiplexing Disambiguation **************************************************/
 

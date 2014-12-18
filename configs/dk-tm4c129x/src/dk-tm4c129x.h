@@ -82,7 +82,24 @@
 #define GPIO_LED_B   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTQ | GPIO_PIN_7)
 
 /* Button definitions ***************************************************************/
-/* Buttons -- To be provided */
+/* There are three push buttons on the board.
+ *
+ *   --- ------------ -----------------
+ *   Pin Pin Function Jumper
+ *   --- ------------ -----------------
+ *   PP1 Select SW4   J37 pins 1 and 2
+ *   PN3 Up SW2       J37 pins 3 and 4
+ *   PE5 Down SW3     J37 pins 5 and 6
+ *   --- ------------ -----------------
+ *
+ * Interrupts are supported only on port P and Q so only SW4 interrupts are supported.
+ */
+
+#define GPIO_SW2   (GPIO_FUNC_INPUT | GPIO_PORTE | GPIO_PIN_5)
+#define GPIO_SW3   (GPIO_FUNC_INPUT | GPIO_PORTN | GPIO_PIN_3)
+#define GPIO_SW4   (GPIO_FUNC_INPUT | GPIO_INT_BOTHEDGES | GPIO_PORTP | GPIO_PIN_1)
+
+#define IRQ_SW4    TIVA_IRQ_GPIOP_1
 
 /************************************************************************************
  * Public Functions
