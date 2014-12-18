@@ -9262,4 +9262,7 @@
 	* configs/freedom-kl25z: Update the Freedom KL25Z board CC3000 support
 	  to use the current CC300 interfaces.  From Alan Carvalho de Assis
 	  (2014-12-18).
+	* arch/arm/src/tiva, include/tiva, and many configurations:  Change
+	  negative Tiva logic CONFIG_TIVA_DISABLE_GPIOx_IRQS to positive logic
+	  CONFIG_TIVA_GPIOx_IRQ (2014-12-18).
 
