@@ -23,6 +23,7 @@ config ARCH_CHIP_LM3S9B96
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
+	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM3S6432
 	bool "LM3S6432"
@@ -36,6 +37,7 @@ config ARCH_CHIP_LM3S6965
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
+	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM3S8962
 	bool "LM3S8962"
@@ -43,6 +45,7 @@ config ARCH_CHIP_LM3S8962
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
+	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM4F120
 	bool "LM4F120"
@@ -57,6 +60,7 @@ config ARCH_CHIP_TM4C123GH6ZRB
 	select ARCH_CORTEXM4
 	select ARCH_CHIP_TM4C
 	select ARCH_HAVE_FPU
+	select TIVA_HAVE_GPIOQ_IRQS
 	select TIVA_HAVE_I2C4
 	select TIVA_HAVE_I2C5
 
@@ -73,6 +77,7 @@ config ARCH_CHIP_TM4C1294NC
 	select ARCH_CORTEXM4
 	select ARCH_CHIP_TM4C
 	select ARCH_HAVE_FPU
+	select TIVA_HAVE_GPIOQ_IRQS
 
 config ARCH_CHIP_TM4C129XNC
 	bool "TM4C129XNC"
@@ -80,6 +85,7 @@ config ARCH_CHIP_TM4C129XNC
 	select ARCH_CORTEXM4
 	select ARCH_CHIP_TM4C
 	select ARCH_HAVE_FPU
+	select TIVA_HAVE_GPIOQ_IRQS
 
 config ARCH_CHIP_CC3200
 	bool "CC3200"
@@ -91,10 +97,25 @@ endchoice
 # Chip families
 
 config ARCH_CHIP_LM3S
+	select TIVA_HAVE_GPIOA_IRQS
+	select TIVA_HAVE_GPIOB_IRQS
+	select TIVA_HAVE_GPIOC_IRQS
+	select TIVA_HAVE_GPIOD_IRQS
+	select TIVA_HAVE_GPIOE_IRQS
+	select TIVA_HAVE_GPIOF_IRQS
+	select TIVA_HAVE_GPIOG_IRQS
 	bool
 
 config ARCH_CHIP_LM4F
 	bool
+	select TIVA_HAVE_GPIOA_IRQS
+	select TIVA_HAVE_GPIOB_IRQS
+	select TIVA_HAVE_GPIOC_IRQS
+	select TIVA_HAVE_GPIOD_IRQS
+	select TIVA_HAVE_GPIOE_IRQS
+	select TIVA_HAVE_GPIOF_IRQS
+	select TIVA_HAVE_GPIOG_IRQS
+	select TIVA_HAVE_GPIOH_IRQS
 	select TIVA_HAVE_I2C2
 	select TIVA_HAVE_I2C3
 	select TIVA_HAVE_UART3
@@ -105,6 +126,7 @@ config ARCH_CHIP_LM4F
 
 config ARCH_CHIP_TM4C
 	bool
+	select TIVA_HAVE_GPIOP_IRQS
 	select TIVA_HAVE_I2C2
 	select TIVA_HAVE_I2C3
 	select TIVA_HAVE_UART3
@@ -268,103 +290,184 @@ config TIVA_GPIO_IRQS
 	bool
 	default n
 
+config TIVA_HAVE_GPIOA_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOB_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOC_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOD_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOE_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOF_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOG_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOH_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOJ_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOK_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOL_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOM_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPION_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOP_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOQ_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOR_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOS_IRQS
+	bool
+	default n
+
+config TIVA_HAVE_GPIOT_IRQS
+	bool
+	default n
+
 config TIVA_GPIOA_IRQS
 	bool "Enable GPIOA IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOA_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOB_IRQS
 	bool "Enable GPIOB IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOB_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOC_IRQS
 	bool "Enable GPIOC IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOC_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOD_IRQS
 	bool "Enable GPIOD IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOD_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOE_IRQS
 	bool "Enable GPIOE IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOE_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOF_IRQS
 	bool "Enable GPIOF IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOF_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOG_IRQS
 	bool "Enable GPIOG IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOG_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOH_IRQS
 	bool "Enable GPIOH IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOH_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOJ_IRQS
 	bool "Enable GPIOJ IRQs"
 	default n
+	depends on TIVA_HAVE_GPIOJ_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOK_IRQS
 	bool "Enable GPIOK IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOK_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOL_IRQS
 	bool "Enable GPIOL IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOL_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOM_IRQS
 	bool "Enable GPIOM IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOM_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPION_IRQS
 	bool "Enable GPION IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPION_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOP_IRQS
 	bool "Enable GPIOP IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOP_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOQ_IRQS
 	bool "Enable GPIOQ IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOQ_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOR_IRQS
 	bool "Enable GPIOR IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOR_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOS_IRQS
 	bool "Enable GPIOS IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOS_IRQS
 	select TIVA_GPIO_IRQS
 
 config TIVA_GPIOT_IRQS
 	bool "Enable GPIOT IRQs"
 	default n
-	depends on ARCH_CHIP_TM4C
+	depends on TIVA_HAVE_GPIOT_IRQS
 	select TIVA_GPIO_IRQS
 
 endmenu
