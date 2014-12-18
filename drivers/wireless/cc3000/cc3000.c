@@ -680,7 +680,7 @@ static void * cc3000_worker(FAR void *arg)
                 * aligned.
                 */
 
-               data_to_recv = (uint16_t)priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH] << 8 |;
+               data_to_recv = (uint16_t)priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH] << 8 |
                               (uint16_t)priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH + 1];
 
                if (data_to_recv)
