@@ -64,7 +64,7 @@
  *
  * Description:
  *   All K25Z architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
@@ -84,7 +84,7 @@ void kl_boardinitialize(void)
 
   /* Initialize USB if the 1) USB device controller is in the configuration
    * and 2) disabled, and 3) the weak function kl_usbinitialize() has been
-   * brought into the build. Presumeably either CONFIG_USBHOST or
+   * brought into the build. Presumably either CONFIG_USBHOST or
    * CONFIG_USBDEV is also selected.
    */
 
