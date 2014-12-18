@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 26, 2014</p>
+      <p>Last Updated: December 17, 2014</p>
     </td>
   </tr>
 </table>
@@ -3425,13 +3425,20 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        This is very much a work in progress.
-        As of this writing, full architectural support for the TI Tiva TM4C123G has been implemented and was released in NuttX 7.1.
-        Basic board support is in place for the TM4C123G LaunchPad but is completely untested and possibly incomplete.
-        This partial logic is also included int he NuttX 7.1 release.
-        This basic board supprted includes an (un-verified) configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
-        A fully verified port to the TM4C123G LaunchPad is expected in NuttX-7.2.
-        The first fully functional LM4F120 LaunchPad port was released in NuttX-6.27.
+        <ul>
+          <li>
+            Initial architectural support for the TI Tiva TM4C123G was implemented and was released in NuttX 7.1.
+            Basic board support support the TM4C123G LaunchPad was also included in that relese but was not fully tested.
+            This basic board supprted included a configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+           </li>
+           <li>
+              The fully verified port to the TM4C123G LaunchPad is provided in NuttX-7.2.
+           </li>
+           <li>
+              An I2C driver was added in NuttX-7.7.
+           </li>
+        </ul>
+      </p>
         Refer to the TM4C123G LaunchPad board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/tm4c123g-launchpad/README.txt">README</a> file for more detailed information about this port.
       </p>
     </ul>
