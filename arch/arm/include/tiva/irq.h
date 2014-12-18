@@ -47,6 +47,44 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* The TM4C123x and TM4C129x support interrupts only on port P and Q */
+
+#if defined(CONFIG_ARCH_CHIP_TM4C)
+#  undef CONFIG_TIVA_DISABLE_GPIOA_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOB_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOC_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOD_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOE_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOF_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOG_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOH_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOK_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOL_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOM_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPION_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOR_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOS_IRQS
+#  undef CONFIG_TIVA_DISABLE_GPIOT_IRQS
+
+#  define CONFIG_TIVA_DISABLE_GPIOA_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOB_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOC_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOD_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOE_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOF_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOG_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOH_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOJ_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOK_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOL_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOM_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPION_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOR_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOS_IRQS 1
+#  define CONFIG_TIVA_DISABLE_GPIOT_IRQS 1
+#endif
+
  /* Mark GPIO interrupts as disabled for non-existent GPIO ports. */
 
 #if TIVA_NPORTS < 1 && !defined(CONFIG_TIVA_DISABLE_GPIOA_IRQS)
@@ -78,6 +116,12 @@
 #elif TIVA_NPORTS < 14 && !defined(CONFIG_TIVA_DISABLE_GPIOP_IRQS)
 #  define CONFIG_TIVA_DISABLE_GPIOP_IRQS
 #elif TIVA_NPORTS < 15 && !defined(CONFIG_TIVA_DISABLE_GPIOQ_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOQ_IRQS
+#elif TIVA_NPORTS < 16 && !defined(CONFIG_TIVA_DISABLE_GPIOQ_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOQ_IRQS
+#elif TIVA_NPORTS < 17 && !defined(CONFIG_TIVA_DISABLE_GPIOQ_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOQ_IRQS
+#elif TIVA_NPORTS < 18 && !defined(CONFIG_TIVA_DISABLE_GPIOQ_IRQS)
 #  define CONFIG_TIVA_DISABLE_GPIOQ_IRQS
 #endif
 
@@ -325,7 +369,49 @@
 #  define _NGPIOQIRQS      _NGPIOPIRQS
 #endif
 
-#define NR_GPIO_IRQS       (_NGPIOQIRQS - NR_IRQS)
+#if !defined(CONFIG_TIVA_DISABLE_GPIOR_IRQS)
+#  define TIVA_IRQ_GPIOR_0 (_NGPIOQIRQS + 0)
+#  define TIVA_IRQ_GPIOR_1 (_NGPIOQIRQS + 1)
+#  define TIVA_IRQ_GPIOR_2 (_NGPIOQIRQS + 2)
+#  define TIVA_IRQ_GPIOR_3 (_NGPIOQIRQS + 3)
+#  define TIVA_IRQ_GPIOR_4 (_NGPIOQIRQS + 4)
+#  define TIVA_IRQ_GPIOR_5 (_NGPIOQIRQS + 5)
+#  define TIVA_IRQ_GPIOR_6 (_NGPIOQIRQS + 6)
+#  define TIVA_IRQ_GPIOR_7 (_NGPIOQIRQS + 7)
+#  define _NGPIORIRQS      (_NGPIOQIRQS + 8)
+#else
+#  define _NGPIORIRQS      _NGPIOQIRQS
+#endif
+
+#if !defined(CONFIG_TIVA_DISABLE_GPIOS_IRQS)
+#  define TIVA_IRQ_GPIOS_0 (_NGPIORIRQS + 0)
+#  define TIVA_IRQ_GPIOS_1 (_NGPIORIRQS + 1)
+#  define TIVA_IRQ_GPIOS_2 (_NGPIORIRQS + 2)
+#  define TIVA_IRQ_GPIOS_3 (_NGPIORIRQS + 3)
+#  define TIVA_IRQ_GPIOS_4 (_NGPIORIRQS + 4)
+#  define TIVA_IRQ_GPIOS_5 (_NGPIORIRQS + 5)
+#  define TIVA_IRQ_GPIOS_6 (_NGPIORIRQS + 6)
+#  define TIVA_IRQ_GPIOS_7 (_NGPIORIRQS + 7)
+#  define _NGPIOSIRQS      (_NGPIORIRQS + 8)
+#else
+#  define _NGPIOSIRQS      _NGPIORIRQS
+#endif
+
+#if !defined(CONFIG_TIVA_DISABLE_GPIOT_IRQS)
+#  define TIVA_IRQ_GPIOT_0 (_NGPIOSIRQS + 0)
+#  define TIVA_IRQ_GPIOT_1 (_NGPIOSIRQS + 1)
+#  define TIVA_IRQ_GPIOT_2 (_NGPIOSIRQS + 2)
+#  define TIVA_IRQ_GPIOT_3 (_NGPIOSIRQS + 3)
+#  define TIVA_IRQ_GPIOT_4 (_NGPIOSIRQS + 4)
+#  define TIVA_IRQ_GPIOT_5 (_NGPIOSIRQS + 5)
+#  define TIVA_IRQ_GPIOT_6 (_NGPIOSIRQS + 6)
+#  define TIVA_IRQ_GPIOT_7 (_NGPIOSIRQS + 7)
+#  define _NGPIOTIRQS      (_NGPIOSIRQS + 8)
+#else
+#  define _NGPIOTIRQS      _NGPIOSIRQS
+#endif
+
+#define NR_GPIO_IRQS       (_NGPIOTIRQS - NR_IRQS)
 
 /************************************************************************************
  * Public Types

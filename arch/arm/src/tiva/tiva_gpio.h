@@ -249,7 +249,7 @@ void tiva_gpiowrite(uint32_t pinset, bool value);
  *
  ************************************************************************************/
 
-bool tiva_gpioread(uint32_t pinset, bool value);
+bool tiva_gpioread(uint32_t pinset);
 
 /************************************************************************************
  * Function:  tiva_dumpgpio

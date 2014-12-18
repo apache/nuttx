@@ -68,36 +68,98 @@ static FAR xcpt_t g_gpioirqvector[NR_GPIO_IRQS];
  * must carefully match the IRQ numbers assigned in arch/arm/include/lm3s/irq.h
  */
 
+#define COMMA
 static const uintptr_t g_gpiobase[] =
 {
 #ifndef CONFIG_TIVA_DISABLE_GPIOA_IRQS
-    TIVA_GPIOA_BASE
-#else
-    0
+  COMMA TIVA_GPIOA_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOB_IRQS
-  , TIVA_GPIOB_BASE
+  COMMA TIVA_GPIOB_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOC_IRQS
-  , TIVA_GPIOC_BASE
+  COMMA TIVA_GPIOC_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOD_IRQS
-  , TIVA_GPIOD_BASE
+  COMMA TIVA_GPIOD_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOE_IRQS
-  , TIVA_GPIOE_BASE
+  COMMA TIVA_GPIOE_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOF_IRQS
-  , TIVA_GPIOF_BASE
+  COMMA TIVA_GPIOF_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOG_IRQS
-  , TIVA_GPIOG_BASE
+  COMMA TIVA_GPIOG_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOH_IRQS
-  , TIVA_GPIOH_BASE
+  COMMA TIVA_GPIOH_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 #ifndef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
-  , TIVA_GPIOJ_BASE
+  COMMA TIVA_GPIOJ_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOK_IRQS
+  COMMA TIVA_GPIOK_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOL_IRQS
+  COMMA TIVA_GPIOL_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOM_IRQS
+  COMMA TIVA_GPIOM_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPION_IRQS
+  COMMA TIVA_GPION_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOP_IRQS
+  COMMA TIVA_GPIOP_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOQ_IRQS
+  COMMA TIVA_GPIOQ_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOR_IRQS
+  COMMA TIVA_GPIOR_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOS_IRQS
+  COMMA TIVA_GPIOS_BASE
+#undef  COMMA
+#define COMMA ,
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOT_IRQS
+  COMMA TIVA_GPIOT_BASE
+#undef  COMMA
+#define COMMA ,
 #endif
 };
 
@@ -241,6 +303,69 @@ static int tiva_gpiojhandler(int irq, FAR void *context)
 }
 #endif
 
+#ifndef CONFIG_TIVA_DISABLE_GPIOK_IRQS
+static int tiva_gpiokhandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOK_BASE, TIVA_IRQ_GPIOK_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOL_IRQS
+static int tiva_gpiolhandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOL_BASE, TIVA_IRQ_GPIOL_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOM_IRQS
+static int tiva_gpiomhandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOM_BASE, TIVA_IRQ_GPIOM_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPION_IRQS
+static int tiva_gpionhandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPION_BASE, TIVA_IRQ_GPION_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOP_IRQS
+static int tiva_gpiophandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOP_BASE, TIVA_IRQ_GPIOP_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOQ_IRQS
+static int tiva_gpioqhandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOQ_BASE, TIVA_IRQ_GPIOQ_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOR_IRQS
+static int tiva_gpiorhandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOR_BASE, TIVA_IRQ_GPIOR_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOS_IRQS
+static int tiva_gpioshandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOS_BASE, TIVA_IRQ_GPIOS_0, context);
+}
+#endif
+
+#ifndef CONFIG_TIVA_DISABLE_GPIOT_IRQS
+static int tiva_gpiothandler(int irq, FAR void *context)
+{
+  return tiva_gpiohandler(TIVA_GPIOT_BASE, TIVA_IRQ_GPIOT_0, context);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -303,6 +428,42 @@ int gpio_irqinitialize(void)
 #ifndef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
   irq_attach(TIVA_IRQ_GPIOJ, tiva_gpiojhandler);
   up_enable_irq(TIVA_IRQ_GPIOJ);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOK_IRQS
+  irq_attach(TIVA_IRQ_GPIOK, tiva_gpiokhandler);
+  up_enable_irq(TIVA_IRQ_GPIOK);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOL_IRQS
+  irq_attach(TIVA_IRQ_GPIOL, tiva_gpiolhandler);
+  up_enable_irq(TIVA_IRQ_GPIOL);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOM_IRQS
+  irq_attach(TIVA_IRQ_GPIOM, tiva_gpiomhandler);
+  up_enable_irq(TIVA_IRQ_GPIOM);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPION_IRQS
+  irq_attach(TIVA_IRQ_GPION, tiva_gpionhandler);
+  up_enable_irq(TIVA_IRQ_GPION);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOP_IRQS
+  irq_attach(TIVA_IRQ_GPIOP, tiva_gpiophandler);
+  up_enable_irq(TIVA_IRQ_GPIOP);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOQ_IRQS
+  irq_attach(TIVA_IRQ_GPIOQ, tiva_gpioqhandler);
+  up_enable_irq(TIVA_IRQ_GPIOQ);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOR_IRQS
+  irq_attach(TIVA_IRQ_GPIOR, tiva_gpiorhandler);
+  up_enable_irq(TIVA_IRQ_GPIOR);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOS_IRQS
+  irq_attach(TIVA_IRQ_GPIOS, tiva_gpioshandler);
+  up_enable_irq(TIVA_IRQ_GPIOS);
+#endif
+#ifndef CONFIG_TIVA_DISABLE_GPIOT_IRQS
+  irq_attach(TIVA_IRQ_GPIOT, tiva_gpiothandler);
+  up_enable_irq(TIVA_IRQ_GPIOT);
 #endif
 
   return OK;
