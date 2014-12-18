@@ -721,25 +721,12 @@ TM4C123G LaunchPad Configuration Options
        the delay actually is 100 seconds.
 
   There are configurations for disabling support for interrupts GPIO ports.
-  GPIOJ must be disabled because it does not exist on the TM4C123G.
-  Additional interrupt support can be disabled if desired to reduce memory
-  footprint.
+  Only GPIOP and GPIOQ pins can be used as interrupting sources on the
+  TM4C129x.  Additional interrupt support can be disabled if desired to
+  reduce memory footprint.
 
-    CONFIG_TIVA_DISABLE_GPIOA_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOB_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOC_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOD_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOE_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOF_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOG_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOH_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOJ_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOK_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOL_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOM_IRQS=n
-    CONFIG_TIVA_DISABLE_GPION_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOP_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOQ_IRQS=n
+    CONFIG_TIVA_GPIOP_IRQS=y
+    CONFIG_TIVA_GPIOQ_IRQS=y
 
   TM4C123G specific device driver settings
 
