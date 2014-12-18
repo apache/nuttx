@@ -436,8 +436,8 @@ VECTOR(tiva_compare2, TIVA_IRQ_COMPARE2)     /* Vector 43: Analog Comparator 2 *
 VECTOR(tiva_syscon, TIVA_IRQ_SYSCON)         /* Vector 44: System Control */
 VECTOR(tiva_flashcon, TIVA_IRQ_FLASHCON)     /* Vector 45: FLASH and EEPROM Control */
 VECTOR(tiva_gpiof, TIVA_IRQ_GPIOF)           /* Vector 46: GPIO Port F */
-VECTOR(tiva_gpiof, TIVA_IRQ_GPIOG)           /* Vector 47: GPIO Port G */
-VECTOR(tiva_gpiof, TIVA_IRQ_GPIOH)           /* Vector 48: GPIO Port H */
+VECTOR(tiva_gpiog, TIVA_IRQ_GPIOG)           /* Vector 47: GPIO Port G */
+VECTOR(tiva_gpioh, TIVA_IRQ_GPIOH)           /* Vector 48: GPIO Port H */
 VECTOR(tiva_uart2, TIVA_IRQ_UART2)           /* Vector 49: UART 2 */
 
 VECTOR(tiva_ssi1, TIVA_IRQ_SSI1)             /* Vector 50: SSI 1 */

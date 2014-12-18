@@ -46,6 +46,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* REVISIT:  Why do we not use the AHB aperture for all GPIO accesses? */
 
 #define TIVA_GPIOK_BASE             TIVA_GPIOKAHB_BASE
 #define TIVA_GPIOL_BASE             TIVA_GPIOLAHB_BASE
@@ -53,6 +54,9 @@
 #define TIVA_GPION_BASE             TIVA_GPIONAHB_BASE
 #define TIVA_GPIOP_BASE             TIVA_GPIOPAHB_BASE
 #define TIVA_GPIOQ_BASE             TIVA_GPIOQAHB_BASE
+#define TIVA_GPIOR_BASE             TIVA_GPIORAHB_BASE
+#define TIVA_GPIOS_BASE             TIVA_GPIOSAHB_BASE
+#define TIVA_GPIOT_BASE             TIVA_GPIOTAHB_BASE
 
 /* GPIO Register Offsets ************************************************************/
 

@@ -418,9 +418,9 @@
 #  define TIVA_GPIONAHB_BASE  (TIVA_PERIPH1_BASE + 0x64000) /* -0x64fff: GPIO Port N (AHB aperture) */
 #  define TIVA_GPIOPAHB_BASE  (TIVA_PERIPH1_BASE + 0x65000) /* -0x65fff: GPIO Port P (AHB aperture) */
 #  define TIVA_GPIOQAHB_BASE  (TIVA_PERIPH1_BASE + 0x66000) /* -0x66fff: GPIO Port Q (AHB aperture) */
-#  define TIVA_GPIORRHB_BASE  (TIVA_PERIPH1_BASE + 0x67000) /* -0x67fff: GPIO Port R (AHB aperture) */
-#  define TIVA_GPIOFSHB_BASE  (TIVA_PERIPH1_BASE + 0x68000) /* -0x68fff: GPIO Port S (AHB aperture) */
-#  define TIVA_GPIOFTHB_BASE  (TIVA_PERIPH1_BASE + 0x69000) /* -0x69fff: GPIO Port T (AHB aperture) */
+#  define TIVA_GPIORAHB_BASE  (TIVA_PERIPH1_BASE + 0x67000) /* -0x67fff: GPIO Port R (AHB aperture) */
+#  define TIVA_GPIOSAHB_BASE  (TIVA_PERIPH1_BASE + 0x68000) /* -0x68fff: GPIO Port S (AHB aperture) */
+#  define TIVA_GPIOTAHB_BASE  (TIVA_PERIPH1_BASE + 0x69000) /* -0x69fff: GPIO Port T (AHB aperture) */
                                                             /* -0xaefff: Reserved */
 #  define TIVA_EEPROM_BASE    (TIVA_PERIPH1_BASE + 0xaf000) /* -0xaffff: EEPROM and Key Locker */
                                                             /* -0xb5fff: Reserved */
