@@ -342,15 +342,15 @@ Stellaris MDL-S2E Reference Design Configuration Options
   Additional interrupt support can be disabled if desired to reduce memory
   footprint - GPIOs C-G are not pinned out on the MDL-S2E board.
 
-    CONFIG_TIVA_DISABLE_GPIOA_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOB_IRQS=n
-    CONFIG_TIVA_DISABLE_GPIOC_IRQS=y
-    CONFIG_TIVA_DISABLE_GPIOD_IRQS=y
-    CONFIG_TIVA_DISABLE_GPIOE_IRQS=y
-    CONFIG_TIVA_DISABLE_GPIOF_IRQS=y
-    CONFIG_TIVA_DISABLE_GPIOG_IRQS=y
-    CONFIG_TIVA_DISABLE_GPIOH_IRQS=y
-    CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
+    CONFIG_TIVA_GPIOA_IRQS=y
+    CONFIG_TIVA_GPIOB_IRQS=y
+    CONFIG_TIVA_GPIOC_IRQS=n << Always
+    CONFIG_TIVA_GPIOD_IRQS=n << Always
+    CONFIG_TIVA_GPIOE_IRQS=n << Always
+    CONFIG_TIVA_GPIOF_IRQS=n << Always
+    CONFIG_TIVA_GPIOG_IRQS=n << Always
+    CONFIG_TIVA_GPIOH_IRQS=n << Always
+    CONFIG_TIVA_GPIOJ_IRQS=n << Always
 
   LM3S6432 specific device driver settings
 

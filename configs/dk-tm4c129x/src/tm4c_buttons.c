@@ -148,7 +148,7 @@ uint8_t board_buttons(void)
  *
  ************************************************************************************/
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && !defined(CONFIG_TIVA_DISABLE_GPIOP_IRQS)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOP_IRQS)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   static xcpt_t handler = NULL;

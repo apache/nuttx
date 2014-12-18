@@ -351,7 +351,7 @@ void up_irqinitialize(void)
 
   /* Initialize support for GPIO interrupts if included in this build */
 
-#ifndef CONFIG_TIVA_DISABLE_GPIO_IRQS
+#ifdef CONFIG_TIVA_GPIO_IRQS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (gpio_irqinitialize != NULL)
 #endif
