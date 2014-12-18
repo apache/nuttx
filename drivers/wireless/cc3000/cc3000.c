@@ -671,12 +671,17 @@ static void * cc3000_worker(FAR void *arg)
 
                 cc3000_lock_and_select(priv->spi); /* Assert CS */
                 priv->state = eSPI_STATE_READ_PROCEED;
-                SPI_EXCHANGE(priv->spi,spi_readCommand,priv->rx_buffer.pbuffer, ARRAY_SIZE(spi_readCommand));
+                SPI_EXCHANGE(priv->spi,spi_readCommand, priv->rx_buffer.pbuffer,
+                             ARRAY_SIZE(spi_readCommand));
 
-               /* Extract Length bytes from Rx Buffer */
+               /* Extract Length bytes from Rx Buffer.  Here we need to convert
+                * unaligned data in network order (big endian, MS byte first) to
+                * host order.  We cannot use ntohs here because the data is not
+                * aligned.
+                */
 
-               uint16_t *pnetlen = (uint16_t *) &priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH];
-               data_to_recv = ntohs(*pnetlen);
+               data_to_recv = (uint16_t)priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH] << 8 |;
+                              (uint16_t)priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH];
 
                if (data_to_recv)
                   {
