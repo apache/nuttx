@@ -54,8 +54,12 @@ ifeq ($(CONFIG_KL_TSI),y)
 CSRCS += kl_tsi.c
 endif
 
-ifeq ($(CONFIG_KL_SPI),y)
+ifeq ($(CONFIG_KL_SPI0),y)
 CSRCS += kl_spi.c
+else
+ifeq ($(CONFIG_KL_SPI1),y)
+CSRCS += kl_spi.c
+endif
 endif
 
 ifeq ($(CONFIG_HAVE_CXX),y)
