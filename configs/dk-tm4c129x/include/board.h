@@ -40,8 +40,12 @@
  * Included Files
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdbool.h>
+#endif
+
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
@@ -112,9 +116,13 @@
  * will vary in color.  But, from the standpoint of the firmware, this appears as
  * three LEDs:
  *
- *   BOARD_LED_R    -- Connected to PF1
- *   BOARD_LED_G    -- Connected to PF3
- *   BOARD_LED_B    -- Connected to PF2
+ *   --- ------------ -----------------
+ *   Pin Pin Function Jumper
+ *   --- ------------ -----------------
+ *   PN5 Red LED      J36 pins 1 and 2
+ *   PQ4 Blue LED     J36 pins 3 and 4
+ *   PQ7 Green LED    J36 pins 5 and 6
+ *   --- ------------ -----------------
  */
 
 /* LED index values for use with tm4c_setled() */
@@ -126,44 +134,24 @@
 
 /* LED bits for use with tm4c_setleds() */
 
-#define BOARD_LED1_BIT            (1 << BOARD_LED1)
-#define BOARD_LED2_BIT            (1 << BOARD_LED2)
+#define BOARD_LED_R_BIT           (1 << BOARD_LED_R)
+#define BOARD_LED_G_BIT           (1 << BOARD_LED_G)
+#define BOARD_LED_B_BIT           (1 << BOARD_LED_B)
 
-/* If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad LEDs
+/* If CONFIG_ARCH_LEDS is defined, then automated support for the DK-TM4C129X LED
  * will be included in the build:
- *
- * OFF:
- * - OFF means that the OS is still initializing. Initialization is very fast so
- *   if you see this at all, it probably means that the system is hanging up
- *   somewhere in the initialization phases.
- *
- * GREEN or GREEN-ish
- * - This means that the OS completed initialization.
- *
- * Bluish:
- * - Whenever and interrupt or signal handler is entered, the BLUE LED is
- *   illuminated and extinguished when the interrupt or signal handler exits.
- *   This will add a BLUE-ish tinge to the LED.
- *
- * Redish:
- * - If a recovered assertion occurs, the RED component will be illuminated
- *   briefly while the assertion is handled.  You will probably never see this.
- *
- * Flashing RED:
- * - In the event of a fatal crash, the BLUE and GREEN components will be
- *   extinguished and the RED component will FLASH at a 2Hz rate.
  */
-                                /* RED  GREEN BLUE               */
-#define LED_STARTED       0     /* OFF  OFF   OFF                */
-#define LED_HEAPALLOCATE  0     /* OFF  OFF   OFF                */
-#define LED_IRQSENABLED   0     /* OFF  OFF   OFF                */
-#define LED_STACKCREATED  1     /* OFF  ON    OFF                */
-#define LED_INIRQ         2     /* NC   NC    ON  (momentary)    */
-#define LED_SIGNAL        2     /* NC   NC    ON  (momentary)    */
-#define LED_ASSERTION     3     /* ON   NC    NC  (momentary)    */
-#define LED_PANIC         4     /* ON   OFF   OFF (flashing 2Hz) */
+                                /* RED  GREEN BLUE */
+#define LED_STARTED       0     /* OFF  OFF   ON   */
+#define LED_HEAPALLOCATE  1     /* NC   NC    NC   */
+#define LED_IRQSENABLED   1     /* NC   NC    NC   */
+#define LED_STACKCREATED  2     /* OFF  ON    OFF  */
+#define LED_INIRQ         1     /* NC   NC    NC   */
+#define LED_SIGNAL        1     /* NC   NC    NC   */
+#define LED_ASSERTION     1     /* NC   NC    NC   */
+#define LED_PANIC         3     /* ON   OFF   OFF (flashing 2Hz) */
 
-/* LED definitions ******************************************************************/
+/* Button definitions ***************************************************************/
 /* The TMC4C123G LaunchPad has a two buttons:
  *
  *   BOARD_SW1    -- Connected to PF4
@@ -195,7 +183,7 @@
  *
  * Description:
  *   All Tiva architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
+ *   point is called early in the initialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/

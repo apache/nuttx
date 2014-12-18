@@ -43,6 +43,8 @@ CSRCS = tm4c_boot.c tm4c_bringup.c tm4c_ssi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += tm4c_autoleds.c
+else
+CSRCS += tm4c_userleds.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
