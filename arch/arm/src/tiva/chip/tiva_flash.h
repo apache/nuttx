@@ -52,8 +52,26 @@
     defined(CONFIG_ARCH_CHIP_LM3S8962) || defined(CONFIG_ARCH_CHIP_LM3S9B96) || \
     defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI) || \
     defined(CONFIG_ARCH_CHIP_CC3200)
+
+/* These parts all support a 1KiB erase page size and a total FLASH memory size
+ * of 256Kib or 256 pages.
+ */
+
 #  define TIVA_FLASH_NPAGES        256
 #  define TIVA_FLASH_PAGESIZE      1024
+
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC)
+
+/* For the TM4C129X family, the Flash memory is configured in groups of four banks
+ * four banks of 16K x 128 bits (4 * 256 KB total) which are two-way interleaved.
+ * Because the memory is two-way interleaved and each bank individually is an 8-KB
+ * sector, when the user erases a sector, using the ERASE bits in the Flash Memory
+ * Control (FMC) register, it is a 16 KB erase.
+ */
+
+#  define TIVA_FLASH_NPAGES        64
+#  define TIVA_FLASH_PAGESIZE      16384
+
 #else
 #  warning "No flash dimensions defined for selected chip."
 #endif

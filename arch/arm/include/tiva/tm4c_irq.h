@@ -370,6 +370,7 @@
 #  define NR_IRQS             (155) /* (Really fewer because of reserved vectors) */
 
 #elif defined(CONFIG_ARCH_CHIP_TM4C129XNC)
+
 #  define TIVA_IRQ_GPIOA      (16)  /* Vector 16: GPIO Port A */
 #  define TIVA_IRQ_GPIOB      (17)  /* Vector 17: GPIO Port B */
 #  define TIVA_IRQ_GPIOC      (18)  /* Vector 18: GPIO Port C */
@@ -437,8 +438,8 @@
 #  define TIVA_IRQ_UART5      (74)  /* Vector 74: UART 5 */
 #  define TIVA_IRQ_UART6      (75)  /* Vector 75: UART 6 */
 #  define TIVA_IRQ_UART7      (76)  /* Vector 76: UART 7 */
-#  define TIVA_IRQ_I2C1       (77)  /* Vector 77: I2C 2 */
-#  define TIVA_IRQ_I2C1       (78)  /* Vector 78: I2C 3 */
+#  define TIVA_IRQ_I2C2       (77)  /* Vector 77: I2C 2 */
+#  define TIVA_IRQ_I2C3       (78)  /* Vector 78: I2C 3 */
 #  define TIVA_IRQ_TIMER4A    (79)  /* Vector 79: 16/32-Bit Timer 4 A */
 
 #  define TIVA_IRQ_TIMER4B    (80)  /* Vector 80: 16/32-Bit Timer 4 B */
