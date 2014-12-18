@@ -9265,4 +9265,8 @@
 	* arch/arm/src/tiva, include/tiva, and many configurations:  Change
 	  negative Tiva logic CONFIG_TIVA_DISABLE_GPIOx_IRQS to positive logic
 	  CONFIG_TIVA_GPIOx_IRQ (2014-12-18).
+	* arch/arm/src/tiva/Kconfig:  Fix configuration logic for IRQ interrupts.
+	  The various parts support varying numbers of GPIO blocks and with varying
+	  capabilities to support interrupts on the pins of different GPIO blocks
+	  (2014-12-18).
 
