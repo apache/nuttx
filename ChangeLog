@@ -9270,21 +9270,21 @@
 	  capabilities to support interrupts on the pins of different GPIO blocks
 	  (2014-12-18).
 	* arch/arm/src/stm32/chip/stm32f40xxx_rcc.h: PLLSAI register name to
-	  this one in the reference manual. From Marco Krahl (2014-14-19).
+	  this one in the reference manual. From Marco Krahl (2014-12-19).
 	* arch/arm/src/stm32/chip/stm32_ltdc.h: Rename CFBLR register name to
-	  the name used in the reference manual. From Marco Krahl (2014-14-19).
+	  the name used in the reference manual. From Marco Krahl (2014-12-19).
 	* arch/arm/src/stm32/chip/stm32_ltdc.h: Add missing clut register
-	  definition. From Marco Krahl (2014-14-19).
+	  definition. From Marco Krahl (2014-12-19).
 	* arch/arm/src/stm32/stm32f40xxx_rcc.c:  Configure PLLSAI clock to
-	  enable ltdc register access. From Marco Krahl (2014-14-19).
+	  enable ltdc register access. From Marco Krahl (2014-12-19).
 	* configs/stm32f429i-disco/include/board.h:  Update board definition for
 	  the ili9341 LCD display. This configures all LCD settings for the RGB
 	  interface. Also adds a customer LCD display template. From Marco Krahl
-	  (2014-14-19).
+	  (2014-12-19).
 	* arch/arm/src/stm32/stm32_ltdc.h: Define a common layer description for
-	  the ltdc and dma2d controller. From Marco Krahl (2014-14-19).
+	  the ltdc and dma2d controller. From Marco Krahl (2014-12-19).
 	* arch/arm/src/stm32/stm32_dma2d.c/.h and related files:  Add
-	  infrastructure for dma2d support. From Marco Krahl (2014-14-19).
+	  infrastructure for dma2d support. From Marco Krahl (2014-12-19).
 	* arch/arm/include/stm32/ltdc.h:  Add interface to perform hardware
 	  accelerated layer operation. The following methods must be supported
 	  by the implementation: gevideoinfo, getplaneinfo, getlid, setclut,
@@ -9292,7 +9292,7 @@
 	  getalpha, setblendmode, getblendmode, setarea, getarea, and update.
 	  And if DMA2D is supported: blit and blend.  The method up_ltdcgetlayer
 	  provides access to a reference of a specific ltdc layer. From Marco
-	  Krahl (2014-14-19).
+	  Krahl (2014-12-19).
 	* arch/arm/src/stm32/stm32_ltdc.c: Implements ltdc frambuffer support
 	  for the generic nuttx framebuffer interface, (see nuttx/video/fb.h).
 	  This also implements the interface to perform hardware accelerated
@@ -9301,9 +9301,9 @@
 	  ltdc interface: getvideoinfo, getplaneinfo, getlid, setclut, getclut,
 	  setcolor, getcolor, setcolorkey, getcolorkey, setalpha, getalpha,
 	  setblendmode, getblendmode, setarea, getarea, and update. From Marco
-	  Krahl (2014-14-19).
+	  Krahl (2014-12-19).
 	* include/nuttx/lcd/ili9341.h: Update interface control definitions.
-	  From Marco Krahl (2014-14-19).
+	  From Marco Krahl (2014-12-19).
 	* configs/stm32f429i-disco/src/stm32_lcd.c:  Add support for
 	  initializing ltdc framebuffer and the configured lcd display.  This
 	  adds support for initializing of the ltdc controller and the lcd
@@ -9311,15 +9311,18 @@
 	  provided for the generic fb interface: up_fbinitialize,
 	  up_fbgetvplane, and fb_uninitialize. The following methods are
 	  provided for the ltdc interface: up_ltdcgetlayer. From Marco Krahl
-	  (2014-14-19).
+	  (2014-12-19).
 	* zrch/arm/src/stm32/Kconfig: Add configuration option for ltdc.  This
 	  adds the following ltdc configuration options: dither support, cmap
 	  support, is this the right place for CONFIG_FB_CMAP?, support for
-	  extended ltdc interface. From Marco Krahl (2014-14-19).
+	  extended ltdc interface. From Marco Krahl (2014-12-19).
 	*  nuttx/configs/stm32f429i-disco: Enable configuration of framebuffer
-	  support for the ltdc controller. From Marco Krahl (2014-14-19).
+	  support for the ltdc controller. From Marco Krahl (2014-12-19).
 	* configs/stm32f429i-disco/src/stm32_boot.c: Initialize ltdc during
-	  bootup. From Marco Krahl (2014-14-19).
+	  bootup. From Marco Krahl (2014-12-19).
 	* configs/stm32f429i-disco/ltdc: Add default platform configuration to
 	  test framebuffer support for the ltdc. . From Marco Krahl
-	  (2014-14-19).
+	  (2014-12-19).
+	* libnx/nxfonts/nxfonts_getfont.c: A patch to add previous added font
+	  into nxf_getfonthandle function.  From  Pierre-Noel Bouteville
+	  (2014-12-19).
