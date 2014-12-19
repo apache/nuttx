@@ -85,7 +85,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2);
  * Name: up_clockconfig
  *
  * Description:
- *   Called early in the bootsequence (before .data and .bss are available)
+ *   Called early in the boot sequence (before .data and .bss are available)
  *   in order to configure initial clocking.
  *
  ****************************************************************************/
