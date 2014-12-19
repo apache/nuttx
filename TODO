@@ -895,7 +895,21 @@ o Network (net/, drivers/net)
                CONFIG_NET_NOINTS).  This is really a very bad use of CPU
                resources;  All of the network stack processing should be more
                to a work queue (and, all use of CONFIG_NET_NOINTS=n should
-               be eliminated).
+               be eliminated).  This applies to almost all Ethernet drivers:
+
+               ARCHITECTURE   CONFIG_NET_NOINTS
+               C5471          NO
+               STM32          NO
+               TIVA           NO
+               eZ80           NO
+               LPC17xx        YES << Only this one supports CONFIG_NET_NOINTS
+               DMxxx NIC      NO
+               PIC32          NO
+               RGMP           NO
+               SAM3/4         NO
+               SAMA5D         NO
+               SIM            NO << Doesn't have interrupts anyway
+
   Status:      Open
   Priority:    Pretty high if you want a well behaved system.
 

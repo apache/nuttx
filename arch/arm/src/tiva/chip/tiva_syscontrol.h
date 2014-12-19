@@ -49,6 +49,8 @@
 #  include "chip/lm3s_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
 #  include "chip/lm4f_syscontrol.h"
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC)
+#  include "chip/tm4c129x_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include "chip/tm4c_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_CC3200)
