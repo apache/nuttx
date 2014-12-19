@@ -104,6 +104,10 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_STM32_FSMC
   stm32_enablefsmc();
 #endif
+
+#ifdef CONFIG_STM32_LTDC
+  up_fbinitialize();
+#endif
 }
 
 /****************************************************************************
