@@ -1176,6 +1176,7 @@ nuttx
  |   |- stm32f4discovery/
  |   |   `- README.txt
  |   |- stm32f429i-disco/
+ |   |   |- ltdc/README.txt
  |   |   `- README.txt
  |   |- stm32ldiscovery/
  |   |   `- README.txt
