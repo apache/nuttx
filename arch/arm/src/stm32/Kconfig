@@ -1233,6 +1233,14 @@ config STM32_LTDC
 		video interface (HSYNC, VSYNC, etc.) for controlling TFT
 		LCD displays.
 
+config STM32_DMA2D
+	bool "DMA2D"
+	default n
+	depends on STM32_STM32F429
+	---help---
+		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
+		available on the STM32F429 and STM32F439 devices.
+
 config STM32_OTGFS
 	bool "OTG FS"
 	default n
@@ -3676,4 +3684,52 @@ endif # STM32_LTDC_L2
 endmenu
 
 endif # STM32_LTDC
+
+if STM32_DMA2D
+
+menu "DMA2D Configuration"
+
+config STM32_DMA2D_NLAYERS
+	int "Number DMA2D layers"
+	default 2
+	---help---
+		Number of allocatable DMA2D layers except the LTDC layer.
+
+menu "Supported pixel format"
+
+config STM32_DMA2D_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	default y
+
+config STM32_DMA2D_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	default n
+
+config STM32_DMA2D_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	default n
+
+config STM32_DMA2D_RGB565
+	bool "16 bpp RGB 565"
+	default y
+
+config STM32_DMA2D_ARGB4444
+	bool "16 bpp ARGB 4444"
+	default n
+
+config STM32_DMA2D_ARGB1555
+	bool "16 bpp ARGB 1555"
+	default n
+
+config STM32_DMA2D_RGB888
+	bool "24 bpp RGB 888"
+	default y
+
+config STM32_DMA2D_ARGB8888
+	bool "32 bpp ARGB 8888"
+	default n
+
+endmenu
+endmenu
+endif # STM32_DMA2D
 

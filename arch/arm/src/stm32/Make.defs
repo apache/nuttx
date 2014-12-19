@@ -195,6 +195,10 @@ ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
 endif
 
+ifeq ($(CONFIG_STM32_DMA2D),y)
+CHIP_CSRCS += stm32_dma2d.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
