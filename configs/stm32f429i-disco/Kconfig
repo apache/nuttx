@@ -174,4 +174,42 @@ config STM32F429I_DISCO_ILI9341_LCDDEVICE
 		corresponding to the configured ili9341 lcd device in the driver
 		section.
 
+config STM32F429I_DISCO_ILI9341_FBIFACE
+	bool "Enable support for nuttx frambuffer interface"
+	default n
+	depends on STM32F429I_DISCO_ILI9341 && STM32_LTDC
+	---help---
+		Enable lcd driver support for the nuttx framebuffer interface to displaying
+		data via ltdc controller of the stm32f429i mcu.
+
+if STM32F429I_DISCO_ILI9341_FBIFACE
+
+choice
+	prompt "LCD Orientation"
+	default STM32F429I_DISCO_ILI9341_FBIFACE_PORTRAIT
+	---help---
+		Configure display orientation.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_LANDSCAPE
+	bool "Landscape orientation"
+	---help---
+		Define for "landscape" orientation support.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_PORTRAIT
+	bool "Portrait orientation"
+	---help---
+		Define for "portrait" orientation support.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_RLANDSCAPE
+	bool "Reverse landscape orientation"
+	---help---
+		Define for "reverse landscape" orientation support.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE_RORTRAIT
+	bool "Reverse portrait display"
+	---help---
+		Define for "reverse portrait" orientation support.
+
+endchoice
+endif
 endif
