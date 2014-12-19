@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_ltdc.c
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitd@gmail.com>
+ *   Copyright (C) 2013-2014 Ken Pettit. All rights reserved.
+ *   Authors: Ken Pettit <pettitd@gmail.com>
+ *            Marco Krahl <ocram.lhark@gmail.com>
  *
  * References:
  *   STM32F429 Technical Reference Manual and Data Sheet
@@ -48,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/video/fb.h>
+#include <nuttx/video/ltdc.h>
 #include <nuttx/kmalloc.h>
 
 #include <arch/board/board.h>
@@ -55,11 +57,84 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
+#include "chip/stm32_ltdc.h"
 #include "stm32_ltdc.h"
+#include "stm32_dma2d.h"
+
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+/* Register definition ******************************************************/
+
+#ifndef BOARD_LTDC_WIDTH
+#  error BOARD_LTDC_WIDTH must be defined in the board.h header file
+#endif
+
+#ifndef BOARD_LTDC_HEIGHT
+#  error BOARD_LTDC_HEIGHT must be defined in the board.h header file
+#endif
+
+#define STM32_LTDC_HEIGHT           BOARD_LTDC_HEIGHT
+#define STM32_LTDC_WIDTH            BOARD_LTDC_WIDTH
+
+/* Configure LTDC register */
+
+/* LTDC_LxWHPCR register */
+#define STM32_LTDC_LxWHPCR_WHSTPOS  (BOARD_LTDC_HSYNC + BOARD_LTDC_HBP - 1)
+#define STM32_LTDC_LxWHPCR_WHSPPOS  (BOARD_LTDC_HSYNC + BOARD_LTDC_HBP + \
+                                     STM32_LTDC_WIDTH - 1)
+
+/* LTDC_LxWVPCR register */
+#define STM32_LTDC_LxWVPCR_WVSTPOS  (BOARD_LTDC_VSYNC + BOARD_LTDC_VBP - 1)
+#define STM32_LTDC_LxWVPCR_WVSPPOS  (BOARD_LTDC_VSYNC + BOARD_LTDC_VBP + \
+                                     STM32_LTDC_HEIGHT - 1)
+
+/* LTDC_SSCR register */
+#define STM32_LTDC_SSCR_VSH          LTDC_SSCR_VSH(BOARD_LTDC_VSYNC - 1)
+#define STM32_LTDC_SSCR_HSW          LTDC_SSCR_HSW(BOARD_LTDC_HSYNC - 1)
+
+/* LTDC_BPCR register */
+#define STM32_LTDC_BPCR_AVBP         LTDC_BPCR_AVBP(STM32_LTDC_LxWVPCR_WVSTPOS)
+#define STM32_LTDC_BPCR_AHBP         LTDC_BPCR_AHBP(STM32_LTDC_LxWHPCR_WHSTPOS)
+
+/* LTDC_AWCR register */
+#define STM32_LTDC_AWCR_AAH          LTDC_AWCR_AAH(STM32_LTDC_LxWVPCR_WVSPPOS)
+#define STM32_LTDC_AWCR_AAW          LTDC_AWCR_AAW(STM32_LTDC_LxWHPCR_WHSPPOS)
+
+/* LTDC_TWCR register */
+#define STM32_LTDC_TWCR_TOTALH       LTDC_TWCR_TOTALH(BOARD_LTDC_VSYNC + \
+                                     BOARD_LTDC_VBP + \
+                                     STM32_LTDC_HEIGHT + BOARD_LTDC_VFP - 1)
+#define STM32_LTDC_TWCR_TOTALW       LTDC_TWCR_TOTALW(BOARD_LTDC_HSYNC + \
+                                     BOARD_LTDC_HBP + \
+                                     STM32_LTDC_WIDTH + BOARD_LTDC_HFP - 1)
+
+/* Global GCR register */
+
+/* Synchronisation and Polarity */
+#define STM32_LTDC_GCR_PCPOL         BOARD_LTDC_GCR_PCPOL
+#define STM32_LTDC_GCR_DEPOL         BOARD_LTDC_GCR_DEPOL
+#define STM32_LTDC_GCR_VSPOL         BOARD_LTDC_GCR_VSPOL
+#define STM32_LTDC_GCR_HSPOL         BOARD_LTDC_GCR_HSPOL
+
+/* Dither */
+#define STM32_LTDC_GCR_DEN           BOARD_LTDC_GCR_DEN
+#define STM32_LTDC_GCR_DBW           LTDC_GCR_GBW(BOARD_LTDC_GCR_DBW)
+#define STM32_LTDC_GCR_DGW           LTDC_GCR_DGW(BOARD_LTDC_GCR_DGW)
+#define STN32_LTDC_GCR_DRW           LTDC_GCR_DBW(BOARD_LTDC_GCR_DRW)
+
+/* IER register */
+#define STM32_LTDC_IER_LIE           LTDC_IER_LIE
+#define STM32_LTDC_IER_FUIE          !LTDC_IER_FUIE
+#define STM32_LTDC_IER_TERRIE        !LTDC_IER_TERRIE
+#define STM32_LTDC_IER_RRIE          LTDC_IER_RRIE
+
+/* LIPCR register */
+#define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TWCR_TOTALW)
+
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_STM32_LTDC_DEFBACKLIGHT
@@ -74,27 +149,36 @@
 #if defined(CONFIG_STM32_LTDC_L1_L8)
 #  define STM32_LTDC_L1_BPP         8
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB8
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_L8)
+#  define STM32_LTDC_L1CMAP
 #elif defined(CONFIG_STM32_LTDC_L1_AL44)
 #  define STM32_LTDC_L1_BPP         8
 #  define STM32_LTDC_L1_COLOR_FMT   ???
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL44)
 #elif defined(CONFIG_STM32_LTDC_L1_AL88)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   ???
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL88)
 #elif defined(CONFIG_STM32_LTDC_L1_ARGB4444)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   ???
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB4444)
 #elif defined(CONFIG_STM32_LTDC_L1_RGB565)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB16_565
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB565)
 #elif defined(CONFIG_STM32_LTDC_L1_ARGB1555)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   ???
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB1555)
 #elif defined(CONFIG_STM32_LTDC_L1_RGB888)
 #  define STM32_LTDC_L1_BPP         24
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB24
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB888)
 #elif defined(CONFIG_STM32_LTDC_L1_ARGB8888)
 #  define STM32_LTDC_L1_BPP         32
 #  define STM32_LTDC_L1_COLOR_FMT   ???
+#  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB8888)
 #endif
 
 /* Layer 2 format */
@@ -102,67 +186,73 @@
 #if defined(CONFIG_STM32_LTDC_L2_L8)
 #  define STM32_LTDC_L2_BPP         8
 #  define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB8
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_L8)
+#  define STM32_LTDC_L2CMAP
 #elif defined(CONFIG_STM32_LTDC_L2_AL44)
 #  define STM32_LTDC_L2_BPP         8
 #  define STM32_LTDC_L2_COLOR_FMT   ???
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL44)
 #elif defined(CONFIG_STM32_LTDC_L2_AL88)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   ???
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL88)
 #elif defined(CONFIG_STM32_LTDC_L2_ARGB4444)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   ???
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB4444)
 #elif defined(CONFIG_STM32_LTDC_L2_RGB565)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB16_565
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB565)
 #elif defined(CONFIG_STM32_LTDC_L2_ARGB1555)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   ???
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB1555)
 #elif defined(CONFIG_STM32_LTDC_L2_RGB888)
 #  define STM32_LTDC_L2_BPP         24
 #  define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB24
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB888)
 #elif defined(CONFIG_STM32_LTDC_L2_ARGB8888)
 #  define STM32_LTDC_L2_BPP         32
 #  define STM32_LTDC_L2_COLOR_FMT   ???
+#  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB8888)
 #endif
 
 /* Framebuffer sizes in bytes */
 
-#ifndef BOARD_LTDC_WIDTH
-#  error BOARD_LTDC_WIDTH must be defined in the board.h header file
-#endif
-
-#ifndef BOARD_LTDC_HEIGHT
-#  error BOARD_LTDC_HEIGHT must be defined in the board.h header file
-#endif
-
 #if STM32_LTDC_L1_BPP == 8
-#  define STM32_L1_STRIDE (BOARD_LTDC_WIDTH)
+#  define STM32_L1_STRIDE (STM32_LTDC_WIDTH)
 #elif STM32_LTDC_L1_BPP == 16
-#  define STM32_L1_STRIDE ((BOARD_LTDC_WIDTH * 16 + 7) / 8)
+#  define STM32_L1_STRIDE ((STM32_LTDC_WIDTH * 16 + 7) / 8)
 #elif STM32_LTDC_L1_BPP == 24
-#  define STM32_L1_STRIDE ((BOARD_LTDC_WIDTH * 24 + 7) / 8)
+#  define STM32_L1_STRIDE ((STM32_LTDC_WIDTH * 24 + 7) / 8)
 #elif STM32_LTDC_L1_BPP == 32
-#  define STM32_L1_STRIDE ((BOARD_LTDC_WIDTH * 32 + 7) / 8)
+#  define STM32_L1_STRIDE ((STM32_LTDC_WIDTH * 32 + 7) / 8)
 #else
 #  error Undefined or unrecognized base resolution
 #endif
 
-#define STM32_L1_FBSIZE (STM32_L1_STRIDE * BOARD_LTDC_HEIGHT)
+/* LTDC only supports 8 bit per pixel overal */
+
+#define STM32_LTDC_Lx_BYPP(n)        ((n) / 8)
+
+
+#define STM32_L1_FBSIZE (STM32_L1_STRIDE * STM32_LTDC_HEIGHT)
 
 #ifdef CONFIG_STM32_LTDC_L2
 #  ifndef CONFIG_STM32_LTDC_L2_WIDTH
-#    define CONFIG_STM32_LTDC_L2_WIDTH BOARD_LTDC_WIDTH
+#    define CONFIG_STM32_LTDC_L2_WIDTH STM32_LTDC_WIDTH
 #  endif
 
-#  if CONFIG_STM32_LTDC_L2_WIDTH > BOARD_LTDC_WIDTH
+#  if CONFIG_STM32_LTDC_L2_WIDTH > STM32_LTDC_WIDTH
 #    error Width of Layer 2 exceeds the width of the display
 #  endif
 
 #  ifndef CONFIG_STM32_LTDC_L2_HEIGHT
-#    define CONFIG_STM32_LTDC_L2_HEIGHT BOARD_LTDC_HEIGHT
+#    define CONFIG_STM32_LTDC_L2_HEIGHT STM32_LTDC_HEIGHT
 #  endif
 
-#  if CONFIG_STM32_LTDC_L2_HEIGHT > BOARD_LTDC_HEIGHT
+#  if CONFIG_STM32_LTDC_L2_HEIGHT > STM32_LTDC_HEIGHT
 #    error Height of Layer 2 exceeds the height of the display
 #  endif
 
@@ -188,27 +278,26 @@
 
 #define STM32_TOTAL_FBSIZE (STM32_L1_FBSIZE + STM32_L2_FBSIZE)
 
-/* Debug */
+/* Debug option */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_STM32_LTDC_REGDEBUG
+#ifdef CONFIG_STM32_LTDC_REGDEBUG
+#  define regdbg       dbg
+#  define regvdbg      vdbg
+#else
+#  define regdbg(x...)
+#  define regvdbg(x...)
 #endif
 
 /* Preallocated LTDC framebuffers */
-/* Maybe we need some meta-data for each layer? */
-
-#define SIZEOF_STM32_LAYER_META_S     32
-#define STM32_LTDC_LAYER_META_SIZE    (2*SIZEOF_STM32_LAYER_META_S)
-#define STM32_LTDC_LAYER_META_END     (CONFIG_STM32_LTDC_FB_BASE+STM32_LTDC_LAYER_META_SIZE)
 
 /* Position the framebuffer memory in the center of the memory set aside.  We
  * will use any skirts before or after the framebuffer memory as a guard against
  * wild framebuffer writes.
  */
 
-#define STM32_LTDC_BUFFER_SIZE  (CONFIG_STM32_LTDC_FB_SIZE-STM32_LTDC_LAYER_META_SIZE)
-#define STM32_LTDC_BUFFER_FREE  (STM32_LTDC_BUFFER_SIZE-STM32_TOTAL_FBSIZE)
-#define STM32_LTDC_BUFFER_START (STM32_LTDC_LAYER_META_END + STM32_LTDC_BUFFER_FREE/2)
+#define STM32_LTDC_BUFFER_SIZE  CONFIG_STM32_LTDC_FB_SIZE
+#define STM32_LTDC_BUFFER_FREE  (STM32_LTDC_BUFFER_SIZE - STM32_TOTAL_FBSIZE)
+#define STM32_LTDC_BUFFER_START (CONFIG_STM32_LTDC_FB_BASE + STM32_LTDC_BUFFER_FREE/2)
 
 #if STM32_LTDC_BUFFER_FREE < 0
 #  error "STM32_LTDC_BUFFER_SIZE not large enough for frame buffers"
@@ -228,15 +317,117 @@
 
 /* Layer helpers */
 
-#define LTDC_NLAYERS 2
+#ifdef CONFIG_STM32_LTDC_L2
+#  define LTDC_NLAYERS 2
+#else
+#  define LTDC_NLAYERS 1
+#endif
 
 #define LAYER(i)     g_ltdc.layer[i]
 #define LAYER_L1     g_ltdc.layer[LTDC_LAYER_L1]
 #define LAYER_L2     g_ltdc.layer[LTDC_LAYER_L2]
 
+/* Dithering */
+
+#ifndef CONFIG_STM32_LTDC_DITHER_RED
+# define STM32_LTDC_DITHER_RED      0
+#else
+# define STM32_LTDC_DITHER_RED      CONFIG_STM32_LTDC_DITHER_RED
+#endif
+#ifndef CONFIG_STM32_LTDC_DITHER_GREEN
+# define STM32_LTDC_DITHER_GREEN    0
+#else
+# define STM32_LTDC_DITHER_GREEN    CONFIG_STM32_LTDC_DITHER_GREEN
+#endif
+#ifndef CONFIG_STM32_LTDC_DITHER_BLUE
+# define STM32_LTDC_DITHER_BLUE     0
+#else
+# define STM32_LTDC_DITHER_BLUE     CONFIG_STM32_LTDC_DITHER_BLUE
+#endif
+
+/* Background color */
+
+#ifndef CONFIG_STM32_LTDC_BACKCOLOR
+# define STM32_LTDC_BACKCOLOR       0
+#else
+# define STM32_LTDC_BACKCOLOR       CONFIG_STM32_LTDC_BACKCOLOR
+#endif
+
+/* Internal operation flags */
+
+#define LTDC_LAYER_SETAREA          (1 << 0) /* Change visible area */
+#define LTDC_LAYER_SETALPHAVALUE    (1 << 1) /* Change constant alpha value */
+#define LTDC_LAYER_SETBLENDMODE     (1 << 2) /* Change blendmode */
+#define LTDC_LAYER_SETCOLORKEY      (1 << 3) /* Change color key */
+#define LTDC_LAYER_ENABLECOLORKEY   (1 << 4) /* Enable colorkey */
+#define LTDC_LAYER_SETCOLOR         (1 << 5) /* Change default color */
+#define LTDC_LAYER_SETENABLE        (1 << 6) /* Change enabled state */
+#define LTDC_LAYER_ENABLE           (1 << 7) /* Enable the layer */
+
+/* Layer initalizing state */
+
+#define LTDC_LAYER_INIT             LTDC_LAYER_SETAREA | \
+                                    LTDC_LAYER_SETALPHAVALUE | \
+                                    LTDC_LAYER_SETBLENDMODE | \
+                                    LTDC_LAYER_SETCOLORKEY | \
+                                    LTDC_LAYER_SETCOLOR | \
+                                    LTDC_LAYER_SETENABLE | \
+                                    LTDC_LAYER_ENABLE
+
+/* Blendfactor reset values for flip operation */
+
+#define STM32_LTDC_BF1_RESET        6
+#define STM32_LTDC_BF2_RESET        7
+
+/*
+ * Waits upon vertical sync
+ * Note! Position is reserved in current SRCR register but not used
+ */
+
+#define LTDC_SRCR_WAIT              4
+
+/* Calculate the size of the layers clut table */
+
+#ifdef CONFIG_FB_CMAP
+#define STM32_LTDC_CLUT_ENTRIES     256
+# ifdef STM32_LTDC_L1CMAP
+#  define STM32_LAYER_CLUT_SIZE     1 * 3 * STM32_LTDC_CLUT_ENTRIES
+# endif
+# ifdef STM32_LTDC_L2CMAP
+#  undef  STM32_LAYER_CLUT_SIZE
+#  define STM32_LAYER_CLUT_SIZE     2 * 3 * STM32_LTDC_CLUT_ENTRIES
+# endif
+#endif
+
+#ifndef CONFIG_FB_CMAP
+# if defined(STM32_LTDC_L1CMAP) || defined(STM32_LTDC_L2CMAP)
+#  undef STM32_LTDC_L1CMAP
+#  undef STM32_LTDC_L2CMAP
+#  error "Enable cmap to support the configured layer format!"
+# endif
+#endif
+
+
+/* Layer clut rgb value positioning */
+
+#define LTDC_L1CLUT_REDOFFSET       0
+#define LTDC_L1CLUT_GREENOFFSET     256
+#define LTDC_L1CLUT_BLUEOFFSET      512
+#define LTDC_L2CLUT_REDOFFSET       768
+#define LTDC_L2CLUT_GREENOFFSET     1024
+#define LTDC_L2CLUT_BLUEOFFSET      1280
+
+/* Layer rgb clut register position */
+
+#define LTDC_CLUT_ADD(n)            ((uint32_t)(n) << 24)
+#define LTDC_CLUT_RED(n)            ((uint32_t)(n) << 16)
+#define LTDC_CLUT_GREEN(n)          ((uint32_t)(n) << 8)
+#define LTDC_CLUT_BLUE(n)           ((uint32_t)(n) << 0)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This enumeration names each layer supported by the hardware */
 
 enum stm32_layer_e
@@ -245,129 +436,440 @@ enum stm32_layer_e
   LTDC_LAYER_L2,           /* LCD Layer 2 */
 };
 
-/* LTDC General Layer information */
+/* LTDC General layer information */
 
 struct stm32_layer_s
 {
-  /* Descriptors and buffering */
+#ifdef CONFIG_STM32_LTDC_INTERFACE
+  /* LTDC interface */
 
-  uint8_t *framebuffer;    /* DMA framebuffer memory */
-  uint8_t lid;             /* Layer ID (see enum stm32_layer_e) */
+  struct ltdc_layer_s ltdc;     /* Layer control structure */
+#endif
 
-  /* Window position information */
+  struct stm32_ltdc_s state; /* Layer state structure */
 
-  uint16_t xpos;           /* Window x position */
-  uint16_t width;          /* Window width */
-  uint16_t ypos;           /* Window y position */
-  uint16_t height;         /* Window width */
+  /* Blending */
 
-  /* Color information */
+  uint8_t  opac;            /* Opacity value for blending */
+  uint8_t  bf1;             /* Blend factor 1 */
+  uint8_t  bf2;             /* Blend factor 2 */
 
-  uint8_t bpp;             /* Bits per pixel */
+  /* Operation */
+
+  uint8_t operation;        /* Operation flags */
 };
 
-/* This structure provides the overall state of the LTDC */
+/* This structure provides the state of each LTDC layer */
 
-struct stm32_ltdc_s
+struct stm32_state_s
+{
+  /* Layer state */
+
+  struct stm32_ltdc_s state[LTDC_NLAYERS];
+};
+
+/* This structure provides the overall state of the LTDC layer */
+
+struct stm32_ltdcdev_s
 {
   /* Layer information */
 
   struct stm32_layer_s layer[LTDC_NLAYERS];
-
-  /* Debug stuff */
-
-#ifdef CONFIG_STM32_LTDC_REGDEBUG
-   bool wrlast;                   /* True: Last access was a write */
-   uintptr_t addrlast;            /* Last address accessed */
-   uint32_t vallast;              /* Last value read or written */
-   int ntimes;                    /* Number of consecutive accesses */
-#endif
 };
+
+/* Layer cmap table description */
+
+#ifdef STM32_LAYER_CLUT_SIZE
+enum stm32_clut_e
+{
+  LTDC_L1CLUT_RED   = LTDC_L1CLUT_REDOFFSET,
+  LTDC_L1CLUT_GREEN = LTDC_L1CLUT_GREENOFFSET,
+  LTDC_L1CLUT_BLUE  = LTDC_L1CLUT_BLUEOFFSET,
+  LTDC_L2CLUT_RED   = LTDC_L2CLUT_REDOFFSET,
+  LTDC_L2CLUT_GREEN = LTDC_L2CLUT_GREENOFFSET,
+  LTDC_L2CLUT_BLUE  = LTDC_L2CLUT_BLUEOFFSET
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-/* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32_LTDC_REGDEBUG) && defined(CONFIG_DEBUG)
-static bool stm32_checkreg(bool wr, uint32_t regval, uintptr_t address);
-static uint32_t stm32_getreg(uintptr_t addr);
-static void stm32_putreg(uintptr_t addr, uint32_t val);
-#else
-#  define stm32_getreg(addr)      getreg32(addr)
-#  define stm32_putreg(addr,val)  putreg32(val,addr)
+/* Global register operation */
+
+static void stm32_lcd_enable(bool enable);
+static void stm32_ltdc_gpioconfig(void);
+static void stm32_ltdc_periphconfig(void);
+static void stm32_ltdc_bgcolor(uint32_t rgb);
+static void stm32_ltdc_dither(bool enable, uint8_t red,
+                                uint8_t green, uint8_t blue);
+static void stm32_ltdc_interrupt(uint32_t mask, uint32_t value);
+static void stm32_ltdc_reload(uint8_t value);
+
+/* Layer and layer register operation */
+
+static inline void stm32_ltdc_lsetopac(FAR struct stm32_layer_s *layer);
+static inline void stm32_ltdc_lunsetopac(FAR struct stm32_layer_s *layer);
+static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer);
+static inline bool stm32_ltdc_lvalidate(FAR struct stm32_layer_s *layer);
+#ifdef CONFIG_STM32_LTDC_INTERFACE
+static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
+                              fb_coord_t xpos, fb_coord_t ypos,
+                              fb_coord_t xres, fb_coord_t yres,
+                              fb_coord_t srcxpos, fb_coord_t srcypos);
 #endif
-static void stm32_wait_lcdstatus(uint32_t mask, uint32_t value);
+static void stm32_ltdc_lupdate(FAR struct stm32_layer_s *layer);
 
-/* Frame buffer interface ***************************************************/
-/* Get information about the video controller configuration and the
- * configuration of each color plane.
- */
+static void stm32_ltdc_lpixelformat(FAR struct stm32_layer_s *layer);
+static inline void stm32_ltdc_lframebuffer(FAR struct stm32_layer_s *layer);
+static void stm32_ltdc_larea(FAR struct stm32_layer_s *layer);
+static void stm32_ltdc_lcolor(FAR struct stm32_layer_s *layer, uint32_t argb);
+static void stm32_ltdc_lcolorkey(FAR struct stm32_layer_s *layer);
+static void stm32_ltdc_lalpha(FAR struct stm32_layer_s *layer);
+static void stm32_ltdc_lblendmode(FAR struct stm32_layer_s *layer,
+                                    uint8_t bf1, uint8_t bf2);
 
-static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
+#ifdef STM32_LAYER_CLUT_SIZE
+static void stm32_ltdc_cmapcpy(FAR struct fb_cmap_s *dest,
+                                FAR const struct fb_cmap_s *src);
+static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer);
+static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s* layer, bool enable);
+#endif
+static void stm32_ltdc_linit(int lid);
+static void stm32_ltdc_lenable(FAR struct stm32_layer_s *layer);
+static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
+                                nxgl_mxpixel_t color);
+
+/* Generic frame buffer interface */
+
+static int stm32_getvideoinfo(FAR struct fb_vtable_s *vtable,
               struct fb_videoinfo_s *vinfo);
-static int stm32_getplaneinfo(struct fb_vtable_s *vtable,
+static int stm32_getplaneinfo(FAR struct fb_vtable_s *vtable,
               int planeno, struct fb_planeinfo_s *pinfo);
 
-/* The following is provided only if the video hardware supports RGB color
+/*
+ * The following is provided only if the video hardware supports RGB color
  * mapping
  */
 
-#ifdef CONFIG_FB_CMAP
+#ifdef STM32_LAYER_CLUT_SIZE
 static int stm32_getcmap(struct fb_vtable_s *vtable,
               struct fb_cmap_s *cmap);
 static int stm32_putcmap(struct fb_vtable_s *vtable,
               const struct fb_cmap_s *cmap);
 #endif
 
-/* Initialization ***********************************************************/
 
-#ifdef CONFIG_FB_CMAP
-static int stm32_setclut(struct stm32_layer_s *layer,
+/* ltdc interface */
+#ifdef STM32_LAYER_CLUT_SIZE
+static int stm32_setclut(struct ltdc_layer_s *layer,
               const struct fb_cmap_s *cmap);
-static int stm32_getclut(struct stm32_layer_s *layer,
+static int stm32_getclut(struct ltdc_layer_s *layer,
               struct fb_cmap_s *cmap);
 #endif
+static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
+                                 struct fb_videoinfo_s *vinfo);
+static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
+                                 struct fb_planeinfo_s *pinfo);
 
-static void stm32_backlight(uint32_t level);
-static void stm32_l1_disable(void);
-static void stm32_l2_disable(void);
-static void stm32_lcd_disable(void);
-static void stm32_layer_color(void);
-static void stm32_lcd_enable(void);
-static void stm32_layer_configure(void);
-static void stm32_show_layer(struct stm32_layer_s *layer,
-              uint32_t dispx, uint32_t dispy, uint32_t dispw, uint32_t disph);
+#ifdef CONFIG_STM32_LTDC_INTERFACE
+static int stm32_getlid(FAR struct ltdc_layer_s *layer,
+                        int *lid, uint32_t flag);
+static int stm32_setcolor(FAR struct ltdc_layer_s *layer, uint32_t argb);
+static int stm32_getcolor(FAR struct ltdc_layer_s *layer, uint32_t *argb);
+static int stm32_setcolorkey(FAR struct ltdc_layer_s *layer, uint32_t argb);
+static int stm32_getcolorkey(FAR struct ltdc_layer_s *layer, uint32_t *argb);
+static int stm32_setalpha(FAR struct ltdc_layer_s *layer, uint8_t alpha);
+static int stm32_getalpha(FAR struct ltdc_layer_s *layer, uint8_t *alpha);
+static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode);
+static int stm32_getblendmode(FAR struct ltdc_layer_s *layer, uint32_t *mode);
+static int stm32_setarea(FAR struct ltdc_layer_s *layer,
+                          FAR const struct ltdc_area_s *area,
+                          fb_coord_t srcxpos, fb_coord_t srcypos);
+static int stm32_getarea(FAR struct ltdc_layer_s *layer,
+                          FAR struct ltdc_area_s *area,
+                          fb_coord_t *srcxpos, fb_coord_t *srcypos);
+static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode);
+
+#ifdef CONFIG_STM32_DMA2D
+static int stm32_blit(FAR struct ltdc_layer_s *dest,
+                      FAR struct ltdc_layer_s *fore,
+                      fb_coord_t forexpos, fb_coord_t foreypos,
+                      FAR struct ltdc_layer_s *back,
+                      FAR const struct ltdc_area_s *backarea);
+static int stm32_blend(FAR struct ltdc_layer_s *dest,
+                        FAR struct ltdc_layer_s *fore,
+                        fb_coord_t forexpos, fb_coord_t foreypos,
+                        FAR struct ltdc_layer_s *back,
+                        FAR const struct ltdc_area_s *backarea);
+#endif
+#endif /* CONFIG_STM32_LTDC_INTERFACE */
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the video controller */
+/* PIO pin configurations */
 
-static const struct fb_videoinfo_s g_videoinfo =
+static const uint32_t g_ltdcpins[] =
 {
-  .fmt      = STM32_LTDC_L1_COLOR_FMT,
-  .xres     = BOARD_LTDC_WIDTH,
-  .yres     = BOARD_LTDC_HEIGHT,
-  .nplanes  = 1,
+  GPIO_LTDC_R4, GPIO_LTDC_R5, GPIO_LTDC_R6, GPIO_LTDC_R7,
+  GPIO_LTDC_G4, GPIO_LTDC_G5, GPIO_LTDC_G6, GPIO_LTDC_G7,
+  GPIO_LTDC_B4, GPIO_LTDC_B5, GPIO_LTDC_B6, GPIO_LTDC_B7,
+#if BOARD_LTDC_OUTPUT_BPP > 12
+  GPIO_LTDC_R3, GPIO_LTDC_G2, GPIO_LTDC_G3, GPIO_LTDC_B3,
+# if BOARD_LTDC_OUTPUT_BPP > 16
+  GPIO_LTDC_R2, GPIO_LTDC_B2,
+#  if BOARD_LTDC_OUTPUT_BPP > 18
+  GPIO_LTDC_R0, GPIO_LTDC_R1, GPIO_LTDC_G0, GPIO_LTDC_G1,
+  GPIO_LTDC_B0, GPIO_LTDC_B1,
+#  endif
+# endif
+#endif
+  GPIO_LTDC_VSYNC, GPIO_LTDC_HSYNC, GPIO_LTDC_DE, GPIO_LTDC_CLK
 };
 
-/* This structure provides the overall state of the LTDC */
-
-static struct stm32_ltdc_s g_ltdc;
+#define STM32_LTDC_NPINCONFIGS (sizeof(g_ltdcpins) / sizeof(uint32_t))
 
 /* This structure provides the base layer interface */
 
 static const struct fb_vtable_s g_vtable =
 {
   .getvideoinfo  = stm32_getvideoinfo,
-  .getplaneinfo  = stm32_getplaneinfo,
-#ifdef CONFIG_FB_CMAP
-  .getcmap       = stm32_getcmap,
-  .putcmap       = stm32_putcmap,
+  .getplaneinfo  = stm32_getplaneinfo
+#ifdef STM32_LAYER_CLUT_SIZE
+ ,.getcmap       = stm32_getcmap,
+  .putcmap       = stm32_putcmap
 #endif
 };
+
+/* The LTDC semaphore that enforces mutually exclusive access */
+
+static sem_t g_lock;
+
+/* The layer active state */
+
+static uint8_t g_lactive;
+
+#ifdef STM32_LAYER_CLUT_SIZE
+/* The layers clut table entries */
+
+static uint8_t g_clut[STM32_LAYER_CLUT_SIZE];
+
+/* The layer 1 cmap */
+
+#ifdef STM32_LTDC_L1CMAP
+static struct fb_cmap_s g_cmap_l1 =
+{
+  .len     = STM32_LTDC_CLUT_ENTRIES,
+  .red     = &g_clut[LTDC_L1CLUT_RED],
+  .green   = &g_clut[LTDC_L1CLUT_GREEN],
+  .blue    = &g_clut[LTDC_L1CLUT_BLUE]
+};
+#endif
+
+/* The layer 2 cmap */
+
+#ifdef STM32_LTDC_L2CMAP
+static struct fb_cmap_s g_cmap_l2 =
+{
+  .len     = STM32_LTDC_CLUT_ENTRIES,
+  .red     = &g_clut[LTDC_L2CLUT_RED],
+  .green   = &g_clut[LTDC_L2CLUT_GREEN],
+  .blue    = &g_clut[LTDC_L2CLUT_BLUE]
+};
+#endif
+#endif
+
+/* The initialized state of the overall LTDC layers */
+
+static struct stm32_ltdcdev_s g_ltdc =
+{
+  .layer[LTDC_LAYER_L1] =
+    {
+      .state =
+        {
+          .lid   = LTDC_LAYER_L1,
+          .pinfo =
+            {
+              .fbmem    = (uint8_t *)STM32_LTDC_BUFFER_L1,
+              .fblen    = STM32_L1_FBSIZE,
+              .stride   = STM32_L1_STRIDE,
+              .bpp      = STM32_LTDC_L1_BPP
+            },
+          .vinfo =
+            {
+              .fmt      = STM32_LTDC_L1_COLOR_FMT,
+              .xres     = STM32_LTDC_WIDTH,
+              .yres     = STM32_LTDC_HEIGHT,
+              .nplanes  = 1
+            }
+#ifdef STM32_LTDC_L1CMAP
+         ,.cmap = &g_cmap_l1
+#endif
+        }
+    }
+#ifdef CONFIG_STM32_LTDC_L2
+ ,.layer[LTDC_LAYER_L2] =
+    {
+      .state =
+        {
+          .lid   = LTDC_LAYER_L2,
+          .pinfo =
+            {
+              .fbmem    = (uint8_t *)STM32_LTDC_BUFFER_L2,
+              .fblen    = STM32_L2_FBSIZE,
+              .stride   = STM32_L2_STRIDE,
+              .bpp      = STM32_LTDC_L2_BPP
+            },
+          .vinfo =
+            {
+              .fmt      = STM32_LTDC_L2_COLOR_FMT,
+              .xres     = STM32_LTDC_WIDTH,
+              .yres     = STM32_LTDC_HEIGHT,
+              .nplanes  = 1
+            }
+#ifdef STM32_LTDC_L2CMAP
+         ,.cmap = &g_cmap_l2
+#endif
+        }
+    }
+#endif
+};
+
+/* Pixel format lookup table */
+
+static const uint32_t stm32_fmt_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1PFCR_PF
+#ifdef CONFIG_STM32_LTDC_L2
+ ,STM32_LTDC_L2PFCR_PF
+#endif
+};
+
+/* Register lookup tables */
+
+/* LTDC_LxCR */
+
+static const uintptr_t stm32_cr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CR
+#endif
+};
+
+/* LTDC_LxWHPCR */
+
+static const uintptr_t stm32_whpcr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1WHPCR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2WHPCR
+#endif
+};
+
+/* LTDC_LxWVPCR */
+
+static const uintptr_t stm32_wvpcr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1WVPCR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2WVPCR
+#endif
+};
+
+/* LTDC_LxPFCR */
+
+static const uintptr_t stm32_pfcr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1PFCR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2PFCR
+#endif
+};
+
+/* LTDC_LxDCCR */
+
+static const uintptr_t stm32_dccr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1DCCR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2DCCR
+#endif
+};
+
+/* LTDC_LxCKCR */
+
+static const uintptr_t stm32_ckcr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CKCR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CKCR
+#endif
+};
+
+/* LTDC_LxCACR */
+
+static const uintptr_t stm32_cacr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CACR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CACR
+#endif
+};
+
+/* LTDC_LxBFCR */
+
+static const uintptr_t stm32_bfcr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1BFCR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2BFCR
+#endif
+};
+
+/* LTDC_LxCFBAR */
+
+static const uintptr_t stm32_cfbar_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CFBAR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CFBAR
+#endif
+};
+
+/* LTDC_LxCFBLR */
+
+static const uintptr_t stm32_cfblr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CFBLR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CFBLR
+#endif
+};
+
+/* LTDC_LxCFBLNR */
+
+static const uintptr_t stm32_cfblnr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CFBLNR
+#ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CFBLNR
+#endif
+};
+
+/* LTDC_LxCLUTWR */
+
+#ifdef STM32_LAYER_CLUT_SIZE
+static const uintptr_t stm32_clutwr_layer_t[LTDC_NLAYERS] =
+{
+  STM32_LTDC_L1CLUTWR
+# ifdef CONFIG_STM32_LTDC_L2
+  , STM32_LTDC_L2CLUTWR
+# endif
+};
+#endif
 
 /****************************************************************************
  * Public Data
@@ -378,145 +880,1303 @@ static const struct fb_vtable_s g_vtable =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_checkreg
+ * Configure global register
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_ltdc_gpioconfig
  *
  * Description:
- *   Check if the current register access is a duplicate of the preceding.
- *
- * Input Parameters:
- *   regval  - The value to be written
- *   address - The address of the register to write to
- *
- * Returned Value:
- *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   Configure GPIO pins for use with the LTDC
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_LTDC_REGDEBUG
-static bool stm32_checkreg(bool wr, uint32_t regval, uintptr_t address)
+static void stm32_ltdc_gpioconfig(void)
 {
-  if (wr      == g_lcdc.wrlast &&   /* Same kind of access? */
-      regval  == g_lcdc.vallast &&  /* Same value? */
-      address == g_lcdc.addrlast)   /* Same address? */
-    {
-      /* Yes, then just keep a count of the number of times we did this. */
+  int i;
 
-      g_lcdc.ntimes++;
-      return false;
+  gvdbg("Configuring pins\n");
+
+  /* Configure each pin */
+
+  for (i = 0; i < STM32_LTDC_NPINCONFIGS; i++)
+    {
+      regvdbg("set gpio%d = %08x\n", i, g_ltdcpins[i]);
+      stm32_configgpio(g_ltdcpins[i]);
+    }
+}
+
+/****************************************************************************
+ * Name: stm32_ltdc_periphconfig
+ *
+ * Description:
+ *   Configures the synchronous timings
+ *   Configures the synchronous signals and clock polarity
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_periphconfig(void)
+{
+  uint32_t    regval;
+
+  /* Configure GPIO's external */
+
+  gvdbg("Configure lcd pins\n");
+  stm32_ltdc_gpioconfig();
+
+  /* Configure APB2 LTDC clock external */
+
+  regvdbg("configured RCC_APB2ENR=%08x\n", getreg32(STM32_RCC_APB2ENR));
+
+  /* Configure the SAI PLL external to provide the LCD_CLK */
+
+  regvdbg("configured RCC_PLLSAI=%08x\n", getreg32(STM32_RCC_PLLSAICFGR));
+
+  /* Configure dedicated clock external */
+
+  regvdbg("configured RCC_DCKCFGR=%08x\n", getreg32(STM32_RCC_DCKCFGR));
+
+  /* Configure LTDC_SSCR */
+
+  regval = (STM32_LTDC_SSCR_VSH | STM32_LTDC_SSCR_HSW);
+  regvdbg("set LTDC_SSCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_SSCR);
+  regvdbg("configured LTDC_SSCR=%08x\n", getreg32(STM32_LTDC_SSCR));
+
+  /* Configure LTDC_BPCR */
+
+  regval = (STM32_LTDC_BPCR_AVBP | STM32_LTDC_BPCR_AHBP);
+  regvdbg("set LTDC_BPCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_BPCR);
+  regvdbg("configured LTDC_BPCR=%08x\n", getreg32(STM32_LTDC_BPCR));
+
+  /* Configure LTDC_AWCR */
+
+  regval = (STM32_LTDC_AWCR_AAH | STM32_LTDC_AWCR_AAW);
+  regvdbg("set LTDC_AWCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_AWCR);
+  regvdbg("configured LTDC_AWCR=%08x\n", getreg32(STM32_LTDC_AWCR));
+
+  /* Configure LTDC_TWCR */
+
+  regval = (STM32_LTDC_TWCR_TOTALH | STM32_LTDC_TWCR_TOTALW);
+  regvdbg("set LTDC_TWCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_TWCR);
+  regvdbg("configured LTDC_TWCR=%08x\n", getreg32(STM32_LTDC_TWCR));
+
+  /* Configure LTDC_GCR */
+
+  regval = (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL
+           | STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
+  regvdbg("set LTDC_GCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_GCR);
+  regvdbg("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_bgcolor
+ *
+ * Description:
+ *   Configures background color of the LCD controller.
+ *
+ * Parameter:
+ *   rgb - RGB888 background color
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_bgcolor(uint32_t rgb)
+{
+  regvdbg("set LTDC_BCCR=%08x\n", rgb);
+  putreg32(rgb, STM32_LTDC_BCCR);
+  regvdbg("configured LTDC_BCCR=%08x\n", getreg32(STM32_LTDC_BCCR));
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_dither
+ *
+ * Description:
+ *   Configures dither settings of the LCD controller.
+ *
+ * Parameter:
+ *   enable - Enable dithering
+ *   red    - Red dither width
+ *   green  - Green dither width
+ *   blue   - Blue dither width
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_dither(bool enable,
+                            uint8_t red,
+                            uint8_t green,
+                            uint8_t blue)
+{
+  uint32_t    regval;
+
+  regval = getreg32(STM32_LTDC_GCR);
+
+  if (enable == true)
+    {
+      regval |= LTDC_GCR_DEN;
     }
   else
     {
-      /* Did we do the previous operation more than once? */
+      regval &= ~LTDC_GCR_DEN;
+    }
 
-      if (g_lcdc.ntimes > 0)
+  regval &= ~(!LTDC_GCR_DEN | LTDC_GCR_DRW(0) |
+                LTDC_GCR_DGW(0) | LTDC_GCR_DBW(0));
+  regval |= (LTDC_GCR_DRW(red) | LTDC_GCR_DGW(green) | LTDC_GCR_DBW(blue));
+
+  regvdbg("set LTDC_GCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_GCR);
+  regvdbg("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_interrupt
+ *
+ * Description:
+ *   Configures specific interrupt
+ *
+ * Parameter:
+ *   mask  - Interrupt mask
+ *   value - Interrupt value
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_interrupt(uint32_t mask, uint32_t value)
+{
+  uint32_t    regval;
+
+  /* Get interrupts */
+
+  regval = getreg32(STM32_LTDC_IER);
+  regvdbg("get LTDC_IER=%08x\n", regval);
+  regval &= ~mask;
+
+  /* Set interrupt */
+
+  regval |= value;
+  regvdbg("set LTDC_IER=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_IER);
+  regvdbg("configured LTDC_IER=%08x\n", getreg32(STM32_LTDC_IER));
+
+  /* Configure LTDC_LIPCR */
+
+  regvdbg("set LTDC_LIPCR=%08x\n", STM32_LTDC_LIPCR_LIPOS);
+  putreg32(STM32_LTDC_LIPCR_LIPOS, STM32_LTDC_LIPCR);
+  regvdbg("configured LTDC_LIPCR=%08x\n", getreg32(STM32_LTDC_LIPCR));
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_reload
+ *
+ * Description:
+ *   Reload the layer shadow register and make layer changes visible
+ *
+ * Parameter:
+ *   value - Reload flag (e.g. upon vertical blank or immediately)
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_reload(uint8_t value)
+{
+  /* Check if last reload is finished */
+
+  while ((getreg32(STM32_LTDC_SRCR) & (LTDC_SRCR_VBR|LTDC_SRCR_IMR)) != 0)
+    {
+    }
+
+  /* Reload shadow register after vertical blank */
+
+  regvdbg("set LTDC_SRCR=%08x\n", value & ~LTDC_SRCR_WAIT);
+  putreg32(value & ~LTDC_SRCR_WAIT, STM32_LTDC_SRCR);
+  regvdbg("configured LTDC_SRCR=%08x\n", getreg32(STM32_LTDC_SRCR));
+
+  /* Wait until registers reloaded */
+
+  if (value & LTDC_SRCR_WAIT)
+    {
+      while ((getreg32(STM32_LTDC_SRCR) & (value & ~LTDC_SRCR_WAIT)) == value)
         {
-          /* Yes... show how many times we did it */
+        }
+    }
+}
 
-          lldbg("...[Repeats %d times]...\n", g_lcdc.ntimes);
+
+/****************************************************************************
+ * Name: stm32_global_configure
+ *
+ * Description:
+ *   Configure background color
+ *   Configure interrupts
+ *   Configure dithering
+ *
+ ****************************************************************************/
+
+static void stm32_global_configure(void)
+{
+  /* Initialize the LTDC semaphore that enforces mutually exclusive access */
+
+  sem_init(&g_lock, 0, 1);
+
+  /* Set the default active layer */
+
+#ifndef CONFIG_STM32_LTDC_L2
+  g_lactive = LTDC_LAYER_L1;
+#else
+  g_lactive = LTDC_LAYER_L2;
+#endif
+
+#ifdef STM32_LAYER_CLUT_SIZE
+  /* cleanup clut */
+
+  memset(g_clut, 0, sizeof(g_clut));
+#endif
+  /* Configure dither */
+
+  stm32_ltdc_dither(
+#ifdef CONFIG_STM32_LTDC_DITHER
+                    true,
+#else
+                    false,
+#endif
+                    STM32_LTDC_DITHER_RED,
+                    STM32_LTDC_DITHER_GREEN,
+                    STM32_LTDC_DITHER_BLUE);
+
+  /* Configure background color of the controller */
+
+  stm32_ltdc_bgcolor(STM32_LTDC_BACKCOLOR);
+
+  /* Enable lcd interrupts only if neccessary */
+
+  /* Enable line interrupt */
+
+  stm32_ltdc_interrupt(STM32_LTDC_IER_LIE, 1);
+
+  /* Disable fifo underrun interrupt */
+
+  stm32_ltdc_interrupt(STM32_LTDC_IER_FUIE, 0);
+
+  /* Disable transfer error interrupt */
+
+  stm32_ltdc_interrupt(STM32_LTDC_IER_TERRIE, 0);
+
+  /* Enable register reload interrupt */
+
+  stm32_ltdc_interrupt(STM32_LTDC_IER_RRIE, 1);
+}
+
+
+/****************************************************************************
+ * Name: stm32_lcd_enable
+ *
+ * Description:
+ *   Disable the LCD peripheral
+ *
+ * Parameter:
+ *   enable - Enable or disable
+ *
+ ****************************************************************************/
+
+static void stm32_lcd_enable(bool enable)
+{
+  uint32_t    regval;
+
+  regval = getreg32(STM32_LTDC_GCR);
+  regvdbg("get LTDC_GCR=%08x\n", regval);
+
+  if (enable == true)
+    {
+      regval |= LTDC_GCR_LTDCEN;
+    }
+  else
+    {
+      regval &= ~LTDC_GCR_LTDCEN;
+    }
+
+  regvdbg("set LTDC_GCR=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_GCR);
+  regvdbg("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
+}
+
+
+/****************************************************************************
+ * Configure layer register
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_ltdc_lclutenable
+ *
+ * Description:
+ *   Disable or enable the layer clut support
+ *
+ * Parameter:
+ *   layer  - Reference to the layer control structure
+ *   enable - Enable or disable
+ *
+ ****************************************************************************/
+#ifdef STM32_LAYER_CLUT_SIZE
+static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s* layer, bool enable)
+{
+  uint32_t    regval;
+
+  regval = getreg32(stm32_cr_layer_t[layer->state.lid]);
+  regvdbg("get LTDC_L%dCR=%08x\n", layer->state.lid + 1, regval);
+
+  /* Disable the clut support during update the color table */
+
+  if (enable == true)
+    {
+      regval |= LTDC_LxCR_CLUTEN;
+    }
+  else
+    {
+      regval &= ~LTDC_LxCR_CLUTEN;
+    }
+
+  regvdbg("set LTDC_L%dCR=%08x\n", layer->state.lid + 1, regval);
+  putreg32(regval, stm32_cr_layer_t[layer->state.lid]);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_ltdc_lsetopac
+ *
+ * Description:
+ *   Helper to set the layer to opac
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static inline void stm32_ltdc_lsetopac(FAR struct stm32_layer_s *layer)
+{
+  layer->opac = 0xff;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lunsetopac
+ *
+ * Description:
+ *   Helper to set the layer opacity to the alpha value
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static inline void stm32_ltdc_lunsetopac(FAR struct stm32_layer_s *layer)
+{
+  layer->opac = 0;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lgetopac
+ *
+ * Description:
+ *   Helper to get the configured layer opacity
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer)
+{
+  return layer->opac | layer->state.alpha;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lvalidate
+ *
+ * Description:
+ *   Helper to check if the layer is an valid ltdc layer
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ * Return:
+ *   true  - layer valid
+ *   false - layer invalid
+ *
+ ****************************************************************************/
+
+static inline bool stm32_ltdc_lvalidate(FAR struct stm32_layer_s *layer)
+{
+#ifdef CONFIG_STM32_LTDC_L2
+  return layer == &LAYER_L1 || layer == &LAYER_L2;
+#else
+  return layer == &LAYER_L1;
+#endif
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lvalidatearea
+ *
+ * Description:
+ *   Check if layer coordinates out of valid area.
+ *
+ * Parameter:
+ *   layer   - Reference to the layer control structure
+ *   xpos    - top left x position of the active area
+ *   ypos    - top left y position of the active area
+ *   xres    - width of the active area
+ *   yres    - height of teh active area
+ *   srcxpos - Top left x position from where data visible in the active area
+ *   srcypos - Top left y position from where data visible in the active area
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
+ ****************************************************************************/
+#ifdef CONFIG_STM32_LTDC_INTERFACE
+static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
+                                    fb_coord_t xpos, fb_coord_t ypos,
+                                    fb_coord_t xres, fb_coord_t yres,
+                                    fb_coord_t srcxpos, fb_coord_t srcypos)
+{
+  FAR const struct fb_videoinfo_s *vinfo = &layer->state.vinfo;
+
+  if ((xpos > vinfo->xres - 1) ||
+      (ypos > vinfo->yres -1) ||
+      (xres > vinfo->xres - xpos) ||
+      (yres > vinfo->yres - ypos) ||
+      (srcxpos > xpos + xres - 1) ||
+      (srcypos > ypos + yres - 1))
+
+    {
+      gdbg("layer coordinates out of valid area: xpos = %d > %d, \
+           ypos = %d > %d, width = %d > %d, height = %d > %d, \
+           srcxpos = %d > %d, srcypos = %d > %d",
+           xpos, vinfo->xres - 1,
+           ypos, vinfo->yres - 1,
+           xres, vinfo->xres - xpos,
+           yres, vinfo->yres - ypos,
+           srcxpos, xpos + xres - 1,
+           srcypos, ypos + yres - 1);
+
+      gdbg("Returning EINVAL\n");
+      return -EINVAL;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_ltdc_lupdate
+ *
+ * Description:
+ *   Updates shadow register content depending on the layer operation flag.
+ *   This made changes for the given layer visible after the next shadow
+ *   register reload.
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lupdate(FAR struct stm32_layer_s *layer)
+{
+  if (layer->operation & LTDC_LAYER_SETAREA)
+    {
+      /* Updates the layer horicontal and vertical position register */
+
+      stm32_ltdc_larea(layer);
+    }
+  if (layer->operation & LTDC_LAYER_SETALPHAVALUE)
+    {
+      /* Updates the constant alpha register */
+
+      stm32_ltdc_lalpha(layer);
+    }
+  if (layer->operation & LTDC_LAYER_SETBLENDMODE)
+    {
+      /* Update blenfactor 1 and 2 register */
+
+      stm32_ltdc_lblendmode(layer, layer->bf1, layer->bf2);
+    }
+  if (layer->operation & LTDC_LAYER_SETCOLORKEY)
+    {
+      /* Update layer colorkey register */
+
+      stm32_ltdc_lcolorkey(layer);
+    }
+  if (layer->operation & LTDC_LAYER_SETCOLOR)
+    {
+      /* Update layer color register */
+
+      stm32_ltdc_lcolor(layer, layer->state.color);
+    }
+  if (layer->operation & LTDC_LAYER_SETENABLE)
+    {
+      /* Enable the layer */
+
+      stm32_ltdc_lenable(layer);
+    }
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_larea
+ *
+ * Description:
+ *   Change the active area of the layer
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_larea(struct stm32_layer_s *layer)
+{
+  uint32_t    lxpos;
+  uint32_t    lypos;
+  uint32_t    whpcr;
+  uint32_t    wvpcr;
+  FAR struct stm32_ltdc_s *priv = &layer->state;
+  FAR struct ltdc_area_s *area = &priv->area;
+
+
+  regvdbg("xpos = %d, ypos = %d, xres = %d, yres = %d\n",
+        area->xpos, area->ypos, area->xres, area->yres);
+
+  lxpos = area->xpos + (STM32_LTDC_LxWHPCR_WHSTPOS + 1);
+  lypos = area->ypos + (STM32_LTDC_LxWVPCR_WVSTPOS + 1);
+
+  /* Accumulate horicontal position */
+
+  whpcr =  LTDC_LxWHPCR_WHSTPOS(lxpos);
+  whpcr |= LTDC_LxWHPCR_WHSPPOS(lxpos + area->xres - 1);
+
+  /* Accumulate vertical position */
+
+  wvpcr =  LTDC_LxWVPCR_WVSTPOS(lypos);
+  wvpcr |= LTDC_LxWVPCR_WVSPPOS(lypos + area->yres - 1);
+
+  /* Configure LxWHPCR / LxWVPCR register */
+
+  regvdbg("set LTDC_L%dWHPCR=%08x\n", priv->lid + 1, whpcr);
+  putreg32(whpcr, stm32_whpcr_layer_t[priv->lid]);
+  regvdbg("set LTDC_L%dWVPCR=%08x\n", priv->lid + 1, wvpcr);
+  putreg32(wvpcr, stm32_wvpcr_layer_t[priv->lid]);
+
+  /* Configure framebuffer */
+
+  stm32_ltdc_lframebuffer(layer);
+
+  /* Clear area operation flag */
+
+  layer->operation &= ~LTDC_LAYER_SETAREA;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lpixelformat
+ *
+ * Description:
+ *   Set the layer pixel format.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Paramater:
+ *   Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lpixelformat(FAR struct stm32_layer_s *layer)
+{
+  /* Configure PFCR register */
+
+  regvdbg("set LTDC_L%dPFCR=%08x\n", layer->state.lid + 1,
+            stm32_fmt_layer_t[layer->state.lid]);
+  putreg32(stm32_fmt_layer_t[layer->state.lid],
+            stm32_pfcr_layer_t[layer->state.lid]);
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_framebuffer
+ *
+ * Description:
+ *   Change layer framebuffer offset.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Parameter:
+ *   Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static inline void stm32_ltdc_lframebuffer(FAR struct stm32_layer_s *layer)
+{
+  uint32_t offset;
+  uint32_t cfblr;
+  FAR struct stm32_ltdc_s *priv = &layer->state;
+  FAR struct ltdc_area_s *area = &priv->area;
+  FAR const struct fb_planeinfo_s *pinfo = &priv->pinfo;
+
+  /* Configure LxCFBAR register */
+
+  /* Calculate offset position in the framebuffer */
+
+  offset = priv->xpos * STM32_LTDC_Lx_BYPP(pinfo->bpp) +
+            pinfo->stride * priv->ypos;
+
+  regvdbg("set LTDC_L%dCFBAR=%08x\n", priv->lid + 1, pinfo->fbmem + offset);
+  putreg32(pinfo->fbmem + offset, stm32_cfbar_layer_t[priv->lid]);
+
+  /* Change line length */
+
+  cfblr = LTDC_LxCFBLR_CFBP(pinfo->stride) |
+          LTDC_LxCFBLR_CFBLL(area->xres * STM32_LTDC_Lx_BYPP(pinfo->bpp) + 3);
+
+  regvdbg("set LTDC_L%dCFBLR=%08x\n", priv->lid + 1, cfblr);
+  putreg32(cfblr, stm32_cfblr_layer_t[priv->lid]);
+
+  /* Configure LxCFBLNR register */
+
+  regvdbg("set LTDC_L%dCFBLNR=%08x\n", priv->lid + 1, area->yres);
+  putreg32(area->yres, stm32_cfblnr_layer_t[priv->lid]);
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lalpha
+ *
+ * Description:
+ *   Change the layer alpha value and clear the alpha operation flag.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lalpha(FAR struct stm32_layer_s *layer)
+{
+  uint8_t opac = stm32_ltdc_lgetopac(layer);
+  regvdbg("set LTDC_L%dCACR=%02x\n", layer->state.lid + 1, opac);
+  putreg32(opac, stm32_cacr_layer_t[layer->state.lid]);
+
+  /* Clear the constant alpha operation flag */
+
+  layer->operation &= ~LTDC_LAYER_SETALPHAVALUE;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_blendfactor
+ *
+ * Description:
+ *   Change layer blend factors used for blend operation and clear the
+ *   blendmode operation flag.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Parameter:
+ *   layer - Reference to the laxer control structure
+ *   bf1   - Value of blend factor 1
+ *   bf2   - Value of blend factor 2
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lblendmode(FAR struct stm32_layer_s *layer,
+                                    uint8_t bf1, uint8_t bf2)
+{
+    regvdbg("set LTDC_L%dBFCR=%08x\n", layer->state.lid + 1,
+              (LTDC_LxBFCR_BF1(bf1) | LTDC_LxBFCR_BF2(bf2)));
+    putreg32((LTDC_LxBFCR_BF1(bf1) | LTDC_LxBFCR_BF2(bf2)),
+                stm32_bfcr_layer_t[layer->state.lid]);
+
+    /* Clear the blendmode operation flag */
+
+    layer->operation &= ~LTDC_LAYER_SETBLENDMODE;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lcolor
+ *
+ * Description:
+ *   Change layer default color and clear the color operation flag.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lcolor(FAR struct stm32_layer_s *layer, uint32_t argb)
+{
+  regvdbg("set LTDC_L%dDCCR=%08x\n", layer->state.lid + 1, argb);
+  putreg32(argb, stm32_dccr_layer_t[layer->state.lid]);
+
+  /* Clear the color operation flag */
+
+  layer->operation &= ~LTDC_LAYER_SETCOLOR;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lcolorkey
+ *
+ * Description:
+ *   Change layer colorkey and clear the colorkey operation flag.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lcolorkey(FAR struct stm32_layer_s *layer)
+{
+  uint32_t   regval;
+
+  regval = getreg32(stm32_cr_layer_t[layer->state.lid]);
+
+  if (layer->operation & LTDC_LAYER_ENABLECOLORKEY)
+    {
+      /* Set colorkey */
+
+      regvdbg("set LTDC_L%dCKCR=%08x\n",
+            layer->state.lid + 1, layer->state.colorkey);
+      putreg32(layer->state.colorkey, stm32_ckcr_layer_t[layer->state.lid]);
+
+      /* Enable colorkey */
+
+      regval |= LTDC_LxCR_COLKEN;
+    }
+  else
+    {
+      /* Disable colorkey */
+
+      regval &= ~LTDC_LxCR_COLKEN;
+    }
+
+  regvdbg("set LTDC_L%dCR=%08x\n", layer->state.lid + 1, regval);
+  putreg32(regval, stm32_cr_layer_t[layer->state.lid]);
+
+  /* Clear the colorkey operation flag */
+
+  layer->operation &= ~LTDC_LAYER_SETCOLORKEY;
+}
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_lclut
+ *
+ * Description:
+ *   Update the clut layer register during blank period.
+ *   Note! The clut register are no shadow register.
+ *
+ * Parameter:
+ *   layer  - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+#ifdef STM32_LAYER_CLUT_SIZE
+static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer)
+{
+  int n;
+  uint32_t regval;
+  FAR struct fb_cmap_s *cmap = layer->state.cmap;
+  irqstate_t flags;
+
+  /* Disable clut during register update */
+
+  stm32_ltdc_lclutenable(layer, false);
+
+  /*
+   * Reload shadow control register
+   * This never changed any layer setting as long the layer register not up to
+   * date. This is what stm32_update does.
+   */
+
+  stm32_ltdc_reload(LTDC_SRCR_IMR);
+
+  flags = irqsave();
+
+  /* Update the clut registers */
+
+  for (n = cmap->first; n < cmap->len - cmap->first; n++)
+    {
+      regval = (uint32_t)LTDC_CLUT_ADD(n) |
+               (uint32_t)LTDC_CLUT_RED(cmap->red[n]) |
+               (uint32_t)LTDC_CLUT_GREEN(cmap->green[n]) |
+               (uint32_t)LTDC_CLUT_BLUE(cmap->blue[n]);
+
+      regvdbg("set LTDC_L%dCLUTWR = %08x, cmap->first = %d, cmap->len = %d\n",
+             layer->state.lid + 1, regval, cmap->first, cmap->len);
+      putreg32(regval, stm32_clutwr_layer_t[layer->state.lid]);
+    }
+
+  irqrestore(flags);
+
+  /* Enable clut */
+
+  stm32_ltdc_lclutenable(layer, true);
+
+  /* Reload shadow control register */
+
+  stm32_ltdc_reload(LTDC_SRCR_IMR);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_ltdc_lenable
+ *
+ * Description:
+ *   Disable or enable specific layer.
+ *   Note! This changes have no effect until the shadow register reload has
+ *   been done.
+ *
+ * Parameter:
+ *   layer - Reference to the layer control structure
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lenable(FAR struct stm32_layer_s *layer)
+{
+  uint32_t   regval;
+
+  /* Enable or disable layer */
+
+  regval = getreg32(stm32_cr_layer_t[layer->state.lid]);
+
+  if (layer->operation & LTDC_LAYER_ENABLE)
+    {
+      regval |= LTDC_LxCR_LEN;
+    }
+  else
+    {
+      regval &= ~LTDC_LxCR_LEN;
+    }
+
+  regvdbg("set LTDC_L%dCR=%08x\n", layer->state.lid + 1, regval);
+  putreg32(regval, stm32_cr_layer_t[layer->state.lid]);
+
+  /* Clear the enable operation flag */
+
+  layer->operation &= ~LTDC_LAYER_SETENABLE;
+}
+
+
+/****************************************************************************
+ * Name stm32_ltdc_lclear
+ *
+ * Description:
+ *   Clear the whole layer
+ *
+ * Paramater:
+ *   layer - Reference to the layer control structure
+ *   color - The color to clear
+ *
+ * Return:
+ *   OK      - On success
+ *   -EINVAL - If one of the parameter invalid
+ *
+ ****************************************************************************/
+
+static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
+                                nxgl_mxpixel_t color)
+{
+  FAR struct stm32_ltdc_s *priv = &layer->state;
+
+#if STM32_LTDC_L1_BPP == 8 || STM32_LTDC_L2_BPP == 8
+  if (priv->pinfo.bpp == 8)
+    {
+      uint8_t *dest = (uint8_t*)priv->pinfo.fbmem;
+      int i;
+
+      gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
+            priv->pinfo.bpp, color, dest, priv->pinfo.fblen);
+
+      for (i = 0; i < priv->pinfo.fblen; i += sizeof(uint8_t))
+        {
+          *dest++ = (uint8_t)color;
         }
 
-      /* Save information about the new access */
-
-      g_lcdc.wrlast   = wr;
-      g_lcdc.vallast  = regval;
-      g_lcdc.addrlast = address;
-      g_lcdc.ntimes   = 0;
+      return;
     }
-
-  /* Return true if this is the first time that we have done this operation */
-
-  return true;
-}
 #endif
-
-/****************************************************************************
- * Name: stm32_getreg
- *
- * Description:
- *  Read any 32-bit register using an absolute
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_LTDC_REGDEBUG
-static uint32_t stm32_getreg(uintptr_t address)
-{
-  uint32_t regval = getreg32(address);
-
-  if (stm_checkreg(false, regval, address))
+#if STM32_LTDC_L1_BPP == 16 || STM32_LTDC_L2_BPP == 16
+  if (priv->pinfo.bpp == 16)
     {
-      lldbg("%08x->%08x\n", address, regval);
+      uint16_t *dest = (uint16_t*)priv->pinfo.fbmem;
+      int i;
+
+      gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
+            priv->pinfo.bpp, color, dest, priv->pinfo.fblen);
+
+      for (i = 0; i < priv->pinfo.fblen; i += sizeof(uint16_t))
+        {
+          *dest++ = (uint16_t)color;
+        }
+
+      return;
     }
-
-  return regval;
-}
 #endif
-
-/****************************************************************************
- * Name: stm32_putreg
- *
- * Description:
- *  Write to any 32-bit register using an absolute address
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_LTDC_REGDEBUG
-static void stm32_putreg(uintptr_t address, uint32_t regval)
-{
-  if (stm_checkreg(true, regval, address))
+#if STM32_LTDC_L1_BPP == 24 || STM32_LTDC_L2_BPP == 24
+  if (priv->pinfo.bpp == 24)
     {
-      lldbg("%08x<-%08x\n", address, regval);
-    }
+      uint8_t *dest = (uint8_t*)priv->pinfo.fbmem;
+      uint8_t r;
+      uint8_t g;
+      uint8_t b;
+      int i;
 
-  putreg32(regval, address);
-}
+      gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
+            priv->pinfo.bpp, color, dest, priv->pinfo.fblen);
+
+      r = (uint8_t) color;
+      g = (uint8_t) (color >> 8);
+      b = (uint8_t) (color >> 16);
+
+      for (i = 0; i < priv->pinfo.fblen; i += 3*sizeof(uint8_t))
+        {
+          *dest++ = r;
+          *dest++ = g;
+          *dest++ = b;
+        }
+
+      return;
+    }
 #endif
+#if STM32_LTDC_L1_BPP == 32 || STM32_LTDC_L2_BPP == 32
+  if (priv->pinfo.bpp == 32)
+    {
+      uint32_t *dest = (uint32_t*)priv->pinfo.fbmem;
+      int i;
+
+      gvdbg("Clearing display: BPP=%d color=%04x framebuffer=%08x size=%d\n",
+            priv->pinfo.bpp, color, dest, priv->pinfo.fblen);
+
+      for (i = 0; i < priv->pinfo.fblen; i += sizeof(uint32_t))
+        {
+          *dest++ = (uint32_t)color;
+        }
+    }
+#endif
+}
+
 
 /****************************************************************************
- * Name: stm32_wait_lcdstatus
+ * Name: stm32_ltdc_linit
  *
  * Description:
- *   Wait for the masked set of bits in the LTDC status register to take a
- *   specific value.
+ *   Initialize layer to their default states.
+ *
+ *   Initialize:
+ *   - Reset layer
+ *   - layer fram
+ *   - Reset layerebuffers
+ *   - layer position
+ *   - layer pixelformat
+ *   - layer color
+ *   - layer colorkey
+ *   - layer alpha
+ *   - layer blendmode
+ *
+ * Parameter
+ *   layer - Reference to the layer control structure
  *
  ****************************************************************************/
 
-static void stm32_wait_lcdstatus(uint32_t mask, uint32_t value)
+static void stm32_ltdc_linit(int lid)
 {
+  /* Reset layer to their default state */
+
+  FAR struct stm32_layer_s *layer = &LAYER(lid);
+  FAR struct stm32_ltdc_s *state = &layer->state;
+#ifdef CONFIG_STM32_LTDC_INTERFACE
+  FAR struct ltdc_layer_s *ltdc = &layer->ltdc;
+
+  /* Initialize the ltdc interface */
+
+  ltdc->getlid       = stm32_getlid;
+  ltdc->getvideoinfo = stm32_lgetvideoinfo;
+  ltdc->getplaneinfo = stm32_lgetplaneinfo;
+# ifdef STM32_LAYER_CLUT_SIZE
+  ltdc->setclut      = stm32_setclut;
+  ltdc->getclut      = stm32_getclut;
+ #endif
+  ltdc->setcolor     = stm32_setcolor;
+  ltdc->getcolor     = stm32_getcolor;
+  ltdc->setcolorkey  = stm32_setcolorkey;
+  ltdc->getcolorkey  = stm32_getcolorkey;
+  ltdc->setalpha     = stm32_setalpha;
+  ltdc->getalpha     = stm32_getalpha;
+  ltdc->setblendmode = stm32_setblendmode;
+  ltdc->getblendmode = stm32_getblendmode;
+  ltdc->setarea      = stm32_setarea;
+  ltdc->getarea      = stm32_getarea;
+  ltdc->update       = stm32_update;
+ #ifdef CONFIG_STM32_DMA2D
+  ltdc->blit         = stm32_blit;
+  ltdc->blend        = stm32_blend;
+ #endif
+#endif
+
+  /* Initialize the layer state */
+
+#ifdef STM32_LAYER_CLUT_SIZE
+  state->cmap->first = 0;
+#endif
+  state->area.xpos   = 0;
+  state->area.ypos   = 0;
+  state->area.xres   = STM32_LTDC_WIDTH;
+  state->area.yres   = STM32_LTDC_HEIGHT;
+  state->xpos        = 0;
+  state->ypos        = 0;
+  state->color       = 0;
+  state->colorkey    = 0;
+  state->alpha       = 0xff;
+  state->blendmode   = LTDC_BLEND_NONE;
+  state->lock        = &g_lock;
+
+  /* Initialize driver internals */
+
+  layer->opac        = 0xff;
+  layer->bf1         = LTDC_BF1_CONST_ALPHA;
+  layer->bf2         = LTDC_BF2_CONST_ALPHA;
+  layer->operation   = LTDC_LAYER_INIT;
+
+  /* Clear the layer framebuffer */
+
+  stm32_ltdc_lclear(layer, 0);
+
+  /* Set Pixel input format */
+
+  stm32_ltdc_lpixelformat(layer);
+
+  /* Set position, color, colorkey, blendmode, alpha */
+
+  stm32_ltdc_lupdate(layer);
+
+#ifdef STM32_LAYER_CLUT_SIZE
+  /* Disable clut by default */
+  if (layer->state.vinfo.fmt == FB_FMT_RGB8)
+    {
+      stm32_ltdc_lclutenable(layer, false);
+    }
+#endif
+
 }
+
+
+/****************************************************************************
+ * Name: stm32_ltdc_cmapcpy
+ *
+ * Description:
+ *   Copies a color table
+ *   Note! Caller must check if first position is out of range
+ *
+ * Parameter:
+ *   dest - color cmap to copy to
+ *   src  - color map to copy from
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
+ ****************************************************************************/
+
+#ifdef STM32_LAYER_CLUT_SIZE
+static void stm32_ltdc_cmapcpy(FAR struct fb_cmap_s *dest,
+                                FAR const struct fb_cmap_s *src)
+{
+  int   n;
+
+  for (n = src->first; n < src->len && n < STM32_LTDC_CLUT_ENTRIES; n++)
+    {
+      regvdbg("n = %d, red = %02x, green = %02x, blue = %02x\n",
+        n, src->red[n], src->green[n], src->blue[n]);
+      dest->red[n]   = src->red[n];
+      dest->green[n] = src->green[n];
+      dest->blue[n]  = src->blue[n];
+    }
+
+  dest->first = src->first;
+  dest->len   = src->len;
+}
+#endif
+
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_getvideoinfo
+ *
+ * Description:
+ *   Get the videoinfo for the framebuffer
+ *
+ * Parameter:
+ *   vtable - The framebuffer driver object
+ *   vinfo  - the videoinfo object
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
  ****************************************************************************/
 
 static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
                                  struct fb_videoinfo_s *vinfo)
 {
   gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
-  if (vtable && vinfo)
+  if (vtable)
     {
-      memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
-      return OK;
+      FAR struct ltdc_layer_s *ltdc;
+#ifdef CONFIG_STM32_LTDC_L2
+      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L2;
+#else
+      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L1;
+#endif
+      return stm32_lgetvideoinfo(ltdc, vinfo);
     }
 
   gdbg("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
+
 /****************************************************************************
  * Name: stm32_getplaneinfo
+ *
+ * Description:
+ *   Get the planeinfo for the framebuffer
+ *
+ * Parameter:
+ *   vtable - The framebuffer driver object
+ *   pinfo  - the planeinfo object
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
  ****************************************************************************/
 
 static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
                                  struct fb_planeinfo_s *pinfo)
 {
   gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
-  if (vtable && planeno == 0 && pinfo)
+  if (vtable)
     {
-      pinfo->fbmem  = (void *)LAYER_L1.framebuffer;
-      pinfo->fblen  = STM32_L1_FBSIZE;
-      pinfo->stride = STM32_L1_STRIDE,
-      pinfo->bpp    = LAYER_L1.bpp;
+      FAR struct ltdc_layer_s *ltdc;
+#ifdef CONFIG_STM32_LTDC_L2
+      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L2;
+#else
+      ltdc = (FAR struct ltdc_layer_s*)&LAYER_L1;
+#endif
+      return stm32_lgetplaneinfo(ltdc, planeno, pinfo);
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: stm32_getcmap
+ *
+ * Description:
+ *   Get a range of CLUT values for the LCD
+ *
+ * Parameter:
+ *   vtable - The framebuffer driver object
+ *   cmap   - the color table
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
+ ****************************************************************************/
+
+#ifdef STM32_LAYER_CLUT_SIZE
+static int stm32_getcmap(struct fb_vtable_s *vtable,
+                            struct fb_cmap_s *cmap)
+{
+#ifdef CONFIG_STM32_LTDC_L2
+  return stm32_getclut((FAR struct ltdc_layer_s*)&LAYER_L2, cmap);
+#else
+  return stm32_getclut((FAR struct ltdc_layer_s*)&LAYER_L1, cmap);
+#endif
+}
+
+
+/****************************************************************************
+ * Name: stm32_putcmap
+ *
+ * Description:
+ *   Set a range of the CLUT values for the LCD
+ *
+ * Parameter:
+ *   vtable - The framebuffer driver object
+ *   cmap   - the color table
+ *
+ * Return:
+ * On success - OK
+ * On error   - -EINVAL
+ *
+ ****************************************************************************/
+
+static int stm32_putcmap(struct fb_vtable_s *vtable,
+                            const struct fb_cmap_s *cmap)
+{
+#ifdef CONFIG_STM32_LTDC_L2
+  return stm32_setclut((FAR struct ltdc_layer_s*)&LAYER_L2, cmap);
+#else
+  return stm32_setclut((FAR struct ltdc_layer_s*)&LAYER_L1, cmap);
+#endif
+}
+#endif /* STM32_LAYER_CLUT_SIZE */
+
+
+/****************************************************************************
+ * Name: stm32_lgetvideoinfo
+ *
+ * Description:
+ *   Get video information about the layer
+ *
+ * Parameter:
+ *   layer  - Reference to the layer control structure
+ *   vinfo  - Reference to the video info structure
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
+ ****************************************************************************/
+
+static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
+                                 struct fb_videoinfo_s *vinfo)
+{
+  gvdbg("layer=%p vinfo=%p\n", layer, vinfo);
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+
+  if (priv == &LAYER_L1 || priv == &LAYER_L2)
+    {
+      memcpy(vinfo, &priv->state.vinfo, sizeof(struct fb_videoinfo_s));
+
       return OK;
     }
 
@@ -524,298 +2184,1059 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
   return -EINVAL;
 }
 
-/****************************************************************************
- * Name: stm32_base_getcmap
- ****************************************************************************/
-
-#ifdef CONFIG_FB_CMAP
-static int stm32_getcmap(struct fb_vtable_s *vtable,
-                            struct fb_cmap_s *cmap)
-{
-  return stm_getclut(&LAYER_L1, cmap);
-}
-#endif
 
 /****************************************************************************
- * Name: stm_base_putcmap
- ****************************************************************************/
-
-#ifdef CONFIG_FB_CMAP
-static int stm32_putcmap(struct fb_vtable_s *vtable,
-                            const struct fb_cmap_s *cmap)
-{
-  return stm32_setclut(&LAYER_L1, cmap);
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_setposition
+ * Name: stm32_lgetplaneinfo
  *
  * Description:
- *   Set the new position of a move-able layer (any layer except the base
- *   layer).
+ *   Get plane information about the layer
+ *
+ * Parameter:
+ *   layer   - Reference to the layer control structure
+ *   planeno - Number of the plane
+ *   pinfo   - Reference to the plane info structure
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
  *
  ****************************************************************************/
 
-static void stm32_setposition(int lid, uint32_t x, uint32_t y)
+static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
+                                 struct fb_planeinfo_s *pinfo)
 {
+  gvdbg("layer=%p planeno=%d pinfo=%p\n", layer, planeno, pinfo);
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+
+  if (stm32_ltdc_lvalidate(priv) && planeno == 0)
+    {
+      memcpy(pinfo, &priv->state.pinfo, sizeof(struct fb_planeinfo_s));
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
+
 
 /****************************************************************************
  * Name: stm32_setclut
  *
  * Description:
- *   Set a range of CLUT values for any layer
+ *   Configure layer clut (color lookup table).
+ *   Non clut is defined during initializing.
+ *   Clut is active during next vertical blank period. Do not need an update.
+ *
+ * Parameter:
+ *   layer  - Reference to the layer structure
+ *   cmap   - color lookup table with up the 256 entries
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FB_CMAP
-static int stm32_setclut(struct stm32_layer_s *layer,
-                       const struct fb_cmap_s *cmap)
+#ifdef STM32_LAYER_CLUT_SIZE
+static int stm32_setclut(struct ltdc_layer_s *layer,
+                        const struct fb_cmap_s *cmap)
 {
+  int   ret;
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer=%p cmap=%p\n", layer, cmap);
 
-  return OK;
+  if (stm32_ltdc_lvalidate(priv) && cmap)
+    {
+      sem_wait(priv->state.lock);
+
+      if (priv->state.vinfo.fmt != FB_FMT_RGB8)
+        {
+          gdbg("Error: CLUT is not supported for the pixel format: %d\n",
+                    priv->state.vinfo.fmt);
+          ret = -EINVAL;
+        }
+      else if (cmap->first > STM32_LTDC_CLUT_ENTRIES)
+        {
+          gdbg("Error: CLUT offset is out of range: %d\n", cmap->first);
+          ret = -EINVAL;
+        }
+      else
+        {
+          /* Copy to the layer clut */
+
+          stm32_ltdc_cmapcpy(priv->state.cmap, cmap);
+
+          /* Update layer clut register */
+
+          stm32_ltdc_lclut(priv);
+
+          ret = OK;
+        }
+
+      sem_post(priv->state.lock);
+
+      return ret;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
-#endif
+
 
 /****************************************************************************
  * Name: stm32_getclut
  *
  * Description:
- *   Get a range of CLUT values for any layer
+ *   Get configured layer clut (color lookup table).
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   cmap  - Reference to valid color lookup table accept up the 256 color
+ *           entries
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FB_CMAP
-static int stm32_getclut(struct stm_layer_s *layer,
-                       struct fb_cmap_s *cmap)
+static int stm32_getclut(struct ltdc_layer_s *layer,
+                         struct fb_cmap_s *cmap)
 {
+  int   ret;
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer=%p cmap=%p\n", layer, cmap);
 
-  return OK;
+  if (priv == &LAYER_L1 || priv == &LAYER_L2)
+    {
+      sem_wait(priv->state.lock);
+
+      if (priv->state.vinfo.fmt != FB_FMT_RGB8)
+        {
+          gdbg("Error: CLUT is not supported for the pixel format: %d\n",
+                    priv->state.vinfo.fmt);
+          ret = -EINVAL;
+        }
+      else if (cmap->len < priv->state.cmap->len)
+        {
+          gdbg("Error: cmap must accept %d color table entries: %d\n",
+                    priv->state.cmap->len);
+          ret = -EINVAL;
+        }
+      else
+        {
+          /* Copy from the layer cmap */
+
+          stm32_ltdc_cmapcpy(cmap, priv->state.cmap);
+
+          ret = OK;
+        }
+
+      sem_post(priv->state.lock);
+
+      return ret;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
-#endif
+#endif /* STM32_LAYER_CLUT_SIZE */
 
+#ifdef CONFIG_STM32_LTDC_INTERFACE
 /****************************************************************************
- * Name: stm32_backlight
+ * Name: getlid
  *
  * Description:
- *   Set the backlight level
+ *   Get a specific layer identifier.
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   lid   - Reference to store the layer id
+ *   flag  - Operation flag describe the layer identifier
+ *           e.g. get the current active or inactive layer.
+ *           See LTDC_LAYER_* for possible values
+ *
+ * Return:
+ *   OK - On success
+ *   Null if invalid flag
  *
  ****************************************************************************/
 
-static void stm32_backlight(uint32_t level)
+static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid, uint32_t flag)
 {
-}
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
-/****************************************************************************
- * Name: stm32_l1_disable
- *
- * Description:
- *   Disable Layer 1
- *
- ****************************************************************************/
+  gvdbg("flag = %08x\n", flag);
 
-static void stm32_l1_disable(void)
-{
-}
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      int   ret = OK;
 
-/****************************************************************************
- * Name: stm32_l2_disable
- *
- * Description:
- *   Disable Layer 2
- *
- ****************************************************************************/
+      sem_wait(priv->state.lock);
 
-static void stm32_l2_disable(void)
-{
-}
-
-/****************************************************************************
- * Name: stm32_lcd_disable
- *
- * Description:
- *   Disable the LCD peripheral
- *
- ****************************************************************************/
-
-static void stm32_lcd_disable(void)
-{
-  /* Disable layers */
-
-  stm32_l1_disable();
-  stm32_l2_disable();
-
-}
-
-/****************************************************************************
- * Name: stm32_layer_position
- *
- * Description:
- *   Configure LTDC layer position
- *
- ****************************************************************************/
-
-static void stm32_layer_position(void)
-{
-}
-
-/****************************************************************************
- * Name: stm32_layer_color
- *
- * Description:
- *   Configure LTDC layer color mode
- *
- ****************************************************************************/
-
-static void stm32_layer_color(void)
-{
-}
-
-/****************************************************************************
- * Name: stm32_lcd_enable
- *
- * Description:
- *   Enable the LCD for normal use
- *
- ****************************************************************************/
-
-static void stm32_lcd_enable(void)
-{
-}
-
-/****************************************************************************
- * Name: stm32_layer_configure
- *
- * Description:
- *   Configure layer layer structures and framebuffers
- *
- ****************************************************************************/
-
-static void stm32_layer_configure(void)
-{
-  /* Common layer initialization */
-
-  memset(&LAYER_L1, 0, sizeof(struct stm32_layer_s));
-  LAYER_L1.lid           = LTDC_LAYER_L1;
-  LAYER_L1.framebuffer   = (uint8_t *)STM32_LTDC_BUFFER_L1;
-
-  memset(&LAYER_L2, 0, sizeof(struct stm32_layer_s));
-  LAYER_L2.lid           = LTDC_LAYER_L2;
+      switch (flag)
+        {
+          case LTDC_LAYER_OWN:
+            *lid = priv->state.lid;
+            break;
 #ifdef CONFIG_STM32_LTDC_L2
-  LAYER_L2.framebuffer   = (uint8_t *)STM32_LTDC_BUFFER_L2;
+          case LTDC_LAYER_ACTIVE:
+            *lid = g_lactive;
+            break;
+          case LTDC_LAYER_INACTIVE:
+            *lid = !g_lactive;
+            break;
+          case LTDC_LAYER_TOP:
+            *lid = LTDC_LAYER_L2;
+            break;
+          case LTDC_LAYER_BOTTOM:
+            *lid = LTDC_LAYER_L1;
+            break;
+#else
+          case LTDC_LAYER_ACTIVE:
+          case LTDC_LAYER_INACTIVE:
+          case LTDC_LAYER_TOP:
+          case LTDC_LAYER_BOTTOM:
+            *lid = LTDC_LAYER_L1;
+            break;
 #endif
+          default:
+            ret = EINVAL;
+            gdbg("Returning EINVAL\n");
+            break;
+        }
+
+      sem_post(priv->state.lock);
+
+      return ret;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
 
+
 /****************************************************************************
- * Name: stm32_ltdc_periphconfig
+ * Name: stm32_setcolor
  *
  * Description:
- *   Configures the LTDC peripheral clock and SAI PLL clocks to drive the
- *   LCD.
+ *    Configure layer default color value for the non active layer area.
+ *    Default value during initializing: 0x00000000
+ *    Color is active after next update.
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   argb  - ARGB8888 color value
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
  *
  ****************************************************************************/
 
-static void stm32_config_lcd_clock(void)
+static int stm32_setcolor(FAR struct ltdc_layer_s *layer, uint32_t argb)
 {
-  uint32_t    regval;
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, argb = %08x\n", layer, argb);
 
-  /* Configure the SAI PLL to provide the LCD_CLK */
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      priv->state.color = argb;
+      priv->operation |= LTDC_LAYER_SETCOLOR;
+      sem_post(priv->state.lock);
 
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
 
+
 /****************************************************************************
- * Name: stm32_show_layer
+ * Name: stm32_getcolor
  *
  * Description:
- *   Show the given layer with the specified window
+ *   Get configured layer color for the non active layer area.
  *
- ****************************************************************************/
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   argb  - Reference to store the ARGB8888 color value
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
+ *
+*******************************************************************************/
 
-static void stm32_show_layer(struct stm32_layer_s *layer,
-                           uint32_t dispx, uint32_t dispy,
-                           uint32_t dispw, uint32_t disph)
+static int stm32_getcolor(FAR struct ltdc_layer_s *layer, uint32_t *argb)
 {
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, argb = %p\n", layer, argb);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      *argb = priv->state.color;
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
 
+
 /****************************************************************************
- * Name: stm32_show_l1
+ * Name: stm32_setcolorkey
  *
  * Description:
- *   Show Layer 1 (the "base" layer)
+ *    Configure layer default color key (chromakey) value for transparence.
+ *    Layer default value during initializing: 0x00000000
+ *    Colorkey is active after next update.
+ *
+ * Parameter:
+ *   layer  - Reference to the layer structure
+ *   rgb   - RGB888 color value
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
  *
  ****************************************************************************/
 
-static void stm32_show_l1(void)
+static int stm32_setcolorkey(FAR struct ltdc_layer_s *layer, uint32_t rgb)
 {
-  stm32_show_layer(&LAYER_L1, 0, 0, BOARD_LTDC_WIDTH, BOARD_LTDC_HEIGHT);
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, argb = %08x\n", layer, rgb);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      priv->state.colorkey = rgb;
+      priv->operation |= LTDC_LAYER_SETCOLORKEY;
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fbinitialize
+ * Name: stm32_getcolorkey
  *
  * Description:
- *   Initialize the framebuffer video hardware
+ *   Get the configured layer color key (chromakey) for transparence.
+ *
+ * Parameter:
+ *   layer  - Reference to the layer structure
+ *   rgb    - Reference to store the RGB888 color key
+ *
+ * Return:
+ *   On success - OK
+ *   On error   - -EINVAL
  *
  ****************************************************************************/
 
-int up_fbinitialize(void)
+static int stm32_getcolorkey(FAR struct ltdc_layer_s *layer, uint32_t *rgb)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, argb = %p\n", layer, rgb);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      *rgb = priv->state.colorkey;
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: setalpha
+ *
+ * Description:
+ *   Configure layer alpha value factor into blend operation.
+ *   During the layer blend operation the source alpha value is multiplied
+ *   with this alpha value. If the source color format doesn't support alpha
+ *   channel (e.g. non ARGB8888) this alpha value will be used as constant
+ *   alpha value for blend operation.
+ *   Default alpha value during initializing: 0xff
+ *   Alpha is active after next update.
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   alpha - Alpha value
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
+ *
+ ****************************************************************************/
+
+static int stm32_setalpha(FAR struct ltdc_layer_s *layer, uint8_t alpha)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, alpha = %02x\n", layer, alpha);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      priv->state.alpha = alpha;
+      priv->operation  |= LTDC_LAYER_SETALPHAVALUE;
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: stm32_getalpha
+ *
+ * Description:
+ *   Get configured layer alpha value factor for blend operation.
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   alpha - Reference to store the alpha value
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
+ *
+ ****************************************************************************/
+
+static int stm32_getalpha(FAR struct ltdc_layer_s *layer, uint8_t *alpha)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, alpha = %p\n", layer, alpha);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      *alpha = priv->state.alpha;
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: setblendmode
+ *
+ * Description:
+ *   Configure blend mode of the layer.
+ *   Default mode during initialzing: LTDC_BLEND_NONE
+ *   Blendmode is active after next update.
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   mode  - Blend mode (see LTDC_BLEND_*)
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
+ *
+ * Procedure information:
+ *   LTDC_BLEND_NONE:
+ *     Informs the driver to disable all blend operation for the given layer.
+ *     That means the layer is opaque. Note this has no effect on the
+ *     colorkey settings.
+ *
+ *   LTDC_BLEND_ALPHA:
+ *     Informs the driver to enable alpha blending for the given layer.
+ *
+ *   LTDC_BLEND_COLORKEY:
+ *     Informs the driver to enable colorkeying for the given layer.
+ *
+ *   LTDC_BLEND_SRCPIXELALPHA:
+ *     Informs the driver to use the pixel alpha value of the layer instead
+ *     the constant alpha value. This is only useful for ARGB8888
+ *     color format.
+ *
+ *   LTDC_BLEND_DESTPIXELALPHA:
+ *     Informs the driver to use the pixel alpha value of the subjacent layer
+ *     instead the constant alpha value. This is only useful for ARGB8888
+ *     color format.
+ *
+ ****************************************************************************/
+
+static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, mode = %08x\n", layer, mode);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      int         ret = OK;
+
+      sem_wait(priv->state.lock);
+
+      /* Disable alpha blending by default */
+
+      priv->bf1         = LTDC_BF1_CONST_ALPHA;
+      priv->bf2         = LTDC_BF2_CONST_ALPHA;
+      stm32_ltdc_lsetopac(priv);
+
+      /* Disable colorkeying by default */
+
+      priv->operation &=~ LTDC_LAYER_ENABLECOLORKEY;
+
+      if (mode & LTDC_BLEND_ALPHA)
+        {
+          /* Initialize blend factor */
+
+          if (mode & LTDC_BLEND_SRCPIXELALPHA)
+            {
+              priv->bf1 = LTDC_BF1_PIXEL_ALPHA;
+            }
+          else if (mode & LTDC_BLEND_DESTPIXELALPHA)
+            {
+              priv->bf2 = LTDC_BF2_PIXEL_ALPHA;
+            }
+
+          /* Enable blending, restore the alpha value */
+
+          stm32_ltdc_lunsetopac(priv);
+          mode       &= ~LTDC_BLEND_ALPHA;
+        }
+      if (mode & LTDC_BLEND_COLORKEY)
+        {
+          /* Enable colorkeying */
+
+          priv->operation |= LTDC_LAYER_ENABLECOLORKEY;
+          mode            &= ~LTDC_BLEND_COLORKEY;
+        }
+      if(mode & ~(LTDC_BLEND_SRCPIXELALPHA|LTDC_BLEND_DESTPIXELALPHA))
+        {
+          gdbg("Unknown blendmode %02x\n", mode);
+          ret = -EINVAL;
+        }
+
+      if (ret == OK)
+        {
+          priv->state.blendmode  = mode;
+          priv->operation       |= (LTDC_LAYER_SETBLENDMODE|
+                                    LTDC_LAYER_SETALPHAVALUE|
+                                    LTDC_LAYER_SETCOLORKEY);
+        }
+
+      sem_post(priv->state.lock);
+
+      return ret;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: stm32_getblendmode
+ *
+ * Description:
+ *   Get configured blend mode of the layer.
+ *
+ * Parameter:
+ *   layer - Reference to the layer structure
+ *   mode  - Reference to store the blend mode
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
+ ****************************************************************************/
+
+static int stm32_getblendmode(FAR struct ltdc_layer_s *layer, uint32_t *mode)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, mode = %p\n", layer, mode);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      *mode = priv->state.blendmode;
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: stm32_setarea
+ *
+ * Description:
+ *   Configure visible layer area and the reference position of the first
+ *   pixel of the whole layer which is the first visible top left pixel in
+ *   the active area.
+ *   Area is active after next update.
+ *
+ * Parameter:
+ *   layer   - Reference to the layer control structure
+ *   area    - Reference to the valid area structure for the new active area
+ *   srcxpos - x position of the visible pixel of the whole layer
+ *   srcypos - y position of the visible pixel of the whole layer
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
+ *
+ * Procedure Information:
+ *   If the srcxpos and srcypos unequal the the xpos and ypos of the area
+ *   structure this acts like moving the visible area to another position on
+ *   the screen during the next update operation.
+ *
+ ****************************************************************************/
+
+static int stm32_setarea(FAR struct ltdc_layer_s *layer,
+                        FAR const struct ltdc_area_s *area,
+                        fb_coord_t srcxpos,
+                        fb_coord_t srcypos)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, area = %p, srcxpos = %d, srcypos = %d\n",
+            layer, area, srcxpos, srcypos);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      int ret;
+
+      sem_wait(priv->state.lock);
+
+      ret = stm32_ltdc_lvalidatearea(priv, area->xpos, area->ypos, area->xres,
+                                    area->yres, srcxpos, srcypos);
+
+      if (ret == OK)
+        {
+          priv->state.xpos       = srcxpos;
+          priv->state.ypos       = srcypos;
+          priv->state.area.xpos  = area->xpos;
+          priv->state.area.ypos  = area->ypos;
+          priv->state.area.xres  = area->xres;
+          priv->state.area.yres  = area->yres;
+          priv->operation       |= LTDC_LAYER_SETAREA;
+        }
+
+      sem_post(priv->state.lock);
+
+      return ret;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: stm32_getarea
+ *
+ * Description:
+ *    Get configured visible layer area.
+ *
+ * Parameter:
+ *   layer   - Reference to the layer control structure
+ *   area    - Reference to the area structure to store the active area
+ *   srcxpos - Reference to store the referenced x position of the whole layer
+ *   srcypos - Reference to store the reterenced y position of the whole layer
+ *
+ * Return:
+ *   On success - OK
+ *   On error - -EINVAL
+ *
+ ****************************************************************************/
+
+static int stm32_getarea(FAR struct ltdc_layer_s *layer,
+                        FAR struct ltdc_area_s *area,
+                        fb_coord_t *srcxpos, fb_coord_t *srcypos)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, area = %p, srcxpos = %p, srcypos = %p\n",
+            layer, area, srcxpos, srcypos);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      sem_wait(priv->state.lock);
+      *srcxpos = priv->state.xpos;
+      *srcypos = priv->state.ypos;
+      memcpy(area, &priv->state.area, sizeof(struct ltdc_area_s));
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ * Name: stm32_update
+ *
+ * Description:
+ *   Update current layer settings and make changes visible.
+ *
+ * Parameter:
+ *   layer   - Reference to the layer structure
+ *   mode    - operation mode
+ *
+ * Return:
+ *    OK     - On success
+ *   -EINVAL - If one of the parameter invalid
+ *
+ * Procedure information:
+ *   LTDC_UPDATE_SIM:
+ *     Informs the driver to update both layers simultaneously. Otherwise update
+ *     the given layer only.
+ *
+ *   LTDC_UPDATE_FLIP:
+ *     Informs the driver to perform a flip operation.
+ *     This only effects the ltdc layer 1 and 2 and can be useful for double
+ *     buffering. Each flip operation changed the active layer to the inactive
+ *     and vice versa. In the context of the ltdc that means, the inactive layer
+ *     is complete disabled. So the subjacent layer is the background layer
+ *     (background color). To reactivate both layer and their current settings
+ *     perform an update without LTDC_UPDATE_FLIP flag.
+ *
+ *   LTDC_UPDATE_ACTIVATE:
+ *     Informs the driver that the given layer should be the active layer when
+ *     the operation is complete.
+ *
+ *   LTDC_SYNC_VBLANK:
+ *     Informs the driver to update the layer upon vertical blank. Otherwise
+ *     immediately.
+ *
+ ****************************************************************************/
+
+static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  FAR struct stm32_layer_s *active = &LAYER(g_lactive);
+  FAR struct stm32_layer_s *inactive = &LAYER(!g_lactive);
+
+  gvdbg("layer = %p, mode = %08x\n", layer, mode);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      /* Reload immediately by default */
+      uint8_t reload = LTDC_SRCR_IMR;
+
+      sem_wait(priv->state.lock);
+
+      if (mode & LTDC_SYNC_VBLANK)
+        {
+          reload = LTDC_SRCR_VBR;
+        }
+
+      if (mode & LTDC_SYNC_WAIT)
+        {
+          reload |= LTDC_SRCR_WAIT;
+        }
+
+      /* Update the given layer */
+
+      stm32_ltdc_lupdate(priv);
+
+      if (mode & LTDC_UPDATE_SIM)
+        {
+          /* Also update the flip layer */
+
+          stm32_ltdc_lupdate(&LAYER(!priv->state.lid));
+        }
+
+      if (mode & LTDC_UPDATE_ACTIVATE)
+        {
+          /* Set the given layer to the active layer */
+
+          g_lactive = priv->state.lid;
+
+          /* Also change this for flip operation */
+
+          active = &LAYER(!g_lactive);
+        }
+
+      if (mode & LTDC_UPDATE_FLIP)
+        {
+          /* Reset if manipulated by ACTIVATE flag */
+
+          inactive = &LAYER(!active->state.lid);
+
+          /* Set blendfactor for current active layer to there reset value */
+
+          stm32_ltdc_lblendmode(active, STM32_LTDC_BF1_RESET, STM32_LTDC_BF2_RESET);
+
+          /* Set blendfactor for current inactive layer */
+
+          stm32_ltdc_lblendmode(inactive, inactive->bf1, inactive->bf2);
+
+          /* Disable the active layer */
+
+          active->operation &= ~LTDC_LAYER_ENABLE;
+
+          stm32_ltdc_lenable(active);
+
+          /* Enable the inactive layer */
+
+          inactive->operation |= LTDC_LAYER_ENABLE;
+
+          stm32_ltdc_lenable(inactive);
+
+          /*
+           * Ensure that both layer active and the manipulated layer
+           * settings restored during the next update (non flip) operation
+           */
+
+          active->operation |= (LTDC_LAYER_SETBLENDMODE|
+                                LTDC_LAYER_ENABLE|
+                                LTDC_LAYER_SETCOLOR|
+                                LTDC_LAYER_SETENABLE);
+
+          /* Change layer activity */
+
+          g_lactive = inactive->state.lid;
+        }
+
+      /* Make the changes visible */
+
+      stm32_ltdc_reload(reload);
+
+      sem_post(priv->state.lock);
+
+      return OK;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+#ifdef CONFIG_STM32_DMA2D
+/****************************************************************************
+ * Name: blit
+ *
+ * Description:
+ *   Copy selected area from a background layer to selected position of the
+ *   foreground layer. Copies the result to the destination layer.
+ *
+ * Parameter:
+ *   dest     - Reference to the destination layer
+ *   fore     - Reference to the foreground layer
+ *   forexpos - Selected x target position of the destination layer
+ *   foreypos - Selected y target position of the destination layer
+ *   back     - Reference to the background layer
+ *   backarea - Reference to the selected area of the background layer
+ *
+ * Return:
+ *    OK     - On success
+ *   -EINVAL - If one of the parameter invalid or if the size of the selected
+ *             source area outside the visible area of the destination layer.
+ *             (The visible area usually represents the display size)
+ *
+ ****************************************************************************/
+
+static int stm32_blit(FAR struct ltdc_layer_s *dest,
+                      FAR struct ltdc_layer_s *fore,
+                      fb_coord_t forexpos, fb_coord_t foreypos,
+                      FAR struct ltdc_layer_s *back,
+                      FAR const struct ltdc_area_s *backarea)
+{
+  gvdbg("dest = %p, fore = %p, forexpos = %d, foreypos = %d, back = %p, \
+            backarea = %p\n", dest, fore, forexpos, foreypos, back, backarea);
+  FAR struct stm32_layer_s *destlayer = (FAR struct stm32_layer_s *)dest;
+  FAR struct stm32_layer_s *forelayer = (FAR struct stm32_layer_s *)fore;
+  FAR struct stm32_layer_s *backlayer = (FAR struct stm32_layer_s *)back;
+
+  if (stm32_ltdc_lvalidate(destlayer) &&
+      stm32_ltdc_lvalidate(forelayer) &&
+      stm32_ltdc_lvalidate(backlayer))
+    {
+      return stm32_dma2dblit(&destlayer->state,
+                              &forelayer->state,
+                              forexpos, foreypos,
+                              &backlayer->state,
+                              backarea);
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+
+/****************************************************************************
+ *
+ * Name: blend
+ *
+ * Description:
+ *   Blends the selected area from a background layer with selected position of
+ *   the foreground layer. Blends the result with the destination layer.
+ *   Note! This is the same as the blit operation but with blending depending on
+ *   the blendmode settings of the layer.
+ *
+ * Parameter:
+ *   dest     - Reference to the destination layer
+ *   fore     - Reference to the foreground layer
+ *   forexpos - Selected x target position of the destination layer
+ *   foreypos - Selected y target position of the destination layer
+ *   back     - Reference to the background layer
+ *   backarea - Reference to the selected area of the background layer
+ *
+ * Return:
+ *    OK     - On success
+ *   -EINVAL - If one of the parameter invalid or if the size of the selected
+ *             source area outside the visible area of the destination layer.
+ *             (The visible area usually represents the display size)
+ *
+ ****************************************************************************/
+
+static int stm32_blend(FAR struct ltdc_layer_s *dest,
+                        FAR struct ltdc_layer_s *fore,
+                        fb_coord_t forexpos, fb_coord_t foreypos,
+                        FAR struct ltdc_layer_s *back,
+                        FAR const struct ltdc_area_s *backarea)
+{
+  gvdbg("dest = %p, fore = %p, forexpos = %d, foreypos = %d, back = %p, \
+            backarea = %p\n", dest, fore, forexpos, foreypos, back, backarea);
+  FAR struct stm32_layer_s *destlayer = (FAR struct stm32_layer_s *)dest;
+  FAR struct stm32_layer_s *forelayer = (FAR struct stm32_layer_s *)fore;
+  FAR struct stm32_layer_s *backlayer = (FAR struct stm32_layer_s *)back;
+
+  if (stm32_ltdc_lvalidate(destlayer) &&
+      stm32_ltdc_lvalidate(forelayer) &&
+      stm32_ltdc_lvalidate(backlayer))
+    {
+      return stm32_dma2dblend(&destlayer->state,
+                              &forelayer->state,
+                              forexpos, foreypos,
+                              &backlayer->state,
+                              backarea);
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+#endif
+
+
+/****************************************************************************
+ * Name: stm32_ltdcgetlayer
+ *
+ * Description:
+ *   This is a non-standard framebuffer interface.
+ *   Get the specific layer object by the layer id to enable layer hardware
+ *   support.
+ *
+ * Parameter:
+ *   lid - Layer identifier
+ *
+ * Return:
+ *   Reference to the layer control structure on success or Null if lid
+ *   is invalid.
+ *
+ ****************************************************************************/
+
+FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
+{
+  gvdbg("lid: %d\n", lid);
+  if (lid == LTDC_LAYER_L1 || lid == LTDC_LAYER_L2)
+    {
+      return (FAR struct ltdc_layer_s *) &LAYER(lid);
+    }
+
+  gdbg("EINVAL\n");
+  errno = EINVAL;
+  return NULL;
+}
+#endif /* CONFIG_STM32_LTDC_INTERFACE */
+
+
+/****************************************************************************
+ * Name: stm32_ltdcinitialize
+ *
+ * Description:
+ *   Initialize the ltdc controller
+ *
+ * Return:
+ *   OK
+ *
+ ****************************************************************************/
+
+int stm32_ltdcinitialize(void)
 {
   gvdbg("Entry\n");
 
-  /* Configure layer layer structures, DMA descriptor memory, and
-   * framebuffers
-   */
-
-  stm32_layer_configure();
-
   /* Disable the LCD */
 
-  stm32_lcd_disable();
+  stm32_lcd_enable(false);
 
   gvdbg("Configuring the LCD controller\n");
 
-  /* Configure and Enable the LCD clock */
+  /* Configure LCD periphery */
 
-  /* Disable LCD interrupts */
+  gvdbg("Configure lcd periphery\n");
+  stm32_ltdc_periphconfig();
 
-  /* Configure layer positions */
+  /* Configure global ltdc register */
 
-  stm32_layer_position();
+  gvdbg("Configure global register\n");
+  stm32_global_configure();
 
-  /* Configure layer colors */
+  /* Initialize ltdc layer */
 
-  stm32_layer_color();
+  gvdbg("Initialize ltdc layer\n");
+  stm32_ltdc_linit(LTDC_LAYER_L1);
+#ifdef CONFIG_STM32_LTDC_L2
+  stm32_ltdc_linit(LTDC_LAYER_L2);
+#endif
 
-  /* Clear the display memory */
+  /* Display layer 1 and 2 */
 
-  stm32_lcdclear(CONFIG_STM32_LTDC_BACKCOLOR);
+  stm32_ltdc_lenable(&LAYER_L1);
+#ifdef CONFIG_STM32_LTDC_L2
+  stm32_ltdc_lenable(&LAYER_L2);
+#endif
 
-  /* And turn the LCD on */
+  /* Enable the backlight */
+
+#ifdef CONFIG_STM32_LCD_BACKLIGHT
+  stm32_backlight(true);
+#endif
+
+  /* Reload shadow register */
+
+  gvdbg("Reload shadow register\n");
+  stm32_ltdc_reload(LTDC_SRCR_IMR);
+
+  /* Turn the LCD on */
 
   gvdbg("Enabling the display\n");
-  stm32_lcd_enable();
-
-  /* Display layer 1 */
-
-  stm32_show_l1();
-
-  /* Enable the backlight.
-   *
-   * REVISIT:  Backlight level could be dynamically adjustable
-   */
-
-  stm32_backlight(CONFIG_STM32_LTDC_DEFBACKLIGHT);
+  stm32_lcd_enable(true);
 
   return OK;
 }
 
+
 /****************************************************************************
- * Name: stm32_fbgetvplane
+ * Name: stm32_ltdcgetvplane
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
@@ -827,9 +3248,9 @@ int up_fbinitialize(void)
  * Returned value:
  *   Reference to the framebuffer object (NULL on failure)
  *
- ***************************************************************************/
+ ****************************************************************************/
 
-struct fb_vtable_s *up_fbgetvplane(int vplane)
+struct fb_vtable_s *stm32_ltdcgetvplane(int vplane)
 {
   gvdbg("vplane: %d\n", vplane);
   if (vplane == 0)
@@ -840,6 +3261,7 @@ struct fb_vtable_s *up_fbgetvplane(int vplane)
     return NULL;
 }
 
+
 /****************************************************************************
  * Name: fb_uninitialize
  *
@@ -849,24 +3271,51 @@ struct fb_vtable_s *up_fbgetvplane(int vplane)
  *
  ****************************************************************************/
 
-void fb_uninitialize(void)
+void stm32_ltdcuninitialize(void)
 {
   /* Disable the LCD controller */
 
-  stm32_lcd_disable();
+  stm32_lcd_enable(false);
 }
 
-/************************************************************************************
+
+/****************************************************************************
  * Name:  stm32_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the STM32.  Clearing the display
- *   in the normal way by writing a sequences of runs that covers the entire display
- *   can be slow.  Here the display is cleared by simply setting all video memory to
- *   the specified color.
+ *   This is a non-standard LCD interface just for the STM32 LTDC. Clearing the
+ *   display in the normal way by writing a sequences of runs that covers the
+ *   entire display can be slow.  Here the display is cleared by simply setting
+ *   all video memory to the specified color.
  *
- ************************************************************************************/
+ * Parameter:
+ *   color - The color the clear the whole framebuffer
+ *
+ ****************************************************************************/
 
 void stm32_lcdclear(nxgl_mxpixel_t color)
 {
+#ifdef CONFIG_STM32_LTDC_L2
+  stm32_ltdc_lclear(&LAYER(LTDC_LAYER_L2), color);
+#endif
+  stm32_ltdc_lclear(&LAYER(LTDC_LAYER_L1), color);
 }
+
+/****************************************************************************
+ * Name: stm32_lcd_backlight
+ *
+ * Description:
+ *   Provide this interface to turn the backlight on and off.
+ *
+ * Parameter:
+ *   blon - Enable or disable the lcd backlight
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_LCD_BACKLIGHT
+void stm32_backlight(bool blon)
+{
+  /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
+  gdbg("Not supported\n");
+}
+#endif
