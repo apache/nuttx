@@ -25,13 +25,8 @@ README.txt
       memories, parallel peripherals, and other system functions. 
     - In-Circuit Debug Interface (ICDI)
 
-On-Board GPIO Usage
-===================
-
-  [To be provided]
-
-Using OpenOCD and GDB with an FT2232 JTAG emulator
-==================================================
+Using OpenOCD and GDB with ICDI
+===============================
 
   Building OpenOCD under Cygwin:
 
@@ -377,8 +372,25 @@ Buttons and LEDs
 Serial Console
 ==============
 
-  [To be provided]
+  By default, all configurations use UART0 which connects to the USB VCOM
+  on the DEBUG port on the TM4C123 ICDI interface:
 
+    UART0 RX - PA.0
+    UART0 TX - PA.1
+
+  However, if you use an external RS232 driver, then other options are
+  available.  If your serial terminal loses connection with the USB serial
+  port each time you power cycle the board, the VCOM option can be very
+  painful.
+
+  UART0 TTL level signals are also available at J3 (also at J1):
+
+    DEBUG_TX - J3, pin 13.  Labelled PA1
+    DEBUG_RX - J3, pin 15.  Labelled PA0
+
+  Remove the jumper between pins 13-14 and 15-16 to disconnect UART0 from
+  the TM4C123 ICDI chip; Connect your external RS-232 driver at pins 13
+  and 16.  5v, 3.3v, AND GND are arvailable nearby at J10.
 
 DK-TM4129X Configuration Options
 ================================
