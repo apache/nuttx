@@ -142,6 +142,106 @@ extern const struct nx_fontpackage_s g_serif27x38b_package;
 extern const struct nx_fontpackage_s g_serif38x49b_package;
 #endif
 
+/* Pixel fonts */
+
+#ifdef CONFIG_NXFONT_PIXEL_UNICODE
+extern const struct nx_fontpackage_s g_pixel_unicode_package;
+#endif
+
+#ifdef CONFIG_NXFONT_PIXEL_LCD_MACHINE
+extern const struct nx_fontpackage_s g_pixel_lcd_machine_package;
+#endif
+
+/* X11 misc fixed fonts */
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_4X6
+extern const struct nx_fontpackage_s g_x11_misc_fixed_4x6_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_5X7
+extern const struct nx_fontpackage_s g_x11_misc_fixed_5x7_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_5X8
+extern const struct nx_fontpackage_s g_x11_misc_fixed_5x8_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X9
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x9_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X10
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x10_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X12
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x12_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13B
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13B_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13O
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13O_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13B
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13B_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13O
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13O_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14B
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14B_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13B
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13B_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13O
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13O_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15B
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15B_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18B
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18B_package;
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
+extern const struct nx_fontpackage_s g_x11_misc_fixed_10x20_package;
+#endif
+
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
 
@@ -225,6 +325,106 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 
 #ifdef CONFIG_NXFONT_SERIF38X49B
   &g_serif38x49b_package,
+#endif
+
+/* Pixel fonts */
+
+#ifdef CONFIG_NXFONT_PIXEL_UNICODE
+  &g_pixel_unicode_package,
+#endif
+
+#ifdef CONFIG_NXFONT_PIXEL_LCD_MACHINE
+  &g_pixel_lcd_machine_package,
+#endif
+
+/* X11 misc fixed fonts */
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_4X6
+  &g_x11_misc_fixed_4x6_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_5X7
+  &g_x11_misc_fixed_5x7_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_5X8
+  &g_x11_misc_fixed_5x8_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X9
+  &g_x11_misc_fixed_6x9_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X10
+  &g_x11_misc_fixed_6x10_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X12
+  &g_x11_misc_fixed_6x12_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13
+  &g_x11_misc_fixed_6x13_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13B
+  &g_x11_misc_fixed_6x13B_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13O
+  &g_x11_misc_fixed_6x13O_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13
+  &g_x11_misc_fixed_7x13_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13B
+  &g_x11_misc_fixed_7x13B_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13O
+  &g_x11_misc_fixed_7x13O_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14
+  &g_x11_misc_fixed_7x14_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14B
+  &g_x11_misc_fixed_7x14B_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13
+  &g_x11_misc_fixed_8x13_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13B
+  &g_x11_misc_fixed_8x13B_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13O
+  &g_x11_misc_fixed_8x13O_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15
+  &g_x11_misc_fixed_9x15_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15B
+  &g_x11_misc_fixed_9x15B_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18
+  &g_x11_misc_fixed_9x18_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18B
+  &g_x11_misc_fixed_9x18B_package,
+#endif
+
+#ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
+  &g_x11_misc_fixed_10x20_package,
 #endif
 
   NULL
