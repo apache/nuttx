@@ -1,5 +1,5 @@
 /*******************************************************************************
- * include/nuttx/video/ltdc.h
+ * arch/arm/src/include/stm32/ltdc.h
  *
  *   Copyright (C) 2014 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_VIDEO_LTDC_H
-#define _INCLUDE_NUTTX_VIDEO_LTDC_H
+#ifndef __ARCH_ARM_INCLUDE_STM32_LTDC_H
+#define __ARCH_ARM_INCLUDE_STM32_LTDC_H
 
 /*******************************************************************************
  * Included Files
@@ -560,4 +560,4 @@ struct ltdc_layer_s
  ******************************************************************************/
 FAR struct ltdc_layer_s *up_ltdcgetlayer(int lid);
 #endif /* CONFIG_STM32_LTDC */
-#endif /* _INCLUDE_NUTTX_VIDEO_LTDC_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32_LTDC_H */

@@ -48,9 +48,9 @@
 #include <debug.h>
 
 #include <nuttx/video/fb.h>
-#include <nuttx/video/ltdc.h>
 #include <nuttx/kmalloc.h>
 
+#include <arch/chip/ltdc.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -109,15 +109,14 @@
  ****************************************************************************/
 
 int stm32_dma2dblit(FAR struct stm32_ltdc_s *dest,
-                            FAR struct stm32_ltdc_s *fore,
-                            fb_coord_t forexpos, fb_coord_t foreypos,
-                            FAR struct stm32_ltdc_s *back,
-                            FAR const struct ltdc_area_s *backarea)
+                    FAR struct stm32_ltdc_s *fore,
+                    fb_coord_t forexpos, fb_coord_t foreypos,
+                    FAR struct stm32_ltdc_s *back,
+                    FAR const struct ltdc_area_s *backarea)
 {
   gdbg("Not implemented");
   return -ENOSYS;
 }
-
 
 /****************************************************************************
  *
@@ -144,15 +143,14 @@ int stm32_dma2dblit(FAR struct stm32_ltdc_s *dest,
  ****************************************************************************/
 
 int stm32_dma2dblend(FAR struct stm32_ltdc_s *dest,
-                            FAR struct stm32_ltdc_s *fore,
-                            fb_coord_t forexpos, fb_coord_t foreypos,
-                            FAR struct stm32_ltdc_s *back,
-                            FAR const struct ltdc_area_s *backarea)
+                     FAR struct stm32_ltdc_s *fore,
+                     fb_coord_t forexpos, fb_coord_t foreypos,
+                     FAR struct stm32_ltdc_s *back,
+                     FAR const struct ltdc_area_s *backarea)
 {
   gdbg("Not implemented");
   return -ENOSYS;
 }
-
 
 /******************************************************************************
  * Name: up_dma2dinitialize
@@ -182,4 +180,3 @@ int up_dma2dinitialize(void)
 void up_dma2duninitialize(void)
 {
 }
-
