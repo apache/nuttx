@@ -191,6 +191,17 @@
 #define ILI9341_INTERFACE_CONTROL_DM(n)        ((n) << ILI9341_INTERFACE_CONTROL_DM_SHIFT)
 #define ILI9341_INTERFACE_CONTROL_ENDIAN       (1 << 5)
 
+/* Interface Mode control */
+
+#define ILI9341_INTERFACE_CONTROL_EPL          (1)
+#define ILI9341_INTERFACE_CONTROL_DPL          (1 << 1)
+#define ILI9341_INTERFACE_CONTROL_HSPL         (1 << 2)
+#define ILI9341_INTERFACE_CONTROL_VSPL         (1 << 3)
+#define ILI9341_INTERFACE_CONTROL_RCM_SHIFT    (5)
+#define ILI9341_INTERFACE_CONTROL_RCM_MASK     (2 << ILI9341_INTERFACE_CONTROL_RCM_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_RCM(n)       ((n) << ILI9341_INTERFACE_CONTROL_RCM_SHIFT)
+#define ILI9341_INTERFACE_CONTROL_BPASS        (1 << 7)
+
 /**************************************************************************************
  * Public Types
  **************************************************************************************/
