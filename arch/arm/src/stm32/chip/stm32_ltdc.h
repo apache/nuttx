@@ -344,12 +344,12 @@
 
 /* LTDC Layer x Color Frame Buffer Length Configuration Register */
 
-#define LTDC_LxCFBLCR_CFBLL_SHIFT   (0)       /* Bits 0-12: Color Frame Buffer Line Length */
-#define LTDC_LxCFBLCR_CFBLL_MASK    (0x1FFF << LTDC_LxCFBLCR_CFBLL_SHIFT)
-#  define LTDC_LxCFBLCR_CFBLL(n)    ((uint32_t)(n) << LTDC_LxCFBLCR_CFBLL_SHIFT)
-#define LTDC_LxCFBLCR_CFBP_SHIFT    (16)       /* Bits 16-28: Color Frame Buffer Pitch */
-#define LTDC_LxCFBLCR_CFBP_MASK     (0x1FFF << LTDC_LxCFBLCR_CFBP_SHIFT)
-#  define LTDC_LxCFBLCR_CFBP(n)     ((uint32_t)(n) << LTDC_LxCFBLCR_CFBP_SHIFT)
+#define LTDC_LxCFBLR_CFBLL_SHIFT    (0)       /* Bits 0-12: Color Frame Buffer Line Length */
+#define LTDC_LxCFBLR_CFBLL_MASK     (0x1FFF << LTDC_LxCFBLR_CFBLL_SHIFT)
+#  define LTDC_LxCFBLR_CFBLL(n)     ((uint32_t)(n) << LTDC_LxCFBLR_CFBLL_SHIFT)
+#define LTDC_LxCFBLR_CFBP_SHIFT     (16)       /* Bits 16-28: Color Frame Buffer Pitch */
+#define LTDC_LxCFBLR_CFBP_MASK      (0x1FFF << LTDC_LxCFBLR_CFBP_SHIFT)
+#  define LTDC_LxCFBLR_CFBP(n)      ((uint32_t)(n) << LTDC_LxCFBLR_CFBP_SHIFT)
 
 /* LTDC Layer x Color Frame Buffer Line Number Register */
 
