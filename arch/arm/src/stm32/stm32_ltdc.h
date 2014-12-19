@@ -42,13 +42,17 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdbool.h>
 #include <semaphore.h>
+
 #include <nuttx/video/fb.h>
-#include <nuttx/video/ltdc.h>
 #include <nuttx/nx/nxglib.h>
 
+#include <arch/chip/ltdc.h>
+
 #ifdef CONFIG_STM32_LTDC
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -98,8 +102,7 @@ struct stm32_ltdc_s
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
-/*
- * The STM32 LTDC driver uses the common framebuffer interfaces declared in
+/* The STM32 LTDC driver uses the common framebuffer interfaces declared in
  * include/nuttx/video/fb.h.
  */
 
