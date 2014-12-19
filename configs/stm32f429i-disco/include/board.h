@@ -238,20 +238,190 @@
 #define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
 
+#ifdef CONFIG_STM32_LTDC
+# ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
+
 /* LCD
  *
  * The STM32F429I-DISCO board contains an onboard TFT LCD connected to the
- * LTDC interface of the uC.  The LCD is 240x320 pixels.  Define the parameters
+ * LTDC interface of the uC.  The LCD is 240x320 pixels. Define the parameters
  * of the LCD and the interface here.
  */
 
-#define BOARD_LTDC_WIDTH    240
-#define BOARD_LTDC_HEIGHT   320
+/* Panel configuration
+ *
+ * LCD Panel is Saef Technology Limited (SF-TC240T-9229A2-T) with integrated
+ * Ilitek ILI9341 LCD Single Chip Driver (240RGBx320)
+ *
+ * PLLSAI settings
+ * PLLSAIN                : 192
+ * PLLSAIR                : 4
+ * PLLSAIQ                : 7
+ * PLLSAIDIVR             : 8
+ *
+ * Timings
+ * Horicontal Front Porch : 10  (STM32_LTDC_HFP)
+ * Horicontal Back Porch  : 20  (STM32_LTDC_HBP)
+ * Vertical Front Porch   :  4  (STM32_LTDC_VFP)
+ * Vertical Back Porch    :  2  (STM32_LTDC_VBP)
+ *
+ * Horicontal Sync        : 10  (STM32_LTDC_HSYNC)
+ * Vertical Sync          :  4  (STM32_LTDC_VSYNC)
+ *
+ * Active Width           : 240 (STM32_LTDC_ACTIVEW)
+ * Active Height          : 320 (STM32_LTDC_ACTIVEH)
+ */
+
+/* LTDC PLL configuration
+ *
+ * PLLSAI_VCO = STM32_HSE_FREQUENCY / PLLM
+ *            = 8000000ul / 8
+ *            = 1,000,000
+ *
+ * PLL LCD clock output
+ *            = PLLSAI_VCO * PLLSAIN / PLLSAIR / PLLSAIDIVR
+ *            = 1,000,000 * 192 / 4 /8
+ *            = 6,000,000
+ */
+
+/* Defined panel settings */
+
+#if defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_LANDSCAPE) || \
+    defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_RLANDSCAPE)
+# define BOARD_LTDC_WIDTH               320
+# define BOARD_LTDC_HEIGHT              240
+#else
+# define BOARD_LTDC_WIDTH               240
+# define BOARD_LTDC_HEIGHT              320
+#endif
+
+#define BOARD_LTDC_HFP                  10
+#define BOARD_LTDC_HBP                  20
+#define BOARD_LTDC_VFP                  4
+#define BOARD_LTDC_VBP                  2
+#define BOARD_LTDC_HSYNC                10
+#define BOARD_LTDC_VSYNC                2
+
+#define BOARD_LTDC_PLLSAIN              192
+#define BOARD_LTDC_PLLSAIR              4
+#define BOARD_LTDC_PLLSAIQ              7
+#define BOARD_LTDC_PLLSAIDIVR           RCC_PLLSAIDIVR_DIV8
+
+/* Pixel Clock Polarity */
+#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
+/* Data Enable Polarity */
+#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
+/* Vertical Sync Polarity */
+#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
+/* Horicontal Sync Polarity */
+#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
+
+/* GPIO pinset */
+
+#define GPIO_LTDC_PINS                  18 /* 18-bit display */
+
+#define GPIO_LTDC_R2                    GPIO_LTDC_R2_1
+#define GPIO_LTDC_R3                    GPIO_LTDC_R3_1
+#define GPIO_LTDC_R4                    GPIO_LTDC_R4_1
+#define GPIO_LTDC_R5                    GPIO_LTDC_R5_1
+#define GPIO_LTDC_R6                    GPIO_LTDC_R6_1
+#define GPIO_LTDC_R7                    GPIO_LTDC_R7_1
+
+#define GPIO_LTDC_G2                    GPIO_LTDC_G2_1
+#define GPIO_LTDC_G3                    GPIO_LTDC_G3_1
+#define GPIO_LTDC_G4                    GPIO_LTDC_G4_1
+#define GPIO_LTDC_G5                    GPIO_LTDC_G5_1
+#define GPIO_LTDC_G6                    GPIO_LTDC_G6_1
+#define GPIO_LTDC_G7                    GPIO_LTDC_G7_1
+
+#define GPIO_LTDC_B2                    GPIO_LTDC_B2_1
+#define GPIO_LTDC_B3                    GPIO_LTDC_B3_1
+#define GPIO_LTDC_B4                    GPIO_LTDC_B4_1
+#define GPIO_LTDC_B5                    GPIO_LTDC_B5_1
+#define GPIO_LTDC_B6                    GPIO_LTDC_B6_1
+#define GPIO_LTDC_B7                    GPIO_LTDC_B7_1
+
+#define GPIO_LTDC_VSYNC                 GPIO_LTDC_VSYNC_1
+#define GPIO_LTDC_HSYNC                 GPIO_LTDC_HSYNC_1
+#define GPIO_LTDC_DE                    GPIO_LTDC_DE_1
+#define GPIO_LTDC_CLK                   GPIO_LTDC_CLK_1
+
+#else
+/* Custom LCD display configuration */
+
+# define BOARD_LTDC_WIDTH               ???
+# define BOARD_LTDC_HEIGHT              ???
+
+#define BOARD_LTDC_HFP                  ???
+#define BOARD_LTDC_HBP                  ???
+#define BOARD_LTDC_VFP                  ???
+#define BOARD_LTDC_VBP                  ???
+#define BOARD_LTDC_HSYNC                ???
+#define BOARD_LTDC_VSYNC                ???
+
+#define BOARD_LTDC_PLLSAIN              ???
+#define BOARD_LTDC_PLLSAIR              ???
+#define BOARD_LTDC_PLLSAIQ              ???
+#define BOARD_LTDC_PLLSAIDIVR           ???
+
+/* Pixel Clock Polarity */
+#define BOARD_LTDC_GCR_PCPOL            ???
+/* Data Enable Polarity */
+#define BOARD_LTDC_GCR_DEPOL            ???
+/* Vertical Sync Polarity */
+#define BOARD_LTDC_GCR_VSPOL            ???
+/* Horicontal Sync Polarity */
+#define BOARD_LTDC_GCR_HSPOL            ???
+
+/* GPIO pinset */
+
+#define GPIO_LTDC_PINS                  ???
+
+#define GPIO_LTDC_R2                    ???
+#define GPIO_LTDC_R3                    ???
+#define GPIO_LTDC_R4                    ???
+#define GPIO_LTDC_R5                    ???
+#define GPIO_LTDC_R6                    ???
+#define GPIO_LTDC_R7                    ???
+
+#define GPIO_LTDC_G2                    ???
+#define GPIO_LTDC_G3                    ???
+#define GPIO_LTDC_G4                    ???
+#define GPIO_LTDC_G5                    ???
+#define GPIO_LTDC_G6                    ???
+#define GPIO_LTDC_G7                    ???
+
+#define GPIO_LTDC_B2                    ???
+#define GPIO_LTDC_B3                    ???
+#define GPIO_LTDC_B4                    ???
+#define GPIO_LTDC_B5                    ???
+#define GPIO_LTDC_B6                    ???
+#define GPIO_LTDC_B7                    ???
+
+#define GPIO_LTDC_VSYNC                 ???
+#define GPIO_LTDC_HSYNC                 ???
+#define GPIO_LTDC_DE                    ???
+#define GPIO_LTDC_CLK                   ???
+
+#endif /* Custom LCD display */
+
+/* Configure PLLSAI */
+
+#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
+#define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
+#define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(BOARD_LTDC_PLLSAIQ)
+
+/* Configure division factor for LCD clock */
+
+#define STM32_RCC_DCKCFGR_PLLSAIDIVR \
+           RCC_DCKCFGR_PLLSAIDIVR(BOARD_LTDC_PLLSAIDIVR)
+
+
+#endif /* CONFIG_STM32_LTDC */
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
-
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
