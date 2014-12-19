@@ -3587,6 +3587,12 @@ if STM32_LTDC
 
 menu "LTDC Configuration"
 
+config STM32_LTDC_INTERFACE
+	bool "LTDC interface support"
+	default n
+	---help---
+		Enable the ltdc interface to support ltdc layer control.
+
 config STM32_LTDC_BACKLIGHT
 	bool "Backlight support"
 	default y
@@ -3601,6 +3607,34 @@ config STM32_LTDC_BACKCOLOR
 	---help---
 		This is the background color that will be used as the LTDC
 		background layer color.  It is an RGB888 format value.
+
+config STM32_LTDC_DITHER
+	bool "Dither support"
+	default n
+
+config STM32_LTDC_DITHER_RED
+	depends on STM32_LTDC_DITHER
+	int "Dither red width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither red width.
+
+config STM32_LTDC_DITHER_GREEN
+	depends on STM32_LTDC_DITHER
+	int "Dither green width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither green width.
+
+config STM32_LTDC_DITHER_BLUE
+	depends on STM32_LTDC_DITHER
+	int "Dither blue width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither blue width.
 
 config STM32_LTDC_FB_BASE
 	hex "Framebuffer memory start address"
@@ -3681,6 +3715,15 @@ endchoice # Layer 2 color format
 
 endif # STM32_LTDC_L2
 
+if STM32_LTDC_L1_L8 || STM32_LTDC_L2_L8
+
+config FB_CMAP
+	bool "Enable color map support"
+	default y
+	---help---
+		Enabling color map suport is neccessary for ltdc L8 format.
+
+endif
 endmenu
 
 endif # STM32_LTDC
