@@ -601,6 +601,11 @@ instead of configure.sh:
 
 Where <subdir> is one of the following:
 
+  ltdc:
+  ----
+    STM32F429I-DISCO LTDC Framebuffer demo example.  See
+    configs/stm32f429i-disco/ltdc/README.txt for additional information.
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
