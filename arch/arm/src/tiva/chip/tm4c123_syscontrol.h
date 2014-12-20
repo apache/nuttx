@@ -857,11 +857,11 @@
 #  define SYSCON_SRPGIO_R7            (1 << 7)   /* Bit 7:  GPIO Port H Software Reset */
 #  define SYSCON_SRPGIO_R8            (1 << 8)   /* Bit 8:  GPIO Port J Software Reset */
 #  define SYSCON_SRPGIO_R9            (1 << 9)   /* Bit 9:  GPIO Port K Software Reset */
-#  define SYSCON_SRPGIO_R10           (1 << 0)   /* Bit 0:  GPIO Port L Software Reset */
-#  define SYSCON_SRPGIO_R11           (1 << 1)   /* Bit 1:  GPIO Port M Software Reset */
-#  define SYSCON_SRPGIO_R12           (1 << 2)   /* Bit 2:  GPIO Port N Software Reset */
-#  define SYSCON_SRPGIO_R13           (1 << 3)   /* Bit 3:  GPIO Port P Software Reset */
-#  define SYSCON_SRPGIO_R14           (1 << 4)   /* Bit 4:  GPIO Port Q Software Reset */
+#  define SYSCON_SRPGIO_R10           (1 << 10)  /* Bit 10:  GPIO Port L Software Reset */
+#  define SYSCON_SRPGIO_R11           (1 << 11)  /* Bit 11:  GPIO Port M Software Reset */
+#  define SYSCON_SRPGIO_R12           (1 << 12)  /* Bit 12:  GPIO Port N Software Reset */
+#  define SYSCON_SRPGIO_R13           (1 << 13)  /* Bit 13:  GPIO Port P Software Reset */
+#  define SYSCON_SRPGIO_R14           (1 << 14)  /* Bit 14:  GPIO Port Q Software Reset */
 
 /* uDMA Software Reset */
 
@@ -928,7 +928,7 @@
 #  define SYSCON_SRPWM_R1             (1 << 1)   /* Bit 1:  PWM Module 1 Software Reset */
 
 /* Quadrature Encoder Interface Software Reset */
-#define SYSCON_SRQEI_
+
 #define SYSCON_SRQEI(n)               (1 << (n)) /* Bit n:  QEI Module n Software Reset */
 #  define SYSCON_SRQEI_R0             (1 << 0)   /* Bit 0:  QEI Module 0 Software Reset */
 #  define SYSCON_SRQEI_R1             (1 << 1)   /* Bit 1:  QEI Module 1 Software Reset */
@@ -1095,11 +1095,11 @@
 #  define SYSCON_SCGCGPIO_S7          (1 << 7)   /* Bit 7:  GPIO Port H Sleep Mode Clock Gating Control */
 #  define SYSCON_SCGCGPIO_S8          (1 << 8)   /* Bit 8:  GPIO Port J Sleep Mode Clock Gating Control */
 #  define SYSCON_SCGCGPIO_S9          (1 << 9)   /* Bit 9:  GPIO Port K Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCGPIO_S10         (1 << 10)  /* Bit 10:  GPIO Port L Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCGPIO_S11         (1 << 11)  /* Bit 11:  GPIO Port M Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCGPIO_S12         (1 << 12)  /* Bit 12:  GPIO Port N Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCGPIO_S13         (1 << 13)  /* Bit 13:  GPIO Port P Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCGPIO_S14         (1 << 14)  /* Bit 14:  GPIO Port Q Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S10         (1 << 10)  /* Bit 10: GPIO Port L Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S11         (1 << 11)  /* Bit 11: GPIO Port M Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S12         (1 << 12)  /* Bit 12: GPIO Port N Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S13         (1 << 13)  /* Bit 13: GPIO Port P Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S14         (1 << 14)  /* Bit 14: GPIO Port Q Sleep Mode Clock Gating Control */
 
 /* uDMA Sleep Mode Clock Gating Control */
 

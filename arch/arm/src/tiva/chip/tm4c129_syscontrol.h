@@ -891,7 +891,7 @@
 #define SYSCON_HSSR_CDOFF_MASK         (0xffffff << SYSCON_HSSR_CDOFF_SHIFT)
 #  define SYSCON_HSSR_CDOFF(n)         ((uint32_t)(n) << SYSCON_HSSR_CDOFF_SHIFT)
 #  define SYSCON_HSSR_CDOFF_NOREQ      (0 << SYSCON_HSSR_CDOFF_SHIFT) /* No request pending */
-#  define SYSCON_HSSR_CDOFF_NOREQ      (0xffffff << SYSCON_HSSR_CDOFF_SHIFT) /* An error occurred */
+#  define SYSCON_HSSR_CDOFF_ERROR      (0xffffff << SYSCON_HSSR_CDOFF_SHIFT) /* An error occurred */
 #define SYSCON_HSSR_KEY_SHIFT          (24)     /* Bit 24-31: Write Key */
 #define SYSCON_HSSR_KEY_MASK           (0xff << SYSCON_HSSR_KEY_SHIFT)
 #  define SYSCON_HSSR_KEY              (0xca << SYSCON_HSSR_KEY_SHIFT) /* Key value */
@@ -1166,173 +1166,573 @@
 #define SYSCON_PPHIM_P0                (1 << 0)   /* Bit 0: HIM Module Present */
 
 /* Watchdog Timer Software Reset */
-#define SYSCON_SRWD_
+
+#define SYSCON_SRWD(n)                 (1 << (n)) /* Bit n:  Watchdog Timer n Software Reset */
+#  define SYSCON_SRWD_R0               (1 << 0)   /* Bit 0:  Watchdog Timer 0 Software Reset */
+#  define SYSCON_SRWD_R1               (1 << 1)   /* Bit 1:  Watchdog Timer 1 Software Reset */
+
 /* 16/32-Bit Timer Software Reset */
-#define SYSCON_SRTIMER_
+
+#define SYSCON_SRTIMER(n)              (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Software Reset */
+#  define SYSCON_SRTIMER_R0            (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Software Reset */
+#  define SYSCON_SRTIMER_R1            (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Software Reset */
+#  define SYSCON_SRTIMER_R2            (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Software Reset */
+#  define SYSCON_SRTIMER_R3            (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Software Reset */
+#  define SYSCON_SRTIMER_R4            (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Software Reset */
+#  define SYSCON_SRTIMER_R5            (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Software Reset */
+#  define SYSCON_SRTIMER_R5            (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Software Reset */
+#  define SYSCON_SRTIMER_R5            (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Software Reset */
+
 /* GPIO Software Reset */
-#define SYSCON_SRGPIO_
+
+#define SYSCON_SRGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port n Software Reset */
+#  define SYSCON_SRGPIO_R0             (1 << 0)   /* Bit 0:  GPIO Port A Software Reset */
+#  define SYSCON_SRGPIO_R1             (1 << 1)   /* Bit 1:  GPIO Port B Software Reset */
+#  define SYSCON_SRGPIO_R2             (1 << 2)   /* Bit 2:  GPIO Port C Software Reset */
+#  define SYSCON_SRGPIO_R3             (1 << 3)   /* Bit 3:  GPIO Port D Software Reset */
+#  define SYSCON_SRGPIO_R4             (1 << 4)   /* Bit 4:  GPIO Port E Software Reset */
+#  define SYSCON_SRPGIO_R5             (1 << 5)   /* Bit 5:  GPIO Port F Software Reset */
+#  define SYSCON_SRPGIO_R6             (1 << 6)   /* Bit 6:  GPIO Port G Software Reset */
+#  define SYSCON_SRPGIO_R7             (1 << 7)   /* Bit 7:  GPIO Port H Software Reset */
+#  define SYSCON_SRPGIO_R8             (1 << 8)   /* Bit 8:  GPIO Port J Software Reset */
+#  define SYSCON_SRPGIO_R9             (1 << 9)   /* Bit 9:  GPIO Port K Software Reset */
+#  define SYSCON_SRPGIO_R10            (1 << 10)  /* Bit 10: GPIO Port L Software Reset */
+#  define SYSCON_SRPGIO_R11            (1 << 11)  /* Bit 11: GPIO Port M Software Reset */
+#  define SYSCON_SRPGIO_R12            (1 << 12)  /* Bit 12: GPIO Port N Software Reset */
+#  define SYSCON_SRPGIO_R13            (1 << 13)  /* Bit 13: GPIO Port P Software Reset */
+#  define SYSCON_SRPGIO_R14            (1 << 14)  /* Bit 14: GPIO Port Q Software Reset */
+#  define SYSCON_SRPGIO_R15            (1 << 15)  /* Bit 15: GPIO Port R Software Reset */
+#  define SYSCON_SRPGIO_R16            (1 << 16)  /* Bit 16: GPIO Port S Software Reset */
+#  define SYSCON_SRPGIO_R17            (1 << 17)  /* Bit 17: GPIO Port T Software Reset */
+
 /* μDMA Software Reset */
-#define SYSCON_SRDMA_
+
+#define SYSCON_SRDMA_R0                (1 << 0)   /* Bit 0:  μDMA Module Software Reset */
+
 /* EPI Software Reset */
-#define SYSCON_SREPI_
+
+#define SYSCON_SREPI_R0                (1 << 0)   /* Bit 0: EPI Module Software Reset */
+
 /* Hibernation Software Reset */
-#define SYSCON_SRHIB_
+
+#define SYSCON_SRHIB_R0                (1 << 0)   /* Bit 0:  Hibernation Module Software Reset */
+
 /* UART Software Reset */
-#define SYSCON_SRUART_
+
+#define SYSCON_SRUARTR(n)              (1 << (n)) /* Bit n:  UART Module n Software Reset */
+#  define SYSCON_SRUARTR_R0            (1 << 0)   /* Bit 0:  UART Module 0 Software Reset */
+#  define SYSCON_SRUARTR_R1            (1 << 1)   /* Bit 1:  UART Module 1 Software Reset */
+#  define SYSCON_SRUARTR_R2            (1 << 2)   /* Bit 2:  UART Module 2 Software Reset */
+#  define SYSCON_SRUARTR_R3            (1 << 3)   /* Bit 3:  UART Module 3 Software Reset */
+#  define SYSCON_SRUARTR_R4            (1 << 4)   /* Bit 4:  UART Module 4 Software Reset */
+#  define SYSCON_SRUARTR_R5            (1 << 5)   /* Bit 5:  UART Module 5 Software Reset */
+#  define SYSCON_SRUARTR_R6            (1 << 6)   /* Bit 6:  UART Module 6 Software Reset */
+#  define SYSCON_SRUARTR_R7            (1 << 7)   /* Bit 7:  UART Module 7 Software Reset */
+
 /* SSI Software Reset */
-#define SYSCON_SRSSI_
+
+#define SYSCON_SRSSI(n)                (1 << (n)) /* Bit n:  SSI Module n Software Reset */
+#  define SYSCON_SRSSI_R0              (1 << 0)   /* Bit 0:  SSI Module 0 Software Reset */
+#  define SYSCON_SRSSI_R1              (1 << 1)   /* Bit 1:  SSI Module 1 Software Reset */
+#  define SYSCON_SRSSI_R2              (1 << 2)   /* Bit 2:  SSI Module 2 Software Reset */
+#  define SYSCON_SRSSI_R3              (1 << 3)   /* Bit 3:  SSI Module 3 Software Reset */
+
 /* I2C Software Reset */
-#define SYSCON_SRI2C_
+
+#define SYSCON_SRI2C(n)                (1 << (n)) /* Bit n:  I2C Module n Software Reset */
+#  define SYSCON_SRI2C_R0              (1 << 0)   /* Bit 0:  I2C Module 0 Software Reset */
+#  define SYSCON_SRI2C_R1              (1 << 1)   /* Bit 1:  I2C Module 1 Software Reset */
+#  define SYSCON_SRI2C_R2              (1 << 2)   /* Bit 2:  I2C Module 2 Software Reset */
+#  define SYSCON_SRI2C_R3              (1 << 3)   /* Bit 3:  I2C Module 3 Software Reset */
+#  define SYSCON_SRI2C_R4              (1 << 4)   /* Bit 4:  I2C Module 4 Software Reset */
+#  define SYSCON_SRI2C_R5              (1 << 5)   /* Bit 5:  I2C Module 5 Software Reset */
+#  define SYSCON_SRI2C_R6              (1 << 6)   /* Bit 6:  I2C Module 6 Software Reset */
+#  define SYSCON_SRI2C_R7              (1 << 7)   /* Bit 7:  I2C Module 7 Software Reset */
+#  define SYSCON_SRI2C_R8              (1 << 8)   /* Bit 8:  I2C Module 8 Software Reset */
+#  define SYSCON_SRI2C_R9              (1 << 9)   /* Bit 9:  I2C Module 9 Software Reset */
+
 /* USB Software Reset */
-#define SYSCON_SRUSB_
+
+#define SYSCON_SRUSB_R0                (1 << 0)   /* Bit 0:  USB Module Software Reset */
+
 /* Ethernet PHY Software Reset */
-#define SYSCON_SREPHY_
+
+#define SYSCON_SREPHY_R0               (1 << 0)   /* Bit 0: Ethernet PHY Module Software Reset */
+
 /* CAN Software Reset */
-#define SYSCON_SRCAN_
+
+#define SYSCON_SRCAN(n)                (1 << (n)) /* Bit n:  CAN Module n Software Reset */
+#  define SYSCON_SRCAN_R0              (1 << 0)   /* Bit 0:  CAN Module 0 Software Reset */
+#  define SYSCON_SRCAN_R1              (1 << 1)   /* Bit 1:  CAN Module 1 Software Reset*/
+
 /* ADC Software Reset */
-#define SYSCON_SRADC_
+
+#define SYSCON_SRADC(n)                (1 << (n)) /* Bit n:  ADC Module n Software Reset */
+#  define SYSCON_SRADC_R0              (1 << 0)   /* Bit 0:  ADC Module 0 Software Reset */
+#  define SYSCON_SRADC_R1              (1 << 1)   /* Bit 1:  ADC Module 1 Software Reset */
+
 /* ACMP Software Reset */
-#define SYSCON_SRACMP_
+
+#define SYSCON_SRACMP_R0               (1 << 0)   /* Bit 0:  Analog Comparator Module 0 Software Reset */
+
 /* PWM Software Reset */
-#define SYSCON_SRPWM_
+
+#define SYSCON_SRPWM(n)                (1 << (n)) /* Bit n:  PWM Module n Software Reset */
+#  define SYSCON_SRPWM_R0              (1 << 0)   /* Bit 0:  PWM Module 0 Software Reset */
+#  define SYSCON_SRPWM_R1              (1 << 1)   /* Bit 1:  PWM Module 1 Software Reset */
+
 /* QE Interface Software Reset */
-#define SYSCON_SRQEI_
+
+#define SYSCON_SRQEI(n)                (1 << (n)) /* Bit n:  QEI Module n Software Reset */
+#  define SYSCON_SRQEI_R0              (1 << 0)   /* Bit 0:  QEI Module 0 Software Reset */
+#  define SYSCON_SRQEI_R1              (1 << 1)   /* Bit 1:  QEI Module 1 Software Reset */
+
 /* EEPROM Software Reset */
-#define SYSCON_SREEPROM_
+
+#define SYSCON_SREEPROM_R0             (1 << 0)   /* Bit 0:  EEPROM Module Software Reset */
+
 /* CRC/Crypto Modules Software Reset */
-#define SYSCON_SRCCM_
+
+#define SYSCON_SRCCM_R0                (1 << 0)   /* Bit 0: CRC/Crypto Modules Software Reset */
+
 /* LCD Controller Software Reset */
-#define SYSCON_SRLCD_
+
+#define SYSCON_SRLCD_R0                (1 << 0)   /* Bit 0: LCD Module 0 Software Reset */
+
 /* 1-Wire Software Reset */
-#define SYSCON_SROWIRE_
+
+#define SYSCON_SROWIRE_R0              (1 << 0)   /* Bit 0: 1-Wire Module Software Reset */
+
 /* Ethernet MAC Software Reset */
-#define SYSCON_SREMAC_
+
+#define SYSCON_SREMAC_R0               (1 << 0)   /* Ethernet Controller MAC Module 0 Software Reset */
+
 /* Watchdog Timer Run Mode Clock Gating Control */
-#define SYSCON_RCGCWD_
+
+#define SYSCON_RCGCWD(n)               (1 << (n)) /* Bit n:  Watchdog Timer n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWD_R0             (1 << 0)   /* Bit 0:  Watchdog Timer 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWD_R1             (1 << 1)   /* Bit 1:  Watchdog Timer 1 Run Mode Clock Gating Control */
+
 /* 16/32-Bit Timer Run Mode Clock Gating Control */
-#define SYSCON_RCGCTIMER_
+
+#define SYSCON_RCGCTIMER(n)            (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R0          (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R1          (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R2          (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R3          (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R4          (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R5          (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R6          (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R7          (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Run Mode Clock Gating Control */
+
 /* GPIO Run Mode Clock Gating Control */
-#define SYSCON_RCGCGPIO_
+
+#define SYSCON_RCGCGPIO(n)             (1 << (n)) /* Bit n:  16/32-Bit GPIO Port n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R0           (1 << 0)   /* Bit 0:  16/32-Bit GPIO Port A Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R1           (1 << 1)   /* Bit 1:  16/32-Bit GPIO Port B Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R2           (1 << 2)   /* Bit 2:  16/32-Bit GPIO Port C Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R3           (1 << 3)   /* Bit 3:  16/32-Bit GPIO Port D Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R4           (1 << 4)   /* Bit 4:  16/32-Bit GPIO Port E Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R5           (1 << 5)   /* Bit 5:  16/32-Bit GPIO Port F Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R6           (1 << 6)   /* Bit 6:  16/32-Bit GPIO Port G Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R7           (1 << 7)   /* Bit 7:  16/32-Bit GPIO Port H Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R8           (1 << 8)   /* Bit 8:  16/32-Bit GPIO Port J Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R9           (1 << 9)   /* Bit 9:  16/32-Bit GPIO Port K Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R10          (1 << 10)  /* Bit 10: 16/32-Bit GPIO Port L Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R11          (1 << 11)  /* Bit 11: 16/32-Bit GPIO Port M Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R12          (1 << 12)  /* Bit 12: 16/32-Bit GPIO Port N Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R13          (1 << 13)  /* Bit 13: 16/32-Bit GPIO Port P Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R14          (1 << 14)  /* Bit 14: 16/32-Bit GPIO Port Q Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R15          (1 << 15)  /* Bit 15: 16/32-Bit GPIO Port R Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R16          (1 << 16)  /* Bit 16: 16/32-Bit GPIO Port S Run Mode Clock Gating Control */
+#  define SYSCON_RCGCGPIO_R17          (1 << 17)  /* Bit 17: 16/32-Bit GPIO Port T Run Mode Clock Gating Control */
+
 /* μDMA Run Mode Clock Gating Control */
-#define SYSCON_RCGCDMA_
+
+#define SYSCON_RCGCDMA_R0              (1 << 0)   /* Bit 0:  μDMA Module Run Mode Clock Gating Control */
+
 /* EPI Run Mode Clock Gating Control */
-#define SYSCON_RCGCEPI_
+
+#define SYSCON_RCGCEPI_R0              (1 << 0)   /* Bit 0: EPI Module Run Mode Clock Gating Control */
+
 /* Hibernation Run Mode Clock Gating Control */
-#define SYSCON_RCGCHIB_
+
+#define SYSCON_RCGCHIB_R0              (1 << 0)   /* Bit 0:  Hibernation Module Run Mode Clock Gating Control */
+
 /* UART Run Mode Clock Gating Control */
-#define SYSCON_RCGCUART_
+
+#define SYSCON_RCGCUART(n)             (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R0           (1 << 0)   /* Bit 0:  UART Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R1           (1 << 1)   /* Bit 1:  UART Module 1 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R2           (1 << 2)   /* Bit 2:  UART Module 2 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R3           (1 << 3)   /* Bit 3:  UART Module 3 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R4           (1 << 4)   /* Bit 4:  UART Module 4 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R5           (1 << 5)   /* Bit 5:  UART Module 5 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R6           (1 << 6)   /* Bit 6:  UART Module 6 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCUART_R7           (1 << 7)   /* Bit 7:  UART Module 7 Run Mode Clock Gating Control */
+
 /* SSI Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCSSI_
+
+#define SYSCON_RCGCSSI(n)              (1 << (n)) /* Bit n:  SSI Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCSSI_R0            (1 << 0)   /* Bit 0:  SSI Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCSSI_R1            (1 << 1)   /* Bit 1:  SSI Module 1 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCSSI_R2            (1 << 2)   /* Bit 2:  SSI Module 2 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCSSI_R3            (1 << 3)   /* Bit 3:  SSI Module 3 Run Mode Clock Gating Control */
+
 /* I2C Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCI2C_
+
+#define SYSCON_RCGCI2C(n)              (1 << (n)) /* Bit n:  I2C Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R0            (1 << 0)   /* Bit 0:  I2C Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R1            (1 << 1)   /* Bit 1:  I2C Module 1 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R2            (1 << 2)   /* Bit 2:  I2C Module 2 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R3            (1 << 3)   /* Bit 3:  I2C Module 3 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R4            (1 << 4)   /* Bit 4:  I2C Module 4 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R5            (1 << 5)   /* Bit 5:  I2C Module 5 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R6            (1 << 6)   /* Bit 6:  I2C Module 6 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R7            (1 << 7)   /* Bit 7:  I2C Module 7 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R8            (1 << 8)   /* Bit 8:  I2C Module 8 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCI2C_R9            (1 << 9)   /* Bit 9:  I2C Module 9 Run Mode Clock Gating Control */
+
 /* USB Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCUSB_
+
+#define SYSCON_RCGCUSB_R0              (1 << 0)   /* Bit 0:  USB Module Run Mode Clock Gating Control */
+
 /* Ethernet PHY Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCEPHY_
+
+#define SYSCON_RCGCEPHY_R0             (1 << 0)   /* Bit 0:  Ethernet PHY Module Run Mode Clock Gating Control */
+
 /* CAN RunMode Clock Gating Control */
-#define TIVA_SYSCON_RCGCCAN_
+
+#define SYSCON_RCGCCAN(n)              (1 << (n)) /* Bit n:  CAN Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCCAN_R0            (1 << 0)   /* Bit 0:  CAN Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCCAN_R1            (1 << 1)   /* Bit 1:  CAN Module 1 Run Mode Clock Gating Control */
+
 /* ADC Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCADC_
+
+#define SYSCON_RCGCADC(n)              (1 << (n)) /* Bit n:  ADC Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCADC_R0            (1 << 0)   /* Bit 0:  ADC Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCADC_R1            (1 << 1)   /* Bit 1:  ADC Module 1 Run Mode Clock Gating Control */
+
 /* ACMP Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCACMP_
+
+#define SYSCON_RCGCACMP_R0             (1 << 0)   /* Bit 0:  Analog Comparator Module 0 Run Mode Clock Gating Control */
+
 /* PWM Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCPWM_
+
+#define SYSCON_RCGCPWM(n)              (1 << (n)) /* Bit n:  PWM Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCPWM_R0            (1 << 0)   /* Bit 0:  PWM Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCPWM_R1            (1 << 1)   /* Bit 1:  PWM Module 1 Run Mode Clock Gating Control */
+
 /* QE Interface Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCQEI_
+
+#define SYSCON_RCGCQEI(n)              (1 << (n)) /* Bit n:  QEI Module n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCQEI_R0            (1 << 0)   /* Bit 0:  QEI Module 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCQEI_R1            (1 << 1)   /* Bit 1:  QEI Module 1 Run Mode Clock Gating Control */
+
 /* EEPROM Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCEEPROM_
+
+#define SYSCON_RCGCEEPROM_R0           (1 << 0)   /* Bit 0:  EEPROM Module Run Mode Clock Gating Control */
+
 /* CRC/Crypto Modules RunMode ClockGating Control */
-#define TIVA_SYSCON_RCGCCCM_
+
+#define SYSCON_RCGCCCM_R0              (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Run Mode Clock Gating Control */
+
 /* LCD Controller Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCLCD_
+
+#define SYSCON_RCGCLCD_R0              (1 << 0)   /* Bit 0:  LCD Controller Module 0 Run Mode Clock Gating Control */
+
 /* 1-Wire Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCOWIRE_
+
+#define SYSCON_RCGCOWIRE_R0            (1 << 0)   /* Bit 0:  1-Wire Module 0 Run Mode Clock Gating Control */
+
 /* Ethernet MAC Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCEMAC_
+
+#define SYSCON_RCGCEMAC_R0             (1 << 0)   /* Bit 0:  Ethernet MAC Module 0 Run Mode Clock Gating Control */
+
 /* Watchdog Timer Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCWD_
+
+#define SYSCON_SCGCWD(n)               (1 << (n)) /* Bit n:  Watchdog Timer n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S0             (1 << 0)   /* Bit 0:  Watchdog Timer 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S1             (1 << 1)   /* Bit 1:  Watchdog Timer 1 Sleep Mode Clock Gating Control */
+
 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCTIMER_
+
+#define SYSCON_SCGCWD(n)               (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S0             (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S1             (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S2             (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S3             (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S4             (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S5             (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S6             (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S7             (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Sleep Mode Clock Gating Control */
+
 /* GPIO Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCGPIO_
+
+#define SYSCON_SCGCGPIO(n)             (1 << (n)) /* Bit n:  GPIO Port n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S0           (1 << 0)   /* Bit 0:  GPIO Port A Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S1           (1 << 1)   /* Bit 1:  GPIO Port B Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S2           (1 << 2)   /* Bit 2:  GPIO Port C Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S3           (1 << 3)   /* Bit 3:  GPIO Port D Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S4           (1 << 4)   /* Bit 4:  GPIO Port E Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S5           (1 << 5)   /* Bit 5:  GPIO Port F Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S6           (1 << 6)   /* Bit 6:  GPIO Port G Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S7           (1 << 7)   /* Bit 7:  GPIO Port H Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S8           (1 << 8)   /* Bit 8:  GPIO Port J Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S9           (1 << 9)   /* Bit 9:  GPIO Port K Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S10          (1 << 10)  /* Bit 10: GPIO Port L Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S11          (1 << 11)  /* Bit 11: GPIO Port M Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S12          (1 << 12)  /* Bit 12: GPIO Port N Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S13          (1 << 13)  /* Bit 13: GPIO Port P Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S14          (1 << 14)  /* Bit 14: GPIO Port Q Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S15          (1 << 15)  /* Bit 15: GPIO Port R Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S16          (1 << 16)  /* Bit 16: GPIO Port S Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCGPIO_S17          (1 << 17)  /* Bit 17: GPIO Port T Sleep Mode Clock Gating Control */
+
 /* μDMA Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCDMA_
+
+#define SYSCON_SCGCDMA_S0              (1 << 0)   /* Bit 0:  μDMA Module Sleep Mode Clock Gating Control */
+
 /* EPI Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCEPI_
+
+#define SYSCON_SCGCEPI_S0              (1 << 0)   /* Bit 0:  EPI Module Sleep Mode Clock Gating Control */
+
 /* Hibernation Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCHIB_
+
+#define SYSCON_SCGCHIB_S0              (1 << 0)   /* Bit 0:  Hibernation Module Sleep Mode Clock Gating Control */
+
 /* UART Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCUART_
+
+#define SYSCON_SCGCUART(n)             (1 << (n)) /* Bit n:  UART Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S0           (1 << 0)   /* Bit 0:  UART Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S1           (1 << 1)   /* Bit 1:  UART Module 1 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S2           (1 << 2)   /* Bit 2:  UART Module 2 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S3           (1 << 3)   /* Bit 3:  UART Module 3 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S4           (1 << 4)   /* Bit 4:  UART Module 4 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S5           (1 << 5)   /* Bit 5:  UART Module 5 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S6           (1 << 6)   /* Bit 6:  UART Module 6 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCUART_S7           (1 << 7)   /* Bit 7:  UART Module 7 Sleep Mode Clock Gating Control */
+
 /* SSI Sleep Mode Clock GatingControl */
-#define TIVA_SYSCON_SCGCSSI_
+
+#define SYSCON_SCGCSSI(n)              (1 << (n)) /* Bit n:  SSI Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCSSI_S0            (1 << 0)   /* Bit 0:  SSI Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCSSI_S1            (1 << 1)   /* Bit 1:  SSI Module 1 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCSSI_S2            (1 << 2)   /* Bit 2:  SSI Module 2 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCSSI_S3            (1 << 3)   /* Bit 3:  SSI Module 3 Sleep Mode Clock Gating Control */
+
 /* I2C Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCI2C_
+
+#define SYSCON_SCGCI2C(n)              (1 << (n)) /* Bit n:  I2C Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S0            (1 << 0)   /* Bit 0:  I2C Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S1            (1 << 1)   /* Bit 1:  I2C Module 1 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S2            (1 << 2)   /* Bit 2:  I2C Module 2 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S3            (1 << 3)   /* Bit 3:  I2C Module 3 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S4            (1 << 4)   /* Bit 4:  I2C Module 4 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S5            (1 << 5)   /* Bit 5:  I2C Module 5 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S6            (1 << 6)   /* Bit 6:  I2C Module 6 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S7            (1 << 7)   /* Bit 7:  I2C Module 7 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S8            (1 << 8)   /* Bit 8:  I2C Module 8 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCI2C_S9            (1 << 9)   /* Bit 9:  I2C Module 9 Sleep Mode Clock Gating Control */
+
 /* USB Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCUSB_
+
+#define SYSCON_SCGCUSB_S0              (1 << 0)   /* Bit 0:  USB Module Sleep Mode Clock Gating Control */
+
 /* Ethernet PHY Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCEPHY_
+
+#define SYSCON_SCGCEPHY_S0             (1 << 0)   /* Bit 0: PHY Module Sleep Mode Clock Gating Control */
+
 /* CAN Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCCAN_
+
+#define SYSCON_SCGCCAN(n)              (1 << (n)) /* Bit n:  CAN Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCCAN_S0            (1 << 0)   /* Bit 0:  CAN Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCCAN_S1            (1 << 1)   /* Bit 1:  CAN Module 1 Sleep Mode Clock Gating Control */
+
 /* ADC Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCADC_
+
+#define SYSCON_SCGCADC(n)              (1 << (n)) /* Bit n:  ADC Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCADC_S0            (1 << 0)   /* Bit 0:  ADC Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCADC_S1            (1 << 1)   /* Bit 1:  ADC Module 1 Sleep Mode Clock Gating Control */
+
 /* ACMP Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCACMP_
+
+#define SYSCON_SCGCACMP_S0             (1 << 0)   /* Bit 0:  Analog Comparator Module 0 Sleep Mode Clock Gating Control */
+
 /* PulseWidthModulator Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCPWM_
+
+#define SYSCON_SCGCPWM(n)              (1 << (n)) /* Bit n:  PWM Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCPWM_S0            (1 << 0)   /* Bit 0:  PWM Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCPWM_S1            (1 << 1)   /* Bit 1:  PWM Module 1 Sleep Mode Clock Gating Control */
+
 /* QE Interface Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCQEI_
+
+#define SYSCON_SCGCQEI(n)              (1 << (n)) /* Bit n:  QEI Module n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCQEI_S0            (1 << 0)   /* Bit 0:  QEI Module 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCQEI_S1            (1 << 1)   /* Bit 1:  QEI Module 1 Sleep Mode Clock Gating Control */
+
 /* EEPROM Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCEEPROM_
+
+#define SYSCON_SCGCEEPROM_S0           (1 << 0)   /* Bit 0:  EEPROM Module Sleep Mode Clock Gating Control */
+
 /* CRC/Crypto Modules Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCCCM_
+
+#define SYSCON_SCGCCCM_S0              (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Sleep Mode Clock Gating Control */
+
 /* LCD Controller Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCLCD_
+
+#define SYSCON_SCGCLCD_S0              (1 << 0)   /* Bit 0: LCD Controller Module 0 Sleep Mode Clock Gating Control */
+
 /* 1-Wire Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCOWIRE_
+
+#define SYSCON_SCGCOWIRE_S0            (1 << 0)   /* Bit 0: 1-Wire Module 0 Sleep Mode Clock Gating Control */
+
 /* Ethernet MAC Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCEMAC_
+
+#define SYSCON_SCGCEMAC_S0             (1 << 0)   /* Bit 0: Ethernet MAC Module 0 Sleep Mode Clock Gating Control */
+
 /* Watchdog Timer Deep-SleepMode Clock Gating Control */
-#define TIVA_SYSCON_DCGCWD_
+
+#define SYSCON_DCGCWD(n)               (1 << (n)) /* Bit n:  Watchdog Timer n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWD_D0             (1 << 0)   /* Bit 0:  Watchdog Timer 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWD_D1             (1 << 1)   /* Bit 1:  Watchdog Timer 1 Deep-Sleep Mode Clock Gating Control */
+
 /* 16/32-Bit Timer Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCTIMER_
+
+#define SYSCON_DCGCTIMER(n)            (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D0          (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D1          (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D2          (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D3          (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D4          (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D5          (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D5          (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D5          (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Deep-Sleep Mode Clock Gating Control */
+
 /* GPIO Deep-Sleep Mode Clock */
-#define TIVA_SYSCON_DCGCGPIO_
+
+#define SYSCON_DCGCGPIO(n)             (1 << (n)) /* Bit n:  GPIO Port F Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D0           (1 << 0)   /* Bit 0:  GPIO Port A Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D1           (1 << 1)   /* Bit 1:  GPIO Port B Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D2           (1 << 2)   /* Bit 2:  GPIO Port C Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D3           (1 << 3)   /* Bit 3:  GPIO Port D Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D4           (1 << 4)   /* Bit 4:  GPIO Port E Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D5           (1 << 5)   /* Bit 5:  GPIO Port F Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D6           (1 << 6)   /* Bit 6:  GPIO Port G Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D7           (1 << 7)   /* Bit 7:  GPIO Port H Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D8           (1 << 8)   /* Bit 8:  GPIO Port J Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D9           (1 << 9)   /* Bit 9:  GPIO Port K Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D10          (1 << 10)  /* Bit 10: GPIO Port L Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D11          (1 << 11)  /* Bit 11: GPIO Port M Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D12          (1 << 12)  /* Bit 12: GPIO Port N Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D13          (1 << 13)  /* Bit 13: GPIO Port P Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D14          (1 << 14)  /* Bit 14: GPIO Port Q Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D15          (1 << 15)  /* Bit 15: GPIO Port R Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D16          (1 << 16)  /* Bit 16: GPIO Port S Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCGPIO_D17          (1 << 17)  /* Bit 17: GPIO Port T Deep-Sleep Mode Clock Gating Control */
+
 /* μDMA Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCDMA_
+
+#define SYSCON_DCGCDMA_D0              (1 << 0)   /* Bit 0:  μDMA Module Deep-Sleep Mode Clock Gating Control */
+
 /* EPI Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCEPI_
+
+#define SYSCON_DCGCEPI_D0              (1 << 0)   /* Bit 0:  EPI Module Deep-Sleep Mode Clock Gating Control */
+
 /* Hibernation Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCHIB_
+
+#define SYSCON_DCGCHIB_D0              (1 << 0)   /* Bit 0:  Hibernation Module Deep-Sleep Mode Clock Gating Control */
+
 /* UART Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCUART_
+
+#define SYSCON_DCGCUART(n)             (1 << (n)) /* Bit n:  UART Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D0           (1 << 0)   /* Bit 0:  UART Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D1           (1 << 1)   /* Bit 1:  UART Module 1 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D2           (1 << 2)   /* Bit 2:  UART Module 2 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D3           (1 << 3)   /* Bit 3:  UART Module 3 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D4           (1 << 4)   /* Bit 4:  UART Module 4 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D5           (1 << 5)   /* Bit 5:  UART Module 5 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D6           (1 << 6)   /* Bit 6:  UART Module 6 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCUART_D7           (1 << 7)   /* Bit 7:  UART Module 7 Deep-Sleep Mode Clock Gating Control */
+
 /* SSI Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCSSI_
+
+#define SYSCON_DCGCSSI(n)              (1 << (n)) /* Bit n:  SSI Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCSSI_D0            (1 << 0)   /* Bit 0:  SSI Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCSSI_D1            (1 << 1)   /* Bit 1:  SSI Module 1 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCSSI_D2            (1 << 2)   /* Bit 2:  SSI Module 2 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCSSI_D3            (1 << 3)   /* Bit 3:  SSI Module 3 Deep-Sleep Mode Clock Gating Control */
+
 /* I2C Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCI2C_
+
+#define SYSCON_DCGCI2C(n)              (1 << (n)) /* Bit n:  I2C Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D0            (1 << 0)   /* Bit 0:  I2C Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D1            (1 << 1)   /* Bit 1:  I2C Module 1 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D2            (1 << 2)   /* Bit 2:  I2C Module 2 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D3            (1 << 3)   /* Bit 3:  I2C Module 3 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D4            (1 << 4)   /* Bit 4:  I2C Module 4 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D5            (1 << 5)   /* Bit 5:  I2C Module 5 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D6            (1 << 6)   /* Bit 6:  I2C Module 6 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D7            (1 << 7)   /* Bit 7:  I2C Module 7 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D8            (1 << 8)   /* Bit 8:  I2C Module 8 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCI2C_D9            (1 << 9)   /* Bit 9:  I2C Module 9 Deep-Sleep Mode Clock Gating Control */
+
 /* USB Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCUSB_
+
+#define SYSCON_DCGCUSB_D0              (1 << 0)   /* Bit 0:  USB Module Deep-Sleep Mode Clock Gating Control */
+
 /* Ethernet PHY Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCEPHY_
+
+#define SYSCON_DCGCEPHY_D0             (1 << 0)   /* Bit 0:  PHY Module Deep-Sleep Mode Clock Gating Control */
+
 /* CAN Deep-SleepMode Clock Gating Control */
-#define TIVA_SYSCON_DCGCCAN_
+
+#define SYSCON_DCGCCAN(n)              (1 << (n)) /* Bit n:  CAN Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCCAN_D0            (1 << 0)   /* Bit 0:  CAN Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCCAN_D1            (1 << 1)   /* Bit 1:  CAN Module 1 Deep-Sleep Mode Clock Gating Control */
+
 /* ADC Deep-Sleep Mode ClockGating Control */
-#define TIVA_SYSCON_DCGCADC_
+
+#define SYSCON_DCGCADC(n)              (1 << (n)) /* Bit n:  ADC Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCADC_D0            (1 << 0)   /* Bit 0:  ADC Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCADC_D1            (1 << 1)   /* Bit 1:  ADC Module 1 Deep-Sleep Mode Clock Gating Control */
+
 /* ACMP Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCACMP_
+
+#define SYSCON_DCGCACMP_D0             (1 << 0)   /* Bit 0:  Analog Comparator Module 0 Deep-Sleep Mode Clock Gating Control */
+
 /* PWM Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCPWM_
+
+#define SYSCON_DCGCPWM(n)              (1 << (n)) /* Bit n:  PWM Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCPWM_D0            (1 << 0)   /* Bit 0:  PWM Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCPWM_D1            (1 << 1)   /* Bit 1:  PWM Module 1 Deep-Sleep Mode Clock Gating Control */
+
 /* QE Interface Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCQEI_
+
+#define SYSCON_DCGCQEI(n)              (1 << (n)) /* Bit n:  QEI Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCQEI_D0            (1 << 0)   /* Bit 0:  QEI Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCQEI_D1            (1 << 1)   /* Bit 1:  QEI Module 1 Deep-Sleep Mode Clock Gating Control */
+
 /* EEPROM Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCEEPROM_
+
+#define SYSCON_DCGCEEPROM_D0          (1 << 0)   /* Bit 0:  EEPROM Module Deep-Sleep Mode Clock Gating Control */
+
 /* CRC/Crypto Modules Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCCCM_
+
+#define SYSCON_DCGCCCM_D0             (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Deep-Sleep Mode Clock Gating Control */
+
 /* LCD Controller Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCLCD_
+
+#define SYSCON_DCGCLCD_D0             (1 << 0)   /* Bit 0: LCD Controller Module 0 Deep-Sleep Mode Clock Gating Control */
+
 /* 1-Wire Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCOWIRE_
+
+#define SYSCON_DCGCOWIRE_D0           (1 << 0)   /* Bit 0: 1-Wire Module 0 Deep-Sleep Mode Clock Gating Control */
+
 /* Ethernet MAC Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCEMAC_
+
+#define SYSCON_DCGCEMAC_D0            (1 << 0)   /* Bit 0: Ethernet MAC Module 0 Deep-Sleep Mode Clock Gating Control */
+
 /* Watchdog Timer Power Control */
 #define TIVA_SYSCON_PCWD_
 /* 16/32-Bit Timer Power Control */
