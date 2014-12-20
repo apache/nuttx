@@ -784,7 +784,7 @@
 
 /* USB Peripheral Present */
 
-#define SYSCON_PPUSB_P0               (1 << 0)   /* USB Module Present */
+#define SYSCON_PPUSB_P0               (1 << 0)   /* Bit 0: USB Module Present */
 
 /* CAN Peripheral Present */
 

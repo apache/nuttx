@@ -93,7 +93,7 @@
 #define TIVA_SYSCON_PPWD_OFFSET        0x0300 /* Watchdog Timer Peripheral Present */
 #define TIVA_SYSCON_PPTIMER_OFFSET     0x0304 /* 16/32-Bit Timer Peripheral Present */
 #define TIVA_SYSCON_PPGPIO_OFFSET      0x0308 /* GPIO Peripheral Present */
-#define TIVA_SYSCON_PPDMA_OFFSET       0x030c /* uDMA Peripheral Present */
+#define TIVA_SYSCON_PPDMA_OFFSET       0x030c /* μDMA Peripheral Present */
 #define TIVA_SYSCON_PPEPI_OFFSET       0x0310 /* EPI Peripheral Present */
 #define TIVA_SYSCON_PPHIB_OFFSET       0x0314 /* Hibernation Peripheral Present */
 #define TIVA_SYSCON_PPUART_OFFSET      0x0318 /* UART Peripheral Present */
@@ -121,7 +121,7 @@
 #define TIVA_SYSCON_SRWD_OFFSET        0x0500 /* Watchdog Timer Software Reset */
 #define TIVA_SYSCON_SRTIMER_OFFSET     0x0504 /* 16/32-Bit Timer Software Reset */
 #define TIVA_SYSCON_SRGPIO_OFFSET      0x0508 /* GPIO Software Reset */
-#define TIVA_SYSCON_SRDMA_OFFSET       0x050c /* uDMA Software Reset */
+#define TIVA_SYSCON_SRDMA_OFFSET       0x050c /* μDMA Software Reset */
 #define TIVA_SYSCON_SREPI_OFFSET       0x0510 /* EPI Software Reset */
 #define TIVA_SYSCON_SRHIB_OFFSET       0x0514 /* Hibernation Software Reset */
 #define TIVA_SYSCON_SRUART_OFFSET      0x0518 /* UART Software Reset */
@@ -142,7 +142,7 @@
 #define TIVA_SYSCON_RCGCWD_OFFSET      0x0600 /* Watchdog Timer Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCTIMER_OFFSET   0x0604 /* 16/32-Bit Timer Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCGPIO_OFFSET    0x0608 /* GPIO Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCDMA_OFFSET     0x060c /* uDMA Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCDMA_OFFSET     0x060c /* μDMA Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCEPI_OFFSET     0x0610 /* EPI Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCHIB_OFFSET     0x0614 /* Hibernation Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCUART_OFFSET    0x0618 /* UART Run Mode Clock Gating Control */
@@ -156,14 +156,14 @@
 #define TIVA_SYSCON_RCGCPWM_OFFSET     0x0640 /* PWM Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCQEI_OFFSET     0x0644 /* QE Interface Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCEEPROM_OFFSET  0x0658 /* EEPROM Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCCCM_OFFSET     0x0674 /* CRC/CryptoModules RunMode ClockGating Control */
+#define TIVA_SYSCON_RCGCCCM_OFFSET     0x0674 /* CRC/CryptoModules Run Mode ClockGating Control */
 #define TIVA_SYSCON_RCGCLCD_OFFSET     0x0690 /* LCD Controller Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCOWIRE_OFFSET   0x0698 /* 1-Wire Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCEMAC_OFFSET    0x069c /* Ethernet MAC Run Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCWD_OFFSET      0x0700 /* Watchdog Timer Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCTIMER_OFFSET   0x0704 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCGPIO_OFFSET    0x0708 /* GPIO Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCDMA_OFFSET     0x070c /* uDMA Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCDMA_OFFSET     0x070c /* μDMA Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCEPI_OFFSET     0x0710 /* EPI Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCHIB_OFFSET     0x0714 /* Hibernation Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCUART_OFFSET    0x0718 /* UART Sleep Mode Clock Gating Control */
@@ -184,7 +184,7 @@
 #define TIVA_SYSCON_DCGCWD_OFFSET      0x0800 /* Watchdog Timer Deep-SleepMode Clock Gating Control */
 #define TIVA_SYSCON_DCGCTIMER_OFFSET   0x0804 /* 16/32-Bit Timer Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCGPIO_OFFSET    0x0808 /* GPIO Deep-Sleep Mode Clock */
-#define TIVA_SYSCON_DCGCDMA_OFFSET     0x080c /* uDMA Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCDMA_OFFSET     0x080c /* μDMA Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCEPI_OFFSET     0x0810 /* EPI Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCHIB_OFFSET     0x0814 /* Hibernation Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCUART_OFFSET    0x0818 /* UART Deep-Sleep Mode Clock Gating Control */
@@ -205,7 +205,7 @@
 #define TIVA_SYSCON_PCWD_OFFSET        0x0900 /* Watchdog Timer Power Control */
 #define TIVA_SYSCON_PCTIMER_OFFSET     0x0904 /* 16/32-Bit Timer Power Control */
 #define TIVA_SYSCON_PCGPIO_OFFSET      0x0908 /* GPIO Power Control */
-#define TIVA_SYSCON_PCDMA_OFFSET       0x090c /* uDMA Power Control */
+#define TIVA_SYSCON_PCDMA_OFFSET       0x090c /* μDMA Power Control */
 #define TIVA_SYSCON_PCEPI_OFFSET       0x0910 /* External Peripheral Interface Power Control */
 #define TIVA_SYSCON_PCHIB_OFFSET       0x0914 /* Hibernation Power Control */
 #define TIVA_SYSCON_PCUART_OFFSET      0x0918 /* UART Power Control */
@@ -226,7 +226,7 @@
 #define TIVA_SYSCON_PRWD_OFFSET        0x0a00 /* Watchdog Timer Peripheral Ready */
 #define TIVA_SYSCON_PRTIMER_OFFSET     0x0a04 /* 16/32-Bit Timer Peripheral Ready */
 #define TIVA_SYSCON_PRGPIO_OFFSET      0x0a08 /* GPIO Peripheral Ready */
-#define TIVA_SYSCON_PRDMA_OFFSET       0x0a0c /* uDMA Peripheral Ready */
+#define TIVA_SYSCON_PRDMA_OFFSET       0x0a0c /* μDMA Peripheral Ready */
 #define TIVA_SYSCON_PREPI_OFFSET       0x0a10 /* EPI Peripheral Ready */
 #define TIVA_SYSCON_PRHIB_OFFSET       0x0a14 /* Hibernation Peripheral Ready */
 #define TIVA_SYSCON_PRUART_OFFSET      0x0a18 /* UART Peripheral Ready */
@@ -779,105 +779,399 @@
 #define SYSCON_DSLPPWRCFG_TSPD             (1 << 8)  /* Bit 8:  Temperature Sense Power Down */
 #define SYSCON_DSLPPWRCFG_LDOSM            (1 << 9)  /* Bit 9:  LDO Sleep Mode */
 
+
 /* Non-Volatile Memory Information */
-#define SYSCON_NVMSTAT_
+
+#define TIVA_SYSCON_NVMSTAT_FWB        (1 << 0)  /* Bit 0: 32 Word Flash Write Buffer Available */
+
 /* LDO Sleep Power Control */
-#define SYSCON_LDOSPCTL_
+
+#define SYSCON_LDOSPCTL_VLDO_SHIFT     (0)       /* Bits 7-0: LDO Output Voltage */
+#define SYSCON_LDOSPCTL_VLDO_MASK      (0xff << SYSCON_LDOSPCTL_VLDO_SHIFT)
+#  define SYSCON_LDOSPCTL_VLDO_0p90V   (0x12 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 0.90 V */
+#  define SYSCON_LDOSPCTL_VLDO_0p95V   (0x13 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 0.95 V */
+#  define SYSCON_LDOSPCTL_VLDO_1p00V   (0x14 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.00 V */
+#  define SYSCON_LDOSPCTL_VLDO_1p05V   (0x15 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.05 V */
+#  define SYSCON_LDOSPCTL_VLDO_1p10V   (0x16 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.10 V */
+#  define SYSCON_LDOSPCTL_VLDO_1p15V   (0x17 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.15 V */
+#  define SYSCON_LDOSPCTL_VLDO_1p20V   (0x18 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.20 V */
+#define SYSCON_LDOSPCTL_VADJEN         (1 << 31) /* Bit 31: Voltage Adjust Enable */
+
 /* LDO Sleep Power Calibration */
-#define SYSCON_LDOSPCAL_
+
+#define SYSCON_LDOSPCAL_NOPLL_SHIFT     (0)     /* Bits 7-0: Sleep without PLL */
+#define SYSCON_LDOSPCAL_NOPLL_MASK      (0xff << SYSCON_LDOSPCAL_NOPLL_SHIFT)
+#  define SYSCON_LDOSPCAL_NOPLL_0p90V   (0x12 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 0.90 V */
+#  define SYSCON_LDOSPCAL_NOPLL_0p95V   (0x13 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 0.95 V */
+#  define SYSCON_LDOSPCAL_NOPLL_1p00V   (0x14 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.00 V */
+#  define SYSCON_LDOSPCAL_NOPLL_1p05V   (0x15 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.05 V */
+#  define SYSCON_LDOSPCAL_NOPLL_1p10V   (0x16 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.10 V */
+#  define SYSCON_LDOSPCAL_NOPLL_1p15V   (0x17 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.15 V */
+#  define SYSCON_LDOSPCAL_NOPLL_1p20V   (0x18 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.20 V */
+#define SYSCON_LDOSPCAL_WITHPLL_SHIFT   (8)     /* Bits 15-8: Sleep with PLL */
+#define SYSCON_LDOSPCAL_WITHPLL_MASK    (0xff << SYSCON_LDOSPCAL_WITHPLL_SHIFT)
+#  define SYSCON_LDOSPCAL_WITHPLL_0p90V (0x12 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 0.90 V */
+#  define SYSCON_LDOSPCAL_WITHPLL_0p95V (0x13 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 0.95 V */
+#  define SYSCON_LDOSPCAL_WITHPLL_1p00V (0x14 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 1.00 V */
+#  define SYSCON_LDOSPCAL_WITHPLL_1p05V (0x15 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 1.05 V */
+#  define SYSCON_LDOSPCAL_WITHPLL_1p10V (0x16 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 1.10 V */
+#  define SYSCON_LDOSPCAL_WITHPLL_1p15V (0x17 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 1.15 V */
+#  define SYSCON_LDOSPCAL_WITHPLL_1p20V (0x18 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 1.20 V */
+
 /* LDO Deep-Sleep Power Control */
-#define SYSCON_LDODPCTL_
+
+#define SYSCON_LDODPCTL_VLDO_SHIFT     (0)       /* Bits 7-0: LDO Output Voltage */
+#define SYSCON_LDODPCTL_VLDO_MASK      (0xff << SYSCON_LDODPCTL_VLDO_SHIFT)
+#  define SYSCON_LDODPCTL_VLDO_0p90V   (0x12 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 0.90 V */
+#  define SYSCON_LDODPCTL_VLDO_0p95V   (0x13 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 0.95 V */
+#  define SYSCON_LDODPCTL_VLDO_1p00V   (0x14 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.00 V */
+#  define SYSCON_LDODPCTL_VLDO_1p05V   (0x15 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.05 V */
+#  define SYSCON_LDODPCTL_VLDO_1p10V   (0x16 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.10 V */
+#  define SYSCON_LDODPCTL_VLDO_1p15V   (0x17 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.15 V */
+#  define SYSCON_LDODPCTL_VLDO_1p20V   (0x18 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.20 V */
+#define SYSCON_LDODPCTL_VADJEN         (1 << 31) /* Bit 31: Voltage Adjust Enable */
+
 /* LDO Deep-Sleep Power Calibration */
-#define SYSCON_LDODPCAL_
+
+#define SYSCON_LDODPCAL_NOPLL_SHIFT    (0)       /* Bits 7-0: Deep-Sleep without PLL */
+#define SYSCON_LDODPCAL_NOPLL_MASK     (0xff << SYSCON_LDODPCAL_NOPLL_SHIFT)
+#  define SYSCON_LDODPCAL_NOPLL_0p90V  (0x12 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 0.90 V */
+#  define SYSCON_LDODPCAL_NOPLL_0p95V  (0x13 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 0.95 V */
+#  define SYSCON_LDODPCAL_NOPLL_1p00V  (0x14 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.00 V */
+#  define SYSCON_LDODPCAL_NOPLL_1p05V  (0x15 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.05 V */
+#  define SYSCON_LDODPCAL_NOPLL_1p10V  (0x16 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.10 V */
+#  define SYSCON_LDODPCAL_NOPLL_1p15V  (0x17 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.15 V */
+#  define SYSCON_LDODPCAL_NOPLL_1p20V  (0x18 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.20 V */
+#define SYSCON_LDODPCAL_30KHZ_SHIFT    (8)       /* Bits 15-8: Deep-Sleep with IOSC */
+#define SYSCON_LDODPCAL_30KHZ_MASK     (0xff << SYSCON_LDODPCAL_30KHZ_SHIFT)
+#  define SYSCON_LDODPCAL_30KHZ_0p90V  (0x12 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 0.90 V */
+#  define SYSCON_LDODPCAL_30KHZ_0p95V  (0x13 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 0.95 V */
+#  define SYSCON_LDODPCAL_30KHZ_1p00V  (0x14 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 1.00 V */
+#  define SYSCON_LDODPCAL_30KHZ_1p05V  (0x15 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 1.05 V */
+#  define SYSCON_LDODPCAL_30KHZ_1p10V  (0x16 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 1.10 V */
+#  define SYSCON_LDODPCAL_30KHZ_1p15V  (0x17 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 1.15 V */
+#  define SYSCON_LDODPCAL_30KHZ_1p20V  (0x18 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 1.20 V */
+
 /* Sleep / Deep-Sleep Power Mode Status */
-#define SYSCON_SDPMST_
+
+#define SYSCON_SDPMST_SPDERR          (1 << 0)  /* Bit 0:  SRAM Power Down Request Error */
+#define SYSCON_SDPMST_FPDERR          (1 << 1)  /* Bit 1:  Flash Memory Power Down Request Error */
+#define SYSCON_SDPMST_PPDERR          (1 << 2)  /* Bit 2:  PIOSC Power Down Request Error */
+#define SYSCON_SDPMST_LDMINERR        (1 << 3)  /* Bit 3:  VLDO Value Below Minimum Error in Deep-Sleep Mode */
+#define SYSCON_SDPMST_LSMINERR        (1 << 4)  /* Bit 4:  VLDO Value Below Minimum Error in Sleep Mode */
+#define SYSCON_SDPMST_LMAXERR         (1 << 6)  /* Bit 6:  VLDO Value Above Maximum Error */
+#define SYSCON_SDPMST_PPDW            (1 << 7)  /* Bit 7:  PIOSC Power Down Request Warning */
+#define SYSCON_SDPMST_PRACT           (1 << 16) /* Bit 16: Sleep or Deep-Sleep Power Request Active */
+#define SYSCON_SDPMST_LOWPWR          (1 << 17) /* Bit 17: Sleep or Deep-Sleep Mode */
+#define SYSCON_SDPMST_FLASHLP         (1 << 18) /* Bit 18: Flash Memory in Low Power State */
+#define SYSCON_SDPMST_LDOUA           (1 << 19) /* Bit 19: LDO Update Active */
+
 /* Reset Behavior Control Register */
-#define SYSCON_RESBEHAVCTL_
+
+#define SYSCON_RESBEHAVCTL_EXTRES_SHIFT    (0)  /* Bits 0-1: External RST Pin Operation */
+#define SYSCON_RESBEHAVCTL_EXTRES_MASK     (3 << SYSCON_RESBEHAVCTL_EXTRES_SHIFT)
+#  define SYSCON_RESBEHAVCTL_EXTRES_SYSRST (2 << SYSCON_RESBEHAVCTL_EXTRES_SHIFT) /* System reset */
+#  define SYSCON_RESBEHAVCTL_EXTRES_POR    (3 << SYSCON_RESBEHAVCTL_EXTRES_SHIFT) /* POR */
+#define SYSCON_RESBEHAVCTL_BOR_SHIFT       (2)  /* Bits 2-3: BOR Reset operation */
+#define SYSCON_RESBEHAVCTL_BOR_MASK        (3 << SYSCON_RESBEHAVCTL_BOR_SHIFT)
+#  define SYSCON_RESBEHAVCTL_BOR_SYSRST    (2 << SYSCON_RESBEHAVCTL_BOR_SHIFT) /* System reset */
+#  define SYSCON_RESBEHAVCTL_BOR_POR       (3 << SYSCON_RESBEHAVCTL_BOR_SHIFT) /* POR */
+#define SYSCON_RESBEHAVCTL_WDOG0_SHIFT     (4)  /* Bits 4-5: Watchdog 0 Reset Operation */
+#define SYSCON_RESBEHAVCTL_WDOG0_MASK      (3 << SYSCON_RESBEHAVCTL_WDOG0_SHIFT)
+#  define SYSCON_RESBEHAVCTL_WDOG0_SYSRST  (2 << SYSCON_RESBEHAVCTL_WDOG0_SHIFT) /* System reset */
+#  define SYSCON_RESBEHAVCTL_WDOG0_POR     (3 << SYSCON_RESBEHAVCTL_WDOG0_SHIFT) /* POR */
+#define SYSCON_RESBEHAVCTL_WDOG1_SHIFT     (6)  /* Bits 6-7: Watchdog 1 Reset Operation */
+#define SYSCON_RESBEHAVCTL_WDOG1_MASK      (3 << SYSCON_RESBEHAVCTL_WDOG1_SHIFT)
+#  define SYSCON_RESBEHAVCTL_WDOG1_SYSRST  (2 << SYSCON_RESBEHAVCTL_WDOG1_SHIFT) /* System reset */
+#  define SYSCON_RESBEHAVCTL_WDOG1_POR     (3 << SYSCON_RESBEHAVCTL_WDOG1_SHIFT) /* POR */
+
 /* Hardware System Service Request */
-#define SYSCON_HSSR_
+
+#define SYSCON_HSSR_CDOFF_SHIFT        (0)      /* Bits 0-23: Command Descriptor Pointer */
+#define SYSCON_HSSR_CDOFF_MASK         (0xffffff << SYSCON_HSSR_CDOFF_SHIFT)
+#  define SYSCON_HSSR_CDOFF(n)         ((uint32_t)(n) << SYSCON_HSSR_CDOFF_SHIFT)
+#  define SYSCON_HSSR_CDOFF_NOREQ      (0 << SYSCON_HSSR_CDOFF_SHIFT) /* No request pending */
+#  define SYSCON_HSSR_CDOFF_NOREQ      (0xffffff << SYSCON_HSSR_CDOFF_SHIFT) /* An error occurred */
+#define SYSCON_HSSR_KEY_SHIFT          (24)     /* Bit 24-31: Write Key */
+#define SYSCON_HSSR_KEY_MASK           (0xff << SYSCON_HSSR_KEY_SHIFT)
+#  define SYSCON_HSSR_KEY              (0xca << SYSCON_HSSR_KEY_SHIFT) /* Key value */
+
 /* USB Power Domain Status */
-#define SYSCON_USBPDS_
+
+#define SYSCON_USBPDS_PWRSTAT_SHIFT    (0)      /* Bits 0-1: Power Domain Status */
+#define SYSCON_USBPDS_PWRSTAT_MASK     (3 << SYSCON_USBPDS_PWRSTAT_SHIFT)
+#  define SYSCON_USBPDS_PWRSTAT_OFF    (0 << SYSCON_USBPDS_PWRSTAT_SHIFT) /* OFF */
+#  define SYSCON_USBPDS_PWRSTAT_ON     (3 << SYSCON_USBPDS_PWRSTAT_SHIFT) /* ON */
+#define SYSCON_USBPDS_MEMSTAT_SHIFT    (2)      /* Bits 2-3: Memory Array Power Status */
+#define SYSCON_USBPDS_MEMSTAT_MASK     (3 << SYSCON_USBPDS_PWRSTAT_SHIFT)
+#  define SYSCON_USBPDS_MEMSTAT_OFF    (0 << SYSCON_USBPDS_PWRSTAT_SHIFT) /* Array OFF */
+#  define SYSCON_USBPDS_MEMSTAT_RETAIN (1 << SYSCON_USBPDS_PWRSTAT_SHIFT) /* SRAM Retention */
+#  define SYSCON_USBPDS_MEMSTAT_ON     (3 << SYSCON_USBPDS_PWRSTAT_SHIFT) /* Array On */
+
 /* USB Memory Power Control */
-#define SYSCON_USBMPC_
+
+#define SYSCON_USBMPC_PWRCTL_SHIFT     (0)      /* Bits 0-1: Memory Array Power Control */
+#define SYSCON_USBMPC_PWRCTL_MASK      (3 << SYSCON_USBMPC_PWRCTL_SHIFT)
+#  define SYSCON_USBMPC_PWRCTL_OFF     (0 << SYSCON_USBMPC_PWRCTL_SHIFT) /* Array OFF */
+#  define SYSCON_USBMPC_PWRCTL_RETAIN  (1 << SYSCON_USBMPC_PWRCTL_SHIFT) /* SRAM Retention */
+#  define SYSCON_USBMPC_PWRCTL_ON      (3 << SYSCON_USBMPC_PWRCTL_SHIFT) /* Array On */
+
 /* Ethernet MAC Power Domain Status */
-#define SYSCON_EMACPDS_
+
+#define SYSCON_EMACPDS_PWRSTAT_SHIFT   (0)      /* Bits 0-1: Power Domain Status */
+#define SYSCON_EMACPDS_PWRSTAT_MASK    (3 << SYSCON_EMACPDS_PWRSTAT_SHIFT)
+#  define SYSCON_EMACPDS_PWRSTAT_OFF   (0 << SYSCON_EMACPDS_PWRSTAT_SHIFT) /* OFF */
+#  define SYSCON_EMACPDS_PWRSTAT_ON    (3 << SYSCON_EMACPDS_PWRSTAT_SHIFT) /* ON */
+#define SYSCON_EMACPDS_MEMSTAT_SHIFT   (2)      /* Bits 2-3: Memory Array Power Status */
+#define SYSCON_EMACPDS_MEMSTAT_MASK    (3 << SYSCON_EMACPDS_MEMSTAT_SHIFT)
+#  define SYSCON_EMACPDS_MEMSTAT_OFF   (0 << SYSCON_EMACPDS_MEMSTAT_SHIFT) /* Array OFF */
+#  define SYSCON_EMACPDS_MEMSTAT_ON    (3 << SYSCON_EMACPDS_MEMSTAT_SHIFT) /* Array On */
+
 /* Ethernet MAC Memory Power Control */
-#define SYSCON_EMACMPC_
+
+#define SYSCON_EMACMPC_PWRCTL_SHIFT    (0)      /* Bits 0-1: Memory Array Power Control */
+#define SYSCON_EMACMPC_PWRCTL_MASK     (3 << SYSCON_EMACMPC_PWRCTL_SHIFT)
+#define SYSCON_EMACMPC_PWRCTL_OFF      (0 << SYSCON_EMACMPC_PWRCTL_SHIFT) /* Array OFF */
+#define SYSCON_EMACMPC_PWRCTL_ON       (3 << SYSCON_EMACMPC_PWRCTL_SHIFT) /* Array On */
+
 /* LCD Power Domain Status */
-#define SYSCON_LCDPDS_
+
+#define SYSCON_LCDPDS_PWRSTAT_SHIFT    (0)      /* Bits 0-1: Power Domain Status */
+#define SYSCON_LCDPDS_PWRSTAT_MASK     (3 << SYSCON_LCDPDS_PWRSTAT_SHIFT)
+#  define SYSCON_LCDPDS_PWRSTAT_OFF    (0 << SYSCON_LCDPDS_PWRSTAT_SHIFT) /* OFF */
+#  define SYSCON_LCDPDS_PWRSTAT_ON     (3 << SYSCON_LCDPDS_PWRSTAT_SHIFT) /* ON */
+#define SYSCON_LCDPDS_MEMSTAT_SHIFT    (2)      /* Bits 2-3: Memory Array Power Status */
+#define SYSCON_LCDPDS_MEMSTAT_MASK     (3 << SYSCON_LCDPDS_MEMSTAT_SHIFT)
+#  define SYSCON_LCDPDS_MEMSTAT_OFF    (0 << SYSCON_LCDPDS_MEMSTAT_SHIFT) /* Array OFF */
+#  define SYSCON_LCDPDS_MEMSTAT_ON     (3 << SYSCON_LCDPDS_MEMSTAT_SHIFT) /* Array On */
+
 /* LCD Memory Power Control */
-#define SYSCON_LCDMPC_
+
+#define SYSCON_LCDMPC_PWRCTL_SHIFT     (0)      /* Bits 0-1: Memory Array Power Control */
+#define SYSCON_LCDMPC_PWRCTL_MASK      (3 << SYSCON_LCDMPC_PWRCTL_SHIFT)
+#define SYSCON_LCDMPC_PWRCTL_OFF       (0 << SYSCON_LCDMPC_PWRCTL_SHIFT) /* Array OFF */
+#define SYSCON_LCDMPC_PWRCTL_ON        (3 << SYSCON_LCDMPC_PWRCTL_SHIFT) /* Array On */
+
 /* CAN 0 Power Domain Status */
-#define SYSCON_CAN0PDS_
+
+#define SYSCON_CAN0PDS_PWRSTAT_SHIFT   (0)      /* Bits 0-1: Power Domain Status */
+#define SYSCON_CAN0PDS_PWRSTAT_MASK    (3 << SYSCON_CAN0PDS_PWRSTAT_SHIFT)
+#  define SYSCON_CAN0PDS_PWRSTAT_OFF   (0 << SYSCON_CAN0PDS_PWRSTAT_SHIFT) /* OFF */
+#  define SYSCON_CAN0PDS_PWRSTAT_ON    (3 << SYSCON_CAN0PDS_PWRSTAT_SHIFT) /* ON */
+#define SYSCON_CAN0PDS_MEMSTAT_SHIFT   (2)      /* Bits 2-3: Memory Array Power Status */
+#define SYSCON_CAN0PDS_MEMSTAT_MASK    (3 << SYSCON_CAN0PDS_MEMSTAT_SHIFT)
+#  define SYSCON_CAN0PDS_MEMSTAT_OFF   (0 << SYSCON_CAN0PDS_MEMSTAT_SHIFT) /* Array OFF */
+#  define SYSCON_CAN0PDS_MEMSTAT_ON    (3 << SYSCON_CAN0PDS_MEMSTAT_SHIFT) /* Array On */
+
 /* CAN 0 Memory Power Control */
-#define SYSCON_CAN0MPC_
+
+#define SYSCON_CAN0MPC_PWRCTL_SHIFT    (0)      /* Bits 0-1: Memory Array Power Control */
+#define SYSCON_CAN0MPC_PWRCTL_MASK     (3 << SYSCON_CAN0MPC_PWRCTL_SHIFT)
+#define SYSCON_CAN0MPC_PWRCTL_OFF      (0 << SYSCON_CAN0MPC_PWRCTL_SHIFT) /* Array OFF */
+#define SYSCON_CAN0MPC_PWRCTL_ON       (3 << SYSCON_CAN0MPC_PWRCTL_SHIFT) /* Array On */
+
 /* CAN 1 Power Domain Status */
-#define SYSCON_CAN1PDS_
+
+#define SYSCON_CAN1PDS_PWRSTAT_SHIFT   (0)      /* Bits 0-1: Power Domain Status */
+#define SYSCON_CAN1PDS_PWRSTAT_MASK    (3 << SYSCON_CAN1PDS_PWRSTAT_SHIFT)
+#  define SYSCON_CAN1PDS_PWRSTAT_OFF   (0 << SYSCON_CAN1PDS_PWRSTAT_SHIFT) /* OFF */
+#  define SYSCON_CAN1PDS_PWRSTAT_ON    (3 << SYSCON_CAN1PDS_PWRSTAT_SHIFT) /* ON */
+#define SYSCON_CAN1PDS_MEMSTAT_SHIFT   (2)      /* Bits 2-3: Memory Array Power Status */
+#define SYSCON_CAN1PDS_MEMSTAT_MASK    (3 << SYSCON_CAN1PDS_MEMSTAT_SHIFT)
+#  define SYSCON_CAN1PDS_MEMSTAT_OFF   (0 << SYSCON_CAN1PDS_MEMSTAT_SHIFT) /* Array OFF */
+#  define SYSCON_CAN1PDS_MEMSTAT_ON    (3 << SYSCON_CAN1PDS_MEMSTAT_SHIFT) /* Array On */
+
 /* CAN 1 Memory Power Control */
-#define SYSCON_CAN1MPC_
+
+#define SYSCON_CAN1MPC_PWRCTL_SHIFT    (0)      /* Bits 0-1: Memory Array Power Control */
+#define SYSCON_CAN1MPC_PWRCTL_MASK     (3 << SYSCON_CAN1MPC_PWRCTL_SHIFT)
+#define SYSCON_CAN1MPC_PWRCTL_OFF      (0 << SYSCON_CAN1MPC_PWRCTL_SHIFT) /* Array OFF */
+#define SYSCON_CAN1MPC_PWRCTL_ON       (3 << SYSCON_CAN1MPC_PWRCTL_SHIFT) /* Array On */
+
 /* Watchdog Timer Peripheral Present */
-#define SYSCON_PPWD_
+
+#define SYSCON_PPWD(n)                 (1 << (n)) /* Bit n:  WDTn present */
+#  define SYSCON_PPWD_P0               (1 << 0)   /* Bit 0:  WDT0 present */
+#  define SYSCON_PPWD_P1               (1 << 1)   /* Bit 1:  WDT1 present */
+
 /* 16/32-Bit Timer Peripheral Present */
-#define SYSCON_PPTIMER_
+
+#define SYSCON_PPTIMER(n)              (1 << (n)) /* Bit n: 16/32-Bit General-Purpose Timer n Present */
+#  define SYSCON_PPTIMER_P0            (1 << 0)   /* Bit 0: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P1            (1 << 1)   /* Bit 1: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P2            (1 << 2)   /* Bit 2: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P3            (1 << 3)   /* Bit 3: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P4            (1 << 4)   /* Bit 4: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P5            (1 << 5)   /* Bit 5: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P6            (1 << 6)   /* Bit 6: 16/32-Bit General-Purpose Timer 0 Present */
+#  define SYSCON_PPTIMER_P7            (1 << 7)   /* Bit 7: 16/32-Bit General-Purpose Timer 0 Present */
+
 /* GPIO Peripheral Present */
-#define SYSCON_PPGPIO_
-/* uDMA Peripheral Present */
-#define SYSCON_PPDMA_
+
+#define SYSCON_PPGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port n Present */
+#  define SYSCON_PPGPIO_P0             (1 << 0)   /* Bit 0:  GPIO Port A Present */
+#  define SYSCON_PPGPIO_P1             (1 << 1)   /* Bit 1:  GPIO Port B Present */
+#  define SYSCON_PPGPIO_P2             (1 << 2)   /* Bit 2:  GPIO Port C Present */
+#  define SYSCON_PPGPIO_P3             (1 << 3)   /* Bit 3:  GPIO Port D Present */
+#  define SYSCON_PPGPIO_P4             (1 << 4)   /* Bit 4:  GPIO Port E Present */
+#  define SYSCON_PPGPIO_P5             (1 << 5)   /* Bit 5:  GPIO Port F Present */
+#  define SYSCON_PPGPIO_P6             (1 << 6)   /* Bit 6:  GPIO Port G Present */
+#  define SYSCON_PPGPIO_P7             (1 << 7)   /* Bit 7:  GPIO Port H Present */
+#  define SYSCON_PPGPIO_P8             (1 << 8)   /* Bit 8:  GPIO Port J Present */
+#  define SYSCON_PPGPIO_P9             (1 << 9)   /* Bit 9:  GPIO Port K Present */
+#  define SYSCON_PPGPIO_P10            (1 << 10)  /* Bit 10: GPIO Port L Present */
+#  define SYSCON_PPGPIO_P11            (1 << 11)  /* Bit 11: GPIO Port M Present */
+#  define SYSCON_PPGPIO_P12            (1 << 12)  /* Bit 12: GPIO Port N Present */
+#  define SYSCON_PPGPIO_P13            (1 << 13)  /* Bit 13: GPIO Port P Present */
+#  define SYSCON_PPGPIO_P14            (1 << 14)  /* Bit 14: GPIO Port Q Present */
+#  define SYSCON_PPGPIO_P15            (1 << 15)  /* Bit 15: GPIO Port R Present */
+#  define SYSCON_PPGPIO_P16            (1 << 16)  /* Bit 16: GPIO Port S Present */
+#  define SYSCON_PPGPIO_P17            (1 << 17)  /* Bit 17: GPIO Port T Present */
+
+/* μDMA Peripheral Present */
+
+#define SYSCON_PPDMA_P0                (1 << 0)   /* Bit 0:  μDMA Module Present */
+
 /* EPI Peripheral Present */
-#define SYSCON_PPEPI_
+
+#define SYSCON_PPEPI_P0                (1 << 0)   /* Bit 0: EPI Module Present */
+
 /* Hibernation Peripheral Present */
-#define SYSCON_PPHIB_
+
+#define SYSCON_PPHIB_P0                (1 << 0)   /* Bit 0: Hibernation Module Present */
+
 /* UART Peripheral Present */
-#define SYSCON_PPUART_
+
+#define SYSCON_PPUART(n)               (1 << (n)) /* Bit n:  UART Module n Present */
+#  define SYSCON_PPUART_P0             (1 << 0)   /* Bit 0:  UART Module 0 Present */
+#  define SYSCON_PPUART_P1             (1 << 1)   /* Bit 1:  UART Module 1 Present */
+#  define SYSCON_PPUART_P2             (1 << 2)   /* Bit 2:  UART Module 2 Present */
+#  define SYSCON_PPUART_P3             (1 << 3)   /* Bit 3:  UART Module 3 Present */
+#  define SYSCON_PPUART_P4             (1 << 4)   /* Bit 4:  UART Module 4 Present */
+#  define SYSCON_PPUART_P5             (1 << 5)   /* Bit 5:  UART Module 5 Present */
+#  define SYSCON_PPUART_P6             (1 << 6)   /* Bit 6:  UART Module 6 Present */
+#  define SYSCON_PPUART_P7             (1 << 7)   /* Bit 7:  UART Module 7 Present */
+
 /* SSI Peripheral Present */
-#define SYSCON_PPSSI_
+
+#define SYSCON_PPSSI(n)                (1 << (n)) /* Bit n:  SSI Module n Present */
+#  define SYSCON_PPSSI_P0              (1 << 0)   /* Bit 0:  SSI Module 0 Present */
+#  define SYSCON_PPSSI_P1              (1 << 1)   /* Bit 1:  SSI Module 1 Present */
+#  define SYSCON_PPSSI_P2              (1 << 2)   /* Bit 2:  SSI Module 2 Present */
+#  define SYSCON_PPSSI_P3              (1 << 3)   /* Bit 3:  SSI Module 3 Present */
+
 /* I2C Peripheral Present */
-#define SYSCON_PPI2C_
+
+#define SYSCON_PPI2C(n)                (1 << (n)) /* Bit n:  I2C Module n Present */
+#  define SYSCON_PPI2C_P0              (1 << 0)   /* Bit 0:  I2C Module 0 Present */
+#  define SYSCON_PPI2C_P1              (1 << 1)   /* Bit 1:  I2C Module 1 Present */
+#  define SYSCON_PPI2C_P2              (1 << 2)   /* Bit 2:  I2C Module 2 Present */
+#  define SYSCON_PPI2C_P3              (1 << 3)   /* Bit 3:  I2C Module 3 Present */
+#  define SYSCON_PPI2C_P4              (1 << 4)   /* Bit 4:  I2C Module 4 Present */
+#  define SYSCON_PPI2C_P5              (1 << 5)   /* Bit 5:  I2C Module 5 Present */
+#  define SYSCON_PPI2C_P6              (1 << 6)   /* Bit 6:  I2C Module 6 Present */
+#  define SYSCON_PPI2C_P7              (1 << 7)   /* Bit 7:  I2C Module 7 Present */
+#  define SYSCON_PPI2C_P8              (1 << 8)   /* Bit 8:  I2C Module 8 Present */
+#  define SYSCON_PPI2C_P9              (1 << 9)   /* Bit 9:  I2C Module 9 Present */
+
+
 /* USB Peripheral Present */
-#define SYSCON_PPUSB_
+
+#define SYSCON_PPUSB_P0                (1 << 0)   /* Bit 0: USB Module Present */
+
 /* Ethernet PHY Peripheral Present */
-#define SYSCON_PPEPHY_
+
+#define SYSCON_PPEPHY_P0               (1 << 0)   /* Bit 0: Ethernet PHY Module Present */
+
 /* CAN Peripheral Present */
-#define SYSCON_PPCAN_
+
+#define SYSCON_PPCAN(n)                (1 << (n)) /* Bit n:  CAN Module n Present */
+#  define SYSCON_PPCAN_P0              (1 << 0)   /* Bit 0:  CAN Module 0 Present */
+#  define SYSCON_PPCAN_P1              (1 << 1)   /* Bit 1:  CAN Module 1 Present */
+
 /* ADC Peripheral Present */
-#define SYSCON_PPADC_
+
+#define SYSCON_PPADC(n)                (1 << (n)) /* Bit n:  ADC Module n Present */
+#  define SYSCON_PPADC_P0              (1 << 0)   /* Bit 0:  ADC Module 0 Present */
+#  define SYSCON_PPADC_P1              (1 << 1)   /* Bit 1:  ADC Module 1 Present */
+
 /* ACMP Peripheral Present */
-#define SYSCON_PPACMP_
+
+#define SYSCON_PPACMP_P0               (1 << 0)   /* Bit 0:  Analog Comparator Module Present */
+
 /* PWM Peripheral Present */
-#define SYSCON_PPPWM_
+
+#define SYSCON_PPWM(n)                 (1 << (n)) /* Bit n:  PWM Module n Present */
+#  define SYSCON_PPWM_P0               (1 << 0)   /* Bit 0:  PWM Module 0 Present */
+#  define SYSCON_PPWM_P1               (1 << 1)   /* Bit 1:  PWM Module 1 Present */
+
 /* QE Interface Peripheral Present */
-#define SYSCON_PPQEI_
+
+#define SYSCON_PPQEI(n)                (1 << (n)) /* Bit n:  QEI Module n Present */
+#  define SYSCON_PPQEI_P0              (1 << 0)   /* Bit 0:  QEI Module 0 Present */
+#  define SYSCON_PPUART_P1             (1 << 1)   /* Bit 1:  QEI Module 1 Present */
+
 /* Low Pin Count Interface Peripheral Present */
-#define SYSCON_PPLPC_
+
+#define SYSCON_PPLPC_P0                (1 << 0)   /* Bit 0: LPC Module Present */
+
 /* Platform Environment Control Interface Peripheral Present */
-#define SYSCON_PPPECI_
+
+#define SYSCON_PPPECI_P0               (1 << 0)   /* Bit 0: PECI Module Present */
+
 /* Fan Control Peripheral Present */
-#define SYSCON_PPFAN_
+
+#define SYSCON_PPFAN_P0                (1 << 0)   /* Bit 0: FAN Module 0 Present */
+
 /* EEPROM Peripheral Present */
-#define SYSCON_PPEEPROM_
+
+#define SYSCON_PPEEPROM_P0             (1 << 0)   /* Bit 0:  EEPROM Module Present */
+
 /* 32/64-Bit Wide Timer Peripheral Present */
-#define SYSCON_PPWTIMER_
+
+#define SYSCON_PPWTIMER(n)             (1 << (n)) /* Bit n:  32/64-Bit Wide General-Purpose Timer n Present */
+#  define SYSCON_PPWTIMER_P0           (1 << 0)   /* Bit 0:  32/64-Bit Wide General-Purpose Timer 0 Present */
+#  define SYSCON_PPWTIMER_P1           (1 << 1)   /* Bit 1:  32/64-Bit Wide General-Purpose Timer 1 Present */
+#  define SYSCON_PPWTIMER_P2           (1 << 2)   /* Bit 2:  32/64-Bit Wide General-Purpose Timer 2 Present */
+#  define SYSCON_PPWTIMER_P3           (1 << 3)   /* Bit 3:  32/64-Bit Wide General-Purpose Timer 3 Present */
+#  define SYSCON_PPWTIMER_P4           (1 << 4)   /* Bit 4:  32/64-Bit Wide General-Purpose Timer 4 Present */
+#  define SYSCON_PPWTIMER_P5           (1 << 5)   /* Bit 5:  32/64-Bit Wide General-Purpose Timer 5 Present */
+
 /* Remote Temperature Sensor Peripheral Present */
-#define SYSCON_PPRTS_
+
+#define SYSCON_PPRTS_P0                (1 << 0)   /* Bit 0: RTS Module Present */
+
 /* CRC/Crypto Modules Peripheral Present */
-#define SYSCON_PPCCM_
+
+#define SYSCON_PPCCM_P0                (1 << 0)   /* Bit 0: CRC/Crypto Modules Present */
+
 /* LCD Peripheral Present */
-#define SYSCON_PPLCD_
+
+#define SYSCON_PPLCD_P0                (1 << 0)   /* Bit 0: LCD Module Present */
+
 /* 1-Wire Peripheral Present */
-#define SYSCON_PPOWIRE_
+
+#define SYSCON_PPOWIRE_P0              (1 << 0)   /* Bit 0: 1-Wire Module Present */
+
 /* Ethernet MAC Peripheral Present */
-#define SYSCON_PPEMAC_
+
+#define SYSCON_PPEMAC_P0               (1 << 0)   /* Bit 0: Ethernet Controller Module Present */
+
 /* Power Regulator Bus Peripheral Present */
-#define SYSCON_PPPRB_
+
+#define SYSCON_PPPRB__P0               (1 << 0)   /* Bit 0: PRB Module Present */
+
 /* Human Interface Master Peripheral Present */
-#define SYSCON_PPHIM_
+
+#define SYSCON_PPHIM_P0                (1 << 0)   /* Bit 0: HIM Module Present */
+
 /* Watchdog Timer Software Reset */
 #define SYSCON_SRWD_
 /* 16/32-Bit Timer Software Reset */
 #define SYSCON_SRTIMER_
 /* GPIO Software Reset */
 #define SYSCON_SRGPIO_
-/* uDMA Software Reset */
+/* μDMA Software Reset */
 #define SYSCON_SRDMA_
 /* EPI Software Reset */
 #define SYSCON_SREPI_
@@ -919,7 +1213,7 @@
 #define SYSCON_RCGCTIMER_
 /* GPIO Run Mode Clock Gating Control */
 #define SYSCON_RCGCGPIO_
-/* uDMA Run Mode Clock Gating Control */
+/* μDMA Run Mode Clock Gating Control */
 #define SYSCON_RCGCDMA_
 /* EPI Run Mode Clock Gating Control */
 #define SYSCON_RCGCEPI_
@@ -947,7 +1241,7 @@
 #define TIVA_SYSCON_RCGCQEI_
 /* EEPROM Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCEEPROM_
-/* CRC/CryptoModules RunMode ClockGating Control */
+/* CRC/Crypto Modules RunMode ClockGating Control */
 #define TIVA_SYSCON_RCGCCCM_
 /* LCD Controller Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCLCD_
@@ -961,7 +1255,7 @@
 #define TIVA_SYSCON_SCGCTIMER_
 /* GPIO Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCGPIO_
-/* uDMA Sleep Mode Clock Gating Control */
+/* μDMA Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCDMA_
 /* EPI Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCEPI_
@@ -1003,7 +1297,7 @@
 #define TIVA_SYSCON_DCGCTIMER_
 /* GPIO Deep-Sleep Mode Clock */
 #define TIVA_SYSCON_DCGCGPIO_
-/* uDMA Deep-Sleep Mode Clock Gating Control */
+/* μDMA Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCDMA_
 /* EPI Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCEPI_
@@ -1045,7 +1339,7 @@
 #define TIVA_SYSCON_PCTIMER_
 /* GPIO Power Control */
 #define TIVA_SYSCON_PCGPIO_
-/* uDMA Power Control */
+/* μDMA Power Control */
 #define TIVA_SYSCON_PCDMA_
 /* External Peripheral Interface Power Control */
 #define TIVA_SYSCON_PCEPI_
@@ -1087,7 +1381,7 @@
 #define TIVA_SYSCON_PRTIMER_
 /* GPIO Peripheral Ready */
 #define TIVA_SYSCON_PRGPIO_
-/* uDMA Peripheral Ready */
+/* μDMA Peripheral Ready */
 #define TIVA_SYSCON_PRDMA_
 /* EPI Peripheral Ready */
 #define TIVA_SYSCON_PREPI_
