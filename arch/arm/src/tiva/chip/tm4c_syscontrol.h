@@ -386,7 +386,7 @@
 #define SYSCON_DID1_QUAL_SHIFT        0         /* Bits 1-0: Qualification Status */
 #define SYSCON_DID1_QUAL_MASK         (0x03 << SYSCON_DID1_QUAL_SHIFT)
 #define SYSCON_DID1_ROHS              (1 << 2)  /* Bit 2: RoHS-Compliance */
-#define SYSCON_DID1_PKG_SHIFT         3 /* Bits 4-3: Package Type */
+#define SYSCON_DID1_PKG_SHIFT         3         /* Bits 4-3: Package Type */
 #define SYSCON_DID1_PKG_MASK          (0x03 << SYSCON_DID1_PKG_SHIFT)
 #define SYSCON_DID1_TEMP_SHIFT        5         /* Bits 7-5: Temperature Range */
 #define SYSCON_DID1_TEMP_MASK         (0x07 << SYSCON_DID1_TEMP_SHIFT)
@@ -416,13 +416,13 @@
 
 /* Interrupt Mask Control */
 
-#define SYSCON_IMC_BORR1RIM           (1 << 1)  /* Bit 1:  VDD under BOR1 Raw Interrupt Mask */
-#define SYSCON_IMC_MOFRIM             (1 << 3)  /* Bit 3:  Main Oscillator Failure Raw Interrupt Mask */
-#define SYSCON_IMC_PLLLRIM            (1 << 6)  /* Bit 6:  PLL Lock Raw Interrupt Mask */
-#define SYSCON_IMC_USBPLLLRIM         (1 << 7)  /* Bit 7:  USB PLL Lock Raw Interrupt Mask */
-#define SYSCON_IMC_MOSCPUPRIM         (1 << 8)  /* Bit 8:  MOSC Power Up Raw Interrupt Mask */
-#define SYSCON_IMC_VDDARIM            (1 << 10) /* Bit 10: VDDA Power OK Event Raw Interrupt Mask */
-#define SYSCON_IMC_BOR0RIM            (1 << 11) /* Bit 11: VDD under BOR0 Raw Interrupt Mask */
+#define SYSCON_IMC_BORR1IM            (1 << 1)  /* Bit 1:  VDD under BOR1 Interrupt Mask */
+#define SYSCON_IMC_MOFIM              (1 << 3)  /* Bit 3:  Main Oscillator Failure Interrupt Mask */
+#define SYSCON_IMC_PLLLIM             (1 << 6)  /* Bit 6:  PLL Lock Interrupt Mask */
+#define SYSCON_IMC_USBPLLLIM          (1 << 7)  /* Bit 7:  USB PLL Lock Interrupt Mask */
+#define SYSCON_IMC_MOSCPUPIM          (1 << 8)  /* Bit 8:  MOSC Power Up Interrupt Mask */
+#define SYSCON_IMC_VDDAIM             (1 << 10) /* Bit 10: VDDA Power OK Event Interrupt Mask */
+#define SYSCON_IMC_BOR0IM             (1 << 11) /* Bit 11: VDD under BOR0 Interrupt Mask */
 
 /* Masked Interrupt Status and Clear */
 
@@ -609,7 +609,7 @@
 #define SYSCON_SLPPWRCFG_SRAMPM_MASK       (3 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT)
 #  define SYSCON_SLPPWRCFG_SRAMPM_ACTIVE   (0 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Active Mode */
 #  define SYSCON_SLPPWRCFG_SRAMPM_STANDBY  (1 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Standby Mode */
-#  define SYSCON_SLPPWRCFG_SRAMPM_LOWPWR   (2 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Low Power Mode */
+#  define SYSCON_SLPPWRCFG_SRAMPM_LOWPWR   (3 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Low Power Mode */
 #define SYSCON_SLPPWRCFG_FLASHPM_SHIFT     (4)  /* Bits 5-4: Flash Power Modes */
 #define SYSCON_SLPPWRCFG_FLASHPM_MASK      (3 << SYSCON_SLPPWRCFG_FLASHPM_SHIFT)
 #  define SYSCON_SLPPWRCFG_FLASHPM_ACTIVE  (0 << SYSCON_SLPPWRCFG_FLASHPM_SHIFT) /* Active Mode */
@@ -621,7 +621,7 @@
 #define SYSCON_DSLPPWRCFG_SRAMPM_MASK      (3 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT)
 #  define SYSCON_DSLPPWRCFG_SRAMPM_ACTIVE  (0 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Active Mode */
 #  define SYSCON_DSLPPWRCFG_SRAMPM_STANDBY (1 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Standby Mode */
-#  define SYSCON_DSLPPWRCFG_SRAMPM_LOWPWR  (2 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Low Power Mode */
+#  define SYSCON_DSLPPWRCFG_SRAMPM_LOWPWR  (3 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Low Power Mode */
 #define SYSCON_DSLPPWRCFG_FLASHPM_SHIFT    (4)  /* Bits 5-4: Flash Power Modes */
 #define SYSCON_DSLPPWRCFG_FLASHPM_MASK     (3 << SYSCON_DSLPPWRCFG_FLASHPM_SHIFT)
 #  define SYSCON_DSLPPWRCFG_FLASHPM_ACTIVE (0 << SYSCON_DSLPPWRCFG_FLASHPM_SHIFT) /* Active Mode */
