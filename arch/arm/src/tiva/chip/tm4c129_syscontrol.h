@@ -135,6 +135,7 @@
 #define TIVA_SYSCON_SRPWM_OFFSET       0x0540 /* PWM Software Reset */
 #define TIVA_SYSCON_SRQEI_OFFSET       0x0544 /* QE Interface Software Reset */
 #define TIVA_SYSCON_SREEPROM_OFFSET    0x0558 /* EEPROM Software Reset */
+#define TIVA_SYSCON_SRWTIMER_OFFSET    0x055c /* 32/64-Bit Wide Timer Software Reset */
 #define TIVA_SYSCON_SRCCM_OFFSET       0x0574 /* CRC/Crypto Modules Software Reset */
 #define TIVA_SYSCON_SRLCD_OFFSET       0x0590 /* LCD Controller Software Reset */
 #define TIVA_SYSCON_SROWIRE_OFFSET     0x0598 /* 1-Wire Software Reset */
@@ -156,6 +157,7 @@
 #define TIVA_SYSCON_RCGCPWM_OFFSET     0x0640 /* PWM Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCQEI_OFFSET     0x0644 /* QE Interface Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCEEPROM_OFFSET  0x0658 /* EEPROM Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCWTIMER_OFFSET  0x065c /* 32/64-Bit Wide Timer Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCCCM_OFFSET     0x0674 /* CRC/CryptoModules Run Mode ClockGating Control */
 #define TIVA_SYSCON_RCGCLCD_OFFSET     0x0690 /* LCD Controller Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCOWIRE_OFFSET   0x0698 /* 1-Wire Run Mode Clock Gating Control */
@@ -177,6 +179,7 @@
 #define TIVA_SYSCON_SCGCPWM_OFFSET     0x0740 /* PulseWidthModulator Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCQEI_OFFSET     0x0744 /* QE Interface Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCEEPROM_OFFSET  0x0758 /* EEPROM Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCWTIMER_OFFSET  0x075c /* 32/64-Bit Wide Timer Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCCCM_OFFSET     0x0774 /* CRC/Crypto Modules Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCLCD_OFFSET     0x0790 /* LCD Controller Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_SCGCOWIRE_OFFSET   0x0798 /* 1-Wire Sleep Mode Clock Gating Control */
@@ -198,6 +201,7 @@
 #define TIVA_SYSCON_DCGCPWM_OFFSET     0x0840 /* PWM Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCQEI_OFFSET     0x0844 /* QE Interface Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCEEPROM_OFFSET  0x0858 /* EEPROM Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCWTIMER_OFFSET  0x085c /* 32/64-Bit Wide Timer Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCCCM_OFFSET     0x0874 /* CRC/Crypto Modules Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCLCD_OFFSET     0x0890 /* LCD Controller Deep-Sleep Mode Clock Gating Control */
 #define TIVA_SYSCON_DCGCOWIRE_OFFSET   0x0898 /* 1-Wire Deep-Sleep Mode Clock Gating Control */
@@ -240,6 +244,7 @@
 #define TIVA_SYSCON_PRPWM_OFFSET       0x0a40 /* PWM Peripheral Ready */
 #define TIVA_SYSCON_PRQEI_OFFSET       0x0a44 /* QE Interface Peripheral Ready */
 #define TIVA_SYSCON_PREEPROM_OFFSET    0x0a58 /* EEPROM Peripheral Ready */
+#define TIVA_SYSCON_PRWTIMER_OFFSET    0x0a5c /* 32/64-Bit Wide Timer Peripheral Ready */
 #define TIVA_SYSCON_PRCCM_OFFSET       0x0a74 /* CRC/Crypto Modules Peripheral Ready */
 #define TIVA_SYSCON_PRLCD_OFFSET       0x0a90 /* LCD Controller Peripheral Ready */
 #define TIVA_SYSCON_PROWIRE_OFFSET     0x0a98 /* 1-Wire Peripheral Ready */
@@ -343,6 +348,7 @@
 #define TIVA_SYSCON_SRPWM              (TIVA_SYSCON_BASE+TIVA_SYSCON_SRPWM_OFFSET)
 #define TIVA_SYSCON_SRQEI              (TIVA_SYSCON_BASE+TIVA_SYSCON_SRQEI_OFFSET)
 #define TIVA_SYSCON_SREEPROM           (TIVA_SYSCON_BASE+TIVA_SYSCON_SREEPROM_OFFSET)
+#define TIVA_SYSCON_SRWTIMER           (TIVA_SYSCON_BASE+TIVA_SYSCON_SRWTIMER_OFFSET)
 #define TIVA_SYSCON_SRCCM              (TIVA_SYSCON_BASE+TIVA_SYSCON_SRCCM_OFFSET)
 #define TIVA_SYSCON_SRLCD              (TIVA_SYSCON_BASE+TIVA_SYSCON_SRLCD_OFFSET)
 #define TIVA_SYSCON_SROWIRE            (TIVA_SYSCON_BASE+TIVA_SYSCON_SROWIRE_OFFSET)
@@ -364,6 +370,7 @@
 #define TIVA_SYSCON_RCGCPWM            (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCPWM_OFFSET)
 #define TIVA_SYSCON_RCGCQEI            (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCQEI_OFFSET)
 #define TIVA_SYSCON_RCGCEEPROM         (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCEEPROM_OFFSET)
+#define TIVA_SYSCON_RCGCWTIMER         (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCWTIMER_OFFSET)
 #define TIVA_SYSCON_RCGCCCM            (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCCCM_OFFSET)
 #define TIVA_SYSCON_RCGCLCD            (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCLCD_OFFSET)
 #define TIVA_SYSCON_RCGCOWIRE          (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCOWIRE_OFFSET)
@@ -385,6 +392,7 @@
 #define TIVA_SYSCON_SCGCPWM            (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCPWM_OFFSET)
 #define TIVA_SYSCON_SCGCQEI            (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCQEI_OFFSET)
 #define TIVA_SYSCON_SCGCEEPROM         (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCEEPROM_OFFSET)
+#define TIVA_SYSCON_SCGCWTIMER         (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCWTIMER_OFFSET)
 #define TIVA_SYSCON_SCGCCCM            (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCCCM_OFFSET)
 #define TIVA_SYSCON_SCGCLCD            (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCLCD_OFFSET)
 #define TIVA_SYSCON_SCGCOWIRE          (TIVA_SYSCON_BASE+TIVA_SYSCON_SCGCOWIRE_OFFSET)
@@ -406,6 +414,7 @@
 #define TIVA_SYSCON_DCGCPWM            (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCPWM_OFFSET)
 #define TIVA_SYSCON_DCGCQEI            (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCQEI_OFFSET)
 #define TIVA_SYSCON_DCGCEEPROM         (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCEEPROM_OFFSET)
+#define TIVA_SYSCON_DCGCWTIMER         (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCWTIMER_OFFSET)
 #define TIVA_SYSCON_DCGCCCM            (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCCCM_OFFSET)
 #define TIVA_SYSCON_DCGCLCD            (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCLCD_OFFSET)
 #define TIVA_SYSCON_DCGCOWIRE          (TIVA_SYSCON_BASE+TIVA_SYSCON_DCGCOWIRE_OFFSET)
@@ -448,6 +457,7 @@
 #define TIVA_SYSCON_PRPWM              (TIVA_SYSCON_BASE+TIVA_SYSCON_PRPWM_OFFSET)
 #define TIVA_SYSCON_PRQEI              (TIVA_SYSCON_BASE+TIVA_SYSCON_PRQEI_OFFSET)
 #define TIVA_SYSCON_PREEPROM           (TIVA_SYSCON_BASE+TIVA_SYSCON_PREEPROM_OFFSET)
+#define TIVA_SYSCON_PRWTIMER           (TIVA_SYSCON_BASE+TIVA_SYSCON_PRWTIMER_OFFSET)
 #define TIVA_SYSCON_PRCCM              (TIVA_SYSCON_BASE+TIVA_SYSCON_PRCCM_OFFSET)
 #define TIVA_SYSCON_PRLCD              (TIVA_SYSCON_BASE+TIVA_SYSCON_PRLCD_OFFSET)
 #define TIVA_SYSCON_PROWIRE            (TIVA_SYSCON_BASE+TIVA_SYSCON_PROWIRE_OFFSET)
@@ -996,15 +1006,15 @@
 
 /* 16/32-Bit Timer Peripheral Present */
 
-#define SYSCON_PPTIMER(n)              (1 << (n)) /* Bit n: 16/32-Bit General-Purpose Timer n Present */
-#  define SYSCON_PPTIMER_P0            (1 << 0)   /* Bit 0: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P1            (1 << 1)   /* Bit 1: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P2            (1 << 2)   /* Bit 2: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P3            (1 << 3)   /* Bit 3: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P4            (1 << 4)   /* Bit 4: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P5            (1 << 5)   /* Bit 5: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P6            (1 << 6)   /* Bit 6: 16/32-Bit General-Purpose Timer 0 Present */
-#  define SYSCON_PPTIMER_P7            (1 << 7)   /* Bit 7: 16/32-Bit General-Purpose Timer 0 Present */
+#define SYSCON_PPTIMER(n)              (1 << (n)) /* Bit n: 16/32-Bit Timer n Present */
+#  define SYSCON_PPTIMER_P0            (1 << 0)   /* Bit 0: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P1            (1 << 1)   /* Bit 1: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P2            (1 << 2)   /* Bit 2: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P3            (1 << 3)   /* Bit 3: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P4            (1 << 4)   /* Bit 4: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P5            (1 << 5)   /* Bit 5: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P6            (1 << 6)   /* Bit 6: 16/32-Bit Timer 0 Present */
+#  define SYSCON_PPTIMER_P7            (1 << 7)   /* Bit 7: 16/32-Bit Timer 0 Present */
 
 /* GPIO Peripheral Present */
 
@@ -1129,13 +1139,13 @@
 
 /* 32/64-Bit Wide Timer Peripheral Present */
 
-#define SYSCON_PPWTIMER(n)             (1 << (n)) /* Bit n:  32/64-Bit Wide General-Purpose Timer n Present */
-#  define SYSCON_PPWTIMER_P0           (1 << 0)   /* Bit 0:  32/64-Bit Wide General-Purpose Timer 0 Present */
-#  define SYSCON_PPWTIMER_P1           (1 << 1)   /* Bit 1:  32/64-Bit Wide General-Purpose Timer 1 Present */
-#  define SYSCON_PPWTIMER_P2           (1 << 2)   /* Bit 2:  32/64-Bit Wide General-Purpose Timer 2 Present */
-#  define SYSCON_PPWTIMER_P3           (1 << 3)   /* Bit 3:  32/64-Bit Wide General-Purpose Timer 3 Present */
-#  define SYSCON_PPWTIMER_P4           (1 << 4)   /* Bit 4:  32/64-Bit Wide General-Purpose Timer 4 Present */
-#  define SYSCON_PPWTIMER_P5           (1 << 5)   /* Bit 5:  32/64-Bit Wide General-Purpose Timer 5 Present */
+#define SYSCON_PPWTIMER(n)             (1 << (n)) /* Bit n:  32/64-Bit Wide Timer n Present */
+#  define SYSCON_PPWTIMER_P0           (1 << 0)   /* Bit 0:  32/64-Bit Wide Timer 0 Present */
+#  define SYSCON_PPWTIMER_P1           (1 << 1)   /* Bit 1:  32/64-Bit Wide Timer 1 Present */
+#  define SYSCON_PPWTIMER_P2           (1 << 2)   /* Bit 2:  32/64-Bit Wide Timer 2 Present */
+#  define SYSCON_PPWTIMER_P3           (1 << 3)   /* Bit 3:  32/64-Bit Wide Timer 3 Present */
+#  define SYSCON_PPWTIMER_P4           (1 << 4)   /* Bit 4:  32/64-Bit Wide Timer 4 Present */
+#  define SYSCON_PPWTIMER_P5           (1 << 5)   /* Bit 5:  32/64-Bit Wide Timer 5 Present */
 
 /* Remote Temperature Sensor Peripheral Present */
 
@@ -1173,15 +1183,15 @@
 
 /* 16/32-Bit Timer Software Reset */
 
-#define SYSCON_SRTIMER(n)              (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Software Reset */
-#  define SYSCON_SRTIMER_R0            (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Software Reset */
-#  define SYSCON_SRTIMER_R1            (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Software Reset */
-#  define SYSCON_SRTIMER_R2            (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Software Reset */
-#  define SYSCON_SRTIMER_R3            (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Software Reset */
-#  define SYSCON_SRTIMER_R4            (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Software Reset */
-#  define SYSCON_SRTIMER_R5            (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Software Reset */
-#  define SYSCON_SRTIMER_R5            (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Software Reset */
-#  define SYSCON_SRTIMER_R5            (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Software Reset */
+#define SYSCON_SRTIMER(n)              (1 << (n)) /* Bit n:  16/32-Bit Timer n Software Reset */
+#  define SYSCON_SRTIMER_R0            (1 << 0)   /* Bit 0:  16/32-Bit Timer 0 Software Reset */
+#  define SYSCON_SRTIMER_R1            (1 << 1)   /* Bit 1:  16/32-Bit Timer 1 Software Reset */
+#  define SYSCON_SRTIMER_R2            (1 << 2)   /* Bit 2:  16/32-Bit Timer 2 Software Reset */
+#  define SYSCON_SRTIMER_R3            (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Software Reset */
+#  define SYSCON_SRTIMER_R4            (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Software Reset */
+#  define SYSCON_SRTIMER_R5            (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Software Reset */
+#  define SYSCON_SRTIMER_R5            (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Software Reset */
+#  define SYSCON_SRTIMER_R5            (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Software Reset */
 
 /* GPIO Software Reset */
 
@@ -1291,6 +1301,16 @@
 
 #define SYSCON_SREEPROM_R0             (1 << 0)   /* Bit 0:  EEPROM Module Software Reset */
 
+/* 32/64-Bit Wide Timer Software Reset */
+
+#define SYSCON_SRWTIMER(n)             (1 << (n)) /* Bit n:  32/64-Bit Wide Timer n Software Reset */
+#  define SYSCON_SRWTIMER_R0           (1 << 0)   /* Bit 0:  32/64-Bit Wide Timer 0 Software Reset */
+#  define SYSCON_SRWTIMER_R1           (1 << 1)   /* Bit 1:  32/64-Bit Wide Timer 1 Software Reset */
+#  define SYSCON_SRWTIMER_R2           (1 << 2)   /* Bit 2:  32/64-Bit Wide Timer 2 Software Reset */
+#  define SYSCON_SRWTIMER_R3           (1 << 3)   /* Bit 3:  32/64-Bit Wide Timer 3 Software Reset */
+#  define SYSCON_SRWTIMER_R4           (1 << 4)   /* Bit 4:  32/64-Bit Wide Timer 4 Software Reset */
+#  define SYSCON_SRWTIMER_R5           (1 << 5)   /* Bit 5:  32/64-Bit Wide Timer 5 Software Reset */
+
 /* CRC/Crypto Modules Software Reset */
 
 #define SYSCON_SRCCM_R0                (1 << 0)   /* Bit 0: CRC/Crypto Modules Software Reset */
@@ -1315,15 +1335,15 @@
 
 /* 16/32-Bit Timer Run Mode Clock Gating Control */
 
-#define SYSCON_RCGCTIMER(n)            (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R0          (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R1          (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R2          (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R3          (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R4          (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R5          (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R6          (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Run Mode Clock Gating Control */
-#  define SYSCON_RCGCTIMER_R7          (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Run Mode Clock Gating Control */
+#define SYSCON_RCGCTIMER(n)            (1 << (n)) /* Bit n:  16/32-Bit Timer n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R0          (1 << 0)   /* Bit 0:  16/32-Bit Timer 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R1          (1 << 1)   /* Bit 1:  16/32-Bit Timer 1 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R2          (1 << 2)   /* Bit 2:  16/32-Bit Timer 2 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R3          (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R4          (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R5          (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R6          (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCTIMER_R7          (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Run Mode Clock Gating Control */
 
 /* GPIO Run Mode Clock Gating Control */
 
@@ -1433,6 +1453,16 @@
 
 #define SYSCON_RCGCEEPROM_R0           (1 << 0)   /* Bit 0:  EEPROM Module Run Mode Clock Gating Control */
 
+/* 32/64-Bit Wide Timer Run Mode Clock Gating Control */
+
+#define SYSCON_RCGCWTIMER(n)           (1 << (n)) /* Bit n:  32/64-Bit Wide Timer n Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWTIMER_R0         (1 << 0)   /* Bit 0:  32/64-Bit Wide Timer 0 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWTIMER_R1         (1 << 1)   /* Bit 1:  32/64-Bit Wide Timer 1 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWTIMER_R2         (1 << 2)   /* Bit 2:  32/64-Bit Wide Timer 2 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWTIMER_R3         (1 << 3)   /* Bit 3:  32/64-Bit Wide Timer 3 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWTIMER_R4         (1 << 4)   /* Bit 4:  32/64-Bit Wide Timer 4 Run Mode Clock Gating Control */
+#  define SYSCON_RCGCWTIMER_R5         (1 << 5)   /* Bit 5:  32/64-Bit Wide Timer 5 Run Mode Clock Gating Control */
+
 /* CRC/Crypto Modules RunMode ClockGating Control */
 
 #define SYSCON_RCGCCCM_R0              (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Run Mode Clock Gating Control */
@@ -1457,15 +1487,15 @@
 
 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
 
-#define SYSCON_SCGCWD(n)               (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S0             (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S1             (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S2             (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S3             (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S4             (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S5             (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S6             (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Sleep Mode Clock Gating Control */
-#  define SYSCON_SCGCWD_S7             (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Sleep Mode Clock Gating Control */
+#define SYSCON_SCGCWD(n)               (1 << (n)) /* Bit n:  16/32-Bit Timer n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S0             (1 << 0)   /* Bit 0:  16/32-Bit Timer 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S1             (1 << 1)   /* Bit 1:  16/32-Bit Timer 1 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S2             (1 << 2)   /* Bit 2:  16/32-Bit Timer 2 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S3             (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S4             (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S5             (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S6             (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWD_S7             (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Sleep Mode Clock Gating Control */
 
 /* GPIO Sleep Mode Clock Gating Control */
 
@@ -1575,6 +1605,16 @@
 
 #define SYSCON_SCGCEEPROM_S0           (1 << 0)   /* Bit 0:  EEPROM Module Sleep Mode Clock Gating Control */
 
+/* 32/64-Bit Wide Timer Sleep Mode Clock Gating Control */
+
+#define SYSCON_SCGCWTIMER(n)           (1 << (n)) /* Bit n:  32/64-Bit Wide Timer n Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWTIMER_S0         (1 << 0)   /* Bit 0:  32/64-Bit Wide Timer 0 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWTIMER_S1         (1 << 1)   /* Bit 1:  32/64-Bit Wide Timer 1 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWTIMER_S2         (1 << 2)   /* Bit 2:  32/64-Bit Wide Timer 2 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWTIMER_S3         (1 << 3)   /* Bit 3:  32/64-Bit Wide Timer 3 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWTIMER_S4         (1 << 4)   /* Bit 4:  32/64-Bit Wide Timer 4 Sleep Mode Clock Gating Control */
+#  define SYSCON_SCGCWTIMER_S5         (1 << 5)   /* Bit 5:  32/64-Bit Wide Timer 5 Sleep Mode Clock Gating Control */
+
 /* CRC/Crypto Modules Sleep Mode Clock Gating Control */
 
 #define SYSCON_SCGCCCM_S0              (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Sleep Mode Clock Gating Control */
@@ -1599,15 +1639,15 @@
 
 /* 16/32-Bit Timer Deep-Sleep Mode Clock Gating Control */
 
-#define SYSCON_DCGCTIMER(n)            (1 << (n)) /* Bit n:  16/32-Bit General-Purpose Timer n Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D0          (1 << 0)   /* Bit 0:  16/32-Bit General-Purpose Timer 0 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D1          (1 << 1)   /* Bit 1:  16/32-Bit General-Purpose Timer 1 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D2          (1 << 2)   /* Bit 2:  16/32-Bit General-Purpose Timer 2 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D3          (1 << 3)   /* Bit 3:  16/32-Bit General-Purpose Timer 3 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D4          (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D5          (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D5          (1 << 6)   /* Bit 6:  16/32-Bit General-Purpose Timer 6 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D5          (1 << 7)   /* Bit 7:  16/32-Bit General-Purpose Timer 7 Deep-Sleep Mode Clock Gating Control */
+#define SYSCON_DCGCTIMER(n)            (1 << (n)) /* Bit n:  16/32-Bit Timer n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D0          (1 << 0)   /* Bit 0:  16/32-Bit Timer 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D1          (1 << 1)   /* Bit 1:  16/32-Bit Timer 1 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D2          (1 << 2)   /* Bit 2:  16/32-Bit Timer 2 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D3          (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D4          (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D5          (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D5          (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D5          (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Deep-Sleep Mode Clock Gating Control */
 
 /* GPIO Deep-Sleep Mode Clock */
 
@@ -1715,121 +1755,333 @@
 
 /* EEPROM Deep-Sleep Mode Clock Gating Control */
 
-#define SYSCON_DCGCEEPROM_D0          (1 << 0)   /* Bit 0:  EEPROM Module Deep-Sleep Mode Clock Gating Control */
+#define SYSCON_DCGCEEPROM_D0           (1 << 0)   /* Bit 0:  EEPROM Module Deep-Sleep Mode Clock Gating Control */
+
+/* 32/64-Bit Wide Timer Deep-Sleep Mode Clock Gating Control */
+
+#define SYSCON_DCGCWTIMER(n)          (1 << (n)) /* Bit n:  UART Module n Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWTIMER_D0        (1 << 0)   /* Bit 0:  UART Module 0 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWTIMER_D1        (1 << 1)   /* Bit 1:  UART Module 1 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWTIMER_D2        (1 << 2)   /* Bit 2:  UART Module 2 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWTIMER_D3        (1 << 3)   /* Bit 3:  UART Module 3 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWTIMER_D4        (1 << 4)   /* Bit 4:  UART Module 4 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCWTIMER_D5        (1 << 5)   /* Bit 5:  UART Module 5 Deep-Sleep Mode Clock Gating Control */
 
 /* CRC/Crypto Modules Deep-Sleep Mode Clock Gating Control */
 
-#define SYSCON_DCGCCCM_D0             (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Deep-Sleep Mode Clock Gating Control */
+#define SYSCON_DCGCCCM_D0              (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Deep-Sleep Mode Clock Gating Control */
 
 /* LCD Controller Deep-Sleep Mode Clock Gating Control */
 
-#define SYSCON_DCGCLCD_D0             (1 << 0)   /* Bit 0: LCD Controller Module 0 Deep-Sleep Mode Clock Gating Control */
+#define SYSCON_DCGCLCD_D0              (1 << 0)   /* Bit 0: LCD Controller Module 0 Deep-Sleep Mode Clock Gating Control */
 
 /* 1-Wire Deep-Sleep Mode Clock Gating Control */
 
-#define SYSCON_DCGCOWIRE_D0           (1 << 0)   /* Bit 0: 1-Wire Module 0 Deep-Sleep Mode Clock Gating Control */
+#define SYSCON_DCGCOWIRE_D0            (1 << 0)   /* Bit 0: 1-Wire Module 0 Deep-Sleep Mode Clock Gating Control */
 
 /* Ethernet MAC Deep-Sleep Mode Clock Gating Control */
 
-#define SYSCON_DCGCEMAC_D0            (1 << 0)   /* Bit 0: Ethernet MAC Module 0 Deep-Sleep Mode Clock Gating Control */
+#define SYSCON_DCGCEMAC_D0             (1 << 0)   /* Bit 0:  Ethernet MAC Module 0 Deep-Sleep Mode Clock Gating Control */
 
 /* Watchdog Timer Power Control */
-#define TIVA_SYSCON_PCWD_
+
+#define SYSCON_PCWD(n)                 (1 << (n)) /* Bit n:  Watchdog Timer n Power Control */
+#  define SYSCON_PCWD_P0               (1 << 0)   /* Bit 0:  Watchdog Timer 0 Power Control */
+#  define SYSCON_PCWD_P1               (1 << 1)   /* Bit 1:  Watchdog Timer 1 Power Control */
+
 /* 16/32-Bit Timer Power Control */
-#define TIVA_SYSCON_PCTIMER_
+
+#define SYSCON_PCTIMER(n)              (1 << (n)) /* Bit n:  Timer n Power Control */
+#  define SYSCON_PCTIMER_P7            (1 << 0)   /* Bit 0:  Timer 0 Power Control */
+#  define SYSCON_PCTIMER_P6            (1 << 1)   /* Bit 1:  Timer 1 Power Control */
+#  define SYSCON_PCTIMER_P5            (1 << 2)   /* Bit 2:  Timer 2 Power Control */
+#  define SYSCON_PCTIMER_P4            (1 << 3)   /* Bit 3:  Timer 3 Power Control */
+#  define SYSCON_PCTIMER_P3            (1 << 4)   /* Bit 4:  Timer 4 Power Control */
+#  define SYSCON_PCTIMER_P2            (1 << 5)   /* Bit 5:  Timer 5 Power Control */
+#  define SYSCON_PCTIMER_P1            (1 << 6)   /* Bit 6:  Timer 6 Power Control */
+#  define SYSCON_PCTIMER_P0            (1 << 7)   /* Bit 7:  Timer 7 Power Control */
+
 /* GPIO Power Control */
-#define TIVA_SYSCON_PCGPIO_
+
+#define SYSCON_PCGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port N Power Control */
+#  define SYSCON_PCGPIO_P0             (1 << 0)   /* Bit 0:  GPIO Port A Power Control */
+#  define SYSCON_PCGPIO_P1             (1 << 1)   /* Bit 1:  GPIO Port B Power Control */
+#  define SYSCON_PCGPIO_P2             (1 << 2)   /* Bit 2:  GPIO Port C Power Control */
+#  define SYSCON_PCGPIO_P3             (1 << 3)   /* Bit 3:  GPIO Port D Power Control */
+#  define SYSCON_PCGPIO_P4             (1 << 4)   /* Bit 4:  GPIO Port E Power Control */
+#  define SYSCON_PCGPIO_P5             (1 << 5)   /* Bit 5:  GPIO Port F Power Control */
+#  define SYSCON_PCGPIO_P6             (1 << 6)   /* Bit 6:  GPIO Port G Power Control */
+#  define SYSCON_PCGPIO_P7             (1 << 7)   /* Bit 7:  GPIO Port H Power Control */
+#  define SYSCON_PCGPIO_P8             (1 << 8)   /* Bit 8:  GPIO Port J Power Control */
+#  define SYSCON_PCGPIO_P9             (1 << 9)   /* Bit 9:  GPIO Port K Power Control */
+#  define SYSCON_PCGPIO_P10            (1 << 10)  /* Bit 10: GPIO Port L Power Control */
+#  define SYSCON_PCGPIO_P11            (1 << 11)  /* Bit 11: GPIO Port M Power Control */
+#  define SYSCON_PCGPIO_P12            (1 << 12)  /* Bit 12: GPIO Port N Power Control */
+#  define SYSCON_PCGPIO_P13            (1 << 13)  /* Bit 13: GPIO Port P Power Control */
+#  define SYSCON_PCGPIO_P14            (1 << 14)  /* Bit 14: GPIO Port Q Power Control */
+#  define SYSCON_PCGPIO_P15            (1 << 15)  /* Bit 15: GPIO Port R Power Control */
+#  define SYSCON_PCGPIO_P16            (1 << 16)  /* Bit 16: GPIO Port S Power Control */
+#  define SYSCON_PCGPIO_P17            (1 << 17)  /* Bit 17: GPIO Port T Power Control */
+
 /* μDMA Power Control */
-#define TIVA_SYSCON_PCDMA_
+
+#define SYSCON_PCDMA_P0                (1 << 0)   /* Bit 0:  uDMA Module Power Control */
+
 /* External Peripheral Interface Power Control */
-#define TIVA_SYSCON_PCEPI_
+
+#define SYSCON_PCEPI_P0                (1 << 0)   /* Bit 0:  EPI Module Power Control */
+
 /* Hibernation Power Control */
-#define TIVA_SYSCON_PCHIB_
+
+#define SYSCON_PCHIB_P0                (1 << 0)   /* Bit 0:  Hibernation Module Power Control */
+
 /* UART Power Control */
-#define TIVA_SYSCON_PCUART_
+
+#define SYSCON_PCUART(n)               (1 << (n)) /* Bit n:  UART Module n Power Control */
+#  define SYSCON_PCUART_P0             (1 << 0)   /* Bit 0:  UART Module 0 Power Control */
+#  define SYSCON_PCUART_P1             (1 << 1)   /* Bit 1:  UART Module 1 Power Control */
+#  define SYSCON_PCUART_P2             (1 << 2)   /* Bit 2:  UART Module 2 Power Control */
+#  define SYSCON_PCUART_P3             (1 << 3)   /* Bit 3:  UART Module 3 Power Control */
+#  define SYSCON_PCUART_P4             (1 << 4)   /* Bit 4:  UART Module 4 Power Control */
+#  define SYSCON_PCUART_P5             (1 << 5)   /* Bit 5:  UART Module 5 Power Control */
+#  define SYSCON_PCUART_P6             (1 << 6)   /* Bit 6:  UART Module 6 Power Control */
+#  define SYSCON_PCUART_P7             (1 << 7)   /* Bit 7:  UART Module 7 Power Control */
+
 /* SSI Power Control */
-#define TIVA_SYSCON_PCSSI_
+
+#define SYSCON_PCSSI(n)                (1 << (n)) /* Bit n:  SSI Module n Power Control */
+#  define SYSCON_PCSSI_P0              (1 << 0)   /* Bit 0:  SSI Module 0 Power Control */
+#  define SYSCON_PCSSI_P1              (1 << 1)   /* Bit 1:  SSI Module 1 Power Control */
+#  define SYSCON_PCSSI_P2              (1 << 2)   /* Bit 2:  SSI Module 2 Power Control */
+#  define SYSCON_PCSSI_P3              (1 << 3)   /* Bit 3:  SSI Module 3 Power Control */
+
 /* I2C Power Control */
-#define TIVA_SYSCON_PCI2C_
+
+#define SYSCON_PCI2C(n)                (1 << (n)) /* Bit n:  I2C Module n Power Control */
+#  define SYSCON_PCI2C_P0              (1 << 0)   /* Bit 0:  I2C Module 0 Power Control */
+#  define SYSCON_PCI2C_P1              (1 << 1)   /* Bit 1:  I2C Module 1 Power Control */
+#  define SYSCON_PCI2C_P2              (1 << 2)   /* Bit 2:  I2C Module 2 Power Control */
+#  define SYSCON_PCI2C_P3              (1 << 3)   /* Bit 3:  I2C Module 3 Power Control */
+#  define SYSCON_PCI2C_P4              (1 << 4)   /* Bit 4:  I2C Module 4 Power Control */
+#  define SYSCON_PCI2C_P5              (1 << 5)   /* Bit 5:  I2C Module 5 Power Control */
+#  define SYSCON_PCI2C_P6              (1 << 6)   /* Bit 6:  I2C Module 6 Power Control */
+#  define SYSCON_PCI2C_P7              (1 << 7)   /* Bit 7:  I2C Module 7 Power Control */
+#  define SYSCON_PCI2C_P8              (1 << 8)   /* Bit 8:  I2C Module 8 Power Control */
+#  define SYSCON_PCI2C_P9              (1 << 9)   /* Bit 9:  I2C Module 9 Power Control */
+
 /* USB Power Control */
-#define TIVA_SYSCON_PCUSB_
+
+#define SYSCON_PCUSB_P0                (1 << 0)   /* Bit 0:  USB Module Power Control */
+
 /* Ethernet PHY Power Control */
-#define TIVA_SYSCON_PCEPHY_
+
+#define SYSCON_PCEPHY_P0               (1 << 0)   /* Bit 0:  Ethernet PHY Module Power Control */
+
 /* CAN Power Control */
-#define TIVA_SYSCON_PCCAN_
+
+#define SYSCON_PCCAN(n)                (1 << (n)) /* Bit n:  CAN Module n Power Control */
+#  define SYSCON_PCCAN_P0              (1 << 0)   /* Bit 0:  CAN Module 0 Power Control */
+#  define SYSCON_PCCAN_P1              (1 << 1)   /* Bit 1:  CAN Module 1 Power Control */
+
 /* ADC Power Control */
-#define TIVA_SYSCON_PCADC_
+
+#define SYSCON_PCADC(n)                (1 << (n)) /* Bit n:  ADC Module n Power Control */
+#  define SYSCON_PCADC_P0              (1 << 0)   /* Bit 0:  ADC Module 0 Power Control */
+#  define SYSCON_PCADC_P1              (1 << 1)   /* Bit 1:  ADC Module 1 Power Control */
+
 /* ACMP Power Control */
-#define TIVA_SYSCON_PCACMP_
+
+#define SYSCON_PCACMP_P0               (1 << 0)   /* Bit 0:  Analog Comparator Module 0 Power Control */
+
 /* PWM Power Control */
-#define TIVA_SYSCON_PCPWM_
+
+#define SYSCON_PCPWM_P0                (1 << 0)   /* Bit 0:  PWM Module 0 Power Control */
+
 /* QE Interface Power Control */
-#define TIVA_SYSCON_PCQEI_
+
+#define SYSCON_PCQEI_P0                (1 << 0)   /* Bit 0: QEI Module 0 Power Control */
+
 /* EEPROM Power Control */
-#define TIVA_SYSCON_PCEEPROM_
+
+#define SYSCON_PCEEPROM_P0             (1 << 0)   /* Bit 0:  EEPROM Module 0 Power Control */
+
 /* CRC/Crypto Modules Power Control */
-#define TIVA_SYSCON_PCCCM_
+
+#define SYSCON_PCCCM_P0                (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Power Control */
+
 /* LCD Controller Power Control */
-#define TIVA_SYSCON_PCLCD_
+
+#define SYSCON_PCLCD_P0                (1 << 0)   /* Bit 0:  LCD Controller Module 0 Power Control */
+
 /* 1-Wire Power Control */
-#define TIVA_SYSCON_PCOWIRE_
+
+#define SYSCON_PCOWIRE_P0              (1 << 0)   /* Bit 0:  1-Wire Module 0 Power Control */
+
 /* Ethernet MAC Power Control */
-#define TIVA_SYSCON_PCEMAC_
+
+#define SYSCON_PCEMAC_P0               (1 << 0)   /* Bit 0:  Ethernet MAC Module 0 Power Control */
+
 /* Watchdog Timer Peripheral Ready */
-#define TIVA_SYSCON_PRWD_
+
+#define SYSCON_PRWD(n)                 (1 << (n)) /* Bit n:  Watchdog Timer n Peripheral Ready */
+#  define SYSCON_PRWD_R0               (1 << 0)   /* Bit 0:  Watchdog Timer 0 Peripheral Ready */
+#  define SYSCON_PRWD_R1               (1 << 1)   /* Bit 1:  Watchdog Timer 1 Peripheral Ready */
+
 /* 16/32-Bit Timer Peripheral Ready */
-#define TIVA_SYSCON_PRTIMER_
+
+#define SYSCON_PRTIMER(n)              (1 << (n)) /* Bit n:  16/32-Bit Timer n Peripheral Ready */
+#  define SYSCON_PRTIMER_R0            (1 << 0)   /* Bit 0:  16/32-Bit Timer 0 Peripheral Ready */
+#  define SYSCON_PRTIMER_R1            (1 << 1)   /* Bit 1:  16/32-Bit Timer 1 Peripheral Ready */
+#  define SYSCON_PRTIMER_R2            (1 << 2)   /* Bit 2:  16/32-Bit Timer 2 Peripheral Ready */
+#  define SYSCON_PRTIMER_R3            (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Peripheral Ready */
+#  define SYSCON_PRTIMER_R4            (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Peripheral Ready */
+#  define SYSCON_PRTIMER_R5            (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Peripheral Ready */
+#  define SYSCON_PRTIMER_R6            (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Peripheral Ready */
+#  define SYSCON_PRTIMER_R7            (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Peripheral Ready */
+
 /* GPIO Peripheral Ready */
-#define TIVA_SYSCON_PRGPIO_
+
+#define SYSCON_PRGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port F Peripheral Ready */
+#  define SYSCON_PRGPIO_R0             (1 << 0)   /* Bit 0:  GPIO Port A Peripheral Ready */
+#  define SYSCON_PRGPIO_R1             (1 << 1)   /* Bit 1:  GPIO Port B Peripheral Ready */
+#  define SYSCON_PRGPIO_R2             (1 << 2)   /* Bit 2:  GPIO Port C Peripheral Ready */
+#  define SYSCON_PRGPIO_R3             (1 << 3)   /* Bit 3:  GPIO Port D Peripheral Ready */
+#  define SYSCON_PRGPIO_R4             (1 << 4)   /* Bit 4:  GPIO Port E Peripheral Ready */
+#  define SYSCON_PRGPIO_R5             (1 << 5)   /* Bit 5:  GPIO Port F Peripheral Ready */
+#  define SYSCON_PRGPIO_R6             (1 << 6)   /* Bit 6:  GPIO Port G Peripheral Ready */
+#  define SYSCON_PRGPIO_R7             (1 << 7)   /* Bit 7:  GPIO Port H Peripheral Ready */
+#  define SYSCON_PRGPIO_R8             (1 << 8)   /* Bit 8:  GPIO Port J Peripheral Ready */
+#  define SYSCON_PRGPIO_R9             (1 << 9)   /* Bit 9:  GPIO Port K Peripheral Ready */
+#  define SYSCON_PRGPIO_R10            (1 << 10)  /* Bit 10: GPIO Port L Peripheral Ready */
+#  define SYSCON_PRGPIO_R11            (1 << 11)  /* Bit 11: GPIO Port M Peripheral Ready */
+#  define SYSCON_PRGPIO_R12            (1 << 12)  /* Bit 12: GPIO Port N Peripheral Ready */
+#  define SYSCON_PRGPIO_R13            (1 << 13)  /* Bit 13: GPIO Port P Peripheral Ready */
+#  define SYSCON_PRGPIO_R14            (1 << 14)  /* Bit 14: GPIO Port Q Peripheral Ready */
+#  define SYSCON_PRGPIO_R15            (1 << 15)  /* Bit 15: GPIO Port R Peripheral Ready */
+#  define SYSCON_PRGPIO_R16            (1 << 16)  /* Bit 16: GPIO Port S Peripheral Ready */
+#  define SYSCON_PRGPIO_R17            (1 << 17)  /* Bit 17: GPIO Port T Peripheral Ready */
+
 /* μDMA Peripheral Ready */
-#define TIVA_SYSCON_PRDMA_
+
+#define SYSCON_PRDMA_R0                (1 << 0)   /* Bit 0:  μDMA Module Peripheral Ready */
+
 /* EPI Peripheral Ready */
-#define TIVA_SYSCON_PREPI_
+
+#define SYSCON_PREPI_R0                (1 << 0)   /* Bit 0:  EPI Module Peripheral Ready */
+
 /* Hibernation Peripheral Ready */
-#define TIVA_SYSCON_PRHIB_
+
+#define SYSCON_PRHIB_R0                (1 << 0)   /* Bit 0:  Hibernation Module Peripheral Ready */
+
 /* UART Peripheral Ready */
-#define TIVA_SYSCON_PRUART_
+
+#define SYSCON_PRUART(n)               (1 << (n)) /* Bit n:  UART Module n Peripheral Ready */
+#  define SYSCON_PRUART_R0             (1 << 0)   /* Bit 0:  UART Module 0 Peripheral Ready */
+#  define SYSCON_PRUART_R1             (1 << 1)   /* Bit 1:  UART Module 1 Peripheral Ready */
+#  define SYSCON_PRUART_R2             (1 << 2)   /* Bit 2:  UART Module 2 Peripheral Ready */
+#  define SYSCON_PRUART_R3             (1 << 3)   /* Bit 3:  UART Module 3 Peripheral Ready */
+#  define SYSCON_PRUART_R4             (1 << 4)   /* Bit 4:  UART Module 4 Peripheral Ready */
+#  define SYSCON_PRUART_R5             (1 << 5)   /* Bit 5:  UART Module 5 Peripheral Ready */
+#  define SYSCON_PRUART_R6             (1 << 6)   /* Bit 6:  UART Module 6 Peripheral Ready */
+#  define SYSCON_PRUART_R7             (1 << 7)   /* Bit 7:  UART Module 7 Peripheral Ready */
+
 /* SSI Peripheral Ready */
-#define TIVA_SYSCON_PRSSI_
+
+#define SYSCON_PRSSI(n)                (1 << (n)) /* Bit n:  SSI Module n Peripheral Ready */
+#  define SYSCON_PRSSI_R0              (1 << 0)   /* Bit 0:  SSI Module 0 Peripheral Ready */
+#  define SYSCON_PRSSI_R1              (1 << 1)   /* Bit 1:  SSI Module 1 Peripheral Ready */
+#  define SYSCON_PRSSI_R2              (1 << 2)   /* Bit 2:  SSI Module 2 Peripheral Ready */
+#  define SYSCON_PRSSI_R3              (1 << 3)   /* Bit 3:  SSI Module 3 Peripheral Ready */
+
 /* I2C Peripheral Ready */
-#define TIVA_SYSCON_PRI2C_
+
+#define SYSCON_PRI2C(n)                (1 << (n)) /* Bit n:  I2C Module n Peripheral Ready */
+#  define SYSCON_PRI2C_R0              (1 << 0)   /* Bit 0:  I2C Module 0 Peripheral Ready */
+#  define SYSCON_PRI2C_R1              (1 << 1)   /* Bit 1:  I2C Module 1 Peripheral Ready */
+#  define SYSCON_PRI2C_R2              (1 << 2)   /* Bit 2:  I2C Module 2 Peripheral Ready */
+#  define SYSCON_PRI2C_R3              (1 << 3)   /* Bit 3:  I2C Module 3 Peripheral Ready */
+#  define SYSCON_PRI2C_R4              (1 << 4)   /* Bit 4:  I2C Module 4 Peripheral Ready */
+#  define SYSCON_PRI2C_R5              (1 << 5)   /* Bit 5:  I2C Module 5 Peripheral Ready */
+#  define SYSCON_PRI2C_R6              (1 << 6)   /* Bit 6:  I2C Module 5 Peripheral Ready */
+#  define SYSCON_PRI2C_R7              (1 << 7)   /* Bit 7:  I2C Module 5 Peripheral Ready */
+#  define SYSCON_PRI2C_R8              (1 << 8)   /* Bit 8:  I2C Module 5 Peripheral Ready */
+#  define SYSCON_PRI2C_R9              (1 << 9)   /* Bit 9:  I2C Module 5 Peripheral Ready */
+
 /* USB Peripheral Ready */
-#define TIVA_SYSCON_PRUSB_
+
+#define SYSCON_PRUSB_R0                (1 << 0)   /* Bit 0:  USB Module Peripheral Ready */
+
 /* Ethernet PHY Peripheral Ready */
-#define TIVA_SYSCON_PREPHY_
+
+#define SYSCON_PREPHY_R0               (1 << 0)   /* Bit 0: Ethernet PHY Module Peripheral Ready */
+
 /* CAN Peripheral Ready */
-#define TIVA_SYSCON_PRCAN_
+
+#define SYSCON_PRCAN(n)                (1 << (n)) /* Bit n:  CAN Module n Peripheral Ready */
+#  define SYSCON_PRCAN_R0              (1 << 0)   /* Bit 0:  CAN Module 0 Peripheral Ready */
+#  define SYSCON_PRCAN_R1              (1 << 1)   /* Bit 1:  CAN Module 1 Peripheral Ready */
+
 /* ADC Peripheral Ready */
-#define TIVA_SYSCON_PRADC_
+
+#define SYSCON_PRADC(n)                (1 << (n)) /* Bit n:  ADC Module n Peripheral Ready */
+#  define SYSCON_PRADC_R0              (1 << 0)   /* Bit 0:  ADC Module 0 Peripheral Ready */
+#  define SYSCON_PRADC_R1              (1 << 1)   /* Bit 1:  ADC Module 1 Peripheral Ready */
+
 /* ACMP Peripheral Ready */
-#define TIVA_SYSCON_PRACMP_
+
+#define SYSCON_PRACMP_R0               (1 << 0)   /* Bit 0:  Analog Comparator Module 0 Peripheral Ready */
+
 /* PWM Peripheral Ready */
-#define TIVA_SYSCON_PRPWM_
+
+#define SYSCON_PRPWM(n)                (1 << (n)) /* Bit n:  PWM Module n Peripheral Ready */
+#  define SYSCON_PRPWM_R0              (1 << 0)   /* Bit 0:  PWM Module 0 Peripheral Ready */
+#  define SYSCON_PRPWM_R1              (1 << 1)   /* Bit 1:  PWM Module 1 Peripheral Ready */
+
 /* QE Interface Peripheral Ready */
-#define TIVA_SYSCON_PRQEI_
+
+#define SYSCON_PRQEI(n)                (1 << (n)) /* Bit n:  QEI Module n Peripheral Ready */
+#  define SYSCON_PRQEI_R0              (1 << 0)   /* Bit 0:  QEI Module 0 Peripheral Ready */
+#  define SYSCON_PRQEI_R1              (1 << 1)   /* Bit 1:  QEI Module 1 Peripheral Ready */
+
 /* EEPROM Peripheral Ready */
-#define TIVA_SYSCON_PREEPROM_
+
+#define SYSCON_PREEPROM_0              (1 << 0)   /* Bit 0:  EEPROM Module Peripheral Ready */
+
+/* 32/64-Bit Wide Timer Peripheral Ready */
+
+#define SYSCON_PRWTIMER(n)            (1 << (n)) /* Bit n:  32/64-Bit Wide Timer n Peripheral Ready */
+#  define SYSCON_PRWTIMER_R0          (1 << 0)   /* Bit 0:  32/64-Bit Wide Timer 0 Peripheral Ready */
+#  define SYSCON_PRWTIMER_R1          (1 << 1)   /* Bit 1:  32/64-Bit Wide Timer 1 Peripheral Ready */
+#  define SYSCON_PRWTIMER_R2          (1 << 2)   /* Bit 2:  32/64-Bit Wide Timer 2 Peripheral Ready */
+#  define SYSCON_PRWTIMER_R3          (1 << 3)   /* Bit 3:  32/64-Bit Wide Timer 3 Peripheral Ready */
+#  define SYSCON_PRWTIMER_R4          (1 << 4)   /* Bit 4:  32/64-Bit Wide Timer 4 Peripheral Ready */
+#  define SYSCON_PRWTIMER_R5          (1 << 5)   /* Bit 5:  32/64-Bit Wide Timer 5 Peripheral Ready */
+
 /* CRC/Crypto Modules Peripheral Ready */
-#define TIVA_SYSCON_PRCCM_
+
+#define SYSCON_PRCCM_R0                (1 << 0)   /* Bit 0:  CRC and Cryptographic Modules Peripheral Ready */
+
 /* LCD Controller Peripheral Ready */
-#define TIVA_SYSCON_PRLCD_
+
+#define SYSCON_PRLCD_R0                (1 << 0)   /* Bit 0:  LCD Controller Module 0 Peripheral Ready */
+
 /* 1-Wire Peripheral Ready */
-#define TIVA_SYSCON_PROWIRE_
+
+#define SYSCON_PROWIRE_R0              (1 << 0)   /* Bit 0:  1-Wire Module 0 Peripheral Ready */
+
 /* Ethernet MAC Peripheral Ready */
-#define TIVA_SYSCON_PREMAC_
-/* Unique ID 0 */
-#define TIVA_SYSCON_UNIQUEID0_
-/* Unique ID 1 */
-#define TIVA_SYSCON_UNIQUEID1_
-/* Unique ID 2 */
-#define TIVA_SYSCON_UNIQUEID2_
-/* Unique ID 3 */
-#define TIVA_SYSCON_UNIQUEID3_
+
+#define SYSCON_PREMAC_R0               (1 << 0)   /* Bit 0:  Ethernet MAC Module 0 Peripheral Ready */
+
+/* Unique ID 0-3: 32-bit values */
 
 /* CCM System Control Registers (CCM Control Offset) */
 
 /* Cryptographic Modules Clock Gating Request */
-#define TIVA_SYSCON_CCMCGREQ_
+
+#define SYSCON_CCMCGREQ_SHACFG         (1 << 0)   /* Bit 0:  SHA/MD5 Clock Gating Request */
+#define SYSCON_CCMCGREQ_AESCFG         (1 << 1)   /* Bit 1:  AES Clock Gating Request */
+#define SYSCON_CCMCGREQ_DESCFG         (1 << 2)   /* Bit 2:  DES Clock Gating Request */
 
 /********************************************************************************************
  * Public Types
