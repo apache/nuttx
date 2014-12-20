@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/tiva/chip/tm4c_syscontrol.h
+ * arch/arm/src/tiva/chip/tm4c123_syscontrol.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TM4C_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_TM4C_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TM4C123_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_CHIP_TM4C123_SYSCONTROL_H
 
 /********************************************************************************************
  * Included Files
@@ -1856,4 +1856,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TM4C_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TM4C123_SYSCONTROL_H */
