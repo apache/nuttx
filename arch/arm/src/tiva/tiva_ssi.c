@@ -56,8 +56,9 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "tiva_gpio.h"
+#include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
+#include "tiva_gpio.h"
 #include "tiva_ssi.h"
 #include "chip/tiva_pinmap.h"
 
@@ -1474,8 +1475,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_ssidev[SSI0_NDX];
 
-      /* Enable clocking to the SSI0 peripheral */
+      /* Enable power and clocking to the SSI0 peripheral */
 
+      tiva_ssi0_enablepwr();
       tiva_ssi0_enableclk();
 
       /* Configure SSI0 GPIOs (NOTE that SS is not initialized here, the
@@ -1495,8 +1497,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_ssidev[SSI1_NDX];
 
-      /* Enable clocking to the SSI1 peripheral */
+      /* Enable power and clocking to the SSI1 peripheral */
 
+      tiva_ssi1_enablepwr();
       tiva_ssi1_enableclk();
 
       /* Configure SSI1 GPIOs */
