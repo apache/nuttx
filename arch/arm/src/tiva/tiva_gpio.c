@@ -835,9 +835,17 @@ int tiva_configgpio(uint32_t cfgset)
 
   flags = irqsave();
 
-  /* Enable power and clocking for this GPIO peripheral. */
+  /* Enable power and clocking for this GPIO peripheral.
+   *
+   * - Enable Power (TM4C129 family only):  Applies power (only) to the GPIO
+   *   peripheral.  This is not an essential step since enabling clocking
+   *   will also apply power.  The only significance is that the GPIO state
+   *   will be retained if the GPIO clocking is subsequently disabled.
+   * - Enable Clocking (All families):  Applies both power and clocking to
+   *   the GPIO peripheral, bringing it a fully functional state.
+   */
 
-  tiva_gpio_enablepwr(port); /* State will be retained of clocking disabled */
+  tiva_gpio_enablepwr(port);
   tiva_gpio_enableclk(port);
 
   /* First, set the port to digital input.  This is the safest state in which

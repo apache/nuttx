@@ -1475,9 +1475,18 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_ssidev[SSI0_NDX];
 
-      /* Enable power and clocking to the SSI0 peripheral */
+      /* Enable power and clocking to the SSI0 peripheral.
+       *
+       * - Enable Power (TM4C129 family only):  Applies power (only) to the
+       *   SSI0 peripheral.  This is not an essential step since enabling
+       *   clocking will also apply power.  The only significance is that
+       *   the SSI0 state will be retained if the SSI0 clocking is
+       *   subsequently disabled.
+       * - Enable Clocking (All families):  Applies both power and clocking
+       *   to the SSI0 peripheral, bringing it a fully functional state.
+       */
 
-      tiva_ssi0_enablepwr(); /* State will be ratained if clocking disabled */
+      tiva_ssi0_enablepwr();
       tiva_ssi0_enableclk();
 
       /* Configure SSI0 GPIOs (NOTE that SS is not initialized here, the
@@ -1497,9 +1506,19 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_ssidev[SSI1_NDX];
 
-      /* Enable power and clocking to the SSI1 peripheral */
+      /* Enable power and clocking to the SSI1 peripheral.
+       *
+       * - Enable Power (TM4C129 family only):  Applies power (only) to the
+       *   SSI1 peripheral.  This is not an essential step since enabling
+       *   clocking will also apply power.  The only significance is that
+       *   the SSI1 state will be retained if the SSI1 clocking is
+       *   subsequently disabled.
+       * - Enable Clocking (All families):  Applies both power and clocking
+       *   to the SSI1 peripheral, bringing it a fully functional state.
+       */
 
-      tiva_ssi1_enablepwr(); /* State will be ratained if clocking disabled */
+
+      tiva_ssi1_enablepwr();
       tiva_ssi1_enableclk();
 
       /* Configure SSI1 GPIOs */

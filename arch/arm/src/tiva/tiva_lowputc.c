@@ -255,10 +255,17 @@ void up_lowsetup(void)
   /* Enable the selected UARTs and configure GPIO pins needed by the
    * the selected UARTs.  NOTE: The serial driver later depends on
    * this pin configuration -- whether or not a serial console is selected.
+   *
+   * - Enable Power (TM4C129 family only):  Applies power (only) to the UART
+   *   peripheral.  This is not an essential step since enabling clocking
+   *   will also apply power.  The only significance is that the UART state
+   *   will be retained if the UART clocking is subsequently disabled.
+   * - Enable Clocking (All families):  Applies both power and clocking to
+   *   the UART peripheral, bringing it a fully functional state.
    */
 
 #ifdef CONFIG_TIVA_UART0
-  tiva_uart0_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart0_enablepwr();
   tiva_uart0_enableclk();
 
   tiva_configgpio(GPIO_UART0_RX);
@@ -266,7 +273,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART1
-  tiva_uart1_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart1_enablepwr();
   tiva_uart1_enableclk();
 
   tiva_configgpio(GPIO_UART1_RX);
@@ -274,7 +281,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART2
-  tiva_uart2_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart2_enablepwr();
   tiva_uart2_enableclk();
 
   tiva_configgpio(GPIO_UART2_RX);
@@ -282,7 +289,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART3
-  tiva_uart3_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart3_enablepwr();
   tiva_uart3_enableclk();
 
   tiva_configgpio(GPIO_UART3_RX);
@@ -290,7 +297,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART4
-  tiva_uart4_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart4_enablepwr();
   tiva_uart4_enableclk();
 
   tiva_configgpio(GPIO_UART4_RX);
@@ -298,7 +305,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART5
-  tiva_uart5_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart5_enablepwr();
   tiva_uart5_enableclk();
 
   tiva_configgpio(GPIO_UART5_RX);
@@ -306,7 +313,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART6
-  tiva_uart6_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart6_enablepwr();
   tiva_uart6_enableclk();
 
   tiva_configgpio(GPIO_UART6_RX);
@@ -314,7 +321,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART7
-  tiva_uart7_enablepwr(); /* State will be retained if clocking disabled */
+  tiva_uart7_enablepwr();
   tiva_uart7_enableclk();
 
   tiva_configgpio(GPIO_UART7_RX);
