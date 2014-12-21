@@ -74,9 +74,15 @@ CMN_CSRCS += up_elf.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_syscontrol.c tiva_irq.c
-CHIP_CSRCS += tiva_gpio.c tiva_gpioirq.c tiva_lowputc.c tiva_serial.c
-CHIP_CSRCS += tiva_ssi.c tiva_dumpgpio.c
+CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_irq.c tiva_gpio.c
+CHIP_CSRCS += tiva_gpioirq.c tiva_lowputc.c tiva_serial.c tiva_ssi.c
+CHIP_CSRCS += tiva_dumpgpio.c
+
+ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
+CHIP_CSRCS += tm4c129_syscontrol.c
+else
+CHIP_CSRCS += tiva_syscontrol.c
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += tiva_timerisr.c
