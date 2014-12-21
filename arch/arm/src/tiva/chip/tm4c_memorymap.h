@@ -450,7 +450,7 @@
 
 /* Peripheral region 2 */
                                                             /* -0x2ffff: Reserved */
-#  define TIVA_CRC_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
+#  define TIVA_CCM_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
                                                             /* -0x33fff: Reserved */
 #  define TIVA_SHAMD5_BASE    (TIVA_PERIPH2_BASE + 0x34000) /* -0x35fff: SHA/MD5 */
 #  define TIVA_AES_BASE       (TIVA_PERIPH2_BASE + 0x36000) /* -0x37fff: AES */

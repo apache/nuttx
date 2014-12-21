@@ -469,7 +469,7 @@
 
 /* CCM System Control Registers (CCM Control Offset) */
 
-#define TIVA_SYSCON_CCMCGREQ           (TIVA_CRC_BASE+TIVA_SYSCON_CCMCGREQ_OFFSET)
+#define TIVA_SYSCON_CCMCGREQ           (TIVA_CCM_BASE+TIVA_SYSCON_CCMCGREQ_OFFSET)
 
 /* System Control Register Bit Definitions **************************************************/
 /* System Control Registers (System Control Offset) */
