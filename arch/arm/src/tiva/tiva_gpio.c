@@ -837,7 +837,7 @@ int tiva_configgpio(uint32_t cfgset)
 
   /* Enable power and clocking for this GPIO peripheral. */
 
-  tiva_gpio_enablepwr(port);
+  tiva_gpio_enablepwr(port); /* State will be retained of clocking disabled */
   tiva_gpio_enableclk(port);
 
   /* First, set the port to digital input.  This is the safest state in which

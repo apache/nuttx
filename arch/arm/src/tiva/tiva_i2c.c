@@ -65,6 +65,8 @@
 
 #include "up_arch.h"
 
+#include "tiva_enablepwr.h"
+#include "tiva_enableclks.h"
 #include "tiva_gpio.h"
 #include "chip/tiva_pinmap.h"
 #include "chip/tiva_syscontrol.h"
@@ -171,7 +173,7 @@ enum tiva_trace_e
   I2CEVENT_SENDBYTE,      /* Send byte, param = mcnt */
   I2CEVENT_SPURIOUS,      /* Spurious interrupt received, param = msgc */
   I2CEVENT_NEXTMSG,       /* Starting next message, param = msgc */
-  I2CEVENT_TIMEOUT,       /* Software detectected timeout, param = RIS */
+  I2CEVENT_TIMEOUT,       /* Software detected timeout, param = RIS */
   I2CEVENT_DONE           /* All messages transferred, param = intstate */
 };
 
@@ -1521,7 +1523,8 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
   /* Enable clocking to the I2C peripheral */
 
 #ifdef TIVA_SYSCON_RCGCI2C
-  modifyreg32(TIVA_SYSCON_RCGCI2C, 0, SYSCON_RCGCI2C(config->devno));
+  tiva_i2c_enablepwr(config->devno); /* State will be retained if clocking stopped */
+  tiva_i2c_enableclk(config->devno);
 
   i2cvdbg("I2C%d: RCGI2C[%08x]=%08x\n",
           config->devno, TIVA_SYSCON_RCGCI2C, getreg32(TIVA_SYSCON_RCGCI2C));

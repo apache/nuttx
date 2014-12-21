@@ -1477,7 +1477,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Enable power and clocking to the SSI0 peripheral */
 
-      tiva_ssi0_enablepwr();
+      tiva_ssi0_enablepwr(); /* State will be ratained if clocking disabled */
       tiva_ssi0_enableclk();
 
       /* Configure SSI0 GPIOs (NOTE that SS is not initialized here, the
@@ -1499,7 +1499,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Enable power and clocking to the SSI1 peripheral */
 
-      tiva_ssi1_enablepwr();
+      tiva_ssi1_enablepwr(); /* State will be ratained if clocking disabled */
       tiva_ssi1_enableclk();
 
       /* Configure SSI1 GPIOs */
