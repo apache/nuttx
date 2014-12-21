@@ -1520,10 +1520,18 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
 
   i2cvdbg("I2C%d: refs=%d\n", config->devno, priv->refs);
 
-  /* Enable clocking to the I2C peripheral */
+  /* Enable power and clocking to the I2C peripheral.
+   *
+   * - Enable Power (TM4C129 family only):  Applies power (only) to the I2C
+   *   peripheral.  This is not an essential step since enabling clocking
+   *   will also apply power.  The only significance is that the I2C state
+   *   will be retained if the I2C clocking is subsequently disabled.
+   * - Enable Clocking (All families):  Applies both power and clocking to
+   *   the I2C peripheral, bringing it a fully functional state.
+   */
 
 #ifdef TIVA_SYSCON_RCGCI2C
-  tiva_i2c_enablepwr(config->devno); /* State will be retained if clocking stopped */
+  tiva_i2c_enablepwr(config->devno);
   tiva_i2c_enableclk(config->devno);
 
   i2cvdbg("I2C%d: RCGI2C[%08x]=%08x\n",
