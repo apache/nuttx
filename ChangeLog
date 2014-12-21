@@ -9326,3 +9326,6 @@
 	* libnx/nxfonts/nxfonts_getfont.c: A patch to add previous added font
 	  into nxf_getfonthandle function.  From  Pierre-Noel Bouteville
 	  (2014-12-19).
+	* arch/arm/src/tiva, include/tiva, and many configurations:  Change
+	  negative Tiva logic CONFIG_SSIx_DISABLE to positive logic
+	  CONFIG_TIVA_SSIx.  Add support for SSI2 and SSI3 (2014-12-21).
