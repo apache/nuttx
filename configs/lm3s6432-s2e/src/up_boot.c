@@ -54,7 +54,7 @@
  * Definitions
  ************************************************************************************/
 
-#if defined(CONFIG_TIVA_UART1) && !defined(CONFIG_SSI0_DISABLE)
+#if defined(CONFIG_TIVA_UART1) && defined(CONFIG_TIVA_SSI0)
 #  error Only one of UART1 and SSI0 can be enabled on this board.
 #endif
 
@@ -82,7 +82,7 @@ void tiva_boardinitialize(void)
    * lm_ssiinitialize() has been brought into the link.
    */
 
-#if !defined(CONFIG_SSI0_DISABLE)
+#if defined(CONFIG_TIVA_SSI0)
   if (lm_ssiinitialize)
     {
       lm_ssiinitialize();

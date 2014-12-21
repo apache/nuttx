@@ -54,7 +54,7 @@
 
 /* The LM3S8962 Eval Kit microSD CS is on SSI0 */
 
-#if !defined(CONFIG_SSI0_DISABLE) /* || !defined(CONFIG_SSI1_DISABLE) */
+#if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
 
 /************************************************************************************
  * Definitions
@@ -161,4 +161,4 @@ uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return SPI_STATUS_PRESENT;
 }
 
-#endif /* !CONFIG_SSI0_DISABLE || !CONFIG_SSI1_DISABLE */
+#endif /* CONFIG_TIVA_SSI0 || CONFIG_TIVA_SSI1 */
