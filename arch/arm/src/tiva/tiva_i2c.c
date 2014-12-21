@@ -76,7 +76,9 @@
 
 #if defined(CONFIG_TIVA_I2C0) || defined(CONFIG_TIVA_I2C1) || \
     defined(CONFIG_TIVA_I2C2) || defined(CONFIG_TIVA_I2C3) || \
-    defined(CONFIG_TIVA_I2C4) || defined(CONFIG_TIVA_I2C5)
+    defined(CONFIG_TIVA_I2C4) || defined(CONFIG_TIVA_I2C5) || \
+    defined(CONFIG_TIVA_I2C6) || defined(CONFIG_TIVA_I2C7) || \
+    defined(CONFIG_TIVA_I2C8) || defined(CONFIG_TIVA_I2C9)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -320,6 +322,18 @@ static int tiva_i2c4_interrupt(int irq, void *context);
 #ifdef CONFIG_TIVA_I2C5
 static int tiva_i2c5_interrupt(int irq, void *context);
 #endif
+#ifdef CONFIG_TIVA_I2C6
+static int tiva_i2c6_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_TIVA_I2C7
+static int tiva_i2c7_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_TIVA_I2C8
+static int tiva_i2c8_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_TIVA_I2C9
+static int tiva_i2c9_interrupt(int irq, void *context);
+#endif
 #endif /* !CONFIG_I2C_POLLED */
 
 static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency);
@@ -480,6 +494,94 @@ static const struct tiva_i2c_config_s tiva_i2c5_config =
 };
 
 static struct tiva_i2c_priv_s tiva_i2c5_priv;
+#endif
+
+#ifdef CONFIG_TIVA_I2C6
+static const struct tiva_i2c_config_s tiva_i2c6_config =
+{
+  .base       = TIVA_I2C6_BASE,
+#ifndef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGC1_I2C6,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C6,
+#endif
+  .scl_pin    = GPIO_I2C6_SCL,
+  .sda_pin    = GPIO_I2C6_SDA,
+#ifndef CONFIG_I2C_POLLED
+  .isr        = tiva_i2c6_interrupt,
+  .irq        = TIVA_IRQ_I2C6,
+#endif
+  .devno      = 6,
+};
+
+static struct tiva_i2c_priv_s tiva_i2c7_priv;
+#endif
+
+#ifdef CONFIG_TIVA_I2C7
+static const struct tiva_i2c_config_s tiva_i2c7_config =
+{
+  .base       = TIVA_I2C7_BASE,
+#ifndef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGC1_I2C7,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C7,
+#endif
+  .scl_pin    = GPIO_I2C7_SCL,
+  .sda_pin    = GPIO_I2C7_SDA,
+#ifndef CONFIG_I2C_POLLED
+  .isr        = tiva_i2c7_interrupt,
+  .irq        = TIVA_IRQ_I2C7,
+#endif
+  .devno      = 7,
+};
+
+static struct tiva_i2c_priv_s tiva_i2c8_priv;
+#endif
+
+#ifdef CONFIG_TIVA_I2C8
+static const struct tiva_i2c_config_s tiva_i2c8_config =
+{
+  .base       = TIVA_I2C8_BASE,
+#ifndef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGC1_I2C8,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C8,
+#endif
+  .scl_pin    = GPIO_I2C8_SCL,
+  .sda_pin    = GPIO_I2C8_SDA,
+#ifndef CONFIG_I2C_POLLED
+  .isr        = tiva_i2c8_interrupt,
+  .irq        = TIVA_IRQ_I2C8,
+#endif
+  .devno      = 8,
+};
+
+static struct tiva_i2c_priv_s tiva_i2c9_priv;
+#endif
+
+#ifdef CONFIG_TIVA_I2C9
+static const struct tiva_i2c_config_s tiva_i2c9_config =
+{
+  .base       = TIVA_I2C9_BASE,
+#ifndef TIVA_SYSCON_RCGCI2C
+  .rcgbit     = SYSCON_RCGC1_I2C9,
+#endif
+#ifndef TIVA_SYSCON_SRI2C
+  .rstbit     = SYSCON_SRCR1_I2C9,
+#endif
+  .scl_pin    = GPIO_I2C9_SCL,
+  .sda_pin    = GPIO_I2C9_SDA,
+#ifndef CONFIG_I2C_POLLED
+  .isr        = tiva_i2c9_interrupt,
+  .irq        = TIVA_IRQ_I2C9,
+#endif
+  .devno      = 9,
+};
+
+static struct tiva_i2c_priv_s tiva_i2c0_priv;
 #endif
 
 /* Device Structures, Instantiation */
@@ -1505,6 +1607,106 @@ static int tiva_i2c5_interrupt(int irq, void *context)
 #endif
 
 /************************************************************************************
+ * Name: tiva_i2c6_interrupt
+ *
+ * Description:
+ *   I2C6 interrupt service routine
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C6)
+static int tiva_i2c6_interrupt(int irq, void *context)
+{
+  struct tiva_i2c_priv_s *priv;
+  uint32_t status;
+
+  /* Read the masked interrupt status */
+
+  priv   = &tiva_i2c6_priv;
+  status = tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+
+  /* Let the common interrupt handler do the rest of the work */
+
+  return tiva_i2c_interrupt(priv, status);
+}
+#endif
+
+/************************************************************************************
+ * Name: tiva_i2c7_interrupt
+ *
+ * Description:
+ *   I2C7 interrupt service routine
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C7)
+static int tiva_i2c7_interrupt(int irq, void *context)
+{
+  struct tiva_i2c_priv_s *priv;
+  uint32_t status;
+
+  /* Read the masked interrupt status */
+
+  priv   = &tiva_i2c7_priv;
+  status = tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+
+  /* Let the common interrupt handler do the rest of the work */
+
+  return tiva_i2c_interrupt(priv, status);
+}
+#endif
+
+/************************************************************************************
+ * Name: tiva_i2c8_interrupt
+ *
+ * Description:
+ *   I2C8 interrupt service routine
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C8)
+static int tiva_i2c8_interrupt(int irq, void *context)
+{
+  struct tiva_i2c_priv_s *priv;
+  uint32_t status;
+
+  /* Read the masked interrupt status */
+
+  priv   = &tiva_i2c8_priv;
+  status = tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+
+  /* Let the common interrupt handler do the rest of the work */
+
+  return tiva_i2c_interrupt(priv, status);
+}
+#endif
+
+/************************************************************************************
+ * Name: tiva_i2c9_interrupt
+ *
+ * Description:
+ *   I2C9 interrupt service routine
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C9)
+static int tiva_i2c9_interrupt(int irq, void *context)
+{
+  struct tiva_i2c_priv_s *priv;
+  uint32_t status;
+
+  /* Read the masked interrupt status */
+
+  priv   = &tiva_i2c9_priv;
+  status = tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+
+  /* Let the common interrupt handler do the rest of the work */
+
+  return tiva_i2c_interrupt(priv, status);
+}
+#endif
+
+/************************************************************************************
  * Name: tiva_i2c_initialize
  *
  * Description:
@@ -2049,6 +2251,30 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       config = &tiva_i2c5_config;
       break;
 #endif
+#ifdef CONFIG_TIVA_I2C6
+    case 6:
+      priv   = &tiva_i2c6_priv;
+      config = &tiva_i2c6_config;
+      break;
+#endif
+#ifdef CONFIG_TIVA_I2C7
+    case 7:
+      priv   = &tiva_i2c7_priv;
+      config = &tiva_i2c7_config;
+      break;
+#endif
+#ifdef CONFIG_TIVA_I2C8
+    case 7:
+      priv   = &tiva_i2c8_priv;
+      config = &tiva_i2c8_config;
+      break;
+#endif
+#ifdef CONFIG_TIVA_I2C9
+    case 0:
+      priv   = &tiva_i2c9_priv;
+      config = &tiva_i2c9_config;
+      break;
+#endif
     default:
       i2cdbg("I2C%d: ERROR: Not supported\n", port);
       return NULL;
@@ -2267,4 +2493,4 @@ out:
 }
 #endif /* CONFIG_I2C_RESET */
 
-#endif /* CONFIG_TIVA_I2C0 ... CONFIG_TIVA_I2C5 */
+#endif /* CONFIG_TIVA_I2C0 ... CONFIG_TIVA_I2C9 */
