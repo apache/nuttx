@@ -121,7 +121,7 @@
 /* Crypto Base Addresses */
 
 #  define TIVA_TCP_DTHE_BASE  (TIVA_CRYPTO_BASE + 0x0000)  /* -0x0fff: TCP Checksum & DTHE regs */
-#  define TIVA_CRC_BASE       TIVA_TCP_DTHE_BASE
+#  define TIVA_CCM_BASE       TIVA_TCP_DTHE_BASE
 #  define TIVA_SHA_BASE       (TIVA_CRYPTO_BASE + 0x5000)  /* -0x5fff: MD5/SHA */
 #  define TIVA_AES_BASE       (TIVA_CRYPTO_BASE + 0x7000)  /* -0x7fff: AES */
 #  define TIVA_DES_BASE       (TIVA_CRYPTO_BASE + 0x9000)  /* -0x9fff: DES */
