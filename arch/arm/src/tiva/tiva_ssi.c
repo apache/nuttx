@@ -57,6 +57,7 @@
 
 #include "chip.h"
 #include "tiva_gpio.h"
+#include "tiva_enableclks.h"
 #include "tiva_ssi.h"
 #include "chip/tiva_pinmap.h"
 
@@ -1473,12 +1474,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_ssidev[SSI0_NDX];
 
-      /* Enable the SSI0 peripheral */
+      /* Enable clocking to the SSI0 peripheral */
 
-      regval = getreg32(TIVA_SYSCON_RCGC1);
-      regval |= SYSCON_RCGC1_SSI0;
-      putreg32(regval, TIVA_SYSCON_RCGC1);
-      ssivdbg("RCGC1: %08x\n", regval);
+      tiva_ssi0_enableclk();
 
       /* Configure SSI0 GPIOs (NOTE that SS is not initialized here, the
        * logic in this file makes no assumptions about chip select)
@@ -1497,12 +1495,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_ssidev[SSI1_NDX];
 
-      /* Enable the SSI1 peripheral */
+      /* Enable clocking to the SSI1 peripheral */
 
-      regval = getreg32(TIVA_SYSCON_RCGC1);
-      regval |= SYSCON_RCGC1_SSI1;
-      putreg32(regval, TIVA_SYSCON_RCGC1);
-      ssivdbg("RCGC1: %08x\n", regval);
+      tiva_ssi1_enableclk();
 
       /* Configure SSI1 GPIOs */
 

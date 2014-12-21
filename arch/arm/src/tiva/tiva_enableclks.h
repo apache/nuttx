@@ -251,6 +251,11 @@
 #  define tiva_ssi2_disableclk()   tiva_ssi_disableclk(2)
 #  define tiva_ssi3_disableclk()   tiva_ssi_disableclk(3)
 #else
+#  define tiva_ssi0_enableclk()    tiva_enableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGC1_SSI0)
+#  define tiva_ssi1_enableclk()    tiva_enableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGC1_SSI1)
+
+#  define tiva_ssi0_disableclk()   tiva_disableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGC1_SSI0)
+#  define tiva_ssi1_disableclk()   tiva_disableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGC1_SSI1)
 #endif
 
 /* I2C Run Mode Clock Gating Control */
