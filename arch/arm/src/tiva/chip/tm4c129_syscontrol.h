@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/tiva/chip/tm4c129x_syscontrol.h
+ * arch/arm/src/tiva/chip/tm4c129_syscontrol.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TM4C129X_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_TM4C129X_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TM4C129_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_CHIP_TM4C129_SYSCONTROL_H
 
 /********************************************************************************************
  * Included Files
@@ -1190,8 +1190,8 @@
 #  define SYSCON_SRTIMER_R3            (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Software Reset */
 #  define SYSCON_SRTIMER_R4            (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Software Reset */
 #  define SYSCON_SRTIMER_R5            (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Software Reset */
-#  define SYSCON_SRTIMER_R5            (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Software Reset */
-#  define SYSCON_SRTIMER_R5            (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Software Reset */
+#  define SYSCON_SRTIMER_R6            (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Software Reset */
+#  define SYSCON_SRTIMER_R7            (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Software Reset */
 
 /* GPIO Software Reset */
 
@@ -1646,8 +1646,8 @@
 #  define SYSCON_DCGCTIMER_D3          (1 << 3)   /* Bit 3:  16/32-Bit Timer 3 Deep-Sleep Mode Clock Gating Control */
 #  define SYSCON_DCGCTIMER_D4          (1 << 4)   /* Bit 4:  16/32-Bit Timer 4 Deep-Sleep Mode Clock Gating Control */
 #  define SYSCON_DCGCTIMER_D5          (1 << 5)   /* Bit 5:  16/32-Bit Timer 5 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D5          (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Deep-Sleep Mode Clock Gating Control */
-#  define SYSCON_DCGCTIMER_D5          (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D6          (1 << 6)   /* Bit 6:  16/32-Bit Timer 6 Deep-Sleep Mode Clock Gating Control */
+#  define SYSCON_DCGCTIMER_D7          (1 << 7)   /* Bit 7:  16/32-Bit Timer 7 Deep-Sleep Mode Clock Gating Control */
 
 /* GPIO Deep-Sleep Mode Clock */
 
@@ -1803,7 +1803,7 @@
 
 /* GPIO Power Control */
 
-#define SYSCON_PCGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port N Power Control */
+#define SYSCON_PCGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port n Power Control */
 #  define SYSCON_PCGPIO_P0             (1 << 0)   /* Bit 0:  GPIO Port A Power Control */
 #  define SYSCON_PCGPIO_P1             (1 << 1)   /* Bit 1:  GPIO Port B Power Control */
 #  define SYSCON_PCGPIO_P2             (1 << 2)   /* Bit 2:  GPIO Port C Power Control */
@@ -1941,7 +1941,7 @@
 
 /* GPIO Peripheral Ready */
 
-#define SYSCON_PRGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port F Peripheral Ready */
+#define SYSCON_PRGPIO(n)               (1 << (n)) /* Bit n:  GPIO Port n Peripheral Ready */
 #  define SYSCON_PRGPIO_R0             (1 << 0)   /* Bit 0:  GPIO Port A Peripheral Ready */
 #  define SYSCON_PRGPIO_R1             (1 << 1)   /* Bit 1:  GPIO Port B Peripheral Ready */
 #  define SYSCON_PRGPIO_R2             (1 << 2)   /* Bit 2:  GPIO Port C Peripheral Ready */
@@ -2095,4 +2095,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TM4C129X_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TM4C129_SYSCONTROL_H */

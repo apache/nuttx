@@ -46,6 +46,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "tiva_enableclks.h"
 #include "tiva_gpio.h"
 #include "chip/tiva_pinmap.h"
 
@@ -246,7 +247,6 @@ void up_lowputc(char ch)
 
 void up_lowsetup(void)
 {
-  uint32_t regval;
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t ctl;
 #endif
@@ -257,72 +257,56 @@ void up_lowsetup(void)
    */
 
 #ifdef CONFIG_TIVA_UART0
-  regval  = getreg32(TIVA_SYSCON_RCGC1);
-  regval |= SYSCON_RCGC1_UART0;
-  putreg32(regval, TIVA_SYSCON_RCGC1);
+  tiva_uart0_enableclk();
 
   tiva_configgpio(GPIO_UART0_RX);
   tiva_configgpio(GPIO_UART0_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART1
-  regval  = getreg32(TIVA_SYSCON_RCGC1);
-  regval |= SYSCON_RCGC1_UART1;
-  putreg32(regval, TIVA_SYSCON_RCGC1);
+  tiva_uart1_enableclk();
 
   tiva_configgpio(GPIO_UART1_RX);
   tiva_configgpio(GPIO_UART1_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART2
-  regval  = getreg32(TIVA_SYSCON_RCGC1);
-  regval |= SYSCON_RCGC1_UART2;
-  putreg32(regval, TIVA_SYSCON_RCGC1);
+  tiva_uart2_enableclk();
 
   tiva_configgpio(GPIO_UART2_RX);
   tiva_configgpio(GPIO_UART2_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART3
-  regval  = getreg32(TIVA_SYSCON_RCGCUART);
-  regval |= SYSCON_RCGCUART_R3;
-  putreg32(regval, TIVA_SYSCON_RCGCUART);
+  tiva_uart3_enableclk();
 
   tiva_configgpio(GPIO_UART3_RX);
   tiva_configgpio(GPIO_UART3_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART4
-  regval  = getreg32(TIVA_SYSCON_RCGCUART);
-  regval |= SYSCON_RCGCUART_R4;
-  putreg32(regval, TIVA_SYSCON_RCGCUART);
+  tiva_uart4_enableclk();
 
   tiva_configgpio(GPIO_UART4_RX);
   tiva_configgpio(GPIO_UART4_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART5
-  regval  = getreg32(TIVA_SYSCON_RCGCUART);
-  regval |= SYSCON_RCGCUART_R5;
-  putreg32(regval, TIVA_SYSCON_RCGCUART);
+  tiva_uart5_enableclk();
 
   tiva_configgpio(GPIO_UART5_RX);
   tiva_configgpio(GPIO_UART5_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART6
-  regval  = getreg32(TIVA_SYSCON_RCGCUART);
-  regval |= SYSCON_RCGCUART_R6;
-  putreg32(regval, TIVA_SYSCON_RCGCUART);
+  tiva_uart6_enableclk();
 
   tiva_configgpio(GPIO_UART6_RX);
   tiva_configgpio(GPIO_UART6_TX);
 #endif
 
 #ifdef CONFIG_TIVA_UART7
-  regval  = getreg32(TIVA_SYSCON_RCGCUART);
-  regval |= SYSCON_RCGCUART_R7;
-  putreg32(regval, TIVA_SYSCON_RCGCUART);
+  tiva_uart7_enableclk();
 
   tiva_configgpio(GPIO_UART7_RX);
   tiva_configgpio(GPIO_UART7_TX);

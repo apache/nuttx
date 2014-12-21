@@ -48,6 +48,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "tiva_enableclks.h"
 #include "tiva_gpio.h"
 
 /****************************************************************************
@@ -814,7 +815,6 @@ int tiva_configgpio(uint32_t cfgset)
   unsigned int pinno;
   uintptr_t    base;
   uint32_t     pin;
-  uint32_t     regval;
 
   /* Decode the basics */
 
@@ -839,9 +839,7 @@ int tiva_configgpio(uint32_t cfgset)
    * in the RCGC2 register."
    */
 
-  regval = getreg32(TIVA_SYSCON_RCGC2);
-  regval |= SYSCON_RCGC2_GPIO(port);
-  putreg32(regval, TIVA_SYSCON_RCGC2);
+  tiva_gpio_enableclk(port);
 
   /* First, set the port to digital input.  This is the safest state in which
    * to perform reconfiguration.
