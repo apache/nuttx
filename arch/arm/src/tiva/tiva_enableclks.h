@@ -102,103 +102,103 @@
 #  define tiva_gpio_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGCGPIO,SYSCON_RCGCGPIO(p))
 #  define tiva_gpio_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGCGPIO,SYSCON_RCGCGPIO(p))
 
-#  define tiva_gpioa_enableclk(p)  tiva_gpio_enableclk(0)
-#  define tiva_gpiob_enableclk(p)  tiva_gpio_enableclk(1)
-#  define tiva_gpioc_enableclk(p)  tiva_gpio_enableclk(2)
-#  define tiva_gpiod_enableclk(p)  tiva_gpio_enableclk(3)
-#  define tiva_gpioe_enableclk(p)  tiva_gpio_enableclk(4)
-#  define tiva_gpiof_enableclk(p)  tiva_gpio_enableclk(5)
-#  define tiva_gpiog_enableclk(p)  tiva_gpio_enableclk(6)
-#  define tiva_gpioh_enableclk(p)  tiva_gpio_enableclk(7)
-#  define tiva_gpioj_enableclk(p)  tiva_gpio_enableclk(8)
-#  define tiva_gpiok_enableclk(p)  tiva_gpio_enableclk(9)
-#  define tiva_gpiol_enableclk(p)  tiva_gpio_enableclk(10)
-#  define tiva_gpiom_enableclk(p)  tiva_gpio_enableclk(11)
-#  define tiva_gpion_enableclk(p)  tiva_gpio_enableclk(12)
-#  define tiva_gpiop_enableclk(p)  tiva_gpio_enableclk(13)
-#  define tiva_gpioq_enableclk(p)  tiva_gpio_enableclk(14)
-#  define tiva_gpior_enableclk(p)  tiva_gpio_enableclk(15)
-#  define tiva_gpios_enableclk(p)  tiva_gpio_enableclk(16)
-#  define tiva_gpiot_enableclk(p)  tiva_gpio_enableclk(17)
+#  define tiva_gpioa_enableclk()   tiva_gpio_enableclk(0)
+#  define tiva_gpiob_enableclk()   tiva_gpio_enableclk(1)
+#  define tiva_gpioc_enableclk()   tiva_gpio_enableclk(2)
+#  define tiva_gpiod_enableclk()   tiva_gpio_enableclk(3)
+#  define tiva_gpioe_enableclk()   tiva_gpio_enableclk(4)
+#  define tiva_gpiof_enableclk()   tiva_gpio_enableclk(5)
+#  define tiva_gpiog_enableclk()   tiva_gpio_enableclk(6)
+#  define tiva_gpioh_enableclk()   tiva_gpio_enableclk(7)
+#  define tiva_gpioj_enableclk()   tiva_gpio_enableclk(8)
+#  define tiva_gpiok_enableclk()   tiva_gpio_enableclk(9)
+#  define tiva_gpiol_enableclk()   tiva_gpio_enableclk(10)
+#  define tiva_gpiom_enableclk()   tiva_gpio_enableclk(11)
+#  define tiva_gpion_enableclk()   tiva_gpio_enableclk(12)
+#  define tiva_gpiop_enableclk()   tiva_gpio_enableclk(13)
+#  define tiva_gpioq_enableclk()   tiva_gpio_enableclk(14)
+#  define tiva_gpior_enableclk()   tiva_gpio_enableclk(15)
+#  define tiva_gpios_enableclk()   tiva_gpio_enableclk(16)
+#  define tiva_gpiot_enableclk()   tiva_gpio_enableclk(17)
 
-#  define tiva_gpioa_disableclk(p) tiva_gpio_disableclk(0)
-#  define tiva_gpiob_disableclk(p) tiva_gpio_disableclk(1)
-#  define tiva_gpioc_disableclk(p) tiva_gpio_disableclk(2)
-#  define tiva_gpiod_disableclk(p) tiva_gpio_disableclk(3)
-#  define tiva_gpioe_disableclk(p) tiva_gpio_disableclk(4)
-#  define tiva_gpiof_disableclk(p) tiva_gpio_disableclk(5)
-#  define tiva_gpiog_disableclk(p) tiva_gpio_disableclk(6)
-#  define tiva_gpioh_disableclk(p) tiva_gpio_disableclk(7)
-#  define tiva_gpioj_disableclk(p) tiva_gpio_disableclk(8)
-#  define tiva_gpiok_disableclk(p) tiva_gpio_disableclk(9)
-#  define tiva_gpiol_disableclk(p) tiva_gpio_disableclk(10)
-#  define tiva_gpiom_disableclk(p) tiva_gpio_disableclk(11)
-#  define tiva_gpion_disableclk(p) tiva_gpio_disableclk(12)
-#  define tiva_gpiop_disableclk(p) tiva_gpio_disableclk(13)
-#  define tiva_gpioq_disableclk(p) tiva_gpio_disableclk(14)
-#  define tiva_gpior_disableclk(p) tiva_gpio_disableclk(15)
-#  define tiva_gpios_disableclk(p) tiva_gpio_disableclk(16)
-#  define tiva_gpiot_disableclk(p) tiva_gpio_disableclk(17)
+#  define tiva_gpioa_disableclk()  tiva_gpio_disableclk(0)
+#  define tiva_gpiob_disableclk()  tiva_gpio_disableclk(1)
+#  define tiva_gpioc_disableclk()  tiva_gpio_disableclk(2)
+#  define tiva_gpiod_disableclk()  tiva_gpio_disableclk(3)
+#  define tiva_gpioe_disableclk()  tiva_gpio_disableclk(4)
+#  define tiva_gpiof_disableclk()  tiva_gpio_disableclk(5)
+#  define tiva_gpiog_disableclk()  tiva_gpio_disableclk(6)
+#  define tiva_gpioh_disableclk()  tiva_gpio_disableclk(7)
+#  define tiva_gpioj_disableclk()  tiva_gpio_disableclk(8)
+#  define tiva_gpiok_disableclk()  tiva_gpio_disableclk(9)
+#  define tiva_gpiol_disableclk()  tiva_gpio_disableclk(10)
+#  define tiva_gpiom_disableclk()  tiva_gpio_disableclk(11)
+#  define tiva_gpion_disableclk()  tiva_gpio_disableclk(12)
+#  define tiva_gpiop_disableclk()  tiva_gpio_disableclk(13)
+#  define tiva_gpioq_disableclk()  tiva_gpio_disableclk(14)
+#  define tiva_gpior_disableclk()  tiva_gpio_disableclk(15)
+#  define tiva_gpios_disableclk()  tiva_gpio_disableclk(16)
+#  define tiva_gpiot_disableclk()  tiva_gpio_disableclk(17)
 
 #else
 #  define tiva_gpio_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGC2,SYSCON_RCGC2_GPIO(p))
 #  define tiva_gpio_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGC2,SYSCON_RCGC2_GPIO(p))
 
-#  define tiva_gpioa_enableclk(p)  tiva_gpio_enableclk(0)
-#  define tiva_gpiob_enableclk(p)  tiva_gpio_enableclk(1)
-#  define tiva_gpioc_enableclk(p)  tiva_gpio_enableclk(2)
-#  define tiva_gpiod_enableclk(p)  tiva_gpio_enableclk(3)
-#  define tiva_gpioe_enableclk(p)  tiva_gpio_enableclk(4)
-#  define tiva_gpiof_enableclk(p)  tiva_gpio_enableclk(5)
-#  define tiva_gpiog_enableclk(p)  tiva_gpio_enableclk(6)
-#  define tiva_gpioh_enableclk(p)  tiva_gpio_enableclk(7)
-#  define tiva_gpioj_enableclk(p)  tiva_gpio_enableclk(8)
-#  define tiva_gpiok_enableclk(p)  tiva_gpio_enableclk(9)
-#  define tiva_gpiol_enableclk(p)  tiva_gpio_enableclk(10)
-#  define tiva_gpiom_enableclk(p)  tiva_gpio_enableclk(11)
-#  define tiva_gpion_enableclk(p)  tiva_gpio_enableclk(12)
-#  define tiva_gpiop_enableclk(p)  tiva_gpio_enableclk(13)
-#  define tiva_gpioq_enableclk(p)  tiva_gpio_enableclk(14)
+#  define tiva_gpioa_enableclk()   tiva_gpio_enableclk(0)
+#  define tiva_gpiob_enableclk()   tiva_gpio_enableclk(1)
+#  define tiva_gpioc_enableclk()   tiva_gpio_enableclk(2)
+#  define tiva_gpiod_enableclk()   tiva_gpio_enableclk(3)
+#  define tiva_gpioe_enableclk()   tiva_gpio_enableclk(4)
+#  define tiva_gpiof_enableclk()   tiva_gpio_enableclk(5)
+#  define tiva_gpiog_enableclk()   tiva_gpio_enableclk(6)
+#  define tiva_gpioh_enableclk()   tiva_gpio_enableclk(7)
+#  define tiva_gpioj_enableclk()   tiva_gpio_enableclk(8)
+#  define tiva_gpiok_enableclk()   tiva_gpio_enableclk(9)
+#  define tiva_gpiol_enableclk()   tiva_gpio_enableclk(10)
+#  define tiva_gpiom_enableclk()   tiva_gpio_enableclk(11)
+#  define tiva_gpion_enableclk()   tiva_gpio_enableclk(12)
+#  define tiva_gpiop_enableclk()   tiva_gpio_enableclk(13)
+#  define tiva_gpioq_enableclk()   tiva_gpio_enableclk(14)
 
-#  define tiva_gpioa_disableclk(p) tiva_gpio_disableclk(0)
-#  define tiva_gpiob_disableclk(p) tiva_gpio_disableclk(1)
-#  define tiva_gpioc_disableclk(p) tiva_gpio_disableclk(2)
-#  define tiva_gpiod_disableclk(p) tiva_gpio_disableclk(3)
-#  define tiva_gpioe_disableclk(p) tiva_gpio_disableclk(4)
-#  define tiva_gpiof_disableclk(p) tiva_gpio_disableclk(5)
-#  define tiva_gpiog_disableclk(p) tiva_gpio_disableclk(6)
-#  define tiva_gpioh_disableclk(p) tiva_gpio_disableclk(7)
-#  define tiva_gpioj_disableclk(p) tiva_gpio_disableclk(8)
-#  define tiva_gpiok_disableclk(p) tiva_gpio_disableclk(9)
-#  define tiva_gpiol_disableclk(p) tiva_gpio_disableclk(10)
-#  define tiva_gpiom_disableclk(p) tiva_gpio_disableclk(11)
-#  define tiva_gpion_disableclk(p) tiva_gpio_disableclk(12)
-#  define tiva_gpiop_disableclk(p) tiva_gpio_disableclk(13)
-#  define tiva_gpioq_disableclk(p) tiva_gpio_disableclk(14)
+#  define tiva_gpioa_disableclk()  tiva_gpio_disableclk(0)
+#  define tiva_gpiob_disableclk()  tiva_gpio_disableclk(1)
+#  define tiva_gpioc_disableclk()  tiva_gpio_disableclk(2)
+#  define tiva_gpiod_disableclk()  tiva_gpio_disableclk(3)
+#  define tiva_gpioe_disableclk()  tiva_gpio_disableclk(4)
+#  define tiva_gpiof_disableclk()  tiva_gpio_disableclk(5)
+#  define tiva_gpiog_disableclk()  tiva_gpio_disableclk(6)
+#  define tiva_gpioh_disableclk()  tiva_gpio_disableclk(7)
+#  define tiva_gpioj_disableclk()  tiva_gpio_disableclk(8)
+#  define tiva_gpiok_disableclk()  tiva_gpio_disableclk(9)
+#  define tiva_gpiol_disableclk()  tiva_gpio_disableclk(10)
+#  define tiva_gpiom_disableclk()  tiva_gpio_disableclk(11)
+#  define tiva_gpion_disableclk()  tiva_gpio_disableclk(12)
+#  define tiva_gpiop_disableclk()  tiva_gpio_disableclk(13)
+#  define tiva_gpioq_disableclk()  tiva_gpio_disableclk(14)
 
 #endif
 
 /* μDMA Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCDMA
-#  define tiva_udma_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGCDMA,SYSCON_RCGCDMA_R0)
-#  define tiva_udma_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGCDMA,SYSCON_RCGCDMA_R0)
+#  define tiva_udma_enableclk()    tiva_enableclk(TIVA_SYSCON_RCGCDMA,SYSCON_RCGCDMA_R0)
+#  define tiva_udma_disableclk()   tiva_disableclk(TIVA_SYSCON_RCGCDMA,SYSCON_RCGCDMA_R0)
 #else
 #endif
 
 /* EPI Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCEPI
-#  define tiva_epi_enableclk(p)    tiva_enableclk(TIVA_SYSCON_RCGCEPI,SYSCON_RCGCEPI_R0)
-#  define tiva_epi_disableclk(p)   tiva_disableclk(TIVA_SYSCON_RCGCEPI,SYSCON_RCGCEPI_R0)
+#  define tiva_epi_enableclk()     tiva_enableclk(TIVA_SYSCON_RCGCEPI,SYSCON_RCGCEPI_R0)
+#  define tiva_epi_disableclk()    tiva_disableclk(TIVA_SYSCON_RCGCEPI,SYSCON_RCGCEPI_R0)
 #else
 #endif
 
 /* Hibernation Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCHIB
-#  define tiva_hib_enableclk(p)    tiva_enableclk(TIVA_SYSCON_RCGCHIB,SYSCON_RCGCHIB_R0)
-#  define tiva_hib_disableclk(p)   tiva_disableclk(TIVA_SYSCON_RCGCHIB,SYSCON_RCGCHIB_R0)
+#  define tiva_hib_enableclk()     tiva_enableclk(TIVA_SYSCON_RCGCHIB,SYSCON_RCGCHIB_R0)
+#  define tiva_hib_disableclk()    tiva_disableclk(TIVA_SYSCON_RCGCHIB,SYSCON_RCGCHIB_R0)
 #else
 #endif
 
@@ -291,16 +291,16 @@
 /* USB Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCUSB
-#  define tiva_usb_enableclk(p)    tiva_enableclk(TIVA_SYSCON_RCGCUSB,SYSCON_RCGCUSB_R0)
-#  define tiva_usb_disableclk(p)   tiva_disableclk(TIVA_SYSCON_RCGCUSB,SYSCON_RCGCUSB_R0)
+#  define tiva_usb_enableclk()     tiva_enableclk(TIVA_SYSCON_RCGCUSB,SYSCON_RCGCUSB_R0)
+#  define tiva_usb_disableclk()    tiva_disableclk(TIVA_SYSCON_RCGCUSB,SYSCON_RCGCUSB_R0)
 #else
 #endif
 
 /* Ethernet PHY Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCEPHY
-#  define tiva_ephy_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGCEPHY,SYSCON_RCGCEPHY_R0)
-#  define tiva_ephy_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGCEPHY,SYSCON_RCGCEPHY_R0)
+#  define tiva_ephy_enableclk()    tiva_enableclk(TIVA_SYSCON_RCGCEPHY,SYSCON_RCGCEPHY_R0)
+#  define tiva_ephy_disableclk()   tiva_disableclk(TIVA_SYSCON_RCGCEPHY,SYSCON_RCGCEPHY_R0)
 #else
 #endif
 
@@ -335,8 +335,8 @@
 /* ACMP Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCACMP
-#  define tiva_acmp_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGCACMP,SYSCON_RCGCACMP_R0)
-#  define tiva_acmp_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGCACMP,SYSCON_RCGCACMP_R0)
+#  define tiva_acmp_enableclk()    tiva_enableclk(TIVA_SYSCON_RCGCACMP,SYSCON_RCGCACMP_R0)
+#  define tiva_acmp_disableclk()   tiva_disableclk(TIVA_SYSCON_RCGCACMP,SYSCON_RCGCACMP_R0)
 #else
 #endif
 
@@ -371,8 +371,8 @@
 /* EEPROM Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCEEPROM
-#  define tiva_eeprom_enableclk(p)  tiva_enableclk(TIVA_SYSCON_RCGCEEPROM,SYSCON_RCGCEEPROM_R0)
-#  define tiva_eeprom_disableclk(p) tiva_disableclk(TIVA_SYSCON_RCGCEEPROM,SYSCON_RCGCEEPROM_R0)
+#  define tiva_eeprom_enableclk()   tiva_enableclk(TIVA_SYSCON_RCGCEEPROM,SYSCON_RCGCEEPROM_R0)
+#  define tiva_eeprom_disableclk()  tiva_disableclk(TIVA_SYSCON_RCGCEEPROM,SYSCON_RCGCEEPROM_R0)
 #else
 #endif
 
@@ -401,32 +401,32 @@
 /* CRC/Crypto Modules RunMode ClockGating Control */
 
 #ifdef TIVA_SYSCON_RCGCCCM
-#  define tiva_ccm_enableclk(p)    tiva_enableclk(TIVA_SYSCON_RCGCCCM,SYSCON_RCGCCCM_R0)
-#  define tiva_ccm_disableclk(p)   tiva_disableclk(TIVA_SYSCON_RCGCCCM,SYSCON_RCGCCCM_R0)
+#  define tiva_ccm_enableclk()     tiva_enableclk(TIVA_SYSCON_RCGCCCM,SYSCON_RCGCCCM_R0)
+#  define tiva_ccm_disableclk()    tiva_disableclk(TIVA_SYSCON_RCGCCCM,SYSCON_RCGCCCM_R0)
 #else
 #endif
 
 /* LCD Controller Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCLCD
-#  define tiva_lcd_enableclk(p)    tiva_enableclk(TIVA_SYSCON_RCGCLCD,SYSCON_RCGCLCD_R0)
-#  define tiva_lcd_disableclk(p)   tiva_disableclk(TIVA_SYSCON_RCGCLCD,SYSCON_RCGCLCD_R0)
+#  define tiva_lcd_enableclk()     tiva_enableclk(TIVA_SYSCON_RCGCLCD,SYSCON_RCGCLCD_R0)
+#  define tiva_lcd_disableclk()    tiva_disableclk(TIVA_SYSCON_RCGCLCD,SYSCON_RCGCLCD_R0)
 #else
 #endif
 
 /* 1-Wire Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCOWIRE
-#  define tiva_owire_enableclk(p)  tiva_enableclk(TIVA_SYSCON_RCGCOWIRE,SYSCON_RCGCOWIRE_R0)
-#  define tiva_owire_disableclk(p) tiva_disableclk(TIVA_SYSCON_RCGCOWIRE,SYSCON_RCGCOWIRE_R0)
+#  define tiva_owire_enableclk()   tiva_enableclk(TIVA_SYSCON_RCGCOWIRE,SYSCON_RCGCOWIRE_R0)
+#  define tiva_owire_disableclk()  tiva_disableclk(TIVA_SYSCON_RCGCOWIRE,SYSCON_RCGCOWIRE_R0)
 #else
 #endif
 
 /* Ethernet MAC Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCEMAC
-#  define tiva_emac_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGCEMAC,SYSCON_RCGCEMAC_R0)
-#  define tiva_emac_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGCEMAC,SYSCON_RCGCEMAC_R0)
+#  define tiva_emac_enableclk()    tiva_enableclk(TIVA_SYSCON_RCGCEMAC,SYSCON_RCGCEMAC_R0)
+#  define tiva_emac_disableclk()   tiva_disableclk(TIVA_SYSCON_RCGCEMAC,SYSCON_RCGCEMAC_R0)
 #else
 #endif
 

@@ -48,6 +48,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
 #include "tiva_gpio.h"
 
@@ -834,11 +835,9 @@ int tiva_configgpio(uint32_t cfgset)
 
   flags = irqsave();
 
-  /* Enable clocking for this GPIO peripheral. "To use the GPIO, the peripheral
-   * clock must be enabled by setting the appropriate GPIO Port bit field (GPIOn)
-   * in the RCGC2 register."
-   */
+  /* Enable power and clocking for this GPIO peripheral. */
 
+  tiva_gpio_enablepwr(port);
   tiva_gpio_enableclk(port);
 
   /* First, set the port to digital input.  This is the safest state in which
