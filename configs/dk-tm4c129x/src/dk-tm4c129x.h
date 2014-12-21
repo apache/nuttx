@@ -54,13 +54,10 @@
 /* How many SSI modules does this chip support? */
 
 #if TIVA_NSSI < 1
-#  undef CONFIG_SSI0_DISABLE
-#  define CONFIG_SSI0_DISABLE 1
-#  undef CONFIG_SSI1_DISABLE
-#  define CONFIG_SSI1_DISABLE 1
+#  undef CONFIG_TIVA_SSI0
+#  undef CONFIG_TIVA_SSI0
 #elif TIVA_NSSI < 2
-#  undef CONFIG_SSI1_DISABLE
-#  define CONFIG_SSI1_DISABLE 1
+#  undef CONFIG_TIVA_SSI0
 #endif
 
 /* LED definitions ******************************************************************/

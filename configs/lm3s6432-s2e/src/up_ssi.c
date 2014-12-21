@@ -52,7 +52,7 @@
 #include "tiva_gpio.h"
 #include "lm3s6432s2e_internal.h"
 
-#if !defined(CONFIG_SSI0_DISABLE)
+#if defined(CONFIG_TIVA_SSI0)
 
 /************************************************************************************
  * Definitions
@@ -149,4 +149,4 @@ uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return SPI_STATUS_PRESENT;
 }
 
-#endif /* !CONFIG_SSI0_DISABLE || !CONFIG_SSI1_DISABLE */
+#endif /* CONFIG_TIVA_SSI0 */

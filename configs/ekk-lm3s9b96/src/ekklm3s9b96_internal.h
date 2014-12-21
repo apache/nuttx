@@ -58,13 +58,10 @@
  */
 
 #if TIVA_NSSI == 0
-#  undef CONFIG_SSI0_DISABLE
-#  define CONFIG_SSI0_DISABLE 1
-#  undef CONFIG_SSI1_DISABLE
-#  define CONFIG_SSI1_DISABLE 1
+#  undef CONFIG_TIVA_SSI0
+#  undef CONFIG_TIVA_SSI1
 #elif TIVA_NSSI == 1
-#  undef CONFIG_SSI1_DISABLE
-#  define CONFIG_SSI1_DISABLE 1
+#  undef CONFIG_TIVA_SSI1
 #endif
 
 /* EKK-LM3S9B96 Eval Kit ************************************************************/

@@ -369,11 +369,11 @@ Stellaris MDL-S2E Reference Design Configuration Options
     CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_UARTn_2STOP - Two stop bits
 
-    CONFIG_SSI0_DISABLE - Select to disable support for SSI0
+    CONFIG_TIVA_SSI0 - Select to enable support for SSI0
       The TX and RX pins for SSI0 share I/O pins with the TX and RX pins
       for UART1.  To avoid conflicts, only one of SSI0 and UART1 should
       be enabled in a configuration.
-    CONFIG_SSI1_DISABLE - Select to disable support for SSI1
+    CONFIG_TIVA_SSI1 - Select to enable support for SSI1
       Note that the LM3S6432 only has one SSI, so SSI1 should always be
       disabled.
     CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support.

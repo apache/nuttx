@@ -78,7 +78,7 @@ void tiva_boardinitialize(void)
 
   /* The LM4F LaunchPad microSD CS and OLED are on SSI0 (Duh! There is no SSI1) */
 
-#if !defined(CONFIG_SSI0_DISABLE) /* || !defined(CONFIG_SSI1_DISABLE) */
+#if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
   if (lm4f_ssiinitialize)
     {
       lm4f_ssiinitialize();

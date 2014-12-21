@@ -85,37 +85,50 @@
  * such case, the following must be expanded).
  */
 
-#if TIVA_NSSI == 0
-#  undef CONFIG_SSI0_DISABLE
-#  define CONFIG_SSI0_DISABLE 1
-#  undef CONFIG_SSI1_DISABLE
-#  define CONFIG_SSI1_DISABLE 1
-#elif TIVA_NSSI == 1
-#  undef CONFIG_SSI1_DISABLE
-#  define CONFIG_SSI1_DISABLE 1
+#if TIVA_NSSI < 1
+#  undef CONFIG_TIVA_SSI0
+#  undef CONFIG_TIVA_SSI1
+#  undef CONFIG_TIVA_SSI2
+#  undef CONFIG_TIVA_SSI3
+#elif TIVA_NSSI < 2
+#  undef CONFIG_TIVA_SSI1
+#  undef CONFIG_TIVA_SSI2
+#  undef CONFIG_TIVA_SSI3
+#elif TIVA_NSSI < 3
+#  undef CONFIG_TIVA_SSI2
+#  undef CONFIG_TIVA_SSI3
+#elif TIVA_NSSI < 4
+#  undef CONFIG_TIVA_SSI3
 #endif
 
 /* Which SSI modules have been enabled? */
 
-#ifndef CONFIG_SSI0_DISABLE
-#  define SSI0_NDX 0             /* Index to SSI0 in g_ssidev[] */
-#  ifndef CONFIG_SSI1_DISABLE
-#   define SSI1_NDX 1            /* Index to SSI1 in g_ssidev[] */
-#   define NSSI_ENABLED 2        /* Two SSI interfaces: SSI0 & SSI1 */
-#  else
-#   define NSSI_ENABLED 1        /* One SSI interface: SSI0 */
-#   define SSI_BASE          TIVA_SSI0_BASE
-#   define SSI_IRQ           TIVA_IRQ_SSI0
-#  endif
+#ifdef CONFIG_TIVA_SSI0
+#  define SSI0_NDX       0               /* Index to SSI0 in g_ssidev[] */
+#  define __SSI1_NDX     1               /* Next available index */
 #else
-#  ifndef CONFIG_SSI1_DISABLE
-#   define SSI1_NDX 0            /* Index to SSI1 in g_ssidev[] */
-#   define NSSI_ENABLED 1        /* One SSI interface: SSI1 */
-#   define SSI_BASE          TIVA_SSI1_BASE
-#   define SSI_IRQ           TIVA_IRQ_SSI1
-#  else
-#   define NSSI_ENABLED 0        /* No SSI interfaces */
-#  endif
+#  define __SSI1_NDX     0               /* Next available index */
+#endif
+
+#ifdef CONFIG_TIVA_SSI1
+#  define SSI1_NDX       __SSI1_NDX       /* Index to SSI1 in g_ssidev[] */
+#  define __SSI2_NDX     (__SSI1_NDX + 1) /* Next available index */
+#else
+#  define __SSI2_NDX     __SSI1_NDX       /* Next available index */
+#endif
+
+#ifdef CONFIG_TIVA_SSI2
+#  define SSI2_NDX       __SSI2_NDX       /* Index to SSI2 in g_ssidev[] */
+#  define __SSI3_NDX     (__SSI2_NDX + 1) /* Next available index */
+#else
+#  define __SSI3_NDX      __SSI2_NDX      /* Next available index */
+#endif
+
+#ifdef CONFIG_TIVA_SSI3
+#  define SSI3_NDX       __SSI3_NDX       /* Index to SSI3 in g_ssidev[] */
+#  define NSSI_ENABLED   (__SSI3_NDX + 1) /* Number of SSI peripheral senabled */
+#else
+#  define NSSI_ENABLED   __SSI3_NDX       /* Number of SSI peripheral senabled */
 #endif
 
 /* Compile the rest of the file only if at least one SSI interface has been
@@ -302,7 +315,7 @@ static const struct spi_ops_s g_spiops =
 
 static struct tiva_ssidev_s g_ssidev[] =
 {
-#ifndef CONFIG_SSI0_DISABLE
+#ifdef CONFIG_TIVA_SSI0
   {
     .ops  = &g_spiops,
 #if NSSI_ENABLED > 1
@@ -313,7 +326,7 @@ static struct tiva_ssidev_s g_ssidev[] =
 #endif
   },
 #endif
-#ifndef CONFIG_SSI1_DISABLE
+#ifdef CONFIG_TIVA_SSI1
   {
     .ops  = &g_spiops,
 #if NSSI_ENABLED > 1
@@ -321,6 +334,28 @@ static struct tiva_ssidev_s g_ssidev[] =
 #endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
     .irq  = TIVA_IRQ_SSI1,
+#endif
+  },
+#endif
+#ifdef CONFIG_TIVA_SSI2
+  {
+    .ops  = &g_spiops,
+#if NSSI_ENABLED > 1
+    .base = TIVA_SSI2_BASE,
+#endif
+#if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
+    .irq  = TIVA_IRQ_SSI2,
+#endif
+  },
+#endif
+#ifdef CONFIG_TIVA_SSI3
+  {
+    .ops  = &g_spiops,
+#if NSSI_ENABLED > 1
+    .base = TIVA_SSI3_BASE,
+#endif
+#if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
+    .irq  = TIVA_IRQ_SSI3,
 #endif
   },
 #endif
@@ -914,13 +949,21 @@ static inline struct tiva_ssidev_s *ssi_mapirq(int irq)
 {
   switch (irq)
     {
-#ifndef CONFIG_SSI0_DISABLE
+#ifdef CONFIG_TIVA_SSI0
       case TIVA_IRQ_SSI0:
         return &g_ssidev[SSI0_NDX];
 #endif
-#ifndef CONFIG_SSI1_DISABLE
+#ifdef CONFIG_TIVA_SSI1
       case TIVA_IRQ_SSI1:
         return &g_ssidev[SSI1_NDX];
+#endif
+#ifdef CONFIG_TIVA_SSI2
+      case TIVA_IRQ_SSI2:
+        return &g_ssidev[SSI2_NDX];
+#endif
+#ifdef CONFIG_TIVA_SSI3
+      case TIVA_IRQ_SSI3:
+        return &g_ssidev[SSI3_NDX];
 #endif
       default:
         return NULL;
@@ -1460,7 +1503,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
-  uint8_t regval;
 
   ssidbg("port: %d\n", port);
 
@@ -1469,7 +1511,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   flags = irqsave();
   switch (port)
     {
-#ifndef CONFIG_SSI0_DISABLE
+#ifdef CONFIG_TIVA_SSI0
     case 0:
       /* Select SSI0 */
 
@@ -1498,11 +1540,11 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       tiva_configgpio(GPIO_SSI0_RX);   /* PA4: SSI0 receive (SSI0Rx) */
       tiva_configgpio(GPIO_SSI0_TX);   /* PA5: SSI0 transmit (SSI0Tx) */
       break;
-#endif /* CONFIG_SSI0_DISABLE */
+#endif /* CONFIG_TIVA_SSI0 */
 
-#ifndef CONFIG_SSI1_DISABLE
+#ifdef CONFIG_TIVA_SSI1
     case 1:
-      /* Select SSI0 */
+      /* Select SSI1 */
 
       priv = &g_ssidev[SSI1_NDX];
 
@@ -1517,7 +1559,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
        *   to the SSI1 peripheral, bringing it a fully functional state.
        */
 
-
       tiva_ssi1_enablepwr();
       tiva_ssi1_enableclk();
 
@@ -1528,7 +1569,65 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       tiva_configgpio(GPIO_SSI1_RX);   /* PE2: SSI1 receive (SSI1Rx) */
       tiva_configgpio(GPIO_SSI1_TX);   /* PE3: SSI1 transmit (SSI1Tx) */
       break;
-#endif /* CONFIG_SSI1_DISABLE */
+#endif /* CONFIG_TIVA_SSI1 */
+
+#ifdef CONFIG_TIVA_SSI2
+    case 2:
+      /* Select SSI2 */
+
+      priv = &g_ssidev[SSI2_NDX];
+
+      /* Enable power and clocking to the SSI2 peripheral.
+       *
+       * - Enable Power (TM4C129 family only):  Applies power (only) to the
+       *   SSI2 peripheral.  This is not an essential step since enabling
+       *   clocking will also apply power.  The only significance is that
+       *   the SSI2 state will be retained if the SSI2 clocking is
+       *   subsequently disabled.
+       * - Enable Clocking (All families):  Applies both power and clocking
+       *   to the SSI2 peripheral, bringing it a fully functional state.
+       */
+
+      tiva_ssi2_enablepwr();
+      tiva_ssi2_enableclk();
+
+      /* Configure SSI2 GPIOs */
+
+      tiva_configgpio(GPIO_SSI2_CLK);  /* PE0: SSI2 clock (SSI2Clk) */
+   /* tiva_configgpio(GPIO_SSI2_FSS);     PE1: SSI2 frame (SSI2Fss) */
+      tiva_configgpio(GPIO_SSI2_RX);   /* PE2: SSI2 receive (SSI2Rx) */
+      tiva_configgpio(GPIO_SSI2_TX);   /* PE3: SSI2 transmit (SSI2Tx) */
+      break;
+#endif /* CONFIG_TIVA_SSI2 */
+
+#ifdef CONFIG_TIVA_SSI3
+    case 3:
+      /* Select SSI3 */
+
+      priv = &g_ssidev[SSI3_NDX];
+
+      /* Enable power and clocking to the SSI3 peripheral.
+       *
+       * - Enable Power (TM4C129 family only):  Applies power (only) to the
+       *   SSI3 peripheral.  This is not an essential step since enabling
+       *   clocking will also apply power.  The only significance is that
+       *   the SSI3 state will be retained if the SSI3 clocking is
+       *   subsequently disabled.
+       * - Enable Clocking (All families):  Applies both power and clocking
+       *   to the SSI3 peripheral, bringing it a fully functional state.
+       */
+
+      tiva_ssi1_enablepwr();
+      tiva_ssi1_enableclk();
+
+      /* Configure SSI3 GPIOs */
+
+      tiva_configgpio(GPIO_SSI3_CLK);  /* PE0: SSI3 clock (SSI3Clk) */
+   /* tiva_configgpio(GPIO_SSI3_FSS);     PE1: SSI3 frame (SSI3Fss) */
+      tiva_configgpio(GPIO_SSI3_RX);   /* PE2: SSI3 receive (SSI3Rx) */
+      tiva_configgpio(GPIO_SSI3_TX);   /* PE3: SSI3 transmit (SSI3Tx) */
+      break;
+#endif /* CONFIG_TIVA_SSI1 */
 
     default:
       irqrestore(flags);

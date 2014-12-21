@@ -56,11 +56,9 @@
  */
 
 #if TIVA_NSSI == 0
-#  undef CONFIG_SSI0_DISABLE
-#  define CONFIG_SSI0_DISABLE 1
+#  undef CONFIG_TIVA_SSI0
 #endif
-#undef CONFIG_SSI1_DISABLE
-#define CONFIG_SSI1_DISABLE 1
+#undef CONFIG_TIVA_SSI1
 
 /* LM3S6432 MDL-S2E *****************************************************************/
 

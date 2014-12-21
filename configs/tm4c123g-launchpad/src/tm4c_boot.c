@@ -77,7 +77,7 @@ void tiva_boardinitialize(void)
 
   /* The TM4C123G LaunchPad microSD CS and OLED are on SSI0 */
 
-#if !defined(CONFIG_SSI0_DISABLE) || !defined(CONFIG_SSI1_DISABLE)
+#if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
   if (tm4c_ssiinitialize)
     {
       tm4c_ssiinitialize();

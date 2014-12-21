@@ -23,6 +23,7 @@ config ARCH_CHIP_LM3S9B96
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
+	select TIVA_HAVE_SSI1
 	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM3S6432
@@ -91,6 +92,7 @@ endchoice
 # Chip families
 
 config ARCH_CHIP_LM3S
+	bool
 	select TIVA_HAVE_GPIOA_IRQS
 	select TIVA_HAVE_GPIOB_IRQS
 	select TIVA_HAVE_GPIOC_IRQS
@@ -98,7 +100,7 @@ config ARCH_CHIP_LM3S
 	select TIVA_HAVE_GPIOE_IRQS
 	select TIVA_HAVE_GPIOF_IRQS
 	select TIVA_HAVE_GPIOG_IRQS
-	bool
+	select TIVA_HAVE_SSI0
 
 config ARCH_CHIP_LM4F
 	bool
@@ -117,6 +119,10 @@ config ARCH_CHIP_LM4F
 	select TIVA_HAVE_UART5
 	select TIVA_HAVE_UART6
 	select TIVA_HAVE_UART7
+	select TIVA_HAVE_SSI0
+	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_SSI2
+	select TIVA_HAVE_SSI3
 
 config ARCH_CHIP_TM4C123
 	bool
@@ -137,6 +143,10 @@ config ARCH_CHIP_TM4C
 	select TIVA_HAVE_UART5
 	select TIVA_HAVE_UART6
 	select TIVA_HAVE_UART7
+	select TIVA_HAVE_SSI0
+	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_SSI2
+	select TIVA_HAVE_SSI3
 
 config LM_REVA2
 	bool "Rev A2"
@@ -154,36 +164,63 @@ menu "Tiva/Stellaris Peripheral Support"
 
 config TIVA_I2C
 	bool
+	default n
 
 config TIVA_HAVE_I2C2
 	bool
+	default n
 
 config TIVA_HAVE_I2C3
 	bool
+	default n
 
 config TIVA_HAVE_I2C4
 	bool
+	default n
 
 config TIVA_HAVE_I2C5
 	bool
+	default n
 
 config TIVA_HAVE_UART3
 	bool
+	default n
 
 config TIVA_HAVE_UART4
 	bool
+	default n
 
 config TIVA_HAVE_UART5
 	bool
+	default n
 
 config TIVA_HAVE_UART6
 	bool
+	default n
 
 config TIVA_HAVE_UART7
 	bool
+	default n
+
+config TIVA_HAVE_SSI0
+	bool
+	default n
 
 config TIVA_HAVE_SSI1
 	bool
+	default n
+
+config TIVA_HAVE_SSI2
+	bool
+	default n
+
+config TIVA_HAVE_SSI3
+	bool
+	default n
+
+config TIVA_SSI
+	bool
+	default n
 
 config TIVA_I2C0
 	bool "I2C0"
@@ -264,13 +301,29 @@ config TIVA_UART7
 	depends on TIVA_HAVE_UART7
 	select ARCH_HAVE_UART7
 
-config SSI0_DISABLE
-	bool "Disable SSI0"
+config TIVA_SSI0
+	bool "SSI0"
 	default y
+	depends on TIVA_HAVE_SSI0
+	select TIVA_SSI
 
-config SSI1_DISABLE
-	bool "Disable SSI1"
+config TIVA_SSI1
+	bool "SSI1"
 	default y
+	depends on TIVA_HAVE_SSI1
+	select TIVA_SSI
+
+config TIVA_SSI2
+	bool "SSI2"
+	default y
+	depends on TIVA_HAVE_SSI2
+	select TIVA_SSI
+
+config TIVA_SSI3
+	bool "SSI3"
+	default y
+	depends on TIVA_HAVE_SSI3
+	select TIVA_SSI
 
 config TIVA_ETHERNET
 	bool "Ethernet"
@@ -588,7 +641,7 @@ config M3S_DUMPPACKET
 endmenu
 endif
 
-if !SSI0_DISABLE || !SSI1_DISABLE
+if TIVA_SSI
 menu "Tiva/Stellaris SSI Configuration"
 
 config SSI_POLLWAIT
