@@ -258,7 +258,7 @@ void up_lowsetup(void)
    */
 
 #ifdef CONFIG_TIVA_UART0
-  tiva_uart0_enablepwr();
+  tiva_uart0_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart0_enableclk();
 
   tiva_configgpio(GPIO_UART0_RX);
@@ -266,7 +266,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART1
-  tiva_uart1_enablepwr();
+  tiva_uart1_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart1_enableclk();
 
   tiva_configgpio(GPIO_UART1_RX);
@@ -274,7 +274,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART2
-  tiva_uart2_enablepwr();
+  tiva_uart2_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart2_enableclk();
 
   tiva_configgpio(GPIO_UART2_RX);
@@ -282,7 +282,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART3
-  tiva_uart3_enablepwr();
+  tiva_uart3_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart3_enableclk();
 
   tiva_configgpio(GPIO_UART3_RX);
@@ -290,6 +290,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART4
+  tiva_uart4_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart4_enableclk();
 
   tiva_configgpio(GPIO_UART4_RX);
@@ -297,7 +298,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART5
-  tiva_uart5_enablepwr();
+  tiva_uart5_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart5_enableclk();
 
   tiva_configgpio(GPIO_UART5_RX);
@@ -305,7 +306,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART6
-  tiva_uart6_enablepwr();
+  tiva_uart6_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart6_enableclk();
 
   tiva_configgpio(GPIO_UART6_RX);
@@ -313,7 +314,7 @@ void up_lowsetup(void)
 #endif
 
 #ifdef CONFIG_TIVA_UART7
-  tiva_uart7_enablepwr();
+  tiva_uart7_enablepwr(); /* State will be retained if clocking disabled */
   tiva_uart7_enableclk();
 
   tiva_configgpio(GPIO_UART7_RX);
