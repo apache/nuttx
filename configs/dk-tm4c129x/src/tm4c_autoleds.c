@@ -86,6 +86,8 @@ void board_led_on(int led)
  * LED_ASSERTION     1     NC   NC    NC
  * LED_PANIC         3     ON   OFF   OFF (flashing 2Hz)
  * --------------- ------- ---- ----- --------------------
+ *
+ * A high output illuminates the LED.
  */
 
  switch (led)
@@ -93,7 +95,7 @@ void board_led_on(int led)
   case 0: /* R=OFF, G=OFF, B=ON */
     /* Previous state was all OFF */
 
-    tiva_gpiowrite(GPIO_LED_B, false);
+    tiva_gpiowrite(GPIO_LED_B, true);
     break;
 
   default:
@@ -103,16 +105,16 @@ void board_led_on(int led)
   case 2: /* R=OFF, G=ON, B=OFF */
     /* Previous state was all: R=OFF, G=OFF, B=ON */
 
-    tiva_gpiowrite(GPIO_LED_G, false);
-    tiva_gpiowrite(GPIO_LED_B, true);
+    tiva_gpiowrite(GPIO_LED_G, true);
+    tiva_gpiowrite(GPIO_LED_B, false);
     break;
 
   case 3: /* R=ON, G=OFF, B=OFF */
     /* Previous state was all: R=OFF, G=Unknown, B=Unknown */
 
-    tiva_gpiowrite(GPIO_LED_R, false);
-    tiva_gpiowrite(GPIO_LED_G, true);
-    tiva_gpiowrite(GPIO_LED_B, true);
+    tiva_gpiowrite(GPIO_LED_R, true);
+    tiva_gpiowrite(GPIO_LED_G, false);
+    tiva_gpiowrite(GPIO_LED_B, false);
     break;
   }
 }
@@ -135,6 +137,8 @@ void board_led_off(int led)
  * LED_ASSERTION     1     NC   NC    NC
  * LED_PANIC         3     ON   OFF   OFF (flashing 2Hz)
  * --------------- ------- ---- ----- --------------------
+ *
+ * A high output illuminates the LED.
  */
 
  switch (led)
@@ -148,7 +152,7 @@ void board_led_off(int led)
   case 3: /* R=OFF, G=OFF, B=OFF */
     /* Previous state was all: R=ON, G=OFF, B=OFF */
 
-    tiva_gpiowrite(GPIO_LED_R, true);
+    tiva_gpiowrite(GPIO_LED_R, false);
   }
 }
 
