@@ -72,11 +72,13 @@
  *   PQ4 Blue LED     J36 pins 3 and 4
  *   PQ7 Green LED    J36 pins 5 and 6
  *   --- ------------ -----------------
+ *
+ * A high output illuminates the LED.
  */
 
-#define GPIO_LED_R   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTN | GPIO_PIN_5)
-#define GPIO_LED_G   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTQ | GPIO_PIN_4)
-#define GPIO_LED_B   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTQ | GPIO_PIN_7)
+#define GPIO_LED_R   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTN | GPIO_PIN_5)
+#define GPIO_LED_G   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTQ | GPIO_PIN_7)
+#define GPIO_LED_B   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTQ | GPIO_PIN_4)
 
 /* Button definitions ***************************************************************/
 /* There are three push buttons on the board.

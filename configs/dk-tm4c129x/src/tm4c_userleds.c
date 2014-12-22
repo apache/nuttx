@@ -41,6 +41,8 @@
  *   PQ4 Blue LED     J36 pins 3 and 4
  *   PQ7 Green LED    J36 pins 5 and 6
  *   --- ------------ -----------------
+ *
+ * A high output illuminates the LED.
  */
 
 /****************************************************************************
@@ -118,7 +120,7 @@ void tiva_setled(int led, bool ledon)
       return;
     }
 
-  tiva_gpiowrite(ledcfg, !ledon);
+  tiva_gpiowrite(ledcfg, ledon);
 }
 
 /****************************************************************************
@@ -127,16 +129,16 @@ void tiva_setled(int led, bool ledon)
 
 void tiva_setleds(uint8_t ledset)
 {
-  bool ledoff;
+  bool ledon;
 
-  ledoff = ((ledset & BOARD_LED_R_BIT) == 0);
-  tiva_gpiowrite(GPIO_LED_R, ledoff);
+  ledon = ((ledset & BOARD_LED_R_BIT) != 0);
+  tiva_gpiowrite(GPIO_LED_R, ledon);
 
-  ledoff = ((ledset & BOARD_LED_G_BIT) == 0);
-  tiva_gpiowrite(GPIO_LED_G, ledoff);
+  ledon = ((ledset & BOARD_LED_G_BIT) != 0);
+  tiva_gpiowrite(GPIO_LED_G, ledon);
 
-  ledoff = ((ledset & BOARD_LED_B_BIT) == 0);
-  tiva_gpiowrite(GPIO_LED_B, ledoff);
+  ledon = ((ledset & BOARD_LED_B_BIT) != 0);
+  tiva_gpiowrite(GPIO_LED_B, ledon);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */
