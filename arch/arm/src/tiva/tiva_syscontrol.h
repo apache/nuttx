@@ -93,24 +93,30 @@ extern "C"
  *   The pllfreq0 and pllfreq1 settings derive from the PLL M, N, and Q
  *   values to generate Fvco like:
  *
- *     Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
+ *     Fin  = Fxtal / Q / N -OR- Fpiosc / Q / N
  *     Mdiv = Mint + (MFrac / 1024)
  *     Fvco = Fin * Mdiv
  *
- * When the PLL is active, the system clock frequency (SysClk) is calculated
- * using the following equation:
+ *   When the PLL is active, the system clock frequency (SysClk) is
+ *   calculated using the following equation:
  *
- *   SysClk = Fvco/ (sysdiv + 1)
+ *     SysClk = Fvco/ sysdiv
  *
- * See the helper macros M2PLLFREQ0(mint,mfrac) and QN2PLLFREQ1(q,n).
+ *   NOTE: The input clock to the PLL may be either the external crystal
+ *   (Fxtal) or PIOSC (Fpiosc).  This logic supports only the external
+ *   crystal as the PLL source clock.
  *
- * NOTE: The input clock to the PLL may be either the external crystal
- * (Fxtal) or PIOSC (Fpiosc).  This logic supports only the external
- * crystal as the PLL source clock.
+ * Input Parameters:
+ *   pllfreq0 - PLLFREQ0 register value (see helper macro M2PLLFREQ0()
+ *   pllfreq1 - PLLFREQ1 register value (see helper macro QN2PLLFREQ1()
+ *   sysdiv   - Fvco divider value
+ *
+ * Returned Value:
+ *   The resulting SysClk frequency
  *
  ****************************************************************************/
 
-void tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv);
+uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv);
 
 #else
 /****************************************************************************

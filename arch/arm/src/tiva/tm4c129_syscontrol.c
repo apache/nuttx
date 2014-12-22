@@ -55,13 +55,69 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define FAST_OSCDELAY   (512*1024)
-#define SLOW_OSCDELAY   (4*1024)
-#define PLLLOCK_DELAY   (32*1024)
+#if XTAL_FREQUENCY < 5000000 || XTAL_FREQUENCY > 25000000
+#  error Crystal frequency is not supported
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure supports mapping of a frequency to optimal memory timing */
+
+struct f2memtim0_s
+{
+  uint32_t frequency;
+  uint32_t memtim0;
+};
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* This structure supports mapping of a frequency to optimal memory timing */
+
+static const struct f2memtim0_s g_f2memtim0[] =
+{
+  {
+    16000000,
+    (SYSCON_MEMTIM0_FWS(0) | SYSCON_MEMTIM0_FBCE | SYSCON_MEMTIM0_FBCHT_0p5 |
+     SYSCON_MEMTIM0_EWS(0) | SYSCON_MEMTIM0_EBCE | SYSCON_MEMTIM0_EBCHT_0p5 |
+     SYSCON_MEMTIM0_MB1)
+  },
+  {
+    40000000,
+    (SYSCON_MEMTIM0_FWS(1) | SYSCON_MEMTIM0_FBCHT_1p5 |
+     SYSCON_MEMTIM0_EWS(1) | SYSCON_MEMTIM0_EBCHT_1p5 |
+     SYSCON_MEMTIM0_MB1)
+  },
+  {
+    60000000,
+    (SYSCON_MEMTIM0_FWS(2) | SYSCON_MEMTIM0_FBCHT_2 |
+     SYSCON_MEMTIM0_EWS(2) | SYSCON_MEMTIM0_EBCHT_2 |
+     SYSCON_MEMTIM0_MB1)
+  },
+  {
+    80000000,
+    (SYSCON_MEMTIM0_FWS(3) | SYSCON_MEMTIM0_FBCHT_2p5 |
+     SYSCON_MEMTIM0_EWS(3) | SYSCON_MEMTIM0_EBCHT_2p5 |
+     SYSCON_MEMTIM0_MB1)
+  },
+  {
+    100000000,
+    (SYSCON_MEMTIM0_FWS(4) | SYSCON_MEMTIM0_FBCHT_3 |
+     SYSCON_MEMTIM0_EWS(4) | SYSCON_MEMTIM0_EBCHT_3 |
+     SYSCON_MEMTIM0_MB1)
+  },
+  {
+    120000000,
+    (SYSCON_MEMTIM0_FWS(5) | SYSCON_MEMTIM0_FBCHT_3p5 |
+     SYSCON_MEMTIM0_EWS(5) | SYSCON_MEMTIM0_EBCHT_3p5 |
+     SYSCON_MEMTIM0_MB1)
+  },
+};
+
+#define NMEMTIM0_SETTINGS (sizeof(g_f2memtim0) / sizeof(struct f2memtim0_s))
 
 /****************************************************************************
  * Public Data
@@ -72,74 +128,79 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_delay
+ * Name: tiva_memtim0
  *
  * Description:
- *   Wait for the newly selected oscillator(s) to settle.  This is tricky
- *   because the time that we wait can be significant and is determined by
- *   the previous clock setting, not the one that we are configuring.
+ *   Given a SysClk frequency, perform a table lookup to select the optimal
+ *   FLASH and EEPROM configuration for the MEMTIM0 register.
  *
  ****************************************************************************/
 
-static inline void tiva_delay(uint32_t delay)
+static uint32_t tiva_memtim0(uint32_t sysclk)
 {
-  __asm__ __volatile__("1:\n"
-                       "\tsubs  %0, #1\n"
-                       "\tbne   1b\n"
-                       : "=r"(delay) : "r"(delay));
-}
+  int i;
 
-/****************************************************************************
- * Name: tiva_oscdelay
- *
- * Description:
- *   Wait for the newly selected oscillator(s) to settle.  This is tricky because
- *   the time that we wait can be significant and is determined by the previous
- *   clock setting, not the one that we are configuring.
- *
- ****************************************************************************/
+  /* Search for the optimal memory timing */
 
-static inline void tiva_oscdelay(uint32_t rcc, uint32_t rcc2)
-{
-  /* Wait for the oscillator  to stabilize.  A smaller delay is used if the
-   * current clock rate is very slow.
-   */
-
-  uint32_t delay = FAST_OSCDELAY;
-#warning Missing logic
-
-  /* Then delay that number of loops */
-
-  tiva_delay(delay);
-}
-
-/****************************************************************************
- * Name: tiva_pll_lock
- *
- * Description:
- *   The new RCC values have been selected... wait for the PLL to lock on
- *
- ****************************************************************************/
-
-static inline void tiva_pll_lock(void)
-{
-  volatile uint32_t delay;
-
-  /* Loop until the lock is achieved or until a timeout occurs */
-
-  for (delay = PLLLOCK_DELAY; delay > 0; delay--)
+  for (i = 0; i < NMEMTIM0_SETTINGS; i++)
     {
-      /* Check if the PLL is locked on */
+      /* Check if  if the SysClk is less than the maximum frequency for this
+       * flash memory timing.
+       */
 
-      if ((getreg32(TIVA_SYSCON_RIS) & SYSCON_RIS_PLLLRIS) != 0)
+      if (sysclk <= g_f2memtim0[i].frequency)
         {
-          /* Yes.. return now */
+          /* Yes.. then this FLASH memory timing is the best choice for the
+           * given system clock frequency.
+           */
 
-          return;
+          return(g_f2memtim0[i].memtim0);
         }
     }
 
-  /* If we get here, then PLL lock was not achieved */
+  /* No appropriate flash memory timing could be found.  The device is
+   * being clocked too fast.
+   */
+
+  DEBUGPANIC();
+  return 0;
+}
+
+/****************************************************************************
+ * Name: tiva_vco_frequency
+ *
+ * Description:
+ *   Given the crystal frequency and the PLLFREQ0 and PLLFREQ1 register
+ *   settings, return the SysClk frequency.
+ *
+ ****************************************************************************/
+
+static uint32_t tiva_vco_frequency(uint32_t pllfreq0, uint32_t pllfreq1)
+{
+  uint64_t fvcob10;
+  uint32_t mint;
+  uint32_t mfrac;
+  uint32_t q;
+  uint32_t n;
+  uint32_t mdivb10;
+
+  /* Extract all of the values from the hardware register values. */
+
+  mfrac =  (pllfreq0 & SYSCON_PLLFREQ0_MFRAC_MASK) >> SYSCON_PLLFREQ0_MFRAC_SHIFT;
+  mint  =  (pllfreq0 & SYSCON_PLLFREQ0_MINT_MASK) >> SYSCON_PLLFREQ0_MINT_SHIFT;
+  q     = ((pllfreq1 & SYSCON_PLLFREQ1_Q_MASK) >> SYSCON_PLLFREQ1_Q_SHIFT) + 1;
+  n     = ((pllfreq1 & SYSCON_PLLFREQ1_N_MASK) >> SYSCON_PLLFREQ1_N_SHIFT) + 1;
+
+  /* Algorithm:
+   *
+   *     Fin  = Fxtal / Q / N (-OR- Fpiosc / Q / N)
+   *     Mdiv = Mint + (MFrac / 1024)
+   *     Fvco = Fin * Mdiv
+   */
+
+  mdivb10 = (mint << 10) + mfrac;
+  fvcob10 = (mdivb10 * (uint64_t)XTAL_FREQUENCY) / (q * n);
+  return (uint32_t)(fvcob10 >> 10);
 }
 
 /****************************************************************************
@@ -157,26 +218,166 @@ static inline void tiva_pll_lock(void)
  *   The pllfreq0 and pllfreq1 settings derive from the PLL M, N, and Q
  *   values to generate Fvco like:
  *
- *     Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
+ *     Fin  = Fxtal / Q / N -OR- Fpiosc / Q / N
  *     Mdiv = Mint + (MFrac / 1024)
  *     Fvco = Fin * Mdiv
  *
- * When the PLL is active, the system clock frequency (SysClk) is calculated
- * using the following equation:
+ *   When the PLL is active, the system clock frequency (SysClk) is
+ *   calculated using the following equation:
  *
- *   SysClk = Fvco/ (sysdiv + 1)
+ *     SysClk = Fvco/ sysdiv
  *
- * See the helper macros M2PLLFREQ0(mint,mfrac) and QN2PLLFREQ1(q,n).
+ *   NOTE: The input clock to the PLL may be either the external crystal
+ *   (Fxtal) or PIOSC (Fpiosc).  This logic supports only the external
+ *   crystal as the PLL source clock.
  *
- * NOTE: The input clock to the PLL may be either the external crystal
- * (Fxtal) or PIOSC (Fpiosc).  This logic supports only the external
- * crystal as the PLL source clock.
+ * Input Parameters:
+ *   pllfreq0 - PLLFREQ0 register value (see helper macro M2PLLFREQ0()
+ *   pllfreq1 - PLLFREQ1 register value (see helper macro QN2PLLFREQ1()
+ *   sysdiv   - Fvco divider value
+ *
+ * Returned Value:
+ *   The resulting SysClk frequency
  *
  ****************************************************************************/
 
-void tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
+uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
 {
-#warning Missing logic
+  uint32_t oscselect;
+  uint32_t sysclk;
+  uint32_t regval;
+  int32_t timeout;
+  bool newpll;
+
+  /* Set the PLL source select to MOSC. */
+
+  oscselect = SYSCON_RSCLKCFG_OSCSRC_MOSC | SYSCON_RSCLKCFG_PLLSRC_MOSC;
+
+  /* Clear MOSC power down, high oscillator range setting, and no crystal
+   * present settings.
+   */
+
+  regval  = getreg32(TIVA_SYSCON_MOSCCTL);
+  regval &= ~(SYSCON_MOSCCTL_OSCRNG | SYSCON_MOSCCTL_PWRDN |
+              SYSCON_MOSCCTL_NOXTAL);
+
+#if XTAL_FREQUENCY >= 10000000
+  /* Increase the drive strength for MOSC of 10 MHz and above. */
+
+  regval |= SYSCON_MOSCCTL_OSCRNG;
+#endif
+
+  putreg32(regval, TIVA_SYSCON_MOSCCTL);
+
+  /* Set the memory timings for the maximum external frequency since this
+   * could be a switch to PIOSC or possibly to MOSC which can be up to
+   * 25MHz.
+   */
+
+  regval = tiva_memtim0(25000000);
+  putreg32(regval, TIVA_SYSCON_MEMTIM0);
+
+  /* Clear any previous PLL divider and source setup.  Update the clock
+   * configuration to switch back to PIOSC.
+   */
+
+  regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
+  regval &= ~(SYSCON_RSCLKCFG_PSYSDIV_MASK | SYSCON_RSCLKCFG_OSCSRC_MASK |
+              SYSCON_RSCLKCFG_PLLSRC_MASK | SYSCON_RSCLKCFG_USEPLL);
+  regval |= SYSCON_RSCLKCFG_MEMTIMU;
+  putreg32(regval, TIVA_SYSCON_RSCLKCFG);
+
+  /* If there were no changes to the PLL do not force the PLL to lock by
+   * writing the PLL settings.
+   */
+
+  newpll = (getreg32(TIVA_SYSCON_PLLFREQ1) != pllfreq1 ||
+            getreg32(TIVA_SYSCON_PLLFREQ0) != pllfreq0);
+
+  /* If there are new PLL settings write them. */
+
+  if (newpll)
+    {
+      /* Set the oscillator source. */
+
+      regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
+      regval |= oscselect;
+      putreg32(regval, TIVA_SYSCON_RSCLKCFG);
+
+      /* Set the M, N and Q values provided by the pllfreq0 and pllfreq1
+       * parameters.
+       */
+
+      putreg32(pllfreq1, TIVA_SYSCON_PLLFREQ1);
+
+      regval    = getreg32(TIVA_SYSCON_PLLFREQ0);
+      regval   &= SYSCON_PLLFREQ0_PLLPWR;
+      pllfreq0 |= regval;
+      putreg32(pllfreq0, TIVA_SYSCON_PLLFREQ0);
+    }
+
+  /* Calculate the actual system clock. */
+
+  sysclk = tiva_vco_frequency(pllfreq0, pllfreq1) / sysdiv;
+
+  /* Set the Flash and EEPROM timing values. */
+
+  regval = tiva_memtim0(sysclk);
+  putreg32(regval, TIVA_SYSCON_MEMTIM0);
+
+  /* Was the PLL already powered up? */
+
+  if ((getreg32(TIVA_SYSCON_PLLFREQ0) & SYSCON_PLLFREQ0_PLLPWR) != 0)
+    {
+      /* Yes.. Is this a new PLL setting? */
+
+      if (newpll == true)
+        {
+          /* Yes.. Trigger the PLL to lock to the new frequency. */
+
+          regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
+          regval |= SYSCON_RSCLKCFG_NEWFREQ;
+          putreg32(regval, TIVA_SYSCON_RSCLKCFG);
+        }
+    }
+  else
+    {
+      /* No... No already powered.  Power up the PLL now. */
+
+      regval  = getreg32(TIVA_SYSCON_PLLFREQ0);
+      regval |= SYSCON_PLLFREQ0_PLLPWR;
+      putreg32(regval, TIVA_SYSCON_PLLFREQ0);
+    }
+
+  /* Wait until the PLL has locked. */
+
+  for (timeout = 32768; timeout > 0; timeout--)
+    {
+      if ((getreg32(TIVA_SYSCON_PLLSTAT) & SYSCON_PLLSTAT_LOCK) != 0)
+        {
+          /* Break out of the loop before the timeout expires if the PLL
+           * reports that it is locked.
+           */
+
+          break;
+        }
+    }
+
+  /* If the loop above did not timeout then switch over to the PLL */
+
+  if (timeout > 0)
+    {
+      regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
+      regval |= SYSCON_RSCLKCFG_PSYSDIV(sysdiv - 1) | SYSCON_RSCLKCFG_USEPLL |
+                SYSCON_RSCLKCFG_MEMTIMU | oscselect;
+      putreg32(regval, TIVA_SYSCON_RSCLKCFG);
+    }
+  else
+    {
+      sysclk = 0;
+    }
+
+  return sysclk;
 }
 
 /****************************************************************************
