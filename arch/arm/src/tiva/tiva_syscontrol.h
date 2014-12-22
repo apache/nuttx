@@ -46,6 +46,18 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
+/* Helpers for use with the TM4C129 version of tiva_clockconfig() */
+
+#  define M2PLLFREQ0(mint,mfrac) \
+     ((uint32_t)((mint) << SYSCON_PLLFREQ0_MINT_SHIFT) | \
+      (uint32_t)((mfrac) << SYSCON_PLLFREQ0_MFRAC_SHIFT))
+
+#  define QN2PLLFREQ1(q,n) \
+     ((uint32_t)(((n) - 1) << SYSCON_PLLFREQ1_N_SHIFT) | \
+      (uint32_t)(((q) - 1) << SYSCON_PLLFREQ1_Q_SHIFT))
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -69,6 +81,38 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
+/****************************************************************************
+ * Name: tiva_clockconfig
+ *
+ * Description:
+ *   Called to change to new clock based on desired pllfreq0, pllfreq1, and
+ *   sysdiv settings.  This is use to set up the initial clocking but can be
+ *   used later to support slow clocked, low power consumption modes.
+ *
+ *   The pllfreq0 and pllfreq1 settings derive from the PLL M, N, and Q
+ *   values to generate Fvco like:
+ *
+ *     Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
+ *     Mdiv = Mint + (MFrac / 1024)
+ *     Fvco = Fin * Mdiv
+ *
+ * When the PLL is active, the system clock frequency (SysClk) is calculated
+ * using the following equation:
+ *
+ *   SysClk = Fvco/ (sysdiv + 1)
+ *
+ * See the helper macros M2PLLFREQ0(mint,mfrac) and QN2PLLFREQ1(q,n).
+ *
+ * NOTE: The input clock to the PLL may be either the external crystal
+ * (Fxtal) or PIOSC (Fpiosc).  This logic supports only the external
+ * crystal as the PLL source clock.
+ *
+ ****************************************************************************/
+
+void tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv);
+
+#else
 /****************************************************************************
  * Name: tiva_clockconfig
  *
@@ -80,6 +124,7 @@ extern "C"
  ****************************************************************************/
 
 void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2);
+#endif
 
 /****************************************************************************
  * Name: up_clockconfig

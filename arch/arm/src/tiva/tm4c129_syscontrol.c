@@ -150,13 +150,31 @@ static inline void tiva_pll_lock(void)
  * Name: tiva_clockconfig
  *
  * Description:
- *   Called to change to new clock based on desired rcc and rcc2 settings.
- *   This is use to set up the initial clocking but can be used later to
- *   support slow clocked, low power consumption modes.
+ *   Called to change to new clock based on desired pllfreq0, pllfreq1, and
+ *   sysdiv settings.  This is use to set up the initial clocking but can be
+ *   used later to support slow clocked, low power consumption modes.
+ *
+ *   The pllfreq0 and pllfreq1 settings derive from the PLL M, N, and Q
+ *   values to generate Fvco like:
+ *
+ *     Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
+ *     Mdiv = Mint + (MFrac / 1024)
+ *     Fvco = Fin * Mdiv
+ *
+ * When the PLL is active, the system clock frequency (SysClk) is calculated
+ * using the following equation:
+ *
+ *   SysClk = Fvco/ (sysdiv + 1)
+ *
+ * See the helper macros M2PLLFREQ0(mint,mfrac) and QN2PLLFREQ1(q,n).
+ *
+ * NOTE: The input clock to the PLL may be either the external crystal
+ * (Fxtal) or PIOSC (Fpiosc).  This logic supports only the external
+ * crystal as the PLL source clock.
  *
  ****************************************************************************/
 
-void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
+void tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
 {
 #warning Missing logic
 }
@@ -172,8 +190,14 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 
 void up_clockconfig(void)
 {
+  uint32_t pllfreq0;
+  uint32_t pllfreq1;
+
   /* Set the clocking to run with the default settings provided in the board.h
    * header file
    */
-#warning Missing logic
+
+  pllfreq0 = M2PLLFREQ0(BOARD_PLL_MINT, BOARD_PLL_MFRAC);
+  pllfreq1 = QN2PLLFREQ1(BOARD_PLL_Q, BOARD_PLL_N);
+  tiva_clockconfig(pllfreq0, pllfreq1, BOARD_PLL_SYSDIV);
 }
