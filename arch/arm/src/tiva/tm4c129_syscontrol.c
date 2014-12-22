@@ -337,7 +337,7 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
     }
   else
     {
-      /* No... No already powered.  Power up the PLL now. */
+      /* No... Not already powered.  Power up the PLL now. */
 
       regval  = getreg32(TIVA_SYSCON_PLLFREQ0);
       regval |= SYSCON_PLLFREQ0_PLLPWR;
@@ -348,32 +348,32 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
 
   for (timeout = 32768; timeout > 0; timeout--)
     {
+      /* Check if the PLL has locked */
+
       if ((getreg32(TIVA_SYSCON_PLLSTAT) & SYSCON_PLLSTAT_LOCK) != 0)
         {
-          /* Break out of the loop before the timeout expires if the PLL
-           * reports that it is locked.
+          /* The PLL has reported that it is locked.  Switch over to the
+           * PLL.
            */
 
-          break;
+          regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
+          regval |= SYSCON_RSCLKCFG_PSYSDIV(sysdiv - 1) |
+                    SYSCON_RSCLKCFG_OSCSRC_MOSC |
+                    SYSCON_RSCLKCFG_PLLSRC_MOSC |
+                    SYSCON_RSCLKCFG_USEPLL |
+                    SYSCON_RSCLKCFG_MEMTIMU;
+          putreg32(regval, TIVA_SYSCON_RSCLKCFG);
+
+          /* And return the new SysClk frequency */
+
+          return sysclk;
         }
     }
 
-  /* If the loop above did not timeout then switch over to the PLL */
+  /* We git here on a timout, failing to get the PLL lock indidation */
 
-  if (timeout > 0)
-    {
-      regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
-      regval |= SYSCON_RSCLKCFG_PSYSDIV(sysdiv - 1) |
-                SYSCON_RSCLKCFG_OSCSRC_MOSC | SYSCON_RSCLKCFG_PLLSRC_MOSC |
-                SYSCON_RSCLKCFG_USEPLL | SYSCON_RSCLKCFG_MEMTIMU;
-      putreg32(regval, TIVA_SYSCON_RSCLKCFG);
-    }
-  else
-    {
-      sysclk = 0;
-    }
-
-  return sysclk;
+  DEBUGPANIC();
+  return 0;
 }
 
 /****************************************************************************
