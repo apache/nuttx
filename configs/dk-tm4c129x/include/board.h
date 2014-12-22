@@ -50,69 +50,52 @@
 
 /* Clocking *************************************************************************/
 
-/* RCC settings.  Crystals on-board the TMC4C123G LaunchPad include:
+/* Crystals on-board the DK-TM4C129X include:
  *
- *   16MHz connected to OSC0/1 (pins 40/41)
- *   32.768kHz connected to XOSC0/1 (pins 34/36)
+ * 1. 25.0MHz (Y2) is connected to OSC0/1 pins and is used as the run mode input to
+ *    the PLL.
+ * 2. 32.768kHz (Y3) connected to XOSC0/1 and clocks the hibernation module.
  */
 
-#define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL16000KHZ /* On-board crystal is 16 MHz */
-#define XTAL_FREQUENCY       16000000
+#define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL16000KHZ /* On-board crystal is 25 MHz */
+#define XTAL_FREQUENCY       25000000
 
-/* Oscillator source is the main oscillator */
-
-#define SYSCON_RCC_OSCSRC    SYSCON_RCC_OSCSRC_MOSC
-#define SYSCON_RCC2_OSCSRC   SYSCON_RCC2_OSCSRC2_MOSC
-#define OSCSRC_FREQUENCY     XTAL_FREQUENCY
-
-/* Use system divider = 4; this corresponds to a system clock frequency
- * of (400 / 1) / 5 = 80MHz (Using RCC2 and DIV400).
+/* The PLL generates Fvco according to the following formulae.  The input clock to
+ * the PLL may be either the external crystal (Fxtal) or PIOSC (Fpiosc).  This
+ * logic supports only the external crystal as the PLL source clock.
+ *
+ *   Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
+ *   Mdiv = Mint + (MFrac / 1024)
+ *   Fvco = Fin * Mdiv
+ *
+ * Where the register fields Q and N actually hold (Q-1) and (N-1).   The following
+ * setup then generates Fvco = 480MHz:
+ *
+ *   Fin  = 25 MHz / 1 / 5 = 5 MHz
+ *   Mdiv = 96
+ *   Fvco = 480
  */
 
-#define TIVA_SYSDIV          5
-#define SYSCLK_FREQUENCY     80000000  /* 80MHz */
+#define BOARD_PLL_MINT       96        /* Integer part of PLL M value */
+#define BOARD_PLL_MFRAC      0         /* Fractional part of PLL M value */
+#define BOARD_PLL_N          5         /* PLL N value */
+#define BOARD_PLL_Q          1         /* PLL Q value */
 
-/* Other RCC settings:
+#define BOARD_FVCO_FREQUENCY 480000000 /* Resulting Fvco */
+
+/* When the PLL is active, the system clock frequency (SysClk) is calculated using
+ * the following equation:
  *
- * - Main and internal oscillators enabled.
- * - PLL and sys dividers not bypassed
- * - PLL not powered down
- * - No auto-clock gating reset
+ *   SysClk = Fvco/ (sysdiv + 1)
+ *
+ * The following setup generates Sysclk = 120MHz:
  */
 
-#define TIVA_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | \
-                      SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(TIVA_SYSDIV))
-
-/* RCC2 settings
- *
- * - PLL and sys dividers not bypassed.
- * - PLL not powered down
- * - Not using RCC2
- *
- * When SYSCON_RCC2_DIV400 is not selected, SYSDIV2 is the divisor-1.
- * When SYSCON_RCC2_DIV400 is selected, SYSDIV2 is the divisor-1)/2, plus
- * the LSB:
- *
- * SYSDIV2 SYSDIV2LSB DIVISOR
- *   0       N/A         2
- *   1       0           3
- *   "       1           4
- *   2       0           5
- *   "       1           6
- *   etc.
- */
-
-#if (TIVA_SYSDIV & 1) == 0
-#  define TIVA_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV2LSB | \
-                           SYSCON_RCC2_SYSDIV_DIV400(TIVA_SYSDIV) | \
-                           SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
-#else
-#  define TIVA_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV_DIV400(TIVA_SYSDIV) | \
-                           SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
-#endif
+#define BOARD_PLL_SYSDIV     4         /* Sysclk = Fvco / 4 = 120MHz */
+#define SYSCLK_FREQUENCY     120000000 /* Resulting SysClk frequency */
 
 /* LED definitions ******************************************************************/
-/* The TMC4C123G LaunchPad has a single RGB LED.  There is only one visible LED which
+/* The DK-TM4C129X has a single RGB LED.  There is only one visible LED which
  * will vary in color.  But, from the standpoint of the firmware, this appears as
  * three LEDs:
  *
