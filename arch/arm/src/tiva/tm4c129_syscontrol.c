@@ -243,15 +243,10 @@ static uint32_t tiva_vco_frequency(uint32_t pllfreq0, uint32_t pllfreq1)
 
 uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
 {
-  uint32_t oscselect;
   uint32_t sysclk;
   uint32_t regval;
   int32_t timeout;
   bool newpll;
-
-  /* Set the PLL source select to MOSC. */
-
-  oscselect = SYSCON_RSCLKCFG_OSCSRC_MOSC | SYSCON_RSCLKCFG_PLLSRC_MOSC;
 
   /* Clear MOSC power down, high oscillator range setting, and no crystal
    * present settings.
@@ -301,7 +296,7 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
       /* Set the oscillator source. */
 
       regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
-      regval |= oscselect;
+      regval |= (SYSCON_RSCLKCFG_OSCSRC_MOSC | SYSCON_RSCLKCFG_PLLSRC_MOSC);
       putreg32(regval, TIVA_SYSCON_RSCLKCFG);
 
       /* Set the M, N and Q values provided by the pllfreq0 and pllfreq1
@@ -368,8 +363,9 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
   if (timeout > 0)
     {
       regval  = getreg32(TIVA_SYSCON_RSCLKCFG);
-      regval |= SYSCON_RSCLKCFG_PSYSDIV(sysdiv - 1) | SYSCON_RSCLKCFG_USEPLL |
-                SYSCON_RSCLKCFG_MEMTIMU | oscselect;
+      regval |= SYSCON_RSCLKCFG_PSYSDIV(sysdiv - 1) |
+                SYSCON_RSCLKCFG_OSCSRC_MOSC | SYSCON_RSCLKCFG_PLLSRC_MOSC |
+                SYSCON_RSCLKCFG_USEPLL | SYSCON_RSCLKCFG_MEMTIMU;
       putreg32(regval, TIVA_SYSCON_RSCLKCFG);
     }
   else
