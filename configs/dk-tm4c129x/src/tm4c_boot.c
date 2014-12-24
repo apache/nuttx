@@ -48,7 +48,7 @@
 #include "dk-tm4c129x.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -75,7 +75,7 @@ void tiva_boardinitialize(void)
    * tm4c_ssiinitialize() has been brought into the link.
    */
 
-  /* The DK-TM4C129x microSD CS and OLED are on SSI0 */
+  /* The DK-TM4C129X microSD CS and OLED are on SSI0 */
 
 #if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
   if (tm4c_ssiinitialize)

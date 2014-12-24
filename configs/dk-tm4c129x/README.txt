@@ -2,11 +2,11 @@ README.txt
 ==========
 
   This README file discuss discusses the port of NuttX to the Texas
-  Instruments DK-TM4C129x Connected Development Kit.
+  Instruments DK-TM4C129X Connected Development Kit.
 
   Description
   -----------
-  The Tiva™ C Series TM4C129x Connected Development Kit highlights
+  The Tiva™ C Series TM4C129X Connected Development Kit highlights
   the 120-MHz Tiva C Series TM4C129XNCZAD ARM® Cortex™-M4 based
   microcontroller, including an integrated 10/100 Ethernet MAC +
   PHY as well as many other key features.
@@ -461,13 +461,13 @@ DK-TM4129X Configuration Options
 
   There are configurations for disabling support for interrupts GPIO ports.
   Only GPIOP and GPIOQ pins can be used as interrupting sources on the
-  TM4C129x.  Additional interrupt support can be disabled if desired to
+  TM4C129X.  Additional interrupt support can be disabled if desired to
   reduce memory footprint.
 
     CONFIG_TIVA_GPIOP_IRQS=y
     CONFIG_TIVA_GPIOQ_IRQS=y
 
-  TM4C129x specific device driver settings
+  TM4C129X specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
        console and ttys0 (default is the UART0).
