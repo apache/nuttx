@@ -47,7 +47,7 @@
 #include "tiva_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
@@ -110,7 +110,7 @@
  * Name: tm4c_ssiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the DK-TM4C129x.
+ *   Called to configure SPI chip select GPIO pins for the DK-TM4C129X.
  *
  ************************************************************************************/
 

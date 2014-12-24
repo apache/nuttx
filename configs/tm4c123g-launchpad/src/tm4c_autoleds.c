@@ -51,7 +51,7 @@
 #include "tm4c123g-launchpad.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* The TM4C123G LaunchPad has a single RGB LED.  There is only one visible LED
  * which will vary in color.  But, from the standpoint of the firmware, this

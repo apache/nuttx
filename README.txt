@@ -12,6 +12,8 @@ README
     - Instantiating "Canned" Configurations
     - Refreshing Configurations
     - NuttX Configuration Tool
+    - Finding Selections in the Configuration Menus
+    - Comparing Two Configurations
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
   o Toolchains
@@ -400,6 +402,58 @@ NuttX Configuration Tool
   or
 
     make gconfig
+
+Finding Selections in the Configuration Menus
+---------------------------------------------
+
+  The NuttX configuration options have gotten complex and it can be very
+  difficult to find options in the menu trees if you are not sure where
+  to look.  The "basic configuration order" describe above can help to
+  narrow things down.
+
+  But if you know exactly what configuration setting you want to select,
+  say CONFIG_XYZ, but not where to find it, then the 'make memconfig'
+  version of the tool offers some help:  By pressing the '/' key, the
+  tool will bring up a menu that will allow you to search for a
+  configuration item.  Just enter the string CONFIG_XYZ and press 'ENTER'.
+  It will show you not only where to find the configuration item, but
+  also all of the dependencies related to the configuration item.
+
+Comparing Two Configurations
+----------------------------
+
+  If you try to compare to configurations using 'diff', you will probably
+  not be happy with the result.  There are superfluous things added to
+  the configuration files that makes comparisons with the human eye
+  difficult.
+
+  There is a tool at nuttx/tools/cmpconfig.c that can be build to simplify
+  these comparisons.  The output from this difference tools will show only
+  the meaningful differences between two configuration files.  This tools
+  built as follows:
+
+    cd nuttx/tools
+    make -f Makefile.host
+
+  This will crate a program called 'cmpconfig' or 'comconfig.exe' on Windows.
+
+  Why would you want to compare two configuration files?  Here are a couple
+  of reasons why I do this:
+
+  1. When I create a new configuration I usually base it on an older
+     configuration and I want to know, "What are the options that I need to
+     change to add the new feature to the older configurations?"  For example,
+     suppose that I have a boardA/nsh configuration and I want to crate a
+     boardA/nxwm configuration.  Suppose I already have boardB/nsh and
+     boardB/nxwm configurations.  Then by comparing the boardB/nsh with the
+     boardB/nxwm I can see the modifications that I would need to make to my
+     boardA/nsh to create a new  boardA/nxwm.
+
+  2. But the most common reason that I use the 'cmpconfig' program to to
+     check the results of "refreshing" a configuration with 'make oldconfig'
+     (see the next paragraph).  The 'make oldconfig' command will make
+     changes to my configuration and using 'cmpconfig', I can see precisely
+     what those changes were and if any should be of concern to me.
 
 Refreshing Configurations with 'make oldconfig'
 -----------------------------------------------
