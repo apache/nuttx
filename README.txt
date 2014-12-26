@@ -315,15 +315,18 @@ Instantiating "Canned" Configurations
 Refreshing Configurations
 -------------------------
 
-  Configurations can get out of data.  It is a good practice to "refresh"
-  each configuration before making.  To refresh the configuration, use the
-  NuttX Configuration Tool like this:
+  Configurations can get out of date.  As new configurations are added or
+  removed, the contents of a default configuration can become out of synch
+  with the build systems.  Hence, it is a good practice to "refresh" each
+  configuration before making.  To refresh the configuration, use the NuttX
+  Configuration Tool like this:
 
     make oldconfig
 
   If you configuration is out of date, you will be prompted to resolve the
-  issues detected by the configuration tool.  Doing this can save you a lot
-  of problems done the road due to a bad configuration.  The NuttX
+  issues detected by the configuration tool, that is, to provide values for
+  the new configuration options in the build system.  Doing this can save
+  you a lot of problems down the road due to a bad configuration.  The NuttX
   configuration is discussed in the following paragraph.
 
 NuttX Configuration Tool
@@ -437,13 +440,13 @@ Comparing Two Configurations
 
   This will crate a program called 'cmpconfig' or 'comconfig.exe' on Windows.
 
-  Why would you want to compare two configuration files?  Here are a couple
+  Why would you want to compare two configuration files?  Here are a few
   of reasons why I do this:
 
   1. When I create a new configuration I usually base it on an older
      configuration and I want to know, "What are the options that I need to
      change to add the new feature to the older configurations?"  For example,
-     suppose that I have a boardA/nsh configuration and I want to crate a
+     suppose that I have a boardA/nsh configuration and I want to create a
      boardA/nxwm configuration.  Suppose I already have boardB/nsh and
      boardB/nxwm configurations.  Then by comparing the boardB/nsh with the
      boardB/nxwm I can see the modifications that I would need to make to my
@@ -451,25 +454,14 @@ Comparing Two Configurations
 
   2. But the most common reason that I use the 'cmpconfig' program to to
      check the results of "refreshing" a configuration with 'make oldconfig'
-     (see the next paragraph).  The 'make oldconfig' command will make
-     changes to my configuration and using 'cmpconfig', I can see precisely
-     what those changes were and if any should be of concern to me.
+     (see the paragraph "Refreshing Configurations" above).  The 'make
+     oldconfig' command will make changes to my configuration and using
+     'cmpconfig', I can see precisely what those changes were and if any
+     should be of concern to me.
 
-Refreshing Configurations with 'make oldconfig'
------------------------------------------------
-
-  Whenever you use a configuration, you really should always do
-  the following *before* you make NuttX:
-
-    make oldconfig
-
-  This will make sure that the configuration is up-to-date in
-  the event that it has lapsed behind the current NuttX development.
-
-  WARNING:  Never do 'make oldconfig' (OR 'make menuconfig') on a
-  configuration that has not been converted to use the kconfig-frontends
-  tools!  This will damage your configuration (see
-  http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig).
+  3. The 'cmpconfig' tool can also be useful when converting older, legacy
+     manual configurations to the current configurations based on the
+     kconfig-frontends tools.  See the following paragraph.
 
 Incompatibilities with Older Configurations
 -------------------------------------------
@@ -477,11 +469,13 @@ Incompatibilities with Older Configurations
   ***** WARNING *****
 
   The current NuttX build system supports *only* the new configuration
-  files generated using the kconfig-frontends tools.  The older, legacy,
-  manual configurations and the new kconfig-frontends configurations are
-  not compatible.  Old legacy configurations can *not* be used with the
-  kconfig-frontends tool and, hence, cannot be used with recent releases
-  of NuttX:
+  files generated using the kconfig-frontends tools.  Support for the
+  older, legacy, manual configurations was eliminated in NuttX 7.0; all
+  configuration must now be done using the kconfig-frontends tool.  The
+  older manual configurations and the new kconfig-frontends configurations
+  are not compatible.  Old legacy configurations can *not* be used
+  with the kconfig-frontends tool and, hence, cannot be used with releases
+  of NuttX 7.0 and beyond:
 
   If you run 'make menuconfig' with a legacy configuration the resulting
   configuration will probably not be functional.
@@ -496,6 +490,24 @@ Incompatibilities with Older Configurations
      kconfig-frontends toolchain.
 
   A: Refer to http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig
+
+  ***** WARNING *****
+
+  As described above, whenever you use a configuration, you really should
+  always refresh the configuration the following command *before* you make
+  NuttX:
+
+    make oldconfig
+
+  This will make sure that the configuration is up-to-date in the event that
+  it has lapsed behind the current NuttX development (see the paragraph
+  "Refreshing Configurations" above).  But this only works with *new*
+  configuration files created with the kconfig-frontends tools
+
+  Never do 'make oldconfig' (OR 'make menuconfig') on a  configuration that
+  has not been converted to use the kconfig-frontends tools!  This will
+  damage your configuration (see
+  http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig).
 
 NuttX Configuration Tool under DOS
 ----------------------------------
