@@ -1033,7 +1033,7 @@ config ARCH_BOARD
 	default "compal_e88"               if ARCH_BOARD_COMPALE88
 	default "compal_e99"               if ARCH_BOARD_COMPALE99
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
-	default "dk-tm4c129x"       if ARCH_BOARD_DK_TM4C129X
+	default "dk-tm4c129x"              if ARCH_BOARD_DK_TM4C129X
 	default "ea3131"                   if ARCH_BOARD_EA3131
 	default "ea3152"                   if ARCH_BOARD_EA3152
 	default "eagle100"                 if ARCH_BOARD_EAGLE100
