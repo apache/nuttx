@@ -54,6 +54,10 @@ CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
 CMN_CSRCS += up_systemreset.c up_unblocktask.c up_usestack.c up_doirq.c
 CMN_CSRCS += up_hardfault.c up_svcall.c up_vfork.c
 
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+CMN_CSRCS += up_stackcheck.c
+endif
+
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CMN_ASRCS += up_exception.S
 CMN_CSRCS += up_vectors.c
