@@ -93,6 +93,16 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  /* Set the stack limit value */
+
+  xcp->regs[REG_R10]     = (uint32_t)tcb->stack_alloc_ptr + 64;
+
+  /* Fill the stack with a watermark value */
+
+  memset(tcb->stack_alloc_ptr, 0xff, tcb->adj_stack_size);
+#endif
+
   /* Save the task entry point (stripping off the thumb bit) */
 
   xcp->regs[REG_PC]      = (uint32_t)tcb->start & ~1;

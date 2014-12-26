@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_start.c
  * arch/arm/src/chip/stm32_start.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,16 @@ static void go_os_start(void *pv, unsigned int nbytes)
 #  define showprogress(c) up_lowputc(c)
 #else
 #  define showprogress(c)
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARMV7M_STACKCHECK
+/* we need to get r10 set before we can allow instrumentation calls */
+
+void __start(void) __attribute__ ((no_instrument_function));
 #endif
 
 /****************************************************************************
@@ -235,7 +245,13 @@ void __start(void)
   const uint32_t *src;
   uint32_t *dest;
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  /* Set the stack limit before we attempt to call any functions */
+
+  __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+#endif
+
+  /* Configure the UART so that we can get debug output as soon as possible */
 
   stm32_clockconfig();
   stm32_fpuconfig();
