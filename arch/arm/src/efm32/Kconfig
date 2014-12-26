@@ -177,6 +177,30 @@ config EFM32_OTGFS
 	default n
 	depends on EFM32_HAVE_OTGFS && EXPERIMENTAL
 
+config EFM32_TIMER0
+	bool "TIMER0"
+	default n
+	select ARCH_HAVE_TIMER0
+	select EFM32_TIMER
+
+config EFM32_TIMER1
+	bool "TIMER1"
+	default n
+	select ARCH_HAVE_TIMER1
+	select EFM32_TIMER
+
+config EFM32_TIMER2
+	bool "TIMER2"
+	default n
+	select ARCH_HAVE_TIMER2
+	select EFM32_TIMER
+
+config EFM32_TIMER3
+	bool "TIMER3"
+	default n
+	select ARCH_HAVE_TIMER3
+	select EFM32_TIMER
+
 endmenu # EFM32 Peripheral Support
 
 config EFM32_GPIO_IRQ
@@ -429,5 +453,117 @@ config EFM32_OTGFS_SOFINTR
 		Enable SOF interrupts.  Why would you ever want to do that?
 
 endmenu
+
+config EFM32_TIMER0
+	bool "TIMER0"
+	default n
+	depends on EFM32_HAVE_TIMER0
+
+config EFM32_TIMER0_PWM
+	bool "TIMER0 PWM"
+	default n
+	depends on EFM32_TIMER0
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER0 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER0_CHANNEL
+	int "TIMER0 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER0_PWM
+	---help---
+		If TIMER0 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_TIMER1
+	bool "TIMER1"
+	default n
+	depends on EFM32_HAVE_TIMER1
+
+config EFM32_TIMER1_PWM
+	bool "TIMER1 PWM"
+	default n
+	depends on EFM32_TIMER1
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER1 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER1_CHANNEL
+	int "TIMER1 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER1_PWM
+	---help---
+		If TIMER1 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_TIMER2
+	bool "TIMER2"
+	default n
+	depends on EFM32_HAVE_TIMER2
+
+config EFM32_TIMER2_PWM
+	bool "TIMER2 PWM"
+	default n
+	depends on EFM32_TIMER2
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER2 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER2_CHANNEL
+	int "TIMER2 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER2_PWM
+	---help---
+		If TIMER2 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
+
+config EFM32_TIMER3
+	bool "TIMER3"
+	default n
+	depends on EFM32_HAVE_TIMER3
+
+config EFM32_TIMER3_PWM
+	bool "TIMER3 PWM"
+	default n
+	depends on EFM32_TIMER3
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If EFM32_TIMER3 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+config EFM32_TIMER3_CHANNEL
+	int "TIMER3 PWM Output Channel"
+	default 0
+	range 0 2
+	depends on EFM32_TIMER3_PWM
+	---help---
+		If TIMER3 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,1,2}
 
 endif # ARCH_CHIP_EFM32

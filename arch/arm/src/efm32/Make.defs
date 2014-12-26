@@ -97,7 +97,7 @@ CHIP_ASRCS += efm32_vectors.S
 endif
 
 CHIP_CSRCS  = efm32_start.c efm32_clockconfig.c efm32_irq.c efm32_timerisr.c
-CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c
+CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c efm32_timer.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c
@@ -134,4 +134,8 @@ endif
 ifeq ($(CONFIG_USBHOST),y)
 CHIP_CSRCS += efm32_usbhost.c
 endif
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += efm32_pwm.c
 endif
