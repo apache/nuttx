@@ -372,6 +372,27 @@ static int stm32_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *m
  * Private Data
  ************************************************************************************/
 
+/* Trace events strings */
+
+#ifdef CONFIG_I2C_TRACE
+static const char *g_trace_names[] =
+{
+  "NONE      ",
+  "SENDADDR  ",
+  "SENDBYTE  ",
+  "ITBUFEN   ",
+  "RCVBYTE   ",
+  "REITBUFEN ",
+  "DISITBUFEN",
+  "BTFNOSTART",
+  "BTFRESTART",
+  "BTFSTOP   ",
+  "ERROR     "
+};
+#endif
+
+/* I2C device structures */
+
 #ifdef CONFIG_STM32_I2C1
 static const struct stm32_i2c_config_s stm32_i2c1_config =
 {
@@ -932,9 +953,9 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. STATUS: %08x COUNT: %3d EVENT: %2d PARM: %08x TIME: %d\n",
-             i+1, trace->status, trace->count,  trace->event, trace->parm,
-             trace->time - priv->start_time);
+             "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
+             i+1, trace->status, trace->count, g_trace_names[trace->event],
+             trace->event, trace->parm, trace->time - priv->start_time);
     }
 }
 #endif /* CONFIG_I2C_TRACE */
