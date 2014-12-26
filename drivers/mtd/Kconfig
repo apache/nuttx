@@ -514,6 +514,33 @@ config MTD_RAMTRON
 	---help---
 		SPI-based RAMTRON NVRAM Devices FM25V10
 
+if MTD_RAMTRON
+
+config RAMTRON_WRITEWAIT
+	bool "Wait after write"
+	default n
+	---help---
+		Wait after performing a RAMTRON write operation to assure that the
+		write completed error-free.  The default behavior is to wait for the
+		previous write to complete BEFORE starting the next write.  This
+		option, if selected, forces the driver to wait for the write to
+		complete AFTER each write.  This is a tradoeff:  Selecting this
+		option will significantly reduce RAMTRON performance but has the
+		advantage that it will correctly associate a write failure with a
+		specific write operation.
+
+		One RAMTRON read operations, this option also enables some additional
+		status checking to check for device failures during the read.
+
+config RAMTRON_SETSPEED
+	bool "Adjustable bus speed"
+	default n
+	---help---
+		Select an option to provide an ioctl, MTDIOC_SETSPEED call that
+		supports dynamic selection of the RAMTRON bus speed.
+
+endif
+
 config MTD_SST25
 	bool "SPI-based SST25 FLASH"
 	default n

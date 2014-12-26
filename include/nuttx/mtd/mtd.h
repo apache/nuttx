@@ -261,7 +261,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
  * Name: flash_eraseall
  *
  * Description:
- *   Call a block driver with the MDIOC_BULKERASE ioctl command.  This will
+ *   Call a block driver with the MTDIOC_BULKERASE ioctl command.  This will
  *   cause the MTD driver to erase all of the flash.
  *
  ****************************************************************************/
