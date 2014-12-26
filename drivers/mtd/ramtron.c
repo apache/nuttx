@@ -41,11 +41,11 @@
  *    must be enabled with the CONFIG_RAMTRON_FRAM_NON_JEDEC=y
  *
  * NOTE:
- *  - frequency is fixed to desired max by RAMTRON_INIT_CLK_MAX
- *    if new devices with different speed arrive, then SETFREQUENCY()
- *    needs to handle freq changes and INIT_CLK_MAX must be reduced
- *    to fit all devices. Note that STM32_SPI driver is prone to
- *    too high freq. parameters and limit it within physical constraints.
+ *  - frequency is fixed to desired max by RAMTRON_INIT_CLK_MAX if new devices with
+ *    different speed arrive, use the table to handle freq change and to fit all
+ *    devices. Note that STM32_SPI driver is prone to too high freq. parameters and
+ *    limit it within physical constraints. The speed may be changed through ioctl
+ *    MTDIOC_SETSPEED
  *
  * TODO:
  *  - add support for sleep
@@ -176,7 +176,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x00,                         /* id2 */
     16L*1024L,                    /* size */
     2,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "FM25V02",                    /* name */
@@ -184,7 +184,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x00,                         /* id2 */
     32L*1024L,                    /* size */
     2,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "FM25VN02",                   /* name */
@@ -192,7 +192,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x01,                         /* id2 */
     32L*1024L,                    /* size */
     2,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "FM25V05",                    /* name */
@@ -200,7 +200,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x00,                         /* id2 */
     64L*1024L,                    /* size */
     2,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "FM25VN05",                   /* name */
@@ -208,7 +208,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x01,                         /* id2 */
     64L*1024L,                    /* size */
     2,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "FM25V10",                    /* name */
@@ -216,7 +216,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x00,                         /* id2 */
     128L*1024L,                   /* size */
     3,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "FM25VN10",                   /* name */
@@ -224,7 +224,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x01,                         /* id2 */
     128L*1024L,                   /* size */
     3,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     "MB85RS1MT",                  /* name */
@@ -241,7 +241,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0xff,                         /* id2 */
     256L*1024L,                   /* size */
     3,                            /* addr_len */
-    40000000                      /* speed */
+    RAMTRON_INIT_CLK_MAX          /* speed */
   },
   {
     NULL,                         /* name */
