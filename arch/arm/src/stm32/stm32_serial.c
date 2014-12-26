@@ -2610,14 +2610,13 @@ void up_serialinit(void)
 
   (void)uart_register("/dev/ttyS0", &uart_devs[CONSOLE_UART - 1]->dev);
   minor = 1;
+#endif
 
+#ifdef SERIAL_HAVE_CONSOLE_DMA
   /* If we need to re-initialise the console to enable DMA do that here. */
 
-# ifdef SERIAL_HAVE_CONSOLE_DMA
   up_dma_setup(&uart_devs[CONSOLE_UART - 1]->dev);
-# endif
-#endif /* CONFIG_SERIAL_DISABLE_REORDERING not defined */
-
+#endif
 #endif /* CONSOLE_UART > 0 */
 
   /* Register all remaining USARTs */

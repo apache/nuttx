@@ -535,7 +535,7 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv, FAR const uint8_
 
 #ifdef RAMTRON_WRITEWAIT
   /* Wait for write completion now so we can report any errors to the caller. Thus
-   * the caller will know weather or not if the data is on stable storage
+   * the caller will know whether or not if the data is on stable storage
    */
 
   return ramtron_waitwritecomplete(priv);
@@ -550,7 +550,7 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv, FAR const uint8_
 
 static int ramtron_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 {
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  fvdbg("startblock: %08lx nblocks: %d\n", (unsigned long)startblock, (int)nblocks);
   fvdbg("On RAMTRON devices erasing makes no sense, returning as OK\n");
   return (int)nblocks;
 }
