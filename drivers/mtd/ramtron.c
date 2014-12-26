@@ -152,9 +152,7 @@ struct ramtron_dev_s
   uint8_t pageshift;
   uint16_t nsectors;
   uint32_t npages;
-#ifdef CONFIG_RAMTRON_SETSPEED
   uint32_t speed;                          /* Overridable via ioctl */
-#endif
   FAR const struct ramtron_parts_s *part;  /* Part instance */
 };
 
