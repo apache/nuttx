@@ -9332,3 +9332,9 @@
 	* arch/arm/src/efm32/efm32_pwm.c/.h, efm32_timer.c/.h, and related
 	  build files: Add support for timer/PWM on the EFM32GG.  From
 	  Pierre-noel Bouteville (2014-12-26).
+	* drivers/serial/Kconfig, serial.c, serialirq.c, and
+	  include/nuttx/serial/serial.h:  Add watermark levels to the serial
+	  RX flow control logic.  Modify the rxflowcontrol method to accept
+	  the number of bytes in the buffer and a boolean indication of which
+	  watermark was crossed (2014-12-27).
+
