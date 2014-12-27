@@ -521,20 +521,21 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR uart_dev_t   *dev   = inode->i_private;
+  FAR uart_dev_t *dev = inode->i_private;
+  FAR struct uart_buffer_s *rxbuf = &dev->recv;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  unsigned int      nbuffered;
-  unsigned int      watermark;
+  unsigned int nbuffered;
+  unsigned int watermark;
 #endif
-  irqstate_t        flags;
-  ssize_t           recvd = 0;
-  int16_t           tail;
-  int               ret;
-  char              ch;
+  irqstate_t flags;
+  ssize_t recvd = 0;
+  int16_t tail;
+  char ch;
+  int ret;
 
-  /* Only one user can access dev->recv.tail at a time */
+  /* Only one user can access rxbuf->tail at a time */
 
-  ret = uart_takesem(&dev->recv.sem, true);
+  ret = uart_takesem(&rxbuf->sem, true);
   if (ret < 0)
     {
       /* A signal received while waiting for access to the recv.tail will avort
@@ -579,24 +580,24 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
        * 8-bit accesses to obtain the 16-bit head index.
        */
 
-      tail = dev->recv.tail;
-      if (dev->recv.head != tail)
+      tail = rxbuf->tail;
+      if (rxbuf->head != tail)
         {
           /* Take the next character from the tail of the buffer */
 
-          ch = dev->recv.buffer[tail];
+          ch = rxbuf->buffer[tail];
 
           /* Increment the tail index.  Most operations are done using the
-           * local variable 'tail' so that the final dev->recv.tail update
+           * local variable 'tail' so that the final rxbuf->tail update
            * is atomic.
            */
 
-          if (++tail >= dev->recv.size)
+          if (++tail >= rxbuf->size)
             {
               tail = 0;
             }
 
-          dev->recv.tail = tail;
+          rxbuf->tail = tail;
 
 #ifdef CONFIG_SERIAL_TERMIOS
           /* Do input processing if any is enabled */
@@ -697,7 +698,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
            * interrupts.
            */
 
-          if (dev->recv.head == dev->recv.tail)
+          if (rxbuf->head == rxbuf->tail)
             {
               /* Yes.. the buffer is still empty.  Wait for some characters
                * to be received into the buffer with the RX interrupt re-
@@ -781,28 +782,29 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* How many bytes are now buffered */
 
-  if (buf->head >= buf->tail)
+  rxbuf = &dev->recv;
+  if (rxbuf->head >= rxbuf->tail)
     {
-      nbuffered = buf->head - buf->tail;
+      nbuffered = rxbuf->head - rxbuf->tail;
     }
   else
     {
-      nbuffered = buf->size - buf->tail + buf->head;
+      nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
     }
 
  /* Is the level now below the watermark level that we need to report? */
 
-  watermark = (CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK * buf->size) / 100
+  watermark = (CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK * rxbuf->size) / 100;
   if (nbuffered <= watermark)
     {
       /* Let the lower level driver know that the watermark level has been
        * crossed.
        */
 
-      (void)uart_rxflowcontrol(dev, nubuffered, false))
+      (void)uart_rxflowcontrol(dev, nbuffered, false);
     }
 #else
-  if (dev->recv.head == dev->recv.tail)
+  if (rxbuf->head == rxbuf->tail)
     {
       /* We might leave Rx interrupt disabled if full recv buffer was read
        * empty. Enable Rx interrupt to make sure that more input is received.

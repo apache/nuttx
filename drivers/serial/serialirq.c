@@ -138,14 +138,15 @@ void uart_xmitchars(FAR uart_dev_t *dev)
 
 void uart_recvchars(FAR uart_dev_t *dev)
 {
+  FAR struct uart_buffer_s *rxbuf = &dev->recv;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int watermark;
 #endif
   unsigned int status;
-  int nexthead = dev->recv.head + 1;
+  int nexthead = rxbuf->head + 1;
   uint16_t nbytes = 0;
 
-  if (nexthead >= dev->recv.size)
+  if (nexthead >= rxbuf->size)
     {
       nexthead = 0;
     }
@@ -153,7 +154,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* Pre-calcuate the watermark level that we will need to test against. */
 
-  watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * buf->size) / 100
+  watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) / 100;
 #endif
 
   /* Loop putting characters into the receive buffer until there are no further
@@ -162,7 +163,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   while (uart_rxavailable(dev))
     {
-      bool is_full = (nexthead == dev->recv.tail);
+      bool is_full = (nexthead == rxbuf->tail);
       char ch;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -171,13 +172,13 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       /* How many bytes are buffered */
 
-      if (buf->head >= buf->tail)
+      if (rxbuf->head >= rxbuf->tail)
         {
-          nbuffered = buf->head - buf->tail;
+          nbuffered = rxbuf->head - rxbuf->tail;
         }
       else
         {
-          nbuffered = buf->size - buf->tail + buf->head;
+          nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
         }
 
       /* Is the level now above the watermark level that we need to report? */
@@ -188,7 +189,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
            * crossed.
            */
 
-          if (uart_rxflowcontrol(dev, nubuffered, true))
+          if (uart_rxflowcontrol(dev, nbuffered, true))
             {
               /* Low-level driver activated RX flow control, exit loop now. */
 
@@ -202,7 +203,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       if (is_full)
         {
-          if (uart_rxflowcontrol(dev, buf->size, true))
+          if (uart_rxflowcontrol(dev, rxbuf->size, true))
             {
               /* Low-level driver activated RX flow control, exit loop now. */
 
@@ -226,13 +227,13 @@ void uart_recvchars(FAR uart_dev_t *dev)
         {
           /* Add the character to the buffer */
 
-          dev->recv.buffer[dev->recv.head] = ch;
+          rxbuf->buffer[rxbuf->head] = ch;
           nbytes++;
 
           /* Increment the head index */
 
-          dev->recv.head = nexthead;
-          if (++nexthead >= dev->recv.size)
+          rxbuf->head = nexthead;
+          if (++nexthead >= rxbuf->size)
             {
                nexthead = 0;
             }
