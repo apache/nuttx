@@ -79,8 +79,8 @@
 #define uart_receive(dev,s)      dev->ops->receive(dev,s)
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-#define uart_rxflowcontrol(dev) \
-  (dev->ops->rxflowcontrol && dev->ops->rxflowcontrol(dev))
+#define uart_rxflowcontrol(dev,n,u) \
+  (dev->ops->rxflowcontrol && dev->ops->rxflowcontrol(dev,n,u))
 #endif
 
 /************************************************************************************
@@ -165,9 +165,12 @@ struct uart_ops_s
   CODE bool (*rxavailable)(FAR struct uart_dev_s *dev);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  /* Return true if UART activated RX flow control to block more incoming data. */
+  /* Return true if UART activated RX flow control to block more incoming
+   * data.
+   */
 
-  CODE bool (*rxflowcontrol)(FAR struct uart_dev_s *dev);
+  CODE bool (*rxflowcontrol)(FAR struct uart_dev_s *dev,
+                             unsigned int nbuffered, bool upper);
 #endif
 
   /* This method will send one byte on the UART */

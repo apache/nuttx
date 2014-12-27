@@ -327,7 +327,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool up_rxflowcontrol(struct uart_dev_s *dev);
+static bool up_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
+                             bool upper);
 #endif
 static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
@@ -2134,13 +2135,16 @@ static bool up_rxavailable(struct uart_dev_s *dev)
  * Name: up_rxflowcontrol
  *
  * Description:
- *   Called when Rx buffer is full. Return true if the Rx interrupt was
- *   disabled.
+ *   Called when Rx buffer is full (or exceeds configured watermark levels
+ *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool up_rxflowcontrol(struct uart_dev_s *dev)
+static bool up_rxflowcontrol(struct uart_dev_s *dev,
+                             unsigned int nbuffered, bool upper)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16_t ie;

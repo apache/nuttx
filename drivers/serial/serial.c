@@ -522,6 +522,10 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+  unsigned int      nbuffered;
+  unsigned int      watermark;
+#endif
   irqstate_t        flags;
   ssize_t           recvd = 0;
   int16_t           tail;
@@ -565,7 +569,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 #endif
 
       /* Check if there is more data to return in the circular buffer.
-       * NOTE: Rx interrupt handling logic may aynchronously increment
+       * NOTE: Rx interrupt handling logic may asynchronously increment
        * the head index but must not modify the tail index.  The tail
        * index is only modified in this function.  Therefore, no
        * special handshaking is required here.
@@ -774,6 +778,30 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
     }
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+  /* How many bytes are now buffered */
+
+  if (buf->head >= buf->tail)
+    {
+      nbuffered = buf->head - buf->tail;
+    }
+  else
+    {
+      nbuffered = buf->size - buf->tail + buf->head;
+    }
+
+ /* Is the level now below the watermark level that we need to report? */
+
+  watermark = (CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK * buf->size) / 100
+  if (nbuffered <= watermark)
+    {
+      /* Let the lower level driver know that the watermark level has been
+       * crossed.
+       */
+
+      (void)uart_rxflowcontrol(dev, nubuffered, false))
+    }
+#else
   if (dev->recv.head == dev->recv.tail)
     {
       /* We might leave Rx interrupt disabled if full recv buffer was read
@@ -782,6 +810,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
       uart_enablerxint(dev);
     }
+#endif
 #endif
 
   uart_givesem(&dev->recv.sem);
