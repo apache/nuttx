@@ -798,19 +798,19 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
   if (nbuffered <= watermark)
     {
       /* Let the lower level driver know that the watermark level has been
-       * crossed.
+       * crossed.  It will probably deactivate RX flow control.
        */
 
       (void)uart_rxflowcontrol(dev, nbuffered, false);
     }
 #else
+  /* If the RX  buffer empty */
+
   if (rxbuf->head == rxbuf->tail)
     {
-      /* We might leave Rx interrupt disabled if full recv buffer was read
-       * empty. Enable Rx interrupt to make sure that more input is received.
-       */
+      /* Deactivate RX flow control. */
 
-      uart_enablerxint(dev);
+      (void)uart_rxflowcontrol(dev, 0, false);
     }
 #endif
 #endif

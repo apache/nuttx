@@ -186,7 +186,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
       if (nbuffered >= watermark)
         {
           /* Let the lower level driver know that the watermark level has been
-           * crossed.
+           * crossed.  It will probably activate RX flow control.
            */
 
           if (uart_rxflowcontrol(dev, nbuffered, true))

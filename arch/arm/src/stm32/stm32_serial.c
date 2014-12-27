@@ -2151,23 +2151,39 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
 
   if (priv->iflow)
     {
-      /* Disable Rx interrupt to prevent more data being from peripheral.
-       * When hardware RTS is enabled, this will prevent more data from
-       * coming in.
-       *
-       * This function is only called when UART recv buffer is full, that
-       * is: "dev->recv.head + 1 == dev->recv.tail".
-       *
-       * Logic in "uart_read" will automatically toggle Rx interrupts when
-       * buffer is read empty and thus we do not have to re-enable Rx
-       * interrupts in any other place.
-       */
+      /* Is the RX buffer full? */
 
-      ie = priv->ie;
-      ie &= ~USART_CR1_RXNEIE;
-      up_restoreusartint(priv, ie);
+      if (upper)
+        {
+          /* Disable Rx interrupt to prevent more data being from
+           * peripheral.  When hardware RTS is enabled, this will
+           * prevent more data from coming in.
+           *
+           * This function is only called when UART recv buffer is full,
+           * that is: "dev->recv.head + 1 == dev->recv.tail".
+           *
+           * Logic in "uart_read" will automatically toggle Rx interrupts
+           * when buffer is read empty and thus we do not have to re-
+           * enable Rx interrupts.
+           */
 
-      return true;
+          ie = priv->ie;
+          ie &= ~USART_CR1_RXNEIE;
+          up_restoreusartint(priv, ie);
+          return true;
+        }
+
+      /* No.. The RX buffer is empty */
+
+      else
+        {
+          /* We might leave Rx interrupt disabled if full recv buffer was
+           * read empty.  Enable Rx interrupt to make sure that more input is
+           * received.
+           */
+
+          up_rxint(dev, true);
+        }
     }
 
   return false;
