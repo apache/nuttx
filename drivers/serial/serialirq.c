@@ -166,6 +166,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
       char ch;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
       unsigned int nbuffered;
 
       /* How many bytes are buffered */
@@ -179,7 +180,6 @@ void uart_recvchars(FAR uart_dev_t *dev)
           nbuffered = buf->size - buf->tail + buf->head;
         }
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
       /* Is the level now above the watermark level that we need to report? */
 
       if (nbuffered >= watermark)
@@ -202,7 +202,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       if (is_full)
         {
-          if (uart_rxflowcontrol(dev, nbuffered, true))
+          if (uart_rxflowcontrol(dev, buf->size, true))
             {
               /* Low-level driver activated RX flow control, exit loop now. */
 
