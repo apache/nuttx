@@ -4443,7 +4443,7 @@ void board_led_off(int led);
      <code>void rxint(FAR struct uart_dev_s *dev, bool enable);</code><br>
      <code>bool rxavailable(FAR struct uart_dev_s *dev);</code><br>
      <code>#ifdef CONFIG_SERIAL_IFLOWCONTROL</code><br>
-     <code>bool rxflowcontrol(FAR struct uart_dev_s *dev);</code><br>
+     <code>bool rxflowcontrol(FAR struct uart_dev_s *dev, unsigned int nbuffered, bool upper);</code><br>
      <code>#endif</code><br>
      <code>void send(FAR struct uart_dev_s *dev, int ch);</code><br>
      <code>void txint(FAR struct uart_dev_s *dev, bool enable);</code><br>
