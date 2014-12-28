@@ -137,6 +137,26 @@
 
 #if NSSI_ENABLED > 0
 
+/* Some special definitions if there is exactly one interface enabled */
+
+#if NSSI_ENABLED < 2
+#  if defined(CONFIG_TIVA_SSI0)
+#    define SSI_BASE TIVA_SSI0_BASE
+#    define SSI_IRQ  TIVA_IRQ_SSI0
+#  elif defined(CONFIG_TIVA_SSI0)
+#    define SSI_BASE TIVA_SSI1_BASE
+#    define SSI_IRQ  TIVA_IRQ_SSI1
+#  elif defined(CONFIG_TIVA_SSI0)
+#    define SSI_BASE TIVA_SSI2_BASE
+#    define SSI_IRQ  TIVA_IRQ_SSI2
+#  elif defined(CONFIG_TIVA_SSI0)
+#    define SSI_BASE TIVA_SSI3_BASE
+#    define SSI_IRQ  TIVA_IRQ_SSI3
+#  else
+#    error Help me... I am confused
+#  endif
+#endif
+
 /* The number of (16-bit) words that will fit in the Tx FIFO */
 
 #define TIVA_TXFIFO_WORDS 8
