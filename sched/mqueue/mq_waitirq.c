@@ -1,5 +1,5 @@
 /****************************************************************************
- *  sched/mqueue/mq_waitirq.c
+ * sched/mqueue/mq_waitirq.c
  *
  *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_waitirq
+ * Name: mq_waitirq
  *
  * Description:
  *   This function is called when a signal or a timeout is received by a

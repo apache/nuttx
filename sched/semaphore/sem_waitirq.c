@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_waitirq.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,10 +73,14 @@
  * Name: sem_waitirq
  *
  * Description:
- *   This function is called when a signal is received by a task that is
- *   waiting on a semaphore.  According to the POSIX spec, "...the calling
- *   thread shall not return from the call to [sem_wait] until it either
- *   locks the semaphore or the call is interrupted by a signal."
+ *   This function is called when either:
+ *
+ *   1. A signal is received by a task that is waiting on a semaphore.
+ *      According to the POSIX spec, "...the calling thread shall not return
+ *      from the call to [sem_wait] until it either locks the semaphore or
+ *      the call is interrupted by a signal."
+ *   2. From logic associated with sem_timedwait().  This function is called
+ *      when the timeout elapses without receiving the semaphore.
  *
  * Parameters:
  *   wtcb    - A pointer to the TCB of the task that is waiting on a
@@ -142,4 +146,3 @@ void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
 
   irqrestore(saved_state);
 }
-

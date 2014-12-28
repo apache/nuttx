@@ -34,11 +34,7 @@
 ############################################################################
 
 CSRCS += sem_destroy.c sem_wait.c sem_trywait.c sem_timedwait.c
-CSRCS += sem_post.c sem_recover.c
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CSRCS += sem_waitirq.c
-endif
+CSRCS += sem_post.c sem_recover.c sem_waitirq.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sem_initialize.c sem_holder.c
