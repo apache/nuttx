@@ -3109,6 +3109,16 @@ config SERIAL_DISABLE_REORDERING
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 
+config STM32_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32_USART
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by useing software based management of RTS
+
 endmenu
 
 config STM32_USART_SINGLEWIRE

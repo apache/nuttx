@@ -410,6 +410,9 @@ static const struct uart_ops_s g_uart_dma_ops =
   .receive        = up_dma_receive,
   .rxint          = up_dma_rxint,
   .rxavailable    = up_dma_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = up_rxflowcontrol,
+#endif
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
@@ -1294,7 +1297,7 @@ static void up_set_format(struct uart_dev_s *dev)
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSE|USART_CR3_RTSE);
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       regval |= USART_CR3_RTSE;
@@ -1437,8 +1440,15 @@ static int up_setup(struct uart_dev_s *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->rts_gpio != 0)
     {
-      stm32_configgpio(priv->rts_gpio);
-    }
+      uint32_t config = priv->rts_gpio;
+
+#ifdef CONFIG_STM32_FLOWCONTROL_BROKEN
+      /* Instead of letting hw manage this pin, we will bitbang */
+
+      config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
+#endif
+      stm32_configgpio(config);
+   }
 #endif
 
 #if HAVE_RS485
@@ -2140,6 +2150,18 @@ static bool up_rxavailable(struct uart_dev_s *dev)
  *   Return true if UART activated RX flow control to block more incoming
  *   data
  *
+ * Input parameters:
+ *   dev       - UART device instance
+ *   nbuffered - the number of characters currently buffered
+ *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
+ *               not defined the value will be 0 for an empty buffer or the
+ *               defined buffer size for a full buffer)
+ *   upper     - true indicates the upper watermark was crossed where
+ *               false indicates the lower watermark has been crossed
+ *
+ * Returned Value:
+ *   true if RX flow control activated.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -2149,6 +2171,16 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16_t ie;
 
+#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
+  if (priv->iflow && (priv->rts_gpio != 0))
+    {
+      /* Assert/de-assert nRTS set it high resume/stop sending */
+
+      stm32_gpiowrite(priv->rts_gpio, upper);
+      return upper;
+    }
+
+#else
   if (priv->iflow)
     {
       /* Is the RX buffer full? */
@@ -2185,6 +2217,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
           up_rxint(dev, true);
         }
     }
+#endif
 
   return false;
 }
