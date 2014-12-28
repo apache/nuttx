@@ -143,13 +143,13 @@
 #  if defined(CONFIG_TIVA_SSI0)
 #    define SSI_BASE TIVA_SSI0_BASE
 #    define SSI_IRQ  TIVA_IRQ_SSI0
-#  elif defined(CONFIG_TIVA_SSI0)
+#  elif defined(CONFIG_TIVA_SSI1)
 #    define SSI_BASE TIVA_SSI1_BASE
 #    define SSI_IRQ  TIVA_IRQ_SSI1
-#  elif defined(CONFIG_TIVA_SSI0)
+#  elif defined(CONFIG_TIVA_SSI2)
 #    define SSI_BASE TIVA_SSI2_BASE
 #    define SSI_IRQ  TIVA_IRQ_SSI2
-#  elif defined(CONFIG_TIVA_SSI0)
+#  elif defined(CONFIG_TIVA_SSI3)
 #    define SSI_BASE TIVA_SSI3_BASE
 #    define SSI_IRQ  TIVA_IRQ_SSI3
 #  else
