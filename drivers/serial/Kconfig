@@ -539,7 +539,8 @@ config SERIAL_IFLOWCONTROL_WATERMARKS
 		Call the "lower half" rxflowcontrol method whenever the number of
 		characters in the serial RX buffer falls above an upper water mark
 		level or below a lower watermark level.  The default behavior is to
-		call the rxflowcontrol method only when the RX buffer is full.
+		call the rxflowcontrol method only when the RX buffer is empty or
+		full.
 
 if SERIAL_IFLOWCONTROL_WATERMARKS
 

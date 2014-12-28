@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/serial/serial.h
  *
- *   Copyright (C) 2007-2008, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,13 +53,39 @@
 #include <nuttx/fs/fs.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_SERIAL_NPOLLWAITERS
 #  define CONFIG_SERIAL_NPOLLWAITERS 2
+#endif
+
+/* RX flow control */
+
+#ifndef CONFIG_SERIAL_IFLOWCONTROL
+#  undef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+#endif
+
+#ifndef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+#  undef CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK
+#  undef CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK
+#endif
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+#  ifndef CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK
+#    define CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK 10
+#  endif
+
+#  ifndef CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK
+#    define CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK 90
+#  endif
+
+#  if CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK > \
+      CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK
+#    warning Lower watermark pct exceeds upper watermark pct
+#  endif
 #endif
 
 /* vtable access helpers */
