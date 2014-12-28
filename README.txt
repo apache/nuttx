@@ -105,7 +105,7 @@ Semi-Optional apps/ Package
   It is call "Semi-optional" because if you don't have some apps/
   directory, NuttX will *fail* to build!
 
-  Download the unpack the apps tarball in the same directly where you
+  Download then unpack the apps tarball in the same directory where you
   unpacked the NuttX tarball.  After you unpack the apps tarball, you
   will have a new directory called apps-version (where the version
   should exactly match the version of the NuttX tarball).  Again, you
@@ -183,13 +183,37 @@ Notes about Header Files
 
   Other C-Library Header Files.
 
-    Some toolchains are built with header files extracted from a C-library
-    distribution (such as newlib).  These header files must *not* be used
-    with NuttX because NuttX provides its own, built-in C-Library.  For
-    toolchains that do include built-in header files from a foreign C-
-    Library, NuttX must be compiled without using the standard header files
-    that are distributed with your toolchain.  This prevents including
-    conflicting, incompatible header files (such as stdio.h).
+    When a GCC toolchain is built, it must be built against a C library.
+    The compiler together with the contents of the C library completes the
+    C language definition and provides the complete C development
+    environment.  NuttX provides its own, built-in C library.  So the
+    complete, consistent C language definition for use with NuttX comes from
+    the combination of the compiler and the header files provided by the
+    NuttX C library.
+
+    When a GCC toolchain is built, it incorporates the C library header
+    files into the compiler internal directories and, in this way, the C
+    library really becomes a part of the toolchain.  If you use the NuttX
+    buildroot toolchain as described below under under "NuttX Buildroot
+    Toolchain", your GCC toolchain will build against the NuttX C library
+    and will incorporate the NuttX C library header files as part of the
+    toolchain.
+
+    If you use some other, third-party tool chain, this will not be the
+    case, however.  Those toolchains were probably built against some
+    other, incompatible C library distribution (such as newlib).  Those
+    tools will have incorporated the incompatible C library header files
+    as part of the toolchain.  These incompatible header files must *not*
+    be used with NuttX because the will conflict with definitions in the
+    NuttX built-in C-Library.  For such toolchains that include header
+    files from a foreign C-Library, NuttX must be compiled without using
+    the standard header files that are distributed with your toolchain.
+    This prevents including conflicting, incompatible header files such
+    as stdio.h.
+
+    The math.h and stdarg.h are probably the two most trouble some header
+    files to deal with.  These troublesome header files are discussed in
+    more detail below.
 
   Header Files Provided by Your Toolchain.
 
@@ -268,10 +292,12 @@ Instantiating "Canned" Configurations
 
     configs/<board-name>/<config-dir>
 
-  Where <board-name> is the name of your development board and <config-dir>.
-  Configuring NuttX requires only copying three files from the <config-dir>
-  to the directory where you installed NuttX (TOPDIR) (and sometimes one
-  additional file to the directory the NuttX application package (APPSDIR)):
+  Where <board-name> is the name of your development board and <config-dir>
+  is the name of the sub-directory containing a specific configuration for
+  that board.  Configuring NuttX requires only copying three files from the
+  <config-dir> to the directory where you installed NuttX (TOPDIR) (and
+  sometimes one additional file to the directory the NuttX application
+  package (APPSDIR)):
 
     Copy configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
 
@@ -315,19 +341,26 @@ Instantiating "Canned" Configurations
 Refreshing Configurations
 -------------------------
 
-  Configurations can get out of date.  As new configurations are added or
-  removed, the contents of a default configuration can become out of synch
+  Configurations can get out of date.  As new configuration settings are
+  added or removed or as dependencies between configuration settings
+  change, the contents of a default configuration can become out of synch
   with the build systems.  Hence, it is a good practice to "refresh" each
-  configuration before making.  To refresh the configuration, use the NuttX
-  Configuration Tool like this:
+  configuration after configuring and before making.  To refresh the
+  configuration, use the NuttX Configuration Tool like this:
 
     make oldconfig
 
-  If you configuration is out of date, you will be prompted to resolve the
-  issues detected by the configuration tool, that is, to provide values for
-  the new configuration options in the build system.  Doing this can save
-  you a lot of problems down the road due to a bad configuration.  The NuttX
-  configuration is discussed in the following paragraph.
+  AFTER you have instantiated the NuttX configuration as described above.
+  The configuration step copied the .config file into place in the top-level
+  NuttX directory; 'make oldconfig' step will then operate on that .config
+  file to bring it up-to-date.
+
+  If you configuration is out of date, you will be prompted by 'make oldconfig'
+  to resolve the issues detected by the configuration tool, that is, to
+  provide values for the new configuration options in the build system.  Doing
+  this can save you a lot of problems down the road due to obsolete settings in
+  the default board configuration file.  The NuttX configuration tool is
+  discussed in more detail in the following paragraph.
 
   Confused about what the correct value for a new configuration item should
   be?  Enter ? in response to the 'make oldconfig' prompt and it will show
@@ -336,12 +369,9 @@ Refreshing Configurations
 NuttX Configuration Tool
 ------------------------
 
-  An automated tool is under development to support re-configuration
-  of NuttX.  This tool, however, is not yet quite ready for general
-  usage.
-
-  This automated tool is based on the kconfig-frontends application
-  available at http://ymorin.is-a-geek.org/projects/kconfig-frontends
+  An automated tool has been incorported to support re-configuration
+  of NuttX.  This automated tool is based on the kconfig-frontends
+  application available at http://ymorin.is-a-geek.org/projects/kconfig-frontends
   (A snapshot of this tool is also available at ../misc/tools).  This
   application provides a tool called 'kconfig-mconf' that is used by
   the NuttX top-level Makefile.  The following make target is provided:
@@ -354,6 +384,9 @@ NuttX Configuration Tool
   not been converted to use the kconfig-frontends tools!  This will
   damage your configuration (see
   http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig).
+
+  How do we tell a new configuration from an old one? See "Incompatibilities
+  with Older Configurations" below.
 
   The 'menuconfig' make target depends on two things:
 
