@@ -81,9 +81,7 @@ void sem_initialize(void);
 #  define sem_initialize()
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
 void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
-#endif
 
 /* Recover semaphore resources with a task or thread is destroyed  */
 
