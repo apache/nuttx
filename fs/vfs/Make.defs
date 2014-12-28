@@ -43,10 +43,6 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 
-# Support for positional file access
-
-CSRCS += fs_pread.c fs_pwrite.c
-
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
