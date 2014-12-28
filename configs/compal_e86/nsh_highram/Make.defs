@@ -44,17 +44,16 @@ ifeq ($(WINTOOL),y)
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-  ARCHINCLUDES = -I. -I "${shell cygpath -w $(OSMODIR)/src/shared/libosmocore/include} -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES = -I. -I "${shell cygpath -w $(OSMODIR)/src/shared/libosmocore/include} -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHINCLUDES = -I. -I "${shell cygpath -w $(OSMODIR)/src/shared/libosmocore/include}" -isystem "${shell cygpath -w $(TOPDIR)/include}"
+  ARCHXXINCLUDES = -I. -I "${shell cygpath -w $(OSMODIR)/src/shared/libosmocore/include}" -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
 
 ifeq ("${CONFIG_SERCOMM_CONSOLE}","y")
-  OSMODIR = "${shell cygpath -w $(TOPDIR)/../../osmocom-bb}
-  EXTRA_LIBS = "${shell cygpath -w $(OSMODIR)/src/target/firmware/comm/libcomm.a} \
-    "${shell cygpath -w $(OSMODIR)/src/shared/libosmocore/build-target/src/.libs/libosmocore.a} \
-    "${shell cygpath -w $(OSMODIR)/src/target/firmware/calypso/libcalypso.a} \
-    "${shell cygpath -w $(OSMODIR)/src/target/firmware/comm/libcomm.a}
-  # ^^^ Stupid hack! Why do I have to put it twice???
+  OSMODIR = "${shell cygpath -w $(TOPDIR)/../../osmocom-bb}"
+  EXTRA_LIBS = "${shell cygpath -w $(OSMODIR)/src/target/firmware/comm/libcomm.a}" \
+    "${shell cygpath -w $(OSMODIR)/src/shared/libosmocore/build-target/src/.libs/libosmocore.a}" \
+    "${shell cygpath -w $(OSMODIR)/src/target/firmware/calypso/libcalypso.a}" \
+    "${shell cygpath -w $(OSMODIR)/src/target/firmware/comm/libcomm.a}"
 endif
 else
   # Linux/Cygwin-native toolchain
