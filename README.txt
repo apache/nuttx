@@ -329,6 +329,10 @@ Refreshing Configurations
   you a lot of problems down the road due to a bad configuration.  The NuttX
   configuration is discussed in the following paragraph.
 
+  Confused about what the correct value for a new configuration item should
+  be?  Enter ? in response to the 'make oldconfig' prompt and it will show
+  you the help text that goes with the option.
+
 NuttX Configuration Tool
 ------------------------
 
