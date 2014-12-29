@@ -104,10 +104,6 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_STM32_FSMC
   stm32_enablefsmc();
 #endif
-
-#ifdef CONFIG_STM32_LTDC
-  up_fbinitialize();
-#endif
 }
 
 /****************************************************************************
@@ -126,6 +122,10 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+#ifdef CONFIG_STM32_LTDC
+  up_fbinitialize();
+#endif
+
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.
