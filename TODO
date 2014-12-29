@@ -19,7 +19,7 @@ nuttx/
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics subystem (graphics/)
+  (9)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (2)  Build system / Toolchains
@@ -1366,6 +1366,25 @@ o Graphics subsystem (graphics/)
                radius equal to the width of the line.
   Status:      Open
   Priority:    Medium-ish.  This would definitely improve line drawing.
+
+  Title:       PER-WINDOW FRAMEBUFFERS
+  Description: One of the most awkard things to handle in the NX windowing
+               system is the re-draw callback.  This is difficult because it
+               requires ad hoc, custom logic to be able to do the redrawing
+               in most cases.
+
+               One solution would be to provide a per-window framebuffer.
+               All rending would be performed into the per-window framebuffer
+               and the rended bits would be copied the LCD or framebuffer
+               device memory on demand when the redraw is required.
+
+               This would (a) greatly simplify the graphics interface, (b)
+               greatly improve redraw performance, and (c) enable a more
+               generic use of the windowing.  The downside would be a large
+               usage of memory to hold all of the framebuffers, one for each
+               window.
+  Status:      Open
+  Priority:    Low, of mostly strategic value.
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
