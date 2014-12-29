@@ -1102,7 +1102,7 @@ static void stm32_ltdc_reload(uint8_t value)
 
   if (value & LTDC_SRCR_WAIT)
     {
-      while ((getreg32(STM32_LTDC_SRCR) & (value & ~LTDC_SRCR_WAIT)) == value)
+      while ((getreg32(STM32_LTDC_SRCR) & (value & ~LTDC_SRCR_WAIT)) != 0)
         {
         }
     }
