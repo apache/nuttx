@@ -292,7 +292,7 @@ CONFIG_STM32_OTGHS=y
 CONFIG_STM32_PWR=y
 # CONFIG_STM32_RNG is not set
 # CONFIG_STM32_SDIO is not set
-CONFIG_STM32_SPI1=y
+# CONFIG_STM32_SPI1 is not set
 # CONFIG_STM32_SPI2 is not set
 # CONFIG_STM32_SPI3 is not set
 # CONFIG_STM32_SPI4 is not set
@@ -322,7 +322,6 @@ CONFIG_STM32_USART1=y
 # CONFIG_STM32_UART8 is not set
 # CONFIG_STM32_IWDG is not set
 # CONFIG_STM32_WWDG is not set
-CONFIG_STM32_SPI=y
 
 #
 # Alternate Pin Mapping
@@ -346,12 +345,6 @@ CONFIG_STM32_USART=y
 # CONFIG_SERIAL_DISABLE_REORDERING is not set
 # CONFIG_STM32_FLOWCONTROL_BROKEN is not set
 # CONFIG_STM32_USART_SINGLEWIRE is not set
-
-#
-# SPI Configuration
-#
-# CONFIG_STM32_SPI_INTERRUPTS is not set
-# CONFIG_STM32_SPI_DMA is not set
 
 #
 # USB FS Host Configuration

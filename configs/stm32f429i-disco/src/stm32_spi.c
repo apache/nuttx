@@ -311,6 +311,7 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
  *   Valid SPI device structure reference on success; a NULL on failure
  *
  ******************************************************************************/
+
 #ifdef CONFIG_STM32_SPI5
 FAR struct spi_dev_s *stm32_spi5initialize(void)
 {
@@ -322,4 +323,4 @@ FAR struct spi_dev_s *stm32_spi5initialize(void)
   return g_spidev5;
 }
 #endif
-#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */
+#endif /* CONFIG_STM32_SPI1 || ... CONFIG_STM32_SPI5 */
