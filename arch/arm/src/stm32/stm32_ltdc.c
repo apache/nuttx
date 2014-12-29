@@ -2906,8 +2906,10 @@ static int stm32_getarea(FAR struct ltdc_layer_s *layer,
 static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+#ifdef CONFIG_STM32_LTDC_L2
   FAR struct stm32_layer_s *active = &LAYER(g_lactive);
   FAR struct stm32_layer_s *inactive = &LAYER(!g_lactive);
+#endif
 
   gvdbg("layer = %p, mode = %08x\n", layer, mode);
 
@@ -2931,6 +2933,11 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
       /* Update the given layer */
 
       stm32_ltdc_lupdate(priv);
+
+#ifdef CONFIG_STM32_LTDC_L2
+      /* The following operation only useful if layer 2 is supported.
+       * Otherwise ignore it.
+       */
 
       if (mode & LTDC_UPDATE_SIM)
         {
@@ -2989,6 +2996,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
           g_lactive = inactive->state.lid;
         }
+#endif
 
       /* Make the changes visible */
 
