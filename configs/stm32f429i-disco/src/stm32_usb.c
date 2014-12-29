@@ -109,6 +109,7 @@ static int usbhost_waiter(int argc, char *argv[])
 
       ret = CONN_WAIT(g_usbconn, &connected);
       DEBUGASSERT(ret == OK);
+      UNUSED(ret);
 
       connected = !connected;
       uvdbg("%s\n", connected ? "connected" : "disconnected");
@@ -185,7 +186,7 @@ int stm32_usbhost_initialize(void)
   /* Then get an instance of the USB host interface */
 
   uvdbg("Initialize USB host\n");
-  g_usbconn = stm32_otgfshost_initialize(0);
+  g_usbconn = stm32_otghshost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
@@ -289,4 +290,3 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 #endif
 
 #endif /* CONFIG_STM32_OTGHS */
-
