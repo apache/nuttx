@@ -9337,8 +9337,19 @@
 	  RX flow control logic.  Modify the rxflowcontrol method to accept
 	  the number of bytes in the buffer and a boolean indication of which
 	  watermark was crossed (2014-12-27).
-	* sched/seamphore/sem_waitirq.c must be built when signals are disabled.
+	* sched/semaphore/sem_waitirq.c must be built when signals are disabled.
 	  That is because not handles not only the case of semaphore wait
 	  being awakened by a signal, but also the case with sem_timedwait.c
 	  when the semaphore wait is awakened by a timeout (2014-12-28).
-
+	* arch/arm/src/stm32/stm32_ltdc.c: stm32: fix faulty access to non-
+	  existing layer.  This disables operation that requires double layer
+	  support, when configured for single layer only.  From Marco Krahl
+	  (2014-12-29).
+	* arch/arm/src/stm32/stm32_ltdc.c: stm32: fix wait upon vertical blank.
+	  This should never have occurred before.  From Marco Krahl (2014-12-29).
+	* configs/stm32f429i-disco/ltdc/defconfig and src/stm32_boot.c:
+	  stm32f429i-disco: change ltdc initializing during boot up. This moves
+	  initializing of the ili9341 lcd and ltdc driver to the board specific
+	  initializing routine.  From Marco Krahl (2014-12-29).
+	* /nuttx/arch/arm/src/stm32/stm32_ltdc.c:  Clean up documentation, some
+	  formatting improvements.  From Marco Krahl (2014-12-29).
