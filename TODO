@@ -1172,8 +1172,8 @@ o Libraries (libc/)
 
                Ref: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/7805
 Status:        Open
-Priority:      Low for casual users but clearly high if you need precision
-               math libraries.
+Priority:      Low for casual users but clearly high if you need care about
+               these incorrect corner case behaviors in the math libraries.
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
