@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 29, 2014)
+NuttX TODO List (Last updated December 29, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -17,7 +17,7 @@ nuttx/
   (6)  Binary loaders (binfmt/)
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
- (10)  Libraries (libc/, )
+ (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -1139,6 +1139,41 @@ o Libraries (libc/)
                a precision of 0 (effectively presented as integers).
   Status:      Open
   Priority:    Medium (this might important to someone).
+
+  Title:       LIBM INACCURACIES
+  Description: "..if you are writing something like robot control or
+               inertial navigation system for aircraft, I have found
+               that using the toolchain libmath is only safe option.
+               I ported some code for converting quaternions to Euler
+               angles to NuttX for my project and only got it working
+               after switching to newlib math library.
+
+               "NuttX does not fully implement IEC 60559 floating point
+               from C99 (sections marked [MX] in OpenGroup specs) so if
+               your code assumes that some function, say pow(), actually
+               behaves right for all the twenty or so odd corner cases
+               that the standards committees have recently specified,
+               you might get surprises. I'd expect pow(0.0, 1.0) to
+               return 0.0 (as zero raised to any positive power is
+               well-defined in mathematics) but I get +Inf.
+
+               "NuttX atan2(-0.0, -1.0) returns +M_PI instead of correct
+               -M_PI. If we expect [MX] functionality, then atan2(Inf, Inf)
+               should return M_PI/4, instead NuttX gives NaN.
+
+               "asin(2.0) does not set domain error or return NaN. In fact
+               it does not return at all as the loop in it does not
+               converge, hanging your app.
+
+               "There are likely many other issues like these as the Rhombs
+               OS code has not been tested or used that much. Sorry for not
+               providing patches, but we found it easier just to switch the
+               math library."
+
+               Ref: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/7805
+Status:        Open
+Priority:      Low for casual users but clearly high if you need precision
+               math libraries.
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
