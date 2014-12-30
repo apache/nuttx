@@ -268,7 +268,7 @@
 #  endif
 #  define USRWORK  LPWORK     /* Redirect user-mode references */
 
-#endif /* CONFIG_LIB_USRWORK && !__KERNEL__
+#endif /* CONFIG_LIB_USRWORK && !__KERNEL__ */
 
 /****************************************************************************
  * Public Types
