@@ -910,6 +910,8 @@ o Network (net/, drivers/net)
                SAMA5D         NO
                SIM            NO << Doesn't have interrupts anyway
 
+               The general outline of how this might be done is included in
+               drivers/net/skeleton.c
   Status:      Open
   Priority:    Pretty high if you want a well behaved system.
 
