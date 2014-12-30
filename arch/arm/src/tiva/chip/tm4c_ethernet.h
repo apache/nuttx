@@ -4,6 +4,11 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Includes some register bit definitions provided by:
+ *
+ *   Copyright (C) 2014 TRD2 Inc. All rights reserved.
+ *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -233,23 +238,159 @@
 /* Ethernet Controller Register Bit Definitions *************************************/
 
 /* Ethernet MAC Configuration */
-#define EMAC_CFG_
+
+#define EMAC_CFG_PRELEN_SHIFT          (0)       /* Bits 0-1: Preamble Length for Transmit */
+#define EMAC_CFG_PRELEN_MASK           (3 << EMAC_CFG_PRELEN_SHIFT)
+#  define EMAC_CFG_PRELEN_7            (0 << EMAC_CFG_PRELEN_SHIFT) /* 7 bytes of preamble */
+#  define EMAC_CFG_PRELEN_5            (1 << EMAC_CFG_PRELEN_SHIFT) /* 5 bytes of preamble */
+#  define EMAC_CFG_PRELEN_3            (2 << EMAC_CFG_PRELEN_SHIFT) /* 3 bytes of preamble */
+#define EMAC_CFG_RE                    (1 << 2)  /* Bit 2:  Receiver Enable */
+#define EMAC_CFG_TE                    (1 << 3)  /* Bit 3:  Transmitter Enable */
+#define EMAC_CFG_DC                    (1 << 4)  /* Bit 4:  Deferral Check */
+#define EMAC_CFG_BL_SHIFT              (5)       /* Bits 5-6: Back-Off Limit */
+#define EMAC_CFG_BL_MASK               (3 << EMAC_CFG_BL_SHIFT)
+#  define EMAC_CFG_BL_1024             (0 << EMAC_CFG_BL_SHIFT) /* k = min (n,10) */
+#  define EMAC_CFG_BL_256              (1 << EMAC_CFG_BL_SHIFT) /* k = min (n,8) */
+#  define EMAC_CFG_BL_8                (2 << EMAC_CFG_BL_SHIFT) /* k = min (n,4) */
+#  define EMAC_CFG_BL_2                (3 << EMAC_CFG_BL_SHIFT) /* k = min (n,1) */
+#define EMAC_CFG_ACS                   (1 << 7)  /* Bit 7:  Automatic Pad or CRC Stripping */
+#define EMAC_CFG_DR                    (1 << 9)  /* Bit 8:  Disable Retry */
+#define EMAC_CFG_IPC                   (1 << 10) /* Bit 10: Checksum Offload */
+#define EMAC_CFG_DUPM                  (1 << 11) /* Bit 11: Duplex Mode */
+#define EMAC_CFG_LOOPBM                (1 << 12) /* Bit 12: Loopback Mode */
+#define EMAC_CFG_DRO                   (1 << 13) /* Bit 13: Disable Receive Own */
+#define EMAC_CFG_FES                   (1 << 14) /* Bit 14: Speed */
+#define EMAC_CFG_PS                    (1 << 15) /* Bit 15: Port Select */
+#define EMAC_CFG_DISCRS                (1 << 16) /* Bit 16: Disable Carrier Sense During Transmission */
+#define EMAC_CFG_IFG_SHIFT             (17)     /* Bits 17-19: Inter-Frame Gap (IFG) */
+#define EMAC_CFG_IFG_MASK              (7 << EMAC_CFG_IFG_SHIFT)
+#  define EMAC_CFG_IFG_96              (0 << EMAC_CFG_IFG_SHIFT) /* 96 bit times */
+#  define EMAC_CFG_IFG_88              (1 << EMAC_CFG_IFG_SHIFT) /* 88 bit times */
+#  define EMAC_CFG_IFG_80              (2 << EMAC_CFG_IFG_SHIFT) /* 80 bit times */
+#  define EMAC_CFG_IFG_72              (3 << EMAC_CFG_IFG_SHIFT) /* 72 bit times */
+#  define EMAC_CFG_IFG_64              (4 << EMAC_CFG_IFG_SHIFT) /* 64 bit times */
+#  define EMAC_CFG_IFG_56              (5 << EMAC_CFG_IFG_SHIFT) /* 56 bit times */
+#  define EMAC_CFG_IFG_48              (6 << EMAC_CFG_IFG_SHIFT) /* 48 bit times */
+#  define EMAC_CFG_IFG_40              (7 << EMAC_CFG_IFG_SHIFT) /* 40 bit times */
+#define EMAC_CFG_JFEN                  (1 << 20) /* Bit 20: Jumbo Frame Enable */
+#define EMAC_CFG_JD                    (1 << 22) /* Bit 21: Jabber Disable */
+#define EMAC_CFG_WDDIS                 (1 << 23) /* Bit 23: Watchdog Disable */
+#define EMAC_CFG_CST                   (1 << 25) /* Bit 25: CRC Stripping for Type Frames */
+#define EMAC_CFG_TWOKPEN               (1 << 27) /* Bit 27: IEEE 802 */
+#define EMAC_CFG_SADDR_SHIFT           (28)      /* Bits 28-30: Source Address Insertion or Replacement Control */
+#define EMAC_CFG_SADDR_MASK            (7 << EMAC_CFG_SADDR_SHIFT)
+#  define EMAC_CFG_SADDR_RADDR0        (2 << EMAC_CFG_SADDR_SHIFT) /* Insert EMACADDR0x */
+#  define EMAC_CFG_SADDR_IADDR0        (3 << EMAC_CFG_SADDR_SHIFT) /* Replace with EMACADDR0x */
+#  define EMAC_CFG_SADDR_RADDR1        (6 << EMAC_CFG_SADDR_SHIFT) /* Insert EMACADDR1x */
+#  define EMAC_CFG_SADDR_IADDR1        (7 << EMAC_CFG_SADDR_SHIFT) /* Replace with EMACADDR1x */
+
 /* Ethernet MAC Frame Filter */
-#define EMAC_FRAMEFLTR_
-/* Ethernet MAC Hash Table High */
-#define EMAC_HASHTBLH_
-/* Ethernet MAC Hash Table Low */
-#define EMAC_HASHTBLL_
+
+#define EMAC_FRAMEFLTR_PR              (1 << 0)  /* Bit 0:  Promiscuous Mode */
+#define EMAC_FRAMEFLTR_HUC             (1 << 1)  /* Bit 1:  Hash Unicast */
+#define EMAC_FRAMEFLTR_HMC             (1 << 2)  /* Bit 2:  Hash Multicast */
+#define EMAC_FRAMEFLTR_DAIF            (1 << 3)  /* Bit 3:  Destination Address (DA) Inverse Filtering */
+#define EMAC_FRAMEFLTR_PM              (1 << 4)  /* Bit 4:  Pass All Multicast */
+#define EMAC_FRAMEFLTR_DBF             (1 << 5)  /* Bit 5:  Disable Broadcast Frames */
+#define EMAC_FRAMEFLTR_PCF_SHIFT       (6)       /* Bits 6-7: Pass Control Frames */
+#define EMAC_FRAMEFLTR_PCF_MASK        (3 << EMAC_FRAMEFLTR_PCF_SHIFT)
+#define EMAC_FRAMEFLTR_PCF_ALL         (0 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Filter all control frames */
+#define EMAC_FRAMEFLTR_PCF_PAUSE       (1 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward all control frames except PAUSE */
+#define EMAC_FRAMEFLTR_PCF_NONE        (2 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward all control frames */
+#define EMAC_FRAMEFLTR_PCF_ADDR        (3 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward control frames that pass the address Filter */
+#define EMAC_FRAMEFLTR_SAIF            (1 << 8)  /* Bit 8:  Source Address (SA) Inverse Filtering */
+#define EMAC_FRAMEFLTR_SAF             (1 << 9)  /* Bit 9:  Source Address Filter Enable */
+#define EMAC_FRAMEFLTR_HPF             (1 << 10) /* Bit 10: Hash or Perfect Filter */
+#define EMAC_FRAMEFLTR_VTFE            (1 << 16) /* Bit 16: VLAN Tag Filter Enable */
+#define EMAC_FRAMEFLTR_RA              (1 << 31) /* Bit 31: Receive All */
+
+/* Ethernet MAC Hash Table High (32-bit data) */
+/* Ethernet MAC Hash Table Low (32-bit data) */
+
 /* Ethernet MAC MII Address */
-#define EMAC_MIIADDR_
+
+#define EMAC_MIIADDR_MIIB              (1 << 0)  /* Bit 0:  MII Busy */
+#define EMAC_MIIADDR_MIIW              (1 << 1)  /* Bit 1:  MII Write */
+#define EMAC_MIIADDR_CR_SHIFT          (2)       /* Bits 2-5: Clock Reference Frequency Selection */
+#define EMAC_MIIADDR_CR_MASK           (15 << EMAC_MIIADDR_CR_SHIFT)
+#  define EMAC_MIIADDR_CR_60_100       (0 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=60-100 MHz; MDIO clock=SYSCLK/42 */
+#  define EMAC_MIIADDR_CR_100_150      (1 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=100-150 MHz; MDIO clock=SYSCLK/62 */
+#  define EMAC_MIIADDR_CR_20_35        (2 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=20-35 MHz; MDIO clock=SYSCLK/16 */
+#  define EMAC_MIIADDR_CR_35_60        (3 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=35-60 MHz; MDIO clock=SYSCLK/26 */
+#define EMAC_MIIADDR_MII_SHIFT         (6)       /* Bits 6-10: MII Register */
+#define EMAC_MIIADDR_MII_MASK          (31 << EMAC_MIIADDR_MII_SHIFT)
+#  define EMAC_MIIADDR_MII(n)          ((uint32_t)(n) << EMAC_MIIADDR_MII_SHIFT)
+#define EMAC_MIIADDR_PLA_SHIFT         (11)      /* Bits 11-15: Physical Layer Address */
+#define EMAC_MIIADDR_PLA_MASK          (31 << EMAC_MIIADDR_PLA_SHIFT)
+#  define EMAC_MIIADDR_PLA(n)          ((uint32_t)(n) << EMAC_MIIADDR_PLA_SHIFT)
+
 /* Ethernet MAC MII Data Register */
-#define EMAC_MIIDATA_
+
+#define EMAC_MIIDATA_SHIFT             (0)       /* Bit 0-15: MII Data */
+#define EMAC_MIIDATA_MASK              (0xffff << EMAC_MIIDATA_SHIFT)
+
 /* Ethernet MAC Flow Control */
-#define EMAC_FLOWCTL_
+
+#define EMAC_FLOWCTL_FCBBPA            (1 << 0)  /* Bit 0:  Flow Control Busy or Back-pressure Activate */
+#define EMAC_FLOWCTL_TFE               (1 << 1)  /* Bit 1:  Transmit Flow Control Enable */
+#define EMAC_FLOWCTL_RFE               (1 << 2)  /* Bit 2:  Receive Flow Control Enable */
+#define EMAC_FLOWCTL_UP                (1 << 3)  /* Bit 3:  Unicast Pause Frame Detect */
+#define EMAC_FLOWCTL_PLT_SHIFT         (4)       /* Bits 4-5: Pause Low Threshold */
+#define EMAC_FLOWCTL_PLT_MASK          (3 << EMAC_FLOWCTL_PLT_SHIFT)
+#  define EMAC_FLOWCTL_PLT_4           (0 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 4 slot times */
+#  define EMAC_FLOWCTL_PLT_28          (1 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 28 slot times */
+#  define EMAC_FLOWCTL_PLT_144         (2 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 144 slot times */
+#  define EMAC_FLOWCTL_PLT_156         (3 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 256 slot times */
+#define EMAC_FLOWCTL_DZQP              (1 << 7)  /* Bit 7:  Disable Zero-Quanta Pause */
+#define EMAC_FLOWCTL_PT_SHIFT          (16)      /* Bits 16-31: Pause Time */
+#define EMAC_FLOWCTL_PT_MASK           (0xffff << EMAC_FLOWCTL_PT_SHIFT)
+#  define EMAC_FLOWCTL_PT(n)           ((uint32_t)(n) << EMAC_FLOWCTL_PT_SHIFT)
+
 /* Ethernet MAC VLAN Tag */
-#define EMAC_VLANTG_
+
+#define EMAC_VLANTG_VL_SHIFT           (0)       /* Bits 0-15: VLAN Tag Identifier for Receive Frames */
+#define EMAC_VLANTG_VL_MASK            (0xffff << EMAC_VLANTG_VL_SHIFT)
+#define EMAC_VLANTG_ETV                (1 << 16) /* Bit 16: Enable 12-Bit VLAN Tag Comparison */
+#define EMAC_VLANTG_VTIM               (1 << 17) /* Bit 17: VLAN Tag Inverse Match Enable */
+#define EMAC_VLANTG_ESVL               (1 << 18) /* Bit 18: Enable S-VLAN */
+#define EMAC_VLANTG_VTHM               (1 << 19) /* Bit 19: VLAN Tag Hash Table Match Enable */
+
 /* Ethernet MAC Status */
-#define EMAC_STATUS_
+
+#define EMAC_STATUS_RPE                (1 << 0)  /* Bit 0:  MAC MII Receive Protocol Engine Status */
+#define EMAC_STATUS_RFCFC_SHIFT        (1)       /* Bits 1-2: MAC Receive Frame Controller FIFO Status */
+#define EMAC_STATUS_RFCFC_MASK         (3 << EMAC_STATUS_RFCFC_SHIFT)
+#define EMAC_STATUS_RWC                (1 << 4)  /* Bit 4:  TX/RX Controller RX FIFO Write Controller Active Status */
+#define EMAC_STATUS_RRC_SHIFT          (5)       /* Bits 5-6: TX/RX Controller Read Controller State */
+#define EMAC_STATUS_RRC_MASK           (3 << EMAC_STATUS_RRC_SHIFT)
+#  define EMAC_STATUS_RRC_IDLE         (0 << EMAC_STATUS_RRC_SHIFT) /* IDLE state */
+#  define EMAC_STATUS_RRC_STATUS       (1 << EMAC_STATUS_RRC_SHIFT) /* Reading frame data */
+#  define EMAC_STATUS_RRC_DATA         (2 << EMAC_STATUS_RRC_SHIFT) /* Reading frame status (or timestamp) */
+#  define EMAC_STATUS_RRC_FLUSH        (3 << EMAC_STATUS_RRC_SHIFT) /* Flushing the frame data and status */
+#define EMAC_STATUS_RXF_SHIFT          (8)       /* Bits 8-9: TX/RX Controller RX FIFO Fill-level Status */
+#define EMAC_STATUS_RXF_MASK           (3 << EMAC_STATUS_RXF_SHIFT)
+#  define EMAC_STATUS_RXF_EMPTY        (0 << EMAC_STATUS_RXF_SHIFT) /* RX FIFO Empty */
+#  define EMAC_STATUS_RXF_BELOW        (1 << EMAC_STATUS_RXF_SHIFT) /* Below the flow-control deactivate threshold */
+#  define EMAC_STATUS_RXF_ABOVE        (2 << EMAC_STATUS_RXF_SHIFT) /* Above the flow-control activate threshold */
+#  define EMAC_STATUS_RXF_FULL         (3 << EMAC_STATUS_RXF_SHIFT) /* RX FIFO Full */
+#define EMAC_STATUS_TPE                (1 << 16) /* Bit 16: MAC MII Transmit Protocol Engine Status */
+#define EMAC_STATUS_TFC_SHIFT          (17)      /* Bits 17-18: MAC Transmit Frame Controller Status */
+#define EMAC_STATUS_TFC_MASK           (3 << EMAC_STATUS_TFC_SHIFT)
+#  define EMAC_STATUS_TFC_IDLE         (0 << EMAC_STATUS_TFC_SHIFT) /* IDLE state */
+#  define EMAC_STATUS_TFC_STATUS       (1 << EMAC_STATUS_TFC_SHIFT) /* Waiting for status */
+#  define EMAC_STATUS_TFC_PAUSE        (2 << EMAC_STATUS_TFC_SHIFT) /* Generating and transmitting a PAUSE control frame */
+#  define EMAC_STATUS_TFC_INPUT        (3 << EMAC_STATUS_TFC_SHIFT) /* Transferring input frame for transmission */
+#define EMAC_STATUS_TXPAUSED           (1 << 19) /* Bit 19: MAC Transmitter PAUSE */
+#define EMAC_STATUS_TRC_SHIFT          (20)      /* Bits 20-21: TX/RX Controller's TX FIFO Read Controller Status */
+#define EMAC_STATUS_TRC_MASK           (3 << EMAC_STATUS_TRC_SHIFT)
+#  define EMAC_STATUS_TRC_IDLE         (0 << EMAC_STATUS_TRC_SHIFT) /* IDLE state */
+#  define EMAC_STATUS_TRC_READ         (1 << EMAC_STATUS_TRC_SHIFT) /* READ state */
+#  define EMAC_STATUS_TRC_WAIT         (2 << EMAC_STATUS_TRC_SHIFT) /* Waiting for TX Status from MAC transmitter */
+#  define EMAC_STATUS_TRC_WRFLUSH      (3 << EMAC_STATUS_TRC_SHIFT) /* Writing received TX Status or flushing TX FIFO */
+#define EMAC_STATUS_TWC                (1 << 22) /* Bit 22: TX/RX Controller TX FIFO Write Controller Active Status */
+#define EMAC_STATUS_TXFE               (1 << 24) /* Bit 24: TX/RX Controller TX FIFO Not Empty Status */
+#define EMAC_STATUS_TXFF               (1 << 25) /* Bit 25: TX/RX Controller TX FIFO Full Status */
+
 /* Ethernet MAC Remote Wake-Up Frame Filter */
 #define EMAC_RWUFF_
 /* Ethernet MAC PMT Control and Status Register */
