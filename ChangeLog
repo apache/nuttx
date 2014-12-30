@@ -9351,5 +9351,9 @@
 	  stm32f429i-disco: change ltdc initializing during boot up. This moves
 	  initializing of the ili9341 lcd and ltdc driver to the board specific
 	  initializing routine.  From Marco Krahl (2014-12-29).
-	* /nuttx/arch/arm/src/stm32/stm32_ltdc.c:  Clean up documentation, some
+	* arch/arm/src/stm32/stm32_ltdc.c:  Clean up documentation, some
 	  formatting improvements.  From Marco Krahl (2014-12-29).
+	* arch/arm/src/tiva/chip/tiva_ethernet.h, lm3s_ethernet.c, and
+	  tm4c_ethernet.h:  Add logic to descriminate betwen LM3S class Ethernet
+	  register definitions and TM4C129X class Ethernet register definitions.
+	  Add TM4C129X Ethernet register definitions (2014-12-30).
