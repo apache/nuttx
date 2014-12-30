@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip/tiva_ethernet.h
+ * arch/arm/src/tiva/chip/tm4c_ethernet.h
  *
- *   Copyright (C) 2009-2010, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TIVA_ETHERNET_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_TIVA_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TM4C_ETHERNET_H
+#define __ARCH_ARM_SRC_TIVA_CHIP_TM4C_ETHERNET_H
 
 /************************************************************************************
  * Included Files
@@ -42,12 +42,35 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
-#  include "chip/tm4c_ethernet.h"
-#elif defined(CONFIG_ARCH_CHIP_LM3S)
-#  include "chip/lm3s_ethernet.h"
-#else
-#  error Ethernet register definitions unknown for this chip
-#endif
+#include "chip.h"
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TIVA_ETHERNET_H */
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Ethernet Controller Register Offsets *********************************************/
+
+/* Ethernet MAC Register Offsets */
+
+
+/* MII Management Register Offsets (see include/nuttx/net/mii.h) */
+
+/* Ethernet Controller Register Addresses *******************************************/
+
+/* Memory Mapped MII Management Registers */
+
+/* Ethernet Controller Register Bit Definitions *************************************/
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TM4C_ETHERNET_H */
