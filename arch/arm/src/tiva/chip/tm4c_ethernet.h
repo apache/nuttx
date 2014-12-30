@@ -391,92 +391,285 @@
 #define EMAC_STATUS_TXFE               (1 << 24) /* Bit 24: TX/RX Controller TX FIFO Not Empty Status */
 #define EMAC_STATUS_TXFF               (1 << 25) /* Bit 25: TX/RX Controller TX FIFO Full Status */
 
-/* Ethernet MAC Remote Wake-Up Frame Filter */
-#define EMAC_RWUFF_
+/* Ethernet MAC Remote Wake-Up Frame Filter (32-bit data) */
+
 /* Ethernet MAC PMT Control and Status Register */
-#define EMAC_PMTCTLSTAT_
+
+#define EMAC_PMTCTLSTAT_PWRDWN         (1 << 0)  /* Bit 0:  Power Down */
+#define EMAC_PMTCTLSTAT_MGKPKTEN       (1 << 1)  /* Bit 1:  Magic Packet Enable */
+#define EMAC_PMTCTLSTAT_WUPFREN        (1 << 2)  /* Bit 2:  Wake-Up Frame Enable */
+#define EMAC_PMTCTLSTAT_MGKPRX         (1 << 5)  /* Bit 3:  Magic Packet Received */
+#define EMAC_PMTCTLSTAT_WUPRX          (1 << 6)  /* Bit 6:  Wake-Up Frame Received */
+#define EMAC_PMTCTLSTAT_GLBLUCAST      (1 << 9)  /* Bit 7:  Global Unicast */
+#define EMAC_PMTCTLSTAT_RWKPTR_SHIFT   (24)      /* Bits 24-26:  Remote Wake-Up FIFO Pointer */
+#define EMAC_PMTCTLSTAT_RWKPTR_MASK    (7 << EMAC_PMTCTLSTAT_RWKPTR_SHIFT)
+#  define EMAC_PMTCTLSTAT_RWKPTR(n)    ((uint32_t)(n) << EMAC_PMTCTLSTAT_RWKPTR_SHIFT)
+#define EMAC_PMTCTLSTAT_WUPFRRST       (1 << 31) /* Bit 31: Wake-Up Frame Filter Register Pointer Reset */
+
 /* Ethernet MAC Raw Interrupt Status */
-#define EMAC_RIS_
+
+#define EMAC_RIS_PMT                   (1 << 3)  /* Bit 3:  PMT Interrupt Status */
+#define EMAC_RIS_MMC                   (1 << 4)  /* Bit 4:  MMC Interrupt Status */
+#define EMAC_RIS_MMCRX                 (1 << 5)  /* Bit 5:  MMC Receive Interrupt Status */
+#define EMAC_RIS_MMCTX                 (1 << 6)  /* Bit 6:  MMC Transmit Interrupt Status */
+#define EMAC_RIS_TS                    (1 << 9)  /* Bit 9:  Timestamp Interrupt Status */
+
 /* Ethernet MAC Interrupt Mask */
-#define EMAC_IM_
+
+#define EMAC_IM_PMT                    (1 << 3)  /* Bit 3:  PMT Interrupt Mask */
+#define EMAC_IM_TSI                    (1 << 9)  /* Bit 9:  Timestamp Interrupt Mask */
+
 /* Ethernet MAC Address 0 High */
-#define EMAC_ADDR0H_
-/* Ethernet MAC Address 0 Low Register */
-#define EMAC_ADDR0L_
+/* Ethernet MAC Address 0 Low Register (32-bit MAC Address0 [31:0]) */
+
+#define EMAC_ADDR0H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
+#define EMAC_ADDR0H_ADDRHI_MASK        (0xffff << EMAC_ADDR0H_ADDRHI_SHIFT)
+#  define EMAC_ADDR0H_ADDRHI(n)        ((uint32_t)(n) << EMAC_ADDR0H_ADDRHI_SHIFT)
+#define EMAC_ADDR0H_AE                 (1 << 31) /* Bit 31: Address Enable */
+
 /* Ethernet MAC Address 1 High */
-#define EMAC_ADDR1H_
-/* Ethernet MAC Address 1 Low */
-#define EMAC_ADDR1L_
+/* Ethernet MAC Address 1 Low  (32-bit MAC Address0 [31:0]) */
+
+#define EMAC_ADDR1H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
+#define EMAC_ADDR1H_ADDRHI_MASK        (0xffff << EMAC_ADDR1H_ADDRHI_SHIFT)
+#  define EMAC_ADDR1H_ADDRHI(n)        ((uint32_t)(n) << EMAC_ADDR1H_ADDRHI_SHIFT)
+#define EMAC_ADDR1H_MBC_SHIFT          (24)      /* Bits 24-29: Mask Byte Control */
+#define EMAC_ADDR1H_MBC_MASK           (0x3f << EMAC_ADDR1H_MBC_SHIFT)
+#  define EMAC_ADDR1H_MBC(n)           ((uint32_t)(n) << EMAC_ADDR1H_MBC_SHIFT)
+#  define EMAC_ADDR1H_EMACADDR1L_0     (1 << 24) /* ADDRLO [7:0] of EMACADDR1L register */
+#  define EMAC_ADDR1H_EMACADDR1L_8     (1 << 25) /* ADDRLO [15:8] of EMACADDR1L register */
+#  define EMAC_ADDR1H_EMACADDR1L_16    (1 << 26) /* ADDRLO [23:16] of EMACADDR1L register */
+#  define EMAC_ADDR1H_EMACADDR1L_24    (1 << 27) /* ADDRLO [31:24] of EMACADDR1L register */
+#  define EMAC_ADDR1H_EMACADDR1H_0     (1 << 28) /* ADDRHI [7:0] of EMACADDR1H */
+#  define EMAC_ADDR1H_EMACADDR1H_8     (1 << 29) /* ADDRHI [15:8] of EMACADDR1H Register */
+#define EMAC_ADDR1H_SA                 (1 << 30) /* Bit 30: Source Address */
+#define EMAC_ADDR1H_AE                 (1 << 31) /* Bit 31: Address Enable */
+
 /* Ethernet MAC Address 2 High */
-#define EMAC_ADDR2H_
-/* Ethernet MAC Address 2 Low */
-#define EMAC_ADDR2L_
+/* Ethernet MAC Address 2 Low  (32-bit MAC Address0 [31:0]) */
+
+#define EMAC_ADDR2H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
+#define EMAC_ADDR2H_ADDRHI_MASK        (0xffff << EMAC_ADDR2H_ADDRHI_SHIFT)
+#  define EMAC_ADDR2H_ADDRHI(n)        ((uint32_t)(n) << EMAC_ADDR2H_ADDRHI_SHIFT)
+#define EMAC_ADDR2H_MBC_SHIFT          (24)      /* Bits 24-29: Mask Byte Control */
+#define EMAC_ADDR2H_MBC_MASK           (0x3f << EMAC_ADDR2H_MBC_SHIFT)
+#  define EMAC_ADDR2H_MBC(n)           ((uint32_t)(n) << EMAC_ADDR2H_MBC_SHIFT)
+#  define EMAC_ADDR2H_EMACADDR2L_0     (1 << 24) /* ADDRLO [7:0] of EMACADDR2L register */
+#  define EMAC_ADDR2H_EMACADDR2L_8     (1 << 25) /* ADDRLO [15:8] of EMACADDR2L register */
+#  define EMAC_ADDR2H_EMACADDR2L_16    (1 << 26) /* ADDRLO [23:16] of EMACADDR2L register */
+#  define EMAC_ADDR2H_EMACADDR2L_24    (1 << 27) /* ADDRLO [31:24] of EMACADDR2L register */
+#  define EMAC_ADDR2H_EMACADDR2H_0     (1 << 28) /* ADDRHI [7:0] of EMACADDR2H */
+#  define EMAC_ADDR2H_EMACADDR2H_8     (1 << 29) /* ADDRHI [15:8] of EMACADDR2H Register */
+#define EMAC_ADDR2H_SA                 (1 << 30) /* Bit 30: Source Address */
+#define EMAC_ADDR2H_AE                 (1 << 31) /* Bit 31: Address Enable */
+
 /* Ethernet MAC Address 3 High */
-#define EMAC_ADDR3H_
-/* Ethernet MAC Address 3 Low */
-#define EMAC_ADDR3L_
+/* Ethernet MAC Address 3 Low  (32-bit MAC Address0 [31:0]) */
+
+#define EMAC_ADDR3H_ADDRHI_SHIFT       (0)       /* Bits 0-15: MAC Address0 [47:32] */
+#define EMAC_ADDR3H_ADDRHI_MASK        (0xffff << EMAC_ADDR3H_ADDRHI_SHIFT)
+#  define EMAC_ADDR3H_ADDRHI(n)        ((uint32_t)(n) << EMAC_ADDR3H_ADDRHI_SHIFT)
+#define EMAC_ADDR3H_MBC_SHIFT          (24)      /* Bits 24-29: Mask Byte Control */
+#define EMAC_ADDR3H_MBC_MASK           (0x3f << EMAC_ADDR3H_MBC_SHIFT)
+#  define EMAC_ADDR3H_MBC(n)           ((uint32_t)(n) << EMAC_ADDR3H_MBC_SHIFT)
+#  define EMAC_ADDR3H_EMACADDR3L_0     (1 << 24) /* ADDRLO [7:0] of EMACADDR3L register */
+#  define EMAC_ADDR3H_EMACADDR3L_8     (1 << 25) /* ADDRLO [15:8] of EMACADDR3L register */
+#  define EMAC_ADDR3H_EMACADDR3L_16    (1 << 26) /* ADDRLO [23:16] of EMACADDR3L register */
+#  define EMAC_ADDR3H_EMACADDR3L_24    (1 << 27) /* ADDRLO [31:24] of EMACADDR3L register */
+#  define EMAC_ADDR3H_EMACADDR3H_0     (1 << 28) /* ADDRHI [7:0] of EMACADDR3H */
+#  define EMAC_ADDR3H_EMACADDR3H_8     (1 << 29) /* ADDRHI [15:8] of EMACADDR3H Register */
+#define EMAC_ADDR3H_SA                 (1 << 30) /* Bit 30: Source Address */
+#define EMAC_ADDR3H_AE                 (1 << 31) /* Bit 31: Address Enable */
+
+
 /* Ethernet MAC Watchdog Timeout */
-#define EMAC_WDOGTO_
+
+#define EMAC_WDOGTO_WTO_SHIFT          (0)       /* Bits 0-13: Watchdog Timeout */
+#define EMAC_WDOGTO_WTO_MASK           (0x3fff << EMAC_WDOGTO_WTO_SHIFT)
+#  define EMAC_WDOGTO_WTO(n)           ((uint32_t)(n) << EMAC_WDOGTO_WTO_SHIFT)
+#define EMAC_WDOGTO_PWE                (1 << 16) /* Bit 16: Programmable Watchdog Enable */
+
 /* Ethernet MAC MMC Control */
-#define EMAC_MMCCTRL_
+
+#define EMAC_MMCCTRL_CNTRST            (1 << 0)  /* Bit 0:  Counters Reset */
+#define EMAC_MMCCTRL_CNTSTPRO          (1 << 1)  /* Bit 1:  Counters Stop Rollover */
+#define EMAC_MMCCTRL_RSTONRD           (1 << 2)  /* Bit 2:  Reset on Read */
+#define EMAC_MMCCTRL_CNTFREEZ          (1 << 3)  /* Bit 3:  MMC Counter Freeze */
+#define EMAC_MMCCTRL_CNTPRST           (1 << 4)  /* Bit 4:  Counters Preset */
+#define EMAC_MMCCTRL_CNTPRSTLVL        (1 << 5)  /* Bit 5:  Full/Half Preset Level Value */
+#define EMAC_MMCCTRL_UCDBC             (1 << 8)  /* Bit 8:  Update MMC Counters for Dropped Broadcast Frames */
+
 /* Ethernet MAC MMC Receive Raw Interrupt Status */
-#define EMAC_MMCRXRIS_
+
+#define EMAC_MMCRXRIS_GBF              (1 << 0)  /* Bit 0:  MMC Receive Good Bad Frame Counter Interrupt Status */
+#define EMAC_MMCRXRIS_CRCERR           (1 << 5)  /* Bit 5:  MMC Receive CRC Error Frame Counter Interrupt Status */
+#define EMAC_MMCRXRIS_ALGNERR          (1 << 6)  /* Bit 6:  MMC Receive Alignment Error Frame Counter Interrupt Status */
+#define EMAC_MMCRXRIS_UCGF             (1 << 17) /* Bit 17: MMC Receive Unicast Good Frame Counter Interrupt Status */
+
 /* Ethernet MAC MMC Transmit Raw Interrupt Status */
-#define EMAC_MMCTXRIS_
+
+#define EMAC_MMCTXRIS_GBF              (1 << 1)  /* Bit 1:  MMC Transmit Good Bad Frame Counter Interrupt Status */
+#define EMAC_MMCTXRIS_SCOLLGF          (1 << 14) /* Bit 14: MMC Transmit Single Collision Good Frame Counter Interrupt Status */
+#define EMAC_MMCTXRIS_MCOLLGF          (1 << 15) /* Bit 15: MMC Transmit Multiple Collision Good Frame Counter Interrupt Status */
+#define EMAC_MMCTXRIS_OCTCNT           (1 << 20) /* Bit 20: Octet Counter Interrupt Status */
+
 /* Ethernet MAC MMC Receive Interrupt Mask */
-#define EMAC_MMCRXIM_
+
+#define EMAC_MMCRXIM_GBF               (1 << 0)  /* Bit 0:  MMC Receive Good Bad Frame Counter Interrupt Mask */
+#define EMAC_MMCRXIM_CRCERR            (1 << 5)  /* Bit 5:  MMC Receive CRC Error Frame Counter Interrupt Mask */
+#define EMAC_MMCRXIM_ALGNERR           (1 << 6)  /* Bit 6:  MMC Receive Alignment Error Frame Counter Interrupt Mask */
+#define EMAC_MMCRXIM_UCGF              (1 << 17) /* Bit 17: MMC Receive Unicast Good Frame Counter Interrupt Mask */
+
 /* Ethernet MAC MMC Transmit Interrupt Mask */
-#define EMAC_MMCTXIM_
-/* Ethernet MAC Transmit Frame Count for Good and Bad Frames */
-#define EMAC_TXCNTGB_
-/* Ethernet MAC Transmit Frame Count for Frames Transmitted after Single Collision */
-#define EMAC_TXCNTSCOL_
-/* Ethernet MAC Transmit Frame Count for Frames Transmitted after Multiple Collisions */
-#define EMAC_TXCNTMCOL_
-/* Ethernet MAC Transmit Octet Count Good */
-#define EMAC_TXOCTCNTG_
-/* Ethernet MAC Receive Frame Count for Good and Bad Frames */
-#define EMAC_RXCNTGB_
-/* Ethernet MAC Receive Frame Count for CRC Error Frames */
-#define EMAC_RXCNTCRCERR_
-/* Ethernet MAC Receive Frame Count for Alignment Error Frames */
-#define EMAC_RXCNTALGNERR_
-/* Ethernet MAC Receive Frame Count for Good Unicast Frames */
-#define EMAC_RXCNTGUNI_
+
+#define EMAC_MMCTXIM_GBF               (1 << 1)  /* Bit 1:  MMC Transmit Good Bad Frame Counter Interrupt Mask */
+#define EMAC_MMCTXIM_SCOLLGF           (1 << 14) /* Bit 14: MMC Transmit Single Collision Good Frame Counter Interrupt Mask */
+#define EMAC_MMCTXIM_MCOLLGF           (1 << 15) /* Bit 15: MMC Transmit Multiple Collision Good Frame Counter Interrupt Mask */
+#define EMAC_MMCTXIM_OCTCNT            (1 << 20) /* Bit 20: MMC Transmit Good Octet Counter Interrupt Mask */
+
+/* Ethernet MAC Transmit Frame Count for Good and Bad Frames (32-bit data) */
+/* Ethernet MAC Transmit Frame Count for Frames Transmitted after Single Collision (32-bit data) */
+/* Ethernet MAC Transmit Frame Count for Frames Transmitted after Multiple Collisions (32-bit data) */
+/* Ethernet MAC Transmit Octet Count Good (32-bit data) */
+/* Ethernet MAC Receive Frame Count for Good and Bad Frames (32-bit data) */
+/* Ethernet MAC Receive Frame Count for CRC Error Frames (32-bit data) */
+/* Ethernet MAC Receive Frame Count for Alignment Error Frames (32-bit data) */
+/* Ethernet MAC Receive Frame Count for Good Unicast Frames (32-bit data) */
+
 /* Ethernet MAC VLAN Tag Inclusion or Replacement */
-#define EMAC_VLNINCREP_
+
+#define EMAC_VLNINCREP_VLT_SHIFT       (0)       /* Bits 0-15: VLAN Tag for Transmit Frames */
+#define EMAC_VLNINCREP_VLT_MASK        (0xffff << EMAC_VLNINCREP_VLT_SHIFT)
+#  define EMAC_VLNINCREP_VLT(n)        ((uint32_t)(n) << EMAC_VLNINCREP_VLT_SHIFT)
+#define EMAC_VLNINCREP_VLC_SHIFT       (16)      /* Bits 16-17: VLAN Tag Control in Transmit Frames */
+#define EMAC_VLNINCREP_VLC_MASK        (3 << EMAC_VLNINCREP_VLC_SHIFT)
+#  define EMAC_VLNINCREP_VLC_NONE      (0 << EMAC_VLNINCREP_VLC_SHIFT) /* No VLAN tag deletion, insertion, or replacement */
+#  define EMAC_VLNINCREP_VLC_TAGDEL    (1 << EMAC_VLNINCREP_VLC_SHIFT) /* VLAN tag deletion */
+#  define EMAC_VLNINCREP_VLC_TAGINS    (2 << EMAC_VLNINCREP_VLC_SHIFT) /* VLAN tag insertion */
+#  define EMAC_VLNINCREP_VLC_TAGREP    (3 << EMAC_VLNINCREP_VLC_SHIFT) /* VLAN tag replacement */
+#define EMAC_VLNINCREP_VLP             (1 << 18) /* Bit 18: VLAN Priority Control */
+#define EMAC_VLNINCREP_CSVL            (1 << 19) /* Bit 19: C-VLAN or S-VLAN */
+
 /* Ethernet MAC VLAN Hash Table */
-#define EMAC_VLANHASH_
+
+#define EMAC_VLANHASH_VLHT_SHIFT       (0)       /* Bits 0-15: VLAN Hash Table */
+#define EMAC_VLANHASH_VLHT_MASK        (0xffff << EMAC_VLANHASH_VLHT_SHIFT)
+
 /* Ethernet MAC Timestamp Control */
-#define EMAC_TIMSTCTRL_
+
+#define EMAC_TIMSTCTRL_TSEN            (1 << 0)  /* Bit 0:  Timestamp Enable */
+#define EMAC_TIMSTCTRL_TSFCUPDT        (1 << 1)  /* Bit 1:  Timestamp Fine or Coarse Update */
+#define EMAC_TIMSTCTRL_TSINIT          (1 << 2)  /* Bit 2:  Timestamp Initialize */
+#define EMAC_TIMSTCTRL_TSUPDT          (1 << 3)  /* Bit 3:  Timestamp Update */
+#define EMAC_TIMSTCTRL_INTTRIG         (1 << 4)  /* Bit 4:  Timestamp Interrupt Trigger Enable */
+#define EMAC_TIMSTCTRL_ADDREGUP        (1 << 5)  /* Bit 5:  Addend Register Update */
+#define EMAC_TIMSTCTRL_ALLF            (1 << 8)  /* Bit 8:  Enable Timestamp For All Frames */
+#define EMAC_TIMSTCTRL_DGTLBIN         (1 << 9)  /* Bit 9:  Timestamp Digital or Binary Rollover Control */
+#define EMAC_TIMSTCTRL_PTPVER2         (1 << 10) /* Bit 10: Enable PTP Packet Processing For Version 2 Format */
+#define EMAC_TIMSTCTRL_PTPETH          (1 << 11) /* Bit 11: Enable Processing of PTP Over Ethernet Frames */
+#define EMAC_TIMSTCTRL_PTPIPV6         (1 << 12) /* Bit 12: Enable Processing of PTP Frames Sent Over IPv6-UDP */
+#define EMAC_TIMSTCTRL_PTPIPV4         (1 << 13) /* Bit 13: Enable Processing of PTP Frames Sent over IPv4-UDP */
+#define EMAC_TIMSTCTRL_TSEVNT          (1 << 14) /* Bit 14: Enable Timestamp Snapshot for Event Messages */
+#define EMAC_TIMSTCTRL_TSMAST          (1 << 15) /* Bit 15: Enable Snapshot for Messages Relevant to Master */
+#define EMAC_TIMSTCTRL_SELPTP_SHIFT    (16)      /* Bits 16-17: Select PTP packets for Taking Snapshots */
+#define EMAC_TIMSTCTRL_SELPTP_MASK     (3 << EMAC_TIMSTCTRL_SELPTP_SHIFT)
+#  define EMAC_TIMSTCTRL_SELPTP(n)     ((uint32_t)(n) << EMAC_TIMSTCTRL_SELPTP_SHIFT)
+#define EMAC_TIMSTCTRL_PTPFLTR         (1 << 18) /* Bit 18: Enable MAC address for PTP Frame Filtering */
+
 /* Ethernet MAC Sub-Second Increment */
-#define EMAC_SUBSECINC_
-/* Ethernet MAC System Time - Seconds */
-#define EMAC_TIMSEC_
+
+#define EMAC_SUBSECINC_SSINC_SHIFT     (0)       /* Bits 0-7: Sub-second Increment Value */
+#define EMAC_SUBSECINC_SSINC_MASK      (0xff << EMAC_SUBSECINC_SSINC_SHIFT)
+
+/* Ethernet MAC System Time - Seconds (32-bit value) */
 /* Ethernet MAC System Time - Nanoseconds */
-#define EMAC_TIMNANO_
-/* Ethernet MAC System Time - Seconds Update */
-#define EMAC_TIMSECU_
+
+#define EMAC_TIMNANO_TSSS_SHIFT        (0)       /* Bits 0-30: Timestamp Sub-Seconds */
+#define EMAC_TIMNANO_TSSS_MASK         (0x7fffffff << EMAC_TIMNANO_TSSS_SHIFT)
+
+/* Ethernet MAC System Time - Seconds Update (32-bit value) */
 /* Ethernet MAC System Time - Nanoseconds Update */
-#define EMAC_TIMNANOU_
-/* Ethernet MAC Timestamp Addend */
-#define EMAC_TIMADD_
-/* Ethernet MAC Target Time Seconds */
-#define EMAC_TARGSEC_
+
+#define EMAC_TIMNANOU_TSSS_SHIFT       (0)       /* Bits 0-30: Timestamp Sub-Second */
+#define EMAC_TIMNANOU_TSSS_MASK        (0x7fffffff << EMAC_TIMNANOU_TSSS_SHIFT)
+#define EMAC_TIMNANOU_ADDSUB           (1 << 31) /* Bit 31: Add or subtract time */
+
+/* Ethernet MAC Timestamp Addend (32-bit value) */
+/* Ethernet MAC Target Time Seconds (32-bit value) */
 /* Ethernet MAC Target Time Nanoseconds */
-#define EMAC_TARGNANO_
+
+#define EMAC_TARGNANO_TTSLO_SHIFT      (0)       /* Bits 0-30: Target Timestamp Low Register */
+#define EMAC_TARGNANO_TTSLO_MASK       (0x7fffffff << EMAC_TARGNANO_TTSLO_SHIFT)
+#define EMAC_TARGNANO_TRGTBUSY         (1 << 31) /* Bit 31: Target Time Register Busy */
+
 /* Ethernet MAC System Time-Higher Word Seconds */
-#define EMAC_HWORDSEC_
+
+#define EMAC_HWORDSEC_TSHWR_SHIFT      (0)       /* Bits 0-15: Target Timestamp Higher Word Register */
+#define EMAC_HWORDSEC_TSHWR_MASK       (0xffff << EMAC_HWORDSEC_TSHWR_SHIFT)
+
 /* Ethernet MAC Timestamp Status */
-#define EMAC_TIMSTAT_
+
+#define EMAC_TIMSTAT_TSSOVF            (1 << 0)  /* Bit 0:  Timestamp Seconds Overflow */
+#define EMAC_TIMSTAT_TSTARGT           (1 << 1)  /* Bit 1:  Timestamp Target Time Reached */
+
 /* Ethernet MAC PPS Control */
-#define EMAC_PPSCTRL_
-/* Ethernet MAC PPS0 Interval */
-#define EMAC_PPS0INTVL_
-/* Ethernet MAC PPS0 Width */
-#define EMAC_PPS0WIDTH_
+
+#define EMAC_PPSCTRL_PPSCTRL_SHIFT     (0)       /* Bits 0-3: EN0PPS Output Frequency Control (PPSCTRL) or Command Control (PPSCMD) */
+#define EMAC_PPSCTRL_PPSCTRL_MASK      (15 << EMAC_PPSCTRL_PPSCTRL_SHIFT)
+#  define EMAC_PPSCTRL_PPSCTRL_1HZ     (0 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* EN0PPS signal=PTP reference clock/sec */
+#  define EMAC_PPSCTRL_PPSCTRL_2HZ     (1 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=2 Hz; digital rollover=1 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_4HZ     (2 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=4 Hz; digital rollover=2 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_8HZ     (3 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=8 Hz; digital rollover=4 Hz, */
+#  define EMAC_PPSCTRL_PPSCTRL_16HZ    (4 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=16 Hz; digital rollover=8 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_32HZ    (5 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=32 Hz; digital rollover=16 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_64HZ    (6 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=64 Hz; digital rollover=32 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_128HZ   (7 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* Binary rollover=128 Hz; digital rollover=64 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_256HZ   (8 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* binary rollover=256 Hz; digital rollover=128 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_512HZ   (9 << EMAC_PPSCTRL_PPSCTRL_SHIFT)  /* binary rollover=512 Hz; digital rollover=256 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_1024HZ  (10 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* binary rollover=1.024 kHz; digital rollover=512 Hz */
+#  define EMAC_PPSCTRL_PPSCTRL_2048HZ  (11 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=2.048 kHz; digital rollover=1.024 kHz */
+#  define EMAC_PPSCTRL_PPSCTRL_4096HZ  (12 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=4.096 kHz; digital rollover=2.048 kHz */
+#  define EMAC_PPSCTRL_PPSCTRL_8192HZ  (13 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=8.192 kHz; digital rollover=4.096 kHz */
+#  define EMAC_PPSCTRL_PPSCTRL_16384HZ (14 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=16.384 kHz; digital rollover=8.092 kHz */
+#  define EMAC_PPSCTRL_PPSCTRL_32768HZ (15 << EMAC_PPSCTRL_PPSCTRL_SHIFT) /* Binary rollover=32.768 KHz; digital rollover=16.384 KHz */
+#define EMAC_PPSCTRL_PPSEN0            (1 << 4)  /* Bit 4:  Flexible PPS Output Mode Enable */
+#define EMAC_PPSCTRL_TRGMODS0_SHIFT    (5)       /* Bits 5-6: Target Time Register Mode for PPS0 Output */
+#define EMAC_PPSCTRL_TRGMODS0_MASK     (3 << EMAC_PPSCTRL_TRGMODS0_SHIFT)
+#  define EMAC_PPSCTRL_TRGMODS0_INTONLY  (0 << EMAC_PPSCTRL_TRGMODS0_SHIFT) /* Generate the interrupt event */
+#  define EMAC_PPSCTRL_TRGMODS0_INTPPS0  (2 << EMAC_PPSCTRL_TRGMODS0_SHIFT) /* Generate the interrupt event and control EN0PPS */
+#  define EMAC_PPSCTRL_TRGMODS0_PPS0ONLY (3 << EMAC_PPSCTRL_TRGMODS0_SHIFT) /* Control ENOPPS output */
+
+/* Ethernet MAC PPS0 Interval (32-bit value) */
+/* Ethernet MAC PPS0 Width (32-bit value) */
+
 /* Ethernet MAC DMA Bus Mode */
-#define EMAC_DMABUSMOD_
+
+#define EMAC_DMABUSMOD_SWR             (1 << 0)  /* Bit 0:  DMA Software Reset */
+#define EMAC_DMABUSMOD_DA              (1 << 1)  /* Bit 1:  DMA Arbitration Scheme */
+#define EMAC_DMABUSMOD_DSL_SHIFT       (2)       /* Bits 2-6: Descriptor Skip Length */
+#define EMAC_DMABUSMOD_DSL_MASK        (31 << EMAC_DMABUSMOD_DSL_SHIFT)
+#  define EMAC_DMABUSMOD_DSL(n)        ((uint32_t)(n) << EMAC_DMABUSMOD_DSL_SHIFT)
+#define EMAC_DMABUSMOD_ATDS            (1 << 7)  /* Bit 7:  Alternate Descriptor Size */
+#define EMAC_DMABUSMOD_PBL_SHIFT       (8)       /* Bits 8-13: Programmable Burst Length */
+#define EMAC_DMABUSMOD_PBL_MASK        (0x3f << EMAC_DMABUSMOD_PBL_SHIFT)
+#  define EMAC_DMABUSMOD_PBL(n)        ((uint32_t)(n) << EMAC_DMABUSMOD_PBL_SHIFT)
+#define EMAC_DMABUSMOD_PR_SHIFT        (14)      /* Bits 14-15: Priority Ratio */
+#define EMAC_DMABUSMOD_PR_MASK         (3 << EMAC_DMABUSMOD_PR_SHIFT)
+#  define EMAC_DMABUSMOD_PR_11         (0 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 1:1 */
+#  define EMAC_DMABUSMOD_PR_21         (1 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 2:1 */
+#  define EMAC_DMABUSMOD_PR_31         (2 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 3:1 */
+#  define EMAC_DMABUSMOD_PR_41         (3 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 4:1 */
+#define EMAC_DMABUSMOD_FB              (1 << 16) /* Bit 16: Fixed Burst */
+#define EMAC_DMABUSMOD_RPBL_SHIFT      (17)      /* Bits 17:22: RX DMA Programmable Burst Length (PBL) */
+#define EMAC_DMABUSMOD_RPBL_MASK       (0x3f << EMAC_DMABUSMOD_RPBL_SHIFT)
+#  define EMAC_DMABUSMOD_RPBL(n)       ((uint32_t)(n) << EMAC_DMABUSMOD_RPBL_SHIFT)
+#define EMAC_DMABUSMOD_USP             (1 << 23) /* Bit 23: Use Separate Programmable Burst Length (PBL) */
+#define EMAC_DMABUSMOD_8XPBL           (1 << 24) /* Bit 24: 8 x Programmable Burst Length (PBL) Mode */
+#define EMAC_DMABUSMOD_AAL             (1 << 25) /* Bit 25: Address Aligned Beats */
+#define EMAC_DMABUSMOD_MB              (1 << 26) /* Bit 26: Mixed Burst */
+#define EMAC_DMABUSMOD_TXPR            (1 << 27) /* Bit 27: Transmit Priority */
+#define EMAC_DMABUSMOD_RIB             (1 << 31) /* Bit 31: Rebuild Burst */
+
 /* Ethernet MAC Transmit Poll Demand */
 #define EMAC_TXPOLLD_
 /* Ethernet MAC Receive Poll Demand */
