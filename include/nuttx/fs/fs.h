@@ -443,9 +443,11 @@ int register_driver(FAR const char *path, FAR const struct file_operations *fops
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int register_blockdriver(FAR const char *path,
                          FAR const struct block_operations *bops, mode_t mode,
                          FAR void *priv);
+#endif
 
 /* fs_unregisterdriver.c ****************************************************/
 /****************************************************************************
