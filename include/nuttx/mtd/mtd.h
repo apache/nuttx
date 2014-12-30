@@ -332,6 +332,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
+struct i2c_dev_s; /* Forward reference */
 FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
 
 /****************************************************************************
