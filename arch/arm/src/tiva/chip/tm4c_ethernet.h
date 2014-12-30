@@ -205,35 +205,35 @@
 
 /* MII Management Register Addresses */
 
-#define TIVA_EPHY_EPHYBMCR             0x00 /* Ethernet PHY Basic Mode Control */
-#define TIVA_EPHY_EPHYBMSR             0x01 /* Ethernet PHY Basic Mode Status */
-#define TIVA_EPHY_EPHYID1              0x02 /* Ethernet PHY Identifier Register 1 */
-#define TIVA_EPHY_EPHYID2              0x03 /* Ethernet PHY Identifier Register 2 */
-#define TIVA_EPHY_EPHYANA              0x04 /* Ethernet PHY Auto-Negotiation Advertisement */
-#define TIVA_EPHY_EPHYANLPA            0x05 /* Ethernet PHY Auto-Negotiation Link Partner Ability */
-#define TIVA_EPHY_EPHYANER             0x06 /* Ethernet PHY Auto-Negotiation Expansion */
-#define TIVA_EPHY_EPHYANNPTR           0x07 /* Ethernet PHY Auto-Negotiation Next Page TX */
-#define TIVA_EPHY_EPHYANLNPTR          0x08 /* Ethernet PHY Auto-Negotiation Link Partner Ability Next Page */
-#define TIVA_EPHY_EPHYCFG1             0x09 /* Ethernet PHY Configuration 1 */
-#define TIVA_EPHY_EPHYCFG2             0x0a /* Ethernet PHY Configuration 2 */
-#define TIVA_EPHY_EPHYCFG3             0x0b /* Ethernet PHY Configuration 3 */
-#define TIVA_EPHY_EPHYREGCTL           0x0d /* Ethernet PHY Register Control */
-#define TIVA_EPHY_EPHYADDAR            0x0e /* Ethernet PHY Address or Data */
-#define TIVA_EPHY_EPHYSTS              0x10 /* Ethernet PHY Status */
-#define TIVA_EPHY_EPHYSCR              0x11 /* Ethernet PHY Specific Control */
-#define TIVA_EPHY_EPHYMISR1            0x12 /* Ethernet PHY MII Interrupt Status 1 */
-#define TIVA_EPHY_EPHYMISR2            0x13 /* Ethernet PHY MII Interrupt Status 2 */
-#define TIVA_EPHY_EPHYFCSCR            0x14 /* Ethernet PHY False Carrier Sense Counter */
-#define TIVA_EPHY_EPHYRXERCNT          0x15 /* Ethernet PHY Receive Error Count */
-#define TIVA_EPHY_EPHYBISTCR           0x16 /* Ethernet PHY BIST Control */
-#define TIVA_EPHY_EPHYLEDCR            0x18 /* Ethernet PHY LED Control */
-#define TIVA_EPHY_EPHYCTL              0x19 /* Ethernet PHY Control */
-#define TIVA_EPHY_EPHY10BTSC           0x1a /* Ethernet PHY 10Base-T Status/Control */
-#define TIVA_EPHY_EPHYBICSR1           0x1b /* Ethernet PHY BIST Control and Status 1 */
-#define TIVA_EPHY_EPHYBICSR2           0x1c /* Ethernet PHY BIST Control and Status 2 */
-#define TIVA_EPHY_EPHYCDCR             0x1e /* Ethernet PHY Cable Diagnostic Control */
-#define TIVA_EPHY_EPHYRCR              0x1f /* Ethernet PHY Reset Control */
-#define TIVA_EPHY_EPHYLEDCFG           0x25 /* Ethernet PHY LED Configuration */
+#define TIVA_EPHY_BMCR                 0x00 /* Ethernet PHY Basic Mode Control */
+#define TIVA_EPHY_BMSR                 0x01 /* Ethernet PHY Basic Mode Status */
+#define TIVA_EPHY_ID1                  0x02 /* Ethernet PHY Identifier Register 1 */
+#define TIVA_EPHY_ID2                  0x03 /* Ethernet PHY Identifier Register 2 */
+#define TIVA_EPHY_ANA                  0x04 /* Ethernet PHY Auto-Negotiation Advertisement */
+#define TIVA_EPHY_ANLPA                0x05 /* Ethernet PHY Auto-Negotiation Link Partner Ability */
+#define TIVA_EPHY_ANER                 0x06 /* Ethernet PHY Auto-Negotiation Expansion */
+#define TIVA_EPHY_ANNPTR               0x07 /* Ethernet PHY Auto-Negotiation Next Page TX */
+#define TIVA_EPHY_ANLNPTR              0x08 /* Ethernet PHY Auto-Negotiation Link Partner Ability Next Page */
+#define TIVA_EPHY_CFG1                 0x09 /* Ethernet PHY Configuration 1 */
+#define TIVA_EPHY_CFG2                 0x0a /* Ethernet PHY Configuration 2 */
+#define TIVA_EPHY_CFG3                 0x0b /* Ethernet PHY Configuration 3 */
+#define TIVA_EPHY_REGCTL               0x0d /* Ethernet PHY Register Control */
+#define TIVA_EPHY_ADDAR                0x0e /* Ethernet PHY Address or Data */
+#define TIVA_EPHY_STS                  0x10 /* Ethernet PHY Status */
+#define TIVA_EPHY_SCR                  0x11 /* Ethernet PHY Specific Control */
+#define TIVA_EPHY_MISR1                0x12 /* Ethernet PHY MII Interrupt Status 1 */
+#define TIVA_EPHY_MISR2                0x13 /* Ethernet PHY MII Interrupt Status 2 */
+#define TIVA_EPHY_FCSCR                0x14 /* Ethernet PHY False Carrier Sense Counter */
+#define TIVA_EPHY_RXERCNT              0x15 /* Ethernet PHY Receive Error Count */
+#define TIVA_EPHY_BISTCR               0x16 /* Ethernet PHY BIST Control */
+#define TIVA_EPHY_LEDCR                0x18 /* Ethernet PHY LED Control */
+#define TIVA_EPHY_CTL                  0x19 /* Ethernet PHY Control */
+#define TIVA_EPHY_10BTSC               0x1a /* Ethernet PHY 10Base-T Status/Control */
+#define TIVA_EPHY_BICSR1               0x1b /* Ethernet PHY BIST Control and Status 1 */
+#define TIVA_EPHY_BICSR2               0x1c /* Ethernet PHY BIST Control and Status 2 */
+#define TIVA_EPHY_CDCR                 0x1e /* Ethernet PHY Cable Diagnostic Control */
+#define TIVA_EPHY_RCR                  0x1f /* Ethernet PHY Reset Control */
+#define TIVA_EPHY_LEDCFG               0x25 /* Ethernet PHY LED Configuration */
 
 /* Ethernet Controller Register Bit Definitions *************************************/
 
@@ -670,105 +670,533 @@
 #define EMAC_DMABUSMOD_TXPR            (1 << 27) /* Bit 27: Transmit Priority */
 #define EMAC_DMABUSMOD_RIB             (1 << 31) /* Bit 31: Rebuild Burst */
 
-/* Ethernet MAC Transmit Poll Demand */
-#define EMAC_TXPOLLD_
-/* Ethernet MAC Receive Poll Demand */
-#define EMAC_RXPOLLD_
+/* Ethernet MAC Transmit Poll Demand (32-bit value) */
+/* Ethernet MAC Receive Poll Demand (32-bit value) */
+
 /* Ethernet MAC Receive Descriptor List Address */
-#define EMAC_RXDLADDR_
+
+#define EMAC_RXDLADDR_MASK             (0xfffffffc)
+
 /* Ethernet MAC Transmit Descriptor List Address */
-#define EMAC_TXDLADDR_
+
+#define EMAC_TXDLADDR_MASK             (0xfffffffc)
+
 /* Ethernet MAC DMA Interrupt Status */
-#define EMAC_DMARIS_
+
+#define EMAC_DMARIS_TI                 (1 << 0)  /* Bit 0:  Transmit Interrupt */
+#define EMAC_DMARIS_TPS                (1 << 1)  /* Bit 1:  Transmit Process Stopped */
+#define EMAC_DMARIS_TU                 (1 << 2)  /* Bit 2:  Transmit Buffer Unavailable */
+#define EMAC_DMARIS_TJT                (1 << 3)  /* Bit 3:  Transmit Jabber Timeout */
+#define EMAC_DMARIS_OVF                (1 << 4)  /* Bit 4:  Receive Overflow */
+#define EMAC_DMARIS_UNF                (1 << 5)  /* Bit 5:  Transmit Underflow */
+#define EMAC_DMARIS_RI                 (1 << 6)  /* Bit 6:  Receive Interrupt */
+#define EMAC_DMARIS_RU                 (1 << 7)  /* Bit 7:  Receive Buffer Unavailable */
+#define EMAC_DMARIS_RPS                (1 << 8)  /* Bit 8:  Receive Process Stopped */
+#define EMAC_DMARIS_RWT                (1 << 9)  /* Bit 9:  Receive Watchdog Timeout */
+#define EMAC_DMARIS_ETI                (1 << 10) /* Bit 10: Early Transmit Interrupt */
+#define EMAC_DMARIS_FBI                (1 << 13) /* Bit 13: Fatal Bus Error Interrupt */
+#define EMAC_DMARIS_ERI                (1 << 14) /* Bit 14: Early Receive Interrupt */
+#define EMAC_DMARIS_AIS                (1 << 15) /* Bit 15: Abnormal Interrupt Summary */
+#define EMAC_DMARIS_NIS                (1 << 16) /* Bit 16: Normal Interrupt Summary */
+#define EMAC_DMARIS_RS_SHIFT           (17)      /* Bits 17-19: Received Process State */
+#define EMAC_DMARIS_RS_MASK            (7 << EMAC_DMARIS_RS_SHIFT)
+#  define EMAC_DMARIS_RS_STOP          (0 << EMAC_DMARIS_RS_SHIFT) /* Stopped: Reset or stop receive command issued */
+#  define EMAC_DMARIS_RS_RUNRXTD       (1 << EMAC_DMARIS_RS_SHIFT) /* Running: Fetching receive transfer descriptor */
+#  define EMAC_DMARIS_RS_RUNRXD        (3 << EMAC_DMARIS_RS_SHIFT) /* Running: Waiting for receive packet */
+#  define EMAC_DMARIS_RS_SUSPEND       (4 << EMAC_DMARIS_RS_SHIFT) /* Suspended: Receive descriptor unavailable */
+#  define EMAC_DMARIS_RS_RUNCRD        (5 << EMAC_DMARIS_RS_SHIFT) /* Running: Closing receive descriptor */
+#  define EMAC_DMARIS_RS_TSWS          (6 << EMAC_DMARIS_RS_SHIFT) /* Writing Timestamp */
+#  define EMAC_DMARIS_RS_RUNTXD        (7 << EMAC_DMARIS_RS_SHIFT) /* Running: Transferring receive packet data from buffer */
+#define EMAC_DMARIS_TS_SHIFT           (20)      /* Bits 20-22: Transmit Process State */
+#define EMAC_DMARIS_TS_MASK            (7 << EMAC_DMARIS_TS_SHIFT)
+#  define EMAC_DMARIS_TS_STOP          (0 << EMAC_DMARIS_TS_SHIFT) /* Stopped; Reset or Stop transmit command processed */
+#  define EMAC_DMARIS_TS_RUNTXTD       (1 << EMAC_DMARIS_TS_SHIFT) /* Running; Fetching transmit transfer descriptor */
+#  define EMAC_DMARIS_TS_STATUS        (2 << EMAC_DMARIS_TS_SHIFT) /* Running; Waiting for status */
+#  define EMAC_DMARIS_TS_RUNTX         (3 << EMAC_DMARIS_TS_SHIFT) /* Running; Reading data from host buffer and queuing to TX FIFO */
+#  define EMAC_DMARIS_TS_TSTAMP        (4 << EMAC_DMARIS_TS_SHIFT) /* Writing Timestamp */
+#  define EMAC_DMARIS_TS_SUSPEND       (6 << EMAC_DMARIS_TS_SHIFT) /* Suspended; Transmit descriptor unavailable or transmit underflow */
+#  define EMAC_DMARIS_TS_RUNCTD        (7 << EMAC_DMARIS_TS_SHIFT)  /* Running; Closing transmit descriptor */
+#define EMAC_DMARIS_AE_SHIFT           (23)      /* Bits 23-25: Access Error */
+#define EMAC_DMARIS_AE_MASK            (7 << EMAC_DMARIS_AE_SHIFT)
+#  define EMAC_DMARIS_AE_RXDMAWD       (0 << EMAC_DMARIS_AE_SHIFT) /* Error during RX DMA Write Data Transfer */
+#  define EMAC_DMARIS_AE_TXDMARD       (3 << EMAC_DMARIS_AE_SHIFT) /* Error during TX DMA Read Data Transfer */
+#  define EMAC_DMARIS_AE_RXDMADW       (4 << EMAC_DMARIS_AE_SHIFT) /* Error during RX DMA Descriptor Write Access */
+#  define EMAC_DMARIS_AE_TXDMADW       (5 << EMAC_DMARIS_AE_SHIFT) /* Error during TX DMA Descriptor Write Access */
+#  define EMAC_DMARIS_AE_RXDMADR       (6 << EMAC_DMARIS_AE_SHIFT) /* Error during RX DMA Descriptor Read Access */
+#  define EMAC_DMARIS_AE_TXDMADR       (7 << EMAC_DMARIS_AE_SHIFT) /* Error during TX DMA Descriptor Read Access */
+#define EMAC_DMARIS_MMC                (1 << 27) /* Bit 27: MAC MMC Interrupt */
+#define EMAC_DMARIS_PMT                (1 << 28) /* Bit 28: MAC PMT Interrupt Status */
+#define EMAC_DMARIS_TT                 (1 << 29) /* Bit 29: Timestamp Trigger Interrupt Status */
+
 /* Ethernet MAC DMA Operation Mode */
-#define EMAC_DMAOPMODE_
+
+#define EMAC_DMAOPMODE_SR              (1 << 1)  /* Bit 1:  Start or Stop Receive */
+#define EMAC_DMAOPMODE_OSF             (1 << 2)  /* Bit 2:  Operate on Second Frame */
+#define EMAC_DMAOPMODE_RTC_SHIFT       (3)       /* Bits 3-4: Receive Threshold Control */
+#define EMAC_DMAOPMODE_RTC_MASK        (3 << EMAC_DMAOPMODE_RTC_SHIFT)
+#  define EMAC_DMAOPMODE_RTC_64        (0 << EMAC_DMAOPMODE_RTC_SHIFT) /* 64 bytes */
+#  define EMAC_DMAOPMODE_RTC_32        (1 << EMAC_DMAOPMODE_RTC_SHIFT) /* 32 bytes */
+#  define EMAC_DMAOPMODE_RTC_96        (2 << EMAC_DMAOPMODE_RTC_SHIFT) /* 96 bytes */
+#  define EMAC_DMAOPMODE_RTC_128       (3 << EMAC_DMAOPMODE_RTC_SHIFT) /* 128 bytes */
+#define EMAC_DMAOPMODE_DGF             (1 << 5)  /* Bit 5:  Drop Giant Frame Enable */
+#define EMAC_DMAOPMODE_FUF             (1 << 6)  /* Bit 6:  Forward Undersized Good Frames */
+#define EMAC_DMAOPMODE_FEF             (1 << 7)  /* Bit 7:  Forward Error Frames */
+#define EMAC_DMAOPMODE_ST              (1 << 13) /* Bit 13: Start or Stop Transmission Command */
+#define EMAC_DMAOPMODE_TTC_SHIFT       (14)      /* Bits 14-16: Transmit Threshold Control */
+#define EMAC_DMAOPMODE_TTC_MASK        (7 << EMAC_DMAOPMODE_TTC_SHIFT)
+#  define EMAC_DMAOPMODE_TTC_64        (0 << EMAC_DMAOPMODE_TTC_SHIFT) /* 64 bytes */
+#  define EMAC_DMAOPMODE_TTC_128       (1 << EMAC_DMAOPMODE_TTC_SHIFT) /* 128 bytes */
+#  define EMAC_DMAOPMODE_TTC_192       (2 << EMAC_DMAOPMODE_TTC_SHIFT) /* 192 bytes */
+#  define EMAC_DMAOPMODE_TTC_256       (3 << EMAC_DMAOPMODE_TTC_SHIFT) /* 256 bytes */
+#  define EMAC_DMAOPMODE_TTC_40        (4 << EMAC_DMAOPMODE_TTC_SHIFT) /* 40 bytes */
+#  define EMAC_DMAOPMODE_TTC_32        (5 << EMAC_DMAOPMODE_TTC_SHIFT) /* 32 bytes */
+#  define EMAC_DMAOPMODE_TTC_24        (6 << EMAC_DMAOPMODE_TTC_SHIFT) /* 24 bytes */
+#  define EMAC_DMAOPMODE_TTC_16        (7 << EMAC_DMAOPMODE_TTC_SHIFT) /* 16 bytes */
+#define EMAC_DMAOPMODE_FTF             (1 << 20) /* Bit 20: Flush Transmit FIFO */
+#define EMAC_DMAOPMODE_TSF             (1 << 21) /* Bit 21: Transmit Store and Forward */
+#define EMAC_DMAOPMODE_DFF             (1 << 24) /* Bit 24: Disable Flushing of Received Frames */
+#define EMAC_DMAOPMODE_RSF             (1 << 25) /* Bit 25: Receive Store and Forward */
+#define EMAC_DMAOPMODE_DT              (1 << 26) /* Bit 26: Disable Dropping of TCP/IP Checksum Error Frames */
+
 /* Ethernet MAC DMA Interrupt Mask Register */
-#define EMAC_DMAIM_
+
+#define EMAC_DMAIM_TIE                 (1 << 0)  /* Bit 0:  Transmit Interrupt Enable */
+#define EMAC_DMAIM_TSE                 (1 << 1)  /* Bit 1:  Transmit Stopped Enable */
+#define EMAC_DMAIM_TUE                 (1 << 2)  /* Bit 2:  Transmit Buffer Unvailable Enable */
+#define EMAC_DMAIM_TJE                 (1 << 3)  /* Bit 3:  Transmit Jabber Timeout Enable */
+#define EMAC_DMAIM_OVE                 (1 << 4)  /* Bit 4:  Overflow Interrupt Enable */
+#define EMAC_DMAIM_UNE                 (1 << 5)  /* Bit 5:  Underflow Interrupt Enable */
+#define EMAC_DMAIM_RIE                 (1 << 6)  /* Bit 6:  Receive Interrupt Enable */
+#define EMAC_DMAIM_RUE                 (1 << 7)  /* Bit 7:  Receive Buffer Unavailable Enable */
+#define EMAC_DMAIM_RSE                 (1 << 8)  /* Bit 8:  Receive Stopped Enable */
+#define EMAC_DMAIM_RWE                 (1 << 9)  /* Bit 9:  Receive Watchdog Timeout Enable */
+#define EMAC_DMAIM_ETE                 (1 << 10) /* Bit 10: Early Transmit Interrupt Enable */
+#define EMAC_DMAIM_FBE                 (1 << 13) /* Bit 13: Fatal Bus Error Enable */
+#define EMAC_DMAIM_ERE                 (1 << 14) /* Bit 14: Early Receive Interrupt Enable */
+#define EMAC_DMAIM_AIE                 (1 << 15) /* Bit 15: Abnormal Interrupt Summary Enable */
+#define EMAC_DMAIM_NIE                 (1 << 16) /* Bit 16: Normal Interrupt Summary Enable */
+
 /* Ethernet MAC Missed Frame and Buffer Overflow Counter */
-#define EMAC_MFBOC_
+
+#define EMAC_MFBOC_MISFRMCNT_SHIFT     (0)       /* Bits 0-15: Missed Frame Counter */
+#define EMAC_MFBOC_MISFRMCNT_MASK      (0xffff << EMAC_MFBOC_MISFRMCNT_SHIFT)
+#define EMAC_MFBOC_MISCNTOVF           (1 << 16) /* Bit 16: Overflow bit for Missed Frame Counter */
+#define EMAC_MFBOC_OVFFRMCNT_MASK      (17)      /* Bits 17-27: Overflow Frame Counter */
+#define EMAC_MFBOC_OVFFRMCNT_MASK      (0x7ff << EMAC_MFBOC_OVFFRMCNT_MASK)
+#define EMAC_MFBOC_OVFCNTOVF           (1 << 28) /* Bit 28: Overflow Bit for FIFO Overflow Counter */
+
 /* Ethernet MAC Receive Interrupt Watchdog Timer */
-#define EMAC_RXINTWDT_
-/* Ethernet MAC Current Host Transmit Descriptor */
-#define EMAC_HOSTXDESC_
-/* Ethernet MAC Current Host Receive Descriptor */
-#define EMAC_HOSRXDESC_
-/* Ethernet MAC Current Host Transmit Buffer Address */
-#define EMAC_HOSTXBA_
-/* Ethernet MAC Current Host Receive Buffer Address */
-#define EMAC_HOSRXBA_
+
+#define EMAC_RXINTWDT_RIWT_SHIFT       (0)       /* Bits 0-7: Receive Interrupt Watchdog Timer Count */
+#define EMAC_RXINTWDT_RIWT_MASK        (0xff << EMAC_RXINTWDT_RIWT_SHIFT)
+
+/* Ethernet MAC Current Host Transmit Descriptor (32-bit value) */
+/* Ethernet MAC Current Host Receive Descriptor (32-bit value) */
+/* Ethernet MAC Current Host Transmit Buffer Address (32-bit value) */
+/* Ethernet MAC Current Host Receive Buffer Address (32-bit value) */
+
 /* Ethernet MAC Peripheral Property Register */
-#define EMAC_PP_
+
+#define EMAC_PP_PHYTYPE_SHIFT          (0)       /* Bits 0-2: Ethernet PHY Type */
+#define EMAC_PP_PHYTYPE_MASK           (7 << EMAC_PP_PHYTYPE_SHIFT)
+#  define EMAC_PP_PHYTYPE_NONE         (0 << EMAC_PP_PHYTYPE_SHIFT) /* No PHY */
+#  define EMAC_PP_PHYTYPE_FURY         (1 << EMAC_PP_PHYTYPE_SHIFT) /* Fury class PHY */
+#  define EMAC_PP_PHYTYPE_TPFS         (2 << EMAC_PP_PHYTYPE_SHIFT) /* Tempest/Firestorm class PHY */
+#  define EMAC_PP_PHYTYPE_SNOWFLAKE    (3 << EMAC_PP_PHYTYPE_SHIFT) /* Snowflake class PHY */
+#define EMAC_PP_MACTYPE_SHIFT          (8)       /* Bits 8-11: Ethernet MAC Type */
+#define EMAC_PP_MACTYPE_MASK           (7 << EMAC_PP_MACTYPE_SHIFT)
+#  define EMAC_PP_MACTYPE_LM3S         (0 << EMAC_PP_MACTYPE_SHIFT) /* Stellaris® LM3S-class MAC */
+#  define EMAC_PP_MACTYPE_TM4C129X     (1 << EMAC_PP_MACTYPE_SHIFT) /* Tiva TM4E129x-class MAC */
+
 /* Ethernet MAC Peripheral Configuration Register */
-#define EMAC_PC_
+
+#define EMAC_PC_PHYHOLD                (1 << 0)  /* Bit 0:  Ethernet PHY Hold */
+#define EMAC_PC_ANMODE_SHIFT           (1)       /* Bits 1-2: Auto Negotiation Mode */
+#define EMAC_PC_ANMODE_MASK            (3 << EMAC_PC_ANMODE_SHIFT)
+#  define EMAC_PC_ANMODE_10HD          (0 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 10Base-T, Half-Duplex */
+#  define EMAC_PC_ANMODE_10FD          (1 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 10Base-T, Full-Duplex */
+#  define EMAC_PC_ANMODE_100HD         (2 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 100Base-TX, Half-Duplex */
+#  define EMAC_PC_ANMODE_100FD         (3 << EMAC_PC_ANMODE_SHIFT)  /* When ANEN = 0x0, mode is 100Base-TX, Full-Duplex */
+#define EMAC_PC_ANEN                   (1 << 3)  /* Bit 3:  Auto Negotiation Enable */
+#define EMAC_PC_FASTANSEL_SHIFT        (4)       /* Bits 4-5: Fast Auto Negotiation Select */
+#define EMAC_PC_FASTANSEL_MASK         (3 << EMAC_PC_FASTANSEL_SHIFT)
+#  define EMAC_PC_FASTANSEL(n)         ((uint32_t)(n) << EMAC_PC_FASTANSEL_SHIFT)
+#define EMAC_PC_FASTANEN               (1 << 6)  /* Bit 6:  Fast Auto Negotiation Enable */
+#define EMAC_PC_EXTFD                  (1 << 7)  /* Bit 7:  Extended Full Duplex Ability */
+#define EMAC_PC_FASTLUPD               (1 << 8)  /* Bit 8:  FAST Link-Up in Parallel Detect */
+#define EMAC_PC_FASTRXDV               (1 << 9)  /* Bit 9:  Fast RXDV Detection */
+#define EMAC_PC_MDIXEN                 (1 << 10) /* Bit 10: MDIX Enable */
+#define EMAC_PC_FASTMDIX               (1 << 11) /* Bit 11: Fast Auto MDI-X */
+#define EMAC_PC_RBSTMDIX               (1 << 12) /* Bit 12: Robust Auto MDI-X */
+#define EMAC_PC_MDISWAP                (1 << 13) /* Bit 13: MDI Swap */
+#define EMAC_PC_POLSWAP                (1 << 14) /* Bit 14: Polarity Swap */
+#define EMAC_PC_FASTLDMODE_SHIFT       (15)      /* Bits 15-19: Fast Link Down Mode */
+#define EMAC_PC_FASTLDMODE_MASK        (31 << EMAC_PC_FASTLDMODE_SHIFT)
+#  define EMAC_PC_FASTLDMODE(n)        ((uint32_t)(n) << EMAC_PC_FASTLDMODE_SHIFT)
+#define EMAC_PC_TDRRUN                 (1 << 20) /* Bit 20: TDR Auto Run */
+#define EMAC_PC_LRR                    (1 << 21) /* Bit 21: Link Loss Recovery */
+#define EMAC_PC_ISOMIILL               (1 << 22) /* Bit 22: Isolate MII in Link Loss */
+#define EMAC_PC_RXERIDLE               (1 << 23) /* Bit 23: RXER Detection During Idle */
+#define EMAC_PC_NIBDETDIS              (1 << 24) /* Bit 24: Odd Nibble TXER Detection Disable */
+#define EMAC_PC_DIGRESTART             (1 << 25) /* Bit 25: PHY Soft Restart */
+#define EMAC_PC_PINTFS_SHIFT           (28)      /* Bits 28-30: Ethernet Interface Select */
+#define EMAC_PC_PINTFS_MASK            (7 << EMAC_PC_PINTFS_SHIFT)
+#  define EMAC_PC_PINTFS_IMII          (0 << EMAC_PC_PINTFS_SHIFT) /* MII: Internal PHY or external PHY connected via MII */
+#  define EMAC_PC_PINTFS_RMII          (4 << EMAC_PC_PINTFS_SHIFT) /* RMII: External PHY connected via RMII */
+#define EMAC_PC_PHYEXT                 (1 << 31) /* Bit 31: PHY Select */
+
 /* Ethernet MAC Clock Configuration Register */
-#define EMAC_CC_
+
+#define EMAC_CC_CLKEN                  (1 << 16) /* Bit 16: EN0RREF_CLK Signal Enable */
+#define EMAC_CC_POL                    (1 << 17) /* Bit 17: LED Polarity Control */
+#define EMAC_CC_PTPCEN                 (1 << 18) /* Bit 18: PTP Clock Reference Enable */
+
 /* Ethernet PHY Raw Interrupt Status */
-#define EPHY_RIS_
+
+#define EMAC_PHYRIS_INT                (1 << 0)  /* Bit 0:  Ethernet PHY Raw Interrupt Status */
+
 /* Ethernet PHY Interrupt Mask */
-#define EPHY_IM_
+
+#define EMAC_PHYIM_INT                 (1 << 0)  /* Bit 0:  Ethernet PHY Interrupt Mask */
+
 /* RW1C Ethernet PHY Masked Interrupt Status and Clear */
-#define EPHY_MISC_
+
+#define EMAC_PHYMISC_INT              (1 << 0)   /* Bit 0: Ethernet PHY Status and Clear register */
 
 /* MII Management Register Bit Definitions */
 
 /* Ethernet PHY Basic Mode Control */
-#define EPHY_EPHYBMCR_
+
+#define EPHY_BMCR_COLLTST              (1 << 7)  /* Bit 7:  Collision Test */
+#define EPHY_BMCR_DUPLEXM              (1 << 8)  /* Bit 8:  Duplex Mode */
+#define EPHY_BMCR_RESTARTAN            (1 << 9)  /* Bit 9:  Restart Auto-Negotiation */
+#define EPHY_BMCR_ISOLATE              (1 << 10) /* Bit 10: Port Isolate */
+#define EPHY_BMCR_PWRDWN               (1 << 11) /* Bit 11: Power Down */
+#define EPHY_BMCR_ANEN                 (1 << 12) /* Bit 12: Auto-Negotiate Enable */
+#define EPHY_BMCR_SPEED                (1 << 13) /* Bit 13: Speed Select */
+#define EPHY_BMCR_MIILOOPBK            (1 << 14) /* Bit 14: MII Loopback */
+#define EPHY_BMCR_MIIRESET             (1 << 15) /* Bit 15: MII Register reset */
+
 /* Ethernet PHY Basic Mode Status */
-#define EPHY_EPHYBMSR_
-/* Ethernet PHY Identifier Register 1 */
-#define EPHY_EPHYID1_
+
+#define EPHY_BMSR_EXTEN                (1 << 0)  /* Bit 0:  Extended Capability Enable */
+#define EPHY_BMSR_JABBER               (1 << 1)  /* Bit 1:  Jabber Detect */
+#define EPHY_BMSR_LINKSTAT             (1 << 2)  /* Bit 2:  Link Status */
+#define EPHY_BMSR_ANEN                 (1 << 3)  /* Bit 3:  Auto Negotiation Enabled */
+#define EPHY_BMSR_RFAULT               (1 << 4)  /* Bit 4:  Remote Fault */
+#define EPHY_BMSR_ANC                  (1 << 5)  /* Bit 5:  Auto-Negotiation Complete */
+#define EPHY_BMSR_MFPRESUP             (1 << 6)  /* Bit 6:  Preamble Suppression Capable */
+#define EPHY_BMSR_10BTHD               (1 << 11) /* Bit 11: 10 Base-T Half Duplex Capable */
+#define EPHY_BMSR_10BTFD               (1 << 12) /* Bit 12: 10 Base-T Full Duplex Capable */
+#define EPHY_BMSR_100BTXHD             (1 << 13) /* Bit 13: 100Base-TX Half Duplex Capable */
+#define EPHY_BMSR_100BTXFD             (1 << 14) /* Bit 14: 100Base-TX Full Duplex Capable */
+
+/* Ethernet PHY Identifier Register 1 (Most significant 16 bits of the OUI) */
 /* Ethernet PHY Identifier Register 2 */
-#define EPHY_EPHYID2_
+
+#define EPHY_ID2_MDLREV_SHIFT          (0)       /* Bits 0-3:  Model Revision Number */
+#define EPHY_ID2_MDLREV_MASK           (15 << EPHY_ID2_MDLREV_SHIFT)
+#define EPHY_ID2_VNDRMDL_SHIFT         (4)       /* Bits 4-9:  Vendor Model Number */
+#define EPHY_ID2_VNDRMDL_MASK          (0x3f << EPHY_ID2_VNDRMDL_SHIFT)
+#define EPHY_ID2_OUILSB_SHIFT          (10)      /* Bits 10-15:  OUI Least Significant Bits */
+#define EPHY_ID2_OUILSB_MASK           (0x3f << EPHY_ID2_OUILSB_SHIFT)
+
 /* Ethernet PHY Auto-Negotiation Advertisement */
-#define EPHY_EPHYANA_
+
+#define EPHY_ANA_SELECT_SHIFT          (0)       /* Bits 0-4:  Protocol Selection */
+#define EPHY_ANA_SELECT_MASK           (31 << EPHY_ANA_SELECT_SHIFT)
+#  define EPHY_ANA_SELECT(n)           ((uint16_t)(n) << EPHY_ANA_SELECT_SHIFT)
+#  define EPHY_ANA_SELECT_802p3U       (1 << EPHY_ANA_SELECT_SHIFT)
+#define EPHY_ANA_10BT                  (1 << 5)  /* Bit 5:  10Base-T Support */
+#define EPHY_ANA_10BTFD                (1 << 6)  /* Bit 6:  10Base-T Full Duplex Support */
+#define EPHY_ANA_100BTX                (1 << 7)  /* Bit 7:  100Base-TX Support */
+#define EPHY_ANA_100BTXFD              (1 << 8)  /* Bit 8:  100Base-TX Full Duplex Support */
+#define EPHY_ANA_100BT4                (1 << 9)  /* Bit 9:  100Base-T4 Support */
+#define EPHY_ANA_PAUSE                 (1 << 10) /* Bit 10: PAUSE Support for Full Duplex Links */
+#define EPHY_ANA_ASMDUP                (1 << 11) /* Bit 11: Asymmetric PAUSE support for Full Duplex Links */
+#define EPHY_ANA_RF                    (1 << 13) /* Bit 13: Remote Fault */
+#define EPHY_ANA_NP                    (1 << 15) /* Bit 15: Next Page Indication */
+
 /* Ethernet PHY Auto-Negotiation Link Partner Ability */
-#define EPHY_EPHYANLPA_
+
+#define EPHY_ANLPA_SELECT_SHIFT        (0)       /* Bits 0-4:  Protocol Selection */
+#define EPHY_ANLPA_SELECT_MASK         (31 << EPHY_ANLPA_SELECT_SHIFT)
+#  define EPHY_ANLPA_SELECT_802p3U     (1 << EPHY_ANA_SELECT_SHIFT)
+#define EPHY_ANLPA_10BT                (1 << 5)  /* Bit 5:  10Base-T Support */
+#define EPHY_ANLPA_10BTFD              (1 << 6)  /* Bit 6:  10Base-T Full Duplex Support */
+#define EPHY_ANLPA_100BTX              (1 << 7)  /* Bit 7:  100Base-TX Support */
+#define EPHY_ANLPA_100BTXFD            (1 << 8)  /* Bit 8:  100Base-TX Full Duplex Support */
+#define EPHY_ANLPA_100BT4              (1 << 9)  /* Bit 9:  100Base-T4 Support */
+#define EPHY_ANLPA_PAUSE               (1 << 10) /* Bit 10: PAUSE */
+#define EPHY_ANLPA_ASMDUP              (1 << 11) /* Bit 11: Asymmetric PAUSE */
+#define EPHY_ANLPA_RF                  (1 << 13) /* Bit 13: Remote Fault */
+#define EPHY_ANLPA_ACK                 (1 << 14) /* Bit 14: Acknowledge */
+#define EPHY_ANLPA_NP                  (1 << 15) /* Bit 15: Next Page Indication */
+
 /* Ethernet PHY Auto-Negotiation Expansion */
-#define EPHY_EPHYANER_
+
+#define EPHY_ANER_LPANABLE             (1 << 0)  /* Bit 0:  Link Partner Auto-Negotiation Able */
+#define EPHY_ANER_PAGERX               (1 << 1)  /* Bit 1:  Link Code Word Page Received */
+#define EPHY_ANER_NPABLE               (1 << 2)  /* Bit 2:  Next Page Able */
+#define EPHY_ANER_LPNPABLE             (1 << 3)  /* Bit 3:  Link Partner Next Page Able */
+#define EPHY_ANER_PDF                  (1 << 4)  /* Bit 4:  Parallel Detection Fault */
+
 /* Ethernet PHY Auto-Negotiation Next Page TX */
-#define EPHY_EPHYANNPTR_
+
+#define EPHY_ANNPTR_CODE_SHIFT         (0)        /* Bits 0-10:  Code */
+#define EPHY_ANNPTR_CODE_MASK          (0x7ff << EPHY_ANNPTR_CODE_SHIFT)
+#  define EPHY_ANNPTR_CODE(n)          ((uint16_t)(n) << EPHY_ANNPTR_CODE_SHIFT)
+#define EPHY_ANNPTR_TOGTX              (1 << 11)  /* Bit 11: Toggle */
+#define EPHY_ANNPTR_ACK2               (1 << 12)  /* Bit 12: Acknowledge 2 */
+#define EPHY_ANNPTR_MP                 (1 << 13)  /* Bit 13: Message Page */
+#define EPHY_ANNPTR_NP                 (1 << 15)  /* Bit 15: Next Page Indication */
+
 /* Ethernet PHY Auto-Negotiation Link Partner Ability Next Page */
-#define EPHY_EPHYANLNPTR_
+
+#define EPHY_ANLNPTR_CODE_SHIFT        (0)  /* Bits 0-10:  Code */
+#define EPHY_ANLNPTR_CODE_MASK         (0x7ff << EPHY_ANLNPTR_CODE_SHIFT)
+#define EPHY_ANLNPTR_TOG               (1 << 11)  /* Bit 11: Toggle */
+#define EPHY_ANLNPTR_ACK2              (1 << 12)  /* Bit 12: Acknowledge 2 */
+#define EPHY_ANLNPTR_MP                (1 << 13)  /* Bit 13: Message Page */
+#define EPHY_ANLNPTR_ACK               (1 << 14)  /* Bit 14: Acknowledge */
+#define EPHY_ANLNPTR_NP                (1 << 15)  /* Bit 15: Next Page Indication */
+
 /* Ethernet PHY Configuration 1 */
-#define EPHY_EPHYCFG1_
+
+#define EPHY_CFG1_FRXDVDET             (1 << 1)  /* Bit 1:  FAST RXDV Detection */
+
+#define EPHY_CFG1_FANSEL_SHIFT         (2)       /* Bits 2-3:  Fast Auto-Negotiation Select Configuration */
+#define EPHY_CFG1_FANSEL_MASK          (3 << EPHY_CFG1_FANSEL_SHIFT)
+#  define EPHY_CFG1_FANSEL_BLT80       (0 << EPHY_CFG1_FANSEL_SHIFT) /* Break Link Timer: 80 ms */
+#  define EPHY_CFG1_FANSEL_BLT120      (1 << EPHY_CFG1_FANSEL_SHIFT) /* Break Link Timer: 120 ms */
+#  define EPHY_CFG1_FANSEL_BLT240      (2 << EPHY_CFG1_FANSEL_SHIFT) /*  Break Link Timer: 240 ms */
+#define EPHY_CFG1_FASTANEN             (1 << 4)  /* Bit 4:  Fast Auto Negotiation Enable */
+#define EPHY_CFG1_RAMDIX               (1 << 5)  /* Bit 5:  Robust Auto MDI/MDIX */
+#define EPHY_CFG1_FAMDIX               (1 << 6)  /* Bit 6:  Fast Auto MDI/MDIX */
+#define EPHY_CFG1_LLR                  (1 << 7)  /* Bit 7:  Link Loss Recovery */
+#define EPHY_CFG1_TDRAR                (1 << 8)  /* Bit 8:  TDR Auto-Run at Link Down */
+#define EPHY_CFG1_DONE                 (1 << 15) /* Bit 15: Configuration Done */
+
 /* Ethernet PHY Configuration 2 */
-#define EPHY_EPHYCFG2_
+
+#define EPHY_CFG2_ODDNDETDIS           (1 << 1)  /* Bit 1:  Detection of Transmit Error */
+#define EPHY_CFG2_RXERRIDLE            (1 << 2)  /* Bit 2:  Detection of Receive Symbol Error During IDLE State */
+#define EPHY_CFG2_ISOMIILL             (1 << 3)  /* Bit 3:  Isolate MII outputs when Enhanced Link is not Achievable */
+#define EPHY_CFG2_ENLEDLINK            (1 << 4)  /* Bit 4:  Enhanced LED Functionality */
+#define EPHY_CFG2_EXTFD                (1 << 5)  /* Bit 5:  Extended Full-Duplex Ability */
+#define EPHY_CFG2_FLUPPD               (1 << 6)  /* Bit 6:  Fast Link-Up in Parallel Detect Mode */
+
 /* Ethernet PHY Configuration 3 */
-#define EPHY_EPHYCFG3_
+
+#define EPHY_CFG3_FLDWNM_SHIFT         (0)       /* Bits 0-4:  Fast Link Down Modes */
+#define EPHY_CFG3_FLDWNM_MASK          (31 << EPHY_CFG3_FLDWNM_SHIFT)
+#  define EPHY_CFG3_FLDWNM(n)          ((uint16_t)(n) << EPHY_CFG3_FLDWNM_SHIFT)
+#define EPHY_CFG3_MDIMDIXS             (1 << 6)  /* Bit 6:  MDI/MDIX Swap */
+#define EPHY_CFG3_POLSWAP              (1 << 7)  /* Bit 7:  Polarity Swap */
+
 /* Ethernet PHY Register Control */
-#define EPHY_EPHYREGCTL_
-/* Ethernet PHY Address or Data */
-#define EPHY_EPHYADDAR_
+
+#define EPHY_REGCTL_DEVAD_SHIFT        (0)       /* Bits 0-4:  Device Address */
+#define EPHY_REGCTL_DEVAD_MASK         (31 << EPHY_REGCTL_DEVAD_SHIFT)
+#  define EPHY_REGCTL_DEVAD(n)         ((uint16_t)(n) << EPHY_REGCTL_DEVAD_SHIFT)
+#define EPHY_REGCTL_FUNC_SHIFT         (14)      /* Bits 14-15:  Function */
+#define EPHY_REGCTL_FUNC_MASK          (3 << EPHY_REGCTL_FUNC_SHIFT)
+#  define EPHY_REGCTL_FUNC_ADDR        (0 << EPHY_REGCTL_FUNC_SHIFT) /* Address */
+#  define EPHY_REGCTL_FUNC_DATANI      (1 << EPHY_REGCTL_FUNC_SHIFT) /* Data, no post increment */
+#  define EPHY_REGCTL_FUNC_DATAPIRW    (2 << EPHY_REGCTL_FUNC_SHIFT) /* Data, post increment on read and write */
+#  define EPHY_REGCTL_FUNC_DATAPIWO    (3 << EPHY_REGCTL_FUNC_SHIFT) /* Data, post increment on write only */
+
+/* Ethernet PHY Address or Data (16-bit value) */
+
 /* Ethernet PHY Status */
-#define EPHY_EPHYSTS_
+
+#define EPHY_STS_LINK                  (1 << 0)  /* Bit 0:  Link Status */
+#define EPHY_STS_SPEED                 (1 << 1)  /* Bit 1:  Speed Status */
+#define EPHY_STS_DUPLEX                (1 << 2)  /* Bit 2:  Duplex Status */
+#define EPHY_STS_MIILB                 (1 << 3)  /* Bit 3:  MII Loopback Status */
+#define EPHY_STS_ANS                   (1 << 4)  /* Bit 4:  Auto-Negotiation Status */
+#define EPHY_STS_JD                    (1 << 5)  /* Bit 5:  Jabber Detect */
+#define EPHY_STS_RF                    (1 << 6)  /* Bit 6:  Remote Fault */
+#define EPHY_STS_MIIREQ                (1 << 7)  /* Bit 7:  MII Interrupt Pending */
+#define EPHY_STS_PAGERX                (1 << 8)  /* Bit 8:  Link Code Page Received */
+#define EPHY_STS_DL                    (1 << 9)  /* Bit 9:  Descrambler Lock */
+#define EPHY_STS_SD                    (1 << 10) /* Bit 10: Signal Detect */
+#define EPHY_STS_FCSL                  (1 << 11) /* Bit 11: False Carrier Sense Latch */
+#define EPHY_STS_POLSTAT               (1 << 12) /* Bit 12: Polarity Status */
+#define EPHY_STS_RXLERR                (1 << 13) /* Bit 13: Receive Error Latch */
+#define EPHY_STS_MDIXM                 (1 << 14) /* Bit 14: MDI-X Mode */
+
 /* Ethernet PHY Specific Control */
-#define EPHY_EPHYSCR_
+
+#define EPHY_SCR_INTEN                 (1 << 1)  /* Bit 1:  Interrupt Enable */
+#define EPHY_SCR_TINT                  (1 << 2)  /* Bit 2:  Test Interrupt */
+#define EPHY_SCR_COLFDM                (1 << 4)  /* Bit 4:  Collision in Full-Duplex Mode */
+#define EPHY_SCR_LBFIFO_SHIFT          (8)       /* Bits 8-9:  Loopback FIFO Depth */
+#define EPHY_SCR_LBFIFO_MASK           (3 << EPHY_SCR_LBFIFO_SHIFT)
+#  define EPHY_SCR_LBFIFO_4            (0 << EPHY_SCR_LBFIFO_SHIFT) /* Four nibble FIFO */
+#  define EPHY_SCR_LBFIFO_5            (1 << EPHY_SCR_LBFIFO_SHIFT) /* Five nibble FIFO */
+#  define EPHY_SCR_LBFIFO_6            (2 << EPHY_SCR_LBFIFO_SHIFT) /* Six nibble FIFO */
+#  define EPHY_SCR_LBFIFO_8            (3 << EPHY_SCR_LBFIFO_SHIFT) /* Eight nibble FIFO */
+#define EPHY_SCR_SBPYASS               (1 << 11) /* Bit 11: Scrambler Bypass */
+#define EPHY_SCR_PSMODE_SHIFT          (12)      /* Bits 12-13:  Power Saving Modes */
+#define EPHY_SCR_PSMODE_MASK           (3 << EPHY_SCR_PSMODE_SHIFT)
+#  define EPHY_SCR_PSMODE_NORMAL       (0 << EPHY_SCR_PSMODE_SHIFT) /* Normal operation mode. PHY is fully functional */
+#  define EPHY_SCR_PSMODE_LOWPWR       (1 << EPHY_SCR_PSMODE_SHIFT) /* IEEE Power Down */
+#  define EPHY_SCR_PSMODE_ACTWOL       (2 << EPHY_SCR_PSMODE_SHIFT) /* Active Sleep */
+#  define EPHY_SCR_PSMODE_PASWOL       (3 << EPHY_SCR_PSMODE_SHIFT) /* Passive Sleep */
+#define EPHY_SCR_PSEN                  (1 << 14) /* Bit 14: Power Saving Modes Enable */
+#define EPHY_SCR_DISCLK                (1 << 15) /* Bit 15: Disable CLK */
+
 /* Ethernet PHY MII Interrupt Status 1 */
-#define EPHY_EPHYMISR1_
+
+#define EPHY_MISR1_RXHFEN              (1 << 0)  /* Bit 0:  Receive Error Counter Register Half-Full Event Interrupt */
+#define EPHY_MISR1_FCHFEN              (1 << 1)  /* Bit 1:  False Carrier Counter Register half-full Interrupt Enable */
+#define EPHY_MISR1_ANCEN               (1 << 2)  /* Bit 2:  Auto-Negotiation Complete Interrupt Enable */
+#define EPHY_MISR1_DUPLEXMEN           (1 << 3)  /* Bit 3:  Duplex Status Interrupt Enable */
+#define EPHY_MISR1_SPEEDEN             (1 << 4)  /* Bit 4:  Speed Change Interrupt Enable */
+#define EPHY_MISR1_LINKSTATEN          (1 << 5)  /* Bit 5:  Link Status Interrupt Enable */
+#define EPHY_MISR1_RXHF                (1 << 8)  /* Bit 8:  Receive Error Counter Half-Full Interrupt */
+#define EPHY_MISR1_FCHF                (1 << 9)  /* Bit 9:  False Carrier Counter Half-Full Interrupt */
+#define EPHY_MISR1_ANC                 (1 << 10) /* Bit 10: Auto-Negotiation Complete Interrupt */
+#define EPHY_MISR1_DUPLEXM             (1 << 11) /* Bit 11: Change of Duplex Status Interrupt */
+#define EPHY_MISR1_SPEED               (1 << 12) /* Bit 12: Change of Speed Status Interrupt */
+#define EPHY_MISR1_LINKSTAT            (1 << 13) /* Bit 13: Change of Link Status Interrupt */
+
 /* Ethernet PHY MII Interrupt Status 2 */
-#define EPHY_EPHYMISR2_
+
+#define EPHY_MISR2_JABBEREN            (1 << 0)  /* Bit 0:  Jabber Detect Event Interrupt Enable */
+#define EPHY_MISR2_POLINTEN            (1 << 1)  /* Bit 1:  Polarity Changed Interrupt Enable */
+#define EPHY_MISR2_SLEEPEN             (1 << 2)  /* Bit 2:  Sleep Mode Event Interrupt Enable */
+#define EPHY_MISR2_MDICOEN             (1 << 3)  /* Bit 3:  MDI/MDIX Crossover Status Changed Interrupt Enable */
+#define EPHY_MISR2_LBFIFOEN            (1 << 4)  /* Bit 4:  Loopback FIFO Overflow/Underflow Interrupt Enable */
+#define EPHY_MISR2_PAGERXEN            (1 << 5)  /* Bit 5:  Page Receive Interrupt Enable */
+#define EPHY_MISR2_ANERREN             (1 << 6)  /* Bit 6:  Auto-Negotiation Error Interrupt Enable */
+#define EPHY_MISR2_JABBER              (1 << 8)  /* Bit 8:  Jabber Detect Event Interrupt */
+#define EPHY_MISR2_POLINT              (1 << 9)  /* Bit 9:  Polarity Changed Interrupt */
+#define EPHY_MISR2_SLEEP               (1 << 10) /* Bit 10: Sleep Mode Event Interrupt */
+#define EPHY_MISR2_MDICO               (1 << 11) /* Bit 11: MDI/MDIX Crossover Status Changed Interrupt */
+#define EPHY_MISR2_LBFIFO              (1 << 12) /* Bit 12: Loopback FIFO Overflow/Underflow Event Interrupt */
+#define EPHY_MISR2_PAGERX              (1 << 13) /* Bit 13: Page Receive Interrupt */
+#define EPHY_MISR2_ANERR               (1 << 14) /* Bit 14: Auto-Negotiation Error Interrupt */
+
 /* Ethernet PHY False Carrier Sense Counter */
-#define EPHY_EPHYFCSCR_
-/* Ethernet PHY Receive Error Count */
-#define EPHY_EPHYRXERCNT_
+
+#define EPHY_FCSCR_FCSCNT_SHIFT        (0)       /* Bits 0-7:  False Carrier Event Counter */
+#define EPHY_FCSCR_FCSCNT_MASK         (0xff << EPHY_FCSCR_FCSCNT_SHIFT)
+
+/* Ethernet PHY Receive Error Count *16-bit value) */
+
 /* Ethernet PHY BIST Control */
-#define EPHY_EPHYBISTCR_
+
+#define EPHY_BISTCR_LBMODE_SHIFT       (0)       /* Bits 0-4:  Loopback Mode Select */
+#define EPHY_BISTCR_LBMODE_MASK        (31 << EPHY_BISTCR_LBMODE_SHIFT)
+#  define EPHY_BISTCR_LBMODE_NPCSIN    (1 << 0)  /* Bit 0:  Near-end loopback: PCS Input Loopback */
+#  define EPHY_BISTCR_LBMODE_NPCSOUT   (1 << 1)  /* Bit 1:  Near-end loopback: PCS Output Loopback (100Base-TX only) */
+#  define EPHY_BISTCR_LBMODE_NDIG      (1 << 2)  /* Bit 2:  Near-end loopback: Digital Loopback */
+#  define EPHY_BISTCR_LBMODE_NANA      (1 << 3)  /* Bit 3:  Near-end loopback: Analog Loopback (requires 100 Ohm termination) */
+#  define EPHY_BISTCR_LBMODE_FREV      (1 << 4)  /* Bit 4:  Far-end Loopback: Reverse Loopback */
+#define EPHY_BISTCR_TXMIILB            (1 << 6)  /* Bit 6:  Transmit Data in MII Loopback Mode */
+#define EPHY_BISTCR_PWRMODE            (1 << 8)  /* Bit 8:  Power Mode Indication */
+#define EPHY_BISTCR_PKTGENSTAT         (1 << 9)  /* Bit 9:  Packet Generator Status Indication */
+#define EPHY_BISTCR_PRBSCHKSYNC        (1 << 10) /* Bit 10: PRBS Checker Lock Sync Loss Indication */
+#define EPHY_BISTCR_PRBSCHKLK          (1 << 11) /* Bit 11: PRBS Checker Lock Indication */
+#define EPHY_BISTCR_PKTEN              (1 << 12) /* Bit 12: Packet Generation Enable */
+#define EPHY_BISTCR_PRBSPKT            (1 << 13) /* Bit 13: Generated PRBS Packets */
+#define EPHY_BISTCR_PRBSM              (1 << 14) /* Bit 14: PRBS Single/Continuous Mode */
+
 /* Ethernet PHY LED Control */
-#define EPHY_EPHYLEDCR_
+
+#define EPHY_LEDCR_BLINKRATE_SHIFT     (9)      /* Bits 9-10: LED Blinking Rate (ON/OFF duration): */
+#define EPHY_LEDCR_BLINKRATE_MASK      (3 << EPHY_LEDCR_BLINKRATE_SHIFT)
+#  define EPHY_LEDCR_BLINKRATE_20HZ    (0 << EPHY_LEDCR_BLINKRATE_SHIFT) /* 20 Hz (50 ms) */
+#  define EPHY_LEDCR_BLINKRATE_10HZ    (1 << EPHY_LEDCR_BLINKRATE_SHIFT) /* 10 Hz (100 ms) */
+#  define EPHY_LEDCR_BLINKRATE_5HZ     (2 << EPHY_LEDCR_BLINKRATE_SHIFT) /* 5 Hz (200 ms) */
+#  define EPHY_LEDCR_BLINKRATE_2HZ     (3 << EPHY_LEDCR_BLINKRATE_SHIFT) /* 2 Hz (500 ms) */
+
 /* Ethernet PHY Control */
-#define EPHY_EPHYCTL_
+
+#define EPHY_CTL_BYPLEDSTRCH           (1 << 7)  /* Bit 7:  Bypass LED Stretching */
+#define EPHY_CTL_MIILNKSTAT            (1 << 11) /* Bit 11: MII Link Status */
+#define EPHY_CTL_PAUSETX               (1 << 12) /* Bit 12: Pause Transmit Negotiated Status */
+#define EPHY_CTL_PAUSERX               (1 << 13) /* Bit 13: Pause Receive Negotiated Status */
+#define EPHY_CTL_FORCEMDI              (1 << 14) /* Bit 14: Force MDIX */
+#define EPHY_CTL_AUTOMDI               (1 << 15) /* Bit 15: Auto-MDIX Enable */
+
 /* Ethernet PHY 10Base-T Status/Control */
-#define EPHY_EPHY10BTSC_
+
+#define EPHY_10BTSC_JABBERD            (1 << 0)  /* Bit 0:  Jabber Disable */
+#define EPHY_10BTSC_POLSTAT            (1 << 4)  /* Bit 4:  10 Mb Polarity Status */
+#define EPHY_10BTSC_NLPDIS             (1 << 7)  /* Bit 7:  Normal Link Pulse (NLP) Transmission Control */
+#define EPHY_10BTSC_SQUELCH_SHIFT      (9)       /* Bits 9-12:  Squelch Configuration */
+#define EPHY_10BTSC_SQUELCH_MASK       (15 << EPHY_10BTSC_SQUELCH_SHIFT)
+#  define EPHY_10BTSC_SQUELCH(n)       ((uint16_t)(n) << EPHY_10BTSC_SQUELCH_SHIFT)
+#define EPHY_10BTSC_RXTHEN             (1 << 13) /* Bit 13: Lower Receiver Threshold Enable */
+
 /* Ethernet PHY BIST Control and Status 1 */
-#define EPHY_EPHYBICSR1_
+
+#define EPHY_BICSR1_IPGLENGTH_SHIFT    (0)       /* Bits 0-7:  BIST IPG Length */
+#define EPHY_BICSR1_IPGLENGTH_MASK     (0xff << EPHY_BICSR1_IPGLENGTH_SHIFT)
+#  define EPHY_BICSR1_IPGLENGTH(n)     ((uint16_t)(n) << EPHY_BICSR1_IPGLENGTH_SHIFT)
+#define EPHY_BICSR1_ERRCNT_SHIFT       (8)       /* Bits 8-15:  BIST Error Count */
+#define EPHY_BICSR1_ERRCNT_MASK        (0xff << EPHY_BICSR1_ERRCNT_SHIFT)
+
 /* Ethernet PHY BIST Control and Status 2 */
-#define EPHY_EPHYBICSR2_
+
+#define EPHY_BICSR2_PKTLENGTH_SHIFT    (0)  /* Bits 0-10:  BIST Packet Length */
+#define EPHY_BICSR2_PKTLENGTH_MASK     (0x7ff << EPHY_BICSR2_PKTLENGTH_SHIFT)
+#  define EPHY_BICSR2_PKTLENGTH(n)     ((uint16_t)(n << EPHY_BICSR2_PKTLENGTH_SHIFT)
+
 /* Ethernet PHY Cable Diagnostic Control */
-#define EPHY_EPHYCDCR_
+
+#define EPHY_CDCR_FAIL                 (1 << 0)  /* Bit 0:  Cable Diagnostic Process Fail */
+#define EPHY_CDCR_DONE                 (1 << 1)  /* Bit 1:  Cable Diagnostic Process Done */
+#define EPHY_CDCR_LINKQUAL_SHIFT       (8)       /* Bits 8-9:  Link Quality Indication */
+#define EPHY_CDCR_LINKQUAL_MASK        (3 << EPHY_CDCR_LINKQUAL_SHIFT)
+#  define EPHY_CDCR_LINKQUAL_GOOD      (1 << EPHY_CDCR_LINKQUAL_SHIFT) /* Good Quality Link Indication */
+#  define EPHY_CDCR_LINKQUAL_MILD      (2 << EPHY_CDCR_LINKQUAL_SHIFT) /* Mid- Quality Link Indication */
+#  define EPHY_CDCR_LINKQUAL_POOR      (3 << EPHY_CDCR_LINKQUAL_SHIFT) /* Poor Quality Link Indication */
+#define EPHY_CDCR_START                (1 << 15) /* Bit 15: Cable Diagnostic Process Start */
+
 /* Ethernet PHY Reset Control */
-#define EPHY_EPHYRCR_
+
+#define EPHY_RCR_SWRESTART             (1 << 14) /* Bit 14: Software Restart */
+#define EPHY_RCR_SWRST                 (1 << 15) /* Bit 15: Software Reset */
+
 /* Ethernet PHY LED Configuration */
-#define EPHY_EPHYLEDCFG_
+
+#define EPHY_LEDCFG_LED0_SHIFT         (0)       /* Bit0-13:  LED0 Configuration */
+#define EPHY_LEDCFG_LED0_MASK          (15 << EPHY_LEDCFG_LED0_SHIFT)
+#  define EPHY_LEDCFG_LED0_LINK        (0 << EPHY_LEDCFG_LED0_SHIFT) /* Link OK */
+#  define EPHY_LEDCFG_LED0_RXTX        (1 << EPHY_LEDCFG_LED0_SHIFT) /* RX/TX Activity */
+#  define EPHY_LEDCFG_LED0_TX          (2 << EPHY_LEDCFG_LED0_SHIFT) /* TX Activity */
+#  define EPHY_LEDCFG_LED0_RX          (3 << EPHY_LEDCFG_LED0_SHIFT) /* RX Activity */
+#  define EPHY_LEDCFG_LED0_COL         (4 << EPHY_LEDCFG_LED0_SHIFT) /* Collision */
+#  define EPHY_LEDCFG_LED0_100BT       (5 << EPHY_LEDCFG_LED0_SHIFT) /* 100-Base TX */
+#  define EPHY_LEDCFG_LED0_10BT        (6 << EPHY_LEDCFG_LED0_SHIFT) /* 10-Base TX */
+#  define EPHY_LEDCFG_LED0_FD          (7 << EPHY_LEDCFG_LED0_SHIFT) /* Full Duplex */
+#  define EPHY_LEDCFG_LED0_LINKTXRX    (8 << EPHY_LEDCFG_LED0_SHIFT) /* Link OK/Blink on TX/RX Activity */
+#define EPHY_LEDCFG_LED1_SHIFT         (4)       /* Bits 4-7:  LED1 Configuration */
+#define EPHY_LEDCFG_LED1_MASK          (15 << EPHY_LEDCFG_LED1_SHIFT)
+#  define EPHY_LEDCFG_LED1_LINK        (0 << EPHY_LEDCFG_LED1_SHIFT) /* Link OK */
+#  define EPHY_LEDCFG_LED1_RXTX        (1 << EPHY_LEDCFG_LED1_SHIFT) /* RX/TX Activity */
+#  define EPHY_LEDCFG_LED1_TX          (2 << EPHY_LEDCFG_LED1_SHIFT) /* TX Activity */
+#  define EPHY_LEDCFG_LED1_RX          (3 << EPHY_LEDCFG_LED1_SHIFT) /* RX Activity */
+#  define EPHY_LEDCFG_LED1_COL         (4 << EPHY_LEDCFG_LED1_SHIFT) /* Collision */
+#  define EPHY_LEDCFG_LED1_100BT       (5 << EPHY_LEDCFG_LED1_SHIFT) /* 100-Base TX */
+#  define EPHY_LEDCFG_LED1_10BT        (6 << EPHY_LEDCFG_LED1_SHIFT) /* 10-Base TX */
+#  define EPHY_LEDCFG_LED1_FD          (7 << EPHY_LEDCFG_LED1_SHIFT) /* Full Duplex */
+#  define EPHY_LEDCFG_LED1_LINKTXRX    (8 << EPHY_LEDCFG_LED1_SHIFT) /* Link OK/Blink on TX/RX Activity */
+#define EPHY_LEDCFG_LED2_SHIFT         (8)       /* Bits 8-11:  LED2 Configuration */
+#define EPHY_LEDCFG_LED2_MASK          (15 << EPHY_LEDCFG_LED2_SHIFT)
+#  define EPHY_LEDCFG_LED2_LINK        (0 << EPHY_LEDCFG_LED2_SHIFT) /* Link OK */
+#  define EPHY_LEDCFG_LED2_RXTX        (1 << EPHY_LEDCFG_LED2_SHIFT) /* RX/TX Activity */
+#  define EPHY_LEDCFG_LED2_TX          (2 << EPHY_LEDCFG_LED2_SHIFT) /* TX Activity */
+#  define EPHY_LEDCFG_LED2_RX          (3 << EPHY_LEDCFG_LED2_SHIFT) /* RX Activity */
+#  define EPHY_LEDCFG_LED2_COL         (4 << EPHY_LEDCFG_LED2_SHIFT) /* Collision */
+#  define EPHY_LEDCFG_LED2_100BT       (5 << EPHY_LEDCFG_LED2_SHIFT) /* 100-Base TX */
+#  define EPHY_LEDCFG_LED2_10BT        (6 << EPHY_LEDCFG_LED2_SHIFT) /* 10-Base TX */
+#  define EPHY_LEDCFG_LED2_FD          (7 << EPHY_LEDCFG_LED2_SHIFT) /* Full Duplex */
+#  define EPHY_LEDCFG_LED2_LINKTXRX    (8 << EPHY_LEDCFG_LED2_SHIFT) /* Link OK/Blink on TX/RX Activity */
 
 /************************************************************************************
  * Public Types
