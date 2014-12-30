@@ -44,8 +44,9 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <arpa/inet.h>
 
