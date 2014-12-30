@@ -46,8 +46,6 @@
 #  include "chip/tm4c_ethernet.h"
 #elif defined(CONFIG_ARCH_CHIP_LM3S)
 #  include "chip/lm3s_ethernet.h"
-#else
-#  error Ethernet register definitions unknown for this chip
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_CHIP_TIVA_ETHERNET_H */
