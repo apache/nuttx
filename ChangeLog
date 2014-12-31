@@ -9357,3 +9357,7 @@
 	  tm4c_ethernet.h:  Add logic to descriminate betwen LM3S class Ethernet
 	  register definitions and TM4C129X class Ethernet register definitions.
 	  Add TM4C129X Ethernet register definitions (2014-12-30).
+	* arch/arm/src/tiva/tm4c_ethernet.c, lm3s_ethernet.c, Kconfig, and
+	  Make.defs: First cut at TM4C129X Ethernet driver.  Initial commit is
+	  basically just the STM32 Ethernet driver with modifications for a clean
+	  compilation in the Tiva environment (2014-12-31).
