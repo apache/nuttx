@@ -79,6 +79,7 @@
 #define TIVA_EMAC_ADDR3H_OFFSET        0x0058  /* Ethernet MAC Address 3 High */
 #define TIVA_EMAC_ADDR3L_OFFSET        0x005c  /* Ethernet MAC Address 3 Low */
 #define TIVA_EMAC_WDOGTO_OFFSET        0x00dc  /* Ethernet MAC Watchdog Timeout */
+
 #define TIVA_EMAC_MMCCTRL_OFFSET       0x0100  /* Ethernet MAC MMC Control */
 #define TIVA_EMAC_MMCRXRIS_OFFSET      0x0104  /* Ethernet MAC MMC Receive Raw Interrupt Status */
 #define TIVA_EMAC_MMCTXRIS_OFFSET      0x0108  /* Ethernet MAC MMC Transmit Raw Interrupt Status */
@@ -92,8 +93,10 @@
 #define TIVA_EMAC_RXCNTCRCERR_OFFSET   0x0194  /* Ethernet MAC Receive Frame Count for CRC Error Frames */
 #define TIVA_EMAC_RXCNTALGNERR_OFFSET  0x0198  /* Ethernet MAC Receive Frame Count for Alignment Error Frames */
 #define TIVA_EMAC_RXCNTGUNI_OFFSET     0x01c4  /* Ethernet MAC Receive Frame Count for Good Unicast Frames */
+
 #define TIVA_EMAC_VLNINCREP_OFFSET     0x0584  /* Ethernet MAC VLAN Tag Inclusion or Replacement */
 #define TIVA_EMAC_VLANHASH_OFFSET      0x0588  /* Ethernet MAC VLAN Hash Table */
+
 #define TIVA_EMAC_TIMSTCTRL_OFFSET     0x0700  /* Ethernet MAC Timestamp Control */
 #define TIVA_EMAC_SUBSECINC_OFFSET     0x0704  /* Ethernet MAC Sub-Second Increment */
 #define TIVA_EMAC_TIMSEC_OFFSET        0x0708  /* Ethernet MAC System Time - Seconds */
@@ -108,6 +111,7 @@
 #define TIVA_EMAC_PPSCTRL_OFFSET       0x072c  /* Ethernet MAC PPS Control */
 #define TIVA_EMAC_PPS0INTVL_OFFSET     0x0760  /* Ethernet MAC PPS0 Interval */
 #define TIVA_EMAC_PPS0WIDTH_OFFSET     0x0764  /* Ethernet MAC PPS0 Width */
+
 #define TIVA_EMAC_DMABUSMOD_OFFSET     0x0c00  /* Ethernet MAC DMA Bus Mode */
 #define TIVA_EMAC_TXPOLLD_OFFSET       0x0c04  /* Ethernet MAC Transmit Poll Demand */
 #define TIVA_EMAC_RXPOLLD_OFFSET       0x0c08  /* Ethernet MAC Receive Poll Demand */
@@ -122,6 +126,7 @@
 #define TIVA_EMAC_HOSRXDESC_OFFSET     0x0c4c  /* Ethernet MAC Current Host Receive Descriptor */
 #define TIVA_EMAC_HOSTXBA_OFFSET       0x0c50  /* Ethernet MAC Current Host Transmit Buffer Address */
 #define TIVA_EMAC_HOSRXBA_OFFSET       0x0c54  /* Ethernet MAC Current Host Receive Buffer Address */
+
 #define TIVA_EMAC_PP_OFFSET            0x0fc0  /* Ethernet MAC Peripheral Property Register */
 #define TIVA_EMAC_PC_OFFSET            0x0fc4  /* Ethernet MAC Peripheral Configuration Register */
 #define TIVA_EMAC_CC_OFFSET            0x0fc8  /* Ethernet MAC Clock Configuration Register */
@@ -249,10 +254,10 @@
 #define EMAC_CFG_DC                    (1 << 4)  /* Bit 4:  Deferral Check */
 #define EMAC_CFG_BL_SHIFT              (5)       /* Bits 5-6: Back-Off Limit */
 #define EMAC_CFG_BL_MASK               (3 << EMAC_CFG_BL_SHIFT)
-#  define EMAC_CFG_BL_1024             (0 << EMAC_CFG_BL_SHIFT) /* k = min (n,10) */
-#  define EMAC_CFG_BL_256              (1 << EMAC_CFG_BL_SHIFT) /* k = min (n,8) */
-#  define EMAC_CFG_BL_8                (2 << EMAC_CFG_BL_SHIFT) /* k = min (n,4) */
-#  define EMAC_CFG_BL_2                (3 << EMAC_CFG_BL_SHIFT) /* k = min (n,1) */
+#  define EMAC_CFG_BL_10               (0 << EMAC_CFG_BL_SHIFT) /* k = min (n,10) */
+#  define EMAC_CFG_BL_8                (1 << EMAC_CFG_BL_SHIFT) /* k = min (n,8) */
+#  define EMAC_CFG_BL_4                (2 << EMAC_CFG_BL_SHIFT) /* k = min (n,4) */
+#  define EMAC_CFG_BL_1                (3 << EMAC_CFG_BL_SHIFT) /* k = min (n,1) */
 #define EMAC_CFG_ACS                   (1 << 7)  /* Bit 7:  Automatic Pad or CRC Stripping */
 #define EMAC_CFG_DR                    (1 << 9)  /* Bit 8:  Disable Retry */
 #define EMAC_CFG_IPC                   (1 << 10) /* Bit 10: Checksum Offload */
@@ -264,6 +269,7 @@
 #define EMAC_CFG_DISCRS                (1 << 16) /* Bit 16: Disable Carrier Sense During Transmission */
 #define EMAC_CFG_IFG_SHIFT             (17)     /* Bits 17-19: Inter-Frame Gap (IFG) */
 #define EMAC_CFG_IFG_MASK              (7 << EMAC_CFG_IFG_SHIFT)
+#  define EMAC_CFG_IFG(n)              ((12-((n) >> 3)) << EMAC_CFG_IFG_SHIFT) /* n bit times, n=40,48,..96 */
 #  define EMAC_CFG_IFG_96              (0 << EMAC_CFG_IFG_SHIFT) /* 96 bit times */
 #  define EMAC_CFG_IFG_88              (1 << EMAC_CFG_IFG_SHIFT) /* 88 bit times */
 #  define EMAC_CFG_IFG_80              (2 << EMAC_CFG_IFG_SHIFT) /* 80 bit times */
@@ -294,10 +300,10 @@
 #define EMAC_FRAMEFLTR_DBF             (1 << 5)  /* Bit 5:  Disable Broadcast Frames */
 #define EMAC_FRAMEFLTR_PCF_SHIFT       (6)       /* Bits 6-7: Pass Control Frames */
 #define EMAC_FRAMEFLTR_PCF_MASK        (3 << EMAC_FRAMEFLTR_PCF_SHIFT)
-#define EMAC_FRAMEFLTR_PCF_ALL         (0 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Filter all control frames */
-#define EMAC_FRAMEFLTR_PCF_PAUSE       (1 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward all control frames except PAUSE */
-#define EMAC_FRAMEFLTR_PCF_NONE        (2 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward all control frames */
-#define EMAC_FRAMEFLTR_PCF_ADDR        (3 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward control frames that pass the address Filter */
+#  define EMAC_FRAMEFLTR_PCF_NONE      (0 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Prevents all control frames */
+#  define EMAC_FRAMEFLTR_PCF_PAUSE     (1 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Prevents all except PAUSE */
+#  define EMAC_FRAMEFLTR_PCF_ALL       (2 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forward all control frames */
+#  define EMAC_FRAMEFLTR_PCF_FILTER    (3 << EMAC_FRAMEFLTR_PCF_SHIFT) /* Forwards all that pass address filter */
 #define EMAC_FRAMEFLTR_SAIF            (1 << 8)  /* Bit 8:  Source Address (SA) Inverse Filtering */
 #define EMAC_FRAMEFLTR_SAF             (1 << 9)  /* Bit 9:  Source Address Filter Enable */
 #define EMAC_FRAMEFLTR_HPF             (1 << 10) /* Bit 10: Hash or Perfect Filter */
@@ -317,6 +323,7 @@
 #  define EMAC_MIIADDR_CR_100_150      (1 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=100-150 MHz; MDIO clock=SYSCLK/62 */
 #  define EMAC_MIIADDR_CR_20_35        (2 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=20-35 MHz; MDIO clock=SYSCLK/16 */
 #  define EMAC_MIIADDR_CR_35_60        (3 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=35-60 MHz; MDIO clock=SYSCLK/26 */
+#  define EMAC_MIIADDR_CR_150_168      (4 << EMAC_MIIADDR_CR_SHIFT) /* System Clock=150-168 MHz; MDIO clock=SYSCLK/102 */
 #define EMAC_MIIADDR_MII_SHIFT         (6)       /* Bits 6-10: MII Register */
 #define EMAC_MIIADDR_MII_MASK          (31 << EMAC_MIIADDR_MII_SHIFT)
 #  define EMAC_MIIADDR_MII(n)          ((uint32_t)(n) << EMAC_MIIADDR_MII_SHIFT)
@@ -337,10 +344,10 @@
 #define EMAC_FLOWCTL_UP                (1 << 3)  /* Bit 3:  Unicast Pause Frame Detect */
 #define EMAC_FLOWCTL_PLT_SHIFT         (4)       /* Bits 4-5: Pause Low Threshold */
 #define EMAC_FLOWCTL_PLT_MASK          (3 << EMAC_FLOWCTL_PLT_SHIFT)
-#  define EMAC_FLOWCTL_PLT_4           (0 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 4 slot times */
-#  define EMAC_FLOWCTL_PLT_28          (1 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 28 slot times */
-#  define EMAC_FLOWCTL_PLT_144         (2 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 144 slot times */
-#  define EMAC_FLOWCTL_PLT_156         (3 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 256 slot times */
+#  define EMAC_FLOWCTL_PLT_M4          (0 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 4 slot times */
+#  define EMAC_FLOWCTL_PLT_M28         (1 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 28 slot times */
+#  define EMAC_FLOWCTL_PLT_M144        (2 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 144 slot times */
+#  define EMAC_FLOWCTL_PLT_M256        (3 << EMAC_FLOWCTL_PLT_SHIFT) /* Pause time minus 256 slot times */
 #define EMAC_FLOWCTL_DZQP              (1 << 7)  /* Bit 7:  Disable Zero-Quanta Pause */
 #define EMAC_FLOWCTL_PT_SHIFT          (16)      /* Bits 16-31: Pause Time */
 #define EMAC_FLOWCTL_PT_MASK           (0xffff << EMAC_FLOWCTL_PT_SHIFT)
@@ -418,6 +425,7 @@
 
 #define EMAC_IM_PMT                    (1 << 3)  /* Bit 3:  PMT Interrupt Mask */
 #define EMAC_IM_TSI                    (1 << 9)  /* Bit 9:  Timestamp Interrupt Mask */
+#define EMAC_IM_ALLINTS                (EMAC_IM_PMT|EMAC_IM_TSI)
 
 /* Ethernet MAC Address 0 High */
 /* Ethernet MAC Address 0 Low Register (32-bit MAC Address0 [31:0]) */
@@ -655,10 +663,10 @@
 #  define EMAC_DMABUSMOD_PBL(n)        ((uint32_t)(n) << EMAC_DMABUSMOD_PBL_SHIFT)
 #define EMAC_DMABUSMOD_PR_SHIFT        (14)      /* Bits 14-15: Priority Ratio */
 #define EMAC_DMABUSMOD_PR_MASK         (3 << EMAC_DMABUSMOD_PR_SHIFT)
-#  define EMAC_DMABUSMOD_PR_11         (0 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 1:1 */
-#  define EMAC_DMABUSMOD_PR_21         (1 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 2:1 */
-#  define EMAC_DMABUSMOD_PR_31         (2 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 3:1 */
-#  define EMAC_DMABUSMOD_PR_41         (3 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 4:1 */
+#  define EMAC_DMABUSMOD_PR_1TO1       (0 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 1:1 */
+#  define EMAC_DMABUSMOD_PR_2TO1       (1 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 2:1 */
+#  define EMAC_DMABUSMOD_PR_3TO1       (2 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 3:1 */
+#  define EMAC_DMABUSMOD_PR_4TO1       (3 << EMAC_DMABUSMOD_PR_SHIFT) /* Priority Ratio is 4:1 */
 #define EMAC_DMABUSMOD_FB              (1 << 16) /* Bit 16: Fixed Burst */
 #define EMAC_DMABUSMOD_RPBL_SHIFT      (17)      /* Bits 17:22: RX DMA Programmable Burst Length (PBL) */
 #define EMAC_DMABUSMOD_RPBL_MASK       (0x3f << EMAC_DMABUSMOD_RPBL_SHIFT)
@@ -681,23 +689,26 @@
 
 #define EMAC_TXDLADDR_MASK             (0xfffffffc)
 
-/* Ethernet MAC DMA Interrupt Status */
+/* Ethernet MAC DMA Interrupt Status and Ethernet MAC DMA Interrupt Mask Register (common bit definitions) */
 
-#define EMAC_DMARIS_TI                 (1 << 0)  /* Bit 0:  Transmit Interrupt */
-#define EMAC_DMARIS_TPS                (1 << 1)  /* Bit 1:  Transmit Process Stopped */
-#define EMAC_DMARIS_TU                 (1 << 2)  /* Bit 2:  Transmit Buffer Unavailable */
-#define EMAC_DMARIS_TJT                (1 << 3)  /* Bit 3:  Transmit Jabber Timeout */
-#define EMAC_DMARIS_OVF                (1 << 4)  /* Bit 4:  Receive Overflow */
-#define EMAC_DMARIS_UNF                (1 << 5)  /* Bit 5:  Transmit Underflow */
-#define EMAC_DMARIS_RI                 (1 << 6)  /* Bit 6:  Receive Interrupt */
-#define EMAC_DMARIS_RU                 (1 << 7)  /* Bit 7:  Receive Buffer Unavailable */
-#define EMAC_DMARIS_RPS                (1 << 8)  /* Bit 8:  Receive Process Stopped */
-#define EMAC_DMARIS_RWT                (1 << 9)  /* Bit 9:  Receive Watchdog Timeout */
-#define EMAC_DMARIS_ETI                (1 << 10) /* Bit 10: Early Transmit Interrupt */
-#define EMAC_DMARIS_FBI                (1 << 13) /* Bit 13: Fatal Bus Error Interrupt */
-#define EMAC_DMARIS_ERI                (1 << 14) /* Bit 14: Early Receive Interrupt */
-#define EMAC_DMARIS_AIS                (1 << 15) /* Bit 15: Abnormal Interrupt Summary */
-#define EMAC_DMARIS_NIS                (1 << 16) /* Bit 16: Normal Interrupt Summary */
+#define EMAC_DMAINT_TI                 (1 << 0)  /* Bit 0:  Transmit interrupt */
+#define EMAC_DMAINT_TPSI               (1 << 1)  /* Bit 1:  Transmit process stopped interrupt */
+#define EMAC_DMAINT_TBUI               (1 << 2)  /* Bit 2:  Transmit buffer unavailable interrupt */
+#define EMAC_DMAINT_TJTI               (1 << 3)  /* Bit 3:  Transmit jabber timeout interrupt */
+#define EMAC_DMAINT_OVFI               (1 << 4)  /* Bit 4:  Overflow interrupt */
+#define EMAC_EMAINT_UNFI               (1 << 5)  /* Bit 5:  Underflow interrupt */
+#define EMAC_DMAINT_RI                 (1 << 6)  /* Bit 6:  Receive interrupt */
+#define EMAC_DMAINT_RBUI               (1 << 7)  /* Bit 7:  Receive buffer unavailable interrupt */
+#define EMAC_DMAINT_RPSI               (1 << 8)  /* Bit 8:  Receive process stopped interrupt */
+#define EMAC_DMAINT_RWTI               (1 << 9)  /* Bit 9:  Receive watchdog timeout interrupt */
+#define EMAC_DMAINT_ETI                (1 << 10) /* Bit 10: Early transmit interrupt */
+#define EMAC_DMAINT_FBEI               (1 << 13) /* Bit 13: Fatal bus error interrupt */
+#define EMAC_DMAINT_ERI                (1 << 14) /* Bit 14: Early receive interrupt */
+#define EMAC_DMAINT_AIS                (1 << 15) /* Bit 15: Abnormal interrupt summary */
+#define EMAC_DMAINT_NIS                (1 << 16) /* Bit 16: Normal interrupt summary */
+
+/* Ethernet MAC DMA Interrupt Status (unique fields) */
+
 #define EMAC_DMARIS_RS_SHIFT           (17)      /* Bits 17-19: Received Process State */
 #define EMAC_DMARIS_RS_MASK            (7 << EMAC_DMARIS_RS_SHIFT)
 #  define EMAC_DMARIS_RS_STOP          (0 << EMAC_DMARIS_RS_SHIFT) /* Stopped: Reset or stop receive command issued */
@@ -757,24 +768,6 @@
 #define EMAC_DMAOPMODE_DFF             (1 << 24) /* Bit 24: Disable Flushing of Received Frames */
 #define EMAC_DMAOPMODE_RSF             (1 << 25) /* Bit 25: Receive Store and Forward */
 #define EMAC_DMAOPMODE_DT              (1 << 26) /* Bit 26: Disable Dropping of TCP/IP Checksum Error Frames */
-
-/* Ethernet MAC DMA Interrupt Mask Register */
-
-#define EMAC_DMAIM_TIE                 (1 << 0)  /* Bit 0:  Transmit Interrupt Enable */
-#define EMAC_DMAIM_TSE                 (1 << 1)  /* Bit 1:  Transmit Stopped Enable */
-#define EMAC_DMAIM_TUE                 (1 << 2)  /* Bit 2:  Transmit Buffer Unvailable Enable */
-#define EMAC_DMAIM_TJE                 (1 << 3)  /* Bit 3:  Transmit Jabber Timeout Enable */
-#define EMAC_DMAIM_OVE                 (1 << 4)  /* Bit 4:  Overflow Interrupt Enable */
-#define EMAC_DMAIM_UNE                 (1 << 5)  /* Bit 5:  Underflow Interrupt Enable */
-#define EMAC_DMAIM_RIE                 (1 << 6)  /* Bit 6:  Receive Interrupt Enable */
-#define EMAC_DMAIM_RUE                 (1 << 7)  /* Bit 7:  Receive Buffer Unavailable Enable */
-#define EMAC_DMAIM_RSE                 (1 << 8)  /* Bit 8:  Receive Stopped Enable */
-#define EMAC_DMAIM_RWE                 (1 << 9)  /* Bit 9:  Receive Watchdog Timeout Enable */
-#define EMAC_DMAIM_ETE                 (1 << 10) /* Bit 10: Early Transmit Interrupt Enable */
-#define EMAC_DMAIM_FBE                 (1 << 13) /* Bit 13: Fatal Bus Error Enable */
-#define EMAC_DMAIM_ERE                 (1 << 14) /* Bit 14: Early Receive Interrupt Enable */
-#define EMAC_DMAIM_AIE                 (1 << 15) /* Bit 15: Abnormal Interrupt Summary Enable */
-#define EMAC_DMAIM_NIE                 (1 << 16) /* Bit 16: Normal Interrupt Summary Enable */
 
 /* Ethernet MAC Missed Frame and Buffer Overflow Counter */
 
