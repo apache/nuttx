@@ -151,8 +151,8 @@
 /* μDMA Power Control */
 
 #ifdef TIVA_SYSCON_PCDMA
-#  define tiva_udma_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCDMA,SYSCON_PCDMA_R0)
-#  define tiva_udma_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCDMA,SYSCON_PCDMA_R0)
+#  define tiva_udma_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCDMA,SYSCON_PCDMA_P0)
+#  define tiva_udma_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCDMA,SYSCON_PCDMA_P0)
 #else
 #  define tiva_udma_enablepwr()
 #  define tiva_udma_disablepwr()
@@ -161,8 +161,8 @@
 /* EPI Power Control */
 
 #ifdef TIVA_SYSCON_PCEPI
-#  define tiva_epi_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCEPI,SYSCON_PCEPI_R0)
-#  define tiva_epi_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCEPI,SYSCON_PCEPI_R0)
+#  define tiva_epi_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCEPI,SYSCON_PCEPI_P0)
+#  define tiva_epi_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCEPI,SYSCON_PCEPI_P0)
 #else
 #  define tiva_epi_enablepwr()
 #  define tiva_epi_disablepwr()
@@ -171,8 +171,8 @@
 /* Hibernation Power Control */
 
 #ifdef TIVA_SYSCON_PCHIB
-#  define tiva_hib_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCHIB,SYSCON_PCHIB_R0)
-#  define tiva_hib_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCHIB,SYSCON_PCHIB_R0)
+#  define tiva_hib_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCHIB,SYSCON_PCHIB_P0)
+#  define tiva_hib_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCHIB,SYSCON_PCHIB_P0)
 #else
 #  define tiva_hib_enablepwr()
 #  define tiva_hib_disablepwr()
@@ -261,8 +261,8 @@
 /* USB Power Control */
 
 #ifdef TIVA_SYSCON_PCUSB
-#  define tiva_usb_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCUSB,SYSCON_PCUSB_R0)
-#  define tiva_usb_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCUSB,SYSCON_PCUSB_R0)
+#  define tiva_usb_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCUSB,SYSCON_PCUSB_P0)
+#  define tiva_usb_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCUSB,SYSCON_PCUSB_P0)
 #else
 #  define tiva_usb_enablepwr()
 #  define tiva_usb_disablepwr()
@@ -271,8 +271,8 @@
 /* Ethernet PHY Power Control */
 
 #ifdef TIVA_SYSCON_PCEPHY
-#  define tiva_ephy_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCEPHY,SYSCON_PCEPHY_R0)
-#  define tiva_ephy_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCEPHY,SYSCON_PCEPHY_R0)
+#  define tiva_ephy_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCEPHY,SYSCON_PCEPHY_P0)
+#  define tiva_ephy_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCEPHY,SYSCON_PCEPHY_P0)
 #else
 #  define tiva_ephy_enablepwr()
 #  define tiva_ephy_disablepwr()
@@ -313,8 +313,8 @@
 /* ACMP Power Control */
 
 #ifdef TIVA_SYSCON_PCACMP
-#  define tiva_acmp_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCACMP,SYSCON_PCACMP_R0)
-#  define tiva_acmp_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCACMP,SYSCON_PCACMP_R0)
+#  define tiva_acmp_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCACMP,SYSCON_PCACMP_P0)
+#  define tiva_acmp_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCACMP,SYSCON_PCACMP_P0)
 #else
 #  define tiva_acmp_enablepwr()
 #  define tiva_acmp_disablepwr()
@@ -355,8 +355,8 @@
 /* EEPROM Power Control */
 
 #ifdef TIVA_SYSCON_PCEEPROM
-#  define tiva_eeprom_enablepwr()   tiva_enablepwr(TIVA_SYSCON_PCEEPROM,SYSCON_PCEEPROM_R0)
-#  define tiva_eeprom_disablepwr()  tiva_disablepwr(TIVA_SYSCON_PCEEPROM,SYSCON_PCEEPROM_R0)
+#  define tiva_eeprom_enablepwr()   tiva_enablepwr(TIVA_SYSCON_PCEEPROM,SYSCON_PCEEPROM_P0)
+#  define tiva_eeprom_disablepwr()  tiva_disablepwr(TIVA_SYSCON_PCEEPROM,SYSCON_PCEEPROM_P0)
 #else
 #  define tiva_eeprom_enablepwr()
 #  define tiva_eeprom_disablepwr()
@@ -389,8 +389,8 @@
 /* CRC/Crypto Modules RunMode ClockGating Control */
 
 #ifdef TIVA_SYSCON_PCCCM
-#  define tiva_ccm_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCCCM,SYSCON_PCCCM_R0)
-#  define tiva_ccm_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCCCM,SYSCON_PCCCM_R0)
+#  define tiva_ccm_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCCCM,SYSCON_PCCCM_P0)
+#  define tiva_ccm_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCCCM,SYSCON_PCCCM_P0)
 #else
 #  define tiva_ccm_enablepwr()
 #  define tiva_ccm_disablepwr()
@@ -399,8 +399,8 @@
 /* LCD Controller Power Control */
 
 #ifdef TIVA_SYSCON_PCLCD
-#  define tiva_lcd_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCLCD,SYSCON_PCLCD_R0)
-#  define tiva_lcd_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCLCD,SYSCON_PCLCD_R0)
+#  define tiva_lcd_enablepwr()     tiva_enablepwr(TIVA_SYSCON_PCLCD,SYSCON_PCLCD_P0)
+#  define tiva_lcd_disablepwr()    tiva_disablepwr(TIVA_SYSCON_PCLCD,SYSCON_PCLCD_P0)
 #else
 #  define tiva_lcd_enablepwr()
 #  define tiva_lcd_disablepwr()
@@ -409,8 +409,8 @@
 /* 1-Wire Power Control */
 
 #ifdef TIVA_SYSCON_PCOWIRE
-#  define tiva_owire_enablepwr()   tiva_enablepwr(TIVA_SYSCON_PCOWIRE,SYSCON_PCOWIRE_R0)
-#  define tiva_owire_disablepwr()  tiva_disablepwr(TIVA_SYSCON_PCOWIRE,SYSCON_PCOWIRE_R0)
+#  define tiva_owire_enablepwr()   tiva_enablepwr(TIVA_SYSCON_PCOWIRE,SYSCON_PCOWIRE_P0)
+#  define tiva_owire_disablepwr()  tiva_disablepwr(TIVA_SYSCON_PCOWIRE,SYSCON_PCOWIRE_P0)
 #else
 #  define tiva_owire_enablepwr()
 #  define tiva_owire_disablepwr()
@@ -419,8 +419,8 @@
 /* Ethernet MAC Power Control */
 
 #ifdef TIVA_SYSCON_PCEMAC
-#  define tiva_emac_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCEMAC,SYSCON_PCEMAC_R0)
-#  define tiva_emac_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCEMAC,SYSCON_PCEMAC_R0)
+#  define tiva_emac_enablepwr()    tiva_enablepwr(TIVA_SYSCON_PCEMAC,SYSCON_PCEMAC_P0)
+#  define tiva_emac_disablepwr()   tiva_disablepwr(TIVA_SYSCON_PCEMAC,SYSCON_PCEMAC_P0)
 #else
 #  define tiva_emac_enablepwr()
 #  define tiva_emac_disablepwr()
