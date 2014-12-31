@@ -183,7 +183,7 @@ config ARCH_BOARD_EZ80F910200ZCO
 		tools.  The development environment is Cygwin under WinXP.
 
 config ARCH_BOARD_FIRE_STM32
-	bool " M3 Wildfire STM32 board"
+	bool "M3 Wildfire STM32 board"
 	depends on ARCH_CHIP_STM32F103VE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
