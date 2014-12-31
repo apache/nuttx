@@ -53,11 +53,16 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-#include <nuttx/net/mii.h>
 
+#ifdef CONFIG_NET_NOINTS
+#  include <nuttx/wqueue.h>
+#endif
+
+#include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
-#if defined(CONFIG_NET_PKT)
+
+#ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
 
@@ -85,6 +90,14 @@
 
 #if TIVA_NETHCONTROLLERS > 1
 #  error Logic to support multiple Ethernet interfaces is incomplete
+#endif
+
+/* If processing is not done at the interrupt level, then high priority
+ * work queue support is required.
+ */
+
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
+#  error High priority work queue support is required
 #endif
 
 #ifndef CONFIG_TIVA_PHYADDR
@@ -544,10 +557,13 @@ struct tiva_ethmac_s
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID              txpoll;      /* TX poll timer */
   WDOG_ID              txtimeout;   /* TX timeout timer */
+#ifdef CONFIG_NET_NOINTS
+  struct work_s        work;        /* For deferring work to the work queue */
+#endif
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct net_driver_s  dev;         /* Interface understood by uIP */
+  struct net_driver_s  dev;         /* Interface understood by network subsysem */
 
   /* Used to track transmit and receive descriptors */
 
@@ -616,12 +632,25 @@ static int  tiva_recvframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_receive(FAR struct tiva_ethmac_s *priv);
 static void tiva_freeframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_txdone(FAR struct tiva_ethmac_s *priv);
+static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void tiva_interrupt_work(FAR void *arg);
+#endif
 static int  tiva_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void tiva_polltimer(int argc, uint32_t arg, ...);
-static void tiva_txtimeout(int argc, uint32_t arg, ...);
+static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void tiva_txtimeout_work(FAR void *arg);
+#endif
+static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void tiva_poll_work(FAR void *arg);
+#endif
+static void tiva_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1100,7 +1129,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, TIVA_TXTIMEOUT, tiva_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, TIVA_TXTIMEOUT, tiva_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -1780,46 +1809,46 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_interrupt
+ * Function: tiva_interrupt_process
  *
  * Description:
- *   Hardware interrupt handler
+ *   Interrupt processing.  This may be performed either within the interrupt
+ *   handler or on the worker thread, depending upon the configuration
  *
  * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
+ *   priv  - Reference to the driver state structure
  *
  * Returned Value:
- *   OK on success
+ *   None
  *
  * Assumptions:
+ *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, FAR void *context)
+static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
 {
-  register FAR struct tiva_ethmac_s *priv = &g_tiva_ethmac[0];
-  uint32_t dmasr;
+  uint32_t dmaris;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
-  dmasr = tiva_getreg(TIVA_EMAC_DMARIS);
+  dmaris = tiva_getreg(TIVA_EMAC_DMARIS);
 
   /* Mask only enabled interrupts.  This depends on the fact that the interrupt
    * related bits (0-16) correspond in these two registers.
    */
 
-  dmasr &= tiva_getreg(TIVA_EMAC_DMAIM);
+  dmaris &= tiva_getreg(TIVA_EMAC_DMAIM);
 
   /* Check if there are pending "normal" interrupts */
 
-  if ((dmasr & EMAC_DMAINT_NIS) != 0)
+  if ((dmaris & EMAC_DMAINT_NIS) != 0)
     {
       /* Yes.. Check if we received an incoming packet, if so, call
        * tiva_receive()
        */
 
-      if ((dmasr & EMAC_DMAINT_RI) != 0)
+      if ((dmaris & EMAC_DMAINT_RI) != 0)
         {
           /* Clear the pending receive interrupt */
 
@@ -1835,7 +1864,7 @@ static int tiva_interrupt(int irq, FAR void *context)
        * are no pending transmissions.
        */
 
-      if ((dmasr & EMAC_DMAINT_TI) != 0)
+      if ((dmaris & EMAC_DMAINT_TI) != 0)
         {
           /* Clear the pending receive interrupt */
 
@@ -1857,11 +1886,11 @@ static int tiva_interrupt(int irq, FAR void *context)
 
   /* Check if there are pending "anormal" interrupts */
 
-  if ((dmasr & EMAC_DMAINT_AIS) != 0)
+  if ((dmaris & EMAC_DMAINT_AIS) != 0)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abormal event(s): %08x\n", dmasr);
+      nlldbg("Abormal event(s): %08x\n", dmaris);
 
       /* Clear all pending abnormal events */
 
@@ -1872,11 +1901,163 @@ static int tiva_interrupt(int irq, FAR void *context)
       tiva_putreg(EMAC_DMAINT_AIS, TIVA_EMAC_DMARIS);
     }
 #endif
+}
+
+/****************************************************************************
+ * Function: tiva_interrupt_work
+ *
+ * Description:
+ *   Perform interrupt related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() was called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void tiva_interrupt_work(FAR void *arg)
+{
+  FAR struct tiva_ethmac_s *priv = ( FAR struct tiva_ethmac_s *)arg;
+
+  /* Process pending Ethernet interrupts */
+
+  tiva_interrupt_process(priv);
+
+  /* Re-enable Ethernet interrupts at the NVIC */
+
+  up_enable_irq(TIVA_IRQ_ETHCON);
+}
+#endif
+
+/****************************************************************************
+ * Function: tiva_interrupt
+ *
+ * Description:
+ *   Hardware interrupt handler
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int tiva_interrupt(int irq, FAR void *context)
+{
+  FAR struct tiva_ethmac_s *priv = &g_tiva_ethmac[0];
+
+#ifdef CONFIG_NET_NOINTS
+  uint32_t dmaris;
+
+  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
+   */
+
+  up_disable_irq(TIVA_IRQ_ETHCON);
+
+  /* Check if a packet transmission just completed. */
+
+  dmaris = tiva_getreg(TIVA_EMAC_DMARIS);
+  if ((dmaris & EMAC_DMAINT_TI) != 0)
+    {
+      /* If a TX transfer just completed, then cancel the TX timeout so
+       * there will be do race condition between any subsequent timeout
+       * expiration and the deferred interrupt processing.
+       */
+
+       wd_cancel(priv->txtimeout);
+    }
+
+  /* Cancel any pending poll work */
+
+  work_cancel(HPWORK, &priv->work);
+
+  /* Schedule to perform the interrupt processing on the worker thread. */
+
+  work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
+
+#else
+  /* Process the interrupt now */
+
+  tiva_interrupt_process(priv);
+#endif
+
   return OK;
 }
 
 /****************************************************************************
- * Function: tiva_txtimeout
+ * Function: tiva_txtimeout_process
+ *
+ * Description:
+ *   Process a TX timeout.  Called from the either the watchdog timer
+ *   expiration logic or from the worker thread, depending upon the
+ *   configuration.  The timeout means that the last TX never completed.
+ *   Reset the hardware and start again.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv)
+{
+  /* Reset the hardware.  Just take the interface down, then back up again. */
+
+  tiva_ifdown(&priv->dev);
+  tiva_ifup(&priv->dev);
+
+  /* Then poll uIP for new XMIT data */
+
+  tiva_dopoll(priv);
+}
+
+/****************************************************************************
+ * Function: tiva_txtimeout_work
+ *
+ * Description:
+ *   Perform TX timeout related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void tiva_txtimeout_work(FAR void *arg)
+{
+  FAR struct tiva_ethmac_s *priv = ( FAR struct tiva_ethmac_s *)arg;
+
+  /* Process pending Ethernet interrupts */
+
+  tiva_txtimeout_process(priv);
+}
+#endif
+
+/****************************************************************************
+ * Function: tiva_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -1894,46 +2075,61 @@ static int tiva_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void tiva_txtimeout(int argc, uint32_t arg, ...)
+static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
   nlldbg("Timeout!\n");
 
-  /* Then reset the hardware.  Just take the interface down, then back
-   * up again.
+#ifdef CONFIG_NET_NOINTS
+  /* Disable further Ethernet interrupts.  This will prevent some race
+   * conditions with interrupt work.  There is still a potential race
+   * condition with interrupt work that is already queued and in progress.
+   *
+   * Interrupts will be re-enabled when tiva_ifup() is called.
    */
 
-  tiva_ifdown(&priv->dev);
-  tiva_ifup(&priv->dev);
+  up_disable_irq(TIVA_IRQ_ETHCON);
 
-  /* Then poll uIP for new XMIT data */
+  /* Cancel any pending poll or interrupt work.  This will have no effect
+   * on work that has already been started.
+   */
 
-  tiva_dopoll(priv);
+  work_cancel(HPWORK, &priv->work);
+
+  /* Schedule to perform the TX timeout processing on the worker thread.
+   * TODO: Assure that no there is not pending interrupt or poll work.
+   */
+
+  work_queue(HPWORK, &priv->work, tiva_txtimeout_work, priv, 0);
+
+#else
+  /* Process the timeout now */
+
+  tiva_txtimeout_process(priv);
+#endif
 }
 
 /****************************************************************************
- * Function: tiva_polltimer
+ * Function: tiva_poll_process
  *
  * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
+ *   Perform the periodic poll.  This may be called either from watchdog
+ *   timer logic or from the worker thread, depending upon the configuration.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   priv  - Reference to the driver state structure
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
-static void tiva_polltimer(int argc, uint32_t arg, ...)
+static inline void tiva_poll_process(FAR struct tiva_ethmac_s *priv)
 {
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
-  FAR struct net_driver_s   *dev  = &priv->dev;
+  FAR struct net_driver_s *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
    * cannot perform the timer poll if we are unable to accept another packet
@@ -1980,7 +2176,86 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_polltimer, 1, arg);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+}
+
+/****************************************************************************
+ * Function: tiva_poll_work
+ *
+ * Description:
+ *   Perform periodic polling from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void tiva_poll_work(FAR void *arg)
+{
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
+
+  /* Perform the poll */
+
+  tiva_poll_process(priv);
+}
+#endif
+
+/****************************************************************************
+ * Function: tiva_poll_expiry
+ *
+ * Description:
+ *   Periodic timer handler.  Called from the timer interrupt handler.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void tiva_poll_expiry(int argc, uint32_t arg, ...)
+{
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
+
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions.
+   */
+
+  if (work_available(&priv->work))
+    {
+      /* Schedule to perform the interrupt processing on the worker thread.
+       * TODO: Make sure that there can be no pending interrupt work.
+       */
+
+      work_queue(HPWORK, &priv->work, tiva_poll_work, priv, 0);
+    }
+  else
+    {
+      /* No.. Just re-start the watchdog poll timer, missing one polling
+       * cycle.
+       */
+
+      (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
+    }
+
+#else
+  /* Process the interrupt now */
+
+  tiva_poll_process(priv);
+#endif
 }
 
 /****************************************************************************
@@ -2019,7 +2294,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TIVA_WDDELAY, tiva_poll_expiry, 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
