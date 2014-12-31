@@ -447,6 +447,17 @@ static int skel_interrupt(int irq, FAR void *context)
    * condition here.
    */
 
+  /* TODO: Determine if a TX transfer just completed */
+
+    {
+      /* If a TX transfer just completed, then cancel the TX timeout so
+       * there will be do race condition between any subsequent timeout
+       * expiration and the deferred interrupt processing.
+       */
+
+       wd_cancel(skel->sk_txtimeout);
+    }
+
   /* Cancel any pending poll work */
 
   work_cancel(HPWORK, skel->sk_work);
@@ -454,6 +465,7 @@ static int skel_interrupt(int irq, FAR void *context)
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(HPWORK, &skel->sk_work, skel_interrupt_work, skel, 0);
+
 #else
   /* Process the interrupt now */
 
