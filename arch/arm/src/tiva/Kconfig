@@ -17,6 +17,7 @@ config ARCH_CHIP_LM3S6918
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_ETHERNET
 
 config ARCH_CHIP_LM3S9B96
 	bool "LM3S9B96"
@@ -26,6 +27,7 @@ config ARCH_CHIP_LM3S9B96
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_ETHERNET
 	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM3S6432
@@ -33,6 +35,7 @@ config ARCH_CHIP_LM3S6432
 	depends on ARCH_CHIP_LM
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
+	select TIVA_HAVE_ETHERNET
 
 config ARCH_CHIP_LM3S6965
 	bool "LM3S6965"
@@ -41,6 +44,7 @@ config ARCH_CHIP_LM3S6965
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_I2C1
+	select TIVA_HAVE_ETHERNET
 	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM3S8962
@@ -50,6 +54,7 @@ config ARCH_CHIP_LM3S8962
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_I2C1
+	select TIVA_HAVE_ETHERNET
 	select TIVA_HAVE_GPIOH_IRQS
 
 config ARCH_CHIP_LM4F120
@@ -79,12 +84,14 @@ config ARCH_CHIP_TM4C1294NC
 	depends on ARCH_CHIP_TIVA
 	select ARCH_CHIP_TM4C
 	select ARCH_CHIP_TM4C129
+	select TIVA_HAVE_ETHERNET
 
 config ARCH_CHIP_TM4C129XNC
 	bool "TM4C129XNC"
 	depends on ARCH_CHIP_TIVA
 	select ARCH_CHIP_TM4C
 	select ARCH_CHIP_TM4C129
+	select TIVA_HAVE_ETHERNET
 
 config ARCH_CHIP_CC3200
 	bool "CC3200"
@@ -248,6 +255,10 @@ config TIVA_HAVE_SSI2
 	default n
 
 config TIVA_HAVE_SSI3
+	bool
+	default n
+
+config TIVA_HAVE_ETHERNET
 	bool
 	default n
 
@@ -634,7 +645,9 @@ endmenu # I2C Configuration
 endif # TIVA_I2C
 
 if TIVA_ETHERNET
-menu "Tiva/Stellaris Ethernet Configuration"
+
+menu "Stellaris Ethernet Configuration"
+	depends on ARCH_CHIP_LM3S
 
 config TIVA_ETHLEDS
 	bool "Ethernet LEDs"
@@ -689,14 +702,191 @@ config TIVA_BADCRC
 	---help---
 		Set to enable bad CRC rejection.
 
-config M3S_DUMPPACKET
+config TIVA_DUMPPACKET
 	bool "Dump Packets"
 	default n
 	---help---
 		Dump each packet received/sent to the console.
 
-endmenu
-endif
+endmenu # Stellaris Ethernet Configuration
+
+menu "Tiva Ethernet Configuration"
+	depends on ARCH_CHIP_TM4C
+
+choice
+	prompt "PHY selection"
+	default TIVA_PHY_INTERNAL
+
+config TIVA_PHY_INTERNAL
+	bool "Internal PHY"
+	---help---
+		Use the built-in, internal Tiva PHY
+
+config TIVA_PHY_MII
+	bool "External MII interface"
+	depends on EXPERIMENTAL
+	---help---
+		Support external PHY MII interface.
+
+config TIVA_PHY_RMII
+	bool "External RMII interface"
+	depends on EXPERIMENTAL
+	---help---
+		Support external PHY RMII interface.
+
+endchoice # PHY selection
+
+config TIVA_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config TIVA_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+if !TIVA_AUTONEG
+config TIVA_ETHFD
+	bool "Full duplex"
+	default n
+	---help---
+		If TIVA_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config TIVA_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	---help---
+		If TIVA_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+endif # !TIVA_AUTONEG
+if TIVA_AUTONEG
+
+config TIVA_PHYSR
+	int "PHY Status Register Address (decimal)"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config TIVA_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if !TIVA_PHYSR_ALTCONFIG
+
+config TIVA_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config TIVA_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config TIVA_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config TIVA_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !TIVA_PHYSR_ALTCONFIG
+if TIVA_PHYSR_ALTCONFIG
+
+config TIVA_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config TIVA_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config TIVA_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config TIVA_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config TIVA_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if TIVA_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # TIVA_PHYSR_ALTCONFIG
+endif # TIVA_AUTONEG
+
+config TIVA_EMAC_NRXDESC
+	int "Number of RX descriptors"
+	default 8
+	---help---
+		Number of RX DMA descriptors to use.
+
+config TIVA_EMAC_NTXDESC
+	int "Number of TX descriptors"
+	default 4
+	---help---
+		Number of TX DMA descriptors to use.
+
+config TIVA_EMAC_ENHANCEDDESC
+	bool
+	default n
+
+config TIVA_EMAC_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	depends on EXPERIMENTAL
+	select TIVA_EMAC_ENHANCEDDESC
+	---help---
+		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
+		with this condition.
+
+config TIVA_EMAC_HWCHECKSUM
+	bool "Use hardware checksums"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Use the hardware checksum capabilities of the Tiva chip
+
+config TIVA_ETHERNET_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # Tiva Ethernet Configuration
+endif # TIVA_ETHERNET
 
 if TIVA_SSI
 menu "Tiva/Stellaris SSI Configuration"
