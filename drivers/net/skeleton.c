@@ -106,7 +106,7 @@ struct skel_driver_s
   WDOG_ID sk_txpoll;           /* TX poll timer */
   WDOG_ID sk_txtimeout;        /* TX timeout timer */
 #ifdef CONFIG_NET_NOINTS
-  struct work_s work;          /* For deferring work to the work queue */
+  struct work_s sk_work;       /* For deferring work to the work queue */
 #endif
 
   /* This holds the information visible to uIP/NuttX */
@@ -397,7 +397,7 @@ static inline void skel_interrupt_process(FAR struct skel_driver_s *skel)
  *   Perform interrupt related work from the worker thread
  *
  * Parameters:
- *   arg - The argument passed when work_queue() as called.
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
  *   OK on success
@@ -442,14 +442,18 @@ static int skel_interrupt(int irq, FAR void *context)
   FAR struct skel_driver_s *skel = &g_skel[0];
 
 #ifdef CONFIG_NET_NOINTS
-  /* TODO: Disable further Ethernet interrupts */
-
-  /* Schedule to perform the interrupt processing on the worker thread.
-   * TODO: Assure that no timeouts can occur.
+  /* TODO: Disable further Ethernet interrupts.  Because Ethernet interrupts
+   * are also disabled if the TX timeout event occurs, there can be no race
+   * condition here.
    */
 
-  DEBUGASSERT(work_available(&skel->work);
-  work_queue(HPWORK, &skel->work, skel_interrupt_work, skel, 0);
+  /* Cancel any pending poll work */
+
+  work_cancel(HPWORK, skel->sk_work);
+
+  /* Schedule to perform the interrupt processing on the worker thread. */
+
+  work_queue(HPWORK, &skel->sk_work, skel_interrupt_work, skel, 0);
 #else
   /* Process the interrupt now */
 
@@ -542,14 +546,22 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
 #ifdef CONFIG_NET_NOINTS
-  /* TODO: Disable further Ethernet interrupts */
+  /* TODO: Disable further Ethernet interrupts.  This will prevent some race
+   * conditions with interrupt work.  There is still a potential race
+   * condition with interrupt work that is already queued and in progress.
+   */
+
+  /* Cancel any pending poll or interrupt work.  This will have not effect
+   * on work that has already been started.
+   */
+
+  work_cancel(HPWORK, skel->sk_work);
 
   /* Schedule to perform the TX timeout processing on the worker thread.
    * TODO: Assure that no there is not pending interrupt or poll work.
    */
 
-  DEBUGASSERT(work_available(&skel->work);
-  work_queue(HPWORK, &skel->work, skel_txtimeout_work, skel, 0);
+  work_queue(HPWORK, &skel->sk_work, skel_txtimeout_work, skel, 0);
 #else
   /* Process the interrupt now */
 
@@ -643,12 +655,27 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
 #ifdef CONFIG_NET_NOINTS
-  /* Schedule to perform the interrupt processing on the worker thread.
-   * TODO: Make sure that there can be no pending interrupt work.
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions.
    */
 
-  DEBUGASSERT(work_available(&skel->work);
-  work_queue(HPWORK, &skel->work, skel_poll_work, skel, 0);
+  if (work_available(&skel->sk_work)
+    {
+      /* Schedule to perform the interrupt processing on the worker thread.
+       * TODO: Make sure that there can be no pending interrupt work.
+       */
+
+      work_queue(HPWORK, &skel->sk_work, skel_poll_work, skel, 0);
+    }
+  else
+    {
+      /* No.. Just re-start the watchdog poll timer, missing one polling
+       * cycle.
+       */
+
+      (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, arg);
+    }
+
 #else
   /* Process the interrupt now */
 
