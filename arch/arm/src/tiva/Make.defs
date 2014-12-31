@@ -97,7 +97,12 @@ CHIP_CSRCS += tiva_i2c.c
 endif
 
 ifeq ($(CONFIG_NET),y)
-CHIP_CSRCS += tiva_ethernet.c
+ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
+CHIP_CSRCS += lm3s_ethernet.c
+endif
+ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
+CHIP_CSRCS += tm4c_ethernet.c
+endif
 endif
 
 ifeq ($(CONFIG_TIVA_FLASH),y)

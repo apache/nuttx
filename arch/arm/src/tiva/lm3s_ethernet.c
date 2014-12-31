@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/tiva_ethernet.c
+ * arch/arm/src/tiva/lm3s_ethernet.c
  *
  *   Copyright (C) 2009-2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,6 +66,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifdef CONFIG_NET_MULTIBUFFER
+#  error CONFIG_NET_MULTIBUFFER should not be selected
+#endif
 
 /* Half duplex can be forced if CONFIG_TIVA_ETHHDUPLEX is defined. */
 
