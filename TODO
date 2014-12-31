@@ -900,15 +900,16 @@ o Network (net/, drivers/net)
                ARCHITECTURE   CONFIG_NET_NOINTS
                C5471          NO
                STM32          NO
-               TIVA           NO
+               TIVA/LM3S      NO
+               TIVA/TM4C      YES <<
                eZ80           NO
-               LPC17xx        YES << Only this one supports CONFIG_NET_NOINTS
+               LPC17xx        YES <<
                DMxxx NIC      NO
                PIC32          NO
                RGMP           NO
                SAM3/4         NO
                SAMA5D         NO
-               SIM            NO << Doesn't have interrupts anyway
+               SIM            N/A << Doesn't support interrupts
 
                The general outline of how this might be done is included in
                drivers/net/skeleton.c
