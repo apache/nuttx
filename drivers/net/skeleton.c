@@ -56,7 +56,7 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
-#ifndef CONFIG_NET_NOINTS
+#ifdef CONFIG_NET_NOINTS
 #  include <nuttx/wqueue.h>
 #endif
 
@@ -141,17 +141,17 @@ static int  skel_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static inline void skel_poll_process(FAR struct skel_driver_s *skel);
-#ifdef CONFIG_NET_NOINTS
-static void skel_poll_work(FAR void *arg);
-#endif
-static void skel_polltimer(int argc, uint32_t arg, ...);
-
 static inline void skel_txtimeout_process(FAR struct skel_driver_s *skel);
 #ifdef CONFIG_NET_NOINTS
 static void skel_txtimeout_work(FAR void *arg);
 #endif
-static void skel_txtimeout(int argc, uint32_t arg, ...);
+static void skel_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static inline void skel_poll_process(FAR struct skel_driver_s *skel);
+#ifdef CONFIG_NET_NOINTS
+static void skel_poll_work(FAR void *arg);
+#endif
+static void skel_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -202,7 +202,7 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(skel->sk_txtimeout, skeleton_TXTIMEOUT, skel_txtimeout, 1, (uint32_t)skel);
+  (void)wd_start(skel->sk_txtimeout, skeleton_TXTIMEOUT, skel_txtimeout_expiry, 1, (uint32_t)skel);
   return OK;
 }
 
@@ -410,7 +410,7 @@ static inline void skel_interrupt_process(FAR struct skel_driver_s *skel)
 #ifdef CONFIG_NET_NOINTS
 static void skel_interrupt_work(FAR void *arg)
 {
-  FAR struct skel_driver_s *skel = ( FAR struct skel_driver_s *)arg;
+  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
   /* Process pending Ethernet interrupts */
 
@@ -460,7 +460,7 @@ static int skel_interrupt(int irq, FAR void *context)
 
   /* Cancel any pending poll work */
 
-  work_cancel(HPWORK, skel->sk_work);
+  work_cancel(HPWORK, &skel->sk_work);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -480,7 +480,7 @@ static int skel_interrupt(int irq, FAR void *context)
  *
  * Description:
  *   Process a TX timeout.  Called from the either the watchdog timer
- *   expiration logic or from the worker thread, depeding upon the
+ *   expiration logic or from the worker thread, depending upon the
  *   configuration.  The timeout means that the last TX never completed.
  *   Reset the hardware and start again.
  *
@@ -526,16 +526,16 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *skel)
 #ifdef CONFIG_NET_NOINTS
 static void skel_txtimeout_work(FAR void *arg)
 {
-  FAR struct skel_driver_s *skel = ( FAR struct skel_driver_s *)arg;
+  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
   /* Process pending Ethernet interrupts */
 
-  skel_txtimetout_process(skel);
+  skel_txtimeout_process(skel);
 }
 #endif
 
 /****************************************************************************
- * Function: skel_txtimeout
+ * Function: skel_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -553,7 +553,7 @@ static void skel_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void skel_txtimeout(int argc, uint32_t arg, ...)
+static void skel_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
@@ -563,11 +563,11 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
    * condition with interrupt work that is already queued and in progress.
    */
 
-  /* Cancel any pending poll or interrupt work.  This will have not effect
+  /* Cancel any pending poll or interrupt work.  This will have no effect
    * on work that has already been started.
    */
 
-  work_cancel(HPWORK, skel->sk_work);
+  work_cancel(HPWORK, &skel->sk_work);
 
   /* Schedule to perform the TX timeout processing on the worker thread.
    * TODO: Assure that no there is not pending interrupt or poll work.
@@ -575,7 +575,7 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
 
   work_queue(HPWORK, &skel->sk_work, skel_txtimeout_work, skel, 0);
 #else
-  /* Process the interrupt now */
+  /* Process the timeout now */
 
   skel_txtimeout_process(skel);
 #endif
@@ -613,7 +613,7 @@ static inline void skel_poll_process(FAR struct skel_driver_s *skel)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, arg);
+  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, skel);
 }
 
 /****************************************************************************
@@ -636,7 +636,7 @@ static inline void skel_poll_process(FAR struct skel_driver_s *skel)
 #ifdef CONFIG_NET_NOINTS
 static void skel_poll_work(FAR void *arg)
 {
-  FAR struct skel_driver_s *skel = ( FAR struct skel_driver_s *)arg;
+  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
   /* Perform the poll */
 
@@ -645,7 +645,7 @@ static void skel_poll_work(FAR void *arg)
 #endif
 
 /****************************************************************************
- * Function: skel_polltimer
+ * Function: skel_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -662,7 +662,7 @@ static void skel_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void skel_polltimer(int argc, uint32_t arg, ...)
+static void skel_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
@@ -671,7 +671,7 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
    * pending interrupt actions.
    */
 
-  if (work_available(&skel->sk_work)
+  if (work_available(&skel->sk_work))
     {
       /* Schedule to perform the interrupt processing on the worker thread.
        * TODO: Make sure that there can be no pending interrupt work.
@@ -685,7 +685,7 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, arg);
+      (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, arg);
     }
 
 #else
@@ -693,8 +693,6 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
 
   skel_poll_process(skel);
 #endif
-
-  return OK;
 }
 
 /****************************************************************************
@@ -726,7 +724,7 @@ static int skel_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, (uint32_t)skel);
+  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1, (uint32_t)skel);
 
   /* Enable the Ethernet interrupt */
 
