@@ -3369,6 +3369,20 @@ int tiva_ethinitialize(int intf)
   priv->txpoll       = wd_create();   /* Create periodic poll timer */
   priv->txtimeout    = wd_create();   /* Create TX timeout timer */
 
+  /* Enable power and clocking to the Ethernet MAC
+   *
+   * - Enable Power:  Applies power (only) to the UART peripheral.  This is not
+   *   an essential step since enabling clocking will also apply power.  The
+   *   only significance is that the EMAC state will be retained if the EMAC
+   *   clocking is subsequently disabled.
+   * - Enable Clocking:  Applies both power and clocking to the EMAC peripheral,
+   *   bringing it a fully functional state.
+   */
+
+  tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
+  tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
+
+#ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
    *
    *   "The Ethernet Controller Module and Integrated PHY receive two clock inputs:
@@ -3386,9 +3400,15 @@ int tiva_ethinitialize(int intf)
    *   External PHY support is not yet implemented.
    */
 
+  /* Enable power and clocking to the Integrated PHY */
+
+  tiva_ephy_enablepwr();   /* Ethernet PHY Power Control */
+  tiva_ephy_enableclk();   /* Ethernet PHY Run Mode Clock Gating Control */
+#else
   /* Configure GPIO pins to support Ethernet */
 
   tiva_ethgpioconfig(priv);
+#endif
 
   /* Attach the IRQ to the driver */
 
