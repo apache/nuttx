@@ -416,7 +416,9 @@ static void skel_interrupt_work(FAR void *arg)
 
   skel_interrupt_process(skel);
 
-  /* TODO: Re-enable Ethernet interrupts */
+  /* Re-enable Ethernet interrupts */
+
+  up_enable_irq(CONFIG_skeleton_IRQ);
 }
 #endif
 
@@ -442,10 +444,12 @@ static int skel_interrupt(int irq, FAR void *context)
   FAR struct skel_driver_s *skel = &g_skel[0];
 
 #ifdef CONFIG_NET_NOINTS
-  /* TODO: Disable further Ethernet interrupts.  Because Ethernet interrupts
-   * are also disabled if the TX timeout event occurs, there can be no race
+  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
+   * also disabled if the TX timeout event occurs, there can be no race
    * condition here.
    */
+
+  up_disable_irq(CONFIG_skeleton_IRQ);
 
   /* TODO: Determine if a TX transfer just completed */
 
@@ -558,10 +562,12 @@ static void skel_txtimeout_expiry(int argc, uint32_t arg, ...)
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
 #ifdef CONFIG_NET_NOINTS
-  /* TODO: Disable further Ethernet interrupts.  This will prevent some race
+  /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
    * condition with interrupt work that is already queued and in progress.
    */
+
+  up_disable_irq(CONFIG_skeleton_IRQ);
 
   /* Cancel any pending poll or interrupt work.  This will have no effect
    * on work that has already been started.
@@ -569,9 +575,7 @@ static void skel_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   work_cancel(HPWORK, &skel->sk_work);
 
-  /* Schedule to perform the TX timeout processing on the worker thread.
-   * TODO: Assure that no there is not pending interrupt or poll work.
-   */
+  /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(HPWORK, &skel->sk_work, skel_txtimeout_work, skel, 0);
 #else
@@ -673,9 +677,7 @@ static void skel_poll_expiry(int argc, uint32_t arg, ...)
 
   if (work_available(&skel->sk_work))
     {
-      /* Schedule to perform the interrupt processing on the worker thread.
-       * TODO: Make sure that there can be no pending interrupt work.
-       */
+      /* Schedule to perform the interrupt processing on the worker thread. */
 
       work_queue(HPWORK, &skel->sk_work, skel_poll_work, skel, 0);
     }

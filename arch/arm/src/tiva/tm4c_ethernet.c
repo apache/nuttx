@@ -2097,9 +2097,7 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   work_cancel(HPWORK, &priv->work);
 
-  /* Schedule to perform the TX timeout processing on the worker thread.
-   * TODO: Assure that no there is not pending interrupt or poll work.
-   */
+  /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(HPWORK, &priv->work, tiva_txtimeout_work, priv, 0);
 
@@ -2236,9 +2234,7 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
 
   if (work_available(&priv->work))
     {
-      /* Schedule to perform the interrupt processing on the worker thread.
-       * TODO: Make sure that there can be no pending interrupt work.
-       */
+      /* Schedule to perform the interrupt processing on the worker thread. */
 
       work_queue(HPWORK, &priv->work, tiva_poll_work, priv, 0);
     }
