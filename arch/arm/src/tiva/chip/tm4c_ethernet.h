@@ -1077,7 +1077,7 @@
 #define EPHY_FCSCR_FCSCNT_SHIFT        (0)       /* Bits 0-7:  False Carrier Event Counter */
 #define EPHY_FCSCR_FCSCNT_MASK         (0xff << EPHY_FCSCR_FCSCNT_SHIFT)
 
-/* Ethernet PHY Receive Error Count *16-bit value) */
+/* Ethernet PHY Receive Error Count (16-bit value) */
 
 /* Ethernet PHY BIST Control */
 
