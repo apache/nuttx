@@ -101,14 +101,18 @@
 #define IRQ_SW4    TIVA_IRQ_GPIOP_1
 
 /* SPI Chip selects ****************************************************************/
-/*   SSI0: PA3 is used for SSI0 chip select to the second booster pack
- *   SSI3: PH4 selects the SD card and PQ1 selects the on-board SPI flash.
+/*   SSI0: PA3 is used for SSI0 chip select to the second booster pack (No pull-
+*          ups)
+ *   SSI3: PH4 selects the SD card and PQ1 selects the on-board SPI flash.  Both
+ *         pulled up on board.
  */
 
-#define GPIO_BSTR_CS (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                      GPIO_VALUE_ONE | GPIO_PORTA | GPIO_PIN_3)
-#define GPIO_SD_CS   (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                      GPIO_VALUE_ONE | GPIO_PORTH | GPIO_PIN_4)
+#define GPIO_BSTR2_CS (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                       GPIO_VALUE_ONE | GPIO_PORTA | GPIO_PIN_3)
+#define GPIO_FLASH_CS (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_4MA | \
+                       GPIO_VALUE_ONE | GPIO_PORTH | GPIO_PIN_4)
+#define GPIO_SD_CS    (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_4MA | \
+                       GPIO_VALUE_ONE | GPIO_PORTH | GPIO_PIN_4)
 
 /* Speaker outputs *****************************************************************/
 /* PB2/PD4 are used for the speaker output */
