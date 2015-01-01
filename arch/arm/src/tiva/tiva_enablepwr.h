@@ -49,7 +49,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Clocks are enabled or disabled by setting or clearing a bit (b) in a system
+/* Power control is enabled or disabled by setting or clearing a bit (b) in a system
  * control register (a))
  */
 
@@ -67,9 +67,9 @@
 #endif
 
 #define tiva_wdt0_enablepwr()      tiva_wdt_enablepwr(0)
-#define tiva_wdt1_enablepwr()      tiva_wdt_disablepwr(1)
+#define tiva_wdt1_enablepwr()      tiva_wdt_enablepwr(1)
 
-#define tiva_wdt0_disablepwr()     tiva_wdt_enablepwr(0)
+#define tiva_wdt0_disablepwr()     tiva_wdt_disablepwr(0)
 #define tiva_wdt1_disablepwr()     tiva_wdt_disablepwr(1)
 
 /* 16/32-Bit Timer Power Control */
