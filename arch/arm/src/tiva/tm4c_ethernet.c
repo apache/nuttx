@@ -102,17 +102,44 @@
 #  error High priority work queue support is required
 #endif
 
-#ifndef CONFIG_TIVA_PHYADDR
-#  error CONFIG_TIVA_PHYADDR must be defined in the NuttX configuration
-#endif
+/* Are we using the internal PHY or an external PHY? */
 
 #if defined(CONFIG_TIVA_PHY_INTERNAL)
+
+/* Internal PHY */
+
 #  if defined(CONFIG_TIVA_PHY_MII) ||defined(CONFIG_TIVA_PHY_RMII)
 #    warning CONFIG_TIVA_PHY_MII or CONFIG_TIVA_PHY_RMII defined with internal PHY
 #  endif
+
 #  undef CONFIG_TIVA_PHY_MII
 #  undef CONFIG_TIVA_PHY_RMII
+
+/* Properties of the internal PHY are hard-coded */
+
+#  undef CONFIG_TIVA_PHYADDR
+#  undef CONFIG_TIVA_PHYSR_ALTCONFIG
+#  undef CONFIG_TIVA_PHYSR_ALTMODE
+#  undef CONFIG_TIVA_PHYSR_10HD
+#  undef CONFIG_TIVA_PHYSR_100HD
+#  undef CONFIG_TIVA_PHYSR_10FD
+#  undef CONFIG_TIVA_PHYSR_100FD
+#  undef CONFIG_TIVA_PHYSR_SPEED
+#  undef CONFIG_TIVA_PHYSR_100MBPS
+#  undef CONFIG_TIVA_PHYSR_MODE
+#  undef CONFIG_TIVA_PHYSR_FULLDUPLEX
+
+#  define CONFIG_TIVA_PHYADDR          1
+#  define CONFIG_TIVA_PHYSR            TIVA_EPHY_STS
+#  define CONFIG_TIVA_PHYSR_SPEED      EPHY_STS_SPEED
+#  define CONFIG_TIVA_PHYSR_100MBPS    0
+#  define CONFIG_TIVA_PHYSR_MODE       EPHY_STS_DUPLEX
+#  define CONFIG_TIVA_PHYSR_FULLDUPLEX EPHY_STS_DUPLEX
+
 #else
+
+/* External PHY. Properties must be provided in the configuration */
+
 #  if !defined(CONFIG_TIVA_PHY_MII) && !defined(CONFIG_TIVA_PHY_RMII)
 #    warning None of CONFIG_TIVA_PHY_INTERNAL, CONFIG_TIVA_PHY_MII, or CONFIG_TIVA_PHY_RMII defined
 #  endif
@@ -120,6 +147,10 @@
 #  if defined(CONFIG_TIVA_PHY_MII) && defined(CONFIG_TIVA_PHY_RMII)
 #    error Both CONFIG_TIVA_PHY_MII and CONFIG_TIVA_PHY_RMII defined
 #  endif
+#endif
+
+#ifndef CONFIG_TIVA_PHYADDR
+#  error CONFIG_TIVA_PHYADDR must be defined in the NuttX configuration
 #endif
 
 #ifdef CONFIG_TIVA_AUTONEG

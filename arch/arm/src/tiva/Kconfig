@@ -736,17 +736,19 @@ config TIVA_PHY_RMII
 
 endchoice # PHY selection
 
-config TIVA_PHYADDR
-	int "PHY address"
-	default 1
-	---help---
-		The 5-bit address of the PHY on the board.  Default: 1
-
 config TIVA_AUTONEG
 	bool "Use autonegotiation"
 	default y
 	---help---
 		Use PHY autonegotiation to determine speed and mode
+
+if !TIVA_PHY_INTERNAL
+
+config TIVA_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
 
 if !TIVA_AUTONEG
 config TIVA_ETHFD
@@ -845,6 +847,7 @@ config TIVA_PHYSR_100FD
 
 endif # TIVA_PHYSR_ALTCONFIG
 endif # TIVA_AUTONEG
+endif # !TIVA_PHY_INTERNAL
 
 config TIVA_EMAC_NRXDESC
 	int "Number of RX descriptors"
