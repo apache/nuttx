@@ -63,9 +63,9 @@
 #  define tiva_wdt_disableclk(p)   tiva_disableclk(TIVA_SYSCON_RCGCWD,SYSCON_RCGCWD(p))
 
 #  define tiva_wdt0_enableclk()    tiva_wdt_enableclk(0)
-#  define tiva_wdt1_enableclk()    tiva_wdt_disableclk(1)
+#  define tiva_wdt1_enableclk()    tiva_wdt_enableclk(1)
 
-#  define tiva_wdt0_disableclk()   tiva_wdt_enableclk(0)
+#  define tiva_wdt0_disableclk()   tiva_wdt_disableclk(0)
 #  define tiva_wdt1_disableclk()   tiva_wdt_disableclk(1)
 #else
 #endif
