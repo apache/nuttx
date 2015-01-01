@@ -44,6 +44,8 @@
 
 // Remove macros in favor of builtin implementations
 
+#if !defined(CONFIG_UCLIBCXX)
+
 #undef isalnum
 #undef isalpha
 #undef iscntrl
@@ -57,6 +59,8 @@
 #undef isxdigit
 #undef tolower
 #undef toupper
+
+#endif
 
 //***************************************************************************
 // Namespace

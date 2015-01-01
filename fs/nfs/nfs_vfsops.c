@@ -69,6 +69,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nfs.h>
 #include <nuttx/net/udp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/netconfig.h>
 
 #include <net/if.h>
