@@ -100,6 +100,22 @@
 
 #define IRQ_SW4    TIVA_IRQ_GPIOP_1
 
+/* SPI Chip selects ****************************************************************/
+/*   SSI0: PA3 is used for SSI0 chip select to the second booster pack
+ *   SSI3: PH4 selects the SD card and PQ1 selects the on-board SPI flash.
+ */
+
+#define GPIO_BSTR_CS (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                      GPIO_VALUE_ONE | GPIO_PORTA | GPIO_PIN_3)
+#define GPIO_SD_CS   (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                      GPIO_VALUE_ONE | GPIO_PORTH | GPIO_PIN_4)
+
+/* Speaker outputs *****************************************************************/
+/* PB2/PD4 are used for the speaker output */
+
+/* Touchscreen *********************************************************************/
+/* PE7/PP7/PT2-3 are used for the touch screen */
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
