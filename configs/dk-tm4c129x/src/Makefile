@@ -51,6 +51,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += tm4c_buttons.c
 endif
 
+ifeq ($(CONFIG_TIVA_ETHERNET),y)
+CSRCS += tm4c_ethernet.c
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += tm4c_nsh.c
 endif

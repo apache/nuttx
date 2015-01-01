@@ -3938,6 +3938,15 @@ int tiva_ethinitialize(int intf)
   priv->txpoll        = wd_create();   /* Create periodic poll timer */
   priv->txtimeout     = wd_create();   /* Create TX timeout timer */
 
+  /* If the board can provide us with a MAC address, get the address
+   * from the board now.  The MAC will not be applied until tiva_ifup()
+   * is called (and the MAC can be overwritten with a netdev ioctl call).
+   */
+
+#ifdef CONFIG_TIVA_BOARDMAC
+   tiva_ethernetmac(&priv->dev.d_mac);
+#endif
+
   /* Enable power and clocking to the Ethernet MAC
    *
    * - Enable Power:  Applies power (only) to the EMAC peripheral.  This is not

@@ -1,9 +1,8 @@
 /************************************************************************************
- * configs/lm3s6432-s3e/src/up_ethernet.c
- * arch/arm/src/board/up_ethernet.c
+ * configs/dk-tm4c129x/src/tm4c_ethernet.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,10 +48,11 @@
 
 #include "up_arch.h"
 #include "chip.h"
+#include "chip/tiva_flash.h"
 #include "tiva_ethernet.h"
 
 /************************************************************************************
- * Pre-processor oDefinitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
