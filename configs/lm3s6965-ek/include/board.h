@@ -123,20 +123,5 @@
 
 void tiva_boardinitialize(void);
 
-/************************************************************************************
- * Name: tiva_ethernetmac
- *
- * Description:
- *   For the Ethernet Eval Kits, the MAC address will be stored in the non-volatile
- *   USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined, this function
- *   will obtain the MAC address from these registers.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_TIVA_BOARDMAC
-struct ether_addr;
-void tiva_ethernetmac(struct ether_addr *ethaddr);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_BOARD_BOARD_H */
