@@ -156,11 +156,23 @@
 #define BUTTON_SW4_BIT    (1 << BUTTON_SW4)
 
 /* Pin Multiplexing Disambiguation **************************************************/
+/* USARTs */
 
 #define GPIO_UART1_CTS    GPIO_UART1_CTS_1
 #define GPIO_UART1_RTS    GPIO_UART1_RTS_1
 #define GPIO_UART1_RX     GPIO_UART1_RX_1
 #define GPIO_UART1_TX     GPIO_UART1_TX_1
+
+/* Ethernet LEDs
+ *
+ *   PK4/EN0RXD3/LED0
+ *   PK6/EN0TXD2/LED1
+ *   PF1/LED2
+ */
+
+#  define GPIO_EN0_LED0   GPIO_EN0_LED0_2
+#  define GPIO_EN0_LED1   GPIO_EN0_LED1_2
+#  define GPIO_EN0_LED2   GPIO_EN0_LED2_1
 
 /************************************************************************************
  * Public Function Prototypes
