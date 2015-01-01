@@ -158,8 +158,17 @@
 /* Pin Multiplexing Disambiguation **************************************************/
 /* UARTs
  *
- *   UART0: PA0, PA1 (fixed configuration)
+ *   UART0: PA0-1 (fixed configuration)
+ *   UART3: PJ0-1 to EM_TX/EM_RX or BOOSTER_PACK2_RX/BOOSTER_PACK2_TX(Depending
+ *          on J12/J13)
+ *   UART5: PH6-7 to BOOSTER_PACK1_RX/BOOSTER_PACK1_TX
  */
+
+#define GPIO_UART3_RX     GPIO_UART3_RX_2
+#define GPIO_UART3_TX     GPIO_UART3_TX_2
+
+#define GPIO_UART5_RX     GPIO_UART5_RX_2
+#define GPIO_UART5_TX     GPIO_UART5_TX_2
 
 /* SSI:
  *
