@@ -98,6 +98,21 @@ extern "C"
 int tiva_ethinitialize(int intf);
 #endif
 
+/****************************************************************************
+ * Name: tiva_ethernetmac
+ *
+ * Description:
+ *   For the Ethernet Eval Kits, the MAC address will be stored in the non-
+ *   volatile USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined,
+ *   this function will obtain the MAC address from these registers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_BOARDMAC
+struct ether_addr;
+void tiva_ethernetmac(struct ether_addr *ethaddr);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

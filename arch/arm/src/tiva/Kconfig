@@ -655,13 +655,6 @@ config TIVA_ETHLEDS
 	---help---
 	Enable to use Ethernet LEDs on the board.
 
-config TIVA_BOARDMAC
-	bool "Board MAC"
-	default n
-	---help---
-		If the board-specific logic can provide a MAC address (via
-		tiva_ethernetmac()), then this should be selected.
-
 config TIVA_ETHHDUPLEX
 	bool "Force Half Duplex"
 	default n
@@ -889,6 +882,14 @@ config TIVA_ETHERNET_REGDEBUG
 		Enable very low-level register access debug.  Depends on DEBUG.
 
 endmenu # Tiva Ethernet Configuration
+
+config TIVA_BOARDMAC
+	bool "Board MAC"
+	default n
+	---help---
+		If the board-specific logic can provide a MAC address (via
+		tiva_ethernetmac()), then this should be selected.
+
 endif # TIVA_ETHERNET
 
 if TIVA_SSI
