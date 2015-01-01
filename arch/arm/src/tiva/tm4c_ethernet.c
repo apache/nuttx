@@ -73,8 +73,10 @@
 #include "tiva_syscontrol.h"
 #include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
+#include "tiva_periphrdy.h"
 #include "tiva_ethernet.h"
 
+#include "chip/tiva_pinmap.h"
 #include <arch/board/board.h>
 
 /* TIVA_NETHCONTROLLERS determines the number of physical interfaces
@@ -299,14 +301,14 @@
  * EMAC_CFG_IPC      IPv4 checksum offload          Depends on CONFIG_TIVA_EMAC_HWCHECKSUM
  * EMAC_CFG_LOOPBM   Loopback mode                  0 (disabled)
  * EMAC_CFG_DRO      Receive own disable            0 (enabled)
- * EMAC_CFG_PS       Port Select
+ * EMAC_CFG_PS       Port Select                      (read-only)
  * EMAC_CFG_DISCRS   Carrier sense disable          0 (enabled)
  * EMAC_CFG_IFG      Interframe gap                 0 (96 bits)
- * EMAC_CFG_JFEN     Jumbo Frame Enable
+ * EMAC_CFG_JFEN     Jumbo Frame Enable             0 (jumbo frame creates error)
  * EMAC_CFG_JD       Jabber disable                 0 (enabled)
  * EMAC_CFG_WDDIS    Watchdog disable               0 (enabled)
  * EMAC_CFG_CST      CRC stripping for Type frames  0 (disabled, F2/F4 only)
- * EMAC_CFG_TWOKPEN  IEEE 802
+ * EMAC_CFG_TWOKPEN  IEEE 802                       0 (>1518 == giant frame)
  * EMAC_CFG_SADDR    Source Address Insertion or
  *                   Replacement Control
  *
@@ -359,7 +361,7 @@
  * EMAC_FRAMEFLTR_SAIF   Source address inverse filtering       0 (not used)
  * EMAC_FRAMEFLTR_SAF    Source address filter                  0 (disabled)
  * EMAC_FRAMEFLTR_HPF    Hash or perfect filter                 0 (Only matching frames passed)
- * EMAC_FRAMEFLTR_VTFE   VLAN Tag Filter Enable
+ * EMAC_FRAMEFLTR_VTFE   VLAN Tag Filter Enable                 0 (VLAN tag ignored)
  * EMAC_FRAMEFLTR_RA     Receive all                            0 (disabled)
  */
 
@@ -493,8 +495,8 @@
  * EMAC_DMABUSMOD_8XPBL  8x programmable burst length mode  0 (disabled)
  * EMAC_DMABUSMOD_AAL    Address-aligned beats              1 (enabled)
  * EMAC_DMABUSMOD_MB     Mixed burst                        0 (disabled, F2/F4 only)
- * EMAC_DMABUSMOD_TXPR   Transmit Priority
- * EMAC_DMABUSMOD_RIB    Rebuild Burst
+ * EMAC_DMABUSMOD_TXPR   Transmit Priority                  0 (RX DMA has priority over TX)
+ * EMAC_DMABUSMOD_RIB    Rebuild Burst                      0
  */
 
 #ifdef CONFIG_TIVA_EMAC_ENHANCEDDESC
@@ -681,7 +683,9 @@ static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
-static inline void tiva_ethgpioconfig(FAR struct tiva_ethmac_s *priv);
+static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv);
+static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv);
+
 static void tiva_ethreset(FAR struct tiva_ethmac_s *priv);
 static int  tiva_macconfig(FAR struct tiva_ethmac_s *priv);
 static void tiva_macaddress(FAR struct tiva_ethmac_s *priv);
@@ -3146,10 +3150,10 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_ethgpioconfig
+ * Function: tiva_phy_reconfigure
  *
  * Description:
- *  Configure GPIOs for the Ethernet interface.
+ *  Configure to support the internal PHY
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -3161,7 +3165,223 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void tiva_ethgpioconfig(FAR struct tiva_ethmac_s *priv)
+#ifdef CONFIG_TIVA_PHY_INTERNAL
+static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv)
+{
+  /* No special actions need to taken after a reset if the internal PHY
+   * is used.
+   */
+}
+#endif
+
+/****************************************************************************
+ * Function: tiva_phy_gpioconfig
+ *
+ * Description:
+ *  Configure to support the internal PHY
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_PHY_INTERNAL
+static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
+{
+  uint32_t regval;
+
+  /* Integrated PHY:
+   *
+   *   "The Ethernet Controller Module and Integrated PHY receive two clock inputs:
+   *    - A gated system clock acts as the clock source to the Control and Status
+   *      registers (CSR) of the Ethernet MAC. The SYSCLK frequency for Run, Sleep
+   *      and Deep Sleep mode is programmed in the System Control module. ...
+   *    - The PHY receives the main oscillator (MOSC) which must be 25 MHz ± 50 ppm
+   *      for proper operation. The MOSC source can be a single-ended source or a
+   *      crystal."
+   *
+   *   These are currently set up in tiva_clockconfig() before this function runs.
+   *
+   * MII/RMII Clocking:
+   *
+   *   External PHY support is not yet implemented.
+   */
+
+  /* Enable the Ethernet PHY in its default configuration */
+
+  /* Hold the Ethernet PHY from transmitting energy on the line during
+   * configuration by setting the PHYHOLD bit in the EMACPC register.
+   */
+
+  regval  = tiva_getreg(TIVA_EMAC_PC);
+  regval |= EMAC_PC_PHYHOLD;
+  tiva_putreg(regval, TIVA_EMAC_PC);
+
+  /* Enable the clock to the PHY module */
+
+  tiva_ephy_enableclk();
+
+  /* What until the PREPHY register indicates that the PHY is ready before
+   * continuing.
+   */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+  /* Enable power to the Ethernet PHY */
+
+  tiva_ephy_enablepwr();
+
+  /* What until the PREPHY register indicates that the PHY registers are ready
+   * to be accessed.
+   */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+  /* The EMAC interface defaults to MII mode. */
+
+  /* PHY interface pins:
+   *
+   * EN0TXOP - Fixed pin assignment
+   * EN0TXON - Fixed pin assignment
+   * EN0RXIP - Fixed pin assignment
+   * EN0RXIN - Fixed pin assignment
+   * RBIAS   - Fixed pin assignment
+   * EN0LED0 - Configured GPIO output
+   * EN0LED1 - Configured GPIO output
+   * EN0LED2 - Configured GPIO output
+   */
+
+  tiva_configgpio(GPIO_EN0_LED0);
+  tiva_configgpio(GPIO_EN0_LED1);
+  tiva_configgpio(GPIO_EN0_LED2);
+}
+#endif
+
+/****************************************************************************
+ * Function: tiva_phy_reconfigure
+ *
+ * Description:
+ *  Configure to support an external PHY
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_TIVA_PHY_INTERNAL
+static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv)
+{
+  /* Enable the Ethernet PHY in a custom configuration */
+
+  /* 1. Hold the Ethernet PHY from transmitting energy on the line during
+   *    configuration by setting the PHYHOLD bit in the EMACPC register.
+   */
+
+  regval  = tiva_getreg(TIVA_EMAC_PC);
+  regval |= EMAC_PC_PHYHOLD;
+  tiva_putreg(regval, TIVA_EMAC_PC)
+
+  /* Enable the clock to the PHY module */
+
+  tiva_ephy_enableclk();
+
+  /* What until the PREPHY register indicates that the PHY is ready before
+   * continuing.
+   */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+  /* Enable power to the Ethernet PHY */
+
+  tiva_ephy_enablepwr();
+
+  /* What until the PREPHY register indicates that the PHY registers are ready
+   * to be accessed.
+   */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+  /* Set up the custom PHY configuration.
+   *
+   * NOTE: This custom PHY configuration will be lost after a reset.
+   */
+
+#if defined(CONFIG_TIVA_PHY_MII)
+  /* Set up the external MII interface configuration */
+#warning Missing logic
+
+#elif defined(CONFIG_TIVA_PHY_RMII)
+  /* Set up the external RMII interface configuration */
+#warning Missing logic
+
+  /* Enable the external clock source input to the RMII interface signal
+   * EN0RREF_CLK by setting both the ECEXT and CLKEN bit in the in the Ethernet
+   * Clock Configuration (EMACCC) register. The external clock source must be
+   * 50 MHz with a frequency tolerance of 50 PPM.
+   */
+#warning Missing logic
+
+  /* Select the RMII interface by programming the PINTFS bit field to 0x4 in
+   * the Ethernet Peripheral Configuration (EMACPC) register.
+   */
+#warning Missing logic
+
+  /* Reset the Ethernet MAC to latch the new RMII configuration by setting the
+   * SWR bit in the EMACDMABUSMOD register. This bit resets the Ethernet MAC
+   * registers in addition to configuring the RMII interface.
+   */
+#warning Missing logic
+
+  /* Software must poll the SWR bit to determine when the new configuration has
+   * been registered.
+   *
+   * Note: After this configuration is active, if the Ethernet MAC is reset by
+   * setting the R0 bit in the Ethernet MAC Software Reset (SREMAC) register in
+   * the System Control Module, then the interface is set back to its default
+   * MII configuration. In this case, the steps listed above must be repeated to
+   * return to an RMII interface.
+   */
+#warning Missing logic
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Function: tiva_phy_gpioconfig
+ *
+ * Description:
+ *  Configure to support an external PHY
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_TIVA_PHY_INTERNAL
+static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
 {
 #if defined(CONFIG_TIVA_PHY_MII) || defined(CONFIG_TIVA_PHY_RMII)
   /* Configure GPIO pins to support Ethernet */
@@ -3173,9 +3393,6 @@ static inline void tiva_ethgpioconfig(FAR struct tiva_ethmac_s *priv)
   /* Set up the MII interface */
 
 #if defined(CONFIG_TIVA_PHY_MII)
-
-  /* Select the MII interface */
-#warning Missing logic
 
   /* "Four clock inputs are driven into the Ethernet MAC when the MII
    *  configuration is enabled. The clocks are described as follows:
@@ -3226,9 +3443,6 @@ static inline void tiva_ethgpioconfig(FAR struct tiva_ethmac_s *priv)
 
 #elif defined(CONFIG_TIVA_PHY_RMII)
 
-  /* Select the RMII interface */
-#warning Missing logic
-
   /* "There are three clock sources that interface to the Ethernet MAC in
    *  an RMII configuration:
    *
@@ -3250,6 +3464,35 @@ static inline void tiva_ethgpioconfig(FAR struct tiva_ethmac_s *priv)
    *    by 20 for 10 Mbps or 2 for 100 Mbps operation and used as the clock
    *    for receive and transmit data."
    */
+
+  /* Enable the external clock source input to the RMII interface signal
+   * EN0RREF_CLK by setting both the ECEXT and CLKEN bit in the in the Ethernet
+   * Clock Configuration (EMACCC) register. The external clock source must be
+   * 50 MHz with a frequency tolerance of 50 PPM.
+   */
+#warning Missing logic
+
+  /* Select the RMII interface by programming the PINTFS bit field to 0x4 in
+   * the Ethernet Peripheral Configuration (EMACPC) register.
+   */
+#warning Missing logic
+
+  /* Reset the Ethernet MAC to latch the new RMII configuration by setting the
+   * SWR bit in the EMACDMABUSMOD register. This bit resets the Ethernet MAC
+   * registers in addition to configuring the RMII interface.
+   */
+#warning Missing logic
+
+  /* Software must poll the SWR bit to determine when the new configuration has
+   * been registered.
+   *
+   * Note: After this configuration is active, if the Ethernet MAC is reset by
+   * setting the R0 bit in the Ethernet MAC Software Reset (SREMAC) register in
+   * the System Control Module, then the interface is set back to its default
+   * MII configuration. In this case, the steps listed above must be repeated to
+   * return to an RMII interface.
+   */
+#warning Missing logic
 
   /* RMII interface pins (7):
    *
@@ -3273,6 +3516,7 @@ static inline void tiva_ethgpioconfig(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_PPS);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Function: tiva_ethreset
@@ -3303,6 +3547,19 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   regval &= ~SYSCON_SREMAC_R0;
   tiva_putreg(regval, TIVA_SYSCON_SREMAC);
 
+  /* Reset the internal PHY
+   *
+   * NOTE: If a custom PHY configuration is used, then that configuration
+   * will be lost after the reset.
+   */
+
+  regval  = tiva_getreg(TIVA_SYSCON_SREPHY);
+  regval |= SYSCON_SREPHY_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+
+  regval &= ~SYSCON_SREPHY_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+
   /* Perform a software reset by setting the SR bit in the DMABUSMOD register.
    * This Resets all MAC subsystem internal registers and logic.  After this
    * reset all the registers holds their reset values.
@@ -3317,6 +3574,16 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
    */
 
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
+
+  /* If the RMII configuration is active when the Ethernet MAC is reset,
+   * then the interface is set back to its default MII configuration. In
+   * this case, the we must restore the RMII interface configuration.
+   *
+   * Also, if the PHY is used any custom configuration, then the PHY
+   * must be reconfigured after the reset.
+   */
+
+  tiva_phy_reconfigure(priv);
 }
 
 /****************************************************************************
@@ -3637,12 +3904,12 @@ int tiva_ethinitialize(int intf)
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->txpoll        = wd_create();   /* Create periodic poll timer */
+  priv->txtimeout     = wd_create();   /* Create TX timeout timer */
 
   /* Enable power and clocking to the Ethernet MAC
    *
-   * - Enable Power:  Applies power (only) to the UART peripheral.  This is not
+   * - Enable Power:  Applies power (only) to the EMAC peripheral.  This is not
    *   an essential step since enabling clocking will also apply power.  The
    *   only significance is that the EMAC state will be retained if the EMAC
    *   clocking is subsequently disabled.
@@ -3653,33 +3920,17 @@ int tiva_ethinitialize(int intf)
   tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
   tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
 
-#ifdef CONFIG_TIVA_PHY_INTERNAL
-  /* Integrated PHY:
-   *
-   *   "The Ethernet Controller Module and Integrated PHY receive two clock inputs:
-   *    - A gated system clock acts as the clock source to the Control and Status
-   *      registers (CSR) of the Ethernet MAC. The SYSCLK frequency for Run, Sleep
-   *      and Deep Sleep mode is programmed in the System Control module. ...
-   *    - The PHY receives the main oscillator (MOSC) which must be 25 MHz ± 50 ppm
-   *      for proper operation. The MOSC source can be a single-ended source or a
-   *      crystal."
-   *
-   *   These are currently set up in tiva_clockconfig() before this function runs.
-   *
-   * MII/RMII Clocking:
-   *
-   *   External PHY support is not yet implemented.
+  /* What until the PREMAC register indicates that the EMAC registers are ready
+   * to be accessed.
    */
 
-  /* Enable power and clocking to the Integrated PHY */
+  while (!tiva_emac_periphrdy())
+    {
+    }
 
-  tiva_ephy_enablepwr();   /* Ethernet PHY Power Control */
-  tiva_ephy_enableclk();   /* Ethernet PHY Run Mode Clock Gating Control */
-#else
-  /* Configure GPIO pins to support Ethernet */
+  /* Configure GPIOs to support the internal/eternal PHY */
 
-  tiva_ethgpioconfig(priv);
-#endif
+  tiva_phy_gpioconfig(priv);
 
   /* Attach the IRQ to the driver */
 
