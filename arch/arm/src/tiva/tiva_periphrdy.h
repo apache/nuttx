@@ -49,8 +49,8 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* We deterimine if a peripheral is ready by testing a bit (b) in system control
- * register (a))
+/* We determine if a peripheral is ready by testing a bit (b) in system control
+ * register (a).
  */
 
 #define tiva_periphrdy(a,b)        ((getreg32(a) & (b)) != 0)
@@ -60,7 +60,7 @@
 #ifdef TIVA_SYSCON_PRWD
 #  define tiva_wdt_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRWD,SYSCON_PRWD(p))
 #else
-#  define tiva_wdt_periphrdy(p)    (false)
+#  define tiva_wdt_periphrdy(p)    (true)
 #endif
 
 #define tiva_wdt0_periphrdy()      tiva_wdt_periphrdy(0)
@@ -71,7 +71,7 @@
 #ifdef TIVA_SYSCON_PRTIMER
 #  define tiva_tm_periphrdy(p)     tiva_periphrdy(TIVA_SYSCON_PRTIMER,SYSCON_PRTIMER(p))
 #else
-#  define tiva_tm_periphrdy(p)    (false)
+#  define tiva_tm_periphrdy(p)    (true)
 #endif
 
 #define tiva_tm0_periphrdy()       tiva_tm_periphrdy(0)
@@ -88,7 +88,7 @@
 #ifdef TIVA_SYSCON_PRGPIO
 #  define tiva_gpio_periphrdy(p)   tiva_periphrdy(TIVA_SYSCON_PRGPIO,SYSCON_PRGPIO(p))
 #else
-#  define tiva_gpio_periphrdy(p)   (false)
+#  define tiva_gpio_periphrdy(p)   (true)
 #endif
 
 #define tiva_gpioa_periphrdy()     tiva_gpio_periphrdy(0)
@@ -115,7 +115,7 @@
 #ifdef TIVA_SYSCON_PRDMA
 #  define tiva_udma_periphrdy()    tiva_periphrdy(TIVA_SYSCON_PRDMA,SYSCON_PRDMA_R0)
 #else
-#  define tiva_udma_periphrdy()    (false)
+#  define tiva_udma_periphrdy()    (true)
 #endif
 
 /* EPI Power Control */
@@ -123,7 +123,7 @@
 #ifdef TIVA_SYSCON_PREPI
 #  define tiva_epi_periphrdy()     tiva_periphrdy(TIVA_SYSCON_PREPI,SYSCON_PREPI_R0)
 #else
-#  define tiva_epi_periphrdy()     (false)
+#  define tiva_epi_periphrdy()     (true)
 #endif
 
 /* Hibernation Power Control */
@@ -131,7 +131,7 @@
 #ifdef TIVA_SYSCON_PRHIB
 #  define tiva_hib_periphrdy()     tiva_periphrdy(TIVA_SYSCON_PRHIB,SYSCON_PRHIB_R0)
 #else
-#  define tiva_hib_periphrdy()     (false)
+#  define tiva_hib_periphrdy()     (true)
 #endif
 
 /* UART Power Control */
@@ -139,7 +139,7 @@
 #ifdef TIVA_SYSCON_PRUART
 #  define tiva_uart_periphrdy(p)   tiva_periphrdy(TIVA_SYSCON_PRUART,SYSCON_PRUART(p))
 #else
-#  define tiva_uart_periphrdy(p)   (false)
+#  define tiva_uart_periphrdy(p)   (true)
 #endif
 
 #define tiva_uart0_periphrdy()     tiva_uart_periphrdy(0)
@@ -156,7 +156,7 @@
 #ifdef TIVA_SYSCON_PRSSI
 #  define tiva_ssi_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRSSI,SYSCON_PRSSI(p))
 #else
-#  define tiva_ssi_periphrdy(p)    (false)
+#  define tiva_ssi_periphrdy(p)    (true)
 #endif
 
 #define tiva_ssi0_periphrdy()      tiva_ssi_periphrdy(0)
@@ -169,7 +169,7 @@
 #ifdef TIVA_SYSCON_PRI2C
 #  define tiva_i2c_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRI2C,SYSCON_PRI2C(p))
 #else
-#  define tiva_i2c_periphrdy(p)    (false)
+#  define tiva_i2c_periphrdy(p)    (true)
 #endif
 
 #define tiva_i2c0_periphrdy()      tiva_i2c_periphrdy(0)
@@ -188,7 +188,7 @@
 #ifdef TIVA_SYSCON_PRUSB
 #  define tiva_usb_periphrdy()     tiva_periphrdy(TIVA_SYSCON_PRUSB,SYSCON_PRUSB_R0)
 #else
-#  define tiva_usb_periphrdy()    (false)
+#  define tiva_usb_periphrdy()     (true)
 #endif
 
 /* Ethernet PHY Power Control */
@@ -196,7 +196,7 @@
 #ifdef TIVA_SYSCON_PREPHY
 #  define tiva_ephy_periphrdy()    tiva_periphrdy(TIVA_SYSCON_PREPHY,SYSCON_PREPHY_R0)
 #else
-#  define tiva_ephy_periphrdy()    (false)
+#  define tiva_ephy_periphrdy()    (true)
 #endif
 
 /* CAN RunMode Clock Gating Control */
@@ -204,7 +204,7 @@
 #ifdef TIVA_SYSCON_PRCAN
 #  define tiva_can_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRCAN,SYSCON_PRCAN(p))
 #else
-#  define tiva_can_periphrdy(p)    (false)
+#  define tiva_can_periphrdy(p)    (true)
 #endif
 
 #define tiva_can0_periphrdy()      tiva_can_periphrdy(0)
@@ -215,7 +215,7 @@
 #ifdef TIVA_SYSCON_PRADC
 #  define tiva_adc_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRADC,SYSCON_PRADC(p))
 #else
-#  define tiva_adc_periphrdy(p)    (false)
+#  define tiva_adc_periphrdy(p)    (true)
 #endif
 
 #define tiva_adc0_periphrdy()      tiva_adc_periphrdy(0)
@@ -226,7 +226,7 @@
 #ifdef TIVA_SYSCON_PRACMP
 #  define tiva_acmp_periphrdy()    tiva_periphrdy(TIVA_SYSCON_PRACMP,SYSCON_PRACMP_R0)
 #else
-#  define tiva_acmp_periphrdy()    (false)
+#  define tiva_acmp_periphrdy()    (true)
 #endif
 
 /* PWM Power Control */
@@ -234,7 +234,7 @@
 #ifdef TIVA_SYSCON_PRPWM
 #  define tiva_pwm_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRPWM,SYSCON_PRPWM(p))
 #else
-#  define tiva_pwm_periphrdy(p)    (false)
+#  define tiva_pwm_periphrdy(p)    (true)
 #endif
 
 #define tiva_pwm0_periphrdy()      tiva_pwm_periphrdy(0)
@@ -245,7 +245,7 @@
 #ifdef TIVA_SYSCON_PRQEI
 #  define tiva_qei_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRQEI,SYSCON_PRQEI(p))
 #else
-#  define tiva_qei_periphrdy(p)    (false)
+#  define tiva_qei_periphrdy(p)    (true)
 #endif
 
 #define tiva_qei0_periphrdy()      tiva_qei_periphrdy(0)
@@ -256,7 +256,7 @@
 #ifdef TIVA_SYSCON_PREEPROM
 #  define tiva_eeprom_periphrdy()   tiva_periphrdy(TIVA_SYSCON_PREEPROM,SYSCON_PREEPROM_R0)
 #else
-#  define tiva_eeprom_periphrdy()   (false)
+#  define tiva_eeprom_periphrdy()   (true)
 #endif
 
 /* 32/64-Bit Wide Timer Power Control */
@@ -264,7 +264,7 @@
 #ifdef TIVA_SYSCON_PRWTIMER
 #  define tiva_wtm_periphrdy(p)    tiva_periphrdy(TIVA_SYSCON_PRWTIMER,SYSCON_PRWTIMER(p))
 #else
-#  define tiva_wtm_periphrdy(p)    (false)
+#  define tiva_wtm_periphrdy(p)    (true)
 #endif
 
 #define tiva_wtm0_periphrdy()      tiva_wtm_periphrdy(0)
@@ -279,7 +279,7 @@
 #ifdef TIVA_SYSCON_PRCCM
 #  define tiva_ccm_periphrdy()     tiva_periphrdy(TIVA_SYSCON_PRCCM,SYSCON_PRCCM_R0)
 #else
-#  define tiva_ccm_periphrdy()     (false)
+#  define tiva_ccm_periphrdy()     (true)
 #endif
 
 /* LCD Controller Power Control */
@@ -287,7 +287,7 @@
 #ifdef TIVA_SYSCON_PRLCD
 #  define tiva_lcd_periphrdy()     tiva_periphrdy(TIVA_SYSCON_PRLCD,SYSCON_PRLCD_R0)
 #else
-#  define tiva_lcd_periphrdy()    (false)
+#  define tiva_lcd_periphrdy()    (true)
 #endif
 
 /* 1-Wire Power Control */
@@ -295,7 +295,7 @@
 #ifdef TIVA_SYSCON_PROWIRE
 #  define tiva_owire_periphrdy()   tiva_periphrdy(TIVA_SYSCON_PROWIRE,SYSCON_PROWIRE_R0)
 #else
-#  define tiva_owire_periphrdy()   (false)
+#  define tiva_owire_periphrdy()   (true)
 #endif
 
 /* Ethernet MAC Power Control */
@@ -303,7 +303,7 @@
 #ifdef TIVA_SYSCON_PREMAC
 #  define tiva_emac_periphrdy()    tiva_periphrdy(TIVA_SYSCON_PREMAC,SYSCON_PREMAC_R0)
 #else
-#  define tiva_emac_periphrdy()    (false)
+#  define tiva_emac_periphrdy()    (true)
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVAPERIPHRDY_H */
