@@ -252,11 +252,11 @@
 
 #if SYSCLK_FREQUENCY >= 20000000 && SYSCLK_FREQUENCY < 35000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_20_35
-#elif SYSCLK_FREQUENCY >= 35000000 && SYSCLK_FREQUENCY < 60000000
+#elif SYSCLK_FREQUENCY >= 35000000 && SYSCLK_FREQUENCY <= 64000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_35_60
-#elif SYSCLK_FREQUENCY >= 60000000 && SYSCLK_FREQUENCY < 100000000
+#elif SYSCLK_FREQUENCY >= 60000000 && SYSCLK_FREQUENCY <= 104000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_60_100
-#elif SYSCLK_FREQUENCY >= 100000000 && SYSCLK_FREQUENCY < 150000000
+#elif SYSCLK_FREQUENCY >= 100000000 && SYSCLK_FREQUENCY <= 150000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_100_150
 #elif SYSCLK_FREQUENCY >= 150000000 && SYSCLK_FREQUENCY <= 168000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_150_168
@@ -3061,6 +3061,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       ndbg("Failed to reset the PHY: %d\n", ret);
       return ret;
     }
+
   up_mdelay(PHY_RESET_DELAY);
 
   /* Perform auto-negotiation if so configured */
@@ -3276,7 +3277,8 @@ static inline void tiva_phy_release(FAR struct tiva_ethmac_s *priv)
  * Function: tiva_phy_configure
  *
  * Description:
- *  Configure to support an external PHY
+ *  Configure to support the selected PHY.  Called after each reset since
+ *  many properties of the PHY configuration are lost at each reset.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -3327,6 +3329,11 @@ static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
   while (!tiva_ephy_periphrdy());
   up_udelay(250);
 #endif
+
+  /* Disable all MMC interrupts as these are enabled by default at reset */
+
+  tiva_putreg(0xffffffff, TIVA_EMAC_MMCRXIM);
+  tiva_putreg(0xffffffff, TIVA_EMAC_MMCTXIM);
 
   /* If using an external RMII PHY, we must enable the external clock */
 
@@ -3566,7 +3573,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
-  /* Configure the PHY */
+  /* Reconfigure the PHY */
 
   tiva_phy_configure(priv);
 
