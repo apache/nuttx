@@ -331,6 +331,11 @@ void up_lowsetup(void)
   /* Enable the selected console device */
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  /* REVISIT:  There is some missing logic.  We really should wait to be
+   * certain that the selected serial console UART is ready before writing
+   * to the UART registers.
+   */
+
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
   ctl = getreg32(TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
