@@ -509,38 +509,68 @@
   (EMAC_DMABUSMOD_SWR | EMAC_DMABUSMOD_DA | EMAC_DMABUSMOD_DSL_MASK | \
    EMAC_DMABUSMOD_ATDS | EMAC_DMABUSMOD_PBL_MASK | EMAC_DMABUSMOD_PR_MASK | \
    EMAC_DMABUSMOD_FB | EMAC_DMABUSMOD_RPBL_MASK | EMAC_DMABUSMOD_USP | \
-   EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_AAL | EMAC_DMABUSMOD_MB)
+   EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_AAL | EMAC_DMABUSMOD_MB |\
+   EMAC_DMABUSMOD_TXPR | EMAC_DMABUSMOD_RIB)
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- *
  * EMAC_DMABUSMOD_SWR    Software reset                     0 (no reset)
- * EMAC_DMABUSMOD_DA     DMA Arbitration                    0 (round robin)
+ * EMAC_DMABUSMOD_DA     DMA Arbitration                    1 (fixed priority)
  * EMAC_DMABUSMOD_DSL    Descriptor skip length             0
  * EMAC_DMABUSMOD_ATDS   Enhanced descriptor format enable  Depends on CONFIG_TIVA_EMAC_ENHANCEDDESC
- * EMAC_DMABUSMOD_PBL    Programmable burst length          32 beats
- * EMAC_DMABUSMOD_PR     RX TX priority ratio               2:1
- * EMAC_DMABUSMOD_FB     Fixed burst                        1 (enabled)
- * EMAC_DMABUSMOD_RPBL   RX DMA programmable burst length  32 beats
- * EMAC_DMABUSMOD_USP    Use separate PBL                   1 (enabled)
- * EMAC_DMABUSMOD_8XPBL  8x programmable burst length mode  0 (disabled)
- * EMAC_DMABUSMOD_AAL    Address-aligned beats              1 (enabled)
- * EMAC_DMABUSMOD_MB     Mixed burst                        0 (disabled, F2/F4 only)
+ * EMAC_DMABUSMOD_PBL    Programmable burst length          Depends on EMAC_DMA_RXBURST
+ * EMAC_DMABUSMOD_PR     RX TX priority ratio               0 1:1
+ * EMAC_DMABUSMOD_FB     Fixed burst                        0 (disabled)
+ * EMAC_DMABUSMOD_RPBL   RX DMA programmable burst length   Depends on EMAC_DMA_TXBURST
+ * EMAC_DMABUSMOD_USP    Use separate PBL                   Depends on EMAC_DMA_RX/TXBURST
+ * EMAC_DMABUSMOD_8XPBL  8x programmable burst length mode  Depends on EMAC_DMA_RX/TXBURST
+ * EMAC_DMABUSMOD_AAL    Address-aligned beats              0 (disabled)
+ * EMAC_DMABUSMOD_MB     Mixed burst                        1 (enabled)
  * EMAC_DMABUSMOD_TXPR   Transmit Priority                  0 (RX DMA has priority over TX)
  * EMAC_DMABUSMOD_RIB    Rebuild Burst                      0
  */
 
-#ifdef CONFIG_TIVA_EMAC_ENHANCEDDESC
-#  define DMABUSMOD_SET_MASK \
-     (EMAC_DMABUSMOD_DSL(0) | EMAC_DMABUSMOD_PBL(32) | EMAC_DMABUSMOD_ATDS | \
-      EMAC_DMABUSMOD_PR_2TO1 | EMAC_DMABUSMOD_FB | EMAC_DMABUSMOD_RPBL(32) | \
-      EMAC_DMABUSMOD_USP | EMAC_DMABUSMOD_AAL)
+#define EMAC_DMA_RXBURST          4
+#define EMAC_DMA_TXBURST          4
+
+#if EMAC_DMA_RXBURST > 32 || EMAC_DMA_TXBURST > 32
+#  define __EMAC_DMABUSMOD_8XPBL  0
+#  define __EMAC_DMA_RXBURST      EMAC_DMA_RXBURST
+#  define __EMAC_DMA_TXBURST      EMAC_DMA_TXBURST
 #else
-#  define DMABUSMOD_SET_MASK \
-     (EMAC_DMABUSMOD_DSL(0) | EMAC_DMABUSMOD_PBL(32) | EMAC_DMABUSMOD_PR_2TO1 | \
-      EMAC_DMABUSMOD_FB | EMAC_DMABUSMOD_RPBL(32) | EMAC_DMABUSMOD_USP | \
-      EMAC_DMABUSMOD_AAL)
+  /* Divide both burst lengths by 8 and set the 8X burst length multiplier */
+
+#  define __EMAC_DMABUSMOD_8XPBL  EMAC_DMABUSMOD_8XPBL
+#  define __EMAC_DMA_RXBURST      (EMAC_DMA_RXBURST >> 3)
+#  define __EMAC_DMA_TXBURST      (EMAC_DMA_TXBURST >> 3)
 #endif
+
+#define __EMAC_DMABUSMOD_PBL      EMAC_DMABUSMOD_PBL(__EMAC_DMA_RXBURST)
+
+/* Are the receive and transmit burst lengths the same? */
+
+#if __EMAC_DMA_RXBURST == __EMAC_DMA_TXBURST
+  /* Yes.. Set up to use a single burst length */
+
+#  define __EMAC_DMABUSMOD_USP    0
+#  define __EMAC_DMABUSMOD_RPBL   0
+#else
+  /* No.. Use separate burst lengths for each */
+
+#  define __EMAC_DMABUSMOD_USP    EMAC_DMABUSMOD_USP
+#  define __EMAC_DMABUSMOD_RPBL   EMAC_DMABUSMOD_RPBL(__EMAC_DMA_TXBURST)
+#endif
+
+#ifdef CONFIG_TIVA_EMAC_ENHANCEDDESC
+#  define __EMAC_DMABUSMOD_ATDS  EMAC_DMABUSMOD_ATDS
+#else
+#  define __EMAC_DMABUSMOD_ATDS  0
+#endif
+
+#define DMABUSMOD_SET_MASK \
+   (EMAC_DMABUSMOD_DA | EMAC_DMABUSMOD_DSL(0) | __EMAC_DMABUSMOD_ATDS | \
+    __EMAC_DMABUSMOD_PBL | __EMAC_DMABUSMOD_RPBL | __EMAC_DMABUSMOD_USP | \
+    __EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_MB)
 
 /* Interrupt bit sets *******************************************************/
 /* All interrupts in the normal and abnormal interrupt summary.  Early transmit
@@ -715,6 +745,7 @@ static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 /* MAC/DMA Initialization */
 
 static void tiva_phy_hold(FAR struct tiva_ethmac_s *priv);
+static inline void tiva_phy_release(FAR struct tiva_ethmac_s *priv);
 static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv);
 static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv);
 
@@ -722,7 +753,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv);
 static int  tiva_macconfig(FAR struct tiva_ethmac_s *priv);
 static void tiva_macaddress(FAR struct tiva_ethmac_s *priv);
 static int  tiva_macenable(FAR struct tiva_ethmac_s *priv);
-static int  tiva_ethconfig(FAR struct tiva_ethmac_s *priv);
+static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -2318,7 +2349,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Configure the Ethernet interface for DMA operation. */
 
-  ret = tiva_ethconfig(priv);
+  ret = tive_emac_configure(priv);
   if (ret < 0)
     {
       return ret;
@@ -3011,6 +3042,10 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   priv->mbps100 = 0;
   priv->fduplex = 0;
 
+  /* Allow the PHY to transmit on the line */
+
+  tiva_phy_release(priv);
+
   /* Setup up PHY clocking by setting the SR field in the MIIADDR register */
 
   regval  = tiva_getreg(TIVA_EMAC_MIIADDR);
@@ -3185,7 +3220,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
  * Function: tiva_phy_hold
  *
  * Description:
- *  Reset the PHY
+ *  Hold the Ethernet PHY from transmitting energy
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -3197,7 +3232,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void tiva_phy_hold(FAR struct tiva_ethmac_s *priv)
+static void tiva_phy_hold(FAR struct tiva_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3207,6 +3242,33 @@ static inline void tiva_phy_hold(FAR struct tiva_ethmac_s *priv)
 
   regval  = tiva_getreg(TIVA_EMAC_PC);
   regval |= EMAC_PC_PHYHOLD;
+  tiva_putreg(regval, TIVA_EMAC_PC);
+}
+
+/****************************************************************************
+ * Function: tiva_phy_release
+ *
+ * Description:
+ *  Release the PHY so that is can transmit energy on the line.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void tiva_phy_release(FAR struct tiva_ethmac_s *priv)
+{
+  uint32_t regval;
+
+  /* Clear the PHYHOLD bit in the EMACPC register */
+
+  regval  = tiva_getreg(TIVA_EMAC_PC);
+  regval &= ~EMAC_PC_PHYHOLD;
   tiva_putreg(regval, TIVA_EMAC_PC);
 }
 
@@ -3262,12 +3324,7 @@ static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Wait for the reset to complete */
 
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Delay a bit longer to ensure that the PHY reset has completed. */
-
+  while (!tiva_ephy_periphrdy());
   up_udelay(250);
 #endif
 
@@ -3324,9 +3381,8 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
    * continuing.
    */
 
-  while (!tiva_ephy_periphrdy())
-    {
-    }
+  while (!tiva_ephy_periphrdy());
+  up_udelay(250);
 
   /* Enable power to the Ethernet PHY */
 
@@ -3336,9 +3392,8 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
    * to be accessed.
    */
 
-  while (!tiva_ephy_periphrdy())
-    {
-    }
+  while (!tiva_ephy_periphrdy());
+  up_udelay(250);
 
 #ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
@@ -3505,6 +3560,11 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
 
   regval &= ~SYSCON_SREMAC_R0;
   tiva_putreg(regval, TIVA_SYSCON_SREMAC);
+
+  /* What for the reset to complete */
+
+  while (!tiva_emac_periphrdy());
+  up_udelay(250);
 
   /* Configure the PHY */
 
@@ -3725,7 +3785,7 @@ static int tiva_macenable(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_ethconfig
+ * Function: tive_emac_configure
  *
  * Description:
  *  Configure the Ethernet interface for DMA operation.
@@ -3740,12 +3800,12 @@ static int tiva_macenable(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int tiva_ethconfig(FAR struct tiva_ethmac_s *priv)
+static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 {
   int ret;
 
-  /* NOTE: The Ethernet clocks were initialized early in the boot-up
-   * sequence in tiva_rcc.c.
+  /* NOTE: The Ethernet clocks were initialized earlier in the start-up
+   * sequence.
    */
 
   /* Reset the Ethernet block */
@@ -3874,9 +3934,8 @@ int tiva_ethinitialize(int intf)
    * to be accessed.
    */
 
-  while (!tiva_emac_periphrdy())
-    {
-    }
+  while (!tiva_emac_periphrdy());
+  up_udelay(250);
 
   /* Configure GPIOs to support the internal/eternal PHY */
 
