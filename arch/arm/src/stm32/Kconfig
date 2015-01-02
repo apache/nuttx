@@ -3238,6 +3238,28 @@ config SDIO_WIDTH_D1_ONLY
 
 endmenu
 
+choice
+	prompt "RTC clock source"
+	default RTC_LSECLOCK
+	depends on RTC
+
+config RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice
+
 if STM32_ETHMAC
 menu "Ethernet MAC configuration"
 
