@@ -48,6 +48,7 @@
 
 #include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
+#include "tiva_periphrdy.h"
 #include "tiva_gpio.h"
 #include "chip/tiva_pinmap.h"
 
@@ -61,48 +62,56 @@
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     0
 #  define TIVA_CONSOLE_BASE     TIVA_UART0_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART0_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART0_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART0_2STOP
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     1
 #  define TIVA_CONSOLE_BASE     TIVA_UART1_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART1_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART1_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART1_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART1_2STOP
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     2
 #  define TIVA_CONSOLE_BASE     TIVA_UART2_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART2_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART2_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART2_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART2_2STOP
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     3
 #  define TIVA_CONSOLE_BASE     TIVA_UART3_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART3_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART3_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART3_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART3_2STOP
 #elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     4
 #  define TIVA_CONSOLE_BASE     TIVA_UART4_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART4_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART4_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART4_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART4_2STOP
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     5
 #  define TIVA_CONSOLE_BASE     TIVA_UART5_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART5_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART5_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART5_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART5_2STOP
 #elif defined(CONFIG_UART6_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     6
 #  define TIVA_CONSOLE_BASE     TIVA_UART6_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART6_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART6_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART6_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART6_2STOP
 #elif defined(CONFIG_UART7_SERIAL_CONSOLE)
+#  define TIVA_CONSOLE_UART     7
 #  define TIVA_CONSOLE_BASE     TIVA_UART7_BASE
 #  define TIVA_CONSOLE_BAUD     CONFIG_UART7_BAUD
 #  define TIVA_CONSOLE_BITS     CONFIG_UART7_BITS
@@ -331,10 +340,14 @@ void up_lowsetup(void)
   /* Enable the selected console device */
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
-  /* REVISIT:  There is some missing logic.  We really should wait to be
-   * certain that the selected serial console UART is ready before writing
-   * to the UART registers.
+#ifdef TIVA_SYSCON_PRUART
+  /* Wait for the console UART to be ready before writing to the UART
+   * registers.
    */
+
+  while (!tiva_periphrdy(TIVA_SYSCON_PRUART,
+                         SYSCON_PRUART(TIVA_CONSOLE_UART)));
+#endif
 
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
