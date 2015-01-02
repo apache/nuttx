@@ -9361,3 +9361,8 @@
 	  Make.defs: First cut at TM4C129X Ethernet driver.  Initial commit is
 	  basically just the STM32 Ethernet driver with modifications for a clean
 	  compilation in the Tiva environment (2014-12-31).
+	* arch/arm/src/stm32/stm32_rtc.c, stm32_rcc.c, Kconfig: Add support for
+	  the internal low speed clock (LSI) as a source of the RTC clock.  Some
+	  boards do not have the external 32khz oscillator installed, for those
+	  boards we must fallback to the crummy internal RC clock.  Turn on by
+	  defining CONFIG_RTC_LSICLOCK.  From Kevin Hester (2015-01-02).
