@@ -797,6 +797,7 @@ static uint32_t tiva_getreg(uint32_t addr)
              {
                lldbg("...\n");
              }
+
           return val;
         }
     }
@@ -3382,6 +3383,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 
   /* Enable the clock to the PHY module */
 
+  nllvdbg("Enable EPHY clocking\n");
   tiva_ephy_enableclk();
 
   /* What until the PREPHY register indicates that the PHY is ready before
@@ -3393,6 +3395,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 
   /* Enable power to the Ethernet PHY */
 
+  nllvdbg("Enable EPHY power\n");
   tiva_ephy_enablepwr();
 
   /* What until the PREPHY register indicates that the PHY registers are ready
@@ -3401,6 +3404,11 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 
   while (!tiva_ephy_periphrdy());
   up_udelay(250);
+
+  nllvdbg("RCGCEPHY: %08x PREPHY: %08x\n",
+          getreg32(TIVA_SYSCON_RCGCEPHY), getreg32(TIVA_SYSCON_PREPHY));
+
+  nllvdbg("Configure PHY GPIOs\n");
 
 #ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
@@ -3573,10 +3581,6 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
-  /* Reconfigure the PHY */
-
-  tiva_phy_configure(priv);
-
   /* Perform a software reset by setting the SR bit in the DMABUSMOD register.
    * This Resets all MAC subsystem internal registers and logic.  After this
    * reset all the registers holds their reset values.
@@ -3592,6 +3596,12 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
 
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
   up_udelay(250);
+
+  /* Reconfigure the PHY.  Some PHY configurations will be lost as a
+   * consequence of the reset
+   */
+
+  tiva_phy_configure(priv);
 }
 
 /****************************************************************************
@@ -3888,7 +3898,7 @@ int tiva_ethinitialize(int intf)
 {
   struct tiva_ethmac_s *priv;
 
-  nvdbg("intf: %d\n", intf);
+  nllvdbg("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 
@@ -3934,6 +3944,7 @@ int tiva_ethinitialize(int intf)
    *   bringing it a fully functional state.
    */
 
+  nllvdbg("Enable EMAC clocking\n");
   tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
   tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
 
@@ -3944,8 +3955,12 @@ int tiva_ethinitialize(int intf)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
+  nllvdbg("RCGCEMAC: %08x PREMAC: %08x\n",
+          getreg32(TIVA_SYSCON_RCGCEMAC), getreg32(TIVA_SYSCON_PREMAC));
+
   /* Configure GPIOs to support the internal/eternal PHY */
 
+  nllvdbg("Calling tiva_phy_initialize\n");
   tiva_phy_initialize(priv);
 
   /* Attach the IRQ to the driver */
@@ -3959,11 +3974,14 @@ int tiva_ethinitialize(int intf)
 
   /* Put the interface in the down state. */
 
+  nllvdbg("Calling tiva_ifdown\n");
   tiva_ifdown(&priv->dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
+  nllvdbg("Registering Ethernet device\n");
   (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+
   return OK;
 }
 
