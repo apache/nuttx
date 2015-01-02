@@ -9366,3 +9366,7 @@
 	  boards do not have the external 32khz oscillator installed, for those
 	  boards we must fallback to the crummy internal RC clock.  Turn on by
 	  defining CONFIG_RTC_LSICLOCK.  From Kevin Hester (2015-01-02).
+	* net/tcp/tcp_conn.c:  Fix a logic error when CONFIG_NETDEV_MULTINIC is
+	  selected: net_unlock(flags) will be called will an uninitialized
+          variable (2015-01-03).
+
