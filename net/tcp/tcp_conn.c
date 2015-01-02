@@ -651,10 +651,13 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
   int port;
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipaddr_t ipaddr;
+#endif
 
   /* Verify or select a local port and address */
 
   flags = net_lock();
+
+#ifdef CONFIG_NETDEV_MULTINIC
 #ifdef CONFIG_NET_IPv6
   /* Get the IPv6 address that we are binding to */
 
@@ -673,6 +676,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
 
   port = tcp_selectport(ntohs(addr->sin_port));
 #endif
+
   net_unlock(flags);
 
   if (port < 0)
