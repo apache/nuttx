@@ -208,7 +208,11 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
   irqstate_t   flags;
   unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uintptr_t    base;
+#ifdef TIVA_SYSCON_RCGCGPIO
+  uint32_t     rcgcgpio;
+#else
   uint32_t     rcgc2;
+#endif
   bool         enabled;
 
   /* Get the base address associated with the GPIO port */
@@ -218,26 +222,36 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags   = irqsave();
-  rcgc2   = getreg32(TIVA_SYSCON_RCGC2);
-  enabled = ((rcgc2 & SYSCON_RCGC2_GPIO(port)) != 0);
+  flags    = irqsave();
+#ifdef TIVA_SYSCON_RCGCGPIO
+  rcgcgpio = getreg32(TIVA_SYSCON_RCGCGPIO);
+  enabled  = ((rcgcgpio & SYSCON_RCGCGPIO(port)) != 0);
+#else
+  rcgc2    = getreg32(TIVA_SYSCON_RCGC2);
+  enabled  = ((rcgc2 & SYSCON_RCGC2_GPIO(port)) != 0);
+#endif
 
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         tiva_gpioport(port), pinset, base, msg);
-  lldbg("  RCGC2: %08x (%s)\n",
+#ifdef TIVA_SYSCON_RCGCGPIO
+  lldbg("RCGCGPIO: %08x (%s)\n",
+        rcgcgpio, enabled ? "enabled" : "disabled" );
+#else
+  lldbg("   RCGC2: %08x (%s)\n",
         rcgc2, enabled ? "enabled" : "disabled" );
+#endif
 
   /* Don't bother with the rest unless the port is enabled */
 
   if (enabled)
     {
-      lldbg("  AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
+      lldbg("   AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
             getreg32(base + TIVA_GPIO_AFSEL_OFFSET), getreg32(base + TIVA_GPIO_DEN_OFFSET),
             getreg32(base + TIVA_GPIO_DIR_OFFSET), getreg32(base + TIVA_GPIO_DATA_OFFSET + 0x3fc));
-      lldbg("  IS:    %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
+      lldbg("      IS:  %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
             getreg32(base + TIVA_GPIO_IEV_OFFSET), getreg32(base + TIVA_GPIO_IM_OFFSET),
             getreg32(base + TIVA_GPIO_RIS_OFFSET), getreg32(base + TIVA_GPIO_MIS_OFFSET));
-      lldbg("  2MA:   %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
+      lldbg("     2MA:  %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
             getreg32(base + TIVA_GPIO_DR2R_OFFSET), getreg32(base + TIVA_GPIO_DR4R_OFFSET),
             getreg32(base + TIVA_GPIO_DR8R_OFFSET), getreg32(base + TIVA_GPIO_ODR_OFFSET),
             getreg32(base + TIVA_GPIO_PUR_OFFSET), getreg32(base + TIVA_GPIO_PDR_OFFSET),
