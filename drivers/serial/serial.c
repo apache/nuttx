@@ -421,18 +421,18 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 #ifdef CONFIG_SERIAL_TERMIOS
       /* Do output post-processing */
 
-      if (dev->tc_oflag & OPOST)
+      if ((dev->tc_oflag & OPOST) != 0)
         {
           /* Mapping CR to NL? */
 
-          if ((ch == '\r') && (dev->tc_oflag & OCRNL))
+          if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
             {
               ch = '\n';
             }
 
           /* Are we interested in newline processing? */
 
-          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)))
+          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
             {
               ret = uart_putxmitchar(dev, '\r', oktoblock);
               if (ret < 0)
@@ -898,7 +898,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           case TCGETS:
             {
-              struct termios *termiosp = (struct termios*)arg;
+              FAR struct termios *termiosp = (struct termios*)arg;
 
               if (!termiosp)
                 {
@@ -916,7 +916,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCSETS:
             {
-              struct termios *termiosp = (struct termios*)arg;
+              FAR struct termios *termiosp = (struct termios*)arg;
 
               if (!termiosp)
                 {
@@ -1269,7 +1269,7 @@ static int uart_open(FAR struct file *filep)
 
 #ifdef CONFIG_SERIAL_TERMIOS
       dev->tc_iflag = 0;
-      if (dev->isconsole == true)
+      if (dev->isconsole)
         {
           /* Enable \n -> \r\n translation for the console */
 
