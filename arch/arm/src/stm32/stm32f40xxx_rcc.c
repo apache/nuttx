@@ -55,6 +55,10 @@
 
 #define HSIRDY_TIMEOUT HSERDY_TIMEOUT
 
+/* HSE divisor to yield ~1MHz RTC clock */
+
+#define HSE_DIVISOR (STM32_HSE_FREQUENCY + 500000) / 1000000
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -684,7 +688,16 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_CFGR_PPRE1;
       putreg32(regval, STM32_RCC_CFGR);
 
-      /* Set the PLL dividers and multiplers to configure the main PLL */
+#ifdef CONFIG_RTC_HSECLOCK
+      /* Set the RTC clock divisor */
+
+      regval = getreg32(STM32_RCC_CFGR);
+      regval &= ~RCC_CFGR_RTCPRE_MASK;
+      regval |= RCC_CFGR_RTCPRE(HSE_DIVISOR);
+      putreg32(regval, STM32_RCC_CFGR);
+#endif
+
+      /* Set the PLL dividers and multipliers to configure the main PLL */
 
 #ifdef STM32_BOARD_USEHSI
       regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |

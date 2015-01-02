@@ -81,9 +81,7 @@
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
-#define RTC_MAGIC        (0xfacefeed)
-#define RTC_PREDIV_S     (0xff)
-#define RTC_PREDIV_A     (0x7f)
+#define RTC_MAGIC        (0xfacefeee)
 
 /* Debug ****************************************************************************/
 
@@ -437,11 +435,46 @@ static int rtc_setup(void)
   uint32_t regval;
   int ret;
 
-  /* Enable the External Low-Speed (LSE) Oscillator setup the LSE as the RTC clock\
-   * source, and enable the RTC.
+  /* We might be changing RTCSEL - to ensure such changes work, we must reset the
+   * backup domain
    */
 
+  modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+  modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
+
+  /* Some boards do not have the external 32khz oscillator installed, for those
+   * boards we must fallback to the crummy internal RC clock or the external high
+   * rate clock
+   */
+
+#ifdef CONFIG_RTC_HSECLOCK
+  /* Use the HSE clock as the input to the RTC block */
+
+  modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
+
+  /* Enable the RTC Clock by setting the RTCEN bit in the RCC BDCR register */
+
+  modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
+
+#elif defined(CONFIG_RTC_LSICLOCK)
+  /* Enable the LSI clock */
+
+  stm32_rcc_enablelsi();
+
+  /* Use the LSI clock as the input to the RTC block */
+
+  modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
+
+  /* Enable the RTC Clock by setting the RTCEN bit in the RCC BDCR register */
+
+  modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
+
+#else
+  /* Enable the LSE clock */
+
   stm32_rcc_enablelse();
+
+#endif
 
   /* Wait for the RTC Time and Date registers to be synchronized with RTC APB
    * clock.
@@ -467,13 +500,23 @@ static int rtc_setup(void)
           regval &= ~RTC_CR_FMT;
           putreg32(regval, STM32_RTC_CR);
 
-          /* Configure RTC pre-scaler to the required, default values for
-           * use with the 32.768 KHz LSE clock:
+          /* Configure RTC pre-scaler with the required values */
+
+#ifdef CONFIG_RTC_HSECLOCK
+          /* For a 1 MHz clock this yields 0.9999360041 Hz on the second
+           * timer - which is pretty close.
            */
+
+          putreg32(((uint32_t)7182 << RTC_PRER_PREDIV_S_SHIFT) |
+                   ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
+                   STM32_RTC_PRER);
+#else
+          /* Correct values for 1 32.768 KHz LSE clock */
 
           putreg32(((uint32_t)0xff << RTC_PRER_PREDIV_S_SHIFT) |
                    ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
                    STM32_RTC_PRER);
+#endif
 
           /* Exit RTC initialization mode */
 
@@ -580,8 +623,6 @@ int up_rtcinitialize(void)
   int maxretry = 10;
   int nretry = 0;
 
-  rtc_dumpregs("On reset");
-
   /* Clocking for the PWR block must be provided.  However, this is done
    * unconditionally in stm32f40xxx_rcc.c on power up.  This done unconditionally
    * because the PWR block is also needed to set the internal voltage regulator for
@@ -593,6 +634,11 @@ int up_rtcinitialize(void)
    */
 
   stm32_pwr_enablebkp();
+  rtc_dumpregs("On reset");
+
+  /* Enable the External Low-Speed (LSE) Oscillator setup the LSE as the RTC clock
+   * source, and enable the RTC.
+   */
 
   /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
    * because it seems that occasionally it takes longer to initialize the RTC
@@ -626,6 +672,7 @@ int up_rtcinitialize(void)
           /* RTC already set-up, just resume normal operation */
 
           ret = rtc_resume();
+          rtc_dumpregs("Did resume");
         }
 
       /* Check that setup or resume returned successfully */
