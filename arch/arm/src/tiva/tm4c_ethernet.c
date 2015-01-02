@@ -714,8 +714,9 @@ static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
-static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv);
-static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv);
+static void tiva_phy_hold(FAR struct tiva_ethmac_s *priv);
+static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv);
+static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv);
 
 static void tiva_ethreset(FAR struct tiva_ethmac_s *priv);
 static int  tiva_macconfig(FAR struct tiva_ethmac_s *priv);
@@ -3181,10 +3182,10 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_phy_reconfigure
+ * Function: tiva_phy_hold
  *
  * Description:
- *  Configure to support the internal PHY
+ *  Reset the PHY
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -3196,36 +3197,150 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv)
-{
-  /* No special actions need to taken after a reset if the internal PHY
-   * is used.
-   */
-}
-#endif
-
-/****************************************************************************
- * Function: tiva_phy_gpioconfig
- *
- * Description:
- *  Configure to support the internal PHY
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
+static inline void tiva_phy_hold(FAR struct tiva_ethmac_s *priv)
 {
   uint32_t regval;
 
+  /* Hold the Ethernet PHY from transmitting energy on the line during
+   * configuration by setting the PHYHOLD bit in the EMACPC register.
+   */
+
+  regval  = tiva_getreg(TIVA_EMAC_PC);
+  regval |= EMAC_PC_PHYHOLD;
+  tiva_putreg(regval, TIVA_EMAC_PC);
+}
+
+/****************************************************************************
+ * Function: tiva_phy_configure
+ *
+ * Description:
+ *  Configure to support an external PHY
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
+{
+  uint32_t regval;
+
+  /* Hold the Ethernet PHY from transmitting energy on the line during
+   * configuration by setting the PHYHOLD bit in the EMACPC register.
+   */
+
+  tiva_phy_hold(priv);
+
+  /* Set up the PHY configuration */
+
+#if defined(CONFIG_TIVA_PHY_RMII)
+  regval = EMAC_PC_PHYHOLD | EMAC_PC_PINTFS_RMII | EMAC_PC_PHYEXT;
+#elif defined(CONFIG_TIVA_PHY_MII)
+  regval = EMAC_PC_PHYHOLD | EMAC_PC_PINTFS_MII | EMAC_PC_PHYEXT;
+#else /* defined(CONFIG_TIVA_PHY_INTERNAL) */
+  regval = EMAC_PC_PHYHOLD | EMAC_PC_MDIXEN | EMAC_PC_ANMODE_100FD |
+           EMAC_PC_ANEN | EMAC_PC_PINTFS_MII;
+#endif
+  tiva_putreg(regval, TIVA_EMAC_PC);
+
+#ifdef CONFIG_TIVA_PHY_INTERNAL
+  /* If we are using the internal PHY, reset it to ensure that new
+   * configuration is latched.
+   */
+
+  regval  = tiva_getreg(TIVA_SYSCON_SREPHY);
+  regval |= SYSCON_SREPHY_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+
+  regval &= ~SYSCON_SREPHY_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+
+  /* Wait for the reset to complete */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+  /* Delay a bit longer to ensure that the PHY reset has completed. */
+
+  up_udelay(250);
+#endif
+
+  /* If using an external RMII PHY, we must enable the external clock */
+
+  regval = tiva_getreg(TIVA_EMAC_CC);
+
+#if defined(CONFIG_TIVA_PHY_RMII)
+  /* Enable the external clock source input to the RMII interface signal
+   * EN0RREF_CLK by setting both the CLKEN bit in the Ethernet Clock
+   * Configuration (EMACCC) register. The external clock source must be
+   * 50 MHz with a frequency tolerance of 50 PPM.
+   */
+
+  regval = tiva_getreg(TIVA_EMAC_CC);
+#else
+  /* Disable the external clock */
+
+  regval &= ~EMAC_CC_CLKEN;
+#endif
+
+  tiva_putreg(regval, TIVA_EMAC_CC);
+}
+
+/****************************************************************************
+ * Function: tiva_phy_initialize
+ *
+ * Description:
+ *  Perform one-time PHY initialization
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
+{
+  /* Hold the Ethernet PHY from transmitting energy on the line during
+   * configuration by setting the PHYHOLD bit in the EMACPC register.
+   */
+
+  tiva_phy_hold(priv);
+
+  /* Enable the clock to the PHY module */
+
+  tiva_ephy_enableclk();
+
+  /* What until the PREPHY register indicates that the PHY is ready before
+   * continuing.
+   */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+  /* Enable power to the Ethernet PHY */
+
+  tiva_ephy_enablepwr();
+
+  /* What until the PREPHY register indicates that the PHY registers are ready
+   * to be accessed.
+   */
+
+  while (!tiva_ephy_periphrdy())
+    {
+    }
+
+#ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
    *
    *   "The Ethernet Controller Module and Integrated PHY receive two clock inputs:
@@ -3243,42 +3358,6 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
    *   External PHY support is not yet implemented.
    */
 
-  /* Enable the Ethernet PHY in its default configuration */
-
-  /* Hold the Ethernet PHY from transmitting energy on the line during
-   * configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  regval  = tiva_getreg(TIVA_EMAC_PC);
-  regval |= EMAC_PC_PHYHOLD;
-  tiva_putreg(regval, TIVA_EMAC_PC);
-
-  /* Enable the clock to the PHY module */
-
-  tiva_ephy_enableclk();
-
-  /* What until the PREPHY register indicates that the PHY is ready before
-   * continuing.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Enable power to the Ethernet PHY */
-
-  tiva_ephy_enablepwr();
-
-  /* What until the PREPHY register indicates that the PHY registers are ready
-   * to be accessed.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* The EMAC interface defaults to MII mode. */
-
   /* PHY interface pins:
    *
    * EN0TXOP - Fixed pin assignment
@@ -3294,136 +3373,16 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_LED0);
   tiva_configgpio(GPIO_EN0_LED1);
   tiva_configgpio(GPIO_EN0_LED2);
-}
-#endif
 
-/****************************************************************************
- * Function: tiva_phy_reconfigure
- *
- * Description:
- *  Configure to support an external PHY
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifndef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv)
-{
-  /* Enable the Ethernet PHY in a custom configuration */
-
-  /* 1. Hold the Ethernet PHY from transmitting energy on the line during
-   *    configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  regval  = tiva_getreg(TIVA_EMAC_PC);
-  regval |= EMAC_PC_PHYHOLD;
-  tiva_putreg(regval, TIVA_EMAC_PC)
-
-  /* Enable the clock to the PHY module */
-
-  tiva_ephy_enableclk();
-
-  /* What until the PREPHY register indicates that the PHY is ready before
-   * continuing.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Enable power to the Ethernet PHY */
-
-  tiva_ephy_enablepwr();
-
-  /* What until the PREPHY register indicates that the PHY registers are ready
-   * to be accessed.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Set up the custom PHY configuration.
-   *
-   * NOTE: This custom PHY configuration will be lost after a reset.
-   */
-
-#if defined(CONFIG_TIVA_PHY_MII)
-  /* Set up the external MII interface configuration */
-#warning Missing logic
-
-#elif defined(CONFIG_TIVA_PHY_RMII)
-  /* Set up the external RMII interface configuration */
-#warning Missing logic
-
-  /* Enable the external clock source input to the RMII interface signal
-   * EN0RREF_CLK by setting both the ECEXT and CLKEN bit in the in the Ethernet
-   * Clock Configuration (EMACCC) register. The external clock source must be
-   * 50 MHz with a frequency tolerance of 50 PPM.
-   */
-#warning Missing logic
-
-  /* Select the RMII interface by programming the PINTFS bit field to 0x4 in
-   * the Ethernet Peripheral Configuration (EMACPC) register.
-   */
-#warning Missing logic
-
-  /* Reset the Ethernet MAC to latch the new RMII configuration by setting the
-   * SWR bit in the EMACDMABUSMOD register. This bit resets the Ethernet MAC
-   * registers in addition to configuring the RMII interface.
-   */
-#warning Missing logic
-
-  /* Software must poll the SWR bit to determine when the new configuration has
-   * been registered.
-   *
-   * Note: After this configuration is active, if the Ethernet MAC is reset by
-   * setting the R0 bit in the Ethernet MAC Software Reset (SREMAC) register in
-   * the System Control Module, then the interface is set back to its default
-   * MII configuration. In this case, the steps listed above must be repeated to
-   * return to an RMII interface.
-   */
-#warning Missing logic
-#endif
-}
-#endif
-
-/****************************************************************************
- * Function: tiva_phy_gpioconfig
- *
- * Description:
- *  Configure to support an external PHY
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifndef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
-{
-#if defined(CONFIG_TIVA_PHY_MII) || defined(CONFIG_TIVA_PHY_RMII)
-  /* Configure GPIO pins to support Ethernet */
+#else /* if defined(CONFIG_TIVA_PHY_MII) || defined(CONFIG_TIVA_PHY_RMII) */
+  /* Configure GPIO pins to support MII or RMII */
   /* MDC and MDIO are common to both modes */
 
   tiva_configgpio(GPIO_EN0_MDC);
   tiva_configgpio(GPIO_EN0_MDIO);
 
-  /* Set up the MII interface */
-
 #if defined(CONFIG_TIVA_PHY_MII)
+  /* Set up the MII interface */
 
   /* "Four clock inputs are driven into the Ethernet MAC when the MII
    *  configuration is enabled. The clocks are described as follows:
@@ -3470,9 +3429,8 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_MII_TX_CLK);
   tiva_configgpio(GPIO_EN0_MII_TX_EN);
 
-  /* Set up the RMII interface. */
-
 #elif defined(CONFIG_TIVA_PHY_RMII)
+  /* Set up the RMII interface. */
 
   /* "There are three clock sources that interface to the Ethernet MAC in
    *  an RMII configuration:
@@ -3496,35 +3454,6 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
    *    for receive and transmit data."
    */
 
-  /* Enable the external clock source input to the RMII interface signal
-   * EN0RREF_CLK by setting both the ECEXT and CLKEN bit in the in the Ethernet
-   * Clock Configuration (EMACCC) register. The external clock source must be
-   * 50 MHz with a frequency tolerance of 50 PPM.
-   */
-#warning Missing logic
-
-  /* Select the RMII interface by programming the PINTFS bit field to 0x4 in
-   * the Ethernet Peripheral Configuration (EMACPC) register.
-   */
-#warning Missing logic
-
-  /* Reset the Ethernet MAC to latch the new RMII configuration by setting the
-   * SWR bit in the EMACDMABUSMOD register. This bit resets the Ethernet MAC
-   * registers in addition to configuring the RMII interface.
-   */
-#warning Missing logic
-
-  /* Software must poll the SWR bit to determine when the new configuration has
-   * been registered.
-   *
-   * Note: After this configuration is active, if the Ethernet MAC is reset by
-   * setting the R0 bit in the Ethernet MAC Software Reset (SREMAC) register in
-   * the System Control Module, then the interface is set back to its default
-   * MII configuration. In this case, the steps listed above must be repeated to
-   * return to an RMII interface.
-   */
-#warning Missing logic
-
   /* RMII interface pins (7):
    *
    * RMII_TXD[1:0], RMII_TX_EN, RMII_RXD[1:0], RMII_CRS_DV, MDC, MDIO,
@@ -3545,9 +3474,8 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
   /* Enable pulse-per-second (PPS) output signal */
 
   tiva_configgpio(GPIO_EN0_PPS);
-#endif
+#endif 
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_ethreset
@@ -3578,18 +3506,9 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   regval &= ~SYSCON_SREMAC_R0;
   tiva_putreg(regval, TIVA_SYSCON_SREMAC);
 
-  /* Reset the internal PHY
-   *
-   * NOTE: If a custom PHY configuration is used, then that configuration
-   * will be lost after the reset.
-   */
+  /* Configure the PHY */
 
-  regval  = tiva_getreg(TIVA_SYSCON_SREPHY);
-  regval |= SYSCON_SREPHY_R0;
-  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
-
-  regval &= ~SYSCON_SREPHY_R0;
-  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+  tiva_phy_configure(priv);
 
   /* Perform a software reset by setting the SR bit in the DMABUSMOD register.
    * This Resets all MAC subsystem internal registers and logic.  After this
@@ -3605,16 +3524,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
    */
 
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
-
-  /* If the RMII configuration is active when the Ethernet MAC is reset,
-   * then the interface is set back to its default MII configuration. In
-   * this case, the we must restore the RMII interface configuration.
-   *
-   * Also, if the PHY is used any custom configuration, then the PHY
-   * must be reconfigured after the reset.
-   */
-
-  tiva_phy_reconfigure(priv);
+  up_udelay(250);
 }
 
 /****************************************************************************
@@ -3970,7 +3880,7 @@ int tiva_ethinitialize(int intf)
 
   /* Configure GPIOs to support the internal/eternal PHY */
 
-  tiva_phy_gpioconfig(priv);
+  tiva_phy_initialize(priv);
 
   /* Attach the IRQ to the driver */
 

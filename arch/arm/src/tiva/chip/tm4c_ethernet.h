@@ -834,7 +834,7 @@
 #define EMAC_PC_DIGRESTART             (1 << 25) /* Bit 25: PHY Soft Restart */
 #define EMAC_PC_PINTFS_SHIFT           (28)      /* Bits 28-30: Ethernet Interface Select */
 #define EMAC_PC_PINTFS_MASK            (7 << EMAC_PC_PINTFS_SHIFT)
-#  define EMAC_PC_PINTFS_IMII          (0 << EMAC_PC_PINTFS_SHIFT) /* MII: Internal PHY or external PHY connected via MII */
+#  define EMAC_PC_PINTFS_MII           (0 << EMAC_PC_PINTFS_SHIFT) /* MII: Internal PHY or external PHY connected via MII */
 #  define EMAC_PC_PINTFS_RMII          (4 << EMAC_PC_PINTFS_SHIFT) /* RMII: External PHY connected via RMII */
 #define EMAC_PC_PHYEXT                 (1 << 31) /* Bit 31: PHY Select */
 
