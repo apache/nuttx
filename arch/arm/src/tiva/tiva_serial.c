@@ -1289,7 +1289,7 @@ void up_earlyserialinit(void)
   up_disableuartint(TTYS7_DEV.priv, NULL);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configure whichever one is the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
