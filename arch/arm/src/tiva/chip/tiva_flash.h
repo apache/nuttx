@@ -47,7 +47,7 @@
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
 #  include "chip/tm4c_flash.h"
 
-/* Others (including TM4C123) are similar to the LM3S family */
+/* Others (including LM4F and TM4C123) are similar to the LM3S family */
 
 #else
 #  include "chip/lm3s_flash.h"
