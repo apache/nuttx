@@ -62,6 +62,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+#  include <nuttx/net/phy.h>
+#endif
+
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
@@ -623,10 +627,13 @@ struct tiva_ethmac_s
 #ifdef CONFIG_NET_NOINTS
   struct work_s        work;        /* For deferring work to the work queue */
 #endif
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+  xcpt_t               handler;     /* Attached PHY interrupt handler */
+#endif
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct net_driver_s  dev;         /* Interface understood by network subsysem */
+  struct net_driver_s  dev;         /* Interface understood by network subsystem */
 
   /* Used to track transmit and receive descriptors */
 
@@ -735,8 +742,8 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv);
 
 /* PHY Initialization */
 
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int  tiva_phyintenable(FAR struct tiva_ethmac_s *priv);
+#if CONFIG_TIVA_PHY_INTERRUPTS
+static void tiva_phyintenable(bool enable);
 #endif
 static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
@@ -2035,28 +2042,49 @@ static int tiva_interrupt(int irq, FAR void *context)
   /* Check if a packet transmission just completed. */
 
   dmaris = tiva_getreg(TIVA_EMAC_DMARIS);
-  if ((dmaris & EMAC_DMAINT_TI) != 0)
+  if (dmaris != 0)
     {
-      /* If a TX transfer just completed, then cancel the TX timeout so
-       * there will be do race condition between any subsequent timeout
-       * expiration and the deferred interrupt processing.
-       */
+      if ((dmaris & EMAC_DMAINT_TI) != 0)
+        {
+          /* If a TX transfer just completed, then cancel the TX timeout so
+           * there will be do race condition between any subsequent timeout
+           * expiration and the deferred interrupt processing.
+           */
 
-       wd_cancel(priv->txtimeout);
+           wd_cancel(priv->txtimeout);
+        }
+
+      /* Cancel any pending poll work */
+
+      work_cancel(HPWORK, &priv->work);
+
+      /* Schedule to perform the interrupt processing on the worker thread. */
+
+      work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
     }
-
-  /* Cancel any pending poll work */
-
-  work_cancel(HPWORK, &priv->work);
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
 
 #else
   /* Process the interrupt now */
 
   tiva_interrupt_process(priv);
+#endif
+
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+  /* Check for pending PHY interrupts */
+
+  if ((tiva_getreg(TIVA_EPHY_MISC) & EMAC_PHYMISC_INT) != 0)
+    {
+      /* Clear the pending PHY interrupt */
+
+      tiva_putreg(EMAC_PHYMISC_INT, TIVA_EPHY_MISC);
+
+      /* Dispatch to the registered handler */
+
+      if (priv->handler)
+        {
+          (void)priv->handler(irq, context);
+        }
+    }
 #endif
 
   return OK;
@@ -2816,14 +2844,11 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
 {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
-#endif
   int ret;
 
   switch (cmd)
   {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
@@ -2833,7 +2858,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
         {
           /* Enable PHY link up/down interrupts */
 
-          ret = tiva_phyintenable(priv);
+          tiva_phyintenable(true);
         }
     }
     break;
@@ -2889,11 +2914,65 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int tiva_phyintenable(struct tiva_ethmac_s *priv)
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+static void tiva_phyintenable(bool enable)
 {
+#ifdef CONFIG_TIVA_PHY_INTERNAL
+  uint16_t phyval;
+  int ret;
+
+  /* Disable further PHY interrupts until we complete this setup */
+
+  ret = tiva_putreg(0, TIVA_EPHY_IM);
+  if (ret == OK)
+    {
+      /* Enable/disable event based PHY interrupts */
+
+      if (enable)
+        {
+          /* Configure interrupts on link status change events */
+
+          ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_MISR1,
+                              EPHY_MISR1_LINKSTATEN);
+          if (ret == OK)
+            {
+              /* Enable PHY event based interrupts */
+
+              ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, &phyval);
+              if (ret == OK)
+                {
+                  phyval |= EPHY_SCR_INTEN;
+                  ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
+                  if (ret == OK)
+                    {
+                      /* Enable PHY interrupts */
+
+                      tiva_putreg(EMAC_PHYIM_INT, TIVA_EPHY_IM);
+                    }
+                }
+            }
+        }
+      else
+        {
+          /* Disable PHY event based interrupts */
+
+          ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, &phyval);
+          if (ret == OK)
+            {
+              phyval |= EPHY_SCR_INTEN;
+              (void)tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
+            }
+        }
+    }
+
+#else
+  /* Interrupt configuration logic for external PHYs depends on the
+   * particular PHY part connected.
+   */
+
 #warning Missing logic
   return -ENOSYS;
+#endif
 }
 #endif
 
@@ -3084,7 +3163,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       return -ETIMEDOUT;
     }
 
-  /* Enable auto-gegotiation */
+  /* Enable auto-negotiation */
 
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
@@ -3970,6 +4049,117 @@ void up_netinitialize(void)
   (void)tiva_ethinitialize(0);
 }
 #endif
+
+/****************************************************************************
+ * Name: arch_phy_irq
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a PHY interrupt occurs.  This function both attaches
+ *   the interrupt handler and enables the interrupt if 'handler' is non-
+ *   NULL.  If handler is NULL, then the interrupt is detached and disabled
+ *   instead.
+ *
+ *   The PHY interrupt is always disabled upon return.  The caller must
+ *   call back through the enable function point to control the state of
+ *   the interrupt.
+ *
+ *   This interrupt may or may not be available on a given platform depending
+ *   on how the network hardware architecture is implemented.  In a typical
+ *   case, the PHY interrupt is provided to board-level logic as a GPIO
+ *   interrupt (in which case this is a board-specific interface and really
+ *   should be called board_phy_irq()); In other cases, the PHY interrupt
+ *   may be cause by the chip's MAC logic (in which case arch_phy_irq()) is
+ *   an appropriate name.  Other other boards, there may be no PHY interrupts
+ *   available at all.  If client attachable PHY interrupts are available
+ *   from the board or from the chip, then CONFIG_ARCH_PHY_INTERRUPT should
+ *   be defined to indicate that fact.
+ *
+ *   Typical usage:
+ *   a. OS service logic (not application logic*) attaches to the PHY
+ *      PHY interrupt and enables the PHY interrupt.
+ *   b. When the PHY interrupt occurs:  (1) the interrupt should be
+ *      disabled and () work should be scheduled on the worker thread (or
+ *      perhaps a dedicated application thread).
+ *   c. That worker thread should use the SIOCGMIIPHY, SIOCGMIIREG,
+ *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
+ *      determine what network event took place (Link Up/Down?), and
+ *      take the appropriate actions.
+ *   d. It should then interact the the PHY to clear any pending
+ *      interrupts, then re-enable the PHY interrupt.
+ *
+ *    * This is an OS internal interface and should not be used from
+ *      application space.  Rather applications should use the SIOCMIISIG
+ *      ioctl to receive a signal when a PHY event occurs.
+ *   ** This interrupt is really of no use if the Ethernet MAC driver
+ *      does not support these ioctl calls.
+ *
+ * Input Parameters:
+ *   intf    - Identifies the network interface.  For example "eth0".  Only
+ *             useful on platforms that support multiple Ethernet interfaces
+ *             and, hence, multiple PHYs and PHY interrupts.
+ *   handler - The client interrupt handler to be invoked when the PHY
+ *             asserts an interrupt.  Must reside in OS space, but can
+ *             signal tasks in user space.  A value of NULL can be passed
+ *             in order to detach and disable the PHY interrupt.
+ *   enable  - A function pointer that be unsed to enable or disable the
+ *             PHY interrupt.
+ *
+ * Returned Value:
+ *   The previous PHY interrupt handler address is returned.  This allows you
+ *   to temporarily replace an interrupt handler, then restore the original
+ *   interrupt handler.  NULL is returned if there is was not handler in
+ *   place when the call was made.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+{
+  struct tiva_ethmac_s *priv;
+  irqstate_t flags;
+  xcpt_t oldhandler;
+
+  DEBUGASSERT(intf);
+  nvdbg("%s: handler=%p\n", intf, handler);
+
+  /* Get the interface structure associated with this interface. */
+
+#if TIVA_NETHCONTROLLERS > 1
+  /* REVISIT: Additional logic needed if there are multiple EMACs */
+
+  warning Missing logic
+#endif
+  priv = g_tiva_ethmac;
+
+  /* Disable interrupts until we are done.  This guarantees that the
+   * following operations are atomic.
+   */
+
+  flags = irqsave();
+
+  /* Get the old interrupt handler and save the new one */
+
+  oldhandler    = priv->handler;
+  priv->handler = handler;
+
+  /* Return with the interrupt disabled in any case */
+
+  tiva_phyintenable(false);
+
+  /* Return the enabling function pointer */
+
+  if (enable)
+    {
+      *enable = handler ? tiva_phyintenable : NULL;;
+    }
+
+  /* Return the old handler (so that it can be restored) */
+
+  irqrestore(flags);
+  return oldhandler;
+}
+#endif /* CONFIG_TIVA_PHY_INTERRUPTS */
 
 #endif /* TIVA_NETHCONTROLLERS > 0 */
 #endif /* CONFIG_NET && CONFIG_TIVA_ETHERNET */
