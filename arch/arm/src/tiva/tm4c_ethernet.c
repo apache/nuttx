@@ -248,7 +248,7 @@
 #endif
 
 /* Clocking *****************************************************************/
-/* Set MIIADDR CR bits depending on SysClk freuency */
+/* Set MIIADDR CR bits depending on SysClk frequency */
 
 #if SYSCLK_FREQUENCY >= 20000000 && SYSCLK_FREQUENCY < 35000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_20_35
@@ -1038,8 +1038,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
-          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
+  nvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+        priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & EMAC_TDES0_OWN) == 0);
 
@@ -1055,7 +1055,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (OPTIMAL_EMAC_BUFSIZE-1)) / OPTIMAL_EMAC_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * OPTIMAL_EMAC_BUFSIZE;
 
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      nvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1165,8 +1165,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  nvdbg("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
    * too.  This is because receive events can trigger more un-stoppable transmit
@@ -1438,7 +1438,7 @@ static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
   struct emac_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  nvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1496,8 +1496,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
    * design unless there is at least one free buffer.
@@ -1562,8 +1562,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-              priv->rxhead, priv->rxcurr, priv->segments);
+          nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+                priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
 
@@ -1601,8 +1601,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               priv->rxhead   = (struct emac_rxdesc_s*)rxdesc->rdes3;
               tiva_freesegment(priv, rxcurr, priv->segments);
 
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
-                      priv->rxhead, dev->d_buf, dev->d_len);
+              nvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+                    priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
             }
@@ -1628,8 +1628,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
 }
@@ -1684,7 +1684,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
       else if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
         {
-          nllvdbg("IP frame\n");
+          nvdbg("IP frame\n");
 
           /* Handle ARP on input then give the IP packet to uIP */
 
@@ -1703,7 +1703,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
         }
       else if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          nvdbg("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1761,8 +1761,8 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
   struct emac_txdesc_s *txdesc;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  nvdbg("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
@@ -1777,8 +1777,8 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
-                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
+          nvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+                txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
 
@@ -1830,8 +1830,8 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-              priv->txhead, priv->txtail, priv->inflight);
+      nvdbg("txhead: %p txtail: %p inflight: %d\n",
+            priv->txhead, priv->txtail, priv->inflight);
     }
 }
 
@@ -2390,7 +2390,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Taking the network down\n");
+  nvdbg("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -2440,7 +2440,7 @@ static int tiva_txavail(struct net_driver_s *dev)
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nllvdbg("ifup: %d\n", priv->ifup);
+  nvdbg("ifup: %d\n", priv->ifup);
 
   /* Disable interrupts because this function may be called from interrupt
    * level processing.
@@ -2531,8 +2531,8 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
 
@@ -2588,8 +2588,8 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
 
@@ -3047,7 +3047,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 
   tiva_phy_release(priv);
 
-  /* Setup up PHY clocking by setting the SR field in the MIIADDR register */
+  /* Setup up PHY clocking by setting the CR field in the MIIADDR register */
 
   regval  = tiva_getreg(TIVA_EMAC_MIIADDR);
   regval &= ~EMAC_MIIADDR_CR_MASK;
@@ -3375,12 +3375,6 @@ static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
 
 static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 {
-  /* Hold the Ethernet PHY from transmitting energy on the line during
-   * configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  tiva_phy_hold(priv);
-
   /* Enable the clock to the PHY module */
 
   nllvdbg("Enable EPHY clocking\n");
@@ -3405,9 +3399,10 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   while (!tiva_ephy_periphrdy());
   up_udelay(250);
 
-  nllvdbg("RCGCEPHY: %08x PREPHY: %08x\n",
-          getreg32(TIVA_SYSCON_RCGCEPHY), getreg32(TIVA_SYSCON_PREPHY));
-
+  nllvdbg("RCGCEPHY: %08x PCEPHY: %08x PREPHY: %08x\n",
+          getreg32(TIVA_SYSCON_RCGCEPHY),
+          getreg32(TIVA_SYSCON_PCEPHY),
+          getreg32(TIVA_SYSCON_PREPHY));
   nllvdbg("Configure PHY GPIOs\n");
 
 #ifdef CONFIG_TIVA_PHY_INTERNAL
@@ -3581,7 +3576,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
-  /* Perform a software reset by setting the SR bit in the DMABUSMOD register.
+  /* Perform a software reset by setting the SWR bit in the DMABUSMOD register.
    * This Resets all MAC subsystem internal registers and logic.  After this
    * reset all the registers holds their reset values.
    */
@@ -3590,7 +3585,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   regval |= EMAC_DMABUSMOD_SWR;
   tiva_putreg(regval, TIVA_EMAC_DMABUSMOD);
 
-  /* Wait for software reset to complete. The SR bit is cleared automatically
+  /* Wait for software reset to complete. The SWR bit is cleared automatically
    * after the reset operation has completed in all of the core clock domains.
    */
 
@@ -3708,11 +3703,11 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          dev->d_ifname,
-          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  nvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_ifname,
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
@@ -3827,12 +3822,12 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
-  nllvdbg("Reset the Ethernet block\n");
+  nvdbg("Reset the Ethernet block\n");
   tiva_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllvdbg("Initialize the PHY\n");
+  nvdbg("Initialize the PHY\n");
   ret = tiva_phyinit(priv);
   if (ret < 0)
     {
@@ -3841,7 +3836,7 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllvdbg("Initialize the MAC and DMA\n");
+  nvdbg("Initialize the MAC and DMA\n");
   ret = tiva_macconfig(priv);
   if (ret < 0)
     {
@@ -3862,7 +3857,7 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  nvdbg("Enable normal operation\n");
   return tiva_macenable(priv);
 }
 
@@ -3955,12 +3950,16 @@ int tiva_ethinitialize(int intf)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
-  nllvdbg("RCGCEMAC: %08x PREMAC: %08x\n",
-          getreg32(TIVA_SYSCON_RCGCEMAC), getreg32(TIVA_SYSCON_PREMAC));
+  /* Show all EMAC clocks */
 
-  /* Configure GPIOs to support the internal/eternal PHY */
+  nllvdbg("RCGCEMAC: %08x PCEMAC: %08x PREMAC: %08x MOSCCTL: %08x\n",
+          getreg32(TIVA_SYSCON_RCGCEMAC),
+          getreg32(TIVA_SYSCON_PCEMAC),
+          getreg32(TIVA_SYSCON_PREMAC),
+          getreg32(TIVA_SYSCON_MOSCCTL));
 
-  nllvdbg("Calling tiva_phy_initialize\n");
+  /* Configure clocking and GPIOs to support the internal/eternal PHY */
+
   tiva_phy_initialize(priv);
 
   /* Attach the IRQ to the driver */
@@ -3972,17 +3971,21 @@ int tiva_ethinitialize(int intf)
       return -EAGAIN;
     }
 
+  /* Wait for EMAC to come out of reset. The SWR bit is cleared automatically
+   * after the reset operation has completed in all of the core clock domains.
+   */
+
+  while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
+  up_udelay(250);
+
   /* Put the interface in the down state. */
 
-  nllvdbg("Calling tiva_ifdown\n");
   tiva_ifdown(&priv->dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   nllvdbg("Registering Ethernet device\n");
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
-
-  return OK;
+  return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 
 /****************************************************************************
