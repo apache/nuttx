@@ -3372,6 +3372,10 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_LED2);
 
 #else /* if defined(CONFIG_TIVA_PHY_MII) || defined(CONFIG_TIVA_PHY_RMII) */
+  /* External PHY interrupt pin */
+
+  tiva_configgpio(GPIO_EN0_INTRN);
+
   /* Configure GPIO pins to support MII or RMII */
   /* MDC and MDIO are common to both modes */
 
