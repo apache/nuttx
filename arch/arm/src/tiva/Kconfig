@@ -842,6 +842,16 @@ endif # TIVA_PHYSR_ALTCONFIG
 endif # TIVA_AUTONEG
 endif # !TIVA_PHY_INTERNAL
 
+config TIVA_PHY_INTERRUPTS
+	bool "PHY interrupt support"
+	select ARCH_PHY_INTERRUPT
+	select NETDEV_PHY_IOCTL
+	default n
+	---help---
+		Enable logic to signal user tasks when a PHY interrupt occurs.  The
+		PHY interrupt may indicate a change in the link status such as, for
+		example, when a cable is plugged in or unplugged.
+
 config TIVA_EMAC_NRXDESC
 	int "Number of RX descriptors"
 	default 8
