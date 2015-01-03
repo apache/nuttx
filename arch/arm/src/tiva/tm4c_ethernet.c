@@ -744,8 +744,6 @@ static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
-static void tiva_phy_hold(FAR struct tiva_ethmac_s *priv);
-static inline void tiva_phy_release(FAR struct tiva_ethmac_s *priv);
 static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv);
 static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv);
 
@@ -3043,10 +3041,6 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   priv->mbps100 = 0;
   priv->fduplex = 0;
 
-  /* Allow the PHY to transmit on the line */
-
-  tiva_phy_release(priv);
-
   /* Setup up PHY clocking by setting the CR field in the MIIADDR register */
 
   regval  = tiva_getreg(TIVA_EMAC_MIIADDR);
@@ -3219,62 +3213,6 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_phy_hold
- *
- * Description:
- *  Hold the Ethernet PHY from transmitting energy
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void tiva_phy_hold(FAR struct tiva_ethmac_s *priv)
-{
-  uint32_t regval;
-
-  /* Hold the Ethernet PHY from transmitting energy on the line during
-   * configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  regval  = tiva_getreg(TIVA_EMAC_PC);
-  regval |= EMAC_PC_PHYHOLD;
-  tiva_putreg(regval, TIVA_EMAC_PC);
-}
-
-/****************************************************************************
- * Function: tiva_phy_release
- *
- * Description:
- *  Release the PHY so that is can transmit energy on the line.
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void tiva_phy_release(FAR struct tiva_ethmac_s *priv)
-{
-  uint32_t regval;
-
-  /* Clear the PHYHOLD bit in the EMACPC register */
-
-  regval  = tiva_getreg(TIVA_EMAC_PC);
-  regval &= ~EMAC_PC_PHYHOLD;
-  tiva_putreg(regval, TIVA_EMAC_PC);
-}
-
-/****************************************************************************
  * Function: tiva_phy_configure
  *
  * Description:
@@ -3295,21 +3233,15 @@ static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
 {
   uint32_t regval;
 
-  /* Hold the Ethernet PHY from transmitting energy on the line during
-   * configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  tiva_phy_hold(priv);
-
   /* Set up the PHY configuration */
 
 #if defined(CONFIG_TIVA_PHY_RMII)
-  regval = EMAC_PC_PHYHOLD | EMAC_PC_PINTFS_RMII | EMAC_PC_PHYEXT;
+  regval = EMAC_PC_PINTFS_RMII | EMAC_PC_PHYEXT;
 #elif defined(CONFIG_TIVA_PHY_MII)
-  regval = EMAC_PC_PHYHOLD | EMAC_PC_PINTFS_MII | EMAC_PC_PHYEXT;
+  regval = EMAC_PC_PINTFS_MII | EMAC_PC_PHYEXT;
 #else /* defined(CONFIG_TIVA_PHY_INTERNAL) */
-  regval = EMAC_PC_PHYHOLD | EMAC_PC_MDIXEN | EMAC_PC_ANMODE_100FD |
-           EMAC_PC_ANEN | EMAC_PC_PINTFS_MII;
+  regval = EMAC_PC_MDIXEN | EMAC_PC_ANMODE_100FD | EMAC_PC_ANEN |
+           EMAC_PC_PINTFS_MII;
 #endif
   tiva_putreg(regval, TIVA_EMAC_PC);
 
@@ -3562,6 +3494,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
 {
   uint32_t regval;
 
+#if 0 /* REVISIT: This causes the DMABUSMOD reset to hang. */
   /* Reset the Ethernet MAC */
 
   regval  = tiva_getreg(TIVA_SYSCON_SREMAC);
@@ -3571,10 +3504,11 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   regval &= ~SYSCON_SREMAC_R0;
   tiva_putreg(regval, TIVA_SYSCON_SREMAC);
 
-  /* What for the reset to complete */
+  /* Wait for the reset to complete */
 
   while (!tiva_emac_periphrdy());
   up_udelay(250);
+#endif
 
   /* Perform a software reset by setting the SWR bit in the DMABUSMOD register.
    * This Resets all MAC subsystem internal registers and logic.  After this
@@ -3593,7 +3527,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   up_udelay(250);
 
   /* Reconfigure the PHY.  Some PHY configurations will be lost as a
-   * consequence of the reset
+   * consequence of the EMAC reset
    */
 
   tiva_phy_configure(priv);
@@ -3892,6 +3826,7 @@ static inline
 int tiva_ethinitialize(int intf)
 {
   struct tiva_ethmac_s *priv;
+  uint32_t regval;
 
   nllvdbg("intf: %d\n", intf);
 
@@ -3978,9 +3913,26 @@ int tiva_ethinitialize(int intf)
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
   up_udelay(250);
 
+#if 0 /* REVISIT: Part of work around to avoid DMABUSMOD SWR hangs */
   /* Put the interface in the down state. */
 
   tiva_ifdown(&priv->dev);
+
+#else
+  /* Reset the Ethernet MAC */
+
+  regval  = tiva_getreg(TIVA_SYSCON_SREMAC);
+  regval |= SYSCON_SREMAC_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREMAC);
+
+  regval &= ~SYSCON_SREMAC_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREMAC);
+
+  /* Wait for the reset to complete */
+
+  while (!tiva_emac_periphrdy());
+  up_udelay(250);
+#endif
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
