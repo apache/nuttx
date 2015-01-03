@@ -14,16 +14,30 @@ README.txt
   Features
   --------
 
-    - Color LCD interface 
-    - USB 2.0 OTG | Host | Device port 
-    - TI wireless EM connection 
-    - BoosterPack and BoosterPack XL interfaces 
-    - Quad SSI-supported 512-Mbit Flash memory 
-    - MicroSD slot 
+    - Color LCD interface
+    - USB 2.0 OTG | Host | Device port
+    - TI wireless EM connection
+    - BoosterPack and BoosterPack XL interfaces
+    - Quad SSI-supported 512-Mbit Flash memory
+    - MicroSD slot
     - Expansion interface headers: MCU high-speed USB ULPI port,
       Ethernet RMII and MII ports External peripheral interface for
-      memories, parallel peripherals, and other system functions. 
+      memories, parallel peripherals, and other system functions.
     - In-Circuit Debug Interface (ICDI)
+
+Contents
+    - Using OpenOCD and GDB with ICDI
+    - Development Environment
+    - GNU Toolchain Options
+    - IDEs
+    - NuttX EABI "buildroot" Toolchain
+    - NuttX OABI "buildroot" Toolchain
+    - NXFLAT Toolchain
+    - Buttons and LEDs
+    - Serial Console
+    - Networking Support
+    - DK-TM4129X Configuration Options
+    - Configurations
 
 Using OpenOCD and GDB with ICDI
 ===============================
@@ -392,6 +406,209 @@ Serial Console
   the TM4C123 ICDI chip; Connect your external RS-232 driver at pins 13
   and 16.  5v, 3.3v, AND GND are arvailable nearby at J10.
 
+Networking Support
+==================
+
+  Networking support via the can be added to NSH by selecting the following
+  configuration options.
+==================================================
+file1: CONFIG_ARCH_HAVE_NET=y
+file1: CONFIG_ARP_SEND_DELAYMSEC=20
+file1: CONFIG_ARP_SEND_MAXTRIES=5
+file1: CONFIG_IOB_BUFSIZE=196
+file1: CONFIG_IOB_NBUFFERS=36
+file1: CONFIG_IOB_NCHAINS=8
+file1: CONFIG_IOB_THROTTLE=8
+file1: CONFIG_NSOCKET_DESCRIPTORS=8
+file1: CONFIG_SCHED_HPWORK=y
+file1: CONFIG_SCHED_HPWORKPERIOD=50000
+file1: CONFIG_SCHED_HPWORKPRIORITY=224
+file1: CONFIG_SCHED_HPWORKSTACKSIZE=2048
+file1: CONFIG_SCHED_WORKQUEUE=y
+file1: CONFIG_SIG_SIGWORK=17
+file1: =y
+file1:
+file1:
+file1:
+file1: =y
+file1: =y
+file1: CONFIG_WEBCLIENT_TIMEOUT=10
+==================================================
+  Selecting the EMAC peripheral
+  -----------------------------
+
+  System Type -> SAM34 Peripheral Support
+    CONFIG_TIVA_ETHERNET=y              : Enable the EMAC peripheral
+
+  System Type -> EMAC device driver options
+    CONFIG_TIVA_EMAC_NRXDESC=8          : Set aside some RX and TX descriptors/buffers
+    CONFIG_TIVA_EMAC_NTXDESC=4
+    CONFIG_TIVA_AUTONEG=y               : Use autonegotiation
+    CONFIG_TIVA_PHY_INTERNAL=y          : Use the internal PHY
+    CONFIG_TIVA_BOARDMAC=y              : Use the MAC address in the FLASH USER0/1 registers
+
+  Networking Support
+    CONFIG_NET=y                        : Enable Neworking
+    CONFIG_NET_ETHERNET=y               : Support Ethernet data link
+    CONFIG_NET_NOINTS=y                 : Should operative at non-interrupt level
+    CONFIG_NET_SOCKOPTS=y               : Enable socket operations
+    CONFIG_NET_MULTIBUFFER=y            : Multi-packet buffer option required
+    CONFIG_NET_ETH_MTU=590              : Maximum packet size (MTU) 1518 is more standard
+    CONFIG_NET_ETH_TCP_RECVWNDO=536     : Should be the same as CONFIG_NET_ETH_MTU
+    CONFIG_NET_ARP=y                    : Enable ARP
+    CONFIG_NET_ARPTAB_SIZE=16           : ARP table size
+    CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
+    CONFIG_NET_ARP_SEND=y               : Send ARP request before sending data
+    CONFIG_NET_TCP=y                    : Enable TCP/IP networking
+    CONFIG_NET_TCP_READAHEAD=y          : Support TCP read-ahead
+    CONFIG_NET_TCP_WRITE_BUFFERS=y      : Support TCP write-buffering
+    CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
+    CONFIG_NET_MAX_LISTENPORTS=20       :
+    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
+    CONFIG_NET_UDP=y                    : Enable UDP networking
+    CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
+    CONFIG_NET_ICMP=y                   : Enable ICMP networking
+    CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
+                                        : Defaults should be okay for other options
+f Application Configuration -> Network Utilities
+    CONFIG_NETUTILS_DNSCLIENT=y            : Enable host address resolution
+    CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
+    CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
+    CONFIG_NETUTILS_NETLIB=y            : Network library support is needed
+    CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
+                                        : Defaults should be okay for other options
+  Application Configuration -> NSH Library
+    CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
+    CONFIG_NSH_IPADDR=0x0a000002        : Select a fixed IP address
+    CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
+    CONFIG_NSH_NETMASK=0xffffff00       : Netmask
+    CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+                                        : Defaults should be okay for other options
+
+  You can also enable enable the DHCPC client for networks that use
+  dynamically assigned address:
+
+  Application Configuration -> Network Utilities
+    CONFIG_NETUTILS_DHCPC=y             : Enables the DHCP client
+
+  Networking Support
+    CONFIG_NET_UDP=y                    : Depends on broadcast UDP
+
+  Application Configuration -> NSH Library
+    CONFIG_NET_BROADCAST=y
+    CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
+                                        : the fixed addresses
+
+  Using the network with NSH
+  --------------------------
+
+  So what can you do with this networking support?  First you see that
+  NSH has several new network related commands:
+
+    ifconfig, ifdown, ifup:  Commands to help manage your network
+    get and put:             TFTP file transfers
+    wget:                    HTML file transfers
+    ping:                    Check for access to peers on the network
+    Telnet console:          You can access the NSH remotely via telnet.
+
+  You can also enable other add on features like full FTP or a Web
+  Server or XML RPC and others.  There are also other features that
+  you can enable like DHCP client (or server) or network name
+  resolution.
+
+  By default, the IP address of the SAM4E-EK will be 10.0.0.2 and
+  it will assume that your host is the gateway and has the IP address
+  10.0.0.1.
+
+    nsh> ifconfig
+    eth0    HWaddr 00:e0:de:ad:be:ef at UP
+            IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+  You can use ping to test for connectivity to the host (Careful,
+  Window firewalls usually block ping-related ICMP traffic).  On the
+  target side, you can:
+
+    nsh> ping 10.0.0.1
+    PING 10.0.0.1 56 bytes of data
+    56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
+    10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+  NOTE: In this configuration is is normal to have packet loss > 0%
+  the first time you ping due to the default handling of the ARP
+  table.
+
+  On the host side, you should also be able to ping the SAM4E-EK:
+
+    $ ping 10.0.0.2
+
+  You can also log into the NSH from the host PC like this:
+
+    $ telnet 10.0.0.2
+    Trying 10.0.0.2...
+    Connected to 10.0.0.2.
+    Escape character is '^]'.
+    sh_telnetmain: Session [3] Started
+
+    NuttShell (NSH) NuttX-6.31
+    nsh> help
+    help usage:  help [-v] [<cmd>]
+
+      [           echo        ifconfig    mkdir       mw          sleep
+      ?           exec        ifdown      mkfatfs     ping        test
+      cat         exit        ifup        mkfifo      ps          umount
+      cp          free        kill        mkrd        put         usleep
+      cmp         get         losetup     mh          rm          wget
+      dd          help        ls          mount       rmdir       xd
+      df          hexdump     mb          mv          sh
+
+    Builtin Apps:
+    nsh>
+
+  NOTE:  If you enable this feature, you experience a delay on booting.
+  That is because the start-up logic waits for the network connection
+  to be established before starting NuttX.  In a real application, you
+  would probably want to do the network bringup on a separate thread
+  so that access to the NSH prompt is not delayed.
+
+  This delay will be especially long if the board is not connected to
+  a network because additional time will be required to fail with timeout
+  errors.
+
+  This delay will be especially long if the board is not connected to
+  a network.  On the order of a minute!  You will probably think that
+  NuttX has crashed!  And then, when it finally does come up, the
+  network will not be available.
+
+  Network Initialization Thread
+  -----------------------------
+  There is a configuration option enabled by CONFIG_NSH_NETINIT_THREAD
+  that will do the NSH network bring-up asynchronously in parallel on
+  a separate thread.  This eliminates the (visible) networking delay
+  altogether.  This current implementation, however, has some limitations:
+
+    - If no network is connected, the network bring-up will fail and
+      the network initialization thread will simply exit.  There are no
+      retries and no mechanism to know if the network initialization was
+      successful (it could perform a network Ioctl to see if the link is
+      up and it now, keep trying, but it does not do that now).
+
+    - Furthermore, there is currently no support for detecting loss of
+      network connection and recovery of the connection (similarly, this
+      thread could poll periodically for network status, but does not).
+
+  Both of these shortcomings could be eliminated by enabling the network
+  monitor.  See the SAMA5 configurations for a description of what it would
+  take to incorporate the network monitor feature.
+
 DK-TM4129X Configuration Options
 ================================
 
@@ -541,3 +758,34 @@ Where <subdir> is one of the following:
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+
+    3. Default stack sizes are large and should really be tuned to reduce
+       the RAM footprint:
+
+         CONFIG_SCHED_HPWORKSTACKSIZE=2048
+         CONFIG_IDLETHREAD_STACKSIZE=1024
+         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_PTHREAD_STACK_DEFAULT=2048
+         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
+         CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
+         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
+         CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
+         CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
+
+    4. This configuration has the network enabled by default.  This can be
+       easily disabled or reconfigured (See see the network related
+       configuration settings above in the section entitled "Networking").
+
+       NOTE: In boot-up sequence is very simple in this example; all
+       initialization is done sequentially (vs. in parallel) and so you will
+       not see the NSH prompt until all initialization is complete.  The
+       network bring-up in particular will add some delay before the NSH
+       prompt appears.  In a real application, you would probably want to
+       do the network bringup on a separate thread so that access to the
+       NSH prompt is not delayed.
+
+       This delay will be especially long if the board is not connected to
+       a network because additional time will be required to fail with
+       timeout errors.  This delay can be eliminated, however, if you enable
+       an NSH initialization option as described above in a paragraph
+       entitled, "Network Initialization Thread."
