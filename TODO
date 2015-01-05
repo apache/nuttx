@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (14)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -893,9 +893,10 @@ o Network (net/, drivers/net)
                the network stack.  The network stack supports either interrupt
                level processing or normal task level processing (depending on
                CONFIG_NET_NOINTS).  This is really a very bad use of CPU
-               resources;  All of the network stack processing should be more
-               to a work queue (and, all use of CONFIG_NET_NOINTS=n should
-               be eliminated).  This applies to almost all Ethernet drivers:
+               resources;  All of the network stack processing should be
+               modified to use a work queue (and, all use of CONFIG_NET_NOINTS=n
+               should be eliminated).  This applies to almost all Ethernet
+               drivers:
 
                ARCHITECTURE   CONFIG_NET_NOINTS
                C5471          NO
@@ -931,6 +932,16 @@ o Network (net/, drivers/net)
                the packet as read-only.
   Status:      Open
   Priority:    Low, unless your logic depends on that behavior.
+
+  Title:       NETWORK WON'T STAY DOWN
+  Description: If you enable the NSH network monitor (CONFIG_NSH_NETINIT_MONITOR)
+               then the NSH 'ifdown' command is broken.  Doing 'nsh> ifconfig eth0'
+               will, indeed, bring the network down.  However, the network monitor
+               notices the change in the link status and will bring the network
+               back up.  There needs to be some kind of interlock between
+               cmd_ifdown() and the network monitor thread to prevent this.
+  Status:      Open
+  Priority:    Low, this is just a nuisance in most cases.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
