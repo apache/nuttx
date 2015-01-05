@@ -1509,7 +1509,8 @@ Networking
     - And a few other things: UDP support is required (CONFIG_NET_UDP) and
       signals must not be disabled (CONFIG_DISABLE_SIGNALS).
 
-  Given those prerequisites, the network monitor can be selected with these additional settings.
+  Given those prerequisites, the network monitor can be selected with these
+  additional settings.
 
     Networking Support -> Networking Device Support
       CONFIG_NETDEV_PHY_IOCTL=y             : Enable PHY ioctl support
