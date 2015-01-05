@@ -275,7 +275,7 @@ static int phy_handler(FAR struct phy_notify_s *client)
 
   /* Signal the client that the PHY has something interesting to say to us */
 
-  #ifdef CONFIG_CAN_PASS_STRUCTS
+#ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = client->arg;
   ret = sigqueue(client->pid, client->signo, value);
 #else
