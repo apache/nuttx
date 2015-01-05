@@ -743,7 +743,7 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv);
 /* PHY Initialization */
 
 #if CONFIG_TIVA_PHY_INTERRUPTS
-static void tiva_phyintenable(bool enable);
+static void tiva_phy_intenable(bool enable);
 #endif
 static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
@@ -2858,7 +2858,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
         {
           /* Enable PHY link up/down interrupts */
 
-          tiva_phyintenable(true);
+          tiva_phy_intenable(true);
         }
     }
     break;
@@ -2896,7 +2896,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
 
 /****************************************************************************
- * Function: tiva_phyintenable
+ * Function: tiva_phy_intenable
  *
  * Description:
  *  Enable link up/down PHY interrupts.  The interrupt protocol is like this:
@@ -2915,7 +2915,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
-static void tiva_phyintenable(bool enable)
+static void tiva_phy_intenable(bool enable)
 {
 #ifdef CONFIG_TIVA_PHY_INTERNAL
   uint16_t phyval;
@@ -2923,36 +2923,51 @@ static void tiva_phyintenable(bool enable)
 
   /* Disable further PHY interrupts until we complete this setup */
 
-  ret = tiva_putreg(0, TIVA_EPHY_IM);
-  if (ret == OK)
+  tiva_putreg(0, TIVA_EPHY_IM);
+
+  /* Enable/disable event based PHY interrupts */
+  /* REVISIT:  There is an issue here:  The PHY interrupt handler is called
+   * from the interrupt level and it, in turn, will call this function to
+   * disabled further interrupts.  Subsequent link status processing will
+   * also call tiva_phyread() to access PHY registers and will, eventually,
+   * call this function again to re-enable the PHY interrupt.  The control
+   * between interrupt level access to the PHY and non-interrupt level
+   * access to the PHY is not well enforced but is probably okay just due
+   * to the sequencing of things.
+   */
+
+  if (enable)
     {
-      /* Enable/disable event based PHY interrupts */
+      /* Configure interrupts on link status change events */
 
-      if (enable)
+      ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_MISR1,
+                          EPHY_MISR1_LINKSTATEN);
+      if (ret == OK)
         {
-          /* Configure interrupts on link status change events */
+          /* Enable PHY event based interrupts */
 
-          ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_MISR1,
-                              EPHY_MISR1_LINKSTATEN);
+          ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, &phyval);
           if (ret == OK)
             {
-              /* Enable PHY event based interrupts */
-
-              ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, &phyval);
+              phyval |= EPHY_SCR_INTEN;
+              ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
               if (ret == OK)
                 {
-                  phyval |= EPHY_SCR_INTEN;
-                  ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
-                  if (ret == OK)
-                    {
-                      /* Enable PHY interrupts */
+                  /* Enable PHY interrupts */
 
-                      tiva_putreg(EMAC_PHYIM_INT, TIVA_EPHY_IM);
-                    }
+                  tiva_putreg(EMAC_PHYIM_INT, TIVA_EPHY_IM);
                 }
             }
         }
-      else
+    }
+  else
+    {
+      /* Read the MISR1 register in order to clear any pending link status
+       * interrupts.
+       */
+
+      ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_MISR1, &phyval);
+      if (ret == OK)
         {
           /* Disable PHY event based interrupts */
 
@@ -4145,13 +4160,13 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   /* Return with the interrupt disabled in any case */
 
-  tiva_phyintenable(false);
+  tiva_phy_intenable(false);
 
   /* Return the enabling function pointer */
 
   if (enable)
     {
-      *enable = handler ? tiva_phyintenable : NULL;;
+      *enable = handler ? tiva_phy_intenable : NULL;;
     }
 
   /* Return the old handler (so that it can be restored) */
