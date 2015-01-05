@@ -186,9 +186,17 @@
 
 /* I2C:
  *
+ *   I2C3: PG4-5 are provide to the BoostPack 1 interface
+ *   I2C7: PA4-5 are provide to the BoostPack 2 interface
  *   I2C6: PB6-7 are used for I2C to the TMP100 and the EM connector.
+ *         J18 and J20 must be closed to connect the TMP100.
+ *         I2C address is 0x4A
  */
 
+#define GPIO_I2C3_SCL     GPIO_I2C3_SCL_1
+#define GPIO_I2C3_SDA     GPIO_I2C3_SDA_1
+#define GPIO_I2C7_SCL     GPIO_I2C7_SCL_1
+#define GPIO_I2C7_SDA     GPIO_I2C7_SDA_1
 #define GPIO_I2C6_SCL     GPIO_I2C6_SCL_2
 #define GPIO_I2C6_SDA     GPIO_I2C6_SDA_2
 
