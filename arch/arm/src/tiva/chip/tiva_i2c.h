@@ -917,74 +917,74 @@
 
 /* I2C Slave Interrupt Mask (I2CS_IMR) */
 
-#define I2CM_IMR_DATAIM                (1 << 0)  /* Bit 0:  Data Interrupt Mask */
+#define I2CS_IMR_DATAIM                (1 << 0)  /* Bit 0:  Data Interrupt Mask */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  define I2CM_IMR_STARTIM             (1 << 1)  /* Bit 1:  Start Condition Interrupt Mask */
-#  define I2CM_IMR_STOPIM              (1 << 2)  /* Bit 2:  Stop Condition Interrupt Mask */
+#  define I2CS_IMR_STARTIM             (1 << 1)  /* Bit 1:  Start Condition Interrupt Mask */
+#  define I2CS_IMR_STOPIM              (1 << 2)  /* Bit 2:  Stop Condition Interrupt Mask */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define I2CM_IMR_DMARXIM             (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
-#  define I2CM_IMR_DMATXIM             (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
-#  define I2CM_IMR_TXIM                (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_IMR_RXIM                (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
-#  define I2CM_IMR_TXFEIM              (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_IMR_RXFFIM              (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
+#  define I2CS_IMR_DMARXIM             (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
+#  define I2CS_IMR_DMATXIM             (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
+#  define I2CS_IMR_TXIM                (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
+#  define I2CS_IMR_RXIM                (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
+#  define I2CS_IMR_TXFEIM              (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
+#  define I2CS_IMR_RXFFIM              (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
 #endif
 
 /* I2C Slave Raw Interrupt Status (I2CS_RIS) */
 
-#define I2CM_RIS_DATARIS               (1 << 0)  /* Bit 0:  Data Raw Interrupt Status */
+#define I2CS_RIS_DATARIS               (1 << 0)  /* Bit 0:  Data Raw Interrupt Status */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  define I2CM_RIS_STARTRIS            (1 << 1)  /* Bit 1:  Start Condition Raw Interrupt Status */
-#  define I2CM_RIS_STOPRIS             (1 << 2)  /* Bit 2:  Stop Condition Raw Interrupt Status */
+#  define I2CS_RIS_STARTRIS            (1 << 1)  /* Bit 1:  Start Condition Raw Interrupt Status */
+#  define I2CS_RIS_STOPRIS             (1 << 2)  /* Bit 2:  Stop Condition Raw Interrupt Status */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define I2CM_RIS_DMARXRIS            (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
-#  define I2CM_RIS_DMATXRIS            (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
-#  define I2CM_RIS_TXRIS               (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_RIS_RXRIS               (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
-#  define I2CM_RIS_TXFERIS             (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_RIS_RXFFRIS             (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
+#  define I2CS_RIS_DMARXRIS            (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
+#  define I2CS_RIS_DMATXRIS            (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
+#  define I2CS_RIS_TXRIS               (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
+#  define I2CS_RIS_RXRIS               (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
+#  define I2CS_RIS_TXFERIS             (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
+#  define I2CS_RIS_RXFFRIS             (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
 #endif
 
 /* I2C Slave Masked Interrupt Status (I2CS_MIS) */
 
-#define I2CM_MIS_DATAMIS               (1 << 0)  /* Bit 0:  Data Masked Interrupt Status */
+#define I2CS_MIS_DATAMIS               (1 << 0)  /* Bit 0:  Data Masked Interrupt Status */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  define I2CM_MIS_STARTMIS            (1 << 1)  /* Bit 1:  Start Condition Masked Interrupt Status */
-#  define I2CM_MIS_STOPMIS             (1 << 2)  /* Bit 2:  Stop Condition Masked Interrupt Status */
+#  define I2CS_MIS_STARTMIS            (1 << 1)  /* Bit 1:  Start Condition Masked Interrupt Status */
+#  define I2CS_MIS_STOPMIS             (1 << 2)  /* Bit 2:  Stop Condition Masked Interrupt Status */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define I2CM_MIS_DMARXMIS            (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
-#  define I2CM_MIS_DMATXMIS            (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
-#  define I2CM_MIS_TXMIS               (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_MIS_RXMIS               (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
-#  define I2CM_MIS_TXFEMIS             (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_MIS_RXFFMIS             (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
+#  define I2CS_MIS_DMARXMIS            (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
+#  define I2CS_MIS_DMATXMIS            (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
+#  define I2CS_MIS_TXMIS               (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
+#  define I2CS_MIS_RXMIS               (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
+#  define I2CS_MIS_TXFEMIS             (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
+#  define I2CS_MIS_RXFFMIS             (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
 #endif
 
 /* I2C Slave Interrupt Clear (I2CS_ICR) */
 
-#define I2CM_ICR_DATAIC                (1 << 0)  /* Bit 0:  Data Interrupt Clear */
+#define I2CS_ICR_DATAIC                (1 << 0)  /* Bit 0:  Data Interrupt Clear */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  define I2CM_ICR_STARTIC             (1 << 1)  /* Bit 1:  Start Condition Interrupt Clear */
-#  define I2CM_ICR_STOPIC              (1 << 2)  /* Bit 2:  Stop Condition Interrupt Clear */
+#  define I2CS_ICR_STARTIC             (1 << 1)  /* Bit 1:  Start Condition Interrupt Clear */
+#  define I2CS_ICR_STOPIC              (1 << 2)  /* Bit 2:  Stop Condition Interrupt Clear */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define I2CM_ICR_DMARXIC             (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
-#  define I2CM_ICR_DMATXIC             (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
-#  define I2CM_ICR_TXIC                (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
-#  define I2CM_ICR_RXIC                (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
-#  define I2CM_ICR_TXFEIC              (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
-#  define I2CM_ICR_RXFFIC              (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
+#  define I2CS_ICR_DMARXIC             (1 << 3)  /* Bit 3:  Receive DMA Interrupt Mask */
+#  define I2CS_ICR_DMATXIC             (1 << 4)  /* Bit 4:  Transmit DMA Interrupt Mask */
+#  define I2CS_ICR_TXIC                (1 << 5)  /* Bit 5:  Transmit FIFO Request Interrupt Mask */
+#  define I2CS_ICR_RXIC                (1 << 6)  /* Bit 6:  Receive FIFO Request Interrupt Mask */
+#  define I2CS_ICR_TXFEIC              (1 << 7)  /* Bit 7:  Transmit FIFO Empty Interrupt Mask */
+#  define I2CS_ICR_RXFFIC              (1 << 8)  /* Bit 8:  Receive FIFO Full Interrupt Mask */
 #endif
 
 /* I2C Slave Own Address 2 */
