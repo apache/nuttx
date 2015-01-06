@@ -1783,6 +1783,18 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
   regval |= I2CM_CR_MFE;
   tiva_i2c_putreg(priv, TIVA_I2CM_CR_OFFSET, regval);
 
+#ifdef TIVA_I2CSC_PC_OFFSET
+#ifdef CONFIG_TIVA_I2C_HIGHSPEED
+  /* Enable high-speed mode */
+
+  tiva_i2c_putreg(priv, TIVA_I2CSC_PC_OFFSET, I2CSC_PC_HS);
+#else
+  /* Disable high-speed mode */
+
+  tiva_i2c_putreg(priv, TIVA_I2CSC_PC_OFFSET, 0);
+#endif
+#endif
+
   /* Configure the the initial I2C clock frequency. */
 
   (void)tiva_i2c_setclock(priv, frequency);
@@ -1867,13 +1879,13 @@ static uint32_t tiva_i2c_setclock(struct tiva_i2c_priv_s *priv, uint32_t frequen
   DEBUGASSERT((regval & I2CM_TPR_MASK) == regval);
   tiva_i2c_putreg(priv, TIVA_I2CM_TPR_OFFSET, regval);
 
-#ifdef TIVA_I2CSC_PP_OFFSET
+#if defined(CONFIG_TIVA_I2C_HIGHSPEED) && defined(TIVA_I2CSC_PC_OFFSET)
   /* If the I2C peripheral is High-Speed enabled then choose the highest
    * speed that is less than or equal to 3.4 Mbps.
    */
 
-  regval = tiva_i2c_getreg(priv, TIVA_I2CSC_PP_OFFSET);
-  if ((regval & I2CSC_PP_HS) != 0)
+  regval = tiva_i2c_getreg(priv, TIVA_I2CSC_PC_OFFSET);
+  if ((regval & I2CSC_PC_HS) != 0)
     {
       tmp    = (2 * 3 * 3400000);
       regval = (((SYSCLK_FREQUENCY + tmp - 1) / tmp) - 1) << I2CM_TPR_SHIFT;

@@ -62,7 +62,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_I2CM_CLKOCNT_OFFSET     0x0024 /* I2C Master Clock Low Timeout Count */
-#  define TIVA_I2CM_BMON_OFFSET        0x002c /* I2C Master Configuration */
+#  define TIVA_I2CM_BMON_OFFSET        0x002c /* I2C Master Bus Monitor */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
