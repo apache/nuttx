@@ -122,6 +122,7 @@
  *         I2C address is 0x4A
  */
 
+#define TMP100_I2CBUS  6
 #define TMP100_I2CADDR 0x4a
 
 /* Speaker outputs *****************************************************************/

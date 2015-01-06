@@ -222,7 +222,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -235,12 +236,12 @@ extern "C" {
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-EXTERN void stm32_boardinitialize(void);
+void stm32_boardinitialize(void);
 
 /************************************************************************************
  * Name:  stm3210e_lcdclear
@@ -254,7 +255,7 @@ EXTERN void stm32_boardinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_STM32_FSMC
-EXTERN void stm3210e_lcdclear(uint16_t color);
+void stm3210e_lcdclear(uint16_t color);
 #endif
 
 /************************************************************************************
@@ -272,7 +273,7 @@ EXTERN void stm3210e_lcdclear(uint16_t color);
  ************************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
-EXTERN int stm32_lm75initialize(FAR const char *devpath);
+int stm32_lm75initialize(FAR const char *devpath);
 #endif
 
 /************************************************************************************
@@ -290,7 +291,7 @@ EXTERN int stm32_lm75initialize(FAR const char *devpath);
  ************************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
-EXTERN xcpt_t stm32_lm75attach(xcpt_t irqhandler);
+xcpt_t stm32_lm75attach(xcpt_t irqhandler);
 #endif
 
 #undef EXTERN

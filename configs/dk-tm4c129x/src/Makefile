@@ -59,6 +59,10 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += tm4c_nsh.c
 endif
 
+ifeq ($(CONFIG_I2C_LM75),y)
+CSRCS += tm4c_tmp100.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
