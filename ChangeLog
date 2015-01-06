@@ -9208,7 +9208,7 @@
 	  and the FS clock enable bits are set in FS mode, then the ARM never
 	  awakens from WFI due to a chip issue.  This is only an issue if you
 	  are using the internal PHY.  From Ken Pettit (2014-12-13).
-	* drivers/serial/serial.c: In case a thread is doing a blockingi
+	* drivers/serial/serial.c: In case a thread is doing a blocking
 	  operation (e.g. read()) on a serial device, while it is being
 	  terminated by pthread_cancel(), then uart_close() gets called, but
 	  the semaphore (dev->recv.sem in the above example) is still blocked.
@@ -9354,7 +9354,7 @@
 	* arch/arm/src/stm32/stm32_ltdc.c:  Clean up documentation, some
 	  formatting improvements.  From Marco Krahl (2014-12-29).
 	* arch/arm/src/tiva/chip/tiva_ethernet.h, lm3s_ethernet.c, and
-	  tm4c_ethernet.h:  Add logic to descriminate betwen LM3S class Ethernet
+	  tm4c_ethernet.h:  Add logic to discriminate betwen LM3S class Ethernet
 	  register definitions and TM4C129X class Ethernet register definitions.
 	  Add TM4C129X Ethernet register definitions (2014-12-30).
 	* arch/arm/src/tiva/tm4c_ethernet.c, lm3s_ethernet.c, Kconfig, and
@@ -9368,5 +9368,7 @@
 	  defining CONFIG_RTC_LSICLOCK.  From Kevin Hester (2015-01-02).
 	* net/tcp/tcp_conn.c:  Fix a logic error when CONFIG_NETDEV_MULTINIC is
 	  selected: net_unlock(flags) will be called will an uninitialized
-          variable (2015-01-03).
-
+	  variable (2015-01-03).
+	* arch/arm/src/tiva/tiva_irq.c:  Fix Tiva IRQ control logic; was limited
+	  to only 64 IRQs.  That is a problem for higher numbered IRQs on many
+	  platforms (2015-01-06).

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lm75.h
+ * include/nuttx/sensors/lm75.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_SENSORS_LM75_H
-#define __NUTTX_SENSORS_LM75_H
+#ifndef __INCLUDE_NUTTX_SENSORS_LM75_H
+#define __INCLUDE_NUTTX_SENSORS_LM75_H
 
 /****************************************************************************
  * Included Files
@@ -86,15 +86,15 @@
  */
 
 /****************************************************************************
- * Global Data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -130,4 +130,4 @@ EXTERN int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
 }
 #endif
 
-#endif /* __NUTTX_SENSORS_LM75_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_LM75_H */
