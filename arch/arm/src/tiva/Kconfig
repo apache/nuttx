@@ -634,6 +634,14 @@ config TIVA_I2C_TIMEOTICKS
 
 endif # !TIVA_I2C_DYNTIMEO
 
+config TIVA_I2C_HIGHSPEED
+	bool "High speed support"
+	default n
+	depends on ARCH_CHIP_TM4C && EXPERIMENTAL
+	---help---
+		Enable support for high speed I2C transfers.
+		Only partially implemented and completely untested.
+
 config TIVA_I2C_REGDEBUG
 	bool "Register level debug"
 	default n
