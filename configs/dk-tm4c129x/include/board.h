@@ -273,7 +273,7 @@ void tiva_setleds(uint8_t ledset);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_TIVA_I2C6)
 int tiva_tmp100_initialize(FAR const char *devpath);
 #endif
 
