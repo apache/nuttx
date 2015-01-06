@@ -60,7 +60,9 @@ CSRCS += tm4c_nsh.c
 endif
 
 ifeq ($(CONFIG_I2C_LM75),y)
+ifeq ($(CONFIG_TIVA_I2C6),y)
 CSRCS += tm4c_tmp100.c
+endif
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
