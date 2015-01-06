@@ -36,6 +36,7 @@ Contents
     - Buttons and LEDs
     - Serial Console
     - Networking Support
+    - Temperature Sensor
     - DK-TM4129X Configuration Options
     - Configurations
 
@@ -647,6 +648,37 @@ f Application Configuration -> Network Utilities
       CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
       CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
       CONFIG_NSH_NETINIT_SIGNO=18
+
+Temperature Sensor
+==================
+
+  Support for the on-board TMP-100 temperature sensor is available.  This
+  uses the driver for the compatible LM-75 part.  To set up the temperature
+  sensor, add the following to the NuttX configuration file:
+
+    System Type -> Tiva/Stellaris Peripheral Selection
+      CONFIG_TIVA_I2C6=y
+
+    Drivers -> I2C Support
+      CONFIG_I2C=y
+
+    Drivers -> Sensors
+      CONFIG_I2C_LM75=y
+
+  Then you can implement logic like the following to use the temperature sensor:
+
+    #include <nuttx/sensors/lm75.h>
+    #include <arch/board/board.h>
+
+    ret = tiva_tmp100_initialize("/dev/temp");      /* Register the temperature sensor */
+    fd  = open("/dev/temp", O_RDONLY);              /* Open the temperature sensor device */
+    ret = ioctl(fd, SNIOC_FAHRENHEIT, 0);           /* Select Fahrenheit */
+    bytesread = read(fd, buffer, 8*sizeof(b16_t));  /* Read temperature samples */
+
+  More complex temperature sensor operations are also available.  See the IOCTL
+  commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
+  of the tiva_tmp100_initialize() and tiva_tmp100_attach() interfaces in the
+  arch/board/board.h file (sames as configs/dk-tm4c129x/include/board.h).
 
 DK-TM4129X Configuration Options
 ================================

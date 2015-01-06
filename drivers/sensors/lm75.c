@@ -331,7 +331,7 @@ static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
   for (i = 0; i < nsamples; i++)
     {
-      b16_t temp;
+      b16_t temp = 0;
 
       /* Read the next b16_t temperature value */
 

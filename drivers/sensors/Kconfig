@@ -60,6 +60,10 @@ config LM75
 	default n
 	select I2C
 	select I2C_LM75
+	---help---
+		Enable driver support for the STMicro LM-75 temperature sensor.
+		This should also work with compatible temperature sensors such as
+		the TI TMP100/101.
 
 config QENCODER
 	bool "Qencoder"
