@@ -109,8 +109,23 @@ static void tiva_dumpnvic(const char *msg, int irq)
         getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
         getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
+
+#if NR_VECTORS < 64
   lldbg("  IRQ ENABLE: %08x %08x\n",
         getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
+#elif NR_VECTORS < 96
+  lldbg("  IRQ ENABLE: %08x %08x %08x\n",
+        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+        getreg32(NVIC_IRQ64_95_ENABLE));
+#elif NR_VECTORS < 128
+  lldbg("  IRQ ENABLE: %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+        getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE));
+#endif
+#if NR_VECTORS > 127
+#  warning Missing output
+#endif
+
   lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
         getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
         getreg32(NVIC_SYSH12_15_PRIORITY));
@@ -123,6 +138,34 @@ static void tiva_dumpnvic(const char *msg, int irq)
   lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+#if NR_VECTORS > 47
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+        getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+#endif
+#if NR_VECTORS > 63
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
+        getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
+#endif
+#if NR_VECTORS > 79
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
+        getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
+#endif
+#if NR_VECTORS > 95
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
+        getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
+#endif
+#if NR_VECTORS > 111
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY),
+        getreg32(NVIC_IRQ120_123_PRIORITY), getreg32(NVIC_IRQ124_127_PRIORITY));
+#endif
+#if NR_VECTORS > 127
+#  warning Missing output
+#endif
   irqrestore(flags);
 }
 #else
@@ -231,19 +274,41 @@ static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= TIVA_IRQ_INTERRUPTS)
     {
+      if (irq >= NR_IRQS)
+        {
+          return ERROR; /* Invalid IRQ number */
+        }
+
       if (irq < TIVA_IRQ_INTERRUPTS + 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS);
         }
-      else if (irq < NR_IRQS)
+      else if (irq < TIVA_IRQ_INTERRUPTS + 64)
         {
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 32);
         }
+#if NR_VECTORS > 63
+      else if (irq < TIVA_IRQ_INTERRUPTS + 96)
+        {
+           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 64);
+        }
+#if NR_VECTORS > 95
+      else if (irq < TIVA_IRQ_INTERRUPTS + 128)
+        {
+           *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
+           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 96);
+        }
+#if NR_VECTORS > 127
+#  warning Missing logic
+#endif
+#endif
+#endif
       else
         {
-          return ERROR; /* Invalid interrupt */
+          return ERROR; /* Internal confusion */
         }
     }
 
