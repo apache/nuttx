@@ -244,8 +244,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         16 /* Sixteen 16-bit timers OR */
-#  define TIVA_NWIDETIMERS     8  /* Eight 32-bit wide timers */
+#  define TIVA_NTIMERS         8  /* Eight Dual 16/32-bit timers A/B */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            2  /* Two watchdog timers */
 #  define TIVA_NETHCONTROLLERS 1  /* One 10/100Mbit Ethernet controller */
 #  define TIVA_NLCD            1  /* One LCD controller */
@@ -267,8 +267,8 @@
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         16 /* Sixteen 16/32-bit timers */
-#  define TIVA_NWIDETIMERS     0  /* NO 32/64-bit timers */
+#  define TIVA_NTIMERS         8  /* Eight Dual 16/32-bit timers A/B */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
 #  define TIVA_NWDT            2  /* Two watchdog timers */
 #  define TIVA_NETHCONTROLLERS 1  /* One 10/100Mbit Ethernet controller */
 #  define TIVA_NLCD            1  /* One LCD controller */
