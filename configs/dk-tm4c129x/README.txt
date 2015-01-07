@@ -692,7 +692,7 @@ Temperature Sensor
   will read the current temperature from an LM75 compatible temperature sensor
   and print the temperature on stdout in either units of degrees Fahrenheit or
   Centigrade.  This tiny command line application is enabled with the following
-  configuratin options:
+  configuration options:
 
     Library
       CONFIG_LIBM=y

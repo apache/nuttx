@@ -347,28 +347,55 @@ events as follows:
 Temperature Sensor
 ==================
 
-Support for the on-board LM-75 temperature sensor is available.  This supported
-has been verified, but has not been included in any of the available the
-configurations.  To set up the temperature sensor, add the following to the
-NuttX configuration file
+  LM-75 Temperature Sensor Driver
+  -------------------------------
+  Support for the on-board LM-75 temperature sensor is available.  This
+  support has been verified, but has not been included in any of the
+  available the configurations.  To set up the temperature sensor, add the
+  following to the NuttX configuration file
 
-  CONFIG_I2C=y
-  CONFIG_I2C_LM75=y
+    Drivers -> Sensors
+      CONFIG_LM75=y
+      CONFIG_I2C_LM75=y
 
-Then you can implement logic like the following to use the temperature sensor:
+  Then you can implement logic like the following to use the temperature
+  sensor:
 
-  #include <nuttx/sensors/lm75.h>
-  #include <arch/board/board.h>
+    #include <nuttx/sensors/lm75.h>
+    #include <arch/board/board.h>
 
-  ret = stm32_lm75initialize("/dev/temp");        /* Register the temperature sensor */
-  fd  = open("/dev/temp", O_RDONLY);              /* Open the temperature sensor device */
-  ret = ioctl(fd, SNIOC_FAHRENHEIT, 0);           /* Select Fahrenheit */
-  bytesread = read(fd, buffer, 8*sizeof(b16_t));  /* Read temperature samples */
+    ret = stm32_lm75initialize("/dev/temp");        /* Register the temperature sensor */
+    fd  = open("/dev/temp", O_RDONLY);              /* Open the temperature sensor device */
+    ret = ioctl(fd, SNIOC_FAHRENHEIT, 0);           /* Select Fahrenheit */
+    bytesread = read(fd, buffer, 8*sizeof(b16_t));  /* Read temperature samples */
 
-More complex temperature sensor operations are also available.  See the IOCTL
-commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
-of the stm32_lm75initialize() and stm32_lm75attach() interfaces in the
-arch/board/board.h file (sames as configs/stm3210e-eval/include/board.h).
+  More complex temperature sensor operations are also available.  See the
+  IOCTL commands enumerated in include/nuttx/sensors/lm75.h.  Also read the 
+  escriptions of the stm32_lm75initialize() and stm32_lm75attach()
+  interfaces in the arch/board/board.h file (sames as
+  configs/stm3210e-eval/include/board.h).
+
+  NSH Command Line Application
+  ----------------------------
+  There is a tiny NSH command line application at examples/system/lm75 that
+  will read the current temperature from an LM75 compatible temperature sensor
+  and print the temperature on stdout in either units of degrees Fahrenheit or
+  Centigrade.  This tiny command line application is enabled with the following
+  configuration options:
+
+    Library
+      CONFIG_LIBM=y
+      CONFIG_LIBC_FLOATINGPOINT=y
+
+    Applications -> NSH Library
+      CONFIG_NSH_ARCHINIT=y
+
+    Applications -> System Add-Ons
+      CONFIG_SYSTEM_LM75=y
+      CONFIG_SYSTEM_LM75_DEVNAME="/dev/temp"
+      CONFIG_SYSTEM_LM75_FAHRENHEIT=y  (or CENTIGRADE)
+      CONFIG_SYSTEM_LM75_STACKSIZE=1024
+      CONFIG_SYSTEM_LM75_PRIORITY=100
 
 RTC
 ===
