@@ -942,7 +942,7 @@
 /* GPTM Clock Configuration */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129XNC)
-#  define TIMER_CC_
+#  define TIMER_CC_ALTCLK              (1 << 0)  /* Bit 0: Alternate Clock Source */
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_CHIP_TIVA_TIMER_H */
