@@ -38,9 +38,14 @@ config MMCSD_HAVECARDDETECT
 		SDIO driver card detection is
 		100% accurate
 
+config ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	bool
+	default n
+
 config MMCSD_SDIOWAIT_WRCOMPLETE
 	bool "Use SDIO_D Busy to detect Write Complete"
 	default n
+	depends on ARCH_HAVE_SDIOWAIT_WRCOMPLETE
 	---help---
 		SDIO driver will use SDIO_D Busy signalling to detect Write Complete.
 		This option when selected, will enable the MMCSD driver to use the
