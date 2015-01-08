@@ -67,7 +67,7 @@
 #define TIVA_TIMER_TBMR_OFFSET         0x0008 /* GPTM Timer B Mode */
 #define TIVA_TIMER_CTL_OFFSET          0x000c /* GPTM Control */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER_SYNC_OFFSET       0x0010 /* GPTM Synchronize */
 #endif
 
@@ -86,7 +86,7 @@
 #define TIVA_TIMER_TAR_OFFSET          0x0048 /* GPTM Timer A */
 #define TIVA_TIMER_TBR_OFFSET          0x004c /* GPTM Timer B */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER_TAV_OFFSET        0x0050 /* GPTM Timer A Value */
 #  define TIVA_TIMER_TBV_OFFSET        0x0054 /* GPTM Timer B Value */
 #  define TIVA_TIMER_RTCPD_OFFSET      0x0058 /* GPTM RTC Predivide */
@@ -101,7 +101,7 @@
 #  define TIVA_TIMER_ADCEV_OFFSET      0x0070 /* GPTM ADC Event */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER_PP_OFFSET         0x0fc0 /* GPTM Peripheral Properties */
 #endif
 
@@ -117,7 +117,7 @@
 #define TIVA_TIMER0_TBMR               (TIVA_TIMER0_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER0_CTL                (TIVA_TIMER0_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER0_SYNC             (TIVA_TIMER0_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -136,7 +136,7 @@
 #define TIVA_TIMER0_TAR                (TIVA_TIMER0_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER0_TBR                (TIVA_TIMER0_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER0_TAV              (TIVA_TIMER0_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER0_TBV              (TIVA_TIMER0_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER0_RTCPD            (TIVA_TIMER0_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -151,7 +151,7 @@
 #  define TIVA_TIMER0_ADCEV            (TIVA_TIMER0_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER0_PP               (TIVA_TIMER0_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -166,7 +166,7 @@
 #define TIVA_TIMER1_TBMR               (TIVA_TIMER1_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER1_CTL                (TIVA_TIMER1_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER1_SYNC             (TIVA_TIMER1_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -185,7 +185,7 @@
 #define TIVA_TIMER1_TAR                (TIVA_TIMER1_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER1_TBR                (TIVA_TIMER1_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER1_TAV              (TIVA_TIMER1_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER1_TBV              (TIVA_TIMER1_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER1_RTCPD            (TIVA_TIMER1_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -200,7 +200,7 @@
 #  define TIVA_TIMER1_ADCEV            (TIVA_TIMER1_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER1_PP               (TIVA_TIMER1_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -215,7 +215,7 @@
 #define TIVA_TIMER2_TBMR               (TIVA_TIMER2_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER2_CTL                (TIVA_TIMER2_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER2_SYNC             (TIVA_TIMER2_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -234,7 +234,7 @@
 #define TIVA_TIMER2_TAR                (TIVA_TIMER2_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER2_TBR                (TIVA_TIMER2_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER2_TAV              (TIVA_TIMER2_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER2_TBV              (TIVA_TIMER2_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER2_RTCPD            (TIVA_TIMER2_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -249,7 +249,7 @@
 #  define TIVA_TIMER2_ADCEV            (TIVA_TIMER2_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER2_PP               (TIVA_TIMER2_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -264,7 +264,7 @@
 #define TIVA_TIMER3_TBMR               (TIVA_TIMER3_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER3_CTL                (TIVA_TIMER3_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER3_SYNC             (TIVA_TIMER3_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -283,7 +283,7 @@
 #define TIVA_TIMER3_TAR                (TIVA_TIMER3_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER3_TBR                (TIVA_TIMER3_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER3_TAV              (TIVA_TIMER3_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER3_TBV              (TIVA_TIMER3_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER3_RTCPD            (TIVA_TIMER3_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -298,7 +298,7 @@
 #  define TIVA_TIMER3_ADCEV            (TIVA_TIMER3_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER3_PP               (TIVA_TIMER3_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -313,7 +313,7 @@
 #define TIVA_TIMER4_TBMR             (TIVA_TIMER4_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER4_CTL                (TIVA_TIMER4_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER4_SYNC             (TIVA_TIMER4_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -332,7 +332,7 @@
 #define TIVA_TIMER4_TAR                (TIVA_TIMER4_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER4_TBR                (TIVA_TIMER4_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER4_TAV              (TIVA_TIMER4_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER4_TBV              (TIVA_TIMER4_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER4_RTCPD            (TIVA_TIMER4_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -347,7 +347,7 @@
 #  define TIVA_TIMER4_ADCEV            (TIVA_TIMER4_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER4_PP               (TIVA_TIMER4_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -362,7 +362,7 @@
 #define TIVA_TIMER5_TBMR               (TIVA_TIMER5_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER5_CTL                (TIVA_TIMER5_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER5_SYNC             (TIVA_TIMER5_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -381,7 +381,7 @@
 #define TIVA_TIMER5_TAR                (TIVA_TIMER5_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER5_TBR                (TIVA_TIMER5_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER5_TAV              (TIVA_TIMER5_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER5_TBV              (TIVA_TIMER5_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER5_RTCPD            (TIVA_TIMER5_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -396,7 +396,7 @@
 #  define TIVA_TIMER5_ADCEV            (TIVA_TIMER5_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER5_PP               (TIVA_TIMER5_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -411,7 +411,7 @@
 #define TIVA_TIMER6_TBMR               (TIVA_TIMER6_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER6_CTL                (TIVA_TIMER6_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER6_SYNC             (TIVA_TIMER6_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -430,7 +430,7 @@
 #define TIVA_TIMER6_TAR                (TIVA_TIMER6_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER6_TBR                (TIVA_TIMER6_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER6_TAV              (TIVA_TIMER6_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER6_TBV              (TIVA_TIMER6_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER6_RTCPD            (TIVA_TIMER6_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -445,7 +445,7 @@
 #  define TIVA_TIMER6_ADCEV            (TIVA_TIMER6_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER6_PP               (TIVA_TIMER6_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -460,7 +460,7 @@
 #define TIVA_TIMER7_TBMR               (TIVA_TIMER7_BASE + TIVA_TIMER_TBMR_OFFSET)
 #define TIVA_TIMER7_CTL                (TIVA_TIMER7_BASE + TIVA_TIMER_CTL_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER7_SYNC             (TIVA_TIMER7_BASE + TIVA_TIMER_SYNC_OFFSET)
 #endif
 
@@ -479,7 +479,7 @@
 #define TIVA_TIMER7_TAR                (TIVA_TIMER7_BASE + TIVA_TIMER_TAR_OFFSET)
 #define TIVA_TIMER7_TBR                (TIVA_TIMER7_BASE + TIVA_TIMER_TBR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER7_TAV              (TIVA_TIMER7_BASE + TIVA_TIMER_TAV_OFFSET)
 #  define TIVA_TIMER7_TBV              (TIVA_TIMER7_BASE + TIVA_TIMER_TBV_OFFSET)
 #  define TIVA_TIMER7_RTCPD            (TIVA_TIMER7_BASE + TIVA_TIMER_RTCPD_OFFSET)
@@ -494,7 +494,7 @@
 #  define TIVA_TIMER7_ADCEV            (TIVA_TIMER7_BASE + TIVA_TIMER_ADCEV_OFFSET)
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIVA_TIMER7_PP               (TIVA_TIMER7_BASE + TIVA_TIMER_PP_OFFSET)
 #endif
 
@@ -526,7 +526,7 @@
 #  define TIMER_TAMR_TAAMS_CAPTURE     (0 << TIMER_TAMR_TAAMS_SHIFT) /* Capture mode is enabled */
 #  define TIMER_TAMR_TAAMS_PWM         (1 << TIMER_TAMR_TAAMS_SHIFT) /* PWM mode is enabled */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_TAMR_TACDIR            (1 << 4)  /* Bit 4:  Timer A Count Direction */
 #    define TIMER_TAMR_TACDIR_DOWN     (0 << TIMER_TAMR_TACDIR_SHIFT) /* The timer counts down */
 #    define TIMER_TAMR_TACDIR_UP       (1 << TIMER_TAMR_TACDIR_SHIFT) /* When in one-shot or periodic mode, the timer counts up */
@@ -567,7 +567,7 @@
 #  define TIMER_TBMR_TBAMS_CAPTURE     (0 << TIMER_TBMR_TBAMS_SHIFT) /* Capture mode is enabled */
 #  define TIMER_TBMR_TBAMS_PWM         (1 << TIMER_TBMR_TBAMS_SHIFT) /* PWM mode is enabled */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_TBMR_TBCDIR            (1 << 4)  /* Bit 4:  Timer B Count Direction */
 #    define TIMER_TBMR_TBCDIR_DOWN     (0 << TIMER_TBMR_TBCDIR_SHIFT) /* The timer counts down */
 #    define TIMER_TBMR_TBCDIR_UP       (1 << TIMER_TBMR_TBCDIR_SHIFT) /* When in one-shot or periodic mode, the timer counts up */
@@ -599,7 +599,7 @@
 #define TIMER_CTL_TAEN                 (1 << 0)  /* Bit 0:  Timer A Enable */
 #define TIMER_CTL_TASTALL_SHIFT        (1 << 1)  /* Bit 1:  Timer A Stall Enable */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_CTL_TAEVENT_SHIFT      (2)       /* Bits 2-3: GPTM Timer A Event Mode */
 #  define TIMER_CTL_TAEVENT_MASK       (3 << TIMER_CTL_TAEVENT_SHIFT)
 #    define TIMER_CTL_TAEVENT_POS      (0 << TIMER_CTL_TAEVENT_SHIFT) /* Positive edge */
@@ -621,7 +621,7 @@
 
 /* GPTM Synchronize */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_SYNC_SYNCT_NONE        0         /* GPTMn is not affected */
 #  define TIMER_SYNC_SYNCT_TA          1         /* Timer A timeout event triggered */
 #  define TIMER_SYNC_SYNCT_TB          2         /* Timer B timeout event triggered */
@@ -748,7 +748,7 @@
 
 #define TIMER_IMR_TATOIM               (1 << 0)  /* Bit 0:  Timer A Time-Out Interrupt Mask */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_IMR_CAMIM              (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Interrupt Mask */
 #  define TIMER_IMR_CAEIM              (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Interrupt Mask */
 #  define TIMER_IMR_RTCIM              (1 << 3)  /* Bit 3:  GPTM RTC Interrupt Mask */
@@ -758,7 +758,7 @@
 #  define TIMER_IMR_DMAAIM             (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Interrupt Mask */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_IMR_TBTOIM             (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Interrupt Mask */
 #  define TIMER_IMR_CBMIM              (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Interrupt Mask */
 #  define TIMER_IMR_CBEIM              (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Interrupt Mask */
@@ -769,7 +769,7 @@
 #  define TIMER_IMR_DMABIM             (1 << 13) /* Bit 13: GPTM Timer B DMA Done Interrupt Mask */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_IMR_WUEIM              (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Interrupt Mask */
 #endif
 
@@ -777,7 +777,7 @@
 
 #define TIMER_RIS_TATORIS              (1 << 0)  /* Bit 0:  Timer A Time-Out Raw Interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_RIS_CAMRIS             (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Raw Interrupt */
 #  define TIMER_RIS_CAERIS             (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Raw Interrupt */
 #  define TIMER_RIS_RTCRIS             (1 << 3)  /* Bit 3:  GPTM RTC Raw Interrupt */
@@ -788,7 +788,7 @@
 #  define TIMER_RIS_DMAARIS            (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Raw Interrupt */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_RIS_TBTORIS            (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Raw Interrupt */
 #  define TIMER_RIS_CBMRIS             (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Raw Interrupt */
 #  define TIMER_RIS_CBERIS             (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Raw Interrupt */
@@ -799,7 +799,7 @@
 #  define TIMER_RIS_DMABRIS            (1 << 13) /* Bit 13: GPTM Timer B DMA Done Raw Interrupt */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_RIS_WUERIS             (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Raw Interrupt */
 #endif
 
@@ -807,7 +807,7 @@
 
 #define TIMER_MIS_TATOMIS              (1 << 0)  /* Bit 0:  Timer A Time-Out Masked Interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_MIS_CAMMIS             (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Masked Interrupt */
 #  define TIMER_MIS_CAEMIS             (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Masked Interrupt */
 #  define TIMER_MIS_RTCMIS             (1 << 3)  /* Bit 3:  GPTM RTC Masked Interrupt */
@@ -818,7 +818,7 @@
 #  define TIMER_MIS_DMAAMIS            (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Masked Interrupt */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_MIS_TBTOMIS            (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Masked Interrupt */
 #  define TIMER_MIS_CBMMIS             (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Masked Interrupt */
 #  define TIMER_MIS_CBEMIS             (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Masked Interrupt */
@@ -829,7 +829,7 @@
 #  define TIMER_MIS_DMABMIS            (1 << 13) /* Bit 13: GPTM Timer B DMA Done Masked Interrupt */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_MIS_WUEMIS             (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Masked Interrupt */
 #endif
 
@@ -837,7 +837,7 @@
 
 #define TIMER_ICR_TATOCINT             (1 << 0)  /* Bit 0:  Timer A Time-Out Interrupt Clear */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_ICR_CAMCINT            (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Interrupt Clear */
 #  define TIMER_ICR_CAECINT            (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Interrupt Clear */
 #  define TIMER_ICR_RTCCINT            (1 << 3)  /* Bit 3:  GPTM RTC Interrupt Clear */
@@ -848,7 +848,7 @@
 #  define TIMER_ICR_DMAAINT            (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Interrupt Clear */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_ICR_TBTOCINT           (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Interrupt Clear */
 #  define TIMER_ICR_CBMCINT            (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Interrupt Clear */
 #  define TIMER_ICR_CBECINT            (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Interrupt Clear */
@@ -859,7 +859,7 @@
 #  define TIMER_ICR_DMABINT            (1 << 13) /* Bit 13: GPTM Timer B DMA Done Interrupt Clear */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_ICR_WUECINT            (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Interrupt Clear */
 #endif
 
@@ -923,7 +923,7 @@
 
 /* GPTM RTC Predivide (RTCPD) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_RTCPD_SHIFT            (0)       /* Bits 0-15: RTC Predivide Counter Value */
 #  define TIMER_RTCPD_MASK             (0xffff << TIMER_RTCPD_SHIFT)
 #    define TIMER_RTCPD(n)             ((uint32_t)(n) << TIMER_RTCPD_SHIFT)
@@ -931,7 +931,7 @@
 
 /* GPTM Timer A Prescale Snapshot (TAPS) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_TAPS_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A Prescaler Snapshot */
 #  define TIMER_TAPS_PSS_MASK          (0xffff << TIMER_TAPS_PSS_SHIFT)
 #    define TIMER_TAPS_PSS(n)          ((uint32_t)(n) << TIMER_TAPS_PSS_SHIFT)
@@ -939,7 +939,7 @@
 
 /* GPTM Timer B Prescale Snapshot (TBPS) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_TBPS_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A Prescaler Value */
 #  define TIMER_TBPS_PSS_MASK          (0xffff << TIMER_TBPS_PSS_SHIFT)
 #    define TIMER_TBPS_PSS(n)          ((uint32_t)(n) << TIMER_TBPS_PSS_SHIFT)
@@ -947,7 +947,7 @@
 
 /* GPTM Timer A Prescale Value (TAPV) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_TAPV_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A Prescaler Value */
 #  define TIMER_TAPS_PSS_MASK          (0xffff << TIMER_TAPS_PSS_SHIFT)
 #    define TIMER_TAPS_PSS(n)          ((uint32_t)(n) << TIMER_TAPS_PSS_SHIFT)
@@ -955,7 +955,7 @@
 
 /* GPTM Timer B Prescale Value (TBPV) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_TBPV_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer B Prescaler Value */
 #  define TIMER_TBPS_PSS_MASK          (0xffff << TIMER_TBPS_PSS_SHIFT)
 #    define TIMER_TBPS_PSS(n)        ((uint32_t)(n) << TIMER_TBPS_PSS_SHIFT)
@@ -991,7 +991,7 @@
 
 /* GPTM Peripheral Properties (PP) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C)
+#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
 #  define TIMER_PP_SIZE_SHIFT          (0)       /* Bits 0-3: Count Size */
 #  define TIMER_PP_SIZE_MASK           (15 << TIMER_PP_SIZE_SHIFT)
 #    define TIMER_PP_SIZE_16           (0 << TIMER_PP_SIZE_SHIFT) /* Timer A/B 16 bits with 8-bit prescale */
