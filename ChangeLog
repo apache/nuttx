@@ -9372,3 +9372,15 @@
 	* arch/arm/src/tiva/tiva_irq.c:  Fix Tiva IRQ control logic; was limited
 	  to only 64 IRQs.  That is a problem for higher numbered IRQs on many
 	  platforms (2015-01-06).
+	* arch/arm/src/stm32/stm32_sdio.c, drivers/mmcsd/mmcsd_sdio.c and Kconfig,
+	  and include/nuttx/sdio.h: MMCSD SDIO:  Add support for a new
+	  SDWAIT_WRCOMPLETE condition.  The previous logic used a busy-wait loop
+	  to pool the car d R1 start to determine when the card was ready for
+	  the next transfer.  That busy-wait can be quite long -- up to hundreds
+	  of milliseconds.  And alternative is to look the the SD D0 pin which
+	  will change state when the card is no longer busy.  This change avoids
+	  the busy-wait poll by reconfiguring the SD D0 pin as a GPIO interrupt,
+	  then waiting for the card to become ready without taking up CPU
+	  cycles.  This change is conditioned on CONFIG_MMCSD_SDIOWATI_WRCOMPLETE
+	  and is currently only implemented for the STM32 SDIO driver. From
+	  David Sidrane (2015-01-08).
