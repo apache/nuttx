@@ -477,86 +477,45 @@
 #  define TIMER_CFG_CFG_RTC            (1 << TIMER_CFG_CFG_SHIFT) /* 32-bit real-time clock (RTC) counter configuration */
 #  define TIMER_CFG_CFG_16             (4 << TIMER_CFG_CFG_SHIFT) /* 16-bit timer configuration */
 
-/* GPTM Timer A Mode (TAMR) */
+/* GPTM Timer A/B Mode (TAMR and TBMR) */
 
-#define TIMER_TAMR_TAMR_SHIFT          0         /* Bits 1-0:  Timer A Mode */
-#define TIMER_TAMR_TAMR_MASK           (3 << TIMER_TAMR_TAMR_SHIFT)
-#  define TIMER_TAMR_TAMR_ONESHOT      (1 << TIMER_TAMR_TAMR_SHIFT) /* One-Shot Timer mode */
-#  define TIMER_TAMR_TAMR_PERIODIC     (2 << TIMER_TAMR_TAMR_SHIFT) /* Periodic Timer mode */
-#  define TIMER_TAMR_TAMR_CAPTURE      (3 << TIMER_TAMR_TAMR_SHIFT) /* Capture mode */
-#define TIMER_TAMR_TACMR               (1 << 2)  /* Bit 2:  Timer A Capture Mode */
-#  define TIMER_TAMR_TACMR_EDGECOUNT   (0 << TIMER_TAMR_TACMR_SHIFT) /* Edge-Count mode */
-#  define TIMER_TAMR_TACMR_EDGETIME    (1 << TIMER_TAMR_TACMR_SHIFT) /* Edge-Time mode */
-#define TIMER_TAMR_TAAMS               (1 << 3)  /* Bit 3:  Timer A Alternate Mode Select */
-#  define TIMER_TAMR_TAAMS_CAPTURE     (0 << TIMER_TAMR_TAAMS_SHIFT) /* Capture mode is enabled */
-#  define TIMER_TAMR_TAAMS_PWM         (1 << TIMER_TAMR_TAAMS_SHIFT) /* PWM mode is enabled */
+#define TIMER_TnMR_TnMR_SHIFT          0         /* Bits 1-0:  Timer A Mode */
+#define TIMER_TnMR_TnMR_MASK           (3 << TIMER_TnMR_TnMR_SHIFT)
+#  define TIMER_TnMR_TnMR_ONESHOT      (1 << TIMER_TnMR_TnMR_SHIFT) /* One-Shot Timer mode */
+#  define TIMER_TnMR_TnMR_PERIODIC     (2 << TIMER_TnMR_TnMR_SHIFT) /* Periodic Timer mode */
+#  define TIMER_TnMR_TnMR_CAPTURE      (3 << TIMER_TnMR_TnMR_SHIFT) /* Capture mode */
+#define TIMER_TnMR_TACMR               (1 << 2)  /* Bit 2:  Timer A Capture Mode */
+#  define TIMER_TnMR_TACMR_EDGECOUNT   (0 << TIMER_TnMR_TACMR_SHIFT) /* Edge-Count mode */
+#  define TIMER_TnMR_TACMR_EDGETIME    (1 << TIMER_TnMR_TACMR_SHIFT) /* Edge-Time mode */
+#define TIMER_TnMR_TAAMS               (1 << 3)  /* Bit 3:  Timer A Alternate Mode Select */
+#  define TIMER_TnMR_TAAMS_CAPTURE     (0 << TIMER_TnMR_TAAMS_SHIFT) /* Capture mode is enabled */
+#  define TIMER_TnMR_TAAMS_PWM         (1 << TIMER_TnMR_TAAMS_SHIFT) /* PWM mode is enabled */
 
 #if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TAMR_TACDIR            (1 << 4)  /* Bit 4:  Timer A Count Direction */
-#    define TIMER_TAMR_TACDIR_DOWN     (0 << TIMER_TAMR_TACDIR_SHIFT) /* The timer counts down */
-#    define TIMER_TAMR_TACDIR_UP       (1 << TIMER_TAMR_TACDIR_SHIFT) /* When in one-shot or periodic mode, the timer counts up */
-#  define TIMER_TAMR_TAMIE             (1 << 5)  /* Bit 5:  Timer A Match Interrupt Enable */
-#  define TIMER_TAMR_TAWOT             (1 << 6)  /* Bit 6:  GPTM Timer A Wait-on-Trigger */
-#  define TIMER_TAMR_TASNAPS           (1 << 7)  /* Bit 7:  GPTM Timer A Snap-Shot Mode */
-#  define TIMER_TAMR_TAILD             (1 << 8)  /* Bit 8:  GPTM Timer A Interval Load Write */
-#  define TIMER_TAMR_TAPWMIE           (1 << 9)  /* Bit 9:  GPTM Timer A PWM Interrupt Enable */
-#  define TIMER_TAMR_TAMRSU            (1 << 10) /* Bit 10: GPTM Timer A Match Register Update */
-#  define TIMER_TAMR_TAPLO             (1 << 11) /* Bit 11: GPTM Timer A PWM Legacy Operation */
+#  define TIMER_TnMR_TACDIR            (1 << 4)  /* Bit 4:  Timer A Count Direction */
+#    define TIMER_TnMR_TACDIR_DOWN     (0 << TIMER_TnMR_TACDIR_SHIFT) /* The timer counts down */
+#    define TIMER_TnMR_TACDIR_UP       (1 << TIMER_TnMR_TACDIR_SHIFT) /* When in one-shot or periodic mode, the timer counts up */
+#  define TIMER_TnMR_TAMIE             (1 << 5)  /* Bit 5:  Timer A Match Interrupt Enable */
+#  define TIMER_TnMR_TAWOT             (1 << 6)  /* Bit 6:  GPTM Timer A Wait-on-Trigger */
+#  define TIMER_TnMR_TASNAPS           (1 << 7)  /* Bit 7:  GPTM Timer A Snap-Shot Mode */
+#  define TIMER_TnMR_TAILD             (1 << 8)  /* Bit 8:  GPTM Timer A Interval Load Write */
+#  define TIMER_TnMR_TAPWMIE           (1 << 9)  /* Bit 9:  GPTM Timer A PWM Interrupt Enable */
+#  define TIMER_TnMR_TnMRSU            (1 << 10) /* Bit 10: GPTM Timer A Match Register Update */
+#  define TIMER_TnMR_TAPLO             (1 << 11) /* Bit 11: GPTM Timer A PWM Legacy Operation */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_TAMR_TACINTD           (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
-#  define TIMER_TAMR_TCACT_SHIFT       (13)      /* Bits 13-15: Timer Compare Action Select */
-#  define TIMER_TAMR_TCACT_MASK        (7 << TIMER_TAMR_TCACT_SHIFT)
-#  define TIMER_TAMR_TCACT_NONE        (0 << TIMER_TAMR_TCACT_SHIFT) /* Disable compare operations */
-#  define TIMER_TAMR_TCACT_TOGGLE      (1 << TIMER_TAMR_TCACT_SHIFT) /* Toggle state on timeout */
-#  define TIMER_TAMR_TCACT_CLRTO       (2 << TIMER_TAMR_TCACT_SHIFT) /* Clear CCP on timeout */
-#  define TIMER_TAMR_TCACT_SETTO       (3 << TIMER_TAMR_TCACT_SHIFT) /* Set CCP on timeout */
-#  define TIMER_TAMR_TCACT_SETTOGTO    (4 << TIMER_TAMR_TCACT_SHIFT) /* Set CCP and toggle on TimeOut */
-#  define TIMER_TAMR_TCACT_CLRTOGTO    (5 << TIMER_TAMR_TCACT_SHIFT) /* Clear CCP and toggle on TimeOut */
-#  define TIMER_TAMR_TCACT_SETCLRTO    (6 << TIMER_TAMR_TCACT_SHIFT) /* Set CCP and clear on timeout */
-#  define TIMER_TAMR_TCACT_CLRSETTO    (7 << TIMER_TAMR_TCACT_SHIFT) /* Clear CCP and set on timeout */
-#endif
-
-/* GPTM Timer B Mode (TBMR) */
-
-#define TIMER_TBMR_TBMR_SHIFT          0         /* Bits 1-0:  Timer B Mode */
-#define TIMER_TBMR_TBMR_MASK           (3 << TIMER_TBMR_TBMR_SHIFT)
-#  define TIMER_TBMR_TBMR_ONESHOT      (1 << TIMER_TBMR_TBMR_SHIFT) /* One-Shot Timer mode */
-#  define TIMER_TBMR_TBMR_PERIODIC     (2 << TIMER_TBMR_TBMR_SHIFT) /* Periodic Timer mode */
-#  define TIMER_TBMR_TBMR_CAPTURE      (3 << TIMER_TBMR_TBMR_SHIFT) /* Capture mode */
-#define TIMER_TBMR_TBCMR               (1 << 2)  /* Bit 2:  Timer B Capture Mode */
-#  define TIMER_TBMR_TBCMR_EDGECOUNT   (0 << TIMER_TBMR_TBCMR_SHIFT) /* Edge-Count mode */
-#  define TIMER_TBMR_TBCMR_EDGETIME    (1 << TIMER_TBMR_TBCMR_SHIFT) /* Edge-Time mode */
-#define TIMER_TBMR_TBAMS               (1 << 3)  /* Bit 3:  Timer B Alternate Mode Select */
-#  define TIMER_TBMR_TBAMS_CAPTURE     (0 << TIMER_TBMR_TBAMS_SHIFT) /* Capture mode is enabled */
-#  define TIMER_TBMR_TBAMS_PWM         (1 << TIMER_TBMR_TBAMS_SHIFT) /* PWM mode is enabled */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TBMR_TBCDIR            (1 << 4)  /* Bit 4:  Timer B Count Direction */
-#    define TIMER_TBMR_TBCDIR_DOWN     (0 << TIMER_TBMR_TBCDIR_SHIFT) /* The timer counts down */
-#    define TIMER_TBMR_TBCDIR_UP       (1 << TIMER_TBMR_TBCDIR_SHIFT) /* When in one-shot or periodic mode, the timer counts up */
-#  define TIMER_TBMR_TBMIE             (1 << 5)  /* Bit 5:  Timer B Match Interrupt Enable */
-#  define TIMER_TBMR_TBWOT             (1 << 6)  /* Bit 6:  GPTM Timer B Wait-on-Trigger */
-#  define TIMER_TBMR_TBSNAPS           (1 << 7)  /* Bit 7:  GPTM Timer B Snap-Shot Mode */
-#  define TIMER_TBMR_TBILD             (1 << 8)  /* Bit 8:  GPTM Timer B Interval Load Write */
-#  define TIMER_TBMR_TBPWMIE           (1 << 9)  /* Bit 9:  GPTM Timer B PWM Interrupt Enable */
-#  define TIMER_TBMR_TBMRSU            (1 << 10) /* Bit 10: GPTM Timer B Match Register Update */
-#  define TIMER_TBMR_TBPLO             (1 << 11) /* Bit 11: GPTM Timer B PWM Legacy Operation */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_TBMR_TBCINTD           (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
-#  define TIMER_TBMR_TCACT_SHIFT       (13)      /* Bits 13-15: Timer Compare Action Select */
-#  define TIMER_TBMR_TCACT_MASK        (7 << TIMER_TBMR_TCACT_SHIFT)
-#  define TIMER_TBMR_TCACT_NONE        (0 << TIMER_TBMR_TCACT_SHIFT) /* Disable compare operations */
-#  define TIMER_TBMR_TCACT_TOGGLE      (1 << TIMER_TBMR_TCACT_SHIFT) /* Toggle state on timeout */
-#  define TIMER_TBMR_TCACT_CLRTO       (2 << TIMER_TBMR_TCACT_SHIFT) /* Clear CCP on timeout */
-#  define TIMER_TBMR_TCACT_SETTO       (3 << TIMER_TBMR_TCACT_SHIFT) /* Set CCP on timeout */
-#  define TIMER_TBMR_TCACT_SETTOGTO    (4 << TIMER_TBMR_TCACT_SHIFT) /* Set CCP and toggle on TimeOut */
-#  define TIMER_TBMR_TCACT_CLRTOGTO    (5 << TIMER_TBMR_TCACT_SHIFT) /* Clear CCP and toggle on TimeOut */
-#  define TIMER_TBMR_TCACT_SETCLRTO    (6 << TIMER_TBMR_TCACT_SHIFT) /* Set CCP and clear on timeout */
-#  define TIMER_TBMR_TCACT_CLRSETTO    (7 << TIMER_TBMR_TCACT_SHIFT) /* Clear CCP and set on timeout */
+#  define TIMER_TnMR_TACINTD           (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
+#  define TIMER_TnMR_TCACT_SHIFT       (13)      /* Bits 13-15: Timer Compare Action Select */
+#  define TIMER_TnMR_TCACT_MASK        (7 << TIMER_TnMR_TCACT_SHIFT)
+#    define TIMER_TnMR_TCACT_NONE      (0 << TIMER_TnMR_TCACT_SHIFT) /* Disable compare operations */
+#    define TIMER_TnMR_TCACT_TOGGLE    (1 << TIMER_TnMR_TCACT_SHIFT) /* Toggle state on timeout */
+#    define TIMER_TnMR_TCACT_CLRTO     (2 << TIMER_TnMR_TCACT_SHIFT) /* Clear CCP on timeout */
+#    define TIMER_TnMR_TCACT_SETTO     (3 << TIMER_TnMR_TCACT_SHIFT) /* Set CCP on timeout */
+#    define TIMER_TnMR_TCACT_SETTOGTO  (4 << TIMER_TnMR_TCACT_SHIFT) /* Set CCP and toggle on TimeOut */
+#    define TIMER_TnMR_TCACT_CLRTOGTO  (5 << TIMER_TnMR_TCACT_SHIFT) /* Clear CCP and toggle on TimeOut */
+#    define TIMER_TnMR_TCACT_SETCLRTO  (6 << TIMER_TnMR_TCACT_SHIFT) /* Set CCP and clear on timeout */
+#    define TIMER_TnMR_TCACT_CLRSETTO  (7 << TIMER_TnMR_TCACT_SHIFT) /* Clear CCP and set on timeout */
 #endif
 
 /* GPTM Control (CTL) */

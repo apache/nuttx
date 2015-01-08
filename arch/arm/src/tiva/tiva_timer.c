@@ -290,6 +290,8 @@ static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
 static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
                                         const struct tiva_timer32config_s *timer)
 {
+  uint32_t regval;
+
   /* The GPTM is configured for One-Shot and Periodic modes by the following
    * sequence:
    *
@@ -305,11 +307,29 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
 
    tiva_putreg(priv, TIVA_TIMER_CFG_OFFSET, TIMER_CFG_CFG_32);
 
-  /* 3. Configure the TnMR field in the GPTM Timer n Mode Register
-   *   (GPTMTnMR):
+  /* 3. Configure the TAMR field in the GPTM Timer n Mode Register
+   *   (GPTMTAMR):
+   *
    *    a. Write a value of 0x1 for One-Shot mode.
    *    b. Write a value of 0x2 for Periodic mode.
+   *
+   *    When Timer A and TimerB are concatenated, the GPTMTBMR register is
+   *    ignored and GPTMTAMR controls the modes for both Timer A and Timer B
    */
+
+  regval  = tiva_getreg(priv, TIVA_TIMER_TAMR_OFFSET);
+  regval &= ~TIMER_TnMR_TnMR_MASK;
+
+  if (priv->config->mode == TIMER32_MODE_ONESHOT)
+    {
+      regval |= TIMER_TnMR_TnMR_ONESHOT;
+    }
+  else /* if (priv->config->mode == TIMER32_MODE_PERIODIC) */
+    {
+      regval |= TIMER_TnMR_TnMR_PERIODIC;
+    }
+
+  tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
 
   /* 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
    *    the GPTMTnMR register to select whether to capture the value of the
@@ -318,10 +338,18 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *    or down. In addition, if using CCP pins, the TCACT field can be
    *    programmed to configure the compare action.
    */
+#warning Missing logic
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
-   *    (GPTMTnILR).
+   *    (GPTMTAILR).
+   *
+   *   When a GPTM is configured to one of the 32-bit modes, GPTMTAILR
+   *   appears as a 32-bit register; the upper 16-bits correspond to bits
+   *   15:0 of the GPTM Timer B Interval Load (GPTMTBILR) register.
+   *   Writes to GPTMTBILR are ignored.
    */
+
+  tiva_putreg(priv, TIVA_TIMER_TAILR_OFFSET, timer->u.periodic.interval);
 
   /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).
@@ -353,6 +381,9 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
                                        const struct tiva_timer16config_s *timer,
                                        int tmndx)
 {
+  unsigned int regoffset;
+  uint32_t regval;
+
   /* The GPTM is configured for One-Shot and Periodic modes by the following
    * sequence:
    *
@@ -374,6 +405,21 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *    b. Write a value of 0x2 for Periodic mode.
    */
 
+  regoffset = tmndx ? TIVA_TIMER_TBMR_OFFSET : TIVA_TIMER_TAMR_OFFSET;
+  regval    = tiva_getreg(priv, regoffset);
+  regval   &= ~TIMER_TnMR_TnMR_MASK;
+
+  if (timer->mode == TIMER16_MODE_ONESHOT)
+    {
+      regval |= TIMER_TnMR_TnMR_ONESHOT;
+    }
+  else /* if (timer->mode == TIMER16_MODE_PERIODIC) */
+    {
+      regval |= TIMER_TnMR_TnMR_PERIODIC;
+    }
+
+  tiva_putreg(priv, regoffset, regval);
+
   /* 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
    *    the GPTMTnMR register to select whether to capture the value of the
    *    free-running timer at time-out, use an external trigger to start
@@ -381,10 +427,14 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *    or down. In addition, if using CCP pins, the TCACT field can be
    *    programmed to configure the compare action.
    */
+#warning Missing logic
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
    */
+
+  regoffset = tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
+  tiva_putreg(priv, regoffset, timer->u.periodic.interval);
 
   /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).

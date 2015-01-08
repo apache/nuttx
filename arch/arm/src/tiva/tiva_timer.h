@@ -123,6 +123,24 @@ struct tiva_timer32config_s
 {
   bool down;                     /* False: Count up; True: Count down */
   /* TODO:  Add fields to support ADC trigger events */
+
+  /* Mode-specific parameters */
+
+  union
+  {
+    /* 32-bit programmable one-shot or periodic timer */
+
+    struct
+    {
+      uint32_t interval;         /* Value for interval load register */
+    } periodic;
+
+    /* 32-bit RTC with external 32.768-KHz input */
+
+    struct
+    {
+    } rtc;
+  } u;
 };
 
 /* This structure describes the configuration of one 16-bit timer A/B */
@@ -132,6 +150,36 @@ struct tiva_timer16config_s
   uint8_t mode;                  /* See enum tiva_timermode_e */
   bool down;                     /* False: Count up; True: Count down */
   /* TODO:  Add fields to support ADC trigger events */
+
+  /* Mode-specific parameters */
+
+  union
+  {
+    /* 16-bit programmable one-shot or periodic timer */
+
+    struct
+    {
+      uint16_t interval;         /* Value for interval load register */
+    } periodic;
+
+    /* 16-bit input edge-count capture mode w/8-bit prescaler */
+
+    struct
+    {
+    } count;
+
+    /* 16-bit input time capture mode w/8-bit prescaler */
+
+    struct
+    {
+    } time;
+
+    /* 16-bit PWM output mode w/8-bit prescaler */
+
+    struct
+    {
+    } pwm;
+  } u;
 };
 
 /* This structure describes usage of both timers on a GPTIM module */
