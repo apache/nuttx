@@ -75,8 +75,19 @@ struct tiva_gptmattr_s
 
 struct tiva_gptmstate_s
 {
+  /* Constant time attributes and configuration */
+
   const struct tiva_gptmattr_s   *attr;
   const struct tiva_gptmconfig_s *config;
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  /* Register level debug */
+
+   bool wrlast;                /* Last was a write */
+   uintptr_t addrlast;         /* Last address */
+   uint32_t vallast;           /* Last value */
+   int ntimes;                 /* Number of times */
+#endif
 };
 
 /****************************************************************************
@@ -167,6 +178,60 @@ static struct tiva_gptmstate_s g_gptm7_state;
  * Private Functions
  ****************************************************************************/
 
+/************************************************************************************
+ * Name: tiva_checkreg
+ *
+ * Description:
+ *   Check if the current register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   regval  - The value to be written
+ *   regaddr - The address of the register to write to
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   flase: This is the same as the preceding register access.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+static bool tiva_timer_checkreg(struct tiva_gptmstate_s *priv, bool wr,
+                                uint32_t regval, uintptr_t regaddr)
+{
+  if (wr      == priv->wrlast &&   /* Same kind of access? */
+      regval  == priv->vallast &&  /* Same value? */
+      regaddr == priv->addrlast)   /* Same address? */
+    {
+      /* Yes, then just keep a count of the number of times we did this. */
+
+      priv->ntimes++;
+      return false;
+    }
+  else
+    {
+      /* Did we do the previous operation more than once? */
+
+      if (priv->ntimes > 0)
+        {
+          /* Yes... show how many times we did it */
+
+          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+        }
+
+      /* Save information about the new access */
+
+      priv->wrlast   = wr;
+      priv->vallast  = regval;
+      priv->addrlast = regaddr;
+      priv->ntimes   = 0;
+    }
+
+  /* Return true if this is the first time that we have done this operation */
+
+  return true;
+}
+#endif
+
 /****************************************************************************
  * Name: tiva_getreg
  *
@@ -178,7 +243,16 @@ static struct tiva_gptmstate_s g_gptm7_state;
 static uint32_t tiva_getreg(struct tiva_gptmstate_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->attr->base + offset;
-  return getreg32(regaddr);
+  uint32_t regval =  getreg32(regaddr);
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  if (tiva_timer_checkreg(priv, false, regval, regaddr))
+    {
+      lldbg("%08x->%08x\n", regaddr, regval);
+    }
+#endif
+
+  return regval;
 }
 
 /****************************************************************************
@@ -193,6 +267,14 @@ static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
                         uint32_t regval)
 {
   uintptr_t regaddr = priv->attr->base + offset;
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  if (tiva_timer_checkreg(priv, true, regval, regaddr))
+    {
+       lldbg("%08x<-%08x\n", regaddr, regval);
+    }
+#endif
+
   putreg32(regval, regaddr);
 }
 
@@ -210,32 +292,49 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
   /* The GPTM is configured for One-Shot and Periodic modes by the following
    * sequence:
    *
-   * 1. Ensure the timer is disabled (the TnEN bit in the GPTMCTL register
+   * 1. Ensure the timer is disabled (the TAEN bit in the GPTMCTL register
    *    is cleared) before making any changes.
+   *
+   *    NOTE: The TAEN bit was cleared when the timer was reset prior to
+   *    calling this function.
+   *
    * 2. Write the GPTM Configuration Register (GPTMCFG) with a value of
    *    0x0000.0000.
-   * 3. Configure the TnMR field in the GPTM Timer n Mode Register
+   */
+
+  /* 3. Configure the TnMR field in the GPTM Timer n Mode Register
    *   (GPTMTnMR):
    *    a. Write a value of 0x1 for One-Shot mode.
    *    b. Write a value of 0x2 for Periodic mode.
-   * 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
+   */
+
+  /* 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
    *    the GPTMTnMR register to select whether to capture the value of the
    *    free-running timer at time-out, use an external trigger to start
    *    counting, configure an additional trigger or interrupt, and count up
    *    or down. In addition, if using CCP pins, the TCACT field can be
    *    programmed to configure the compare action.
-   * 5. Load the start value into the GPTM Timer n Interval Load Register
+   */
+
+  /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
-   * 6. If interrupts are required, set the appropriate bits in the GPTM
+   */
+
+  /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).
-   * 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
+   */
+#warning Missing Logic
+
+  /* 7. Set the TAEN bit in the GPTMCTL register to enable the timer and
    *    start counting.
    * 8. Poll the GPTMRIS register or wait for the interrupt to be generated
    *    (if enabled). In both cases, the status flags are cleared by writing
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
+   *
+   * NOTE: This timer is started until tiva_gptm_enable() is called.
    */
-#warning Missing Logic
+
   return -ENOSYS;
 }
 
@@ -256,30 +355,47 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *
    * 1. Ensure the timer is disabled (the TnEN bit in the GPTMCTL register
    *    is cleared) before making any changes.
+   *
+   *    NOTE: The TnEN bit was cleared when the timer was reset prior to
+   *    calling this function.
+   *
    * 2. Write the GPTM Configuration Register (GPTMCFG) with a value of
    *    0x0000.0000.
-   * 3. Configure the TnMR field in the GPTM Timer n Mode Register
+   */
+
+  /* 3. Configure the TnMR field in the GPTM Timer n Mode Register
    *   (GPTMTnMR):
    *    a. Write a value of 0x1 for One-Shot mode.
    *    b. Write a value of 0x2 for Periodic mode.
-   * 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
+   */
+
+  /* 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
    *    the GPTMTnMR register to select whether to capture the value of the
    *    free-running timer at time-out, use an external trigger to start
    *    counting, configure an additional trigger or interrupt, and count up
    *    or down. In addition, if using CCP pins, the TCACT field can be
    *    programmed to configure the compare action.
-   * 5. Load the start value into the GPTM Timer n Interval Load Register
+   */
+
+  /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
-   * 6. If interrupts are required, set the appropriate bits in the GPTM
+   */
+
+  /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).
-   * 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
+   */
+#warning Missing Logic
+
+  /* 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
    *    start counting.
    * 8. Poll the GPTMRIS register or wait for the interrupt to be generated
    *    (if enabled). In both cases, the status flags are cleared by writing
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
+   *
+   * NOTE: This timer is started until tiva_gptm_enable() is called.
    */
-#warning Missing Logic
+
   return -ENOSYS;
 }
 
@@ -295,32 +411,48 @@ static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
                            const struct tiva_timer32config_s *timer)
 {
   /* To use the RTC mode, the timer must have a 32.768-KHz input signal on
-  * an even CCP input. To enable the RTC feature, follow these steps:
-  *
-  * 1. Ensure the timer is disabled (the TAEN bit is cleared) before making
-  *    any changes.
-  * 2. If the timer has been operating in a different mode prior to this,
-  *    clear any residual set bits in the GPTM Timer n Mode (GPTMTnMR)
-  *    register before reconfiguring.
-  * 3. Write the GPTM Configuration Register (GPTMCFG) with a value of
-  *    0x0000.0001.
-  * 4. Write the match value to the GPTM Timer n Match Register
-  *    (GPTMTnMATCHR).
-  * 5. Set/clear the RTCEN and TnSTALL bit in the GPTM Control Register
-  *    (GPTMCTL) as needed.
-  * 6. If interrupts are required, set the RTCIM bit in the GPTM Interrupt
-  *    Mask Register (GPTMIMR).
-  * 7. Set the TAEN bit in the GPTMCTL register to enable the timer and
-  *    start counting.
-  *
-  * When the timer count equals the value in the GPTMTnMATCHR register,
-  * the GPTM asserts the RTCRIS bit in the GPTMRIS register and continues
-  * counting until Timer A is disabled or a hardware reset. The interrupt
-  * is cleared by writing the RTCCINT bit in the GPTMICR register. Note
-  * that if the GPTMTnILR register is loaded with a new value, the timer
-  * begins counting at this new value and continues until it reaches
-  * 0xFFFF.FFFF, at which point it rolls over.
-  */
+   * an even CCP input. To enable the RTC feature, follow these steps:
+   *
+   * 1. Ensure the timer is disabled (the TAEN bit is cleared) before making
+   *    any changes.
+   *
+   *    NOTE: The TAEN bit was cleared when the timer was reset prior to
+   *    calling this function.
+   *
+   * 2. If the timer has been operating in a different mode prior to this,
+   *    clear any residual set bits in the GPTM Timer n Mode (GPTMTnMR)
+   *    register before reconfiguring.
+   */
+
+  /* 3. Write the GPTM Configuration Register (GPTMCFG) with a value of
+   *    0x0000.0001.
+   */
+
+  /* 4. Write the match value to the GPTM Timer n Match Register
+   *    (GPTMTnMATCHR).
+   */
+
+  /* 5. Set/clear the RTCEN and TnSTALL bit in the GPTM Control Register
+   *    (GPTMCTL) as needed.
+   */
+
+  /* 6. If interrupts are required, set the RTCIM bit in the GPTM Interrupt
+   *    Mask Register (GPTMIMR).
+   */
+
+  /* 7. Set the TAEN bit in the GPTMCTL register to enable the timer and
+   *    start counting.
+   *
+   * When the timer count equals the value in the GPTMTnMATCHR register,
+   * the GPTM asserts the RTCRIS bit in the GPTMRIS register and continues
+   * counting until Timer A is disabled or a hardware reset. The interrupt
+   * is cleared by writing the RTCCINT bit in the GPTMICR register. Note
+   * that if the GPTMTnILR register is loaded with a new value, the timer
+   * begins counting at this new value and continues until it reaches
+   * 0xFFFF.FFFF, at which point it rolls over.
+   *
+   * NOTE: The timer will not be enabled until tiva_gptm_enable() is called.
+   */
 #warning Missing Logic
   return -ENOSYS;
 }
@@ -341,13 +473,23 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    *
    * 1. Ensure the timer is disabled (the TnEN bit is cleared) before making
    *    any changes.
+   *
+   *    NOTE: The TnEN bit was cleared when the timer was reset prior to
+   *    calling this function.
+   *
    * 2. Write the GPTM Configuration (GPTMCFG) register with a value of
    *    0x0000.0004.
-   * 3. In the GPTM Timer Mode (GPTMTnMR) register, write the TnCMR field to
+   */
+
+  /* 3. In the GPTM Timer Mode (GPTMTnMR) register, write the TnCMR field to
    *    0x0 and the TnMR field to 0x3.
-   * 4. Configure the type of event(s) that the timer captures by writing
+   */
+
+  /* 4. Configure the type of event(s) that the timer captures by writing
    *    the TnEVENT field of the GPTM Control (GPTMCTL) register.
-   * 5. Program registers according to count direction:
+   */
+
+  /* 5. Program registers according to count direction:
    *   - In down-count mode, the GPTMTnMATCHR and GPTMTnPMR registers are
    *    configured so that the difference between the value in the GPTMTnILR
    *    and GPTMTnPR registers and the GPTMTnMATCHR and GPTMTnPMR registers
@@ -356,9 +498,14 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    *    GPTMTnMATCHR and GPTMTnPMR registers. Note that when executing an
    *    up-count, the value of the GPTMTnPR and GPTMTnILR must be greater
    *    than the value of GPTMTnPMR and GPTMTnMATCHR.
-   * 6. If interrupts are required, set the CnMIM bit in the GPTM Interrupt
+   */
+
+  /* 6. If interrupts are required, set the CnMIM bit in the GPTM Interrupt
    *    Mask (GPTMIMR) register.
-   * 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
+   */
+#warning Missing Logic
+
+  /* 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
    *     begin waiting for edge events.
    * 8. Poll the CnMRIS bit in the GPTMRIS register or wait for the
    *    interrupt to be generated (if enabled). In both cases, the status
@@ -368,8 +515,10 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    * When counting down in Input Edge-Count Mode, the timer stops after the
    * programmed number of edge events has been detected. To re-enable the
    * timer, ensure that the TnEN bit is cleared and repeat steps 4 through 8.
+   *
+   * NOTE: This timer is started until tiva_gptm_enable() is called.
    */
-#warning Missing Logic
+
   return -ENOSYS;
 }
 
@@ -389,6 +538,10 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    *
    * 1. Ensure the timer is disabled (the TnEN bit is cleared) before making
    *    any changes.
+   *
+   *    NOTE: The TnEN bit was cleared when the timer was reset prior to
+   *    calling this function.
+   *
    * 2. Write the GPTM Configuration (GPTMCFG) register with a value of
    *    0x0000.0004.
    * 3. In the GPTM Timer Mode (GPTMTnMR) register, write the TnCMR field to
@@ -402,7 +555,10 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    *    (GPTMTnILR) register.
    * 7. If interrupts are required, set the CnEIM bit in the GPTM Interrupt
    *    Mask (GPTMIMR) register.
-   * 8. Set the TnEN bit in the GPTM Control (GPTMCTL) register to enable the
+   */
+#warning Missing Logic
+
+  /* 8. Set the TnEN bit in the GPTM Control (GPTMCTL) register to enable the
    *    timer and start counting.
    * 9. Poll the CnERIS bit in the GPTMRIS register or wait for the interrupt
    *    to be generated (if enabled). In both cases, the status flags are
@@ -415,8 +571,10 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    * time by writing the GPTMTnILR register and clearing the TnILD bit in
    * the GPTMTnMR register. The change takes effect at the next cycle after
    * the write.
+   *
+   * NOTE: This timer is started until tiva_gptm_enable() is called.
    */
-#warning Missing Logic
+
   return -ENOSYS;
 }
 
@@ -436,32 +594,53 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
    *
    * 1. Ensure the timer is disabled (the TnEN bit is cleared) before making
    *    any changes.
+   *
+   *    NOTE: The TnEN bit was cleared when the timer was reset prior to
+   *    calling this function.
+   *
    * 2. Write the GPTM Configuration (GPTMCFG) register with a value of
    *    0x0000.0004.
-   * 3. In the GPTM Timer Mode (GPTMTnMR) register, set the TnAMS bit to
+   */
+
+  /* 3. In the GPTM Timer Mode (GPTMTnMR) register, set the TnAMS bit to
    *    0x1, the TnCMR bit to 0x0, and the TnMR field to 0x2.
-   * 4. Configure the output state of the PWM signal (whether or not it is
+   */
+
+  /* 4. Configure the output state of the PWM signal (whether or not it is
    *    inverted) in the TnPWML field of the GPTM Control (GPTMCTL) register.
-   * 5. If a prescaler is to be used, write the prescale value to the GPTM
+   */
+
+  /* 5. If a prescaler is to be used, write the prescale value to the GPTM
    *    Timer n Prescale Register (GPTMTnPR).
-   * 6. If PWM interrupts are used, configure the interrupt condition in the
+   */
+
+  /* 6. If PWM interrupts are used, configure the interrupt condition in the
    *    TnEVENT field in the GPTMCTL register and enable the interrupts by
    *    setting the TnPWMIE bit in the GPTMTnMR register. Note that edge
    *    detect interrupt behavior is reversed when the PWM output is
    *    inverted.
-   * 7. Load the timer start value into the GPTM Timer n Interval Load
+   */
+
+  /* 7. Load the timer start value into the GPTM Timer n Interval Load
    *    (GPTMTnILR) register.
-   * 8. Load the GPTM Timer n Match (GPTMTnMATCHR) register with the match
+   */
+
+  /* 8. Load the GPTM Timer n Match (GPTMTnMATCHR) register with the match
    *    value.
-   * 9. Set the TnEN bit in the GPTM Control (GPTMCTL) register to enable
+   */
+#warning Missing Logic
+
+  /* 9. Set the TnEN bit in the GPTM Control (GPTMCTL) register to enable
    *    the timer and begin generation of the output PWM signal.
    *
    * In PWM Time mode, the timer continues running after the PWM signal has
    * been generated. The PWM period can be adjusted at any time by writing
    * the GPTMTnILR register, and the change takes effect at the next cycle
    * after the write.
+   *
+   * NOTE: This timer is started until tiva_gptm_enable() is called.
    */
-#warning Missing Logic
+
   return -ENOSYS;
 }
 

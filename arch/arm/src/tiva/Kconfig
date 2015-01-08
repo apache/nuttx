@@ -735,6 +735,20 @@ config TIVA_I2C_REGDEBUG
 endmenu # I2C Configuration
 endif # TIVA_I2C
 
+if TIVA_TIMER
+
+menu "Tiva Timer Configuration"
+
+config TIVA_TIMER_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enables extremely detailed register access debug output.
+
+endmenu # Tiva Timer Configuration
+endif # TIVA_TIMER
+
 if TIVA_ETHERNET
 
 menu "Stellaris Ethernet Configuration"
