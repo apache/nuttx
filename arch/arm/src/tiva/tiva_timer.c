@@ -50,6 +50,7 @@
 
 #include "up_arch.h"
 #include "chip/tiva_syscontrol.h"
+#include "chip/tiva_timer.h"
 
 #include "tiva_enableclks.h"
 #include "tiva_enablepwr.h"
@@ -298,9 +299,11 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *    NOTE: The TAEN bit was cleared when the timer was reset prior to
    *    calling this function.
    *
-   * 2. Write the GPTM Configuration Register (GPTMCFG) with a value of
-   *    0x0000.0000.
+   * 2. Write the GPTM Configuration Register (GPTMCFG) to select 32-bit
+   *    operation.
    */
+
+   tiva_putreg(priv, TIVA_TIMER_CFG_OFFSET, TIMER_CFG_CFG_32);
 
   /* 3. Configure the TnMR field in the GPTM Timer n Mode Register
    *   (GPTMTnMR):
@@ -359,11 +362,13 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *    NOTE: The TnEN bit was cleared when the timer was reset prior to
    *    calling this function.
    *
-   * 2. Write the GPTM Configuration Register (GPTMCFG) with a value of
-   *    0x0000.0000.
-   */
-
-  /* 3. Configure the TnMR field in the GPTM Timer n Mode Register
+   * 2. Write the GPTM Configuration Register (GPTMCFG) to select 16-bit
+   *    operation.
+   *
+   *    NOTE: 16-bit mode of operation was already selected in
+   *    tiva_gptm_configure() before this function was called.
+   *
+   * 3. Configure the TnMR field in the GPTM Timer n Mode Register
    *   (GPTMTnMR):
    *    a. Write a value of 0x1 for One-Shot mode.
    *    b. Write a value of 0x2 for Periodic mode.
@@ -422,11 +427,15 @@ static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
    * 2. If the timer has been operating in a different mode prior to this,
    *    clear any residual set bits in the GPTM Timer n Mode (GPTMTnMR)
    *    register before reconfiguring.
+   *
+   *    NOTE: The TAMR and TBMR registers were cleared when the timer
+   *    was reset prior to calling this function.
+   *
+   * 3. Write the GPTM Configuration Register (GPTMCFG) with a to select
+   *    the 32-bit RTC mode.
    */
 
-  /* 3. Write the GPTM Configuration Register (GPTMCFG) with a value of
-   *    0x0000.0001.
-   */
+   tiva_putreg(priv, TIVA_TIMER_CFG_OFFSET, TIMER_CFG_CFG_RTC);
 
   /* 4. Write the match value to the GPTM Timer n Match Register
    *    (GPTMTnMATCHR).
@@ -477,11 +486,13 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    *    NOTE: The TnEN bit was cleared when the timer was reset prior to
    *    calling this function.
    *
-   * 2. Write the GPTM Configuration (GPTMCFG) register with a value of
-   *    0x0000.0004.
-   */
-
-  /* 3. In the GPTM Timer Mode (GPTMTnMR) register, write the TnCMR field to
+   * 2. Write the GPTM Configuration Register (GPTMCFG) to select 16-bit
+   *    operation.
+   *
+   *    NOTE: 16-bit mode of operation was already selected in
+   *    tiva_gptm_configure() before this function was called.
+   *
+   * 3. In the GPTM Timer Mode (GPTMTnMR) register, write the TnCMR field to
    *    0x0 and the TnMR field to 0x3.
    */
 
@@ -542,18 +553,30 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    *    NOTE: The TnEN bit was cleared when the timer was reset prior to
    *    calling this function.
    *
-   * 2. Write the GPTM Configuration (GPTMCFG) register with a value of
-   *    0x0000.0004.
+   * 2. Write the GPTM Configuration Register (GPTMCFG) to select 16-bit
+   *    operation.
+   *
+   *    NOTE: 16-bit mode of operation was already selected in
+   *    tiva_gptm_configure() before this function was called.
+   *
    * 3. In the GPTM Timer Mode (GPTMTnMR) register, write the TnCMR field to
    *    0x1 and the TnMR field to 0x3 and select a count direction by
    *    programming the TnCDIR bit.
-   * 4. Configure the type of event that the timer captures by writing the
+   */
+
+  /* 4. Configure the type of event that the timer captures by writing the
    *    TnEVENT field of the GPTM Control (GPTMCTL) register.
-   * 5. If a prescaler is to be used, write the prescale value to the GPTM
+   */
+
+  /* 5. If a prescaler is to be used, write the prescale value to the GPTM
    *    Timer n Prescale Register (GPTMTnPR).
-   * 6. Load the timer start value into the GPTM Timer n Interval Load
+   */
+
+  /* 6. Load the timer start value into the GPTM Timer n Interval Load
    *    (GPTMTnILR) register.
-   * 7. If interrupts are required, set the CnEIM bit in the GPTM Interrupt
+   */
+
+  /* 7. If interrupts are required, set the CnEIM bit in the GPTM Interrupt
    *    Mask (GPTMIMR) register.
    */
 #warning Missing Logic
@@ -598,11 +621,13 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
    *    NOTE: The TnEN bit was cleared when the timer was reset prior to
    *    calling this function.
    *
-   * 2. Write the GPTM Configuration (GPTMCFG) register with a value of
-   *    0x0000.0004.
-   */
-
-  /* 3. In the GPTM Timer Mode (GPTMTnMR) register, set the TnAMS bit to
+   * 2. Write the GPTM Configuration Register (GPTMCFG) to select 16-bit
+   *    operation.
+   *
+   *    NOTE: 16-bit mode of operation was already selected in
+   *    tiva_gptm_configure() before this function was called.
+   *
+   * 3. In the GPTM Timer Mode (GPTMTnMR) register, set the TnAMS bit to
    *    0x1, the TnCMR bit to 0x0, and the TnMR field to 0x2.
    */
 
@@ -682,6 +707,8 @@ static int tiva_timer16_configure(struct tiva_gptmstate_s *priv,
                                   const struct tiva_timer16config_s *timer,
                                   int tmndx)
 {
+  /* Configure the timer per the selected mode */
+
   switch (timer->mode)
     {
     case TIMER16_MODE_NONE:
@@ -834,6 +861,31 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
+  /* Select the alternal timer clock source is so reuested.  The general
+   * purpose timer has the capability of being clocked by either the system
+   * clock or an alternate clock source. By setting the ALTCLK bit in the
+   * GPTM Clock Configuration (GPTMCC) register, software can selects an
+   * alternate clock source as programmed in the Alternate Clock
+   * Configuration (ALTCLKCFG) register in the System Control Module. The
+   * alternate clock source options available are PIOSC, RTCOSC and LFIOSC.
+   *
+   * NOTE: The actual alternate clock source selection is a global property
+   * and cannot be configure on a timer-by-timer basis here.  That selection
+   * must be done by common logic early in the initialization sequence.
+   *
+   * In any case, the caller must provide us with the correct source
+   * frequency in gptm->frequency field.
+   */
+
+  if (gptm->alternate)
+    {
+      /* Enable the alternate clock source */
+
+      regval  = tiva_getreg(priv, TIVA_TIMER_CC_OFFSET);
+      regval |= TIMER_CC_ALTCLK;
+      tiva_putreg(priv, TIVA_TIMER_CC_OFFSET, regval);
+    }
+
   /* Then [re-]configure the timer into the new configuration */
 
   if (gptm->mode != TIMER16_MODE)
@@ -849,6 +901,12 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
     {
       const struct tiva_gptm16config_s *gptm16 =
         (const struct tiva_gptm16config_s *)gptm;
+
+      /* Write the GPTM Configuration Register (GPTMCFG) to select 16-bit
+       * operation.
+       */
+
+      tiva_putreg(priv, TIVA_TIMER_CFG_OFFSET, TIMER_CFG_CFG_16);
 
       /* Configure both 16-bit timers */
 

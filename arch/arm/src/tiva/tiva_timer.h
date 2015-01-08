@@ -47,6 +47,8 @@
 
 #include <arch/tiva/chip.h>
 
+#include "chip/tiva_timer.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -115,16 +117,6 @@ enum tiva_timer16mode_e
   TIMER16_MODE_PWM               /* 16-bit PWM output mode w/8-bit prescaler */
 };
 
-/* This enumeration describes the timer clock source */
-
-enum tiva_timersource_e
-{
-  TIMER_SOURCE_SYSCLK = 0,       /* Timer clock source is SysClk */
-  TIMER_SOURCE_PIOSC,            /* Timer clock source is PIOSC */
-  TIMER_SOURCE_RTCOSC,           /* Source is  Hibernation Module Real-time clock */
-  TIMER_SOURCE_LFIOSC            /* Timer clock source is LFI oscillator */
-};
-
 /* This structure describes the configuration of one 32-bit timer */
 
 struct tiva_timer32config_s
@@ -147,8 +139,9 @@ struct tiva_timer16config_s
 struct tiva_gptmconfig_s
 {
   uint8_t gptm;                  /* GPTM number */
-  uint8_t source;                /* See enum tiva_timersource_e */
   uint8_t mode;                  /* See enum tiva_timer32mode_e */
+  uint8_t alternate;             /* False: Use SysClk; True: Use alternate clock source */
+  uint32_t frequency;            /* Frequency of the selected clock source */
 };
 
 /* This structure is cast compatible with struct tiva_gptmconfig_s and
