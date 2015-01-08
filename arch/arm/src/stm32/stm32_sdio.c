@@ -400,6 +400,9 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 /* Interrupt Handling *******************************************************/
 
 static int  stm32_interrupt(int irq, void *context);
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+static int  stm32_rdyinterrupt(int irq, void *context);
+#endif
 
 /* SDIO interface methods ***************************************************/
 
@@ -619,12 +622,39 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
                                  sdio_eventset_t wkupevent)
 {
   irqstate_t flags;
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+  int pinset;
+#endif
 
   /* Save all of the data and set the new interrupt mask in one, atomic
    * operation.
    */
-
   flags = irqsave();
+
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+  if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
+    {
+      /* Do not use this in STM32_SDIO_MASK register */
+
+      waitmask &= !SDIOWAIT_WRCOMPLETE;
+
+      pinset = GPIO_SDIO_D0 & (GPIO_PORT_MASK|GPIO_PIN_MASK);
+      pinset |= (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI);
+
+      /* Arm the SDIO_D Ready and install Isr */
+
+      stm32_gpiosetevent(pinset, true, false, false, stm32_rdyinterrupt);
+    }
+
+  /* Disarm SDIO_D ready */
+
+  if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
+    {
+      stm32_gpiosetevent(GPIO_SDIO_D0, false, false, false , NULL);
+      stm32_configgpio(GPIO_SDIO_D0);
+    }
+#endif
+
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
@@ -1235,8 +1265,31 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 }
 
 /****************************************************************************
- * Interrrupt Handling
+ * Interrupt Handling
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_rdyinterrupt
+ *
+ * Description:
+ *   SDIO ready interrupt handler
+ *
+ * Input Parameters:
+ *   dev - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+static int stm32_rdyinterrupt(int irq, void *context)
+{
+  struct stm32_dev_s *priv = &g_sdiodev;
+  stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_interrupt
@@ -2236,25 +2289,35 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
    * interrupts.
    */
 
-  waitmask = 0;
-  if ((eventset & SDIOWAIT_CMDDONE) != 0)
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  if ((eventset & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      waitmask |= SDIO_CMDDONE_MASK;
+      waitmask = SDIOWAIT_WRCOMPLETE;
     }
-
-  if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
+  else
+#endif
     {
-      waitmask |= SDIO_RESPDONE_MASK;
-    }
+      waitmask = 0;
+      if ((eventset & SDIOWAIT_CMDDONE) != 0)
+        {
+          waitmask |= SDIO_CMDDONE_MASK;
+        }
 
-  if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
-    {
-      waitmask |= SDIO_XFRDONE_MASK;
-    }
+      if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
+        {
+          waitmask |= SDIO_RESPDONE_MASK;
+        }
 
-  /* Enable event-related interrupts */
+      if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
+        {
+          waitmask |= SDIO_XFRDONE_MASK;
+        }
 
-  putreg32(SDIO_WAITALL_ICR, STM32_SDIO_ICR);
+      /* Enable event-related interrupts */
+
+      putreg32(SDIO_WAITALL_ICR, STM32_SDIO_ICR);
+   }
+
   stm32_configwaitints(priv, waitmask, eventset, 0);
 }
 
@@ -2323,6 +2386,21 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
            fdbg("ERROR: wd_start failed: %d\n", ret);
          }
     }
+
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) != 0)
+    {
+      /* Atomically read pin to see if ready (true) and determine if ISR fired
+       * If Pin is ready and if ISR did NOT fire end the wait here
+       */
+
+      if (stm32_gpioread(GPIO_SDIO_D0) &&
+         (priv->wkupevent & SDIOWAIT_WRCOMPLETE) == 0)
+        {
+          stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
+        }
+    }
+#endif
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
    * by calling stm32_waitenable prior to triggering the logic that will cause
