@@ -69,19 +69,19 @@
 /* 16/32-Bit Timer Power Control */
 
 #ifdef TIVA_SYSCON_PRTIMER
-#  define tiva_tm_periphrdy(p)     tiva_periphrdy(TIVA_SYSCON_PRTIMER,SYSCON_PRTIMER(p))
+#  define tiva_gptm_periphrdy(p)   tiva_periphrdy(TIVA_SYSCON_PRTIMER,SYSCON_PRTIMER(p))
 #else
-#  define tiva_tm_periphrdy(p)    (true)
+#  define tiva_gptm_periphrdy(p)   (true)
 #endif
 
-#define tiva_tm0_periphrdy()       tiva_tm_periphrdy(0)
-#define tiva_tm1_periphrdy()       tiva_tm_periphrdy(1)
-#define tiva_tm2_periphrdy()       tiva_tm_periphrdy(2)
-#define tiva_tm3_periphrdy()       tiva_tm_periphrdy(3)
-#define tiva_tm4_periphrdy()       tiva_tm_periphrdy(4)
-#define tiva_tm5_periphrdy()       tiva_tm_periphrdy(5)
-#define tiva_tm6_periphrdy()       tiva_tm_periphrdy(6)
-#define tiva_tm7_periphrdy()       tiva_tm_periphrdy(7)
+#define tiva_gptm0_periphrdy()     tiva_gptm_periphrdy(0)
+#define tiva_gptm1_periphrdy()     tiva_gptm_periphrdy(1)
+#define tiva_gptm2_periphrdy()     tiva_gptm_periphrdy(2)
+#define tiva_gptm3_periphrdy()     tiva_gptm_periphrdy(3)
+#define tiva_gptm4_periphrdy()     tiva_gptm_periphrdy(4)
+#define tiva_gptm5_periphrdy()     tiva_gptm_periphrdy(5)
+#define tiva_gptm6_periphrdy()     tiva_gptm_periphrdy(6)
+#define tiva_gptm7_periphrdy()     tiva_gptm_periphrdy(7)
 
 /* GPIO Power Control */
 
