@@ -1150,6 +1150,15 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
    * the TRANSFER state when the card completes the WRITE operation.
    */
 
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR,
+                        MMCSD_BLOCK_WDATADELAY);
+  if (ret != OK)
+    {
+      fdbg("ERROR: mmcsd_eventwait for transfer ready failed: %d\n", ret);
+    }
+#endif
+
   starttime = clock_systimer();
   do
     {
@@ -1720,6 +1729,12 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       fdbg("ERROR: CMD24 transfer failed: %d\n", ret);
       return ret;
     }
+
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  /* Arm the write complete detection with timeout */
+
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_WRCOMPLETE|SDIOWAIT_TIMEOUT);
+#endif
 
   /* On success, return the number of blocks written */
 
