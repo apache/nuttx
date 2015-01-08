@@ -17,6 +17,7 @@ config ARCH_CHIP_LM3S6918
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_TIMER3
 	select TIVA_HAVE_ETHERNET
 
 config ARCH_CHIP_LM3S9B96
@@ -27,6 +28,7 @@ config ARCH_CHIP_LM3S9B96
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_TIMER3
 	select TIVA_HAVE_ETHERNET
 	select TIVA_HAVE_GPIOH_IRQS
 
@@ -44,6 +46,7 @@ config ARCH_CHIP_LM3S6965
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_I2C1
+	select TIVA_HAVE_TIMER3
 	select TIVA_HAVE_ETHERNET
 	select TIVA_HAVE_GPIOH_IRQS
 
@@ -54,6 +57,9 @@ config ARCH_CHIP_LM3S8962
 	select ARCH_CHIP_LM3S
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_I2C1
+	select TIVA_HAVE_TIMER3
+	select TIVA_HAVE_TIMER4
+	select TIVA_HAVE_TIMER5
 	select TIVA_HAVE_ETHERNET
 	select TIVA_HAVE_GPIOH_IRQS
 
@@ -136,6 +142,9 @@ config ARCH_CHIP_LM4F
 	select TIVA_HAVE_SSI1
 	select TIVA_HAVE_SSI2
 	select TIVA_HAVE_SSI3
+	select TIVA_HAVE_TIMER3
+	select TIVA_HAVE_TIMER4
+	select TIVA_HAVE_TIMER5
 
 config ARCH_CHIP_TM4C123
 	bool
@@ -149,6 +158,8 @@ config ARCH_CHIP_TM4C129
 	select TIVA_HAVE_I2C7
 	select TIVA_HAVE_I2C8
 	select TIVA_HAVE_I2C9
+	select TIVA_HAVE_TIMER6
+	select TIVA_HAVE_TIMER7
 
 config ARCH_CHIP_TM4C
 	bool
@@ -167,6 +178,9 @@ config ARCH_CHIP_TM4C
 	select TIVA_HAVE_SSI1
 	select TIVA_HAVE_SSI2
 	select TIVA_HAVE_SSI3
+	select TIVA_HAVE_TIMER3
+	select TIVA_HAVE_TIMER4
+	select TIVA_HAVE_TIMER5
 
 config LM_REVA2
 	bool "Rev A2"
@@ -263,6 +277,30 @@ config TIVA_HAVE_ETHERNET
 	default n
 
 config TIVA_SSI
+	bool
+	default n
+
+config TIVA_TIMER
+	bool
+	default n
+
+config TIVA_HAVE_TIMER3
+	bool
+	default n
+
+config TIVA_HAVE_TIMER4
+	bool
+	default n
+
+config TIVA_HAVE_TIMER5
+	bool
+	default n
+
+config TIVA_HAVE_TIMER6
+	bool
+	default n
+
+config TIVA_HAVE_TIMER7
 	bool
 	default n
 
@@ -371,27 +409,72 @@ config TIVA_UART7
 
 config TIVA_SSI0
 	bool "SSI0"
-	default y
+	default n
 	depends on TIVA_HAVE_SSI0
 	select TIVA_SSI
 
 config TIVA_SSI1
 	bool "SSI1"
-	default y
+	default n
 	depends on TIVA_HAVE_SSI1
 	select TIVA_SSI
 
 config TIVA_SSI2
 	bool "SSI2"
-	default y
+	default n
 	depends on TIVA_HAVE_SSI2
 	select TIVA_SSI
 
 config TIVA_SSI3
 	bool "SSI3"
-	default y
+	default n
 	depends on TIVA_HAVE_SSI3
 	select TIVA_SSI
+
+config TIVA_TIMER0
+	bool "16-/32-bit Timer 0"
+	default n
+	select TIVA_TIMER
+
+config TIVA_TIMER1
+	bool "16-/32-bit Timer 1"
+	default n
+	select TIVA_TIMER
+
+config TIVA_TIMER2
+	bool "16-/32-bit Timer 2"
+	default n
+	select TIVA_TIMER
+
+config TIVA_TIMER3
+	bool "16-/32-bit Timer 3"
+	default n
+	depends on TIVA_HAVE_TIMER3
+	select TIVA_TIMER
+
+config TIVA_TIMER4
+	bool "16-/32-bit Timer 4"
+	default n
+	depends on TIVA_HAVE_TIMER4
+	select TIVA_TIMER
+
+config TIVA_TIMER5
+	bool "16-/32-bit Timer 5"
+	default n
+	depends on TIVA_HAVE_TIMER5
+	select TIVA_TIMER
+
+config TIVA_TIMER6
+	bool "16-/32-bit Timer 6"
+	default n
+	depends on TIVA_HAVE_TIMER6
+	select TIVA_TIMER
+
+config TIVA_TIMER7
+	bool "16-/32-bit Timer 7"
+	default n
+	depends on TIVA_HAVE_TIMER7
+	select TIVA_TIMER
 
 config TIVA_ETHERNET
 	bool "Ethernet"

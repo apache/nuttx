@@ -75,30 +75,30 @@
 /* 16/32-Bit Timer Power Control */
 
 #ifdef TIVA_SYSCON_PCTIMER
-#  define tiva_tm_enablepwr(p)     tiva_enablepwr(TIVA_SYSCON_PCTIMER,SYSCON_PCTIMER(p))
-#  define tiva_tm_disablepwr(p)    tiva_disablepwr(TIVA_SYSCON_PCTIMER,SYSCON_PCTIMER(p))
+#  define tiva_gptm_enablepwr(p)   tiva_enablepwr(TIVA_SYSCON_PCTIMER,SYSCON_PCTIMER(p))
+#  define tiva_gptm_disablepwr(p)  tiva_disablepwr(TIVA_SYSCON_PCTIMER,SYSCON_PCTIMER(p))
 #else
-#  define tiva_tm_enablepwr(p)
-#  define tiva_tm_disablepwr(p)
+#  define tiva_gptm_enablepwr(p)
+#  define tiva_gptm_disablepwr(p)
 #endif
 
-#define tiva_tm0_enablepwr()       tiva_tm_enablepwr(0)
-#define tiva_tm1_enablepwr()       tiva_tm_enablepwr(1)
-#define tiva_tm2_enablepwr()       tiva_tm_enablepwr(2)
-#define tiva_tm3_enablepwr()       tiva_tm_enablepwr(3)
-#define tiva_tm4_enablepwr()       tiva_tm_enablepwr(4)
-#define tiva_tm5_enablepwr()       tiva_tm_enablepwr(5)
-#define tiva_tm6_enablepwr()       tiva_tm_enablepwr(6)
-#define tiva_tm7_enablepwr()       tiva_tm_enablepwr(7)
+#define tiva_gptm0_enablepwr()     tiva_gptm_enablepwr(0)
+#define tiva_gptm1_enablepwr()     tiva_gptm_enablepwr(1)
+#define tiva_gptm2_enablepwr()     tiva_gptm_enablepwr(2)
+#define tiva_gptm3_enablepwr()     tiva_gptm_enablepwr(3)
+#define tiva_gptm4_enablepwr()     tiva_gptm_enablepwr(4)
+#define tiva_gptm5_enablepwr()     tiva_gptm_enablepwr(5)
+#define tiva_gptm6_enablepwr()     tiva_gptm_enablepwr(6)
+#define tiva_gptm7_enablepwr()     tiva_gptm_enablepwr(7)
 
-#define tiva_tm0_disablepwr()      tiva_tm_disablepwr(0)
-#define tiva_tm1_disablepwr()      tiva_tm_disablepwr(1)
-#define tiva_tm2_disablepwr()      tiva_tm_disablepwr(2)
-#define tiva_tm3_disablepwr()      tiva_tm_disablepwr(3)
-#define tiva_tm4_disablepwr()      tiva_tm_disablepwr(4)
-#define tiva_tm5_disablepwr()      tiva_tm_disablepwr(5)
-#define tiva_tm6_disablepwr()      tiva_tm_disablepwr(6)
-#define tiva_tm7_disablepwr()      tiva_tm_disablepwr(7)
+#define tiva_gptm0_disablepwr()    tiva_gptm_disablepwr(0)
+#define tiva_gptm1_disablepwr()    tiva_gptm_disablepwr(1)
+#define tiva_gptm2_disablepwr()    tiva_gptm_disablepwr(2)
+#define tiva_gptm3_disablepwr()    tiva_gptm_disablepwr(3)
+#define tiva_gptm4_disablepwr()    tiva_gptm_disablepwr(4)
+#define tiva_gptm5_disablepwr()    tiva_gptm_disablepwr(5)
+#define tiva_gptm6_disablepwr()    tiva_gptm_disablepwr(6)
+#define tiva_gptm7_disablepwr()    tiva_gptm_disablepwr(7)
 
 /* GPIO Power Control */
 

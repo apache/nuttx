@@ -73,26 +73,26 @@
 /* 16/32-Bit Timer Run Mode Clock Gating Control */
 
 #ifdef TIVA_SYSCON_RCGCTIMER
-#  define tiva_tm_enableclk(p)     tiva_enableclk(TIVA_SYSCON_RCGCTIMER,SYSCON_RCGCTIMER(p))
-#  define tiva_tm_disableclk(p)    tiva_disableclk(TIVA_SYSCON_RCGCTIMER,SYSCON_RCGCTIMER(p))
+#  define tiva_gptm_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGCTIMER,SYSCON_RCGCTIMER(p))
+#  define tiva_gptm_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGCTIMER,SYSCON_RCGCTIMER(p))
 
-#  define tiva_tm0_enableclk()     tiva_tm_enableclk(0)
-#  define tiva_tm1_enableclk()     tiva_tm_enableclk(1)
-#  define tiva_tm2_enableclk()     tiva_tm_enableclk(2)
-#  define tiva_tm3_enableclk()     tiva_tm_enableclk(3)
-#  define tiva_tm4_enableclk()     tiva_tm_enableclk(4)
-#  define tiva_tm5_enableclk()     tiva_tm_enableclk(5)
-#  define tiva_tm6_enableclk()     tiva_tm_enableclk(6)
-#  define tiva_tm7_enableclk()     tiva_tm_enableclk(7)
+#  define tiva_gptm0_enableclk()   tiva_gptm_enableclk(0)
+#  define tiva_gptm1_enableclk()   tiva_gptm_enableclk(1)
+#  define tiva_gptm2_enableclk()   tiva_gptm_enableclk(2)
+#  define tiva_gptm3_enableclk()   tiva_gptm_enableclk(3)
+#  define tiva_gptm4_enableclk()   tiva_gptm_enableclk(4)
+#  define tiva_gptm5_enableclk()   tiva_gptm_enableclk(5)
+#  define tiva_gptm6_enableclk()   tiva_gptm_enableclk(6)
+#  define tiva_gptm7_enableclk()   tiva_gptm_enableclk(7)
 
-#  define tiva_tm0_disableclk()    tiva_tm_disableclk(0)
-#  define tiva_tm1_disableclk()    tiva_tm_disableclk(1)
-#  define tiva_tm2_disableclk()    tiva_tm_disableclk(2)
-#  define tiva_tm3_disableclk()    tiva_tm_disableclk(3)
-#  define tiva_tm4_disableclk()    tiva_tm_disableclk(4)
-#  define tiva_tm5_disableclk()    tiva_tm_disableclk(5)
-#  define tiva_tm6_disableclk()    tiva_tm_disableclk(6)
-#  define tiva_tm7_disableclk()    tiva_tm_disableclk(7)
+#  define tiva_gptm0_disableclk()  tiva_gptm_disableclk(0)
+#  define tiva_gptm1_disableclk()  tiva_gptm_disableclk(1)
+#  define tiva_gptm2_disableclk()  tiva_gptm_disableclk(2)
+#  define tiva_gptm3_disableclk()  tiva_gptm_disableclk(3)
+#  define tiva_gptm4_disableclk()  tiva_gptm_disableclk(4)
+#  define tiva_gptm5_disableclk()  tiva_gptm_disableclk(5)
+#  define tiva_gptm6_disableclk()  tiva_gptm_disableclk(6)
+#  define tiva_gptm7_disableclk()  tiva_gptm_disableclk(7)
 #else
 #endif
 
