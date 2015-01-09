@@ -88,7 +88,7 @@ struct tiva_gptmstate_s
 
   /* Variable state values */
 
-  uint32_t frequency;          /* Frequency of the input clock */
+  uint32_t clkin;              /* Frequency of the input clock */
   uint32_t imr;                /* Interrupt mask value. Zero if no interrupts */
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
@@ -975,12 +975,17 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    */
 #warning Missing Logic
 
+  /* Set the input clock pre-scaler value */
+
+  regoffset = tmndx ? TIVA_TIMER_TBPR_OFFSET : TIVA_TIMER_TAPR_OFFSET;
+  tiva_putreg(priv, regoffset, (uint32_t)timer->u.periodic.prescaler);
+
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
    */
 
   regoffset = tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
-  tiva_putreg(priv, regoffset, timer->u.periodic.interval);
+  tiva_putreg(priv, regoffset, (uint32_t)timer->u.periodic.interval);
 
   /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).
@@ -1504,13 +1509,13 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
       /* Remember the frequency of the input clock */
 
-      priv->frequency = ALTCLK_FREQUENCY;
+      priv->clkin = ALTCLK_FREQUENCY;
     }
   else
     {
       /* Remember the frequency of the input clock */
 
-      priv->frequency = SYSCLK_FREQUENCY;
+      priv->clkin = SYSCLK_FREQUENCY;
     }
 
   /* Then [re-]configure the timer into the new configuration */

@@ -725,23 +725,11 @@
 #define TIMER_TnPR_TnPSR_MASK          (0xff << TIMER_TnPR_TnPSR_SHIFT)
 #  define TIMER_TnPR_TnPSR(n)          ((uint32_t)(n) << TIMER_TnPR_TnPSR_SHIFT)
 
-#if 0
-#  define TIMER_TnPR_TnPSRH_SHIFT      (8)       /* Bits 8-15: GPTM Timer A/B Prescale High word */
-#  define TIMER_TnPR_TnPSRH_MASK       (0xff << TIMER_TnPR_TnPSRH_SHIFT)
-#    define TIMER_TnPR_TnPSRH(n)       ((uint32_t)(n) << TIMER_TnPR_TnPSRH_SHIFT)
-#endif
-
 /* GPTM Timer A/B Prescale Match (TnPMR) */
 
 #define TIMER_TnPMR_TnPSMR_SHIFT       (0)       /* Bits 0-8:  GPTM Timer A/B Prescale Match */
 #define TIMER_TnPMR_TnPSMR_MASK        (0xff << TIMER_TnPMR_TnPSMR_SHIFT)
 #  define TIMER_TnPMR_TnPSMR(n)        ((uint32_t)(n) << TIMER_TnPMR_TnPSMR_SHIFT)
-
-#if 0
-#  define TIMER_TnPMR_TnPSMRH_SHIFT    (8)       /* Bits 8-15: GPTM Timer A/B Prescale Match High word */
-#  define TIMER_TnPMR_TnPSMRH_MASK     (0xff << TIMER_TnPMR_TnPSMRH_SHIFT)
-#    define TIMER_TnPMR_TnPSMRH(n)     ((uint32_t)(n) << TIMER_TnPMR_TnPSMRH_SHIFT)
-#endif
 
 /* GPTM Timer A (TAR) (32-bit value) */
 /* GPTM Timer B (TBR) (32-bit value) */
