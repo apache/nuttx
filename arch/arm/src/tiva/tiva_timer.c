@@ -47,7 +47,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+
 #include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip/tiva_syscontrol.h"
@@ -86,6 +88,7 @@ struct tiva_gptmstate_s
 
   /* Variable state values */
 
+  uint32_t frequency;          /* Frequency of the input clock */
   uint32_t imr;                /* Interrupt mask value. Zero if no interrupts */
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
@@ -1436,7 +1439,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
   while (!tiva_emac_periphrdy());
   up_udelay(250);
 
-  /* Select the alternal timer clock source is so reuested.  The general
+  /* Select the alternate timer clock source is so requested.  The general
    * purpose timer has the capability of being clocked by either the system
    * clock or an alternate clock source. By setting the ALTCLK bit in the
    * GPTM Clock Configuration (GPTMCC) register, software can selects an
@@ -1446,10 +1449,11 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
    *
    * NOTE: The actual alternate clock source selection is a global property
    * and cannot be configure on a timer-by-timer basis here.  That selection
-   * must be done by common logic early in the initialization sequence.
+   * must be done by common logic earlier in the initialization sequence.
    *
-   * In any case, the caller must provide us with the correct source
-   * frequency in gptm->frequency field.
+   * NOTE: Both the frequency of the SysClk (SYSCLK_FREQUENCY) and of the
+   * alternate clock (ALTCLK_FREQUENCY) must be provided in the board.h
+   * header file.
    */
 
   if (config->alternate)
@@ -1459,6 +1463,16 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
       regval  = tiva_getreg(priv, TIVA_TIMER_CC_OFFSET);
       regval |= TIMER_CC_ALTCLK;
       tiva_putreg(priv, TIVA_TIMER_CC_OFFSET, regval);
+
+      /* Remember the frequency of the input clock */
+
+      priv->frequency = ALTCLK_FREQUENCY;
+    }
+  else
+    {
+      /* Remember the frequency of the input clock */
+
+      priv->frequency = SYSCLK_FREQUENCY;
     }
 
   /* Then [re-]configure the timer into the new configuration */

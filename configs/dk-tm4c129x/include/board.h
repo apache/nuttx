@@ -60,6 +60,12 @@
 #define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL16000KHZ /* On-board crystal is 25 MHz */
 #define XTAL_FREQUENCY       25000000
 
+/* Frequencies of other clock sources */
+
+#define PIOSC_FREQUENCY      16000000 /* Precision internal oscillator */
+#define RTCOSC_FREQUENCY     32768    /* Hibernation Module RTC Oscillator */
+#define LFIOSC_FREQUENCY     33000    /* Low frequency internal oscillator */
+
 /* The PLL generates Fvco according to the following formulae.  The input clock to
  * the PLL may be either the external crystal (Fxtal) or PIOSC (Fpiosc).  This
  * logic supports only the external crystal as the PLL source clock.
@@ -93,6 +99,18 @@
 
 #define BOARD_PLL_SYSDIV     4         /* Sysclk = Fvco / 4 = 120MHz */
 #define SYSCLK_FREQUENCY     120000000 /* Resulting SysClk frequency */
+
+/* Alternate Clock (ALTCLK)
+ *
+ * The ALTCLK provides a clock source of numerous frequencies to the general-purpose
+ * timer, SSI, and UART modules.  The default source for the ALTCLK is the Precision
+ * Internal Oscillator (PIOSC).  The Hibernation Real-time Clock (RTCOSC) and Low
+ * Frequency Internal Oscillator (LFIOSC) are alternatives.  If the RTCOSC Output is
+ * selected, the clock source must also be enabled in the Hibernation module.
+ */
+
+#define BOARD_ALTCLKCFG      SYSCON_ALTCLKCFG_ALTCLK_PIOSC
+#define ALTCLK_FREQUENCY     PIOSC_FREQUENCY
 
 /* LED definitions ******************************************************************/
 /* The DK-TM4C129X has a single RGB LED.  There is only one visible LED which

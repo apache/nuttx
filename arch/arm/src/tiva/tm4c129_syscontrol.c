@@ -397,4 +397,17 @@ void up_clockconfig(void)
   pllfreq0 = M2PLLFREQ0(BOARD_PLL_MINT, BOARD_PLL_MFRAC);
   pllfreq1 = QN2PLLFREQ1(BOARD_PLL_Q, BOARD_PLL_N);
   tiva_clockconfig(pllfreq0, pllfreq1, BOARD_PLL_SYSDIV);
+
+  /* Set up the alternate clock source
+   *
+   * The ALTCLK provides a clock source of numerous frequencies to the
+   * general-purpose timer, SSI, and UART modules.  The default source for
+   * the ALTCLK is the Precision Internal Oscillator (PIOSC).  The
+   * Hibernation Real-time Clock (RTCOSC) and Low Frequency Internal
+   * Oscillator (LFIOSC) are alternatives.  If the RTCOSC Output is
+   * selected, the clock source must also be enabled in the Hibernation
+   * module.
+   */
+
+  putreg32(BOARD_ALTCLKCFG, TIVA_SYSCON_ALTCLKCFG);
 }
