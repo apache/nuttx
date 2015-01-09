@@ -85,10 +85,13 @@
 
 #define TIMER_SYNC(n)         (1 << (n))
 
-/* Identifies timer A and timer B */
+/* Identifies 16-bit timer A and timer B.  In most cases, the 32-bit timer
+ * is equivalent to timer a.
+ */
 
-#define TIMER_A               0
-#define TIMER_B               1
+#define TIMER32               0
+#define TIMER16A              0
+#define TIMER16B              1
 
 /****************************************************************************
  * Public Types
@@ -117,11 +120,23 @@ enum tiva_timer16mode_e
   TIMER16_MODE_PWM               /* 16-bit PWM output mode w/8-bit prescaler */
 };
 
+/* This type represents the opaque handler returned by tiva_gptm_configure() */
+
+typedef FAR void *TIMER_HANDLE;
+
+/* This type describes the 32-bit timer interrupt handler */
+
+struct tiva_gptm32config_s;
+typedef void (*timer32_handler_t)(TIMER_HANDLE handle,
+                                  const struct tiva_gptm32config_s *config);
+
 /* This structure describes the configuration of one 32-bit timer */
 
 struct tiva_timer32config_s
 {
   bool down;                     /* False: Count up; True: Count down */
+  timer32_handler_t handler;     /* Non-NULL: Interrupts will be enabled
+                                  * and forwarded to this function */
   /* TODO:  Add fields to support ADC trigger events */
 
   /* Mode-specific parameters */
@@ -143,12 +158,21 @@ struct tiva_timer32config_s
   } u;
 };
 
+/* This type describes the 16-bit timer interrupt handler */
+
+struct tiva_gptm16config_s;
+typedef void (*timer16_handler_t)(TIMER_HANDLE handle,
+                                  const struct tiva_gptm16config_s *config,
+                                  int tmndx);
+
 /* This structure describes the configuration of one 16-bit timer A/B */
 
 struct tiva_timer16config_s
 {
   uint8_t mode;                  /* See enum tiva_timermode_e */
   bool down;                     /* False: Count up; True: Count down */
+  timer16_handler_t handler;     /* Non-NULL: Interrupts will be enabled
+                                  * and forwarded to this function */
   /* TODO:  Add fields to support ADC trigger events */
 
   /* Mode-specific parameters */
@@ -211,10 +235,6 @@ struct tiva_gptm16config_s
   struct tiva_gptmconfig_s cmn;
   struct tiva_timer16config_s config[2];
 };
-
-/* This type represents the opaque handler returned by tiva_gptm_configure() */
-
-typedef FAR void *TIMER_HANDLE;
 
 /****************************************************************************
  * Public Data

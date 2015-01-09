@@ -46,6 +46,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <arch/irq.h>
 
 #include "up_arch.h"
@@ -64,12 +65,14 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure retains the fixed, well-known attrutes of a GPTM module */
+/* This structure retains the fixed, well-known attributes of a GPTM module */
 
 struct tiva_gptmattr_s
 {
-  uintptr_t base;  /* Register base address */
-  int irq[2];      /* Timer A/B interrupt numbers */
+  uintptr_t base;              /* Register base address */
+  int irq[2];                  /* Timer A/B interrupt numbers */
+  xcpt_t handler32;            /* Handler for 32-bit timer interrupts */
+  xcpt_t handler16[2];         /* Handlers for 16-bit timer A/B interrupts */
 };
 
 /* This structure represents the state of a GPTM module */
@@ -92,14 +95,112 @@ struct tiva_gptmstate_s
 };
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+/* Register Access */
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+static bool tiva_timer_checkreg(struct tiva_gptmstate_s *priv, bool wr,
+                                uint32_t regval, uintptr_t regaddr);
+#endif
+static uint32_t tiva_getreg(struct tiva_gptmstate_s *priv, unsigned int offset);
+static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
+              uint32_t regval);
+
+/* Interrupt handling */
+
+static int  tiva_timer32_interrupt(struct tiva_gptmstate_s *priv);
+#ifdef CONFIG_TIVA_TIMER0
+static int  tiva_gptm0_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER1
+static int  tiva_gptm1_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER2
+static int  tiva_gptm2_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER3
+static int  tiva_gptm3_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER4
+static int  tiva_gptm4_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER5
+static int  tiva_gptm5_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER6
+static int  tiva_gptm6_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER7
+static int  tiva_gptm7_interrupt(int irq, FAR void *context);
+#endif
+
+static int  tiva_timer16_interrupt(struct tiva_gptmstate_s *priv,
+              int tmndx);
+#ifdef CONFIG_TIVA_TIMER0
+static int  tiva_timer0a_interrupt(int irq, FAR void *context);
+static int  tiva_timer0b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER1
+static int  tiva_timer1a_interrupt(int irq, FAR void *context);
+static int  tiva_timer1b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER2
+static int  tiva_timer2a_interrupt(int irq, FAR void *context);
+static int  tiva_timer2b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER3
+static int  tiva_timer3a_interrupt(int irq, FAR void *context);
+static int  tiva_timer3b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER4
+static int  tiva_timer4a_interrupt(int irq, FAR void *context);
+static int  tiva_timer4b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER5
+static int  tiva_timer5a_interrupt(int irq, FAR void *context);
+static int  tiva_timer5b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER6
+static int  tiva_timer6a_interrupt(int irq, FAR void *context);
+static int  tiva_timer6b_interrupt(int irq, FAR void *context);
+#endif
+#ifdef CONFIG_TIVA_TIMER7
+static int  tiva_timer7a_interrupt(int irq, FAR void *context);
+static int  tiva_timer7b_interrupt(int irq, FAR void *context);
+#endif
+
+/* Timer initialization and configuration */
+
+static int  tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer32config_s *timer);
+static int  tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer16config_s *timer, int tmndx);
+static int  tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer32config_s *timer);
+static int  tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer16config_s *timer, int tmndx);
+static int  tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer16config_s *timer, int tmndx);
+static int  tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer16config_s *timer, int tmndx);
+
+static int  tiva_timer32_configure(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer32config_s *timer);
+static int  tiva_timer16_configure(struct tiva_gptmstate_s *priv,
+              const struct tiva_timer16config_s *timer, int tmndx);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_TIMER0
 static const struct tiva_gptmattr_s g_gptm0_attr =
 {
-  .base = TIVA_TIMER0_BASE,
-  .irq  = { TIVA_IRQ_TIMER0A, TIVA_IRQ_TIMER0B },
+  .base      = TIVA_TIMER0_BASE,
+  .irq       = { TIVA_IRQ_TIMER0A, TIVA_IRQ_TIMER0B },
+  .handler32 = tiva_gptm0_interrupt,
+  .handler16 = { tiva_timer0a_interrupt, tiva_timer0b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm0_state;
@@ -108,8 +209,10 @@ static struct tiva_gptmstate_s g_gptm0_state;
 #ifdef CONFIG_TIVA_TIMER1
 static const struct tiva_gptmattr_s g_gptm1_attr =
 {
-  .base = TIVA_TIMER1_BASE,
-  .irq  = { TIVA_IRQ_TIMER1A, TIVA_IRQ_TIMER1B },
+  .base      = TIVA_TIMER1_BASE,
+  .irq       = { TIVA_IRQ_TIMER1A, TIVA_IRQ_TIMER1B },
+  .handler32 = tiva_gptm1_interrupt,
+  .handler16 = { tiva_timer1a_interrupt, tiva_timer1b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm1_state;
@@ -118,8 +221,10 @@ static struct tiva_gptmstate_s g_gptm1_state;
 #ifdef CONFIG_TIVA_TIMER2
 static const struct tiva_gptmattr_s g_gptm2_attr =
 {
-  .base = TIVA_TIMER2_BASE,
-  .irq  = { TIVA_IRQ_TIMER2A, TIVA_IRQ_TIMER2B },
+  .base      = TIVA_TIMER2_BASE,
+  .irq       = { TIVA_IRQ_TIMER2A, TIVA_IRQ_TIMER2B },
+  .handler32 = tiva_gptm2_interrupt,
+  .handler16 = { tiva_timer2a_interrupt, tiva_timer2b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm2_state;
@@ -128,8 +233,10 @@ static struct tiva_gptmstate_s g_gptm2_state;
 #ifdef CONFIG_TIVA_TIMER3
 static const struct tiva_gptmattr_s g_gptm3_attr =
 {
-  .base = TIVA_TIMER3_BASE,
-  .irq  = { TIVA_IRQ_TIMER3A, TIVA_IRQ_TIMER3B },
+  .base      = TIVA_TIMER3_BASE,
+  .irq       = { TIVA_IRQ_TIMER3A, TIVA_IRQ_TIMER3B },
+  .handler32 = tiva_gptm3_interrupt,
+  .handler16 = { tiva_timer3a_interrupt, tiva_timer3b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm3_state;
@@ -138,8 +245,10 @@ static struct tiva_gptmstate_s g_gptm3_state;
 #ifdef CONFIG_TIVA_TIMER4
 static const struct tiva_gptmattr_s g_gptm4_attr =
 {
-  .base = TIVA_TIMER4_BASE,
-  .irq  = { TIVA_IRQ_TIMER4A, TIVA_IRQ_TIMER4B },
+  .base      = TIVA_TIMER4_BASE,
+  .irq       = { TIVA_IRQ_TIMER4A, TIVA_IRQ_TIMER4B },
+  .handler32 = tiva_gptm4_interrupt,
+  .handler16 = { tiva_timer4a_interrupt, tiva_timer4b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm4_state;
@@ -148,8 +257,10 @@ static struct tiva_gptmstate_s g_gptm4_state;
 #ifdef CONFIG_TIVA_TIMER5
 static const struct tiva_gptmattr_s g_gptm5_attr =
 {
-  .base = TIVA_TIMER5_BASE,
-  .irq  = { TIVA_IRQ_TIMER5A, TIVA_IRQ_TIMER5B },
+  .base      = TIVA_TIMER5_BASE,
+  .irq       = { TIVA_IRQ_TIMER5A, TIVA_IRQ_TIMER5B },
+  .handler32 = tiva_gptm5_interrupt,
+  .handler16 = { tiva_timer5a_interrupt, tiva_timer5b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm5_state;
@@ -158,8 +269,10 @@ static struct tiva_gptmstate_s g_gptm5_state;
 #ifdef CONFIG_TIVA_TIMER6
 static const struct tiva_gptmattr_s g_gptm6_attr =
 {
-  .base = TIVA_TIMER6_BASE,
-  .irq  = { TIVA_IRQ_TIMER6A, TIVA_IRQ_TIMER6B },
+  .base      = TIVA_TIMER6_BASE,
+  .irq       = { TIVA_IRQ_TIMER6A, TIVA_IRQ_TIMER6B },
+  .handler32 = tiva_gptm6_interrupt,
+  .handler16 = { tiva_timer6a_interrupt, tiva_timer6b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm6_state;
@@ -168,8 +281,10 @@ static struct tiva_gptmstate_s g_gptm6_state;
 #ifdef CONFIG_TIVA_TIMER7
 static const struct tiva_gptmattr_s g_gptm7_attr =
 {
-  .base = TIVA_TIMER7_BASE,
-  .irq  = { TIVA_IRQ_TIMER7A, TIVA_IRQ_TIMER7B },
+  .base      = TIVA_TIMER7_BASE,
+  .irq       = { TIVA_IRQ_TIMER7A, TIVA_IRQ_TIMER7B },
+  .handler32 = tiva_gptm7_interrupt,
+  .handler16 = { tiva_timer7a_interrupt, tiva_timer7b_interrupt },
 };
 
 static struct tiva_gptmstate_s g_gptm7_state;
@@ -179,7 +294,7 @@ static struct tiva_gptmstate_s g_gptm7_state;
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_checkreg
  *
  * Description:
@@ -193,7 +308,7 @@ static struct tiva_gptmstate_s g_gptm7_state;
  *   true:  This is the first register access of this type.
  *   flase: This is the same as the preceding register access.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
 static bool tiva_timer_checkreg(struct tiva_gptmstate_s *priv, bool wr,
@@ -278,6 +393,238 @@ static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
 
   putreg32(regval, regaddr);
 }
+
+/****************************************************************************
+ * Name: tiva_timer32_interrupt
+ *
+ * Description:
+ *   Common interrupt handler for 32-bit timers
+ *
+ ****************************************************************************/
+
+static int tiva_timer32_interrupt(struct tiva_gptmstate_s *priv)
+{
+  const struct tiva_gptm32config_s *config32;
+  const struct tiva_timer32config_s *timer32;
+
+  /* Get the timer configuration from the private state structure */
+
+  DEBUGASSERT(priv && priv->attr && priv->config);
+  config32 = (const struct tiva_gptm32config_s *)priv->config;
+  timer32  =  &config32->config;
+
+  /* Forward the interrupt to the handler.  There should always be a non-
+   * NULL handler in this case.
+   */
+
+  DEBUGASSERT(timer32->handler);
+  if (timer32->handler)
+    {
+      timer32->handler((TIMER_HANDLE)priv, config32);
+    }
+#warning Do I need to clear the interrupt here?
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tiva_gptmN_interrupt, N=0..7
+ *
+ * Description:
+ *   Individual interrupt handlers for each 32-bit timer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER0
+static int tiva_gptm0_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm0_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER1
+static int tiva_gptm1_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm1_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER2
+static int tiva_gptm2_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm2_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER3
+static int tiva_gptm3_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm3_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER4
+static int tiva_gptm4_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm4_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER5
+static int tiva_gptm5_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm5_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER6
+static int tiva_gptm6_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm6_state);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER7
+static int tiva_gptm7_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer32_interrupt(&g_gptm7_state);
+}
+#endif
+
+/****************************************************************************
+ * Name: tiva_timer16_interrupt
+ *
+ * Description:
+ *   Common interrupt handler for 16-bit timers
+ *
+ ****************************************************************************/
+
+static int tiva_timer16_interrupt(struct tiva_gptmstate_s *priv, int tmndx)
+{
+  const struct tiva_gptm16config_s  *config16;
+  const struct tiva_timer16config_s *timer16;
+
+  /* Get the timer configuration from the private state structure */
+
+  DEBUGASSERT(priv && priv->attr && priv->config && (unsigned)tmndx < 2);
+  config16 = (const struct tiva_gptm16config_s *)priv->config;
+  timer16  = &config16->config[tmndx];
+
+  /* Forward the interrupt to the handler.  There should always be a non-
+   * NULL handler in this case.
+   */
+
+  DEBUGASSERT(timer16->handler);
+  if (timer16->handler)
+    {
+      timer16->handler((TIMER_HANDLE)priv, config16, tmndx);
+    }
+#warning Do I need to clear the interrupt here?
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tiva_timerNa_interrupt, tiva_timerNb_interrupt, N=0..7
+ *
+ * Description:
+ *   Individual interrupt handlers for each 16-bit timer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER0
+static int tiva_timer0a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm0_state, TIMER16A);
+}
+
+static int tiva_timer0b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm0_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER1
+static int tiva_timer1a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm1_state, TIMER16A);
+}
+
+static int tiva_timer1b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm1_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER2
+static int tiva_timer2a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm2_state, TIMER16A);
+}
+
+static int tiva_timer2b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm2_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER3
+static int tiva_timer3a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm3_state, TIMER16A);
+}
+
+static int tiva_timer3b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm3_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER4
+static int tiva_timer4a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm4_state, TIMER16A);
+}
+
+static int tiva_timer4b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm4_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER5
+static int tiva_timer5a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm5_state, TIMER16A);
+}
+
+static int tiva_timer5b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm5_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER6
+static int tiva_timer6a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm6_state, TIMER16A);
+}
+
+static int tiva_timer6b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm6_state, TIMER16B);
+}
+#endif
+
+#ifdef CONFIG_TIVA_TIMER7
+static int tiva_timer7a_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm7_state, TIMER16A);
+}
+
+static int tiva_timer7b_interrupt(int irq, FAR void *context)
+{
+  return tiva_timer16_interrupt(&g_gptm7_state, TIMER16B);
+}
+#endif
 
 /****************************************************************************
  * Name: tiva_oneshot_periodic_mode32
@@ -798,18 +1145,18 @@ static int tiva_timer16_configure(struct tiva_gptmstate_s *priv,
  *
  ****************************************************************************/
 
-TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
+TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 {
   static const struct tiva_gptmattr_s *attr;
   static struct tiva_gptmstate_s *priv;
   uint32_t regval;
   int ret;
 
-  DEBUGASSERT(gptm);
+  DEBUGASSERT(config);
 
   /* Select the GPTM module. */
 
-  switch (gptm->gptm)
+  switch (config->gptm)
     {
 #ifdef CONFIG_TIVA_TIMER0
     case 0:
@@ -878,7 +1225,12 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
 
   memset(priv, 0, sizeof(struct tiva_gptmstate_s));
   priv->attr   = attr;
-  priv->config = gptm;
+  priv->config = config;
+
+  /* Detach all interrupt handlers */
+
+  (void)irq_detach(attr->irq[TIMER16A]);
+  (void)irq_detach(attr->irq[TIMER16B]);
 
   /* Enable power and clocking to the GPTM module
    *
@@ -890,21 +1242,21 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
    *   the GPTM module, bringing it a fully functional state.
    */
 
-  tiva_gptm_enableclk(gptm->gptm);
-  tiva_gptm_enablepwr(gptm->gptm);
+  tiva_gptm_enableclk(config->gptm);
+  tiva_gptm_enablepwr(config->gptm);
 
   /* Wait for the gptm to become ready before modifying its registers */
 
-  while (!tiva_gpio_periphrdy(gptm->gptm));
+  while (!tiva_gpio_periphrdy(config->gptm));
 
   /* Reset the time to be certain that it is in the disabled state */
 
-   regval  = tiva_getreg(priv, TIVA_SYSCON_SRTIMER);
-   regval |= SYSCON_SRTIMER(gptm->gptm);
-   tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
+  regval  = tiva_getreg(priv, TIVA_SYSCON_SRTIMER);
+  regval |= SYSCON_SRTIMER(config->gptm);
+  tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
 
-   regval &= ~SYSCON_SRTIMER(gptm->gptm);
-   tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
+  regval &= ~SYSCON_SRTIMER(config->gptm);
+  tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
 
   /* Wait for the reset to complete */
 
@@ -927,7 +1279,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
    * frequency in gptm->frequency field.
    */
 
-  if (gptm->alternate)
+  if (config->alternate)
     {
       /* Enable the alternate clock source */
 
@@ -938,33 +1290,58 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm)
 
   /* Then [re-]configure the timer into the new configuration */
 
-  if (gptm->mode != TIMER16_MODE)
+  if (config->mode != TIMER16_MODE)
     {
-      const struct tiva_gptm32config_s *gptm32 =
-        (const struct tiva_gptm32config_s *)gptm;
+      const struct tiva_gptm32config_s *config32 =
+        (const struct tiva_gptm32config_s *)config;
 
-      /* Configure the 32-bit timer */
+      /* Attach the 32-bit timer interrupt handler (but do not yet enable
+       * the interrupt).
+       */
 
-      ret = tiva_timer32_configure(priv, &gptm32->config);
+      ret = irq_attach(attr->irq[TIMER32], attr->handler32);
+      if (ret == OK)
+        {
+          /* Configure the 32-bit timer */
+
+          ret = tiva_timer32_configure(priv, &config32->config);
+        }
     }
   else
     {
-      const struct tiva_gptm16config_s *gptm16 =
-        (const struct tiva_gptm16config_s *)gptm;
+      const struct tiva_gptm16config_s *config16 =
+        (const struct tiva_gptm16config_s *)config;
 
-      /* Write the GPTM Configuration Register (GPTMCFG) to select 16-bit
-       * operation.
+      /* Attach the 16-bit timer interrupt handlers (but do not yet enable
+       * the interrupts).
        */
 
-      tiva_putreg(priv, TIVA_TIMER_CFG_OFFSET, TIMER_CFG_CFG_16);
-
-      /* Configure both 16-bit timers */
-
-      ret = tiva_timer16_configure(priv, &gptm16->config[TIMER_A], TIMER_A);
+      ret = irq_attach(attr->irq[TIMER16A], attr->handler16[TIMER16A]);
       if (ret == OK)
         {
-          ret = tiva_timer16_configure(priv, &gptm16->config[TIMER_B],
-                                       TIMER_B);
+          ret = irq_attach(attr->irq[TIMER16B], attr->handler16[TIMER16B]);
+        }
+
+      if (ret == OK)
+        {
+          /* Write the GPTM Configuration Register (GPTMCFG) to select 16-
+           * bit operation.
+           */
+
+          tiva_putreg(priv, TIVA_TIMER_CFG_OFFSET, TIMER_CFG_CFG_16);
+
+          /* Configure 16-bit timer A */
+
+          ret = tiva_timer16_configure(priv, &config16->config[TIMER16A],
+                                       TIMER16A);
+        }
+
+      /* Configure 16-bit timer B */
+
+      if (ret == OK)
+        {
+          ret = tiva_timer16_configure(priv, &config16->config[TIMER16B],
+                                       TIMER16B);
         }
     }
 
