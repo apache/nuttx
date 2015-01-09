@@ -63,15 +63,12 @@
 #define SDIOWAIT_TIMEOUT       (1 << 3) /* Bit 3: Timeout */
 #define SDIOWAIT_ERROR         (1 << 4) /* Bit 4: Some other error occurred */
 
-/* SDIOWAIT_WRCOMPLETE (optional) : SDIO driver will use SDIO_D Busy
- *   signalling to detect Write Complete.  This option when selected, will
- *   enable the MMCSD driver to use the underlying (stm32_sdio only) drivers
- *   implementation of the SD specs SDIO_D Busy signalling to detect Write
- *   Complete. This will avoid potentially very long (600Ms+) busy waiting
- *   in the MMCSD driver.
+/* SDIOWAIT_WRCOMPLETE (optional) : Certain SDIO driver can use D0 busy
+ *   signalling to detect Write Complete.  Used of D0 busy signalling will
+ *   avoid potentially very long (600Ms+) busy waiting in the MMCSD driver.
  *
- *   To implement SDIO_D Busy signalling, the underlying driver must be
- *   capable of switching the GPIO_SDIO_D0 to be a rising edge sensitive
+ *   To implement D0 Busy signalling, the underlying SDIO driver must be
+ *   capable of switching the the D0 GPIO to be a rising edge sensitive
  *   interrupt pin. It must then, condition that pin to detect the rising
  *   edge on receipt of SDWAIT_WRCOMPLETE in the SDIO_WAITENABLE call and
  *   return it back to regular SDIO mode, when either the ISR fires or pin
