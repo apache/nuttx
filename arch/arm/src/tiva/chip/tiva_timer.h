@@ -479,33 +479,33 @@
 
 /* GPTM Timer A/B Mode (TAMR and TBMR) */
 
-#define TIMER_TnMR_TnMR_SHIFT          0         /* Bits 1-0:  Timer A Mode */
+#define TIMER_TnMR_TnMR_SHIFT          0         /* Bits 1-0:  Timer A/B Mode */
 #define TIMER_TnMR_TnMR_MASK           (3 << TIMER_TnMR_TnMR_SHIFT)
 #  define TIMER_TnMR_TnMR_ONESHOT      (1 << TIMER_TnMR_TnMR_SHIFT) /* One-Shot Timer mode */
 #  define TIMER_TnMR_TnMR_PERIODIC     (2 << TIMER_TnMR_TnMR_SHIFT) /* Periodic Timer mode */
 #  define TIMER_TnMR_TnMR_CAPTURE      (3 << TIMER_TnMR_TnMR_SHIFT) /* Capture mode */
-#define TIMER_TnMR_TACMR               (1 << 2)  /* Bit 2:  Timer A Capture Mode */
-#  define TIMER_TnMR_TACMR_EDGECOUNT   (0 << TIMER_TnMR_TACMR_SHIFT) /* Edge-Count mode */
-#  define TIMER_TnMR_TACMR_EDGETIME    (1 << TIMER_TnMR_TACMR_SHIFT) /* Edge-Time mode */
-#define TIMER_TnMR_TAAMS               (1 << 3)  /* Bit 3:  Timer A Alternate Mode Select */
-#  define TIMER_TnMR_TAAMS_CAPTURE     (0 << TIMER_TnMR_TAAMS_SHIFT) /* Capture mode is enabled */
-#  define TIMER_TnMR_TAAMS_PWM         (1 << TIMER_TnMR_TAAMS_SHIFT) /* PWM mode is enabled */
+#define TIMER_TnMR_TnCMR               (1 << 2)  /* Bit 2:  Timer A/B Capture Mode */
+#  define TIMER_TnMR_TnCMR_EDGECOUNT   (0 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Count mode */
+#  define TIMER_TnMR_TnCMR_EDGETIME    (1 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Time mode */
+#define TIMER_TnMR_TnAMS               (1 << 3)  /* Bit 3:  Timer A/B Alternate Mode Select */
+#  define TIMER_TnMR_TnAMS_CAPTURE     (0 << TIMER_TnMR_TnAMS_SHIFT) /* Capture mode is enabled */
+#  define TIMER_TnMR_TnAMS_PWM         (1 << TIMER_TnMR_TnAMS_SHIFT) /* PWM mode is enabled */
 
 #if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TnMR_TACDIR            (1 << 4)  /* Bit 4:  Timer A Count Direction */
-#    define TIMER_TnMR_TACDIR_DOWN     (0 << TIMER_TnMR_TACDIR_SHIFT) /* The timer counts down */
-#    define TIMER_TnMR_TACDIR_UP       (1 << TIMER_TnMR_TACDIR_SHIFT) /* When in one-shot or periodic mode, the timer counts up */
-#  define TIMER_TnMR_TAMIE             (1 << 5)  /* Bit 5:  Timer A Match Interrupt Enable */
-#  define TIMER_TnMR_TAWOT             (1 << 6)  /* Bit 6:  GPTM Timer A Wait-on-Trigger */
-#  define TIMER_TnMR_TASNAPS           (1 << 7)  /* Bit 7:  GPTM Timer A Snap-Shot Mode */
-#  define TIMER_TnMR_TAILD             (1 << 8)  /* Bit 8:  GPTM Timer A Interval Load Write */
-#  define TIMER_TnMR_TAPWMIE           (1 << 9)  /* Bit 9:  GPTM Timer A PWM Interrupt Enable */
-#  define TIMER_TnMR_TnMRSU            (1 << 10) /* Bit 10: GPTM Timer A Match Register Update */
-#  define TIMER_TnMR_TAPLO             (1 << 11) /* Bit 11: GPTM Timer A PWM Legacy Operation */
+#  define TIMER_TnMR_TnCDIR            (1 << 4)  /* Bit 4:  Timer A/B Count Direction */
+#    define TIMER_TnMR_TnCDIR_DOWN     (0)               /* Timer counts down */
+#    define TIMER_TnMR_TnCDIR_UP       TIMER_TnMR_TnCDIR /* Timer counts up (one-shot/periodic modes) */
+#  define TIMER_TnMR_TnMIE             (1 << 5)  /* Bit 5:  Timer A/B Match Interrupt Enable */
+#  define TIMER_TnMR_TnWOT             (1 << 6)  /* Bit 6:  GPTM Timer A/B Wait-on-Trigger */
+#  define TIMER_TnMR_TnSNAPS           (1 << 7)  /* Bit 7:  GPTM Timer A/B Snap-Shot Mode */
+#  define TIMER_TnMR_TnILD             (1 << 8)  /* Bit 8:  GPTM Timer A/B Interval Load Write */
+#  define TIMER_TnMR_TnPWMIE           (1 << 9)  /* Bit 9:  GPTM Timer A/B PWM Interrupt Enable */
+#  define TIMER_TnMR_TnMRSU            (1 << 10) /* Bit 10: GPTM Timer A/B Match Register Update */
+#  define TIMER_TnMR_TnPLO             (1 << 11) /* Bit 11: GPTM Timer A/B PWM Legacy Operation */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_TnMR_TACINTD           (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
+#  define TIMER_TnMR_TnCINTD           (1 << 12) /* Bit 12: One-shot/Periodic Interrupt Disable */
 #  define TIMER_TnMR_TCACT_SHIFT       (13)      /* Bits 13-15: Timer Compare Action Select */
 #  define TIMER_TnMR_TCACT_MASK        (7 << TIMER_TnMR_TCACT_SHIFT)
 #    define TIMER_TnMR_TCACT_NONE      (0 << TIMER_TnMR_TCACT_SHIFT) /* Disable compare operations */
@@ -522,26 +522,23 @@
 
 #define TIMER_CTL_TAEN                 (1 << 0)  /* Bit 0:  Timer A Enable */
 #define TIMER_CTL_TASTALL_SHIFT        (1 << 1)  /* Bit 1:  Timer A Stall Enable */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_CTL_TAEVENT_SHIFT      (2)       /* Bits 2-3: GPTM Timer A Event Mode */
-#  define TIMER_CTL_TAEVENT_MASK       (3 << TIMER_CTL_TAEVENT_SHIFT)
-#    define TIMER_CTL_TAEVENT_POS      (0 << TIMER_CTL_TAEVENT_SHIFT) /* Positive edge */
-#    define TIMER_CTL_TAEVENT_NEG      (1 << TIMER_CTL_TAEVENT_SHIFT) /* Negative edge */
-#    define TIMER_CTL_TAEVENT_BOTH     (3 << TIMER_CTL_TAEVENT_SHIFT) /* Both edges */
-#  define TIMER_CTL_RTCEN              (1 << 4)  /* Bit 4:  GPTM RTC Stall Enable */
-#  define TIMER_CTL_TAOTE              (1 << 5)  /* Bit 5:  GPTM Timer A Output Trigger Enable */
-#  define TIMER_CTL_TAPWML             (1 << 6)  /* Bit 6:  GPTM Timer A PWM Output Level */
-#  define TIMER_CTL_TBEN               (1 << 8)  /* Bit 8:  GPTM Timer B Enable */
-#  define TIMER_CTL_TBSTALL            (1 << 9)  /* Bit 9:  GPTM Timer B Stall Enable */
-#  define TIMER_CTL_TBEVENT_SHFIT      (10)      /* Bits 10-11: GPTM Timer B Event Mode */
-#  define TIMER_CTL_TBEVENT_MASK       (3 << TIMER_CTL_TBEVENT_SHFIT)
-#    define TIMER_CTL_TBEVENT_POS      (0 << TIMER_CTL_TBEVENT_SHFIT) /* Positive edge */
-#    define TIMER_CTL_TBEVENT_NEG      (1 << TIMER_CTL_TBEVENT_SHFIT) /* Negative edge */
-#    define TIMER_CTL_TBEVENT_BOTH     (3 << TIMER_CTL_TBEVENT_SHFIT) /* Both edges */
-#  define TIMER_CTL_TBOTE              (1 << 13) /* Bit 13: GPTM Timer B Output Trigger Enable */
-#  define TIMER_CTL_TBPWML             (1 << 14) /* Bit 14: GPTM Timer B PWM Output Level */
-#endif
+#define TIMER_CTL_TAEVENT_SHIFT        (2)       /* Bits 2-3: GPTM Timer A Event Mode */
+#define TIMER_CTL_TAEVENT_MASK         (3 << TIMER_CTL_TAEVENT_SHIFT)
+#  define TIMER_CTL_TAEVENT_POS        (0 << TIMER_CTL_TAEVENT_SHIFT) /* Positive edge */
+#  define TIMER_CTL_TAEVENT_NEG        (1 << TIMER_CTL_TAEVENT_SHIFT) /* Negative edge */
+#  define TIMER_CTL_TAEVENT_BOTH       (3 << TIMER_CTL_TAEVENT_SHIFT) /* Both edges */
+#define TIMER_CTL_RTCEN                (1 << 4)  /* Bit 4:  GPTM RTC Stall Enable */
+#define TIMER_CTL_TAOTE                (1 << 5)  /* Bit 5:  GPTM Timer A Output Trigger Enable */
+#define TIMER_CTL_TAPWML               (1 << 6)  /* Bit 6:  GPTM Timer A PWM Output Level */
+#define TIMER_CTL_TBEN                 (1 << 8)  /* Bit 8:  GPTM Timer B Enable */
+#define TIMER_CTL_TBSTALL              (1 << 9)  /* Bit 9:  GPTM Timer B Stall Enable */
+#define TIMER_CTL_TBEVENT_SHFIT        (10)      /* Bits 10-11: GPTM Timer B Event Mode */
+#define TIMER_CTL_TBEVENT_MASK         (3 << TIMER_CTL_TBEVENT_SHFIT)
+#  define TIMER_CTL_TBEVENT_POS        (0 << TIMER_CTL_TBEVENT_SHFIT) /* Positive edge */
+#  define TIMER_CTL_TBEVENT_NEG        (1 << TIMER_CTL_TBEVENT_SHFIT) /* Negative edge */
+#  define TIMER_CTL_TBEVENT_BOTH       (3 << TIMER_CTL_TBEVENT_SHFIT) /* Both edges */
+#define TIMER_CTL_TBOTE                (1 << 13) /* Bit 13: GPTM Timer B Output Trigger Enable */
+#define TIMER_CTL_TBPWML               (1 << 14) /* Bit 14: GPTM Timer B PWM Output Level */
 
 /* GPTM Synchronize (GPTM0 only) */
 
@@ -793,52 +790,28 @@
 /* GPTM Timer A Match (TAMATCHR) (32-bit value) */
 /* GPTM Timer B Match (TBMATCHR) (32-bit value) */
 
-/* GPTM Timer A Prescale (TAPR) */
+/* GPTM Timer A/B Prescale (TnPR) */
 
-#define TIMER_TAPR_TAPSR_SHIFT         (0)       /* Bits 0-8: GPTM Timer A Prescale */
-#define TIMER_TAPR_TAPSR_MASK          (0xff << TIMER_TAPR_TAPSR_SHIFT)
-#  define TIMER_TAPR_TAPSR(n)          ((uint32_t)(n) << TIMER_TAPR_TAPSR_SHIFT)
+#define TIMER_TnPR_TnPSR_SHIFT         (0)       /* Bits 0-8: GPTM Timer A/B Prescale */
+#define TIMER_TnPR_TnPSR_MASK          (0xff << TIMER_TnPR_TnPSR_SHIFT)
+#  define TIMER_TnPR_TnPSR(n)          ((uint32_t)(n) << TIMER_TnPR_TnPSR_SHIFT)
 
 #if 0
-#  define TIMER_TAPR_TAPSRH_SHIFT      (8)       /* Bits 8-15: GPTM Timer A Prescale High Byte */
-#  define TIMER_TAPR_TAPSRH_MASK       (0xff << TIMER_TAPR_TAPSRH_SHIFT)
-#    define TIMER_TAPR_TAPSRH(n)       ((uint32_t)(n) << TIMER_TAPR_TAPSRH_SHIFT)
+#  define TIMER_TnPR_TnPSRH_SHIFT      (8)       /* Bits 8-15: GPTM Timer A/B Prescale High word */
+#  define TIMER_TnPR_TnPSRH_MASK       (0xff << TIMER_TnPR_TnPSRH_SHIFT)
+#    define TIMER_TnPR_TnPSRH(n)       ((uint32_t)(n) << TIMER_TnPR_TnPSRH_SHIFT)
 #endif
 
-/* GPTM Timer B Prescale (TBPR) */
+/* GPTM Timer A/B Prescale Match (TnPMR) */
 
-#define TIMER_TBPR_TBPSR_SHIFT         (0)       /* Bits 0-8: GPTM Timer B Prescale */
-#define TIMER_TBPR_TBPSR_MASK          (0xff << TIMER_TBPR_TBPSR_SHIFT)
-#  define TIMER_TBPR_TBPSR(n)          ((uint32_t)(n) << TIMER_TBPR_TBPSR_SHIFT)
-
-#if 0
-#  define TIMER_TBPR_TBPSRH_SHIFT      (8)       /* Bits 8-15: GPTM Timer B Prescale High Byte */
-#  define TIMER_TBPR_TBPSRH_MASK       (0xff << TIMER_TBPR_TBPSRH_SHIFT)
-#    define TIMER_TBPR_TBPSRH(n)       ((uint32_t)(n) << TIMER_TBPR_TBPSRH_SHIFT)
-#endif
-
-/* GPTM TimerA Prescale Match (TAPMR) */
-
-#define TIMER_TAPMR_TAPSMR_SHIFT       (0)       /* Bits 0-8:  GPTM Timer A Prescale Match */
-#define TIMER_TAPMR_TAPSMR_MASK        (0xff << TIMER_TAPMR_TAPSMR_SHIFT)
-#  define TIMER_TAPMR_TAPSMR(n)        ((uint32_t)(n) << TIMER_TAPMR_TAPSMR_SHIFT)
+#define TIMER_TnPMR_TnPSMR_SHIFT       (0)       /* Bits 0-8:  GPTM Timer A/B Prescale Match */
+#define TIMER_TnPMR_TnPSMR_MASK        (0xff << TIMER_TnPMR_TnPSMR_SHIFT)
+#  define TIMER_TnPMR_TnPSMR(n)        ((uint32_t)(n) << TIMER_TnPMR_TnPSMR_SHIFT)
 
 #if 0
-#  define TIMER_TAPMR_TAPSMRH_SHIFT    (8)       /* Bits 8-15: GPTM Timer A Prescale Match High Byte */
-#  define TIMER_TAPMR_TAPSMRH_MASK     (0xff << TIMER_TAPMR_TAPSMRH_SHIFT)
-#    define TIMER_TAPMR_TAPSMRH(n)     ((uint32_t)(n) << TIMER_TAPMR_TAPSMRH_SHIFT)
-#endif
-
-/* GPTM TimerB Prescale Match (TBPMR) */
-
-#define TIMER_TBPMR_TBPSMR_SHIFT       (0)       /* Bits 0-8:  GPTM Timer B Prescale Match */
-#define TIMER_TBPMR_TBPSMR_MASK        (0xff << TIMER_TBPMR_TBPSMR_SHIFT)
-#  define TIMER_TBPMR_TBPSMR(n)        ((uint32_t)(n) << TIMER_TBPMR_TBPSMR_SHIFT)
-
-#if 0
-#  define TIMER_TBPMR_TBPSMRH_SHIFT    (8)       /* Bits 8-15: GPTM Timer B Prescale Match High Byte */
-#  define TIMER_TBPMR_TBPSMRH_MASK     (0xff << TIMER_TBPMR_TBPSMRH_SHIFT)
-#    define TIMER_TBPMR_TBPSMRH(n)     ((uint32_t)(n) << TIMER_TBPMR_TBPSMRH_SHIFT)
+#  define TIMER_TnPMR_TnPSMRH_SHIFT    (8)       /* Bits 8-15: GPTM Timer A/B Prescale Match High word */
+#  define TIMER_TnPMR_TnPSMRH_MASK     (0xff << TIMER_TnPMR_TnPSMRH_SHIFT)
+#    define TIMER_TnPMR_TnPSMRH(n)     ((uint32_t)(n) << TIMER_TnPMR_TnPSMRH_SHIFT)
 #endif
 
 /* GPTM Timer A (TAR) (32-bit value) */
@@ -854,36 +827,20 @@
 #    define TIMER_RTCPD(n)             ((uint32_t)(n) << TIMER_RTCPD_SHIFT)
 #endif
 
-/* GPTM Timer A Prescale Snapshot (TAPS) */
+/* GPTM Timer A/B Prescale Snapshot (TnPS) */
 
 #if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TAPS_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A Prescaler Snapshot */
-#  define TIMER_TAPS_PSS_MASK          (0xffff << TIMER_TAPS_PSS_SHIFT)
-#    define TIMER_TAPS_PSS(n)          ((uint32_t)(n) << TIMER_TAPS_PSS_SHIFT)
+#  define TIMER_TnPS_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A/B Prescaler Snapshot */
+#  define TIMER_TnPS_PSS_MASK          (0xffff << TIMER_TnPS_PSS_SHIFT)
+#    define TIMER_TnPS_PSS(n)          ((uint32_t)(n) << TIMER_TnPS_PSS_SHIFT)
 #endif
 
-/* GPTM Timer B Prescale Snapshot (TBPS) */
+/* GPTM Timer A/B Prescale Value (TnPV) */
 
 #if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TBPS_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A Prescaler Value */
-#  define TIMER_TBPS_PSS_MASK          (0xffff << TIMER_TBPS_PSS_SHIFT)
-#    define TIMER_TBPS_PSS(n)          ((uint32_t)(n) << TIMER_TBPS_PSS_SHIFT)
-#endif
-
-/* GPTM Timer A Prescale Value (TAPV) */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TAPV_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A Prescaler Value */
-#  define TIMER_TAPS_PSS_MASK          (0xffff << TIMER_TAPS_PSS_SHIFT)
-#    define TIMER_TAPS_PSS(n)          ((uint32_t)(n) << TIMER_TAPS_PSS_SHIFT)
-#endif
-
-/* GPTM Timer B Prescale Value (TBPV) */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_TBPV_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer B Prescaler Value */
-#  define TIMER_TBPS_PSS_MASK          (0xffff << TIMER_TBPS_PSS_SHIFT)
-#    define TIMER_TBPS_PSS(n)          ((uint32_t)(n) << TIMER_TBPS_PSS_SHIFT)
+#  define TIMER_TnPV_PSS_SHIFT         (0)       /* Bits 0-15: GPTM Timer A/B Prescaler Value */
+#  define TIMER_TnPS_PSS_MASK          (0xffff << TIMER_TnPS_PSS_SHIFT)
+#    define TIMER_TnPS_PSS(n)          ((uint32_t)(n) << TIMER_TnPS_PSS_SHIFT)
 #endif
 
 /* GPTM DMA Event (DMAEV) */

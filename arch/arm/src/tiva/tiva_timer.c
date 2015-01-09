@@ -678,14 +678,61 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
 
   tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
 
-  /* 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
-   *    the GPTMTnMR register to select whether to capture the value of the
+  /* 4. Optionally configure the TASNAPS, TAWOT, TAMINTD, and TACDIR bits in
+   *    the GPTMTAMR register to select whether to capture the value of the
    *    free-running timer at time-out, use an external trigger to start
    *    counting, configure an additional trigger or interrupt, and count up
-   *    or down. In addition, if using CCP pins, the TCACT field can be
-   *    programmed to configure the compare action.
+   *    or down.
+   *
+   *    TASNAPS - GPTM Timer A Snap-Shot Mode
+   *              0: Snap-shot mode is disabled (default)
+   *              1: If the 32-bit timeris configured in the periodic mode,
+   *                 the actual free-running, capture or snapshot value of
+   *                 the timer is loaded at the time-out event/capture or
+   *                 snapshot event into the concatenated GPTM Timer A
+   *                 (GPTMTAR) register.
+   *    TAWOT   - GPTM Timer A Wait-on-Trigger
+   *              0: The 32-bit timer begins counting as soon as it is
+   *                 enabled (default).
+   *              1: If the 32-bit timer is enabled, it does not begin
+   *                 counting until it receives a trigger from the timer
+   *                 in the previous position in the daisy chain.
+   *    TAINTD  - One-shot/Periodic Interrupt Disable
+   *              0: Time-out interrupt functions as normal.
+   *              1: Time-out interrupt are disabled (default).
+   *    TACDIR  - GPTM Timer A Count Direction
+   *              0: The timer counts down (default).
+   *              1: The timer counts up. When counting up, the timer
+   *                 starts from a value of 0.
    */
-#warning Missing logic
+
+   /* Setup defaults */
+
+   regval &= (TIMER_TnMR_TnCDIR | TIMER_TnMR_TnWOT | TIMER_TnMR_TnCDIR);
+   regval |= TIMER_TnMR_TnCINTD;
+
+   /* Enable snapshot mode? */
+#warning Missing Logic
+
+   /* Enable wait-on-trigger? */
+#warning Missing Logic
+
+   /* Enable one-shot/periodic interrupts? */
+#warning Missing Logic
+
+  /* Enable count down? */
+
+  if (timer->countup)
+    {
+      regval |= TIMER_TnMR_TnCDIR_UP;
+    }
+
+  tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
+
+  /* In addition, if using CCP pins, the TCACT field can be programmed to
+   * configure the compare action.
+   */
+#warning Missing Logic
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTAILR).
@@ -767,14 +814,62 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   tiva_putreg(priv, regoffset, regval);
 
-  /* 4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in
+  /* 4. Optionally configure the TnSNAPS, TnWOT, TnMINTD, and TnCDIR bits in
    *    the GPTMTnMR register to select whether to capture the value of the
    *    free-running timer at time-out, use an external trigger to start
    *    counting, configure an additional trigger or interrupt, and count up
    *    or down. In addition, if using CCP pins, the TCACT field can be
    *    programmed to configure the compare action.
+   *
+   *    TnSNAPS - GPTM Timer A/B Snap-Shot Mode
+   *              0: Snap-shot mode is disabled (default)
+   *              1: If the 16-bit timer is configured in the periodic mode,
+   *                 the actual free-running, capture or snapshot value of
+   *                 the timer is loaded at the time-out event/capture or
+   *                 snapshot event into the GPTM Timer A/B (GPTMTnR)
+   *                 register. If the timer prescaler is used, the prescaler
+   *                 snapshot is loaded into the GPTM Timer A/B (GPTMTnPR).
+   *    TnWOT   - GPTM Timer A/B Wait-on-Trigger
+   *              0: The 16-bit begins counting as soon as it is enabled (default).
+   *              1: If the 16-bit timer is enabled, it does not begin counting
+   *                 until it receives a trigger from the timer in the
+   *                 previous position in the daisy chain.
+   *    TnINTD  - One-shot/Periodic Interrupt Disable
+   *              0: Time-out interrupt functions as normal.
+   *              1: Time-out interrupt are disabled (default).
+   *    TnCDIR  - GPTM Timer A/B Count Direction
+   *              0: The timer counts down (default).
+   *              1: The timer counts up. When counting up, the timer
+   *                 starts from a value of 0.
    */
-#warning Missing logic
+
+   /* Setup defaults */
+
+   regval &= (TIMER_TnMR_TnCDIR | TIMER_TnMR_TnWOT | TIMER_TnMR_TnCDIR);
+   regval |= TIMER_TnMR_TnCINTD;
+
+   /* Enable snapshot mode? */
+#warning Missing Logic
+
+   /* Enable wait-on-trigger? */
+#warning Missing Logic
+
+   /* Enable one-shot/periodic interrupts? */
+#warning Missing Logic
+
+  /* Enable count down? */
+
+  if (timer->countup)
+    {
+      regval |= TIMER_TnMR_TnCDIR_UP;
+    }
+
+  tiva_putreg(priv, regoffset, regval);
+
+  /* In addition, if using CCP pins, the TCACT field can be programmed to
+   * configure the compare action.
+   */
+#warning Missing Logic
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
