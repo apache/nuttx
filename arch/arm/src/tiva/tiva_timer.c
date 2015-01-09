@@ -442,23 +442,37 @@ static int tiva_timer32_interrupt(struct tiva_gptmstate_s *priv)
 {
   const struct tiva_gptm32config_s *config32;
   const struct tiva_timer32config_s *timer32;
-
-  /* Get the timer configuration from the private state structure */
+  uint32_t status;
 
   DEBUGASSERT(priv && priv->attr && priv->config);
-  config32 = (const struct tiva_gptm32config_s *)priv->config;
-  timer32  =  &config32->config;
 
-  /* Forward the interrupt to the handler.  There should always be a non-
-   * NULL handler in this case.
+  /* Status flags are cleared by writing to the corresponding bits in the
+   * GPTMICR register.
    */
 
-  DEBUGASSERT(timer32->handler);
-  if (timer32->handler)
+  status = tiva_getreg(priv, TIVA_TIMER_MIS_OFFSET);
+  DEBUGASSERT(status != 0);
+
+  if (status != 0)
     {
-      timer32->handler((TIMER_HANDLE)priv, config32);
+      tiva_putreg(priv, TIVA_TIMER_ICR_OFFSET, status);
+
+      /* Get the timer configuration from the private state structure */
+
+      config32 = (const struct tiva_gptm32config_s *)priv->config;
+      timer32  = &config32->config;
+
+      /* Forward the interrupt to the handler.  There should always be a non-
+       * NULL handler in this case.
+       */
+
+      DEBUGASSERT(timer32->handler);
+      if (timer32->handler)
+        {
+          timer32->handler((TIMER_HANDLE)priv, config32, status);
+        }
     }
-#warning Do I need to clear the interrupt here?
+
   return OK;
 }
 
@@ -538,23 +552,39 @@ static int tiva_timer16_interrupt(struct tiva_gptmstate_s *priv, int tmndx)
 {
   const struct tiva_gptm16config_s  *config16;
   const struct tiva_timer16config_s *timer16;
-
-  /* Get the timer configuration from the private state structure */
+  uint32_t intmask;
+  uint32_t status;
 
   DEBUGASSERT(priv && priv->attr && priv->config && (unsigned)tmndx < 2);
-  config16 = (const struct tiva_gptm16config_s *)priv->config;
-  timer16  = &config16->config[tmndx];
 
-  /* Forward the interrupt to the handler.  There should always be a non-
-   * NULL handler in this case.
+  /* Status flags are cleared by writing to the corresponding bits in the
+   * GPTMICR register.
    */
 
-  DEBUGASSERT(timer16->handler);
-  if (timer16->handler)
+  intmask = tmndx ? TIMERB_INTS : TIMERA_INTS;
+  status  = tiva_getreg(priv, TIVA_TIMER_MIS_OFFSET) & intmask;
+  DEBUGASSERT(status != 0);
+
+  if (status != 0)
     {
-      timer16->handler((TIMER_HANDLE)priv, config16, tmndx);
+      tiva_putreg(priv, TIVA_TIMER_ICR_OFFSET, status);
+
+      /* Get the timer configuration from the private state structure */
+
+      config16 = (const struct tiva_gptm16config_s *)priv->config;
+      timer16  = &config16->config[tmndx];
+
+      /* Forward the interrupt to the handler.  There should always be a
+       * non-NULL handler in this context.
+       */
+
+      DEBUGASSERT(timer16->handler);
+      if (timer16->handler)
+        {
+          timer16->handler((TIMER_HANDLE)priv, config16, status, tmndx);
+        }
     }
-#warning Do I need to clear the interrupt here?
+
   return OK;
 }
 
@@ -918,7 +948,7 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
   if (timer->handler)
     {
       /* Select the interrupt mask that will enable the timer interrupt.
-       * Any non-zero value of imr indicates that interrupts are expected.
+       * Any non-zero value of 'imr' indicates that interrupts are expected.
        */
 
       priv->imr |= tmndx ? TIMER_INT_TBTO : TIMER_INT_TATO;
@@ -1316,6 +1346,14 @@ static int tiva_timer16_configure(struct tiva_gptmstate_s *priv,
  *   Configure a general purpose timer module to operate in the provided
  *   modes.
  *
+ * Input Parameters:
+ *   gptm - Describes the configure of the GPTM timer resources
+ *
+ * Returned Value:
+ *   On success, a non-NULL handle is returned that can be used with the
+ *   other timer interfaces.  NULL is returned on any failure to initialize
+ *   the timer.
+ *
  ****************************************************************************/
 
 TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
@@ -1545,6 +1583,14 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
  *   the timer block.  Its primary purpose is to support inline functions
  *   defined in this header file.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   offset - The offset to the timer register to be written
+ *   value  - The value to write to the timer register
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void tiva_gptm_putreg(TIMER_HANDLE handle, unsigned int offset, uint32_t value)
@@ -1561,6 +1607,14 @@ void tiva_gptm_putreg(TIMER_HANDLE handle, unsigned int offset, uint32_t value)
  *   the timer block.  Its primary purpose is to support inline functions
  *   defined in this header file.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   offset - The offset to the timer register to be written
+ *
+ * Returned Value:
+ *   The 32-bit value read at the provided offset into the timer register base
+ *   address.
+ *
  ****************************************************************************/
 
 uint32_t tiva_gptm_getreg(TIMER_HANDLE handle, unsigned int offset)
@@ -1576,6 +1630,15 @@ uint32_t tiva_gptm_getreg(TIMER_HANDLE handle, unsigned int offset)
  *   This function permits atomic of any timer register by its offset into
  *   the timer block.  Its primary purpose is to support inline functions
  *   defined in this header file.
+ *
+ * Input Parameters:
+ *   handle  - The handle value returned  by tiva_gptm_configure()
+ *   offset  - The offset to the timer register to be written
+ *   clrbits - The collection of bits to be cleared in the register
+ *   setbits - The collection of bits to be set in the register
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -1594,6 +1657,12 @@ void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
  * Description:
  *   After tiva_gptm_configure() has been called to configure a 32-bit timer,
  *   this function must be called to start the timer(s).
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -1623,6 +1692,13 @@ void tiva_timer32_start(TIMER_HANDLE handle)
  * Description:
  *   After tiva_gptm_configure() has been called to configure 16-bit timer(s),
  *   this function must be called to start one 16-bit timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -1657,6 +1733,12 @@ void tiva_timer16_start(TIMER_HANDLE handle, int tmndx)
  *   After tiva_timer32_start() has been called to start a 32-bit timer,
  *   this function may be called to stop the timer.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void tiva_timer32_stop(TIMER_HANDLE handle)
@@ -1680,6 +1762,13 @@ void tiva_timer32_stop(TIMER_HANDLE handle)
  * Description:
  *   After tiva_timer32_start() has been called to start a 16-bit timer,
  *   this function may be called to stop the timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
