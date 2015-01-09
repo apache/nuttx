@@ -200,6 +200,7 @@ struct tiva_timer16config_s
 
     struct
     {
+      uint8_t  prescaler;        /* Prescaler-1:  0-255 corresponding to 1-256 */
       uint16_t interval;         /* Value for interval load register */
     } periodic;
 
