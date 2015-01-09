@@ -1349,3 +1349,56 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
   return ret < 0 ? (TIMER_HANDLE)NULL : (TIMER_HANDLE)priv;
 }
+
+/****************************************************************************
+ * Name: tiva_gptm_putreg
+ *
+ * Description:
+ *   This function permits setting of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+void tiva_gptm_putreg(TIMER_HANDLE handle, unsigned int offset, uint32_t value)
+{
+  DEBUGASSERT(handle);
+  tiva_putreg((struct tiva_gptmstate_s *)handle, offset, value);
+}
+
+/****************************************************************************
+ * Name: tiva_gptm_getreg
+ *
+ * Description:
+ *   This function permits reading of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+uint32_t tiva_gptm_getreg(TIMER_HANDLE handle, unsigned int offset)
+{
+  DEBUGASSERT(handle);
+  return tiva_getreg((struct tiva_gptmstate_s *)handle, offset);
+}
+
+/****************************************************************************
+ * Name: tiva_gptm_modifyreg
+ *
+ * Description:
+ *   This function permits atomic of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
+                         uint32_t clrbits, uint32_t setbits)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  uintptr_t regaddr;
+
+  DEBUGASSERT(priv && priv->attr);
+  regaddr = priv->attr->base + offset;
+  modifyreg32(regaddr, clrbits, setbits);
+}
