@@ -301,14 +301,7 @@ void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
  *
  ****************************************************************************/
 
-static inline void tiva_timer32_start(TIMER_HANDLE handle)
-{
-  /* Set the TAEN bit in the GPTMCTL register to enable the timer and start
-   * counting
-   */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, 0, TIMER_CTL_TAEN);
-}
+void tiva_timer32_start(TIMER_HANDLE handle);
 
 /****************************************************************************
  * Name: tiva_timer16_start
@@ -319,34 +312,10 @@ static inline void tiva_timer32_start(TIMER_HANDLE handle)
  *
  ****************************************************************************/
 
-static inline void tiva_timer16_start(TIMER_HANDLE handle, int tmndx)
-{
-  uint32_t setbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
+void tiva_timer16_start(TIMER_HANDLE handle, int tmndx);
 
-  /* Set the TnEN bit in the GPTMCTL register to enable the 16-bit timer and
-   * start counting
-   */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, 0, setbits);
-}
-
-static inline void tiva_timer16a_start(TIMER_HANDLE handle)
-{
-  /* Set the TAEN bit in the GPTMCTL register to enable 16-bit timer A and
-   * start counting
-   */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, 0, TIMER_CTL_TAEN);
-}
-
-static inline void tiva_timer16b_start(TIMER_HANDLE handle)
-{
-  /* Set the TBEN bit in the GPTMCTL register to enable 16-bit timer B and
-   * start counting
-   */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, 0, TIMER_CTL_TBEN);
-}
+#define tiva_timer16a_start(h) tiva_timer16_start(h, TIMER16A)
+#define tiva_timer16b_start(h) tiva_timer16_start(h, TIMER16B)
 
 /****************************************************************************
  * Name: tiva_timer32_stop
@@ -357,12 +326,7 @@ static inline void tiva_timer16b_start(TIMER_HANDLE handle)
  *
  ****************************************************************************/
 
-static inline void tiva_timer32_stop(TIMER_HANDLE handle)
-{
-  /* Clear the TAEN bit in the GPTMCTL register to disable the 16-bit timer */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, TIMER_CTL_TAEN, 0);
-}
+void tiva_timer32_stop(TIMER_HANDLE handle);
 
 /****************************************************************************
  * Name: tiva_timer16_stop
@@ -373,28 +337,10 @@ static inline void tiva_timer32_stop(TIMER_HANDLE handle)
  *
  ****************************************************************************/
 
-static inline void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
-{
-  uint32_t clrbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
+void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx);
 
-  /* Clear the TnEN bit in the GPTMCTL register to disable the 16-bit timer */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, clrbits, 0);
-}
-
-static inline void tiva_timer16a_stop(TIMER_HANDLE handle)
-{
-  /* Clear the TAEN bit in the GPTMCTL register to disable the 16-bit timer A */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, TIMER_CTL_TAEN, 0);
-}
-
-static inline void tiva_timer16b_stop(TIMER_HANDLE handle)
-{
-  /* Clear the TBEN bit in the GPTMCTL register to disable the 16-bit timer B */
-
-  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, TIMER_CTL_TBEN, 0);
-}
+#define tiva_timer16a_stop(h) tiva_timer16_stop(h, TIMER16A)
+#define tiva_timer16b_stop(h) tiva_timer16_stop(h, TIMER16B)
 
 /****************************************************************************
  * Name: tiva_timer32_setload

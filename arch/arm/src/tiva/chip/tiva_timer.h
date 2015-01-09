@@ -665,124 +665,53 @@
 #    define TIMER_SYNC_SYNCWT5_TATB    TIMER_SYNC_SYNCWT5(TIMER_SYNC_TATB)
 #endif
 
-/* GPTM Interrupt Mask (IMR) */
+/* Common bit definitions used with:
+ *
+ * - GPTM Interrupt Mask (IMR)
+ * - GPTM Raw Interrupt Status (RIS)
+ * - GPTM Masked Interrupt Status (MIS)
+ * - GPTM Interrupt Clear (ICR)
+ */
 
-#define TIMER_IMR_TATOIM               (1 << 0)  /* Bit 0:  Timer A Time-Out Interrupt Mask */
+#define TIMER_INT_TATO                 (1 << 0)  /* Bit 0:  Timer A Time-Out Interrupt */
 
 #if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_IMR_CAMIM              (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Interrupt Mask */
-#  define TIMER_IMR_CAEIM              (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Interrupt Mask */
-#  define TIMER_IMR_RTCIM              (1 << 3)  /* Bit 3:  GPTM RTC Interrupt Mask */
-#  define TIMER_IMR_TAMIM              (1 << 4)  /* Bit 4:  GPTM Timer A Match Interrupt Mask */
+#  define TIMER_INT_CAM                (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Interrupt */
+#  define TIMER_INT_CAE                (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Interrupt */
+#  define TIMER_INT_RTC                (1 << 3)  /* Bit 3:  GPTM RTC Interrupt */
+#  define TIMER_INT_TAM                (1 << 4)  /* Bit 4:  GPTM Timer A Match Interrupt */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_IMR_DMAAIM             (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Interrupt Mask */
+#  define TIMER_INT_DMAA               (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Interrupt */
 #endif
 
+#define TIMER_INT_TBTO                 (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Interrupt */
+
 #if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_IMR_TBTOIM             (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Interrupt Mask */
-#  define TIMER_IMR_CBMIM              (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Interrupt Mask */
-#  define TIMER_IMR_CBEIM              (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Interrupt Mask */
-#  define TIMER_IMR_TBMIM              (1 << 11) /* Bit 11: GPTM Timer B Match Interrupt Mask */
+#  define TIMER_INT_CBM                (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Interrupt */
+#  define TIMER_INT_CBE                (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Interrupt */
+#  define TIMER_INT_TBM                (1 << 11) /* Bit 11: GPTM Timer B Match Interrupt */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_IMR_DMABIM             (1 << 13) /* Bit 13: GPTM Timer B DMA Done Interrupt Mask */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_IMR_WUEIM              (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Interrupt Mask */
-#endif
-
-/* GPTM Raw Interrupt Status (RIS) */
-
-#define TIMER_RIS_TATORIS              (1 << 0)  /* Bit 0:  Timer A Time-Out Raw Interrupt */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_RIS_CAMRIS             (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Raw Interrupt */
-#  define TIMER_RIS_CAERIS             (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Raw Interrupt */
-#  define TIMER_RIS_RTCRIS             (1 << 3)  /* Bit 3:  GPTM RTC Raw Interrupt */
-#  define TIMER_RIS_TAMRIS             (1 << 4)  /* Bit 4:  GPTM Timer A Match Raw Interrupt */
+#  define TIMER_INT_DMAB               (1 << 13) /* Bit 13: GPTM Timer B DMA Done Interrupt */
+#elif defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
+#  define TIMER_INT_WUE                (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Interrupt */
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_RIS_DMAARIS            (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Raw Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_RIS_TBTORIS            (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Raw Interrupt */
-#  define TIMER_RIS_CBMRIS             (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Raw Interrupt */
-#  define TIMER_RIS_CBERIS             (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Raw Interrupt */
-#  define TIMER_RIS_TBMRIS             (1 << 11) /* Bit 11: GPTM Timer B Match Raw Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_RIS_DMABRIS            (1 << 13) /* Bit 13: GPTM Timer B DMA Done Raw Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_RIS_WUERIS             (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Raw Interrupt */
-#endif
-
-/* GPTM Masked Interrupt Status (MIS) */
-
-#define TIMER_MIS_TATOMIS              (1 << 0)  /* Bit 0:  Timer A Time-Out Masked Interrupt */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_MIS_CAMMIS             (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Masked Interrupt */
-#  define TIMER_MIS_CAEMIS             (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Masked Interrupt */
-#  define TIMER_MIS_RTCMIS             (1 << 3)  /* Bit 3:  GPTM RTC Masked Interrupt */
-#  define TIMER_MIS_TAMMIS             (1 << 4)  /* Bit 4:  GPTM Timer A Match Masked Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_MIS_DMAAMIS            (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Masked Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_MIS_TBTOMIS            (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Masked Interrupt */
-#  define TIMER_MIS_CBMMIS             (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Masked Interrupt */
-#  define TIMER_MIS_CBEMIS             (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Masked Interrupt */
-#  define TIMER_MIS_TBMMIS             (1 << 11) /* Bit 11: GPTM Timer B Match Masked Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_MIS_DMABMIS            (1 << 13) /* Bit 13: GPTM Timer B DMA Done Masked Interrupt */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_MIS_WUEMIS             (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Masked Interrupt */
-#endif
-
-/* GPTM Interrupt Clear (ICR) */
-
-#define TIMER_ICR_TATOCINT             (1 << 0)  /* Bit 0:  Timer A Time-Out Interrupt Clear */
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_ICR_CAMCINT            (1 << 1)  /* Bit 1:  GPTM Timer A Capture Mode Match Interrupt Clear */
-#  define TIMER_ICR_CAECINT            (1 << 2)  /* Bit 2:  GPTM Timer A Capture Mode Event Interrupt Clear */
-#  define TIMER_ICR_RTCCINT            (1 << 3)  /* Bit 3:  GPTM RTC Interrupt Clear */
-#  define TIMER_ICR_TAMCINT            (1 << 4)  /* Bit 4:  GPTM Timer A Match Interrupt Clear */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_ICR_DMAAINT            (1 << 5)  /* Bit 5:  GPTM Timer A DMA Done Interrupt Clear */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_ICR_TBTOCINT           (1 << 8)  /* Bit 8:  GPTM Timer B Time-Out Interrupt Clear */
-#  define TIMER_ICR_CBMCINT            (1 << 9)  /* Bit 9:  GPTM Timer B Capture Mode Match Interrupt Clear */
-#  define TIMER_ICR_CBECINT            (1 << 10) /* Bit 10: GPTM Timer B Capture Mode Event Interrupt Clear */
-#  define TIMER_ICR_TBMCINT            (1 << 11) /* Bit 11: GPTM Timer B Match Interrupt Clear */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define TIMER_ICR_DMABINT            (1 << 13) /* Bit 13: GPTM Timer B DMA Done Interrupt Clear */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
-#  define TIMER_ICR_WUECINT            (1 << 16) /* Bit 16: 32/64-Bit Wide GPTM Write Update Error Interrupt Clear */
+#  define TIMERA_INTS                  0x0000003f
+#  define TIMERB_INTS                  0x00002f00
+#  define TIMER_ALLINTS                0x00002f3f
+#elif defined(CONFIG_ARCH_CHIP_LM4F) || defined(CONFIG_ARCH_CHIP_TM4C)
+#  define TIMERA_INTS                  0x0000001f
+#  define TIMERB_INTS                  0x00000f00
+#  define TIMER_ALLINTS                0x00010f1f
+#else
+#  define TIMERA_INTS                  0x00000001
+#  define TIMERB_INTS                  0x00000100
+#  define TIMER_ALLINTS                0x00000101
 #endif
 
 /* GPTM Timer A Interval Load (TAILR) (32-bit value) */

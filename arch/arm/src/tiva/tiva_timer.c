@@ -79,10 +79,14 @@ struct tiva_gptmattr_s
 
 struct tiva_gptmstate_s
 {
-  /* Constant time attributes and configuration */
+  /* Constant timer attributes and configuration */
 
   const struct tiva_gptmattr_s   *attr;
   const struct tiva_gptmconfig_s *config;
+
+  /* Variable state values */
+
+  uint32_t imr;                /* Interrupt mask value. Zero if no interrupts */
 
 #ifdef CONFIG_TIVA_TIMER_REGDEBUG
   /* Register level debug */
@@ -392,6 +396,35 @@ static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
 #endif
 
   putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: tiva_modifyreg
+ *
+ * Description:
+ *   This function permits atomic of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+static void tiva_modifyreg(struct tiva_gptmstate_s *priv, unsigned int offset,
+                           uint32_t clrbits, uint32_t setbits)
+{
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags = irqsave();
+  regval = tiva_getreg(priv, offset);
+  regval &= ~clrbits;
+  regval |= setbits;
+  tiva_putreg(priv, offset, regval);
+  irqrestore(flags);
+#else
+  uintptr_t regaddr = priv->attr->base + offset;
+  modifyreg32(regaddr, clrbits, setbits);
+#endif
 }
 
 /****************************************************************************
@@ -717,8 +750,25 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    /* Enable wait-on-trigger? */
 #warning Missing Logic
 
-   /* Enable one-shot/periodic interrupts? */
-#warning Missing Logic
+  /* Enable one-shot/periodic interrupts?  Enable interrupts only if an
+   * interrupt handler was provided.
+   */
+
+  if (timer->handler)
+    {
+      /* Select the interrupt mask that will enable the timer interrupt.
+       * Any non-zero value of imr indicates that interrupts are expected.
+       */
+
+      priv->imr = TIMER_INT_TATO;
+
+      /* Clearing the TACINTD bit allows the time-out interrupt to be
+       * generated as normal
+       */
+      /* REVISIT: When will interrupts be enabled? */
+
+      regval &= ~TIMER_TnMR_TnCINTD;
+    }
 
   /* Enable count down? */
 
@@ -747,8 +797,12 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
 
   /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).
+   *
+   *    NOTE: Interrupts are still disabled at the NVIC.  Interrupts will
+   *    be enabled at the NVIC after ther timer is started.
    */
-#warning Missing Logic
+
+  tiva_putreg(priv, TIVA_TIMER_IMR_OFFSET, priv->imr);
 
   /* 7. Set the TAEN bit in the GPTMCTL register to enable the timer and
    *    start counting.
@@ -854,8 +908,25 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    /* Enable wait-on-trigger? */
 #warning Missing Logic
 
-   /* Enable one-shot/periodic interrupts? */
-#warning Missing Logic
+  /* Enable one-shot/periodic interrupts?  Enable interrupts only if an
+   * interrupt handler was provided.
+   */
+
+  if (timer->handler)
+    {
+      /* Select the interrupt mask that will enable the timer interrupt.
+       * Any non-zero value of imr indicates that interrupts are expected.
+       */
+
+      priv->imr |= tmndx ? TIMER_INT_TBTO : TIMER_INT_TATO;
+
+      /* Clearing the TnCINTD bit allows the time-out interrupt to be
+       * generated as normal
+       */
+      /* REVISIT: When will interrupts be enabled? */
+
+      regval &= ~TIMER_TnMR_TnCINTD;
+    }
 
   /* Enable count down? */
 
@@ -880,8 +951,12 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   /* 6. If interrupts are required, set the appropriate bits in the GPTM
    *    Interrupt Mask Register (GPTMIMR).
+   *
+   *    NOTE: Interrupts are still disabled at the NVIC.  Interrupts will
+   *    be enabled at the NVIC after ther timer is started.
    */
-#warning Missing Logic
+
+  tiva_putreg(priv, TIVA_TIMER_IMR_OFFSET, priv->imr);
 
   /* 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
    *    start counting.
@@ -1322,7 +1397,10 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
   priv->attr   = attr;
   priv->config = config;
 
-  /* Detach all interrupt handlers */
+  /* Disable and detach all interrupt handlers */
+
+  up_disable_irq(attr->irq[TIMER16A]);
+  up_disable_irq(attr->irq[TIMER16B]);
 
   (void)irq_detach(attr->irq[TIMER16A]);
   (void)irq_detach(attr->irq[TIMER16B]);
@@ -1491,9 +1569,119 @@ void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
                          uint32_t clrbits, uint32_t setbits)
 {
   struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
-  uintptr_t regaddr;
 
   DEBUGASSERT(priv && priv->attr);
-  regaddr = priv->attr->base + offset;
-  modifyreg32(regaddr, clrbits, setbits);
+  tiva_modifyreg(priv, offset, clrbits, setbits);
+}
+
+/****************************************************************************
+ * Name: tiva_timer32_start
+ *
+ * Description:
+ *   After tiva_gptm_configure() has been called to configure a 32-bit timer,
+ *   this function must be called to start the timer(s).
+ *
+ ****************************************************************************/
+
+void tiva_timer32_start(TIMER_HANDLE handle)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+
+  DEBUGASSERT(priv && priv->attr);
+
+  /* Set the TAEN bit in the GPTMCTL register to enable the 32-bit timer and
+   * start counting
+   */
+
+  tiva_modifyreg(priv, TIVA_TIMER_CTL_OFFSET, 0, TIMER_CTL_TAEN);
+
+  /* Enable interrupts at the NVIC if interrupts are expected */
+
+  if (priv->imr)
+    {
+      up_enable_irq(priv->attr->irq[TIMER32]);
+    }
+}
+
+/****************************************************************************
+ * Name: tiva_timer16_start
+ *
+ * Description:
+ *   After tiva_gptm_configure() has been called to configure 16-bit timer(s),
+ *   this function must be called to start one 16-bit timer.
+ *
+ ****************************************************************************/
+
+void tiva_timer16_start(TIMER_HANDLE handle, int tmndx)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  uint32_t setbits;
+  uint32_t intmask;
+
+  DEBUGASSERT(priv && priv->attr && (unsigned)tmndx < 2);
+
+  /* Set the TnEN bit in the GPTMCTL register to enable the 16-bit timer and
+   * start counting
+   */
+
+  setbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
+  tiva_modifyreg(priv, TIVA_TIMER_CTL_OFFSET, 0, setbits);
+
+  /* Enable interrupts at the NVIC if interrupts are expected */
+
+  intmask = tmndx ? TIMERB_INTS : TIMERA_INTS;
+  if ((priv->imr & intmask) != 0)
+    {
+      up_enable_irq(priv->attr->irq[tmndx]);
+    }
+}
+
+/****************************************************************************
+ * Name: tiva_timer32_stop
+ *
+ * Description:
+ *   After tiva_timer32_start() has been called to start a 32-bit timer,
+ *   this function may be called to stop the timer.
+ *
+ ****************************************************************************/
+
+void tiva_timer32_stop(TIMER_HANDLE handle)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+
+  DEBUGASSERT(priv && priv->attr);
+
+  /* Disable interrupts at the NVIC */
+
+  up_disable_irq(priv->attr->irq[TIMER32]);
+
+  /* Clear the TAEN bit in the GPTMCTL register to disable the 16-bit timer */
+
+  tiva_modifyreg(priv, TIVA_TIMER_CTL_OFFSET, TIMER_CTL_TAEN, 0);
+}
+
+/****************************************************************************
+ * Name: tiva_timer16_stop
+ *
+ * Description:
+ *   After tiva_timer32_start() has been called to start a 16-bit timer,
+ *   this function may be called to stop the timer.
+ *
+ ****************************************************************************/
+
+void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  uint32_t clrbits;
+
+  DEBUGASSERT(priv && priv->attr && (unsigned)tmndx < 2);
+
+  /* Disable interrupts at the NVIC */
+
+  up_disable_irq(priv->attr->irq[tmndx]);
+
+  /* Clear the TnEN bit in the GPTMCTL register to disable the 16-bit timer */
+
+  clrbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
+  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, clrbits, 0);
 }
