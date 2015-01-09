@@ -212,8 +212,7 @@ struct tiva_gptmconfig_s
 {
   uint8_t gptm;                  /* GPTM number */
   uint8_t mode;                  /* See enum tiva_timer32mode_e */
-  uint8_t alternate;             /* False: Use SysClk; True: Use alternate clock source */
-  uint32_t frequency;            /* Frequency of the selected clock source */
+  bool alternate;                /* False: Use SysClk; True: Use alternate clock source */
 };
 
 /* This structure is cast compatible with struct tiva_gptmconfig_s and
