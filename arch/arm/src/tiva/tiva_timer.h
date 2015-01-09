@@ -256,6 +256,151 @@ struct tiva_gptm16config_s
 TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm);
 
 /****************************************************************************
+ * Name: tiva_gptm_putreg
+ *
+ * Description:
+ *   This function permits setting of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+void tiva_gptm_putreg(TIMER_HANDLE handle, unsigned int offset, uint32_t value);
+
+/****************************************************************************
+ * Name: tiva_gptm_getreg
+ *
+ * Description:
+ *   This function permits reading of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+uint32_t tiva_gptm_getreg(TIMER_HANDLE handle, unsigned int offset);
+
+/****************************************************************************
+ * Name: tiva_gptm_modifyreg
+ *
+ * Description:
+ *   This function permits atomic of any timer register by its offset into
+ *   the timer block.  Its primary purpose is to support inline functions
+ *   defined in this header file.
+ *
+ ****************************************************************************/
+
+void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
+                         uint32_t clrbits, uint32_t setbits);
+
+/****************************************************************************
+ * Name: tiva_timer32_start
+ *
+ * Description:
+ *   After tiva_gptm_configure() has been called to configure a 32-bit timer,
+ *   this function must be called to start the timer(s).
+ *
+ ****************************************************************************/
+
+static inline void tiva_timer32_start(TIMER_HANDLE handle)
+{
+  /* Set the TAEN bit in the GPTMCTL register to enable the timer and start
+   * counting
+   */
+
+  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, 0, TIMER_CTL_TAEN);
+}
+
+/****************************************************************************
+ * Name: tiva_timer16_start
+ *
+ * Description:
+ *   After tiva_gptm_configure() has been called to configure 16-bit timer(s),
+ *   this function must be called to start one 16-bit timer.
+ *
+ ****************************************************************************/
+
+static inline void tiva_timer16_start(TIMER_HANDLE handle, int tmndx)
+{
+  uint32_t setbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
+
+  /* Set the TnEN bit in the GPTMCTL register to enable the timer and start
+   * counting
+   */
+
+  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, 0, setbits);
+}
+
+/****************************************************************************
+ * Name: tiva_timer32_stop
+ *
+ * Description:
+ *   After tiva_timer32_start() has been called to start a 32-bit timer,
+ *   this function may be called to stop the timer.
+ *
+ ****************************************************************************/
+
+static inline void tiva_timer32_stop(TIMER_HANDLE handle)
+{
+  /* Clear the TAEN bit in the GPTMCTL register to enable the timer and
+   * start counting
+   */
+
+  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, TIMER_CTL_TAEN, 0);
+}
+
+/****************************************************************************
+ * Name: tiva_timer16_stop
+ *
+ * Description:
+ *   After tiva_timer32_start() has been called to start a 16-bit timer,
+ *   this function may be called to stop the timer.
+ *
+ ****************************************************************************/
+
+static inline void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
+{
+  uint32_t clrbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
+
+  /* Clear the TAEN bit in the GPTMCTL register to enable the timer and
+   * start counting
+   */
+
+  tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, clrbits, 0);
+}
+
+/****************************************************************************
+ * Name: tiva_timer32_setload
+ *
+ * Description:
+ *   This function may be called at any time to change the timer interval
+ *   load value of a 32-bit timer.
+ *
+ ****************************************************************************/
+
+static inline void tiva_timer32_setload(TIMER_HANDLE handle, uint32_t load)
+{
+  tiva_gptm_putreg(handle, TIVA_TIMER_TAILR_OFFSET, load);
+}
+
+/****************************************************************************
+ * Name: tiva_timer16_setload
+ *
+ * Description:
+ *   This function may be called at any time to change the timer interval
+ *   load value of a 16-bit timer.
+ *
+ ****************************************************************************/
+
+static inline void tiva_timer16_setload(TIMER_HANDLE handle, uint16_t load,
+                                        int tmndx)
+{
+  unsigned int regoffset =
+    tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
+
+  tiva_gptm_putreg(handle, regoffset, load);
+}
+
+/****************************************************************************
  * Name: tiva_gptm0_synchronize
  *
  * Description:
@@ -263,6 +408,9 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm);
  *
  ****************************************************************************/
 
-int tiva_gptm0_synchronize(uint32_t sync);
+static inline void tiva_gptm0_synchronize(uint32_t sync)
+{
+  putreg32(sync, TIVA_TIMER0_SYNC);
+}
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_TIMER_H */
