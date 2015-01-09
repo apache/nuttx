@@ -124,11 +124,19 @@ enum tiva_timer16mode_e
 
 typedef FAR void *TIMER_HANDLE;
 
-/* This type describes the 32-bit timer interrupt handler */
+/* This type describes the 32-bit timer interrupt handler.
+ *
+ * Input Parameters:
+ *   handle - The same value as returned by tiva_gptm_configure()
+ *   config - The same value provided as as an input to tiva_gptm_configure()
+ *   status - The value of the GPTM masked status register that caused the
+ *            interrupt
+ */
 
 struct tiva_gptm32config_s;
 typedef void (*timer32_handler_t)(TIMER_HANDLE handle,
-                                  const struct tiva_gptm32config_s *config);
+                                  const struct tiva_gptm32config_s *config,
+                                  uint32_t status);
 
 /* This structure describes the configuration of one 32-bit timer */
 
@@ -158,12 +166,21 @@ struct tiva_timer32config_s
   } u;
 };
 
-/* This type describes the 16-bit timer interrupt handler */
+/* This type describes the 16-bit timer interrupt handler
+ *
+ * Input Parameters:
+ *   handle - The same value as returned by tiva_gptm_configure()
+ *   config - The same value provided as as an input to tiva_gptm_configure()
+ *   status - The value of the GPTM masked status register that caused the
+ *            interrupt.
+ *   tmndx  - Either TIMER16A or TIMER16B.  This may be useful in the
+ *            event that the same handler is used for Timer A and B.
+ */
 
 struct tiva_gptm16config_s;
 typedef void (*timer16_handler_t)(TIMER_HANDLE handle,
                                   const struct tiva_gptm16config_s *config,
-                                  int tmndx);
+                                  uint32_t status, int tmndx);
 
 /* This structure describes the configuration of one 16-bit timer A/B */
 
@@ -250,6 +267,14 @@ struct tiva_gptm16config_s
  *   Configure a general purpose timer module to operate in the provided
  *   modes.
  *
+ * Input Parameters:
+ *   gptm - Describes the configure of the GPTM timer resources
+ *
+ * Returned Value:
+ *   On success, a non-NULL handle is returned that can be used with the
+ *   other timer interfaces.  NULL is returned on any failure to initialize
+ *   the timer.
+ *
  ****************************************************************************/
 
 TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm);
@@ -261,6 +286,14 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm);
  *   This function permits setting of any timer register by its offset into
  *   the timer block.  Its primary purpose is to support inline functions
  *   defined in this header file.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   offset - The offset to the timer register to be written
+ *   value  - The value to write to the timer register
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -274,6 +307,14 @@ void tiva_gptm_putreg(TIMER_HANDLE handle, unsigned int offset, uint32_t value);
  *   the timer block.  Its primary purpose is to support inline functions
  *   defined in this header file.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   offset - The offset to the timer register to be written
+ *
+ * Returned Value:
+ *   The 32-bit value read at the provided offset into the timer register base
+ *   address.
+ *
  ****************************************************************************/
 
 uint32_t tiva_gptm_getreg(TIMER_HANDLE handle, unsigned int offset);
@@ -285,6 +326,15 @@ uint32_t tiva_gptm_getreg(TIMER_HANDLE handle, unsigned int offset);
  *   This function permits atomic of any timer register by its offset into
  *   the timer block.  Its primary purpose is to support inline functions
  *   defined in this header file.
+ *
+ * Input Parameters:
+ *   handle  - The handle value returned  by tiva_gptm_configure()
+ *   offset  - The offset to the timer register to be written
+ *   clrbits - The collection of bits to be cleared in the register
+ *   setbits - The collection of bits to be set in the register
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -298,6 +348,12 @@ void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
  *   After tiva_gptm_configure() has been called to configure a 32-bit timer,
  *   this function must be called to start the timer(s).
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void tiva_timer32_start(TIMER_HANDLE handle);
@@ -308,6 +364,13 @@ void tiva_timer32_start(TIMER_HANDLE handle);
  * Description:
  *   After tiva_gptm_configure() has been called to configure 16-bit timer(s),
  *   this function must be called to start one 16-bit timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -323,6 +386,12 @@ void tiva_timer16_start(TIMER_HANDLE handle, int tmndx);
  *   After tiva_timer32_start() has been called to start a 32-bit timer,
  *   this function may be called to stop the timer.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void tiva_timer32_stop(TIMER_HANDLE handle);
@@ -333,6 +402,13 @@ void tiva_timer32_stop(TIMER_HANDLE handle);
  * Description:
  *   After tiva_timer32_start() has been called to start a 16-bit timer,
  *   this function may be called to stop the timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -348,6 +424,13 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx);
  *   This function may be called at any time to change the timer interval
  *   load value of a 32-bit timer.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   load   - The value to write to the timer interval load register
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 static inline void tiva_timer32_setload(TIMER_HANDLE handle, uint32_t load)
@@ -361,6 +444,14 @@ static inline void tiva_timer32_setload(TIMER_HANDLE handle, uint32_t load)
  * Description:
  *   This function may be called at any time to change the timer interval
  *   load value of a 16-bit timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   load   - The value to write to the timer interval load register
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -390,6 +481,13 @@ static inline void tiva_timer16b_setload(TIMER_HANDLE handle, uint16_t load)
  *   This function may be called at any time to change the timer interval
  *   match value of a 32-bit timer.
  *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   match  - The value to write to the timer match register
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 static inline void tiva_timer32_setmatch(TIMER_HANDLE handle, uint32_t match)
@@ -403,6 +501,14 @@ static inline void tiva_timer32_setmatch(TIMER_HANDLE handle, uint32_t match)
  * Description:
  *   This function may be called at any time to change the timer interval
  *   match value of a 16-bit timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   match  - The value to write to the timer match register
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -431,6 +537,12 @@ static inline void tiva_timer16b_setmatch(TIMER_HANDLE handle, uint16_t match)
  * Description:
  *   Trigger timers from GPTM0 output. This is part of the timer
  *   configuration logic and should be called before timers are enabled.
+ *
+ * Input Parameters:
+ *   sync   - The value to write to the GPTM0 SYNC register
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
