@@ -591,7 +591,7 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
  *
  ****************************************************************************/
 
-static inline void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t newtime)
+static inline void tiva_rtc_settime(TIMER_HANDLE handle, uint32_t newtime)
 {
   tiva_gptm_putreg(handle, TIVA_TIMER_TAILR_OFFSET, newtime);
 }
