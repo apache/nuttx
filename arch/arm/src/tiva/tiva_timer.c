@@ -923,10 +923,10 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
    *
-   * NOTE: This timer is started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enable() is called.
    */
 
-  return -ENOSYS;
+  return OK;
 }
 
 /****************************************************************************
@@ -1143,10 +1143,10 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
    *
-   * NOTE: This timer is started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enable() is called.
    */
 
-  return -ENOSYS;
+  return OK;
 }
 
 /****************************************************************************
@@ -1164,6 +1164,8 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
                            const struct tiva_timer32config_s *timer)
 {
+  uint32_t regval;
+
   /* To use the RTC mode, the timer must have a 32.768-KHz input signal on
    * an even CCP input. To enable the RTC feature, follow these steps:
    *
@@ -1188,17 +1190,34 @@ static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
 
   /* 4. Write the match value to the GPTM Timer n Match Register
    *    (GPTMTnMATCHR).
+   *
+   *    NOTE: The match register is not set until tiva_rtc_setalarm() is
+   *    called.
+   *
+   * 5. Set/clear the RTCEN and TnSTALL bit in the GPTM Control Register
+   *    (GPTMCTL) as needed.
+   *
+   *      RTCEN   - 1: RTC counting continues while the processor is
+   *                halted by the debugger
+   *      TASTALL - 1: Timer A freezes counting while the processor is
+   *                halted by the debugger.
    */
 
-  /* 5. Set/clear the RTCEN and TnSTALL bit in the GPTM Control Register
-   *    (GPTMCTL) as needed.
-   */
+  regval = tiva_getreg(priv, TIVA_TIMER_CTL_OFFSET);
+#ifdef CONFIG_DEBUG_SYMBOLS
+  regval |=  (TIMER_CTL_RTCEN | TIMER_CTL_TASTALL);
+#else
+  regval &= ~(TIMER_CTL_RTCEN | TIMER_CTL_TASTALL);
+#endif
+  tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
 
   /* 6. If interrupts are required, set the RTCIM bit in the GPTM Interrupt
    *    Mask Register (GPTMIMR).
-   */
-
-  /* 7. Set the TAEN bit in the GPTMCTL register to enable the timer and
+   *
+   *    NOTE: RTC interrupts are not enabled until tiva_rtc_setalarm() is
+   *    called.
+   *
+   * 7. Set the TAEN bit in the GPTMCTL register to enable the timer and
    *    start counting.
    *
    * When the timer count equals the value in the GPTMTnMATCHR register,
@@ -1209,10 +1228,11 @@ static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
    * begins counting at this new value and continues until it reaches
    * 0xFFFF.FFFF, at which point it rolls over.
    *
-   * NOTE: The timer will not be enabled until tiva_gptm_enable() is called.
+   * NOTE: The RTC timer will not be enabled until tiva_gptm_enable() is
+   * called.
    */
-#warning Missing Logic
-  return -ENOSYS;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1276,7 +1296,7 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    * programmed number of edge events has been detected. To re-enable the
    * timer, ensure that the TnEN bit is cleared and repeat steps 4 through 8.
    *
-   * NOTE: This timer is started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enable() is called.
    */
 
   return -ENOSYS;
@@ -1344,7 +1364,7 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    * the GPTMTnMR register. The change takes effect at the next cycle after
    * the write.
    *
-   * NOTE: This timer is started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enable() is called.
    */
 
   return -ENOSYS;
@@ -1412,7 +1432,7 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
    * the GPTMTnILR register, and the change takes effect at the next cycle
    * after the write.
    *
-   * NOTE: This timer is started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enable() is called.
    */
 
   return -ENOSYS;
@@ -1939,7 +1959,7 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
 }
 
 /****************************************************************************
- * Name: tiva_rtc_alarm
+ * Name: tiva_rtc_setalarm
  *
  * Description:
  *   Setup to receive an interrupt when the RTC counter equals a match time
@@ -1958,7 +1978,7 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
  *
  ****************************************************************************/
 
-void tiva_rtc_alarm(TIMER_HANDLE handle, uint32_t delay)
+void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
 {
   struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
   const struct tiva_timer32config_s *config;

@@ -521,7 +521,7 @@
 /* GPTM Control (CTL) */
 
 #define TIMER_CTL_TAEN                 (1 << 0)  /* Bit 0:  Timer A Enable */
-#define TIMER_CTL_TASTALL_SHIFT        (1 << 1)  /* Bit 1:  Timer A Stall Enable */
+#define TIMER_CTL_TASTALL              (1 << 1)  /* Bit 1:  Timer A Stall Enable */
 #define TIMER_CTL_TAEVENT_SHIFT        (2)       /* Bits 2-3: GPTM Timer A Event Mode */
 #define TIMER_CTL_TAEVENT_MASK         (3 << TIMER_CTL_TAEVENT_SHIFT)
 #  define TIMER_CTL_TAEVENT_POS        (0 << TIMER_CTL_TAEVENT_SHIFT) /* Positive edge */
