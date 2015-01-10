@@ -94,21 +94,47 @@
 #define TIMER16B              1
 
 /* Flags bit definitions in configuration structures.  NOTE: not all flags
- * apply in all timer modes.
+ * apply in all timer modes.  Applicable modes noted with:
+ *
+ *   a. 32-bit one shot timer
+ *   b. 32-bit periodic timer
+ *   c. 32-bit one shot timer
+ *   d. 32-bit periodic timer
+ *   e. 32-bit RTC timer
  */
 
-#define TIMER_FLAG_COUNTUP    (1 << 0) /* Bit 0: Count up */
-#define TIMER_FLAG_ADCTIMEOUT (1 << 1) /* Bit 1: Generate ADC trigger on timeout */
-#define TIMER_FLAG_ADCMATCH   (1 << 2) /* Bit 2: Generate ADC trigger on match */
+#define TIMER_FLAG_COUNTUP    (1 << 0) /* Bit 0: Count up (abcd) */
+#define TIMER_FLAG_ADCTIMEOUT (1 << 1) /* Bit 1: Generate ADC trigger on
+                                        * timeout (abcd) */
+#define TIMER_FLAG_ADCRTCM    (1 << 2) /* Bit 2: Generate ADC trigger on
+                                        * RTC match (e) */
+#define TIMER_FLAG_ADCMATCH   (1 << 3) /* Bit 3: Generate ADC trigger on
+                                        * match (abcd) */
+#define TIMER_FLAG_DMATIMEOUT (1 << 4) /* Bit 4: Generate uDMA trigger on
+                                        * timeout (abcd) */
+#define TIMER_FLAG_DMARTCM    (1 << 5) /* Bit 5: Generate uDMA trigger on
+                                        * RTC match (e) */
+#define TIMER_FLAG_DMAMATCH   (1 << 6) /* Bit 6: Generate uDMA trigger on
+                                        * match (abcd) */
 
 #define TIMER_ISCOUNTUP(c)    ((((c)->flags) & TIMER_FLAG_COUNTUP) != 0)
 #define TIMER_ISADCTIMEOUT(c) ((((c)->flags) & TIMER_FLAG_ADCTIMEOUT) != 0)
+#define TIMER_ISADCRTCM(c)    ((((c)->flags) & TIMER_FLAG_ADCRTCM) != 0)
 #define TIMER_ISADCMATCH(c)   ((((c)->flags) & TIMER_FLAG_ADCMATCH) != 0)
+#define TIMER_ISDMATIMEOUT(c) ((((c)->flags) & TIMER_FLAG_DMATIMEOUT) != 0)
+#define TIMER_ISDMARTCM(c)    ((((c)->flags) & TIMER_FLAG_DMARTCM) != 0)
+#define TIMER_ISDMAMATCH(c)   ((((c)->flags) & TIMER_FLAG_DMAMATCH) != 0)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This enumeration identifies all supported 32-bit timer modes of operation */
+/* This enumeration identifies all supported 32-bit timer modes of operation
+ *
+ * NOTES:
+ * - TIMER32_MODE_RTC: The input clock on a CCP0 input is required to be
+ *   32.768 KHz in RTC mode. The clock signal is then divided down to a 1-Hz
+ *   rate and is passed along to the input of the counter.
+ */
 
 enum tiva_timer32mode_e
 {
@@ -118,7 +144,7 @@ enum tiva_timer32mode_e
   TIMER32_MODE_RTC               /* 32-bit RTC with external 32.768-KHz input */
 };
 
-/* This enumeration identifies all supported 16-bit timer A/Bmodes of
+/* This enumeration identifies all supported 16-bit timer A/B modes of
  * operation.
  */
 
@@ -546,6 +572,33 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
 }
 
 /****************************************************************************
+ * Name: tiva_rtc_alarm
+ *
+ * Description:
+ *   Setup to receive an interrupt when the RTC counter equals a match time
+ *   value.  This function sets the match register to the current timer
+ *   counter register value PLUS the relative value provided.  The relative
+ *   value then is an offset in seconds from the current time.
+ *
+ *   If an interrupt handler is provided, then the RTC match interrupt will
+ *   be enabled.  A single RTC match interrupt will be generated; further
+ *   RTC match interrupts will be disabled.
+ *
+ *   NOTE: Use of this function is only meaningful for a a 32-bit RTC time.
+ *   NOTE: An interrupt handler address must provided in the configuration.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   delay  - A relative time in the future (seconds)
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tiva_rtc_alarm(TIMER_HANDLE handle, uint32_t delay);
+
+/****************************************************************************
  * Name: tiva_timer32_relmatch
  *
  * Description:
@@ -559,8 +612,8 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
  *   be enabled.  A single match interrupt will be generated; further match
  *   interrupts will be disabled.
  *
- *   NOTE: Use of this function is only meaningful for a free-runnning,
- *   periodic timer.
+ *   NOTE: Use of this function is only meaningful for a 32-bit free-
+ *   runnning, periodic timer.
  *
  *   WARNING: For free-running timers, the relative match value should be
  *   sufficiently far in the future to avoid race conditions.
@@ -590,8 +643,8 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch);
  *   be enabled.  A single match interrupt will be generated; further match
  *   interrupts will be disabled.
  *
- *   NOTE: Use of this function is only meaningful for a free-runnning,
- *   periodic timer.
+ *   NOTE: Use of this function is only meaningful for a 16-bit free-
+ *   runnning, periodic timer.
  *
  *   NOTE: The relmatch input is a really a 24-bit value; it is the 16-bit
  *   match counter match value AND the 8-bit prescaler value.  From the
