@@ -476,61 +476,140 @@ static inline void tiva_timer16b_setload(TIMER_HANDLE handle, uint16_t load)
 }
 
 /****************************************************************************
- * Name: tiva_timer32_setmatch
+ * Name: tiva_timer32_absmatch
  *
  * Description:
  *   This function may be called at any time to change the timer interval
- *   match value of a 32-bit timer.
+ *   match value of a 32-bit timer.  This function sets the match register
+ *   the the absolute value specified.
  *
  * Input Parameters:
- *   handle - The handle value returned  by tiva_gptm_configure()
- *   match  - The value to write to the timer match register
+ *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   absmatch - The absolute value to write to the timer match register
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static inline void tiva_timer32_setmatch(TIMER_HANDLE handle, uint32_t match)
+static inline void tiva_timer32_absmatch(TIMER_HANDLE handle,
+                                         uint32_t absmatch)
 {
-  tiva_gptm_putreg(handle, TIVA_TIMER0_TAMATCHR, match);
+  tiva_gptm_putreg(handle, TIVA_TIMER_TAMATCHR_OFFSET, absmatch);
 }
 
 /****************************************************************************
- * Name: tiva_timer16_setmatch
+ * Name: tiva_timer16_absmatch
  *
  * Description:
  *   This function may be called at any time to change the timer interval
- *   match value of a 16-bit timer.
+ *   match value of a 16-bit timer.  This function sets the match register
+ *   the the absolute value specified.
  *
  * Input Parameters:
- *   handle - The handle value returned  by tiva_gptm_configure()
- *   match  - The value to write to the timer match register
- *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   absmatch - The value to write to the timer match register
+ *   tmndx    - Either TIMER16A or TIMER16B to select the 16-bit timer
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static inline void tiva_timer16_setmatch(TIMER_HANDLE handle, uint16_t match,
-                                        int tmndx)
+static inline void tiva_timer16_absmatch(TIMER_HANDLE handle,
+                                         uint16_t absmatch, int tmndx)
 {
   unsigned int regoffset =
-    tmndx ? TIVA_TIMER0_TBMATCHR : TIVA_TIMER0_TAMATCHR;
+    tmndx ? TIVA_TIMER_TBMATCHR_OFFSET : TIVA_TIMER_TAMATCHR_OFFSET;
 
-  tiva_gptm_putreg(handle, regoffset, match);
+  tiva_gptm_putreg(handle, regoffset, absmatch);
 }
 
-static inline void tiva_timer16a_setmatch(TIMER_HANDLE handle, uint16_t match)
+static inline void tiva_timer16a_absmatch(TIMER_HANDLE handle, uint16_t absmatch)
 {
-  tiva_gptm_putreg(handle, TIVA_TIMER0_TAMATCHR, match);
+  tiva_gptm_putreg(handle, TIVA_TIMER_TAMATCHR_OFFSET, absmatch);
 }
 
-static inline void tiva_timer16b_setmatch(TIMER_HANDLE handle, uint16_t match)
+static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch)
 {
-  tiva_gptm_putreg(handle, TIVA_TIMER0_TBMATCHR, match);
+  tiva_gptm_putreg(handle, TIVA_TIMER_TBMATCHR_OFFSET, absmatch);
 }
+
+/****************************************************************************
+ * Name: tiva_timer32_relmatch
+ *
+ * Description:
+ *   This function may be called at any time to change the timer interval
+ *   match value of a 32-bit timer.  This function sets the match register
+ *   to the current timer counter register value PLUS the relative value
+ *   provided.  The relative value then is some the offset to some timer
+ *   counter value in the future.
+ *
+ *   If an interrupt handler is provided, then the match interrupt will also
+ *   be enabled.  A single match interrupt will be generated; further match
+ *   interrupts will be disabled.
+ *
+ *   NOTE: Use of this function is only meaningful for a free-runnning,
+ *   periodic timer.
+ *
+ *   WARNING: For free-running timers, the relative match value should be
+ *   sufficiently far in the future to avoid race conditions.
+ *
+ * Input Parameters:
+ *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   relmatch - The value to write to the timer match register
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch);
+
+/****************************************************************************
+ * Name: tiva_timer16_relmatch
+ *
+ * Description:
+ *   This function may be called at any time to change the timer interval
+ *   match value of a 16-bit timer.  This function sets the match register
+ *   to the current timer counter register value PLUS the relative value
+ *   provided.  The relative value then is some the offset to some timer
+ *   counter value in the future.
+ *
+ *   If an interrupt handler is provided, then the match interrupt will also
+ *   be enabled.  A single match interrupt will be generated; further match
+ *   interrupts will be disabled.
+ *
+ *   NOTE: Use of this function is only meaningful for a free-runnning,
+ *   periodic timer.
+ *
+ *   NOTE: The relmatch input is a really a 24-bit value; it is the 16-bit
+ *   match counter match value AND the 8-bit prescaler value.  From the
+ *   callers point of view the match value is the 24-bit time to match
+ *   driven at the timer input clock frequency.
+ *
+ *   When counting down in periodic modes, the prescaler contains the
+ *   least-significant bits of the count. When counting up, the prescaler
+ *   holds the most-significant bits of the count.  But the caller is
+ *   protected from this complexity.
+ *
+ *   WARNING: For free-running timers, the relative match value should be
+ *   sufficiently far in the future to avoid race conditions.
+ *
+ * Input Parameters:
+ *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   relmatch - The value to write to the timer match register
+ *   tmndx    - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx);
+
+#define tiva_timer16a_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16A)
+#define tiva_timer16b_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16B)
 
 /****************************************************************************
  * Name: tiva_gptm0_synchronize
