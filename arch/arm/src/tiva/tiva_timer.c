@@ -839,14 +839,37 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
       regval &= ~TIMER_TnMR_TnCINTD;
     }
 
+
   /* Enable count down? */
 
-  if (timer->countup)
+  if (TIMER_ISCOUNTUP(timer))
     {
       regval |= TIMER_TnMR_TnCDIR_UP;
     }
 
   tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
+
+  /* Enable and configure ADC trigger outputs */
+
+  if (TIMER_ISADCTIMEOUT(timer) || TIMER_ISADCMATCH(timer))
+    {
+      /* Enable ADC trigger outputs by setting the TAOTE bit in the
+       * control register.
+       */
+
+      regval = tiva_getreg(priv, TIVA_TIMER_CTL_OFFSET);
+      regval |= TIMER_CTL_TAOTE;
+      tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
+
+      /* Enable timeout triggers now (match triggers will be
+       * enabled when the first match value is set).
+       */
+
+      if (TIMER_ISADCTIMEOUT(timer))
+        {
+          tiva_putreg(priv, TIVA_TIMER_ADCEV_OFFSET, TIMER_ADCEV_TATOADCEN);
+        }
+    }
 
   /* In addition, if using CCP pins, the TCACT field can be programmed to
    * configure the compare action.
@@ -870,7 +893,7 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    * next clock cycle.
    */
 
-  if (timer->countup)
+  if (TIMER_ISCOUNTUP(timer))
     {
       /* Count up from zero */
 
@@ -1034,12 +1057,35 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   /* Enable count down? */
 
-  if (timer->countup)
+  if (TIMER_ISCOUNTUP(timer))
     {
       regval |= TIMER_TnMR_TnCDIR_UP;
     }
 
   tiva_putreg(priv, regoffset, regval);
+
+  /* Enable and configure ADC trigger outputs */
+
+  if (TIMER_ISADCTIMEOUT(timer) || TIMER_ISADCMATCH(timer))
+    {
+      /* Enable ADC trigger outputs by setting the TnOTE bit in the
+       * control register.
+       */
+
+      regval = tiva_getreg(priv, TIVA_TIMER_CTL_OFFSET);
+      regval |= tmndx ? TIMER_CTL_TBOTE : TIMER_CTL_TAOTE;
+      tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
+
+      /* Enable timeout triggers now (match triggers will be
+       * enabled when the first match value is set).
+       */
+
+      if (TIMER_ISADCTIMEOUT(timer))
+        {
+          regval = tmndx ? TIMER_ADCEV_TBTOADCEN : TIMER_ADCEV_TATOADCEN;
+          tiva_putreg(priv, TIVA_TIMER_ADCEV_OFFSET, regval);
+        }
+    }
 
   /* In addition, if using CCP pins, the TCACT field can be programmed to
    * configure the compare action.
@@ -1065,7 +1111,7 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    */
 
   regoffset = tmndx ? TIVA_TIMER_TBV_OFFSET : TIVA_TIMER_TAV_OFFSET;
-  if (timer->countup)
+  if (TIMER_ISCOUNTUP(timer))
     {
       /* Count up from zero */
 
@@ -1922,6 +1968,8 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
   irqstate_t flags;
   uint32_t counter;
   uint32_t match;
+  uint32_t adcev;
+  uint32_t adcbits;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);
@@ -1942,7 +1990,9 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
    * minimum.
    */
 
-  base  = priv->attr->base;
+  base    = priv->attr->base;
+  adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CAMADCEN : 0;
+
   flags = irqsave();
 
   /* Set the match register to the current value of the timer counter plus
@@ -1955,6 +2005,13 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
   match   = counter + relmatch;
   putreg32(match, base + TIVA_TIMER_TAMATCHR_OFFSET);
 
+  /* Enable ADC trigger (if selected).  NOTE the TAOTE bit was already
+   * selected in the GPTMCTL register when the timer was configured.
+   */
+
+  adcev   = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  putreg32(adcev | adcbits, base + TIVA_TIMER_ADCEV_OFFSET);
+
   /* Enable interrupts as necessary */
 
   putreg32(priv->imr, base + TIVA_TIMER_IMR_OFFSET);
@@ -1965,6 +2022,8 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
 
   lldbg("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
+  lldbg("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
+  lldbg("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
 #endif
 }
@@ -2020,12 +2079,15 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   uintptr_t prescr;
   uintptr_t matchr;
   uintptr_t prematchr;
+  uintptr_t adcevr;
   uintptr_t imr;
   uint32_t timerv;
   uint32_t prescv;
   uint32_t matchv;
   uint32_t prematchv;
+  uint32_t adcevv;
   uint32_t counter;
+  uint32_t adcbits;
   bool countup;
 
   DEBUGASSERT(priv && priv->attr &&  priv->config &&
@@ -2055,6 +2117,10 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
       prescr    = base + TIVA_TIMER_TBPR_OFFSET;
       matchr    = base + TIVA_TIMER_TBMATCHR_OFFSET;
       prematchr = base + TIVA_TIMER_TBPMR_OFFSET;
+
+      /* Do we need to enable ADC trigger on the match? */
+
+      adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CBMADCEN : 0;
     }
   else
     {
@@ -2074,10 +2140,15 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
       prescr    = base + TIVA_TIMER_TAPR_OFFSET;
       matchr    = base + TIVA_TIMER_TAMATCHR_OFFSET;
       prematchr = base + TIVA_TIMER_TAPMR_OFFSET;
+
+      /* Do we need to enable ADC trigger on the match? */
+
+      adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CAMADCEN : 0;
     }
 
+  adcevr   = base + TIVA_TIMER_ADCEV_OFFSET;
   imr      = base + TIVA_TIMER_IMR_OFFSET;
-  countup  = config->countup;
+  countup  = TIMER_ISCOUNTUP(config);
 
   /* This must be done without interrupt or context switches to minimize
    * race conditions with the free-running timer.  Note that we also
@@ -2121,6 +2192,13 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   putreg32(matchv, matchr);
   putreg32(prematchv, prematchr);
 
+  /* Enable ADC trigger (if selected).  NOTE the TnOTE bit was already
+   * selected in the GPTMCTL register when the timer was configured.
+   */
+
+  adcevv = getreg32(adcevr);
+  putreg32(adcevv | adcbits, adcevr);
+
   /* Enable interrupts as necessary */
 
   putreg32(priv->imr, imr);
@@ -2133,6 +2211,8 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   lldbg("%08x->%08x\n", prescr, prescv);
   lldbg("%08x<-%08x\n", matchr, matchv);
   lldbg("%08x<-%08x\n", prematchr, prematchv);
+  lldbg("%08x->%08x\n", adcevr, adcevv);
+  lldbg("%08x<-%08x\n", adcevr, adcevv | adcbits);
   lldbg("%08x<-%08x\n", imr, priv->imr);
 #endif
 }
