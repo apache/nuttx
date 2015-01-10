@@ -731,10 +731,10 @@
 #define TIMER_TnPMR_TnPSMR_MASK        (0xff << TIMER_TnPMR_TnPSMR_SHIFT)
 #  define TIMER_TnPMR_TnPSMR(n)        ((uint32_t)(n) << TIMER_TnPMR_TnPSMR_SHIFT)
 
-/* GPTM Timer A (TAR) (32-bit value) */
-/* GPTM Timer B (TBR) (32-bit value) */
-/* GPTM Timer A Value (TAV) (32-bit value) */
-/* GPTM Timer B Value (TBV) (32-bit value) */
+/* GPTM Timer A (TAR) (16/32-bit value) */
+/* GPTM Timer B (TBR) (16/32-bit value) */
+/* GPTM Timer A Value (TAV) (16/32-bit value) */
+/* GPTM Timer B Value (TBV) (16/32-bit value) */
 
 /* GPTM RTC Predivide (RTCPD) */
 
