@@ -572,7 +572,32 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
 }
 
 /****************************************************************************
- * Name: tiva_rtc_alarm
+ * Name: tiva_rtc_settime
+ *
+ * Description:
+ *   Set the 32-bit RTC timer counter.  When RTC mode is selected for the
+ *   first time after reset, the counter is loaded with a value of 1. All
+ *   subsequent load values must be written to the concatenated GPTM Timer A
+ *   Interval Load (GPTMTAILR) registers. If the GPTMTnILR register is
+ *   loaded with a new value, the counter begins counting at that value
+ *   and rolls over at the fixed value of 0xffffffff.
+ *
+ * Input Parameters:
+ *   handle  - The handle value returned  by tiva_gptm_configure()
+ *   newtime - The new RTC time (seconds)
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t newtime)
+{
+  tiva_gptm_putreg(handle, TIVA_TIMER_TAILR_OFFSET, newtime);
+}
+
+/****************************************************************************
+ * Name: tiva_rtc_setalarm
  *
  * Description:
  *   Setup to receive an interrupt when the RTC counter equals a match time
@@ -596,7 +621,7 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
  *
  ****************************************************************************/
 
-void tiva_rtc_alarm(TIMER_HANDLE handle, uint32_t delay);
+void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay);
 
 /****************************************************************************
  * Name: tiva_timer32_relmatch
