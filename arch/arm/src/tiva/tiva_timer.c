@@ -457,13 +457,13 @@ static int tiva_timer32_interrupt(struct tiva_gptmstate_s *priv)
     {
       tiva_putreg(priv, TIVA_TIMER_ICR_OFFSET, status);
 
-      /* If this was a match interrupt, then disable further match
-       * interrupts.
+      /* If this was a match (or RTC match) interrupt, then disable further
+       * match interrupts.
        */
 
-      if ((status & TIMER_INT_TAM) != 0)
+      if ((status & (TIMER_INT_TAM | TIMER_INT_RTC)) != 0)
         {
-          priv->imr &= ~TIMER_INT_TAM;
+          status &= ~(TIMER_INT_TAM | TIMER_INT_RTC);
           tiva_putreg(priv, TIVA_TIMER_IMR_OFFSET, priv->imr);
         }
 
@@ -839,7 +839,6 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
       regval &= ~TIMER_TnMR_TnCINTD;
     }
 
-
   /* Enable count down? */
 
   if (TIMER_ISCOUNTUP(timer))
@@ -875,6 +874,8 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    * configure the compare action.
    */
 #warning Missing Logic
+
+  /* TODO: Enable and configure uDMA trigger outputs */
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTAILR).
@@ -1087,6 +1088,8 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
         }
     }
 
+  /* TODO: Enable and configure uDMA trigger outputs */
+
   /* In addition, if using CCP pins, the TCACT field can be programmed to
    * configure the compare action.
    */
@@ -1151,6 +1154,10 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
  *
  * Description:
  *   Configure a 32-bit timer to operate in RTC mode
+ *
+ *   The input clock on a CCP0 input is required to be 32.768 KHz in RTC
+ *   mode. The clock signal is then divided down to a 1-Hz rate and is
+ *   passed along to the input of the counter.
  *
  ****************************************************************************/
 
@@ -1929,6 +1936,94 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
 
   clrbits = tmndx ? TIMER_CTL_TBEN : TIMER_CTL_TAEN;
   tiva_gptm_modifyreg(handle, TIVA_TIMER_CTL_OFFSET, clrbits, 0);
+}
+
+/****************************************************************************
+ * Name: tiva_rtc_alarm
+ *
+ * Description:
+ *   Setup to receive an interrupt when the RTC counter equals a match time
+ *   value.  This function sets the match register to the current timer
+ *   counter register value PLUS the relative value provided.  The relative
+ *   value then is an offset in seconds from the current time.
+ *
+ *   NOTE: Use of this function is only meaningful for a a 32-bit RTC time.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   delay  - A relative time in the future (seconds)
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tiva_rtc_alarm(TIMER_HANDLE handle, uint32_t delay)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  const struct tiva_timer32config_s *config;
+  irqstate_t flags;
+  uintptr_t base;
+  uint32_t counter;
+  uint32_t match;
+  uint32_t adcev;
+  uint32_t adcbits;
+
+  DEBUGASSERT(priv && priv->attr && priv->config &&
+              priv->config->mode == TIMER32_MODE_RTC);
+
+  /* Update the saved IMR if an interrupt will be needed */
+
+  config = (const struct tiva_timer32config_s *)priv->config;
+  if (config->handler)
+    {
+      /* Update the saved IMR to enable the RTC match interrupt */
+
+      priv->imr |= TIMER_INT_RTC;
+    }
+
+  /* This must be done without interrupt or context switches to minimize
+   * race conditions with the free-running timer.  Note that we also
+   * by-pass the normal register accesses to keep the latency to a
+   * minimum.
+   */
+
+  base = priv->attr->base;
+  adcbits = TIMER_ISADCRTCM(config) ? TIMER_ADCEV_RTCADCEN : 0;
+
+  flags = irqsave();
+
+  /* Set the match register to the current value of the timer counter plus
+   * the provided relative delay value.
+   */
+
+  counter = getreg32(base + TIVA_TIMER_TAR_OFFSET);
+  match   = counter + delay;
+  putreg32(match, base + TIVA_TIMER_TAMATCHR_OFFSET);
+
+  /* Enable ADC trigger (if selected).  NOTE the TAOTE bit was already
+   * selected in the GPTMCTL register when the timer was configured.
+   */
+
+  adcev   = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  putreg32(adcev | adcbits, base + TIVA_TIMER_ADCEV_OFFSET);
+
+  /* TODO: Set uDMA trigger in the same manner */
+
+  /* Enable interrupts as necessary */
+
+  putreg32(priv->imr, base + TIVA_TIMER_IMR_OFFSET);
+  irqrestore(flags);
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  /* Generate low-level debug output outside of the critical section */
+
+  lldbg("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
+  lldbg("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
+  lldbg("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
+  lldbg("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
+  lldbg("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
+#endif
 }
 
 /****************************************************************************
