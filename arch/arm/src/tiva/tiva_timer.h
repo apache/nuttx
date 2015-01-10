@@ -93,6 +93,18 @@
 #define TIMER16A              0
 #define TIMER16B              1
 
+/* Flags bit definitions in configuration structures.  NOTE: not all flags
+ * apply in all timer modes.
+ */
+
+#define TIMER_FLAG_COUNTUP    (1 << 0) /* Bit 0: Count up */
+#define TIMER_FLAG_ADCTIMEOUT (1 << 1) /* Bit 1: Generate ADC trigger on timeout */
+#define TIMER_FLAG_ADCMATCH   (1 << 2) /* Bit 2: Generate ADC trigger on match */
+
+#define TIMER_ISCOUNTUP(c)    ((((c)->flags) & TIMER_FLAG_COUNTUP) != 0)
+#define TIMER_ISADCTIMEOUT(c) ((((c)->flags) & TIMER_FLAG_ADCTIMEOUT) != 0)
+#define TIMER_ISADCMATCH(c)   ((((c)->flags) & TIMER_FLAG_ADCMATCH) != 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -142,10 +154,9 @@ typedef void (*timer32_handler_t)(TIMER_HANDLE handle,
 
 struct tiva_timer32config_s
 {
-  bool countup;                  /* True: Count up; False: Count down */
+  uint8_t flags;                 /* See TIMER_FLAG_* definitions */
   timer32_handler_t handler;     /* Non-NULL: Interrupts will be enabled
                                   * and forwarded to this function */
-  /* TODO:  Add fields to support ADC trigger events */
 
   /* Mode-specific parameters */
 
@@ -187,10 +198,9 @@ typedef void (*timer16_handler_t)(TIMER_HANDLE handle,
 struct tiva_timer16config_s
 {
   uint8_t mode;                  /* See enum tiva_timermode_e */
-  bool countup;                  /* True: Count up; False: Count down */
+  uint8_t flags;                 /* See TIMER_FLAG_* definitions */
   timer16_handler_t handler;     /* Non-NULL: Interrupts will be enabled
                                   * and forwarded to this function */
-  /* TODO:  Add fields to support ADC trigger events */
 
   /* Mode-specific parameters */
 
