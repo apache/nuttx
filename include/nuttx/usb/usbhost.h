@@ -98,12 +98,12 @@
  *
  * Description:
  *   This macro will call the connect() method of struct usbhost_class_s.  This
- *   method is a callback into the class implementation.  It is used to provide the
- *   device's configuration descriptor to the class so that the class may initialize
+ *   method is a callback into the usbclass implementation.  It is used to provide the
+ *   device's configuration descriptor to the usbclass so that the usbclass may initialize
  *   properly
  *
  * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to create().
+ *   usbclass - The USB host class entry previously obtained from a call to create().
  *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
  *   desclen - The length in bytes of the configuration descriptor.
  *   funcaddr - The USB address of the function containing the endpoint that EP0
@@ -126,8 +126,8 @@
  *
  ************************************************************************************/
 
-#define CLASS_CONNECT(class,configdesc,desclen,funcaddr) \
-  ((class)->connect(class,configdesc,desclen, funcaddr))
+#define CLASS_CONNECT(usbclass,configdesc,desclen,funcaddr) \
+  ((usbclass)->connect(usbclass,configdesc,desclen, funcaddr))
 
 /************************************************************************************
  * Name: CLASS_DISCONNECTED
@@ -138,7 +138,7 @@
  *   class that the USB device has been disconnected.
  *
  * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to create().
+ *   usbclass - The USB host class entry previously obtained from a call to create().
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -149,7 +149,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_DISCONNECTED(class) ((class)->disconnected(class))
+#define CLASS_DISCONNECTED(usbclass) ((usbclass)->disconnected(usbclass))
 
 /*******************************************************************************
  * Name: CONN_WAIT
@@ -584,12 +584,13 @@ struct usbhost_class_s
    * initialize properly (such as endpoint selections).
    */
 
-  int (*connect)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc,
+  int (*connect)(FAR struct usbhost_class_s *usbclass,
+                 FAR const uint8_t *configdesc,
                  int desclen, uint8_t funcaddr);
 
   /* This method informs the class that the USB device has been disconnected. */
 
-  int (*disconnected)(FAR struct usbhost_class_s *class);
+  int (*disconnected)(FAR struct usbhost_class_s *usbclass);
 };
 
 /* This structure describes one endpoint.  It is used as an input to the
@@ -765,7 +766,7 @@ extern "C"
  *   the device.
  *
  * Input Parameters:
- *   class - An write-able instance of struct usbhost_registry_s that will be
+ *   usbclass - An write-able instance of struct usbhost_registry_s that will be
  *     maintained in a registry.
  *
  * Returned Values:
@@ -774,7 +775,7 @@ extern "C"
  *
  ************************************************************************************/
 
-int usbhost_registerclass(struct usbhost_registry_s *class);
+int usbhost_registerclass(struct usbhost_registry_s *usbclass);
 
 /************************************************************************************
  * Name: usbhost_findclass
@@ -902,7 +903,7 @@ int usbhost_wlaninit(void);
  *      the class create() method.
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
- *   class - If the class driver for the device is successful located
+ *   usbclass - If the class driver for the device is successful located
  *      and bound to the driver, the allocated class instance is returned into
  *      this caller-provided memory location.
  *
@@ -918,7 +919,7 @@ int usbhost_wlaninit(void);
  *******************************************************************************/
 
 int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
-                      FAR struct usbhost_class_s **class);
+                      FAR struct usbhost_class_s **usbclass);
 
 #undef EXTERN
 #if defined(__cplusplus)

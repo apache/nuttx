@@ -70,7 +70,7 @@ static void usbhost_takesem(FAR struct usbhost_devaddr_s *hcd)
 
   while (sem_wait(&hcd->exclsem) != 0)
     {
-      /* The only case that an error should occr here is if the wait was
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 

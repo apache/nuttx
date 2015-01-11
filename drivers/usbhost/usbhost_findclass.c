@@ -152,7 +152,7 @@ static bool usbhost_idmatch(const struct usbhost_id_s *classid,
 
 const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id)
 {
-  struct usbhost_registry_s *class;
+  struct usbhost_registry_s *usbclass;
   irqstate_t flags;
   int ndx;
 
@@ -170,23 +170,23 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
 
   /* Examine each register class in the linked list */
 
-  for (class = g_classregistry; class; class = class->flink)
+  for (usbclass = g_classregistry; usbclass; usbclass = usbclass->flink)
     {
       /* If the registered class supports more than one ID, subclass, or
        * protocol, then try each.
        */
 
-     uvdbg("Checking class:%p nids:%d\n", class, class->nids);
-     for (ndx = 0; ndx < class->nids; ndx++)
+     uvdbg("Checking class:%p nids:%d\n", usbclass, usbclass->nids);
+     for (ndx = 0; ndx < usbclass->nids; ndx++)
         {
           /* Did we find a matching ID? */
 
-          if (usbhost_idmatch(&class->id[ndx], id))
+          if (usbhost_idmatch(&usbclass->id[ndx], id))
             {
               /* Yes.. restore interrupts and return the class info */
 
               irqrestore(flags);
-              return class;
+              return usbclass;
             }
         }
     }

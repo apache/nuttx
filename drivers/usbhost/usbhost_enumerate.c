@@ -73,7 +73,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
 static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
                                     const uint8_t *configdesc, int desclen,
                                     struct usbhost_id_s *id, uint8_t funcaddr,
-                                    FAR struct usbhost_class_s **class);
+                                    FAR struct usbhost_class_s **usbclass);
 
 /*******************************************************************************
  * Private Data
@@ -224,7 +224,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
 static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
                                     const uint8_t *configdesc, int desclen,
                                     struct usbhost_id_s *id, uint8_t funcaddr,
-                                    FAR struct usbhost_class_s **class)
+                                    FAR struct usbhost_class_s **usbclass)
 {
   FAR struct usbhost_class_s *devclass;
   const struct usbhost_registry_s *reg;
@@ -259,7 +259,7 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
             }
           else
             {
-              *class = devclass;
+              *usbclass = devclass;
             }
         }
     }
@@ -290,7 +290,7 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
  *      the class create() method.
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
- *   class - If the class driver for the device is successful located
+ *   usbclass - If the class driver for the device is successful located
  *      and bound to the driver, the allocated class instance is returned into
  *      this caller-provided memory location.
  *
@@ -306,7 +306,7 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
  *******************************************************************************/
 
 int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
-                      FAR struct usbhost_class_s **class)
+                      FAR struct usbhost_class_s **usbclass)
 {
   struct usb_ctrlreq_s *ctrlreq;
   struct usbhost_devinfo_s devinfo;
@@ -318,7 +318,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   uint8_t *buffer;
   int  ret;
 
-  DEBUGASSERT(drvr && class);
+  DEBUGASSERT(drvr && usbclass);
 
   /* Allocate descriptor buffers for use in this function.  We will need two:
    * One for the request and one for the data buffer.
@@ -542,7 +542,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
    * will begin configuring the device.
    */
 
-  ret = usbhost_classbind(drvr, buffer, cfglen, &id, funcaddr, class);
+  ret = usbhost_classbind(drvr, buffer, cfglen, &id, funcaddr, usbclass);
   if (ret != OK)
     {
       udbg("ERROR: usbhost_classbind returned %d\n", ret);

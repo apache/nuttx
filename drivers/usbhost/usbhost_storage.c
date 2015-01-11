@@ -118,7 +118,7 @@ struct usbhost_state_s
 {
   /* This is the externally visible portion of the state */
 
-  struct usbhost_class_s  class;
+  struct usbhost_class_s  usbclass;
 
   /* This is an instance of the USB host driver bound to this class instance */
 
@@ -159,13 +159,14 @@ static void usbhost_takesem(sem_t *sem);
 /* Memory allocation services */
 
 static inline FAR struct usbhost_state_s *usbhost_allocclass(void);
-static inline void usbhost_freeclass(FAR struct usbhost_state_s *class);
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass);
 
 /* Device name management */
 
 static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
+                                     FAR char *devname);
 
 /* CBW/CSW debug helpers */
 
@@ -232,10 +233,10 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 
 /* struct usbhost_class_s methods */
 
-static int usbhost_connect(FAR struct usbhost_class_s *class,
+static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen,
                            uint8_t funcaddr);
-static int usbhost_disconnected(FAR struct usbhost_class_s *class);
+static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /* struct block_operations methods */
 
@@ -334,7 +335,7 @@ static void usbhost_takesem(sem_t *sem)
 
   while (sem_wait(sem) != 0)
     {
-      /* The only case that an error should occr here is if the wait was
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
@@ -405,7 +406,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
  *   Free a class instance previously allocated by usbhost_allocclass().
  *
  * Input Parameters:
- *   class - A reference to the class instance to be freed.
+ *   usbclass - A reference to the class instance to be freed.
  *
  * Returned Values:
  *   None
@@ -413,9 +414,9 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
  ****************************************************************************/
 
 #if CONFIG_USBHOST_NPREALLOC > 0
-static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 {
-  FAR struct usbhost_freestate_s *entry = (FAR struct usbhost_freestate_s *)class;
+  FAR struct usbhost_freestate_s *entry = (FAR struct usbhost_freestate_s *)usbclass;
   irqstate_t flags;
   DEBUGASSERT(entry != NULL);
 
@@ -429,16 +430,16 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
   irqrestore(flags);
 }
 #else
-static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 {
-  DEBUGASSERT(class != NULL);
+  DEBUGASSERT(usbclass != NULL);
 
   /* Free the class instance (calling sched_kmm_free() in case we are executing
    * from an interrupt handler.
    */
 
-  uvdbg("Freeing: %p\n", class);;
-  kmm_free(class);
+  uvdbg("Freeing: %p\n", usbclass);;
+  kmm_free(usbclass);
 }
 #endif
 
@@ -880,7 +881,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
  * Name: usbhost_destroy
  *
  * Description:
- *   The USB mass storage device has been disconnected and the refernce count
+ *   The USB mass storage device has been disconnected and the reference count
  *   on the USB host class instance has gone to 1.. Time to destroy the USB
  *   host class instance.
  *
@@ -953,10 +954,11 @@ static void usbhost_destroy(FAR void *arg)
  *
  * Input Parameters:
  *   priv - The USB host class instance.
- *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
+ *   configdesc - A pointer to a uint8_t buffer container the configuration
+ *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
+ *   funcaddr - The USB address of the function containing the endpoint that
+ *     EP0 controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -1644,8 +1646,9 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
  *
  ****************************************************************************/
 
-static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
-                                                  FAR const struct usbhost_id_s *id)
+static FAR struct usbhost_class_s *
+usbhost_create(FAR struct usbhost_driver_s *drvr,
+               FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
 
@@ -1664,12 +1667,12 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
         {
          /* Initialize class method function pointers */
 
-          priv->class.connect      = usbhost_connect;
-          priv->class.disconnected = usbhost_disconnected;
+          priv->usbclass.connect      = usbhost_connect;
+          priv->usbclass.disconnected = usbhost_disconnected;
 
           /* The initial reference count is 1... One reference is held by the driver */
 
-          priv->crefs              = 1;
+          priv->crefs = 1;
 
           /* Initialize semphores (this works okay in the interrupt context) */
 
@@ -1677,13 +1680,13 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
           /* Bind the driver to the storage class instance */
 
-          priv->drvr               = drvr;
+          priv->drvr = drvr;
 
           /* NOTE: We do not yet know the geometry of the USB mass storage device */
 
           /* Return the instance of the USB mass storage class */
 
-          return &priv->class;
+          return &priv->usbclass;
         }
     }
 
@@ -1709,11 +1712,13 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   descriptor to the class so that the class may initialize properly
  *
  * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to create().
- *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
+ *   usbclass - The USB host class entry previously obtained from a call to
+ *     create().
+ *   configdesc - A pointer to a uint8_t buffer container the configuration
+ *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
+ *   funcaddr - The USB address of the function containing the endpoint that
+ *     EP0 controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -1730,11 +1735,11 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *
  ****************************************************************************/
 
-static int usbhost_connect(FAR struct usbhost_class_s *class,
+static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen,
                            uint8_t funcaddr)
 {
-  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   int ret;
 
   DEBUGASSERT(priv != NULL &&
@@ -1772,7 +1777,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
  *   been disconnected.
  *
  * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to
+ *   usbclass - The USB host class entry previously obtained from a call to
  *     create().
  *
  * Returned Values:
@@ -1784,9 +1789,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
  *
  ****************************************************************************/
 
-static int usbhost_disconnected(struct usbhost_class_s *class)
+static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
-  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
@@ -1963,9 +1968,9 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
 
   if (priv->disconnected)
     {
-      /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.  Refuse any attempt to read
-       * from the device.
+      /* No... the block driver is no longer bound to the class.  That means
+       * that the USB storage device is no longer connected.  Refuse any
+       * attempt to read from the device.
        */
 
       ret = -ENODEV;
@@ -2062,9 +2067,9 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
 
   if (priv->disconnected)
     {
-      /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.  Refuse any attempt to
-       * write to the device.
+      /* No... the block driver is no longer bound to the class.  That means
+       * that the USB storage device is no longer connected.  Refuse any
+       * attempt to write to the device.
        */
 
       ret = -ENODEV;
@@ -2150,9 +2155,9 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
   priv = (FAR struct usbhost_state_s *)inode->i_private;
   if (priv->disconnected)
     {
-      /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.  Refuse to return any
-       * geometry info.
+      /* No... the block driver is no longer bound to the class.  That means
+       * that the USB storage device is no longer connected.  Refuse to
+       * return any geometry info.
        */
 
       ret = -ENODEV;
@@ -2203,9 +2208,9 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   if (priv->disconnected)
     {
-      /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.  Refuse to process any
-       * ioctl commands.
+      /* No... the block driver is no longer bound to the class.  That means
+       * that the USB storage device is no longer connected.  Refuse to
+       * process any ioctl commands.
        */
 
       ret = -ENODEV;

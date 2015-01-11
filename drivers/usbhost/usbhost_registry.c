@@ -63,7 +63,7 @@
  * Public Data
  ****************************************************************************/
 
-/* g_classregistry is a singly-linkedlist of class ID information added by
+/* g_classregistry is a singly-linked list of class ID information added by
  * calls to usbhost_registerclass().  Since this list is accessed from USB
  * host controller interrupt handling logic, accesses to this list must be
  * protected by disabling interrupts.

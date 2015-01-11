@@ -194,7 +194,7 @@ struct usbhost_state_s
 {
   /* This is the externally visible portion of the state */
 
-  struct usbhost_class_s  class;
+  struct usbhost_class_s  usbclass;
 
   /* This is an instance of the USB host driver bound to this class instance */
 
@@ -223,7 +223,7 @@ struct usbhost_state_s
    * - OUT data from the host.
    * EP Interrupt IN:
    * - Receiving asynchronous (unrequested) IN data from the device.
-   * EP Interrrupt OUT (optional):
+   * EP Interrupt OUT (optional):
    * - Transmitting low latency OUT data to the device.
    * - If not present, EP0 used.
    */
@@ -277,7 +277,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
 /* Memory allocation services */
 
 static inline FAR struct usbhost_state_s *usbhost_allocclass(void);
-static inline void usbhost_freeclass(FAR struct usbhost_state_s *class);
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass);
 
 /* Device name management */
 
@@ -327,10 +327,10 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 
 /* struct usbhost_class_s methods */
 
-static int usbhost_connect(FAR struct usbhost_class_s *class,
+static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen,
                            uint8_t funcaddr);
-static int usbhost_disconnected(FAR struct usbhost_class_s *class);
+static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /* Driver methods.  We export the keyboard as a standard character driver */
 
@@ -676,21 +676,21 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
  *   Free a class instance previously allocated by usbhost_allocclass().
  *
  * Input Parameters:
- *   class - A reference to the class instance to be freed.
+ *   usbclass - A reference to the class instance to be freed.
  *
  * Returned Values:
  *   None
  *
  ****************************************************************************/
 
-static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 {
-  DEBUGASSERT(class != NULL);
+  DEBUGASSERT(usbclass != NULL);
 
   /* Free the class instance. */
 
-  uvdbg("Freeing: %p\n", class);;
-  kmm_free(class);
+  uvdbg("Freeing: %p\n", usbclass);;
+  kmm_free(usbclass);
 }
 
 /****************************************************************************
@@ -1801,14 +1801,14 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
         {
          /* Initialize class method function pointers */
 
-          priv->class.connect      = usbhost_connect;
-          priv->class.disconnected = usbhost_disconnected;
+          priv->usbclass.connect      = usbhost_connect;
+          priv->usbclass.disconnected = usbhost_disconnected;
 
           /* The initial reference count is 1... One reference is held by
            * the driver.
            */
 
-          priv->crefs              = 1;
+          priv->crefs = 1;
 
           /* Initialize semaphores */
 
@@ -1817,11 +1817,11 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
           /* Bind the driver to the storage class instance */
 
-          priv->drvr               = drvr;
+          priv->drvr = drvr;
 
           /* Return the instance of the USB keyboard class driver */
 
-          return &priv->class;
+          return &priv->usbclass;
         }
     }
 
@@ -1848,7 +1848,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   descriptor to the class so that the class may initialize properly
  *
  * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to create().
+ *   usbclass - The USB host class entry previously obtained from a call to create().
  *   configdesc - A pointer to a uint8_t buffer container the configuration
  *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
@@ -1870,11 +1870,11 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *
  ****************************************************************************/
 
-static int usbhost_connect(FAR struct usbhost_class_s *class,
+static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen,
                            uint8_t funcaddr)
 {
-  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   int ret;
 
   DEBUGASSERT(priv != NULL &&
@@ -1922,7 +1922,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
  *   been disconnected.
  *
  * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to
+ *   usbclass - The USB host class entry previously obtained from a call to
  *     create().
  *
  * Returned Values:
@@ -1934,9 +1934,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
  *
  ****************************************************************************/
 
-static int usbhost_disconnected(struct usbhost_class_s *class)
+static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
-  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
 
   DEBUGASSERT(priv != NULL);
 
