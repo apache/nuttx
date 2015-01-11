@@ -199,6 +199,7 @@ struct tiva_timer32config_s
 
     struct
     {
+                                 /* No special configuration settings */
     } rtc;
   } u;
 };
@@ -244,18 +245,21 @@ struct tiva_timer16config_s
 
     struct
     {
+                                 /* TODO: To be provided */
     } count;
 
     /* 16-bit input time capture mode w/8-bit prescaler */
 
     struct
     {
+                                 /* TODO: To be provided */
     } time;
 
     /* 16-bit PWM output mode w/8-bit prescaler */
 
     struct
     {
+                                 /* TODO: To be provided */
     } pwm;
   } u;
 };
