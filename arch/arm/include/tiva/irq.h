@@ -58,22 +58,47 @@
 
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 
-/* The TM4C123x and TM4C129x support interrupts only on ports P and Q. */
+/* The TM4C123GH6PMI supports ports A-F of which any can support interrupts */
 
-#  undef CONFIG_TIVA_GPIOA_IRQS
-#  undef CONFIG_TIVA_GPIOB_IRQS
-#  undef CONFIG_TIVA_GPIOC_IRQS
-#  undef CONFIG_TIVA_GPIOD_IRQS
-#  undef CONFIG_TIVA_GPIOE_IRQS
-#  undef CONFIG_TIVA_GPIOF_IRQS
-#  undef CONFIG_TIVA_GPIOG_IRQS
+#  if defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI)
+#    undef CONFIG_TIVA_GPIOP_IRQS /* P-Q */
+#    undef CONFIG_TIVA_GPIOQ_IRQS
+
+/* The TM4C123GH6PGE supports interrupts on port P */
+
+#  elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PGE)
+#    undef CONFIG_TIVA_GPIOA_IRQS /* A-F */
+#    undef CONFIG_TIVA_GPIOB_IRQS
+#    undef CONFIG_TIVA_GPIOC_IRQS
+#    undef CONFIG_TIVA_GPIOD_IRQS
+#    undef CONFIG_TIVA_GPIOE_IRQS
+#    undef CONFIG_TIVA_GPIOF_IRQS
+
+#    undef CONFIG_TIVA_GPIOQ_IRQS /* Q */
+
+/* The TM4C123GH6ZRB  and the TM4C129x support interrupts only on ports P and Q. */
+
+#  else
+#    undef CONFIG_TIVA_GPIOA_IRQS /* A-F */
+#    undef CONFIG_TIVA_GPIOB_IRQS
+#    undef CONFIG_TIVA_GPIOC_IRQS
+#    undef CONFIG_TIVA_GPIOD_IRQS
+#    undef CONFIG_TIVA_GPIOE_IRQS
+#    undef CONFIG_TIVA_GPIOF_IRQS
+
+#  endif
+
+/* No supported architecture supports interrupts on ports G-N or R-T */
+
+#  undef CONFIG_TIVA_GPIOG_IRQS /* G-N */
 #  undef CONFIG_TIVA_GPIOH_IRQS
 #  undef CONFIG_TIVA_GPIOJ_IRQS
 #  undef CONFIG_TIVA_GPIOK_IRQS
 #  undef CONFIG_TIVA_GPIOL_IRQS
 #  undef CONFIG_TIVA_GPIOM_IRQS
 #  undef CONFIG_TIVA_GPION_IRQS
-#  undef CONFIG_TIVA_GPIOR_IRQS
+
+#  undef CONFIG_TIVA_GPIOR_IRQS /* R-T */
 #  undef CONFIG_TIVA_GPIOS_IRQS
 #  undef CONFIG_TIVA_GPIOT_IRQS
 
