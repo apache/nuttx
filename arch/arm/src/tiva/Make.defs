@@ -98,6 +98,9 @@ endif
 
 ifeq ($(CONFIG_TIVA_TIMER),y)
 CHIP_CSRCS += tiva_timer.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += tiva_timerlow.c
+endif
 endif
 
 ifeq ($(CONFIG_NET),y)
