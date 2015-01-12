@@ -47,6 +47,8 @@
 
 #include <arch/tiva/chip.h>
 
+#include "up_arch.h"
+#include "chip.h"
 #include "chip/tiva_timer.h"
 
 /****************************************************************************
@@ -124,6 +126,20 @@
 #define TIMER_ISDMATIMEOUT(c) ((((c)->flags) & TIMER_FLAG_DMATIMEOUT) != 0)
 #define TIMER_ISDMARTCM(c)    ((((c)->flags) & TIMER_FLAG_DMARTCM) != 0)
 #define TIMER_ISDMAMATCH(c)   ((((c)->flags) & TIMER_FLAG_DMAMATCH) != 0)
+
+/* Debug ********************************************************************/
+/* Non-standard debug that may be enabled just for testing the timer
+ * driver.  NOTE: that only lldbg types are used so that the output is
+ * immediately available.
+ */
+
+#ifdef CONFIG_DEBUG_TIMER
+#  define timdbg  lldbg
+#  define timvdbg llvdbg
+#else
+#  define timdbg(x...)
+#  define timvdbg(x...)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -321,6 +337,23 @@ struct tiva_gptm16config_s
 TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *gptm);
 
 /****************************************************************************
+ * Name: tiva_gptm_release
+ *
+ * Description:
+ *   Release resources held by the timer instance.  After this function is
+ *   called, the timer handle is invalid and must not be used further.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tiva_gptm_release(TIMER_HANDLE handle);
+
+/****************************************************************************
  * Name: tiva_gptm_putreg
  *
  * Description:
@@ -504,61 +537,44 @@ static inline uint32_t tiva_timer32_counter(TIMER_HANDLE handle)
 uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx);
 
 /****************************************************************************
- * Name: tiva_timer32_setload
+ * Name: tiva_timer32_setinterval
  *
  * Description:
  *   This function may be called at any time to change the timer interval
  *   load value of a 32-bit timer.
  *
  * Input Parameters:
- *   handle - The handle value returned  by tiva_gptm_configure()
- *   load   - The value to write to the timer interval load register
+ *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   interval - The value to write to the timer interval load register
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static inline void tiva_timer32_setload(TIMER_HANDLE handle, uint32_t load)
-{
-  tiva_gptm_putreg(handle, TIVA_TIMER_TAILR_OFFSET, load);
-}
+void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval);
 
 /****************************************************************************
- * Name: tiva_timer16_setload
+ * Name: tiva_timer16_setinterval
  *
  * Description:
  *   This function may be called at any time to change the timer interval
  *   load value of a 16-bit timer.
  *
  * Input Parameters:
- *   handle - The handle value returned  by tiva_gptm_configure()
- *   load   - The value to write to the timer interval load register
- *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   interval - The value to write to the timer interval load register
+ *   tmndx    - Either TIMER16A or TIMER16B to select the 16-bit timer
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static inline void tiva_timer16_setload(TIMER_HANDLE handle, uint16_t load,
-                                        int tmndx)
-{
-  unsigned int regoffset =
-    tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
+void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx);
 
-  tiva_gptm_putreg(handle, regoffset, load);
-}
-
-static inline void tiva_timer16a_setload(TIMER_HANDLE handle, uint16_t load)
-{
-  tiva_gptm_putreg(handle, TIVA_TIMER_TAILR_OFFSET, load);
-}
-
-static inline void tiva_timer16b_setload(TIMER_HANDLE handle, uint16_t load)
-{
-  tiva_gptm_putreg(handle, TIVA_TIMER_TBILR_OFFSET, load);
-}
+#define tiva_timer16a_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16A)
+#define tiva_timer16b_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16B)
 
 /****************************************************************************
  * Name: tiva_timer32_absmatch
@@ -767,5 +783,33 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
 {
   putreg32(sync, TIVA_TIMER0_SYNC);
 }
+
+/****************************************************************************
+ * Name: tiva_timer_register
+ *
+ * Description:
+ *   Bind the configuration timer to a timer lower half instance and
+ *   register the timer drivers at 'devpath'
+ *
+ *   NOTE: Only 32-bit periodic timers are supported.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the form
+ *     /dev/timer0
+ *   gptm - General purpose timer number
+ *   timeout - Timeout interval in milliseconds. Set to a non-zero value
+ *     to enable timeout interrupts
+ *   altlck - True: Use alternate clock source.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int tiva_timer_register(FAR const char *devpath, int gptm, uint32_t timeout,
+                        bool altclk);
+#endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_TIMER_H */
