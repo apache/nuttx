@@ -1959,6 +1959,131 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx)
 }
 
 /****************************************************************************
+ * Name: tiva_timer16_counter
+ *
+ * Description:
+ *   Return the current 24-bit counter value of the 16-bit timer.
+ *
+ *   The timer 24-bit value is the 16-bit counter value AND the 8-bit
+ *   prescaler value.  From the caller's point of view the match value is
+ *   the 24-bit timer at the timer input clock frequency.
+ *
+ *   When counting down in periodic modes, the prescaler contains the
+ *   least-significant bits of the count. When counting up, the prescaler
+ *   holds the most-significant bits of the count.  But the caller is
+ *   protected from this complexity.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   The current 24-bit counter value.
+ *
+ ****************************************************************************/
+
+uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  const struct tiva_gptm16config_s *gptm;
+  const struct tiva_timer16config_s *config;
+  irqstate_t flags;
+  uintptr_t base;
+  uintptr_t timerr;
+  uintptr_t prescr;
+  uint32_t timerv;
+  uint32_t prescv;
+  uint32_t checkv;
+  uint32_t counter;
+
+  DEBUGASSERT(priv && priv->attr &&  priv->config &&
+              priv->config->mode == TIMER16_MODE && (unsigned)tmndx < 2);
+
+  /* Get settings common to both 16-bit timers */
+
+  gptm = (const struct tiva_gptm16config_s *)priv->config;
+  base = priv->attr->base;
+
+  /* Get settings unique to one of the 16-bit timers */
+
+  if (tmndx)
+    {
+      /* Get the Timer B configuration */
+
+      config = &gptm->config[TIMER16B];
+
+      /* Get Timer B register addresses */
+
+      timerr = base + TIVA_TIMER_TBR_OFFSET;
+      prescr = base + TIVA_TIMER_TBPR_OFFSET;
+    }
+  else
+    {
+      /* Get the Timer A configuration */
+
+      config = &gptm->config[TIMER16A];
+
+      /* Get Timer A register addresses */
+
+      timerr = base + TIVA_TIMER_TAR_OFFSET;
+      prescr = base + TIVA_TIMER_TAPR_OFFSET;
+    }
+
+  /* Are we counting up or down? */
+
+  if (TIMER_ISCOUNTUP(config))
+    {
+      /* We are counting up. The prescaler holds the most-significant bits of
+       * the count.  Sample these registers until we are assured that there
+       * is no roll-over from the counter to the prescaler register.
+       */
+
+      do
+        {
+          flags = irqsave();
+          checkv = getreg32(prescr);
+          timerv = getreg32(timerr);
+          prescv = getreg32(prescr);
+          irqrestore(flags);
+        }
+      while (checkv != prescv);
+
+      /* Then form the 32-bit counter value with the prescaler as the most
+       * significant 8-bits.
+       */
+
+      counter = (prescv & 0xff) << 16 | (timerv & 0xffff);
+    }
+  else
+    {
+      /* We are counting down.  The prescaler contains the least-significant
+       * bits of the count.   Sample these registers until we are assured that
+       * there is no roll-over from the counter to the counter register.
+       */
+
+      do
+        {
+          flags = irqsave();
+          checkv = getreg32(timerr);
+          prescv = getreg32(prescr);
+          timerv = getreg32(timerr);
+          irqrestore(flags);
+        }
+      while (checkv != timerv);
+
+      /* Then form the 32-bit counter value with the counter as the most
+       * significant 8-bits.
+       */
+
+      counter = (timerv & 0xffff) << 8 | (prescv & 0xff);
+    }
+
+  /* Return the counter value */
+
+  return counter;
+}
+
+/****************************************************************************
  * Name: tiva_rtc_setalarm
  *
  * Description:
@@ -2161,8 +2286,8 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
  *   periodic timer.
  *
  *   NOTE: The relmatch input is a really a 24-bit value; it is the 16-bit
- *   match counter match value AND the 8-bit prescaler value.  From the
- *   callers point of view the match value is the 24-bit time to match
+ *   match counter match value AND the 8-bit prescaler match value.  From
+ *   the caller's point of view the match value is the 24-bit time to match
  *   driven at the timer input clock frequency.
  *
  *   When counting down in periodic modes, the prescaler contains the
@@ -2208,8 +2333,7 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   DEBUGASSERT(priv && priv->attr &&  priv->config &&
               priv->config->mode == TIMER16_MODE && (unsigned)tmndx < 2);
 
-
-  /* Precalculate as much as possible before entering the critical section */
+  /* Pre-calculate as much as possible before entering the critical section */
 
   gptm = (const struct tiva_gptm16config_s *)priv->config;
   base = priv->attr->base;
@@ -2249,7 +2373,7 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
           priv->imr |= TIMER_INT_TAM;
         }
 
-      /* Get Timer B register addresses */
+      /* Get Timer A register addresses */
 
       timerr    = base + TIVA_TIMER_TAR_OFFSET;
       prescr    = base + TIVA_TIMER_TAPR_OFFSET;

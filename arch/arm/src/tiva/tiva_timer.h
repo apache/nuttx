@@ -459,6 +459,51 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx);
 #define tiva_timer16b_stop(h) tiva_timer16_stop(h, TIMER16B)
 
 /****************************************************************************
+ * Name: tiva_timer32_counter
+ *
+ * Description:
+ *   Return the current 32-bit counter value of the 32-bit timer.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *
+ * Returned Value:
+ *   The current 32-bit counter value.
+ *
+ ****************************************************************************/
+
+static inline uint32_t tiva_timer32_counter(TIMER_HANDLE handle)
+{
+  return tiva_gptm_getreg(handle, TIVA_TIMER_TAR_OFFSET);
+}
+
+/****************************************************************************
+ * Name: tiva_timer16_counter
+ *
+ * Description:
+ *   Return the current 24-bit counter value of the 16-bit timer.
+ *
+ *   The timer 24-bit value is the 16-bit counter value AND the 8-bit
+ *   prescaler value.  From the caller's point of view the match value is
+ *   the 24-bit timer at the timer input clock frequency.
+ *
+ *   When counting down in periodic modes, the prescaler contains the
+ *   least-significant bits of the count. When counting up, the prescaler
+ *   holds the most-significant bits of the count.  But the caller is
+ *   protected from this complexity.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure()
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   The current 24-bit counter value.
+ *
+ ****************************************************************************/
+
+uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx);
+
+/****************************************************************************
  * Name: tiva_timer32_setload
  *
  * Description:
@@ -676,8 +721,8 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch);
  *   runnning, periodic timer.
  *
  *   NOTE: The relmatch input is a really a 24-bit value; it is the 16-bit
- *   match counter match value AND the 8-bit prescaler value.  From the
- *   callers point of view the match value is the 24-bit time to match
+ *   match counter match value AND the 8-bit prescaler match value.  From
+ *   the caller's point of view the match value is the 24-bit time to match
  *   driven at the timer input clock frequency.
  *
  *   When counting down in periodic modes, the prescaler contains the
