@@ -64,7 +64,7 @@
 #    undef CONFIG_TIVA_GPIOP_IRQS /* P-Q */
 #    undef CONFIG_TIVA_GPIOQ_IRQS
 
-/* The TM4C123GH6PGE supports interrupts on port P */
+/* The TM4C123GH6PGE supports interrupts only on port P */
 
 #  elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PGE)
 #    undef CONFIG_TIVA_GPIOA_IRQS /* A-F */
@@ -76,7 +76,7 @@
 
 #    undef CONFIG_TIVA_GPIOQ_IRQS /* Q */
 
-/* The TM4C123GH6ZRB  and the TM4C129x support interrupts only on ports P and Q. */
+/* The TM4C123GH6ZRB and the TM4C129x support interrupts only on ports P and Q. */
 
 #  else
 #    undef CONFIG_TIVA_GPIOA_IRQS /* A-F */
