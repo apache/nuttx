@@ -178,6 +178,7 @@ enum tiva_timer16mode_e
 
 typedef FAR void *TIMER_HANDLE;
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 /* This type describes the 32-bit timer interrupt handler.
  *
  * Input Parameters:
@@ -204,22 +205,28 @@ struct tiva_timer32config_s
 
   union
   {
+#ifdef CONFIG_TIVA_TIMER32_PERIODIC
     /* 32-bit programmable one-shot or periodic timer */
 
     struct
     {
       uint32_t interval;         /* Value for interval load register */
     } periodic;
+#endif
 
+#ifdef CONFIG_TIVA_TIMER32_RTC
     /* 32-bit RTC with external 32.768-KHz input */
 
     struct
     {
                                  /* No special configuration settings */
     } rtc;
+#endif
   } u;
 };
+#endif
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 /* This type describes the 16-bit timer interrupt handler
  *
  * Input Parameters:
@@ -249,6 +256,7 @@ struct tiva_timer16config_s
 
   union
   {
+#ifdef CONFIG_TIVA_TIMER16_PERIODIC
     /* 16-bit programmable one-shot or periodic timer */
 
     struct
@@ -256,29 +264,37 @@ struct tiva_timer16config_s
       uint8_t  prescaler;        /* Prescaler-1:  0-255 corresponding to 1-256 */
       uint16_t interval;         /* Value for interval load register */
     } periodic;
+#endif
 
+#ifdef CONFIG_TIVA_TIMER32_EDGECOUNT
     /* 16-bit input edge-count capture mode w/8-bit prescaler */
 
     struct
     {
                                  /* TODO: To be provided */
     } count;
+#endif
 
+#ifdef CONFIG_TIVA_TIMER32_TIMECAP
     /* 16-bit input time capture mode w/8-bit prescaler */
 
     struct
     {
                                  /* TODO: To be provided */
     } time;
+#endif
 
+#ifdef CONFIG_TIVA_TIMER32_PWM
     /* 16-bit PWM output mode w/8-bit prescaler */
 
     struct
     {
                                  /* TODO: To be provided */
     } pwm;
+#endif
   } u;
 };
+#endif
 
 /* This structure describes usage of both timers on a GPTIM module */
 
@@ -289,6 +305,7 @@ struct tiva_gptmconfig_s
   bool alternate;                /* False: Use SysClk; True: Use alternate clock source */
 };
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 /* This structure is cast compatible with struct tiva_gptmconfig_s and
  * describes usage of the single 32-bit timers on a GPTM module.
  */
@@ -298,16 +315,19 @@ struct tiva_gptm32config_s
   struct tiva_gptmconfig_s cmn;
   struct tiva_timer32config_s config;
 };
+#endif
 
 /* This structure is cast compatible with struct tiva_gptmconfig_s and
  * describes usage of both bit-bit timers A/B on a GPTM module.
  */
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 struct tiva_gptm16config_s
 {
   struct tiva_gptmconfig_s cmn;
   struct tiva_timer16config_s config[2];
 };
+#endif
 
 /****************************************************************************
  * Public Data
@@ -430,7 +450,9 @@ void tiva_gptm_modifyreg(TIMER_HANDLE handle, unsigned int offset,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 void tiva_timer32_start(TIMER_HANDLE handle);
+#endif
 
 /****************************************************************************
  * Name: tiva_timer16_start
@@ -448,10 +470,12 @@ void tiva_timer32_start(TIMER_HANDLE handle);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 void tiva_timer16_start(TIMER_HANDLE handle, int tmndx);
 
-#define tiva_timer16a_start(h) tiva_timer16_start(h, TIMER16A)
-#define tiva_timer16b_start(h) tiva_timer16_start(h, TIMER16B)
+#  define tiva_timer16a_start(h) tiva_timer16_start(h, TIMER16A)
+#  define tiva_timer16b_start(h) tiva_timer16_start(h, TIMER16B)
+#endif
 
 /****************************************************************************
  * Name: tiva_timer32_stop
@@ -468,7 +492,9 @@ void tiva_timer16_start(TIMER_HANDLE handle, int tmndx);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 void tiva_timer32_stop(TIMER_HANDLE handle);
+#endif
 
 /****************************************************************************
  * Name: tiva_timer16_stop
@@ -486,10 +512,12 @@ void tiva_timer32_stop(TIMER_HANDLE handle);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx);
 
-#define tiva_timer16a_stop(h) tiva_timer16_stop(h, TIMER16A)
-#define tiva_timer16b_stop(h) tiva_timer16_stop(h, TIMER16B)
+#  define tiva_timer16a_stop(h) tiva_timer16_stop(h, TIMER16A)
+#  define tiva_timer16b_stop(h) tiva_timer16_stop(h, TIMER16B)
+#endif
 
 /****************************************************************************
  * Name: tiva_timer32_counter
@@ -505,10 +533,12 @@ void tiva_timer16_stop(TIMER_HANDLE handle, int tmndx);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 static inline uint32_t tiva_timer32_counter(TIMER_HANDLE handle)
 {
   return tiva_gptm_getreg(handle, TIVA_TIMER_TAR_OFFSET);
 }
+#endif
 
 /****************************************************************************
  * Name: tiva_timer16_counter
@@ -534,7 +564,12 @@ static inline uint32_t tiva_timer32_counter(TIMER_HANDLE handle)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx);
+
+#  define tiva_timer16a_counter(h) tiva_timer16_counter(h, TIMER16A)
+#  define tiva_timer16b_counter(h) tiva_timer16_counter(h, TIMER16B)
+#endif
 
 /****************************************************************************
  * Name: tiva_timer32_setinterval
@@ -552,7 +587,9 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval);
+#endif
 
 /****************************************************************************
  * Name: tiva_timer16_setinterval
@@ -571,10 +608,12 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx);
 
-#define tiva_timer16a_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16A)
-#define tiva_timer16b_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16B)
+#  define tiva_timer16a_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16A)
+#  define tiva_timer16b_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16B)
+#endif
 
 /****************************************************************************
  * Name: tiva_timer32_absmatch
@@ -593,11 +632,13 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_32BIT
 static inline void tiva_timer32_absmatch(TIMER_HANDLE handle,
                                          uint32_t absmatch)
 {
   tiva_gptm_putreg(handle, TIVA_TIMER_TAMATCHR_OFFSET, absmatch);
 }
+#endif
 
 /****************************************************************************
  * Name: tiva_timer16_absmatch
@@ -617,6 +658,7 @@ static inline void tiva_timer32_absmatch(TIMER_HANDLE handle,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER_16BIT
 static inline void tiva_timer16_absmatch(TIMER_HANDLE handle,
                                          uint16_t absmatch, int tmndx)
 {
@@ -635,6 +677,7 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
 {
   tiva_gptm_putreg(handle, TIVA_TIMER_TBMATCHR_OFFSET, absmatch);
 }
+#endif
 
 /****************************************************************************
  * Name: tiva_rtc_settime
@@ -656,10 +699,12 @@ static inline void tiva_timer16b_absmatch(TIMER_HANDLE handle, uint16_t absmatch
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER32_RTC
 static inline void tiva_rtc_settime(TIMER_HANDLE handle, uint32_t newtime)
 {
   tiva_gptm_putreg(handle, TIVA_TIMER_TAILR_OFFSET, newtime);
 }
+#endif
 
 /****************************************************************************
  * Name: tiva_rtc_setalarm
@@ -686,7 +731,9 @@ static inline void tiva_rtc_settime(TIMER_HANDLE handle, uint32_t newtime)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER32_RTC
 void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay);
+#endif
 
 /****************************************************************************
  * Name: tiva_timer32_relmatch
@@ -717,7 +764,9 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER32_PERIODIC
 void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch);
+#endif
 
 /****************************************************************************
  * Name: tiva_timer16_relmatch
@@ -759,10 +808,12 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_TIMER16_PERIODIC
 void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx);
 
-#define tiva_timer16a_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16A)
-#define tiva_timer16b_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16B)
+#  define tiva_timer16a_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16A)
+#  define tiva_timer16b_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16B)
+#endif
 
 /****************************************************************************
  * Name: tiva_gptm0_synchronize
@@ -779,10 +830,12 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVER_TIMER0
 static inline void tiva_gptm0_synchronize(uint32_t sync)
 {
   putreg32(sync, TIVA_TIMER0_SYNC);
 }
+#endif
 
 /****************************************************************************
  * Name: tiva_timer_register

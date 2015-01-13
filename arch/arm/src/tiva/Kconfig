@@ -746,6 +746,54 @@ if TIVA_TIMER
 
 menu "Tiva Timer Configuration"
 
+config TIVA_TIMER_DRIVER
+	bool
+	default n
+
+config TIVA_TIMER_32BIT
+	bool "32-bit timer support"
+	default n
+
+if TIVA_TIMER_32BIT
+
+config TIVA_TIMER32_PERIODIC
+	bool "32-bit one-shot/periodic timer support"
+	default n
+	select TIVA_TIMER_DRIVER if TIMER
+
+config TIVA_TIMER32_RTC
+	bool "32-bit RTC (needs 32.768-KHz input)"
+	default n
+
+endif # TIVA_TIMER_32BIT
+
+config TIVA_TIMER_16BIT
+	bool "16-bit Timers"
+	default n
+
+if TIVA_TIMER_16BIT
+
+config TIVA_TIMER16_PERIODIC
+	bool "16-bit one-shot/periodic timer support"
+	default n
+
+config TIVA_TIMER32_EDGECOUNT
+	bool "16-bit input edge-count capture support"
+	default n
+	depends on EXPERIMENTAL
+
+config TIVA_TIMER32_TIMECAP
+	bool "16-bit input time capture support"
+	default n
+	depends on EXPERIMENTAL
+
+config TIVA_TIMER32_PWM
+	bool "16-bit PWM output support"
+	default n
+	depends on EXPERIMENTAL
+
+endif # TIVA_TIMER_16BIT
+
 config TIVA_TIMER_REGDEBUG
 	bool "Register level debug"
 	default n
