@@ -2353,95 +2353,13 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
 void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 {
   struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
-  const struct tiva_gptm32config_s *config;
-  const struct tiva_timer32config_s *timer;
-  irqstate_t flags;
-  uintptr_t base;
-  uintptr_t moder;
-  uintptr_t loadr;
-  uintptr_t icrr;
-  uintptr_t imrr;
-  uint32_t modev1;
-  uint32_t modev2;
-  bool toints;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);
-  config = (const struct tiva_gptm32config_s *)priv->config;
-  timer  = &config->config;
-
-  /* Do we need to control timeout interrupts? */
-
-  base = priv->attr->base;
-  if (timer->handler && interval > 0 &&
-     (config->cmn.mode == TIMER32_MODE_ONESHOT ||
-      config->cmn.mode == TIMER32_MODE_PERIODIC))
-    {
-       priv->imr |= TIMER_INT_TATO;
-       toints = true;
-    }
-  else
-    {
-       priv->imr &= ~TIMER_INT_TATO;
-       toints = false;
-    }
-
-  loadr = base + TIVA_TIMER_TAILR_OFFSET;
-  moder = base + TIVA_TIMER_TAMR_OFFSET;
-  icrr  = base + TIVA_TIMER_ICR_OFFSET;
-  imrr  = base + TIVA_TIMER_IMR_OFFSET;
-
-  /* Make the following atomic */
-
-  flags = irqsave();
 
    /* Set the new timeout interval */
 
-  putreg32(interval, loadr);
-
-  /* Enable/disable timeout interrupts */
-
-  if (toints)
-    {
-      /* Clearing the TACINTD bit allows the time-out interrupt to be
-       * generated as normal
-       */
-
-      modev1 = getreg32(moder);
-      modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
-      putreg32(modev2, moder);
-    }
-  else
-    {
-      /* Setting the TACINTD bit prevents the time-out interrupt */
-
-      modev1 = getreg32(moder);
-      modev2 = modev1 | TIMER_TnMR_TnCINTD;
-      putreg32(modev2, moder);
-
-      /* Clear any pending timeout interrupts */
-
-      putreg32(TIMER_INT_TATO, icrr);
-    }
-
-  /* Set the new interrupt mask */
-
-  putreg32(priv->imr, imrr);
-  irqrestore(flags);
-
-#ifdef CONFIG_TIVA_TIMER_REGDEBUG
-  /* Generate low-level debug output outside of the critical section */
-
-  lldbg("%08x<-%08x\n", loadr, interval);
-  lldbg("%08x->%08x\n", moder, modev1);
-  lldbg("%08x<-%08x\n", moder, modev2);
-  if (!toints)
-    {
-      lldbg("%08x->%08x\n", icrr, TIMER_INT_TATO);
-    }
-
-  lldbg("%08x<-%08x\n", imrr, priv->imr);
-#endif
+  tiva_putreg(priv, TIVA_TIMER_TAILR_OFFSET, interval);
 }
 #endif
 
@@ -2482,109 +2400,15 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 {
   struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
-  const struct tiva_gptm16config_s *config;
-  const struct tiva_timer16config_s *timer;
-  irqstate_t flags;
-  uintptr_t base;
-  uintptr_t moder;
-  uintptr_t loadr;
-  uintptr_t icrr;
-  uintptr_t imrr;
-  uint32_t intbit;
-  uint32_t modev1;
-  uint32_t modev2;
-  bool toints;
+  unsigned int regoffset;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);
-  config = (const struct tiva_gptm16config_s *)priv->config;
-  timer  = &config->config[tmndx];
-
-  /* Pre-calculate as much as possible outside of the critical section */
-
-  base = priv->attr->base;
-  if (tmndx)
-    {
-      intbit = TIMER_INT_TBTO;
-      loadr  = base + TIVA_TIMER_TBILR_OFFSET;
-      moder  = base + TIVA_TIMER_TBMR_OFFSET;
-    }
-  else
-    {
-      intbit = TIMER_INT_TATO;
-      loadr  = base + TIVA_TIMER_TAILR_OFFSET;
-      moder  = base + TIVA_TIMER_TAMR_OFFSET;
-    }
-
-  icrr = base + TIVA_TIMER_ICR_OFFSET;
-  imrr = base + TIVA_TIMER_IMR_OFFSET;
-
-  /* Do we need to control timeout interrupts? */
-
-  if (timer->handler && interval > 0 &&
-     (config->cmn.mode == TIMER16_MODE_ONESHOT ||
-      config->cmn.mode == TIMER16_MODE_PERIODIC))
-    {
-       priv->imr |= intbit;
-       toints = true;
-    }
-  else
-    {
-       priv->imr &= ~intbit;
-       toints = false;
-    }
-
-  /* Make the following atomic */
-
-  flags = irqsave();
 
   /* Set the new timeout interval */
 
-  putreg32(interval, loadr);
-
-  /* Enable/disable timeout interrupts */
-
-  if (toints)
-    {
-      /* Clearing the TACINTD bit allows the time-out interrupt to be
-       * generated as normal
-       */
-
-      modev1 = getreg32(moder);
-      modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
-      putreg32(modev2, moder);
-    }
-  else
-    {
-      /* Setting the TACINTD bit prevents the time-out interrupt */
-
-      modev1 = getreg32(moder);
-      modev2 = modev1 | TIMER_TnMR_TnCINTD;
-      putreg32(modev2, moder);
-
-      /* Clear any pending timeout interrupts */
-
-      putreg32(intbit, icrr);
-    }
-
-  /* Set the new interrupt mask */
-
-  putreg32(priv->imr, imrr);
-  irqrestore(flags);
-
-#ifdef CONFIG_TIVA_TIMER_REGDEBUG
-  /* Generate low-level debug output outside of the critical section */
-
-  lldbg("%08x<-%08x\n", loadr, interval);
-  lldbg("%08x->%08x\n", moder, modev1);
-  lldbg("%08x<-%08x\n", moder, modev2);
-  if (!toints)
-    {
-      lldbg("%08x->%08x\n", icrr, intbit);
-    }
-
-  lldbg("%08x<-%08x\n", imrr, priv->imr);
-#endif
+  regoffset = tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
+  tiva_putreg(priv, regoffet, interval);
 }
 #endif
 
@@ -2763,7 +2587,7 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
    * selected in the GPTMCTL register when the timer was configured.
    */
 
-  adcev   = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  adcev = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
   putreg32(adcev | adcbits, base + TIVA_TIMER_ADCEV_OFFSET);
 
   /* TODO: Set uDMA trigger in the same manner */
@@ -2864,7 +2688,7 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
    * selected in the GPTMCTL register when the timer was configured.
    */
 
-  adcev   = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  adcev = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
   putreg32(adcev | adcbits, base + TIVA_TIMER_ADCEV_OFFSET);
 
   /* Enable interrupts as necessary */
@@ -3073,4 +2897,3 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
 #endif
 }
 #endif
-
