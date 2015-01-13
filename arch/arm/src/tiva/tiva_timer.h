@@ -892,7 +892,7 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
  *   devpath - The full path to the timer device.  This should be of the form
  *     /dev/timer0
  *   gptm - General purpose timer number
- *   timeout - Timeout interval in milliseconds. Set to a non-zero value
+ *   timeout - Timeout interval in microseconds. Set to a non-zero value
  *     to enable timeout interrupts
  *   altlck - True: Use alternate clock source.
  *
