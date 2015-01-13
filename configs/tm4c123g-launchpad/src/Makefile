@@ -55,6 +55,10 @@ CSRCS += tm4c_at24.c
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += tm4c_buttons.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
