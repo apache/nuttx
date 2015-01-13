@@ -76,7 +76,7 @@ struct tiva_lowerhalf_s
   uint32_t clkin;                    /* Input clock frequency */
   uint32_t timeout;                  /* The current timeout value (us) */
   uint32_t clkticks;                 /* Actual clock ticks for current interval */
-  uint32_t adjustment;               /* Time lost due to clock resolution truncation (us) */
+  uint32_t adjustment;               /* Time lost due to truncation (us) */
   bool started;                      /* True: Timer has been started */
 };
 
@@ -90,8 +90,7 @@ static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks);
 
 /* Interrupt handling *******************************************************/
 
-static void     tiva_handler(TIMER_HANDLE handle,
-                  const struct tiva_gptm32config_s *config, uint32_t status);
+static void     tiva_handler(TIMER_HANDLE handle, void *arg, uint32_t status);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -195,16 +194,16 @@ static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks)
  *
  ****************************************************************************/
 
-static void tiva_handler(TIMER_HANDLE handle,
-                         const struct tiva_gptm32config_s *config,
-                         uint32_t status)
+static void tiva_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
 {
-  struct tiva_lowerhalf_s *priv;
+  struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)arg;
 
-  timvdbg("Entry\n");
+  timvdbg("Entry: status=%08x\n", status);
+  DEBUGASSERT(arg && status);
 
   /* Check if the timeout interrupt is pending */
-#warning Missing logic
+
+  if ((status & TIMER_INT_TATO) != 0)
     {
       uint32_t timeout;
 
@@ -219,7 +218,12 @@ static void tiva_handler(TIMER_HANDLE handle,
           /* Set next interval interval. TODO: make sure the interval is not
            * so soon it will be missed!
            */
-#warning Missing logic
+
+#if 0 /* Too much in this context */
+          tiva_timer32_setinterval(priv->handle, priv->clkticks);
+#else
+          tiva_gptm_putreg(priv->handle, TIVA_TIMER_TAILR_OFFSET, priv->clkticks);
+#endif
 
           /* Calculate the next adjustment */
 
@@ -327,7 +331,7 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
                           struct timer_status_s *status)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
-  uint32_t elapsed;
+  uint32_t remaining;
 
   timvdbg("Entry\n");
   DEBUGASSERT(priv);
@@ -349,14 +353,14 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
 
   status->timeout = priv->timeout;
 
-  /* Get the time remaining until the timer expires (in microseconds) */
+  /* Get the time remaining until the timer expires (in microseconds). */
 
-  //elapsed = ;
-  status->timeleft = ((uint64_t)priv->timeout * elapsed) / (priv->clkticks + 1); /* TODO - check on this +1 */
+  remaining = tiva_timer32_remaining(priv->handle);
+  status->timeleft =  tiva_ticks2usec(priv, remaining);
 
   timvdbg("  flags    : %08x\n", status->flags);
-  timvdbg("  timeout  : %d\n", status->timeout);
-  timvdbg("  timeleft : %d\n", status->timeleft);
+  timvdbg("  timeout  : %d\n",   status->timeout);
+  timvdbg("  timeleft : %d\n",   status->timeleft);
   return OK;
 }
 
@@ -519,7 +523,8 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
 {
   struct tiva_lowerhalf_s *priv;
   struct tiva_gptm32config_s *config;
-  void *rethandle;
+  void *drvr;
+  int ret;
 
   DEBUGASSERT(devpath);
   timvdbg("Entry: devpath=%s\n", devpath);
@@ -537,7 +542,6 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
 
   priv->ops                          = &g_timer_ops;
   priv->clkin                        = altclk ? ALTCLK_FREQUENCY : SYSCLK_FREQUENCY;
-  priv->timeout                      = timeout;
 
   config                             = &priv->config;
   config->cmn.gptm                   = gptm;
@@ -545,7 +549,17 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
   config->cmn.alternate              = altclk;
   config->config.flags               = TIMER_FLAG_COUNTUP;
   config->config.handler             = tiva_handler;
+  config->config.arg                 = priv;
   config->config.u.periodic.interval = tiva_usec2ticks(priv, timeout);
+
+  /* Set the initial timer interval */
+
+  ret = tiva_settimeout((struct timer_lowerhalf_s *)priv, timeout);
+  if (ret < 0)
+    {
+      timdbg("ERROR: Failed to set initial timeout\n");
+      goto errout_with_alloc;
+    }
 
   /* Create the timer handle */
 
@@ -553,7 +567,8 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
   if (!priv->handle)
     {
       timdbg("ERROR: Failed to create timer handle\n");
-      return -EINVAL;
+      ret = -EINVAL;
+      goto errout_with_alloc;
     }
 
   /* Register the timer driver as /dev/timerX.  The returned value from
@@ -561,23 +576,27 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
    * REVISIT: The returned handle is discard here.
    */
 
-  rethandle = timer_register(devpath, (struct timer_lowerhalf_s *)priv);
-  if (!rethandle)
+  drvr = timer_register(devpath, (struct timer_lowerhalf_s *)priv);
+  if (!drvr)
     {
-      /* Free the allocated state structure */
-
-      kmm_free(priv);
-
       /* The actual cause of the failure may have been a failure to allocate
        * perhaps a failure to register the timer driver (such as if the
        * 'depath' were not unique).  We know here but we return EEXIST to
        * indicate the failure (implying the non-unique devpath).
        */
 
-      return -EEXIST;
+      ret = -EEXIST;
+      goto errout_with_timer;
     }
 
   return OK;
+
+errout_with_timer:
+  tiva_gptm_release(priv->handle);  /* Free timer resources */
+
+errout_with_alloc:
+  kmm_free(priv);                   /* Free the allocated state structure */
+  return ret;                       /* Return the error indication */
 }
 
 #endif /* CONFIG_TIMER && CONFIG_TIVA_TIMER */

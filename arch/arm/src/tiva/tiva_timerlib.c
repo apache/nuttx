@@ -536,7 +536,7 @@ static int tiva_timer32_interrupt(struct tiva_gptmstate_s *priv)
       DEBUGASSERT(timer32->handler);
       if (timer32->handler)
         {
-          timer32->handler((TIMER_HANDLE)priv, config32, status);
+          timer32->handler((TIMER_HANDLE)priv, timer32->arg, status);
         }
     }
 
@@ -662,7 +662,7 @@ static int tiva_timer16_interrupt(struct tiva_gptmstate_s *priv, int tmndx)
       DEBUGASSERT(timer16->handler);
       if (timer16->handler)
         {
-          timer16->handler((TIMER_HANDLE)priv, config16, status, tmndx);
+          timer16->handler((TIMER_HANDLE)priv, timer16->arg, status, tmndx);
         }
     }
 
@@ -2585,6 +2585,113 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 
   lldbg("%08x<-%08x\n", imrr, priv->imr);
 #endif
+}
+#endif
+
+/****************************************************************************
+ * Name: tiva_timer32_remaining
+ *
+ * Description:
+ *   Get the time remaining before a one-shot or periodic 32-bit timer
+ *   expires.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure().
+ *
+ * Returned Value:
+ *   Time remaining until the next timeout interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER32_PERIODIC
+uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
+{
+  struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  const struct tiva_gptm32config_s *config;
+  irqstate_t flags;
+  uint32_t counter;
+  uint32_t status;
+  uint32_t interval;
+  uint32_t remaining;
+
+  timvdbg("Entry\n");
+
+  DEBUGASSERT(priv && priv->attr && priv->config &&
+              priv->config->mode != TIMER16_MODE);
+
+  config = (const struct tiva_gptm32config_s *)priv->config;
+  DEBUGASSERT(config->cmn.mode == TIMER32_MODE_ONESHOT ||
+              config->cmn.mode == TIMER32_MODE_PERIODIC);
+
+  /* These values can be modified if a timer interrupt were to occur.  Best
+   * to do this is a critical section.
+   */
+
+  flags = irqsave();
+
+  /* Get the time remaining until the timer expires (in clock ticks).
+   * Since we have selected a count-up timer timer and the interval will
+   * expire when the count-up timer equals the timeout value, the
+   * difference between the current count value and the timeout is the
+   * time remaining.
+   *
+   * There is a race condition here.  What if the timer expires and
+   * counter rolls over between the time that we disabled interrupts
+   * above and the time that we read the counter below?
+   */
+
+  counter = tiva_getreg(priv, TIVA_TIMER_TAR_OFFSET);
+
+  /* If the timer rolled over, there would be a pending timer interrupt.  In
+   * that case, the time remaining time is zero.
+   */
+
+  status = tiva_getreg(priv, TIVA_TIMER_MIS_OFFSET);
+  if ((status & TIMER_INT_TATO) != 0)
+    {
+      remaining = 0;
+    }
+  else
+    {
+      /* Is this a count-up or a count-down timer? */
+
+      if (TIMER_ISCOUNTUP(&config->config))
+        {
+          /* Counting up.. When the timer is counting up and it reaches the
+           * timeout event (the value in the GPTMTAILR, the timer reloads
+           * with zero.
+           *
+           * Get the current timer interval value */
+
+           interval  = tiva_getreg(priv, TIVA_TIMER_TAILR_OFFSET);
+
+          /* The time remaining is the current interval reload value minus
+           * the above sampled counter value.
+           *
+           * REVISIT: Or the difference +1?
+           */
+
+          DEBUGASSERT(interval >= counter);
+          remaining = interval - counter;
+        }
+      else
+        {
+          /* Counting down:  When the timer is counting down and it reaches
+           * the timeout event (0x0), the timer reloads its start value
+           * from the GPTMTAILR register on the next cycle.
+           *
+           * The time remaining it then just the the value of the counter
+           * register.
+           *
+           * REVISIT: Or the counter value +1?
+           */
+
+          remaining = counter;
+        }
+    }
+
+  irqrestore(flags);
+  return remaining;
 }
 #endif
 
