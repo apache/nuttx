@@ -9384,6 +9384,9 @@
 	  cycles.  This change is conditioned on CONFIG_MMCSD_SDIOWATI_WRCOMPLETE
 	  and is currently only implemented for the STM32 SDIO driver. From
 	  David Sidrane (2015-01-08).
-	* arch/arm/src/tiva/tiva_timer.c and .h:  Add a timer library for
+	* arch/arm/src/tiva/tiva_timerlib.c and .h:  Add a timer library for
 	  generic support of Tiva timers (2015-01-08).
+	* arch/arm/src/tiva/tiva_timerlow32.c:  Add a driver lower half for
+          drivers/timer.c.  Only 32-bit periodic timers are supported.  This
+          provides userspace access to timers.
 
