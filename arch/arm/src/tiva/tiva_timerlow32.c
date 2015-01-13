@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/tiva_timerlow.c
+ * arch/arm/src/tiva/tiva_timerlow32.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
