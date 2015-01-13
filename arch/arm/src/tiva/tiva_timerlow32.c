@@ -87,7 +87,7 @@ struct tiva_lowerhalf_s
 
 static uint32_t tiva_usec2ticks(struct tiva_lowerhalf_s *priv, uint32_t usecs);
 static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks);
-static int      tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout);
+static void     tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout);
 
 /* Interrupt handling *******************************************************/
 
@@ -192,11 +192,11 @@ static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks)
  *   timeout - The new timeout value in microseconds.
  *
  * Returned Values:
- *   Zero on success; a negated errno value on failure.
+ *   None
  *
  ****************************************************************************/
 
-static int tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
+static void tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
 {
   timvdbg("Entry: timeout=%d\n", timeout);
 
@@ -215,8 +215,6 @@ static int tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
 
   timvdbg("clkin=%d clkticks=%d timeout=%d, adjustment=%d\n",
           priv->clkin, priv->clkticks, priv->timeout, priv->adjustment);
-
-  return OK;
 }
 
 /****************************************************************************
@@ -246,7 +244,9 @@ static void tiva_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
     {
       uint32_t timeout;
 
-      /* Is there a registered handler? */
+      /* Is there a registered handler?  If the handler has been nullified,
+       * the timer will be stopped.
+       */
 
       if (priv->handler && priv->handler(&priv->timeout))
         {
@@ -269,9 +269,12 @@ static void tiva_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
           timeout = tiva_ticks2usec(priv, priv->clkticks);
           priv->adjustment = (priv->adjustment + priv->timeout) - timeout;
         }
-      else /* stop */
+      else
         {
+          /* No handler or the handler returned false.. stop the timer */
+
           tiva_timer32_stop(priv->handle);
+          timvdbg("Stopped\n");
         }
     }
 }
@@ -422,7 +425,6 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
 static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
-  int ret;
 
   DEBUGASSERT(priv);
 
@@ -435,15 +437,12 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
 
   /* Calculate the the new time settings */
 
-  ret = tiva_timeout(priv, timeout);
-  if (ret == OK)
-    {
-      /* Reset the timer interval */
+  tiva_timeout(priv, timeout);
 
-      tiva_timer32_setinterval(priv->handle, priv->clkticks);
-    }
+  /* Reset the timer interval */
 
-  return ret;
+  tiva_timer32_setinterval(priv->handle, priv->clkticks);
+  return OK;
 }
 
 /****************************************************************************
@@ -584,12 +583,7 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
 
   /* Set the initial timer interval */
 
-  ret = tiva_timeout(priv, timeout);
-  if (ret < 0)
-    {
-      timdbg("ERROR: Failed to set initial timeout\n");
-      goto errout_with_alloc;
-    }
+  tiva_timeout(priv, timeout);
 
   /* Create the timer handle */
 

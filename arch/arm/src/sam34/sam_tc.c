@@ -276,7 +276,9 @@ static int sam34_interrupt(int irq, FAR void *context)
     {
       uint32_t timeout;
 
-      /* Is there a registered handler? */
+      /* Is there a registered handler?  If the handler has been nullified,
+       * the timer will be stopped.
+       */
 
       if (priv->handler && priv->handler(&priv->timeout))
         {
@@ -291,9 +293,12 @@ static int sam34_interrupt(int irq, FAR void *context)
           timeout = (1000000ULL * priv->clkticks) / TC_FCLK;    /* trucated timeout */
           priv->adjustment = (priv->adjustment + priv->timeout) - timeout;  /* truncated time to be added to next interval (dither) */
         }
-      else /* stop */
+      else
         {
+          /* No handler or the handler returned false.. stop the timer */
+
           sam34_stop((FAR struct timer_lowerhalf_s *)priv);
+          tcvdbg("Stopped\n");
         }
 
       /* TC_INT_CPCS is cleared by reading SAM_TCx_SR */
