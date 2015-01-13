@@ -87,6 +87,7 @@ struct tiva_lowerhalf_s
 
 static uint32_t tiva_usec2ticks(struct tiva_lowerhalf_s *priv, uint32_t usecs);
 static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks);
+static int      tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout);
 
 /* Interrupt handling *******************************************************/
 
@@ -178,6 +179,44 @@ static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks)
     }
 
   return (uint32_t)bigusec;
+}
+
+/****************************************************************************
+ * Name: tiva_timeout
+ *
+ * Description:
+ *   Calculate a new timeout value.
+ *
+ * Input Parameters:
+ *   priv - A pointer to a private timer driver lower half instance
+ *   timeout - The new timeout value in microseconds.
+ *
+ * Returned Values:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
+{
+  timvdbg("Entry: timeout=%d\n", timeout);
+
+  /* Save the desired timeout value */
+
+  priv->timeout = timeout;
+
+  /* Calculate the actual timeout value in clock ticks */
+
+  priv->clkticks = tiva_usec2ticks(priv, timeout);
+
+  /* Calculate an adjustment due to truncation in timer resolution */
+
+  timeout  = tiva_ticks2usec(priv, priv->clkticks);
+  priv->adjustment = priv->timeout - timeout;
+
+  timvdbg("clkin=%d clkticks=%d timeout=%d, adjustment=%d\n",
+          priv->clkin, priv->clkticks, priv->timeout, priv->adjustment);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -380,10 +419,10 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int tiva_settimeout(struct timer_lowerhalf_s *lower,
-                           uint32_t timeout)
+static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
+  int ret;
 
   DEBUGASSERT(priv);
 
@@ -394,26 +433,17 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower,
 
   timvdbg("Entry: timeout=%d\n", timeout);
 
-  /* Save the desired timeout value */
+  /* Calculate the the new time settings */
 
-  priv->timeout = timeout;
+  ret = tiva_timeout(priv, timeout);
+  if (ret == OK)
+    {
+      /* Reset the timer interval */
 
-  /* Calculate the actual timeout value in clock ticks */
+      tiva_timer32_setinterval(priv->handle, priv->clkticks);
+    }
 
-  priv->clkticks = tiva_usec2ticks(priv, timeout);
-
-  /* Calculate an adjustment due to truncation in timer resolution */
-
-  timeout  = tiva_ticks2usec(priv, priv->clkticks);
-  priv->adjustment = priv->timeout - timeout;
-
-  timvdbg("clkin=%d clkticks=%d timout=%d, adjustment=%d\n",
-          priv->clkin, priv->clkticks, priv->timeout, priv->adjustment);
-
-  /* Reset the timer interval */
-
-  tiva_timer32_setinterval(priv->handle, priv->clkticks);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -554,7 +584,7 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
 
   /* Set the initial timer interval */
 
-  ret = tiva_settimeout((struct timer_lowerhalf_s *)priv, timeout);
+  ret = tiva_timeout(priv, timeout);
   if (ret < 0)
     {
       timdbg("ERROR: Failed to set initial timeout\n");

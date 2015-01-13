@@ -1792,12 +1792,12 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
   /* Reset the timer to be certain that it is in the disabled state */
 
-  regval  = tiva_getreg(priv, TIVA_SYSCON_SRTIMER);
+  regval  = getreg32(TIVA_SYSCON_SRTIMER);
   regval |= SYSCON_SRTIMER(config->gptm);
-  tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
+  putreg32(regval, TIVA_SYSCON_SRTIMER);
 
   regval &= ~SYSCON_SRTIMER(config->gptm);
-  tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
+  putreg32(regval, TIVA_SYSCON_SRTIMER);
 
   /* Wait for the reset to complete */
 
@@ -1946,12 +1946,12 @@ void tiva_gptm_release(TIMER_HANDLE handle)
 
   /* Reset the time to be certain that it is in the disabled state */
 
-  regval  = tiva_getreg(priv, TIVA_SYSCON_SRTIMER);
+  regval  = getreg32(TIVA_SYSCON_SRTIMER);
   regval |= SYSCON_SRTIMER(config->gptm);
-  tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
+  putreg32(regval, TIVA_SYSCON_SRTIMER);
 
   regval &= ~SYSCON_SRTIMER(config->gptm);
-  tiva_putreg(priv, TIVA_SYSCON_SRTIMER, regval);
+  putreg32(regval, TIVA_SYSCON_SRTIMER);
 
   /* Wait for the reset to complete */
 
@@ -2407,7 +2407,7 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
        * generated as normal
        */
 
-      modev1 = tiva_getreg(priv, moder);
+      modev1 = getreg32(moder);
       modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
       putreg32(modev2, moder);
     }
@@ -2415,7 +2415,7 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
     {
       /* Setting the TACINTD bit prevents the time-out interrupt */
 
-      modev1 = tiva_getreg(priv, moder);
+      modev1 = getreg32(moder);
       modev2 = modev1 | TIMER_TnMR_TnCINTD;
       putreg32(modev2, moder);
 
@@ -2550,7 +2550,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
        * generated as normal
        */
 
-      modev1 = tiva_getreg(priv, moder);
+      modev1 = getreg32(moder);
       modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
       putreg32(modev2, moder);
     }
@@ -2558,7 +2558,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
     {
       /* Setting the TACINTD bit prevents the time-out interrupt */
 
-      modev1 = tiva_getreg(priv, moder);
+      modev1 = getreg32(moder);
       modev2 = modev1 | TIMER_TnMR_TnCINTD;
       putreg32(modev2, moder);
 
