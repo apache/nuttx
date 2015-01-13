@@ -36,6 +36,7 @@ Contents
     - Buttons and LEDs
     - Serial Console
     - Networking Support
+    - Timers
     - Temperature Sensor
     - DK-TM4129X Configuration Options
     - Configurations
@@ -648,6 +649,44 @@ f Application Configuration -> Network Utilities
       CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
       CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
       CONFIG_NSH_NETINIT_SIGNO=18
+
+Timers
+======
+
+  Tiva timers may be enbled in 32-bit periodic mode using these settings.
+
+  This settings enables the "upper half" timer driver:
+
+    Devices Drivers -> Timer Support
+      CONFIG_TIMER=y
+
+  These settings enable Tiva timer driver support
+
+    System Type -> Tiva/Stellaris Peripheral Support
+      CONFIG_TIVA_TIMER1=y     : For timer 1
+
+    System Type -> Tiva Timer Configuration (using Timer 1)
+      CONFIG_TIVA_TIMER_32BIT=y
+      CONFIG_TIVA_TIMER32_PERIODIC=y
+
+  These setting enable board-specific logic to initialize the timer logic
+  (using Timer 1):
+
+    Board Selection -> Timer driver selection
+      CONFIG_DK_TM4C129X_TIMER1=y
+      CONFIG_DK_TM4C129X_TIMER_DEVNAME="/dev/timer0"
+      CONFIG_DK_TM4C129X_TIMER_TIMEOUT=10000
+
+  There is a simple example at apps/examples/timer that can be used to
+  exercise the timers.  The following configuration options can be
+  selected to enable that example:
+
+    Application Configure -> Examples -> Timer Example
+      CONFIG_EXAMPLES_TIMER=y
+      CONFIG_EXAMPLE_TIMER_DEVNAME="/dev/timer0"
+      CONFIG_EXAMPLE_TIMER_INTERVAL=1000000
+      CONFIG_EXAMPLE_TIMER_DELAY=100000
+      CONFIG_EXAMPLE_TIMER_NSAMPLES=20
 
 Temperature Sensor
 ==================
