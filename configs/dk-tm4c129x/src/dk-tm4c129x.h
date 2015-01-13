@@ -169,6 +169,18 @@ void tm4c_ledinit(void);
 
 int tm4c_bringup(void);
 
+/****************************************************************************
+ * Name: tiva_timer_initialize
+ *
+ * Description:
+ *   Configure the timer driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DK_TM4C129X_TIMER
+int tiva_timer_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_DK_TM4C129X_DK_TM4C129X_H */
 

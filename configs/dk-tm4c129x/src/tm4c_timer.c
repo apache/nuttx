@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/dk-tm4c129x/src/tm4c_nsh.c
+ * config/dk-tm4c129x/src/tm4c_timer.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,33 +39,84 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
+#include "tiva_timer.h"
 #include "dk-tm4c129x.h"
+
+#ifdef CONFIG_DK_TM4C129X_TIMER
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_TIMER
+#  error CONFIG_TIMER is not defined
+#endif
+
+#ifndef CONFIG_TIVA_TIMER32_PERIODIC
+#  error CONFIG_TIVA_TIMER32_PERIODIC is not defined
+#endif
+
+#if defined(CONFIG_DK_TM4C129X_TIMER0)
+#  define GPTM 0
+#elif defined(CONFIG_DK_TM4C129X_TIMER1)
+#  define GPTM 1
+#elif defined(CONFIG_DK_TM4C129X_TIMER2)
+#  define GPTM 2
+#elif defined(CONFIG_DK_TM4C129X_TIMER3)
+#  define GPTM 3
+#elif defined(CONFIG_DK_TM4C129X_TIMER4)
+#  define GPTM 4
+#elif defined(CONFIG_DK_TM4C129X_TIMER5)
+#  define GPTM 5
+#elif defined(CONFIG_DK_TM4C129X_TIMER6)
+#  define GPTM 6
+#elif defined(CONFIG_DK_TM4C129X_TIMER7)
+#  define GPTM 7
+#else
+#  error No CONFIG_DK_TM4C129X_TIMERn definition
+#endif
+
+#ifndef CONFIG_DK_TM4C129X_TIMER_DEVNAME
+#  define CONFIG_DK_TM4C129X_TIMER_DEVNAME "/dev/timer0"
+#endif
+
+#ifndef CONFIG_DK_TM4C129X_TIMER_TIMEOUT
+#  define CONFIG_DK_TM4C129X_TIMER_TIMEOUT 10000
+#endif
+
+#undef CONFIG_DK_TM4C129X_TIMER_ALTCLK
+#define ALTCLK false
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: tiva_timer_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Configure the timer driver
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int tiva_timer_initialize(void)
 {
-  /* If CONFIG_BOARD_INITIALIZE is selected then board initialization was
-   * already performed in board_initialize.
-   */
+  int ret;
 
-#ifndef CONFIG_BOARD_INITIALIZE
-  return tm4c_bringup();
-#else
-  return OK;
-#endif
+  timvdbg("Registering TIMER%d at %s\n", GPTM, CONFIG_DK_TM4C129X_TIMER_DEVNAME);
+  timvdbg("Initial timer period: %d uS\n", CONFIG_DK_TM4C129X_TIMER_TIMEOUT);
+
+  ret = tiva_timer_register(CONFIG_DK_TM4C129X_TIMER_DEVNAME, GPTM,
+                            CONFIG_DK_TM4C129X_TIMER_TIMEOUT, ALTCLK);
+  if (ret < 0)
+    {
+      timdbg("ERROR: Failed to register timer driver: %d\n", ret);
+    }
+
+  return ret;
 }
+
+#endif /* CONFIG_DK_TM4C129X_TIMER */

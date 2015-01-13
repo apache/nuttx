@@ -55,6 +55,10 @@ ifeq ($(CONFIG_TIVA_ETHERNET),y)
 CSRCS += tm4c_ethernet.c
 endif
 
+ifeq ($(CONFIG_DK_TM4C129X_TIMER),y)
+CSRCS += tm4c_timer.c
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += tm4c_nsh.c
 endif
