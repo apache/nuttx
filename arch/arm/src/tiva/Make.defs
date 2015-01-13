@@ -98,8 +98,8 @@ endif
 
 ifeq ($(CONFIG_TIVA_TIMER),y)
 CHIP_CSRCS += tiva_timerlib.c
-ifeq ($(CONFIG_TIVA_TIMER_DRIVER),y)
-CHIP_CSRCS += tiva_timerlow.c
+ifeq ($(CONFIG_TIVA_TIMER32_PERIODIC),y)
+CHIP_CSRCS += tiva_timerlow32.c
 endif
 endif
 

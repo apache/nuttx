@@ -746,10 +746,6 @@ if TIVA_TIMER
 
 menu "Tiva Timer Configuration"
 
-config TIVA_TIMER_DRIVER
-	bool
-	default n
-
 config TIVA_TIMER_32BIT
 	bool "32-bit timer support"
 	default n
@@ -759,7 +755,6 @@ if TIVA_TIMER_32BIT
 config TIVA_TIMER32_PERIODIC
 	bool "32-bit one-shot/periodic timer support"
 	default n
-	select TIVA_TIMER_DRIVER if TIMER
 
 config TIVA_TIMER32_RTC
 	bool "32-bit RTC (needs 32.768-KHz input)"
