@@ -884,12 +884,11 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
     */
 #warning Missing Logic
 
-  /* Enable one-shot/periodic interrupts?  Enable interrupts only if an
-   * non-NULL interrupt handler and non-zero timeout interval were
-   * provided.
+  /* Enable one-shot/periodic interrupts  Enable interrupts only if an
+   * non-NULL interrupt handler.
    */
 
-  if (timer->handler && timer->u.periodic.interval > 0)
+  if (timer->handler)
     {
       /* Select the interrupt mask that will enable the timer interrupt.
        * Any non-zero value of imr indicates that interrupts are expected.
@@ -946,10 +945,26 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTAILR).
    *
-   *   When a GPTM is configured to one of the 32-bit modes, GPTMTAILR
-   *   appears as a 32-bit register; the upper 16-bits correspond to bits
-   *   15:0 of the GPTM Timer B Interval Load (GPTMTBILR) register.
-   *   Writes to GPTMTBILR are ignored.
+   *    When a GPTM is configured to one of the 32-bit modes, GPTMTAILR
+   *    appears as a 32-bit register; the upper 16-bits correspond to bits
+   *    15:0 of the GPTM Timer B Interval Load (GPTMTBILR) register.
+   *    Writes to GPTMTBILR are ignored.
+   *
+   *    REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
+   *    using the alternate clock source, the synchronization imposes
+   *    restrictions on the starting count value (down-count), terminal value
+   *    (up-count) and the match value. This restriction applies to all modes
+   *    of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
+   *    periods + 2 system clock periods. If some events do not meet this
+   *    requirement, then it is possible that the timer block may need to be
+   *    reset for correct functionality to be restored.
+   *
+   *      Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
+   *      Thclk = 1us (1Mhz)
+   *      4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
+   *
+   *    The minimum values for the periodic or one-shot with a match
+   *    interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
    */
 
   regval = timer->u.periodic.interval;
@@ -1170,6 +1185,22 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
+   *
+   *    REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
+   *    using the alternate clock source, the synchronization imposes
+   *    restrictions on the starting count value (down-count), terminal value
+   *    (up-count) and the match value. This restriction applies to all modes
+   *    of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
+   *    periods + 2 system clock periods. If some events do not meet this
+   *    requirement, then it is possible that the timer block may need to be
+   *    reset for correct functionality to be restored.
+   *
+   *      Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
+   *      Thclk = 1us (1Mhz)
+   *      4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
+   *
+   *    The minimum values for the periodic or one-shot with a match
+   *    interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
    */
 
   regval    = (uint32_t)timer->u.periodic.interval;
@@ -1342,14 +1373,16 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    */
 
   /* 5. Program registers according to count direction:
+   *
    *   - In down-count mode, the GPTMTnMATCHR and GPTMTnPMR registers are
-   *    configured so that the difference between the value in the GPTMTnILR
-   *    and GPTMTnPR registers and the GPTMTnMATCHR and GPTMTnPMR registers
-   *    equals the number of edge events that must be counted.
+   *     configured so that the difference between the value in the GPTMTnILR
+   *     and GPTMTnPR registers and the GPTMTnMATCHR and GPTMTnPMR registers
+   *     equals the number of edge events that must be counted.
+   *
    *   - In up-count mode, the timer counts from 0x0 to the value in the
-   *    GPTMTnMATCHR and GPTMTnPMR registers. Note that when executing an
-   *    up-count, the value of the GPTMTnPR and GPTMTnILR must be greater
-   *    than the value of GPTMTnPMR and GPTMTnMATCHR.
+   *     GPTMTnMATCHR and GPTMTnPMR registers. Note that when executing an
+   *     up-count, the value of the GPTMTnPR and GPTMTnILR must be greater
+   *     than the value of GPTMTnPMR and GPTMTnMATCHR.
    */
 
   /* 6. If interrupts are required, set the CnMIM bit in the GPTM Interrupt
@@ -1417,6 +1450,22 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
 
   /* 6. Load the timer start value into the GPTM Timer n Interval Load
    *    (GPTMTnILR) register.
+   *
+   *    REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
+   *    using the alternate clock source, the synchronization imposes
+   *    restrictions on the starting count value (down-count), terminal value
+   *    (up-count) and the match value. This restriction applies to all modes
+   *    of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
+   *    periods + 2 system clock periods. If some events do not meet this
+   *    requirement, then it is possible that the timer block may need to be
+   *    reset for correct functionality to be restored.
+   *
+   *      Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
+   *      Thclk = 1us (1Mhz)
+   *      4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
+   *
+   *    The minimum values for the periodic or one-shot with a match
+   *    interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
    */
 
   /* 7. If interrupts are required, set the CnEIM bit in the GPTM Interrupt
@@ -1493,6 +1542,22 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
 
   /* 7. Load the timer start value into the GPTM Timer n Interval Load
    *    (GPTMTnILR) register.
+   *
+   *    REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
+   *    using the alternate clock source, the synchronization imposes
+   *    restrictions on the starting count value (down-count), terminal value
+   *    (up-count) and the match value. This restriction applies to all modes
+   *    of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
+   *    periods + 2 system clock periods. If some events do not meet this
+   *    requirement, then it is possible that the timer block may need to be
+   *    reset for correct functionality to be restored.
+   *
+   *      Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
+   *      Thclk = 1us (1Mhz)
+   *      4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
+   *
+   *    The minimum values for the periodic or one-shot with a match
+   *    interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
    */
 
   /* 8. Load the GPTM Timer n Match (GPTMTnMATCHR) register with the match
@@ -2259,6 +2324,22 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
  *   This function may be called at any time to change the timer interval
  *   load value of a 32-bit timer.
  *
+ *   REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
+ *   using the alternate clock source, the synchronization imposes
+ *   restrictions on the starting count value (down-count), terminal value
+ *   (up-count) and the match value. This restriction applies to all modes
+ *   of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
+ *   periods + 2 system clock periods. If some events do not meet this
+ *   requirement, then it is possible that the timer block may need to be
+ *   reset for correct functionality to be restored.
+ *
+ *     Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
+ *     Thclk = 1us (1Mhz)
+ *     4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
+ *
+ *   The minimum values for the periodic or one-shot with a match
+ *   interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
+ *
  * Input Parameters:
  *   handle   - The handle value returned  by tiva_gptm_configure()
  *   interval - The value to write to the timer interval load register
@@ -2370,6 +2451,22 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
  * Description:
  *   This function may be called at any time to change the timer interval
  *   load value of a 16-bit timer.
+ *
+ *   REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
+ *   using the alternate clock source, the synchronization imposes
+ *   restrictions on the starting count value (down-count), terminal value
+ *   (up-count) and the match value. This restriction applies to all modes
+ *   of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
+ *   periods + 2 system clock periods. If some events do not meet this
+ *   requirement, then it is possible that the timer block may need to be
+ *   reset for correct functionality to be restored.
+ *
+ *     Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
+ *     Thclk = 1us (1Mhz)
+ *     4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
+ *
+ *   The minimum values for the periodic or one-shot with a match
+ *   interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
  *
  * Input Parameters:
  *   handle   - The handle value returned  by tiva_gptm_configure()
