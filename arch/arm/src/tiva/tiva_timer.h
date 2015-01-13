@@ -183,14 +183,13 @@ typedef FAR void *TIMER_HANDLE;
  *
  * Input Parameters:
  *   handle - The same value as returned by tiva_gptm_configure()
- *   config - The same value provided as as an input to tiva_gptm_configure()
+ *   arg    - The same value provided in struct tiva_timer32config_s
  *   status - The value of the GPTM masked status register that caused the
  *            interrupt
  */
 
 struct tiva_gptm32config_s;
-typedef void (*timer32_handler_t)(TIMER_HANDLE handle,
-                                  const struct tiva_gptm32config_s *config,
+typedef void (*timer32_handler_t)(TIMER_HANDLE handle, void *arg,
                                   uint32_t status);
 
 /* This structure describes the configuration of one 32-bit timer */
@@ -200,6 +199,9 @@ struct tiva_timer32config_s
   uint8_t flags;                 /* See TIMER_FLAG_* definitions */
   timer32_handler_t handler;     /* Non-NULL: Interrupts will be enabled
                                   * and forwarded to this function */
+  void *arg;                     /* Argument that accompanies the handler
+                                  * callback.
+                                  */
 
   /* Mode-specific parameters */
 
@@ -231,7 +233,7 @@ struct tiva_timer32config_s
  *
  * Input Parameters:
  *   handle - The same value as returned by tiva_gptm_configure()
- *   config - The same value provided as as an input to tiva_gptm_configure()
+ *   arg    - The same value provided in struct tiva_timer16config_s
  *   status - The value of the GPTM masked status register that caused the
  *            interrupt.
  *   tmndx  - Either TIMER16A or TIMER16B.  This may be useful in the
@@ -239,8 +241,7 @@ struct tiva_timer32config_s
  */
 
 struct tiva_gptm16config_s;
-typedef void (*timer16_handler_t)(TIMER_HANDLE handle,
-                                  const struct tiva_gptm16config_s *config,
+typedef void (*timer16_handler_t)(TIMER_HANDLE handle, void *arg,
                                   uint32_t status, int tmndx);
 
 /* This structure describes the configuration of one 16-bit timer A/B */
@@ -251,6 +252,9 @@ struct tiva_timer16config_s
   uint8_t flags;                 /* See TIMER_FLAG_* definitions */
   timer16_handler_t handler;     /* Non-NULL: Interrupts will be enabled
                                   * and forwarded to this function */
+  void *arg;                     /* Argument that accompanies the handler
+                                  * callback.
+                                  */
 
   /* Mode-specific parameters */
 
@@ -613,6 +617,44 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 
 #  define tiva_timer16a_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16A)
 #  define tiva_timer16b_setinterval(h,l) tiva_timer16_setinterval(h,l,TIMER16B)
+#endif
+
+/****************************************************************************
+ * Name: tiva_timer32_remaining
+ *
+ * Description:
+ *   Get the time remaining before a one-shot or periodic 32-bit timer
+ *   expires.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure().
+ *
+ * Returned Value:
+ *   Time remaining until the next timeout interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER32_PERIODIC
+uint32_t tiva_timer32_remaining(TIMER_HANDLE handle);
+#endif
+
+/****************************************************************************
+ * Name: tiva_timer16_remaining
+ *
+ * Description:
+ *   Get the time remaining before a one-shot or periodic 16-bit timer
+ *   expires.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned  by tiva_gptm_configure().
+ *
+ * Returned Value:
+ *   Time remaining until the next timeout interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER16_PERIODIC
+/* To be provided */
 #endif
 
 /****************************************************************************
