@@ -1,7 +1,7 @@
 /*******************************************************************************************
  * include/net/if.h
  *
- *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,8 +84,11 @@ struct mii_ioctl_data_s
   uint16_t val_out;     /* PHY output data */
 };
 
-/* This is the newer form if the I/F request structure that can be used with both IPv4
- * and IPv6.
+/* There are two forms of the I/F request structure.  One for IPv6 and one for IPv4.
+ * Notice that they are (and must be) cast compatible and really different only
+ * in the size of the structure allocation.
+ *
+ * This is the I/F request that should be used with IPv6.
  */
 
 struct lifreq
@@ -122,12 +125,8 @@ struct lifreq
 #define lifr_mii_val_in       lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
 #define lifr_mii_val_out      lifr_ifru.lifru_mii_data.val_out /* PHY output data */
 
-/* This is the older I/F request that should only be used with IPv4.  However, since
- * NuttX only supports IPv4 or 6 (not both), we can force the older structure to
- * be compatible when IPv6 is enabled.
- */
+/* This is the I/F request that should be used with IPv4. */
 
-#ifndef CONFIG_NET_IPv6
 struct ifreq
 {
   char                        ifr_name[IFNAMSIZ];       /* Network device name (e.g. "eth0") */
@@ -161,25 +160,6 @@ struct ifreq
 #define ifr_mii_reg_num       ifr_ifru.ifru_mii_data.reg_num /* PHY register address */
 #define ifr_mii_val_in        ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
 #define ifr_mii_val_out       ifr_ifru.ifru_mii_data.val_out /* PHY output data */
-
-#else /* CONFIG_NET_IPv6 */
-
-#define ifreq                 lifreq                    /* Replace ifreq with lifreq */
-#define ifr_name              lifr_name                 /* Network device name */
-#define ifr_addr              lifr_ifru.lifru_addr      /* IP address */
-#define ifr_dstaddr           lifr_ifru.lifru_dstaddr   /* P-to-P Address */
-#define ifr_broadaddr         lifr_ifru.lifru_broadaddr /* Broadcast address */
-#define ifr_netmask           lifr_ifru.lifru_netmask   /* Interface net mask */
-#define ifr_hwaddr            lifr_ifru.lifru_hwaddr    /* MAC address */
-#define ifr_mtu               lifr_ifru.lifru_mtu       /* MTU */
-#define ifr_count             lifr_ifru.lifru_count     /* Number of devices */
-#define ifr_flags             lifr_ifru.lifru_flags     /* interface flags */
-#define ifr_mii_phy_id        lifr_ifru.lifru_mii_data.phy_id  /* PHY device address */
-#define ifr_mii_reg_num       lifr_ifru.lifru_mii_data.reg_num /* PHY register address */
-#define ifr_mii_val_in        lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
-#define ifr_mii_val_out       lifr_ifru.lifru_mii_data.val_out /* PHY output data */
-
-#endif /* CONFIG_NET_IPv6 */
 
 /*******************************************************************************************
  * Public Function Prototypes

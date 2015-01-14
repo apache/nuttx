@@ -184,11 +184,13 @@ endmenu # Data link support
 source "net/socket/Kconfig"
 source "net/netdev/Kconfig"
 
-#source "net/ipv4/Kconfig"
+# source "net/ipv4/Kconfig"
+# Currently cannot select both IPv4 and IPv6
 
 config NET_IPv4
 	bool
-	default y
+	default y if !NET_IPv6
+	default n if NET_IPv6
 
 source "net/ipv6/Kconfig"
 source "net/pkt/Kconfig"
