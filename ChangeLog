@@ -9397,3 +9397,9 @@
 	  evaluation.  It is best retained the PX4 repositories where it can be
 	  properly maintained and not in the upstream NuttX repository
 	  (2015-01-14).
+	* net/netdev/netdev_ioctl.c and include/nuttx/net/ioctl.h:  Add support
+	  for IPv6 ioctls to manipulate IP addresses (2015-01-14).
+	* net/icmpv6:  Create a future home for ICMPv6 (2015-01-14).
+	* net/icmp:  Remove all logic conditioned on CONFIG_NET_IPv6
+	  (2015-01-14).
+
