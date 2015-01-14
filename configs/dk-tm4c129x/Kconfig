@@ -65,10 +65,6 @@ config DK_TM4C129X_TIMER_DEVNAME
 	string "Timer device name"
 	default "/dev/timer0"
 
-config DK_TM4C129X_TIMER_TIMEOUT
-	int "Timer interval (microseconds)"
-	default 10000
-
 config DK_TM4C129X_TIMER_ALTCLK
 	bool "Use alternate clock source"
 	default n
