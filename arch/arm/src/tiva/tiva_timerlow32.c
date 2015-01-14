@@ -398,7 +398,7 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
   /* Get the time remaining until the timer expires (in microseconds). */
 
   remaining = tiva_timer32_remaining(priv->handle);
-  status->timeleft =  tiva_ticks2usec(priv, remaining);
+  status->timeleft = tiva_ticks2usec(priv, remaining);
 
   timvdbg("  flags    : %08x\n", status->flags);
   timvdbg("  timeout  : %d\n",   status->timeout);
@@ -531,14 +531,17 @@ static int tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
  *   Bind the configuration timer to a timer lower half instance and
  *   register the timer drivers at 'devpath'
  *
- *   NOTE: Only 32-bit periodic timers are supported.
+ *   NOTES:
+ *   1. Only 32-bit periodic timers are supported.
+ *   2. Timeout interrupts are disabled until tiva_timer32_setinterval() is
+ *      called.
+ *   3. Match interrupts are disabled until tiva_timer32_relmatch() is
+ *      called.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form
- *     /dev/timer0
+ *   devpath - The full path to the timer device.  This should be of the
+ *     form /dev/timer0
  *   gptm - General purpose timer number
- *   timeout - Timeout interval in microseconds. Set to a non-zero value
- *     to enable timeout interrupts
  *   altlck - True: Use alternate clock source.
  *
  * Returned Values:
@@ -547,8 +550,7 @@ static int tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
-                        bool altclk)
+int tiva_timer_register(FAR const char *devpath, int gptm, bool altclk)
 {
   struct tiva_lowerhalf_s *priv;
   struct tiva_gptm32config_s *config;
@@ -579,11 +581,10 @@ int tiva_timer_register(const char *devpath, int gptm, uint32_t timeout,
   config->config.flags               = TIMER_FLAG_COUNTUP;
   config->config.handler             = tiva_handler;
   config->config.arg                 = priv;
-  config->config.u.periodic.interval = tiva_usec2ticks(priv, timeout);
 
   /* Set the initial timer interval */
 
-  tiva_timeout(priv, timeout);
+  tiva_timeout(priv, 0);
 
   /* Create the timer handle */
 

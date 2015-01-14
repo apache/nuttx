@@ -855,6 +855,9 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *              0: The timer counts down (default).
    *              1: The timer counts up. When counting up, the timer
    *                 starts from a value of 0.
+   *
+   *    NOTE: one-shot/periodic timeout interrupts remain disabled until
+   *    tiva_timer32_setinterval is called.
    */
 
   /* Setup defaults */
@@ -883,26 +886,6 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
     * TODO: Not implemented
     */
 #warning Missing Logic
-
-  /* Enable one-shot/periodic interrupts  Enable interrupts only if an
-   * non-NULL interrupt handler.
-   */
-
-  if (timer->handler)
-    {
-      /* Select the interrupt mask that will enable the timer interrupt.
-       * Any non-zero value of imr indicates that interrupts are expected.
-       */
-
-      priv->imr = TIMER_INT_TATO;
-
-      /* Clearing the TACINTD bit allows the time-out interrupt to be
-       * generated as normal
-       */
-      /* REVISIT: When will interrupts be enabled? */
-
-      regval &= ~TIMER_TnMR_TnCINTD;
-    }
 
   /* Enable count down? */
 
@@ -950,25 +933,12 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *    15:0 of the GPTM Timer B Interval Load (GPTMTBILR) register.
    *    Writes to GPTMTBILR are ignored.
    *
-   *    REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
-   *    using the alternate clock source, the synchronization imposes
-   *    restrictions on the starting count value (down-count), terminal value
-   *    (up-count) and the match value. This restriction applies to all modes
-   *    of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
-   *    periods + 2 system clock periods. If some events do not meet this
-   *    requirement, then it is possible that the timer block may need to be
-   *    reset for correct functionality to be restored.
-   *
-   *      Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
-   *      Thclk = 1us (1Mhz)
-   *      4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
-   *
-   *    The minimum values for the periodic or one-shot with a match
-   *    interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
+   *    NOTE: The default is a free-running timer.  The timer interval
+   *    reload register is clear here.  It can be set to any value
+   *    desired by calling tiva_timer32_setinterval().
    */
 
-  regval = timer->u.periodic.interval;
-  tiva_putreg(priv, TIVA_TIMER_TAILR_OFFSET, regval);
+  tiva_putreg(priv, TIVA_TIMER_TAILR_OFFSET, 0);
 
   /* Preload the timer counter register by setting the timer value register.
    * The timer value will be copied to the timer counter register on the
@@ -1090,6 +1060,9 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *              0: The timer counts down (default).
    *              1: The timer counts up. When counting up, the timer
    *                 starts from a value of 0.
+   *
+   *    NOTE: one-shot/periodic timeout interrupts remain disabled until
+   *    tiva_timer32_setinterval is called.
    */
 
   /* Setup defaults */
@@ -1118,26 +1091,6 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    * TODO: Not implemented
    */
 #warning Missing Logic
-
-  /* Enable one-shot/periodic interrupts?  Enable interrupts only if an
-   * interrupt handler was provided.
-   */
-
-  if (timer->handler)
-    {
-      /* Select the interrupt mask that will enable the timer interrupt.
-       * Any non-zero value of 'imr' indicates that interrupts are expected.
-       */
-
-      priv->imr |= tmndx ? TIMER_INT_TBTO : TIMER_INT_TATO;
-
-      /* Clearing the TnCINTD bit allows the time-out interrupt to be
-       * generated as normal
-       */
-      /* REVISIT: When will interrupts be enabled? */
-
-      regval &= ~TIMER_TnMR_TnCINTD;
-    }
 
   /* Enable count down? */
 
@@ -1178,34 +1131,19 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    */
 #warning Missing Logic
 
-  /* Set the input clock pre-scaler value */
-
-  regoffset = tmndx ? TIVA_TIMER_TBPR_OFFSET : TIVA_TIMER_TAPR_OFFSET;
-  tiva_putreg(priv, regoffset, (uint32_t)timer->u.periodic.prescaler);
-
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
    *
-   *    REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
-   *    using the alternate clock source, the synchronization imposes
-   *    restrictions on the starting count value (down-count), terminal value
-   *    (up-count) and the match value. This restriction applies to all modes
-   *    of operation. Each event must be spaced by 4 Timer (ALTCLK) clock
-   *    periods + 2 system clock periods. If some events do not meet this
-   *    requirement, then it is possible that the timer block may need to be
-   *    reset for correct functionality to be restored.
-   *
-   *      Example: ALTCLK= TPIOSC = 62.5ns (16Mhz Trimmed)
-   *      Thclk = 1us (1Mhz)
-   *      4*62.5ns + 2*1us = 2.25us 2.25us/62.5ns = 36 or 0x23
-   *
-   *    The minimum values for the periodic or one-shot with a match
-   *    interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
+   *    NOTE: The default is a free-running timer.  The timer interval
+   *    reload and prescale registers are cleared here.  They can be set to
+   *    any value desired by calling tiva_timer32_setinterval().
    */
 
-  regval    = (uint32_t)timer->u.periodic.interval;
+  regoffset = tmndx ? TIVA_TIMER_TBPR_OFFSET : TIVA_TIMER_TAPR_OFFSET;
+  tiva_putreg(priv, regoffset, 0);
+
   regoffset = tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
-  tiva_putreg(priv, regoffset, regval);
+  tiva_putreg(priv, regoffset, 0);
 
   /* Preload the timer counter register by setting the timer value register.
    * The timer value will be copied to the timer counter register on the
@@ -2324,6 +2262,12 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
  *   This function may be called at any time to change the timer interval
  *   load value of a 32-bit timer.
  *
+ *   It the timer is configured as a 32-bit one-shot or periodic timer, then
+ *   then function will also enable timeout interrupts.
+ *
+ *   NOTE: As of this writing, there is no interface to disable the timeout
+ *   interrupts once they have been enabled.
+ *
  *   REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
  *   using the alternate clock source, the synchronization imposes
  *   restrictions on the starting count value (down-count), terminal value
@@ -2353,13 +2297,80 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
 void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 {
   struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
+  const struct tiva_gptm32config_s *config;
+  const struct tiva_timer32config_s *timer;
+  irqstate_t flags;
+  uintptr_t base;
+  uintptr_t moder;
+  uintptr_t loadr;
+  uintptr_t imrr;
+  uint32_t modev1;
+  uint32_t modev2;
+  bool toints;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);
+  config = (const struct tiva_gptm32config_s *)priv->config;
+  timer  = &config->config;
+
+  /* Do we need to enable timeout interrupts?  Interrupts are only enabled
+   * if (1) the user has provided a handler, and (2) the timer timer is
+   * configure as a one-short or periodic timer.
+   */
+
+  base   = priv->attr->base;
+  toints = false;
+
+  if (timer->handler &&
+     (config->cmn.mode == TIMER32_MODE_ONESHOT ||
+      config->cmn.mode == TIMER32_MODE_PERIODIC))
+    {
+      toints = true;
+    }
+
+  loadr = base + TIVA_TIMER_TAILR_OFFSET;
+  moder = base + TIVA_TIMER_TAMR_OFFSET;
+  imrr  = base + TIVA_TIMER_IMR_OFFSET;
+
+  /* Make the following atomic */
+
+  flags = irqsave();
 
    /* Set the new timeout interval */
 
-  tiva_putreg(priv, TIVA_TIMER_TAILR_OFFSET, interval);
+  putreg32(interval, loadr);
+
+  /* Enable/disable timeout interrupts */
+
+  if (toints)
+    {
+      /* Clearing the TACINTD bit allows the time-out interrupt to be
+       * generated as normal
+       */
+
+      modev1 = getreg32(moder);
+      modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
+      putreg32(modev2, moder);
+
+      /* Set the new interrupt mask */
+
+      priv->imr |= TIMER_INT_TATO;
+      putreg32(priv->imr, imrr);
+    }
+
+  irqrestore(flags);
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  /* Generate low-level debug output outside of the critical section */
+
+  lldbg("%08x<-%08x\n", loadr, interval);
+  if (toints)
+    {
+      lldbg("%08x->%08x\n", moder, modev1);
+      lldbg("%08x<-%08x\n", moder, modev2);
+      lldbg("%08x<-%08x\n", imrr, priv->imr);
+    }
+#endif
 }
 #endif
 
@@ -2369,6 +2380,12 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
  * Description:
  *   This function may be called at any time to change the timer interval
  *   load value of a 16-bit timer.
+ *
+ *   It the timer is configured as a 16-bit one-shot or periodic timer, then
+ *   then function will also enable timeout interrupts.
+ *
+ *   NOTE: As of this writing, there is no interface to disable the timeout
+ *   interrupts once they have been enabled.
  *
  *   REVISIT:  When the ALTCLK bit is set in the GPTMCC register to enable
  *   using the alternate clock source, the synchronization imposes
@@ -2400,15 +2417,93 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 {
   struct tiva_gptmstate_s *priv = (struct tiva_gptmstate_s *)handle;
-  unsigned int regoffset;
+  const struct tiva_gptm16config_s *config;
+  const struct tiva_timer16config_s *timer;
+  irqstate_t flags;
+  uintptr_t base;
+  uintptr_t moder;
+  uintptr_t loadr;
+  uintptr_t imrr;
+  uint32_t intbit;
+  uint32_t modev1;
+  uint32_t modev2;
+  bool toints;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);
+  config = (const struct tiva_gptm16config_s *)priv->config;
+  timer  = &config->config[tmndx];
+
+  /* Pre-calculate as much as possible outside of the critical section */
+
+  base = priv->attr->base;
+  if (tmndx)
+    {
+      intbit = TIMER_INT_TBTO;
+      loadr  = base + TIVA_TIMER_TBILR_OFFSET;
+      moder  = base + TIVA_TIMER_TBMR_OFFSET;
+    }
+  else
+    {
+      intbit = TIMER_INT_TATO;
+      loadr  = base + TIVA_TIMER_TAILR_OFFSET;
+      moder  = base + TIVA_TIMER_TAMR_OFFSET;
+    }
+
+  imrr = base + TIVA_TIMER_IMR_OFFSET;
+
+  /* Do we need to enable timeout interrupts?  Interrupts are only enabled
+   * if (1) the user has provided a handler, and (2) the timer timer is
+   * configure as a one-short or periodic timer.
+   */
+
+  toints = false;
+  if (timer->handler &&
+     (config->cmn.mode == TIMER16_MODE_ONESHOT ||
+      config->cmn.mode == TIMER16_MODE_PERIODIC))
+    {
+       toints = true;
+    }
+
+  /* Make the following atomic */
+
+  flags = irqsave();
 
   /* Set the new timeout interval */
 
-  regoffset = tmndx ? TIVA_TIMER_TBILR_OFFSET : TIVA_TIMER_TAILR_OFFSET;
-  tiva_putreg(priv, regoffet, interval);
+  putreg32(interval, loadr);
+
+  /* Enable/disable timeout interrupts */
+
+  if (toints)
+    {
+      /* Clearing the TACINTD bit allows the time-out interrupt to be
+       * generated as normal
+       */
+
+      modev1 = getreg32(moder);
+      modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
+      putreg32(modev2, moder);
+
+      /* Set the new interrupt mask */
+
+      priv->imr |= intbit;
+      putreg32(priv->imr, imrr);
+    }
+
+  irqrestore(flags);
+
+#ifdef CONFIG_TIVA_TIMER_REGDEBUG
+  /* Generate low-level debug output outside of the critical section */
+
+  lldbg("%08x<-%08x\n", loadr, interval);
+  if (toints)
+    {
+      lldbg("%08x->%08x\n", moder, modev1);
+      lldbg("%08x<-%08x\n", moder, modev2);
+      lldbg("%08x<-%08x\n", imrr, priv->imr);
+    }
+#endif
 }
 #endif
 
@@ -2495,7 +2590,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
            * REVISIT: Or the difference +1?
            */
 
-          DEBUGASSERT(interval >= counter);
+          DEBUGASSERT(interval == 0 || interval >= counter);
           remaining = interval - counter;
         }
       else
@@ -2897,3 +2992,4 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
 #endif
 }
 #endif
+
