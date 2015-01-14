@@ -183,6 +183,13 @@ endmenu # Data link support
 
 source "net/socket/Kconfig"
 source "net/netdev/Kconfig"
+
+#source "net/ipv4/Kconfig"
+
+config NET_IPv4
+	bool
+	default y
+
 source "net/ipv6/Kconfig"
 source "net/pkt/Kconfig"
 source "net/tcp/Kconfig"

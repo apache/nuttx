@@ -8,7 +8,7 @@ menu "ARP Configuration"
 config NET_ARP
 	bool
 	default y
-	depends on NET_ETHERNET
+	depends on NET_ETHERNET && NET_IPv4
 	---help---
 		This setting is currently overridden by logic in include/nuttx/net
 
