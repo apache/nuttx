@@ -1,7 +1,7 @@
 ############################################################################
-# net/arp/Make.defs
+# net/icmpv6/Make.defs
 #
-#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,13 @@
 #
 ############################################################################
 
-# ARP support is available for Ethernet only
+ifeq ($(CONFIG_NET_ICMPv6),y)
 
-ifeq ($(CONFIG_NET_ARP),y)
-NET_CSRCS +=arp_arpin.c arp_out.c arp_format.c arp_table.c arp_timer.c
+# Support for ICMPv6
 
-ifeq ($(CONFIG_NET_ARP_IPIN),y)
-NET_CSRCS += arp_ipin.c
+# Include ICMPv6 build support
+
+DEPPATH += --dep-path icmpv6
+VPATH += :icmpv6
+
 endif
-
-ifeq ($(CONFIG_NET_ARP_SEND),y)
-NET_CSRCS += arp_send.c arp_poll.c arp_notify.c
-endif
-
-ifeq ($(CONFIG_NET_ARP_DUMP),y)
-NET_CSRCS += arp_dump.c
-endif
-
-# Include arp build support
-
-DEPPATH += --dep-path arp
-VPATH += :arp
-
-endif # CONFIG_NET_ARP

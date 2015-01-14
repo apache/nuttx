@@ -3,12 +3,12 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+if NET_IPv4
 menu "ICMP Networking Support"
 
 config NET_ICMP
 	bool "Enable ICMP networking"
 	default n
-	depends on NET
 	---help---
 		Enable minimal ICMP support. Includes built-in support
 		for sending replies to received ECHO (ping) requests.
@@ -30,3 +30,4 @@ config NET_PINGADDRCONF
 
 endif # NET_ICMP
 endmenu # ICMP Networking Support
+endif # NET_IPv4

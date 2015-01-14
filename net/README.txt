@@ -10,7 +10,8 @@ Directory Structure
        |
        +- arp      - Address resolution protocol
        +- devif    - Stack/device interface layer
-       +- icmp     - Internet Control Message Protocol
+       +- icmp     - Internet Control Message Protocol (IPv4)
+       +- icmpv6   - Internet Control Message Protocol (IPv6)
        +- iob      - I/O buffering logic
        +- ipv6     - Logic unique to IPv6
        +- netdev   - Socket network device interface

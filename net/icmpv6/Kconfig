@@ -1,0 +1,21 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if NET_IPv6
+menu "ICMPv6 Networking Support"
+
+config NET_ICMPv6
+	bool "Enable ICMPv6 networking"
+	default n
+	depends on NET
+	---help---
+		Enable minimal ICMPv6 support. Includes built-in support
+		for sending replies to received ECHO (ping) requests.
+
+if NET_ICMPv6
+
+endif # NET_ICMPv6
+endmenu # ICMPv6 Networking Support
+endif # NET_IPv6
