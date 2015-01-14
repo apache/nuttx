@@ -2458,6 +2458,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
    */
 
   toints = false;
+
   if (timer->handler &&
      (config->cmn.mode == TIMER16_MODE_ONESHOT ||
       config->cmn.mode == TIMER16_MODE_PERIODIC))
