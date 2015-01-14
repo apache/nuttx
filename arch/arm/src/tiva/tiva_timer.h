@@ -203,28 +203,7 @@ struct tiva_timer32config_s
                                   * callback.
                                   */
 
-  /* Mode-specific parameters */
-
-  union
-  {
-#ifdef CONFIG_TIVA_TIMER32_PERIODIC
-    /* 32-bit programmable one-shot or periodic timer */
-
-    struct
-    {
-      uint32_t interval;         /* Value for interval load register */
-    } periodic;
-#endif
-
-#ifdef CONFIG_TIVA_TIMER32_RTC
-    /* 32-bit RTC with external 32.768-KHz input */
-
-    struct
-    {
-                                 /* No special configuration settings */
-    } rtc;
-#endif
-  } u;
+  /* Mode-specific parameters may follow */
 };
 #endif
 
@@ -256,47 +235,7 @@ struct tiva_timer16config_s
                                   * callback.
                                   */
 
-  /* Mode-specific parameters */
-
-  union
-  {
-#ifdef CONFIG_TIVA_TIMER16_PERIODIC
-    /* 16-bit programmable one-shot or periodic timer */
-
-    struct
-    {
-      uint8_t  prescaler;        /* Prescaler-1:  0-255 corresponding to 1-256 */
-      uint16_t interval;         /* Value for interval load register */
-    } periodic;
-#endif
-
-#ifdef CONFIG_TIVA_TIMER32_EDGECOUNT
-    /* 16-bit input edge-count capture mode w/8-bit prescaler */
-
-    struct
-    {
-                                 /* TODO: To be provided */
-    } count;
-#endif
-
-#ifdef CONFIG_TIVA_TIMER32_TIMECAP
-    /* 16-bit input time capture mode w/8-bit prescaler */
-
-    struct
-    {
-                                 /* TODO: To be provided */
-    } time;
-#endif
-
-#ifdef CONFIG_TIVA_TIMER32_PWM
-    /* 16-bit PWM output mode w/8-bit prescaler */
-
-    struct
-    {
-                                 /* TODO: To be provided */
-    } pwm;
-#endif
-  } u;
+  /* Mode-specific parameters may follow */
 };
 #endif
 
@@ -582,6 +521,12 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx);
  *   This function may be called at any time to change the timer interval
  *   load value of a 32-bit timer.
  *
+ *   It the timer is configured as a 32-bit one-shot or periodic timer, then
+ *   then function will also enable timeout interrupts.
+ *
+ *   NOTE: As of this writing, there is no interface to disable the timeout
+ *   interrupts once they have been enabled.
+ *
  * Input Parameters:
  *   handle   - The handle value returned  by tiva_gptm_configure()
  *   interval - The value to write to the timer interval load register
@@ -601,6 +546,12 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval);
  * Description:
  *   This function may be called at any time to change the timer interval
  *   load value of a 16-bit timer.
+ *
+ *   It the timer is configured as a 16-bit one-shot or periodic timer, then
+ *   then function will also enable timeout interrupts.
+ *
+ *   NOTE: As of this writing, there is no interface to disable the timeout
+ *   interrupts once they have been enabled.
  *
  * Input Parameters:
  *   handle   - The handle value returned  by tiva_gptm_configure()
@@ -886,14 +837,17 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
  *   Bind the configuration timer to a timer lower half instance and
  *   register the timer drivers at 'devpath'
  *
- *   NOTE: Only 32-bit periodic timers are supported.
+ *   NOTES:
+ *   1. Only 32-bit periodic timers are supported.
+ *   2. Timeout interrupts are disabled until tiva_timer32_setinterval() is
+ *      called.
+ *   3. Match interrupts are disabled until tiva_timer32_relmatch() is
+ *      called.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form
- *     /dev/timer0
+ *   devpath - The full path to the timer device.  This should be of the
+ *     form /dev/timer0
  *   gptm - General purpose timer number
- *   timeout - Timeout interval in microseconds. Set to a non-zero value
- *     to enable timeout interrupts
  *   altlck - True: Use alternate clock source.
  *
  * Returned Values:
@@ -903,8 +857,7 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int tiva_timer_register(FAR const char *devpath, int gptm, uint32_t timeout,
-                        bool altclk);
+int tiva_timer_register(FAR const char *devpath, int gptm, bool altclk);
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_TIMER_H */

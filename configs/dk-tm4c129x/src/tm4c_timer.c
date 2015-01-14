@@ -83,10 +83,6 @@
 #  define CONFIG_DK_TM4C129X_TIMER_DEVNAME "/dev/timer0"
 #endif
 
-#ifndef CONFIG_DK_TM4C129X_TIMER_TIMEOUT
-#  define CONFIG_DK_TM4C129X_TIMER_TIMEOUT 10000
-#endif
-
 #undef CONFIG_DK_TM4C129X_TIMER_ALTCLK
 #define ALTCLK false
 
@@ -107,10 +103,8 @@ int tiva_timer_initialize(void)
   int ret;
 
   timvdbg("Registering TIMER%d at %s\n", GPTM, CONFIG_DK_TM4C129X_TIMER_DEVNAME);
-  timvdbg("Initial timer period: %d uS\n", CONFIG_DK_TM4C129X_TIMER_TIMEOUT);
 
-  ret = tiva_timer_register(CONFIG_DK_TM4C129X_TIMER_DEVNAME, GPTM,
-                            CONFIG_DK_TM4C129X_TIMER_TIMEOUT, ALTCLK);
+  ret = tiva_timer_register(CONFIG_DK_TM4C129X_TIMER_DEVNAME, GPTM, ALTCLK);
   if (ret < 0)
     {
       timdbg("ERROR: Failed to register timer driver: %d\n", ret);
