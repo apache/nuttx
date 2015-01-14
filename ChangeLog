@@ -9402,4 +9402,11 @@
 	* net/icmpv6:  Create a future home for ICMPv6 (2015-01-14).
 	* net/icmp:  Remove all logic conditioned on CONFIG_NET_IPv6
 	  (2015-01-14).
-
+	* net/, include/nuttx/net, and a few other files: (1) Copied all ICMP
+	  sources files to net/icmpv6 with proper renaming and removal of IPv4
+	  logic, (2) remove IPv6 logic from files in net/icmp, (3) copied
+	  include/nuttx/icmp.h to icmpv6.h and removed IPv4 specific logic, (4)
+	  removed all IPv6 logic from icmp.h, (5) IP_HDRLEN became IPv4_HDRLEN
+	  and IPv6_HDRLEN, (6) ip_chksum() became ipv4_chksum() and
+	  ipv6_chksum(), and (7) added partial support for ICMPv6 statistics
+	  (2015-01-14).
