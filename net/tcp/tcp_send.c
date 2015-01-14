@@ -106,8 +106,8 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev)
    * length.
    */
 
-  pbuf->len[0]      = ((dev->d_len - IP_HDRLEN) >> 8);
-  pbuf->len[1]      = ((dev->d_len - IP_HDRLEN) & 0xff);
+  pbuf->len[0]      = ((dev->d_len - IPv6_HDRLEN) >> 8);
+  pbuf->len[1]      = ((dev->d_len - IPv6_HDRLEN) & 0xff);
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -142,7 +142,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev)
   /* Calculate IP checksum. */
 
   pbuf->ipchksum    = 0;
-  pbuf->ipchksum    = ~(ip_chksum(dev));
+  pbuf->ipchksum    = ~(ipv4_chksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 

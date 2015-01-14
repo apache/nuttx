@@ -83,7 +83,7 @@
  */
 
 #define IGMP_HDRLEN              8
-#define IPIGMP_HDRLEN            (IGMP_HDRLEN + IP_HDRLEN + 4)
+#define IPIGMP_HDRLEN            (IGMP_HDRLEN + IPv4_HDRLEN + 4)
 
 /* Group flags */
 

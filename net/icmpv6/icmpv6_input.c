@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/icmp/icmp_input.c
- * Handling incoming ICMP input
+ * net/icmpv6/icmpv6_input.c
+ * Handling incoming ICMPv6 input
  *
- *   Copyright (C) 2007-2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -46,6 +46,7 @@
 #ifdef CONFIG_NET
 
 #include <stdint.h>
+#include <string.h>
 #include <debug.h>
 
 #include <net/if.h>
@@ -57,16 +58,17 @@
 #include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
-#include "icmp/icmp.h"
 #include "utils/utils.h"
+#include "ipv6/ipv6.h"
+#include "icmpv6/icmpv6.h"
 
-#ifdef CONFIG_NET_ICMP
+#ifdef CONFIG_NET_ICMPv6
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Variables
@@ -76,7 +78,7 @@
  * Private Variables
  ****************************************************************************/
 
-#ifdef CONFIG_NET_ICMP_PING
+#ifdef CONFIG_NET_ICMPv6v6_PING
 FAR struct devif_callback_s *g_echocallback = NULL;
 #endif
 
@@ -89,13 +91,13 @@ FAR struct devif_callback_s *g_echocallback = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmp_input
+ * Name: icmpv6_input
  *
  * Description:
- *   Handle incoming ICMP input
+ *   Handle incoming ICMPv6 input
  *
  * Parameters:
- *   dev - The device driver structure containing the received ICMP
+ *   dev - The device driver structure containing the received ICMPv6
  *         packet
  *
  * Return:
@@ -106,105 +108,122 @@ FAR struct devif_callback_s *g_echocallback = NULL;
  *
  ****************************************************************************/
 
-void icmp_input(FAR struct net_driver_s *dev)
+void icmpv6_input(FAR struct net_driver_s *dev)
 {
-  FAR struct icmp_iphdr_s *picmp = ICMPBUF;
+  FAR struct icmpv6_iphdr_s *picmp = ICMPv6BUF;
 
 #ifdef CONFIG_NET_STATISTICS
-  g_netstats.icmp.recv++;
+  g_netstats.icmpv6.recv++;
 #endif
 
-  /* ICMP echo (i.e., ping) processing. This is simple, we only change the
-   * ICMP type from ECHO to ECHO_REPLY and adjust the ICMP checksum before
-   * we return the packet.
+  /* If we get a neighbor solicitation for our address we should send
+   * a neighbor advertisement message back.
    */
 
-  if (picmp->type == ICMP_ECHO_REQUEST)
+  if (picmp->type == ICMPv6_NEIGHBOR_SOLICITATION)
     {
-      /* If we are configured to use ping IP address assignment, we use
-       * the destination IP address of this ping packet and assign it to
-       * ourself.
-       */
-
-#ifdef CONFIG_NET_PINGADDRCONF
-      if (dev->d_ipaddr == 0)
+      if (net_ipaddr_cmp(picmp->icmpv6data, dev->d_ipaddr))
         {
-          dev->d_ipaddr = picmp->destipaddr;
-        }
-#endif
+          if (picmp->options[0] == ICMPv6_OPTION_SOURCE_LINK_ADDRESS)
+            {
+              /* Save the sender's address in our neighbor list. */
 
-      /* Change the ICMP type */
+              net_neighbor_add(picmp->srcipaddr, &(picmp->options[2]));
+            }
 
-      picmp->type = ICMP_ECHO_REPLY;
+          /* We should now send a neighbor advertisement back to where the
+           * neighbor solicitation came from.
+           */
 
-      /* Swap IP addresses. */
+          picmp->type = ICMPv6_NEIGHBOR_ADVERTISEMENT;
+          picmp->flags = ICMPv6_FLAG_S; /* Solicited flag. */
 
-      net_ipaddr_hdrcopy(picmp->destipaddr, picmp->srcipaddr);
-      net_ipaddr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);
+          picmp->reserved1 = picmp->reserved2 = picmp->reserved3 = 0;
 
-      /* Recalculate the ICMP checksum */
+          net_ipv6addr_copy(picmp->destipaddr, picmp->srcipaddr);
+          net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipaddr);
 
-#if 0
-      /* The slow way... sum over the ICMP message */
+          picmp->options[0]   = ICMPv6_OPTION_TARGET_LINK_ADDRESS;
+          picmp->options[1]   = 1;  /* Options length, 1 = 8 bytes. */
+          memcpy(&(picmp->options[2]), &dev->d_mac, IFHWADDRLEN);
 
-      picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - IPv4_HDRLEN);
-      if (picmp->icmpchksum == 0)
-        {
-          picmp->icmpchksum = 0xffff;
-        }
-#else
-      /* The quick way -- Since only the type has changed, just adjust the
-       * checksum for the change of type
-       */
-
-      if (picmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
-        {
-          picmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
+          picmp->icmpv6chksum = 0;
+          picmp->icmpv6chksum = ~icmpv6_chksum(dev);
         }
       else
         {
-          picmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
+          goto drop;
         }
-#endif
+    }
+  else if (picmp->type == ICMPv6_ECHO_REQUEST)
+    {
+      /* ICMPv6 echo (i.e., ping) processing. This is simple, we only
+       * change the ICMPv6 type from ECHO to ECHO_REPLY and update the
+       * ICMPv6 checksum before we return the packet.
+       */
 
-      nllvdbg("Outgoing ICMP packet length: %d (%d)\n",
-              dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+      picmp->type = ICMPv6_ECHO_REPLY;
 
-#ifdef CONFIG_NET_STATISTICS
-      g_netstats.icmp.sent++;
-      g_netstats.ip.sent++;
-#endif
+      net_ipv6addr_copy(picmp->destipaddr, picmp->srcipaddr);
+      net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipaddr);
+
+      picmp->icmpv6chksum = 0;
+      picmp->icmpv6chksum = ~icmpv6_chksum(dev);
     }
 
-  /* If an ICMP echo reply is received then there should also be
+  /* If an ICMPv6 echo reply is received then there should also be
    * a thread waiting to received the echo response.
    */
 
-#ifdef CONFIG_NET_ICMP_PING
-  else if (picmp->type == ICMP_ECHO_REPLY && g_echocallback)
+#ifdef CONFIG_NET_ICMPv6v6_PING
+  else if (picmp->type == ICMPv6_ECHO_REPLY && g_echocallback)
     {
-      (void)devif_callback_execute(dev, picmp, ICMP_ECHOREPLY, g_echocallback);
+      uint16_t flags = ICMPv6_ECHOREPLY;
+
+      if (g_echocallback)
+        {
+          /* Dispatch the ECHO reply to the waiting thread */
+
+          flags = devif_callback_execute(dev, picmp, flags, g_echocallback);
+        }
+
+      /* If the ECHO reply was not handled, then drop the packet */
+
+      if (flags == ICMPv6_ECHOREPLY)
+        {
+          /* The ECHO reply was not handled */
+
+          goto drop;
+        }
     }
 #endif
 
-  /* Otherwise the ICMP input was not processed */
-
   else
     {
-      nlldbg("Unknown ICMP cmd: %d\n", picmp->type);
+      nlldbg("Unknown ICMPv6 cmd: %d\n", picmp->type);
       goto typeerr;
     }
 
+  nllvdbg("Outgoing ICMPv6 packet length: %d (%d)\n",
+          dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.icmpv6.sent++;
+  g_netstats.ip.sent++;
+#endif
   return;
 
 typeerr:
 #ifdef CONFIG_NET_STATISTICS
-  g_netstats.icmp.typeerr++;
-  g_netstats.icmp.drop++;
+  g_netstats.icmpv6.typeerr++;
+#endif
+
+drop:
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.icmpv6.drop++;
 #endif
   dev->d_len = 0;
 }
 
-#endif /* CONFIG_NET_ICMP */
+#endif /* CONFIG_NET_ICMPv6 */
 #endif /* CONFIG_NET */

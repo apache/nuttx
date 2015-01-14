@@ -324,7 +324,7 @@ found:
    * len) and the length of the IP header (20 bytes).
    */
 
-  dev->d_len -= (len + IP_HDRLEN);
+  dev->d_len -= (len + IPv4_HDRLEN);
 
   /* First, check if the sequence number of the incoming packet is
    * what we're expecting next. If not, we send out an ACK with the

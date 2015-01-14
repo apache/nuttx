@@ -76,12 +76,14 @@
 #define IP_FLAG_DONTFRAG  0x4000
 #define IP_FLAG_MOREFRAGS 0x2000
 
-/* Header sizes */
+/* IP Header sizes */
+
+#ifdef CONFIG_NET_IPv4
+#  define IPv4_HDRLEN     20    /* Size of IPv4 header */
+#endif
 
 #ifdef CONFIG_NET_IPv6
-# define IP_HDRLEN        40    /* Size of IP header */
-#else
-# define IP_HDRLEN        20    /* Size of IP header */
+#  define IPv6_HDRLEN     40    /* Size of IPv6 header */
 #endif
 
 /****************************************************************************
@@ -99,7 +101,7 @@ typedef net_ip6addr_t net_ipaddr_t;
 typedef net_ip4addr_t net_ipaddr_t;
 #endif
 
-/* The IP header */
+/* The IPv4 header */
 
 struct net_iphdr_s
 {
@@ -218,19 +220,25 @@ struct net_iphdr_s
  * src The source from where to copy.
  */
 
-#ifndef CONFIG_NET_IPv6
-#  define net_ipaddr_copy(dest, src) \
+#define net_ipv4addr_copy(dest, src) \
    do { \
      (dest) = (in_addr_t)(src); \
    } while (0)
-#  define net_ipaddr_hdrcopy(dest, src) \
+#define net_ipv4addr_hdrcopy(dest, src) \
    do { \
      ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while (0)
+
+#define net_ipv6addr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
+#define net_ipv6addr_hdrcopy(dest, src) net_ipv6addr_copy(dest, src)
+
+#ifndef CONFIG_NET_IPv6
+#  define net_ipaddr_copy(dest, src)    net_ipv4addr_copy(dest, src)
+#  define net_ipaddr_hdrcopy(dest, src) net_ipv4addr_hdrcopy(dest, src)
 #else /* !CONFIG_NET_IPv6 */
-#  define net_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
-#  define net_ipaddr_hdrcopy(dest, src) net_ipaddr_copy(dest, src)
+#  define net_ipaddr_copy(dest, src)    net_ipv6addr_copy(dest, src)
+#  define net_ipaddr_hdrcopy(dest, src) net_ipv6addr_hdrcopy(dest, src)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses

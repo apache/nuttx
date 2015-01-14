@@ -147,7 +147,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       /* Calculate IP checksum. */
 
       pudpbuf->ipchksum    = 0;
-      pudpbuf->ipchksum    = ~(ip_chksum(dev));
+      pudpbuf->ipchksum    = ~(ipv4_chksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 

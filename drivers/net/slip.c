@@ -705,7 +705,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
        * enough to hold an IP header.
        */
 
-      if (priv->rxlen >= IP_HDRLEN)
+      if (priv->rxlen >= IPv4_HDRLEN)
         {
           /* Handle the IP input.  Get exclusive access to uIP. */
 

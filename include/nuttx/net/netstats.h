@@ -59,6 +59,9 @@
 #ifdef CONFIG_NET_ICMP
 #  include <nuttx/net/icmp.h>
 #endif
+#ifdef CONFIG_NET_ICMPv6
+#  include <nuttx/net/icmpv6.h>
+#endif
 #ifdef CONFIG_NET_IGMP
 #  include <nuttx/net/igmp.h>
 #endif
@@ -97,22 +100,26 @@ struct ip_stats_s
 
 struct net_stats_s
 {
-  struct ip_stats_s   ip;   /* IP statistics */
+  struct ip_stats_s   ip;       /* IP statistics */
 
 #ifdef CONFIG_NET_ICMP
-  struct icmp_stats_s icmp; /* ICMP statistics */
+  struct icmp_stats_s icmp;     /* ICMP statistics */
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+  struct icmpv6_stats_s icmpv6; /* ICMPv6 statistics */
 #endif
 
 #ifdef CONFIG_NET_IGMP
-  struct igmp_stats_s igmp; /* IGMP statistics */
+  struct igmp_stats_s igmp;     /* IGMP statistics */
 #endif
 
 #ifdef CONFIG_NET_TCP
-  struct tcp_stats_s  tcp;  /* TCP statistics */
+  struct tcp_stats_s  tcp;      /* TCP statistics */
 #endif
 
 #ifdef CONFIG_NET_UDP
-  struct udp_stats_s  udp;  /* UDP statistics */
+  struct udp_stats_s  udp;      /* UDP statistics */
 #endif
 };
 #endif /* CONFIG_NET_STATISTICS */

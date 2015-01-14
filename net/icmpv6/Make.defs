@@ -35,7 +35,13 @@
 
 ifeq ($(CONFIG_NET_ICMPv6),y)
 
-# Support for ICMPv6
+# ICMPv6 source files
+
+NET_CSRCS += icmpv6_input.c
+
+ifeq ($(CONFIG_NET_ICMPv6_PING),y)
+NET_CSRCS += icmpv6_ping.c icmpv6_poll.c icmpv6_send.c
+endif
 
 # Include ICMPv6 build support
 

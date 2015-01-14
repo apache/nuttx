@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-# ICMP source files
-
 ifeq ($(CONFIG_NET_ICMP),y)
+
+# ICMP source files
 
 NET_CSRCS += icmp_input.c
 

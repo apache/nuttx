@@ -167,7 +167,7 @@ static uint8_t devif_reassembly(void)
 
   if (!g_reassembly_timer)
     {
-      memcpy(g_reassembly_buffer, &pbuf->vhl, IP_HDRLEN);
+      memcpy(g_reassembly_buffer, &pbuf->vhl, IPv4_HDRLEN);
       g_reassembly_timer = CONFIG_NET_TCP_REASS_MAXAGE;
       g_reassembly_flags = 0;
 
@@ -200,7 +200,7 @@ static uint8_t devif_reassembly(void)
 
       /* Copy the fragment into the reassembly buffer, at the right offset. */
 
-      memcpy(&g_reassembly_buffer[IP_HDRLEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
+      memcpy(&g_reassembly_buffer[IPv4_HDRLEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
 
     /* Update the bitmap. */
 
@@ -282,7 +282,7 @@ static uint8_t devif_reassembly(void)
         pbuf->len[0] = g_reassembly_len >> 8;
         pbuf->len[1] = g_reassembly_len & 0xff;
         pbuf->ipchksum = 0;
-        pbuf->ipchksum = ~(ip_chksum(dev));
+        pbuf->ipchksum = ~(ipv4_chksum(dev));
 
         return g_reassembly_len;
       }
@@ -372,7 +372,7 @@ int devif_input(FAR struct net_driver_s *dev)
    * the size of the IPv6 header (40 bytes).
    */
 
-  iplen = (pbuf->len[0] << 8) + pbuf->len[1] + IP_HDRLEN;
+  iplen = (pbuf->len[0] << 8) + pbuf->len[1] + IPv6_HDRLEN;
 #else
   iplen = (pbuf->len[0] << 8) + pbuf->len[1];
 #endif /* CONFIG_NET_IPv6 */
@@ -496,7 +496,7 @@ int devif_input(FAR struct net_driver_s *dev)
     }
 
 #ifndef CONFIG_NET_IPv6
-  if (ip_chksum(dev) != 0xffff)
+  if (ipv4_chksum(dev) != 0xffff)
     {
       /* Compute and check the IP header checksum. */
 

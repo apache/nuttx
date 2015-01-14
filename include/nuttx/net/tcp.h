@@ -97,8 +97,8 @@
 
 /* TCP header sizes */
 
-#define TCP_HDRLEN        20                       /* Size of TCP header */
-#define IPTCP_HDRLEN      (TCP_HDRLEN + IP_HDRLEN) /* Size of IP + TCP header */
+#define TCP_HDRLEN        20                         /* Size of TCP header */
+#define IPTCP_HDRLEN      (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */
 
 /* Initial minimum MSS according to RFC 879
  *
