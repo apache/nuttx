@@ -9387,6 +9387,13 @@
 	* arch/arm/src/tiva/tiva_timerlib.c and .h:  Add a timer library for
 	  generic support of Tiva timers (2015-01-08).
 	* arch/arm/src/tiva/tiva_timerlow32.c:  Add a driver lower half for
-          drivers/timer.c.  Only 32-bit periodic timers are supported.  This
-          provides userspace access to timers.
-
+	  drivers/timer.c.  Only 32-bit periodic timers are supported.  This
+	  provides userspace access to timers.
+	* configs/px4-v2_upstream, Kconfig, README.txt: Remove the px4-v2_upstream
+	  configuration.  Moved to misc/Obsoleted/configs.  This was not the
+	  official configuration for the PX4 board and has led to confusion by
+	  NuttX users.  The board configuration also requires some ongoing
+	  maintenance and customization to support ongoing PX4 testing and
+	  evaluation.  It is best retained the PX4 repositories where it can be
+	  properly maintained and not in the upstream NuttX repository
+	  (2015-01-14).
