@@ -559,16 +559,6 @@ config ARCH_BOARD_PIRELLI_DPL10
 		This directory contains the board support for Pirelli dpl10 phones.  The
 		additions were made by Craig Comstock (with help form Alan Carvalho de Assis).
 
-config ARCH_BOARD_PX4FMU_V2
-	bool "PX4FMU v2"
-	depends on ARCH_CHIP_STM32F427V
-	---help---
-		This is a minimal configuration that supports low-level test of the
-		PX4FMU v2 in the NuttX source tree.  If you are using PX4, you
-		probably don't want this configuration.  You probably want the
-		latest supported configuration available from the PX4 GIT
-		repositories.
-
 config ARCH_BOARD_NUCLEO_F401RE
 	bool "STM32F401 Nucleo F401RE"
 	depends on ARCH_CHIP_STM32F401RE
@@ -1095,7 +1085,6 @@ config ARCH_BOARD
 	default "pic32-starterkit"         if ARCH_BOARD_PIC32_STARTERKIT
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pirelli_dpl10"            if ARCH_BOARD_PIRELLI_DPL10
-	default "px4fmu-v2_upstream"       if ARCH_BOARD_PX4FMU_V2
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "rgmp"                     if ARCH_BOARD_RGMP
@@ -1358,9 +1347,6 @@ source "configs/pirelli_dpl10/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "configs/nucleo-f4x1re/Kconfig"
-endif
-if ARCH_BOARD_PX4FMU_V2
-source "configs/px4fmu-v2_upstream/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "configs/qemu-i486/Kconfig"
