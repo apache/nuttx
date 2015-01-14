@@ -110,24 +110,7 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
 
       dev->d_sndlen += ICMP_HDRLEN;
 
-      /* Initialize the IP header.  Note that for IPv6, the IP length field
-       * does not include the IPv6 IP header length.
-       */
-
-#ifdef CONFIG_NET_IPv6
-
-      picmp->vtc         = 0x60;
-      picmp->tcf         = 0x00;
-      picmp->flow        = 0x00;
-      picmp->len[0]      = (dev->d_sndlen >> 8);
-      picmp->len[1]      = (dev->d_sndlen & 0xff);
-      picmp->nexthdr     = IP_PROTO_ICMP;
-      picmp->hoplimit    = IP_TTL;
-
-      net_ipaddr_copy(picmp->srcipaddr, &dev->d_ipaddr);
-      net_ipaddr_copy(picmp->destipaddr, destaddr);
-
-#else /* CONFIG_NET_IPv6 */
+      /* Initialize the IP header. */
 
       picmp->vhl         = 0x45;
       picmp->tos         = 0;
@@ -148,8 +131,6 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
 
       picmp->ipchksum    = 0;
       picmp->ipchksum    = ~(ip_chksum(dev));
-
-#endif /* CONFIG_NET_IPv6 */
 
       /* Calculate the ICMP checksum. */
 

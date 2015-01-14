@@ -218,12 +218,9 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
           picmp->type  = ICMP_ECHO_REQUEST;
           picmp->icode = 0;
-#ifndef CONFIG_NET_IPv6
           picmp->id    = htons(pstate->png_id);
           picmp->seqno = htons(pstate->png_seqno);
-#else
-# error "IPv6 ECHO Request not implemented"
-#endif
+
           /* Add some easily verifiable data */
 
           for (i = 0, ptr = ICMPDAT; i < pstate->png_datlen; i++)
