@@ -9416,3 +9416,5 @@
 	  net/devif/devif_input.c to ipv4_input.c, remove all IPv6-specific
 	  logic, and (4) xplit IPv4 header structure out as net_ipv4hdr_s from
 	  net_iphdr_s (2015-01-15).
+	* arch/:  All Ethernet drivers:  Call ipv6_input() if IPv6 is enabled
+	  and an IPv6 packet is received (2015-01-15).
