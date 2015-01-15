@@ -286,12 +286,15 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
+          nllvdbg("IPv4 frame\n");
+
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
+
           arp_ipin(&skel->sk_dev);
           ipv4_input(&skel->sk_dev);
 
@@ -300,12 +303,56 @@ static void skel_receive(FAR struct skel_driver_s *skel)
            */
 
           if (skel->sk_dev.d_len > 0)
-           {
-             arp_out(&skel->sk_dev);
-             skel_transmit(skel);
-           }
+            {
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&skel->sk_dev);
+                }
+
+              /* And send the packet */
+
+              skel_transmit(skel);
+            }
         }
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          ipv6_input(&skel->sk_dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (skel->sk_dev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (BUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&skel->sk_dev);
+                }
+#endif
+
+              /* And send the packet */
+
+              skel_transmit(skel);
+            }
+        }
+      else
+#endif
+#ifdef CONFIG_NET_ARP
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&skel->sk_dev);
 
@@ -318,6 +365,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
               skel_transmit(skel);
             }
         }
+#endif
     }
   while (); /* While there are more packets to be processed */
 }

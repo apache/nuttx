@@ -980,12 +980,15 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
           /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
             {
+              nllvdbg("IPv4 frame\n");
+
+              /* Handle ARP on input then give the IPv4 packet to the network
+               * layer
+               */
+
               arp_ipin(&dm9x->dm_dev);
               ipv4_input(&dm9x->dm_dev);
 
@@ -995,11 +998,55 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
               if (dm9x->dm_dev.d_len > 0)
                 {
-                  arp_out(&dm9x->dm_dev);
+                  /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                    {
+                      arp_out(&dm9x->dm_dev);
+                    }
+
+                  /* And send the packet */
+
                   dm9x_transmit(dm9x);
                 }
             }
-          else if (BUF->type == htons(ETHTYPE_ARP))
+          else
+#endif
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == HTONS(ETHTYPE_IP6))
+            {
+              nllvdbg("Iv6 frame\n");
+
+              /* Give the IPv6 packet to the network layer */
+
+              ipv6_input(&dm9x->dm_dev);
+
+             /* If the above function invocation resulted in data that should be
+              * sent out on the network, the field  d_len will set to a value > 0.
+              */
+
+              if (dm9x->dm_dev.d_len > 0)
+               {
+#ifdef CONFIG_NET_IPv4
+                  /* Update the Ethernet header with the correct MAC address */
+
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+                    {
+                      arp_out(&dm9x->dm_dev);
+                    }
+#endif
+
+                  /* And send the packet */
+
+                      dm9x_transmit(dm9x);
+                }
+            }
+          else
+#endif
+#ifdef CONFIG_NET_ARP
+          if (BUF->type == htons(ETHTYPE_ARP))
             {
               arp_arpin(&dm9x->dm_dev);
 
@@ -1012,6 +1059,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
                   dm9x_transmit(dm9x);
                 }
             }
+#endif
         }
 
 #if defined(CONFIG_DM9X_STATS)

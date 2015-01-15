@@ -430,14 +430,18 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_C89x0_STATISTICS
   cd89x0->cs_stats.rx_packets++;
 #endif
+
   /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
   if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
     {
+      nllvdbg("IPv4 frame\n");
+
+      /* Handle ARP on input then give the IPv4 packet to the network
+       * layer
+       */
+
       arp_ipin(&cs89x0->cs_dev);
       ipv4_input(&cs89x0->cs_dev);
 
@@ -447,11 +451,55 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
       if (cs89x0->cs_dev.d_len > 0)
         {
-          arp_out(&cs89x0->cs_dev);
+          /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+            {
+              arp_out(&cs89x0->cs_dev);
+            }
+
+          /* And send the packet */
+
           cs89x0_transmit(cs89x0);
         }
     }
-  else if (BUF->type == htons(ETHTYPE_ARP))
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if (BUF->type == HTONS(ETHTYPE_IP6))
+    {
+      nllvdbg("Iv6 frame\n");
+
+      /* Give the IPv6 packet to the network layer */
+
+      ipv6_input(&cs89x0->cs_dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+      if (cs89x0->cs_dev.d_len > 0)
+        {
+#ifdef CONFIG_NET_IPv4
+          /* Update the Ethernet header with the correct MAC address */
+
+          if (BUF->type == HTONS(ETHTYPE_IP))
+            {
+              arp_out(&cs89x0->cs_dev);
+            }
+#endif
+
+          /* And send the packet */
+
+          cs89x0_transmit(cs89x0);
+        }
+    }
+  else
+#endif
+#ifdef CONFIG_NET_ARP
+  if (BUF->type == htons(ETHTYPE_ARP))
     {
        arp_arpin(&cs89x0->cs_dev);
 
@@ -463,6 +511,11 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
          {
            cs89x0_transmit(cs89x0);
          }
+    }
+  else
+#endif
+    {
+      nllvdbg("Unrecognized packet type %02x\n", BUF->type);
     }
 }
 

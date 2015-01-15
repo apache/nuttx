@@ -567,12 +567,15 @@ static void e1000_receive(struct e1000_dev *e1000)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
+          nllvdbg("IPv4 frame\n");
+
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
+
           arp_ipin(&e1000->netdev);
           ipv4_input(&e1000->netdev);
 
@@ -582,11 +585,55 @@ static void e1000_receive(struct e1000_dev *e1000)
 
           if (e1000->netdev.d_len > 0)
             {
-              arp_out(&e1000->netdev);
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&e1000->netdev);
+                }
+
+              /* And send the packet */
+
               e1000_transmit(e1000);
             }
         }
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          ipv6_input(&e1000->netdev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (e1000->netdev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (BUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&e1000->netdev);
+                }
+#endif
+
+              /* And send the packet */
+
+              e1000_transmit(e1000);
+            }
+        }
+      else
+#endif
+#ifdef CONFIG_NET_ARP
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&e1000->netdev);
 
@@ -598,6 +645,7 @@ static void e1000_receive(struct e1000_dev *e1000)
             {
               e1000_transmit(e1000);
             }
+#endif
         }
 
 next:

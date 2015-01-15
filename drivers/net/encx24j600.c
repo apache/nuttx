@@ -1495,20 +1495,21 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
-          nllvdbg("Try to process IP packet (%02x)\n", BUF->type);
+          nllvdbg("IPv4 frame\n");
+
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
 
           arp_ipin(&priv->dev);
           ret = ipv4_input(&priv->dev);
 
           if (ret == OK || (clock_systimer() - descr->ts) > ENC_RXTIMEOUT)
             {
-              /* If packet has been sucessfully processed or has timed out,
+              /* If packet has been successfully processed or has timed out,
                * free it.
                */
 
@@ -1521,11 +1522,64 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              arp_out(&priv->dev);
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&priv->dev);
+                }
+
+              /* And send the packet */
+
               enc_txenqueue(priv);
             }
         }
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          ret = ipv6_input(&priv->dev);
+
+          if (ret == OK || (clock_systimer() - descr->ts) > ENC_RXTIMEOUT)
+            {
+              /* If packet has been successfully processed or has timed out,
+               * free it.
+               */
+
+              enc_rxrmpkt(priv, descr);
+            }
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->dev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (BUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&priv->dev);
+                }
+#endif
+
+              /* And send the packet */
+
+              enc_txenqueue(priv);
+            }
+        }
+      else
+#endif
+#ifdef CONFIG_NET_ARP
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP packet received (%02x)\n", BUF->type);
           arp_arpin(&priv->dev);
@@ -1544,6 +1598,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
             }
         }
       else
+#endif
         {
           /* free unsupported packet */
 
