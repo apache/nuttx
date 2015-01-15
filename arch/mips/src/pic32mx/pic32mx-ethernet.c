@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/pic32mx/pic32mx_ethernet.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the PIC32MX Ethernet Driver
@@ -297,7 +297,12 @@ struct pic32mx_statistics_s
   uint32_t rx_bufna;       /*   Number of Rx buffer not available errors */
   uint32_t rx_buse;        /*   Number of Rx BVCI bus errors */
   uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-  uint32_t rx_ip;          /*   Number of Rx IP packets received */
+#ifdef CONFIG_NET_IPv4
+  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
+#endif
+#ifdef CONFIG_NET_IPv6
+  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
+#endif
   uint32_t rx_arp;         /*   Number of Rx ARP packets received */
   uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
   uint32_t rx_pkterr;      /*   Number of dropped, error in Rx descriptor */
@@ -1426,13 +1431,14 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
           /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
             {
-              /* Handle the incoming IP packet */
+              nllvdbg("IPv4 frame\n");
+
+              /* Handle ARP on input then give the IPv4 packet to the network
+               * layer
+               */
 
               EMAC_STAT(priv, rx_ip);
               arp_ipin(&priv->pd_dev);
@@ -1445,11 +1451,55 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  arp_out(&priv->pd_dev);
+                  /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                    {
+                      arp_out(&priv->pd_dev);
+                    }
+
+                  /* And send the packet */
+
+                      pic32mx_response(priv);
+                }
+            }
+          else
+#endif
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == HTONS(ETHTYPE_IP6))
+            {
+              nllvdbg("Iv6 frame\n");
+
+              /* Give the IPv6 packet to the network layer */
+
+              EMAC_STAT(priv, rx_ipv6);
+              ipv6_input(&priv->pd_dev);
+
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field d_len will
+               * set to a value > 0.
+               */
+
+              if (priv->pd_dev.d_len > 0)
+               {
+#ifdef CONFIG_NET_IPv4
+                  /* Update the Ethernet header with the correct MAC address */
+
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+                    {
+                      arp_out(&priv->pd_dev);
+                    }
+#endif
+
+                  /* And send the packet */
+
                   pic32mx_response(priv);
                 }
             }
           else
+#endif
 #ifdef CONFIG_NET_ARP
           if (BUF->type == htons(ETHTYPE_ARP))
             {

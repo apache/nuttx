@@ -230,7 +230,12 @@ struct lpc17_statistics_s
   uint32_t rx_ovrerrors;   /* Number of Rx overrun error interrupts */
   uint32_t rx_errors;      /* Number of Rx error interrupts (OR of other errors) */
   uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-  uint32_t rx_ip;          /*   Number of Rx IP packets received */
+#ifdef CONFIG_NET_IPv4
+  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
+#endif
+#ifdef CONFIG_NET_IPv6
+  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
+#endif
   uint32_t rx_arp;         /*   Number of Rx ARP packets received */
   uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
   uint32_t rx_pkterr;      /*   Number of dropped, error in Rx descriptor */
@@ -869,13 +874,14 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
           /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
             {
-              /* Handle the incoming Rx packet */
+              nllvdbg("IPv4 frame\n");
+
+              /* Handle ARP on input then give the IPv4 packet to the
+               * network layer
+               */
 
               EMAC_STAT(priv, rx_ip);
               arp_ipin(&priv->lp_dev);
@@ -888,11 +894,55 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
               if (priv->lp_dev.d_len > 0)
                 {
-                  arp_out(&priv->lp_dev);
+                  /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                    {
+                      arp_out(&priv->lp_dev);
+                    }
+
+                  /* And send the packet */
+
                   lpc17_response(priv);
                 }
             }
           else
+#endif
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == HTONS(ETHTYPE_IP6))
+            {
+              nllvdbg("Iv6 frame\n");
+
+              /* Give the IPv6 packet to the network layer */
+
+              EMAC_STAT(priv, rx_ipv6);
+              ipv6_input(&priv->lp_dev);
+
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field  d_len will
+               * set to a value > 0.
+               */
+
+              if (priv->lp_dev.d_len > 0)
+               {
+#ifdef CONFIG_NET_IPv4
+                  /* Update the Ethernet header with the correct MAC address */
+
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+                    {
+                      arp_out(&priv->lp_dev);
+                    }
+#endif
+
+                  /* And send the packet */
+
+                  lpc17_response(priv);
+                }
+            }
+          else
+#endif
 #ifdef CONFIG_NET_ARP
           if (BUF->type == htons(ETHTYPE_ARP))
             {
