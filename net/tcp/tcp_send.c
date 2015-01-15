@@ -275,7 +275,7 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
 
   pbuf->flags     = TCP_RST | TCP_ACK;
-  dev->d_len      = IPTCP_HDRLEN;
+  dev->d_len      = IPv4TCP_HDRLEN;
   pbuf->tcpoffset = 5 << 4;
 
   /* Flip the seqno and ackno fields in the TCP header. */
@@ -362,7 +362,7 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   pbuf->optdata[1] = TCP_OPT_MSS_LEN;
   pbuf->optdata[2] = TCP_MSS(dev) / 256;
   pbuf->optdata[3] = TCP_MSS(dev) & 255;
-  dev->d_len       = IPTCP_HDRLEN + TCP_OPT_MSS_LEN;
+  dev->d_len       = IPv4TCP_HDRLEN + TCP_OPT_MSS_LEN;
   pbuf->tcpoffset  = ((TCP_HDRLEN + TCP_OPT_MSS_LEN) / 4) << 4;
 
   /* Complete the common portions of the TCP message */

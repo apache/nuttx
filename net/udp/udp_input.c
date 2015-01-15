@@ -60,8 +60,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -75,17 +73,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: udp_input
  *
  * Description:
  *   Handle incoming UDP input
  *
  * Parameters:
- *   dev - The device driver structure containing the received UDP packet
+ *   dev      - The device driver structure containing the received UDP packet
+ *   udp      - A pointer to the UDP header in the packet
+ *   udpiplen - Length of the IP and UDP headers
  *
  * Return:
  *   OK  The packet has been processed  and can be deleted
@@ -97,11 +93,14 @@
  *
  ****************************************************************************/
 
-int udp_input(FAR struct net_driver_s *dev)
+static int udp_input(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp,
+                     unsigned int udpiplen)
 {
   FAR struct udp_conn_s *conn;
-  FAR struct udp_iphdr_s *pbuf = UDPBUF;
+  unsigned int hdrlen;
   int ret = OK;
+
+  /* Update the count of UDP packets received */
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.udp.recv++;
@@ -112,10 +111,16 @@ int udp_input(FAR struct net_driver_s *dev)
    * application sets d_sndlen, it has a packet to send.
    */
 
-  dev->d_len    -= IPUDP_HDRLEN;
+  dev->d_len -= udpiplen;
+
+  /* Get the size of the link layer header, the IP header, and the UDP header */
+
+  hdrlen = udpiplen + NET_LL_HDRLEN(dev);
+
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPUDP_HDRLEN];
-  if (pbuf->udpchksum != 0 && udp_chksum(dev) != 0xffff)
+  dev->d_appdata = &dev->d_buf[hdrlen];
+
+  if (udp->udpchksum != 0 && udp_chksum(dev) != 0xffff)
     {
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;
@@ -134,7 +139,7 @@ int udp_input(FAR struct net_driver_s *dev)
        * receiving a UDP datagram (multicast reception).  This could be
        * handled easily by something like:
        *
-       *   for (conn = NULL; conn = udp_active (pbuf, conn); )
+       *   for (conn = NULL; conn = udp_active(dev, udp); )
        *
        * If the callback logic that receives a packet responds with an
        * outgoing packet, then it will over-write the received buffer,
@@ -143,15 +148,15 @@ int udp_input(FAR struct net_driver_s *dev)
        * packet as read-only.
        */
 
-      conn = udp_active(pbuf);
+      conn = udp_active(dev, udp);
       if (conn)
         {
           uint16_t flags;
 
           /* Set-up for the application callback */
 
-          dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPUDP_HDRLEN];
-          dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPUDP_HDRLEN];
+          dev->d_appdata = &dev->d_buf[hdrlen];
+          dev->d_snddata = &dev->d_buf[hdrlen];
           dev->d_sndlen  = 0;
 
           /* Perform the application callback */
@@ -187,5 +192,65 @@ int udp_input(FAR struct net_driver_s *dev)
 
   return ret;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: udp_ipv4_input
+ *
+ * Description:
+ *   Handle incoming UDP input in an IPv4 packet
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received UDP packet
+ *
+ * Return:
+ *   OK  The packet has been processed  and can be deleted
+ *   ERROR Hold the packet and try again later. There is a listening socket
+ *         but no receive in place to catch the packet yet.
+ *
+ * Assumptions:
+ *   Called from network stack logic with the network stack locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int udp_ipv4_input(FAR struct net_driver_s *dev)
+{
+  unsigned int offset = IPv4_HDRLEN + NET_LL_HDRLEN(dev);
+  return udp_input(dev, (FAR struct udp_hdr_s *)&dev->d_buf[offset],
+                   IPv4UDP_HDRLEN);
+}
+#endif
+
+/****************************************************************************
+ * Name: udp_ipv6_input
+ *
+ * Description:
+ *   Handle incoming UDP input in an IPv6 packet
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received UDP packet
+ *
+ * Return:
+ *   OK  The packet has been processed  and can be deleted
+ *   ERROR Hold the packet and try again later. There is a listening socket
+ *         but no receive in place to catch the packet yet.
+ *
+ * Assumptions:
+ *   Called from network stack logic with the network stack locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int udp_ipv6_input(FAR struct net_driver_s *dev)
+{
+  unsigned int offset = IPv6_HDRLEN + NET_LL_HDRLEN(dev);
+  return udp_input(dev, (FAR struct udp_hdr_s *)&dev->d_buf[offset],
+                   IPv6UDP_HDRLEN);
+}
+#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

@@ -98,7 +98,14 @@
 /* TCP header sizes */
 
 #define TCP_HDRLEN        20                         /* Size of TCP header */
-#define IPTCP_HDRLEN      (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */
+
+#ifdef CONFIG_NET_IPv4
+#  define IPv4TCP_HDRLEN (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */
+#endif
+
+#ifdef CONFIG_NET_IPv4
+#  define IPv6TCP_HDRLEN (TCP_HDRLEN + IPv6_HDRLEN) /* Size of IPv4 + TCP header */
+#endif
 
 /* Initial minimum MSS according to RFC 879
  *
@@ -120,6 +127,22 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* TCP header */
+
+struct tcp_hdr_s
+{
+  uint16_t srcport;
+  uint16_t destport;
+  uint8_t  seqno[4];
+  uint8_t  ackno[4];
+  uint8_t  tcpoffset;
+  uint8_t  flags;
+  uint8_t  wnd[2];
+  uint16_t tcpchksum;
+  uint8_t  urgp[2];
+  uint8_t  optdata[4];
+};
 
 /* The TCP and IP headers */
 

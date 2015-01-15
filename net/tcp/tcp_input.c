@@ -64,8 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -79,17 +77,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: tcp_input
  *
  * Description:
  *   Handle incoming TCP input
  *
  * Parameters:
- *   dev - The device driver structure containing the received TCP packet.
+ *   dev      - The device driver structure containing the received TCP packet.
+ *   tcp      - A pointer to the TCP header in the packet
+ *   tcpiplen - Combined length of the IP and TCP headers
  *
  * Return:
  *   None
@@ -99,10 +95,11 @@
  *
  ****************************************************************************/
 
-void tcp_input(FAR struct net_driver_s *dev)
+static void tcp_input(FAR struct net_driver_s *dev,
+                      FAR struct tcp_hdr_s *tcp, unsigned int tcpiplen)
 {
   FAR struct tcp_conn_s *conn = NULL;
-  FAR struct tcp_iphdr_s *pbuf = BUF;
+  unsigned int hdrlen;
   uint16_t tmp16;
   uint16_t flags;
   uint8_t  opt;
@@ -110,12 +107,20 @@ void tcp_input(FAR struct net_driver_s *dev)
   int      len;
   int      i;
 
-  dev->d_snddata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev)];
-  dev->d_appdata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev)];
-
 #ifdef CONFIG_NET_STATISTICS
+  /* Bump up the count of TCP packets received */
+
   g_netstats.tcp.recv++;
 #endif
+
+  /* Get the size of the link layer header, the IP header, and the TCP header */
+
+  hdrlen = tcpiplen + NET_LL_HDRLEN(dev);
+
+  /* Initialize for tcp_send() */
+
+  dev->d_snddata = &dev->d_buf[hdrlen];
+  dev->d_appdata = &dev->d_buf[hdrlen];
 
   /* Start of TCP input header processing code. */
 
@@ -133,7 +138,7 @@ void tcp_input(FAR struct net_driver_s *dev)
 
   /* Demultiplex this segment. First check any active connections. */
 
-  conn = tcp_active(pbuf);
+  conn = tcp_active(dev, tcp);
   if (conn)
     {
       /* We found an active connection.. Check for the subsequent SYN
@@ -143,7 +148,7 @@ void tcp_input(FAR struct net_driver_s *dev)
        */
 
       if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD &&
-         (BUF->flags & TCP_CTL) == TCP_SYN)
+          (tcp->flags & TCP_CTL) == TCP_SYN)
         {
           goto reset;
         }
@@ -159,13 +164,13 @@ void tcp_input(FAR struct net_driver_s *dev)
    * it is an old packet and we send a RST.
    */
 
-  if ((pbuf->flags & TCP_CTL) == TCP_SYN)
+  if ((tcp->flags & TCP_CTL) == TCP_SYN)
     {
       /* This is a SYN packet for a connection.  Find the connection
        * listening on this port.
        */
 
-      tmp16 = pbuf->destport;
+      tmp16 = tcp->destport;
       if (tcp_islistener(tmp16))
         {
           /* We matched the incoming packet with a connection in LISTEN.
@@ -177,7 +182,7 @@ void tcp_input(FAR struct net_driver_s *dev)
            * user application to accept it.
            */
 
-          conn = tcp_alloc_accept(dev, pbuf);
+          conn = tcp_alloc_accept(dev, tcp);
           if (conn)
             {
               /* The connection structure was successfully allocated.  Now see if
@@ -215,11 +220,11 @@ void tcp_input(FAR struct net_driver_s *dev)
 
           /* Parse the TCP MSS option, if present. */
 
-          if ((pbuf->tcpoffset & 0xf0) > 0x50)
+          if ((tcp->tcpoffset & 0xf0) > 0x50)
             {
-              for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
+              for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ;)
                 {
-                  opt = dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + i];
+                  opt = dev->d_buf[hdrlen + i];
                   if (opt == TCP_OPT_END)
                     {
                       /* End of options. */
@@ -233,12 +238,12 @@ void tcp_input(FAR struct net_driver_s *dev)
                       ++i;
                     }
                   else if (opt == TCP_OPT_MSS &&
-                          dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 1 + i] == TCP_OPT_MSS_LEN)
+                          dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
                     {
                       /* An MSS option with the right option length. */
 
-                      tmp16 = ((uint16_t)dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 2 + i] << 8) |
-                               (uint16_t)dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 3 + i];
+                      tmp16 = ((uint16_t)dev->d_buf[hdrlen + 2 + i] << 8) |
+                               (uint16_t)dev->d_buf[hdrlen + 3 + i];
                       conn->mss = tmp16 > TCP_MSS(dev) ? TCP_MSS(dev) : tmp16;
 
                       /* And we are done processing options. */
@@ -251,7 +256,7 @@ void tcp_input(FAR struct net_driver_s *dev)
                        * can skip past them.
                        */
 
-                      if (dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 1 + i] == 0)
+                      if (dev->d_buf[hdrlen + 1 + i] == 0)
                         {
                           /* If the length field is zero, the options are malformed
                            * and we don't process them further.
@@ -259,7 +264,7 @@ void tcp_input(FAR struct net_driver_s *dev)
 
                           break;
                         }
-                      i += dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 1 + i];
+                      i += dev->d_buf[hdrlen + 1 + i];
                     }
                 }
             }
@@ -279,7 +284,7 @@ reset:
 
   /* We do not send resets in response to resets. */
 
-  if ((pbuf->flags & TCP_RST) != 0)
+  if ((tcp->flags & TCP_RST) != 0)
     {
       goto drop;
     }
@@ -294,7 +299,7 @@ found:
 
   /* Update the connection's window size */
 
-  conn->winsize = ((uint16_t)pbuf->wnd[0] << 8) + (uint16_t)pbuf->wnd[1];
+  conn->winsize = ((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1];
 
   flags = 0;
 
@@ -304,7 +309,7 @@ found:
    * before we accept the reset.
    */
 
-  if ((pbuf->flags & TCP_RST) != 0)
+  if ((tcp->flags & TCP_RST) != 0)
     {
       conn->tcpstateflags = TCP_CLOSED;
       nlldbg("RESET - TCP state: TCP_CLOSED\n");
@@ -317,7 +322,7 @@ found:
    * any data to us.
    */
 
-  len = (pbuf->tcpoffset >> 4) << 2;
+  len = (tcp->tcpoffset >> 4) << 2;
 
   /* d_len will contain the length of the actual TCP data. This is
    * calculated by subtracting the length of the TCP header (in
@@ -334,14 +339,14 @@ found:
    */
 
   if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
-        ((pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
+        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
         (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
-        ((pbuf->flags & TCP_CTL) == TCP_SYN))))
+        ((tcp->flags & TCP_CTL) == TCP_SYN))))
     {
-      if ((dev->d_len > 0 || ((pbuf->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          memcmp(pbuf->seqno, conn->rcvseq, 4) != 0)
+      if ((dev->d_len > 0 || ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
+          memcmp(tcp->seqno, conn->rcvseq, 4) != 0)
         {
-          tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+          tcp_send(dev, conn, TCP_ACK, tcpiplen);
           return;
         }
     }
@@ -352,7 +357,7 @@ found:
    * retransmission timer.
    */
 
-  if ((pbuf->flags & TCP_ACK) != 0 && conn->unacked > 0)
+  if ((tcp->flags & TCP_ACK) != 0 && conn->unacked > 0)
     {
       uint32_t unackseq;
       uint32_t ackseq;
@@ -372,7 +377,7 @@ found:
        * incoming packet.
        */
 
-      ackseq = tcp_getsequence(pbuf->ackno);
+      ackseq = tcp_getsequence(tcp->ackno);
 
       /* Check how many of the outstanding bytes have been acknowledged. For
        * a most uIP send operation, this should always be true.  However,
@@ -464,7 +469,7 @@ found:
             conn->tcpstateflags = TCP_ESTABLISHED;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-            conn->isn           = tcp_getsequence(pbuf->ackno);
+            conn->isn           = tcp_getsequence(tcp->ackno);
             tcp_setsequence(conn->sndseq, conn->isn);
             conn->sent          = 0;
 #endif
@@ -486,7 +491,7 @@ found:
 
         /* We need to retransmit the SYNACK */
 
-        if ((pbuf->flags & TCP_CTL) == TCP_SYN)
+        if ((tcp->flags & TCP_CTL) == TCP_SYN)
           {
             tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
             return;
@@ -501,15 +506,15 @@ found:
          * state.
          */
 
-        if ((flags & TCP_ACKDATA) != 0 && (pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
+        if ((flags & TCP_ACKDATA) != 0 && (tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
           {
             /* Parse the TCP MSS option, if present. */
 
-            if ((pbuf->tcpoffset & 0xf0) > 0x50)
+            if ((tcp->tcpoffset & 0xf0) > 0x50)
               {
-                for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
+                for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ;)
                   {
-                    opt = dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + i];
+                    opt = dev->d_buf[hdrlen + i];
                     if (opt == TCP_OPT_END)
                       {
                         /* End of options. */
@@ -523,13 +528,13 @@ found:
                         ++i;
                       }
                     else if (opt == TCP_OPT_MSS &&
-                              dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 1 + i] == TCP_OPT_MSS_LEN)
+                              dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
                       {
                         /* An MSS option with the right option length. */
 
                         tmp16 =
-                          (dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 2 + i] << 8) |
-                          dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 3 + i];
+                          (dev->d_buf[hdrlen + 2 + i] << 8) |
+                          dev->d_buf[hdrlen + 3 + i];
                         conn->mss = tmp16 > TCP_MSS(dev) ? TCP_MSS(dev) : tmp16;
 
                         /* And we are done processing options. */
@@ -542,7 +547,7 @@ found:
                          * easily can skip past them.
                          */
 
-                        if (dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 1 + i] == 0)
+                        if (dev->d_buf[hdrlen + 1 + i] == 0)
                           {
                             /* If the length field is zero, the options are
                              * malformed and we don't process them further.
@@ -550,19 +555,19 @@ found:
 
                             break;
                           }
-                        i += dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN(dev) + 1 + i];
+                        i += dev->d_buf[hdrlen + 1 + i];
                       }
                   }
               }
 
             conn->tcpstateflags = TCP_ESTABLISHED;
-            memcpy(conn->rcvseq, pbuf->seqno, 4);
+            memcpy(conn->rcvseq, tcp->seqno, 4);
 
             net_incr32(conn->rcvseq, 1);
             conn->unacked       = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-            conn->isn           = tcp_getsequence(pbuf->ackno);
+            conn->isn           = tcp_getsequence(tcp->ackno);
             tcp_setsequence(conn->sndseq, conn->isn);
 #endif
             dev->d_len          = 0;
@@ -585,7 +590,7 @@ found:
 
         /* We do not send resets in response to resets. */
 
-        if ((pbuf->flags & TCP_RST) != 0)
+        if ((tcp->flags & TCP_RST) != 0)
           {
             goto drop;
           }
@@ -606,7 +611,7 @@ found:
          * sequence numbers will be screwed up.
          */
 
-        if ((pbuf->flags & TCP_FIN) != 0 && (conn->tcpstateflags & TCP_STOPPED) == 0)
+        if ((tcp->flags & TCP_FIN) != 0 && (conn->tcpstateflags & TCP_STOPPED) == 0)
           {
             /* Needs to be investigated further.
              * Windows often sends FIN packets together with the last ACK for
@@ -639,7 +644,7 @@ found:
             conn->nrtx          = 0;
             nllvdbg("TCP state: TCP_LAST_ACK\n");
 
-            tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPTCP_HDRLEN);
+            tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
             return;
           }
 
@@ -647,10 +652,10 @@ found:
          * data that we must pass to the application.
          */
 
-        if ((pbuf->flags & TCP_URG) != 0)
+        if ((tcp->flags & TCP_URG) != 0)
           {
 #ifdef CONFIG_NET_TCPURGDATA
-            dev->d_urglen = (pbuf->urgp[0] << 8) | pbuf->urgp[1];
+            dev->d_urglen = (tcp->urgp[0] << 8) | tcp->urgp[1];
             if (dev->d_urglen > dev->d_len)
               {
                 /* There is more urgent data in the next segment to come. */
@@ -667,8 +672,8 @@ found:
           {
             dev->d_urglen   = 0;
 #else /* CONFIG_NET_TCPURGDATA */
-            dev->d_appdata  = ((uint8_t*)dev->d_appdata) + ((pbuf->urgp[0] << 8) | pbuf->urgp[1]);
-            dev->d_len     -= (pbuf->urgp[0] << 8) | pbuf->urgp[1];
+            dev->d_appdata  = ((uint8_t*)dev->d_appdata) + ((tcp->urgp[0] << 8) | tcp->urgp[1]);
+            dev->d_len     -= (tcp->urgp[0] << 8) | tcp->urgp[1];
 #endif /* CONFIG_NET_TCPURGDATA */
           }
 
@@ -692,8 +697,7 @@ found:
          * When the application is called, the d_len field
          * contains the length of the incoming data. The application can
          * access the incoming data through the global pointer
-         * d_appdata, which usually points IPTCP_HDRLEN + NET_LL_HDRLEN(dev)
-         * bytes into the d_buf array.
+         * d_appdata, which usually points hdrlen bytes into the d_buf array.
          *
          * If the application wishes to send any data, this data should be
          * put into the d_appdata and the length of the data should be
@@ -761,7 +765,7 @@ found:
             net_incr32(conn->rcvseq, dev->d_len);
           }
 
-        if ((pbuf->flags & TCP_FIN) != 0)
+        if ((tcp->flags & TCP_FIN) != 0)
           {
             if ((flags & TCP_ACKDATA) != 0)
               {
@@ -778,7 +782,7 @@ found:
 
             net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, TCP_CLOSE);
-            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+            tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
         else if ((flags & TCP_ACKDATA) != 0)
@@ -791,7 +795,7 @@ found:
 
         if (dev->d_len > 0)
           {
-            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+            tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
 
@@ -803,7 +807,7 @@ found:
             net_incr32(conn->rcvseq, dev->d_len);
           }
 
-        if ((pbuf->flags & TCP_FIN) != 0)
+        if ((tcp->flags & TCP_FIN) != 0)
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
             conn->timer         = 0;
@@ -811,20 +815,20 @@ found:
 
             net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, TCP_CLOSE);
-            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+            tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
 
         if (dev->d_len > 0)
           {
-            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+            tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
 
         goto drop;
 
       case TCP_TIME_WAIT:
-        tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+        tcp_send(dev, conn, TCP_ACK, tcpiplen);
         return;
 
       case TCP_CLOSING:
@@ -842,5 +846,59 @@ found:
 drop:
   dev->d_len = 0;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_ipv4_input
+ *
+ * Description:
+ *   Handle incoming TCP input with IPv4 header
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received TCP packet.
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the Ethernet driver with the network stack locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+void tcp_ipv4_input(FAR struct net_driver_s *dev)
+{
+  unsigned int offset = IPv4_HDRLEN + NET_LL_HDRLEN(dev);
+  tcp_input(dev, (FAR struct tcp_hdr_s *)&dev->d_buf[offset], IPv4TCP_HDRLEN);
+}
+#endif
+
+/****************************************************************************
+ * Name: tcp_ipv6_input
+ *
+ * Description:
+ *   Handle incoming TCP input with IPv4 header
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received TCP packet.
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the Ethernet driver with the network stack locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+void tcp_ipv6_input(FAR struct net_driver_s *dev)
+{
+  unsigned int offset = IPv6_HDRLEN + NET_LL_HDRLEN(dev);
+  tcp_input(dev, (FAR struct tcp_hdr_s *)&dev->d_buf[offset], IPv6TCP_HDRLEN);
+}
+#endif
 
 #endif /* CONFIG_NET  && CONFIG_NET_TCP */

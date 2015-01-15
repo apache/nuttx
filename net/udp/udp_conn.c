@@ -63,6 +63,12 @@
 #include "udp/udp.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define IPv4 ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -342,11 +348,13 @@ void udp_free(FAR struct udp_conn_s *conn)
  *
  ****************************************************************************/
 
-FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
+FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
+                                  FAR struct udp_hdr_s *udp)
 {
-  FAR struct udp_conn_s *conn =
-    (FAR struct udp_conn_s *)g_active_udp_connections.head;
+  FAR struct net_iphdr_s *ip = IPv4;
+  FAR struct udp_conn_s *conn;
 
+  conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
   while (conn)
     {
       /* If the local UDP port is non-zero, the connection is considered
@@ -370,16 +378,16 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
        * is destined for this UDP connection.
        */
 
-      if (conn->lport != 0 && buf->destport == conn->lport &&
-          (conn->rport == 0 || buf->srcport == conn->rport) &&
+      if (conn->lport != 0 && udp->destport == conn->lport &&
+          (conn->rport == 0 || udp->srcport == conn->rport) &&
 #ifdef CONFIG_NETDEV_MULTINIC
           (net_ipaddr_cmp(conn->lipaddr, g_allzeroaddr) ||
            net_ipaddr_cmp(conn->lipaddr, g_alloneaddr) ||
-           net_ipaddr_hdrcmp(buf->destipaddr, &conn->lipaddr)) &&
+           net_ipaddr_hdrcmp(ip->destipaddr, &conn->lipaddr)) &&
 #endif
           (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
            net_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
-           net_ipaddr_hdrcmp(buf->srcipaddr, &conn->ripaddr)))
+           net_ipaddr_hdrcmp(ip->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
 

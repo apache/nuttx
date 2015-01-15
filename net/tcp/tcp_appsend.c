@@ -112,7 +112,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       conn->tcpstateflags = TCP_CLOSED;
       nllvdbg("TCP state: TCP_CLOSED\n");
 
-      tcp_send(dev, conn, TCP_RST | TCP_ACK, IPTCP_HDRLEN);
+      tcp_send(dev, conn, TCP_RST | TCP_ACK, IPv4TCP_HDRLEN);
     }
 
   /* Check for connection closed */
@@ -125,7 +125,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       nllvdbg("TCP state: TCP_FIN_WAIT_1\n");
 
       dev->d_sndlen  = 0;
-      tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPTCP_HDRLEN);
+      tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPv4TCP_HDRLEN);
     }
 
   /* None of the above */
@@ -204,14 +204,14 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * the IP and TCP headers.
        */
 
-      tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + IPTCP_HDRLEN);
+      tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + IPv4TCP_HDRLEN);
     }
 
   /* If there is no data to send, just send out a pure ACK if one is requested`. */
 
   else if ((result & TCP_SNDACK) != 0)
     {
-      tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
+      tcp_send(dev, conn, TCP_ACK, IPv4TCP_HDRLEN);
     }
 
   /* There is nothing to do -- drop the packet */

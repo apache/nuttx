@@ -62,12 +62,29 @@
 
 /* Header sizes */
 
-#define UDP_HDRLEN   8                           /* Size of UDP header */
-#define IPUDP_HDRLEN (UDP_HDRLEN + IPv4_HDRLEN)  /* Size of IPv4 + UDP header */
+#define UDP_HDRLEN       8                           /* Size of UDP header */
+
+#ifdef CONFIG_NET_IPv4
+#  define IPv4UDP_HDRLEN (UDP_HDRLEN + IPv4_HDRLEN)  /* Size of IPv4 + UDP headers */
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#  define IPv6UDP_HDRLEN (UDP_HDRLEN + IPv4_HDRLEN)  /* Size of IPv6 + UDP headers */
+#endif
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* The UDP header */
+
+struct udp_hdr_s
+{
+  uint16_t srcport;
+  uint16_t destport;
+  uint16_t udplen;
+  uint16_t udpchksum;
+};
 
 /* The UDP and IP headers */
 

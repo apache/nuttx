@@ -109,7 +109,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
        * the IP and UDP headers (and, eventually, the Ethernet header)
        */
 
-      dev->d_len = dev->d_sndlen + IPUDP_HDRLEN;
+      dev->d_len = dev->d_sndlen + IPv4UDP_HDRLEN;
 
       /* Initialize the IP header.  Note that for IPv6, the IP length field
        * does not include the IPv6 IP header length.

@@ -211,21 +211,21 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than NET_DEV_MTU(d) - NET_LL_HDRLEN(dev) - IPUDP_HDRLEN.
+ * than NET_DEV_MTU(d) - NET_LL_HDRLEN(dev) - IPv4UDP_HDRLEN.
  */
 
-#define UDP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPUDP_HDRLEN)
+#define UDP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPv4UDP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
-#  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
+#  define MIN_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPv4UDP_HDRLEN)
 #else /* if defined(CONFIG_NET_SLIP) */
-#  define MIN_UDP_MSS (CONFIG_NET_SLIP_MTU - IPUDP_HDRLEN)
+#  define MIN_UDP_MSS (CONFIG_NET_SLIP_MTU - IPv4UDP_HDRLEN)
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define MAX_UDP_MSS (CONFIG_NET_SLIP_MTU - IPUDP_HDRLEN)
+#  define MAX_UDP_MSS (CONFIG_NET_SLIP_MTU - IPv4UDP_HDRLEN)
 #else /* if defined(CONFIG_NET_ETHERNET) */
-#  define MAX_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPUDP_HDRLEN)
+#  define MAX_UDP_MSS (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPv4UDP_HDRLEN)
 #endif
 
 /* TCP configuration options */
@@ -288,7 +288,7 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev) - IPTCP_HDRLEN.
+ * than NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev) - IPv4TCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
  * link layer protocols (CONFIG_NET_MULTILINK), each network device
@@ -296,13 +296,13 @@
  * the minimum MSS for that case.
  */
 
-#define TCP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPTCP_HDRLEN)
+#define TCP_MSS(d)    (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - IPv4TCP_HDRLEN)
 
 #ifdef CONFIG_NET_ETHERNET
-#  define ETH_TCP_MSS  (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPTCP_HDRLEN)
+#  define ETH_TCP_MSS  (CONFIG_NET_ETH_MTU - ETH_HDRLEN - IPv4TCP_HDRLEN)
 #  define MIN_TCP_MSS  ETH_TCP_MSS
 #elif defined(CONFIG_NET_SLIP)
-#  define SLIP_TCP_MSS (CONFIG_NET_SLIP_MTU - IPTCP_HDRLEN)
+#  define SLIP_TCP_MSS (CONFIG_NET_SLIP_MTU - IPv4TCP_HDRLEN)
 #  define MIN_TCP_MSS  SLIP_TCP_MSS
 #endif
 

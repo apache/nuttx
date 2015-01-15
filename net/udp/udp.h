@@ -62,6 +62,7 @@
 /* Representation of a uIP UDP connection */
 
 struct devif_callback_s;  /* Forward reference */
+struct udp_hdr_s;         /* Forward reference */
 
 struct udp_conn_s
 {
@@ -96,8 +97,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-struct udp_iphdr_s; /* Forward reference */
-struct net_driver_s;      /* Forward reference */
+struct net_driver_s;  /* Forward reference */
+struct udp_iphdr_s;   /* Forward reference */
 
 /* Defined in udp_conn.c ****************************************************/
 /****************************************************************************
@@ -141,11 +142,12 @@ void udp_free(FAR struct udp_conn_s *conn);
  *   connection to be used within the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level
+ *   Called from network stack logic with the network stack locked
  *
  ****************************************************************************/
 
-FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf);
+FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
+                                  FAR struct udp_hdr_s *udp);
 
 /****************************************************************************
  * Name: udp_nextconn()
@@ -154,8 +156,7 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf);
  *   Traverse the list of allocated UDP connections
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level (or with
- *   interrupts disabled).
+ *   Called from network stack logic with the network stack locked
  *
  ****************************************************************************/
 
@@ -224,7 +225,7 @@ int udp_connect(FAR struct udp_conn_s *conn,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called from network stack logic with the network stack locked
  *
  ****************************************************************************/
 
@@ -245,7 +246,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called from network stack logic with the network stack locked
  *
  ****************************************************************************/
 
@@ -253,10 +254,10 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
 
 /* Defined in udp_input.c ***************************************************/
 /****************************************************************************
- * Name: udp_input
+ * Name: udp_ipv4_input
  *
  * Description:
- *   Handle incoming UDP input
+ *   Handle incoming UDP input in an IPv4 packet
  *
  * Parameters:
  *   dev - The device driver structure containing the received UDP packet
@@ -267,11 +268,36 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  *         but no receive in place to catch the packet yet.
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called from network stack logic with the network stack locked
  *
  ****************************************************************************/
 
-int udp_input(FAR struct net_driver_s *dev);
+#ifdef CONFIG_NET_IPv4
+int udp_ipv4_input(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: udp_ipv6_input
+ *
+ * Description:
+ *   Handle incoming UDP input in an IPv6 packet
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received UDP packet
+ *
+ * Return:
+ *   OK  The packet has been processed  and can be deleted
+ *   ERROR Hold the packet and try again later. There is a listening socket
+ *         but no receive in place to catch the packet yet.
+ *
+ * Assumptions:
+ *   Called from network stack logic with the network stack locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int udp_ipv6_input(FAR struct net_driver_s *dev);
+#endif
 
 /* Defined in udp_callback.c ************************************************/
 /****************************************************************************
@@ -284,7 +310,7 @@ int udp_input(FAR struct net_driver_s *dev);
  *   OK if packet has been processed, otherwise ERROR.
  *
  * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
+ *   Called from network stack logic with the network stack locked
  *
  ****************************************************************************/
 
