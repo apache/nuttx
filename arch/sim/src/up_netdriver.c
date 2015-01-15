@@ -179,6 +179,7 @@ void netdriver_loop(void)
                   netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
+#ifdef CONFIG_NET_ARP
           else if (BUF->ether_type == htons(ETHTYPE_ARP))
             {
               arp_arpin(&g_sim_dev);
@@ -193,6 +194,7 @@ void netdriver_loop(void)
                   netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
+#endif
         }
     }
 

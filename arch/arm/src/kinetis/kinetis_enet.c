@@ -535,6 +535,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
               kinetis_transmit(priv);
             }
         }
+#ifdef CONFIG_NET_ARP
       else if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&priv->dev);
@@ -549,6 +550,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
               kinetis_transmit(priv);
             }
         }
+#endif
     }
 }
 

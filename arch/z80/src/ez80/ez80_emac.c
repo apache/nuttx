@@ -1287,7 +1287,9 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
               ez80emac_transmit(priv);
             }
         }
-      else if (ETHBUF->type == htons(ETHTYPE_ARP))
+      else
+#ifdef CONFIG_NET_ARP
+      if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
           nvdbg("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);
@@ -1303,13 +1305,13 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
               ez80emac_transmit(priv);
             }
         }
-#ifdef CONFIG_DEBUG
       else
+#endif
         {
           ndbg("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_dropped);
         }
-#endif
+
       npackets++;
     }
   return npackets;

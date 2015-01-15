@@ -892,7 +892,9 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
                   lpc17_response(priv);
                 }
             }
-          else if (BUF->type == htons(ETHTYPE_ARP))
+          else
+#ifdef CONFIG_NET_ARP
+          if (BUF->type == htons(ETHTYPE_ARP))
             {
               EMAC_STAT(priv, rx_arp);
               arp_arpin(&priv->lp_dev);
@@ -908,6 +910,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
                 }
             }
           else
+#endif
             {
               /* Unrecognized... drop it. */
 

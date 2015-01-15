@@ -1639,7 +1639,9 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
              stm32_transmit(priv);
            }
         }
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      else
+#ifdef CONFIG_NET_ARP
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP frame\n");
 
@@ -1657,6 +1659,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
             }
         }
       else
+#endif
         {
           nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
         }
