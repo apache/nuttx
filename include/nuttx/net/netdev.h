@@ -99,25 +99,33 @@ struct net_driver_s
 #ifdef CONFIG_NET_MULTILINK
   /* Multi network devices using multiple data links protocols are selected */
 
-  uint8_t d_lltype;         /* See enum net_datalink_e */
-  uint8_t d_llhdrlen;       /* Link layer header size */
-  uint16_t d_mtu;           /* Maximum packet size */
+  uint8_t d_lltype;             /* See enum net_datalink_e */
+  uint8_t d_llhdrlen;           /* Link layer header size */
+  uint16_t d_mtu;               /* Maximum packet size */
 #ifdef CONFIG_NET_TCP
-  uint16_t d_recvwndo;      /* TCP receive window size */
+  uint16_t d_recvwndo;          /* TCP receive window size */
 #endif
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
   /* Ethernet device identity */
 
-  struct ether_addr d_mac;  /* Device MAC address */
+  struct ether_addr d_mac;      /* Device MAC address */
 #endif
 
   /* Network identity */
 
-  net_ipaddr_t d_ipaddr;    /* Host IP address assigned to the network interface */
-  net_ipaddr_t d_draddr;    /* Default router IP address */
-  net_ipaddr_t d_netmask;   /* Network subnet mask */
+#ifdef CONFIG_NET_IPv4
+  in_addr_t      d_ipaddr;      /* Host IPv4 address assigned to the network interface */
+  in_addr_t      d_draddr;      /* Default router IP address */
+  in_addr_t      d_netmask;     /* Network subnet mask */
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  net_ipv6addr_t d_ipv6addr;    /* Host IPv6 address assigned to the network interface */
+  net_ipv6addr_t d_ipv6draddr;  /* Default router IPv6 address */
+  net_ipv6addr_t d_ipv6netmask; /* Network IPv6 subnet mask */
+#endif
 
   /* The d_buf array is used to hold incoming and outgoing packets. The device
    * driver should place incoming data into this buffer. When sending data,

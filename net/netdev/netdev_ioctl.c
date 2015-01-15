@@ -95,13 +95,12 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static void ioctl_getipv4addr(FAR struct sockaddr *outaddr,
-                              FAR const net_ipaddr_t *inaddr)
+static void ioctl_getipv4addr(FAR struct sockaddr *outaddr, in_addr_t inaddr)
 {
   FAR struct sockaddr_in *dest  = (FAR struct sockaddr_in *)outaddr;
   dest->sin_family              = AF_INET;
   dest->sin_port                = 0;
-  dest->sin_addr.s_addr         = *inaddr;
+  dest->sin_addr.s_addr         = inaddr;
 }
 #endif
 
@@ -119,7 +118,7 @@ static void ioctl_getipv4addr(FAR struct sockaddr *outaddr,
 
 #ifdef CONFIG_NET_IPv6
 static void ioctl_getipv6addr(FAR struct sockaddr_storage *outaddr,
-                              FAR const net_ipaddr_t *inaddr)
+                              FAR const net_ipv6addr_t inaddr)
 {
   FAR struct sockaddr_in6 *dest = (FAR struct sockaddr_in6 *)outaddr;
   dest->sin_family              = AF_INET6;
@@ -142,7 +141,7 @@ static void ioctl_getipv6addr(FAR struct sockaddr_storage *outaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static void ioctl_setipv4addr(FAR net_ipaddr_t *outaddr,
+static void ioctl_setipv4addr(FAR in_addr_t *outaddr,
                               FAR const struct sockaddr *inaddr)
 {
   FAR const struct sockaddr_in *src = (FAR const struct sockaddr_in *)inaddr;
@@ -164,7 +163,7 @@ static void ioctl_setipv4addr(FAR net_ipaddr_t *outaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static void ioctl_setipv6addr(FAR net_ipaddr_t *outaddr,
+static void ioctl_setipv6addr(FAR net_ipv6addr_t outaddr,
                               FAR const struct sockaddr_storage *inaddr)
 {
   FAR const struct sockaddr_in6 *src = (FAR const struct sockaddr_in6 *)inaddr;
@@ -288,7 +287,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              ioctl_getipv4addr(&req->ifr_addr, &dev->d_ipaddr);
+              ioctl_getipv4addr(&req->ifr_addr, dev->d_ipaddr);
               ret = OK;
             }
         }
@@ -317,7 +316,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              ioctl_getipv4addr(&req->ifr_dstaddr, &dev->d_draddr);
+              ioctl_getipv4addr(&req->ifr_dstaddr, dev->d_draddr);
               ret = OK;
             }
         }
@@ -352,7 +351,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              ioctl_getipv4addr(&req->ifr_addr, &dev->d_netmask);
+              ioctl_getipv4addr(&req->ifr_addr, dev->d_netmask);
               ret = OK;
             }
         }
@@ -380,7 +379,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
-              ioctl_getipv6addr(&lreq->lifr_addr, &dev->d_ipaddr);
+              ioctl_getipv6addr(&lreq->lifr_addr, dev->d_ipv6addr);
               ret = OK;
             }
         }
@@ -396,7 +395,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
               ioctl_ifdown(dev);
-              ioctl_setipv6addr(&dev->d_ipaddr, &lreq->lifr_addr);
+              ioctl_setipv6addr(dev->d_ipv6addr, &lreq->lifr_addr);
               ioctl_ifup(dev);
               ret = OK;
             }
@@ -412,7 +411,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
-              ioctl_getipv6addr(&lreq->lifr_dstaddr, &dev->d_draddr);
+              ioctl_getipv6addr(&lreq->lifr_dstaddr, dev->d_ipv6draddr);
               ret = OK;
             }
         }
@@ -427,7 +426,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
-              ioctl_setipv6addr(&dev->d_draddr, &lreq->lifr_dstaddr);
+              ioctl_setipv6addr(dev->d_ipv6draddr, &lreq->lifr_dstaddr);
               ret = OK;
             }
         }
@@ -451,7 +450,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
-              ioctl_getipv6addr(&lreq->lifr_addr, &dev->d_netmask);
+              ioctl_getipv6addr(&lreq->lifr_addr, dev->d_ipv6netmask);
               ret = OK;
             }
         }
@@ -465,7 +464,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
-              ioctl_setipv6addr(&dev->d_netmask, &lreq->lifr_addr);
+              ioctl_setipv6addr(dev->d_ipv6netmask, &lreq->lifr_addr);
               ret = OK;
             }
         }
@@ -560,7 +559,12 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
               ioctl_ifdown(dev);
-              memset(&dev->d_ipaddr, 0, sizeof(net_ipaddr_t));
+#ifdef CONFIG_NET_IPv4
+              dev->d_ipaddr = 0;
+#endif
+#ifdef CONFIG_NET_IPv6
+              memset(&dev->d_ipv6addr, 0, sizeof(net_ipv6addr_t));
+#endif
               ret = OK;
             }
         }
