@@ -9418,3 +9418,8 @@
 	  net_iphdr_s (2015-01-15).
 	* arch/ and drivers/net:  All Ethernet drivers:  Call ipv6_input() if
 	  IPv6 is enabled and an IPv6 packet is received (2015-01-15).
+	* net/devif, net/tcp, net/ucp, include/nuttx/net:  Seperate tcp_input()
+	  and udp_input() into seprate functions tcp_ipv4_input(),
+	  tcp_ipv6_input(), udp_ipv4_input(), and upd_ipv6_input() than can deal
+	  will the data offsets caused by the differing sizes of the IP header
+	  (2015-01-15).
