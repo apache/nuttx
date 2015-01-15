@@ -103,7 +103,7 @@
 #  define IPv4TCP_HDRLEN (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */
 #endif
 
-#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
 #  define IPv6TCP_HDRLEN (TCP_HDRLEN + IPv6_HDRLEN) /* Size of IPv4 + TCP header */
 #endif
 

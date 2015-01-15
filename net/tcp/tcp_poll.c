@@ -101,10 +101,18 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
     {
-      /* Set up for the callback */
+      /* Set up for the callback.  We can't know in advance if the application
+       * is going to send a IPv4 or an IPv6 packet, so this setup may not
+       * actually be used.
+       */
 
+#if defined(CONFIG_NET_IPv4)
       dev->d_snddata = &dev->d_buf[IPv4TCP_HDRLEN + NET_LL_HDRLEN(dev)];
       dev->d_appdata = &dev->d_buf[IPv4TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+#else /* if defined(CONFIG_NET_IPv6) */
+      dev->d_snddata = &dev->d_buf[IPv6TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+      dev->d_appdata = &dev->d_buf[IPv6TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+#endif
 
       dev->d_len     = 0;
       dev->d_sndlen  = 0;

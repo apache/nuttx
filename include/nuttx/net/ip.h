@@ -279,9 +279,9 @@ struct net_ipv6hdr_s
  *
  * Example:
  *
- *   net_ipaddr_t ipaddr1;
- *   net_ipaddr_t ipaddr2;
- *   net_ipaddr_t mask;
+ *   in_addr_t ipaddr1;
+ *   in_addr_t ipaddr2;
+ *   in_addr_t mask;
  *
  *   net_ipaddr(&mask, 255,255,255,0);
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
@@ -304,8 +304,9 @@ struct net_ipv6hdr_s
 #  define net_ipaddr_maskcmp(a,b,m) net_ipv4addr_maskcmp(a,b,m)
 
 #else
-bool net_ipv6addr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
-                        net_ipaddr_t mask);
+bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
+                          const net_ipv6addr_t addr2,
+                          const net_ipv6addr_t mask);
 
 #  define net_ipaddr_maskcmp(a,b,m) net_ipv6addr_maskcmp(a,b,m)
 #endif

@@ -69,7 +69,7 @@
 #endif
 
 #ifdef CONFIG_NET_IPv6
-#  define IPv6UDP_HDRLEN (UDP_HDRLEN + IPv4_HDRLEN)  /* Size of IPv6 + UDP headers */
+#  define IPv6UDP_HDRLEN (UDP_HDRLEN + IPv6_HDRLEN)  /* Size of IPv6 + UDP headers */
 #endif
 
 /****************************************************************************
