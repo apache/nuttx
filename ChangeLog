@@ -9423,3 +9423,5 @@
 	  tcp_ipv6_input(), udp_ipv4_input(), and upd_ipv6_input() than can deal
 	  will the data offsets caused by the differing sizes of the IP header
 	  (2015-01-15).
+	* net/utils/net_ipv6_maskcmp.c:  Add missing implementation of
+	  net_ipv6_maskcmp() (2015-01-15).
