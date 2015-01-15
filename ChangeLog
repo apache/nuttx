@@ -9410,3 +9410,9 @@
 	  and IPv6_HDRLEN, (6) ip_chksum() became ipv4_chksum() and
 	  ipv6_chksum(), and (7) added partial support for ICMPv6 statistics
 	  (2015-01-14).
+	* arch/, drivers/net/, include/nuttx/net, and net/devif:  (1) Rename
+	  devif_input() ipv4_input(), (2) copy net/devif/devif_input.c to
+	  ipv6_input.c, remove all IPv4-specific logic, (3) rename
+	  net/devif/devif_input.c to ipv4_input.c, remove all IPv6-specific
+	  logic, and (4) xplit IPv4 header structure out as net_ipv4hdr_s from
+	  net_iphdr_s (2015-01-15).
