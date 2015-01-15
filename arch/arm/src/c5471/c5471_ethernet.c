@@ -5,7 +5,7 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based one a C5471 Linux driver and released under this BSD license with
- * special permisson from the copyright holder of the Linux driver:
+ * special permission from the copyright holder of the Linux driver:
  * Todd Fischer, Cadenux, LLC.  Other references: "TMS320VC547x CPU and
  * Peripherals Reference Guide," TI document spru038.pdf.
  *
@@ -1254,6 +1254,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
               c5471_transmit(c5471);
             }
         }
+#ifdef CONFIG_NET_ARP
       else if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(dev);
@@ -1270,6 +1271,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
               c5471_transmit(c5471);
             }
         }
+#endif
     }
 #ifdef CONFIG_C5471_NET_STATS
   else

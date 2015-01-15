@@ -785,7 +785,9 @@ static void tiva_receive(struct tiva_driver_s *priv)
               tiva_transmit(priv);
             }
         }
-      else if (ETHBUF->type == htons(ETHTYPE_ARP))
+      else
+#ifdef CONFIG_NET_ARP
+      if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);
@@ -801,13 +803,12 @@ static void tiva_receive(struct tiva_driver_s *priv)
                tiva_transmit(priv);
              }
         }
-#ifdef CONFIG_DEBUG
       else
+#endif
         {
           nlldbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
           EMAC_STAT(priv, rx_dropped);
         }
-#endif
     }
 }
 

@@ -103,7 +103,7 @@ SYMBOL(up_setjmp):
 	push	%rsi
 
 	/* Save registers */
-   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
+	/* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
 
 	movq	%rbp, JB_RBP(%rdi)	/* Save 3: rbp */
 	movq	%r12, JB_R12(%rdi)	/* Save 4: r12 */

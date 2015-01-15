@@ -1449,7 +1449,9 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
                   pic32mx_response(priv);
                 }
             }
-          else if (BUF->type == htons(ETHTYPE_ARP))
+          else
+#ifdef CONFIG_NET_ARP
+          if (BUF->type == htons(ETHTYPE_ARP))
             {
               /* Handle the incoming ARP packet */
 
@@ -1467,6 +1469,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
                 }
             }
           else
+#endif
             {
               /* Unrecognized... drop it. */
 

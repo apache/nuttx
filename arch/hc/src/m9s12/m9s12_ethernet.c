@@ -277,6 +277,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
              emac_transmit(priv);
            }
         }
+#ifdef CONFIG_NET_ARP
       else if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&priv->d_dev);
@@ -290,6 +291,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
               emac_transmit(priv);
             }
         }
+#endif
     }
   while (true); /* While there are more packets to be processed */
 }

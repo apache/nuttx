@@ -1163,7 +1163,9 @@ static void sam_receive(struct sam_emac_s *priv)
              sam_transmit(priv);
            }
         }
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      else
+#ifdef CONFIG_NET_ARP
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP frame\n");
 
@@ -1181,6 +1183,7 @@ static void sam_receive(struct sam_emac_s *priv)
             }
         }
       else
+#endif
         {
           nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
         }

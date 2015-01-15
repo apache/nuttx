@@ -1706,7 +1706,9 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
              tiva_transmit(priv);
            }
         }
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      else
+#ifdef CONFIG_NET_ARP
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           nvdbg("ARP frame\n");
 
@@ -1724,6 +1726,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
             }
         }
       else
+#endif
         {
           nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
         }
