@@ -257,17 +257,23 @@ struct net_iphdr_s
  * addr2 The second IP address.
  */
 
+#define net_ipv6addr_cmp(addr1, addr2) \
+  (addr1 == addr2)
+#define net_ipv6addr_hdrcmp(addr1, addr2) \
+  net_ipv6addr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
+
+#define net_ipv4addr_cmp(addr1, addr2) \
+  (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
+#define net_ipv4addr_hdrcmp(addr1, addr2) \
+  net_ipv4addr_cmp(addr1, addr2)
+
 #ifndef CONFIG_NET_IPv6
-#  define net_ipaddr_cmp(addr1, addr2) \
-     (addr1 == addr2)
-#  define net_ipaddr_hdrcmp(addr1, addr2) \
-     net_ipaddr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
-#else /* !CONFIG_NET_IPv6 */
-#  define net_ipaddr_cmp(addr1, addr2) \
-     (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
-#  define net_ipaddr_hdrcmp(addr1, addr2) \
-     net_ipaddr_cmp(addr, addr2)
-#endif /* !CONFIG_NET_IPv6 */
+#  define net_ipaddr_cmp(addr1, addr2)    net_ipv6addr_cmp(addr1, addr2)
+#  define net_ipaddr_hdrcmp(addr1, addr2) net_ipv6addr_hdrcmp(addr1, addr2)
+#else
+#  define net_ipaddr_cmp(addr1, addr2)    net_ipv4addr_cmp(addr1, addr2)
+#  define net_ipaddr_hdrcmp(addr1, addr2) net_ipv4addr_hdrcmp(addr1, addr2
+#endif
 
 /* Compare two IP addresses under a netmask.  The mask is used to mask
  * out the bits that are to be compared:  Buts within the mask much

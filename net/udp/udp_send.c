@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
+#include <string.h>
 #include <debug.h>
 
 #include <arpa/inet.h>
@@ -121,8 +122,8 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->flow        = 0x00;
       pudpbuf->len[0]      = (dev->d_sndlen >> 8);
       pudpbuf->len[1]      = (dev->d_sndlen & 0xff);
-      pudpbuf->nexthdr     = IP_PROTO_UDP;
-      pudpbuf->hoplimit    = conn->ttl;
+      pudpbuf->proto       = IP_PROTO_UDP;
+      pudpbuf->ttl         = conn->ttl;
 
       net_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
       net_ipaddr_copy(pudpbuf->destipaddr, &conn->ripaddr);
