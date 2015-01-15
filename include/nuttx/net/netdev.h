@@ -225,7 +225,7 @@ typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  * These functions are used by a network device driver for interacting
  * with uIP.
  *
- * Process an incoming packet.
+ * Process an incoming IP packet.
  *
  * This function should be called when the device driver has received
  * a packet from the network. The packet from the device driver must
@@ -243,7 +243,7 @@ typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  *     dev->d_len = devicedriver_poll();
  *     if (dev->d_len > 0)
  *       {
- *         devif_input(dev);
+ *         ipv4_input(dev);
  *         if (dev->d_len > 0)
  *           {
  *             devicedriver_send();
@@ -262,7 +262,7 @@ typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  *         if (BUF->type == HTONS(ETHTYPE_IP))
  *           {
  *             arp_ipin();
- *             devif_input(dev);
+ *             ipv4_input(dev);
  *             if (dev->d_len > 0)
  *               {
  *                 arp_out();
@@ -280,7 +280,13 @@ typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int devif_input(FAR struct net_driver_s *dev);
+#ifdef CONFIG_NET_IPv4
+int ipv4_input(FAR struct net_driver_s *dev);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int ipv6_input(FAR struct net_driver_s *dev);
+#endif
 
 /****************************************************************************
  * Polling of connections

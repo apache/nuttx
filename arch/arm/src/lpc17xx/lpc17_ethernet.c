@@ -879,7 +879,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
               EMAC_STAT(priv, rx_ip);
               arp_ipin(&priv->lp_dev);
-              devif_input(&priv->lp_dev);
+              ipv4_input(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the field  d_len will

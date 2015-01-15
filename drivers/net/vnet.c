@@ -310,7 +310,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 #endif
         {
           arp_ipin(&vnet->sk_dev);
-          devif_input(&vnet->sk_dev);
+          ipv4_input(&vnet->sk_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

@@ -166,7 +166,7 @@ void netdriver_loop(void)
 #endif
             {
               arp_ipin(&g_sim_dev);
-              devif_input(&g_sim_dev);
+              ipv4_input(&g_sim_dev);
 
              /* If the above function invocation resulted in data that
               * should be sent out on the network, the global variable

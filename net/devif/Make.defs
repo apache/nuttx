@@ -1,7 +1,7 @@
 ############################################################################
 # net/devif/Make.defs
 #
-#   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2009-2010, 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,18 @@
 
 # Network device interface source files
 
-NET_CSRCS += devif_initialize.c net_setipid.c devif_input.c devif_send.c
-NET_CSRCS += devif_poll.c devif_callback.c
+NET_CSRCS += devif_initialize.c net_setipid.c devif_send.c devif_poll.c
+NET_CSRCS += devif_callback.c
+
+# Device driver IP packet receipt interfaces
+
+ifeq ($(CONFIG_NET_IPv4),y)
+NET_CSRCS += ipv4_input.c
+endif
+
+ifeq ($(CONFIG_NET_IPv6),y)
+NET_CSRCS += ipv6_input.c
+endif
 
 # I/O buffer chain support required?
 

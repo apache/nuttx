@@ -1504,7 +1504,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           nllvdbg("Try to process IP packet (%02x)\n", BUF->type);
 
           arp_ipin(&priv->dev);
-          ret = devif_input(&priv->dev);
+          ret = ipv4_input(&priv->dev);
 
           if (ret == OK || (clock_systimer() - descr->ts) > ENC_RXTIMEOUT)
             {

@@ -574,7 +574,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 #endif
         {
           arp_ipin(&e1000->netdev);
-          devif_input(&e1000->netdev);
+          ipv4_input(&e1000->netdev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

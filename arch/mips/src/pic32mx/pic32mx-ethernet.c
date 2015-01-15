@@ -1436,7 +1436,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               EMAC_STAT(priv, rx_ip);
               arp_ipin(&priv->pd_dev);
-              devif_input(&priv->pd_dev);
+              ipv4_input(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the field d_len will

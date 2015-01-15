@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/devif/devif_input.c
- * The uIP TCP/IP stack code.
+ * net/devif/ipv4_input.c
+ * Device driver IPv4 packet receipt interface
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -51,7 +51,7 @@
  * well as some basic ICMP stuff). The implementation couples the IP,
  * UDP, TCP and the application layers very tightly. To keep the size
  * of the compiled code down, this code frequently uses the goto
- * statement. While it would be possible to break the devif_input()
+ * statement. While it would be possible to break the ipv4_input()
  * function into many smaller functions, this would increase the code
  * size because of the overhead of parameter passing and the fact that
  * the optimizer would not be as efficient.
@@ -78,7 +78,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#ifdef CONFIG_NET_IPv4
 
 #include <sys/ioctl.h>
 #include <stdint.h>
@@ -90,16 +90,13 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 
-#ifdef CONFIG_NET_IPv6
-#  include "ipv6/ipv6.h"
-#endif /* CONFIG_NET_IPv6 */
-
-#include "devif/devif.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
+
+#include "devif/devif.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -117,11 +114,11 @@
 #define TCP_REASS_LASTFRAG   0x01
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 #if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
@@ -181,8 +178,8 @@ static uint8_t devif_reassembly(void)
    * fragment into the buffer.
    */
 
-  if (net_ipaddr_hdrcmp(pbuf->srcipaddr, pfbuf->srcipaddr) &&
-      net_ipaddr_hdrcmp(pbuf->destipaddr, pfbuf->destipaddr) &&
+  if (net_ipv4addr_hdrcmp(pbuf->srcipaddr, pfbuf->srcipaddr) &&
+      net_ipv4addr_hdrcmp(pbuf->destipaddr, pfbuf->destipaddr) &&
       pbuf->g_ipid[0] == pfbuf->g_ipid[0] && pbuf->g_ipid[1] == pfbuf->g_ipid[1])
     {
       len = (pbuf->len[0] << 8) + pbuf->len[1] - (pbuf->vhl & 0x0f) * 4;
@@ -298,7 +295,7 @@ nullreturn:
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_input
+ * Function: ipv4_input
  *
  * Description:
  *
@@ -312,7 +309,7 @@ nullreturn:
  *
  ****************************************************************************/
 
-int devif_input(FAR struct net_driver_s *dev)
+int ipv4_input(FAR struct net_driver_s *dev)
 {
   FAR struct net_iphdr_s *pbuf = BUF;
   uint16_t iplen;
@@ -324,23 +321,6 @@ int devif_input(FAR struct net_driver_s *dev)
 #endif
 
   /* Start of IP input header processing code. */
-
-#ifdef CONFIG_NET_IPv6
-  /* Check validity of the IP header. */
-
-  if ((pbuf->vtc & 0xf0) != 0x60)
-    {
-      /* IP version and header length. */
-
-#ifdef CONFIG_NET_STATISTICS
-      g_netstats.ip.drop++;
-      g_netstats.ip.vhlerr++;
-#endif
-      nlldbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
-      goto drop;
-    }
-
-#else /* CONFIG_NET_IPv6 */
   /* Check validity of the IP header. */
 
   if (pbuf->vhl != 0x45)
@@ -354,7 +334,6 @@ int devif_input(FAR struct net_driver_s *dev)
       nlldbg("Invalid IP version or header length: %02x\n", pbuf->vhl);
       goto drop;
     }
-#endif /* CONFIG_NET_IPv6 */
 
   /* Check the size of the packet. If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet
@@ -363,20 +342,7 @@ int devif_input(FAR struct net_driver_s *dev)
    * we set d_len to the correct value.
    */
 
-#ifdef CONFIG_NET_IPv6
-  /* The length reported in the IPv6 header is the length of the payload
-   * that follows the header. However, uIP uses the d_len variable for
-   * holding the size of the entire packet, including the IP header. For
-   * IPv4 this is not a problem as the length field in the IPv4 header
-   * contains the length of the entire packet. But for IPv6 we need to add
-   * the size of the IPv6 header (40 bytes).
-   */
-
-  iplen = (pbuf->len[0] << 8) + pbuf->len[1] + IPv6_HDRLEN;
-#else
   iplen = (pbuf->len[0] << 8) + pbuf->len[1];
-#endif /* CONFIG_NET_IPv6 */
-
   if (iplen <= dev->d_len)
     {
       dev->d_len = iplen;
@@ -387,7 +353,6 @@ int devif_input(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-#ifndef CONFIG_NET_IPv6
   /* Check the fragment flag. */
 
   if ((pbuf->ipoffset[0] & 0x3f) != 0 || pbuf->ipoffset[1] != 0)
@@ -407,7 +372,6 @@ int devif_input(FAR struct net_driver_s *dev)
       goto drop;
 #endif /* CONFIG_NET_TCP_REASSEMBLY */
     }
-#endif /* CONFIG_NET_IPv6 */
 
    /* If IP broadcast support is configured, we check for a broadcast
     * UDP packet, which may be destined to us (even if there is no IP
@@ -417,11 +381,7 @@ int devif_input(FAR struct net_driver_s *dev)
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
   if (pbuf->proto == IP_PROTO_UDP &&
-#ifndef CONFIG_NET_IPv6
-      net_ipaddr_cmp(net_ip4addr_conv32(pbuf->destipaddr), g_alloneaddr))
-#else
-      net_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
-#endif
+      net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr), g_alloneaddr))
     {
       return udp_input(dev);
     }
@@ -434,14 +394,14 @@ int devif_input(FAR struct net_driver_s *dev)
   else
 #endif
 #ifdef CONFIG_NET_ICMP
-  if (net_ipaddr_cmp(dev->d_ipaddr, g_allzeroaddr))
+  if (net_ipv4addr_cmp(dev->d_ipaddr, g_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP
        * packets.
        */
 
-#if defined(CONFIG_NET_PINGADDRCONF) && !defined(CONFIG_NET_IPv6)
+#ifdef CONFIG_NET_PINGADDRCONF
       if (pbuf->proto == IP_PROTO_ICMP)
         {
           nlldbg("Possible ping config packet received\n");
@@ -461,11 +421,11 @@ int devif_input(FAR struct net_driver_s *dev)
 #endif
     {
       /* Check if the packet is destined for our IP address. */
-#ifndef CONFIG_NET_IPv6
-      if (!net_ipaddr_cmp(net_ip4addr_conv32(pbuf->destipaddr), dev->d_ipaddr))
+
+      if (!net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr), dev->d_ipaddr))
         {
 #ifdef CONFIG_NET_IGMP
-          net_ipaddr_t destip = net_ip4addr_conv32(pbuf->destipaddr);
+          net_ipv4addr_t destip = net_ip4addr_conv32(pbuf->destipaddr);
           if (igmp_grpfind(dev, &destip) == NULL)
 #endif
             {
@@ -475,27 +435,8 @@ int devif_input(FAR struct net_driver_s *dev)
               goto drop;
             }
         }
-
-#else /* CONFIG_NET_IPv6 */
-      /* For IPv6, packet reception is a little trickier as we need to
-       * make sure that we listen to certain multicast addresses (all
-       * hosts multicast address, and the solicited-node multicast
-       * address) as well. However, we will cheat here and accept all
-       * multicast packets that are sent to the ff02::/16 addresses.
-       */
-
-      if (!net_ipaddr_cmp(pbuf->destipaddr, dev->d_ipaddr) &&
-          pbuf->destipaddr[0] != 0xff02)
-        {
-#ifdef CONFIG_NET_STATISTICS
-          g_netstats.ip.drop++;
-#endif
-          goto drop;
-        }
-#endif /* CONFIG_NET_IPv6 */
     }
 
-#ifndef CONFIG_NET_IPv6
   if (ipv4_chksum(dev) != 0xffff)
     {
       /* Compute and check the IP header checksum. */
@@ -507,7 +448,6 @@ int devif_input(FAR struct net_driver_s *dev)
       nlldbg("Bad IP checksum\n");
       goto drop;
     }
-#endif /* CONFIG_NET_IPv6 */
 
   /* Everything looks good so far.  Now process the incoming packet
    * according to the protocol.
@@ -530,23 +470,17 @@ int devif_input(FAR struct net_driver_s *dev)
   /* Check for ICMP input */
 
 #ifdef CONFIG_NET_ICMP
-#ifndef CONFIG_NET_IPv6
       case IP_PROTO_ICMP:  /* ICMP input */
-#else
-      case IP_PROTO_ICMP6: /* ICMP6 input */
-#endif
         icmp_input(dev);
         break;
 #endif
 
-  /* Check for ICMP input */
+  /* Check for IGMP input */
 
 #ifdef CONFIG_NET_IGMP
-#ifndef CONFIG_NET_IPv6
       case IP_PROTO_IGMP:  /* IGMP input */
         igmp_input(dev);
         break;
-#endif
 #endif
 
       default:              /* Unrecognized/unsupported protocol */
@@ -571,4 +505,4 @@ drop:
   dev->d_len = 0;
   return OK;
 }
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET_IPv4 */

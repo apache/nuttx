@@ -1384,7 +1384,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
     {
       nllvdbg("IP packet received (%02x)\n", BUF->type);
       arp_ipin(&priv->dev);
-      devif_input(&priv->dev);
+      ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
        * sent out on the network, the field  d_len will set to a value > 0.

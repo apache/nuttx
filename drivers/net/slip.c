@@ -714,7 +714,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
           priv->dev.d_len = priv->rxlen;
 
           flags = net_lock();
-          devif_input(&priv->dev);
+          ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should
            * be sent out on the network, the field  d_len will set to a
