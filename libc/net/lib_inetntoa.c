@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/net/lib_inetntoa.c
  *
- *   Copyright (C) 2007-2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#ifndef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
 
 /****************************************************************************
  * Global Functions
@@ -78,5 +78,4 @@ FAR char *_inet_ntoa(in_addr_t in)
   return buffer;
 }
 #endif
-#endif /* !CONFIG_NET_IPv6 */
-
+#endif /* CONFIG_NET_IPv4 */

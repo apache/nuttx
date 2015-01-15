@@ -425,7 +425,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
       if (!net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr), dev->d_ipaddr))
         {
 #ifdef CONFIG_NET_IGMP
-          net_ipv4addr_t destip = net_ip4addr_conv32(pbuf->destipaddr);
+          in_addr_t destip = net_ip4addr_conv32(pbuf->destipaddr);
           if (igmp_grpfind(dev, &destip) == NULL)
 #endif
             {

@@ -122,7 +122,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
   if (picmp->type == ICMPv6_NEIGHBOR_SOLICITATION)
     {
-      if (net_ipaddr_cmp(picmp->icmpv6data, dev->d_ipaddr))
+      if (net_ipv6addr_cmp(picmp->icmpv6data, dev->d_ipaddr))
         {
           if (picmp->options[0] == ICMPv6_OPTION_SOURCE_LINK_ADDRESS)
             {

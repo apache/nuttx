@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
+void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr)
 {
   FAR struct icmpv6_iphdr_s *picmpv6 = ICMPv6BUF;
 
@@ -122,8 +122,8 @@ void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
       picmpv6->nexthdr     = IP_PROTO_ICMPv6;
       picmpv6->hoplimit    = IP_TTL;
 
-      net_ipaddr_copy(picmpv6->srcipaddr, &dev->d_ipaddr);
-      net_ipaddr_copy(picmpv6->destipaddr, destaddr);
+      net_ipv6addr_copy(picmpv6->srcipaddr, &dev->d_ipaddr);
+      net_ipv6addr_copy(picmpv6->destipaddr, destaddr);
 
       /* Calculate the ICMPv6 checksum. */
 

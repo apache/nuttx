@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/net/lib_inetntop.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Includes some logic extracted from hwport_ftpd, written by Jaehyuk Cho
@@ -54,22 +54,63 @@
 #include <arpa/inet.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_ntop
+ * Name: inet_ipv4_ntop
  *
  * Description:
- *  The inet_ntop() function converts a numeric address into a text string
- *  suitable for presentation.
+ *  The inet_ipv4_ntop() function converts a numeric IPv4 address into a
+ *  text string suitable for presentation.
+ *
+ * Input Parameters:
+ *   src  - The src argument points to a buffer holding an address of the
+ *          specified type.  The address must be in network byte order.
+ *   dest - The dest argument points to a buffer where the function stores
+ *          the resulting text string; it shall not be NULL.
+ *   size - The size argument specifies the size of this buffer, which must
+ *          be large enough to hold the text string (INET_ADDRSTRLEN
+ *          characters for IPv4, INET6_ADDRSTRLEN characters for IPv6).
+ *
+ * Returned Value:
+ *   inet_ntop() returns a pointer to the buffer containing the text string
+ *   if the conversion succeeds.  Otherwise, NULL is returned and the errno
+ *   is set to indicate the error.  There follow errno values may be set:
+ *
+ *   ENOSPC - The size of the inet_ntop() result buffer is inadequate
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+static int inet_ipv4_ntop(FAR const void *src, FAR char *dest, socklen_t size)
+{
+  FAR char *ptr;
+
+  if (size < INET_ADDRSTRLEN)
+    {
+      return -ENOSPC;
+    }
+
+  ptr = (FAR char*)src;
+  sprintf(dest, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: inet_ipv6_ntop
+ *
+ * Description:
+ *  The inet_ipv6_ntop() function converts a numeric IPv6 address into a
+ *  text string suitable for presentation.
  *
  * Input Parameters:
  *   af   - The af argument specifies the family of the address. This can be
  *          AF_INET or AF_INET6.
  *   src  - The src argument points to a buffer holding an address of the
  *          specified type.  The address must be in network byte order.
- *   dst  - The dst argument points to a buffer where the function stores
+ *   dest - The dest argument points to a buffer where the function stores
  *          the resulting text string; it shall not be NULL.
  *   size - The size argument specifies the size of this buffer, which must
  *          be large enough to hold the text string (INET_ADDRSTRLEN
@@ -85,30 +126,9 @@
  *
  ****************************************************************************/
 
-FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dst, socklen_t size)
+#ifdef CONFIG_NET_IPv6
+static int inet_ipv6_ntop(FAR const void *src, FAR char *dest, socklen_t size)
 {
-  int errval;
-#ifndef CONFIG_NET_IPv6
-  FAR char *ptr;
-
-  DEBUGASSERT(src && dst);
-
-  if (af != AF_INET)
-    {
-      errval = EAFNOSUPPORT;
-      goto errout;
-    }
-
-  if (size < INET_ADDRSTRLEN)
-    {
-      errval = ENOSPC;
-      goto errout;
-    }
-
-  ptr = (FAR char*)src;
-  sprintf(dst, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
-  return dst;
-#else
   FAR const struct in6_addr *in6_addr;
   uint16_t warray[8];
   int offset;
@@ -117,18 +137,9 @@ FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dst, socklen_t 
   int maxentry;
   int maxcount;
 
-  DEBUGASSERT(src && dst);
-
-  if (af != AF_INET6)
-    {
-      errval = EAFNOSUPPORT;
-      goto errout;
-    }
-
   if (size < INET6_ADDRSTRLEN)
     {
-      errval = ENOSPC;
-      goto errout;
+      return -ENOSPC;
     }
 
   in6_addr = (FAR const struct in6_addr *)src;
@@ -167,36 +178,105 @@ FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dst, socklen_t 
     }
 
   offset = 0;
-  dst[0] = '\0';
+  dest[0] = '\0';
 
   while (offset < 8)
     {
       if (offset == maxentry)
         {
-          size   -= snprintf(&dst[strlen(dst)], size, ":");
+          size   -= snprintf(&dest[strlen(dest)], size, ":");
           offset += maxcount;
           if (offset >= 8)
             {
-              size -= snprintf(&dst[strlen(dst)], size, ":");
+              size -= snprintf(&dest[strlen(dest)], size, ":");
             }
         }
       else
         {
           if (offset > 0)
             {
-              size -= snprintf(&dst[strlen(dst)], size, ":");
+              size -= snprintf(&dest[strlen(dest)], size, ":");
             }
 
-          size -= snprintf(&dst[strlen(dst)], size, "%x", warray[offset]);
+          size -= snprintf(&dest[strlen(dest)], size, "%x", warray[offset]);
           offset++;
         }
     }
 
-    return dst;
+  return OK;
+}
 #endif
 
-errout:
-    set_errno(errval);
-    memset(dst, 0, size);
-    return NULL;
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: inet_ntop
+ *
+ * Description:
+ *  The inet_ntop() function converts a numeric address into a text string
+ *  suitable for presentation.
+ *
+ * Input Parameters:
+ *   af   - The af argument specifies the family of the address. This can be
+ *          AF_INET or AF_INET6.
+ *   src  - The src argument points to a buffer holding an address of the
+ *          specified type.  The address must be in network byte order.
+ *   dest - The dest argument points to a buffer where the function stores
+ *          the resulting text string; it shall not be NULL.
+ *   size - The size argument specifies the size of this buffer, which must
+ *          be large enough to hold the text string (INET_ADDRSTRLEN
+ *          characters for IPv4, INET6_ADDRSTRLEN characters for IPv6).
+ *
+ * Returned Value:
+ *   inet_ntop() returns a pointer to the buffer containing the text string
+ *   if the conversion succeeds.  Otherwise, NULL is returned and the errno
+ *   is set to indicate the error.  There follow errno values may be set:
+ *
+ *   EAFNOSUPPORT - The af argument is invalid.
+ *   ENOSPC - The size of the inet_ntop() result buffer is inadequate
+ *
+ ****************************************************************************/
+
+FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dest,
+                          socklen_t size)
+{
+  int ret;
+
+  DEBUGASSERT(src && dest);
+
+  /* Do the conversion according to the IP version */
+
+  switch (af)
+    {
+#ifdef CONFIG_NET_IPv4
+    case AF_INET:
+      ret = inet_ipv4_ntop(src, dest, size);
+      break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+    case AF_INET6:
+      ret = inet_ipv6_ntop(src, dest, size);
+      break;
+#endif
+
+    default:
+      ret = -EAFNOSUPPORT;
+      break;
+    }
+
+  /* Handle errors in the conversion */
+
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      memset(dest, 0, size);
+      return NULL;
+    }
+
+  /* Return success */
+
+  return dest;
 }

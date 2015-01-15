@@ -105,8 +105,8 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr)
   memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
   memcpy(arp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
 
-  net_ipaddr_hdrcopy(arp->ah_dipaddr, &ipaddr);
-  net_ipaddr_hdrcopy(arp->ah_sipaddr, &dev->d_ipaddr);
+  net_ipv4addr_hdrcopy(arp->ah_dipaddr, &ipaddr);
+  net_ipv4addr_hdrcopy(arp->ah_sipaddr, &dev->d_ipaddr);
 
   arp->ah_opcode   = HTONS(ARP_REQUEST);
   arp->ah_hwtype   = HTONS(ARP_HWTYPE_ETH);

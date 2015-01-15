@@ -114,20 +114,20 @@ struct icmpv6_iphdr_s
 {
   /* IPv6 Ip header */
 
-  uint8_t  vtc;             /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  uint8_t  tcf;             /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
-  uint16_t flow;            /* 16-bit flow label (LS) */
-  uint8_t  len[2];          /* 16-bit Payload length */
-  uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
-  uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
-  net_ip6addr_t srcipaddr;  /* 128-bit Source address */
-  net_ip6addr_t destipaddr; /* 128-bit Destination address */
+  uint8_t  vtc;              /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8_t  tcf;              /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
+  uint16_t flow;             /* 16-bit flow label (LS) */
+  uint8_t  len[2];           /* 16-bit Payload length */
+  uint8_t  proto;            /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8_t  ttl;              /*  8-bit Hop limit (like IPv4 TTL field) */
+  net_ipv6addr_t srcipaddr;  /* 128-bit Source address */
+  net_ipv6addr_t destipaddr; /* 128-bit Destination address */
 
   /* ICMPv6 header */
 
-  uint8_t  type;            /* Defines the format of the ICMP message */
-  uint8_t  icode;           /* Further qualifies the ICMP messsage */
-  uint16_t icmpv6chksum;    /* Checksum of ICMP header and data */
+  uint8_t  type;             /* Defines the format of the ICMP message */
+  uint8_t  icode;            /* Further qualifies the ICMP messages */
+  uint16_t icmpv6chksum;     /* Checksum of ICMP header and data */
 
   /* Data following the ICMP header contains the data specific to the
    * message type indicated by the Type and Code fields.
@@ -200,7 +200,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int icmpv6_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
+int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
                 uint16_t datalen, int dsecs);
 
 #undef EXTERN

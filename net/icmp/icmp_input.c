@@ -139,8 +139,8 @@ void icmp_input(FAR struct net_driver_s *dev)
 
       /* Swap IP addresses. */
 
-      net_ipaddr_hdrcopy(picmp->destipaddr, picmp->srcipaddr);
-      net_ipaddr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);
+      net_ipv4addr_hdrcopy(picmp->destipaddr, picmp->srcipaddr);
+      net_ipv4addr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);
 
       /* Recalculate the ICMP checksum */
 

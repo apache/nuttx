@@ -123,7 +123,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
         /* ARP request. If it asked for our address, we send out a reply. */
 
-        if (net_ipaddr_cmp(ipaddr, dev->d_ipaddr))
+        if (net_ipv4addr_cmp(ipaddr, dev->d_ipaddr))
           {
             struct eth_hdr_s *peth = ETHBUF;
 
@@ -142,7 +142,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
             parp->ah_dipaddr[0] = parp->ah_sipaddr[0];
             parp->ah_dipaddr[1] = parp->ah_sipaddr[1];
-            net_ipaddr_hdrcopy(parp->ah_sipaddr, &dev->d_ipaddr);
+            net_ipv4addr_hdrcopy(parp->ah_sipaddr, &dev->d_ipaddr);
             arp_dump(parp);
 
             peth->type          = HTONS(ETHTYPE_ARP);
@@ -157,7 +157,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
          * for us.
          */
 
-        if (net_ipaddr_cmp(ipaddr, dev->d_ipaddr))
+        if (net_ipv4addr_cmp(ipaddr, dev->d_ipaddr))
           {
             /* Yes... Insert the address mapping in the ARP table */
 

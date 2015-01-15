@@ -56,61 +56,33 @@
 #include <netinet/in.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_pton
+ * Name: inet_ipv4_pton
  *
  * Description:
- *  The inet_pton() function converts an address in its standard text
- *  presentation form into its numeric binary form.
- *
- *  If the af argument of inet_pton() is AF_INET, the src string will be
- *  in the standard IPv4 dotted-decimal form:
- *
- *    ddd.ddd.ddd.ddd
- *
- *  where "ddd" is a one to three digit decimal number between 0 and 255.
- *
- *  If the af argument of inet_pton() is AF_INET6, the src string will be in
- *  one of the following standard IPv6 text forms:
- *
- *  1. The preferred form is "x:x:x:x:x:x:x:x", where the 'x' s are the
- *     hexadecimal values of the eight 16-bit pieces of the address. Leading
- *     zeros in individual fields can be omitted, but there must be at least
- *     one numeral in every field.
- *
- *  2. A string of contiguous zero fields in the preferred form can be shown
- *     as "::". The "::" can only appear once in an address. Unspecified
- *     addresses ( "0:0:0:0:0:0:0:0" ) may be represented simply as "::".
- *
- *  3. A third form that is sometimes more convenient when dealing with a
- *     mixed environment of IPv4 and IPv6 nodes is "x:x:x:x:x:x:d.d.d.d",
- *     where the 'x' s are the hexadecimal values of the six high-order
- *     16-bit pieces of the address, and the 'd' s are the decimal values
- *     of the four low-order 8-bit pieces of the address (standard IPv4
- *     representation).
+ *  The inet_ipv4_pton() function converts an IPv4 address in its standard
+ *  text presentation form into its numeric binary form.
  *
  * Input Parameters:
- *   af   - The af argument specifies the family of the address. This can be
- *          AF_INET or AF_INET6.
  *   src  - The src argument points to the string being passed in.
- *   dst  - The dst argument points to a numstr into which the function stores
+ *   dest - The dest argument points to a numstr into which the function stores
  *          the numeric address; this must be large enough to hold the numeric
  *          address (32 bits for AF_INET, 128 bits for AF_INET6).
  *
  * Returned Value:
  *   The inet_pton() function returns 1 if the conversion succeeds, with the
- *   address pointed to by dst in network byte order. It will return 0 if the
+ *   address pointed to by dest in network byte order. It will return 0 if the
  *   input is not a valid IPv4 dotted-decimal string or a valid IPv6 address
  *   string, or -1 with errno set to EAFNOSUPPOR] if the af argument is unknown.
  *
  ****************************************************************************/
 
-int inet_pton(int af, FAR const char *src, FAR void *dst)
+#ifdef CONFIG_NET_IPv4
+static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
 {
-#ifndef CONFIG_NET_IPv6
   size_t srcoffset;
   size_t numoffset;
   int value;
@@ -119,17 +91,9 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
   char numstr[4];
   uint8_t *ip;
 
-  DEBUGASSERT(src && dst);
+  (void)memset(dest, 0, sizeof(struct in_addr));
 
-  if (af != AF_INET)
-    {
-      set_errno(EAFNOSUPPORT);
-      return -1;
-    }
-
-  (void)memset(dst, 0, sizeof(struct in_addr));
-
-  ip        = (uint8_t *)dst;
+  ip        = (uint8_t *)dest;
   srcoffset = 0;
   numoffset = 0;
   ndots     = 0;
@@ -204,7 +168,33 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
   /* Return zero if there is any problem parsing the input */
 
   return 0;
-#else
+}
+#endif
+
+/****************************************************************************
+ * Name: inet_ipv6_pton
+ *
+ * Description:
+ *  The inet_ipv6_pton() function converts an IPv6 address in its standard
+ *  text presentation form into its numeric binary form.
+ *
+ * Input Parameters:
+ *   src  - The src argument points to the string being passed in.
+ *   dest - The dest argument points to a numstr into which the function stores
+ *          the numeric address; this must be large enough to hold the numeric
+ *          address (32 bits for AF_INET, 128 bits for AF_INET6).
+ *
+ * Returned Value:
+ *   The inet_pton() function returns 1 if the conversion succeeds, with the
+ *   address pointed to by dest in network byte order. It will return 0 if the
+ *   input is not a valid IPv4 dotted-decimal string or a valid IPv6 address
+ *   string, or -1 with errno set to EAFNOSUPPOR] if the af argument is unknown.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
+{
   size_t srcoffset;
   size_t numoffset;
   long value;
@@ -216,15 +206,7 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
   uint8_t rip[sizeof(struct in6_addr)];
   bool rtime;
 
-  DEBUGASSERT(src && dst);
-
-  if (af != AF_INET6)
-    {
-      set_errno(EAFNOSUPPORT);
-      return -1;
-    }
-
-  (void)memset(dst, 0, sizeof(struct in6_addr));
+  (void)memset(dest, 0, sizeof(struct in6_addr));
 
   srcoffset = 0;
   numoffset = 0;
@@ -298,12 +280,12 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
 
               if (nsep > 0)
                 {
-                  memcpy(dst, &ip[0], nsep << 1);
+                  memcpy(dest, &ip[0], nsep << 1);
                 }
 
               if (nrsep > 0)
                 {
-                  memcpy(dst + (16 - (nrsep << 1)), &rip[0], nrsep << 1);
+                  memcpy(dest + (16 - (nrsep << 1)), &rip[0], nrsep << 1);
                 }
 
               /* Return 1 if the conversion succeeds */
@@ -335,5 +317,83 @@ int inet_pton(int af, FAR const char *src, FAR void *dst)
   /* Return zero if there is any problem parsing the input */
 
   return 0;
+}
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: inet_pton
+ *
+ * Description:
+ *  The inet_pton() function converts an address in its standard text
+ *  presentation form into its numeric binary form.
+ *
+ *  If the af argument of inet_pton() is AF_INET, the src string will be
+ *  in the standard IPv4 dotted-decimal form:
+ *
+ *    ddd.ddd.ddd.ddd
+ *
+ *  where "ddd" is a one to three digit decimal number between 0 and 255.
+ *
+ *  If the af argument of inet_pton() is AF_INET6, the src string will be in
+ *  one of the following standard IPv6 text forms:
+ *
+ *  1. The preferred form is "x:x:x:x:x:x:x:x", where the 'x' s are the
+ *     hexadecimal values of the eight 16-bit pieces of the address. Leading
+ *     zeros in individual fields can be omitted, but there must be at least
+ *     one numeral in every field.
+ *
+ *  2. A string of contiguous zero fields in the preferred form can be shown
+ *     as "::". The "::" can only appear once in an address. Unspecified
+ *     addresses ( "0:0:0:0:0:0:0:0" ) may be represented simply as "::".
+ *
+ *  3. A third form that is sometimes more convenient when dealing with a
+ *     mixed environment of IPv4 and IPv6 nodes is "x:x:x:x:x:x:d.d.d.d",
+ *     where the 'x' s are the hexadecimal values of the six high-order
+ *     16-bit pieces of the address, and the 'd' s are the decimal values
+ *     of the four low-order 8-bit pieces of the address (standard IPv4
+ *     representation).
+ *
+ * Input Parameters:
+ *   af   - The af argument specifies the family of the address. This can be
+ *          AF_INET or AF_INET6.
+ *   src  - The src argument points to the string being passed in.
+ *   dest - The dest argument points to a numstr into which the function stores
+ *          the numeric address; this must be large enough to hold the numeric
+ *          address (32 bits for AF_INET, 128 bits for AF_INET6).
+ *
+ * Returned Value:
+ *   The inet_pton() function returns 1 if the conversion succeeds, with the
+ *   address pointed to by dest in network byte order. It will return 0 if the
+ *   input is not a valid IPv4 dotted-decimal string or a valid IPv6 address
+ *   string, or -1 with errno set to EAFNOSUPPORT] if the af argument is
+ *   unknown.
+ *
+ ****************************************************************************/
+
+int inet_pton(int af, FAR const char *src, FAR void *dest)
+{
+  DEBUGASSERT(src && dest);
+
+  /* Do the conversion according to the IP version */
+
+  switch (af)
+    {
+#ifdef CONFIG_NET_IPv4
+    case AF_INET:
+      return inet_ipv4_pton(src, dest);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+    case AF_INET6:
+      return inet_ipv6_pton(src, dest);
+#endif
+
+    default:
+      set_errno(EAFNOSUPPORT);
+      return ERROR;
+    }
 }

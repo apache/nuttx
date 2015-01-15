@@ -85,7 +85,7 @@ void icmp_poll(FAR struct net_driver_s *dev);
 /* Defined in icmp_send.c ***************************************************/
 
 #ifdef CONFIG_NET_ICMP_PING
-void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr);
+void icmp_send(FAR struct net_driver_s *dev, FAR in_addr_t *destaddr);
 #endif /* CONFIG_NET_ICMP_PING */
 
 #undef EXTERN

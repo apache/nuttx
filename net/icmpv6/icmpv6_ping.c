@@ -81,15 +81,15 @@ struct icmpv6_ping_s
 {
   FAR struct devif_callback_s *png_cb; /* Reference to callback instance */
 
-  sem_t        png_sem;     /* Use to manage the wait for the response */
-  uint32_t     png_time;    /* Start time for determining timeouts */
-  uint32_t     png_ticks;   /* System clock ticks to wait */
-  int          png_result;  /* 0: success; <0:negated errno on fail */
-  net_ipaddr_t png_addr;    /* The peer to be ping'ed */
-  uint16_t     png_id;      /* Used to match requests with replies */
-  uint16_t     png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
-  uint16_t     png_datlen;  /* The length of data to send in the ECHO request */
-  bool         png_sent;    /* true... the PING request has been sent */
+  sem_t          png_sem;     /* Use to manage the wait for the response */
+  uint32_t       png_time;    /* Start time for determining timeouts */
+  uint32_t       png_ticks;   /* System clock ticks to wait */
+  int            png_result;  /* 0: success; <0:negated errno on fail */
+  net_ipv6addr_t png_addr;    /* The peer to be ping'ed */
+  uint16_t       png_id;      /* Used to match requests with replies */
+  uint16_t       png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
+  uint16_t       png_datlen;  /* The length of data to send in the ECHO request */
+  bool           png_sent;    /* true... the PING request has been sent */
 };
 
 /****************************************************************************
@@ -250,7 +250,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
            * device.
            */
 
-          if (!net_ipaddr_maskcmp(pstate->png_addr, dev->d_ipaddr, dev->d_netmask))
+          if (!net_ipv6addr_maskcmp(pstate->png_addr, dev->d_ipaddr, dev->d_netmask))
             {
               /* Destination address was not on the local network served by this
                * device.  If a timeout occurs, then the most likely reason is
@@ -323,7 +323,7 @@ end_wait:
  *
  ****************************************************************************/
 
-int icmpv6_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
+int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
                 uint16_t datalen, int dsecs)
 {
   struct icmpv6_ping_s state;

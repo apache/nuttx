@@ -92,13 +92,12 @@
 
 /* Representation of an IP address */
 
-typedef in_addr_t net_ip4addr_t;
-typedef uint16_t net_ip6addr_t[8];
+typedef uint16_t net_ipv6addr_t[8];
 
 #ifdef CONFIG_NET_IPv6
-typedef net_ip6addr_t net_ipaddr_t;
+typedef net_ipv6addr_t net_ipaddr_t;
 #else
-typedef net_ip4addr_t net_ipaddr_t;
+typedef in_addr_t net_ipaddr_t;
 #endif
 
 #ifdef CONFIG_NET_IPv4
@@ -106,16 +105,16 @@ typedef net_ip4addr_t net_ipaddr_t;
 
 struct net_iphdr_s
 {
-  uint8_t  vhl;             /*  8-bit Version (4) and header length (5 or 6) */
-  uint8_t  tos;             /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8_t  len[2];          /* 16-bit Total length */
-  uint8_t  ipid[2];         /* 16-bit Identification */
-  uint8_t  ipoffset[2];     /* 16-bit IP flags + fragment offset */
-  uint8_t  ttl;             /*  8-bit Time to Live */
-  uint8_t  proto;           /*  8-bit Protocol */
-  uint16_t ipchksum;        /* 16-bit Header checksum */
-  uint16_t srcipaddr[2];    /* 32-bit Source IP address */
-  uint16_t destipaddr[2];   /* 32-bit Destination IP address */
+  uint8_t  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
+  uint8_t  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8_t  len[2];           /* 16-bit Total length */
+  uint8_t  ipid[2];          /* 16-bit Identification */
+  uint8_t  ipoffset[2];      /* 16-bit IP flags + fragment offset */
+  uint8_t  ttl;              /*  8-bit Time to Live */
+  uint8_t  proto;            /*  8-bit Protocol */
+  uint16_t ipchksum;         /* 16-bit Header checksum */
+  uint16_t srcipaddr[2];     /* 32-bit Source IP address */
+  uint16_t destipaddr[2];    /* 32-bit Destination IP address */
 };
 #endif
 
@@ -124,14 +123,14 @@ struct net_iphdr_s
 
 struct net_ipv6hdr_s
 {
-  uint8_t  vtc;             /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  uint8_t  tcf;             /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
-  uint16_t flow;            /* 16-bit flow label (LS) */
-  uint8_t  len[2];          /* 16-bit Payload length */
-  uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
-  uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
-  net_ip6addr_t srcipaddr;  /* 128-bit Source address */
-  net_ip6addr_t destipaddr; /* 128-bit Destination address */
+  uint8_t  vtc;              /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8_t  tcf;              /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  uint16_t flow;             /* 16-bit flow label (LS) */
+  uint8_t  len[2];           /* 16-bit Payload length */
+  uint8_t  proto;            /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8_t  ttl;              /*  8-bit Hop limit (like IPv4 TTL field) */
+  net_ipv6addr_t srcipaddr;  /* 128-bit Source address */
+  net_ipv6addr_t destipaddr; /* 128-bit Destination address */
 };
 #endif
 
@@ -229,7 +228,7 @@ struct net_ipv6hdr_s
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while (0)
 
-#define net_ipv6addr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
+#define net_ipv6addr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ipv6addr_t))
 #define net_ipv6addr_hdrcopy(dest, src) net_ipv6addr_copy(dest, src)
 
 #ifndef CONFIG_NET_IPv6
@@ -262,7 +261,7 @@ struct net_ipv6hdr_s
   net_ipv4addr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
 
 #define net_ipv6addr_cmp(addr1, addr2) \
-  (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
+  (memcmp(&addr1, &addr2, sizeof(net_ipv6addr_t)) == 0)
 #define net_ipv6addr_hdrcmp(addr1, addr2) \
   net_ipv6addr_cmp(addr1, addr2)
 
@@ -297,13 +296,18 @@ struct net_ipv6hdr_s
  * mask The netmask.
  */
 
-#ifndef CONFIG_NET_IPv6
-#  define net_ipaddr_maskcmp(addr1, addr2, mask) \
+#define net_ipv4addr_maskcmp(addr1, addr2, mask) \
   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
+
+#ifndef CONFIG_NET_IPv6
+#  define net_ipaddr_maskcmp(a,b,m) net_ipv4addr_maskcmp(a,b,m)
+
 #else
-bool net_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
+bool net_ipv6addr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
                         net_ipaddr_t mask);
+
+#  define net_ipaddr_maskcmp(a,b,m) net_ipv6addr_maskcmp(a,b,m)
 #endif
 
 /* Mask out the network part of an IP address, given the address and

@@ -85,7 +85,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev);
 /* Defined in icmpv6_send.c *************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_PING
-void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr);
+void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr);
 #endif /* CONFIG_NET_ICMPv6_PING */
 
 #undef EXTERN

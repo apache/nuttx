@@ -173,7 +173,7 @@ void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
            * the IP address in this ARP table entry.
            */
 
-          if (net_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
+          if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr))
             {
               /* An old entry found, update this and return. */
 
@@ -252,7 +252,7 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr)
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       tabptr = &g_arptable[i];
-      if (net_ipaddr_cmp(ipaddr, tabptr->at_ipaddr))
+      if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr))
         {
           return tabptr;
         }

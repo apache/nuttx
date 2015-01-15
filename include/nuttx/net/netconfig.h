@@ -9,7 +9,7 @@
  * Note: Network configuration options the netconfig.h should not be changed,
  * but rather the per-project defconfig file.
  *
- *   Copyright (C) 2007, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -139,9 +139,10 @@
 #elif defined(CONFIG_NET_SLIP)
    /* There is no link layer header with SLIP */
 
-#  ifdef CONFIG_NET_IPv6
-#    error SLIP is not available for IPv6
+#  ifdef CONFIG_NET_IPv4
+#    error SLIP requires IPv4 support
 #  endif
+
 #  define NET_LL_HDRLEN(d)  0
 #  define NET_DEV_MTU(d)    CONFIG_NET_SLIP_MTU
 #  define MIN_NET_DEV_MTU   CONFIG_NET_SLIP_MTU

@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
+void icmp_send(FAR struct net_driver_s *dev, FAR in_addr_t *destaddr)
 {
   FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 
@@ -124,8 +124,8 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
       picmp->ttl         = IP_TTL;
       picmp->proto       = IP_PROTO_ICMP;
 
-      net_ipaddr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);
-      net_ipaddr_hdrcopy(picmp->destipaddr, destaddr);
+      net_ipv4addr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);
+      net_ipv4addr_hdrcopy(picmp->destipaddr, destaddr);
 
       /* Calculate IP checksum. */
 
