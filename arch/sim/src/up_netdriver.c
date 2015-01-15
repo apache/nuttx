@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_netdriver.c
  *
- *   Copyright (C) 2007, 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -159,12 +159,15 @@ void netdriver_loop(void)
         {
           /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-          if (BUF->ether_type == htons(ETHTYPE_IP6))
-#else
-          if (BUF->ether_type == htons(ETHTYPE_IP))
-#endif
+#ifdef CONFIG_NET_IPv4
+          if (BUF->type == HTONS(ETHTYPE_IP))
             {
+              nllvdbg("IPv4 frame\n");
+
+              /* Handle ARP on input then give the IPv4 packet to the network
+               * layer
+               */
+
               arp_ipin(&g_sim_dev);
               ipv4_input(&g_sim_dev);
 
@@ -175,12 +178,56 @@ void netdriver_loop(void)
 
               if (g_sim_dev.d_len > 0)
                 {
-                  arp_out(&g_sim_dev);
+                  /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                    {
+                      arp_out(&g_sim_dev);
+                    }
+
+                  /* And send the packet */
+
                   netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
+          else
+#endif
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == HTONS(ETHTYPE_IP6))
+            {
+              nllvdbg("Iv6 frame\n");
+
+              /* Give the IPv6 packet to the network layer */
+
+              ipv6_input(&g_sim_dev);
+
+             /* If the above function invocation resulted in data that
+              * should be sent out on the network, the global variable
+              * d_len is set to a value > 0.
+              */
+
+              if (g_sim_dev.d_len > 0)
+               {
+#ifdef CONFIG_NET_IPv4
+                  /* Update the Ethernet header with the correct MAC address */
+
+                  if (BUF->type == HTONS(ETHTYPE_IP))
+                    {
+                      arp_out(&g_sim_dev);
+                    }
+#endif
+
+                  /* And send the packet */
+
+                  netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+                }
+            }
+          else
+#endif
 #ifdef CONFIG_NET_ARP
-          else if (BUF->ether_type == htons(ETHTYPE_ARP))
+          if (BUF->ether_type == htons(ETHTYPE_ARP))
             {
               arp_arpin(&g_sim_dev);
 

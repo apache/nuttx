@@ -1137,18 +1137,18 @@ static void sam_receive(struct sam_emac_s *priv)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
         }
+      else
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      else if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
-      else if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
+#ifdef CONFIG_NET_IPv4
+      if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          nllvdbg("IP frame\n");
+          nllvdbg("IPv4 frame\n");
 
-          /* Handle ARP on input then give the IP packet to uIP */
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
 
           arp_ipin(&priv->dev);
           ipv4_input(&priv->dev);
@@ -1158,12 +1158,54 @@ static void sam_receive(struct sam_emac_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
-             arp_out(&priv->dev);
-             sam_transmit(priv);
-           }
+            {
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&priv->dev);
+                }
+
+              /* And send the packet */
+
+              sam_transmit(priv);
+            }
         }
       else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          ipv6_input(&priv->dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->dev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (BUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&priv->dev);
+                }
+#endif
+
+              /* And send the packet */
+
+              sam_transmit(priv);
+            }
+        }
+      else
+#endif
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {

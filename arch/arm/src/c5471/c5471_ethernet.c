@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/c5471/c5471_ethernet.c
  *
- *   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based one a C5471 Linux driver and released under this BSD license with
@@ -1232,12 +1232,15 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
+          nllvdbg("IPv4 frame\n");
+
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
+
           arp_ipin(dev);
           ipv4_input(dev);
 
@@ -1250,10 +1253,56 @@ static void c5471_receive(struct c5471_driver_s *c5471)
           if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
             {
-              arp_out(dev);
-              c5471_transmit(c5471);
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(dev);
+                }
+
+              /* And send the packet */
+
+               c5471_transmit(c5471);
             }
         }
+      else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          ipv6_input(dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           * Send that data now if ESM has let go of the RX descriptor giving us
+           * access rights to submit another Ethernet frame.
+           */
+
+          if (dev->d_len > 0 &&
+             (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
+            {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (BUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(dev);
+                }
+#endif
+
+              /* And send the packet */
+
+               c5471_transmit(c5471);
+            }
+        }
+      else
+#endif
 #ifdef CONFIG_NET_ARP
       else if (BUF->type == HTONS(ETHTYPE_ARP))
         {

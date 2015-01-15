@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -246,18 +246,23 @@ struct ez80mac_statistics_s
 {
   uint32_t rx_int;         /* Number of Rx interrupts received */
   uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-  uint32_t rx_ip;        /*   Number of Rx IP packets received */
-  uint32_t rx_arp;       /*   Number of Rx ARP packets received */
-  uint32_t rx_dropped;   /*   Number of dropped, unsupported Rx packets */
-  uint32_t rx_nok;       /*   Number of Rx packets received without OK bit */
+#ifdef CONFIG_NET_IPv4
+  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
+#endif
+#ifdef CONFIG_NET_IPv6
+  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
+#endif
+  uint32_t rx_arp;         /*   Number of Rx ARP packets received */
+  uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
+  uint32_t rx_nok;         /*   Number of Rx packets received without OK bit */
   uint32_t rx_errors;      /* Number of Rx errors (rx_overerrors + rx_nok) */
-  uint32_t rx_ovrerrors; /*   Number of FIFO overrun errors */
+  uint32_t rx_ovrerrors;   /*   Number of FIFO overrun errors */
   uint32_t tx_int;         /* Number of Tx interrupts received */
   uint32_t tx_packets;     /* Number of Tx descriptors queued */
   uint32_t tx_errors;      /* Number of Tx errors (sum of the following) */
-  uint32_t tx_abterrors; /*   Number of aborted Tx descriptors */
-  uint32_t tx_fsmerrors; /*   Number of Tx state machine errors */
-  uint32_t tx_timeouts;  /*   Number of Tx timeout errors */
+  uint32_t tx_abterrors;   /*   Number of aborted Tx descriptors */
+  uint32_t tx_fsmerrors;   /*   Number of Tx state machine errors */
+  uint32_t tx_timeouts;    /*   Number of Tx timeout errors */
   uint32_t sys_int;        /* Number of system interrupts received */
 };
 #  define _MKFIELD(a,b,c)        a->b##c
@@ -1265,15 +1270,16 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
-          nvdbg("IP packet received (%02x)\n", ETHBUF->type);
-          EMAC_STAT(priv, rx_ip);
+          nllvdbg("IPv4 frame\n");
 
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
+
+          EMAC_STAT(priv, rx_ip);
           arp_ipin(&priv->dev);
           ipv4_input(&priv->dev);
 
@@ -1283,11 +1289,54 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              arp_out(&priv->dev);
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (ETHBUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&priv->dev);
+                }
+
+              /* And send the packet */
+
               ez80emac_transmit(priv);
             }
         }
       else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          EMAC_STAT(priv, rx_ip);
+          ipv6_input(&priv->dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->dev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (ETHBUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&priv->dev);
+                }
+#endif
+
+              /* And send the packet */
+
+              ez80emac_transmit(priv);
+            }
+        }
+      else
+#endif
 #ifdef CONFIG_NET_ARP
       if (ETHBUF->type == htons(ETHTYPE_ARP))
         {

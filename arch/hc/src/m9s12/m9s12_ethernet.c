@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/m9s12_ethernet.c
  *
- *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -258,12 +258,15 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
+          nllvdbg("IPv4 frame\n");
+
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
+
           arp_ipin(&priv->d_dev);
           ipv4_input(&priv->d_dev);
 
@@ -272,13 +275,56 @@ static void emac_receive(FAR struct emac_driver_s *priv)
            */
 
           if (priv->d_dev.d_len > 0)
-           {
-             arp_out(&priv->d_dev);
-             emac_transmit(priv);
-           }
+            {
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (BUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&priv->d_dev);
+                }
+
+              /* And send the packet */
+
+              emac_transmit(priv);
+            }
         }
+      else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          ipv6_input(&priv->d_dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->d_dev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (BUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&priv->d_dev);
+                }
+#endif
+
+              /* And send the packet */
+
+              emac_transmit(priv);
+            }
+        }
+      else
+#endif
 #ifdef CONFIG_NET_ARP
-      else if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&priv->d_dev);
 

@@ -172,7 +172,12 @@ struct tiva_statistics_s
 {
   uint32_t rx_int;         /* Number of Rx interrupts received */
   uint32_t rx_packets;     /* Number of packets received (sum of the following): */
-  uint32_t rx_ip;          /*   Number of Rx IP packets received */
+#ifdef CONFIG_NET_IPv4
+  uint32_t rx_ip;          /*   Number of Rx IPv4 packets received */
+#endif
+#ifdef CONFIG_NET_IPv6
+  uint32_t rx_ipv6;        /*   Number of Rx IPv6 packets received */
+#endif
   uint32_t rx_arp;         /*   Number of Rx ARP packets received */
   uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
   uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
@@ -763,15 +768,16 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
       /* We only accept IP packets of the configured type and ARP packets */
 
-#ifdef CONFIG_NET_IPv6
-      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
-#else
+#ifdef CONFIG_NET_IPv4
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
-#endif
         {
-          nllvdbg("IP packet received (%02x)\n", ETHBUF->type);
-          EMAC_STAT(priv, rx_ip);
+          nllvdbg("IPv4 frame\n");
 
+          /* Handle ARP on input then give the IPv4 packet to the network
+           * layer
+           */
+
+          EMAC_STAT(priv, rx_ip);
           arp_ipin(&priv->ld_dev);
           ipv4_input(&priv->ld_dev);
 
@@ -781,11 +787,55 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           if (priv->ld_dev.d_len > 0)
             {
-              arp_out(&priv->ld_dev);
+              /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+              if (ETHBUF->type == HTONS(ETHTYPE_IP))
+#endif
+                {
+                  arp_out(&priv->ld_dev);
+                }
+
+              /* And send the packet */
+
               tiva_transmit(priv);
             }
         }
       else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
+        {
+          nllvdbg("Iv6 frame\n");
+
+          /* Give the IPv6 packet to the network layer */
+
+          EMAC_STAT(priv, rx_ipv6);
+          arp_ipin(&priv->ld_dev);
+          ipv6_input(&priv->ld_dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (priv->dev.d_len > 0)
+           {
+#ifdef CONFIG_NET_IPv4
+              /* Update the Ethernet header with the correct MAC address */
+
+              if (ETHBUF->type == HTONS(ETHTYPE_IP))
+                {
+                  arp_out(&priv->ld_dev);
+                }
+#endif
+
+              /* And send the packet */
+
+              tiva_transmit(priv);
+            }
+        }
+      else
+#endif
 #ifdef CONFIG_NET_ARP
       if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
