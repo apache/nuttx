@@ -773,7 +773,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           EMAC_STAT(priv, rx_ip);
 
           arp_ipin(&priv->ld_dev);
-          devif_input(&priv->ld_dev);
+          ipv4_input(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

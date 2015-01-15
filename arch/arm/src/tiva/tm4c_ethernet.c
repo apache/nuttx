@@ -1694,7 +1694,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
           /* Handle ARP on input then give the IP packet to uIP */
 
           arp_ipin(&priv->dev);
-          devif_input(&priv->dev);
+          ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
