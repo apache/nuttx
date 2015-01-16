@@ -259,7 +259,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
        */
 
       DEBUGASSERT(pstate->tc_conn);
-      pstate->tc_conn->mss = TCP_INITIAL_MSS(dev);
+      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
 #endif
 
       /* Wake up the waiting thread */

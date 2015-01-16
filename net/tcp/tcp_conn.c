@@ -599,7 +599,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->nrtx          = 0;
       conn->lport         = tcp->destport;
       conn->rport         = tcp->srcport;
-      conn->mss           = TCP_INITIAL_MSS(dev);
+      conn->mss           = TCP_IPv4_INITIAL_MSS(dev);
       net_ipv4addr_copy(conn->u.ipv4.raddr, net_ip4addr_conv32(ip->srcipaddr));
 #ifdef CONFIG_NETDEV_MULTINIC
       net_ipv4addr_copy(conn->u.ipv4.laddr, net_ip4addr_conv32(ip->destipaddr));
@@ -780,7 +780,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
   conn->tcpstateflags = TCP_SYN_SENT;
   tcp_initsequence(conn->sndseq);
 
-  conn->mss        = MIN_TCP_INITIAL_MSS;
+  conn->mss        = MIN_IPv4_TCP_INITIAL_MSS;
   conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */

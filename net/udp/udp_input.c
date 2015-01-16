@@ -93,10 +93,11 @@
  *
  ****************************************************************************/
 
-static int udp_input(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp,
-                     unsigned int udpiplen)
+static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
+  FAR struct udp_hdr_s *udp;
   FAR struct udp_conn_s *conn;
+  unsigned int udpiplen;
   unsigned int hdrlen;
   int ret = OK;
 
@@ -106,16 +107,26 @@ static int udp_input(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp,
   g_netstats.udp.recv++;
 #endif
 
+  /* Get a pointer to the UDP header.  The UDP header lies just after the
+   * the link layer header and the IP header.
+   */
+
+  udp = (FAR struct udp_hdr_s *)&dev->d_buf[iplen + NET_LL_HDRLEN(dev)];
+
+  /* Get the size of the IP header and the UDP header */
+
+  udpiplen = iplen + UDP_HDRLEN;
+
+  /* Get the size of the link layer header, the IP header, and the UDP header */
+
+  hdrlen = udpiplen + NET_LL_HDRLEN(dev);
+
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
    * headers, but let the UDP application do all the hard work. If the
    * application sets d_sndlen, it has a packet to send.
    */
 
   dev->d_len -= udpiplen;
-
-  /* Get the size of the link layer header, the IP header, and the UDP header */
-
-  hdrlen = udpiplen + NET_LL_HDRLEN(dev);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   dev->d_appdata = &dev->d_buf[hdrlen];
@@ -219,9 +230,7 @@ static int udp_input(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp,
 #ifdef CONFIG_NET_IPv4
 int udp_ipv4_input(FAR struct net_driver_s *dev)
 {
-  unsigned int offset = IPv4_HDRLEN + NET_LL_HDRLEN(dev);
-  return udp_input(dev, (FAR struct udp_hdr_s *)&dev->d_buf[offset],
-                   IPv4UDP_HDRLEN);
+  return udp_input(dev, IPv4_HDRLEN);
 }
 #endif
 
@@ -247,9 +256,7 @@ int udp_ipv4_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
 int udp_ipv6_input(FAR struct net_driver_s *dev)
 {
-  unsigned int offset = IPv6_HDRLEN + NET_LL_HDRLEN(dev);
-  return udp_input(dev, (FAR struct udp_hdr_s *)&dev->d_buf[offset],
-                   IPv6UDP_HDRLEN);
+  return udp_input(dev, IPv6_HDRLEN);
 }
 #endif
 

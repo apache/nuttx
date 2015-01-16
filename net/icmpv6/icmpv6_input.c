@@ -122,7 +122,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
   if (picmp->type == ICMPv6_NEIGHBOR_SOLICITATION)
     {
-      if (net_ipv6addr_cmp(picmp->icmpv6data, dev->d_ipaddr))
+      if (net_ipv6addr_cmp(picmp->icmpv6data, dev->d_ipv6addr))
         {
           if (picmp->options[0] == ICMPv6_OPTION_SOURCE_LINK_ADDRESS)
             {
@@ -142,7 +142,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
           picmp->reserved1 = picmp->reserved2 = picmp->reserved3 = 0;
 
           net_ipv6addr_copy(picmp->destipaddr, picmp->srcipaddr);
-          net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipaddr);
+          net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipv6addr);
 
           picmp->options[0]   = ICMPv6_OPTION_TARGET_LINK_ADDRESS;
           picmp->options[1]   = 1;  /* Options length, 1 = 8 bytes. */
@@ -166,7 +166,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       picmp->type = ICMPv6_ECHO_REPLY;
 
       net_ipv6addr_copy(picmp->destipaddr, picmp->srcipaddr);
-      net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipaddr);
+      net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipv6addr);
 
       picmp->icmpv6chksum = 0;
       picmp->icmpv6chksum = ~icmpv6_chksum(dev);

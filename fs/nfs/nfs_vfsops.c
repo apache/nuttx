@@ -1722,9 +1722,9 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    * the minimum MSS for that case.
    */
 
-  if (buflen > MIN_UDP_MSS)
+  if (buflen > MIN_IPv4_UDP_MSS)
     {
-      buflen = MIN_UDP_MSS;
+      buflen = MIN_IPv4_UDP_MSS;
     }
 
   /* Create an instance of the mountpt state structure */

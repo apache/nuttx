@@ -351,6 +351,7 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
              uint8_t ack)
 {
   struct tcp_iphdr_s *pbuf = BUF;
+  uint16_t tcp_mss = TCP_IPv4_MSS(dev);
 
   /* Save the ACK bits */
 
@@ -360,8 +361,8 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   pbuf->optdata[0] = TCP_OPT_MSS;
   pbuf->optdata[1] = TCP_OPT_MSS_LEN;
-  pbuf->optdata[2] = TCP_MSS(dev) / 256;
-  pbuf->optdata[3] = TCP_MSS(dev) & 255;
+  pbuf->optdata[2] = tcp_mss >> 8;
+  pbuf->optdata[3] = tcp_mss & 0xff;
   dev->d_len       = IPv4TCP_HDRLEN + TCP_OPT_MSS_LEN;
   pbuf->tcpoffset  = ((TCP_HDRLEN + TCP_OPT_MSS_LEN) / 4) << 4;
 

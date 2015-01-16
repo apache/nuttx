@@ -119,10 +119,22 @@
  * This is a long established rule.
  */
 
-#define TCP_INITIAL_MSS(d)  (TCP_MSS(d) > 576 ? 576 : TCP_MSS(d))
+#define TCP_INITIAL_MSS(d,h)       (TCP_MSS(d,h) > 576 ? 576 : TCP_MSS(d,h))
 
-#define MIN_TCP_INITIAL_MSS (MIN_TCP_MSS > 576 ? 576 : MIN_TCP_MSS)
-#define MAX_TCP_INITIAL_MSS (MAX_TCP_MSS > 576 ? 576 : MAX_TCP_MSS)
+#define MIN_TCP_INITIAL_MSS(h)     (__MIN_TCP_MSS(h) > 576 ? 576 : __MIN_TCP_MSS(h))
+#define MAX_TCP_INITIAL_MSS(h)     (__MAX_TCP_MSS(h) > 576 ? 576 : __MAX_TCP_MSS(h))
+
+#ifdef CONFIG_NET_IPv4
+#  define TCP_IPv4_INITIAL_MSS(d)  TCP_INITIAL_MSS(d,IPv4_HDRLEN)
+#  define MIN_IPv4_TCP_INITIAL_MSS MIN_TCP_INITIAL_MSS(IPv4_HDRLEN)
+#  define MAX_IPv4_TCP_INITIAL_MSS MAX_TCP_INITIAL_MSS(IPv4_HDRLEN)
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#  define TCP_IPv6_INITIAL_MSS(d)  TCP_INITIAL_MSS(d,IPv6_HDRLEN)
+#  define MIN_IPv6_TCP_INITIAL_MSS MIN_TCP_INITIAL_MSS(IPv6_HDRLEN)
+#  define MAX_IPv6_TCP_INITIAL_MSS MAX_TCP_INITIAL_MSS(IPv6_HDRLEN)
+#endif
 
 /****************************************************************************
  * Public Type Definitions
