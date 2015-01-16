@@ -61,6 +61,253 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: get_ipv4_sockname
+ *
+ * Description:
+ *   The getsockname() function retrieves the locally-bound name of the
+ *   specified PF_NET socket.
+ *
+ * Parameters:
+ *   psock    Point to the socket structure instance [in]
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address. Otherwise, -1 is returned and errno is set to indicate the error.
+ *   Possible errno values that may be returned include:
+ *
+ *   EBADF - The socket argument is not a valid file descriptor.
+ *   EOPNOTSUPP - The operation is not supported for this socket's protocol.
+ *   EINVAL - The socket has been shut down.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen)
+{
+  FAR struct net_driver_s *dev;
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+  FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
+#endif
+#ifdef CONFIG_NETDEV_MULTINIC
+  in_addr_t lipaddr;
+  in_addr_t ripaddr;
+#endif
+
+  /* Check if enough space has been provided for the full address */
+
+  if (*addrlen < sizeof(struct sockaddr_in))
+    {
+      /* This function is supposed to return the partial address if
+       * a smaller buffer has been provided.  This support has not
+       * been implemented.
+       */
+
+      return -ENOSYS;
+    }
+
+  /* Set the port number */
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+        {
+          FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
+          outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
+#ifdef CONFIG_NETDEV_MULTINIC
+          lipaddr = tcp_conn->lipaddr;
+          ripaddr = tcp_conn->ripaddr;
+#endif
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        {
+          FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
+          outaddr->sin_port = udp_conn->lport; /* Already in network byte order */
+#ifdef CONFIG_NETDEV_MULTINIC
+          lipaddr = udp_conn->lipaddr;
+          ripaddr = udp_conn->ripaddr;
+#endif
+        }
+        break;
+#endif
+
+      default:
+        return -EOPNOTSUPP;
+    }
+
+  /* The socket/connection does not know its IP address unless
+   * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
+   * a single network device and only the network device knows the IP address.
+   */
+
+  netdev_semtake();
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* Find the device matching the IPv4 address in the connection structure */
+
+  dev = netdev_findby_ipv4addr(lipaddr, ripaddr);
+#else
+  /* There is only one, the first network device in the list. */
+
+  dev = g_netdevices;
+#endif
+
+  if (!dev)
+    {
+      netdev_semgive();
+      return -EINVAL;
+    }
+
+  /* Set the address family and the IP address */
+
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+  outaddr->sin_family = AF_INET;
+  outaddr->sin_addr.s_addr = dev->d_ipaddr;
+  *addrlen = sizeof(struct sockaddr_in);
+#endif
+  netdev_semgive();
+
+  /* Return success */
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: ipv6_getsockname
+ *
+ * Description:
+ *   The getsockname() function retrieves the locally-bound name of the
+ *   specified PF_NET6 socket.
+ *
+ * Parameters:
+ *   psock    Point to the socket structure instance [in]
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address. Otherwise, -1 is returned and errno is set to indicate the error.
+ *   Possible errno values that may be returned include:
+ *
+ *   EBADF - The socket argument is not a valid file descriptor.
+ *   EOPNOTSUPP - The operation is not supported for this socket's protocol.
+ *   EINVAL - The socket has been shut down.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen)
+{
+  FAR struct net_driver_s *dev;
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+  FAR struct sockaddr_in6 *outaddr = (FAR struct sockaddr_in6 *)addr;
+#endif
+#ifdef CONFIG_NETDEV_MULTINIC
+  net_ipv6addr_t *lipaddr;
+  net_ipv6addr_t *ripaddr;
+#endif
+
+  /* Check if enough space has been provided for the full address */
+
+  if (*addrlen < sizeof(struct sockaddr_in6))
+  {
+    /* This function is supposed to return the partial address if
+     * a smaller buffer has been provided.  This support has not
+     * been implemented.
+     */
+
+    return -ENOSYS;
+  }
+
+  /* Set the port number */
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+        {
+          FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
+          outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
+#ifdef CONFIG_NETDEV_MULTINIC
+          lipaddr = tcp_conn->lipaddr;
+          ripaddr = tcp_conn->ripaddr;
+#endif
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        {
+          FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
+          outaddr->sin_port = udp_conn->lport; /* Already in network byte order */
+#ifdef CONFIG_NETDEV_MULTINIC
+          lipaddr = &udp_conn->lipaddr;
+          ripaddr = &udp_conn->ripaddr;
+#endif
+        }
+        break;
+#endif
+
+      default:
+        err = EOPNOTSUPP;
+        goto errout;
+    }
+
+  /* The socket/connection does not know its IP address unless
+   * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
+   * a single network device and only the network device knows the IP address.
+   */
+
+  netdev_semtake();
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* Find the device matching the IPv6 address in the connection structure */
+
+  dev = netdev_findby_ipv6addr(*lipaddr, *ripaddr);
+#else
+  /* There is only one, the first network device in the list. */
+
+  dev = g_netdevices;
+#endif
+
+  if (!dev)
+    {
+      netdev_semgive();
+      return -EINVAL;
+    }
+
+  /* Set the address family and the IP address */
+
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+  outaddr->sin_family = AF_INET6;
+  memcpy(outaddr->sin6_addr.in6_u.u6_addr8, dev->d_ipaddr, 16);
+  *addrlen = sizeof(struct sockaddr_in6);
+#endif
+  netdev_semgive();
+
+  /* Return success */
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -101,16 +348,7 @@
 int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  FAR struct net_driver_s *dev;
-
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *outaddr = (FAR struct sockaddr_in6 *)addr;
-#else
-  FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
-#endif
-#endif
-
+  int ret;
   int err;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -133,84 +371,35 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
     }
 #endif
 
-  /* Check if enough space has been provided for the full address */
+  /* Handle by address domain */
+
+  switch (psock->s_domain)
+    {
+#ifdef CONFIG_NET_IPv4
+    case PF_INET:
+      ret = ipv4_getsockname(psock, addr, addrlen);
+      break;
+#endif
 
 #ifdef CONFIG_NET_IPv6
-  if (*addrlen < sizeof(struct sockaddr_in6))
-#else
-  if (*addrlen < sizeof(struct sockaddr_in))
-#endif
-  {
-    /* This function is supposed to return the partial address if
-     * a smaller buffer has been provided.  This support has not
-     * been implemented.
-     */
-
-    err = ENOSYS;
-    goto errout;
-  }
-
-  /* Set the port number */
-
-  switch (psock->s_type)
-    {
-#ifdef CONFIG_NET_TCP
-      case SOCK_STREAM:
-        {
-          FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
-          outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
-        }
-        break;
+    case PF_INET6:
+      ret = ipv6_getsockname(psock, addr, addrlen);
+      break;
 #endif
 
-#ifdef CONFIG_NET_UDP
-      case SOCK_DGRAM:
-        {
-          FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
-          outaddr->sin_port = udp_conn->lport; /* Already in network byte order */
-        }
-        break;
-#endif
-
-      default:
-        err = EOPNOTSUPP;
-        goto errout;
-    }
-
-  /* ISSUE: As of this writing, the socket/connection does not know its IP
-   * address.  This is because the uIP design is only intended to support
-   * a single network device and, therefore, only the network device knows
-   * the IP address.
-   *
-   * Right now, we can just pick the first network device.  But that may
-   * not work in the future.
-   */
-
-  netdev_semtake();
-  dev = g_netdevices;
-  if (!dev)
-    {
-      netdev_semgive();
-      err = EINVAL;
+    case PF_PACKET:
+    default:
+      err = EAFNOSUPPORT;
       goto errout;
     }
 
-  /* Set the address family and the IP address */
+  /* Check for failure */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-#ifdef CONFIG_NET_IPv6
-  outaddr->sin_family = AF_INET6;
-  memcpy(outaddr->sin6_addr.in6_u.u6_addr8, dev->d_ipaddr, 16);
-  *addrlen = sizeof(struct sockaddr_in6);
-#else
-  outaddr->sin_family = AF_INET;
-  outaddr->sin_addr.s_addr = dev->d_ipaddr;
-  *addrlen = sizeof(struct sockaddr_in);
-#endif
-#endif
-  netdev_semgive();
-
-  /* Return success */
+  if (ret < 0)
+    {
+      err = -ret;
+      goto errout;
+    }
 
   return OK;
 

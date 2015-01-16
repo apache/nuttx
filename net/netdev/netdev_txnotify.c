@@ -102,9 +102,9 @@ void netdev_txnotify(const net_ipaddr_t ripaddr)
   /* Find the device driver that serves the subnet of the remote address */
 
 #ifdef CONFIG_NET_MULTILINK
-  dev = netdev_findbyaddr(lipaddr, ripaddr);
+  dev = netdev_findby_ipv4addr(lipaddr, ripaddr);
 #else
-  dev = netdev_findbyaddr(ripaddr);
+  dev = netdev_findby_ipv4addr(ripaddr);
 #endif
 
   if (dev && dev->d_txavail)

@@ -96,7 +96,8 @@ struct devif_callback_s;     /* Forward reference */
 
 struct socket
 {
-  int           s_crefs;     /* Reference count on the socket */
+  int16_t       s_crefs;     /* Reference count on the socket */
+  uint8_t       s_domain;    /* Domain: PF_INET, PF_INET6, or PF_PACKET */
   uint8_t       s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
   uint8_t       s_flags;     /* See _SF_* definitions */
 

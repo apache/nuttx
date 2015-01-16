@@ -223,9 +223,9 @@ int arp_send(in_addr_t ipaddr)
   /* Get the device that can route this request */
 
 #ifdef CONFIG_NET_MULTILINK
-  dev = netdev_findbyaddr(g_allzeroaddr, ipaddr);
+  dev = netdev_findby_ipv4addr(g_allzeroaddr, ipaddr);
 #else
-  dev = netdev_findbyaddr(ipaddr);
+  dev = netdev_findby_ipv4addr(ipaddr);
 #endif
   if (!dev)
     {

@@ -94,11 +94,22 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 /* netdev_findbyaddr.c *******************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_MULTILINK
-FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t lipaddr,
-                                           const net_ipaddr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
+                                                in_addr_t ripaddr);
 #else
-FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr);
+#endif
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_MULTILINK
+FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
+                                                const net_ipv6addr_t ripaddr);
+#else
+FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr);
+#endif
 #endif
 #endif
 
