@@ -9441,3 +9441,6 @@
 	  IPv4 and IPv6 simultaneously.  This requires that the macros be
 	  distinct and not conditionally defined to one on or the other
 	  (2015-01-16).
+	* Networking: UDP and TCP MSS depends on the IP header size (as well
+	  as the link layer header size) and cannot be represented with a
+	  single value (2015-01-16).
