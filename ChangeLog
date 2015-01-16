@@ -9444,3 +9444,5 @@
 	* Networking: UDP and TCP MSS depends on the IP header size (as well
 	  as the link layer header size) and cannot be represented with a
 	  single value (2015-01-16).
+	* net/neighbor:  Move net/ipv6 to net/neighbor (2015-01-16).
+
