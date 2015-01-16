@@ -104,8 +104,7 @@ static uint16_t g_last_tcp_port;
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static FAR struct tcp_conn_s *tcp_listener(net_ipaddr_t ipaddr,
-                                           uint16_t portno)
+static FAR struct tcp_conn_s *tcp_listener(in_addr_t ipaddr, uint16_t portno)
 #else
 static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
 #endif
@@ -132,11 +131,11 @@ static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
            * with INADDR_ANY.
            */
 
-          if (net_ipaddr_cmp(conn->u.ipv4.laddr, ipaddr) ||
+          if (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr) ||
 #ifdef CONFIG_NET_IPv6
-              net_ipaddr_cmp(conn->u.ipv4.laddr, g_allzeroaddr))
+              net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr))
 #else
-              net_ipaddr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
+              net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
 #endif
 #endif
             {
@@ -176,7 +175,7 @@ static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static int tcp_selectport(net_ipaddr_t ipaddr, uint16_t portno)
+static int tcp_selectport(in_addr_t ipaddr, uint16_t portno)
 #else
 static int tcp_selectport(uint16_t portno)
 #endif
@@ -525,7 +524,7 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
           tcp->destport == conn->lport &&
           tcp->srcport  == conn->rport &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipaddr_cmp(conn->u.ipv4.laddr, g_allzeroaddr) ||
+          (net_ipaddr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr) ||
            net_ipaddr_cmp(destipaddr, conn->u.ipv4.laddr)) &&
 #endif
           net_ipaddr_cmp(srcipaddr, conn->u.ipv4.raddr))
@@ -668,7 +667,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
   net_lock_t flags;
   int port;
 #ifdef CONFIG_NETDEV_MULTINIC
-  net_ipaddr_t ipaddr;
+  in_addr_t ipaddr;
 #endif
 
   /* Verify or select a local port and address */

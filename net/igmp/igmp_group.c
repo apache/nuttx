@@ -221,7 +221,7 @@ void igmp_grpinit(void)
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
-                                       FAR const net_ipaddr_t *addr)
+                                       FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group;
   net_lock_t flags;
@@ -284,7 +284,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
-                                      FAR const net_ipaddr_t *addr)
+                                      FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group;
   net_lock_t flags;
@@ -325,7 +325,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
-                                           FAR const net_ipaddr_t *addr)
+                                           FAR const in_addr_t *addr)
 {
   FAR struct igmp_group_s *group = igmp_grpfind(dev, addr);
 

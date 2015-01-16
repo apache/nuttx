@@ -165,8 +165,15 @@ struct devif_callback_s
  * Public Data
  ****************************************************************************/
 
-extern const net_ipaddr_t g_alloneaddr;
-extern const net_ipaddr_t g_allzeroaddr;
+#ifdef CONFIG_NET_IPv4
+extern const in_addr_t g_ipv4_alloneaddr;
+extern const in_addr_t g_ipv4_allzeroaddr;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+extern const net_ipv6addr_t g_ipv6_alloneaddr;
+extern const net_ipv6addr_t g_ipv6_allzeroaddr;
+#endif
 
 /* Increasing number used for the IP ID field. */
 

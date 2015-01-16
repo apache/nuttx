@@ -101,7 +101,7 @@ typedef FAR struct wdog_s *WDOG_ID;
 struct igmp_group_s
 {
   struct igmp_group_s *next;    /* Implements a singly-linked list */
-  net_ipaddr_t         grpaddr; /* Group IP address */
+  in_addr_t            grpaddr; /* Group IPv4 address */
   WDOG_ID              wdog;    /* WDOG used to detect timeouts */
   sem_t                sem;     /* Used to wait for message transmission */
   volatile uint8_t     flags;   /* See IGMP_ flags definitions */
@@ -120,8 +120,8 @@ extern "C"
 #  define EXTERN extern
 #endif
 
-EXTERN net_ipaddr_t g_allsystems;
-EXTERN net_ipaddr_t g_allrouters;
+EXTERN in_addr_t g_ipv4_allsystems;
+EXTERN in_addr_t g_ipv4_allrouters;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -188,7 +188,7 @@ void igmp_grpinit(void);
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
-                                       FAR const net_ipaddr_t *addr);
+                                       FAR const in_addr_t *addr);
 
 /****************************************************************************
  * Name:  igmp_grpfind
@@ -202,7 +202,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
-                                      FAR const net_ipaddr_t *addr);
+                                      FAR const in_addr_t *addr);
 
 /****************************************************************************
  * Name:  igmp_grpallocfind
@@ -217,7 +217,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
-                                           FAR const net_ipaddr_t *addr);
+                                           FAR const in_addr_t *addr);
 
 /****************************************************************************
  * Name:  igmp_grpfree
@@ -304,7 +304,7 @@ void igmp_poll(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
-                  FAR net_ipaddr_t *dest);
+                  FAR in_addr_t *dest);
 
 /* Defined in igmp_join.c ***************************************************/
 /****************************************************************************
@@ -405,7 +405,7 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks);
  *
  ****************************************************************************/
 
-void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip);
+void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR in_addr_t *ip);
 
 /****************************************************************************
  * Name:  igmp_removemcastmac
@@ -415,7 +415,7 @@ void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip);
  *
  ****************************************************************************/
 
-void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip);
+void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR in_addr_t *ip);
 
 #undef EXTERN
 #ifdef __cplusplus

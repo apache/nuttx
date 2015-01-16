@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp_send.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,7 +223,7 @@ int arp_send(in_addr_t ipaddr)
   /* Get the device that can route this request */
 
 #ifdef CONFIG_NET_MULTILINK
-  dev = netdev_findby_ipv4addr(g_allzeroaddr, ipaddr);
+  dev = netdev_findby_ipv4addr(g_ipv4_allzeroaddr, ipaddr);
 #else
   dev = netdev_findby_ipv4addr(ipaddr);
 #endif
@@ -337,7 +337,7 @@ int arp_send(in_addr_t ipaddr)
       state.snd_cb->event = arp_send_interrupt;
 
       /* Notify the device driver that new TX data is available.
-       * NOTES: This is in essence what netdev_txnotify() does, which
+       * NOTES: This is in essence what netdev_ipv4_txnotify() does, which
        * is not possible to call since it expects a in_addr_t as
        * its single argument to lookup the network interface.
        */

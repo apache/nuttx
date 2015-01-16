@@ -189,7 +189,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int icmp_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
+int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
               int dsecs);
 
 #undef EXTERN

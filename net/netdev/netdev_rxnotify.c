@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_rxnotify.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,13 +75,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_rxnotify
+ * Function: netdev_ipv4_rxnotify
  *
  * Description:
- *   Notify the device driver that the application waits for RX data.
+ *   Notify the device driver that forwards the IPv4 address that the
+ *  application waits for RX data.
  *
  * Parameters:
- *   ripaddr - The remote address to send the data
+ *   lipaddr - The local board IPv6 address of the socket
+ *   ripaddr - The remote IPv4 address to send the data
  *
  * Returned Value:
  *  None
@@ -91,10 +93,11 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_MULTILINK
-void netdev_rxnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr)
+void netdev_ipv4_rxnotify(in_addr_t lipaddr, in_addr_t ripaddr)
 #else
-void netdev_rxnotify(const net_ipaddr_t ripaddr)
+void netdev_ipv4_rxnotify(in_addr_t ripaddr)
 #endif
 {
   FAR struct net_driver_s *dev;
@@ -114,5 +117,52 @@ void netdev_rxnotify(const net_ipaddr_t ripaddr)
       (void)dev->d_rxavail(dev);
     }
 }
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Function: netdev_ipv6_rxnotify
+ *
+ * Description:
+ *   Notify the device driver that forwards the IPv6 address that the
+ *  application waits for RX data.
+ *
+ * Parameters:
+ *   lipaddr - The local board IPv6 address of the socket
+ *   ripaddr - The remote IPv6 address to send the data
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_MULTILINK
+void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t lipaddr,
+                          FAR const net_ipv6addr_t ripaddr)
+#else
+void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t ripaddr)
+#endif
+{
+  FAR struct net_driver_s *dev;
+
+  /* Find the device driver that serves the subnet of the remote address */
+
+#ifdef CONFIG_NET_MULTILINK
+  dev = netdev_findby_ipv6addr(lipaddr, ripaddr);
+#else
+  dev = netdev_findby_ipv6addr(ripaddr);
+#endif
+
+  if (dev && dev->d_rxavail)
+    {
+      /* Notify the device driver that new RX data is available. */
+
+      (void)dev->d_rxavail(dev);
+    }
+}
+#endif /* CONFIG_NET_IPv6 */
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_RXAVAIL */

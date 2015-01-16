@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_router.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,21 +54,31 @@
  * Public Types
  ****************************************************************************/
 
-struct route_match_s
+#ifdef CONFIG_NET_IPv4
+struct route_ipv4_match_s
 {
-  net_ipaddr_t target;   /* The target IP address on an external network to match */
-  net_ipaddr_t router;   /* The IP address of the router on one of our networks*/
+  in_addr_t target;       /* Target IPv4 address on an external network to match */
+  in_addr_t router;       /* IPv4 address of the router on one of our networks*/
 };
+#endif
+
+#ifdef CONFIG_NET_IPv6
+struct route_ipv6_match_s
+{
+  net_ipv6addr_t target;  /* arget IPv6 address on an external network to match */
+  net_ipv6addr_t router;  /* IPv6 address of the router on one of our networks*/
+};
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_match
+ * Function: net_ipv4_match
  *
  * Description:
- *   Return 1 if the route is available
+ *   Return 1 if the IPv4 route is available
  *
  * Parameters:
  *   route - The next route to examine
@@ -79,16 +89,17 @@ struct route_match_s
  *
  ****************************************************************************/
 
-static int net_match(FAR struct net_route_s *route, FAR void *arg)
+#ifdef CONFIG_NET_IPv4
+static int net_ipv4_match(FAR struct net_route_s *route, FAR void *arg)
 {
-  FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
+  FAR struct route_ipv4_match_s *match = (FAR struct route_ipv4_match_s *)arg;
 
   /* To match, the masked target addresses must be the same.  In the event
    * of multiple matches, only the first is returned.  There is not (yet) any
    * concept for the precedence of networks.
    */
 
-  if (net_ipaddr_maskcmp(route->target, match->target, route->netmask))
+  if (net_ipv4addr_maskcmp(route->target, match->target, route->netmask))
     {
       /* They match.. Copy the router address */
 
@@ -98,66 +109,98 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
 
   return 0;
 }
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Function: net_ipv6_match
+ *
+ * Description:
+ *   Return 1 if the IPv6 route is available
+ *
+ * Parameters:
+ *   route - The next route to examine
+ *   arg   - The match values (cast to void*)
+ *
+ * Returned Value:
+ *   0 if the entry is not a match; 1 if the entry matched and was cleared.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int net_ipv6_match(FAR struct net_route_s *route, FAR void *arg)
+{
+#if 1
+#  warning Missing logic
+#else
+  FAR struct route_ipv4_match_s *match = (FAR struct route_ipv4_match_s *)arg;
+
+  /* To match, the masked target addresses must be the same.  In the event
+   * of multiple matches, only the first is returned.  There is not (yet) any
+   * concept for the precedence of networks.
+   */
+
+  if (net_ipv6ddr_maskcmp(route->target, match->target, route->netmask))
+    {
+      /* They match.. Copy the router address */
+
+      net_ipaddr_copy(match->router, route->router);
+      return 1;
+    }
+#endif
+
+  return 0;
+}
+#endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_router
+ * Function: net_ipv4_router
  *
  * Description:
- *   Given an IP address on a external network, return the address of the
+ *   Given an IPv4 address on a external network, return the address of the
  *   router on a local network that can forward to the external network.
  *
  * Parameters:
- *   target - An IP address on a remote network to use in the lookup.
+ *   target - An IPv4 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
  *     packets to the target.
- *
- *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
- *   value.  Hence, the change in the function signature.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int net_router(net_ipaddr_t target, net_ipaddr_t router)
-#else
-int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
-#endif
+#ifdef CONFIG_NET_IPv4
+int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
 {
-  struct route_match_s match;
+  struct route_ipv4_match_s match;
   int ret;
 
   /* Do not route the special broadcast IP address */
 
-  if (net_ipaddr_cmp(target, g_alloneaddr))
+  if (net_ipaddr_cmp(target, g_ipv4_alloneaddr))
     {
       return -ENOENT;
     }
 
   /* Set up the comparison structure */
 
-  memset(&match, 0, sizeof(struct route_match_s));
+  memset(&match, 0, sizeof(struct route_ipv4_match_s));
   net_ipaddr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address
    */
 
-  ret = net_foreachroute(net_match, &match);
+  ret = net_foreachroute(net_ipv4_match, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */
 
-#ifdef CONFIG_NET_IPv6
-      net_ipaddr_copy(router, match.router);
-#else
-      net_ipaddr_copy(*router, match.router);
-#endif
+      net_ipv4addr_copy(*router, match.router);
       ret = OK;
     }
   else
@@ -169,5 +212,64 @@ int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
 
   return ret;
 }
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Function: net_ipv6_router
+ *
+ * Description:
+ *   Given an IPv6 address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
+ *
+ * Parameters:
+ *   target - An IPv6 address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router)
+{
+  struct route_ipv6_match_s match;
+  int ret;
+
+  /* Do not route the special broadcast IP address */
+
+  if (net_ipaddr_cmp(target, g_ipv6_alloneaddr))
+    {
+      return -ENOENT;
+    }
+
+  /* Set up the comparison structure */
+
+  memset(&match, 0, sizeof(struct route_ipv6_match_s));
+  net_ipaddr_copy(match.target, target);
+
+  /* Find an router entry with the routing table that can forward to this
+   * address
+   */
+
+  ret = net_foreachroute(net_ipv6_match, &match);
+  if (ret > 0)
+    {
+      /* We found a route.  Return the router address. */
+
+      net_ipv6addr_copy(router, match.router);
+      ret = OK;
+    }
+  else
+    {
+      /* There is no route for this address */
+
+      ret = -ENOENT;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_NET_IPv6 */
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */

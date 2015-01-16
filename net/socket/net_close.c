@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_close.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -358,9 +358,9 @@ static inline int netclose_disconnect(FAR struct socket *psock)
       /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-      netdev_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-      netdev_txnotify(conn->u.ipv4.raddr);
+      netdev_ipv4_txnotify(conn->u.ipv4.raddr);
 #endif
 
 #ifdef CONFIG_NET_SOLINGER

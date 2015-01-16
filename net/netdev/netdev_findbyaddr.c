@@ -211,18 +211,18 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
-  net_ipaddr_t router;
+  in_addr_t router;
   int ret;
 #endif
 
   /* First, check if this is the broadcast IP address */
 
-  if (net_ipv4addr_cmp(ripaddr, g_alloneaddr))
+  if (net_ipv4addr_cmp(ripaddr, g_ipv4_alloneaddr))
     {
 #ifdef CONFIG_NET_MULTILINK
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
-      if (net_ipv4addr_cmp(lipaddr, g_allzeroaddr))
+      if (net_ipv4addr_cmp(lipaddr, g_ipv4_allzeroaddr))
         {
           /* Yes.. In this case, I think we are supposed to send the
            * broadcast packet out ALL local networks.  I am not sure
@@ -262,7 +262,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
    * address of a router that can forward packets to the external network.
    */
 
-  ret = net_router(ripaddr, &router);
+  ret = net_ipv4_router(ripaddr, &router);
   if (ret >= 0)
     {
       /* Success... try to find the network device associated with the local
@@ -329,18 +329,18 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
-  net_ipaddr_t router;
+  net_ipv6addr_t router;
   int ret;
 #endif
 
   /* First, check if this is the broadcast IP address */
 
-  if (net_ipv6addr_cmp(ripaddr, g_alloneaddr))
+  if (net_ipv6addr_cmp(ripaddr, g_ipv6_alloneaddr))
     {
 #ifdef CONFIG_NET_MULTILINK
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
-      if (net_ipv6addr_cmp(lipaddr, g_allzeroaddr))
+      if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
         {
           /* Yes.. In this case, I think we are supposed to send the
            * broadcast packet out ALL local networks.  I am not sure
@@ -380,7 +380,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
    * address of a router that can forward packets to the external network.
    */
 
-  ret = net_router(ripaddr, router);
+  ret = net_ipv6_router(ripaddr, router);
   if (ret >= 0)
     {
       /* Success... try to find the network device associated with the local

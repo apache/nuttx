@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-static void igmp_mcastmac(net_ipaddr_t *ip, FAR uint8_t *mac)
+static void igmp_mcastmac(in_addr_t *ip, FAR uint8_t *mac)
 {
   /* This mapping is from the IETF IN RFC 1700 */
 
@@ -99,7 +99,7 @@ static void igmp_mcastmac(net_ipaddr_t *ip, FAR uint8_t *mac)
  *
  ****************************************************************************/
 
-void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip)
+void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR in_addr_t *ip)
 {
   uint8_t mcastmac[6];
 
@@ -119,7 +119,7 @@ void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip)
  *
  ****************************************************************************/
 
-void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip)
+void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR in_addr_t *ip)
 {
   uint8_t mcastmac[6];
 

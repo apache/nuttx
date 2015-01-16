@@ -196,7 +196,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
   if (pbuf->proto == IP_PROTO_UDP &&
-      net_ipv6addr_cmp(pbuf->destipaddr, g_alloneaddr))
+      net_ipv6addr_cmp(pbuf->destipaddr, g_ipv6_alloneaddr))
     {
       return udp_ipv6_input(dev);
     }
@@ -209,7 +209,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   else
 #endif
 #ifdef CONFIG_NET_ICMPv6
-  if (net_ipv6addr_cmp(dev->d_ipv6addr, g_allzeroaddr))
+  if (net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP

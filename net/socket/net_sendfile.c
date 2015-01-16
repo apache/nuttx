@@ -565,9 +565,9 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-      netdev_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-      netdev_txnotify(conn->u.ipv4.raddr);
+      netdev_ipv4_txnotify(conn->u.ipv4.raddr);
 #endif
       net_lockedwait(&state.snd_sem);
     }

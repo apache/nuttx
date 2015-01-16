@@ -381,7 +381,8 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
   if (pbuf->proto == IP_PROTO_UDP &&
-      net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr), g_alloneaddr))
+      net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr),
+                       g_ipv4_alloneaddr))
     {
       return udp_ipv4_input(dev);
     }
@@ -394,7 +395,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
   else
 #endif
 #ifdef CONFIG_NET_ICMP
-  if (net_ipv4addr_cmp(dev->d_ipaddr, g_allzeroaddr))
+  if (net_ipv4addr_cmp(dev->d_ipaddr, g_ipv4_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP

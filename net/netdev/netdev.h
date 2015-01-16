@@ -122,27 +122,61 @@ FAR struct net_driver_s *netdev_default(void);
 /* netdev_txnotify.c *********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET_IPv4
 #  ifdef CONFIG_NET_MULTILINK
-void netdev_txnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr);
+void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 #  else
-void netdev_txnotify(const net_ipaddr_t ripaddr);
+void netdev_ipv4_txnotify(in_addr_t ripaddr);
 #  endif
-#endif
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_MULTILINK
+void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
+                          FAR const net_ipv6addr_t ripaddr);
+#  else
+void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr);
+#  endif
+#endif /* CONFIG_NET_IPv6 */
+#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /* netdev_rxnotify.c *********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
+
+#ifdef CONFIG_NET_IPv4
 #  ifdef CONFIG_NET_MULTILINK
-void netdev_rxnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr);
+void netdev_ipv4_rxnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 #  else
-void netdev_rxnotify(const net_ipaddr_t ripaddr);
+void netdev_ipv4_rxnotify(in_addr_t ripaddr);
 #  endif
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_MULTILINK
+void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t lipaddr,
+                          FAR const net_ipv6addr_t ripaddr);
+#  else
+void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t ripaddr);
+#  endif
+#endif /* CONFIG_NET_IPv6 */
+
 #else
+#ifdef CONFIG_NET_IPv4
 #  ifdef CONFIG_NET_MULTILINK
-#    define netdev_rxnotify(lipaddr,ripaddr)
+#    define netdev_ipv4_rxnotify(lipaddr,ripaddr)
 #  else
-#    define netdev_rxnotify(ripaddr)
+#    define netdev_ipv4_rxnotify(ripaddr)
 #  endif
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_MULTILINK
+#    define netdev_ipv6_rxnotify(lipaddr,ripaddr)
+#  else
+#    define netdev_ipv6_rxnotify(ripaddr)
+#  endif
+#endif /* CONFIG_NET_IPv6 */
 #endif
 
 /* netdev_count.c ************************************************************/

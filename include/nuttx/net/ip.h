@@ -94,12 +94,6 @@
 
 typedef uint16_t net_ipv6addr_t[8];
 
-#ifdef CONFIG_NET_IPv6
-typedef net_ipv6addr_t net_ipaddr_t;
-#else
-typedef in_addr_t net_ipaddr_t;
-#endif
-
 /* Describes and address in either the IPv4 or IPv6 domain */
 
 union ip_addr_u
@@ -192,7 +186,7 @@ struct net_ipv6hdr_s
  *
  * This function constructs an IPv4 address in network byte order.
  *
- *   addr  A pointer to a net_ipaddr_t variable that will be
+ *   addr  A pointer to a in_addr_t variable that will be
  *         filled in with the IPv4 address.
  *   addr0 The first octet of the IPv4 address.
  *   addr1 The second octet of the IPv4 address.
@@ -255,7 +249,7 @@ struct net_ipv6hdr_s
  *
  * Example:
  *
- *   net_ipaddr_t ipaddr1, ipaddr2;
+ *   in_addr_t ipaddr1, ipaddr2;
  *
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
  *   net_ipaddr_copy(&ipaddr2, &ipaddr1);
@@ -289,7 +283,7 @@ struct net_ipv6hdr_s
  *
  * Example:
  *
- *   net_ipaddr_t ipaddr1, ipaddr2;
+ *   in_addr_t ipaddr1, ipaddr2;
  *
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
  *   if (net_ipaddr_cmp(ipaddr2, ipaddr1))
@@ -362,7 +356,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *
  * Example:
  *
- *   net_ipaddr_t ipaddr1, ipaddr2, netmask;
+ *   in_addr_t ipaddr1, ipaddr2, netmask;
  *
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
  *   net_ipaddr(&netmask, 255,255,255,0);

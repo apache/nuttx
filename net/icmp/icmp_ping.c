@@ -369,9 +369,9 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
       /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-      netdev_txnotify(g_allzeroaddr, state.png_addr);
+      netdev_ipv4_txnotify(g_ipv4_allzeroaddr, state.png_addr);
 #else
-      netdev_txnotify(state.png_addr);
+      netdev_ipv4_txnotify(state.png_addr);
 #endif
 
       /* Wait for either the full round trip transfer to complete or

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/netdev_router.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,22 +55,24 @@
  * Public Types
  ****************************************************************************/
 
-struct route_devmatch_s
+#ifdef CONFIG_NET_IPv4
+struct route_ipv4_devmatch_s
 {
   FAR struct net_driver_s *dev; /* The route must use this device */
-  net_ipaddr_t target;   /* The target IP address on an external network to match */
-  net_ipaddr_t router;   /* The IP address of the router on one of our networks*/
+  in_addr_t target;             /* Target IPv4 address on an external network to match */
+  in_addr_t router;             /* IPv6 address of the router on one of our networks*/
 };
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_devmatch
+ * Function: net_ipv4_devmatch
  *
  * Description:
- *   Return 1 if the route is available on the device's network.
+ *   Return 1 if the IPv4 route is available on the device's network.
  *
  * Parameters:
  *   route - The next route to examine
@@ -81,9 +83,10 @@ struct route_devmatch_s
  *
  ****************************************************************************/
 
-static int net_devmatch(FAR struct net_route_s *route, FAR void *arg)
+#ifdef CONFIG_NET_IPv4
+static int net_ipv4_devmatch(FAR struct net_route_s *route, FAR void *arg)
 {
-  FAR struct route_devmatch_s *match = (FAR struct route_devmatch_s *)arg;
+  FAR struct route_ipv4_devmatch_s *match = (FAR struct route_ipv4_devmatch_s *)arg;
   FAR struct net_driver_s *dev = match->dev;
 
   /* To match, (1) the masked target addresses must be the same, and (2) the
@@ -93,59 +96,99 @@ static int net_devmatch(FAR struct net_route_s *route, FAR void *arg)
    * not (yet) any concept for the precedence of networks.
    */
 
-  if (net_ipaddr_maskcmp(route->target, match->target, route->netmask) &&
-      net_ipaddr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
+  if (net_ipv4addr_maskcmp(route->target, match->target, route->netmask) &&
+      net_ipv4addr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
     {
       /* They match.. Copy the router address */
 
-      net_ipaddr_copy(match->router, route->router);
+      net_ipv4addr_copy(match->router, route->router);
       return 1;
     }
 
   return 0;
 }
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Function: net_ipv6_devmatch
+ *
+ * Description:
+ *   Return 1 if the IPv6 route is available on the device's network.
+ *
+ * Parameters:
+ *   route - The next route to examine
+ *   arg   - The match values (cast to void*)
+ *
+ * Returned Value:
+ *   0 if the entry is not a match; 1 if the entry matched and was cleared.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int net_ipv6_devmatch(FAR struct net_route_s *route, FAR void *arg)
+{
+#if 1
+#  warning Missing logic
+#else
+  FAR struct route_ipv6_devmatch_s *match = (FAR struct route_ipv6_devmatch_s *)arg;
+  FAR struct net_driver_s *dev = match->dev;
+
+  /* To match, (1) the masked target addresses must be the same, and (2) the
+   * router address must like on the network provided by the device.
+   *
+   * In the event of multiple matches, only the first is returned.  There
+   * not (yet) any concept for the precedence of networks.
+   */
+
+  if (net_ipv6addr_maskcmp(route->target, match->target, route->netmask) &&
+      net_ipv6addr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
+    {
+      /* They match.. Copy the router address */
+
+      net_ipv6addr_copy(match->router, route->router);
+      return 1;
+    }
+#endif
+
+  return 0;
+}
+#endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_router
+ * Function: netdev_ipv4_router
  *
  * Description:
- *   Given an IP address on a external network, return the address of the
+ *   Given an IPv4 address on a external network, return the address of the
  *   router on a local network that can forward to the external network.
- *   This is similar to net_router().  However, the set of routers is
+ *   This is similar to net_ipv4_router().  However, the set of routers is
  *   constrained to those accessible by the specific device
  *
  * Parameters:
  *   dev    - We are committed to using this device.
- *   target - An IP address on a remote network to use in the lookup.
+ *   target - An IPv4 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
  *     packets to the target.
  *
- *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
- *   value.  Hence, the change in the function signature.
- *
  * Returned Value:
- *   None
+ *   A router address is always returned (which may just be, perhaps,
+ *   device's default router address)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
-                   net_ipaddr_t router)
-#else
-void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
-                   FAR net_ipaddr_t *router)
-#endif
+#ifdef CONFIG_NET_IPv4
+void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
+                        FAR in_addr_t *router)
 {
-  struct route_devmatch_s match;
+  struct route_ipv4_devmatch_s match;
   int ret;
 
   /* Set up the comparison structure */
 
-  memset(&match, 0, sizeof(struct route_devmatch_s));
+  memset(&match, 0, sizeof(struct route_ipv4_devmatch_s));
   match.dev = dev;
   net_ipaddr_copy(match.target, target);
 
@@ -153,16 +196,12 @@ void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
    * address using this device.
    */
 
-  ret = net_foreachroute(net_devmatch, &match);
+  ret = net_foreachroute(net_ipv4_devmatch, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */
 
-#ifdef CONFIG_NET_IPv6
-      net_ipaddr_copy(router, match.target);
-#else
-      net_ipaddr_copy(*router, match.target);
-#endif
+      net_ipv4addr_copy(*router, match.target);
     }
   else
     {
@@ -170,12 +209,66 @@ void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
        * of the device.
        */
 
-#ifdef CONFIG_NET_IPv6
-      net_ipaddr_copy(router, dev->d_draddr);
-#else
-      net_ipaddr_copy(*router, dev->d_draddr);
-#endif
+      net_ipv4addr_copy(*router, dev->d_draddr);
     }
 }
+#endif
+
+/****************************************************************************
+ * Function: netdev_ipv6_router
+ *
+ * Description:
+ *   Given an IPv6 address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
+ *   This is similar to net_ipv6_router().  However, the set of routers is
+ *   constrained to those accessible by the specific device
+ *
+ * Parameters:
+ *   dev    - We are committed to using this device.
+ *   target - An IPv6 address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ * Returned Value:
+ *   A router address is always returned (which may just be, perhaps,
+ *   device's default router address)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+void netdev_ipv6_router(FAR struct net_driver_s *dev,
+                        FAR const net_ipv6addr_t target,
+                        FAR net_ipv6addr_t router)
+{
+  struct route_ipv6_devmatch_s match;
+  int ret;
+
+  /* Set up the comparison structure */
+
+  memset(&match, 0, sizeof(struct route_ipv6_devmatch_s));
+  match.dev = dev;
+  net_ipaddr_copy(match.target, target);
+
+  /* Find an router entry with the routing table that can forward to this
+   * address using this device.
+   */
+
+  ret = net_foreachroute(net_ipv6_devmatch, &match);
+  if (ret > 0)
+    {
+      /* We found a route.  Return the router address. */
+
+      net_ipv6addr_copy(router, match.target);
+    }
+  else
+    {
+      /* There isn't a matching route.. fallback and use the default router
+       * of the device.
+       */
+
+      net_ipv6addr_copy(router, dev->d_draddr);
+    }
+}
+#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */

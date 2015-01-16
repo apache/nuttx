@@ -67,9 +67,9 @@
 struct net_route_s
 {
   FAR struct net_route_s *flink; /* Supports a singly linked list */
-  net_ipaddr_t target;           /* The destination network */
-  net_ipaddr_t netmask;          /* The network address mask */
-  net_ipaddr_t router;           /* Route packets via this router */
+  in_addr_t target;              /* The destination network */
+  in_addr_t netmask;             /* The network address mask */
+  in_addr_t router;              /* Route packets via this router */
 };
 
 /* Type of the call out function pointer provided to net_foreachroute() */
@@ -162,8 +162,8 @@ void net_freeroute(FAR struct net_route_s *route);
  *
  ****************************************************************************/
 
-int net_addroute(net_ipaddr_t target, net_ipaddr_t netmask,
-                 net_ipaddr_t router);
+int net_addroute(in_addr_t target, in_addr_t netmask,
+                 in_addr_t router);
 
 /****************************************************************************
  * Function: net_delroute
@@ -178,22 +178,40 @@ int net_addroute(net_ipaddr_t target, net_ipaddr_t netmask,
  *
  ****************************************************************************/
 
-int net_delroute(net_ipaddr_t target, net_ipaddr_t netmask);
+int net_delroute(in_addr_t target, in_addr_t netmask);
 
 /****************************************************************************
- * Function: net_router
+ * Function: net_ipv4_router
  *
  * Description:
- *   Given an IP address on a external network, return the address of the
+ *   Given an IPv4 address on a external network, return the address of the
  *   router on a local network that can forward to the external network.
  *
  * Parameters:
- *   target - An IP address on a remote network to use in the lookup.
+ *   target - An IPv4 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
  *     packets to the target.
  *
- *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
- *   value.  Hence, the change in the function signature.
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int net_ipv4_router(in_addr_t target, FAR in_addr_t *router);
+#endif
+
+/****************************************************************************
+ * Function: net_ipv6_router
+ *
+ * Description:
+ *   Given an IPv6 address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
+ *
+ * Parameters:
+ *   target - An IPv6 address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -201,43 +219,62 @@ int net_delroute(net_ipaddr_t target, net_ipaddr_t netmask);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_router(net_ipaddr_t target, net_ipaddr_t router);
-#else
-int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router);
+int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router);
 #endif
 
 /****************************************************************************
- * Function: netdev_router
+ * Function: netdev_ipv4_router
  *
  * Description:
- *   Given an IP address on a external network, return the address of the
+ *   Given an IPv4 address on a external network, return the address of the
  *   router on a local network that can forward to the external network.
- *   This is similar to net_router().  However, the set of routers is
+ *   This is similar to net_ipv4_router().  However, the set of routers is
  *   constrained to those accessible by the specific device
  *
  * Parameters:
  *   dev    - We are committed to using this device.
- *   target - An IP address on a remote network to use in the lookup.
+ *   target - An IPv4 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
  *     packets to the target.
  *
- *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
- *   value.  Hence, the change in the function signature.
- *
  * Returned Value:
- *   None, a router address is always returned (which may just be, perhaps,
+ *   A router address is always returned (which may just be, perhaps,
  *   device's default router address)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 struct net_driver_s;
+void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
+                        FAR in_addr_t *router);
+#endif
+
+/****************************************************************************
+ * Function: netdev_ipv6_router
+ *
+ * Description:
+ *   Given an IPv6 address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
+ *   This is similar to net_ipv6_router().  However, the set of routers is
+ *   constrained to those accessible by the specific device
+ *
+ * Parameters:
+ *   dev    - We are committed to using this device.
+ *   target - An IPv6 address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ * Returned Value:
+ *   A router address is always returned (which may just be, perhaps,
+ *   device's default router address)
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
-                   net_ipaddr_t router);
-#else
-void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
-                   FAR net_ipaddr_t *router);
+struct net_driver_s;
+void netdev_ipv6_router(FAR struct net_driver_s *dev,
+                        FAR const net_ipv6addr_t target,
+                        FAR net_ipv6addr_t router);
 #endif
 
 /****************************************************************************

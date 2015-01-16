@@ -829,9 +829,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
               /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-              netdev_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+              netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-              netdev_txnotify(conn->u.ipv4.raddr);
+              netdev_ipv4_txnotify(conn->u.ipv4.raddr);
 #endif
               result = len;
             }

@@ -83,6 +83,144 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ioctl_addipv4route
+ *
+ * Description:
+ *   Add an IPv4 route to the routing table.
+ *
+ * Input Parameters:
+ *   rentry - Describes the route to be added
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv4)
+static int ioctl_addipv4route(FAR struct rtentry *rtentry)
+{
+  FAR struct sockaddr_in *addr;
+  in_addr_t target;
+  in_addr_t netmask;
+  in_addr_t router;
+
+  addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
+  target  = (in_addr_t)addr->sin_addr.s_addr;
+
+  addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
+  netmask = (in_addr_t)addr->sin_addr.s_addr;
+
+  /* The router is an optional argument */
+
+  if (rtentry->rt_router)
+    {
+      addr   = (FAR struct sockaddr_in *)rtentry->rt_router;
+      router = (in_addr_t)addr->sin_addr.s_addr;
+    }
+  else
+    {
+      router = 0;
+    }
+
+  return net_addroute(target, netmask, router);
+}
+#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Name: ioctl_addipv6route
+ *
+ * Description:
+ *   Add an IPv6 route to the routing table.
+ *
+ * Input Parameters:
+ *   rentry - Describes the route to be added
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
+static int ioctl_addipv6route(FAR struct rtentry *rtentry)
+{
+  FAR struct sockaddr_in6 *addr;
+  net_ipv6addr_t target;
+  net_ipv6addr_t netmask;
+  net_ipv6addr_t router;
+
+  addr   = (FAR struct sockaddr_in6 *)rtentry->rt_target;
+  target = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+
+  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
+  netmask = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+
+  /* The router is an optional argument */
+
+  if (rtentry->rt_router)
+    {
+      addr   = (FAR struct sockaddr_in6 *)rtentry->rt_router;
+      router = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+    }
+  else
+    {
+      router = NULL;
+    }
+
+  return net_addroute(target, netmask, router);
+}
+#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv6 */
+
+/****************************************************************************
+ * Name: ioctl_delipv4route
+ *
+ * Description:
+ *   Delete an IPv4 route to the routing table.
+ *
+ * Input Parameters:
+ *   rentry - Describes the route to be deleted
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv4)
+static int ioctl_delipv4route(FAR struct rtentry *rtentry)
+{
+  FAR struct sockaddr_in *addr;
+  in_addr_t target;
+  in_addr_t netmask;
+
+  addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
+  target  = (in_addr_t)addr->sin_addr.s_addr;
+
+  addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
+  netmask = (in_addr_t)addr->sin_addr.s_addr;
+
+  return net_delroute(target, netmask);
+}
+#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Name: ioctl_delipv6route
+ *
+ * Description:
+ *   Delete an IPv6 route to the routing table.
+ *
+ * Input Parameters:
+ *   rentry - Describes the route to be deleted
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
+static int ioctl_delipv6route(FAR struct rtentry *rtentry)
+{
+  FAR struct sockaddr_in6 *addr;
+  net_ipv6addr_t target;
+  net_ipv6addr_t netmask;
+
+  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
+  target  = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+
+  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
+  netmask = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+
+  return net_delroute(target, netmask);
+}
+#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv6 */
+
+/****************************************************************************
  * Name: ioctl_getipv4addr
  *
  * Description:
@@ -90,7 +228,7 @@
  *
  * Input Parameters:
  *   outaddr - Pointer to the user-provided memory to receive the address.
- *   inaddr - The source IP adress in the device structure.
+ *   inaddr - The source IP address in the device structure.
  *
  ****************************************************************************/
 
@@ -741,99 +879,67 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
     {
       case SIOCADDRT:  /* Add an entry to the routing table */
         {
-          if (rtentry)
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          FAR struct sockaddr_in *addr;
+#endif
+          /* The target address and the netmask are required values */
+
+          if (!retentry || !rtentry->rt_target || !rtentry->rt_netmask)
             {
-              net_ipaddr_t target;
-              net_ipaddr_t netmask;
-              net_ipaddr_t router;
-#ifdef CONFIG_NET_IPv6
-              FAR struct sockaddr_in6 *addr;
-#else
-              FAR struct sockaddr_in *addr;
-#endif
-              /* The target address and the netmask are required value */
-
-              if (!rtentry->rt_target || !rtentry->rt_netmask)
-                {
-                  return -EINVAL;
-                }
-
-#ifdef CONFIG_NET_IPv6
-              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-              target  = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
-
-              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
-              netmask = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
-
-              /* The router is an optional argument */
-
-              if (rtentry->rt_router)
-                {
-                  addr   = (FAR struct sockaddr_in6 *)rtentry->rt_router;
-                  router = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
-                }
-              else
-                {
-                  router = NULL;
-                }
-#else
-              addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
-              target  = (net_ipaddr_t)addr->sin_addr.s_addr;
-
-              addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
-              netmask = (net_ipaddr_t)addr->sin_addr.s_addr;
-
-              /* The router is an optional argument */
-
-              if (rtentry->rt_router)
-                {
-                  addr   = (FAR struct sockaddr_in *)rtentry->rt_router;
-                  router = (net_ipaddr_t)addr->sin_addr.s_addr;
-                }
-              else
-                {
-                  router = 0;
-                }
-#endif
-              ret = net_addroute(target, netmask, router);
+              return -EINVAL;
             }
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          addr = (FAR struct sockaddr_in *)rtentry->rt_target;
+          if (addr->sin_family == AF_INET)
+            {
+              ret = ioctl_addipv4route(rtentry);
+            }
+          else
+            {
+              ret = ioctl_addipv6route(rtentry);
+            }
+
+#elif defined(CONFIG_NET_IPv4)
+          ret = ioctl_addipv4route(rtentry);
+#elif defined(CONFIG_NET_IPv6)
+          ret = ioctl_addipv6route(rtentry);
+#else
+          ret = -EAFNOSUPPORT;
+#endif
         }
         break;
 
       case SIOCDELRT:  /* Delete an entry from the routing table */
         {
-          if (rtentry)
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          FAR struct sockaddr_in *addr;
+#endif
+          /* The target address and the netmask are required values */
+
+          if (!retentry || !rtentry->rt_target || !rtentry->rt_netmask)
             {
-              net_ipaddr_t target;
-              net_ipaddr_t netmask;
-#ifdef CONFIG_NET_IPv6
-              FAR struct sockaddr_in6 *addr;
-#else
-              FAR struct sockaddr_in *addr;
-#endif
-
-              /* The target address and the netmask are required value */
-
-              if (!rtentry->rt_target || !rtentry->rt_netmask)
-                {
-                  return -EINVAL;
-                }
-
-#ifdef CONFIG_NET_IPv6
-              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-              target  = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
-
-              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
-              netmask = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
-#else
-              addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
-              target  = (net_ipaddr_t)addr->sin_addr.s_addr;
-
-              addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
-              netmask = (net_ipaddr_t)addr->sin_addr.s_addr;
-#endif
-              ret = net_delroute(target, netmask);
+              return -EINVAL;
             }
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          addr = (FAR struct sockaddr_in *)rtentry->rt_target;
+          if (addr->sin_family == AF_INET)
+            {
+              ret = ioctl_delipv4route(rtentry);
+            }
+          else
+            {
+              ret = ioctl_delipv6route(rtentry);
+            }
+
+#elif defined(CONFIG_NET_IPv4)
+          ret = ioctl_delipv4route(rtentry);
+#elif defined(CONFIG_NET_IPv6)
+          ret = ioctl_delipv6route(rtentry);
+#else
+          ret = -EAFNOSUPPORT;
+#endif
         }
         break;
 

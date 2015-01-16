@@ -69,25 +69,23 @@ struct net_stats_s g_netstats;
 
 uint16_t g_ipid;
 
-const net_ipaddr_t g_alloneaddr =
-#ifdef CONFIG_NET_IPv6
-  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
-#else
-  0xffffffff;
-#endif
-
-const net_ipaddr_t g_allzeroaddr =
-#ifdef CONFIG_NET_IPv6
-  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-#else
-  0x00000000;
-#endif
+#ifdef CONFIG_NET_IPv4
+const in_addr_t g_ipv4_alloneaddr  = 0xffffffff;
+const in_addr_t g_ipv4_allzeroaddr = 0x00000000;
 
 /* Reassembly timer (units: deci-seconds) */
 
-#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
+#ifdef CONFIG_NET_TCP_REASSEMBLY
 uint8_t g_reassembly_timer;
 #endif
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+const net_ipv6addr_t g_ipv6_alloneaddr =
+  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
+const net_ipv6addr_t g_ipv6_allzeroaddr =
+  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+#endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
  * Private Variables

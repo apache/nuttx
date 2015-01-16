@@ -67,8 +67,8 @@
  * Public Data
  ****************************************************************************/
 
-net_ipaddr_t g_allsystems;
-net_ipaddr_t g_allrouters;
+in_addr_t g_ipv4_allsystems;
+in_addr_t g_ipv4_allrouters;
 
 /****************************************************************************
  * Public Functions
@@ -86,8 +86,8 @@ void igmp_initialize(void)
 {
   nvdbg("IGMP initializing\n");
 
-  net_ipaddr(g_allrouters, 224, 0, 0, 2);
-  net_ipaddr(g_allsystems, 224, 0, 0, 1);
+  net_ipaddr(g_ipv4_allrouters, 224, 0, 0, 2);
+  net_ipaddr(g_ipv4_allsystems, 224, 0, 0, 1);
 
   /* Initialize the group allocation logic */
 
@@ -110,12 +110,12 @@ void igmp_devinit(struct net_driver_s *dev)
 
   /* Add the all systems address to the group */
 
-  (void)igmp_grpalloc(dev, &g_allsystems);
+  (void)igmp_grpalloc(dev, &g_ipv4_allsystems);
 
   /* Allow the IGMP messages at the MAC level */
 
-  igmp_addmcastmac(dev, &g_allrouters);
-  igmp_addmcastmac(dev, &g_allsystems);
+  igmp_addmcastmac(dev, &g_ipv4_allrouters);
+  igmp_addmcastmac(dev, &g_ipv4_allsystems);
 }
 
 #endif /* CONFIG_NET_IGMP */

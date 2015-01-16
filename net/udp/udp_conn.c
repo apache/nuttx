@@ -127,8 +127,7 @@ static inline void _udp_semtake(FAR sem_t *sem)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static FAR struct udp_conn_s *udp_find_conn(net_ipaddr_t ipaddr,
-                                            uint16_t portno)
+static FAR struct udp_conn_s *udp_find_conn(in_addr_t ipaddr, uint16_t portno)
 #else
 static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
 #endif
@@ -150,11 +149,11 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
        */
 
       if (conn->lport == portno &&
-          (net_ipaddr_cmp(conn->u.ipv4.laddr, ipaddr) ||
+          (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr) ||
 #ifdef CONFIG_NET_IPv6
-           net_ipaddr_cmp(conn->u.ipv4.laddr, g_allzeroaddr)))
+           net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr)))
 #else
-           net_ipaddr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
+           net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
 #endif
         {
           return conn;
@@ -195,7 +194,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static uint16_t udp_select_port(net_ipaddr_t ipaddr)
+static uint16_t udp_select_port(in_addr_t ipaddr)
 #else
 static uint16_t udp_select_port(void)
 #endif
@@ -381,13 +380,13 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipaddr_cmp(conn->u.ipv4.laddr, g_allzeroaddr) ||
-           net_ipaddr_cmp(conn->u.ipv4.laddr, g_alloneaddr) ||
-           net_ipaddr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
+          (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr) ||
+           net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_alloneaddr) ||
+           net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
 #endif
-          (net_ipaddr_cmp(conn->u.ipv4.raddr, g_allzeroaddr) ||
-           net_ipaddr_cmp(conn->u.ipv4.raddr, g_alloneaddr) ||
-           net_ipaddr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
+          (net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_allzeroaddr) ||
+           net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_alloneaddr) ||
+           net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
         {
           /* Matching connection found.. return a reference to it */
 
@@ -448,7 +447,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
   int ret;
 
 #ifdef CONFIG_NETDEV_MULTINIC
-  net_ipaddr_t ipaddr;
+  in_addr_t ipaddr;
 
 #ifdef CONFIG_NET_IPv6
   /* Get the IPv6 address that we are binding to */
@@ -569,7 +568,7 @@ int udp_connect(FAR struct udp_conn_s *conn,
   else
     {
       conn->rport = 0;
-      net_ipaddr_copy(conn->u.ipv4.raddr, g_allzeroaddr);
+      net_ipv4addr_copy(conn->u.ipv4.raddr, g_ipv4_allzeroaddr);
     }
 
   conn->ttl = IP_TTL;

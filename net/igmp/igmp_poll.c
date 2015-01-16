@@ -82,7 +82,7 @@
 static inline void igmp_sched_send(FAR struct net_driver_s *dev,
                                    FAR struct igmp_group_s *group)
 {
-  net_ipaddr_t *dest;
+  in_addr_t *dest;
 
   /* Check what kind of message we need to send.  There are only two
    * possibilities:
@@ -99,7 +99,7 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
   else
     {
       DEBUGASSERT(group->msgid == IGMP_LEAVE_GROUP);
-      dest = &g_allrouters;
+      dest = &g_ipv4_allrouters;
       nllvdbg("Send IGMP_LEAVE_GROUP, dest=%08x flags=%02x\n",
                *dest, group->flags);
       IGMP_STATINCR(g_netstats.igmp.leave_sched);

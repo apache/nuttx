@@ -143,7 +143,7 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev,
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (uint8_t *)&pbuf->srcipaddr, 2 * sizeof(net_ipaddr_t));
+  sum = chksum(sum, (uint8_t *)&pbuf->srcipaddr, 2 * sizeof(in_addr_t));
 
   /* Sum TCP header and data. */
 

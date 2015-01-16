@@ -75,12 +75,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_txnotify
+ * Function: netdev_ipv4_txnotify
  *
  * Description:
- *   Notify the device driver that new TX data is available.
+ *   Notify the device driver that forwards the IPv4 address that new TX
+ *   data is available.
  *
  * Parameters:
+ *   lipaddr - The local address bound to the socket
  *   ripaddr - The remote address to send the data
  *
  * Returned Value:
@@ -91,11 +93,12 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_MULTILINK
-void netdev_txnotify(const net_ipaddr_t lipaddr, const net_ipaddr_t ripaddr)
-#else
-void netdev_txnotify(const net_ipaddr_t ripaddr)
-#endif
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_MULTILINK
+void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
+#  else
+void netdev_ipv4_txnotify(in_addr_t ripaddr)
+#  endif
 {
   FAR struct net_driver_s *dev;
 
@@ -114,5 +117,53 @@ void netdev_txnotify(const net_ipaddr_t ripaddr)
       (void)dev->d_txavail(dev);
     }
 }
+#endif /* CONFIG_NET_IPv4 */
+
+
+/****************************************************************************
+ * Function: netdev_ipv6_txnotify
+ *
+ * Description:
+ *   Notify the device driver that forwards the IPv4 address that new TX
+ *   data is available.
+ *
+ * Parameters:
+ *   lipaddr - The local address bound to the socket
+ *   ripaddr - The remote address to send the data
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_MULTILINK
+void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
+                          FAR const net_ipv6addr_t ripaddr)
+#else
+void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr)
+#endif
+{
+  FAR struct net_driver_s *dev;
+
+  /* Find the device driver that serves the subnet of the remote address */
+
+#ifdef CONFIG_NET_MULTILINK
+  dev = netdev_findby_ipv6addr(lipaddr, ripaddr);
+#else
+  dev = netdev_findby_ipv6addr(ripaddr);
+#endif
+
+  if (dev && dev->d_txavail)
+    {
+      /* Notify the device driver that new TX data is available. */
+
+      (void)dev->d_txavail(dev);
+    }
+}
+#endif /* CONFIG_NET_IPv6 */
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

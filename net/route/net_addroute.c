@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_addroute.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,8 +78,7 @@
  *
  ****************************************************************************/
 
-int net_addroute(net_ipaddr_t target, net_ipaddr_t netmask,
-                 net_ipaddr_t router)
+int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 {
   FAR struct net_route_s *route;
   net_lock_t save;
