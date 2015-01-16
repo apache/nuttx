@@ -330,7 +330,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN) && \
     !defined(CONFIG_NET_ARP_SEND)
-          if (pstate->snd_sent != 0 || arp_find(conn->ripaddr) != NULL)
+          if (pstate->snd_sent != 0 || arp_find(conn->u.ipv4.raddr) != NULL)
 #endif
             {
               /* Update the amount of data sent (but not necessarily ACKed) */
@@ -484,7 +484,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   /* Make sure that the IP address mapping is in the ARP table */
 
 #ifdef CONFIG_NET_ARP_SEND
-  ret = arp_send(conn->ripaddr);
+  ret = arp_send(conn->u.ipv4.raddr);
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
@@ -565,9 +565,9 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-      netdev_txnotify(conn->lipaddr, conn->ripaddr);
+      netdev_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-      netdev_txnotify(conn->ripaddr);
+      netdev_txnotify(conn->u.ipv4.raddr);
 #endif
       net_lockedwait(&state.snd_sem);
     }

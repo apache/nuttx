@@ -90,7 +90,6 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-
 /* Representation of a TCP connection.
  *
  * The tcp_conn_s structure is used for identifying a connection. All
@@ -108,10 +107,7 @@ struct tcp_hdr_s;         /* Forward reference */
 struct tcp_conn_s
 {
   dq_entry_t node;        /* Implements a doubly linked list */
-#ifdef CONFIG_NETDEV_MULTINIC
-  net_ipaddr_t lipaddr;   /* The bound local IP address */
-#endif
-  net_ipaddr_t ripaddr;   /* The IP address of the remote host */
+  union ip_binding_u u;   /* IP address binding */
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */

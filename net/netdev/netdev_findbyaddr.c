@@ -160,7 +160,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
         {
           /* Yes.. check for an address match (under the netmask) */
 
-          if (net_ipaddr_maskcmp(dev->d_ipv6ipaddr, ripaddr, dev->d_ipv6netmask))
+          if (net_ipaddr_maskcmp(dev->d_ipv6addr, ripaddr, dev->d_ipv6netmask))
             {
               /* Its a match */
 

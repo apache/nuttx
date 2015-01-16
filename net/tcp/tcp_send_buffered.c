@@ -552,7 +552,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN) && \
     !defined(CONFIG_NET_ARP_SEND)
-      if (arp_find(conn->ripaddr) != NULL)
+      if (arp_find(conn->u.ipv4.raddr) != NULL)
 #endif
         {
           FAR struct tcp_wrbuffer_s *wrb;
@@ -754,7 +754,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
 #ifdef CONFIG_NET_ARP_SEND
-  ret = arp_send(conn->ripaddr);
+  ret = arp_send(conn->u.ipv4.raddr);
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
@@ -829,9 +829,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
               /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-              netdev_txnotify(conn->lipaddr, conn->ripaddr);
+              netdev_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-              netdev_txnotify(conn->ripaddr);
+              netdev_txnotify(conn->u.ipv4.raddr);
 #endif
               result = len;
             }

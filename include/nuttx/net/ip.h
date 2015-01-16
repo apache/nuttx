@@ -90,7 +90,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Representation of an IP address */
+/* Representation of an IP address in the IPv6 domains */
 
 typedef uint16_t net_ipv6addr_t[8];
 
@@ -99,6 +99,52 @@ typedef net_ipv6addr_t net_ipaddr_t;
 #else
 typedef in_addr_t net_ipaddr_t;
 #endif
+
+/* Describes and address in either the IPv4 or IPv6 domain */
+
+union ip_addr_u
+{
+#ifdef CONFIG_NET_IPv4
+  /* IPv4 address */
+
+  in_addr_t ipv4;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  /* IPv6 addresse */
+
+  net_ipv6addr_t ipv6;
+#endif
+};
+
+/* Describes address binding for a PF_INET or PF_INET6 socket */
+
+union ip_binding_u
+{
+#ifdef CONFIG_NET_IPv4
+  /* IPv4 addresses (for PF_INET socket) */
+
+  struct
+  {
+#ifdef CONFIG_NETDEV_MULTINIC
+    in_addr_t laddr;      /* The bound local IPv4 address */
+#endif
+    in_addr_t raddr;      /* The IPv4 address of the remote host */
+  } ipv4;
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+  /* IPv6 addresses (for PF_INET6 socket) */
+
+  struct
+  {
+#ifdef CONFIG_NETDEV_MULTINIC
+    net_ipv6addr_t laddr; /* The bound local IPv6 address */
+#endif
+    net_ipv6addr_t raddr; /* The IPv6 address of the remote host */
+  } ipv6;
+#endif /* CONFIG_NET_IPv6 */
+};
 
 #ifdef CONFIG_NET_IPv4
 /* The IPv4 header */

@@ -132,11 +132,11 @@ static FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
            * with INADDR_ANY.
            */
 
-          if (net_ipaddr_cmp(conn->lipaddr, ipaddr) ||
+          if (net_ipaddr_cmp(conn->u.ipv4.laddr, ipaddr) ||
 #ifdef CONFIG_NET_IPv6
-              net_ipaddr_cmp(conn->lipaddr, g_allzeroaddr))
+              net_ipaddr_cmp(conn->u.ipv4.laddr, g_allzeroaddr))
 #else
-              net_ipaddr_cmp(conn->lipaddr, INADDR_ANY))
+              net_ipaddr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
 #endif
 #endif
             {
@@ -525,10 +525,10 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
           tcp->destport == conn->lport &&
           tcp->srcport  == conn->rport &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipaddr_cmp(conn->lipaddr, g_allzeroaddr) ||
-           net_ipaddr_cmp(destipaddr, conn->lipaddr)) &&
+          (net_ipaddr_cmp(conn->u.ipv4.laddr, g_allzeroaddr) ||
+           net_ipaddr_cmp(destipaddr, conn->u.ipv4.laddr)) &&
 #endif
-          net_ipaddr_cmp(srcipaddr, conn->ripaddr))
+          net_ipaddr_cmp(srcipaddr, conn->u.ipv4.raddr))
         {
           /* Matching connection found.. break out of the loop and return a
            * reference to it.
@@ -601,9 +601,9 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->lport         = tcp->destport;
       conn->rport         = tcp->srcport;
       conn->mss           = TCP_INITIAL_MSS(dev);
-      net_ipaddr_copy(conn->ripaddr, net_ip4addr_conv32(ip->srcipaddr));
+      net_ipaddr_copy(conn->u.ipv4.raddr, net_ip4addr_conv32(ip->srcipaddr));
 #ifdef CONFIG_NETDEV_MULTINIC
-      net_ipaddr_copy(conn->lipaddr, net_ip4addr_conv32(ip->destipaddr));
+      net_ipaddr_copy(conn->u.ipv4.laddr, net_ip4addr_conv32(ip->destipaddr));
 #endif
       conn->tcpstateflags = TCP_SYN_RCVD;
 
@@ -707,7 +707,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
   conn->lport = addr->sin_port;
 
 #ifdef CONFIG_NETDEV_MULTINIC
-  net_ipaddr_copy(conn->lipaddr, ipaddr);
+  net_ipaddr_copy(conn->u.ipv4.laddr, ipaddr);
 #endif
 
   return OK;
@@ -761,7 +761,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
 
   flags = net_lock();
 #ifdef CONFIG_NETDEV_MULTINIC
-  port = tcp_selectport(conn->lipaddr, ntohs(conn->lport));
+  port = tcp_selectport(conn->u.ipv4.laddr, ntohs(conn->lport));
 #else
   port = tcp_selectport(ntohs(conn->lport));
 #endif
@@ -801,7 +801,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
 
   /* The sockaddr address is 32-bits in network order. */
 
-  net_ipaddr_copy(conn->ripaddr, addr->sin_addr.s_addr);
+  net_ipaddr_copy(conn->u.ipv4.raddr, addr->sin_addr.s_addr);
 
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Initialize the list of TCP read-ahead buffers */

@@ -397,7 +397,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN) && \
     !defined(CONFIG_NET_ARP_SEND)
-         if (pstate->snd_sent != 0 || arp_find(conn->ripaddr) != NULL)
+         if (pstate->snd_sent != 0 || arp_find(conn->u.ipv4.raddr) != NULL)
 #endif
             {
               /* Update the amount of data sent (but not necessarily ACKed) */
@@ -538,7 +538,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
 #ifdef CONFIG_NET_ARP_SEND
-  ret = arp_send(conn->ripaddr);
+  ret = arp_send(conn->u.ipv4.raddr);
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
@@ -591,15 +591,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
                                    TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT);
-          state.snd_cb->priv    = (void*)&state;
+          state.snd_cb->priv    = (FAR void *)&state;
           state.snd_cb->event   = tcpsend_interrupt;
 
           /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NET_MULTILINK
-          netdev_txnotify(conn->lipaddr, conn->ripaddr);
+          netdev_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-          netdev_txnotify(conn->ripaddr);
+          netdev_txnotify(conn->u.ipv4.raddr);
 #endif
 
           /* Wait for the send to complete or an error to occur:  NOTES: (1)

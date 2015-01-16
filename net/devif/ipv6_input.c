@@ -209,7 +209,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   else
 #endif
 #ifdef CONFIG_NET_ICMPv6
-  if (net_ipv6addr_cmp(dev->d_ipaddr, g_allzeroaddr))
+  if (net_ipv6addr_cmp(dev->d_ipv6addr, g_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP
@@ -233,7 +233,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
        * multicast packets that are sent to the ff02::/16 addresses.
        */
 
-      if (!net_ipv6addr_cmp(pbuf->destipaddr, dev->d_ipaddr) &&
+      if (!net_ipv6addr_cmp(pbuf->destipaddr, dev->d_ipv6addr) &&
           pbuf->destipaddr[0] != 0xff02)
         {
 #ifdef CONFIG_NET_STATISTICS

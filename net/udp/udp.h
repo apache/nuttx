@@ -67,10 +67,7 @@ struct udp_hdr_s;         /* Forward reference */
 struct udp_conn_s
 {
   dq_entry_t node;        /* Supports a doubly linked list */
-#ifdef CONFIG_NETDEV_MULTINIC
-  net_ipaddr_t lipaddr;   /* Bound local IP address (network byte order) */
-#endif
-  net_ipaddr_t ripaddr;   /* IP address of remote peer (network byte order) */
+  union ip_binding_u u;   /* IP address binding */
   uint16_t lport;         /* Bound local port number (network byte order) */
   uint16_t rport;         /* Remote port number (network byte order) */
   uint8_t  ttl;           /* Default time-to-live */

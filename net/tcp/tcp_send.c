@@ -188,7 +188,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   pbuf->destport = conn->rport;
 
   net_ipaddr_hdrcopy(pbuf->srcipaddr, &dev->d_ipaddr);
-  net_ipaddr_hdrcopy(pbuf->destipaddr, &conn->ripaddr);
+  net_ipaddr_hdrcopy(pbuf->destipaddr, &conn->u.ipv4.raddr);
 
   if (conn->tcpstateflags & TCP_STOPPED)
     {

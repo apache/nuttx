@@ -1097,9 +1097,9 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
 #if 0 /* No */
 #ifdef CONFIG_NET_MULTILINK
-      netdev_rxnotify(conn->lipaddr, conn->ripaddr);
+      netdev_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-      netdev_rxnotify(conn->ripaddr);
+      netdev_rxnotify(conn->u.ipv4.raddr);
 #endif
 #endif
 
@@ -1196,9 +1196,9 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       /* Notify the device driver of the receive call */
 
 #ifdef CONFIG_NET_MULTILINK
-      netdev_rxnotify(conn->lipaddr, conn->ripaddr);
+      netdev_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
-      netdev_rxnotify(conn->ripaddr);
+      netdev_rxnotify(conn->u.ipv4.raddr);
 #endif
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
