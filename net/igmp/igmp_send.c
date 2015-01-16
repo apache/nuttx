@@ -155,8 +155,8 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   IGMPBUF->ttl         = IGMP_TTL;
   IGMPBUF->proto       = IP_PROTO_IGMP;
 
-  net_ipaddr_hdrcopy(IGMPBUF->srcipaddr, &dev->d_ipaddr);
-  net_ipaddr_hdrcopy(IGMPBUF->destipaddr, destipaddr);
+  net_ipv4addr_hdrcopy(IGMPBUF->srcipaddr, &dev->d_ipaddr);
+  net_ipv4addr_hdrcopy(IGMPBUF->destipaddr, destipaddr);
 
   /* Calculate IP checksum. */
 
@@ -167,7 +167,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
 
   IGMPBUF->type        = group->msgid;
   IGMPBUF->maxresp     = 0;
-  net_ipaddr_hdrcopy(IGMPBUF->grpaddr, &group->grpaddr);
+  net_ipv4addr_hdrcopy(IGMPBUF->grpaddr, &group->grpaddr);
 
   /* Calculate the IGMP checksum. */
 

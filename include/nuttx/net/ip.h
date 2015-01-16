@@ -105,7 +105,7 @@ union ip_addr_u
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  /* IPv6 addresse */
+  /* IPv6 address */
 
   net_ipv6addr_t ipv6;
 #endif
@@ -156,7 +156,7 @@ struct net_iphdr_s
   uint16_t srcipaddr[2];     /* 32-bit Source IP address */
   uint16_t destipaddr[2];    /* 32-bit Destination IP address */
 };
-#endif
+#endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 /* The IPv6 header */
@@ -172,7 +172,7 @@ struct net_ipv6hdr_s
   net_ipv6addr_t srcipaddr;  /* 128-bit Source address */
   net_ipv6addr_t destipaddr; /* 128-bit Destination address */
 };
-#endif
+#endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
  * Public Data
@@ -258,26 +258,24 @@ struct net_ipv6hdr_s
  * src The source from where to copy.
  */
 
-#define net_ipv4addr_copy(dest, src) \
+#ifdef CONFIG_NET_IPv4
+#  define net_ipv4addr_copy(dest, src) \
    do { \
      (dest) = (in_addr_t)(src); \
    } while (0)
-#define net_ipv4addr_hdrcopy(dest, src) \
+#  define net_ipv4addr_hdrcopy(dest, src) \
    do { \
      ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while (0)
+#endif
 
-#define net_ipv6addr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ipv6addr_t))
-#define net_ipv6addr_hdrcopy(dest, src) net_ipv6addr_copy(dest, src)
-
-#ifndef CONFIG_NET_IPv6
-#  define net_ipaddr_copy(dest, src)    net_ipv4addr_copy(dest, src)
-#  define net_ipaddr_hdrcopy(dest, src) net_ipv4addr_hdrcopy(dest, src)
-#else /* !CONFIG_NET_IPv6 */
-#  define net_ipaddr_copy(dest, src)    net_ipv6addr_copy(dest, src)
-#  define net_ipaddr_hdrcopy(dest, src) net_ipv6addr_hdrcopy(dest, src)
-#endif /* !CONFIG_NET_IPv6 */
+#ifdef CONFIG_NET_IPv6
+#  define net_ipv6addr_copy(dest,src) \
+   memcpy(&dest, &src, sizeof(net_ipv6addr_t))
+#  define net_ipv6addr_hdrcopy(dest,src) \
+   net_ipv6addr_copy(dest, src)
+#endif
 
 /* Compare two IP addresses
  *
@@ -286,7 +284,7 @@ struct net_ipv6hdr_s
  *   in_addr_t ipaddr1, ipaddr2;
  *
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
- *   if (net_ipaddr_cmp(ipaddr2, ipaddr1))
+ *   if (net_ipv4addr_cmp(ipaddr2, ipaddr1))
  *     {
  *       printf("They are the same");
  *     }
@@ -295,22 +293,18 @@ struct net_ipv6hdr_s
  * addr2 The second IP address.
  */
 
-#define net_ipv4addr_cmp(addr1, addr2) \
+#ifdef CONFIG_NET_IPv4
+#  define net_ipv4addr_cmp(addr1, addr2) \
   (addr1 == addr2)
-#define net_ipv4addr_hdrcmp(addr1, addr2) \
-  net_ipv4addr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
+#  define net_ipv4addr_hdrcmp(addr1, addr2) \
+   net_ipv4addr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
+#endif
 
-#define net_ipv6addr_cmp(addr1, addr2) \
-  (memcmp(&addr1, &addr2, sizeof(net_ipv6addr_t)) == 0)
-#define net_ipv6addr_hdrcmp(addr1, addr2) \
-  net_ipv6addr_cmp(addr1, addr2)
-
-#if defined(CONFIG_NET_IPv4)
-#  define net_ipaddr_cmp(addr1, addr2)    net_ipv4addr_cmp(addr1, addr2)
-#  define net_ipaddr_hdrcmp(addr1, addr2) net_ipv4addr_hdrcmp(addr1, addr2)
-#elif defined(CONFIG_NET_IPv6)
-#  define net_ipaddr_cmp(addr1, addr2)    net_ipv6addr_cmp(addr1, addr2)
-#  define net_ipaddr_hdrcmp(addr1, addr2) net_ipv6addr_hdrcmp(addr1, addr2)
+#ifdef CONFIG_NET_IPv4
+#  define net_ipv6addr_cmp(addr1, addr2) \
+   (memcmp(&addr1, &addr2, sizeof(net_ipv6addr_t)) == 0)
+#  define net_ipv6addr_hdrcmp(addr1, addr2) \
+   net_ipv6addr_cmp(addr1, addr2)
 #endif
 
 /* Compare two IP addresses under a netmask.  The mask is used to mask
@@ -326,7 +320,7 @@ struct net_ipv6hdr_s
  *   net_ipaddr(&mask, 255,255,255,0);
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
  *   net_ipaddr(&ipaddr2, 192,16,1,3);
- *   if (net_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask))
+ *   if (net_ipv4addr_maskcmp(ipaddr1, ipaddr2, &mask))
  *     {
  *       printf("They are the same");
  *     }
@@ -336,19 +330,16 @@ struct net_ipv6hdr_s
  * mask The netmask.
  */
 
-#define net_ipv4addr_maskcmp(addr1, addr2, mask) \
-  (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
-   ((in_addr_t)(addr2) & (in_addr_t)(mask)))
+#ifdef CONFIG_NET_IPv4
+#  define net_ipv4addr_maskcmp(addr1, addr2, mask) \
+   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
+    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
+#endif
 
-#ifndef CONFIG_NET_IPv6
-#  define net_ipaddr_maskcmp(a,b,m) net_ipv4addr_maskcmp(a,b,m)
-
-#else
+#ifdef CONFIG_NET_IPv6
 bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
                           const net_ipv6addr_t addr2,
                           const net_ipv6addr_t mask);
-
-#  define net_ipaddr_maskcmp(a,b,m) net_ipv6addr_maskcmp(a,b,m)
 #endif
 
 /* Mask out the network part of an IP address, given the address and

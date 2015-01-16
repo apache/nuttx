@@ -103,7 +103,7 @@ static int net_ipv4_match(FAR struct net_route_s *route, FAR void *arg)
     {
       /* They match.. Copy the router address */
 
-      net_ipaddr_copy(match->router, route->router);
+      net_ipv4addr_copy(match->router, route->router);
       return 1;
     }
 
@@ -143,7 +143,7 @@ static int net_ipv6_match(FAR struct net_route_s *route, FAR void *arg)
     {
       /* They match.. Copy the router address */
 
-      net_ipaddr_copy(match->router, route->router);
+      net_ipv6addr_copy(match->router, route->router);
       return 1;
     }
 #endif
@@ -181,7 +181,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
 
   /* Do not route the special broadcast IP address */
 
-  if (net_ipaddr_cmp(target, g_ipv4_alloneaddr))
+  if (net_ipv4addr_cmp(target, g_ipv4_alloneaddr))
     {
       return -ENOENT;
     }
@@ -189,7 +189,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
   /* Set up the comparison structure */
 
   memset(&match, 0, sizeof(struct route_ipv4_match_s));
-  net_ipaddr_copy(match.target, target);
+  net_ipv4addr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address
@@ -239,7 +239,7 @@ int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router)
 
   /* Do not route the special broadcast IP address */
 
-  if (net_ipaddr_cmp(target, g_ipv6_alloneaddr))
+  if (net_ipv6addr_cmp(target, g_ipv6_alloneaddr))
     {
       return -ENOENT;
     }
@@ -247,7 +247,7 @@ int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router)
   /* Set up the comparison structure */
 
   memset(&match, 0, sizeof(struct route_ipv6_match_s));
-  net_ipaddr_copy(match.target, target);
+  net_ipv6addr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address

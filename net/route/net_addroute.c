@@ -94,9 +94,9 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 
   /* Format the new route table entry */
 
-  net_ipaddr_copy(route->target, target);
-  net_ipaddr_copy(route->netmask, netmask);
-  net_ipaddr_copy(route->router, router);
+  net_ipv4addr_copy(route->target, target);
+  net_ipv4addr_copy(route->netmask, netmask);
+  net_ipv4addr_copy(route->router, router);
 
   /* Get exclusive address to the networking data structures */
 

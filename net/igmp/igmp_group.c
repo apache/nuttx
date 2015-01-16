@@ -251,7 +251,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
     {
       /* Initialize the non-zero elements of the group structure */
 
-      net_ipaddr_copy(group->grpaddr, *addr);
+      net_ipv4addr_copy(group->grpaddr, *addr);
       sem_init(&group->sem, 0, 0);
 
       /* Initialize the group timer (but don't start it yet) */
@@ -301,7 +301,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
        group = group->next)
     {
       grplldbg("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
-      if (net_ipaddr_cmp(group->grpaddr, *addr))
+      if (net_ipv4addr_cmp(group->grpaddr, *addr))
         {
           grplldbg("Match!\n");
           break;

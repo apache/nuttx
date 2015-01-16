@@ -125,8 +125,8 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->proto       = IP_PROTO_UDP;
       pudpbuf->ttl         = conn->ttl;
 
-      net_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
-      net_ipaddr_copy(pudpbuf->destipaddr, &conn->u.ipv4.raddr);
+      net_ipv6addr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
+      net_ipav6ddr_copy(pudpbuf->destipaddr, &conn->u.ipv4.raddr);
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -142,8 +142,8 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->ttl         = conn->ttl;
       pudpbuf->proto       = IP_PROTO_UDP;
 
-      net_ipaddr_hdrcopy(pudpbuf->srcipaddr, &dev->d_ipaddr);
-      net_ipaddr_hdrcopy(pudpbuf->destipaddr, &conn->u.ipv4.raddr);
+      net_ipv4addr_hdrcopy(pudpbuf->srcipaddr, &dev->d_ipaddr);
+      net_ipv4addr_hdrcopy(pudpbuf->destipaddr, &conn->u.ipv4.raddr);
 
       /* Calculate IP checksum. */
 

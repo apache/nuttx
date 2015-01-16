@@ -190,7 +190,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
 
   memset(&match, 0, sizeof(struct route_ipv4_devmatch_s));
   match.dev = dev;
-  net_ipaddr_copy(match.target, target);
+  net_ipv4addr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address using this device.
@@ -247,7 +247,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
 
   memset(&match, 0, sizeof(struct route_ipv6_devmatch_s));
   match.dev = dev;
-  net_ipaddr_copy(match.target, target);
+  net_ipv6addr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address using this device.

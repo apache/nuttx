@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,8 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
         {
           /* Yes.. check for an address match (under the netmask) */
 
-          if (net_ipaddr_maskcmp(dev->d_ipaddr, ripaddr, dev->d_netmask))
+          if (net_ipv4addr_maskcmp(dev->d_ipaddr, ripaddr,
+                                   dev->d_netmask))
             {
               /* Its a match */
 
@@ -160,7 +161,8 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
         {
           /* Yes.. check for an address match (under the netmask) */
 
-          if (net_ipaddr_maskcmp(dev->d_ipv6addr, ripaddr, dev->d_ipv6netmask))
+          if (net_ipv6addr_maskcmp(dev->d_ipv6addr, ripaddr,
+                                   dev->d_ipv6netmask))
             {
               /* Its a match */
 

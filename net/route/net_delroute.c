@@ -87,8 +87,8 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
    * must be the same.
    */
 
-  if (net_ipaddr_maskcmp(route->target, match->target, match->netmask) &&
-      net_ipaddr_cmp(route->netmask, match->netmask))
+  if (net_ipv4addr_maskcmp(route->target, match->target, match->netmask) &&
+      net_ipv4addr_cmp(route->netmask, match->netmask))
     {
       /* They match.. Remove the entry from the routing table */
 
@@ -141,8 +141,8 @@ int net_delroute(in_addr_t target, in_addr_t netmask)
   /* Set up the comparison structure */
 
   match.prev = NULL;
-  net_ipaddr_copy(match.target, target);
-  net_ipaddr_copy(match.netmask, netmask);
+  net_ipv4addr_copy(match.target, target);
+  net_ipv4addr_copy(match.netmask, netmask);
 
   /* Then remove the entry from the routing table */
 

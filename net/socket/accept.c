@@ -104,18 +104,7 @@ struct accept_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_IPv6
-static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
-                                    FAR struct sockaddr_in6 *addr)
-{
-  if (addr)
-    {
-      addr->sin_family = AF_INET6;
-      addr->sin_port   = conn->rport;
-      net_ipaddr_copy(addr->sin6_addr.s6_addr, conn->u.ipv4.raddr);
-    }
-}
-#else
+#ifdef CONFIG_NET_IPv4
 static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
                                     FAR struct sockaddr_in *addr)
 {
@@ -123,10 +112,21 @@ static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
     {
       addr->sin_family = AF_INET;
       addr->sin_port   = conn->rport;
-      net_ipaddr_copy(addr->sin_addr.s_addr, conn->u.ipv4.raddr);
+      net_ipv4addr_copy(addr->sin_addr.s_addr, conn->u.ipv4.raddr);
     }
 }
-#endif /* CONFIG_NET_IPv6 */
+#else
+static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
+                                    FAR struct sockaddr_in6 *addr)
+{
+  if (addr)
+    {
+      addr->sin_family = AF_INET6;
+      addr->sin_port   = conn->rport;
+      net_ipv6addr_copy(addr->sin6_addr.s6_addr, conn->u.ipv4.raddr);
+    }
+}
+#endif /* CONFIG_NET_IPv4 */
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************

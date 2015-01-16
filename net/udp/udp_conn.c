@@ -466,7 +466,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
    * for receiving (Sending will use the default port).
    */
 
-  net_ipaddr_copy(conn->u.ipv4.laddr, ipaddr);
+  net_ipv4addr_copy(conn->u.ipv4.laddr, ipaddr);
 #endif
 
   /* Is the user requesting to bind to any port? */
@@ -563,7 +563,7 @@ int udp_connect(FAR struct udp_conn_s *conn,
   if (addr)
     {
       conn->rport = addr->sin_port;
-      net_ipaddr_copy(conn->u.ipv4.raddr, addr->sin_addr.s_addr);
+      net_ipv4addr_copy(conn->u.ipv4.raddr, addr->sin_addr.s_addr);
     }
   else
     {
