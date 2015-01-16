@@ -9434,3 +9434,10 @@
 	  in_addr_t on net_ipv6addr_t.  The goal is to support both IPv4 and
 	  IPv6 simultaneously.  This requires that the two types be distinct
 	  and not conditionally typedef'ed to net_ipaddr_t (2015-01-16).
+	* Networking:  Replace all references to the macros net_ipaddr_copy,
+	  net_ipaddr_hdrcopy, net_ipaddr_cmp, net_ipaddr_hdrcmp, and
+	  net_ipaddr_maskcmp with the appropriate IPv4 or IPv6 version of the
+	  macro (such as net_ipv4addr_copy).  The goal is to support both
+	  IPv4 and IPv6 simultaneously.  This requires that the macros be
+	  distinct and not conditionally defined to one on or the other
+	  (2015-01-16).
