@@ -9425,3 +9425,9 @@
 	  (2015-01-15).
 	* net/utils/net_ipv6_maskcmp.c:  Add missing implementation of
 	  net_ipv6_maskcmp() (2015-01-15).
+	* Networking: Drivers can have both IPv4 and IPv6 addesses, but a
+	  socket can only only one or the other; The socket connnection
+	  structures need to include a union of IPv4 and IPv6 addresses fori
+	  the local address binding and for the remote address connections
+	  (2015-01-16).
+
