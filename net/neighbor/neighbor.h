@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipv6/ipv6.h
+ * net/neighbor/neighbor.h
  * Header file for database of link-local neighbors, used by IPv6 code and
  * to be used by future ARP code.
  *
@@ -38,8 +38,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IPV6_IPV6_H
-#define __NET_IPV6_IPV6_H
+#ifndef __NET_NEIGHBOR_NEIGHBOR_H
+#define __NET_NEIGHBOR_NEIGHBOR_H
 
 /****************************************************************************
  * Included Files
@@ -81,5 +81,5 @@ struct net_neighbor_addr_s *net_neighbor_lookup(net_ipv6addr_t ipaddr);
 void net_neighbor_periodic(void);
 
 #endif /* CONFIG_NET_IPv6 */
-#endif /* __NET_IPV6_IPV6_H */
+#endif /* __NET_NEIGHBOR_NEIGHBOR_H */
 

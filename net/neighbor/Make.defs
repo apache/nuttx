@@ -1,5 +1,5 @@
 ############################################################################
-# net/utils/Make.defs
+# net/neighbor/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,14 @@
 #
 ############################################################################
 
-# IPv6-specific logic
+# Logic specific to IPv6 Neighbor Discovery Protocol
 
 ifeq ($(CONFIG_NET_IPv6),y)
 
-NET_CSRCS += ipv6_neighbor.c
+NET_CSRCS += neighbor.c
 
 # Include utility build support
 
-DEPPATH += --dep-path ipv6
-VPATH += :ipv6
+DEPPATH += --dep-path neighbor
+VPATH += :neighbor
 endif

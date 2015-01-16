@@ -181,18 +181,30 @@ config SLIP_DEFPRIO
 endif # NET_SLIP
 endmenu # Data link support
 
-source "net/socket/Kconfig"
 source "net/netdev/Kconfig"
 
-# source "net/ipv4/Kconfig"
 # Currently cannot select both IPv4 and IPv6
 
 config NET_IPv4
 	bool
 	default y if !NET_IPv6
 	default n if NET_IPv6
+	---help---
+		Build in support for IPv4.
 
-source "net/ipv6/Kconfig"
+menu "Internet Protocol Selection"
+	depends on EXPERIMENTAL
+
+config NET_IPv6
+	bool "IPv6"
+	default n
+	---help---
+		Build in support for IPv6.  Not fully implemented.
+
+source "net/neighbor/Kconfig"
+endmenu # Internet Protocol Selection
+
+source "net/socket/Kconfig"
 source "net/pkt/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"

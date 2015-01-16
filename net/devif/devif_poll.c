@@ -392,7 +392,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
 
   /* Increment the timer used by the IP reassembly logic */
 
-#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_TCP_REASSEMBLY) && defined(CONFIG_NET_IPv4)
   if (g_reassembly_timer != 0 &&
       g_reassembly_timer < CONFIG_NET_TCP_REASS_MAXAGE)
     {

@@ -1,11 +1,11 @@
 /****************************************************************************
- * net/ipv6/ipv6_neighbor.c
+ * net/neighbor/neighbor.c
  * Database of link-local neighbors, used by IPv6 code and to be used by
  * a future ARP code rewrite.
  *
+ *   Copyright (c) 2006, Swedish Institute of Computer Science.  All rights
+ *     reserved.
  *   Author: Adam Dunkels <adam@sics.se>
- *   Copyright (c) 2006, Swedish Institute of Computer Science.
- *  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,7 +45,7 @@
 
 #include <nuttx/net/ip.h>
 
-#include "ipv6/ipv6.h"
+#include "neighbor/neighbor.h"
 
 /****************************************************************************
  * Pre-processor Definitions

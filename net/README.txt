@@ -8,12 +8,12 @@ Directory Structure
    |
    `- net/
        |
-       +- arp      - Address resolution protocol
+       +- arp      - Address resolution protocol (IPv4)
        +- devif    - Stack/device interface layer
        +- icmp     - Internet Control Message Protocol (IPv4)
        +- icmpv6   - Internet Control Message Protocol (IPv6)
        +- iob      - I/O buffering logic
-       +- ipv6     - Logic unique to IPv6
+       +- neighbor - Neighbor Discovery Protocol (IPv6)
        +- netdev   - Socket network device interface
        +- pkt      - "Raw" packet socket support
        +- socket   - BSD socket interface

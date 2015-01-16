@@ -3,17 +3,10 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config NET_IPv6
-	bool "IPv6"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		Build in support for IPv6.  Not fully implemented.
-
 if NET_IPv6
 
 config NET_IPV6_NCONF_ENTRIES
-	int "Number of neighbors"
+	int "Number of IPv6 neighbors"
 	default 8
 
 #config NET_IPV6_NEIGHBOR_ADDRTYPE
