@@ -1857,7 +1857,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
           txdesc->tdes2 = 0;
 
-          /* Check if this is the last segement of a TX frame */
+          /* Check if this is the last segment of a TX frame */
 
           if ((txdesc->tdes0 & EMAC_TDES0_LS) != 0)
             {
@@ -1918,7 +1918,7 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
 
-  /* Scan the TX desciptor change, returning buffers to free list */
+  /* Scan the TX descriptor change, returning buffers to free list */
 
   tiva_freeframe(priv);
 
@@ -2014,13 +2014,13 @@ static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
 
 #ifdef CONFIG_DEBUG_NET
 
-  /* Check if there are pending "anormal" interrupts */
+  /* Check if there are pending "abnormal" interrupts */
 
   if ((dmaris & EMAC_DMAINT_AIS) != 0)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abormal event(s): %08x\n", dmaris);
+      nlldbg("Abnormal event(s): %08x\n", dmaris);
 
       /* Clear all pending abnormal events */
 
@@ -2201,7 +2201,7 @@ static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_NOINTS
 static void tiva_txtimeout_work(FAR void *arg)
 {
-  FAR struct tiva_ethmac_s *priv = ( FAR struct tiva_ethmac_s *)arg;
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
   /* Process pending Ethernet interrupts */
 
@@ -2621,7 +2621,7 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast hash table */
 
-  crc = tiva_calcethcrc( mac, 6 );
+  crc = tiva_calcethcrc(mac, 6);
 
   hashindex = (crc >> 26) & 0x3F;
 
@@ -2678,7 +2678,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Remove the MAC address to the hardware multicast hash table */
 
-  crc = tiva_calcethcrc( mac, 6 );
+  crc = tiva_calcethcrc(mac, 6);
 
   hashindex = (crc >> 26) & 0x3F;
 
@@ -2698,7 +2698,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* If there is no address registered any more, delete multicast filtering */
 
-  if (tiva_getreg(TIVA_EMAC_HASHTBLH ) == 0 &&
+  if (tiva_getreg(TIVA_EMAC_HASHTBLH) == 0 &&
       tiva_getreg(TIVA_EMAC_HASHTBLL) == 0)
     {
       temp = tiva_getreg(TIVA_EMAC_FRAMEFLTR);
