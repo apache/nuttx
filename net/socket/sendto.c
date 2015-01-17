@@ -528,7 +528,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   /* Setup the UDP socket */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
-  ret = udp_connect(conn, into);
+  ret = udp_connect(conn, to);
   if (ret < 0)
     {
       net_unlock(save);

@@ -511,7 +511,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         {
-          ret = udp_connect(psock->s_conn, inaddr);
+          ret = udp_connect(psock->s_conn, addr);
           if (ret < 0)
             {
               err = -ret;
