@@ -1665,7 +1665,12 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
    * flasher leaves the hardware in a bad state(?).
    */
 
-  DEBUGASSERT(dev->d_buf != NULL);
+  // DEBUGASSERT(dev->d_buf != NULL);
+  if (dev->d_buf == NULL)
+    {
+      nlldbg("ERROR: Ignoring NULL I/O buffer\n");
+      return;
+    }
 
   /* Loop while while tiva_recvframe() successfully retrieves valid
    * Ethernet frames.
