@@ -310,6 +310,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_UDP
 static inline void sendto_txnotify(FAR struct socket *psock,
                                    FAR struct udp_conn_s *conn)
 {
@@ -348,6 +349,7 @@ static inline void sendto_txnotify(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_IPv6 */
 }
+#endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Public Functions
@@ -424,10 +426,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 {
 #ifdef CONFIG_NET_UDP
   FAR struct udp_conn_s *conn;
-#ifdef CONFIG_NET_IPv6
-  FAR const struct sockaddr_in6 *into = (const struct sockaddr_in6 *)to;
-#else
-  FAR const struct sockaddr_in *into = (const struct sockaddr_in *)to;
+#ifdef CONFIG_NET_ARP_SEND
+  FAR const struct sockaddr_in *into;
 #endif
   struct sendto_s state;
   net_lock_t save;
@@ -484,6 +484,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   /* Make sure that the IP address mapping is in the ARP table */
 
 #ifdef CONFIG_NET_ARP_SEND
+  into = (FAR const struct sockaddr_in *)to;
   ret = arp_send(into->sin_addr.s_addr);
   if (ret < 0)
     {
@@ -582,7 +583,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   return state.st_sndlen;
 #else
   err = ENOSYS;
-#endif
+#endif /* CONFIG_NET_UDP */
 
 errout:
   set_errno(err);

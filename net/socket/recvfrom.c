@@ -1077,6 +1077,7 @@ static void recvfromo_pkt_rxnotify(FAR struct pkt_conn_s *conn)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_UDP
 static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
                                          FAR struct udp_conn_s *conn)
 {
@@ -1115,6 +1116,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_IPv6 */
 }
+#endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Function: pkt_recvfrom
