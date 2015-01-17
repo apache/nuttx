@@ -157,13 +157,16 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
 #if defined(CONFIG_MTD_SST25)
 
   if (devid == SPIDEV_FLASH)
     {
       stm32_gpiowrite(GPIO_MEM_CS, !selected);
     }
+if defined(CONFIG_WL_CC3000)
   else
+#endif
 #endif
 
 #if defined(CONFIG_WL_CC3000)
