@@ -66,7 +66,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4 ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF ((struct net_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Data
@@ -127,7 +128,9 @@ static inline void _udp_semtake(FAR sem_t *sem)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static FAR struct udp_conn_s *udp_find_conn(in_addr_t ipaddr, uint16_t portno)
+static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
+                                            FAR union ip_binding_u *ipaddr,
+                                            uint16_t portno)
 #else
 static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
 #endif
@@ -148,17 +151,35 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
        * case:  There can only be instance of a port number with INADDR_ANY.
        */
 
-      if (conn->lport == portno &&
-          (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr) ||
+#ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-           net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr)))
-#else
-           net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
+      if (domain == PF_INET)
 #endif
         {
-          return conn;
+          if (conn->lport == portno &&
+              (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4.laddr) ||
+               net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
+            {
+              return conn;
+            }
         }
-#else
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          if (conn->lport == portno &&
+              (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6.laddr) ||
+               net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr)))
+            {
+              return conn;
+            }
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+#else /* CONFIG_NETDEV_MULTINIC */
       /* If the port local port number assigned to the connections matches,
        * then return a reference to the connection structure.
        */
@@ -167,14 +188,14 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
         {
           return conn;
         }
-#endif
+#endif /* CONFIG_NETDEV_MULTINIC */
     }
 
   return NULL;
 }
 
 /****************************************************************************
- * Name: udp_select_port()
+ * Name: udp_select_port
  *
  * Description:
  *   Select an unused port number.
@@ -194,7 +215,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static uint16_t udp_select_port(in_addr_t ipaddr)
+static uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
 #else
 static uint16_t udp_select_port(void)
 #endif
@@ -222,7 +243,7 @@ static uint16_t udp_select_port(void)
         }
     }
 #ifdef CONFIG_NETDEV_MULTINIC
-  while (udp_find_conn(ipaddr, htons(g_last_udp_port)));
+  while (udp_find_conn(domain, u, htons(g_last_udp_port)));
 #else
   while (udp_find_conn(htons(g_last_udp_port)));
 #endif
@@ -236,6 +257,142 @@ static uint16_t udp_select_port(void)
 
   return portno;
 }
+
+/****************************************************************************
+ * Name: udp_ipv4_active
+ *
+ * Description:
+ *   Find a connection structure that is the appropriate connection to be
+ *   used within the provided UDP header
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+static inline FAR struct udp_conn_s *
+  udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp)
+{
+  FAR struct net_iphdr_s *ip = IPv4BUF;
+  FAR struct udp_conn_s *conn;
+
+  conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
+  while (conn)
+    {
+      /* If the local UDP port is non-zero, the connection is considered
+       * to be used. If so, then the following checks are performed:
+       *
+       * - The local port number is checked against the destination port
+       *   number in the received packet.
+       * - The remote port number is checked if the connection is bound
+       *   to a remote port.
+       * - If multiple network interfaces are supported, then the local
+       *   IP address is available and we will insist that the
+       *   destination IP matches the bound address (or the destination
+       *   IP address is a broadcast address). If a socket is bound to
+       *   INADDRY_ANY (laddr), then it should receive all packets
+       *   directed to the port.
+       * - Finally, if the connection is bound to a remote IP address,
+       *   the source IP address of the packet is checked. Broadcast
+       *   addresses are also accepted.
+       *
+       * If all of the above are true then the newly received UDP packet
+       * is destined for this UDP connection.
+       */
+
+      if (conn->lport != 0 && udp->destport == conn->lport &&
+          (conn->rport == 0 || udp->srcport == conn->rport) &&
+#ifdef CONFIG_NETDEV_MULTINIC
+          (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr) ||
+           net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_alloneaddr) ||
+           net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
+#endif
+          (net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_allzeroaddr) ||
+           net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_alloneaddr) ||
+           net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
+        {
+          /* Matching connection found.. return a reference to it */
+
+          break;
+        }
+
+      /* Look at the next active connection */
+
+      conn = (FAR struct udp_conn_s *)conn->node.flink;
+    }
+
+  return conn;
+}
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Name: udp_ipv6_active
+ *
+ * Description:
+ *   Find a connection structure that is the appropriate connection to be
+ *   used within the provided UDP header
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static inline FAR struct udp_conn_s *
+  udp_ipv6_active(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp)
+{
+  FAR struct net_ipv6hdr_s *ip = IPv6BUF;
+  FAR struct udp_conn_s *conn;
+
+  conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
+  while (conn)
+    {
+      /* If the local UDP port is non-zero, the connection is considered
+       * to be used. If so, then the following checks are performed:
+       *
+       * - The local port number is checked against the destination port
+       *   number in the received packet.
+       * - The remote port number is checked if the connection is bound
+       *   to a remote port.
+       * - If multiple network interfaces are supported, then the local
+       *   IP address is available and we will insist that the
+       *   destination IP matches the bound address (or the destination
+       *   IP address is a broadcast address). If a socket is bound to
+       *   INADDRY_ANY (laddr), then it should receive all packets
+       *   directed to the port.
+       * - Finally, if the connection is bound to a remote IP address,
+       *   the source IP address of the packet is checked. Broadcast
+       *   addresses are also accepted.
+       *
+       * If all of the above are true then the newly received UDP packet
+       * is destined for this UDP connection.
+       */
+
+      if (conn->lport != 0 && udp->destport == conn->lport &&
+          (conn->rport == 0 || udp->srcport == conn->rport) &&
+#ifdef CONFIG_NETDEV_MULTINIC
+          (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
+           net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_alloneaddr) ||
+           net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr)) &&
+#endif
+          (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_allzeroaddr) ||
+           net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_alloneaddr) ||
+           net_ipv6addr_hdrcmp(ip->srcipaddr, conn->u.ipv6.raddr)))
+        {
+          /* Matching connection found.. return a reference to it */
+
+          break;
+        }
+
+      /* Look at the next active connection */
+
+      conn = (FAR struct udp_conn_s *)conn->node.flink;
+    }
+
+  return conn;
+}
+#endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
  * Public Functions
@@ -294,7 +451,9 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
     {
       /* Make sure that the connection is marked as uninitialized */
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain = domain;
+#endif
       conn->lport  = 0;
 
       /* Enqueue the connection into the active list */
@@ -351,55 +510,23 @@ void udp_free(FAR struct udp_conn_s *conn)
 FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
                                   FAR struct udp_hdr_s *udp)
 {
-  FAR struct net_iphdr_s *ip = IPv4;
-  FAR struct udp_conn_s *conn;
-
-  conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
-  while (conn)
-    {
-      /* If the local UDP port is non-zero, the connection is considered
-       * to be used. If so, then the following checks are performed:
-       *
-       * - The local port number is checked against the destination port
-       *   number in the received packet.
-       * - The remote port number is checked if the connection is bound
-       *   to a remote port.
-       * - If multiple network interfaces are supported, then the local
-       *   IP address is available and we will insist that the
-       *   destination IP matches the bound address (or the destination
-       *   IP address is a broadcast address). If a socket is bound to
-       *   INADDRY_ANY (laddr), then it should receive all packets
-       *   directed to the port.
-       * - Finally, if the connection is bound to a remote IP address,
-       *   the source IP address of the packet is checked. Broadcast
-       *   addresses are also accepted.
-       *
-       * If all of the above are true then the newly received UDP packet
-       * is destined for this UDP connection.
-       */
-
-      if (conn->lport != 0 && udp->destport == conn->lport &&
-          (conn->rport == 0 || udp->srcport == conn->rport) &&
-#ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr) ||
-           net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_alloneaddr) ||
-           net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  if (IFF_IS_IPv6(dev->d_flags))
 #endif
-          (net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_allzeroaddr) ||
-           net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_alloneaddr) ||
-           net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
-        {
-          /* Matching connection found.. return a reference to it */
-
-          break;
-        }
-
-      /* Look at the next active connection */
-
-      conn = (FAR struct udp_conn_s *)conn->node.flink;
+    {
+      return udp_ipv6_active(dev, udp);
     }
+#endif /* CONFIG_NET_IPv6 */
 
-  return conn;
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  else
+#endif
+    {
+      return udp_ipv4_active(dev, udp);
+    }
+#endif /* CONFIG_NET_IPv4 */
 }
 
 /****************************************************************************
@@ -438,46 +565,66 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in6 *addr)
-#else
-int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
-#endif
+int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   net_lock_t flags;
+  uint16_t portno;
   int ret;
 
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (conn->domain == PF_INET)
+#endif
+    {
+      FAR const struct sockaddr_in *inaddr =
+        (FAR const struct sockaddr_in *)addr;
+
+      /* Get the port number that we are binding to */
+
+      portno = inaddr->sin_port;
+
 #ifdef CONFIG_NETDEV_MULTINIC
-  in_addr_t ipaddr;
+      /* Bind the local IP address to the connection.  NOTE this address may
+       * be INADDR_ANY meaning, essentially, that we are binding to all
+       * interfaces for receiving (Sending will use the default port).
+       */
+
+      net_ipv4addr_copy(conn->u.ipv4.laddr, inaddr->sin_addr.s_addr;);
+#endif /* CONFIG_NETDEV_MULTINIC */
+    }
+#endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-  /* Get the IPv6 address that we are binding to */
-
-  ipaddr = addr->sin6_addr.in6_u.u6_addr16;
-
-#else
-  /* Get the IPv4 address that we are binding to */
-
-  ipaddr = addr->sin_addr.s_addr;
-
+#ifdef CONFIG_NET_IPv4
+  else
 #endif
+    {
+      FAR const struct sockaddr_in6 *inaddr =
+        (FAR const struct sockaddr_in6 *)addr;
 
-  /* Bind the local IP address to the connection.  NOTE this address may be
-   * INADDR_ANY meaning, essentially, that we are binding to all interfaces
-   * for receiving (Sending will use the default port).
-   */
+      /* Get the port number that we are binding to */
 
-  net_ipv4addr_copy(conn->u.ipv4.laddr, ipaddr);
-#endif
+      portno = inaddr->sin_port;
+
+#ifdef CONFIG_NETDEV_MULTINIC
+      /* Bind the local IP address to the connection.  NOTE this address may
+       * be INADDR_ANY meaning, essentially, that we are binding to all
+       * interfaces for receiving (Sending will use the default port).
+       */
+
+      net_ipv6addr_copy(conn->u.ipv6.laddr, ipaddr->sin6_addr.in6_u.u6_addr16);
+#endif /* CONFIG_NETDEV_MULTINIC */
+    }
+#endif /* CONFIG_NET_IPv6 */
 
   /* Is the user requesting to bind to any port? */
 
-  if (!addr->sin_port)
+  if (portno == 0)
     {
       /* Yes.. Select any unused local port number */
 
 #ifdef CONFIG_NETDEV_MULTINIC
-      conn->lport = htons(udp_select_port(ipaddr));
+      conn->lport = htons(udp_select_port(conn->domain, &conn->u));
 #else
       conn->lport = htons(udp_select_port());
 #endif
@@ -492,14 +639,14 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
       /* Is any other UDP connection already bound to this address and port? */
 
 #ifdef CONFIG_NETDEV_MULTINIC
-      if (!udp_find_conn(ipaddr, addr->sin_port))
+      if (!udp_find_conn(conn->domain, &config->u, portno))
 #else
-      if (!udp_find_conn(addr->sin_port))
+      if (!udp_find_conn(portno))
 #endif
         {
           /* No.. then bind the socket to the port */
 
-          conn->lport = addr->sin_port;
+          conn->lport = portno;
           ret         = OK;
         }
 
@@ -536,13 +683,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int udp_connect(FAR struct udp_conn_s *conn,
-                FAR const struct sockaddr_in6 *addr)
-#else
-int udp_connect(FAR struct udp_conn_s *conn,
-                FAR const struct sockaddr_in *addr)
-#endif
+int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   /* Has this address already been bound to a local port (lport)? */
 
@@ -553,7 +694,7 @@ int udp_connect(FAR struct udp_conn_s *conn,
        */
 
 #ifdef CONFIG_NETDEV_MULTINIC
-      conn->lport = htons(udp_select_port(conn->u.ipv4.laddr));
+      conn->lport = htons(udp_select_port(conn->domain, &conn->u));
 #else
       conn->lport = htons(udp_select_port());
 #endif
@@ -563,13 +704,53 @@ int udp_connect(FAR struct udp_conn_s *conn,
 
   if (addr)
     {
-      conn->rport = addr->sin_port;
-      net_ipv4addr_copy(conn->u.ipv4.raddr, addr->sin_addr.s_addr);
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET)
+#endif
+        {
+          FAR const struct sockaddr_in *inaddr =
+            (FAR const struct sockaddr_in *)addr;
+
+          conn->rport = inaddr->sin_port;
+          net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          FAR const struct sockaddr_in6 *inaddr =
+            (FAR const struct sockaddr_in6 *)addr;
+
+          conn->rport = inaddr->sin_port;
+          net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
+        }
+#endif /* CONFIG_NET_IPv6 */
     }
   else
     {
       conn->rport = 0;
-      net_ipv4addr_copy(conn->u.ipv4.raddr, g_ipv4_allzeroaddr);
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET)
+#endif
+        {
+          net_ipv4addr_copy(conn->u.ipv4.raddr, g_ipv4_allzeroaddr);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          net_ipv6addr_copy(conn->u.ipv6.raddr, g_ipv6_allzeroaddr);
+        }
+#endif /* CONFIG_NET_IPv6 */
     }
 
   conn->ttl = IP_TTL;

@@ -374,7 +374,9 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
     {
       memset(conn, 0, sizeof(struct tcp_conn_s));
       conn->tcpstateflags = TCP_ALLOCATED;
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain        = domain;
+#endif
     }
 
   return conn;

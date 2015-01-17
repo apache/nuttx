@@ -112,7 +112,9 @@ struct tcp_conn_s
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
   uint8_t  crefs;         /* Reference counts on this instance */
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
+#endif
   uint8_t  sa;            /* Retransmission time-out calculation state
                            * variable */
   uint8_t  sv;            /* Retransmission time-out calculation state

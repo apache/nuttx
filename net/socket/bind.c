@@ -211,7 +211,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-        ret = udp_bind(psock->s_conn, inaddr);
+        ret = udp_bind(psock->s_conn, addr);
         break;
 #endif
 

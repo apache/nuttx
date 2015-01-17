@@ -76,7 +76,7 @@ struct udp_conn_s
 
   /* Defines the list of UDP callbacks */
 
-  struct devif_callback_s *list;
+  FAR struct devif_callback_s *list;
 };
 
 /****************************************************************************
@@ -172,11 +172,7 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in6 *addr);
-#else
-int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr);
-#endif
+int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
  * Name: udp_connect
@@ -200,13 +196,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int udp_connect(FAR struct udp_conn_s *conn,
-                FAR const struct sockaddr_in6 *addr);
-#else
-int udp_connect(FAR struct udp_conn_s *conn,
-                FAR const struct sockaddr_in *addr);
-#endif
+int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /* Defined in udp_ipselect.c ************************************************/
 /****************************************************************************
