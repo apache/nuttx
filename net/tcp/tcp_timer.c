@@ -2,7 +2,7 @@
  * net/tcp/tcp_timer.c
  * Poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -98,9 +98,36 @@
 void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec)
 {
+  uint8_t hdrlen;
   uint8_t result;
 
-  dev->d_appdata = &dev->d_buf[IPv4TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+  /* Set up for the callback.  We can't know in advance if the application
+   * is going to send a IPv4 or an IPv6 packet, so this setup may not
+   * actually be used.  Furthermore, the TCP logic is required to call
+   * tcp_ipv4_select() or tcp_ipv6_select() prior to sending any packets.
+   * We will try to set the correct value here basic on the binding of
+   * the connection.
+   */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (conn->domain == PF_INET)
+#endif
+    {
+      hdrlen = IPv4TCP_HDRLEN;
+      tcp_ipv4_select(dev);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      hdrlen = IPv6TCP_HDRLEN;
+      tcp_ipv6_select(dev);
+    }
+#endif /* CONFIG_NET_IPv6 */
 
   /* Increase the TCP sequence number */
 
@@ -182,7 +209,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                   /* We also send a reset packet to the remote host. */
 
-                  tcp_send(dev, conn, TCP_RST | TCP_ACK, IPv4TCP_HDRLEN);
+                  tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
                   goto done;
                 }
 
@@ -233,7 +260,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   case TCP_LAST_ACK:
                     /* In all these states we should retransmit a FINACK. */
 
-                    tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPv4TCP_HDRLEN);
+                    tcp_send(dev, conn, TCP_FIN | TCP_ACK, hdrlen);
                     goto done;
                 }
             }
