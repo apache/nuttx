@@ -1086,7 +1086,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
    * the device driver using the appropriate IP domain.
    */
 
-  if (psock->domain == PF_INET)
+  if (psock->s_domain == PF_INET)
 #endif
     {
       /* Notify the device driver of the receive ready */
@@ -1101,12 +1101,12 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else /* if (psock->domain == PF_INET6) */
+  else /* if (psock->s_domain == PF_INET6) */
 #endif /* CONFIG_NET_IPv4 */
     {
       /* Notify the device driver of the receive ready */
 
-      DEBUGASSERT(psock->domain == PF_INET6);
+      DEBUGASSERT(psock->s_domain == PF_INET6);
 #ifdef CONFIG_NET_MULTILINK
       netdev_ipv6_rxnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
 #else
@@ -1226,10 +1226,10 @@ errout_with_state:
 #ifdef CONFIG_NET_UDP
 #ifdef CONFIG_NET_IPv6
 static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_in6 *infrom )
+                            FAR struct sockaddr_in6 *infrom)
 #else
 static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_in *infrom )
+                            FAR struct sockaddr_in *infrom)
 #endif
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;

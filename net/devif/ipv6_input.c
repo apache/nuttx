@@ -90,7 +90,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 
-#include "ipv6/ipv6.h"
+#include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"

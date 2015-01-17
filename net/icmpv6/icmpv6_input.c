@@ -59,7 +59,7 @@
 
 #include "devif/devif.h"
 #include "utils/utils.h"
-#include "ipv6/ipv6.h"
+#include "neighbor/neighbor.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6

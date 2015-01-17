@@ -183,17 +183,17 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
 
   /* Which domain the the socket support */
 
-  if (psock->domain == PF_INET)
+  if (psock->s_domain == PF_INET)
     {
       /* Select the IPv4 domain */
 
       udp_ipv4_select(dev);
     }
-  else /* if (psock->domain == PF_INET6) */
+  else /* if (psock->s_domain == PF_INET6) */
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(psock->domain == PF_INET6);
+      DEBUGASSERT(psock->s_domain == PF_INET6);
       udp_ipv4_select(dev);
     }
 }
@@ -319,7 +319,7 @@ static inline void sendto_txnotify(FAR struct socket *psock,
    * the device driver using the appropriate IP domain.
    */
 
-  if (psock->domain == PF_INET)
+  if (psock->s_domain == PF_INET)
 #endif
     {
       /* Notify the device driver that send data is available */
@@ -334,12 +334,12 @@ static inline void sendto_txnotify(FAR struct socket *psock,
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else /* if (psock->domain == PF_INET6) */
+  else /* if (psock->s_domain == PF_INET6) */
 #endif /* CONFIG_NET_IPv4 */
     {
       /* Notify the device driver that send data is available */
 
-      DEBUGASSERT(psock->domain == PF_INET6);
+      DEBUGASSERT(psock->s_domain == PF_INET6);
 #ifdef CONFIG_NET_MULTILINK
       netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
 #else

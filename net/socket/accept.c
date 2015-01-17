@@ -58,7 +58,7 @@
 #include "socket/socket.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,14 +67,11 @@
 
 struct accept_s
 {
-  sem_t                    acpt_sem;        /* Wait for interrupt event */
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *acpt_addr;       /* Return connection adress */
-#else
-  FAR struct sockaddr_in  *acpt_addr;       /* Return connection adress */
-#endif
-  FAR struct tcp_conn_s   *acpt_newconn;    /* The accepted connection */
-  int                      acpt_result;     /* The result of the wait */
+  FAR struct socket     *acpt_sock;       /* The accepting socket */
+  sem_t                  acpt_sem;        /* Wait for interrupt event */
+  FAR struct sockaddr   *acpt_addr;       /* Return connection address */
+  FAR struct tcp_conn_s *acpt_newconn;    /* The accepted connection */
+  int                    acpt_result;     /* The result of the wait */
 };
 
 /****************************************************************************
@@ -89,9 +86,10 @@ struct accept_s
  * Function: accept_tcpsender
  *
  * Description:
- *   Getting the sender's address from the UDP packet
+ *   Get the sender's address from the UDP packet
  *
  * Parameters:
+ *   psock  - The state structure of the accepting socket
  *   conn   - The newly accepted TCP connection
  *   pstate - the recvfrom state structure
  *
@@ -100,33 +98,50 @@ struct accept_s
  *
  * Assumptions:
  *   Running at the interrupt level
- *
+*
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
+static inline void accept_tcpsender(FAR struct socket *psock,
+                                    FAR struct tcp_conn_s *conn,
+                                    FAR struct sockaddr *addr)
+{
+  if (addr)
+    {
 #ifdef CONFIG_NET_IPv4
-static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
-                                    FAR struct sockaddr_in *addr)
-{
-  if (addr)
-    {
-      addr->sin_family = AF_INET;
-      addr->sin_port   = conn->rport;
-      net_ipv4addr_copy(addr->sin_addr.s_addr, conn->u.ipv4.raddr);
-    }
-}
-#else
-static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
-                                    FAR struct sockaddr_in6 *addr)
-{
-  if (addr)
-    {
-      addr->sin_family = AF_INET6;
-      addr->sin_port   = conn->rport;
-      net_ipv6addr_copy(addr->sin6_addr.s6_addr, conn->u.ipv4.raddr);
-    }
-}
+#ifdef CONFIG_NET_IPv6
+      /* If both IPv4 and IPv6 support are enabled, then we will need to
+       * select which one to use when obtaining the sender's IP address.
+       */
+
+      if (psock->s_domain == PF_INET)
+#endif /* CONFIG_NET_IPv6 */
+        {
+          FAR struct sockaddr_in *inaddr = (FAR struct sockaddr_in *)addr;
+
+          inaddr->sin_family = AF_INET;
+          inaddr->sin_port   = conn->rport;
+          net_ipv4addr_copy(inaddr->sin_addr.s_addr, conn->u.ipv4.raddr);
+        }
 #endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      /* Otherwise, this the IPv6 address is needed */
+
+      else
+#endif /* CONFIG_NET_IPv4 */
+        {
+          FAR struct sockaddr_in6 *inaddr = (FAR struct sockaddr_in6 *)addr;
+
+          DEBUGASSERT(psock->s_domain == PF_INET6);
+          inaddr->sin_family = AF_INET6;
+          inaddr->sin_port   = conn->rport;
+          net_ipv6addr_copy(inaddr->sin6_addr.s6_addr, conn->u.ipv6.raddr);
+        }
+#endif /* CONFIG_NET_IPv6 */
+    }
+}
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
@@ -157,7 +172,7 @@ static int accept_interrupt(FAR struct tcp_conn_s *listener,
     {
       /* Get the connection address */
 
-      accept_tcpsender(conn, pstate->acpt_addr);
+      accept_tcpsender(pstate->acpt_sock, conn, pstate->acpt_addr);
 
       /* Save the connection structure */
 
@@ -256,17 +271,12 @@ static int accept_interrupt(FAR struct tcp_conn_s *listener,
  *
  ****************************************************************************/
 
-int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *pnewsock;
   FAR struct tcp_conn_s *conn;
   struct accept_s state;
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *inaddr = (struct sockaddr_in6 *)addr;
-#else
-  FAR struct sockaddr_in *inaddr = (struct sockaddr_in *)addr;
-#endif
   net_lock_t save;
   int newfd;
   int err;
@@ -316,13 +326,35 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
   if (addr)
     {
-#ifdef CONFIG_NET_IPv6
-      if (*addrlen < sizeof(struct sockaddr_in6))
-#else
-      if (*addrlen < sizeof(struct sockaddr_in))
-#endif
+      switch (psock->s_domain)
         {
-          err = EBADF;
+#ifdef CONFIG_NET_IPv4
+        case PF_INET:
+          {
+            if (*addrlen < sizeof(struct sockaddr_in))
+              {
+                err = EBADF;
+                goto errout;
+              }
+          }
+          break;
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+        case PF_INET:
+          {
+            if (*addrlen < sizeof(struct sockaddr_in6))
+              {
+                err = EBADF;
+                goto errout;
+              }
+          }
+          break;
+#endif /* CONFIG_NET_IPv6 */
+
+        default:
+          DEBUGPANIC();
+          err = EINVAL;
           goto errout;
         }
     }
@@ -359,7 +391,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       /* Yes... get the address of the connected client */
 
       nvdbg("Pending conn=%p\n", state.acpt_newconn);
-      accept_tcpsender(state.acpt_newconn, inaddr);
+      accept_tcpsender(psock, state.acpt_newconn, addr);
     }
 
   /* In general, this uIP-based implementation will not support non-blocking
@@ -387,7 +419,8 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
        * are ready.
        */
 
-      state.acpt_addr       = inaddr;
+      state.acpt_sock       = psock;
+      state.acpt_addr       = addr;
       state.acpt_newconn    = NULL;
       state.acpt_result     = OK;
       sem_init(&state.acpt_sem, 0, 0);
