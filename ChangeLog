@@ -9453,3 +9453,8 @@
 	  outgoing packet before sending any UDP or TCP packet.  This sets the
 	  bit to indicate the IPv4 or IPv6 domain and the correct offset to the
 	  output going payload data (2015-01-17).
+	* net/socket and net/tcp: When we are ready to receive data or when we
+	  have outgoing data ready to be sent, we need to the notify the
+	  appropriate device driver of this condition.  The notifying socket
+	  will be configured as either PF_INET or PF_INET6 and must look up the
+	  correct driver using the correct IP domain (2015-01-17).
