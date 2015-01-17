@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_conn.c
  *
- *   Copyright (C) 2007-2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -739,13 +739,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int tcp_connect(FAR struct tcp_conn_s *conn,
-                FAR const struct sockaddr_in6 *addr)
-#else
-int tcp_connect(FAR struct tcp_conn_s *conn,
-                FAR const struct sockaddr_in *addr)
-#endif
+int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   net_lock_t flags;
   int port;
@@ -787,7 +781,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
   conn->tcpstateflags = TCP_SYN_SENT;
   tcp_initsequence(conn->sndseq);
 
-  conn->mss        = MIN_IPv4_TCP_INITIAL_MSS;
   conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */
@@ -801,13 +794,45 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
   conn->sent       = 0;
 #endif
 
-  /* The sockaddr port is 16 bits and already in network order */
+  /* Save values that are specific to the IP address domain */
 
-  conn->rport = addr->sin_port;
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (conn->domain == PF_INET)
+#endif
+    {
+      FAR const struct sockaddr_in *inaddr =
+        (FAR const struct sockaddr_in *)addr;
 
-  /* The sockaddr address is 32-bits in network order. */
+      /* Save MSS and the port from the sockaddr (already in network order) */
 
-  net_ipv4addr_copy(conn->u.ipv4.raddr, addr->sin_addr.s_addr);
+      conn->mss    = MIN_IPv4_TCP_INITIAL_MSS;
+      conn->rport  = inaddr->sin_port;
+
+      /* The sockaddr address is 32-bits in network order. */
+
+      net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      FAR const struct sockaddr_in6 *inaddr =
+        (FAR const struct sockaddr_in6 *)addr;
+
+      /* Save MSS and the port from the sockaddr (already in network order) */
+
+      conn->mss     = MIN_IPv6_TCP_INITIAL_MSS;
+      conn->rport   = inaddr->sin_port;
+
+      /* The sockaddr address is 32-bits in network order. */
+
+      net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
+    }
+#endif /* CONFIG_NET_IPv6 */
 
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Initialize the list of TCP read-ahead buffers */

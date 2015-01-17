@@ -84,12 +84,8 @@ static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
 static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags);
-#ifdef CONFIG_NET_IPv6
 static inline int psock_tcp_connect(FAR struct socket *psock,
-                                    FAR const struct sockaddr_in6 *inaddr);
-#else
-static inline int psock_tcp_connect(FAR struct socket *psock, const struct sockaddr_in *inaddr);
-#endif
+                                    FAR const struct sockaddr *addr);
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
@@ -278,8 +274,8 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
  *   Perform a TCP connection
  *
  * Parameters:
- *   psock    A reference to the socket structure of the socket to be connected
- *   inaddr   The address of the remote server to connect to
+ *   psock - A reference to the socket structure of the socket to be connected
+ *   addr  - The address of the remote server to connect to
  *
  * Returned Value:
  *   None
@@ -290,13 +286,8 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_IPv6
 static inline int psock_tcp_connect(FAR struct socket *psock,
-                                    FAR const struct sockaddr_in6 *inaddr)
-#else
-static inline int psock_tcp_connect(FAR struct socket *psock,
-                                    FAR const struct sockaddr_in *inaddr)
-#endif
+                                    FAR const struct sockaddr *addr)
 {
   struct tcp_connect_s state;
   net_lock_t           flags;
@@ -319,7 +310,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
     {
       /* Perform the TCP connection operation */
 
-      ret = tcp_connect(psock->s_conn, inaddr);
+      ret = tcp_connect(psock->s_conn, addr);
     }
 
   if (ret >= 0)
@@ -370,8 +361,8 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
         }
     }
 
-    net_unlock(flags);
-    return ret;
+  net_unlock(flags);
+  return ret;
 }
 #endif /* CONFIG_NET_TCP */
 
@@ -450,15 +441,10 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
 int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen)
 {
+  FAR const struct sockaddr_in *inaddr = (FAR const struct sockaddr_in *)addr;
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-#ifdef CONFIG_NET_IPv6
-  FAR const struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
-#else
-  FAR const struct sockaddr_in *inaddr = (const struct sockaddr_in *)addr;
-#endif
   int ret;
 #endif
-
   int err;
 
   /* Verify that the psock corresponds to valid, allocated socket */
@@ -471,15 +457,37 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Verify that a valid address has been provided */
 
-#ifdef CONFIG_NET_IPv6
-  if (addr->sa_family != AF_INET6 || addrlen < sizeof(struct sockaddr_in6))
-#else
-  if (addr->sa_family != AF_INET || addrlen < sizeof(struct sockaddr_in))
+  switch (inaddr->sin_family)
+    {
+#ifdef CONFIG_NET_IPv4
+    case AF_INET:
+      {
+        if (addrlen < sizeof(struct sockaddr_in))
+          {
+            err = EBADF;
+            goto errout;
+          }
+      }
+      break;
 #endif
-  {
-      err = EBADF;
+
+#ifdef CONFIG_NET_IPv6
+    case AF_INET6:
+      {
+        if (addrlen < sizeof(struct sockaddr_in6))
+          {
+            err = EBADF;
+            goto errout;
+          }
+      }
+      break;
+#endif
+
+    default:
+      DEBUGPANIC();
+      err = EAFNOSUPPORT;
       goto errout;
-  }
+    }
 
   /* Perform the connection depending on the protocol type */
 
@@ -498,7 +506,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           /* Its not ... connect it */
 
-          ret = psock_tcp_connect(psock, inaddr);
+          ret = psock_tcp_connect(psock, addr);
           if (ret < 0)
             {
               err = -ret;

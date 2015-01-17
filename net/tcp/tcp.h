@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -269,6 +269,7 @@ extern "C"
 
 /* Defined in tcp_conn.c ****************************************************/
 
+struct sockaddr; /* Forward reference */
 struct tcp_iphdr_s; /* Forward reference */
 
 /****************************************************************************
@@ -393,13 +394,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int tcp_connect(FAR struct tcp_conn_s *conn,
-                FAR const struct sockaddr_in6 *addr);
-#else
-int tcp_connect(FAR struct tcp_conn_s *conn,
-                FAR const struct sockaddr_in *addr);
-#endif
+int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /* Defined in tcp_ipselect.c ************************************************/
 /****************************************************************************
