@@ -726,6 +726,61 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Function: send_txnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are have data ready to
+ *   be send (TCP)
+ *
+ * Parameters:
+ *   psock - Socket state structure
+ *   conn  - The TCP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void send_txnotify(FAR struct socket *psock,
+                                 FAR struct tcp_conn_s *conn)
+{
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  /* If both IPv4 and IPv6 support are enabled, then we will need to select
+   * the device driver using the appropriate IP domain.
+   */
+
+  if (psock->domain == PF_INET)
+#endif
+    {
+      /* Notify the device driver that send data is available */
+
+#ifdef CONFIG_NET_MULTILINK
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+#else
+      netdev_ipv4_txnotify(conn->u.ipv4.raddr);
+#endif
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else /* if (psock->domain == PF_INET6) */
+#endif /* CONFIG_NET_IPv4 */
+    {
+      /* Notify the device driver that send data is available */
+
+      DEBUGASSERT(psock->domain == PF_INET6);
+#ifdef CONFIG_NET_MULTILINK
+      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+#else
+      netdev_ipv6_txnotify(conn->u.ipv6.raddr);
+#endif
+    }
+#endif /* CONFIG_NET_IPv6 */
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -887,11 +942,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
               /* Notify the device driver of the availability of TX data */
 
-#ifdef CONFIG_NET_MULTILINK
-              netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-#else
-              netdev_ipv4_txnotify(conn->u.ipv4.raddr);
-#endif
+              send_txnotify(psock, conn);
               result = len;
             }
 

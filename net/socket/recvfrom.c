@@ -1040,6 +1040,83 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
+ * Function: recvfromo_pkt_rxnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are ready to receive a
+ *   packet (PKT)
+ *
+ * Parameters:
+ *   conn - The PKT connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if 0 /* Not implemented */
+static void recvfromo_pkt_rxnotify(FAR struct pkt_conn_s *conn)
+{
+#  warning Missing logic
+}
+#endif
+
+/****************************************************************************
+ * Function: recvfrom_udp_rxnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are ready to receive a
+ *   packet (UDP)
+ *
+ * Parameters:
+ *   psock - Socket state structure
+ *   conn  - The UDP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
+                                         FAR struct udp_conn_s *conn)
+{
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  /* If both IPv4 and IPv6 support are enabled, then we will need to select
+   * the device driver using the appropriate IP domain.
+   */
+
+  if (psock->domain == PF_INET)
+#endif
+    {
+      /* Notify the device driver of the receive ready */
+
+#ifdef CONFIG_NET_MULTILINK
+      netdev_ipv4_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+#else
+      netdev_ipv4_rxnotify(conn->u.ipv4.raddr);
+#endif
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else /* if (psock->domain == PF_INET6) */
+#endif /* CONFIG_NET_IPv4 */
+    {
+      /* Notify the device driver of the receive ready */
+
+      DEBUGASSERT(psock->domain == PF_INET6);
+#ifdef CONFIG_NET_MULTILINK
+      netdev_ipv6_rxnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+#else
+      netdev_ipv6_rxnotify(conn->u.ipv6.raddr);
+#endif
+    }
+#endif /* CONFIG_NET_IPv6 */
+}
+
+/****************************************************************************
  * Function: pkt_recvfrom
  *
  * Description:
@@ -1095,12 +1172,8 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Notify the device driver of the receive call */
 
-#if 0 /* No */
-#ifdef CONFIG_NET_MULTILINK
-      netdev_ipv4_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-#else
-      netdev_ipv4_rxnotify(conn->u.ipv4.raddr);
-#endif
+#if 0 /* Not implemented */
+      recvfromo_pkt_rxnotify(conn);
 #endif
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
@@ -1195,11 +1268,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Notify the device driver of the receive call */
 
-#ifdef CONFIG_NET_MULTILINK
-      netdev_ipv4_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-#else
-      netdev_ipv4_rxnotify(conn->u.ipv4.raddr);
-#endif
+      recvfrom_udp_rxnotify(psock, conn);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
