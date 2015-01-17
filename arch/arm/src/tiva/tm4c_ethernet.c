@@ -1664,18 +1664,6 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
 
-  /* I have seen this error just after writing a new image to FLASH.  After
-   * resetting he board, I never see it again.  I am guessing that the
-   * flasher leaves the hardware in a bad state(?).
-   */
-
-  // DEBUGASSERT(dev->d_buf != NULL);
-  if (dev->d_buf == NULL)
-    {
-      nlldbg("ERROR: Ignoring NULL I/O buffer\n");
-      return;
-    }
-
   /* Loop while while tiva_recvframe() successfully retrieves valid
    * Ethernet frames.
    */
