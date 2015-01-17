@@ -192,7 +192,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            * socket instance.
            */
 
-          FAR struct tcp_conn_s *conn = tcp_alloc();
+          FAR struct tcp_conn_s *conn = tcp_alloc(domain);
           if (!conn)
             {
               /* Failed to reserve a connection structure */
@@ -219,7 +219,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            * socket instance.
            */
 
-          FAR struct udp_conn_s *conn = udp_alloc();
+          FAR struct udp_conn_s *conn = udp_alloc(domain);
           if (!conn)
             {
               /* Failed to reserve a connection structure */

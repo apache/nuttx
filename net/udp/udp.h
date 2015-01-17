@@ -70,6 +70,7 @@ struct udp_conn_s
   union ip_binding_u u;   /* IP address binding */
   uint16_t lport;         /* Bound local port number (network byte order) */
   uint16_t rport;         /* Remote port number (network byte order) */
+  uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
   uint8_t  ttl;           /* Default time-to-live */
   uint8_t  crefs;         /* Reference counts on this instance */
 
@@ -99,7 +100,7 @@ struct udp_iphdr_s;   /* Forward reference */
 
 /* Defined in udp_conn.c ****************************************************/
 /****************************************************************************
- * Name: udp_initialize()
+ * Name: udp_initialize
  *
  * Description:
  *   Initialize the UDP connection structures.  Called once and only from
@@ -110,7 +111,7 @@ struct udp_iphdr_s;   /* Forward reference */
 void udp_initialize(void);
 
 /****************************************************************************
- * Name: udp_alloc()
+ * Name: udp_alloc
  *
  * Description:
  *   Allocate a new, uninitialized UDP connection structure.  This is
@@ -118,10 +119,10 @@ void udp_initialize(void);
  *
  ****************************************************************************/
 
-FAR struct udp_conn_s *udp_alloc(void);
+FAR struct udp_conn_s *udp_alloc(uint8_t domain);
 
 /****************************************************************************
- * Name: udp_free()
+ * Name: udp_free
  *
  * Description:
  *   Free a UDP connection structure that is no longer in use. This should be
@@ -132,7 +133,7 @@ FAR struct udp_conn_s *udp_alloc(void);
 void udp_free(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
- * Name: udp_active()
+ * Name: udp_active
  *
  * Description:
  *   Find a connection structure that is the appropriate
@@ -147,7 +148,7 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
                                   FAR struct udp_hdr_s *udp);
 
 /****************************************************************************
- * Name: udp_nextconn()
+ * Name: udp_nextconn
  *
  * Description:
  *   Traverse the list of allocated UDP connections
@@ -160,7 +161,7 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
 FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
- * Name: udp_bind()
+ * Name: udp_bind
  *
  * Description:
  *   This function implements the low-level parts of the standard UDP bind()
@@ -178,7 +179,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr);
 #endif
 
 /****************************************************************************
- * Name: udp_connect()
+ * Name: udp_connect
  *
  * Description:
  *   This function sets up a new UDP connection. The function will

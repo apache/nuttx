@@ -277,7 +277,7 @@ void tcp_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct tcp_conn_s *tcp_alloc(void)
+FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 {
   FAR struct tcp_conn_s *conn;
   net_lock_t flags;
@@ -374,6 +374,7 @@ FAR struct tcp_conn_s *tcp_alloc(void)
     {
       memset(conn, 0, sizeof(struct tcp_conn_s));
       conn->tcpstateflags = TCP_ALLOCATED;
+      conn->domain        = domain;
     }
 
   return conn;
@@ -587,7 +588,11 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
   FAR struct net_iphdr_s *ip = IPv4;
   FAR struct tcp_conn_s *conn;
 
-  conn = tcp_alloc();
+#ifdef CONFIG_NET_IPv4
+  conn = tcp_alloc(PF_INET);
+#else
+  conn = tcp_alloc(PF_INET6);
+#endif
   if (conn)
     {
       /* Fill in the necessary fields for the new connection. */
