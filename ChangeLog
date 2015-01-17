@@ -9418,16 +9418,16 @@
 	  net_iphdr_s (2015-01-15).
 	* arch/ and drivers/net:  All Ethernet drivers:  Call ipv6_input() if
 	  IPv6 is enabled and an IPv6 packet is received (2015-01-15).
-	* net/devif, net/tcp, net/ucp, include/nuttx/net:  Seperate tcp_input()
+	* net/devif, net/tcp, net/ucp, include/nuttx/net:  Separate tcp_input()
 	  and udp_input() into seprate functions tcp_ipv4_input(),
 	  tcp_ipv6_input(), udp_ipv4_input(), and upd_ipv6_input() than can deal
 	  will the data offsets caused by the differing sizes of the IP header
 	  (2015-01-15).
 	* net/utils/net_ipv6_maskcmp.c:  Add missing implementation of
 	  net_ipv6_maskcmp() (2015-01-15).
-	* Networking: Drivers can have both IPv4 and IPv6 addesses, but a
-	  socket can only only one or the other; The socket connnection
-	  structures need to include a union of IPv4 and IPv6 addresses fori
+	* Networking: Drivers can have both IPv4 and IPv6 addresses, but a
+	  socket can only only one or the other; The socket connection
+	  structures need to include a union of IPv4 and IPv6 addresses for
 	  the local address binding and for the remote address connections
 	  (2015-01-16).
 	* Networking:  Replace all references to net_ipaddr_t with either
@@ -9445,4 +9445,11 @@
 	  as the link layer header size) and cannot be represented with a
 	  single value (2015-01-16).
 	* net/neighbor:  Move net/ipv6 to net/neighbor (2015-01-16).
-
+	* include/net/if.h:  Add a bit to the device flags to indicate if the
+	  device packet buffer holds an IPv4 or an IPv6 domain packet.
+	  Set/clear the flag along with the correct offset to the application
+	  payload data as each packet is received (2015-01-17).
+	* net/socket, net/tcp, net/udp:  Add logic to select the domain of the
+	  outgoing packet before sending any UDP or TCP packet.  This sets the
+	  bit to indicate the IPv4 or IPv6 domain and the correct offset to the
+	  output going payload data (2015-01-17).
