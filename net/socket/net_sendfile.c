@@ -289,7 +289,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
               goto end_wait;
             }
 
-          ret = file_read(pstate->snd_file, dev->d_snddata, sndlen);
+          ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
           if (ret < 0)
             {
               int errcode = errno;

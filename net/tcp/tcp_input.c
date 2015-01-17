@@ -130,7 +130,6 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
   /* Initialize for tcp_send() */
 
-  dev->d_snddata = &dev->d_buf[hdrlen];
   dev->d_appdata = &dev->d_buf[hdrlen];
 
   /* Start of TCP input header processing code. */

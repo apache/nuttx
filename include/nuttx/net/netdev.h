@@ -146,16 +146,10 @@ struct net_driver_s
 #endif
 
   /* d_appdata points to the location where application data can be read from
-   * or written into a packet.
+   * or written to in the the packet buffer.
    */
 
   uint8_t *d_appdata;
-
-  /* This is a pointer into d_buf where a user application may append
-   * data to be sent.
-   */
-
-  uint8_t *d_snddata;
 
 #ifdef CONFIG_NET_TCPURGDATA
   /* This pointer points to any urgent TCP data that has been received. Only
@@ -185,7 +179,7 @@ struct net_driver_s
   uint16_t d_len;
 
   /* When d_buf contains outgoing xmit data, d_sndlen is non-zero and represents
-   * the amount of application data after d_snddata
+   * the amount of application data after d_appdata
    */
 
   uint16_t d_sndlen;

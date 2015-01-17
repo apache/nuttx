@@ -188,8 +188,6 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",
           result, dev->d_sndlen, conn->unacked);
 
-  dev->d_appdata = dev->d_snddata;
-
   /* If the application has data to be sent, or if the incoming packet had
    * new data in it, we must send out a packet.
    */

@@ -109,7 +109,6 @@ int pkt_input(struct net_driver_s *dev)
       /* Setup for the application callback */
 
       dev->d_appdata = dev->d_buf;
-      dev->d_snddata = dev->d_buf;
       dev->d_sndlen  = 0;
 
       /* Perform the application callback */

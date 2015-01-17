@@ -152,8 +152,6 @@ void igmp_poll(FAR struct net_driver_s *dev)
   /* Setup the poll operation */
 
   dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN];
-  dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN];
-
   dev->d_len     = 0;
   dev->d_sndlen  = 0;
 

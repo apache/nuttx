@@ -87,7 +87,7 @@
  *   an xmit or poll request from the the network interface driver.
  *
  *   This is almost identical to calling devif_send() except that the data to
- *   be sent is copied into dev->d_buf (vs. dev->d_snddata), since there is
+ *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is
  *   no header on the data.
  *
  * Assumptions:

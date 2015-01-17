@@ -167,7 +167,6 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
           /* Set-up for the application callback */
 
           dev->d_appdata = &dev->d_buf[hdrlen];
-          dev->d_snddata = &dev->d_buf[hdrlen];
           dev->d_sndlen  = 0;
 
           /* Perform the application callback */

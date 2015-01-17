@@ -103,13 +103,13 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 
   /* Copy the data from the I/O buffer chain to the device buffer */
 
-  iob_copyout(dev->d_snddata, iob, len, offset);
+  iob_copyout(dev->d_appdata, iob, len, offset);
   dev->d_sndlen = len;
 
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
   /* Dump the outgoing device buffer */
 
-  lib_dumpbuffer("devif_iob_send", dev->d_snddata, len);
+  lib_dumpbuffer("devif_iob_send", dev->d_appdata, len);
 #endif
 }
 

@@ -207,7 +207,7 @@ static uint16_t sendto_interrupt(struct net_driver_s *dev, void *conn,
 
       else
         {
-          /* Copy the user data into d_snddata and send it */
+          /* Copy the user data into d_appdata and send it */
 
           devif_send(dev, pstate->st_buffer, pstate->st_buflen);
           pstate->st_sndlen = pstate->st_buflen;
