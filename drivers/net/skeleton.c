@@ -155,12 +155,16 @@ static void skel_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int skel_ifup(struct net_driver_s *dev);
-static int skel_ifdown(struct net_driver_s *dev);
-static int skel_txavail(struct net_driver_s *dev);
+static int skel_ifup(FAR struct net_driver_s *dev);
+static int skel_ifdown(FAR struct net_driver_s *dev);
+static inline int skel_txavail_process(FAR struct skel_driver_s *skel);
+#ifdef CONFIG_NET_NOINTS
+static void skel_txavail_work(FAR void *arg);
+#endif
+static int skel_txavail(FAR struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int skel_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
-static int skel_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /****************************************************************************
@@ -827,6 +831,67 @@ static int skel_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: skel_txavail_process
+ *
+ * Description:
+ *   Perform an out-of-cycle poll.
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in normal user mode
+ *
+ ****************************************************************************/
+
+static int inline skel_txavail_process(FAR struct skel_driver_s *skel)
+{
+  /* Ignore the notification if the interface is not yet up */
+
+  if (skel->sk_bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      /* If so, then poll uIP for new XMIT data */
+
+      (void)devif_poll(&skel->sk_dev, skel_txpoll);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: skel_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg  - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void skel_txavail_work(FAR void *arg)
+{
+  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+
+  /* Perform the poll */
+
+  skel_txavail_process(skel);
+}
+#endif
+
+/****************************************************************************
  * Function: skel_txavail
  *
  * Description:
@@ -848,6 +913,21 @@ static int skel_ifdown(struct net_driver_s *dev)
 static int skel_txavail(struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
+   */
+
+  if (work_available(&skel->sk_work))
+    {
+      /* Schedule to serialize the poll on the worker thread. */
+
+      work_queue(HPWORK, &skel->sk_work, skel_txavail_work, skel, 0);
+    }
+
+#else
   irqstate_t flags;
 
   /* Disable interrupts because this function may be called from interrupt
@@ -856,18 +936,12 @@ static int skel_txavail(struct net_driver_s *dev)
 
   flags = irqsave();
 
-  /* Ignore the notification if the interface is not yet up */
+  /* Perform the out-of-cycle poll now */
 
-  if (skel->sk_bifup)
-    {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-
-      /* If so, then poll uIP for new XMIT data */
-
-      (void)devif_poll(&skel->sk_dev, skel_txpoll);
-    }
-
+  skel_poll_process(skel);
   irqrestore(flags);
+#endif
+
   return OK;
 }
 
