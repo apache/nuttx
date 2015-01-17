@@ -269,7 +269,7 @@ extern "C"
 
 /* Defined in tcp_conn.c ****************************************************/
 
-struct sockaddr; /* Forward reference */
+struct sockaddr;    /* Forward reference */
 struct tcp_iphdr_s; /* Forward reference */
 
 /****************************************************************************
@@ -366,13 +366,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-int tcp_bind(FAR struct tcp_conn_s *conn,
-             FAR const struct sockaddr_in6 *addr);
-#else
-int tcp_bind(FAR struct tcp_conn_s *conn,
-             FAR const struct sockaddr_in *addr);
-#endif
+int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
  * Name: tcp_connect

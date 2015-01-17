@@ -74,11 +74,11 @@
 #define IFF_CLR_IPv6(f)    do { (f) &= ~IFF_IPv6; } while (0)
 #define IFF_CLR_NOARP(f)   do { (f) &= ~IFF_NOARP; } while (0)
 
-#define IFF_IS_DOWN(f)     ((f) & IFF_DOWN) != 0)
-#define IFF_IS_UP(f)       ((f) & IFF_UP) != 0)
-#define IFF_IS_RUNNING(f)  ((f) & IFF_RUNNING) != 0)
-#define IFF_IS_IPv6(f)     ((f) & IFF_IPv6) != 0)
-#define IFF_IS_NOARP(f)    ((f) & IFF_NOARP) != 0)
+#define IFF_IS_DOWN(f)     (((f) & IFF_DOWN) != 0)
+#define IFF_IS_UP(f)       (((f) & IFF_UP) != 0)
+#define IFF_IS_RUNNING(f)  (((f) & IFF_RUNNING) != 0)
+#define IFF_IS_IPv6(f)     (((f) & IFF_IPv6) != 0)
+#define IFF_IS_NOARP(f)    (((f) & IFF_NOARP) != 0)
 
 #define IFF_SET_IPv4(f)    IFF_CLR_IPv6(f)
 #define IFF_CLR_IPv4(f)    IFF_SET_IPv6(f)
