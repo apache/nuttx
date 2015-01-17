@@ -726,6 +726,10 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...);
 
 static int  tiva_ifup(struct net_driver_s *dev);
 static int  tiva_ifdown(struct net_driver_s *dev);
+static inline void tiva_txavail_process(FAR struct tiva_ethmac_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void tiva_txavail_work(FAR void *arg);
+#endif
 static int  tiva_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
 static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -1665,7 +1669,12 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
    * flasher leaves the hardware in a bad state(?).
    */
 
-  DEBUGASSERT(dev->d_buf != NULL);
+  // DEBUGASSERT(dev->d_buf != NULL);
+  if (dev->d_buf == NULL)
+    {
+      nlldbg("ERROR: Ignoring NULL I/O buffer\n");
+      return;
+    }
 
   /* Loop while while tiva_recvframe() successfully retrieves valid
    * Ethernet frames.
@@ -1815,7 +1824,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 
 static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 {
-  struct emac_txdesc_s *txdesc;
+  FAR struct emac_txdesc_s *txdesc;
   int i;
 
   nvdbg("txhead: %p txtail: %p inflight: %d\n",
@@ -1852,7 +1861,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
           txdesc->tdes2 = 0;
 
-          /* Check if this is the last segement of a TX frame */
+          /* Check if this is the last segment of a TX frame */
 
           if ((txdesc->tdes0 & EMAC_TDES0_LS) != 0)
             {
@@ -1911,11 +1920,15 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
 static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
 {
+  FAR struct net_driver_s *dev  = &priv->dev;
+
   DEBUGASSERT(priv->txtail != NULL);
 
-  /* Scan the TX desciptor change, returning buffers to free list */
+  /* Scan the TX descriptor change, returning buffers to free list */
 
   tiva_freeframe(priv);
+  dev->d_buf = NULL;
+  dev->d_len = 0;
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
@@ -2009,13 +2022,13 @@ static inline void tiva_interrupt_process(FAR struct tiva_ethmac_s *priv)
 
 #ifdef CONFIG_DEBUG_NET
 
-  /* Check if there are pending "anormal" interrupts */
+  /* Check if there are pending "abnormal" interrupts */
 
   if ((dmaris & EMAC_DMAINT_AIS) != 0)
     {
       /* Just let the user know what happened */
 
-      nlldbg("Abormal event(s): %08x\n", dmaris);
+      nlldbg("Abnormal event(s): %08x\n", dmaris);
 
       /* Clear all pending abnormal events */
 
@@ -2196,7 +2209,7 @@ static inline void tiva_txtimeout_process(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NET_NOINTS
 static void tiva_txtimeout_work(FAR void *arg)
 {
-  FAR struct tiva_ethmac_s *priv = ( FAR struct tiva_ethmac_s *)arg;
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
   /* Process pending Ethernet interrupts */
 
@@ -2497,6 +2510,65 @@ static int tiva_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: tiva_txavail_process
+ *
+ * Description:
+ *   Perform an out-of-cycle poll.
+ *
+ * Parameters:
+ *   priv - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in normal user mode
+ *
+ ****************************************************************************/
+
+static inline void tiva_txavail_process(FAR struct tiva_ethmac_s *priv)
+{
+  nvdbg("ifup: %d\n", priv->ifup);
+
+  /* Ignore the notification if the interface is not yet up */
+
+  if (priv->ifup)
+    {
+      /* Poll uIP for new XMIT data */
+
+      tiva_dopoll(priv);
+    }
+}
+
+/****************************************************************************
+ * Function: tiva_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg  - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void tiva_txavail_work(FAR void *arg)
+{
+  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
+
+  /* Perform the poll */
+
+  tiva_txavail_process(priv);
+}
+#endif
+
+/****************************************************************************
  * Function: tiva_txavail
  *
  * Description:
@@ -2518,9 +2590,22 @@ static int tiva_ifdown(struct net_driver_s *dev)
 static int tiva_txavail(struct net_driver_s *dev)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
-  irqstate_t flags;
 
-  nvdbg("ifup: %d\n", priv->ifup);
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
+   */
+
+  if (work_available(&priv->work))
+    {
+      /* Schedule to serialize the poll on the worker thread. */
+
+      work_queue(HPWORK, &priv->work, tiva_txavail_work, priv, 0);
+    }
+
+#else
+  irqstate_t flags;
 
   /* Disable interrupts because this function may be called from interrupt
    * level processing.
@@ -2528,16 +2613,12 @@ static int tiva_txavail(struct net_driver_s *dev)
 
   flags = irqsave();
 
-  /* Ignore the notification if the interface is not yet up */
+  /* Perform the out-of-cycle poll now */
 
-  if (priv->ifup)
-    {
-      /* Poll uIP for new XMIT data */
-
-      tiva_dopoll(priv);
-    }
-
+  tiva_txavail_process(priv);
   irqrestore(flags);
+#endif
+
   return OK;
 }
 
@@ -2616,7 +2697,7 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast hash table */
 
-  crc = tiva_calcethcrc( mac, 6 );
+  crc = tiva_calcethcrc(mac, 6);
 
   hashindex = (crc >> 26) & 0x3F;
 
@@ -2673,7 +2754,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Remove the MAC address to the hardware multicast hash table */
 
-  crc = tiva_calcethcrc( mac, 6 );
+  crc = tiva_calcethcrc(mac, 6);
 
   hashindex = (crc >> 26) & 0x3F;
 
@@ -2693,7 +2774,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* If there is no address registered any more, delete multicast filtering */
 
-  if (tiva_getreg(TIVA_EMAC_HASHTBLH ) == 0 &&
+  if (tiva_getreg(TIVA_EMAC_HASHTBLH) == 0 &&
       tiva_getreg(TIVA_EMAC_HASHTBLL) == 0)
     {
       temp = tiva_getreg(TIVA_EMAC_FRAMEFLTR);
