@@ -54,7 +54,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF       ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF   ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF   ((struct net_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPBUF   ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPv6BUF ((struct icmp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
@@ -111,35 +112,30 @@ static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 
 /****************************************************************************
- * Name: upper_layer_chksum
+ * Name: ipv4_upperlayer_chksum
  ****************************************************************************/
 
-#if !CONFIG_NET_ARCH_CHKSUM
-static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev,
-                                   uint8_t proto)
+#if !defined(CONFIG_NET_ARCH_CHKSUM) && defined(CONFIG_NET_IPv4)
+static uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev,
+                                       uint8_t proto)
 {
-  FAR struct net_iphdr_s *pbuf = BUF;
-  uint16_t upper_layer_len;
+  FAR struct net_iphdr_s *pbuf = IPv4BUF;
+  uint16_t upperlen;
   uint16_t sum;
 
-#ifdef CONFIG_NET_IPv6
-  upper_layer_len = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]);
-#else /* CONFIG_NET_IPv6 */
-  upper_layer_len = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]) - IPv4_HDRLEN;
-#endif /* CONFIG_NET_IPv6 */
+  upperlen = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]) - IPv4_HDRLEN;
 
   /* Verify some minimal assumptions */
 
-  if (upper_layer_len > NET_DEV_MTU(dev))
+  if (upperlen > NET_DEV_MTU(dev))
     {
       return 0;
     }
 
   /* First sum pseudo-header. */
-
   /* IP protocol and length fields. This addition cannot carry. */
 
-  sum = upper_layer_len + proto;
+  sum = upperlen + proto;
 
   /* Sum IP source and destination addresses. */
 
@@ -147,7 +143,45 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev,
 
   /* Sum TCP header and data. */
 
-  sum = chksum(sum, &dev->d_buf[IPv4_HDRLEN + NET_LL_HDRLEN(dev)], upper_layer_len);
+  sum = chksum(sum, &dev->d_buf[IPv4_HDRLEN + NET_LL_HDRLEN(dev)], upperlen);
+
+  return (sum == 0) ? 0xffff : htons(sum);
+}
+#endif /* CONFIG_NET_ARCH_CHKSUM */
+
+/****************************************************************************
+ * Name: ipv6_upperlayer_chksum
+ ****************************************************************************/
+
+#if !defined(CONFIG_NET_ARCH_CHKSUM) && defined(CONFIG_NET_IPv6)
+static uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
+                                       uint8_t proto)
+{
+  FAR struct net_ipv6hdr_s *pbuf = IPv6BUF;
+  uint16_t upperlen;
+  uint16_t sum;
+
+  upperlen = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]);
+
+  /* Verify some minimal assumptions */
+
+  if (upperlen > NET_DEV_MTU(dev))
+    {
+      return 0;
+    }
+
+  /* First sum pseudo-header. */
+  /* IP protocol and length fields. This addition cannot carry. */
+
+  sum = upperlen + proto;
+
+  /* Sum IP source and destination addresses. */
+
+  sum = chksum(sum, (uint8_t *)&pbuf->srcipaddr, 2 * sizeof(net_ipv6addr_t));
+
+  /* Sum TCP header and data. */
+
+  sum = chksum(sum, &dev->d_buf[IPv6_HDRLEN + NET_LL_HDRLEN(dev)], upperlen);
 
   return (sum == 0) ? 0xffff : htons(sum);
 }
@@ -328,7 +362,22 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev)
 #if !CONFIG_NET_ARCH_CHKSUM
 uint16_t tcp_chksum(FAR struct net_driver_s *dev)
 {
-  return upper_layer_chksum(dev, IP_PROTO_TCP);
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (IFF_IS_IPv6(dev->d_flags))
+    {
+      return ipv6_upperlayer_chksum(dev, IP_PROTO_TCP);
+    }
+  else
+    {
+      return ipv4_upperlayer_chksum(dev, IP_PROTO_TCP);
+    }
+
+#elif defined(CONFIG_NET_IPv4)
+  return ipv4_upperlayer_chksum(dev, IP_PROTO_TCP);
+
+#else /* if defined(CONFIG_NET_IPv6) */
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_TCP);
+#endif
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 
@@ -343,7 +392,22 @@ uint16_t tcp_chksum(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_UDP_CHECKSUMS) && !defined(CONFIG_NET_ARCH_CHKSUM)
 uint16_t udp_chksum(FAR struct net_driver_s *dev)
 {
-  return upper_layer_chksum(dev, IP_PROTO_UDP);
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (IFF_IS_IPv6(dev->d_flags))
+    {
+      return ipv6_upperlayer_chksum(dev, IP_PROTO_UDP);
+    }
+  else
+    {
+      return ipv4_upperlayer_chksum(dev, IP_PROTO_UDP);
+    }
+
+#elif defined(CONFIG_NET_IPv4)
+  return ipv4_upperlayer_chksum(dev, IP_PROTO_UDP);
+
+#else /* if defined(CONFIG_NET_IPv6) */
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_UDP);
+#endif
 }
 #endif /* CONFIG_NET_UDP_CHECKSUMS && !CONFIG_NET_ARCH_CHKSUM */
 
@@ -374,7 +438,7 @@ uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 #ifdef CONFIG_NET_ICMPv6
 uint16_t icmpv6_chksum(FAR struct net_driver_s *dev)
 {
-  return upper_layer_chksum(dev, IP_PROTO_ICMP6);
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_ICMP6);
 }
 #endif
 
