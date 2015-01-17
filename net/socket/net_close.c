@@ -273,6 +273,7 @@ end_wait:
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
 static inline void netclose_txnotify(FAR struct socket *psock,
                                      FAR struct tcp_conn_s *conn)
 {
@@ -311,6 +312,7 @@ static inline void netclose_txnotify(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_IPv6 */
 }
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: netclose_disconnect
