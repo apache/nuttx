@@ -9458,3 +9458,5 @@
 	  appropriate device driver of this condition.  The notifying socket
 	  will be configured as either PF_INET or PF_INET6 and must look up the
 	  correct driver using the correct IP domain (2015-01-17).
+	* net/socket/accept.c:  Fix accept() so that it returns the correct IP
+	  address for the selected socket IP domain (2015-01-17).
