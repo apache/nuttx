@@ -66,6 +66,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* If both IPv4 and IPv6 support are both enabled, then we will need to build
+ * in some additional domain selection support.
+ */
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#  define NEED_IPDOMAIN_SUPPORT 1
+#endif
 
 #if defined(CONFIG_NET_TCP_SPLIT) && !defined(CONFIG_NET_TCP_SPLIT_SIZE)
 #  define CONFIG_NET_TCP_SPLIT_SIZE 40
@@ -123,7 +130,7 @@ struct send_s
 #ifdef CONFIG_NET_SOCKOPTS
 static inline int send_timeout(FAR struct send_s *pstate)
 {
-  FAR struct socket *psock = 0;
+  FAR struct socket *psock;
 
   /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
    * If none... we well let the send wait forever.
@@ -142,6 +149,52 @@ static inline int send_timeout(FAR struct send_s *pstate)
   return FALSE;
 }
 #endif /* CONFIG_NET_SOCKOPTS */
+
+/****************************************************************************
+ * Function: tcpsend_ipselect
+ *
+ * Description:
+ *   If both IPv4 and IPv6 support are enabled, then we will need to select
+ *   which one to use when generating the outgoing packet.  If only one
+ *   domain is selected, then the setup is already in place and we need do
+ *   nothing.
+ *
+ * Parameters:
+ *   dev    - The structure of the network driver that caused the interrupt
+ *   pstate - sendto state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef NEED_IPDOMAIN_SUPPORT
+static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
+                                    FAR struct send_s *pstate)
+{
+  FAR struct socket *psock = pstate->snd_sock;
+  DEBUGASSERT(psock);
+
+  /* Which domain the the socket support */
+
+  if (psock->domain == PF_INET)
+    {
+      /* Select the IPv4 domain */
+
+      tcp_ipv4_select(dev);
+    }
+  else /* if (psock->domain == PF_INET6) */
+    {
+      /* Select the IPv6 domain */
+
+      DEBUGASSERT(psock->domain == PF_INET6);
+      tcp_ipv4_select(dev);
+    }
+}
+#endif
 
 /****************************************************************************
  * Function: tcpsend_interrupt
@@ -373,6 +426,15 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
           nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
           tcp_setsequence(conn->sndseq, seqno);
 
+#ifdef NEED_IPDOMAIN_SUPPORT
+          /* If both IPv4 and IPv6 support are enabled, then we will need to
+           * select which one to use when generating the outgoing packet.
+           * If only one domain is selected, then the setup is already in
+           * place and we need do nothing.
+           */
+
+          tcpsend_ipselect(dev, pstate);
+#endif
           /* Then set-up to send that amount of data. (this won't actually
            * happen until the polling cycle completes).
            */

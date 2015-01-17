@@ -398,6 +398,31 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
                 FAR const struct sockaddr_in *addr);
 #endif
 
+/* Defined in tcp_ipselect.c ************************************************/
+/****************************************************************************
+ * Function: tcp_ipv4_select
+ *
+ * Description:
+ *   Configure to send or receive an TCP IPv4 packet
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+void tcp_ipv4_select(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Function: tcp_ipv6_select
+ *
+ * Description:
+ *   Configure to send or receive an TCP IPv6 packet
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+void tcp_ipv6_select(FAR struct net_driver_s *dev);
+#endif
+
 /* Defined in tcp_seqno.c ***************************************************/
 /****************************************************************************
  * Name: tcp_setsequence

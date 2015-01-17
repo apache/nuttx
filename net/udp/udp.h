@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Allocate a new TCP data callback */
+/* Allocate a new UDP data callback */
 
 #define udp_callback_alloc(conn)   devif_callback_alloc(&conn->list)
 #define udp_callback_free(conn,cb) devif_callback_free(cb, &conn->list)
@@ -136,7 +136,7 @@ void udp_free(FAR struct udp_conn_s *conn);
  *
  * Description:
  *   Find a connection structure that is the appropriate
- *   connection to be used within the provided TCP/IP header
+ *   connection to be used within the provided UDP/IP header
  *
  * Assumptions:
  *   Called from network stack logic with the network stack locked
@@ -163,8 +163,8 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
  * Name: udp_bind()
  *
  * Description:
- *   This function implements the UIP specific parts of the standard UDP
- *   bind() operation.
+ *   This function implements the low-level parts of the standard UDP bind()
+ *   operation.
  *
  * Assumptions:
  *   This function is called from normal user level code.
@@ -205,6 +205,31 @@ int udp_connect(FAR struct udp_conn_s *conn,
 #else
 int udp_connect(FAR struct udp_conn_s *conn,
                 FAR const struct sockaddr_in *addr);
+#endif
+
+/* Defined in udp_ipselect.c ************************************************/
+/****************************************************************************
+ * Function: udp_ipv4_select
+ *
+ * Description:
+ *   Configure to send or receive an UDP IPv4 packet
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+void udp_ipv4_select(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Function: udp_ipv6_select
+ *
+ * Description:
+ *   Configure to send or receive an UDP IPv6 packet
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+void udp_ipv6_select(FAR struct net_driver_s *dev);
 #endif
 
 /* Defined in udp_poll.c ****************************************************/

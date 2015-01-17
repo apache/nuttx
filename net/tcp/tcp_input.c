@@ -128,10 +128,6 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
   hdrlen = tcpiplen + NET_LL_HDRLEN(dev);
 
-  /* Initialize for tcp_send() */
-
-  dev->d_appdata = &dev->d_buf[hdrlen];
-
   /* Start of TCP input header processing code. */
 
   if (tcp_chksum(dev) != 0xffff)
@@ -886,6 +882,12 @@ drop:
 #ifdef CONFIG_NET_IPv4
 void tcp_ipv4_input(FAR struct net_driver_s *dev)
 {
+  /* Configure to receive an TCP IPv4 packet */
+
+  tcp_ipv4_select(dev);
+
+  /* Then process in the TCP IPv4 input */
+
   tcp_input(dev, IPv4_HDRLEN);
 }
 #endif
@@ -910,6 +912,12 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
 void tcp_ipv6_input(FAR struct net_driver_s *dev)
 {
+  /* Configure to receive an TCP IPv6 packet */
+
+  tcp_ipv6_select(dev);
+
+  /* Then process in the TCP IPv6 input */
+
   tcp_input(dev, IPv6_HDRLEN);
 }
 #endif

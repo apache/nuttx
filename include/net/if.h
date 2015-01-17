@@ -48,14 +48,41 @@
 
 /* Sizing parameters */
 
-#define IFNAMSIZ        6   /* Older naming standard */
-#define IF_NAMESIZE     6   /* Newer naming standard */
-#define IFHWADDRLEN     6
+#define IFNAMSIZ           6   /* Older naming standard */
+#define IF_NAMESIZE        6   /* Newer naming standard */
+#define IFHWADDRLEN        6
 
-#define IFF_DOWN        (1 << 0)
-#define IFF_UP          (1 << 1)
-#define IFF_RUNNING     (1 << 2)
-#define IFF_NOARP       (1 << 7)
+/* Interface flag bits */
+
+#define IFF_DOWN           (1 << 0) /* Interface is down */
+#define IFF_UP             (1 << 1) /* Interface is up */
+#define IFF_RUNNING        (1 << 2) /* Carrier is available */
+#define IFF_IPv6           (1 << 3) /* Configured for IPv6 packet (vs ARP or IPv4) */
+#define IFF_NOARP          (1 << 7) /* ARP is not required for this packet */
+
+/* Interface flag helpers */
+
+#define IFF_SET_DOWN(f)    do { (f) |= IFF_DOWN; } while (0)
+#define IFF_SET_UP(f)      do { (f) |= IFF_UP; } while (0)
+#define IFF_SET_RUNNING(f) do { (f) |= IFF_RUNNING; } while (0)
+#define IFF_SET_IPv6(f)    do { (f) |= IFF_IPv6; } while (0)
+#define IFF_SET_NOARP(f)   do { (f) |= IFF_NOARP; } while (0)
+
+#define IFF_CLR_DOWN(f)    do { (f) &= ~IFF_DOWN; } while (0)
+#define IFF_CLR_UP(f)      do { (f) &= ~IFF_UP; } while (0)
+#define IFF_CLR_RUNNING(f) do { (f) &= ~IFF_RUNNING; } while (0)
+#define IFF_CLR_IPv6(f)    do { (f) &= ~IFF_IPv6; } while (0)
+#define IFF_CLR_NOARP(f)   do { (f) &= ~IFF_NOARP; } while (0)
+
+#define IFF_IS_DOWN(f)     ((f) & IFF_DOWN) != 0)
+#define IFF_IS_UP(f)       ((f) & IFF_UP) != 0)
+#define IFF_IS_RUNNING(f)  ((f) & IFF_RUNNING) != 0)
+#define IFF_IS_IPv6(f)     ((f) & IFF_IPv6) != 0)
+#define IFF_IS_NOARP(f)    ((f) & IFF_NOARP) != 0)
+
+#define IFF_SET_IPv4(f)    IFF_CLR_IPv6(f)
+#define IFF_CLR_IPv4(f)    IFF_SET_IPv6(f)
+#define IFF_IS_IPv4(f)     (!IFF_IS_IPv6(f))
 
 /*******************************************************************************************
  * Public Type Definitions

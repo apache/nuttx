@@ -38,6 +38,7 @@
 ifeq ($(CONFIG_NET_UDP),y)
 
 NET_CSRCS += udp_conn.c udp_poll.c udp_send.c udp_input.c udp_callback.c
+NET_CSRCS += udp_ipselect.c
 
 # Include UDP build support
 

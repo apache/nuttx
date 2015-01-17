@@ -229,6 +229,12 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #ifdef CONFIG_NET_IPv4
 int udp_ipv4_input(FAR struct net_driver_s *dev)
 {
+  /* Configure to receive an UDP IPv4 packet */
+
+  udp_ipv4_select(dev);
+
+  /* Then process in the UDP IPv4 input */
+
   return udp_input(dev, IPv4_HDRLEN);
 }
 #endif
@@ -255,6 +261,12 @@ int udp_ipv4_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
 int udp_ipv6_input(FAR struct net_driver_s *dev)
 {
+  /* Configure to receive an UDP IPv6 packet */
+
+  udp_ipv6_select(dev);
+
+  /* Then process in the UDP IPv6 input */
+
   return udp_input(dev, IPv6_HDRLEN);
 }
 #endif

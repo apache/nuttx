@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif.h
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -134,6 +134,20 @@
 #define ICMP_ECHOREPLY  (1 << 10)
 
 #define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT)
+
+/* IPv4/IPv6 Helpers */
+
+#ifdef CONFIG_NET_IPv4
+#  define DEVIF_IS_IPv4(dev) IFF_IS_IPv4(dev->d_flags)
+#else
+#  define DEVIF_IS_IPv4(dev) (0)
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#  define DEVIF_IS_IPv6(dev) IFF_IS_IPv6(dev->d_flags)
+#else
+#  define DEVIF_IS_IPv6(dev) (0)
+#endif
 
 /****************************************************************************
  * Public Type Definitions

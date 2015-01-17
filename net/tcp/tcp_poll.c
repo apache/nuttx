@@ -107,9 +107,9 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
        */
 
 #if defined(CONFIG_NET_IPv4)
-      dev->d_appdata = &dev->d_buf[IPv4TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+      tcp_ipv4_select(dev);
 #else /* if defined(CONFIG_NET_IPv6) */
-      dev->d_appdata = &dev->d_buf[IPv6TCP_HDRLEN + NET_LL_HDRLEN(dev)];
+      tcp_ipv6_select(dev);
 #endif
 
       dev->d_len     = 0;

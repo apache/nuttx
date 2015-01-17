@@ -62,6 +62,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* If both IPv4 and IPv6 support are both enabled, then we will need to build
+ * in some additional domain selection support.
+ */
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#  define NEED_IPDOMAIN_SUPPORT 1
+#endif
+
 /* Timeouts on sendto() do not make sense.  Each polling cycle from the
  * driver is an opportunity to send a packet.  If the driver is not polling,
  * then the network is not up (and there are no polling cycles to drive
@@ -88,8 +96,10 @@
 
 struct sendto_s
 {
-#ifdef CONFIG_NET_SENDTO_TIMEOUT
+#if defined(CONFIG_NET_SENDTO_TIMEOUT) || defined(NEED_IPDOMAIN_SUPPORT)
   FAR struct socket *st_sock;         /* Points to the parent socket structure */
+#endif
+#ifdef CONFIG_NET_SENDTO_TIMEOUT
   uint32_t st_time;                   /* Last send time for determining timeout */
 #endif
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
@@ -110,7 +120,7 @@ struct sendto_s
  *   Check for send timeout.
  *
  * Parameters:
- *   pstate   send state structure
+ *   pstate - sendto state structure
  *
  * Returned Value:
  *   TRUE:timeout FALSE:no timeout
@@ -123,7 +133,7 @@ struct sendto_s
 #ifdef CONFIG_NET_SENDTO_TIMEOUT
 static inline int send_timeout(FAR struct sendto_s *pstate)
 {
-  FAR struct socket *psock = 0;
+  FAR struct socket *psock;
 
   /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
    * If none... we well let the send wait forever.
@@ -144,6 +154,52 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
 #endif /* CONFIG_NET_SENDTO_TIMEOUT */
 
 /****************************************************************************
+ * Function: sendto_ipselect
+ *
+ * Description:
+ *   If both IPv4 and IPv6 support are enabled, then we will need to select
+ *   which one to use when generating the outgoing packet.  If only one
+ *   domain is selected, then the setup is already in place and we need do
+ *   nothing.
+ *
+ * Parameters:
+ *   dev    - The structure of the network driver that caused the interrupt
+ *   pstate - sendto state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef NEED_IPDOMAIN_SUPPORT
+static inline void sendto_ipselect(FAR struct net_driver_s *dev,
+                                   FAR struct sendto_s *pstate)
+{
+  FAR struct socket *psock = pstate->st_sock;
+  DEBUGASSERT(psock);
+
+  /* Which domain the the socket support */
+
+  if (psock->domain == PF_INET)
+    {
+      /* Select the IPv4 domain */
+
+      udp_ipv4_select(dev);
+    }
+  else /* if (psock->domain == PF_INET6) */
+    {
+      /* Select the IPv6 domain */
+
+      DEBUGASSERT(psock->domain == PF_INET6);
+      udp_ipv4_select(dev);
+    }
+}
+#endif
+
+/****************************************************************************
  * Function: sendto_interrupt
  *
  * Description:
@@ -151,7 +207,7 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
  *   send operation when polled by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev        The sructure of the network driver that caused the interrupt
+ *   dev        The structure of the network driver that caused the interrupt
  *   conn       An instance of the UDP connection structure cast to void *
  *   pvpriv     An instance of struct sendto_s cast to void*
  *   flags      Set of events describing why the callback was invoked
@@ -165,8 +221,8 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static uint16_t sendto_interrupt(struct net_driver_s *dev, void *conn,
-                                 void *pvpriv, uint16_t flags)
+static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
+                                 FAR void *pvpriv, uint16_t flags)
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
@@ -207,6 +263,16 @@ static uint16_t sendto_interrupt(struct net_driver_s *dev, void *conn,
 
       else
         {
+#ifdef NEED_IPDOMAIN_SUPPORT
+          /* If both IPv4 and IPv6 support are enabled, then we will need to
+           * select which one to use when generating the outgoing packet.
+           * If only one domain is selected, then the setup is already in
+           * place and we need do nothing.
+           */
+
+          sendto_ipselect(dev, pstate);
+#endif
+
           /* Copy the user data into d_appdata and send it */
 
           devif_send(dev, pstate->st_buffer, pstate->st_buflen);
@@ -390,10 +456,17 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_buflen = len;
   state.st_buffer = buf;
 
-  /* Set the initial time for calculating timeouts */
+#if defined(CONFIG_NET_SENDTO_TIMEOUT) || defined(NEED_IPDOMAIN_SUPPORT)
+  /* Save the reference to the socket structure if it will be needed for
+   * asynchronous processing.
+   */
+
+  state.st_sock = psock;
+#endif
 
 #ifdef CONFIG_NET_SENDTO_TIMEOUT
-  state.st_sock = psock;
+  /* Set the initial time for calculating timeouts */
+
   state.st_time = clock_systimer();
 #endif
 
