@@ -164,7 +164,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
     {
       stm32_gpiowrite(GPIO_MEM_CS, !selected);
     }
-if defined(CONFIG_WL_CC3000)
+#if defined(CONFIG_WL_CC3000)
   else
 #endif
 #endif
