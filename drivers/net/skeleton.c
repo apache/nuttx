@@ -463,10 +463,13 @@ static inline void skel_interrupt_process(FAR struct skel_driver_s *skel)
 static void skel_interrupt_work(FAR void *arg)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+  net_lock_t state;
 
   /* Process pending Ethernet interrupts */
 
+  state = net_lock();
   skel_interrupt_process(skel);
+  net_unlock(state);
 
   /* Re-enable Ethernet interrupts */
 
@@ -583,10 +586,13 @@ static inline void skel_txtimeout_process(FAR struct skel_driver_s *skel)
 static void skel_txtimeout_work(FAR void *arg)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+  net_lock_t state;
 
   /* Process pending Ethernet interrupts */
 
+  state = net_lock();
   skel_txtimeout_process(skel);
+  net_unlock(state);
 }
 #endif
 
@@ -693,10 +699,13 @@ static inline void skel_poll_process(FAR struct skel_driver_s *skel)
 static void skel_poll_work(FAR void *arg)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+  net_lock_t state;
 
   /* Perform the poll */
 
+  state = net_lock();
   skel_poll_process(skel);
+  net_unlock(state);
 }
 #endif
 
@@ -884,10 +893,13 @@ static int inline skel_txavail_process(FAR struct skel_driver_s *skel)
 static void skel_txavail_work(FAR void *arg)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+  net_lock_t state;
 
   /* Perform the poll */
 
+  state = net_lock();
   skel_txavail_process(skel);
+  net_unlock(state);
 }
 #endif
 
