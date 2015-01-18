@@ -9462,3 +9462,7 @@
 	  address for the selected socket IP domain (2015-01-17).
 	* Networking: Final detangling off IPv4 and IPv6 TCP/UDP send logic.
 	  The etworking subsystem now compiles with IPv6 enabled (2015-01-18).
+	* arch/arm/src/tiva/tm4c_ethernet.c:  When calling into the stack
+	  from the worker thread, it is necessary to have the stack locked
+	  (2015-01-18).
+
