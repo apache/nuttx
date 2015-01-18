@@ -73,11 +73,9 @@
 #ifdef CONFIG_NET_IPv4
 void udp_ipv4_select(FAR struct net_driver_s *dev)
 {
-#ifdef CONFIG_NET_IPv6
   /* Clear a bit in the d_flags to distinguish this from an IPv6 packet */
 
-  IFF_SET_IPv4(dev->dflags);
-#endif
+  IFF_SET_IPv4(dev->d_flags);
 
  /* Set the offset to the beginning of the UDP data payload */
 
@@ -96,11 +94,9 @@ void udp_ipv4_select(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
 void udp_ipv6_select(FAR struct net_driver_s *dev)
 {
-#ifdef CONFIG_NET_IPv4
   /* Set a bit in the d_flags to distinguish this from an IPv6 packet */
 
-  IFF_SET_IPv6(dev->dflags);
-#endif
+  IFF_SET_IPv6(dev->d_flags);
 
  /* Set the offset to the beginning of the UDP data payload */
 

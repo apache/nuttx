@@ -341,7 +341,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-        case PF_INET:
+        case PF_INET6:
           {
             if (*addrlen < sizeof(struct sockaddr_in6))
               {

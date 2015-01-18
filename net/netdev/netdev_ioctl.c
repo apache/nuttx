@@ -581,7 +581,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-      case SIOCGIFNETMASK:  /* Get network mask */
+      case SIOCGLIFNETMASK:  /* Get network mask */
         {
           dev = netdev_ifrdev(req);
           if (dev)

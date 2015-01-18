@@ -183,23 +183,20 @@ endmenu # Data link support
 
 source "net/netdev/Kconfig"
 
-# Currently cannot select both IPv4 and IPv6
+menu "Internet Protocol Selection"
 
 config NET_IPv4
-	bool
-	default y if !NET_IPv6
-	default n if NET_IPv6
+	bool "IPv4"
+	default y
 	---help---
 		Build in support for IPv4.
-
-menu "Internet Protocol Selection"
-	depends on EXPERIMENTAL
 
 config NET_IPv6
 	bool "IPv6"
 	default n
+	depends on EXPERIMENTAL
 	---help---
-		Build in support for IPv6.  Not fully implemented.
+		Build in support for IPv6.
 
 source "net/neighbor/Kconfig"
 endmenu # Internet Protocol Selection

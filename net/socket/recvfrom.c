@@ -98,11 +98,7 @@ struct recvfrom_s
   sem_t                    rf_sem;       /* Semaphore signals recv completion */
   size_t                   rf_buflen;    /* Length of receive buffer */
   uint8_t                 *rf_buffer;    /* Pointer to receive buffer */
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *rf_from;      /* Address of sender */
-#else
-  FAR struct sockaddr_in  *rf_from;      /* Address of sender */
-#endif
+  FAR struct sockaddr     *rf_from;      /* Address of sender */
   size_t                   rf_recvlen;   /* The received length */
   int                      rf_result;    /* Success:OK, failure:negated errno */
 };
@@ -582,7 +578,8 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      FAR struct sockaddr_in6 *infrom = pstate->rf_from;
+      FAR struct sockaddr_in6 *infrom =
+        (FAR struct sockaddr_in6 *)pstate->rf_from;
 
       if (infrom)
         {
@@ -602,7 +599,8 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
   else
 #endif
     {
-      FAR struct sockaddr_in *infrom  = pstate->rf_from;
+      FAR struct sockaddr_in *infrom  =
+        (FAR struct sockaddr_in *)pstate->rf_from;
 
       if (infrom)
         {
@@ -855,7 +853,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      FAR struct sockaddr_in6 *infrom = pstate->rf_from;
+      FAR struct sockaddr_in6 *infrom =
+        (FAR struct sockaddr_in6 *)pstate->rf_from;
 
       if (infrom)
         {
@@ -875,7 +874,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
   else
 #endif
     {
-      FAR struct sockaddr_in *infrom  = pstate->rf_from;
+      FAR struct sockaddr_in *infrom  =
+        (FAR struct sockaddr_in *)pstate->rf_from;
 
       if (infrom)
         {
@@ -1012,13 +1012,9 @@ static uint16_t recvfrom_udpinterrupt(struct net_driver_s *dev, void *pvconn,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
-static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
-#ifdef CONFIG_NET_IPv6
-                          FAR struct sockaddr_in6 *infrom,
-#else
-                          FAR struct sockaddr_in *infrom,
-#endif
-                          struct recvfrom_s *pstate)
+static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
+                          size_t len, FAR struct sockaddr *infrom,
+                          FAR struct recvfrom_s *pstate)
 {
   /* Initialize the state structure. */
 
@@ -1187,7 +1183,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
 
 #ifdef CONFIG_NET_PKT
 static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_ll *from)
+                            FAR struct sockaddr *from)
 {
   FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
   struct recvfrom_s state;
@@ -1202,7 +1198,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    */
 
   save = net_lock();
-  recvfrom_init(psock, buf, len, (struct sockaddr_in *)from, &state);
+  recvfrom_init(psock, buf, len, from, &state);
 
   /* TODO recvfrom_init() expects from to be of type sockaddr_in, but
    * in our case is sockaddr_ll
@@ -1265,10 +1261,10 @@ errout_with_state:
  *   Perform the recvfrom operation for a UDP SOCK_DGRAM
  *
  * Parameters:
- *   psock    Pointer to the socket structure for the SOCK_DRAM socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   infrom   INET address of source (may be NULL)
+ *   psock  Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf    Buffer to receive data
+ *   len    Length of buffer
+ *   from   INET address of source (may be NULL)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -1279,13 +1275,8 @@ errout_with_state:
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_IPv6
 static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_in6 *infrom)
-#else
-static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_in *infrom)
-#endif
+                            FAR struct sockaddr *from)
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
   struct recvfrom_s state;
@@ -1300,7 +1291,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    */
 
   save = net_lock();
-  recvfrom_init(psock, buf, len, infrom, &state);
+  recvfrom_init(psock, buf, len, from, &state);
 
   /* Setup the UDP remote connection */
 
@@ -1357,10 +1348,10 @@ errout_with_state:
  *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
  *
  * Parameters:
- *   psock    Pointer to the socket structure for the SOCK_DRAM socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   infrom   INET address of source (may be NULL)
+ *   psock  Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf    Buffer to receive data
+ *   len    Length of buffer
+ *   from   INET address of source (may be NULL)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -1371,13 +1362,8 @@ errout_with_state:
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_IPv6
 static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_in6 *infrom )
-#else
-static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                            FAR struct sockaddr_in *infrom )
-#endif
+                            FAR struct sockaddr *from)
 {
   struct recvfrom_s       state;
   net_lock_t              save;
@@ -1389,7 +1375,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    */
 
   save = net_lock();
-  recvfrom_init(psock, buf, len, infrom, &state);
+  recvfrom_init(psock, buf, len, from, &state);
 
   /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
    * that there may be read-ahead data to be retrieved even after the
@@ -1597,17 +1583,6 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        int flags,FAR struct sockaddr *from,
                        FAR socklen_t *fromlen)
 {
-#if defined(CONFIG_NET_PKT)
-  FAR struct sockaddr_ll *llfrom = (struct sockaddr_ll *)from;
-#endif
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *infrom = (struct sockaddr_in6 *)from;
-#else
-  FAR struct sockaddr_in *infrom = (struct sockaddr_in *)from;
-#endif
-#endif
-
   ssize_t ret;
   int err;
 
@@ -1635,11 +1610,28 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (from)
     {
+      socklen_t minlen;
+
+      /* Get the minimum socket length */
+
+#ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-      if (*fromlen < sizeof(struct sockaddr_in6))
-#else
-      if (*fromlen < sizeof(struct sockaddr_in))
+      if (psock->s_domain == PF_INET)
 #endif
+        {
+          minlen = sizeof(struct sockaddr_in);
+        }
+#endif /*CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+#endif
+        {
+          minlen = sizeof(struct sockaddr_in6);
+        }
+#endif /*CONFIG_NET_IPv6 */
+
+      if (*fromlen < minlen)
         {
           err = EINVAL;
           goto errout;
@@ -1656,21 +1648,21 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #if defined(CONFIG_NET_PKT)
   if (psock->s_type == SOCK_RAW)
     {
-      ret = pkt_recvfrom(psock, buf, len, llfrom);
+      ret = pkt_recvfrom(psock, buf, len, from);
     }
   else
 #endif
 #if defined(CONFIG_NET_TCP)
   if (psock->s_type == SOCK_STREAM)
     {
-      ret = tcp_recvfrom(psock, buf, len, infrom);
+      ret = tcp_recvfrom(psock, buf, len, from);
     }
   else
 #endif
 #if defined(CONFIG_NET_UDP)
   if (psock->s_type == SOCK_DGRAM)
     {
-      ret = udp_recvfrom(psock, buf, len, infrom);
+      ret = udp_recvfrom(psock, buf, len, from);
     }
   else
 #endif
