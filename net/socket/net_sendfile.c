@@ -2,7 +2,7 @@
  * net/socket/net_sendfile.c
  *
  *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Max Holtzberg <mh@uvc.de>
  *
@@ -77,7 +77,8 @@
 #  define CONFIG_NET_TCP_SPLIT_SIZE 40
 #endif
 
-#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -157,11 +158,35 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
   if ((flags & TCP_ACKDATA) != 0)
     {
+      FAR struct tcp_hdr_s *tcp;
+
 #ifdef CONFIG_NET_SOCKOPTS
       /* Update the timeout */
 
       pstate->snd_time = clock_systimer();
 #endif
+
+      /* Get the offset address of the TCP header */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      if (IFF_IS_IPv6(dev->d_flags))
+#endif
+        {
+          DEBUGASSERT(pstate->snd_sock == PF_INET6);
+          tcp = TCPIPv6BUF;
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      else
+#endif
+        {
+          DEBUGASSERT(pstate->snd_sock == PF_INET);
+          tcp = TCPIPv4BUF;
+        }
+#endif /* CONFIG_NET_IPv4 */
 
       /* The current acknowledgement number number is the (relative) offset
        * of the of the next byte needed by the receiver.  The snd_isn is the

@@ -270,7 +270,6 @@ extern "C"
 /* Defined in tcp_conn.c ****************************************************/
 
 struct sockaddr;    /* Forward reference */
-struct tcp_iphdr_s; /* Forward reference */
 
 /****************************************************************************
  * Name: tcp_initialize

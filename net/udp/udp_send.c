@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp_send.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -63,7 +63,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF    ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF    ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+
+#define UDPIPv4BUF ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define UDPIPv6BUF ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -99,80 +103,114 @@
  *
  ****************************************************************************/
 
-void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
+void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 {
-  FAR struct udp_iphdr_s *pudpbuf = UDPBUF;
+  FAR struct udp_hdr_s *udp;
 
   if (dev->d_sndlen > 0)
     {
-      /* The total length to send is the size of the application data plus
-       * the IP and UDP headers (and, eventually, the Ethernet header)
-       */
+      /* Initialize the IP header. */
 
-      dev->d_len = dev->d_sndlen + IPv4UDP_HDRLEN;
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET)
+#endif
+        {
+          /* Get pointers to the IPv4 header and the offset TCP header */
 
-      /* Initialize the IP header.  Note that for IPv6, the IP length field
-       * does not include the IPv6 IP header length.
-       */
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
+          DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
+          udp = UDPIPv4BUF;
+
+          /* Initialize the IPv4 header. */
+
+          ipv4->vhl         = 0x45;
+          ipv4->tos         = 0;
+          ipv4->len[0]      = (dev->d_len >> 8);
+          ipv4->len[1]      = (dev->d_len & 0xff);
+          ++g_ipid;
+          ipv4->ipid[0]     = g_ipid >> 8;
+          ipv4->ipid[1]     = g_ipid & 0xff;
+          ipv4->ipoffset[0] = 0;
+          ipv4->ipoffset[1] = 0;
+          ipv4->ttl         = conn->ttl;
+          ipv4->proto       = IP_PROTO_UDP;
+
+          net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
+          net_ipv4addr_hdrcopy(ipv4->destipaddr, &conn->u.ipv4.raddr);
+
+          /* Calculate IP checksum. */
+
+          ipv4->ipchksum    = 0;
+          ipv4->ipchksum    = ~ipv4_chksum(dev);
+
+          /* The total length to send is the size of the application data
+           * plus the IPv4 and UDP headers (and, eventually, the link layer
+           * header)
+           */
+
+          dev->d_len = dev->d_sndlen + IPv4UDP_HDRLEN;
+        }
+#endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          /* Get pointers to the IPv6 header and the offset TCP header */
 
-      pudpbuf->vtc         = 0x60;
-      pudpbuf->tcf         = 0x00;
-      pudpbuf->flow        = 0x00;
-      pudpbuf->len[0]      = (dev->d_sndlen >> 8);
-      pudpbuf->len[1]      = (dev->d_sndlen & 0xff);
-      pudpbuf->proto       = IP_PROTO_UDP;
-      pudpbuf->ttl         = conn->ttl;
+          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
-      net_ipv6addr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
-      net_ipav6ddr_copy(pudpbuf->destipaddr, &conn->u.ipv4.raddr);
+          DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
+          udp = UDPIPv6BUF;
 
-#else /* CONFIG_NET_IPv6 */
+          /* Initialize the IPv6 header.  Note that the IP length field
+           * does not include the IPv6 IP header length.
+           */
 
-      pudpbuf->vhl         = 0x45;
-      pudpbuf->tos         = 0;
-      pudpbuf->len[0]      = (dev->d_len >> 8);
-      pudpbuf->len[1]      = (dev->d_len & 0xff);
-      ++g_ipid;
-      pudpbuf->ipid[0]     = g_ipid >> 8;
-      pudpbuf->ipid[1]     = g_ipid & 0xff;
-      pudpbuf->ipoffset[0] = 0;
-      pudpbuf->ipoffset[1] = 0;
-      pudpbuf->ttl         = conn->ttl;
-      pudpbuf->proto       = IP_PROTO_UDP;
+          ipv6->vtc         = 0x60;
+          ipv6->tcf         = 0x00;
+          ipv6->flow        = 0x00;
+          ipv6->len[0]      = (dev->d_sndlen >> 8);
+          ipv6->len[1]      = (dev->d_sndlen & 0xff);
+          ipv6->proto       = IP_PROTO_UDP;
+          ipv6->ttl         = conn->ttl;
 
-      net_ipv4addr_hdrcopy(pudpbuf->srcipaddr, &dev->d_ipaddr);
-      net_ipv4addr_hdrcopy(pudpbuf->destipaddr, &conn->u.ipv4.raddr);
+          net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
+          net_ipv6addr_copy(ipv6->destipaddr, conn->u.ipv6.raddr);
 
-      /* Calculate IP checksum. */
+          /* The total length to send is the size of the application data
+           * plus the IPv4 and UDP headers (and, eventually, the link layer
+           * header)
+           */
 
-      pudpbuf->ipchksum    = 0;
-      pudpbuf->ipchksum    = ~(ipv4_chksum(dev));
-
+          dev->d_len = dev->d_sndlen + IPv6UDP_HDRLEN;
+        }
 #endif /* CONFIG_NET_IPv6 */
 
       /* Initialize the UDP header */
 
-      pudpbuf->srcport     = conn->lport;
-      pudpbuf->destport    = conn->rport;
-      pudpbuf->udplen      = HTONS(dev->d_sndlen + UDP_HDRLEN);
+      udp->srcport     = conn->lport;
+      udp->destport    = conn->rport;
+      udp->udplen      = HTONS(dev->d_sndlen + UDP_HDRLEN);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */
 
-      pudpbuf->udpchksum   = 0;
-      pudpbuf->udpchksum   = ~(udp_chksum(dev));
-      if (pudpbuf->udpchksum == 0)
+      udp->udpchksum   = 0;
+      udp->udpchksum   = ~(udp_chksum(dev));
+      if (udp->udpchksum == 0)
         {
-          pudpbuf->udpchksum = 0xffff;
+          udp->udpchksum = 0xffff;
         }
 #else
-      pudpbuf->udpchksum   = 0;
+      udp->udpchksum   = 0;
 #endif
 
       nllvdbg("Outgoing UDP packet length: %d (%d)\n",
-              dev->d_len, (pudpbuf->len[0] << 8) | pudpbuf->len[1]);
+              dev->d_len, (udp->len[0] << 8) | udp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.sent++;
@@ -180,5 +218,4 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
 #endif
     }
 }
-
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

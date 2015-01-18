@@ -21,6 +21,6 @@ config NET_ARCH_CHKSUM
 
 			uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
 			uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
-			uint16_t ipv6_chksum(FAR struct net_driver_s *dev)
-			uint16_t tcp_chksum(FAR struct net_driver_s *dev);
+			uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev);
+			uint16_t tcp_ipv6_chksum(FAR struct net_driver_s *dev);
 			uint16_t udp_chksum(FAR struct net_driver_s *dev);

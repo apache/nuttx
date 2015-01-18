@@ -86,11 +86,8 @@
 #  define NEED_IPDOMAIN_SUPPORT 1
 #endif
 
-#if defined(CONFIG_NET_IPv4)
-#  define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#elif defined(CONFIG_NET_IPv6)
-#  define TCPBUF ((struct tcp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#endif
+#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /* Debug */
 
@@ -285,11 +282,36 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
   if ((flags & TCP_ACKDATA) != 0)
     {
       FAR struct tcp_wrbuffer_s *wrb;
+      FAR struct tcp_hdr_s *tcp;
       FAR sq_entry_t *entry;
       FAR sq_entry_t *next;
       uint32_t ackno;
 
-      ackno = tcp_getsequence(TCPBUF->ackno);
+      /* Get the offset address of the TCP header */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET))
+#endif
+        {
+          DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
+          tcp = TCPIPv4BUF;
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
+          tcp = TCPIPv6BUF;
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Get the ACK number from the TCP header */
+
+      ackno = tcp_getsequence(tcp->ackno);
       nllvdbg("ACK: ackno=%u flags=%04x\n", ackno, flags);
 
       /* Look at every write buffer in the unacked_q.  The unacked_q

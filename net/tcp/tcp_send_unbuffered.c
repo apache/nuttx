@@ -78,7 +78,8 @@
 #  define CONFIG_NET_TCP_SPLIT_SIZE 40
 #endif
 
-#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -232,11 +233,35 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_ACKDATA) != 0)
     {
+      FAR struct tcp_hdr_s *tcp;
+
       /* Update the timeout */
 
 #ifdef CONFIG_NET_SOCKOPTS
       pstate->snd_time = clock_systimer();
 #endif
+
+      /* Get the offset address of the TCP header */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET))
+#endif
+        {
+          DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
+          tcp = TCPIPv4BUF;
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
+          tcp = TCPIPv6BUF;
+        }
+#endif /* CONFIG_NET_IPv6 */
 
       /* The current acknowledgement number number is the (relative) offset
        * of the of the next byte needed by the receiver.  The snd_isn is the
@@ -244,7 +269,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = tcp_getsequence(TCPBUF->ackno) - pstate->snd_isn;
+      pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
       nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
               pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 

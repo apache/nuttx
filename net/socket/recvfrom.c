@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/recvfrom.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,13 +74,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPv4)
-#  define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#  define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#elif defined(CONFIG_NET_IPv6)
-#  define UDPBUF ((struct udp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#  define TCPBUF ((struct tcp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#endif
+#define IPv4BUF    ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF    ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+
+#define UDPIPv4BUF ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define UDPIPv6BUF ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+
+#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -572,26 +573,52 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
                                       FAR struct recvfrom_s *pstate)
 {
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *infrom = pstate->rf_from;
-#else
-  FAR struct sockaddr_in *infrom  = pstate->rf_from;
-#endif
+  /* Get the family from the packet type, IP address from the IP header, and
+   * the port number from the TCP header.
+   */
 
-  if (infrom)
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  if (IFF_IS_IPv6(dev->d_flags))
+#endif
     {
-      infrom->sin_family = AF_INET;
-      infrom->sin_port   = TCPBUF->srcport;
+      FAR struct sockaddr_in6 *infrom = pstate->rf_from;
 
-#ifdef CONFIG_NET_IPv6
-      net_ipv6addr_copy(infrom->sin6_addr.s6_addr, TCPBUF->srcipaddr);
-#else
-      net_ipv4addr_copy(infrom->sin_addr.s_addr,
-                        net_ip4addr_conv32(TCPBUF->srcipaddr));
-#endif
+      if (infrom)
+        {
+          FAR struct tcp_hdr_s *tcp   = TCPIPv6BUF;
+          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
+          infrom->sin_family = AF_INET6;
+          infrom->sin_port   = tcp->srcport;
+
+          net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
+        }
     }
-}
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  else
 #endif
+    {
+      FAR struct sockaddr_in *infrom  = pstate->rf_from;
+
+      if (infrom)
+        {
+          FAR struct tcp_hdr_s *tcp   = TCPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
+          infrom->sin_family = AF_INET;
+          infrom->sin_port   = tcp->srcport;
+
+          net_ipv4addr_copy(infrom->sin_addr.s_addr,
+                            net_ip4addr_conv32(ipv4->srcipaddr));
+        }
+    }
+#endif /* CONFIG_NET_IPv4 */
+}
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: recvfrom_tcpinterrupt
@@ -819,26 +846,52 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_UDP
 static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_s *pstate)
 {
-#ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 *infrom = pstate->rf_from;
-#else
-  FAR struct sockaddr_in *infrom  = pstate->rf_from;
-#endif
+  /* Get the family from the packet type, IP address from the IP header, and
+   * the port number from the UDP header.
+   */
 
-  if (infrom)
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  if (IFF_IS_IPv6(dev->d_flags))
+#endif
     {
-      infrom->sin_family = AF_INET;
-      infrom->sin_port   = UDPBUF->srcport;
+      FAR struct sockaddr_in6 *infrom = pstate->rf_from;
 
-#ifdef CONFIG_NET_IPv6
-      net_ipv6addr_copy(infrom->sin6_addr.s6_addr, UDPBUF->srcipaddr);
-#else
-      net_ipv4addr_copy(infrom->sin_addr.s_addr,
-                        net_ip4addr_conv32(UDPBUF->srcipaddr));
-#endif
+      if (infrom)
+        {
+          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
+          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
+          infrom->sin_family = AF_INET6;
+          infrom->sin_port   = udp->srcport;
+
+          net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
+        }
     }
-}
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  else
 #endif
+    {
+      FAR struct sockaddr_in *infrom  = pstate->rf_from;
+
+      if (infrom)
+        {
+          FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
+          infrom->sin_family = AF_INET;
+          infrom->sin_port   = udp->srcport;
+
+          net_ipv4addr_copy(infrom->sin_addr.s_addr,
+                            net_ip4addr_conv32(ipv4->srcipaddr));
+        }
+    }
+#endif /* CONFIG_NET_IPv4 */
+}
+#endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Function: recvfrom_udpinterrupt

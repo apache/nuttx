@@ -64,8 +64,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF ((struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF ((struct net_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Data
@@ -357,7 +357,7 @@ static int tcp_selectport(uint16_t portno)
 static inline FAR struct tcp_conn_s *
   tcp_ipv4_active(FAR struct net_driver_s *dev, FAR struct tcp_hdr_s *tcp)
 {
-  FAR struct net_iphdr_s *ip = IPv4BUF;
+  FAR struct ipv4_hdr_s *ip = IPv4BUF;
   FAR struct tcp_conn_s *conn;
   in_addr_t srcipaddr;
 #ifdef CONFIG_NETDEV_MULTINIC
@@ -432,7 +432,7 @@ static inline FAR struct tcp_conn_s *
 static inline FAR struct tcp_conn_s *
   tcp_ipv6_active(FAR struct net_driver_s *dev, FAR struct tcp_hdr_s *tcp)
 {
-  FAR struct net_ipv6hdr_s *ip = IPv6BUF;
+  FAR struct ipv6_hdr_s *ip = IPv6BUF;
   FAR struct tcp_conn_s *conn;
   net_ipv6addr_t *srcipaddr;
 #ifdef CONFIG_NETDEV_MULTINIC
@@ -952,7 +952,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       if (ipv6)
 #endif
         {
-          FAR struct net_ipv6hdr_s *ip = IPv6BUF;
+          FAR struct ipv6_hdr_s *ip = IPv6BUF;
 
           conn->mss = TCP_IPv6_INITIAL_MSS(dev);
           net_ipv6addr_copy(conn->u.ipv6.raddr, ip->srcipaddr);
@@ -967,7 +967,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          FAR struct net_iphdr_s *ip = IPv4BUF;
+          FAR struct ipv4_hdr_s *ip = IPv4BUF;
 
           conn->mss = TCP_IPv4_INITIAL_MSS(dev);
           net_ipv4addr_copy(conn->u.ipv4.raddr,

@@ -143,7 +143,7 @@ union ip_binding_u
 #ifdef CONFIG_NET_IPv4
 /* The IPv4 header */
 
-struct net_iphdr_s
+struct ipv4_hdr_s
 {
   uint8_t  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
   uint8_t  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
@@ -161,7 +161,7 @@ struct net_iphdr_s
 #ifdef CONFIG_NET_IPv6
 /* The IPv6 header */
 
-struct net_ipv6hdr_s
+struct ipv6_hdr_s
 {
   uint8_t  vtc;              /* Bits 0-3: version, bits 4-7: traffic class (MS) */
   uint8_t  tcf;              /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */

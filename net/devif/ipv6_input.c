@@ -104,7 +104,7 @@
 
 /* Macros */
 
-#define BUF  ((FAR struct net_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Data
@@ -139,7 +139,7 @@
 
 int ipv6_input(FAR struct net_driver_s *dev)
 {
-  FAR struct net_ipv6hdr_s *pbuf = BUF;
+  FAR struct ipv6_hdr_s *pbuf = BUF;
   uint16_t iplen;
 
   /* This is where the input processing starts. */
