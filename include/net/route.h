@@ -64,7 +64,7 @@ struct rtentry
 {
   FAR struct sockaddr_storage *rt_target;  /* Address of the network */
   FAR struct sockaddr_storage *rt_netmask; /* Network mask defining the sub-net */
-  FAR struct sockaddr_storage *rt_router; /* Gateway address associated with the hop */
+  FAR struct sockaddr_storage *rt_router;  /* Gateway address associated with the hop */
 };
 
 /****************************************************************************

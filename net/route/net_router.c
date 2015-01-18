@@ -65,7 +65,7 @@ struct route_ipv4_match_s
 #ifdef CONFIG_NET_IPv6
 struct route_ipv6_match_s
 {
-  net_ipv6addr_t target;  /* arget IPv6 address on an external network to match */
+  net_ipv6addr_t target;  /* Target IPv6 address on an external network to match */
   net_ipv6addr_t router;  /* IPv6 address of the router on one of our networks*/
 };
 #endif

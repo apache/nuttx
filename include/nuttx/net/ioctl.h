@@ -82,7 +82,7 @@
 
 #define SIOCGIFHWADDR    _SIOC(0x0013)  /* Get hardware address */
 #define SIOCSIFHWADDR    _SIOC(0x0014)  /* Set hardware address */
-#define SIOCDIFADDR      _SIOC(0x0015)  /* Delete IP address */
+#define SIOCDIFADDR      _SIOC(0x0015)  /* Delete IP address (IPv4 and IPv6) */
 #define SIOCGIFCOUNT     _SIOC(0x0016)  /* Get number of devices */
 
 /* Interface flags */

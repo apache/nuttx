@@ -433,6 +433,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   net_lock_t save;
   int ret;
 #endif
+  socklen_t minlen;
   int err;
 
   /* If to is NULL or tolen is zero, then this function is same as send (for
@@ -452,16 +453,32 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that a valid address has been provided */
 
-#ifdef CONFIG_NET_IPv6
-  if (to->sa_family != AF_INET6 || tolen < sizeof(struct sockaddr_in6))
-#else
-  if (to->sa_family != AF_INET || tolen < sizeof(struct sockaddr_in))
+  switch (to->sa_family)
+    {
+#ifdef CONFIG_NET_IPv4
+    case AF_INET:
+      minlen = sizeof(struct sockaddr_in);
+      break;
 #endif
-  {
-      ndbg("ERROR: Invalid address\n");
+
+#ifdef CONFIG_NET_IPv6
+    case AF_INET6:
+      minlen = sizeof(struct sockaddr_in6);
+      break;
+#endif
+
+    default:
+      ndbg("ERROR: Unrecognized address family: %d\n", to->sa_family);
+      err = EAFNOSUPPORT;
+      goto errout;
+    }
+
+  if (tolen < minlen)
+    {
+      ndbg("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
       err = EBADF;
       goto errout;
-  }
+    }
 
   /* Verify that the psock corresponds to valid, allocated socket */
 

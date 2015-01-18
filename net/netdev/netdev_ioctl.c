@@ -72,10 +72,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* This is really kind of bogus.. When asked for an IP address, this is
+ * family that is returned in the ifr structure.  Probably could just skip
+ * this since the address family has nothing to do with the Ethernet address.
+ */
+
 #ifdef CONFIG_NET_IPv6
-# define AF_INETX AF_INET6
+#  define AF_INETX AF_INET6
 #else
-# define AF_INETX AF_INET
+#  define AF_INETX AF_INET
 #endif
 
 /****************************************************************************
@@ -682,7 +687,6 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              req->ifr_hwaddr.sa_family = AF_INETX;
               memcpy(dev->d_mac.ether_addr_octet,
                      req->ifr_hwaddr.sa_data, IFHWADDRLEN);
               ret = OK;
@@ -871,7 +875,7 @@ static int netdev_imsfioctl(FAR struct socket *psock, int cmd,
 static int netdev_rtioctl(FAR struct socket *psock, int cmd,
                           FAR struct rtentry *rtentry)
 {
-  int ret = -EINVAL;
+  int ret = -EAFNOSUPPORT;
 
   /* Execute the command */
 
@@ -879,9 +883,6 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
     {
       case SIOCADDRT:  /* Add an entry to the routing table */
         {
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          FAR struct sockaddr_in *addr;
-#endif
           /* The target address and the netmask are required values */
 
           if (!retentry || !rtentry->rt_target || !rtentry->rt_netmask)
@@ -889,32 +890,28 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
               return -EINVAL;
             }
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          addr = (FAR struct sockaddr_in *)rtentry->rt_target;
-          if (addr->sin_family == AF_INET)
+#ifdef CONFIG_NET_IPv4
+          if (rtentry->rt_target.ss_family == AF_INET)
+#ifdef CONFIG_NET_IPv6
+#endif
             {
               ret = ioctl_addipv4route(rtentry);
             }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
           else
+#endif
             {
               ret = ioctl_addipv6route(rtentry);
             }
-
-#elif defined(CONFIG_NET_IPv4)
-          ret = ioctl_addipv4route(rtentry);
-#elif defined(CONFIG_NET_IPv6)
-          ret = ioctl_addipv6route(rtentry);
-#else
-          ret = -EAFNOSUPPORT;
-#endif
+#endif /* CONFIG_NET_IPv4 */
         }
         break;
 
       case SIOCDELRT:  /* Delete an entry from the routing table */
         {
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          FAR struct sockaddr_in *addr;
-#endif
           /* The target address and the netmask are required values */
 
           if (!retentry || !rtentry->rt_target || !rtentry->rt_netmask)
@@ -922,24 +919,23 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
               return -EINVAL;
             }
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          addr = (FAR struct sockaddr_in *)rtentry->rt_target;
-          if (addr->sin_family == AF_INET)
+#ifdef CONFIG_NET_IPv4
+          if (rtentry->rt_target.ss_family == AF_INET)
+#ifdef CONFIG_NET_IPv6
+#endif
             {
               ret = ioctl_delipv4route(rtentry);
             }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
           else
+#endif
             {
               ret = ioctl_delipv6route(rtentry);
             }
-
-#elif defined(CONFIG_NET_IPv4)
-          ret = ioctl_delipv4route(rtentry);
-#elif defined(CONFIG_NET_IPv6)
-          ret = ioctl_delipv6route(rtentry);
-#else
-          ret = -EAFNOSUPPORT;
-#endif
+#endif /* CONFIG_NET_IPv4 */
         }
         break;
 
