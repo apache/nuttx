@@ -9465,4 +9465,8 @@
 	* arch/arm/src/tiva/tm4c_ethernet.c:  When calling into the stack
 	  from the worker thread, it is necessary to have the stack locked
 	  (2015-01-18).
+	* nuttx/arch/arm/src/stm32/stm32_serial.c: fix declaration and
+          definition of up_receive() and up_dma_receive() to match fields of
+	  uart_ops_s from nuttx/include/nuttx/serial/serial.h.  From Freddie
+	  Chopin (2015-01-19).
 
