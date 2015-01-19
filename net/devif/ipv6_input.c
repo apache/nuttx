@@ -104,7 +104,7 @@
 
 /* Macros */
 
-#define BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Data
@@ -139,7 +139,7 @@
 
 int ipv6_input(FAR struct net_driver_s *dev)
 {
-  FAR struct ipv6_hdr_s *pbuf = BUF;
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   uint16_t iplen;
 
   /* This is where the input processing starts. */
@@ -151,7 +151,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   /* Start of IP input header processing code. */
   /* Check validity of the IP header. */
 
-  if ((pbuf->vtc & 0xf0) != 0x60)
+  if ((ipv6->vtc & 0xf0) != 0x60)
     {
       /* IP version and header length. */
 
@@ -159,7 +159,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
       g_netstats.ip.drop++;
       g_netstats.ip.vhlerr++;
 #endif
-      nlldbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
+
+      nlldbg("Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
       goto drop;
     }
 
@@ -177,7 +178,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * the size of the IPv6 header (40 bytes).
    */
 
-  iplen = (pbuf->len[0] << 8) + pbuf->len[1] + IPv6_HDRLEN;
+  iplen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN;
   if (iplen <= dev->d_len)
     {
       dev->d_len = iplen;
@@ -195,8 +196,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
     */
 
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
-  if (pbuf->proto == IP_PROTO_UDP &&
-      net_ipv6addr_cmp(pbuf->destipaddr, g_ipv6_alloneaddr))
+  if (ipv6->proto == IP_PROTO_UDP &&
+      net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_alloneaddr))
     {
       return udp_ipv6_input(dev);
     }
@@ -233,8 +234,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
        * multicast packets that are sent to the ff02::/16 addresses.
        */
 
-      if (!net_ipv6addr_cmp(pbuf->destipaddr, dev->d_ipv6addr) &&
-          pbuf->destipaddr[0] != 0xff02)
+      if (!net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr) &&
+          ipv6->destipaddr[0] != HTONS(0xff02))
         {
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.ip.drop++;
@@ -247,7 +248,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * according to the protocol.
    */
 
-  switch (pbuf->proto)
+  switch (ipv6->proto)
     {
 #ifdef CONFIG_NET_TCP
       case IP_PROTO_TCP:   /* TCP input */
@@ -275,7 +276,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
         g_netstats.ip.protoerr++;
 #endif
 
-        nlldbg("Unrecognized IP protocol\n");
+        nlldbg("Unrecognized IP protocol: %04x\n", ipv6->proto);
         goto drop;
     }
 
