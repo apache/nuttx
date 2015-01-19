@@ -107,6 +107,8 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 {
   FAR struct udp_hdr_s *udp;
 
+  nllvdbg("IP payload: %d bytes\n", dev->d_len);
+
   if (dev->d_sndlen > 0)
     {
       /* Initialize the IP header. */
@@ -209,8 +211,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
       udp->udpchksum   = 0;
 #endif
 
-      nllvdbg("Outgoing UDP packet length: %d (%d)\n",
-              dev->d_len, (udp->len[0] << 8) | udp->len[1]);
+      nllvdbg("Outgoing UDP packet length: %d\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.sent++;

@@ -250,6 +250,8 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
 static void tcp_sendcomplete(FAR struct net_driver_s *dev,
                              FAR struct tcp_hdr_s *tcp)
 {
+  nllvdbg("TCP payload: %d (%d) bytes\n", dev->d_sndlen, dev->d_len);
+
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
@@ -268,8 +270,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev,
     }
 #endif /* CONFIG_NET_IPv4 */
 
-  nllvdbg("Outgoing TCP packet length: %d (%d)\n",
-          dev->d_len, (tcp->len[0] << 8) | tcp->len[1]);
+  nllvdbg("Outgoing TCP packet length: %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.sent++;
