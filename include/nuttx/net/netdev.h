@@ -99,7 +99,7 @@ struct net_driver_s
 #ifdef CONFIG_NET_MULTILINK
   /* Multi network devices using multiple data links protocols are selected */
 
-  uint8_t d_lltype;             /* See enum net_datalink_e */
+  uint8_t d_lltype;             /* See enum net_lltype_e */
   uint8_t d_llhdrlen;           /* Link layer header size */
   uint16_t d_mtu;               /* Maximum packet size */
 #ifdef CONFIG_NET_TCP

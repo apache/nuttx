@@ -68,6 +68,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ETHBUF    ((struct eth_hdr_s *)&dev->d_buf[0])
 #define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
@@ -110,66 +111,92 @@ FAR struct devif_callback_s *g_echocallback = NULL;
 
 void icmpv6_input(FAR struct net_driver_s *dev)
 {
-  FAR struct icmpv6_iphdr_s *picmp = ICMPv6BUF;
+  FAR struct icmpv6_iphdr_s *icmp = ICMPv6BUF;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;
 #endif
 
+  /* Set a bit in the d_flags to distinguish this from an IPv6 packet */
+
+  IFF_SET_IPv6(dev->d_flags);
+
   /* If we get a neighbor solicitation for our address we should send
    * a neighbor advertisement message back.
    */
 
-  if (picmp->type == ICMPv6_NEIGHBOR_SOLICIT)
+  if (icmp->type == ICMPv6_NEIGHBOR_SOLICIT)
     {
-      if (net_ipv6addr_cmp(picmp->icmpv6data, dev->d_ipv6addr))
+      /* If the data matches our address, add the neighbor to the list
+       * of neighbors.
+       */
+
+      if (net_ipv6addr_cmp(icmp->icmpv6data, dev->d_ipv6addr))
         {
-          if (picmp->options[0] == ICMPv6_OPTION_SOURCE_LINK_ADDRESS)
+          if (icmp->options[0] == ICMPv6_OPTION_SOURCE_LINK_ADDRESS)
             {
               /* Save the sender's address in our neighbor list. */
 
-              net_neighbor_add(picmp->srcipaddr,
-                               (FAR struct net_neighbor_addr_s *)&(picmp->options[2]));
+              net_neighbor_add(icmp->srcipaddr,
+                               (FAR struct net_neighbor_addr_s *)&(icmp->options[2]));
             }
 
           /* We should now send a neighbor advertisement back to where the
            * neighbor solicitation came from.
            */
 
-          picmp->type = ICMPv6_NEIGHBOR_ADVERTISE;
-          picmp->flags = ICMPv6_FLAG_S; /* Solicited flag. */
+          icmp->type = ICMPv6_NEIGHBOR_ADVERTISE;
+          icmp->flags = ICMPv6_FLAG_S; /* Solicited flag. */
 
-          picmp->reserved1 = picmp->reserved2 = picmp->reserved3 = 0;
+          icmp->reserved1 = 0;
+          icmp->reserved2 = 0;
+          icmp->reserved3 = 0;
 
-          net_ipv6addr_copy(picmp->destipaddr, picmp->srcipaddr);
-          net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipv6addr);
+          net_ipv6addr_copy(icmp->destipaddr, icmp->srcipaddr);
+          net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
-          picmp->options[0]   = ICMPv6_OPTION_TARGET_LINK_ADDRESS;
-          picmp->options[1]   = 1;  /* Options length, 1 = 8 bytes. */
-          memcpy(&(picmp->options[2]), &dev->d_mac, IFHWADDRLEN);
+          icmp->options[0]   = ICMPv6_OPTION_TARGET_LINK_ADDRESS;
+          icmp->options[1]   = 1;  /* Options length, 1 = 8 bytes. */
+          memcpy(&(icmp->options[2]), &dev->d_mac, IFHWADDRLEN);
 
-          picmp->icmpv6chksum = 0;
-          picmp->icmpv6chksum = ~icmpv6_chksum(dev);
+          icmp->icmpv6chksum = 0;
+          icmp->icmpv6chksum = ~icmpv6_chksum(dev);
+
+#ifdef CONFIG_NET_ETHERNET
+          /* Move the source and to the destination addresses in the
+           * Ethernet header and use our MAC as the new source address.
+           */
+
+#ifdef CONFIG_NET_MULTILINK
+          if (dev->d_lltype == NET_LL_ETHERNET)
+#endif
+            {
+              FAR struct eth_hdr_s *eth = ETHBUF;
+
+              memcpy(eth->dest, eth->src, ETHER_ADDR_LEN);
+              memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            }
+#endif
         }
       else
         {
           goto drop;
         }
     }
-  else if (picmp->type == ICMPv6_ECHO_REQUEST)
+  else if (icmp->type == ICMPv6_ECHO_REQUEST)
     {
       /* ICMPv6 echo (i.e., ping) processing. This is simple, we only
        * change the ICMPv6 type from ECHO to ECHO_REPLY and update the
        * ICMPv6 checksum before we return the packet.
        */
 
-      picmp->type = ICMPv6_ECHO_REPLY;
+      icmp->type = ICMPv6_ECHO_REPLY;
 
-      net_ipv6addr_copy(picmp->destipaddr, picmp->srcipaddr);
-      net_ipv6addr_copy(picmp->srcipaddr, dev->d_ipv6addr);
+      net_ipv6addr_copy(icmp->destipaddr, icmp->srcipaddr);
+      net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
-      picmp->icmpv6chksum = 0;
-      picmp->icmpv6chksum = ~icmpv6_chksum(dev);
+      icmp->icmpv6chksum = 0;
+      icmp->icmpv6chksum = ~icmpv6_chksum(dev);
     }
 
   /* If an ICMPv6 echo reply is received then there should also be
@@ -177,7 +204,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
    */
 
 #ifdef CONFIG_NET_ICMPv6v6_PING
-  else if (picmp->type == ICMPv6_ECHO_REPLY && g_echocallback)
+  else if (icmp->type == ICMPv6_ECHO_REPLY && g_echocallback)
     {
       uint16_t flags = ICMPv6_ECHOREPLY;
 
@@ -185,7 +212,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
         {
           /* Dispatch the ECHO reply to the waiting thread */
 
-          flags = devif_callback_execute(dev, picmp, flags, g_echocallback);
+          flags = devif_callback_execute(dev, icmp, flags, g_echocallback);
         }
 
       /* If the ECHO reply was not handled, then drop the packet */
@@ -201,12 +228,12 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
   else
     {
-      nlldbg("Unknown ICMPv6 cmd: %d\n", picmp->type);
+      nlldbg("Unknown ICMPv6 cmd: %d\n", icmp->type);
       goto typeerr;
     }
 
   nllvdbg("Outgoing ICMPv6 packet length: %d (%d)\n",
-          dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+          dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;
