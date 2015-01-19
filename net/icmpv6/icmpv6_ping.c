@@ -297,7 +297,7 @@ end_wait:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imcp_ping
+ * Name: imcpv6_ping
  *
  * Description:
  *   Send a ECHO request and wait for the ECHO response
