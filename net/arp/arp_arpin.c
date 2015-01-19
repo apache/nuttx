@@ -103,7 +103,7 @@
 
 void arp_arpin(FAR struct net_driver_s *dev)
 {
-  FAR struct arp_hdr_s *parp = ARPBUF;
+  FAR struct arp_hdr_s *arp = ARPBUF;
   in_addr_t ipaddr;
 
   if (dev->d_len < (sizeof(struct arp_hdr_s) + ETH_HDRLEN))
@@ -115,8 +115,8 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
   dev->d_len = 0;
 
-  ipaddr = net_ip4addr_conv32(parp->ah_dipaddr);
-  switch(parp->ah_opcode)
+  ipaddr = net_ip4addr_conv32(arp->ah_dipaddr);
+  switch(arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
         nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
@@ -125,27 +125,27 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
         if (net_ipv4addr_cmp(ipaddr, dev->d_ipaddr))
           {
-            struct eth_hdr_s *peth = ETHBUF;
+            FAR struct eth_hdr_s *eth = ETHBUF;
 
             /* First, we register the one who made the request in our ARP
              * table, since it is likely that we will do more communication
              * with this host in the future.
              */
 
-            arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
+            arp_update(arp->ah_sipaddr, arp->ah_shwaddr);
 
-            parp->ah_opcode = HTONS(ARP_REPLY);
-            memcpy(parp->ah_dhwaddr, parp->ah_shwaddr, ETHER_ADDR_LEN);
-            memcpy(parp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(peth->dest, parp->ah_dhwaddr, ETHER_ADDR_LEN);
+            arp->ah_opcode = HTONS(ARP_REPLY);
+            memcpy(arp->ah_dhwaddr, arp->ah_shwaddr, ETHER_ADDR_LEN);
+            memcpy(arp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(eth->dest, arp->ah_dhwaddr, ETHER_ADDR_LEN);
 
-            parp->ah_dipaddr[0] = parp->ah_sipaddr[0];
-            parp->ah_dipaddr[1] = parp->ah_sipaddr[1];
-            net_ipv4addr_hdrcopy(parp->ah_sipaddr, &dev->d_ipaddr);
-            arp_dump(parp);
+            arp->ah_dipaddr[0] = arp->ah_sipaddr[0];
+            arp->ah_dipaddr[1] = arp->ah_sipaddr[1];
+            net_ipv4addr_hdrcopy(arp->ah_sipaddr, &dev->d_ipaddr);
+            arp_dump(arp);
 
-            peth->type          = HTONS(ETHTYPE_ARP);
+            eth->type           = HTONS(ETHTYPE_ARP);
             dev->d_len          = sizeof(struct arp_hdr_s) + ETH_HDRLEN;
           }
         break;
@@ -161,11 +161,11 @@ void arp_arpin(FAR struct net_driver_s *dev)
           {
             /* Yes... Insert the address mapping in the ARP table */
 
-            arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
+            arp_update(arp->ah_sipaddr, arp->ah_shwaddr);
 
             /* Then notify any logic waiting for the ARP result */
 
-            arp_notify(net_ip4addr_conv32(parp->ah_sipaddr));
+            arp_notify(net_ip4addr_conv32(arp->ah_sipaddr));
           }
         break;
     }
