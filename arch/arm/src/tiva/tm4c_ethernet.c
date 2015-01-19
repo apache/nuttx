@@ -3929,6 +3929,10 @@ static void tiva_ipv6multicast(FAR struct tiva_ethmac_s *priv)
    * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
    * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
    * to the Ethernet MAC address 33:33:00:01:00:03.
+   *
+   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
+   * Message, but the ICMPv6 Neighbor Solicitation message seems to
+   * use 33:33:ff:01:00:03.
    */
 
   mac[0] = 0x33;
@@ -3936,7 +3940,7 @@ static void tiva_ipv6multicast(FAR struct tiva_ethmac_s *priv)
 
   dev    = &priv->dev;
   tmp16  = dev->d_ipv6addr[6];
-  mac[2] = tmp16 & 0xff;
+  mac[2] = 0xff;
   mac[3] = tmp16 >> 8;
 
   tmp16  = dev->d_ipv6addr[7];
