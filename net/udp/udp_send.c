@@ -107,7 +107,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 {
   FAR struct udp_hdr_s *udp;
 
-  nllvdbg("IP payload: %d bytes\n", dev->d_len);
+  nllvdbg("UDP payload: %d (%d) bytes\n", dev->d_sndlen, dev->d_len);
 
   if (dev->d_sndlen > 0)
     {
