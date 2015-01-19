@@ -120,7 +120,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
    * a neighbor advertisement message back.
    */
 
-  if (picmp->type == ICMPv6_NEIGHBOR_SOLICITATION)
+  if (picmp->type == ICMPv6_NEIGHBOR_SOLICIT)
     {
       if (net_ipv6addr_cmp(picmp->icmpv6data, dev->d_ipv6addr))
         {
@@ -136,7 +136,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
            * neighbor solicitation came from.
            */
 
-          picmp->type = ICMPv6_NEIGHBOR_ADVERTISEMENT;
+          picmp->type = ICMPv6_NEIGHBOR_ADVERTISE;
           picmp->flags = ICMPv6_FLAG_S; /* Solicited flag. */
 
           picmp->reserved1 = picmp->reserved2 = picmp->reserved3 = 0;

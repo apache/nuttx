@@ -57,42 +57,40 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ICMP definitions */
+/* ICMPv6 definitions */
 
-/* ICMP Message Types */
+/* ICMPv6 Message Types */
 
-#define ICMPv6_ECHO_REPLY              0    /* RFC 792 */
-#define ICMPv6_DEST_UNREACHABLE        3    /* RFC 792 */
-#define ICMPv6_SRC_QUENCH              4    /* RFC 792 */
-#define ICMPv6_REDIRECT                5    /* RFC 792 */
-#define ICMPv6_ALT_HOST_ADDRESS        6
-#define ICMPv6_ECHO_REQUEST            8    /* RFC 792 */
-#define ICMPv6_ROUTER_ADVERTISEMENT    9    /* RFC 1256 */
-#define ICMPv6_ROUTER_SOLICITATION     10   /* RFC 1256 */
-#define ICMPv6_TIME_EXCEEDED           11   /* RFC 792 */
-#define ICMPv6_PARAMETER_PROBLEM       12
-#define ICMPv6_TIMESTAMP_REQUEST       13
-#define ICMPv6_TIMESTAMP_REPLY         14
-#define ICMPv6_INFORMATION_REQUEST     15
-#define ICMPv6_INFORMATION_REPLY       16
-#define ICMPv6_ADDRESS_MASK_REQUEST    17
-#define ICMPv6_ADDRESS_MASK_REPLY      18
-#define ICMPv6_TRACEROUTE              30
-#define ICMPv6_CONVERSION_ERROR        31
-#define ICMPv6_MOBILE_HOST_REDIRECT    32
-#define ICMPv6_IPV6_WHEREAREYOU        33
-#define ICMPv6_IPV6_IAMHERE            34
-#define ICMPv6_MOBILE_REGIS_REQUEST    35
-#define ICMPv6_MOBILE_REGIS_REPLY      36
-#define ICMPv6_DOMAIN_NAME_REQUEST     37
-#define ICMPv6_DOMAIN_NAME_REPLY       38
-#define ICMPv6_SKIP_DISCOVERY_PROTO    39
-#define ICMPv6_PHOTURIS_SECURITY_FAIL  40
-#define ICMPv6_EXP_MOBILE_PROTO        41   /* RFC 4065 */
-#define ICMPv6_ECHO_REPLY             129
-#define ICMPv6_ECHO_REQUEST           128
-#define ICMPv6_NEIGHBOR_SOLICITATION  135
-#define ICMPv6_NEIGHBOR_ADVERTISEMENT 136
+#define ICMPv6_RESERVED                0    /* RFC 4443 */
+#define ICMPv6_DEST_UNREACHABLE        1
+#define ICMPv6_PACKET_TOO_BIG          2
+#define ICMPv6_PACKET_TIME_EXCEEDED    3
+#define ICMPv6_PACKET_PARAM_PROBLEM    4
+#define ICMPv6_PRIVATE_ERR_MSG_1       100
+#define ICMPv6_PRIVATE_ERR_MSG_2       101
+#define ICMPv6_RESERVED_ERROR_MSG      127
+#define ICMPv6_ECHO_REQUEST            128
+#define ICMPv6_ECHO_REPLY              129
+#define ICMPV6_MCAST_LISTEN_QUERY      130   /* RFC 2710 */
+#define ICMPV6_MCAST_LISTEN_REPORT     131
+#define ICMPV6_MCAST_LISTEN_DONE       132
+#define ICMPV6_ROUTER_SOLICIT          133   /* RFC 4861 */
+#define ICMPV6_ROUTER_ADVERTISE        134
+#define ICMPv6_NEIGHBOR_SOLICIT        135
+#define ICMPv6_NEIGHBOR_ADVERTISE      136
+#define ICMPv6_REDIRECT                137
+#define ICMPV6_ROUTER_RENUMBERING      138   /* Matt Crawford */
+#define ICMPV6_NODE_INFO_QUERY         139   /* RFC 4620 */
+#define ICMPV6_NODE_INFO_REPLY         140
+#define ICMPV6_INV_NEIGHBOR_DISCOVERY  141   /* RFC 3122 */
+#define ICMPV6_INV_NEIGHBOR_ADVERTISE  142
+#define ICMPV6_HOME_AGENT_DISCOVERY    144   /* RFC 3775 */
+#define ICMPV6_HOME_AGENT_REPLY        145
+#define ICMPV6_MOBILE_PREFIX_SOLICIT   146
+#define ICMPV6_MOBILE_PREFIX_ADVERTISE 147
+#define ICMPv6_PRIVATE_INFO_MSG_1      200   /* RFC 4443 */
+#define ICMPv6_PRIVATE_INFO_MSG_2      201
+#define ICMPv6_RESERVED_INFO_MSG       255
 
 #define ICMPv6_FLAG_S (1 << 6)
 
