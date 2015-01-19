@@ -275,7 +275,10 @@ errout_with_wrfd:
 errout_with_driver:
   unregister_driver(devname);
 errout_with_dev:
-  pipecommon_freedev(dev);
+  if (dev)
+    {
+      pipecommon_freedev(dev);
+    }
 errout_with_pipe:
   pipe_free(pipeno);
 errout:
