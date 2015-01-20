@@ -9477,3 +9477,6 @@
 	  destination address in the output Ethernet header OR to send an
 	  ICMPv6 Neighbor Solicitation if there is no entry in the Neighbor
 	  table for the IPv6 address (2015-01-20).
+	* Networking:  Add missing raw/packet socket support to all Ethernet
+	  driverss (2015-01-20).
+
