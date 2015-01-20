@@ -897,7 +897,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-                  if (BUF->type == HTONS(ETHTYPE_IP))
+                  if (IFF_IS_IPv4(priv->lp_dev.d_flags))
 #endif
                     {
                       arp_out(&priv->lp_dev);
@@ -930,7 +930,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 #ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
-                  if (BUF->type == HTONS(ETHTYPE_IP))
+                  if (IFF_IS_IPv4(priv->lp_dev.d_flags))
                     {
                       arp_out(&priv->lp_dev);
                     }

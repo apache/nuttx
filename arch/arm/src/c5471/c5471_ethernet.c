@@ -1256,7 +1256,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(dev->d_flags))
 #endif
                 {
                   arp_out(dev);
@@ -1290,7 +1290,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(dev->d_flags))
                 {
                   arp_out(dev);
                 }
