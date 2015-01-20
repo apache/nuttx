@@ -603,6 +603,12 @@ static void e1000_receive(struct e1000_dev *e1000)
                 {
                   arp_out(&e1000->netdev);
                 }
+#ifdef CONFIG_NET_IPv6
+              else
+                {
+                  neighbor_out(&e1000->netdev);
+                }
+#endif
 
               /* And send the packet */
 
@@ -626,12 +632,18 @@ static void e1000_receive(struct e1000_dev *e1000)
 
           if (e1000->netdev.d_len > 0)
            {
-#ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
               if (IFF_IS_IPv4(e1000->netdev.d_flags))
                 {
                   arp_out(&e1000->netdev);
+                }
+              else
+#endif
+#ifdef CONFIG_NET_IPv6
+                {
+                  neighbor_out(&e1000->netdev);
                 }
 #endif
 

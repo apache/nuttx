@@ -326,6 +326,12 @@ static void skel_receive(FAR struct skel_driver_s *skel)
                 {
                   arp_out(&skel->sk_dev);
                 }
+#ifdef CONFIG_NET_IPv6
+              else
+                {
+                  neighbor_out(&kel->sk_dev);
+                }
+#endif
 
               /* And send the packet */
 
@@ -349,12 +355,18 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 
           if (skel->sk_dev.d_len > 0)
            {
-#ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
               if (IFF_IS_IPv4(skel->sk_dev.d_flags))
                 {
                   arp_out(&skel->sk_dev);
+                }
+              else
+#endif
+#ifdef CONFIG_NET_IPv6
+                {
+                  neighbor_out(&skel->sk_dev);
                 }
 #endif
 

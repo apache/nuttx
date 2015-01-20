@@ -472,6 +472,12 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
             {
               arp_out(&cs89x0->cs_dev);
             }
+#ifdef CONFIG_NET_IPv6
+          else
+            {
+              neighbor_out(&s89x0->cs_dev);
+            }
+#endif
 
           /* And send the packet */
 
@@ -495,12 +501,18 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
       if (cs89x0->cs_dev.d_len > 0)
         {
-#ifdef CONFIG_NET_IPv4
           /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
           if (IFF_IS_IPv4(cs89x0->cs_dev.d_flags))
             {
               arp_out(&cs89x0->cs_dev);
+            }
+          else
+#endif
+#ifdef CONFIG_NET_IPv6
+            {
+              neighbor_out(&cs89x0->cs_dev);
             }
 #endif
 

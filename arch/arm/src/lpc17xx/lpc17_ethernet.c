@@ -914,6 +914,12 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
                     {
                       arp_out(&priv->lp_dev);
                     }
+#ifdef CONFIG_NET_IPv6
+                  else
+                    {
+                      neighbor_out(&priv->lp_dev);
+                    }
+#endif
 
                   /* And send the packet */
 
@@ -939,12 +945,18 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
               if (priv->lp_dev.d_len > 0)
                {
-#ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(priv->lp_dev.d_flags))
                     {
                       arp_out(&priv->lp_dev);
+                    }
+                  else
+#endif
+#ifdef CONFIG_NET_IPv6
+                    {
+                      neighbor_out(&priv->lp_dev);
                     }
 #endif
 

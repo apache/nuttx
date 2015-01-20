@@ -1016,6 +1016,12 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
                     {
                       arp_out(&dm9x->dm_dev);
                     }
+#ifdef CONFIG_NET_IPv6
+                  else
+                    {
+                      neighbor_out(&dm9x->dm_dev);
+                    }
+#endif
 
                   /* And send the packet */
 
@@ -1039,12 +1045,18 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
               if (dm9x->dm_dev.d_len > 0)
                {
-#ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(dm9x->dm_dev.d_flags))
                     {
                       arp_out(&dm9x->dm_dev);
+                    }
+                  else
+#endif
+#ifdef CONFIG_NET_IPv6
+                    {
+                      neighbor_out(&dm9x->dm_dev);
                     }
 #endif
 

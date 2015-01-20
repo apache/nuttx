@@ -1719,7 +1719,12 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
                 {
                   arp_out(&priv->dev);
                 }
-
+#ifdef CONFIG_NET_IPv6
+              else
+                {
+                  neighbor_out(&priv->dev);
+                }
+#endif
               /* And send the packet */
 
               tiva_transmit(priv);
@@ -1742,12 +1747,18 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
 
           if (priv->dev.d_len > 0)
            {
-#ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
               if (IFF_IS_IPv4(priv->dev.d_flags))
                 {
                   arp_out(&priv->dev);
+                }
+              else
+#endif
+#ifdef CONFIG_NET_IPv6
+                {
+                  neighbor_out(&priv->dev);
                 }
 #endif
 

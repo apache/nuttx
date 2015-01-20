@@ -339,6 +339,12 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
                 {
                   arp_out(&vnet->sk_dev);
                 }
+#ifdef CONFIG_NET_IPv6
+              else
+                {
+                  neighbor_out(&vnet->sk_dev);
+                }
+#endif
 
               /* And send the packet */
 
@@ -362,12 +368,18 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 
           if (vnet->sk_dev.d_len > 0)
            {
-#ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
               if (IFF_IS_IPv4(vnet->sk_dev.d_flags))
                 {
                   arp_out(&vnet->sk_dev);
+                }
+              else
+#endif
+#ifdef CONFIG_NET_IPv6
+                {
+                  neighbor_out(&vnet->sk_dev);
                 }
 #endif
 
