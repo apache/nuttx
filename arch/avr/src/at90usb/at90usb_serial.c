@@ -106,7 +106,7 @@ static bool usart1_txempty(struct uart_dev_s *dev);
  ****************************************************************************/
 
 struct uart_ops_s g_uart1_ops =
-{O
+{
   .setup          = usart1_setup,
   .shutdown       = usart1_shutdown,
   .attach         = usart1_attach,
