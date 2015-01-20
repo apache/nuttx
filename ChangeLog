@@ -9477,6 +9477,9 @@
 	  destination address in the output Ethernet header OR to send an
 	  ICMPv6 Neighbor Solicitation if there is no entry in the Neighbor
 	  table for the IPv6 address (2015-01-20).
-	* Networking:  Add missing raw/packet socket support to all Ethernet
-	  driverss (2015-01-20).
+	* arch/ and drivers/net:  Add missing raw/packet socket support toi
+	  all Ethernet driverss (2015-01-20).
+	* arch/ and drivers/net: "Networking:  Modify all Ethernet drivers:
+	  Do neighbor look-up on all outgoing IPv6 packs in order to properly
+	  set the destination link layer address (2015-01-20).
 
