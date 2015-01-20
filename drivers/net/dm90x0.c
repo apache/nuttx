@@ -68,6 +68,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -978,6 +982,12 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
           dm9x->dm_dev.d_len = rx.desc.rx_len;
           dm9x->dm_read(dm9x->dm_dev.d_buf, rx.desc.rx_len);
 
+#ifdef CONFIG_NET_PKT
+          /* When packet sockets are enabled, feed the frame into the packet tap */
+
+          pkt_input(&dm9x->dm_dev);
+#endif
+
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
@@ -1001,7 +1011,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-                  if (BUF->type == HTONS(ETHTYPE_IP))
+                  if (IFF_IS_IPv4(dm9x->dm_dev.d_flags))
 #endif
                     {
                       arp_out(&dm9x->dm_dev);
@@ -1032,7 +1042,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 #ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
-                  if (BUF->type == HTONS(ETHTYPE_IP))
+                  if (IFF_IS_IPv4(dm9x->dm_dev.d_flags))
                     {
                       arp_out(&dm9x->dm_dev);
                     }

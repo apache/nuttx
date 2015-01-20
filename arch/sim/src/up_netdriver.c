@@ -56,6 +56,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -157,6 +161,14 @@ void netdriver_loop(void)
 
       if (g_sim_dev.d_len > ETH_HDRLEN && up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
         {
+#ifdef CONFIG_NET_PKT
+          /* When packet sockets are enabled, feed the frame into the packet
+           * tap.
+           */
+
+          pkt_input(&g_sim_dev);
+#endif
+
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4

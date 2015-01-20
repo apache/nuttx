@@ -67,6 +67,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/phy.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include "up_arch.h"
 #include "up_internal.h"
 #include "cache.h"
@@ -1106,8 +1110,14 @@ static void sam_receive(struct sam_gmac_s *priv)
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          continue;
         }
-      else
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&priv->dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 

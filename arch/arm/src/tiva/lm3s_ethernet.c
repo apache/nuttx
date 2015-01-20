@@ -56,6 +56,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include "chip.h"
 #include "up_arch.h"
 
@@ -765,6 +769,12 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
       priv->ld_dev.d_len = pktlen - 6;
       tiva_dumppacket("Received packet", priv->ld_dev.d_buf, priv->ld_dev.d_len);
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&priv->ld_dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 

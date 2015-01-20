@@ -60,6 +60,10 @@
 #  include <nuttx/wqueue.h>
 #endif
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -288,6 +292,12 @@ static void skel_receive(FAR struct skel_driver_s *skel)
        * amount of data in skel->sk_dev.d_len
        */
 
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&skel->sk_dev);
+#endif
+
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
@@ -311,7 +321,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(skel->sk_dev.d_flags))
 #endif
                 {
                   arp_out(&skel->sk_dev);
@@ -342,7 +352,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 #ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(skel->sk_dev.d_flags))
                 {
                   arp_out(&skel->sk_dev);
                 }

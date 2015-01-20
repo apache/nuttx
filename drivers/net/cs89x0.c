@@ -55,6 +55,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -387,10 +391,12 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
         {
           cd89x0->cs_stats.rx_lengtherrors++;
         }
+
       if ((isq & RX_EXTRA_DATA) != 0)
         {
           cd89x0->cs_stats.rx_lengtherrors++;
         }
+
       if (isq & RX_CRC_ERROR) != 0)
         {
           if (!(isq & (RX_EXTRA_DATA|RX_RUNT)))
@@ -398,6 +404,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
               cd89x0->cs_stats.rx_crcerrors++;
             }
         }
+
       if ((isq & RX_DRIBBLE) != 0)
         {
           cd89x0->cs_stats.rx_frameerrors++;
@@ -431,6 +438,12 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   cd89x0->cs_stats.rx_packets++;
 #endif
 
+#ifdef CONFIG_NET_PKT
+  /* When packet sockets are enabled, feed the frame into the packet tap */
+
+   pkt_input(&cs89x0->cs_dev);
+#endif
+
   /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
@@ -454,7 +467,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
           /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(ETHTYPE_IP))
+          if (IFF_IS_IPv4(cs89x0->cs_dev.d_flags))
 #endif
             {
               arp_out(&cs89x0->cs_dev);
@@ -485,7 +498,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #ifdef CONFIG_NET_IPv4
           /* Update the Ethernet header with the correct MAC address */
 
-          if (BUF->type == HTONS(ETHTYPE_IP))
+          if (IFF_IS_IPv4(cs89x0->cs_dev.d_flags))
             {
               arp_out(&cs89x0->cs_dev);
             }

@@ -58,6 +58,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include <rgmp/pmap.h>
 #include <rgmp/string.h>
 #include <rgmp/stdio.h>
@@ -565,6 +569,12 @@ static void e1000_receive(struct e1000_dev *e1000)
       memcpy(e1000->netdev.d_buf, cp, cnt);
       e1000->netdev.d_len = cnt;
 
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&e1000->netdev);
+#endif
+
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
@@ -588,7 +598,7 @@ static void e1000_receive(struct e1000_dev *e1000)
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(e1000->netdev.d_flags))
 #endif
                 {
                   arp_out(&e1000->netdev);
@@ -619,7 +629,7 @@ static void e1000_receive(struct e1000_dev *e1000)
 #ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(e1000->netdev.d_flags))
                 {
                   arp_out(&e1000->netdev);
                 }

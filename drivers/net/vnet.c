@@ -59,6 +59,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include <rgmp/vnet.h>
 #include <rgmp/stdio.h>
 
@@ -301,6 +305,12 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
       memcpy(vnet->sk_dev.d_buf, data, len);
       vnet->sk_dev.d_len = len;
 
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&vnet->sk_dev);
+#endif
+
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
@@ -324,7 +334,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(vnet->sk_dev.d_flags))
 #endif
                 {
                   arp_out(&vnet->sk_dev);
@@ -355,7 +365,7 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 #ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
-              if (BUF->type == HTONS(ETHTYPE_IP))
+              if (IFF_IS_IPv4(vnet->sk_dev.d_flags))
                 {
                   arp_out(&vnet->sk_dev);
                 }

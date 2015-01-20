@@ -55,6 +55,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -255,6 +259,12 @@ static void emac_receive(FAR struct emac_driver_s *priv)
       /* Copy the data data from the hardware to priv->d_dev.d_buf.  Set
        * amount of data in priv->d_dev.d_len
        */
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+      pkt_input(&priv->d_dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 

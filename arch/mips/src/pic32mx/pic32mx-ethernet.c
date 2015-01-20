@@ -60,6 +60,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
@@ -69,7 +73,7 @@
 #include "pic32mx-ethernet.h"
 #include "pic32mx-internal.h"
 
-/* Does this chip have and ethernet controller? */
+/* Does this chip have and Ethernet controller? */
 
 #if CHIP_NETHERNET > 0
 
@@ -1428,6 +1432,14 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
           pic32mx_rxreturn(rxdesc);
           pic32mx_dumppacket("Received packet",
                              priv->pd_dev.d_buf, priv->pd_dev.d_len);
+
+#ifdef CONFIG_NET_PKT
+          /* When packet sockets are enabled, feed the frame into the packet
+           * tap.
+           */
+
+          pkt_input(&priv->pd_dev);
+#endif
 
           /* We only accept IP packets of the configured type and ARP packets */
 

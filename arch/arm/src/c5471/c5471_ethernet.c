@@ -62,6 +62,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
@@ -1229,6 +1233,12 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       dev->d_len = packetlen;
       nvdbg("Received packet, packetlen: %d type: %02x\n", packetlen, ntohs(BUF->type));
       c5471_dumpbuffer("Received packet", dev->d_buf, dev->d_len);
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+      pkt_input(dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 

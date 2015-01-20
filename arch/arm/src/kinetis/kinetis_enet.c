@@ -57,6 +57,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include "up_arch.h"
 #include "chip.h"
 #include "kinetis_internal.h"
@@ -513,6 +517,12 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       /* Indicate that there have been empty receive buffers produced */
 
       putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&priv->dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 
