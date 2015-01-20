@@ -5,10 +5,10 @@
 
 if NET_IPv6
 
-config NET_IPV6_NCONF_ENTRIES
+config NET_IPv6_NCONF_ENTRIES
 	int "Number of IPv6 neighbors"
 	default 8
 
-#config NET_IPV6_NEIGHBOR_ADDRTYPE
+#config NET_IPv6_NEIGHBOR_ADDRTYPE
 
 endif # NET_IPv6

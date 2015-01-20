@@ -47,6 +47,7 @@
 
 #include "devif/devif.h"
 #include "arp/arp.h"
+#include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -426,6 +427,12 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
     {
       g_reassembly_timer += hsec;
     }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  /* Perform aging on the entries in the Neighbor Table */
+
+  neighbor_periodic();
 #endif
 
   /* Traverse all of the active packet connections and perform the poll

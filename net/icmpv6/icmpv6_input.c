@@ -149,8 +149,8 @@ void icmpv6_input(FAR struct net_driver_s *dev)
             {
               /* Save the sender's address in our neighbor list. */
 
-              net_neighbor_add(icmp->srcipaddr,
-                               (FAR struct net_neighbor_addr_s *)sol->srclladdr);
+              neighbor_add(icmp->srcipaddr,
+                           (FAR struct neighbor_addr_s *)sol->srclladdr);
             }
 
           /* We should now send a neighbor advertisement back to where the

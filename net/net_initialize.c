@@ -49,6 +49,7 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"
+#include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -105,9 +106,15 @@ void net_initialize(void)
 
   arp_reset();
 
-  /* Initialize I/O buffering */
+#ifdef CONFIG_NET_IPv6
+  /* Initialize the Neighbor Table */
+
+  neighbor_initialize();
+#endif
 
 #ifdef CONFIG_NET_IOB
+  /* Initialize I/O buffering */
+
   iob_initialize();
 #endif
 

@@ -37,7 +37,8 @@
 
 ifeq ($(CONFIG_NET_IPv6),y)
 
-NET_CSRCS += neighbor.c
+NET_CSRCS += neighbor_initialize.c neighbor_add.c neighbor_lookup.c
+NET_CSRCS += neighbor_update.c neighbor_periodic.c neighbor_findentry.c
 
 # Include utility build support
 
