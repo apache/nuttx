@@ -1471,6 +1471,12 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
                     {
                       arp_out(&priv->pd_dev);
                     }
+#ifdef CONFIG_NET_IPv6
+                  else
+                    {
+                      neighbor_out(&priv->pd_dev);
+                    }
+#endif
 
                   /* And send the packet */
 
@@ -1496,12 +1502,18 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                {
-#ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(priv->pd_dev.d_flags))
                     {
                       arp_out(&priv->pd_dev);
+                    }
+                  else
+#endif
+#ifdef CONFIG_NET_IPv6
+                    {
+                      neighbor_out(&priv->pd_dev);
                     }
 #endif
 

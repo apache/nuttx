@@ -1271,6 +1271,12 @@ static void c5471_receive(struct c5471_driver_s *c5471)
                 {
                   arp_out(dev);
                 }
+#ifdef CONFIG_NET_IPv6
+              else
+                {
+                  neighbor_out(dev);
+                }
+#endif
 
               /* And send the packet */
 
@@ -1297,12 +1303,18 @@ static void c5471_receive(struct c5471_driver_s *c5471)
           if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
             {
-#ifdef CONFIG_NET_IPv4
               /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
               if (IFF_IS_IPv4(dev->d_flags))
                 {
                   arp_out(dev);
+                }
+              else
+#endif
+#ifdef CONFIG_NET_IPv6
+                {
+                  neighbor_out(dev);
                 }
 #endif
 

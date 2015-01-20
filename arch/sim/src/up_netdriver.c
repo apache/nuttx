@@ -198,6 +198,12 @@ void netdriver_loop(void)
                     {
                       arp_out(&g_sim_dev);
                     }
+#ifdef CONFIG_NET_IPv6
+                  else
+                    {
+                      neighbor_out(&g_sim_dev);
+                    }
+#endif
 
                   /* And send the packet */
 
@@ -222,12 +228,18 @@ void netdriver_loop(void)
 
               if (g_sim_dev.d_len > 0)
                {
-#ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
+#ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(g_sim_dev.d_flags))
                     {
                       arp_out(&g_sim_dev);
+                    }
+                  else
+#endif
+#ifdef CONFIG_NET_IPv6
+                    {
+                      neighbor_out(&g_sim_dev);
                     }
 #endif
 
