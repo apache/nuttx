@@ -74,9 +74,9 @@
 #if !CONFIG_NET_ARCH_CHKSUM
 static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 {
+  FAR const uint8_t *dataptr;
+  FAR const uint8_t *last_byte;
   uint16_t t;
-  const uint8_t *dataptr;
-  const uint8_t *last_byte;
 
   dataptr = data;
   last_byte = data + len - 1;
@@ -85,7 +85,7 @@ static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
     {
       /* At least two more bytes */
 
-      t = (dataptr[0] << 8) + dataptr[1];
+      t = ((uint16_t)dataptr[0] << 8) + dataptr[1];
       sum += t;
       if (sum < t)
         {
@@ -119,11 +119,16 @@ static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 static uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev,
                                        uint8_t proto)
 {
-  FAR struct ipv4_hdr_s *pbuf = IPv4BUF;
+  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
   uint16_t upperlen;
   uint16_t sum;
 
-  upperlen = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]) - IPv4_HDRLEN;
+  /* The length reported in the IPv4 header is the length of both the IPv4
+   * header and the payload that follows the header.  We need to subtract
+   * the size of the IPv4 header to get the size of the payload.
+   */
+
+  upperlen = (((uint16_t)(ipv4->len[0]) << 8) + ipv4->len[1]) - IPv4_HDRLEN;
 
   /* Verify some minimal assumptions */
 
@@ -139,12 +144,11 @@ static uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev,
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (uint8_t *)&pbuf->srcipaddr, 2 * sizeof(in_addr_t));
+  sum = chksum(sum, (FAR uint8_t *)&ipv4->srcipaddr, 2 * sizeof(in_addr_t));
 
-  /* Sum TCP header and data. */
+  /* Sum IP payload data. */
 
   sum = chksum(sum, &dev->d_buf[IPv4_HDRLEN + NET_LL_HDRLEN(dev)], upperlen);
-
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
@@ -157,11 +161,15 @@ static uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev,
 static uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
                                        uint8_t proto)
 {
-  FAR struct ipv6_hdr_s *pbuf = IPv6BUF;
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   uint16_t upperlen;
   uint16_t sum;
 
-  upperlen = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]);
+  /* The length reported in the IPv6 header is the length of the payload
+   * that follows the header.
+   */
+
+  upperlen = ((uint16_t)ipv6->len[0] << 8) + ipv6->len[1];
 
   /* Verify some minimal assumptions */
 
@@ -170,19 +178,20 @@ static uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
       return 0;
     }
 
-  /* First sum pseudo-header. */
-  /* IP protocol and length fields. This addition cannot carry. */
+  /* The checksum is calculated starting with a pseudo-header of IPv6 header
+   * fields according to the IPv6 standard, which consists of the source
+   * and destination addresses, the packet length and the next header field.
+   */
 
   sum = upperlen + proto;
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (uint8_t *)&pbuf->srcipaddr, 2 * sizeof(net_ipv6addr_t));
+  sum = chksum(sum, (FAR uint8_t *)&ipv6->srcipaddr, 2 * sizeof(net_ipv6addr_t));
 
-  /* Sum TCP header and data. */
+  /* Sum IP payload data. */
 
   sum = chksum(sum, &dev->d_buf[IPv6_HDRLEN + NET_LL_HDRLEN(dev)], upperlen);
-
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */

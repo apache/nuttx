@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ICMPv6) && defined(CONFIG_NET_ICMPv6_PING)
 
+#include <string.h>
 #include <debug.h>
 
 #include <arpa/inet.h>
@@ -48,6 +49,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/icmpv6.h>
 
 #include "devif/devif.h"
 #include "utils/utils.h"
@@ -94,7 +96,7 @@
 
 void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr)
 {
-  FAR struct icmpv6_iphdr_s *picmpv6 = ICMPv6BUF;
+  FAR struct icmpv6_iphdr_s *icmp = ICMPv6BUF;
 
   if (dev->d_sndlen > 0)
     {
@@ -114,28 +116,24 @@ void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr)
        * does not include the IPv6 IP header length.
        */
 
-      picmpv6->vtc         = 0x60;
-      picmpv6->tcf         = 0x00;
-      picmpv6->flow        = 0x00;
-      picmpv6->len[0]      = (dev->d_sndlen >> 8);
-      picmpv6->len[1]      = (dev->d_sndlen & 0xff);
-      picmpv6->nexthdr     = IP_PROTO_ICMPv6;
-      picmpv6->hoplimit    = IP_TTL;
+      icmp->vtc         = 0x60;
+      icmp->tcf         = 0x00;
+      icmp->flow        = 0x00;
+      icmp->len[0]      = (dev->d_sndlen >> 8);
+      icmp->len[1]      = (dev->d_sndlen & 0xff);
+      icmp->proto       = IP_PROTO_ICMP6;
+      icmp->ttl         = IP_TTL;
 
-      net_ipv6addr_copy(picmpv6->srcipaddr, &dev->d_ipaddr);
-      net_ipv6addr_copy(picmpv6->destipaddr, destaddr);
+      net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
+      net_ipv6addr_copy(icmp->destipaddr, destaddr);
 
       /* Calculate the ICMPv6 checksum. */
 
-      picmpv6->icmpv6chksum  = 0;
-      picmpv6->icmpv6chksum  = ~(icmpv6_chksum(dev, dev->d_sndlen));
-      if (picmpv6->icmpv6chksum == 0)
-        {
-          picmpv6->icmpv6chksum = 0xffff;
-        }
+      icmp->chksum  = 0;
+      icmp->chksum  = ~icmpv6_chksum(dev);
 
       nllvdbg("Outgoing ICMPv6 packet length: %d (%d)\n",
-              dev->d_len, (picmpv6->len[0] << 8) | picmpv6->len[1]);
+              dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.icmpv6.sent++;

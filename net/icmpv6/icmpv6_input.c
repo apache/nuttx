@@ -71,6 +71,11 @@
 #define ETHBUF    ((struct eth_hdr_s *)&dev->d_buf[0])
 #define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
+#define ICMPv6SOLICIT \
+  ((struct icmpv6_neighbor_solicit_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define ICMPv6ADVERTISE \
+  ((struct icmpv6_neighbor_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -79,8 +84,8 @@
  * Private Variables
  ****************************************************************************/
 
-#ifdef CONFIG_NET_ICMPv6v6_PING
-FAR struct devif_callback_s *g_echocallback = NULL;
+#ifdef CONFIG_NET_ICMPv6_PING
+FAR struct devif_callback_s *g_icmpv6_echocallback = NULL;
 #endif
 
 /****************************************************************************
@@ -127,42 +132,84 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
   if (icmp->type == ICMPv6_NEIGHBOR_SOLICIT)
     {
+      FAR struct icmpv6_neighbor_solicit_s *sol;
+      FAR struct icmpv6_neighbor_advertise_s *adv;
+
       /* If the data matches our address, add the neighbor to the list
        * of neighbors.
+       *
+       * Missing checks:
+       *  optlen = 1 (8 octets)
        */
 
-      if (net_ipv6addr_cmp(icmp->icmpv6data, dev->d_ipv6addr))
+      sol = ICMPv6SOLICIT;
+      if (net_ipv6addr_cmp(sol->tgtaddr, dev->d_ipv6addr))
         {
-          if (icmp->options[0] == ICMPv6_OPTION_SOURCE_LINK_ADDRESS)
+          if (sol->opttype == ICMPv6_OPT_SRCLLADDR)
             {
               /* Save the sender's address in our neighbor list. */
 
               net_neighbor_add(icmp->srcipaddr,
-                               (FAR struct net_neighbor_addr_s *)&(icmp->options[2]));
+                               (FAR struct net_neighbor_addr_s *)sol->srclladdr);
             }
 
           /* We should now send a neighbor advertisement back to where the
            * neighbor solicitation came from.
            */
 
-          icmp->type = ICMPv6_NEIGHBOR_ADVERTISE;
-          icmp->flags = ICMPv6_FLAG_S; /* Solicited flag. */
+          /* Set up the IPv6 header (most is probably already in place) */
 
-          icmp->reserved1 = 0;
-          icmp->reserved2 = 0;
-          icmp->reserved3 = 0;
+          icmp->vtc    = 0x60;           /* Version/traffic class (MS) */
+          icmp->tcf    = 0;              /* Traffic class (LS)/Flow label (MS) */
+          icmp->flow   = 0;              /* Flow label (LS) */
+
+          /* Length excludes the IPv6 header */
+
+          icmp->len[0] = (sizeof(struct icmpv6_neighbor_advertise_s) >> 8);
+          icmp->len[1] = (sizeof(struct icmpv6_neighbor_advertise_s) & 0xff);
+
+          icmp->proto  = IP_PROTO_ICMP6; /* Next header */
+          icmp->ttl    = IP_TTL;         /* Hop limit */
+
+          /* Swap source for destination IP address, add our source IP
+           * address
+           */
 
           net_ipv6addr_copy(icmp->destipaddr, icmp->srcipaddr);
           net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
-          icmp->options[0]   = ICMPv6_OPTION_TARGET_LINK_ADDRESS;
-          icmp->options[1]   = 1;  /* Options length, 1 = 8 bytes. */
-          memcpy(&(icmp->options[2]), &dev->d_mac, IFHWADDRLEN);
+          /* Set up the ICMPv6 Neighbor Advertise response */
 
-          icmp->icmpv6chksum = 0;
-          icmp->icmpv6chksum = ~icmpv6_chksum(dev);
+          adv            = ICMPv6ADVERTISE;
+          adv->type      = ICMPv6_NEIGHBOR_ADVERTISE; /* Message type */
+          adv->code      = 0;                         /* Message qualifier */
+          adv->flags[0]  = ICMPv6_FLAG_S;             /* Solicited flag. */
+          adv->flags[1]  = 0;
+          adv->flags[2]  = 0;
+          adv->flags[3]  = 0;
+          adv->opttype   = ICMPv6_OPT_TGTLLADDR;      /* Option type */
+          adv->optlen    = 1;                         /* Option length = 1 octet */
+
+          /* Copy our link layer address into the message
+           * REVISIT:  What if the link layer is not Ethernet?
+           */
+
+          memcpy(&(adv->tgtlladdr), &dev->d_mac, IFHWADDRLEN);
+
+          /* Calculate the checksum over both the ICMP header and payload */
+
+          icmp->chksum   = 0;
+          icmp->chksum   = ~icmpv6_chksum(dev);
+
+          /* Set the size to the size of the IPv6 header and the payload size */
+
+          dev->d_len     = IPv6_HDRLEN + sizeof(struct icmpv6_neighbor_advertise_s);
 
 #ifdef CONFIG_NET_ETHERNET
+          /* Add the size of the Ethernet header */
+
+          dev->d_len    += ETH_HDRLEN;
+
           /* Move the source and to the destination addresses in the
            * Ethernet header and use our MAC as the new source address.
            */
@@ -195,8 +242,8 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       net_ipv6addr_copy(icmp->destipaddr, icmp->srcipaddr);
       net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
-      icmp->icmpv6chksum = 0;
-      icmp->icmpv6chksum = ~icmpv6_chksum(dev);
+      icmp->chksum = 0;
+      icmp->chksum = ~icmpv6_chksum(dev);
     }
 
   /* If an ICMPv6 echo reply is received then there should also be
@@ -204,15 +251,15 @@ void icmpv6_input(FAR struct net_driver_s *dev)
    */
 
 #ifdef CONFIG_NET_ICMPv6v6_PING
-  else if (icmp->type == ICMPv6_ECHO_REPLY && g_echocallback)
+  else if (icmp->type == ICMPv6_ECHO_REPLY && g_icmpv6_echocallback)
     {
       uint16_t flags = ICMPv6_ECHOREPLY;
 
-      if (g_echocallback)
+      if (g_icmpv6_echocallback)
         {
           /* Dispatch the ECHO reply to the waiting thread */
 
-          flags = devif_callback_execute(dev, icmp, flags, g_echocallback);
+          flags = devif_callback_execute(dev, icmp, flags, g_icmpv6_echocallback);
         }
 
       /* If the ECHO reply was not handled, then drop the packet */

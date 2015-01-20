@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_PING
-FAR struct devif_callback_s *g_echocallback = NULL;
+FAR struct devif_callback_s *g_icmp_echocallback = NULL;
 #endif
 
 /****************************************************************************
@@ -182,9 +182,9 @@ void icmp_input(FAR struct net_driver_s *dev)
    */
 
 #ifdef CONFIG_NET_ICMP_PING
-  else if (picmp->type == ICMP_ECHO_REPLY && g_echocallback)
+  else if (picmp->type == ICMP_ECHO_REPLY && g_icmp_echocallback)
     {
-      (void)devif_callback_execute(dev, picmp, ICMP_ECHOREPLY, g_echocallback);
+      (void)devif_callback_execute(dev, picmp, ICMP_ECHOREPLY, g_icmp_echocallback);
     }
 #endif
 

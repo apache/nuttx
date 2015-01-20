@@ -70,8 +70,8 @@
 
 /* Allocate a new ICMP data callback */
 
-#define icmp_callback_alloc()   devif_callback_alloc(&g_echocallback)
-#define icmp_callback_free(cb)  devif_callback_free(cb, &g_echocallback)
+#define icmp_callback_alloc()   devif_callback_alloc(&g_icmp_echocallback)
+#define icmp_callback_free(cb)  devif_callback_free(cb, &g_icmp_echocallback)
 
 /****************************************************************************
  * Private Types

@@ -96,7 +96,7 @@ void icmp_poll(FAR struct net_driver_s *dev)
 
   /* Perform the application callback */
 
-  (void)devif_callback_execute(dev, NULL, ICMP_POLL, g_echocallback);
+  (void)devif_callback_execute(dev, NULL, ICMP_POLL, g_icmp_echocallback);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */

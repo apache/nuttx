@@ -16,6 +16,13 @@ config NET_ICMPv6
 
 if NET_ICMPv6
 
+config NET_ICMPv6_PING
+	bool "ICMPv6 ping interfaces"
+	default n
+	---help---
+		Provide interfaces to support application level support for
+		for sending ECHO (ping) requests and associating ECHO replies.
+
 endif # NET_ICMPv6
 endmenu # ICMPv6 Networking Support
 endif # NET_IPv6
