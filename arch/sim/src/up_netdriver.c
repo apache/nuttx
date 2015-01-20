@@ -181,7 +181,7 @@ void netdriver_loop(void)
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-                  if (BUF->type == HTONS(ETHTYPE_IP))
+                  if (IFF_IS_IPv4(g_sim_dev.d_flags))
 #endif
                     {
                       arp_out(&g_sim_dev);
@@ -213,7 +213,7 @@ void netdriver_loop(void)
 #ifdef CONFIG_NET_IPv4
                   /* Update the Ethernet header with the correct MAC address */
 
-                  if (BUF->type == HTONS(ETHTYPE_IP))
+                  if (IFF_IS_IPv4(g_sim_dev.d_flags))
                     {
                       arp_out(&g_sim_dev);
                     }
