@@ -61,11 +61,11 @@
  *
  * Input Parameters:
  *   ipaddr - The IPv6 address to use in the lookup;
+ *   lladdr - The location to return the link layer address
  *
  * Returned Value:
- *   A read-only reference to the link layer address in the Neighbor Table is
- *   returned on success.  NULL is returned if there is no matching entry in
- *   the Neighbor Table.
+ *   Returns OK if the address was successfully obtain; a negated errno
+ *   value is returned on failure.
  *
  ****************************************************************************/
 

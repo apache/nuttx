@@ -161,20 +161,20 @@ void arp_arpin(struct net_driver_s *dev);
  * Name: arp_out
  *
  * Description:
- *   This function should be called before sending out an IP packet. The
- *   function checks the destination IP address of the IP packet to see
+ *   This function should be called before sending out an IPv4 packet. The
+ *   function checks the destination IPv4 address of the IPv4 packet to see
  *   what Ethernet MAC address that should be used as a destination MAC
  *   address on the Ethernet.
  *
- *   If the destination IP address is in the local network (determined
- *   by logical ANDing of netmask and our IP address), the function
- *   checks the ARP cache to see if an entry for the destination IP
+ *   If the destination IPv4 address is in the local network (determined
+ *   by logical ANDing of netmask and our IPv4 address), the function
+ *   checks the ARP cache to see if an entry for the destination IPv4
  *   address is found.  If so, an Ethernet header is pre-pended at the
  *   beginning of the packet and the function returns.
  *
- *   If no ARP cache entry is found for the destination IP address, the
+ *   If no ARP cache entry is found for the destination IIPv4P address, the
  *   packet in the d_buf[] is replaced by an ARP request packet for the
- *   IP address. The IP packet is dropped and it is assumed that the
+ *   IPv4 address. The IPv4 packet is dropped and it is assumed that the
  *   higher level protocols (e.g., TCP) eventually will retransmit the
  *   dropped packet.
  *

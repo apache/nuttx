@@ -72,21 +72,85 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Defined in icmpv6_input.c ************************************************/
+/****************************************************************************
+ * Name: icmpv6_input
+ *
+ * Description:
+ *   Handle incoming ICMPv6 input
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received ICMPv6
+ *         packet
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void icmpv6_input(FAR struct net_driver_s *dev);
 
-/* Defined in icmpv6_poll.c *************************************************/
+/****************************************************************************
+ * Name: icmpv6_poll
+ *
+ * Description:
+ *   Poll a UDP "connection" structure for availability of TX data
+ *
+ * Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_PING
 void icmpv6_poll(FAR struct net_driver_s *dev);
 #endif /* CONFIG_NET_ICMPv6_PING */
 
-/* Defined in icmpv6_send.c *************************************************/
+/****************************************************************************
+ * Name: icmpv6_send
+ *
+ * Description:
+ *   Setup to send an ICMPv6 packet
+ *
+ * Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_PING
 void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr);
 #endif /* CONFIG_NET_ICMPv6_PING */
+
+/****************************************************************************
+ * Name: icmpv6_solicit
+ *
+ * Description:
+ *   Set up to send an ICMPv6 Neighbor Solicitation message
+ *
+ * Parameters:
+ *   dev - Reference to an Ethernet device driver structure
+ *   ipaddr - IP address of Neighbor to be solicited
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+void icmpv6_solicit(FAR struct net_driver_s *dev,
+                    FAR const net_ipv6addr_t ipaddr);
 
 #undef EXTERN
 #ifdef __cplusplus
