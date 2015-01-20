@@ -9461,7 +9461,7 @@
 	* net/socket/accept.c:  Fix accept() so that it returns the correct IP
 	  address for the selected socket IP domain (2015-01-17).
 	* Networking: Final detangling off IPv4 and IPv6 TCP/UDP send logic.
-	  The etworking subsystem now compiles with IPv6 enabled (2015-01-18).
+	  The networking subsystem now compiles with IPv6 enabled (2015-01-18).
 	* arch/arm/src/tiva/tm4c_ethernet.c:  When calling into the stack
 	  from the worker thread, it is necessary to have the stack locked
 	  (2015-01-18).
@@ -9472,3 +9472,8 @@
 	* drivers/pipes/pipe.c, drivers/usbdev/cdcacm.c, and
 	  mm/mm_gran/mm_granalloc.c: Fixes some issues found by the PX4 team
 	  using Coverity.  From Pavel Krienko (2015-01-19).
+	* net/icmpv6/icmpv6_solicit.c, net/neighbor/neighbor_out.c, and other
+	  files: Add logic to search the Neighbor Table and update the
+	  destination address in the output Ethernet header OR to send an
+	  ICMPv6 Neighbor Solicitation if there is no entry in the Neighbor
+	  table for the IPv6 address (2015-01-20).
