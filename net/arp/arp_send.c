@@ -264,7 +264,7 @@ int arp_send(in_addr_t ipaddr)
        * destination address when determining the MAC address.
        */
 
-      netdev_router(dev, ipaddr, &dripaddr);
+      netdev_ipv4_router(dev, ipaddr, &dripaddr);
 #else
       /* Use the device's default router IP address instead of the
        * destination address when determining the MAC address.

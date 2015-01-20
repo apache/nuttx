@@ -207,7 +207,7 @@ void arp_out(FAR struct net_driver_s *dev)
            * destination address when determining the MAC address.
            */
 
-          netdev_router(dev, destipaddr, &ipaddr);
+          netdev_ipv4_router(dev, destipaddr, &ipaddr);
 #else
           /* Use the device's default router IP address instead of the
            * destination address when determining the MAC address.
