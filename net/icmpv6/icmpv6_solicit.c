@@ -180,6 +180,16 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
       /* Move our source Ethernet addresses into the Ethernet header */
 
       memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+
+#if 0
+      /* No additional neighbor lookup is required on this packet.
+       * REVISIT:  It is inappropriate to set this bit if we get here
+       * via neighbor_out(); It is no necessary to set this bit if we
+       * get here via icmpv6_input().  Is it ever necessary?
+       */
+
+      IFF_SET_NOARP(dev->d_flags);
+#endif
     }
 #endif
 

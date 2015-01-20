@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp_out.c
  *
- *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on uIP which also has a BSD style license:
@@ -144,11 +144,11 @@ void arp_out(FAR struct net_driver_s *dev)
    * written into a packet socket.
    */
 
-  if ((dev->d_flags & IFF_NOARP) != 0)
+  if (IFF_IS_NOARP(dev->d_flags))
     {
       /* Clear the indication and let the packet continue on its way. */
 
-      dev->d_flags &= ~IFF_NOARP;
+      IFF_CLR_IPv6(dev->d_flags);
       return;
     }
 #endif

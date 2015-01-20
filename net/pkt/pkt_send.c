@@ -132,7 +132,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
            * flag will be cleared in arp_out().
            */
 
-          dev->d_flags |= IFF_NOARP;
+          IFF_SET_NOARP(dev->d_flags);
         }
 
       /* Don't allow any further call backs. */

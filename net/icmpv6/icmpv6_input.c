@@ -279,6 +279,10 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       goto typeerr;
     }
 
+  /* No additional neighbor lookup is required on this packet. */
+
+  IFF_SET_NOARP(dev->d_flags);
+
   nllvdbg("Outgoing ICMPv6 packet length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 

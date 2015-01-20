@@ -131,19 +131,18 @@ void neighbor_out(FAR struct net_driver_s *dev)
   FAR struct ipv6_hdr_s *ip = IPv6BUF;
   net_ipv6addr_t ipaddr;
 
-#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_NEIGHBOR_SEND)
   /* Skip sending ARP requests when the frame to be transmitted was
-   * written into a packet socket.
+   * written into a packet socket or if we are sending certain Neighbor
+   * messages (soliciation, advertisement, echo request).
    */
 
-  if ((dev->d_flags & IFF_NOARP) != 0)
+  if (IFF_IS_NOARP(dev->d_flags))
     {
       /* Clear the indication and let the packet continue on its way. */
 
-      dev->d_flags &= ~IFF_NOARP;
+      IFF_CLR_IPv6(dev->d_flags);
       return;
     }
-#endif
 
   /* Find the destination IPv6 address in the ARP table and construct
    * the Ethernet header. If the destination IPv6 address isn't on the
