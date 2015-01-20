@@ -9482,4 +9482,7 @@
 	* arch/ and drivers/net: "Networking:  Modify all Ethernet drivers:
 	  Do neighbor look-up on all outgoing IPv6 packs in order to properly
 	  set the destination link layer address (2015-01-20).
+	* Networking:  When sending ICMPv6 advertisements and solicitations,
+	  set the NOARP bit so that we don't overwrite the destination MAC
+	  address (2015-01-20).
 
