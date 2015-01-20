@@ -60,6 +60,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include <arch/io.h>
 
 #include "chip.h"
@@ -1267,6 +1271,12 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
             rxdesc, rxdesc->np, rxdesc->pktsize, rxdesc->stat,
             ez80emac_rrp(), rwp,
             inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
+
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+       pkt_input(&priv->dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 

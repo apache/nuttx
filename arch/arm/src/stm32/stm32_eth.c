@@ -53,8 +53,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
-#include <nuttx/net/mii.h>
 
+#include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #if defined(CONFIG_NET_PKT)
@@ -1612,8 +1612,14 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       if (dev->d_len > CONFIG_NET_ETH_MTU)
         {
           nlldbg("DROPPED: Too big: %d\n", dev->d_len);
+          continue;
         }
-      else
+
+#ifdef CONFIG_NET_PKT
+  /* When packet sockets are enabled, feed the frame into the packet tap */
+
+   pkt_input(&priv->dev);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 

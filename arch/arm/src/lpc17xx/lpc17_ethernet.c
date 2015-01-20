@@ -58,6 +58,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include "up_arch.h"
 #include "chip.h"
 #include "chip/lpc17_syscon.h"
@@ -871,6 +875,14 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
           lpc17_dumppacket("Received packet",
                            priv->lp_dev.d_buf, priv->lp_dev.d_len);
+
+#ifdef CONFIG_NET_PKT
+          /* When packet sockets are enabled, feed the frame into the packet
+           * tap.
+           */
+
+           pkt_input(&priv->lp_dev);
+#endif
 
           /* We only accept IP packets of the configured type and ARP packets */
 
