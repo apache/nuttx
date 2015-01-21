@@ -302,7 +302,7 @@ struct ipv6_hdr_s
 
 #ifdef CONFIG_NET_IPv6
 #  define net_ipv6addr_cmp(addr1, addr2) \
-   (memcmp(&addr1, &addr2, sizeof(net_ipv6addr_t)) == 0)
+   (memcmp(addr1, addr2, sizeof(net_ipv6addr_t)) == 0)
 #  define net_ipv6addr_hdrcmp(addr1, addr2) \
    net_ipv6addr_cmp(addr1, addr2)
 #endif
