@@ -64,10 +64,12 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* First 6 swords of the multi-cast address in network byte order */
 
 static const uint16_t g_icmpv_mcastaddr[6] =
 {
-  0xff02, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001
+  HTONS(0xff02), HTONS(0x0000), HTONS(0x0000), HTONS(0x0000),
+  HTONS(0x0000), HTONS(0x0001)
 };
 
 /****************************************************************************
@@ -99,22 +101,22 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   /* Set up the IPv6 header (most is probably already in place) */
 
   icmp          = ICMPv6BUF;
-  icmp->vtc     = 0x60;           /* Version/traffic class (MS) */
-  icmp->tcf     = 0;              /* Traffic class (LS)/Flow label (MS) */
-  icmp->flow    = 0;              /* Flow label (LS) */
+  icmp->vtc     = 0x60;                    /* Version/traffic class (MS) */
+  icmp->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
+  icmp->flow    = 0;                       /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
   icmp->len[0]  = (sizeof(struct icmpv6_neighbor_solicit_s) >> 8);
   icmp->len[1]  = (sizeof(struct icmpv6_neighbor_solicit_s) & 0xff);
 
-  icmp->proto   = IP_PROTO_ICMP6; /* Next header */
-  icmp->ttl     = IP_TTL;         /* Hop limit */
+  icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
+  icmp->ttl     = 255;                     /* Hop limit */
 
   /* Set the multicast destination IP address */
 
   memcpy(icmp->destipaddr, g_icmpv_mcastaddr, 6*sizeof(uint16_t));
-  icmp->destipaddr[6] = ipaddr[6] | 0xff00;
+  icmp->destipaddr[6] = ipaddr[6] | HTONS(0xff00);
   icmp->destipaddr[7] = ipaddr[7];
 
   /* Add out IPv6 address as the source address */
@@ -130,6 +132,13 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   sol->flags[1] = 0;
   sol->flags[2] = 0;
   sol->flags[3] = 0;
+
+  /* Copy the target address into the Neighbor Solicitation message */
+
+  net_ipv6addr_copy(sol->tgtaddr, ipaddr);
+
+  /* Set up the options */
+
   sol->opttype  = ICMPv6_OPT_SRCLLADDR;    /* Option type */
   sol->optlen   = 1;                       /* Option length = 1 octet */
 
@@ -153,10 +162,6 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   if (dev->d_lltype == NET_LL_ETHERNET)
 #endif
     {
-      /* Add the size of the Ethernet header */
-
-      dev->d_len += ETH_HDRLEN;
-
       /* Set the destination IPv6 multicast Ethernet address:
        *
        * For IPv6 multicast addresses, the Ethernet MAC is derived by
@@ -191,6 +196,18 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
       IFF_SET_NOARP(dev->d_flags);
 #endif
     }
+#endif
+
+  /* Add the size of the layer layer header to the total size of the
+   * outgoing packet.
+   */
+
+#if defined(CONFIG_NET_MULTILINK)
+  dev->d_len += dev->d_llhdrlen;
+#elif defined(CONFIG_NET_ETHERNET)
+  dev->d_len += ETH_HDRLEN;
+#else /* if defined(CONFIG_NET_SLIP) */
+  /* SLIP has no link layer header */
 #endif
 
   nllvdbg("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",

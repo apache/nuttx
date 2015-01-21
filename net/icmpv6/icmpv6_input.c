@@ -188,6 +188,13 @@ void icmpv6_input(FAR struct net_driver_s *dev)
           adv->flags[1]  = 0;
           adv->flags[2]  = 0;
           adv->flags[3]  = 0;
+
+          /* Copy the target address into the Neighbor Advertisement message */
+
+          net_ipv6addr_copy(adv->tgtaddr, dev->d_ipv6addr);
+
+          /* Set up the options */
+
           adv->opttype   = ICMPv6_OPT_TGTLLADDR;          /* Option type */
           adv->optlen    = 1;                             /* Option length = 1 octet */
 

@@ -148,7 +148,7 @@ void arp_out(FAR struct net_driver_s *dev)
     {
       /* Clear the indication and let the packet continue on its way. */
 
-      IFF_CLR_IPv6(dev->d_flags);
+      IFF_CLR_NOARP(dev->d_flags);
       return;
     }
 #endif

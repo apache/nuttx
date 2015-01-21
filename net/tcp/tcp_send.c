@@ -170,6 +170,8 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
 
   ipv4->ipchksum    = 0;
   ipv4->ipchksum    = ~ipv4_chksum(dev);
+
+  nllvdbgi("IPv4 length: %d\n", ((int)ipv4->len << 8) + ipv4->len[1]);
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -226,6 +228,8 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
   ipv6->vtc    = 0x60;
   ipv6->tcf    = 0x00;
   ipv6->flow   = 0x00;
+
+  nllvdbg("IPv6 length: %d\n", ((int)ipv6->len << 8) + ipv6->len[1]);
 }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -250,8 +254,6 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
 static void tcp_sendcomplete(FAR struct net_driver_s *dev,
                              FAR struct tcp_hdr_s *tcp)
 {
-  nllvdbg("TCP payload: %d (%d) bytes\n", dev->d_sndlen, dev->d_len);
-
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))

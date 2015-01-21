@@ -131,25 +131,25 @@ void neighbor_out(FAR struct net_driver_s *dev)
   FAR struct ipv6_hdr_s *ip = IPv6BUF;
   net_ipv6addr_t ipaddr;
 
-  /* Skip sending ARP requests when the frame to be transmitted was
+  /* Skip sending Neighbor Solicitations when the frame to be transmitted was
    * written into a packet socket or if we are sending certain Neighbor
-   * messages (soliciation, advertisement, echo request).
+   * messages (solicitation, advertisement, echo request).
    */
 
   if (IFF_IS_NOARP(dev->d_flags))
     {
       /* Clear the indication and let the packet continue on its way. */
 
-      IFF_CLR_IPv6(dev->d_flags);
+      IFF_CLR_NOARP(dev->d_flags);
       return;
     }
 
-  /* Find the destination IPv6 address in the ARP table and construct
-   * the Ethernet header. If the destination IPv6 address isn't on the
-   * local network, we use the default router's IPv6 address instead.
+  /* Find the destination IPv6 address in the Neighbor Table and construct
+   * the Ethernet header. If the destination IPv6 address isn't on the local
+   * network, we use the default router's IPv6 address instead.
    *
-   * If not ARP table entry is found, we overwrite the original IPv6
-   * packet with an ARP request for the IPv6 address.
+   * If no Neighbor Table entry is found, we overwrite the original IPv6
+   * packet with an Neighbor Solicitation Request for the IPv6 address.
    */
 
   /* First check if destination is a IPv6 multicast address.  IPv6
@@ -240,5 +240,19 @@ void neighbor_out(FAR struct net_driver_s *dev)
 
   memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
   eth->type  = HTONS(ETHTYPE_IP6);
+
+  /* Add the size of the layer layer header to the total size of the
+   * outgoing packet.
+   */
+
+#if defined(CONFIG_NET_MULTILINK)
+  dev->d_len += dev->d_llhdrlen;
+#elif defined(CONFIG_NET_ETHERNET)
   dev->d_len += ETH_HDRLEN;
+#else /* if defined(CONFIG_NET_SLIP) */
+  /* SLIP has no link layer header */
+#endif
+
+  nllvdbg("Outgoing IPv6 Packet length: %d (%d)\n",
+          dev->d_len, (ip->len[0] << 8) | ip->len[1]);
 }
