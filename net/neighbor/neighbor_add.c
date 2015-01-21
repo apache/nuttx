@@ -76,17 +76,17 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, FAR struct neighbor_addr_s *addr)
   int     oldest_ndx;
   int     i;
 
-  nlldbg("Add neighbor: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-         ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
-         ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-         ntohs(ipaddr[6]), ntohs(ipaddr[7]));
-  nlldbg("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
-         addr->na_addr.ether_addr_octet[0],
-         addr->na_addr.ether_addr_octet[1],
-         addr->na_addr.ether_addr_octet[2],
-         addr->na_addr.ether_addr_octet[3],
-         addr->na_addr.ether_addr_octet[4],
-         addr->na_addr.ether_addr_octet[5]);
+  nllvdbg("Add neighbor: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
+          ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
+          ntohs(ipaddr[6]), ntohs(ipaddr[7]));
+  nllvdbg("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
+          addr->na_addr.ether_addr_octet[0],
+          addr->na_addr.ether_addr_octet[1],
+          addr->na_addr.ether_addr_octet[2],
+          addr->na_addr.ether_addr_octet[3],
+          addr->na_addr.ether_addr_octet[4],
+          addr->na_addr.ether_addr_octet[5]);
 
   /* Find the first unused entry or the oldest used entry. */
 

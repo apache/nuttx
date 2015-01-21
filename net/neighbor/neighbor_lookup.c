@@ -76,13 +76,13 @@ FAR const struct neighbor_addr_s *neighbor_lookup(net_ipv6addr_t ipaddr)
   neighbor = neighbor_findentry(ipaddr);
   if (neighbor != NULL)
     {
-      nlldbg("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
-             neighbor->ne_addr.na_addr.ether_addr_octet[0],
-             neighbor->ne_addr.na_addr.ether_addr_octet[1],
-             neighbor->ne_addr.na_addr.ether_addr_octet[2],
-             neighbor->ne_addr.na_addr.ether_addr_octet[3],
-             neighbor->ne_addr.na_addr.ether_addr_octet[4],
-             neighbor->ne_addr.na_addr.ether_addr_octet[5]);
+      nllvdbg("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
+              neighbor->ne_addr.na_addr.ether_addr_octet[0],
+              neighbor->ne_addr.na_addr.ether_addr_octet[1],
+              neighbor->ne_addr.na_addr.ether_addr_octet[2],
+              neighbor->ne_addr.na_addr.ether_addr_octet[3],
+              neighbor->ne_addr.na_addr.ether_addr_octet[4],
+              neighbor->ne_addr.na_addr.ether_addr_octet[5]);
 
       return &neighbor->ne_addr;
     }
