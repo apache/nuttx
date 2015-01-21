@@ -139,7 +139,8 @@ void icmpv6_input(FAR struct net_driver_s *dev)
        * of neighbors.
        *
        * Missing checks:
-       *  optlen = 1 (8 octets)
+       *  optlen = 1 (8 octets)i
+       *  Should only update Neighbor Table if [O]verride bit is set in flags
        */
 
       sol = ICMPv6SOLICIT;
@@ -159,17 +160,17 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
           /* Set up the IPv6 header (most is probably already in place) */
 
-          icmp->vtc    = 0x60;           /* Version/traffic class (MS) */
-          icmp->tcf    = 0;              /* Traffic class (LS)/Flow label (MS) */
-          icmp->flow   = 0;              /* Flow label (LS) */
+          icmp->vtc    = 0x60;                            /* Version/traffic class (MS) */
+          icmp->tcf    = 0;                               /* Traffic class (LS)/Flow label (MS) */
+          icmp->flow   = 0;                               /* Flow label (LS) */
 
           /* Length excludes the IPv6 header */
 
           icmp->len[0] = (sizeof(struct icmpv6_neighbor_advertise_s) >> 8);
           icmp->len[1] = (sizeof(struct icmpv6_neighbor_advertise_s) & 0xff);
 
-          icmp->proto  = IP_PROTO_ICMP6; /* Next header */
-          icmp->ttl    = IP_TTL;         /* Hop limit */
+          icmp->proto  = IP_PROTO_ICMP6;                  /* Next header */
+          icmp->ttl    = 255;                             /* Hop limit */
 
           /* Swap source for destination IP address, add our source IP
            * address
@@ -181,14 +182,14 @@ void icmpv6_input(FAR struct net_driver_s *dev)
           /* Set up the ICMPv6 Neighbor Advertise response */
 
           adv            = ICMPv6ADVERTISE;
-          adv->type      = ICMPv6_NEIGHBOR_ADVERTISE; /* Message type */
-          adv->code      = 0;                         /* Message qualifier */
-          adv->flags[0]  = ICMPv6_FLAG_S;             /* Solicited flag. */
+          adv->type      = ICMPv6_NEIGHBOR_ADVERTISE;     /* Message type */
+          adv->code      = 0;                             /* Message qualifier */
+          adv->flags[0]  = ICMPv6_FLAG_S | ICMPv6_FLAG_O; /* Solicited+Override flags. */
           adv->flags[1]  = 0;
           adv->flags[2]  = 0;
           adv->flags[3]  = 0;
-          adv->opttype   = ICMPv6_OPT_TGTLLADDR;      /* Option type */
-          adv->optlen    = 1;                         /* Option length = 1 octet */
+          adv->opttype   = ICMPv6_OPT_TGTLLADDR;          /* Option type */
+          adv->optlen    = 1;                             /* Option length = 1 octet */
 
           /* Copy our link layer address into the message
            * REVISIT:  What if the link layer is not Ethernet?
