@@ -171,7 +171,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
   ipv4->ipchksum    = 0;
   ipv4->ipchksum    = ~ipv4_chksum(dev);
 
-  nllvdbgi("IPv4 length: %d\n", ((int)ipv4->len << 8) + ipv4->len[1]);
+  nllvdbg("IPv4 length: %d\n", ((int)ipv4->len << 8) + ipv4->len[1]);
 }
 #endif /* CONFIG_NET_IPv4 */
 
