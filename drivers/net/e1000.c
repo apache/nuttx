@@ -492,7 +492,30 @@ static int e1000_txpoll(struct net_driver_s *dev)
 
   if (e1000->netdev.d_len > 0)
     {
-      arp_out(&e1000->netdev);
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(e1000->netdev.d_flags))
+#endif
+        {
+          arp_out(&e1000->netdev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&e1000->netdev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Send the packet */
+
       e1000_transmit(e1000);
 
       /* Check if there is room in the device to hold another packet. If not,

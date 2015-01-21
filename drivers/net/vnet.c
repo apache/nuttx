@@ -243,7 +243,30 @@ static int vnet_txpoll(struct net_driver_s *dev)
 
   if (vnet->sk_dev.d_len > 0)
     {
-      arp_out(&vnet->sk_dev);
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(vnet->sk_dev.d_flags))
+#endif
+        {
+          arp_out(&vnet->sk_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&vnet->sk_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Send the packet */
+
       vnet_transmit(vnet);
 
       /* Check if there is room in the device to hold another packet. If not,

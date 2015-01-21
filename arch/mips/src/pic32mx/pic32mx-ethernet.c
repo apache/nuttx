@@ -1152,11 +1152,32 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
 
   if (priv->pd_dev.d_len > 0)
     {
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(priv->pd_dev.d_flags))
+#endif
+        {
+          arp_out(&priv->pd_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&priv->pd_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
       /* Send this packet.  In this context, we know that there is space for
        * at least one more packet in the descriptor list.
        */
 
-      arp_out(&priv->pd_dev);
       pic32mx_transmit(priv);
 
       /* Check if the next TX descriptor is available. If not, return a

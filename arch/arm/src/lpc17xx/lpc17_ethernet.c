@@ -697,11 +697,32 @@ static int lpc17_txpoll(struct net_driver_s *dev)
 
   if (priv->lp_dev.d_len > 0)
     {
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(priv->lp_dev.d_flags))
+#endif
+        {
+          arp_out(&priv->lp_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&priv->lp_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
       /* Send this packet.  In this context, we know that there is space for
        * at least one more packet in the descriptor list.
        */
 
-      arp_out(&priv->lp_dev);
       lpc17_transmit(priv);
 
       /* Check if there is room in the device to hold another packet. If not,

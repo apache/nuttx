@@ -248,7 +248,30 @@ static int skel_txpoll(struct net_driver_s *dev)
 
   if (skel->sk_dev.d_len > 0)
     {
-      arp_out(&skel->sk_dev);
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(skel->sk_dev.d_flags))
+#endif
+        {
+          arp_out(&skel->sk_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&skel->sk_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Send the packet */
+
       skel_transmit(skel);
 
       /* Check if there is room in the device to hold another packet. If not,

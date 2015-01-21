@@ -853,7 +853,30 @@ static int dm9x_txpoll(struct net_driver_s *dev)
 
   if (dm9x->dm_dev.d_len > 0)
     {
-      arp_out(&dm9x->dm_dev);
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(dm9x->dm_dev.d_flags))
+#endif
+        {
+          arp_out(&dm9x->dm_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&dm9x->dm_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Send the packet */
+
       dm9x_transmit(dm9x);
 
       /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
