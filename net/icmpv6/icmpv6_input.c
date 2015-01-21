@@ -135,30 +135,18 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       FAR struct icmpv6_neighbor_solicit_s *sol;
       FAR struct icmpv6_neighbor_advertise_s *adv;
 
-      /* If the data matches our address, add the neighbor to the list
-       * of neighbors.
-       *
-       * Missing checks:
-       *  optlen = 1 (8 octets)i
-       *  Should only update Neighbor Table if [O]verride bit is set in flags
-       */
+      /* Check if we are the target of the solicitation */
 
       sol = ICMPv6SOLICIT;
       if (net_ipv6addr_cmp(sol->tgtaddr, dev->d_ipv6addr))
         {
-          if (sol->opttype == ICMPv6_OPT_SRCLLADDR)
-            {
-              /* Save the sender's address in our neighbor list. */
-
-              neighbor_add(icmp->srcipaddr,
-                           (FAR struct neighbor_addr_s *)sol->srclladdr);
-            }
-
-          /* We should now send a neighbor advertisement back to where the
-           * neighbor solicitation came from.
+          /* Yes..  Send a neighbor advertisement back to where the neighbor
+           * solicitation came from.
+           *
+           *
+           * Set up the IPv6 header.  Most is probably already in place from
+           * the Neighbor Solitication.  We could save some time here.
            */
-
-          /* Set up the IPv6 header (most is probably already in place) */
 
           icmp->vtc    = 0x60;                            /* Version/traffic class (MS) */
           icmp->tcf    = 0;                               /* Traffic class (LS)/Flow label (MS) */
@@ -235,8 +223,49 @@ void icmpv6_input(FAR struct net_driver_s *dev)
         }
       else
         {
-          goto drop;
+          goto icmpv6_drop_packet;
         }
+    }
+
+  /* If we get a neighbor advertise for our address we should send
+   * a neighbor advertisement message back.
+   */
+
+  else if (icmp->type == ICMPv6_NEIGHBOR_ADVERTISE)
+    {
+      FAR struct icmpv6_neighbor_advertise_s *adv;
+
+      /* If the IPv6 destination address matches our address, and if so,
+       * add the neighbor address mapping to the list of neighbors.
+       *
+       * Missing checks:
+       *   optlen = 1 (8 octets)
+       *   Should only update Neighbor Table if [O]verride bit is set in flags
+       */
+
+      adv = ICMPv6ADVERTISE;
+      if (net_ipv6addr_cmp(icmp->destipaddr, dev->d_ipv6addr))
+        {
+          /* This message is required to support the Target link-layer
+           * address option.
+           */
+
+          if (adv->opttype == ICMPv6_OPT_TGTLLADDR)
+            {
+              /* Save the sender's address mapping in our Neighbor Table. */
+
+              neighbor_add(icmp->srcipaddr,
+                           (FAR struct neighbor_addr_s *)adv->tgtlladdr);
+
+              /* We consumed the packet but we don't send anything in
+               * response.
+               */
+
+              goto icmpv_send_nothing;
+            }
+        }
+
+      goto icmpv6_drop_packet;
     }
   else if (icmp->type == ICMPv6_ECHO_REQUEST)
     {
@@ -276,7 +305,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
         {
           /* The ECHO reply was not handled */
 
-          goto drop;
+          goto icmpv6_drop_packet;
         }
     }
 #endif
@@ -284,7 +313,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
   else
     {
       nlldbg("Unknown ICMPv6 cmd: %d\n", icmp->type);
-      goto typeerr;
+      goto icmpv6_type_error;
     }
 
   /* No additional neighbor lookup is required on this packet. */
@@ -300,15 +329,17 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 #endif
   return;
 
-typeerr:
+icmpv6_type_error:
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.typeerr++;
 #endif
 
-drop:
+icmpv6_drop_packet:
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.drop++;
 #endif
+
+icmpv_send_nothing:
   dev->d_len = 0;
 }
 
