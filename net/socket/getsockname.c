@@ -242,10 +242,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       case SOCK_STREAM:
         {
           FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
-          outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
+          outaddr->sin6_port = tcp_conn->lport; /* Already in network byte order */
 #ifdef CONFIG_NETDEV_MULTINIC
-          lipaddr = &tcp_conn->u.ipv6.laddr;
-          ripaddr = &tcp_conn->u.ipv6.raddr;
+          lipaddr            = &tcp_conn->u.ipv6.laddr;
+          ripaddr            = &tcp_conn->u.ipv6.raddr;
 #endif
         }
         break;
@@ -255,10 +255,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       case SOCK_DGRAM:
         {
           FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
-          outaddr->sin_port = udp_conn->lport; /* Already in network byte order */
+          outaddr->sin6_port = udp_conn->lport; /* Already in network byte order */
 #ifdef CONFIG_NETDEV_MULTINIC
-          lipaddr = &udp_conn->u.ipv6.laddr;
-          ripaddr = &udp_conn->u.ipv6.raddr;
+          lipaddr            = &udp_conn->u.ipv6.laddr;
+          ripaddr            = &udp_conn->u.ipv6.raddr;
 #endif
         }
         break;
@@ -294,7 +294,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   /* Set the address family and the IP address */
 
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-  outaddr->sin_family = AF_INET6;
+  outaddr->sin6_family = AF_INET6;
   memcpy(outaddr->sin6_addr.in6_u.u6_addr8, dev->d_ipv6addr, 16);
   *addrlen = sizeof(struct sockaddr_in6);
 #endif

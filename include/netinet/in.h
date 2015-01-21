@@ -143,8 +143,8 @@ struct in6_addr
 
 struct sockaddr_in6
 {
-  sa_family_t     sin_family;  /* Address family: AF_INET */
-  uint16_t        sin_port;    /* Port in network byte order */
+  sa_family_t     sin6_family; /* Address family: AF_INET */
+  uint16_t        sin6_port;   /* Port in network byte order */
   struct in6_addr sin6_addr;   /* IPv6 internet address */
 };
 

@@ -604,7 +604,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
       /* Get the port number that we are binding to */
 
-      portno = inaddr->sin_port;
+      portno = inaddr->sin6_port;
 
 #ifdef CONFIG_NETDEV_MULTINIC
       /* Bind the local IP address to the connection.  NOTE this address may
@@ -725,7 +725,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
           FAR const struct sockaddr_in6 *inaddr =
             (FAR const struct sockaddr_in6 *)addr;
 
-          conn->rport = inaddr->sin_port;
+          conn->rport = inaddr->sin6_port;
           net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
         }
 #endif /* CONFIG_NET_IPv6 */

@@ -577,9 +577,9 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NETDEV_MULTINIC
   port = tcp_selectport(PF_INET6,
                         (FAR const union ip_addr_u ipaddr *)addr->sin6_addr.in6_u.u6_addr16,
-                        ntohs(addr->sin_port));
+                        ntohs(addr->sin6_port));
 #else
-  port = tcp_selectport(ntohs(addr->sin_port));
+  port = tcp_selectport(ntohs(addr->sin6_port));
 #endif
 
   net_unlock(flags);
@@ -591,7 +591,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   /* Save the local address in the connection structure. */
 
-  conn->lport = addr->sin_port;
+  conn->lport = addr->sin6_port;
 
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_copy(conn->u.ipv6.laddr, addr->sin6_addr.in6_u.u6_addr16);
@@ -1165,7 +1165,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       /* Save MSS and the port from the sockaddr (already in network order) */
 
       conn->mss     = MIN_IPv6_TCP_INITIAL_MSS;
-      conn->rport   = inaddr->sin_port;
+      conn->rport   = inaddr->sin6_port;
 
       /* The sockaddr address is 32-bits in network order. */
 

@@ -586,8 +586,8 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
           FAR struct tcp_hdr_s *tcp   = TCPIPv6BUF;
           FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
-          infrom->sin_family = AF_INET6;
-          infrom->sin_port   = tcp->srcport;
+          infrom->sin6_family = AF_INET6;
+          infrom->sin6_port   = tcp->srcport;
 
           net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
         }
@@ -861,8 +861,8 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
           FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
           FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
-          infrom->sin_family = AF_INET6;
-          infrom->sin_port   = udp->srcport;
+          infrom->sin6_family = AF_INET6;
+          infrom->sin6_port   = udp->srcport;
 
           net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
         }

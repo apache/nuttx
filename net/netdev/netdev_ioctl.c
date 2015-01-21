@@ -147,8 +147,8 @@ static int ioctl_addipv6route(FAR struct rtentry *rtentry)
   net_ipv6addr_t netmask;
   net_ipv6addr_t router;
 
-  addr   = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-  target = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
+  target  = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
 
   addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
   netmask = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
@@ -264,8 +264,8 @@ static void ioctl_getipv6addr(FAR struct sockaddr_storage *outaddr,
                               FAR const net_ipv6addr_t inaddr)
 {
   FAR struct sockaddr_in6 *dest = (FAR struct sockaddr_in6 *)outaddr;
-  dest->sin_family              = AF_INET6;
-  dest->sin_port                = 0;
+  dest->sin6_family             = AF_INET6;
+  dest->sin6_port               = 0;
   memcpy(dest->sin6_addr.in6_u.u6_addr8, inaddr, 16);
 }
 #endif
