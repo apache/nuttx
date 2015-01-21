@@ -9485,4 +9485,5 @@
 	* Networking:  When sending ICMPv6 advertisements and solicitations,
 	  set the NOARP bit so that we don't overwrite the destination MAC
 	  address (2015-01-20).
-
+	* Many files: Correct name of fields in struct sockaddr_in6:  sin6_port
+	  and sin6_family, not sin_port and sin_family (2015-01-20).
