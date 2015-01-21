@@ -202,7 +202,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
            * REVISIT:  What if the link layer is not Ethernet?
            */
 
-          memcpy(&(adv->tgtlladdr), &dev->d_mac, IFHWADDRLEN);
+          memcpy(adv->tgtlladdr, &dev->d_mac, IFHWADDRLEN);
 
           /* Calculate the checksum over both the ICMP header and payload */
 

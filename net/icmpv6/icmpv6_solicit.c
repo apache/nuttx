@@ -146,7 +146,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
    * REVISIT:  What if the link layer is not Ethernet?
    */
 
-  memcpy(&(sol->srclladdr), &dev->d_mac, IFHWADDRLEN);
+  memcpy(sol->srclladdr, &dev->d_mac, IFHWADDRLEN);
 
   /* Calculate the checksum over both the ICMP header and payload */
 

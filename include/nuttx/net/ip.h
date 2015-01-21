@@ -272,7 +272,7 @@ struct ipv6_hdr_s
 
 #ifdef CONFIG_NET_IPv6
 #  define net_ipv6addr_copy(dest,src) \
-   memcpy(&dest, &src, sizeof(net_ipv6addr_t))
+   memcpy(dest, src, sizeof(net_ipv6addr_t))
 #  define net_ipv6addr_hdrcopy(dest,src) \
    net_ipv6addr_copy(dest, src)
 #endif
