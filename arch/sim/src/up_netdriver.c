@@ -126,7 +126,30 @@ static int sim_txpoll(struct net_driver_s *dev)
 
   if (g_sim_dev.d_len > 0)
     {
-      arp_out(&g_sim_dev);
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(&g_sim_dev))
+#endif
+        {
+          arp_out(&g_sim_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&g_sim_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      /* Send the packet */
+
       netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
     }
 

@@ -620,12 +620,34 @@ static int tiva_txpoll(struct net_driver_s *dev)
   nllvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
+      DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(priv->ld_dev.d_flags))
+#endif
+        {
+          arp_out(&priv->ld_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&priv->ld_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
       /* Send the packet.  tiva_transmit() will return zero if the
        * packet was successfully handled.
        */
 
-      DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
-      arp_out(&priv->ld_dev);
       ret = tiva_transmit(priv);
     }
 
