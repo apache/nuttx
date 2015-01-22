@@ -227,6 +227,14 @@ void net_unlock(net_lock_t flags);
  * Description:
  *   Atomically wait for sem while temporarily releasing g_netlock.
  *
+ * Input Parameters:
+ *   sem - A reference to the semaphore to be taken.
+ *
+ * Returned value:
+ *   The returned value is the same as sem_wait():  Zero (OK) is returned
+ *   on success; -1 (ERROR) is returned on a failure with the errno value
+ *   set appropriately.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NOINTS

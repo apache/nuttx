@@ -301,6 +301,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
         {
           err = EBADF;
         }
+
       goto errout;
     }
 
@@ -431,12 +432,25 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       conn->accept          = accept_interrupt;
 
       /* Wait for the send to complete or an error to occur:  NOTES: (1)
-       * net_lockedwait will also terminate if a signal is received, (2) interrupts
-       * may be disabled!  They will be re-enabled while the task sleeps and
-       * automatically re-enabled when the task restarts.
+       * net_lockedwait will also terminate if a signal is received, (2)
+       * interrupts may be disabled!  They will be re-enabled while the
+       * task sleeps and automatically re-enabled when the task restarts.
        */
 
       ret = net_lockedwait(&state.acpt_sem);
+      if (ret < 0)
+        {
+          /* The value returned by net_lockedwait() the same as the value
+           * returned by sem_wait():  Zero (OK) is returned on success; -1
+           * (ERROR) is returned on a failure with the errno value set
+           * appropriately.
+           *
+           * We have to preserve the errno value here because it may be
+           * altered by intervening operations.
+           */
+
+          err = get_errno();
+        }
 
       /* Make sure that no further interrupts are processed */
 
@@ -449,7 +463,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
       psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-      /* Check for a errors.  Errors are signaled by negative errno values
+      /* Check for a errors.  Errors are signalled by negative errno values
        * for the send length.
        */
 
@@ -459,13 +473,13 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
           goto errout_with_lock;
         }
 
-      /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-       * this case, net_lockedwait will have set errno appropriately.
+      /* If net_lockedwait failed, then we were probably reawakened by a
+       * signal. In this case, logic above will have set 'err' to the
+       * ernno value returned by net_lockedwait().
        */
 
       if (ret < 0)
         {
-          err = -ret;
           goto errout_with_lock;
         }
     }
@@ -493,7 +507,7 @@ errout_with_socket:
   sockfd_release(newfd);
 
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 
