@@ -145,6 +145,10 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
   ipv4->proto       = IP_PROTO_TCP;
   ipv4->ttl         = IP_TTL;
 
+  /* At this point the TCP header holds the size of the payload, the
+   * TCP header, and the IP header.
+   */
+
   ipv4->len[0]      = (dev->d_len >> 8);
   ipv4->len[1]      = (dev->d_len & 0xff);
 
@@ -207,8 +211,9 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
   ipv6->proto     = IP_PROTO_TCP;
   ipv6->ttl       = IP_TTL;
 
-  /* For IPv6, the IP length field does not include the IPv6 IP header
-   * length.
+  /* At this point the TCP header holds the size of the payload, the
+   * TCP header, and the IP header.  For IPv6, the IP length field does
+   * not include the size of IPv6 IP header length.
    */
 
   iplen           = dev->d_len - IPv6_HDRLEN;
@@ -372,7 +377,8 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
  *   dev    - The device driver structure to use in the send operation
  *   conn   - The TCP connection structure holding connection information
  *   flags  - flags to apply to the TCP header
- *   len    - length of the message
+ *   len    - length of the message (includes the length of the IP and TCP
+ *            headers)
  *
  * Return:
  *   None

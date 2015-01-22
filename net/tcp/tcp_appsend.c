@@ -226,7 +226,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #endif
     {
       DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
-      hdrlen = IPv4_HDRLEN;
+      hdrlen = IPv4TCP_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -236,7 +236,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #endif
     {
       DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
-      hdrlen = IPv6_HDRLEN;
+      hdrlen = IPv6TCP_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv6 */
 
