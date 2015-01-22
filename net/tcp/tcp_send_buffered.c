@@ -350,7 +350,6 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
       FAR sq_entry_t *entry;
       FAR sq_entry_t *next;
       uint32_t ackno;
-lldbg("TCP_ACKDATA\n"); // REMOVE ME
 
       /* Get the offset address of the TCP header */
 
@@ -656,7 +655,6 @@ lldbg("TCP_ACKDATA\n"); // REMOVE ME
   if (dev->d_sndlen > 0)
     {
       /* Another thread has beat us sending data, wait for the next poll */
-lldbg("d_sndlen > 0, ABORTING\n"); // REMOVE ME
 
       return flags;
     }
@@ -793,9 +791,6 @@ lldbg("d_sndlen > 0, ABORTING\n"); // REMOVE ME
 
           flags &= ~TCP_POLL;
         }
-else { // REMOVE ME
-lldbg("NOT sending!!!\n"); // REMOVE ME
-} // REMOVE ME
     }
 
   /* Continue waiting */

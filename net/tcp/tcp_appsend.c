@@ -239,7 +239,6 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       hdrlen = IPv6_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv6 */
-lldbg("hdrlen=%d\n", hdrlen); // REMOVE ME
 
  /* If the application has data to be sent, or if the incoming packet had
    * new data in it, we must send out a packet.
