@@ -176,7 +176,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Name: tcp_pv6_sendcomplete
+ * Name: tcp_ipv6_sendcomplete
  *
  * Description:
  *   Complete the final portions of the send operation.  This function sets
@@ -304,7 +304,8 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_conn_s *conn,
                            FAR struct tcp_hdr_s *tcp)
 {
-      /* Copy the IP address into the IPv6 header */
+  /* Copy the IP address into the IPv6 header */
+lldbg("d_len=%d\n", dev->d_len); // REMOVE ME
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
@@ -386,6 +387,7 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len)
 {
   FAR struct tcp_hdr_s *tcp = tcp_header(dev);
+lldbg("sndlen=%d len=%d d_len=%d\n", dev->d_sndlen, len, dev->d_len); // REMOVE ME
 
   tcp->flags     = flags;
   dev->d_len     = len;
