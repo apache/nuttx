@@ -97,10 +97,6 @@ void up_initial_state(struct tcb_s *tcb)
   /* Set the stack limit value */
 
   xcp->regs[REG_R10]     = (uint32_t)tcb->stack_alloc_ptr + 64;
-
-  /* Fill the stack with a watermark value */
-
-  memset(tcb->stack_alloc_ptr, 0xff, tcb->adj_stack_size);
 #endif
 
   /* Save the task entry point (stripping off the thumb bit) */
