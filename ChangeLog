@@ -9490,3 +9490,7 @@
 	* net/socket/accept.c: Correct the value returned by accept() in the
 	  case where net_lockingwait() is called.  It was returning -1 and
 	  losing the errno value.  Noted by Rony Xln (2015-01-22).
+	* net/: After some significant effort, ICMPv6 and TCP are both
+	  functional when IPv6 is selected.  UDP still requies testing
+	  (2014-01-22).
+
