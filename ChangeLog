@@ -9487,3 +9487,6 @@
 	  address (2015-01-20).
 	* Many files: Correct name of fields in struct sockaddr_in6:  sin6_port
 	  and sin6_family, not sin_port and sin_family (2015-01-20).
+	* net/socket/accept.c: Correct the value returned by accept() in the
+	  case where net_lockingwait() is called.  It was returning -1 and
+	  losing the errno value.  Noted by Rony Xln (2015-01-22).
