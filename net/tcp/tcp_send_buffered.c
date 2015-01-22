@@ -1035,7 +1035,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  /* Check for a errors.  Errors are signaled by negative errno values
+  /* Check for errors.  Errors are signalled by negative errno values
    * for the send length
    */
 

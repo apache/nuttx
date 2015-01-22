@@ -199,7 +199,7 @@ int net_lockedwait(sem_t *sem)
   sched_lock();      /* No context switches */
   if (g_holder == me)
     {
-      /* Release the uIP semaphore, remembering the count */
+      /* Release the network lock, remembering my count */
 
       count    = g_count;
       g_holder = NO_HOLDER;
@@ -210,7 +210,7 @@ int net_lockedwait(sem_t *sem)
 
       ret = sem_wait(sem);
 
-      /* Recover the uIP semaphore at the proper count */
+      /* Recover the network lock at the proper count */
 
       _net_takesem();
       g_holder = me;
