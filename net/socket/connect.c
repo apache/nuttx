@@ -255,8 +255,26 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
        */
 
       DEBUGASSERT(pstate->tc_conn);
-      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (pstate->tc_conn->domain == PF_INET)
 #endif
+    {
+      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+    }
+#endif /* CONFIG_NET_IPv6 */
+
+#endif /* CONFIG_NET_MULTILINK */
 
       /* Wake up the waiting thread */
 
