@@ -322,7 +322,7 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev) - IPv4TCP_HDRLEN.
+ * than NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev) - IPvN_HDRLEN - TCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
  * link layer protocols (CONFIG_NET_MULTILINK), each network device
@@ -330,7 +330,7 @@
  * the minimum MSS for that case.
  */
 
-#define TCP_MSS(d,h)        (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - (h))
+#define TCP_MSS(d,h)        (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - TCP_HDRLEN - (h))
 
 /* If Ethernet is supported, then it will have the smaller MSS */
 
