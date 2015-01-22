@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_clone.c
  *
- *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 
   /* Duplicate the socket state */
 
+  psock2->s_domain   = psock1->s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
   psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
   psock2->s_flags    = psock1->s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS

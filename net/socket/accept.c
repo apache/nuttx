@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/accept.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -489,6 +489,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
    * interrupt handler).
    */
 
+  pnewsock->s_domain = psock->s_domain;
   pnewsock->s_type   = SOCK_STREAM;
   pnewsock->s_conn   = state.acpt_newconn;
   pnewsock->s_flags |= _SF_CONNECTED;

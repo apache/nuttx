@@ -211,7 +211,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
  *   Copy the read data from the packet
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
  * Returned Value:
