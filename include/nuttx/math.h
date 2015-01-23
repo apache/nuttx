@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/math.h
  *
- *   Copyright (C) 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -193,11 +193,14 @@ long double powl  (long double b, long double e);
 #endif
 
 float       expf  (float x);
+#define expm1f(x) (expf(x) - 1.0)
 #if CONFIG_HAVE_DOUBLE
 double      exp   (double x);
+#define expm1(x) (exp(x) - 1.0)
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double expl  (long double x);
+#define expm1l(x) (expl(x) - 1.0)
 #endif
 
 float       logf  (float x);
