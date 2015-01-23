@@ -305,7 +305,7 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdping">2.37 Check Network Peer (ping)</a>
+    <a href="#cmdping">2.37 Check Network Peer (ping/ping6)</a>
   </td>
 </tr>
 <tr>
@@ -2092,14 +2092,15 @@ nfsmount &lt;server-address&gt; &lt;mount-point&gt; &lt;remote-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdping"><h2>2.37 Check Network Peer (ping)</h2></a>
+    <a name="cmdping"><h2>2.37 Check Network Peer (ping/ping6)</h2></a>
   </td>
   </tr>
 </table>
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-ping [-c &lt;count&gt;] [-i &lt;interval&gt;] &lt;ip-address&gt;
+ping  [-c &lt;count&gt;] [-i &lt;interval&gt;] &lt;ip-address&gt;
+ping6 [-c &lt;count&gt;] [-i &lt;interval&gt;] &lt;ip-address&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
@@ -2121,6 +2122,9 @@ PING 10.0.0.1 56 bytes of data
 10 packets transmitted, 10 received, 0% packet loss, time 10190 ms
 nsh&gt;
 </pre></ul>
+<p>
+  <code>ping6</code> differs from <code>ping</code> in that it uses IPv6 addressing.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2702,6 +2706,12 @@ nsh>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP</code> &amp;&amp;
         <code>CONFIG_NET_ICMP_PING</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code></td>
     <td><code>CONFIG_NSH_DISABLE_PING</code></td>
+  </tr>
+  <tr>
+    <td><b><code>ping6</code></b></td>
+    <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMPv6</code> &amp;&amp;
+        <code>CONFIG_NET_ICMPv6_PING</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_PING6</code></td>
   </tr>
   <tr>
     <td><b><code>ps</code></b></td>
@@ -4183,10 +4193,10 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NETMASK</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NOMAC</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_READLINE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
 </ul></td>
 <td width="33%" valign="top">
 <ul>
-  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
@@ -4243,11 +4253,11 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdmbhw"><code>mb</code></a></li>
   <li><a href="#cmdmd5">md5</a></li>
   <li><a href="#cmdmbhw"><code>mh</code></a></li>
+  <li><a href="#cmdmbhw"><code>mw</code></a></li>
+  <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#cmdmbhw"><code>mw</code></a></li>
-  <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
   <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
   <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>
   <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
@@ -4271,6 +4281,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#environvars"><code>OLDPWD</code></a></li>
   <li><a href="#overview">Overview</a></li>
   <li><a href="#cmdping"><code>ping</code></a></li>
+  <li><a href="#cmdping"><code>ping6</code></a></li>
   <li><a href="#nshprompt">Prompt</a></li>
   <li><a href="#cmdps"><code>ps</code></a></li>
   <li><a href="#cmdput"><code>put</code></a></li>
