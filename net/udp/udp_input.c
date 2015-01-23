@@ -99,6 +99,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   FAR struct udp_conn_s *conn;
   unsigned int udpiplen;
   unsigned int hdrlen;
+  uint16_t chksum;
   int ret = OK;
 
   /* Update the count of UDP packets received */
@@ -126,13 +127,34 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
    * application sets d_sndlen, it has a packet to send.
    */
 
-  dev->d_len -= udpiplen;
-
-#ifdef CONFIG_NET_UDP_CHECKSUMS
+  dev->d_len    -= udpiplen;
   dev->d_appdata = &dev->d_buf[hdrlen];
 
-  if (udp->udpchksum != 0 && udp_chksum(dev) != 0xffff)
+#ifdef CONFIG_NET_UDP_CHECKSUMS
+  chksum = udp->udpchksum;
+  if (chksum != 0)
     {
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      if (IFF_IS_IPv6(dev->d_flags))
+#endif
+        {
+          chksum = ~udp_ipv6_chksum(dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      else
+#endif
+        {
+          chksum = ~udp_ipv4_chksum(dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+     }
+
+   if (chksum != 0)
+     {
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;
       g_netstats.udp.chkerr++;

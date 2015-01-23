@@ -129,8 +129,6 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
           ipv4->vhl         = 0x45;
           ipv4->tos         = 0;
-          ipv4->len[0]      = (dev->d_len >> 8);
-          ipv4->len[1]      = (dev->d_len & 0xff);
           ++g_ipid;
           ipv4->ipid[0]     = g_ipid >> 8;
           ipv4->ipid[1]     = g_ipid & 0xff;
@@ -142,17 +140,22 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
           net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
           net_ipv4addr_hdrcopy(ipv4->destipaddr, &conn->u.ipv4.raddr);
 
-          /* Calculate IP checksum. */
-
-          ipv4->ipchksum    = 0;
-          ipv4->ipchksum    = ~ipv4_chksum(dev);
-
           /* The total length to send is the size of the application data
            * plus the IPv4 and UDP headers (and, eventually, the link layer
            * header)
            */
 
-          dev->d_len = dev->d_sndlen + IPv4UDP_HDRLEN;
+          dev->d_len        = dev->d_sndlen + IPv4UDP_HDRLEN;
+
+          /* The IPv4 length includes the size of the IPv4 header */
+
+          ipv4->len[0]      = (dev->d_len >> 8);
+          ipv4->len[1]      = (dev->d_len & 0xff);
+
+          /* Calculate IP checksum. */
+
+          ipv4->ipchksum    = 0;
+          ipv4->ipchksum    = ~ipv4_chksum(dev);
         }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -175,20 +178,26 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
           ipv6->vtc         = 0x60;
           ipv6->tcf         = 0x00;
           ipv6->flow        = 0x00;
-          ipv6->len[0]      = (dev->d_sndlen >> 8);
-          ipv6->len[1]      = (dev->d_sndlen & 0xff);
           ipv6->proto       = IP_PROTO_UDP;
           ipv6->ttl         = conn->ttl;
 
           net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
           net_ipv6addr_copy(ipv6->destipaddr, conn->u.ipv6.raddr);
 
+          /* The IPv6 length, Includes the UDP header size but not the IPv6
+           * header size
+           */
+
+          dev->d_len        = dev->d_sndlen + UDP_HDRLEN;
+          ipv6->len[0]      = (dev->d_len >> 8);
+          ipv6->len[1]      = (dev->d_len & 0xff);
+
           /* The total length to send is the size of the application data
-           * plus the IPv4 and UDP headers (and, eventually, the link layer
+           * plus the IPv6 and UDP headers (and, eventually, the link layer
            * header)
            */
 
-          dev->d_len = dev->d_sndlen + IPv6UDP_HDRLEN;
+          dev->d_len       += IPv6_HDRLEN;
         }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -197,19 +206,34 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
       udp->srcport     = conn->lport;
       udp->destport    = conn->rport;
       udp->udplen      = HTONS(dev->d_sndlen + UDP_HDRLEN);
+      udp->udpchksum   = 0;
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */
 
-      udp->udpchksum   = 0;
-      udp->udpchksum   = ~(udp_chksum(dev));
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv5
+      if (conn->domain = PF_INET)
+#endif
+        {
+          udp->udpchksum = ~udp_ipv4_chksum(dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          udp->udpchksum = ~udp_ipv6_chksum(dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
       if (udp->udpchksum == 0)
         {
           udp->udpchksum = 0xffff;
         }
-#else
-      udp->udpchksum   = 0;
-#endif
+#endif /* CONFIG_NET_UDP_CHECKSUMS */
 
       nllvdbg("Outgoing UDP packet length: %d\n", dev->d_len);
 
