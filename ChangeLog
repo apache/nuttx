@@ -9495,3 +9495,5 @@
 	  (2015-01-22).
 	* "configs/dk-tm4c129x/ipv6:  Add an IPv6-enabled NSH configruation
 	  (2015-01-23)
+	* include/nuttx/net/icmpv6.h and net/icmpv6/icmpv6_ping.c: First cut
+	  at ICMPv6 ping logic (2015-01-23).
