@@ -186,6 +186,9 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
 
       memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
 
+      /* Set the IPv6 Ethernet type */
+
+      eth->type  = HTONS(ETHTYPE_IP6);
 #if 0
       /* No additional neighbor lookup is required on this packet.
        * REVISIT:  It is inappropriate to set this bit if we get here

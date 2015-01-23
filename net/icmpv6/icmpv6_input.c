@@ -218,6 +218,10 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
               memcpy(eth->dest, eth->src, ETHER_ADDR_LEN);
               memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+
+              /* Set the IPv6 Ethernet type */
+
+              eth->type  = HTONS(ETHTYPE_IP6);
             }
 #endif
         }
