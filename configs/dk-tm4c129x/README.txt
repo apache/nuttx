@@ -947,3 +947,10 @@ Where <subdir> is one of the following:
        The default units is degrees Fahrenheit, but that is easily
        reconfigured.  See the discussin above in the paragraph entitled
        "Temperature Sensor".
+
+  ipv6:
+  ----
+    This is another version of the NuttShell configuration.  It is very
+    similar to the nsh configuration except that it has IPv6 enabled and
+    IPv4 disabled.  Several network utilities that are not yet available
+    under IPv6 are disabled.
