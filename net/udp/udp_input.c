@@ -99,7 +99,9 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   FAR struct udp_conn_s *conn;
   unsigned int udpiplen;
   unsigned int hdrlen;
+#ifdef CONFIG_NET_UDP_CHECKSUMS
   uint16_t chksum;
+#endif
   int ret = OK;
 
   /* Update the count of UDP packets received */
