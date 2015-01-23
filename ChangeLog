@@ -9493,7 +9493,10 @@
 	* net/: After some significant effort, ICMPv6 and TCP are both
 	  functional when IPv6 is selected.  UDP still requies testing
 	  (2015-01-22).
-	* "configs/dk-tm4c129x/ipv6:  Add an IPv6-enabled NSH configruation
+	* configs/dk-tm4c129x/ipv6:  Add an IPv6-enabled NSH configruation
 	  (2015-01-23)
 	* include/nuttx/net/icmpv6.h and net/icmpv6/icmpv6_ping.c: First cut
-	  at ICMPv6 ping logic (2015-01-23).
+	  at ICMPv6 ping logic.  It works in both directions! (2015-01-23).
+	* arch/arm/src/efm32/efm32_rmu.c and .h: Add support for the EFM32
+	  reset management unit (RMU).  From Pierre-noel Bouteville
+	  (2015-01-23).
