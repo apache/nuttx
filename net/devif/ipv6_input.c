@@ -171,14 +171,11 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * we set d_len to the correct value.
    *
    * The length reported in the IPv6 header is the length of the payload
-   * that follows the header. However, uIP uses the d_len variable for
-   * holding the size of the entire packet, including the IP header. For
-   * IPv4 this is not a problem as the length field in the IPv4 header
-   * contains the length of the entire packet. But for IPv6 we need to add
-   * the size of the IPv6 header (40 bytes).
+   * that follows the header. The device interface uses the d_len variable for
+   * holding the size of the entire packet, including the IP header.
    */
 
-  iplen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN;
+  iplen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + ETH_HDRLEN;
   if (iplen <= dev->d_len)
     {
       dev->d_len = iplen;

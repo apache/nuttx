@@ -145,7 +145,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
            *
            *
            * Set up the IPv6 header.  Most is probably already in place from
-           * the Neighbor Solitication.  We could save some time here.
+           * the Neighbor Solicitation.  We could save some time here.
            */
 
           icmp->vtc    = 0x60;                            /* Version/traffic class (MS) */
@@ -224,6 +224,11 @@ void icmpv6_input(FAR struct net_driver_s *dev)
               eth->type  = HTONS(ETHTYPE_IP6);
             }
 #endif
+          /* No additional neighbor lookup is required on this packet
+           * (We are using a multicast address).
+           */
+
+          IFF_SET_NOARP(dev->d_flags);
         }
       else
         {
@@ -319,10 +324,6 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       nlldbg("Unknown ICMPv6 cmd: %d\n", icmp->type);
       goto icmpv6_type_error;
     }
-
-  /* No additional neighbor lookup is required on this packet. */
-
-  IFF_SET_NOARP(dev->d_flags);
 
   nllvdbg("Outgoing ICMPv6 packet length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
