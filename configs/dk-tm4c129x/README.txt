@@ -954,3 +954,44 @@ Where <subdir> is one of the following:
     similar to the nsh configuration except that it has IPv6 enabled and
     IPv4 disabled.  Several network utilities that are not yet available
     under IPv6 are disabled.
+
+    NOTES:
+
+    1. As of 2015-01-23, this configuration was identical to the nsh
+       configuration other than using IPv6.  So all of the notes above
+       regarding the nsh configuration apply.
+
+       Telnet does not work with IPv6.
+
+    2. This configuration can be modified to that both IPv4 and IPv6
+       are support.  Here is a summary of the additional configuration
+       settings requird to support both IPv4 and IPv6:
+
+         CONFIG_NET_IPv4=y
+         CONFIG_NET_ARP=y
+         CONFIG_NET_ICMP=y
+         CONFIG_NET_ICMP_PING=y
+
+         CONFIG_NETUTILS_DNSCLIENT=y
+         CONFIG_NETUTILS_DNSCLIENT_IPv4=y
+         CONFIG_NETUTILS_TELNETD=y
+
+         CONFIG_NSH_IPADDR=0x0a000002
+         CONFIG_NSH_DRIPADDR=0x0a000001
+         CONFIG_NSH_NETMASK=0xffffff00
+         CONFIG_NSH_TELNET=y
+
+       Then from NSH, you have both ping and ping6 commands:
+
+         nsh> ping 10.0.0.1
+         nsh> ping6 fc00::1
+
+       And from the host you can do similar:
+
+         ping 10.0.0.2
+         ping6 fc00::2   (Linux)
+         ping -6 fc00::2 (Windows cmd)
+
+       and Telnet again works from the host:
+
+         telent 10.0.0.2
