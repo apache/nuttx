@@ -128,6 +128,10 @@ config EFM32_DMA
 	default n
 	select ARCH_DMA
 
+config EFM32_RMU
+	bool "Reset Management Unit (RMU) "
+	default n
+
 config EFM32_USART0
 	bool "USART0"
 	default n
