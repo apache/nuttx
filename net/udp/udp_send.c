@@ -212,8 +212,8 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
       /* Calculate UDP checksum. */
 
 #ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv5
-      if (conn->domain = PF_INET)
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET)
 #endif
         {
           udp->udpchksum = ~udp_ipv4_chksum(dev);

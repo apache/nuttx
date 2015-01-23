@@ -140,7 +140,7 @@
 int ipv6_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  uint16_t iplen;
+  uint16_t pktlen;
 
   /* This is where the input processing starts. */
 
@@ -172,13 +172,21 @@ int ipv6_input(FAR struct net_driver_s *dev)
    *
    * The length reported in the IPv6 header is the length of the payload
    * that follows the header. The device interface uses the d_len variable for
-   * holding the size of the entire packet, including the IP header.
+   * holding the size of the entire packet, including the IP and link layer
+   * headers.
    */
 
-  iplen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + ETH_HDRLEN;
-  if (iplen <= dev->d_len)
+#if defined(CONFIG_NET_MULTILINK)
+  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + dev->d_llhdrlen;
+#elif defined(CONFIG_NET_ETHERNET)
+  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + ETH_HDRLEN;
+#else /* if defined(CONFIG_NET_SLIP) */
+  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN;
+#endif
+
+  if (pktlen <= dev->d_len)
     {
-      dev->d_len = iplen;
+      dev->d_len = pktlen;
     }
   else
     {
