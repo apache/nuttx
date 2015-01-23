@@ -291,7 +291,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
    * a thread waiting to received the echo response.
    */
 
-#ifdef CONFIG_NET_ICMPv6v6_PING
+#ifdef CONFIG_NET_ICMPv6_PING
   else if (icmp->type == ICMPv6_ECHO_REPLY && g_icmpv6_echocallback)
     {
       uint16_t flags = ICMPv6_ECHOREPLY;

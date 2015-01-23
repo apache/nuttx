@@ -70,8 +70,8 @@
  *   Poll all packet connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver and may be called
+ *   from the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
@@ -150,8 +150,8 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
  *   Poll all IGMP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver and may be called
+ *   from the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
@@ -251,8 +251,8 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  *   TCP connection.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver and may be called
+ *   from the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
@@ -430,7 +430,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  /* Perform aging on the entries in the Neighbor Table */
+  /* Perform ageing on the entries in the Neighbor Table */
 
   neighbor_periodic();
 #endif
@@ -494,11 +494,11 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
 
   if (!bstop)
 #endif
-#if defined(CONFIG_NET_ICMP6) && defined(CONFIG_NET_ICMPv6_PING)
+#if defined(CONFIG_NET_ICMPv6) && defined(CONFIG_NET_ICMPv6_PING)
     {
       /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
 
-      bstop = devif_poll_icmp6(dev, callback);
+      bstop = devif_poll_icmpv6(dev, callback);
     }
 
   if (!bstop)

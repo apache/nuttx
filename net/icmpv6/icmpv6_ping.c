@@ -187,7 +187,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
   icmp->len[1]  = (reqlen & 0xff);
 
   icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
-  icmp->ttl     = 255;                     /* Hop limit */
+  icmp->ttl     = IP_TTL;                  /* Hop limit */
 
   /* Set the multicast destination IP address */
 
@@ -261,6 +261,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   FAR struct icmpv6_ping_s *pstate = (struct icmpv6_ping_s *)pvpriv;
 
   nllvdbg("flags: %04x\n", flags);
+
   if (pstate)
     {
       /* Check if this is a ICMPv6 ECHO reply.  If so, return the sequence
