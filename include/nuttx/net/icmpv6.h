@@ -175,6 +175,36 @@ struct icmpv6_neighbor_advertise_s
 #endif
 };
 
+/* This the message format for the ICMPv6 Echo Request message */
+
+struct icmpv6_echo_request_s
+{
+  uint8_t  type;             /* Message Type: ICMPv6_ECHO_REQUEST */
+  uint8_t  code;             /* Further qualifies the ICMP messages */
+  uint16_t chksum;           /* Checksum of ICMP header and data */
+  uint16_t id;               /* Identifier */
+  uint16_t seqno;            /* Sequence Number */
+  uint8_t  data[1];          /* Data follows */
+};
+
+#define SIZEOF_ICMPV6_ECHO_REQUEST_S(n) \
+  (sizeof(struct icmpv6_echo_request_s) - 1 + (n))
+
+/* This the message format for the ICMPv6 Echo Reply message */
+
+struct icmpv6_echo_reply_s
+{
+  uint8_t  type;             /* Message Type: ICMPv6_ECHO_REQUEST */
+  uint8_t  code;             /* Further qualifies the ICMP messages */
+  uint16_t chksum;           /* Checksum of ICMP header and data */
+  uint16_t id;               /* Identifier */
+  uint16_t seqno;            /* Sequence Number */
+  uint8_t  data[1];          /* Data follows */
+};
+
+#define SIZEOF_ICMPV6_ECHO_REPLY_S(n) \
+  (sizeof(struct icmpv6_echo_reply_s) - 1 + (n))
+
 /* The structure holding the ICMP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.
  */

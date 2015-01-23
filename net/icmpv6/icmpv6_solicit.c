@@ -80,7 +80,12 @@ static const uint16_t g_icmpv_mcastaddr[6] =
  * Name: icmpv6_solicit
  *
  * Description:
- *   Set up to send an ICMPv6 Neighbor Solicitation message
+ *   Set up to send an ICMPv6 Neighbor Solicitation message.  This version
+ *   is for a standalone solicitation.  If formats:
+ *
+ *   - The Ethernet header
+ *   - The IPv6 header
+ *   - The ICMPv6 Neighbor Solicitation Message
  *
  * Parameters:
  *   dev - Reference to an Ethernet device driver structure

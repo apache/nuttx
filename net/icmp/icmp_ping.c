@@ -349,7 +349,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   state.png_result = -ENOMEM;          /* Assume allocation failure */
   state.png_addr   = addr;             /* Address of the peer to be ping'ed */
   state.png_id     = id;               /* The ID to use in the ECHO request */
-  state.png_seqno  = seqno;            /* The seqno to use int the ECHO request */
+  state.png_seqno  = seqno;            /* The seqno to use in the ECHO request */
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = false;            /* ECHO request not yet sent */
 

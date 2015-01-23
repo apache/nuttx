@@ -39,11 +39,12 @@
 
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ICMPv6) && \
-    defined(CONFIG_NET_ICMPv6v6_PING)
+    defined(CONFIG_NET_ICMPv6_PING)
 
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <semaphore.h>
 #include <debug.h>
 
@@ -55,23 +56,33 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/icmpv6.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "arp/arp.h"
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ETHBUF    ((struct eth_hdr_s *)&dev->d_buf[0])
 #define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPv6DAT (&dev->d_buf[NET_LL_HDRLEN(dev) + sizeof(struct icmpv6_iphdr_s)])
+#define ICMPv6ECHOREQ \
+  ((struct icmpv6_echo_request_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define ICMPv6ECHOREPLY \
+  ((struct icmpv6_echo_reply_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /* Allocate a new ICMPv6 data callback */
 
 #define icmpv6_callback_alloc()   devif_callback_alloc(&g_icmpv6_echocallback)
 #define icmpv6_callback_free(cb)  devif_callback_free(cb, &g_icmpv6_echocallback)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -133,6 +144,96 @@ static inline int ping_timeout(FAR struct icmpv6_ping_s *pstate)
 }
 
 /****************************************************************************
+ * Name: icmpv6_echo_request
+ *
+ * Description:
+ *   Format an ICMPv6 Echo Request message.. This version
+ *   is for a standalone solicitation.  If formats:
+ *
+ *   - The Ethernet header
+ *   - The IPv6 header
+ *   - The ICMPv6 Echo Request Message
+ *
+ * Parameters:
+ *   dev    - Reference to an Ethernet device driver structure
+ *   pstate - Ping state structure
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+static void icmpv6_echo_request(FAR struct net_driver_s *dev,
+                                FAR struct icmpv6_ping_s *pstate)
+{
+  FAR struct icmpv6_iphdr_s *icmp;
+  FAR struct icmpv6_echo_request_s *req;
+  uint16_t reqlen;
+  int i;
+
+  nllvdbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+
+  /* Set up the IPv6 header (most is probably already in place) */
+
+  icmp          = ICMPv6BUF;
+  icmp->vtc     = 0x60;                    /* Version/traffic class (MS) */
+  icmp->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
+  icmp->flow    = 0;                       /* Flow label (LS) */
+
+  /* Length excludes the IPv6 header */
+
+  reqlen        = SIZEOF_ICMPV6_ECHO_REQUEST_S(pstate->png_datlen);
+  icmp->len[0]  = (reqlen >> 8);
+  icmp->len[1]  = (reqlen & 0xff);
+
+  icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
+  icmp->ttl     = 255;                     /* Hop limit */
+
+  /* Set the multicast destination IP address */
+
+  net_ipv6addr_copy(icmp->destipaddr,  pstate->png_addr);
+
+  /* Add out IPv6 address as the source address */
+
+  net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
+
+  /* Set up the ICMPv6 Echo Request message */
+
+  req           = ICMPv6ECHOREQ;
+  req->type     = ICMPv6_ECHO_REQUEST; /* Message type */
+  req->code     = 0;                   /* Message qualifier */
+  req->id       = htons(pstate->png_id);
+  req->seqno    = htons(pstate->png_seqno);
+
+  /* Add some easily verifiable data */
+
+  for (i = 0; i < pstate->png_datlen; i++)
+    {
+      req->data[i] = i;
+    }
+
+  /* Calculate the checksum over both the ICMP header and payload */
+
+  icmp->chksum  = 0;
+  icmp->chksum  = ~icmpv6_chksum(dev);
+
+  /* Set the size to the size of the IPv6 header and the payload size */
+
+  IFF_SET_IPv6(dev->d_flags);
+
+  dev->d_sndlen = reqlen;
+  dev->d_len    = reqlen + IPv6_HDRLEN;
+
+  nllvdbg("Outgoing ICMPv6 Echo Request length: %d (%d)\n",
+          dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.icmpv6.sent++;
+  g_netstats.ip.sent++;
+#endif
+}
+
+/****************************************************************************
  * Function: ping_interrupt
  *
  * Description:
@@ -158,8 +259,6 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                                FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmpv6_ping_s *pstate = (struct icmpv6_ping_s *)pvpriv;
-  FAR uint8_t *ptr;
-  int i;
 
   nllvdbg("flags: %04x\n", flags);
   if (pstate)
@@ -172,12 +271,12 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       if ((flags & ICMPv6_ECHOREPLY) != 0 && conn != NULL)
         {
-          FAR struct icmpv6_iphdr_s *icmpv6 = (FAR struct icmpv6_iphdr_s *)conn;
+          FAR struct icmpv6_echo_reply_s *reply = ICMPv6ECHOREPLY;
 
           nllvdbg("ECHO reply: id=%d seqno=%d\n",
-                  ntohs(icmpv6->id), ntohs(icmpv6->seqno));
+                  ntohs(reply->id), reply(reply->seqno));
 
-          if (ntohs(icmpv6->id) == pstate->png_id)
+          if (ntohs(reply->id) == pstate->png_id)
             {
               /* Consume the ECHOREPLY */
 
@@ -187,7 +286,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
               /* Return the result to the caller */
 
               pstate->png_result = OK;
-              pstate->png_seqno  = ntohs(icmpv6->seqno);
+              pstate->png_seqno  = ntohs(reply->seqno);
               goto end_wait;
             }
         }
@@ -209,33 +308,9 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
           (flags & ICMPv6_NEWDATA) == 0 &&  /* No incoming data */
           !pstate->png_sent)                /* Request not sent */
         {
-          FAR struct icmpv6_iphdr_s *picmpv6 = ICMPv6BUF;
+          /* Send the ECHO request now. */
 
-          /* We can send the ECHO request now.
-           *
-           * Format the ICMPv6 ECHO request packet
-           */
-
-          picmpv6->type  = ICMPv6_ECHO_REQUEST;
-          picmpv6->icode = 0;
-# error "IPv6 ECHO Request not implemented"
-
-          /* Add some easily verifiable data */
-
-          for (i = 0, ptr = ICMPv6DAT; i < pstate->png_datlen; i++)
-            {
-              *ptr++ = i;
-            }
-
-          /* Send the ICMPv6 echo request.  Note that d_sndlen is set to
-           * the size of the ICMPv6 payload and does not include the size
-           * of the ICMPv6 header.
-           */
-
-          nllvdbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
-
-          dev->d_sndlen = pstate->png_datlen + 4;
-          icmpv6_send(dev, &pstate->png_addr);
+          icmpv6_echo_request(dev, pstate);
           pstate->png_sent = true;
           return flags;
         }
@@ -250,7 +325,8 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
            * device.
            */
 
-          if (!net_ipv6addr_maskcmp(pstate->png_addr, dev->d_ipaddr, dev->d_netmask))
+          if (!net_ipv6addr_maskcmp(pstate->png_addr, dev->d_ipv6addr,
+                                    dev->d_ipv6netmask))
             {
               /* Destination address was not on the local network served by this
                * device.  If a timeout occurs, then the most likely reason is
@@ -328,12 +404,13 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 {
   struct icmpv6_ping_s state;
   net_lock_t save;
-#ifdef CONFIG_NET_ARP_SEND
+
+#ifdef CONFIG_NET_ICMPv6_SEND
   int ret;
 
-  /* Make sure that the IP address mapping is in the ARP table */
+  /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = arp_send(addr);
+  ret = neighbor_send(addr);
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
@@ -344,13 +421,14 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
   /* Initialize the state structure */
 
   sem_init(&state.png_sem, 0, 0);
-  state.png_ticks  = DSEC2TICK(dsecs); /* System ticks to wait */
-  state.png_result = -ENOMEM;          /* Assume allocation failure */
-  state.png_addr   = addr;             /* Address of the peer to be ping'ed */
-  state.png_id     = id;               /* The ID to use in the ECHO request */
-  state.png_seqno  = seqno;            /* The seqno to use int the ECHO request */
-  state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
-  state.png_sent   = false;            /* ECHO request not yet sent */
+  state.png_ticks  = DSEC2TICK(dsecs);     /* System ticks to wait */
+  state.png_result = -ENOMEM;              /* Assume allocation failure */
+  state.png_id     = id;                   /* The ID to use in the ECHO request */
+  state.png_seqno  = seqno;                /* The seqno to use in the ECHO request */
+  state.png_datlen = datalen;              /* The length of data to send in the ECHO request */
+  state.png_sent   = false;                /* ECHO request not yet sent */
+
+  net_ipv6addr_copy(state.png_addr, addr); /* Address of the peer to be ping'ed */
 
   save             = net_lock();
   state.png_time   = clock_systimer();
@@ -404,4 +482,4 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
     }
 }
 
-#endif /* CONFIG_NET_ICMPv6 && CONFIG_NET_ICMPv6v6_PING  ... */
+#endif /* CONFIG_NET_ICMPv6 && CONFIG_NET_ICMPv6_PING  ... */

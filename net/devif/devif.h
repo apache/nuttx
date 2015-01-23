@@ -61,78 +61,80 @@
  * TCP_ACKDATA, XYZ_NEWDATA, and TCP_CLOSE flags may be set at the same time,
  * whereas the others are mutually exclusive.
  *
- *   TCP_ACKDATA    IN: Signifies that the outstanding data was ACKed and
- *                      the socket layer should send out new data instead
- *                      of retransmitting the last data (TCP only)
- *                 OUT: Input state must be preserved on output.
+ *   TCP_ACKDATA     IN: Signifies that the outstanding data was ACKed and
+ *                       the socket layer should send out new data instead
+ *                       of retransmitting the last data (TCP only)
+ *                  OUT: Input state must be preserved on output.
  *
- *   TCP_NEWDATA    IN: Set to indicate that the peer has sent us new data.
- *   UDP_NEWDATA   OUT: Cleared (only) by the socket layer logic to indicate
- *   PKT_NEWDATA        that the new data was consumed, suppressing further
- *   ICMP_NEWDATA       attempts to process the new data.
+ *   TCP_NEWDATA     IN: Set to indicate that the peer has sent us new data.
+ *   UDP_NEWDATA    OUT: Cleared (only) by the socket layer logic to indicate
+ *   PKT_NEWDATA         that the new data was consumed, suppressing further
+ *   ICMP_NEWDATA        attempts to process the new data.
  *
- *   TCP_SNDACK     IN: Not used; always zero
- *                 OUT: Set by the socket layer if the new data was consumed
- *                      and an ACK should be sent in the response. (TCP only)
+ *   TCP_SNDACK      IN: Not used; always zero
+ *                  OUT: Set by the socket layer if the new data was consumed
+ *                       and an ACK should be sent in the response. (TCP only)
  *
- *   TCP_REXMIT     IN: Tells the socket layer to retransmit the data that
- *                      was last sent. (TCP only)
- *                 OUT: Not used
+ *   TCP_REXMIT      IN: Tells the socket layer to retransmit the data that
+ *                       was last sent. (TCP only)
+ *                  OUT: Not used
  *
- *   TCP_POLL      IN:  Used for polling the socket layer.  This is provided
- *   UDP_POLL           periodically from the drivers to support (1) timed
- *   PKT_POLL           operations, and (2) to check if the socket layer has
- *   ICMP_POLL          data that it wants to send
- *   ICMPv6_POLL   OUT: Not used
+ *   TCP_POLL       IN:  Used for polling the socket layer.  This is provided
+ *   UDP_POLL            periodically from the drivers to support (1) timed
+ *   PKT_POLL            operations, and (2) to check if the socket layer has
+ *   ICMP_POLL           data that it wants to send
+ *   ICMPv6_POLL    OUT: Not used
  *
- *   TCP_BACKLOG    IN: There is a new connection in the backlog list set
- *                      up by the listen() command. (TCP only)
- *                 OUT: Not used
+ *   TCP_BACKLOG     IN: There is a new connection in the backlog list set
+ *                       up by the listen() command. (TCP only)
+ *                  OUT: Not used
  *
- *   TCP_CLOSE      IN: The remote host has closed the connection, thus the
- *                      connection has gone away. (TCP only)
- *                 OUT: The socket layer signals that it wants to close the
- *                      connection. (TCP only)
+ *   TCP_CLOSE       IN: The remote host has closed the connection, thus the
+ *                       connection has gone away. (TCP only)
+ *                  OUT: The socket layer signals that it wants to close the
+ *                       connection. (TCP only)
  *
- *   TCP_ABORT      IN: The remote host has aborted the connection, thus the
- *                      connection has gone away. (TCP only)
- *                 OUT: The socket layer signals that it wants to abort the
- *                      connection. (TCP only)
+ *   TCP_ABORT       IN: The remote host has aborted the connection, thus the
+ *                       connection has gone away. (TCP only)
+ *                  OUT: The socket layer signals that it wants to abort the
+ *                       connection. (TCP only)
  *
- *   TCP_CONNECTED  IN: We have got a connection from a remote host and have
- *                      set up a new connection for it, or an active connection
- *                      has been successfully established. (TCP only)
- *                 OUT: Not used
+ *   TCP_CONNECTED   IN: We have got a connection from a remote host and have
+ *                       set up a new connection for it, or an active connection
+ *                       has been successfully established. (TCP only)
+ *                  OUT: Not used
  *
- *   TCP_TIMEDOUT   IN: The connection has been aborted due to too many
- *                      retransmissions. (TCP only)
- *                 OUT: Not used
+ *   TCP_TIMEDOUT    IN: The connection has been aborted due to too many
+ *                       retransmissions. (TCP only)
+ *                  OUT: Not used
  *
- *   ICMP_ECHOREPLY IN: An ICMP Echo Reply has been received.  Used to support
- *                      ICMP ping from the socket layer. (ICMP only)
- *                 OUT: Cleared (only) by the socket layer logic to indicate
- *                      that the reply was processed, suppressing further
- *                      attempts to process the reply.
+ *   ICMP_ECHOREPLY  IN: An ICMP Echo Reply has been received.  Used to support
+ *   ICMPv6_ECHOREPLY    ICMP ping from the socket layer. (ICMP only)
+ *                  OUT: Cleared (only) by the socket layer logic to indicate
+ *                       that the reply was processed, suppressing further
+ *                       attempts to process the reply.
  */
 
-#define TCP_ACKDATA     (1 << 0)
-#define TCP_NEWDATA     (1 << 1)
-#define UDP_NEWDATA     TCP_NEWDATA
-#define PKT_NEWDATA     TCP_NEWDATA
-#define ICMP_NEWDATA    TCP_NEWDATA
-#define TCP_SNDACK      (1 << 2)
-#define TCP_REXMIT      (1 << 3)
-#define TCP_POLL        (1 << 4)
-#define UDP_POLL        TCP_POLL
-#define PKT_POLL        TCP_POLL
-#define ICMP_POLL       TCP_POLL
-#define ICMPv6_POLL     TCP_POLL
-#define TCP_BACKLOG     (1 << 5)
-#define TCP_CLOSE       (1 << 6)
-#define TCP_ABORT       (1 << 7)
-#define TCP_CONNECTED   (1 << 8)
-#define TCP_TIMEDOUT    (1 << 9)
-#define ICMP_ECHOREPLY  (1 << 10)
+#define TCP_ACKDATA      (1 << 0)
+#define TCP_NEWDATA      (1 << 1)
+#define UDP_NEWDATA      TCP_NEWDATA
+#define PKT_NEWDATA      TCP_NEWDATA
+#define ICMP_NEWDATA     TCP_NEWDATA
+#define ICMPv6_NEWDATA   TCP_NEWDATA
+#define TCP_SNDACK       (1 << 2)
+#define TCP_REXMIT       (1 << 3)
+#define TCP_POLL         (1 << 4)
+#define UDP_POLL         TCP_POLL
+#define PKT_POLL         TCP_POLL
+#define ICMP_POLL        TCP_POLL
+#define ICMPv6_POLL      TCP_POLL
+#define TCP_BACKLOG      (1 << 5)
+#define TCP_CLOSE        (1 << 6)
+#define TCP_ABORT        (1 << 7)
+#define TCP_CONNECTED    (1 << 8)
+#define TCP_TIMEDOUT     (1 << 9)
+#define ICMP_ECHOREPLY   (1 << 10)
+#define ICMPv6_ECHOREPLY ICMP_ECHOREPLY
 
 #define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT)
 
