@@ -9492,5 +9492,6 @@
 	  losing the errno value.  Noted by Rony Xln (2015-01-22).
 	* net/: After some significant effort, ICMPv6 and TCP are both
 	  functional when IPv6 is selected.  UDP still requies testing
-	  (2014-01-22).
-
+	  (2015-01-22).
+	* "configs/dk-tm4c129x/ipv6:  Add an IPv6-enabled NSH configruation
+	  (2015-01-23)
