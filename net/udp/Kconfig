@@ -16,9 +16,11 @@ if NET_UDP
 
 config NET_UDP_CHECKSUMS
 	bool "UDP checksums"
-	default n
+	default y if NET_IPv6
+	default n if !NET_IPv6
 	---help---
-		Enable/disable UDP checksum support
+		Enable/disable UDP checksum support.  UDP checksum support is
+		REQUIRED for IPv6.
 
 config NET_UDP_CONNS
 	int "Number of UDP sockets"
