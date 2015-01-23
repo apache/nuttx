@@ -194,7 +194,6 @@ config NET_IPv4
 config NET_IPv6
 	bool "IPv6"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Build in support for IPv6.
 
