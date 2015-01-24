@@ -71,6 +71,10 @@ CMN_UASRCS += up_signal_handler.S
 endif
 endif
 
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif

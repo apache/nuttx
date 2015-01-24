@@ -119,6 +119,10 @@ CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif

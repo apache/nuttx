@@ -1729,7 +1729,7 @@ void irq_dispatch(int irq, FAR void *context);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
 struct tcb_s;
 size_t  up_check_tcbstack(FAR struct tcb_s *tcb);
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb);

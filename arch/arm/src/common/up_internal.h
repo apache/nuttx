@@ -519,8 +519,7 @@ void up_rnginitialize(void);
 #endif
 
 /* Debug ********************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+#if (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)) || defined(CONFIG_STACK_COLORATION)
 void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 

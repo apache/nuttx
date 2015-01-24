@@ -129,7 +129,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
+#if defined(CONFIG_DEBUG) && !(defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION))
           tcb->stack_alloc_ptr = (uint32_t *)kmm_zalloc(stack_size);
 #else
           tcb->stack_alloc_ptr = (uint32_t *)kmm_malloc(stack_size);
@@ -140,7 +140,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
+#if defined(CONFIG_DEBUG) && !(defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION))
           tcb->stack_alloc_ptr = (uint32_t *)kumm_zalloc(stack_size);
 #else
           tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
@@ -169,7 +169,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+#if (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)) || defined(CONFIG_STACK_COLORATION)
       memset(tcb->stack_alloc_ptr, STACK_COLOR, stack_size);
 #endif
 

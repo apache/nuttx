@@ -631,7 +631,7 @@ __start:
 
 	bl		up_boot
 
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
 	/* Write a known value to the IDLE thread stack to support stack
 	 * monitoring logic
 	 */
@@ -748,7 +748,7 @@ arm_data_initialize:
 	.size	.Ldatainit, . -.Ldatainit
 #endif
 
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
 	.type	.Lstkinit, %object
 .Lstkinit:
 #ifdef CONFIG_BOOT_SDRAM_DATA

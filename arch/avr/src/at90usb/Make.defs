@@ -58,6 +58,10 @@ ifeq ($(CONFIG_AVR_SPI),y)
 CMN_CSRCS += up_spi.c
 endif
 
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif

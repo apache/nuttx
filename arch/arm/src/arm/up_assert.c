@@ -237,7 +237,7 @@ static void up_dumpstate(void)
   lldbg("IRQ stack:\n");
   lldbg("  base: %08x\n", istackbase);
   lldbg("  size: %08x\n", istacksize);
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
   lldbg("  used: %08x\n", up_check_intstack());
 #endif
 
@@ -264,7 +264,7 @@ static void up_dumpstate(void)
   lldbg("User stack:\n");
   lldbg("  base: %08x\n", ustackbase);
   lldbg("  size: %08x\n", ustacksize);
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
   lldbg("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 
@@ -272,7 +272,7 @@ static void up_dumpstate(void)
   lldbg("sp:         %08x\n", sp);
   lldbg("stack base: %08x\n", ustackbase);
   lldbg("stack size: %08x\n", ustacksize);
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
   lldbg("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
 #endif

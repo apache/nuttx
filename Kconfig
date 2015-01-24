@@ -675,6 +675,15 @@ config DEBUG_WATCHDOG
 
 endif # DEBUG
 
+config STACK_COLORATION
+	bool "Stack coloration"
+	default n
+	depends on ARCH_HAVE_STACKCHECK && !DEBUG_STACK
+	---help---
+		Enable stack coloration to initialize the stack memory to the value
+		of STACK_COLOR and use the stack checking API in a non debug build.
+		Only supported by a few architectures.
+
 config DEBUG_SYMBOLS
 	bool "Generate Debug Symbols"
 	default n
