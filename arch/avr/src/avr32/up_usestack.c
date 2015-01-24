@@ -111,7 +111,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * that we can use later to test for high water marks.
    */
 
-#if (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)) || defined(CONFIG_STACK_COLORATION)
+#ifdef CONFIG_STACK_COLORATION
    memset(tcb->stack_alloc_ptr, STACK_COLOR, stack_size);
 #endif
 

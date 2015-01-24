@@ -117,11 +117,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * then create a zeroed stack to make stack dumps easier to trace.
        */
 
-#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
-      tcb->stack_alloc_ptr = (uint32_t *)kumm_zalloc(stack_size);
-#else
       tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
-#endif
 
 #ifdef CONFIG_DEBUG
       /* Was the allocation successful? */
@@ -145,7 +141,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+#ifdef CONFIG_STACK_COLORATION
       memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
 

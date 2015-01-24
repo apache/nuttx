@@ -128,7 +128,7 @@ __start:
 	bl		board_led_initialize
 #endif
 
-#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
+#ifdef CONFIG_STACK_COLORATION
 	/* Write a known value to the IDLE thread stack to support stack
 	 * monitoring logic
 	 */
@@ -170,7 +170,7 @@ __start:
 	.long	_edata
 #endif
 
-#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
+#ifdef CONFIG_STACK_COLORATION
 	.type	.Lstkinit, %object
 .Lstkinit:
 	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */

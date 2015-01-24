@@ -353,7 +353,7 @@ void up_irqinitialize(void)
 #endif
 #endif
 
-#if (defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Colorize the interrupt stack for debug purposes */
 
   {

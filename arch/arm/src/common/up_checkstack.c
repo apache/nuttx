@@ -53,11 +53,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_DEBUG)
-#  undef CONFIG_DEBUG_STACK
-#endif
-
-#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
+#ifdef CONFIG_STACK_COLORATION
 
 /****************************************************************************
  * Public Data
@@ -203,4 +199,4 @@ size_t up_check_intstack_remain(void)
 }
 #endif
 
-#endif /* CONFIG_DEBUG_STACK || CONFIG_STACK_COLORATION */
+#endif /* CONFIG_STACK_COLORATION */

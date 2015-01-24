@@ -62,10 +62,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
 CMN_CSRCS += up_romgetc.c
 endif

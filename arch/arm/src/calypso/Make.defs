@@ -56,10 +56,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
 CHIP_ASRCS  = calypso_lowputc.S
 CHIP_CSRCS  = calypso_irq.c calypso_heap.c calypso_serial.c calypso_spi.c
 CHIP_CSRCS += clock.c calypso_uwire.c calypso_armio.c calypso_keypad.c

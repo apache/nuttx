@@ -53,10 +53,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
 CHIP_ASRCS = c5471_lowputc.S c5471_vectors.S
 CHIP_CSRCS = c5471_irq.c c5471_serial.c c5471_watchdog.c c5471_ethernet.c
 
