@@ -202,6 +202,7 @@ endmenu # Internet Protocol Selection
 
 source "net/socket/Kconfig"
 source "net/pkt/Kconfig"
+source "net/local/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
 source "net/icmp/Kconfig"

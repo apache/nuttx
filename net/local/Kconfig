@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "Unix Domain Socket Support"
+	depends on NET && EXPERIMENTAL
+
+config NET_LOCAL
+	bool "Unix domain (local) sockets"
+	default n
+	---help---
+		Enable or disable Unix domain (aka Local) sockets.
+
+if NET_LOCAL
+
+endif # NET_LOCAL
+
+endmenu # Unix Domain Sockets
