@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_send.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -175,7 +175,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   IGMPBUF->chksum      = ~igmp_chksum(&IGMPBUF->type, IPIGMP_HDRLEN);
 
   IGMP_STATINCR(g_netstats.igmp.poll_send);
-  IGMP_STATINCR(g_netstats.ip.sent);
+  IGMP_STATINCR(g_netstats.ipv4.sent);
 
   nllvdbg("Outgoing IGMP packet length: %d (%d)\n",
           dev->d_len, (IGMPBUF->len[0] << 8) | IGMPBUF->len[1]);

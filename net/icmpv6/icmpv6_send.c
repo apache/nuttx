@@ -137,7 +137,7 @@ void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr)
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.icmpv6.sent++;
-      g_netstats.ip.sent++;
+      g_netstats.ipv6.sent++;
 #endif
     }
 }

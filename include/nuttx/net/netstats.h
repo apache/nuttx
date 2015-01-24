@@ -50,6 +50,7 @@
 
 #include <nuttx/net/netconfig.h>
 
+#include <nuttx/net/ip.h>
 #ifdef CONFIG_NET_TCP
 #  include <nuttx/net/tcp.h>
 #endif
@@ -66,6 +67,8 @@
 #  include <nuttx/net/igmp.h>
 #endif
 
+#ifdef CONFIG_NET_STATISTICS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -74,33 +77,19 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* The structure holding the uIP statistics that are gathered if
+/* The structure holding the networking statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.
  */
 
-#ifdef CONFIG_NET_STATISTICS
-struct ip_stats_s
-{
-  net_stats_t drop;       /* Number of dropped packets at the IP layer */
-  net_stats_t recv;       /* Number of received packets at the IP layer */
-  net_stats_t sent;       /* Number of sent packets at the IP layer */
-  net_stats_t vhlerr;     /* Number of packets dropped due to wrong
-                             IP version or header length */
-  net_stats_t hblenerr;   /* Number of packets dropped due to wrong
-                             IP length, high byte */
-  net_stats_t lblenerr;   /* Number of packets dropped due to wrong
-                             IP length, low byte */
-  net_stats_t fragerr;    /* Number of packets dropped since they
-                             were IP fragments */
-  net_stats_t chkerr;     /* Number of packets dropped due to IP
-                             checksum errors */
-  net_stats_t protoerr;   /* Number of packets dropped since they
-                             were neither ICMP, UDP nor TCP */
-};
-
 struct net_stats_s
 {
-  struct ip_stats_s   ip;       /* IP statistics */
+#ifdef CONFIG_NET_IPv4
+  struct ipv4_stats_s ipv4;     /* IPv4 statistics */
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  struct ipv6_stats_s ipv6;     /* IPv6 statistics */
+#endif
 
 #ifdef CONFIG_NET_ICMP
   struct icmp_stats_s icmp;     /* ICMP statistics */
@@ -122,7 +111,6 @@ struct net_stats_s
   struct udp_stats_s  udp;      /* UDP statistics */
 #endif
 };
-#endif /* CONFIG_NET_STATISTICS */
 
 /****************************************************************************
  * Public Data
@@ -130,12 +118,11 @@ struct net_stats_s
 
 /* This is the structure in which the statistics are gathered. */
 
-#ifdef CONFIG_NET_STATISTICS
 extern struct net_stats_s g_netstats;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#endif /* CONFIG_NET_STATISTICS */
 #endif /* __INCLUDE_NUTTX_NET_NETSTATS_H */

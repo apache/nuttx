@@ -147,7 +147,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   /* This is where the input processing starts. */
 
 #ifdef CONFIG_NET_STATISTICS
-  g_netstats.ip.recv++;
+  g_netstats.ipv6.recv++;
 #endif
 
   /* Start of IP input header processing code. */
@@ -158,8 +158,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
       /* IP version and header length. */
 
 #ifdef CONFIG_NET_STATISTICS
-      g_netstats.ip.drop++;
-      g_netstats.ip.vhlerr++;
+      g_netstats.ipv6.drop++;
+      g_netstats.ipv6.vhlerr++;
 #endif
 
       nlldbg("Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
@@ -245,7 +245,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
           ipv6->destipaddr[0] != HTONS(0xff02))
         {
 #ifdef CONFIG_NET_STATISTICS
-          g_netstats.ip.drop++;
+          g_netstats.ipv6.drop++;
 #endif
           goto drop;
         }
@@ -283,8 +283,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
       default:              /* Unrecognized/unsupported protocol */
 #ifdef CONFIG_NET_STATISTICS
-        g_netstats.ip.drop++;
-        g_netstats.ip.protoerr++;
+        g_netstats.ipv6.drop++;
+        g_netstats.ipv6.protoerr++;
 #endif
 
         nlldbg("Unrecognized IP protocol: %04x\n", ipv6->proto);

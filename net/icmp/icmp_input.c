@@ -173,7 +173,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.icmp.sent++;
-      g_netstats.ip.sent++;
+      g_netstats.ipv4.sent++;
 #endif
     }
 

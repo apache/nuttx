@@ -148,7 +148,7 @@ void icmp_send(FAR struct net_driver_s *dev, FAR in_addr_t *destaddr)
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.icmp.sent++;
-      g_netstats.ip.sent++;
+      g_netstats.ipv4.sent++;
 #endif
     }
 }

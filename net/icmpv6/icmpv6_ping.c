@@ -229,7 +229,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;
-  g_netstats.ip.sent++;
+  g_netstats.ipv6.sent++;
 #endif
 }
 
