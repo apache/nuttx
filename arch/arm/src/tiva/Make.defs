@@ -55,6 +55,10 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif

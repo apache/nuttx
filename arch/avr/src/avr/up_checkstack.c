@@ -57,7 +57,7 @@
 #  undef CONFIG_DEBUG_STACK
 #endif
 
-#if defined(CONFIG_DEBUG_STACK)
+#if defined(CONFIG_DEBUG_STACK)) || defined(CONFIG_STACK_COLORATION)
 
 /****************************************************************************
  * Public Data
@@ -66,6 +66,8 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static size_t do_stackcheck(uintptr_t alloc, size_t size);
 
 /****************************************************************************
  * Name: do_stackcheck
@@ -84,7 +86,7 @@
  *
  ****************************************************************************/
 
-size_t do_stackcheck(uintptr_t alloc, size_t size)
+static size_t do_stackcheck(uintptr_t alloc, size_t size)
 {
   FAR uint8_t *ptr;
   size_t mark;
@@ -197,4 +199,4 @@ size_t up_check_intstack_remain(void)
 }
 #endif
 
-#endif /* CONFIG_DEBUG_STACK */
+#endif /* CONFIG_DEBUG_STACK || CONFIG_STACK_COLORATION */

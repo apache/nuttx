@@ -65,7 +65,7 @@
 #ifdef CONFIG_ARCH_FPU
 static inline void stm32_fpuconfig(void);
 #endif
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
 static void go_os_start(void *pv, unsigned int nbytes)
   __attribute__ ((naked,no_instrument_function,noreturn));
 #endif
@@ -195,8 +195,7 @@ static inline void stm32_fpuconfig(void)
  *   Set the IDLE stack to the
  *
  ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
 static void go_os_start(void *pv, unsigned int nbytes)
 {
   /* Set the IDLE stack to the stack coloration value then jump to
@@ -311,7 +310,7 @@ void __start(void)
   showprogress('\r');
   showprogress('\n');
 
-#ifdef CONFIG_DEBUG_STACK
+#if defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)
   /* Set the IDLE stack to the coloration value and jump into os_start() */
 
   go_os_start((FAR void *)&_ebss, CONFIG_IDLETHREAD_STACKSIZE);
