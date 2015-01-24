@@ -9506,5 +9506,6 @@
 	* Many file: Add CONFIG_STACK_COLORATION that does the same thing as
 	  CONFIG_DEBUG_STACK but without enabling debug.  From David Sidrane
 	  (2015-01-24).
-
+	* Remove CONFIG_DEBUG_STACK.  Adding CONFIG_STACK_COLORATION makes
+	  this configuration option pointless (2015-01-24).
 
