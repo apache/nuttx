@@ -548,7 +548,7 @@ Configurations
   in the top level Make.degs or the code will not fit.
 
   Stack space has been hand optimized using the stack coloring by enabling
-  "Stack usage debug hooks" (CONFIG_DEBUG_STACK) in Build Setup-> Debug
+  "Stack coloration" (CONFIG_STACK_COLORATION) in Build Setup-> Debug
   Options. I have selected values that have 8-16 bytes of headroom with
   network debugging on. If you enable more debugging and get a hard fault
   or any weirdness like commands hanging. Then the Idle, main or Interrupt
