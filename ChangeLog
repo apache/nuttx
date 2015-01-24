@@ -9503,4 +9503,8 @@
 	* include/nuttx/math.h: Adds support for the expm1 functions:
 	  http://pubs.opengroup.org/onlinepubs/009695399/functions/expm1.html.
 	  From Brennan Ashton (2015-01-23).
+	* Many file: Add CONFIG_STACK_COLORATION that does the same thing as
+	  CONFIG_DEBUG_STACK but without enabling debug.  From David Sidrane
+	  (2015-01-24).
+
 
