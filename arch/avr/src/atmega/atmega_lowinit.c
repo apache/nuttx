@@ -128,7 +128,12 @@ void up_lowinit(void)
 
   /* Set the system clock divider to 1 */
 
+#ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
+  CLKPR = 0x80;
+  CLKPR = 0;
+#else
   XDIV = 0;
+#endif
 
   /* Initialize the watchdog timer */
 
