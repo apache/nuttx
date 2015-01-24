@@ -59,10 +59,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
 CGU_ASRCS  =
 
 CGU_CSRCS  = lpc31_bcrndx.c lpc31_clkdomain.c lpc31_clkexten.c

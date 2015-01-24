@@ -522,13 +522,6 @@ config DEBUG_PAGING
 	---help---
 		Enable demand paging debug SYSLOG output (disabled by default)
 
-config DEBUG_STACK
-	bool "Stack usage debug hooks"
-	default n
-	depends on ARCH_HAVE_STACKCHECK
-	---help---
-		Enable hooks to check stack usage.  Only supported by a few architectures.
-
 comment "Driver Debug Options"
 
 config DEBUG_LCD

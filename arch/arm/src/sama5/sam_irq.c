@@ -427,7 +427,7 @@ void up_irqinitialize(void)
 
   /* Colorize the interrupt stack for debug purposes */
 
-#if (defined(CONFIG_DEBUG_STACK) || defined(CONFIG_STACK_COLORATION)) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   {
     size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
     up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),

@@ -62,10 +62,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
 CHIP_ASRCS  = lpc23xx_lowputc.S
 CHIP_CSRCS += lpc23xx_pllsetup.c  lpc23xx_decodeirq.c lpc23xx_irq.c
 CHIP_CSRCS += lpc23xx_serial.c lpc23xx_io.c

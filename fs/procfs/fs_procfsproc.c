@@ -631,7 +631,7 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+#ifdef CONFIG_DEBUG_COLORATION
   if (totalsize >= buflen)
     {
       return totalsize;
