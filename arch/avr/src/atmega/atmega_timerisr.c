@@ -177,5 +177,9 @@ void up_timer_initialize(void)
 
   /* Enable the interrupt on compare match A */
 
+#ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
+  TIMSK1 |= (1 << OCIE1A);
+#else
   TIMSK |= (1 << OCIE1A);
+#endif
 }
