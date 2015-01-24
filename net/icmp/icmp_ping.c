@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_ping.c
  *
- *   Copyright (C) 2008-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -237,6 +237,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
           dev->d_sndlen = pstate->png_datlen + 4;
           icmp_send(dev, &pstate->png_addr);
+
           pstate->png_sent = true;
           return flags;
         }

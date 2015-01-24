@@ -98,6 +98,8 @@ void icmp_send(FAR struct net_driver_s *dev, FAR in_addr_t *destaddr)
 
   if (dev->d_sndlen > 0)
     {
+      IFF_SET_IPv4(dev->d_flags);
+
       /* The total length to send is the size of the application data plus
        * the IP and ICMP headers (and, eventually, the Ethernet header)
        */

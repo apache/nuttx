@@ -85,6 +85,8 @@
 #include <debug.h>
 #include <string.h>
 
+#include <net/if.h>
+
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -249,9 +251,13 @@ int ipv6_input(FAR struct net_driver_s *dev)
         }
     }
 
-  /* Everything looks good so far.  Now process the incoming packet
-   * according to the protocol.
+  /* Make sure that all packet processing logic knows that there is an IPv6
+   * packet in the device buffer.
    */
+
+  IFF_SET_IPv6(dev->d_flags);
+
+  /* Now process the incoming packet according to the protocol. */
 
   switch (ipv6->proto)
     {

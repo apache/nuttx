@@ -85,6 +85,8 @@
 #include <debug.h>
 #include <string.h>
 
+#include <net/if.h>
+
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -220,7 +222,9 @@ static uint8_t devif_reassembly(void)
           {
             g_reassembly_bitmap[i] = 0xff;
           }
-        g_reassembly_bitmap[(offset + len) / (8 * 8)] |= ~g_bitmap_bits[((offset + len) / 8 ) & 7];
+
+        g_reassembly_bitmap[(offset + len) / (8 * 8)] |=
+          ~g_bitmap_bits[((offset + len) / 8 ) & 7];
       }
 
     /* If this fragment has the More Fragments flag set to zero, we know that
@@ -450,9 +454,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-  /* Everything looks good so far.  Now process the incoming packet
-   * according to the protocol.
+  /* Make sure that all packet processing logic knows that there is an IPv4
+   * packet in the device buffer.
    */
+
+  IFF_SET_IPv4(dev->d_flags);
+
+  /* Now process the incoming packet according to the protocol. */
 
   switch (pbuf->proto)
     {

@@ -122,10 +122,6 @@ void icmpv6_input(FAR struct net_driver_s *dev)
   g_netstats.icmpv6.recv++;
 #endif
 
-  /* Set a bit in the d_flags to distinguish this from an IPv6 packet */
-
-  IFF_SET_IPv6(dev->d_flags);
-
   /* If we get a neighbor solicitation for our address we should send
    * a neighbor advertisement message back.
    */
