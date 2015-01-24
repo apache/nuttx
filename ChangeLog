@@ -9508,4 +9508,4 @@
 	  (2015-01-24).
 	* Remove CONFIG_DEBUG_STACK.  Adding CONFIG_STACK_COLORATION makes
 	  this configuration option pointless (2015-01-24).
-
+	* net/: Clean up network status collection for IPv6 (2015-01-24).
