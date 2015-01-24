@@ -318,6 +318,15 @@ config ARCH_BOARD_MICROPENDOUS3
 		be populated with either an AVR AT90USB646, 647, 1286, or 1287 MCU.
 		Support is configured for the AT90USB647.
 
+config ARCH_BOARD_MOTEINO_MEGA
+	bool "LowPowerLab MoteinoMEGA"
+	depends on ARCH_CHIP_ATMEGA1284P
+	select ARCH_HAVE_LEDS
+	---help---
+		This is placeholder for the LowPowerLab MoteinoMEGA that is based
+		on the Atmel AVR ATMega1284P MCU.  There is not much there yet and what is
+		there is untested due to tool-related issues.
+
 config ARCH_BOARD_MX1ADS
 	bool "Motorola MX1ADS development board"
 	depends on ARCH_CHIP_IMX1
@@ -1065,6 +1074,7 @@ config ARCH_BOARD
 	default "mcu123-lpc214x"           if ARCH_BOARD_MCU123_LPC214X
 	default "micropendous3"            if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                   if ARCH_BOARD_MIRTOO
+	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
 	default "mx1ads"                   if ARCH_BOARD_MX1ADS
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
@@ -1287,6 +1297,9 @@ source "configs/mikroe-stm32f4/Kconfig"
 endif
 if ARCH_BOARD_MIRTOO
 source "configs/mirtoo/Kconfig"
+endif
+if ARCH_BOARD_MOTEINO_MEGA
+source "configs/moteino-mega/Kconfig"
 endif
 if ARCH_BOARD_MX1ADS
 source "configs/mx1ads/Kconfig"
