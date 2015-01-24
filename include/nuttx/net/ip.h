@@ -175,7 +175,7 @@ struct ipv6_hdr_s
 #endif /* CONFIG_NET_IPv6 */
 
 #ifdef CONFIG_NET_STATISTICS
-#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
 struct ipv4_stats_s
 {
   net_stats_t drop;       /* Number of dropped packets at the IP layer */

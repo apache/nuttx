@@ -390,10 +390,6 @@ config DEBUG
 		Note that enabling this option by itself does not produce debug output.
 		Debug output must also be selected on a subsystem-by-subsystem basis.
 
-config ARCH_HAVE_STACKCHECK
-	bool
-	default n
-
 config ARCH_HAVE_HEAPCHECK
 	bool
 	default n
@@ -668,13 +664,19 @@ config DEBUG_WATCHDOG
 
 endif # DEBUG
 
+config ARCH_HAVE_STACKCHECK
+	bool
+	default n
+
 config STACK_COLORATION
 	bool "Stack coloration"
 	default n
-	depends on ARCH_HAVE_STACKCHECK && !DEBUG_STACK
+	depends on ARCH_HAVE_STACKCHECK
 	---help---
 		Enable stack coloration to initialize the stack memory to the value
-		of STACK_COLOR and use the stack checking API in a non debug build.
+		of STACK_COLOR and enable the stack checking APIs that can be used
+		to monitor the level of stack usage.
+
 		Only supported by a few architectures.
 
 config DEBUG_SYMBOLS
