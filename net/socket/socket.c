@@ -51,6 +51,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "local/local.h"
 
 /****************************************************************************
  * Public Functions
@@ -96,7 +97,10 @@
 
 int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 {
+#ifdef CONFIG_NET_LOCAL
   bool ipdomain = false;
+#endif
+  bool dgramok  = false;
   int err;
 
   /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
@@ -105,13 +109,25 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
     {
 #ifdef CONFIG_NET_IPv4
     case PF_INET:
+#ifdef CONFIG_NET_LOCAL
       ipdomain = true;
+#endif
+      dgramok  = true;
       break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
     case PF_INET6:
+#ifdef CONFIG_NET_LOCAL
       ipdomain = true;
+#endif
+      dgramok  = true;
+      break;
+#endif
+
+#ifdef CONFIG_NET_LOCAL
+    case PF_LOCAL:
+      dgramok = true;
       break;
 #endif
 
@@ -131,7 +147,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
     {
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
-        if ((protocol != 0 && protocol != IPPROTO_TCP) || !ipdomain)
+        if ((protocol != 0 && protocol != IPPROTO_TCP) || !dgramok)
           {
             err = EPROTONOSUPPORT;
             goto errout;
@@ -142,7 +158,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-        if ((protocol != 0 && protocol != IPPROTO_UDP) || !ipdomain)
+        if ((protocol != 0 && protocol != IPPROTO_UDP) || !dgramok)
           {
             err = EPROTONOSUPPORT;
             goto errout;
@@ -153,7 +169,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:
-        if (ipdomain)
+        if (dgramok)
           {
             err = EPROTONOSUPPORT;
             goto errout;
@@ -185,56 +201,130 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   err = ENOMEM; /* Assume failure to allocate connection instance */
   switch (type)
     {
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
       case SOCK_STREAM:
         {
-          /* Allocate the TCP connection structure and save in the new
-           * socket instance.
-           */
-
-          FAR struct tcp_conn_s *conn = tcp_alloc(domain);
-          if (!conn)
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+          if (ipdomain)
+#endif
             {
-              /* Failed to reserve a connection structure */
+              /* Allocate the TCP connection structure */
 
-              goto errout; /* With err == ENFILE or ENOMEM */
+              FAR struct tcp_conn_s *conn = tcp_alloc(domain);
+              if (!conn)
+                {
+                  /* Failed to reserve a connection structure */
+
+                  goto errout; /* With err == ENFILE or ENOMEM */
+                }
+
+              /* Set the reference count on the connection structure.  This
+               * reference count will be increment only if the socket is
+               * dup'ed
+               */
+
+              DEBUGASSERT(conn->crefs == 0);
+              conn->crefs   = 1;
+
+              /* Save the pre-allocated connection in the socket structure */
+
+              psock->s_conn = conn;
             }
+#endif /* CONFIG_NET_TCP */
 
-          /* Set the reference count on the connection structure.  This
-           * reference count will be increment only if the socket is
-           * dup'ed
-           */
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+         else
+#endif
+            {
+              /* Allocate the local connection structure */
 
-          DEBUGASSERT(conn->crefs == 0);
-          psock->s_conn = conn;
-          conn->crefs   = 1;
+              FAR struct local_conn_s *conn = local_alloc();
+              if (!conn)
+                {
+                  /* Failed to reserve a connection structure */
+
+                  goto errout; /* With err == ENFILE or ENOMEM */
+                }
+
+              /* Set the reference count on the connection structure.  This
+               * reference count will be increment only if the socket is
+               * dup'ed
+               */
+
+              DEBUGASSERT(conn->crefs == 0);
+              conn->crefs   = 1;
+
+              /* Save the pre-allocated connection in the socket structure */
+
+              psock->s_conn = conn;
+            }
+#endif /* CONFIG_NET_LOCAL */
         }
         break;
 #endif
 
-#ifdef CONFIG_NET_UDP
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
       case SOCK_DGRAM:
         {
-          /* Allocate the UDP connection structure and save in the new
-           * socket instance.
-           */
-
-          FAR struct udp_conn_s *conn = udp_alloc(domain);
-          if (!conn)
+#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL
+          if (ipdomain)
+#endif
             {
-              /* Failed to reserve a connection structure */
+              /* Allocate the UDP connection structure */
 
-              goto errout; /* With err == ENFILE or ENOMEM */
+              FAR struct udp_conn_s *conn = udp_alloc(domain);
+              if (!conn)
+                {
+                  /* Failed to reserve a connection structure */
+
+                  goto errout; /* With err == ENFILE or ENOMEM */
+                }
+
+              /* Set the reference count on the connection structure.  This
+               * reference count will be increment only if the socket is
+               * dup'ed
+               */
+
+              DEBUGASSERT(conn->crefs == 0);
+              conn->crefs   = 1;
+
+              /* Save the pre-allocated connection in the socket structure */
+
+              psock->s_conn = conn;
             }
+#endif /* CONFIG_NET_UDP */
 
-          /* Set the reference count on the connection structure.  This
-           * reference count will be increment only if the socket is
-           * dup'ed
-           */
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_UDP
+         else
+#endif
+            {
+              /* Allocate the local connection structure */
 
-          DEBUGASSERT(conn->crefs == 0);
-          psock->s_conn = conn;
-          conn->crefs   = 1;
+              FAR struct local_conn_s *conn = local_alloc();
+              if (!conn)
+                {
+                  /* Failed to reserve a connection structure */
+
+                  goto errout; /* With err == ENFILE or ENOMEM */
+                }
+
+              /* Set the reference count on the connection structure.  This
+               * reference count will be increment only if the socket is
+               * dup'ed
+               */
+
+              DEBUGASSERT(conn->crefs == 0);
+              conn->crefs   = 1;
+
+              /* Save the pre-allocated connection in the socket structure */
+
+              psock->s_conn = conn;
+            }
+#endif /* CONFIG_NET_LOCAL */
         }
         break;
 #endif

@@ -53,6 +53,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "local/local.h"
 #include "igmp/igmp.h"
 #include "route/route.h"
 #include "utils/utils.h"
@@ -126,6 +127,12 @@ void net_initialize(void)
   /* Initialize packet socket support */
 
   pkt_initialize();
+#endif
+
+#ifdef CONFIG_NET_UDP
+  /* Initialize the local, "Unix domain" socket support */
+
+  local_initialize();
 #endif
 
 #ifdef CONFIG_NET_TCP
