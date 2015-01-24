@@ -169,6 +169,11 @@
 #define SIOCGMIIREG      _SIOC(0x004d) /* Get a MII register via MDIO */
 #define SIOCSMIIREG      _SIOC(0x004e) /* Set a MII register via MDIO */
 
+/* Unix domain sockets ******************************************************/
+
+#define SIOCINQ          _SIOC(0x004f) /* Returns the amount of queued unread
+                                        * data in the receive */
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/

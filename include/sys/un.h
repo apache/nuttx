@@ -74,6 +74,17 @@ struct sockaddr_un
   char sun_path[UNIX_PATH_MAX];  /* pathname */
 };
 
+/* There are three types of addresses:
+ *
+ * 1. pathname:  sun_path holds a null terminated string.  The allocated
+ *    size may be variable:  sizeof(sa_family_t) + strlen(pathname) + 1
+ * 2. unnamed:  A unix socket that is not bound to any name.  This case
+ *    there is no path.  The allocated size may be sizeof(sa_family_t)
+ * 3. abstract. The abstract path is destinguished because the pathname
+ *    consists of only the NUL terminator.  The allocated size is then
+ *    sizeof(s_family_t) + 1.
+ */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
