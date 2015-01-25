@@ -38,7 +38,7 @@
 ifeq ($(CONFIG_NET_LOCAL),y)
 
 NET_CSRCS += local_conn.c local_connect.c local_release.c local_bind.c
-NET_CSRCS += local_listen.c
+NET_CSRCS += local_listen.c local_accept.c
 
 # Include UDP build support
 

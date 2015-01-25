@@ -224,6 +224,20 @@ int local_connect(FAR struct local_conn_s *client,
                   FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: local_release
+ *
+ * Description:
+ *   If the local, Unix domain socket is in the connected state, then
+ *   disconnect it.  Release the local connection structure in any event
+ *
+ * Input Parameters:
+ *   conn - A reference to local connection structure
+ *
+ ****************************************************************************/
+
+int local_release(FAR struct local_conn_s *conn);
+
+/****************************************************************************
  * Name: local_listen
  *
  * Description:
@@ -238,23 +252,12 @@ int local_connect(FAR struct local_conn_s *client,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
+ * Assumptions:
+ *   The network is NOT locked
+ *
  ****************************************************************************/
 
 int local_listen(FAR struct local_conn_s *server, int backlog);
-
-/****************************************************************************
- * Name: local_release
- *
- * Description:
- *   If the local, Unix domain socket is in the connected state, then
- *   disconnect it.  Release the local connection structure in any event
- *
- * Input Parameters:
- *   conn - A reference to local connection structure
- *
- ****************************************************************************/
-
-int local_release(FAR struct local_conn_s *conn);
 
 /****************************************************************************
  * Function: psock_local_accept

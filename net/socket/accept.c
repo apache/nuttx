@@ -133,7 +133,6 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *pnewsock;
-  net_lock_t save;
   int newfd;
   int err;
   int ret;
@@ -266,6 +265,8 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   if (psock->s_domain == PF_LOCAL)
 #endif
     {
+      /* Perform the local accept operation (with the network unlocked) */
+
       ret = psock_local_accept(psock, addr, addrlen, &pnewsock->s_conn);
       if (ret < 0)
         {
@@ -280,11 +281,15 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   else
 #endif
     {
-      save = net_lock();
-      ret  = psock_tcp_accept(psock, addr, addrlen, &pnewsock->s_conn);
+      net_lock_t state;
+
+      /* Perform the local accept operation (with the network locked) */
+
+      state = net_lock();
+      ret = psock_tcp_accept(psock, addr, addrlen, &pnewsock->s_conn);
       if (ret < 0)
         {
-          net_unlock(save);
+          net_unlock(state);
           err = -ret;
           goto errout_with_socket;
         }
@@ -294,7 +299,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
        */
 
       net_startmonitor(pnewsock);
-      net_unlock(save);
+      net_unlock(state);
     }
 #endif /* CONFIG_NET_TCP */
 

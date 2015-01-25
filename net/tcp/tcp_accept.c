@@ -107,7 +107,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
 {
   if (addr)
     {
-      /* If an address is provided, then the lenght must also be provided. */
+      /* If an address is provided, then the length must also be provided. */
 
       DEBUGASSERT(addrlen);
 
@@ -158,8 +158,8 @@ static inline void accept_tcpsender(FAR struct socket *psock,
  *   Receive interrupt level callbacks when connections occur
  *
  * Parameters:
- *   listener The conection stucture of the listener
- *   conn     The connection stucture that was just accepted
+ *   listener The connection structure of the listener
+ *   conn     The connection structure that was just accepted
  *
  * Returned Value:
  *   None
