@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/local_conn.c
+ * net/local/local_listen.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,86 +40,107 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <semaphore.h>
-#include <string.h>
 #include <assert.h>
-#include <errno.h>
 #include <queue.h>
-#include <debug.h>
+#include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/net/net.h>
 
 #include "local/local.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* A list of all allocated packet socket connections */
+
+dq_queue_t g_local_listeners;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_initialize
+ * Name: local_listen
  *
  * Description:
- *   Initialize the local, Unix domain connection structures.  Called once
- *   and only from the common network initialization logic.
+ *   Listen for a new connection of a SOCK_STREAM Unix domain socket.
+ *
+ *   This function is called as part of the implementation of listen();
+ *
+ * Input Parameters:
+ *   server  - A reference to the server-side local connection structure
+ *   backlog - Maximum number of pending connections.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
- void local_initialize(void)
+int local_listen(FAR struct local_conn_s *server, int backlog)
 {
-  dq_init(&g_local_listeners);
-}
+  net_lock_t state;
+  int ret;
 
-/****************************************************************************
- * Name: local_alloc()
- *
- * Description:
- *   Allocate a new, uninitialized Unix domain socket connection structure.
- *   This is normally something done by the implementation of the socket()
- *   API
- *
- ****************************************************************************/
+  /* Some sanity checks */
 
-FAR struct local_conn_s *local_alloc(void)
-{
-  FAR struct local_conn_s *conn =
-    (FAR struct local_conn_s *)kmm_zalloc(sizeof(struct local_conn_s));
+  DEBUGASSERT(server);
 
-  if (conn)
+  if (server->lc_family != SOCK_STREAM ||
+      server->lc_state == LOCAL_STATE_UNBOUND ||
+      server->lc_type != LOCAL_TYPE_PATHNAME)
     {
-      /* Initialize non-zero elements the new connection structure */
-
-      conn->lc_fd = -1;
-      sem_init(&conn->lc_waitsem, 0, 0);
+      return -EOPNOTSUPP;
     }
 
-  return conn;
-}
+  DEBUGASSERT(server->lc_state == LOCAL_STATE_BOUND ||
+              server->lc_state == LOCAL_STATE_LISTENING);
 
-/****************************************************************************
- * Name: local_free()
- *
- * Description:
- *   Free a packet Unix domain connection structure that is no longer in use.
- *   This should be done by the implementation of close().
- *
- ****************************************************************************/
+  /* Set the backlog value */
 
-void local_free(FAR struct local_conn_s *conn)
-{
-  DEBUGASSERT(conn != NULL);
+  DEBUGASSERT((unsigned)backlog < 256);
+  server->u.server.lc_backlog = backlog;
 
-  /* Make sure that the pipe is closed */
+  /* Is this the first time since being bound to an address and that
+   * listen() was called?  If so, the state should be LOCAL_STATE_BOUND.
+   */
 
-  if (conn->lc_fd >= 0)
+  if (server->lc_state == LOCAL_STATE_BOUND)
     {
-      close(conn->lc_fd);
+      /* The connection should not reside in any other list */
+
+      DEBUGASSERT(server->lc_node.flink == NULL &&
+                  server->lc_node.flink == NULL);
+
+      /* Add the connection structure to the list of listeners */
+
+      state = net_lock();
+      dq_addlast(&server->lc_node, &g_local_listeners);
+      net_unlock(state);
+
+      /* And change the server state to listing */
+
+      server->lc_state = LOCAL_STATE_LISTENING;
     }
 
-  sem_destroy(&conn->lc_waitsem);
+  /* Loop until a connection requested or we receive a signal */
 
-  /* And free the connection structure */
+  while (dq_empty(&server->u.server.lc_waiters))
+    {
+      /* No.. wait for a connection or a signal */
 
-  kmm_free(conn);
+      ret = sem_wait(&server->lc_waitsem);
+      if (ret < 0)
+        {
+          int errval = errno;
+          DEBUGASSERT(errval == EINTR);
+          return -errval;
+        }
+    }
+
+  /* There is a client waiting for the connection */
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

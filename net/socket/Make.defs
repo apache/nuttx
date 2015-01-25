@@ -43,6 +43,13 @@ SOCK_CSRCS += net_clone.c net_poll.c net_vfcntl.c
 
 ifeq ($(CONFIG_NET_TCP),y)
 SOCK_CSRCS += send.c listen.c accept.c net_monitor.c
+else
+
+# Local Unix domain support
+
+ifeq ($(CONFIG_NET_LOCAL),y)
+SOCK_CSRCS += send.c listen.c accept.c
+endif
 endif
 
 # Socket options

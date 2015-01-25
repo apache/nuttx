@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/listen.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include "tcp/tcp.h"
+#include "local/local.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -89,7 +90,6 @@
 int listen(int sockfd, int backlog)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  struct tcp_conn_s *conn;
   int err;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -111,39 +111,73 @@ int listen(int sockfd, int backlog)
         {
           err = EBADF;
         }
+
       goto errout;
     }
 
   /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
-  if (psock->s_type != SOCK_STREAM || !psock->s_conn || conn->lport <= 0)
+  if (psock->s_type != SOCK_STREAM || !psock->s_conn)
     {
       err = EOPNOTSUPP;
       goto errout;
     }
 
-  /* Set up the backlog for this connection */
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+  if (psock->s_domain == PF_LOCAL)
+#endif
+    {
+      FAR struct local_conn_s *conn =
+        (FAR struct local_conn_s *)psock->s_conn;
+
+      err = local_listen(conn, backlog);
+      if (err < 0)
+        {
+          err = -err;
+          goto errout;
+        }
+    }
+#endif /* CONFIG_NET_LOCAL */
+
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+  else
+#endif
+    {
+      FAR struct tcp_conn_s *conn =
+        (FAR struct tcp_conn_s *)psock->s_conn;
+
+      if (conn->lport <= 0)
+        {
+          err = EOPNOTSUPP;
+          goto errout;
+        }
+
+      /* Set up the backlog for this connection */
 
 #ifdef CONFIG_NET_TCPBACKLOG
-  err = tcp_backlogcreate(conn, backlog);
-  if (err < 0)
-    {
-      err = -err;
-      goto errout;
-    }
+      err = tcp_backlogcreate(conn, backlog);
+      if (err < 0)
+        {
+          err = -err;
+          goto errout;
+        }
 #endif
 
-  /* Start listening to the bound port.  This enables callbacks when accept()
-   * is called and enables poll()/select() logic.
-   */
+      /* Start listening to the bound port.  This enables callbacks when
+       * accept() is called and enables poll()/select() logic.
+       */
 
-  tcp_listen(conn);
+      tcp_listen(conn);
+    }
+#endif /* CONFIG_NET_TCP */
+
   psock->s_flags |= _SF_LISTENING;
   return OK;
 
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

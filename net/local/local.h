@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <sys/un.h>
+#include <semaphore.h>
 #include <queue.h>
 #include <stdint.h>
 
@@ -88,9 +89,15 @@ enum local_state_s
 
 struct local_conn_s
 {
-  /* Fields common to SOCK_STREAM and SOCK_DGRAM */
+  /* lc_node supports a doubly linked list: Listening SOCK_STREAM servers
+   * will be linked into a list of listeners; SOCK_STREAM clients will be
+   * linked to the lc_waiters and lc_conn lists.
+   */
 
   dq_entry_t lc_node;          /* Supports a doubly linked list */
+
+  /* Fields common to SOCK_STREAM and SOCK_DGRAM */
+
   uint8_t lc_crefs;            /* Reference counts on this instance */
   uint8_t lc_family;           /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;             /* See enum local_type_e */
@@ -137,6 +144,10 @@ extern "C"
 #else
 #  define EXTERN extern
 #endif
+
+/* A list of all SOCK_STREAM listener connections */
+
+EXTERN dq_queue_t g_local_listeners;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -211,6 +222,25 @@ int local_bind(FAR struct local_conn_s *conn,
 
 int local_connect(FAR struct local_conn_s *client,
                   FAR const struct sockaddr *addr);
+
+/****************************************************************************
+ * Name: local_listen
+ *
+ * Description:
+ *   Listen for a new connection of a SOCK_STREAM Unix domain socket.
+ *
+ *   This function is called as part of the implementation of listen();
+ *
+ * Input Parameters:
+ *   server  - A reference to the server-side local connection structure
+ *   backlog - Maximum number of pending connections.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int local_listen(FAR struct local_conn_s *server, int backlog);
 
 /****************************************************************************
  * Name: local_release

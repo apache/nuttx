@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/local_conn.c
+ * net/local/local_bind.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,14 +40,9 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <semaphore.h>
+#include <sys/socket.h>
 #include <string.h>
 #include <assert.h>
-#include <errno.h>
-#include <queue.h>
-#include <debug.h>
-
-#include <nuttx/kmalloc.h>
 
 #include "local/local.h"
 
@@ -56,70 +51,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_initialize
+ * Name: local_bind
  *
  * Description:
- *   Initialize the local, Unix domain connection structures.  Called once
- *   and only from the common network initialization logic.
+ *   This function implements the low-level parts of the standard local
+ *   bind()operation.
  *
  ****************************************************************************/
 
- void local_initialize(void)
+int local_bind(FAR struct local_conn_s *conn,
+               FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  dq_init(&g_local_listeners);
-}
+  FAR const struct sockaddr_un *unaddr =
+    (FAR const struct sockaddr_un *)addr;
+  int namelen;
 
-/****************************************************************************
- * Name: local_alloc()
- *
- * Description:
- *   Allocate a new, uninitialized Unix domain socket connection structure.
- *   This is normally something done by the implementation of the socket()
- *   API
- *
- ****************************************************************************/
+  DEBUGASSERT(conn && unaddr && unaddr->sun_family == AF_LOCAL &&
+              addrlen >= sizeof(sa_family_t));
 
-FAR struct local_conn_s *local_alloc(void)
-{
-  FAR struct local_conn_s *conn =
-    (FAR struct local_conn_s *)kmm_zalloc(sizeof(struct local_conn_s));
+  /* Save the address family */
 
-  if (conn)
+  conn->lc_family = unaddr->sun_family;
+
+  /* No determine the type of the Unix domain socket by comparing the size
+   * of the address description.
+   */
+
+  if (addrlen == sizeof(sa_family_t))
     {
-      /* Initialize non-zero elements the new connection structure */
+      /* No sun_path... This is an un-named Unix domain socket */
 
-      conn->lc_fd = -1;
-      sem_init(&conn->lc_waitsem, 0, 0);
+      conn->lc_type = LOCAL_TYPE_UNNAMED;
+    }
+  else
+    {
+      namelen = strnlen(unaddr->sun_path, UNIX_PATH_MAX-1);
+      if (namelen <= 0)
+        {
+          /* Zero-length sun_path... This is an abstract Unix domain socket */
+
+          conn->lc_type    = LOCAL_TYPE_ABSTRACT;
+          conn->lc_path[0] = '\0';
+        }
+      else
+        {
+          /* This is an normal, pathname Unix domain socket */
+
+          conn->lc_type = LOCAL_TYPE_PATHNAME;
+
+          /* Copy the path into the connection structure */
+
+          (void)strncpy(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
+          conn->lc_path[UNIX_PATH_MAX-1] = '\0';
+        }
     }
 
-  return conn;
-}
-
-/****************************************************************************
- * Name: local_free()
- *
- * Description:
- *   Free a packet Unix domain connection structure that is no longer in use.
- *   This should be done by the implementation of close().
- *
- ****************************************************************************/
-
-void local_free(FAR struct local_conn_s *conn)
-{
-  DEBUGASSERT(conn != NULL);
-
-  /* Make sure that the pipe is closed */
-
-  if (conn->lc_fd >= 0)
-    {
-      close(conn->lc_fd);
-    }
-
-  sem_destroy(&conn->lc_waitsem);
-
-  /* And free the connection structure */
-
-  kmm_free(conn);
+  conn->lc_state = LOCAL_STATE_BOUND;
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */
