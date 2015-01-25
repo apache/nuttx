@@ -83,6 +83,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct local_conn_s *server;
   FAR struct local_conn_s *client;
+  int ret;
 
   /* Some sanity checks */
 
@@ -96,83 +97,82 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       return -EOPNOTSUPP;
     }
 
-  /* Are there pending connections.  Remove the client from the
-   * head of the waiting list.
-   */
+  /* Loop as necessary if we have to wait for a connection */
 
-try_again:
-
-  client = (FAR struct local_conn_s *)
-    dq_remfirst(&server->u.server.lc_waiters);
-
-  if (client)
+  for (;;)
     {
-      /* Add the waiting connection to list of clients */
+      /* Are there pending connections.  Remove the client from the
+       * head of the waiting list.
+       */
 
-      dq_addlast(&client->lc_node, &server->u.server.lc_conns);
+      client = (FAR struct local_conn_s *)
+        dq_remfirst(&server->u.server.lc_waiters);
 
-      /* Decrement the number of pending clients */
-
-      DEBUGASSERT(server->u.server.lc_pending > 0);
-      server->u.server.lc_pending--;
-
-      /* And signal the client that the connection was successful */
-
-      client->u.client.lc_result = OK;
-      sem_post(&client->lc_waitsem);
-
-      /* Return the address family */
-
-      if (addr)
+      if (client)
         {
-          FAR struct sockaddr_un *unaddr;
-          int totlen;
-          int pathlen;
+          /* Add the waiting connection to list of clients */
 
-          /* If an address is provided, then the length must also be
-           * provided.
-           */
+          dq_addlast(&client->lc_node, &server->u.server.lc_conns);
 
-          DEBUGASSERT(addrlen);
+          /* Decrement the number of pending clients */
 
-          /* Get the length of the path (minus the NUL terminator)
-           * and the length of the whole client address.
-           */
+          DEBUGASSERT(server->u.server.lc_pending > 0);
+          server->u.server.lc_pending--;
 
-          pathlen = strnlen(client->lc_path, UNIX_PATH_MAX-1);
-          totlen  = sizeof(sa_family_t) + pathlen + 1;
+          /* And signal the client that the connection was successful */
 
-          /* If the length of the whole client address is larger
-           * than the buffer provided by the caller, then truncate
-           * the address to fit.
-           */
+          client->u.client.lc_result = OK;
+          sem_post(&client->lc_waitsem);
 
-          if (totlen > *addrlen)
+          /* Return the address family */
+
+          if (addr)
             {
-              pathlen    -= (totlen - *addrlen);
-              totlen      = *addrlen;
+              FAR struct sockaddr_un *unaddr;
+              int totlen;
+              int pathlen;
+
+              /* If an address is provided, then the length must also be
+               * provided.
+               */
+
+              DEBUGASSERT(addrlen);
+
+              /* Get the length of the path (minus the NUL terminator)
+               * and the length of the whole client address.
+               */
+
+              pathlen = strnlen(client->lc_path, UNIX_PATH_MAX-1);
+              totlen  = sizeof(sa_family_t) + pathlen + 1;
+
+              /* If the length of the whole client address is larger
+               * than the buffer provided by the caller, then truncate
+               * the address to fit.
+               */
+
+              if (totlen > *addrlen)
+                {
+                  pathlen    -= (totlen - *addrlen);
+                  totlen      = *addrlen;
+                }
+
+              /* Copy the Unix domain address */
+
+              unaddr = (FAR struct sockaddr_un *)addr;
+              unaddr->sun_family = AF_LOCAL;
+              memcpy(unaddr->sun_path, client->lc_path, pathlen);
+              unaddr->sun_path[pathlen] = '\0';
+
+              /* Return the Unix domain address size */
+
+              *addrlen = totlen;
             }
 
-          /* Copy the Unix domain address */
+          /* Return the client connection structure */
 
-          unaddr = (FAR struct sockaddr_un *)addr;
-          unaddr->sun_family = AF_LOCAL;
-          memcpy(unaddr->sun_path, client->lc_path, pathlen);
-          unaddr->sun_path[pathlen] = '\0';
-
-          /* Return the Unix domain address size */
-
-          *addrlen = totlen;
+          *newconn = (FAR void *)client;
+          return OK;
         }
-
-      /* Return the client connection structure */
-
-      *newconn = (FAR void *)client;
-      return OK;
-    }
-  else
-    {
-      int ret;
 
       /* No.. then there should be no pending connections */
 
@@ -194,8 +194,6 @@ try_again:
         {
           return ret;
         }
-
-      goto try_again;
     }
 }
 
