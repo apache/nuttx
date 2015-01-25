@@ -480,7 +480,7 @@ static void local_close(FAR struct socket *psock)
   if (conn->lc_crefs <= 1)
     {
       conn->lc_crefs = 0;
-      local_free(conn);
+      local_release(conn);
     }
   else
     {

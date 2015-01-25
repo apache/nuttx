@@ -60,19 +60,70 @@
 
 enum local_type_e
 {
-  LOCAL_TYPE_UNNAMED = 0,      /*  A Unix socket that is not bound to any name */
+  LOCAL_TYPE_UNTYPED = 0,      /* Type is not determined until the socket is bound */
+  LOCAL_TYPE_UNNAMED,          /* A Unix socket that is not bound to any name */
   LOCAL_TYPE_PATHNAME,         /* lc_path holds a null terminated string */
   LOCAL_TYPE_ABSTRACT          /* lc_path is length zero */
+};
+
+/* The state of a Unix socket */
+
+enum local_state_s
+{
+  /* Common states */
+
+  LOCAL_STATE_UNBOUND = 0,     /* Created by socket, but not bound */
+  LOCAL_STATE_BOUND,           /* Bound to an pipe */
+
+  /* SOCK_STREAM only */
+
+  LOCAL_STATE_LISTENING,       /* Server listening for connections */
+  LOCAL_STATE_CLOSED,          /* Server closed, no longer connected */
+  LOCAL_STATE_ACCEPT,          /* Client waiting for a connection */
+  LOCAL_STATE_CONNECTED,       /* Client connected */
+  LOCAL_STATE_DISCONNECTED     /* Client disconnected */
 };
 
 /* Representation of a local connection */
 
 struct local_conn_s
 {
+  /* Fields common to SOCK_STREAM and SOCK_DGRAM */
+
+  dq_entry_t lc_node;          /* Supports a doubly linked list */
   uint8_t lc_crefs;            /* Reference counts on this instance */
+  uint8_t lc_family;           /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;             /* See enum local_type_e */
+  uint8_t lc_state;            /* See enum local_state_e */
   int16_t lc_fd;               /* File descriptor of underlying pipe */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
+
+  /* SOCK_STREAM fields common to both client and server */
+
+  sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
+
+  /* Union of fields unique to SOCK_STREAM client and servers  */
+
+  union
+  {
+    /* Fields unique to the SOCK_STREAM server side */
+
+    struct
+    {
+      uint8_t lc_pending;      /* Number of pending connections */
+      uint8_t lc_backlog;      /* Maximum number of pending connections */
+      dq_queue_t lc_waiters;   /* List of connections waiting to be accepted */
+      dq_queue_t lc_conns;     /* List of connections */
+    } server;
+
+    /* Fields unique to the client side */
+
+    struct
+    {
+      FAR struct local_conn_s *lc_server; /* Server connection */
+      volatile int lc_result;  /* Result of the connection operation */
+    } client;
+  } u;
 };
 
 /****************************************************************************
@@ -103,8 +154,7 @@ struct socket;   /* Forward reference */
  *
  ****************************************************************************/
 
-/* void local_initialize(void) */
-#define local_initialize()
+void local_initialize(void);
 
 /****************************************************************************
  * Name: local_alloc
@@ -154,16 +204,27 @@ int local_bind(FAR struct local_conn_s *conn,
  *   and recvfrom.
  *
  * Input Parameters:
- *   conn - A reference to local connection structure
+ *   client - A reference to the client-side local connection structure
  *   addr - The address of the remote host.
- *
- * Assumptions:
- *   This function is called user code.  Interrupts may be enabled.
  *
  ****************************************************************************/
 
-int local_connect(FAR struct local_conn_s *conn,
+int local_connect(FAR struct local_conn_s *client,
                   FAR const struct sockaddr *addr);
+
+/****************************************************************************
+ * Name: local_release
+ *
+ * Description:
+ *   If the local, Unix domain socket is in the connected state, then
+ *   disconnect it.  Release the local connection structure in any event
+ *
+ * Input Parameters:
+ *   conn - A reference to local connection structure
+ *
+ ****************************************************************************/
+
+int local_release(FAR struct local_conn_s *conn);
 
 /****************************************************************************
  * Name: psock_local_send
