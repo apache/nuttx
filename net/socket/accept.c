@@ -43,159 +43,17 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <semaphore.h>
-#include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/irq.h>
-
-#include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
-
 #include "tcp/tcp.h"
+#include "local/local.h"
 #include "socket/socket.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct accept_s
-{
-  FAR struct socket     *acpt_sock;       /* The accepting socket */
-  sem_t                  acpt_sem;        /* Wait for interrupt event */
-  FAR struct sockaddr   *acpt_addr;       /* Return connection address */
-  FAR struct tcp_conn_s *acpt_newconn;    /* The accepted connection */
-  int                    acpt_result;     /* The result of the wait */
-};
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function: accept_tcpsender
- *
- * Description:
- *   Get the sender's address from the UDP packet
- *
- * Parameters:
- *   psock  - The state structure of the accepting socket
- *   conn   - The newly accepted TCP connection
- *   pstate - the recvfrom state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Running at the interrupt level
-*
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP
-static inline void accept_tcpsender(FAR struct socket *psock,
-                                    FAR struct tcp_conn_s *conn,
-                                    FAR struct sockaddr *addr)
-{
-  if (addr)
-    {
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      /* If both IPv4 and IPv6 support are enabled, then we will need to
-       * select which one to use when obtaining the sender's IP address.
-       */
-
-      if (psock->s_domain == PF_INET)
-#endif /* CONFIG_NET_IPv6 */
-        {
-          FAR struct sockaddr_in *inaddr = (FAR struct sockaddr_in *)addr;
-
-          inaddr->sin_family = AF_INET;
-          inaddr->sin_port   = conn->rport;
-          net_ipv4addr_copy(inaddr->sin_addr.s_addr, conn->u.ipv4.raddr);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      /* Otherwise, this the IPv6 address is needed */
-
-      else
-#endif /* CONFIG_NET_IPv4 */
-        {
-          FAR struct sockaddr_in6 *inaddr = (FAR struct sockaddr_in6 *)addr;
-
-          DEBUGASSERT(psock->s_domain == PF_INET6);
-          inaddr->sin6_family = AF_INET6;
-          inaddr->sin6_port   = conn->rport;
-          net_ipv6addr_copy(inaddr->sin6_addr.s6_addr, conn->u.ipv6.raddr);
-        }
-#endif /* CONFIG_NET_IPv6 */
-    }
-}
-#endif /* CONFIG_NET_TCP */
-
-/****************************************************************************
- * Function: accept_interrupt
- *
- * Description:
- *   Receive interrupt level callbacks when connections occur
- *
- * Parameters:
- *   listener The conection stucture of the listener
- *   conn     The connection stucture that was just accepted
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Running at the interrupt level
- *
- ****************************************************************************/
-
-static int accept_interrupt(FAR struct tcp_conn_s *listener,
-                            FAR struct tcp_conn_s *conn)
-{
-  struct accept_s *pstate = (struct accept_s *)listener->accept_private;
-  int ret = -EINVAL;
-
-  if (pstate)
-    {
-      /* Get the connection address */
-
-      accept_tcpsender(pstate->acpt_sock, conn, pstate->acpt_addr);
-
-      /* Save the connection structure */
-
-      pstate->acpt_newconn     = conn;
-      pstate->acpt_result      = OK;
-
-      /* There should be a reference of one on the new connection */
-
-      DEBUGASSERT(conn->crefs == 1);
-
-      /* Wake-up the waiting caller thread */
-
-      sem_post(&pstate->acpt_sem);
-
-      /* Stop any further callbacks */
-
-      listener->accept_private = NULL;
-      listener->accept         = NULL;
-      ret                      = OK;
-  }
-
-  return ret;
-}
 
 /****************************************************************************
  * Public Functions
@@ -229,7 +87,7 @@ static int accept_interrupt(FAR struct tcp_conn_s *listener,
  *   connections are present on the queue, accept returns EAGAIN.
  *
  * Parameters:
- *   sockfd   The listening socket descriptior
+ *   sockfd   The listening socket descriptor
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
  *
@@ -275,8 +133,6 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *pnewsock;
-  FAR struct tcp_conn_s *conn;
-  struct accept_s state;
   net_lock_t save;
   int newfd;
   int err;
@@ -327,6 +183,12 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   if (addr)
     {
+      /* If an address is provided, then the lenght must also be provided. */
+
+      DEBUGASSERT(addrlen);
+
+      /* A valid length depends on the address domain */
+
       switch (psock->s_domain)
         {
 #ifdef CONFIG_NET_IPv4
@@ -345,6 +207,18 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
         case PF_INET6:
           {
             if (*addrlen < sizeof(struct sockaddr_in6))
+              {
+                err = EBADF;
+                goto errout;
+              }
+          }
+          break;
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_LOCAL
+        case PF_LOCAL:
+          {
+            if (*addrlen < sizeof(sa_family_t))
               {
                 err = EBADF;
                 goto errout;
@@ -378,131 +252,53 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       goto errout_with_socket;
     }
 
-  /* Check the backlog to see if there is a connection already pending for
-   * this listener.
-   */
-
-  save = net_lock();
-  conn = (struct tcp_conn_s *)psock->s_conn;
-
-#ifdef CONFIG_NET_TCPBACKLOG
-  state.acpt_newconn = tcp_backlogremove(conn);
-  if (state.acpt_newconn)
-    {
-      /* Yes... get the address of the connected client */
-
-      nvdbg("Pending conn=%p\n", state.acpt_newconn);
-      accept_tcpsender(psock, state.acpt_newconn, addr);
-    }
-
-  /* In general, this uIP-based implementation will not support non-blocking
-   * socket operations... except in a few cases:  Here for TCP accept with backlog
-   * enabled.  If this socket is configured as non-blocking then return EAGAIN
-   * if there is no pending connection in the backlog.
-   */
-
-  else if (_SS_ISNONBLOCK(psock->s_flags))
-    {
-      err = EAGAIN;
-      goto errout_with_lock;
-    }
-  else
-#endif
-    {
-      /* Set the socket state to accepting */
-
-      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_ACCEPT);
-
-      /* Perform the TCP accept operation */
-
-      /* Initialize the state structure.  This is done with interrupts
-       * disabled because we don't want anything to happen until we
-       * are ready.
-       */
-
-      state.acpt_sock       = psock;
-      state.acpt_addr       = addr;
-      state.acpt_newconn    = NULL;
-      state.acpt_result     = OK;
-      sem_init(&state.acpt_sem, 0, 0);
-
-      /* Set up the callback in the connection */
-
-      conn->accept_private  = (void*)&state;
-      conn->accept          = accept_interrupt;
-
-      /* Wait for the send to complete or an error to occur:  NOTES: (1)
-       * net_lockedwait will also terminate if a signal is received, (2)
-       * interrupts may be disabled!  They will be re-enabled while the
-       * task sleeps and automatically re-enabled when the task restarts.
-       */
-
-      ret = net_lockedwait(&state.acpt_sem);
-      if (ret < 0)
-        {
-          /* The value returned by net_lockedwait() the same as the value
-           * returned by sem_wait():  Zero (OK) is returned on success; -1
-           * (ERROR) is returned on a failure with the errno value set
-           * appropriately.
-           *
-           * We have to preserve the errno value here because it may be
-           * altered by intervening operations.
-           */
-
-          err = get_errno();
-        }
-
-      /* Make sure that no further interrupts are processed */
-
-      conn->accept_private = NULL;
-      conn->accept         = NULL;
-
-      sem_destroy(&state. acpt_sem);
-
-      /* Set the socket state to idle */
-
-      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-
-      /* Check for a errors.  Errors are signalled by negative errno values
-       * for the send length.
-       */
-
-      if (state.acpt_result != 0)
-        {
-          err = state.acpt_result;
-          goto errout_with_lock;
-        }
-
-      /* If net_lockedwait failed, then we were probably reawakened by a
-       * signal. In this case, logic above will have set 'err' to the
-       * ernno value returned by net_lockedwait().
-       */
-
-      if (ret < 0)
-        {
-          goto errout_with_lock;
-        }
-    }
-
-  /* Initialize the socket structure and mark the socket as connected.
-   * (The reference count on the new connection structure was set in the
-   * interrupt handler).
-   */
+  /* Initialize the socket structure and mark the socket as connected. */
 
   pnewsock->s_domain = psock->s_domain;
   pnewsock->s_type   = SOCK_STREAM;
-  pnewsock->s_conn   = state.acpt_newconn;
   pnewsock->s_flags |= _SF_CONNECTED;
   pnewsock->s_flags &= ~_SF_CLOSED;
 
-  /* Begin monitoring for TCP connection events on the newly connected socket */
+  /* Perform the correct accept operation for this address domain */
 
-  net_startmonitor(pnewsock);
-  net_unlock(save);
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+  if (psock->s_domain == PF_LOCAL)
+#endif
+    {
+      ret = psock_local_accept(psock, addr, addrlen, &pnewsock->s_conn);
+      if (ret < 0)
+        {
+          err = -ret;
+          goto errout_with_socket;
+        }
+    }
+#endif /* CONFIG_NET_LOCAL */
+
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+  else
+#endif
+    {
+      save = net_lock();
+      ret  = psock_tcp_accept(psock, addr, addrlen, &pnewsock->s_conn);
+      if (ret < 0)
+        {
+          net_unlock(save);
+          err = -ret;
+          goto errout_with_socket;
+        }
+
+      /* Begin monitoring for TCP connection events on the newly connected
+       * socket
+       */
+
+      net_startmonitor(pnewsock);
+      net_unlock(save);
+    }
+#endif /* CONFIG_NET_TCP */
+
   return newfd;
-
-errout_with_lock:
-  net_unlock(save);
 
 errout_with_socket:
   sockfd_release(newfd);

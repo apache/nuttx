@@ -267,9 +267,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Defined in tcp_conn.c ****************************************************/
-
-struct sockaddr;    /* Forward reference */
+struct sockaddr;  /* Forward reference */
+struct socket;    /* Forward reference */
 
 /****************************************************************************
  * Name: tcp_initialize
@@ -389,7 +388,6 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
-/* Defined in tcp_ipselect.c ************************************************/
 /****************************************************************************
  * Function: tcp_ipv4_select
  *
@@ -414,7 +412,6 @@ void tcp_ipv4_select(FAR struct net_driver_s *dev);
 void tcp_ipv6_select(FAR struct net_driver_s *dev);
 #endif
 
-/* Defined in tcp_seqno.c ***************************************************/
 /****************************************************************************
  * Name: tcp_setsequence
  *
@@ -481,7 +478,6 @@ void tcp_initsequence(FAR uint8_t *seqno);
 
 void tcp_nextsequence(void);
 
-/* Defined in tcp_poll.c ****************************************************/
 /****************************************************************************
  * Name: tcp_poll
  *
@@ -502,7 +498,6 @@ void tcp_nextsequence(void);
 
 void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
 
-/* Defined in tcp_timer.c ***************************************************/
 /****************************************************************************
  * Name: tcp_timer
  *
@@ -525,7 +520,6 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
 void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec);
 
-/* Defined in tcp_listen.c **************************************************/
 /****************************************************************************
  * Function: tcp_listen_initialize
  *
@@ -593,7 +587,6 @@ bool tcp_islistener(uint16_t portno);
 int tcp_accept_connection(FAR struct net_driver_s *dev,
                           FAR struct tcp_conn_s *conn, uint16_t portno);
 
-/* Defined in tcp_send.c ****************************************************/
 /****************************************************************************
  * Name: tcp_send
  *
@@ -658,7 +651,6 @@ void tcp_reset(FAR struct net_driver_s *dev);
 void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
              uint8_t ack);
 
-/* Defined in tcp_appsend.c *************************************************/
 /****************************************************************************
  * Name: tcp_appsend
  *
@@ -705,7 +697,6 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result);
 
-/* Defined in tcp_input.c ***************************************************/
 /****************************************************************************
  * Name: tcp_ipv4_input
  *
@@ -748,7 +739,6 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev);
 void tcp_ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
-/* Defined in tcp_callback.c ************************************************/
 /****************************************************************************
  * Function: tcp_callback
  *
@@ -794,7 +784,6 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
                          uint16_t nbytes);
 #endif
 
-/* Defined in tcp_backlog.c *************************************************/
 /****************************************************************************
  * Function: tcp_backlogcreate
  *
@@ -910,7 +899,32 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
 #  define tcp_backlogdelete(c,b) (-ENOSYS)
 #endif
 
-/* Defined in tcp_send_buffered.c or tcp_send_unbuffered.c ******************/
+/****************************************************************************
+ * Function: tcp_accept
+ *
+ * Description:
+ *   This function implements accept() for TCP/IP sockets.  See the
+ *   description of accept() for further information.
+ *
+ * Parameters:
+ *   psock    The listening TCP socket structure
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newconn  The new, accepted TCP connection structure
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success or a negated errno value on failure.
+ *   See the description of accept of the possible errno values in the
+ *   description of accept().
+ *
+ * Assumptions:
+ *   Network is locked.
+ *
+ ****************************************************************************/
+
+int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen, FAR void **newconn);
+
 /****************************************************************************
  * Function: psock_tcp_send
  *
@@ -972,7 +986,6 @@ struct socket;
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
-/* Defined in tcp_wrbuffer.c ************************************************/
 /****************************************************************************
  * Function: tcp_wrbuffer_initialize
  *

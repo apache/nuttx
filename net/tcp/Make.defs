@@ -39,6 +39,8 @@ ifeq ($(CONFIG_NET_TCP),y)
 
 # Socket layer
 
+SOCK_CSRCS += tcp_accept.c
+
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 SOCK_CSRCS += tcp_send_buffered.c
 else

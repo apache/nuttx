@@ -257,6 +257,32 @@ int local_listen(FAR struct local_conn_s *server, int backlog);
 int local_release(FAR struct local_conn_s *conn);
 
 /****************************************************************************
+ * Function: psock_local_accept
+ *
+ * Description:
+ *   This function implements accept() for Unix domain sockets.  See the
+ *   description of accept() for further information.
+ *
+ * Parameters:
+ *   psock    The listening Unix domain socket structure
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newconn  The new, accepted  Unix domain connection structure
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success or a negated errno value on failure.
+ *   See the description of accept of the possible errno values in the
+ *   description of accept().
+ *
+ * Assumptions:
+ *   Network is NOT locked.
+ *
+ ****************************************************************************/
+
+int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                       FAR socklen_t *addrlen, FAR void **newconn);
+
+/****************************************************************************
  * Name: psock_local_send
  *
  * Description:
