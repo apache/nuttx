@@ -40,9 +40,11 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <debug.h>
+
+#include <nuttx/kmalloc.h>
 
 #include "local/local.h"
 
@@ -81,7 +83,17 @@
 
 FAR struct local_conn_s *local_alloc(void)
 {
-  return (FAR struct local_conn_s *)malloc(sizeof(struct local_conn_s));
+  FAR struct local_conn_s *conn =
+    (FAR struct local_conn_s *)kmm_zalloc(sizeof(struct local_conn_s));
+
+  if (conn)
+    {
+      /* Make sure that the pipe is marked closed */
+
+      conn->lc_fd = -1;
+    }
+
+  return conn;
 }
 
 /****************************************************************************
@@ -98,5 +110,57 @@ void local_free(FAR struct local_conn_s *conn)
   DEBUGASSERT(conn != NULL);
   free(conn);
 }
+
+/****************************************************************************
+ * Name: local_bind
+ *
+ * Description:
+ *   This function implements the low-level parts of the standard local
+ *   bind()operation.
+ *
+ ****************************************************************************/
+
+int local_bind(FAR struct local_conn_s *conn,
+               FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  FAR const struct sockaddr_un *unaddr =
+    (FAR const struct sockaddr_un *)addr;
+  int namelen;
+
+  DEBUGASSERT(conn && unaddr && unaddr->sun_family == AF_LOCAL &&
+              addrlen >= sizeof(sa_family_t));
+
+  if (addrlen == sizeof(sa_family_t))
+    {
+      /* No sun_path... This is an un-named Unix domain socket */
+
+      conn->lc_type = LOCAL_TYPE_UNNAMED;
+    }
+  else
+    {
+      namelen = strnlen(unaddr->sun_path, UNIX_PATH_MAX-1);
+      if (namelen <= 0)
+        {
+          /* Zero-length sun_path... This is an abstract Unix domain socket */
+
+          conn->lc_type    = LOCAL_TYPE_ABSTRACT;
+          conn->lc_path[0] = '\0';
+        }
+      else
+        {
+          /* This is an normal, pathname Unix domain socket */
+
+          conn->lc_type    = LOCAL_TYPE_PATHNAME;
+
+          /* Copy the path into the connection structure */
+
+          (void)strncpy(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
+          conn->lc_path[UNIX_PATH_MAX-1] = '\0';
+        }
+    }
+
+  return OK;
+}
+
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

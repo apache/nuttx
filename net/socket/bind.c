@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/bind.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <errno.h>
 #include <string.h>
 #include <debug.h>
@@ -58,6 +59,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "local/local.h"
 
 /****************************************************************************
  * Private Functions
@@ -116,8 +118,8 @@ static int pkt_bind(FAR struct pkt_conn_s *conn,
  *
  * Description:
  *   bind() gives the socket 'psock' the local address 'addr'. 'addr' is
- *   'addrlen' bytes long. Traditionally, this is called "assigning a name to
- *   a socket." When a socket is created with socket, it exists in a name
+ *   'addrlen' bytes long. Traditionally, this is called "assigning a name
+ *   to a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
  *
  * Parameters:
@@ -175,6 +177,12 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
       break;
 #endif
 
+#ifdef CONFIG_NET_LOCAL
+    case AF_LOCAL:
+      minlen = sizeof(sa_family_t);
+      break;
+#endif
+
 #ifdef CONFIG_NET_PKT
     case AF_PACKET:
       minlen = sizeof(struct sockaddr_ll);
@@ -204,18 +212,87 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
         break;
 #endif
 
-#ifdef CONFIG_NET_TCP
+      /* Bind a stream socket which may either be TCP/IP or a local, Unix
+       * domain socket.
+       */
+
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
       case SOCK_STREAM:
-        ret = tcp_bind(psock->s_conn, addr);
-        psock->s_flags |= _SF_BOUND;
-        break;
+        {
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+          /* Is this a Unix domain socket? */
+
+          if (psock->s_domain == PF_LOCAL)
 #endif
+            {
+              /* Bind the Unix domain connection structure */
+
+              ret = local_bind(psock->s_conn, addr, addrlen);
+            }
+#endif /* CONFIG_NET_LOCAL */
+
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+          else
+#endif
+            {
+              /* Bind the TCP/IP connection structure */
+
+              ret = tcp_bind(psock->s_conn, addr);
+            }
+#endif /* CONFIG_NET_TCP */
+
+          /* Mark the socket bound */
+
+          if (ret >= 0)
+            {
+              psock->s_flags |= _SF_BOUND;
+            }
+        }
+        break;
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
+
+      /* Bind a datagram socket which may either be TCP/IP or a local, Unix
+       * domain socket.
+       */
+
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+      case SOCK_DGRAM:
+        {
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_UDP
+          /* Is this a Unix domain socket? */
+
+          if (psock->s_domain == PF_LOCAL)
+#endif
+            {
+              /* Bind the Unix domain connection structure */
+
+              ret = local_bind(psock->s_conn, addr, addrlen);
+            }
+#endif /* CONFIG_NET_LOCAL */
 
 #ifdef CONFIG_NET_UDP
-      case SOCK_DGRAM:
-        ret = udp_bind(psock->s_conn, addr);
-        break;
+#ifdef CONFIG_NET_LOCAL
+          else
 #endif
+            {
+              /* Bind the UDPP/IP connection structure */
+
+              ret = udp_bind(psock->s_conn, addr);
+            }
+#endif /* CONFIG_NET_UDP */
+
+          /* Mark the socket bound */
+
+          if (ret >= 0)
+            {
+              psock->s_flags |= _SF_BOUND;
+            }
+        }
+        break;
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
 
       default:
         err = EBADF;

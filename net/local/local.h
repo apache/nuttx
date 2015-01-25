@@ -56,12 +56,21 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+/* Local, Unix domain socket types */
+
+enum local_type_e
+{
+  LOCAL_TYPE_UNNAMED = 0,      /*  A Unix socket that is not bound to any name */
+  LOCAL_TYPE_PATHNAME,         /* lc_path holds a null terminated string */
+  LOCAL_TYPE_ABSTRACT          /* lc_path is length zero */
+};
 
 /* Representation of a local connection */
 
 struct local_conn_s
 {
   uint8_t lc_crefs;            /* Reference counts on this instance */
+  uint8_t lc_type;             /* See enum local_type_e */
   int16_t lc_fd;               /* File descriptor of underlying pipe */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
 };
@@ -129,7 +138,7 @@ void local_free(FAR struct local_conn_s *conn);
  ****************************************************************************/
 
 int local_bind(FAR struct local_conn_s *conn,
-               FAR const struct sockaddr *addr);
+               FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
  * Name: local_connect
