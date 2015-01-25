@@ -100,7 +100,7 @@ extern "C"
  *
  * Description:
  *   Initialize the packet socket connection structures.  Called once and
- *   only from the UIP layer.
+ *   only from the network initialization logic.
  *
  ****************************************************************************/
 

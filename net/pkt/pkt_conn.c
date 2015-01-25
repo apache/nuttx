@@ -71,7 +71,7 @@ static struct pkt_conn_s g_pkt_connections[CONFIG_NET_PKT_CONNS];
 static dq_queue_t g_free_pkt_connections;
 static sem_t g_free_sem;
 
-/* A list of all allocated packet scoket connections */
+/* A list of all allocated packet socket connections */
 
 static dq_queue_t g_active_pkt_connections;
 
@@ -129,6 +129,7 @@ void pkt_initialize(void)
   for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
+
       g_pkt_connections[i].ifindex = 0;
       dq_addlast(&g_pkt_connections[i].node, &g_free_pkt_connections);
     }

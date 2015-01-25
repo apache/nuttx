@@ -54,6 +54,152 @@
 #include "local/local.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: psock_tcp_alloc
+ *
+ * Description:
+ *   Allocate and attach a TCP connection structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+static int psock_tcp_alloc(FAR struct socket *psock)
+{
+  /* Allocate the TCP connection structure */
+
+  FAR struct tcp_conn_s *conn = tcp_alloc(psock->s_domain);
+  if (!conn)
+    {
+      /* Failed to reserve a connection structure */
+
+      return -ENOMEM;
+    }
+
+  /* Set the reference count on the connection structure.  This reference
+   * count will be incremented only if the socket is dup'ed
+   */
+
+  DEBUGASSERT(conn->crefs == 0);
+  conn->crefs = 1;
+
+  /* Save the pre-allocated connection in the socket structure */
+
+  psock->s_conn = conn;
+  return OK;
+}
+#endif /* CONFIG_NET_TCP */
+
+/****************************************************************************
+ * Name: psock_udp_alloc
+ *
+ * Description:
+ *   Allocate and attach a UDP connection structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+static int psock_udp_alloc(FAR struct socket *psock)
+{
+  /* Allocate the UDP connection structure */
+
+  FAR struct udp_conn_s *conn = udp_alloc(psock->s_domain);
+  if (!conn)
+    {
+      /* Failed to reserve a connection structure */
+
+      return -ENOMEM;
+    }
+
+  /* Set the reference count on the connection structure.  This reference
+   * count will be incremented only if the socket is dup'ed
+   */
+
+  DEBUGASSERT(conn->crefs == 0);
+  conn->crefs = 1;
+
+  /* Save the pre-allocated connection in the socket structure */
+
+  psock->s_conn = conn;
+  return OK;
+}
+#endif /* CONFIG_NET_UDP */
+
+/****************************************************************************
+ * Name: psock_pkt_alloc
+ *
+ * Description:
+ *   Allocate and attach a raw packet connection structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_PKT
+static int psock_pkt_alloc(FAR struct socket *psock)
+{
+  /* Allocate the packet socket connection structure and save in the new
+   * socket instance.
+   */
+
+  FAR struct pkt_conn_s *conn = pkt_alloc();
+  if (!conn)
+    {
+      /* Failed to reserve a connection structure */
+
+      return -ENOMEM;
+    }
+
+  /* Set the reference count on the connection structure.  This reference
+   * count will be incremented only if the socket is dup'ed
+   */
+
+  DEBUGASSERT(conn->crefs == 0);
+  conn->crefs = 1;
+
+  /* Save the pre-allocated connection in the socket structure */
+
+  psock->s_conn = conn;
+  return OK;
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Name: psock_local_alloc
+ *
+ * Description:
+ *   Allocate and attach a local, Unix domain connection structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL
+static int psock_local_alloc(FAR struct socket *psock)
+{
+  /* Allocate the local connection structure */
+
+  FAR struct local_conn_s *conn = local_alloc();
+  if (!conn)
+    {
+      /* Failed to reserve a connection structure */
+
+      return -ENOMEM;
+    }
+
+ /* Set the reference count on the connection structure.  This reference
+  * count will be incremented only if the socket is dup'ed
+  */
+
+  DEBUGASSERT(conn->lc_crefs == 0);
+  conn->lc_crefs = 1;
+
+  /* Save the pre-allocated connection in the socket structure */
+
+  psock->s_conn = conn;
+  return OK;
+}
+#endif /* CONFIG_NET_LOCAL */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -101,6 +247,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   bool ipdomain = false;
 #endif
   bool dgramok  = false;
+  int ret;
   int err;
 
   /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
@@ -209,27 +356,9 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           if (ipdomain)
 #endif
             {
-              /* Allocate the TCP connection structure */
+              /* Allocate and attach the TCP connection structure */
 
-              FAR struct tcp_conn_s *conn = tcp_alloc(domain);
-              if (!conn)
-                {
-                  /* Failed to reserve a connection structure */
-
-                  goto errout; /* With err == ENFILE or ENOMEM */
-                }
-
-              /* Set the reference count on the connection structure.  This
-               * reference count will be increment only if the socket is
-               * dup'ed
-               */
-
-              DEBUGASSERT(conn->crefs == 0);
-              conn->crefs   = 1;
-
-              /* Save the pre-allocated connection in the socket structure */
-
-              psock->s_conn = conn;
+              ret = psock_tcp_alloc(psock);
             }
 #endif /* CONFIG_NET_TCP */
 
@@ -238,29 +367,21 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
          else
 #endif
             {
-              /* Allocate the local connection structure */
+              /* Allocate and attach the local connection structure */
 
-              FAR struct local_conn_s *conn = local_alloc();
-              if (!conn)
-                {
-                  /* Failed to reserve a connection structure */
-
-                  goto errout; /* With err == ENFILE or ENOMEM */
-                }
-
-              /* Set the reference count on the connection structure.  This
-               * reference count will be increment only if the socket is
-               * dup'ed
-               */
-
-              DEBUGASSERT(conn->crefs == 0);
-              conn->crefs   = 1;
-
-              /* Save the pre-allocated connection in the socket structure */
-
-              psock->s_conn = conn;
+              ret = psock_local_alloc(psock);
             }
 #endif /* CONFIG_NET_LOCAL */
+
+          /* Check for failures to allocate the connection structure. */
+
+          if (ret < 0)
+            {
+              /* Failed to reserve a connection structure */
+
+              err = -ret;
+              goto errout;
+            }
         }
         break;
 #endif
@@ -273,27 +394,9 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           if (ipdomain)
 #endif
             {
-              /* Allocate the UDP connection structure */
+              /* Allocate and attach the UDP connection structure */
 
-              FAR struct udp_conn_s *conn = udp_alloc(domain);
-              if (!conn)
-                {
-                  /* Failed to reserve a connection structure */
-
-                  goto errout; /* With err == ENFILE or ENOMEM */
-                }
-
-              /* Set the reference count on the connection structure.  This
-               * reference count will be increment only if the socket is
-               * dup'ed
-               */
-
-              DEBUGASSERT(conn->crefs == 0);
-              conn->crefs   = 1;
-
-              /* Save the pre-allocated connection in the socket structure */
-
-              psock->s_conn = conn;
+              ret = psock_udp_alloc(psock);
             }
 #endif /* CONFIG_NET_UDP */
 
@@ -302,29 +405,21 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
          else
 #endif
             {
-              /* Allocate the local connection structure */
+              /* Allocate and attach the local connection structure */
 
-              FAR struct local_conn_s *conn = local_alloc();
-              if (!conn)
-                {
-                  /* Failed to reserve a connection structure */
-
-                  goto errout; /* With err == ENFILE or ENOMEM */
-                }
-
-              /* Set the reference count on the connection structure.  This
-               * reference count will be increment only if the socket is
-               * dup'ed
-               */
-
-              DEBUGASSERT(conn->crefs == 0);
-              conn->crefs   = 1;
-
-              /* Save the pre-allocated connection in the socket structure */
-
-              psock->s_conn = conn;
+              ret = psock_local_alloc(psock);
             }
 #endif /* CONFIG_NET_LOCAL */
+
+          /* Check for failures to allocate the connection structure. */
+
+          if (ret < 0)
+            {
+              /* Failed to reserve a connection structure */
+
+              err = -ret;
+              goto errout;
+            }
         }
         break;
 #endif
@@ -332,26 +427,14 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:
         {
-          /* Allocate the packet socket connection structure and save
-           * in the new socket instance.
-           */
-
-          FAR struct pkt_conn_s *conn = pkt_alloc();
-          if (!conn)
+          ret = psock_pkt_alloc(FAR struct socket *psock)
+          if (ret < 0)
             {
               /* Failed to reserve a connection structure */
 
+              err = -ret;
               goto errout;
             }
-
-          /* Set the reference count on the connection structure.  This
-           * reference count will be increment only if the socket is
-           * dup'ed
-           */
-
-          DEBUGASSERT(conn->crefs == 0);
-          psock->s_conn = conn;
-          conn->crefs   = 1;
         }
         break;
 #endif

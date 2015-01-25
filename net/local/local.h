@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/un.h>
 #include <queue.h>
 #include <stdint.h>
 
@@ -60,9 +61,9 @@
 
 struct local_conn_s
 {
-  dq_entry_t node;        /* Supports a doubly linked list */
-  int16_t fd;             /* File descriptor of underlying file */
-  uint8_t crefs;          /* Reference counts on this instance */
+  uint8_t lc_crefs;            /* Reference counts on this instance */
+  int16_t lc_fd;               /* File descriptor of underlying pipe */
+  char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
 };
 
 /****************************************************************************
@@ -88,12 +89,13 @@ struct socket;   /* Forward reference */
  * Name: local_initialize
  *
  * Description:
- *   Initialize the local connection structures.  Called once and only from
- *   the UIP layer.
+ *   Initialize the local, Unix domain connection structures.  Called once
+ *   and only from the common network initialization logic.
  *
  ****************************************************************************/
 
-void local_initialize(void);
+/* void local_initialize(void) */
+#define local_initialize()
 
 /****************************************************************************
  * Name: local_alloc

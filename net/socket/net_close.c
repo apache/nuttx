@@ -477,16 +477,16 @@ static void local_close(FAR struct socket *psock)
    * be more if the socket was dup'ed).
    */
 
-  if (conn->crefs <= 1)
+  if (conn->lc_crefs <= 1)
     {
-      conn->crefs = 0;
+      conn->lc_crefs = 0;
       local_free(conn);
     }
   else
     {
       /* No.. Just decrement the reference count */
 
-      conn->crefs--;
+      conn->lc_crefs--;
     }
 }
 #endif /* CONFIG_NET_LOCAL */
@@ -533,32 +533,6 @@ int psock_close(FAR struct socket *psock)
 
       switch (psock->s_type)
         {
-#ifdef CONFIG_NET_PKT
-          case SOCK_RAW:
-            {
-              FAR struct pkt_conn_s *conn = psock->s_conn;
-
-              /* Is this the last reference to the connection structure (there
-               * could be more if the socket was dup'ed).
-               */
-
-              if (conn->crefs <= 1)
-                {
-                  /* Yes... free the connection structure */
-
-                  conn->crefs = 0;          /* No more references on the connection */
-                  pkt_free(psock->s_conn);  /* Free uIP resources */
-                }
-              else
-                {
-                  /* No.. Just decrement the reference count */
-
-                  conn->crefs--;
-                }
-            }
-            break;
-#endif
-
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
           case SOCK_STREAM:
             {
@@ -655,6 +629,32 @@ int psock_close(FAR struct socket *psock)
                     }
                 }
 #endif /* CONFIG_NET_UDP */
+            }
+            break;
+#endif
+
+#ifdef CONFIG_NET_PKT
+          case SOCK_RAW:
+            {
+              FAR struct pkt_conn_s *conn = psock->s_conn;
+
+              /* Is this the last reference to the connection structure (there
+               * could be more if the socket was dup'ed).
+               */
+
+              if (conn->crefs <= 1)
+                {
+                  /* Yes... free the connection structure */
+
+                  conn->crefs = 0;          /* No more references on the connection */
+                  pkt_free(psock->s_conn);  /* Free uIP resources */
+                }
+              else
+                {
+                  /* No.. Just decrement the reference count */
+
+                  conn->crefs--;
+                }
             }
             break;
 #endif
