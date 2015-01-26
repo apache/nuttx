@@ -9514,3 +9514,10 @@
 	  on the Embest development board.  From Toby Duckworth.
 
 7.8 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* include/nuttx/math.h and libc/math: Add support for inverse
+	  hyperbolic functions.  From Brennan Ashton (2015-01-26).
+	* include/nuttx/math.h: Add math library definition for isfinite().
+	  From Brennan Ashton (2015-01-26).
+	* include/nuttx/math.h and libc/math/lib_erf*.c: Add error function
+	  to math library.  From Brennan Ashton (2015-01-26).
