@@ -89,12 +89,13 @@
 
 /* General Constants ********************************************************/
 
-#define INFINITY (1.0/0.0)
-#define NAN (0.0/0.0)
-#define HUGE_VAL INFINITY
+#define INFINITY    (1.0/0.0)
+#define NAN         (0.0/0.0)
+#define HUGE_VAL    INFINITY
 
-#define isnan(x) ((x) != (x))
-#define isinf(x) (((x) == INFINITY) || ((x) == -INFINITY))
+#define isnan(x)    ((x) != (x))
+#define isinf(x)    (((x) == INFINITY) || ((x) == -INFINITY))
+#define isfinite(x) (!(isinf(x)) && (x != NAN))
 
 /* Exponential and Logarithmic constants ************************************/
 
@@ -331,6 +332,41 @@ double      tanh  (double x);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double tanhl (long double x);
+#endif
+
+float       asinhf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      asinh  (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double asinhl (long double x);
+#endif
+
+float       acoshf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      acosh  (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double acoshl (long double x);
+#endif
+
+float       atanhf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      atanh  (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double atanhl (long double x);
+#endif
+
+float       erff (float x);
+#define     erfcf(x) (1 - erff(x))
+#if CONFIG_HAVE_DOUBLE
+double      erf  (double x);
+#define     erfc(x) (1 - erf(x))
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double erfl (long double x);
+#define     erfcl(x) (1 - erfl(x))
 #endif
 
 #if defined(__cplusplus)
