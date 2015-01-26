@@ -7735,3 +7735,366 @@ operation.  My thanks to the developers of cppcheck!  I am impressed!
       - Examples: These examples all set the IP address of eth1 but the
         netmask and gateway of eth0 if DHCP is enabled:  discover, tcpecho,
         webserver, xmlrpc. That can't be right.
+
+NuttX-7.7
+---------
+
+The 107th release of NuttX, Version 7.7, was made on January 26, 2015,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-7.7.tar.gz and
+apps-7.7.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * Core OS:
+
+      - Task exit handling:  Add logic to clean up after task_delete() or
+        pthread_cancel() if the task happens to be waiting on a semaphore
+        when was is cancelled.
+      - Stack coloration:  Removed CONFIG_DEBUG_STACK and replaced it with
+        CONFIG_STACK_COLORATION that does the same thing but without enabling
+        debug.  From David Sidrane.
+
+    * Common Drivers:
+
+      - Discrete joystick driver: Added an interface definition and upper
+        half driver for a discrete joystick device (where X/Y changes are
+        indicated with button presses).
+      - Analog joystick driver: Added an interface definition and upper
+        half driver for a analog joystick device (where X/Y positions are
+        sampled, numeric values).
+      - Add driver support for the ADXL345 accelerometer.  From  Alan
+        Carvalho de Assis
+      - Generic serial driver:  Add watermark levels to the serial RX flow
+        control logic.  Modify the rxflowcontrol method to accept the number
+        of bytes in the buffer and a boolean indication of which watermark
+        was crossed.
+
+    * File Systems/Block Drivers/MTD:
+
+      - Add procfs write support.  From Ken Petit.
+      - Implemented wear-leveling in the SmartFS.  From Ken Pettit.
+      - MMC/SD Interface: MMCSD SDIO:  Add support for a new
+        SDWAIT_WRCOMPLETE condition.  The previous logic used a busy-wait
+        loop to poll the card R1 status to determine when the card was
+        ready for the next transfer.  That busy-wait can be quite long --
+        up to hundreds of milliseconds.  An alternative is to look the SD D0
+        pin which will change state when the card is no longer busy.  This
+        change avoids the busy-wait poll by reconfiguring the SD D0 pin as a
+        GPIO interrupt, then waiting for the card to become ready without
+        taking up CPU cycles. From David Sidrane.
+
+    * Drivers:
+
+      - Add support for a generic EEPROM driver that accesses EEPROM as a
+        character driver (vs. an MTD driver).  From Sébastien Lorquet.
+
+    * Graphics Support:
+
+      - Many new fonts converted for use with NuttX and added by
+        Pierre-noel Bouteville
+
+    * Networking:
+
+      - IPv4 support is now conditioned on CONFIG_NET_IPv4.
+      - Implemented and verified IPv6 support conditioned on
+        CONFIG_NET_IPv6.  Either IPv4 or IPv4 or both may be selected.
+        Sockets, of course, must be bound to one or the other. Added support
+        for IPv6 ioctls to manipulate IP addresses.
+      - Integrated support for ICMPv6 and the ICMPv6 Neighbor Discovery
+        Protocol and ICMPv6 ECHO request/reply needed to support ping logic.
+      - All Ethernet drivers:  Modified to support.  Most, however, are
+        still missing address filtering logic required for ICMPv6 Neighbor
+        Discovery Protocol.  See
+        http://www.nuttx.org/doku.php?id=wiki:howtos:ipv6#ethernet_driver_requirements
+      - Also added missing raw/packet socket support to all Ethernet drivers.
+
+    * Host Simulation:
+
+      - Add a configuration build and test the Traveler first person game
+        using the simulator.
+      - Add an X11 mouse-based simulation of an analog joystick device
+
+    * Atmel SAMA5D Boards:
+
+      - Add analog Joystick shield support for the SAMA5D3 Xplained board.
+
+    * Freescale KL Drivers:
+
+      - Add GPIO interrupt capability for the KL architecture. From Alan
+        Carvalho de Assis
+
+    * Freescale KL Boards:
+
+      - Freedom-KL25Z: Add board support for the ADXL345 accelerometer. From
+        Alan Carvalho de Assis
+      - Freedom-KL25Z: Update the Freedom KL25Z board CC3000 support to use
+        the current CC300 interfaces.  From Alan Carvalho de Assis
+
+    * NXP LPC43xx Boards:
+
+      - A port of NuttX to the LPC4357-EVB from Toby Duckworth.  This port
+        is a leverage of the LPC3330-Xplorer port and still have a some
+        misinformation from that port that needs to be updated for the
+        LPC4357-EVB.
+
+    * SiLabs EFM32 Drivers:
+
+      - Serial: Add support for serial termios TCGET and TCSET.  For the
+        moment, only set/get speed is implemented.  From Pierre-noel
+        Bouteville.
+      - RMU: Add support for the EFM32 reset management unit (RMU).  From
+        Pierre-noel Bouteville.
+
+    * SiLabs EFM32 Boards:
+
+      - Add support for timer/PWM on the EFM32GG.  From Pierre-noel
+        Bouteville
+
+    * STMicro STM32:
+
+      - Enable support for the STM32 F102.  From the PX4 team.
+
+    * STMicro STM32 Drivers:
+
+      - STM32 F429 LTDC: Add interface to perform hardware accelerated layer
+        operation. Provides access to a reference of a specific ltdc layer.
+        From Marco Krahl
+      - STM32 F429 LTDC support: Implemented LTDC framebuffer support for the
+        generic nuttx framebuffer interface. Also implements the interface to
+        perform hardware accelerated layer operation by the ltdc controller
+        and dma2d controller later. From Marco Krahl.
+      - STM32:  Add support for the internal low speed clock (LSI) as a
+        source of the RTC clock.  Some  boards do not have the external
+        32kKhz oscillator installed, for those boards we must fallback to
+        the crummy internal RC clock.  From Kevin Hester
+      - STM32 SDIO:  Add support for the new SDWAIT_WRCOMPLETE condition.
+        From David Sidrane
+
+    * STMicro STM32 Boards:
+
+      - Add a discrete Joystick support for the STM3210E-EVAL.
+      - Add analog Joystick shield support for the Nucleo F4x1RE boards.
+      - STM32 F429i-Disco:  Add support for initializing of the ltdc
+        controller and the lcd device connected on the stm32f429i-disco.
+        From Marco Krahl.
+      - Removed the px4-v2_upstream configuration.  This was not the
+        official configuration for the PX4 board and has led to confusion
+        by NuttX users.  The board configuration also requires some ongoing
+        maintenance and customization to support ongoing PX4 testing and
+        evaluation.  It is best retained the PX4 repositories where it can
+        be properly maintained and not in the upstream NuttX repository.
+
+    * TI Tiva:
+
+       - Add support for the TI Tiva TM4C 129X family.  Some unverified
+         support for the TM4C 1294 is also in place.
+
+    * TI Tiva Drivers:
+
+      - Added support for Tiva I2C driver.  Verified on the Tiva TM4C123G
+        and TM4C129X.
+      - Added a Tiva TM4C129X Ethernet driver.
+      - Add a timer library for generic support of Tiva timers
+      - Add a driver lower half for drivers/timer.c.  Only 32-bit periodic
+        timers are supported.  This provides userspace access to timers.
+
+    * TI Tiva Boards:
+
+      - TM4C123G Launchpad:  Add initialization logic for an external AT24
+        EEPROM.  This is intended only to support testing of the Tiva I2C
+        driver.
+      - Board support for the Tiva DK-TM4C129x Connected Development Kit.
+      - DK-TMC129X:  Add an IPv6-enabled NSH configuration.
+
+    * C Library/Header Files:
+
+      - Added support for a variadic ioctl() function.  The ioctl()
+        interface is a non-standard, Unix interface.  NuttX has always used
+        the older, three-parameter version.  Most contemporary systems now,
+        however, use a variadic form of the ioctl() function.  Added an
+        option to insert a shim layer to adapt the three-parameter ioctl()
+        to use the variadic interface form.  Internally, the ioctl handling
+        is the same three-parameter logic.  The only real complexity to the
+        shim is in how the system calls must be handled.
+      - Added sys/custom_file.h.  Used when CUSTOM_FILE_IO is define and
+        avoids  re-definition errors about the FILE define.  From Thomas
+        Gruber via the PX4 repository
+      - Add CRC8 support to the C library. From Ken Pettit.
+      - math.h: Added support for the expm1 functions. From Brennan Ashton
+
+    * Applications:
+
+      - apps/examples/djoystick:  Add a test of the discrete  joystick
+        driver.
+      - apps/examples/ajoystick:  Add a test of the analog joystick
+        driver.
+      - apps/examples/ltdc: Add ltdc test example. From Marco Krahl
+      - apps/system/lm75:  Add a tiny application to read the temperature
+        from an LM-75 (or compatible) temperature sensor
+      - apps/examples/timer:  Add a trivial test of the timer driver
+
+      - apps/system/cu: Add a minimalist implementation  of the 'cu'
+        terminal program (part of Taylor UUCP for ages). Using it, you can
+        simply open a serial port and interact with it. Using '~.' you can
+        leave the terminal program and drop back to nsh.  This  might come
+        in handy for people that have e.g. GSM modems, GPS receivers or
+        other devices with text based serial communications attached to
+        their Nuttx systems. From Harald Welte
+      - apps/interpreters/micropython:  A port of Micro Python to NuttX.
+        Contributed by Dave Marples
+
+      - apps/netutils/dnsclient:  Can select to be either IPv4 or IPv6, but
+        not both (IPv6 still does not compile)
+      - apps/netutils/netlib:  Add new library functions to manipulate IPv6
+        addresses.
+      - apps/examples/nettest:  Update test so that it can be used to test
+        IPv6 TCP sockets
+      - apps/examples/udp:  The UDP test example has been extend to support
+        IPv6 domain sockets
+
+      - apps/nshlib:  Add logic to initialize IPv6 addresses
+      - apps/nshlib:  Add the ping6 command to support checking IPv6 networks.
+      - apps/nshlib: Clean up network status presentation for IPv6
+
+Efforts In Progress.  The following are features that are partially
+implemented but present in this release.  They are not likely to be
+completed soon.
+
+    * IPv6.  While basic IPv6 support was completed in NuttX-7.7,
+      there are lingering issues with getting IPv6 compatibility
+      with applications and network utilities.
+
+    * Processes.  Much of the work in this release is focused on the
+      realization of Unix-style user processes in NuttX.  There is more to
+      be done, however.  The full roadmap and status is available at:
+      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+
+    * XMega:  There are some fragments in place for an XMega port.  That
+      port has not really started, however.
+
+    * Galileo:  Similarly, there are fragments in place for an Intel Galileo
+      port.  The port probably will not happen (I gave my Galileo board away!).
+
+Bugfixes.  Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+    * Core OS:
+
+      - POSIX message queues: msg type should be char * not void * in
+        mq_send, mq_timedsend, mq_receive, and mq_timedreceive.  Noted by
+        Pierre-Noel Bouteville
+      - POSIX message queues: In message queue creation return ENOSPC error
+        if size exceeds the configured size of pre-allocated messages; Use
+        ENOSPC vs ENOMEM per OpenGroup.org.  From Pierre-Noel Bouteville.
+      - Task Names: strncpy() will not copy the terminating \0 into the
+        destination if the source is larger than the size of the
+        destination. Ensure that the last byte is always zero and let
+        strncpy() only copy CONFIG_TASK_NAME_SIZE bytes. The issue of
+        unterminated names can be observed in ps when creating a pthread
+        while CONFIG_TASK_NAME_SIZE is set to 8.  From  Daniel Willmann
+
+    * Memory Management:
+
+      - Granule allocator: Fixes some issues found by the PX4 team using
+        Coverity.  From Pavel Krienko
+
+    * Networking:
+
+      - Several fixes correcting issues with the CC3000 networking.  From
+        Jussi  Kivilinna
+      - CC3000 Fix: Data can be unaligned.  When dereferenced as an input
+        ntosh(), a bad value is returned.  Reported by Alan Carvalho de
+        Assis
+      - Correct naming of fields in struct sockaddr_in6:  sin6_port and
+        sin6_family, not sin_port and sin_family.
+      - accept(): Correct the value returned by accept() in the case where
+        net_lockingwait() is called.  It was returning -1 and losing the
+        errno value.  Noted by Rony Xln
+
+    * Common Drivers:
+
+      - Loop device should return -EINTR is interrupted by a signal.
+      - M25P serial flash driver:  Add subsector size of the M24P16 part. 
+        From Lazlo
+      - Common serial driver: In case a thread is doing a blocking operation
+        (e.g. read()) on a serial device, while it is being terminated by
+        pthread_cancel(), then uart_close() gets called, but the semaphore
+        is still blocked. This means that once the serial device is opened
+        next time, data will arrive on the serial port (and driver
+        interrupts handled as normal), but the received characters never
+        arrive in the reader thread.  The problem was fixed by re-
+        initializing the semaphores on the last uart_close() on the device.
+        From Harald Welte
+      - Pipes: Fixes some issues found by the PX4 team using Coverity.  From
+        Pavel Krienko
+      - CDC/ACM driver: Fixes some issues found by the PX4 team using
+        Coverity.  From Pavel Krienko
+
+    * NXP LPC43xx Drivers:
+
+      - LPC4357: Changes required to get USART 2 & 3 working on the
+        lpc4357-evb.  From Toby Duckworth.
+
+    * STMicro STM32:
+
+      - Several fixes correcting issues with the STM32 header files from
+        Jussi Kivilinna
+
+    * STMicro STM32 Drivers:
+
+      - Ported Tridge's STM32 I2C noise resilience logic from the PX4
+        repository.
+      - STM32 F2 and F4:  Set the GPIO_SPEED_50MHz on all F2 and F4 SPI pin
+        configurations.  This is based on an F411 SPI1 errata but the fixed
+        is generalized to all SPI and all F2 and F4.  Discovered and fixed
+        by Sebastien Lorquet.
+      - Fix for STM32 OTGHS device driver working in FS mode.  From Ken
+        Pettit.
+      - For STM32 OTG HS DEV (in FS mode): Disable ULPI clock enable in RCC
+        AHB1 Register.  If Both ULPI and the FS clock enable bits are set in
+        FS mode, then the ARM never awakens from WFI due to a chip issue.
+        This is only an issue if you are using the internal PHY.  From Ken
+        Pettit.
+      - STM32 F429 LTDC: Add missing clut register definition. From Marco
+        Krahl
+      - STM32 serial: fix declaration and definition of up_receive() and
+        up_dma_receive() to match fields in the interface definition of
+        struct uart_ops_s.  From Freddie Chopin.
+
+    * TI Tiva Drivers:
+
+      - Fix Tiva IRQ control logic; was limited to only 64 IRQs.  That is a
+        problem for higher numbered IRQs on many platforms
+
+    * C Library/Header Files:
+
+      - avsprintf():  Fix a bug in usage of va_list on x86.  On x86,
+        va_list is a pointer to a single copy on the stack.  avsprintf()
+        calls lib_vsprintf() twice and so traverses the va_list twice using
+        va_start.  va_start modifies that single copy on the stack so that
+        the second call to lib_vsprintf() fails.  This appears to be an
+        issue with x86 only so far.
+      - stdint.h:  Don't use hex values to specify minimum values of fixed
+        width, signed values.  Hex values are inherently unsigned and not
+        usable for this purpose in all contexts.
+      - strncpy():  Would trash a lot of memory if n == 0.  From Yasuhiro
+        Osaki.
+      - sscanf().  Accept %X and %F as well as %x %f as a format specifiers.
+        From Sébastien Lorquet
+
+    * Applications:
+
+      - apps/examples/romfs: fix romfs example builtin app registry issue.
+        From Librae
+      - apps/system/cdcacm, composite and usbmsc:  Fix some strangely placed
+        conditional compilation.  Looks like an automated update went awry
+      - apps/netutils/telnetd:  Add protection when CONFIG_SCHED_HAVE_PARENT
+        is enabled:  Call sigaction with SA_NOCLDWAIT so that exit status is
+        not retained (no zombies) and block receipt of SIGCHLD so that
+        accept is not awakened by a signal.  If accept() is awakened by a
+        signal, do not do anything crazy like exit.  Most from Rony Xln
+      - apps/nshlib/: NSH TFTP get command:  Wrong file name used for the
+        destination.  From Lazlo
