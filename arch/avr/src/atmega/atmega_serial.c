@@ -897,7 +897,7 @@ void up_earlyserialinit(void)
 {
   /* Disable all USARTS */
 
-#ifdef CONFIG_AVR_USART1
+#ifdef CONFIG_AVR_USART0
   usart0_disableusartint(NULL);
 #endif
 #ifdef CONFIG_AVR_USART1
@@ -949,9 +949,6 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
-#ifdef HAVE_SERIAL_CONSOLE
-#endif
-
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
@@ -960,7 +957,7 @@ int up_putc(int ch)
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
   usart0_disableusartint(&imr);
 #else
-  usart1_cdisableusartint(&imr);
+  usart1_disableusartint(&imr);
 #endif
 
   /* Check for LF */

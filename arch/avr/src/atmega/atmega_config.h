@@ -48,7 +48,7 @@
 /* USARTs ***************************************************************************/
 
 #undef HAVE_USART_DEVICE
-#if defined(CONFIG_AVR_USART0) || defined(CONFIG_AVR_USART0)
+#if defined(CONFIG_AVR_USART0) || defined(CONFIG_AVR_USART1)
 #  define HAVE_USART_DEVICE 1
 #endif
 
