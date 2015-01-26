@@ -41,6 +41,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <string.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <queue.h>
@@ -112,11 +113,41 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
       server->u.server.lc_pending >= server->u.server.lc_backlog)
     {
       net_unlock(state);
+      ndbg("ERROR: Server is not listening: lc_state=%d\n",
+           server->lc_state);
+      ndbg("   OR: The backlog limit was reached: %d or %d\n",
+           server->u.server.lc_pending, server->u.server.lc_backlog);
       return -ECONNREFUSED;
     }
 
+  /* Increment the number of pending server connection s*/
+
   server->u.server.lc_pending++;
   DEBUGASSERT(server->u.server.lc_pending != 0);
+
+  /* Create the FIFOs needed for the connection */
+
+  ret = local_create_fifos(client);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to create FIFOs for %s: %d\n",
+           client->lc_path, ret);
+      return ret;
+    }
+
+  /* Open the client-side write-only FIFO.  This should not block and should
+   * prevent the server-side from blocking as well.
+   */
+
+  ret = local_open_client_tx(client);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+           client->lc_path, ret);
+      goto errout_with_fifos;
+    }
+
+  DEBUGASSERT(client->lc_outfd >= 0);
 
   /* Add ourself to the list of waiting connections and notify the server. */
 
@@ -135,9 +166,34 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
     }
   while (ret == -EBUSY);
 
-  /* Was the connection successful? */
+  /* Did we successfully connect? */
 
-  client->lc_state = (ret < 0 ? LOCAL_STATE_BOUND : LOCAL_STATE_CONNECTED);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to connect: %d\n", ret);
+      goto errout_with_outfd;
+    }
+
+  /* Yes.. open the read-only FIFO */
+
+  ret = local_open_client_tx(client);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+           client->lc_path, ret);
+      goto errout_with_outfd;
+    }
+
+  DEBUGASSERT(client->lc_infd >= 0);
+  client->lc_state = LOCAL_STATE_CONNECTED;
+  return OK;
+
+errout_with_outfd:
+  (void)close(client->lc_outfd);
+
+errout_with_fifos:
+  (void)local_destroy_fifos(client);
+  client->lc_state = LOCAL_STATE_BOUND;
   return ret;
 }
 

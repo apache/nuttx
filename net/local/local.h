@@ -74,14 +74,14 @@ enum local_state_s
   /* Common states */
 
   LOCAL_STATE_UNBOUND = 0,     /* Created by socket, but not bound */
-  LOCAL_STATE_BOUND,           /* Bound to an pipe */
+  LOCAL_STATE_BOUND,           /* Bound to an path */
 
   /* SOCK_STREAM only */
 
   LOCAL_STATE_LISTENING,       /* Server listening for connections */
   LOCAL_STATE_CLOSED,          /* Server closed, no longer connected */
   LOCAL_STATE_ACCEPT,          /* Client waiting for a connection */
-  LOCAL_STATE_CONNECTED,       /* Client connected */
+  LOCAL_STATE_CONNECTED,       /* Client (or server) connected */
   LOCAL_STATE_DISCONNECTED     /* Client disconnected */
 };
 
@@ -102,7 +102,8 @@ struct local_conn_s
   uint8_t lc_family;           /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;             /* See enum local_type_e */
   uint8_t lc_state;            /* See enum local_state_e */
-  int16_t lc_fd;               /* File descriptor of underlying pipe */
+  int16_t lc_infd;             /* File descriptor of read-only FIFO */
+  int16_t lc_outfd;            /* File descriptor of write-only FIFO */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
 
   /* SOCK_STREAM fields common to both client and server */
@@ -363,6 +364,66 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
                              size_t len, int flags, FAR struct sockaddr *from,
                              FAR socklen_t *fromlen);
+
+/****************************************************************************
+ * Name: local_create_fifos
+ *
+ * Description:
+ *   Create the FIFO pair needed for a connection.
+ *
+ ****************************************************************************/
+
+int local_create_fifos(FAR struct local_conn_s *client);
+
+/****************************************************************************
+ * Name: local_destroy_fifos
+ *
+ * Description:
+ *   Destroy the FIFO pair used for a connection.
+ *
+ ****************************************************************************/
+
+int local_destroy_fifos(FAR struct local_conn_s *client);
+
+/****************************************************************************
+ * Name: local_open_client_rx
+ *
+ * Description:
+ *   Only the client-side Rx FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_client_rx(FAR struct local_conn_s *client);
+
+/****************************************************************************
+ * Name: local_open_client_tx
+ *
+ * Description:
+ *   Only the client-side Tx FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_client_tx(FAR struct local_conn_s *client);
+
+/****************************************************************************
+ * Name: local_open_server_rx
+ *
+ * Description:
+ *   Only the server-side Rx FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_server_rx(FAR struct local_conn_s *server);
+
+/****************************************************************************
+ * Name: local_open_server_tx
+ *
+ * Description:
+ *   Only the server-side Tx FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_server_tx(FAR struct local_conn_s *server);
 
 #undef EXTERN
 #ifdef __cplusplus

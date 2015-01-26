@@ -133,7 +133,7 @@ int local_release(FAR struct local_conn_s *conn)
            client;
            client = (FAR struct local_conn_s *)dq_next(&client->lc_node))
         {
-          client->u.client.lc_result = -ENETUNREACH;
+          client->u.client.lc_result = -ENOTCONN;
           sem_post(&client->lc_waitsem);
           conn->lc_state = LOCAL_STATE_CLOSED;
         }

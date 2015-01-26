@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
@@ -83,6 +84,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct local_conn_s *server;
   FAR struct local_conn_s *client;
+  FAR struct local_conn_s *conn;
   int ret;
 
   /* Some sanity checks */
@@ -110,68 +112,124 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       if (client)
         {
-          /* Add the waiting connection to list of clients */
-
-          dq_addlast(&client->lc_node, &server->u.server.lc_conns);
-
           /* Decrement the number of pending clients */
 
           DEBUGASSERT(server->u.server.lc_pending > 0);
           server->u.server.lc_pending--;
 
-          /* And signal the client that the connection was successful */
+          /* Create a new connection structure for the server side of the
+           * connection.
+           */
 
-          client->u.client.lc_result = OK;
-          sem_post(&client->lc_waitsem);
-
-          /* Return the address family */
-
-          if (addr)
+          conn = local_alloc();
+          if (!conn)
             {
-              FAR struct sockaddr_un *unaddr;
-              int totlen;
-              int pathlen;
+              ndbg("ERROR:  Failed to allocate new connection structure\n");
+              ret = -ENOMEM;
+            }
+          else
+            {
+              /* Initialize the new connection structure */
 
-              /* If an address is provided, then the length must also be
-               * provided.
+              conn->lc_crefs  = 1;
+              conn->lc_family = SOCK_STREAM;
+              conn->lc_type   = LOCAL_TYPE_PATHNAME;
+              conn->lc_state   = LOCAL_STATE_CONNECTED;
+
+              strncpy(conn->lc_path, client->lc_path, UNIX_PATH_MAX-1);
+              conn->lc_path[UNIX_PATH_MAX-1] = '\0';
+
+              /* Open the server-side write-only FIFO.  This should not
+               * block.
                */
 
-              DEBUGASSERT(addrlen);
-
-              /* Get the length of the path (minus the NUL terminator)
-               * and the length of the whole client address.
-               */
-
-              pathlen = strnlen(client->lc_path, UNIX_PATH_MAX-1);
-              totlen  = sizeof(sa_family_t) + pathlen + 1;
-
-              /* If the length of the whole client address is larger
-               * than the buffer provided by the caller, then truncate
-               * the address to fit.
-               */
-
-              if (totlen > *addrlen)
+              ret = local_open_server_tx(conn);
+              if (ret < 0)
                 {
-                  pathlen    -= (totlen - *addrlen);
-                  totlen      = *addrlen;
+                   ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+                        conn->lc_path, ret);
                 }
-
-              /* Copy the Unix domain address */
-
-              unaddr = (FAR struct sockaddr_un *)addr;
-              unaddr->sun_family = AF_LOCAL;
-              memcpy(unaddr->sun_path, client->lc_path, pathlen);
-              unaddr->sun_path[pathlen] = '\0';
-
-              /* Return the Unix domain address size */
-
-              *addrlen = totlen;
             }
 
-          /* Return the client connection structure */
+          if (ret == OK)
+            {
+              DEBUGASSERT(conn->lc_outfd >= 0);
 
-          *newconn = (FAR void *)client;
-          return OK;
+              /* Open the server-side read-only FIFO.  This should not
+               * block because the client side has already opening it
+               * for writing.
+               */
+
+              ret = local_open_server_rx(conn);
+              if (ret < 0)
+                {
+                   ndbg("ERROR: Failed to open read-only FIFOs for %s: %d\n",
+                        conn->lc_path, ret);
+                }
+            }
+
+          if (ret == OK)
+            {
+              DEBUGASSERT(conn->lc_infd >= 0);
+
+              /* Add the waiting connection to list of clients */
+
+              dq_addlast(&client->lc_node, &server->u.server.lc_conns);
+
+              /* Return the address family */
+
+              if (addr)
+                {
+                  FAR struct sockaddr_un *unaddr;
+                  int totlen;
+                  int pathlen;
+
+                  /* If an address is provided, then the length must also be
+                   * provided.
+                   */
+
+                  DEBUGASSERT(addrlen);
+
+                  /* Get the length of the path (minus the NUL terminator)
+                   * and the length of the whole client address.
+                   */
+
+                  pathlen = strnlen(client->lc_path, UNIX_PATH_MAX-1);
+                  totlen  = sizeof(sa_family_t) + pathlen + 1;
+
+                  /* If the length of the whole client address is larger
+                   * than the buffer provided by the caller, then truncate
+                   * the address to fit.
+                   */
+
+                  if (totlen > *addrlen)
+                    {
+                      pathlen    -= (totlen - *addrlen);
+                      totlen      = *addrlen;
+                    }
+
+                  /* Copy the Unix domain address */
+
+                  unaddr = (FAR struct sockaddr_un *)addr;
+                  unaddr->sun_family = AF_LOCAL;
+                  memcpy(unaddr->sun_path, client->lc_path, pathlen);
+                  unaddr->sun_path[pathlen] = '\0';
+
+                  /* Return the Unix domain address size */
+
+                  *addrlen = totlen;
+                }
+
+              /* Return the client connection structure */
+
+              *newconn = (FAR void *)conn;
+            }
+
+          /* Signal the client with the result of the connection */
+
+          client->u.client.lc_result = ret;
+          sem_post(&client->lc_waitsem);
+          return ret;
         }
 
       /* No.. then there should be no pending connections */

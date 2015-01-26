@@ -88,7 +88,8 @@ FAR struct local_conn_s *local_alloc(void)
     {
       /* Initialize non-zero elements the new connection structure */
 
-      conn->lc_fd = -1;
+      conn->lc_infd  = -1;
+      conn->lc_outfd = -1;
       sem_init(&conn->lc_waitsem, 0, 0);
     }
 
@@ -108,13 +109,23 @@ void local_free(FAR struct local_conn_s *conn)
 {
   DEBUGASSERT(conn != NULL);
 
-  /* Make sure that the pipe is closed */
+  /* Make sure that the read-only FIFO is closed */
 
-  if (conn->lc_fd >= 0)
+  if (conn->lc_infd >= 0)
     {
-      close(conn->lc_fd);
+      close(conn->lc_infd);
     }
 
+  /* Make sure that the write-only FIFO is closed */
+
+  if (conn->lc_outfd >= 0)
+    {
+      close(conn->lc_outfd);
+    }
+
+  /* Destroy all FIFOs associted with the connection */
+
+  local_destroy_fifos(conn);
   sem_destroy(&conn->lc_waitsem);
 
   /* And free the connection structure */
