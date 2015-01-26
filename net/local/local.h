@@ -79,10 +79,10 @@ enum local_state_s
   /* SOCK_STREAM only */
 
   LOCAL_STATE_LISTENING,       /* Server listening for connections */
-  LOCAL_STATE_CLOSED,          /* Server closed, no longer connected */
+  LOCAL_STATE_CLOSED,          /* Server closed, no longer connecting */
   LOCAL_STATE_ACCEPT,          /* Client waiting for a connection */
-  LOCAL_STATE_CONNECTED,       /* Client (or server) connected */
-  LOCAL_STATE_DISCONNECTED     /* Client disconnected */
+  LOCAL_STATE_CONNECTED,       /* Peer connected */
+  LOCAL_STATE_DISCONNECTED     /* Peer disconnected */
 };
 
 /* Representation of a local connection */
@@ -102,8 +102,8 @@ struct local_conn_s
   uint8_t lc_family;           /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;             /* See enum local_type_e */
   uint8_t lc_state;            /* See enum local_state_e */
-  int16_t lc_infd;             /* File descriptor of read-only FIFO */
-  int16_t lc_outfd;            /* File descriptor of write-only FIFO */
+  int16_t lc_infd;             /* File descriptor of read-only FIFO (peers) */
+  int16_t lc_outfd;            /* File descriptor of write-only FIFO (peers) */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
 
   /* SOCK_STREAM fields common to both client and server */
@@ -124,7 +124,7 @@ struct local_conn_s
       dq_queue_t lc_conns;     /* List of connections */
     } server;
 
-    /* Fields unique to the client side */
+    /* Fields unique to the connecting client side */
 
     struct
     {

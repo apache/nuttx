@@ -151,6 +151,8 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                 }
             }
 
+          /* Do we have a connection?  Is the write-side FIFO opened? */
+
           if (ret == OK)
             {
               DEBUGASSERT(conn->lc_outfd >= 0);
@@ -167,6 +169,8 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                         conn->lc_path, ret);
                 }
             }
+
+          /* Do we have a connection?  Are the FIFOs opened? */
 
           if (ret == OK)
             {
