@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 24, 2014</p>
+      <p>Last Updated: January 26, 2014</p>
     </td>
   </tr>
 </table>
@@ -1233,11 +1233,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.6.
-  NuttX 7.6 is the 106<sup>th</sup> release of NuttX.
-  It was released on November 26, 2014, and is available for download from the
+  The current release is NuttX 7.7.
+  NuttX 7.7 is the 107<sup>th</sup> release of NuttX.
+  It was released on Januay 26, 2015, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.6.tar.gz</code> and <code>apps-7.6.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.7.tar.gz</code> and <code>apps-7.7.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1246,7 +1246,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.6 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.6/">here</a>;
+      Release notes for NuttX 7.7 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.7/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1254,7 +1254,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.6 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.6/">here</a>;
+      Release notes for NuttX 7.7 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.7/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
       The ChangeLog for the all releases of apps is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1308,8 +1308,8 @@
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (3)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (29)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (17)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (30)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (18)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1449,6 +1449,7 @@
       <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
       <li><a href="#stm32l162">STMicro STM32L162</a> <small>(STM32 L &quot;EnergyLite&quot; Medium+ Density, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f100x">STMicro STM32F100x</a> <small>(STM32 F1 &quot;Value Line&quot;Family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f102x">STMicro STM32F102x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103cx">STMicro STM32F103C4/C8</a> <small>(STM32 F1 &quot;Low- and Medium-Density Line&quot; Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103x">STMicro STM32F103x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f107x">STMicro STM32F107x</a> <small>(STM32 F1 &quot;Connectivity Line&quot; family, ARM Cortex-M3)</small></li>
@@ -1476,7 +1477,8 @@
       <li><a href="#tilms8962">TI/Stellaris LM3S8962</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#tilms9b96">TI/Stellaris LM3S9B96</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#tilm4f120x">TI/Stellaris LM4F120x</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#titm4c123x">TI/Tiva TM4C123G</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#titm4c123g">TI/Tiva TM4C123G</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#titm4c129x">TI/Tiva TM4C129X</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#ticc3200launchpad">TI/Tiva CC3200 Launchpad</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
   </li>
@@ -2403,7 +2405,7 @@ nsh>
     </p>
       Board support is available for the following:
     </p>
-    <ol>
+    <ul>
       <li>
         <p>
           <b>SiLabs EFM32 Giant Gecko Starter Kit t (EFM32GG-STK3700)</b>.
@@ -2429,12 +2431,21 @@ nsh>
         </ul>
         <p>
         <b>STATUS</b>.
-          As of this writing, the basic board support is available for the <i>Giant Gecko</i> in the NuttX source tree.
-          A verified configuration is available for the basic NuttShell (NSH) using LEUART0 for the serial console.
-          Development of USB support is in progress.
         </p>
+        <ul>
+          <li>
+             The basic board support for the <i>Giant Gecko</i> was introduced int the NuttX source tree in NuttX-7.6.
+             A verified configuration was available for the basic NuttShell (NSH) using LEUART0 for the serial console.
+           </li>
+           <li>
+             Development of USB support is in started, but never completed.
+           </li>
+           <li>
+             Reset Management Unit (RMU) was added Pierre-noel Bouteville in NuttX-7.7.
+           </li>
+        </ul>
       </li>
-    </ol>
+    </ul>
   </td>
 </tr>
 <tr>
@@ -2555,6 +2566,26 @@ nsh>
           </p>
        </li>
     </ul>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f102x"><b>STMicro STM32F102</b>.</a>
+      Architecture support (only) for the STM32 F102 family was contributed by the PX4 team in NuttX-7.7.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        Architecture support only is provided.
+        No specific STM32 F102 boards are supported.
+      </p>
+     </ul>
+  </td>
 </tr>
 <tr>
   <td><br></td>
@@ -3303,8 +3334,27 @@ nsh>
     <p>
       <a name="stm32f429x"><b>STMicro STM32 F429</b>.</a>
       Support for STMicro STM32F429I-Discovery development board featuring the STM32F429ZIT6 MCU was contributed in NuttX-6.32 by Ken Pettit.
-      The F429 port adds support for the STM32F439 LCDC and OTG HS (in FS mode).
       The STM32F429ZIT6 is a 180MHz Cortex-M4 operation with 2Mbit Flash memory and 256kbytes.
+    </p>
+    <p>
+      <b>STATUS</b>:
+    </p>
+    <ul>
+      <li>
+        The intial release included support from either OTG FS or OTG HS in FS mode.
+      </li>
+      <li>
+        The F429 port adds support for the STM32F439 LCD and OTG HS (in FS mode).
+      </li>
+      <li>
+        In Nutt-7.6, Brennan Ashton added support for concurrent OTG FS and OTG HS (still in FS mode) and Marco Krahl added support for an SPI-based LCD .
+      </li>
+      <li>
+        In Nutt-7.7, Marco Krahl included support for a framebuffer based driver using the LTDC and DMA2D.
+        Marcos's implementation included extensions to support more advance LTDC functions through an auxiliary interface.
+      </li>
+    </ul>
+    <p>
       Refer to the STM32F429I-Discovery board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f429i-disco/README.txt">README</a> file for further information.
     </p>
   </td>
@@ -3419,7 +3469,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="titm4c123x"><b>TI Tiva TM4C123G</b>.</a>
+      <a name="titm4c123g"><b>TI Tiva TM4C123G</b>.</a>
       This port uses the TI Tiva TM4C123G LaunchPad.
     </p>
     <ul>
@@ -3428,8 +3478,8 @@ nsh>
         <ul>
           <li>
             Initial architectural support for the TI Tiva TM4C123G was implemented and was released in NuttX 7.1.
-            Basic board support support the TM4C123G LaunchPad was also included in that relese but was not fully tested.
-            This basic board supprted included a configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+            Basic board support the TM4C123G LaunchPad was also included in that release but was not fully tested.
+            This basic board support included a configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
            </li>
            <li>
               The fully verified port to the TM4C123G LaunchPad is provided in NuttX-7.2.
@@ -3452,6 +3502,40 @@ nsh>
   <td><br></td>
   <td>
     <p>
+      <a name="titm4c129x"><b>TI Tiva TM4C129X</b>.</a>
+      This port uses the TI Tiva DK-TM4C129X Connected Development Kit.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        <ul>
+          <li>
+            A mature port to the DK-TM4C123G was implemented and was released in NuttX 7.7.
+          </li>
+          <li>
+            At the initial release, verified drivers were available for Ethernet interface, I2C, and timers as well as board LEDs and push buttons.
+            Other Tiva/Stellaris drivers should port to the TM4C129X without major difficulty.
+          </li>
+          <li>
+            This board supports included two configurations for the NuttShell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+            Both are networked enabled:  One configured to support IPv4 and one configured to supported IPv6.
+            Instructions are included in the board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/dk-tm4c129x/README.txt">README</a> file for configuring both IPv4 and IPv6 simultaneously..
+          </li>
+        </ul>
+      </p>
+        Refer to the TM4C129X LaunchPad board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/dk-tm4c129x/README.txt">README</a> file for more detailed information about this port.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <a name="ticc3200launchpad"><b>TI/Tiva CC3200 Launchpad</b>.</a>
       TI/Tiva CC3200 Launchpad
     </p>
@@ -3460,7 +3544,7 @@ nsh>
         <b>STATUS:</b>
         This is very much a work in progress.
         The basic port was released in NuttX-7.5.
-        This basic board supprted includes an verified configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        This basic board supported includes an verified configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         Key wireless networking capability is still missing.
         Refer to the CC3200 LaunchPad board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/cc3200-launchpad/README.txt">README</a> file for more detailed information about this port.
       </p>
