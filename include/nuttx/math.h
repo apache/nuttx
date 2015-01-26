@@ -333,6 +333,30 @@ double      tanh  (double x);
 long double tanhl (long double x);
 #endif
 
+float       asinhf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      asinh  (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double asinhl (long double x);
+#endif
+
+float       acoshf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      acosh  (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double acoshl (long double x);
+#endif
+
+float       atanhf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      atanh  (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double atanhl (long double x);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
