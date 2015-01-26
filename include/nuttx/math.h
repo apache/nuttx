@@ -358,6 +358,17 @@ double      atanh  (double x);
 long double atanhl (long double x);
 #endif
 
+float       erff (float x);
+#define     erfcf(x) (1 - erff(x))
+#if CONFIG_HAVE_DOUBLE
+double      erf  (double x);
+#define     erfc(x) (1 - erf(x))
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double erfl (long double x);
+#define     erfcl(x) (1 - erfl(x))
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
