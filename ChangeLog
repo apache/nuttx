@@ -9521,3 +9521,6 @@
 	  From Brennan Ashton (2015-01-26).
 	* include/nuttx/math.h and libc/math/lib_erf*.c: Add error function
 	  to math library.  From Brennan Ashton (2015-01-26).
+	* include/nuttx/math.h and libc/math: Add math library defines for
+	  nan(), copysign(), and trunc() functions.  From Brennan Ashton
+	  (2015-01-26).
