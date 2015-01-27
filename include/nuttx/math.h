@@ -377,6 +377,14 @@ double      copysign  (double x, double y);
 long double copysignl (long double x, long double y);
 #endif
 
+float       truncf (float x);
+#if CONFIG_HAVE_DOUBLE
+double      trunc (double x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double truncl (long double x);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
