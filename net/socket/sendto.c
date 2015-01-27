@@ -467,6 +467,12 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       break;
 #endif
 
+#ifdef CONFIG_NET_IPv6
+    case AF_LOCAL:
+      minlen = sizeof(sa_family_t);
+      break;
+#endif
+
     default:
       ndbg("ERROR: Unrecognized address family: %d\n", to->sa_family);
       err = EAFNOSUPPORT;
@@ -511,9 +517,13 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
     }
 #endif
 
-  /* Perform the UDP sendto operation */
+#ifdef CONFIG_NET_LOCAL
+  /* Perform the Unix domain sendto operation */
+#  warning Missing logic
+#endif
 
 #ifdef CONFIG_NET_UDP
+  /* Perform the UDP sendto operation */
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);

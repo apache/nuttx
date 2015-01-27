@@ -45,6 +45,7 @@
 
 #include "tcp/tcp.h"
 #include "pkt/pkt.h"
+#include "local/local.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -138,17 +139,31 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
       case SOCK_RAW:
         {
           ret = psock_pkt_send(psock, buf, len);
-          break;
         }
+        break;
 #endif
 
-#if defined(CONFIG_NET_TCP)
       case SOCK_STREAM:
         {
-          ret = psock_tcp_send(psock, buf, len);
-          break;
-        }
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+          if (psock->s_domain == PF_LOCAL)
 #endif
+            {
+              ret = psock_local_send(psock, buf, len, flags);
+            }
+#endif /* CONFIG_NET_LOCAL */
+
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+          else
+#endif
+            {
+              ret = psock_tcp_send(psock, buf, len);
+            }
+#endif /* CONFIG_NET_TCP */
+        }
+        break;
 
       default:
         {

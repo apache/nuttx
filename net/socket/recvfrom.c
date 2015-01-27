@@ -68,6 +68,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "local/local.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -1580,7 +1581,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  ****************************************************************************/
 
 ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                       int flags,FAR struct sockaddr *from,
+                       int flags, FAR struct sockaddr *from,
                        FAR socklen_t *fromlen)
 {
   ssize_t ret;
@@ -1645,30 +1646,72 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* Read from the network interface driver buffer */
   /* Or perform the TCP/IP or UDP recv() operation */
 
-#if defined(CONFIG_NET_PKT)
-  if (psock->s_type == SOCK_RAW)
+  switch (psock->s_type)
     {
-      ret = pkt_recvfrom(psock, buf, len, from);
-    }
-  else
+#ifdef CONFIG_NET_PKT
+    case SOCK_RAW:
+      {
+        ret = pkt_recvfrom(psock, buf, len, from);
+      }
+      break;
+#endif /* CONFIG_NET_PKT */
+
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+    case SOCK_STREAM:
+      {
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+        if (psock->s_domain == PF_LOCAL)
 #endif
-#if defined(CONFIG_NET_TCP)
-  if (psock->s_type == SOCK_STREAM)
-    {
-      ret = tcp_recvfrom(psock, buf, len, from);
-    }
-  else
+          {
+            ret = psock_local_recvfrom(psock, buf, len, flags,
+                                       from, fromlen);
+          }
+#endif /* CONFIG_NET_LOCAL */
+
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+        else
 #endif
-#if defined(CONFIG_NET_UDP)
-  if (psock->s_type == SOCK_DGRAM)
-    {
-      ret = udp_recvfrom(psock, buf, len, from);
-    }
-  else
+          {
+            ret = tcp_recvfrom(psock, buf, len, from);
+          }
+#endif /* CONFIG_NET_TCP */
+      }
+      break;
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
+
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+    case SOCK_DGRAM:
+      {
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_UDP
+        if (psock->s_domain == PF_LOCAL)
 #endif
-    {
-      ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type);
-      ret = -ENOSYS;
+          {
+            ret = psock_local_recvfrom(psock, buf, len, flags,
+                                       from, fromlen);
+          }
+#endif /* CONFIG_NET_LOCAL */
+
+#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL
+        else
+#endif
+          {
+            ret = udp_recvfrom(psock, buf, len, from);
+          }
+#endif /* CONFIG_NET_UDP */
+      }
+      break;
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
+
+    default:
+      {
+        ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type);
+        ret = -ENOSYS;
+      }
+      break;
     }
 
   /* Set the socket state to idle */
