@@ -60,11 +60,10 @@
  * 2. End/Start byte
  * 3. 16-bit packet length (in host order)
  * 4. Packet data (in host order)
- * 5. 16-bit checksum (in host order, includes packet length)
  */
 
-#define LOCAL_SYNC_BYTE   0x42                /* Byte in sync sequence */
-#define LOCAL_END_BYTE    0xbd                /* End of sync seqence */
+#define LOCAL_SYNC_BYTE   0x42     /* Byte in sync sequence */
+#define LOCAL_END_BYTE    0xbd     /* End of sync seqence */
 
 /****************************************************************************
  * Public Type Definitions
@@ -140,7 +139,9 @@ struct local_conn_s
 
   sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
 
-  /* Union of fields unique to SOCK_STREAM client and servers  */
+  /* Union of fields unique to SOCK_STREAM client, server, and connected
+   * peers.
+   */
 
   union
   {
@@ -157,8 +158,16 @@ struct local_conn_s
 
     struct
     {
-      volatile int lc_result;  /* Result of the connection operation */
+      uint16_t lc_remaining;   /* (For binary compatibility with peer) */
+      volatile int lc_result;  /* Result of the connection operation (client)*/
     } client;
+
+    /* Fields common to connected peers (connected or accepted) */
+
+    struct
+    {
+      uint16_t lc_remaining;   /* Bytes remaining in the incoming stream */
+    } peer;
   } u;
 };
 
@@ -362,6 +371,25 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
                            socklen_t tolen);
 
 /****************************************************************************
+ * Name: local_send_packet
+ *
+ * Description:
+ *   Send a packet on the write-only FIFO.
+ *
+ * Parameters:
+ *   fd       File descriptor of write-only FIFO.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *
+ * Return:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
+
+/****************************************************************************
  * Function: psock_recvfrom
  *
  * Description:
@@ -392,6 +420,65 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
                              size_t len, int flags, FAR struct sockaddr *from,
                              FAR socklen_t *fromlen);
+
+/****************************************************************************
+ * Name: local_fifo_read
+ *
+ * Description:
+ *   Read a data from the read-only FIFO.
+ *
+ * Parameters:
+ *   fd  - File descriptor of read-only FIFO.
+ *   buf - Local to store the received data
+ *   len - Length of data to receive [in]
+ *         Length of data actually received [out]
+ *
+ * Return:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.  If -ECONNRESET is received, then the sending side has closed
+ *   the FIFO. In this case, the returned data may still be valid (if the
+ *   returned len > 0).
+ *
+ ****************************************************************************/
+
+int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len);
+
+/****************************************************************************
+ * Name: local_getaddr
+ *
+ * Description:
+ *   Return the Unix domain address of a connection.
+ *
+ * Parameters:
+ *   conn - The connection
+ *   addr - The location to return the address
+ *   addrlen - The size of the memory allocat by the caller to receive the
+ *             address.
+ *
+ * Return:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
+                  FAR socklen_t *addrlen);
+
+/****************************************************************************
+ * Name: local_sync
+ *
+ * Description:
+ *   Read a sync bytes until the start of the packet is found.
+ *
+ * Parameters:
+ *   fd - File descriptor of read-only FIFO.
+ *
+ * Return:
+ *   The non-zero size of the following packet is returned on success; a
+ *   negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int local_sync(int fd);
 
 /****************************************************************************
  * Name: local_create_fifos
@@ -452,61 +539,6 @@ int local_open_server_rx(FAR struct local_conn_s *server);
  ****************************************************************************/
 
 int local_open_server_tx(FAR struct local_conn_s *server);
-
-/****************************************************************************
- * Name: local_chksum
- *
- * Description:
- *   Compute a simple checksum over the packet data
- *
- * Parameters:
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Return:
- *   The 16-bit checksum (including the length)
- *
- ****************************************************************************/
-
-uint16_t local_chksum(FAR const uint8_t *buf, size_t len);
-
-/****************************************************************************
- * Name: local_write
- *
- * Description:
- *   Write a data on the write-only FIFO.
- *
- * Parameters:
- *   fd       File descriptor or write-only FIFO.
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Return:
- *   On success, returns the number of characters sent.  On  error, a
- *   negated errno value is returned.
- *
- ****************************************************************************/
-
-int local_write(int fd, FAR const uint8_t *buf, size_t len);
-
-/****************************************************************************
- * Name: local_send_packet
- *
- * Description:
- *   Write a packet on the write-only FIFO.
- *
- * Parameters:
- *   fd       File descriptor or write-only FIFO.
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Return:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
 
 #undef EXTERN
 #ifdef __cplusplus

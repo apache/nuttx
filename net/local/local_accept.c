@@ -180,46 +180,12 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
               if (addr)
                 {
-                  FAR struct sockaddr_un *unaddr;
-                  int totlen;
-                  int pathlen;
-
-                  /* If an address is provided, then the length must also be
-                   * provided.
-                   */
-
-                  DEBUGASSERT(addrlen);
-
-                  /* Get the length of the path (minus the NUL terminator)
-                   * and the length of the whole client address.
-                   */
-
-                  pathlen = strnlen(client->lc_path, UNIX_PATH_MAX-1);
-                  totlen  = sizeof(sa_family_t) + pathlen + 1;
-
-                  /* If the length of the whole client address is larger
-                   * than the buffer provided by the caller, then truncate
-                   * the address to fit.
-                   */
-
-                  if (totlen > *addrlen)
-                    {
-                      pathlen    -= (totlen - *addrlen);
-                      totlen      = *addrlen;
-                    }
-
-                  /* Copy the Unix domain address */
-
-                  unaddr = (FAR struct sockaddr_un *)addr;
-                  unaddr->sun_family = AF_LOCAL;
-                  memcpy(unaddr->sun_path, client->lc_path, pathlen);
-                  unaddr->sun_path[pathlen] = '\0';
-
-                  /* Return the Unix domain address size */
-
-                  *addrlen = totlen;
+                  ret = local_getaddr(client, addr, addrlen);
                 }
+            }
 
+          if (ret == OK)
+            {
               /* Return the client connection structure */
 
               *newconn = (FAR void *)conn;

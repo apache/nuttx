@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/local_utils.c
+ * net/local/local_sendpacket.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,48 +66,17 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
 };
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_chksum
- *
- * Description:
- *   Compute a simple checksum over the packet data
- *
- * Parameters:
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Return:
- *   The 16-bit checksum (including the length)
- *
- ****************************************************************************/
-
-uint16_t local_chksum(FAR const uint8_t *buf, size_t len)
-{
-  uint16_t chksum;
-  int i;
-
-  DEBUGASSERT(buf && len <= 0xffff);
-
-  chksum = (len & 0xff)  + ((len >> 8) & 0xff);
-  for (i = 0; i < len; i++)
-    {
-      chksum += *buf++;
-    }
-
-  return chksum;
-}
-
-/****************************************************************************
- * Name: local_write
+ * Name: local_fifo_write
  *
  * Description:
  *   Write a data on the write-only FIFO.
  *
  * Parameters:
- *   fd       File descriptor or write-only FIFO.
+ *   fd       File descriptor of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
  *
@@ -117,7 +86,7 @@ uint16_t local_chksum(FAR const uint8_t *buf, size_t len)
  *
  ****************************************************************************/
 
-int local_write(int fd, FAR const uint8_t *buf, size_t len)
+static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
 {
   ssize_t nwritten;
 
@@ -149,13 +118,17 @@ int local_write(int fd, FAR const uint8_t *buf, size_t len)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: local_send_packet
  *
  * Description:
- *   Write a packet on the write-only FIFO.
+ *   Send a packet on the write-only FIFO.
  *
  * Parameters:
- *   fd       File descriptor or write-only FIFO.
+ *   fd       File descriptor of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
  *
@@ -168,34 +141,22 @@ int local_write(int fd, FAR const uint8_t *buf, size_t len)
 int local_send_packet(int fd, FAR const uint8_t *buf, size_t len)
 {
   uint16_t len16;
-  uint16_t chksum;
   int ret;
-
-  /* Compute the checksum over the packet data (including the length) */
-
-  chksum = local_chksum(buf, len);
 
   /* Send the packet preamble */
 
-  ret = local_write(fd, g_preamble, LOCAL_PREAMBLE_SIZE);
+  ret = local_fifo_write(fd, g_preamble, LOCAL_PREAMBLE_SIZE);
   if (ret == OK)
     {
       /* Send the packet length */
 
       len16 = len;
-      ret = local_write(fd, (FAR const uint8_t *)&len16, sizeof(uint16_t));
+      ret = local_fifo_write(fd, (FAR const uint8_t *)&len16, sizeof(uint16_t));
       if(ret == OK)
         {
           /* Send the packet data */
 
-          ret = local_write(fd, buf, len);
-          if (ret == OK)
-            {
-              /* Send the checksum */
-
-              ret = local_write(fd, (FAR const uint8_t *)&chksum,
-                                sizeof(uint16_t));
-            }
+          ret = local_fifo_write(fd, buf, len);
         }
     }
 
