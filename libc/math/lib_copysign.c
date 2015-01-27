@@ -54,6 +54,7 @@ double copysign(double x, double y)
     {
       return -fabs(x);
     }
+
   return fabs(x);
 }
 #endif
