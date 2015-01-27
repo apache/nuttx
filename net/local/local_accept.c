@@ -92,9 +92,9 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   DEBUGASSERT(psock && psock->s_conn);
   server = (FAR struct local_conn_s *)psock->s_conn;
 
-  if (server->lc_family != SOCK_STREAM ||
+  if (server->lc_proto != SOCK_STREAM ||
       server->lc_state != LOCAL_STATE_LISTENING ||
-      server->lc_type != LOCAL_TYPE_PATHNAME)
+      server->lc_type  != LOCAL_TYPE_PATHNAME)
     {
       return -EOPNOTSUPP;
     }
@@ -132,9 +132,9 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               /* Initialize the new connection structure */
 
               conn->lc_crefs  = 1;
-              conn->lc_family = SOCK_STREAM;
+              conn->lc_proto  = SOCK_STREAM;
               conn->lc_type   = LOCAL_TYPE_PATHNAME;
-              conn->lc_state   = LOCAL_STATE_CONNECTED;
+              conn->lc_state  = LOCAL_STATE_CONNECTED;
 
               strncpy(conn->lc_path, client->lc_path, UNIX_PATH_MAX-1);
               conn->lc_path[UNIX_PATH_MAX-1] = '\0';

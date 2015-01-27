@@ -89,7 +89,7 @@ int local_listen(FAR struct local_conn_s *server, int backlog)
 
   DEBUGASSERT(server);
 
-  if (server->lc_family != SOCK_STREAM ||
+  if (server->lc_proto != SOCK_STREAM ||
       server->lc_state == LOCAL_STATE_UNBOUND ||
       server->lc_type != LOCAL_TYPE_PATHNAME)
     {

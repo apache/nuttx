@@ -85,7 +85,7 @@ int local_release(FAR struct local_conn_s *conn)
   if (conn->lc_state == LOCAL_STATE_CONNECTED ||
       conn->lc_state == LOCAL_STATE_DISCONNECTED)
     {
-      DEBUGASSERT(conn->lc_family == SOCK_STREAM);
+      DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
 
       /* Just free the connection structure */
     }
@@ -96,7 +96,7 @@ int local_release(FAR struct local_conn_s *conn)
     {
       FAR struct local_conn_s *client;
 
-      DEBUGASSERT(conn->lc_family == SOCK_STREAM);
+      DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
 
       /* Are there still clients waiting for a connection to the server? */
 

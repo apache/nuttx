@@ -503,6 +503,18 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       break;
 #endif
 
+#ifdef CONFIG_NET_LOCAL
+    case AF_LOCAL:
+      {
+        if (addrlen < sizeof(sa_family_t))
+          {
+            err = EBADF;
+            goto errout;
+          }
+      }
+      break;
+#endif
+
     default:
       DEBUGPANIC();
       err = EAFNOSUPPORT;

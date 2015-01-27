@@ -228,7 +228,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
             {
               /* Bind the Unix domain connection structure */
 
-              ret = local_bind(psock->s_conn, addr, addrlen);
+              ret = psock_local_bind(psock, addr, addrlen);
             }
 #endif /* CONFIG_NET_LOCAL */
 
@@ -269,7 +269,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
             {
               /* Bind the Unix domain connection structure */
 
-              ret = local_bind(psock->s_conn, addr, addrlen);
+              ret = psock_local_bind(psock, addr, addrlen);
             }
 #endif /* CONFIG_NET_LOCAL */
 

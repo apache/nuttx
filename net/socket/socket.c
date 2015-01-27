@@ -292,27 +292,67 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   switch (type)
     {
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
       case SOCK_STREAM:
-        if ((protocol != 0 && protocol != IPPROTO_TCP) || !dgramok)
+#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+        if (ipdomain)
+#endif
           {
-            err = EPROTONOSUPPORT;
-            goto errout;
+            if ((protocol != 0 && protocol != IPPROTO_TCP) || !dgramok)
+              {
+                err = EPROTONOSUPPORT;
+                goto errout;
+              }
           }
+#endif /* CONFIG_NET_TCP */
+
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_TCP
+        else
+#endif
+          {
+            if (protocol != 0 || !dgramok)
+              {
+                err = EPROTONOSUPPORT;
+                goto errout;
+              }
+          }
+#endif /* CONFIG_NET_LOCAL */
 
         break;
-#endif
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
 
-#ifdef CONFIG_NET_UDP
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
       case SOCK_DGRAM:
-        if ((protocol != 0 && protocol != IPPROTO_UDP) || !dgramok)
+#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL
+        if (ipdomain)
+#endif
           {
-            err = EPROTONOSUPPORT;
-            goto errout;
+            if ((protocol != 0 && protocol != IPPROTO_UDP) || !dgramok)
+              {
+                err = EPROTONOSUPPORT;
+                goto errout;
+              }
           }
+#endif /* CONFIG_NET_UDP */
+
+#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_UDP
+        else
+#endif
+          {
+            if (protocol != 0 || !dgramok)
+              {
+                err = EPROTONOSUPPORT;
+                goto errout;
+              }
+          }
+#endif /* CONFIG_NET_LOCAL */
 
         break;
-#endif
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
 
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:

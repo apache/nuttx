@@ -225,6 +225,7 @@ errout_with_fifos:
 int local_connect(FAR struct local_conn_s *client,
                   FAR const struct sockaddr *addr)
 {
+  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)addr;
   FAR struct local_conn_s *conn;
   net_lock_t state;
 
@@ -243,20 +244,16 @@ int local_connect(FAR struct local_conn_s *client,
       conn;
       conn = (FAR struct local_conn_s *)dq_next(&conn->lc_node))
     {
-      /* Skip over connections that that have not yet been bound,
-       * are or a different address family, or are of a different type.
+      /* Anything in the listener list should be a stream socket in the
+       * istening state
        */
 
-      if (conn->lc_state == LOCAL_STATE_UNBOUND ||
-          conn->lc_family != client->lc_family ||
-          conn->lc_type != client->lc_type)
-        {
-          continue;
-        }
+      DEBUGASSERT(conn->lc_state == LOCAL_STATE_LISTENING &&
+                  conn->lc_proto == SOCK_STREAM);
 
-      /* Handle according to the connection type */
+      /* Handle according to the server connection type */
 
-      switch (client->lc_type)
+      switch (conn->lc_type)
         {
         case LOCAL_TYPE_UNNAMED:   /* A Unix socket that is not bound to any name */
         case LOCAL_TYPE_ABSTRACT:  /* lc_path is length zero */
@@ -269,11 +266,17 @@ int local_connect(FAR struct local_conn_s *client,
 
         case LOCAL_TYPE_PATHNAME:  /* lc_path holds a null terminated string */
           {
-            if (strncmp(client->lc_path, conn->lc_path, UNIX_PATH_MAX-1) == 0)
+            if (strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1) == 0)
               {
+                /* Bind the address and protocol */
+
+                client->lc_proto = conn->lc_proto;
+                strncpy(client->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
+                client->lc_path[UNIX_PATH_MAX-1] = '\0';
+
                 /* We have to do more for the SOCK_STREAM family */
 
-                if (conn->lc_family == SOCK_STREAM)
+                if (conn->lc_proto == SOCK_STREAM)
                   {
                     return local_stream_connect(client, conn, state);
                   }

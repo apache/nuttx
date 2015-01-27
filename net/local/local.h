@@ -128,7 +128,7 @@ struct local_conn_s
   /* Fields common to SOCK_STREAM and SOCK_DGRAM */
 
   uint8_t lc_crefs;            /* Reference counts on this instance */
-  uint8_t lc_family;           /* SOCK_STREAM or SOCK_DGRAM */
+  uint8_t lc_proto;            /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;             /* See enum local_type_e */
   uint8_t lc_state;            /* See enum local_state_e */
   int16_t lc_infd;             /* File descriptor of read-only FIFO (peers) */
@@ -228,7 +228,7 @@ FAR struct local_conn_s *local_alloc(void);
 void local_free(FAR struct local_conn_s *conn);
 
 /****************************************************************************
- * Name: local_bind
+ * Name: psock_local_bind
  *
  * Description:
  *   This function implements the low-level parts of the standard local
@@ -236,8 +236,8 @@ void local_free(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_bind(FAR struct local_conn_s *conn,
-               FAR const struct sockaddr *addr, socklen_t addrlen);
+int psock_local_bind(FAR struct socket *psock,
+                     FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
  * Name: local_connect
@@ -246,7 +246,7 @@ int local_bind(FAR struct local_conn_s *conn,
  *   This function sets up a new local connection. The function will
  *   automatically allocate an unused local port for the new
  *   connection. However, another port can be chosen by using the
- *   local_bind() call, after the local_connect() function has been
+ *   psock_local_bind() call, after the local_connect() function has been
  *   called.
  *
  *   This function is called as part of the implementation of sendto

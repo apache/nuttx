@@ -44,6 +44,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include <nuttx/net/net.h>
+
 #include "local/local.h"
 
 /****************************************************************************
@@ -59,19 +61,23 @@
  *
  ****************************************************************************/
 
-int local_bind(FAR struct local_conn_s *conn,
-               FAR const struct sockaddr *addr, socklen_t addrlen)
+int psock_local_bind(FAR struct socket *psock,
+                     FAR const struct sockaddr *addr, socklen_t addrlen)
 {
+  FAR struct local_conn_s *conn;
   FAR const struct sockaddr_un *unaddr =
     (FAR const struct sockaddr_un *)addr;
   int namelen;
 
-  DEBUGASSERT(conn && unaddr && unaddr->sun_family == AF_LOCAL &&
+  DEBUGASSERT(psock && psock->s_conn && unaddr &&
+              unaddr->sun_family == AF_LOCAL &&
               addrlen >= sizeof(sa_family_t));
+
+  conn = (FAR struct local_conn_s *)psock->s_conn;
 
   /* Save the address family */
 
-  conn->lc_family = unaddr->sun_family;
+  conn->lc_proto = psock->s_type;
 
   /* No determine the type of the Unix domain socket by comparing the size
    * of the address description.
