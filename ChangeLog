@@ -9535,3 +9535,7 @@
 	* arch/arm/src/stm32/stm32_rtcc.c and Kconfig:  Recent changes to
 	  stm32_rtcc.c do not compile with STM32L15XX configurations.  From
 	  Jussi Kivilinna (2015-01-27).
+	* net/local:  Add initial support for local, Unix domain sockets.
+	  Initial support is limited to SOCK_STREAM and is untested on
+	  initial commit (2014-01-27).
+
