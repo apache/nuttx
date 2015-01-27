@@ -198,18 +198,26 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, uint32_t period, int wndx)
               work = (FAR struct work_s *)work->dq.flink;
             }
         }
-      else
+      else /* elapsed < work->delay */
         {
-          /* This one is not ready.. will it be ready before the next
-           * scheduled wakeup interval?
+          /* This one is not ready.
            *
            * NOTE that elapsed is relative to the the current time,
            * not the time of beginning of this queue processing pass.
            * So it may need an adjustment.
            */
 
-          elapsed  += (ctick - stick);
-          remaining = elapsed - work->delay;
+          elapsed += (ctick - stick);
+          if (elapsed > work->delay)
+            {
+              /* The delay has expired while we are processing */
+
+              elapsed = work->delay;
+            }
+
+          /* Will it be ready before the next scheduled wakeup interval? */
+
+          remaining = work->delay - elapsed;
           if (remaining < next)
             {
               /* Yes.. Then schedule to wake up when the work is ready */
