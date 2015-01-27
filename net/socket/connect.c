@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/irq.h>
@@ -461,7 +462,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen)
 {
   FAR const struct sockaddr_in *inaddr = (FAR const struct sockaddr_in *)addr;
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
   int ret;
 #endif
   int err;

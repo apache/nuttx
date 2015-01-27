@@ -148,13 +148,21 @@
 #  define MIN_NET_DEV_MTU   CONFIG_NET_SLIP_MTU
 #  define MAX_NET_DEV_MTU   CONFIG_NET_SLIP_MTU
 
-#else /* if defined(CONFIG_NET_ETHERNET) */
+#elif defined(CONFIG_NET_ETHERNET)
    /* Assume standard Ethernet link layer header */
 
 #  define NET_LL_HDRLEN(d)  14
 #  define NET_DEV_MTU(d)    CONFIG_NET_ETH_MTU
 #  define MIN_NET_DEV_MTU   CONFIG_NET_ETH_MTU
 #  define MAX_NET_DEV_MTU   CONFIG_NET_ETH_MTU
+
+#else
+  /* Perhaps only Unix domain sockets */
+
+#  define NET_LL_HDRLEN(d)  0
+#  define NET_DEV_MTU(d)    0
+#  define MIN_NET_DEV_MTU   0
+#  define MAX_NET_DEV_MTU   0
 
 #endif /* MULTILINK or SLIP or ETHERNET */
 
