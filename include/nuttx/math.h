@@ -369,6 +369,14 @@ long double erfl (long double x);
 #define     erfcl(x) (1 - erfl(x))
 #endif
 
+float       copysignf (float x, float y);
+#if CONFIG_HAVE_DOUBLE
+double      copysign  (double x, double y);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double copysignl (long double x, long double y);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
