@@ -9524,3 +9524,8 @@
 	* include/nuttx/math.h and libc/math: Add math library defines for
 	  nan(), copysign(), and trunc() functions.  From Brennan Ashton
 	  (2015-01-26).
+	* sched/wqueue/kwork_process and libc/wqueue/lib_usrthread.c:  Fix
+	  a backward calculation when determining the time to the next event.
+	  This is a bug in the back-up, "fail safe", work queue timing so it
+	  not as bad as it seems.  From Liio Chen via the PX4 repository
+	 (2015-01-27).
