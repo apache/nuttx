@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_exti_gpio.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Uros Platise <uros.platise@isotel.eu>
@@ -245,12 +245,17 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   int      irq;
   xcpt_t   handler;
   xcpt_t   oldhandler = NULL;
+  int      nshared;
+  xcpt_t  *shared_cbs;
+  int      i;
 
   /* Select the interrupt handler for this EXTI pin */
 
   if (pin < 5)
     {
-      irq = pin + STM32_IRQ_EXTI0;
+      irq        = pin + STM32_IRQ_EXTI0;
+      nshared    = 1;
+      shared_cbs = &stm32_exti_callbacks[pin];
       switch (pin)
         {
           case 0:
@@ -276,13 +281,17 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     }
   else if (pin < 10)
     {
-      irq     = STM32_IRQ_EXTI95;
-      handler = stm32_exti95_isr;
+      irq        = STM32_IRQ_EXTI95;
+      handler    = stm32_exti95_isr;
+      shared_cbs = &stm32_exti_callbacks[5];
+      nshared    = 5;
     }
   else
     {
-      irq     = STM32_IRQ_EXTI1510;
-      handler = stm32_exti1510_isr;
+      irq        = STM32_IRQ_EXTI1510;
+      handler    = stm32_exti1510_isr;
+      shared_cbs = &stm32_exti_callbacks[10];
+      nshared    = 6;
     }
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
@@ -299,7 +308,22 @@ xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     }
   else
     {
-      up_disable_irq(irq);
+      /* Only disable IRQ if shared handler does not have any active
+       * callbacks.
+       */
+
+      for (i = 0; i < nshared; i++)
+        {
+          if (shared_cbs[i] != NULL)
+            {
+              break;
+            }
+        }
+
+      if (i == nshared)
+        {
+          up_disable_irq(irq);
+        }
     }
 
   /* Configure GPIO, enable EXTI line enabled if event or interrupt is
