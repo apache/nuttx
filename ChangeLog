@@ -9529,3 +9529,9 @@
 	  This is a bug in the back-up, "fail safe", work queue timing so it
 	  not as bad as it seems.  From Liio Chen via the PX4 repository
 	 (2015-01-27).
+	* arch/arm/src/stm32/stm32_exti_gpio.c:  Disabling any of EXTI 5-9
+	  interrupts was disabling interrupts for all EXTI 5-9. Same issue with
+	  EXTI 10-15.  From Jussi Kivilinna (2015-01-27).
+	* arch/arm/src/stm32/stm32_rtcc.c and Kconfig:  Recent changes to
+	  stm32_rtcc.c do not compile with STM32L15XX configurations.  From
+	  Jussi Kivilinna (2015-01-27).
