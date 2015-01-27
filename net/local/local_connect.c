@@ -248,7 +248,6 @@ int local_connect(FAR struct local_conn_s *client,
        */
 
       if (conn->lc_state == LOCAL_STATE_UNBOUND ||
-          conn->lc_state == LOCAL_STATE_CLOSED ||
           conn->lc_family != client->lc_family ||
           conn->lc_type != client->lc_type)
         {

@@ -176,10 +176,6 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
             {
               DEBUGASSERT(conn->lc_infd >= 0);
 
-              /* Add the waiting connection to list of clients */
-
-              dq_addlast(&client->lc_node, &server->u.server.lc_conns);
-
               /* Return the address family */
 
               if (addr)

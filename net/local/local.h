@@ -76,16 +76,34 @@ enum local_state_s
   LOCAL_STATE_UNBOUND = 0,     /* Created by socket, but not bound */
   LOCAL_STATE_BOUND,           /* Bound to an path */
 
-  /* SOCK_STREAM only */
+  /* SOCK_STREAM server only */
 
   LOCAL_STATE_LISTENING,       /* Server listening for connections */
-  LOCAL_STATE_CLOSED,          /* Server closed, no longer connecting */
+
+  /* SOCK_STREAM peers only */
+
   LOCAL_STATE_ACCEPT,          /* Client waiting for a connection */
   LOCAL_STATE_CONNECTED,       /* Peer connected */
   LOCAL_STATE_DISCONNECTED     /* Peer disconnected */
 };
 
-/* Representation of a local connection */
+/* Representation of a local connection.  There are four types of
+ * connection structures:
+ *
+ * 1. Server.  A SOCK_STREAM that only listens for and accepts
+ *    connections from server.
+ * 2. Client.  A SOCK_STREAM peer that connects via the server.
+ * 3. Peer. A connected SOCK_STREAM that sends() and recvs() packets.
+ *    May either be the client that connect with the server of the
+ *    new peer connect generated with the connection was accepted by
+ *    the server.
+ *
+ * And
+ *
+ * 4. Connectionless.  Like a peer but using a connectionless datagram
+ *    style of communication.  SOCK_DRAM support has not yet been
+ *    implemented.
+ */
 
 struct local_conn_s
 {
@@ -121,14 +139,12 @@ struct local_conn_s
       uint8_t lc_pending;      /* Number of pending connections */
       uint8_t lc_backlog;      /* Maximum number of pending connections */
       dq_queue_t lc_waiters;   /* List of connections waiting to be accepted */
-      dq_queue_t lc_conns;     /* List of connections */
     } server;
 
     /* Fields unique to the connecting client side */
 
     struct
     {
-      FAR struct local_conn_s *lc_server; /* Server connection */
       volatile int lc_result;  /* Result of the connection operation */
     } client;
   } u;

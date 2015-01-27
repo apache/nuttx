@@ -74,48 +74,20 @@ int local_release(FAR struct local_conn_s *conn)
   DEBUGASSERT(conn->lc_crefs == 0);
   state = net_lock();
 
-  /* We should not bet here with states LOCAL_STATE_CLOSED or with
-   * LOCAL_STATE_ACCEPT.  Those are internal states that should be atomic
-   * with respect to socket operations.
+  /* We should not bet here with state LOCAL_STATE_ACCEPT.  That is an
+   * internal state that should be atomic with respect to socket operations.
    */
 
-  DEBUGASSERT(conn->lc_state != LOCAL_STATE_CLOSED &&
-              conn->lc_state != LOCAL_STATE_ACCEPT);
+  DEBUGASSERT(conn->lc_state != LOCAL_STATE_ACCEPT);
 
   /* If the socket is connected (SOCK_STREAM client), then disconnect it */
 
   if (conn->lc_state == LOCAL_STATE_CONNECTED ||
       conn->lc_state == LOCAL_STATE_DISCONNECTED)
     {
-      FAR struct local_conn_s *server;
-
       DEBUGASSERT(conn->lc_family == SOCK_STREAM);
 
-      server = conn->u.client.lc_server;
-      DEBUGASSERT(server &&
-                  (server->lc_state == LOCAL_STATE_LISTENING ||
-                   server->lc_state == LOCAL_STATE_CLOSED) &&
-                  !dq_empty(&server->u.server.lc_conns));
-
-      /* Remove ourself from the list of connections */
-
-      dq_rem(&conn->lc_node, &server->u.server.lc_conns);
-
-      /* Is the list of pending connections now empty?  Was the connection
-       * already closed?
-       */
-
-      if (dq_empty(&server->u.server.lc_waiters) &&
-          server->lc_state == LOCAL_STATE_CLOSED)
-        {
-          /* Yes,  free the server connection as well */
-
-          local_free(server);
-        }
-
-      /* Now we can free this connection structure */
-
-      local_free(conn);
+      /* Just free the connection structure */
     }
 
   /* Is the socket is listening socket (SOCK_STREAM server) */
@@ -123,7 +95,6 @@ int local_release(FAR struct local_conn_s *conn)
   else if (conn->lc_state == LOCAL_STATE_LISTENING)
     {
       FAR struct local_conn_s *client;
-      FAR struct local_conn_s *next;
 
       DEBUGASSERT(conn->lc_family == SOCK_STREAM);
 
@@ -135,47 +106,22 @@ int local_release(FAR struct local_conn_s *conn)
         {
           client->u.client.lc_result = -ENOTCONN;
           sem_post(&client->lc_waitsem);
-          conn->lc_state = LOCAL_STATE_CLOSED;
         }
 
       conn->u.server.lc_pending = 0;
 
-      /* Disconnect any previous client connections */
-
-      for (client = (FAR struct local_conn_s *)conn->u.server.lc_conns.head;
-           client;
-           client = next)
-        {
-           next = (FAR struct local_conn_s *)dq_next(&client->lc_node);
-           dq_rem(&client->lc_node, &conn->u.server.lc_conns);
-           client->lc_state = LOCAL_STATE_DISCONNECTED;
-        }
-
-      /* Remove the server from the list of listeners */
+      /* Remove the server from the list of listeners. */
 
       dq_rem(&conn->lc_node, &g_local_listeners);
-
-      /* Can we free the connection structure now?  We cannot
-       * if there are still pending connection requested to
-       * be resolved.
-       */
-
-      conn->u.server.lc_backlog = 0;
-      if (conn->lc_state == LOCAL_STATE_CLOSED)
-        {
-          local_free(conn);
-        }
     }
 
   /* For the remaining states (LOCAL_STATE_UNBOUND and LOCAL_STATE_UNBOUND),
    * we simply free the connection structure.
    */
 
-  else
-    {
-      local_free(conn);
-    }
+  /* Free the connection structure */
 
+  local_free(conn);
   net_unlock(state);
   return OK;
 }
