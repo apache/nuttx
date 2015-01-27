@@ -54,6 +54,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Packet format in FIFO:
+ *
+ * 1. Sync bytes (7 at most)
+ * 2. End/Start byte
+ * 3. 16-bit packet length (in host order)
+ * 4. Packet data (in host order)
+ * 5. 16-bit checksum (in host order, includes packet length)
+ */
+
+#define LOCAL_SYNC_BYTE   0x42                /* Byte in sync sequence */
+#define LOCAL_END_BYTE    0xbd                /* End of sync seqence */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -312,7 +324,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
- *   flags    Send flags
+ *   flags    Send flags (ignored for now)
  *
  * Return:
  *   On success, returns the number of characters sent.  On  error,
@@ -334,7 +346,7 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
- *   flags    Send flags
+ *   flags    Send flags (ignored for now)
  *   to       Address of recipient
  *   tolen    The length of the address structure
  *
@@ -365,7 +377,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer
- *   flags    Receive flags
+ *   flags    Receive flags (ignored for now)
  *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
  *
@@ -440,6 +452,61 @@ int local_open_server_rx(FAR struct local_conn_s *server);
  ****************************************************************************/
 
 int local_open_server_tx(FAR struct local_conn_s *server);
+
+/****************************************************************************
+ * Name: local_chksum
+ *
+ * Description:
+ *   Compute a simple checksum over the packet data
+ *
+ * Parameters:
+ *   buf      Data to send
+ *   len      Length of data to send
+ *
+ * Return:
+ *   The 16-bit checksum (including the length)
+ *
+ ****************************************************************************/
+
+uint16_t local_chksum(FAR const uint8_t *buf, size_t len);
+
+/****************************************************************************
+ * Name: local_write
+ *
+ * Description:
+ *   Write a data on the write-only FIFO.
+ *
+ * Parameters:
+ *   fd       File descriptor or write-only FIFO.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *
+ * Return:
+ *   On success, returns the number of characters sent.  On  error, a
+ *   negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int local_write(int fd, FAR const uint8_t *buf, size_t len);
+
+/****************************************************************************
+ * Name: local_send_packet
+ *
+ * Description:
+ *   Write a packet on the write-only FIFO.
+ *
+ * Parameters:
+ *   fd       File descriptor or write-only FIFO.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *
+ * Return:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -42,6 +42,8 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
@@ -61,7 +63,7 @@
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
- *   flags    Send flags
+ *   flags    Send flags (ignored for now)
  *
  * Return:
  *   On success, returns the number of characters sent.  On  error,
@@ -73,8 +75,23 @@
 ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct local_conn_s *peer;
+
+  DEBUGASSERT(psock && psock->s_conn && buf);
+  peer = (FAR struct local_conn_s *)psock->s_conn;
+
+  /* Verify that this is a connected peer socket and that it has opened the
+   * outgoing FIFO for write-only access.
+   */
+
+  if (peer->lc_type != LOCAL_STATE_CONNECTED ||
+      peer->lc_outfd < 0)
+    {
+      ndbg("ERROR: not connected\n");
+      return -ENOTCONN;
+    }
+
+  return local_send_packet(peer->lc_outfd, (FAR uint8_t *)buf, len);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */
