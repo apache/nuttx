@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
+    (defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL))
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -313,4 +314,4 @@ errout:
   return ERROR;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_TCP */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && (CONFIG_NET_TCP || CONFIG_NET_LOCAL) */

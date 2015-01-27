@@ -164,7 +164,7 @@ ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
    * incoming FIFO for read-only access.
    */
 
-  if (conn->lc_type != LOCAL_STATE_CONNECTED ||
+  if (conn->lc_state != LOCAL_STATE_CONNECTED ||
       conn->lc_infd < 0)
     {
       ndbg("ERROR: not connected\n");
