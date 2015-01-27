@@ -115,7 +115,7 @@ struct recvfrom_s
  *   Copy the read data from the packet
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -678,11 +678,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
            * 1) If CONFIG_NET_TCP_RECVDELAY == 0 then we will consider the
            *    TCP/IP transfer complete as soon as any data has been received.
            *    This is safe because if any additional data is received, it
-           *    will be retained inthe TCP/IP read-ahead buffer until the
+           *    will be retained in the TCP/IP read-ahead buffer until the
            *    next receive is performed.
            * 2) CONFIG_NET_TCP_RECVDELAY > 0 may be set to wait a little
            *    bit to determine if more data will be received.  You might
-           *    do this if read-ahead buffereing is disabled and we want to
+           *    do this if read-ahead buffering is disabled and we want to
            *    minimize the loss of back-to-back packets.  In this case,
            *    the transfer is complete when either a) the entire user buffer
            *    is full or 2) when the receive timeout occurs (below).
@@ -1032,7 +1032,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
 #endif
 }
 
-/* The only uninitialization that has to be performed is destroying the
+/* The only un-initialization that has to be performed is destroying the
  * semaphore.
  */
 
@@ -1625,6 +1625,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
+      else
 #endif
         {
           minlen = sizeof(struct sockaddr_in6);
