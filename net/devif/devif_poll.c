@@ -313,7 +313,7 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
-  int bstop;
+  int bstop = false;
 
   /* Traverse all of the active packet connections and perform the poll
    * action.
@@ -417,7 +417,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
                 int hsec)
 {
-  int bstop;
+  int bstop = false;
 
   /* Increment the timer used by the IP reassembly logic */
 

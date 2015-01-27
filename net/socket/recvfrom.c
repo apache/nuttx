@@ -1615,23 +1615,37 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Get the minimum socket length */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (psock->s_domain == PF_INET)
-#endif
+      switch (psock->s_domain)
         {
-          minlen = sizeof(struct sockaddr_in);
-        }
-#endif /*CONFIG_NET_IPv4 */
+#ifdef CONFIG_NET_IPv4
+        case PF_INET:
+          {
+            minlen = sizeof(struct sockaddr_in);
+          }
+          break;
+#endif
 
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
+        case PF_INET6:
+          {
+            minlen = sizeof(struct sockaddr_in6);
+          }
+          break;
 #endif
-        {
-          minlen = sizeof(struct sockaddr_in6);
+
+#ifdef CONFIG_NET_LOCAL
+        case PF_LOCAL:
+          {
+            minlen = sizeof(sa_family_t);
+          }
+          break;
+#endif
+
+        default:
+          DEBUGPANIC();
+          err = EINVAL;
+          goto errout;
         }
-#endif /*CONFIG_NET_IPv6 */
 
       if (*fromlen < minlen)
         {

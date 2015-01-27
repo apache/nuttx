@@ -117,7 +117,7 @@ void up_idle(void)
 #endif
 
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_NET_ETHERNET
   /* Run the network if enabled */
 
   netdriver_loop();

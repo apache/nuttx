@@ -65,7 +65,7 @@
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
-#elif defined(CONFIG_NET_ETHERNET)
+#else /* `if defined(CONFIG_NET_ETHERNET) */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
 #endif
 
