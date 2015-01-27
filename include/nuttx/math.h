@@ -385,6 +385,14 @@ double      trunc (double x);
 long double truncl (long double x);
 #endif
 
+#define nanf(x) ((float)(NAN))
+#ifdef CONFIG_HAVE_DOUBLE
+#define nan(x) ((double)(NAN))
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+#define nanl(x) ((long double)(NAN))
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
