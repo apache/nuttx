@@ -51,6 +51,8 @@
 
 #include "up_arch.h"
 
+#include "stm32_rcc.h"
+#include "stm32_pwr.h"
 #include "stm32_rtc.h"
 
 #ifdef CONFIG_RTC
@@ -75,6 +77,14 @@
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_RTC
+#endif
+
+#ifdef CONFIG_STM32_STM32L15XX
+#  if defined(CONFIG_RTC_HSECLOCK)
+#    error "RTC with HSE clock not yet implemented for STM32L15XXX"
+#  elif defined(CONFIG_RTC_LSICLOCK)
+#    error "RTC with LSI clock not yet implemented for STM32L15XXX"
+#  endif
 #endif
 
 /* Constants ************************************************************************/
@@ -435,6 +445,7 @@ static int rtc_setup(void)
   uint32_t regval;
   int ret;
 
+#ifndef CONFIG_STM32_STM32L15XX
   /* We might be changing RTCSEL - to ensure such changes work, we must reset the
    * backup domain
    */
@@ -475,6 +486,12 @@ static int rtc_setup(void)
   stm32_rcc_enablelse();
 
 #endif
+#else
+  /* Enable the LSE clock */
+
+  stm32_rcc_enablelse();
+
+#endif /* CONFIG_STM32_STM32L15XX */
 
   /* Wait for the RTC Time and Date registers to be synchronized with RTC APB
    * clock.
