@@ -158,7 +158,7 @@ void up_initialize(void)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
 #endif
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_NET_ETHERNET
   netdriver_init();         /* Our "real" network driver */
 #endif
 
