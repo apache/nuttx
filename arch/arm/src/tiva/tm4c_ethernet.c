@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tm4c_ethernet.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2127,22 +2127,24 @@ static int tiva_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_NET_NOINTS
   uint32_t dmaris;
 
-  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
-   * also disabled if the TX timeout event occurs, there can be no race
-   * condition here.
-   */
-
-  up_disable_irq(TIVA_IRQ_ETHCON);
-
-  /* Check if a packet transmission just completed. */
+  /* Get the raw interrupt status. */
 
   dmaris = tiva_getreg(TIVA_EMAC_DMARIS);
   if (dmaris != 0)
     {
+      /* Disable further Ethernet interrupts.  Because Ethernet interrupts
+       * are also disabled if the TX timeout event occurs, there can be no
+       * race condition here.
+       */
+
+      up_disable_irq(TIVA_IRQ_ETHCON);
+
+      /* Check if a packet transmission just completed. */
+
       if ((dmaris & EMAC_DMAINT_TI) != 0)
         {
           /* If a TX transfer just completed, then cancel the TX timeout so
-           * there will be do race condition between any subsequent timeout
+           * there will be no race condition between any subsequent timeout
            * expiration and the deferred interrupt processing.
            */
 
