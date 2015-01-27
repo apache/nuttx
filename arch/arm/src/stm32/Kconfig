@@ -3251,11 +3251,13 @@ config RTC_LSECLOCK
 
 config RTC_LSICLOCK
 	bool "LSI clock"
+	depends on !STM32_STM32L15XX
 	---help---
 		Drive the RTC with the LSI clock
 
 config RTC_HSECLOCK
 	bool "HSE clock"
+	depends on !STM32_STM32L15XX
 	---help---
 		Drive the RTC with the HSE clock, divided down to 1MHz.
 
