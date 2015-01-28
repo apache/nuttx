@@ -9547,3 +9547,9 @@
 	  there are non-waiting versions of the same interfaces (like
 	  iob_tryalloc()).  The TCP read-ahead logic now uses only these non-
 	  waiting interfaces (2015-01-27).
+	* net/tcp/tcp_send_buffered.c and tcp_wrbuffer.c: Fix another deadlock
+	  condition.  tcp_write_buffer_alloc() calls sem_wait() with network
+	  locked.  That worked if CONFIG_NET_NOINTS was not defined because
+	  interrupts are automatically restored when the wait happens.  But
+	  with CONFIG_NET_NOINTS=y, the wait blocks with the network locked --
+	  bad style and also can lead to a deadlock condition (2015-01-28).
