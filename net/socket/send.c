@@ -143,6 +143,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
         break;
 #endif
 
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
       case SOCK_STREAM:
         {
 #ifdef CONFIG_NET_LOCAL
@@ -164,6 +165,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #endif /* CONFIG_NET_TCP */
         }
         break;
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
 
       default:
         {

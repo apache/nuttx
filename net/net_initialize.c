@@ -129,7 +129,7 @@ void net_initialize(void)
   pkt_initialize();
 #endif
 
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL
   /* Initialize the local, "Unix domain" socket support */
 
   local_initialize();
