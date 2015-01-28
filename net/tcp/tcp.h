@@ -1000,7 +1000,7 @@ void tcp_wrbuffer_initialize(void);
  *   None
  *
  * Assumptions:
- *   Called from user logic with interrupts enabled.
+ *   Called from user logic with the network locked.
  *
  ****************************************************************************/
 

@@ -918,6 +918,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len)
 {
   FAR struct tcp_conn_s *conn;
+  FAR struct tcp_wrbuffer_s *wrb;
   net_lock_t save;
   ssize_t    result = 0;
   int        err;
@@ -940,6 +941,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   /* Make sure that the IP address mapping is in the ARP table */
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
 #ifdef CONFIG_NET_ARP_SEND
   ret = arp_send(conn->u.ipv4.raddr);
   if (ret < 0)
@@ -958,10 +960,23 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
-  save = net_lock();
-
   if (len > 0)
     {
+      /* Allocate a write buffer.  Careful, the network will be momentarily
+       * unlocked here.
+       */
+
+      save = net_lock();
+      wrb = tcp_wrbuffer_alloc();
+      if (!wrb)
+        {
+          /* A buffer allocation error occurred */
+
+          ndbg("ERROR: Failed to allocate write buffer\n");
+          err = ENOMEM;
+          goto errout_with_lock;
+        }
+
       /* Allocate resources to receive a callback */
 
       if (!psock->s_sndcb)
@@ -976,60 +991,42 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           ndbg("ERROR: Failed to allocate callback\n");
-          result = -ENOMEM;
+          err = ENOMEM;
+          goto errout_with_wrb;
         }
-      else
-        {
-          FAR struct tcp_wrbuffer_s *wrb;
 
-          /* Set up the callback in the connection */
+      /* Set up the callback in the connection */
 
-          psock->s_sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                                   TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT);
-          psock->s_sndcb->priv  = (void*)psock;
-          psock->s_sndcb->event = psock_send_interrupt;
+      psock->s_sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+                               TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT);
+      psock->s_sndcb->priv  = (void*)psock;
+      psock->s_sndcb->event = psock_send_interrupt;
 
-          /* Allocate an write buffer */
+      /* Initialize the write buffer */
 
-          wrb = tcp_wrbuffer_alloc();
-          if (wrb)
-            {
-              /* Initialize the write buffer */
+      WRB_SEQNO(wrb) = (unsigned)-1;
+      WRB_NRTX(wrb)  = 0;
+      WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
 
-              WRB_SEQNO(wrb) = (unsigned)-1;
-              WRB_NRTX(wrb)  = 0;
-              WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
+      /* Dump I/O buffer chain */
 
-              /* Dump I/O buffer chain */
+      WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb), 0);
 
-              WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb), 0);
+      /* psock_send_interrupt() will send data in FIFO order from the
+       * conn->write_q
+       */
 
-              /* psock_send_interrupt() will send data in FIFO order from the
-               * conn->write_q
-               */
+      sq_addlast(&wrb->wb_node, &conn->write_q);
+      nvdbg("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
+            wrb, WRB_PKTLEN(wrb),
+            conn->write_q.head, conn->write_q.tail);
 
-              sq_addlast(&wrb->wb_node, &conn->write_q);
-              nvdbg("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
-                    wrb, WRB_PKTLEN(wrb),
-                    conn->write_q.head, conn->write_q.tail);
+      /* Notify the device driver of the availability of TX data */
 
-              /* Notify the device driver of the availability of TX data */
-
-              send_txnotify(psock, conn);
-              result = len;
-            }
-
-          /* A buffer allocation error occurred */
-
-          else
-            {
-              ndbg("ERROR: Failed to allocate write buffer\n");
-              result = -ENOMEM;
-            }
-        }
+      send_txnotify(psock, conn);
+      net_unlock(save);
+      result = len;
     }
-
-  net_unlock(save);
 
   /* Set the socket state to idle */
 
@@ -1058,6 +1055,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   /* Return the number of bytes actually sent */
 
   return result;
+
+errout_with_wrb:
+  tcp_wrbuffer_release(wrb);
+
+errout_with_lock:
+  net_unlock(save);
 
 errout:
   set_errno(err);
