@@ -220,6 +220,19 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_tryadd_queue
+ *
+ * Description:
+ *   Add one I/O buffer chain to the end of a queue without waiting for
+ *   resources to become free.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_remove_queue
  *
  * Description:
@@ -276,6 +289,19 @@ void iob_free_queue(FAR struct iob_queue_s *qhead);
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                unsigned int len, unsigned int offset, bool throttled);
+
+/****************************************************************************
+ * Name: iob_trycopyin
+ *
+ * Description:
+ *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary BUT without
+ *  waiting if buffers are not available.
+ *
+ ****************************************************************************/
+
+int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+                  unsigned int len, unsigned int offset, bool throttled);
 
 /****************************************************************************
  * Name: iob_copyout

@@ -77,55 +77,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_tryalloc_qentry
- *
- * Description:
- *   Try to allocate an I/O buffer chain container by taking the buffer at
- *   the head of the free list. This function is intended only for internal
- *   use by the IOB module.
- *
- ****************************************************************************/
-
-static FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
-{
-  FAR struct iob_qentry_s *iobq;
-  irqstate_t flags;
-
-  /* We don't know what context we are called from so we use extreme measures
-   * to protect the free list:  We disable interrupts very briefly.
-   */
-
-  flags = irqsave();
-  iobq  = g_iob_freeqlist;
-  if (iobq)
-    {
-      /* Remove the I/O buffer chain container from the free list and
-       * decrement the counting semaphore that tracks the number of free
-       * containers.
-       */
-
-      g_iob_freeqlist = iobq->qe_flink;
-
-      /* Take a semaphore count.  Note that we cannot do this in
-       * in the orthodox way by calling sem_wait() or sem_trywait()
-       * because this function may be called from an interrupt
-       * handler. Fortunately we know at at least one free buffer
-       * so a simple decrement is all that is needed.
-       */
-
-      g_qentry_sem.semcount--;
-      DEBUGASSERT(g_qentry_sem.semcount >= 0);
-
-      /* Put the I/O buffer in a known state */
-
-      iobq->qe_head = NULL; /* Nothing is contained */
-    }
-
-  irqrestore(flags);
-  return iobq;
-}
-
-/****************************************************************************
  * Name: iob_allocwait_qentry
  *
  * Description:
@@ -209,6 +160,55 @@ FAR struct iob_qentry_s *iob_alloc_qentry(void)
 
       return iob_allocwait_qentry();
     }
+}
+
+/****************************************************************************
+ * Name: iob_tryalloc_qentry
+ *
+ * Description:
+ *   Try to allocate an I/O buffer chain container by taking the buffer at
+ *   the head of the free list without waiting for the container to become
+ *   free. This function is intended only for internal use by the IOB module.
+ *
+ ****************************************************************************/
+
+FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
+{
+  FAR struct iob_qentry_s *iobq;
+  irqstate_t flags;
+
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the free list:  We disable interrupts very briefly.
+   */
+
+  flags = irqsave();
+  iobq  = g_iob_freeqlist;
+  if (iobq)
+    {
+      /* Remove the I/O buffer chain container from the free list and
+       * decrement the counting semaphore that tracks the number of free
+       * containers.
+       */
+
+      g_iob_freeqlist = iobq->qe_flink;
+
+      /* Take a semaphore count.  Note that we cannot do this in
+       * in the orthodox way by calling sem_wait() or sem_trywait()
+       * because this function may be called from an interrupt
+       * handler. Fortunately we know at at least one free buffer
+       * so a simple decrement is all that is needed.
+       */
+
+      g_qentry_sem.semcount--;
+      DEBUGASSERT(g_qentry_sem.semcount >= 0);
+
+      /* Put the I/O buffer in a known state */
+
+      iobq->qe_head = NULL; /* Nothing is contained */
+    }
+
+  irqrestore(flags);
+  return iobq;
 }
 
 #endif /* CONFIG_IOB_NCHAINS > 0 */
