@@ -1746,7 +1746,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   return ret;
 
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

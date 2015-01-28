@@ -682,13 +682,27 @@ traveler
        cd /usr/lib/
        sudo ln -s libXext.so.6.4.0 libXext.so
 
+udgram
+
+  This is the same as the nsh configuration except that it includes
+  two addition build in applications:  server and client.  These
+  applications are provided by the test at apps/examples/udgram.
+  This configuration enables local, Unix domain sockets and supports
+  the test of the datagram sockets.
+
+  To use the test:
+
+    nsh> mount -t binfs /bin
+    nsh> server &
+    nsh> client
+
 ustream
 
   This is the same as the nsh configuration except that it includes
   two addition build in applications:  server and client.  These
   applications are provided by the test at apps/examples/ustream.
   This configuration enables local, Unix domain sockets and supports
-  the test of those sockets.
+  the test of the stream sockets.
 
   To use the test:
 
