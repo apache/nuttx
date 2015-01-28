@@ -54,6 +54,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/iob.h>
 
 #include "tcp/tcp.h"
@@ -132,7 +133,7 @@ void tcp_wrbuffer_initialize(void)
  *   None
  *
  * Assumptions:
- *   Called from user logic with interrupts enabled.
+ *   Called from user logic with the network locked.
  *
  ****************************************************************************/
 
@@ -148,7 +149,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
    * buffer
    */
 
-  DEBUGVERIFY(sem_wait(&g_wrbuffer.sem));
+  DEBUGVERIFY(net_lockedwait(&g_wrbuffer.sem));
 
   /* Now, we are guaranteed to have a write buffer structure reserved
    * for us in the free list.

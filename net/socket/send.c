@@ -169,8 +169,13 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
       default:
         {
-          ret = ERROR;
+          /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
+           * and no peer address is set.
+           */
+
+          ret = -EDESTADDRREQ;
         }
+        break;
     }
 
   return ret;
