@@ -48,6 +48,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/irq.h>
+
 #include "tcp/tcp.h"
 #include "local/local.h"
 #include "socket/socket.h"
