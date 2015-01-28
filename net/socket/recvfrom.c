@@ -1268,7 +1268,7 @@ errout_with_state:
  *   from   INET address of source (may be NULL)
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
+ *   On success, returns the number of characters received.  On  error,
  *   -errno is returned (see recvfrom for list of errnos).
  *
  * Assumptions:
@@ -1355,7 +1355,7 @@ errout_with_state:
  *   from   INET address of source (may be NULL)
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
+ *   On success, returns the number of characters received.  On  error,
  *   -errno is returned (see recvfrom for list of errnos).
  *
  * Assumptions:
@@ -1547,7 +1547,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
  *   recv() will return 0.  Otherwise, on errors, -1 is returned, and errno
  *   is set appropriately:
@@ -1771,7 +1771,7 @@ errout:
  *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
+ *   On success, returns the number of characters received.  On  error,
  *   -1 is returned, and errno is set appropriately:
  *
  *   EAGAIN
