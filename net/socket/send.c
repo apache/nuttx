@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <errno.h>
 
 #include "tcp/tcp.h"
 #include "pkt/pkt.h"
