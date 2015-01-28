@@ -6,7 +6,7 @@
 #
 # Build Setup
 #
-CONFIG_EXPERIMENTAL=y
+# CONFIG_EXPERIMENTAL is not set
 # CONFIG_DEFAULT_SMALL is not set
 CONFIG_HOST_LINUX=y
 # CONFIG_HOST_OSX is not set
