@@ -9535,3 +9535,15 @@
 	* arch/arm/src/stm32/stm32_rtcc.c and Kconfig:  Recent changes to
 	  stm32_rtcc.c do not compile with STM32L15XX configurations.  From
 	  Jussi Kivilinna (2015-01-27).
+	* net/iob, net/tcp/tcp_callback.c, and include/nuttx/net/iob.h:  There
+	  were issues with the TCP write-ahead buffering if CONFIG_NET_NOINTS was
+	  enabled:  There is a possibility of deadlocks in certain timing conditions.
+	  I have not seen this with the Tiva driver that I have been users but
+	  other people claim to see the issue on other platforms.  Certainly it
+	  is a logic error:  The network should never wait for TCP read-ahead
+	  buffering space to be available.  It should drop the packets
+	  immediately. This was fixed by duplicating most of the IOB interfaces:
+	  The versions that waited are still present (like iob_alloc()), but now
+	  there are non-waiting versions of the same interfaces (like
+	  iob_tryalloc()).  The TCP read-ahead logic now uses only these non-
+	  waiting interfaces (2015-01-27).
