@@ -26,10 +26,14 @@ nanosleep      NXnanosleep
 pthread_create NXpthread_create
 read           NXread
 realloc        NXrealloc
+recv           NXrecv
+recvfrom       NXrecvfrom
 rewinddir      NXrewinddir
 rmdir          NXrmdir
 seekdir        NXseekdir
 select         NXselect
+send           NXsend
+sendto         NXsendto
 sleep          NXsleep
 socket         NXsocket
 stat           NXstat
