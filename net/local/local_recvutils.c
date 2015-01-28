@@ -76,16 +76,16 @@
 
 int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
 {
-  ssize_t total;
+  ssize_t remaining;
   ssize_t nread;
   int ret;
 
   DEBUGASSERT(buf && len);
 
-  total = 0;
-  while (len > 0)
+  remaining = *len;
+  while (remaining > 0)
     {
-      nread = read(fd, buf, *len);
+      nread = read(fd, buf, remaining);
       if (nread < 0)
         {
           int errcode = errno;
@@ -112,15 +112,15 @@ int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
       else
         {
           DEBUGASSERT(nread <= len);
-          len -= nread;
-          buf += nread;
+          remaining -= nread;
+          buf       += nread;
         }
     }
 
   ret = OK;
 
 errout:
-  *len = total;
+  *len -= remaining;
   return ret;
 }
 

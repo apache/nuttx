@@ -76,6 +76,7 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags)
 {
   FAR struct local_conn_s *peer;
+  int ret;
 
   DEBUGASSERT(psock && psock->s_conn && buf);
   peer = (FAR struct local_conn_s *)psock->s_conn;
@@ -84,14 +85,20 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
    * outgoing FIFO for write-only access.
    */
 
-  if (peer->lc_type != LOCAL_STATE_CONNECTED ||
+  if (peer->lc_state != LOCAL_STATE_CONNECTED ||
       peer->lc_outfd < 0)
     {
       ndbg("ERROR: not connected\n");
       return -ENOTCONN;
     }
 
-  return local_send_packet(peer->lc_outfd, (FAR uint8_t *)buf, len);
+  /* Send the packet */
+
+  ret = local_send_packet(peer->lc_outfd, (FAR uint8_t *)buf, len);
+
+  /* If the send was successful, then the full packet will have been sent */
+
+  return ret < 0 ? ret : len;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

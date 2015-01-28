@@ -179,7 +179,7 @@ ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
        * the size of the next packet.
        */
 
-     ret = local_sync(conn->lc_infd);
+      ret = local_sync(conn->lc_infd);
       if (ret < 0)
         {
           ndbg("ERROR: Failed to get packet length: %d\n", ret);

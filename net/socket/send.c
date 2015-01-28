@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -243,4 +243,4 @@ ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
   return psock_send(sockfd_socket(sockfd), buf, len, flags);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_TCP */
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */

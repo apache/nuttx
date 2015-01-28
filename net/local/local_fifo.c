@@ -237,8 +237,8 @@ static inline int local_rx_open(FAR struct local_conn_s *conn,
 static inline int local_tx_open(FAR struct local_conn_s *conn,
                                 FAR const char *path)
 {
-  conn->lc_infd = open(path, O_WRONLY);
-  if (conn->lc_infd < 0)
+  conn->lc_outfd = open(path, O_WRONLY);
+  if (conn->lc_outfd < 0)
     {
       int errcode = errno;
       DEBUGASSERT(errcode > 0);

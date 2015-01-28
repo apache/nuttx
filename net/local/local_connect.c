@@ -176,7 +176,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
 
   /* Yes.. open the read-only FIFO */
 
-  ret = local_open_client_tx(client);
+  ret = local_open_client_rx(client);
   if (ret < 0)
     {
       ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
@@ -268,21 +268,27 @@ int local_connect(FAR struct local_conn_s *client,
           {
             if (strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1) == 0)
               {
+                int ret = OK;
+
                 /* Bind the address and protocol */
 
                 client->lc_proto = conn->lc_proto;
                 strncpy(client->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
                 client->lc_path[UNIX_PATH_MAX-1] = '\0';
 
+                /* The client is now bound to an address */
+
+                client->lc_state = LOCAL_STATE_BOUND;
+
                 /* We have to do more for the SOCK_STREAM family */
 
                 if (conn->lc_proto == SOCK_STREAM)
                   {
-                    return local_stream_connect(client, conn, state);
+                    ret = local_stream_connect(client, conn, state);
                   }
 
                 net_unlock(state);
-                return OK;
+                return ret;
               }
           }
           break;
