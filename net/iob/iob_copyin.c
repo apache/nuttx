@@ -68,6 +68,8 @@
  * Private Types
  ****************************************************************************/
 
+typedef CODE struct iob_s *(*iob_alloc_t)(bool throttled);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -81,7 +83,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_copyin
+ * Name: iob_copyin_internal
  *
  * Description:
  *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
@@ -89,8 +91,9 @@
  *
  ****************************************************************************/
 
-int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset, bool throttled)
+static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
+                               unsigned int len, unsigned int offset,
+                               bool throttled, iob_alloc_t allocator)
 {
   FAR struct iob_s *head = iob;
   FAR struct iob_s *next;
@@ -206,7 +209,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
         {
           /* Yes.. allocate a new buffer */
 
-          next = iob_alloc(throttled);
+          next = allocator(throttled);
           if (next == NULL)
             {
               ndbg("ERROR: Failed to allocate I/O buffer\n");
@@ -225,3 +228,39 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
   return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: iob_copyin
+ *
+ * Description:
+ *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary.
+ *
+ ****************************************************************************/
+
+int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+               unsigned int len, unsigned int offset, bool throttled)
+{
+  return iob_copyin_internal(iob, src, len, offset, throttled, iob_alloc);
+}
+
+/****************************************************************************
+ * Name: iob_trycopyin
+ *
+ * Description:
+ *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary BUT without
+ *  waiting if buffers are not available.
+ *
+ ****************************************************************************/
+
+int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+                  unsigned int len, unsigned int offset, bool throttled)
+{
+  return iob_copyin_internal(iob, src, len, offset, throttled, iob_tryalloc);
+}
+

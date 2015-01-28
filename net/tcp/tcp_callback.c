@@ -50,6 +50,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
+#include "iob/iob.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -239,18 +240,21 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   FAR struct iob_s *iob;
   int ret;
 
-  /* Allocate on I/O buffer to start the chain (throttling as necessary) */
+  /* Try to allocate on I/O buffer to start the chain without waiting (and
+   * throttling as necessary).  If we would have to wait, then drop the
+   * packet.
+   */
 
-  iob = iob_alloc(true);
+  iob = iob_tryalloc(true);
   if (iob == NULL)
     {
       nlldbg("ERROR: Failed to create new I/O buffer chain\n");
       return 0;
     }
 
-  /* Copy the new appdata into the I/O buffer chain */
+  /* Copy the new appdata into the I/O buffer chain (without waiting) */
 
-  ret = iob_copyin(iob, buffer, buflen, 0, true);
+  ret = iob_trycopyin(iob, buffer, buflen, 0, true);
   if (ret < 0)
     {
       /* On a failure, iob_copyin return a negated error value but does
@@ -262,9 +266,11 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
       return 0;
     }
 
-  /* Add the new I/O buffer chain to the tail of the read-ahead queue */
+  /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
+   * without waiting).
+   */
 
-  ret = iob_add_queue(iob, &conn->readahead);
+  ret = iob_tryadd_queue(iob, &conn->readahead);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);

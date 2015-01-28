@@ -75,87 +75,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_tryalloc
- *
- * Description:
- *   Try to allocate an I/O buffer by taking the buffer at the head of the
- *   free list.
- *
- ****************************************************************************/
-
-static FAR struct iob_s *iob_tryalloc(bool throttled)
-{
-  FAR struct iob_s *iob;
-  irqstate_t flags;
-#if CONFIG_IOB_THROTTLE > 0
-  FAR sem_t *sem;
-#endif
-
-#if CONFIG_IOB_THROTTLE > 0
-  /* Select the semaphore count to check. */
-
-  sem = (throttled ? &g_throttle_sem : &g_iob_sem);
-#endif
-
-  /* We don't know what context we are called from so we use extreme measures
-   * to protect the free list:  We disable interrupts very briefly.
-   */
-
-  flags = irqsave();
-
-#if CONFIG_IOB_THROTTLE > 0
-  /* If there are free I/O buffers for this allocation */
-
-  if (sem->semcount > 0)
-#endif
-    {
-      /* Take the I/O buffer from the head of the free list */
-
-      iob = g_iob_freelist;
-      if (iob)
-        {
-          /* Remove the I/O buffer from the free list and decrement the
-           * counting semaphore(s) that tracks the number of available
-           * IOBs.
-           */
-
-          g_iob_freelist = iob->io_flink;
-
-          /* Take a semaphore count.  Note that we cannot do this in
-           * in the orthodox way by calling sem_wait() or sem_trywait()
-           * because this function may be called from an interrupt
-           * handler. Fortunately we know at at least one free buffer
-           * so a simple decrement is all that is needed.
-           */
-
-          g_iob_sem.semcount--;
-          DEBUGASSERT(g_iob_sem.semcount >= 0);
-
-#if CONFIG_IOB_THROTTLE > 0
-          /* The throttle semaphore is a little more complicated because
-           * it can be negative!  Decrementing is still safe, however.
-           */
-
-          g_throttle_sem.semcount--;
-          DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
-#endif
-          irqrestore(flags);
-
-          /* Put the I/O buffer in a known state */
-
-          iob->io_flink  = NULL; /* Not in a chain */
-          iob->io_len    = 0;    /* Length of the data in the entry */
-          iob->io_offset = 0;    /* Offset to the beginning of data */
-          iob->io_pktlen = 0;    /* Total length of the packet */
-          return iob;
-        }
-    }
-
-  irqrestore(flags);
-  return NULL;
-}
-
-/****************************************************************************
  * Name: iob_allocwait
  *
  * Description:
@@ -245,4 +164,85 @@ FAR struct iob_s *iob_alloc(bool throttled)
 
       return iob_allocwait(throttled);
     }
+}
+
+/****************************************************************************
+ * Name: iob_tryalloc
+ *
+ * Description:
+ *   Try to allocate an I/O buffer by taking the buffer at the head of the
+ *   free list without waiting for a buffer to become free.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_tryalloc(bool throttled)
+{
+  FAR struct iob_s *iob;
+  irqstate_t flags;
+#if CONFIG_IOB_THROTTLE > 0
+  FAR sem_t *sem;
+#endif
+
+#if CONFIG_IOB_THROTTLE > 0
+  /* Select the semaphore count to check. */
+
+  sem = (throttled ? &g_throttle_sem : &g_iob_sem);
+#endif
+
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the free list:  We disable interrupts very briefly.
+   */
+
+  flags = irqsave();
+
+#if CONFIG_IOB_THROTTLE > 0
+  /* If there are free I/O buffers for this allocation */
+
+  if (sem->semcount > 0)
+#endif
+    {
+      /* Take the I/O buffer from the head of the free list */
+
+      iob = g_iob_freelist;
+      if (iob)
+        {
+          /* Remove the I/O buffer from the free list and decrement the
+           * counting semaphore(s) that tracks the number of available
+           * IOBs.
+           */
+
+          g_iob_freelist = iob->io_flink;
+
+          /* Take a semaphore count.  Note that we cannot do this in
+           * in the orthodox way by calling sem_wait() or sem_trywait()
+           * because this function may be called from an interrupt
+           * handler. Fortunately we know at at least one free buffer
+           * so a simple decrement is all that is needed.
+           */
+
+          g_iob_sem.semcount--;
+          DEBUGASSERT(g_iob_sem.semcount >= 0);
+
+#if CONFIG_IOB_THROTTLE > 0
+          /* The throttle semaphore is a little more complicated because
+           * it can be negative!  Decrementing is still safe, however.
+           */
+
+          g_throttle_sem.semcount--;
+          DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
+#endif
+          irqrestore(flags);
+
+          /* Put the I/O buffer in a known state */
+
+          iob->io_flink  = NULL; /* Not in a chain */
+          iob->io_len    = 0;    /* Length of the data in the entry */
+          iob->io_offset = 0;    /* Offset to the beginning of data */
+          iob->io_pktlen = 0;    /* Total length of the packet */
+          return iob;
+        }
+    }
+
+  irqrestore(flags);
+  return NULL;
 }

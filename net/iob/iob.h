@@ -99,6 +99,29 @@ extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
 FAR struct iob_qentry_s *iob_alloc_qentry(void);
 
 /****************************************************************************
+ * Name: iob_tryalloc_qentry
+ *
+ * Description:
+ *   Try to allocate an I/O buffer chain container by taking the buffer at
+ *   the head of the free list without waiting for the container to become
+ *   free. This function is intended only for internal use by the IOB module.
+ *
+ ****************************************************************************/
+
+FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
+
+/****************************************************************************
+ * Name: iob_tryalloc
+ *
+ * Description:
+ *   Try to allocate an I/O buffer by taking the buffer at the head of the
+ *   free list without waiting for a buffer to become free.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_tryalloc(bool throttled);
+
+/****************************************************************************
  * Name: iob_free_qentry
  *
  * Description:
