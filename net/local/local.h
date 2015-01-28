@@ -346,23 +346,27 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags);
 
 /****************************************************************************
- * Function: psock_sendto
+ * Function: psock_local_sendto
  *
  * Description:
- *   Send a local packet as a datagram.
+ *   This function implements the Unix domain-specific logic of the
+ *   standard sendto() socket operation.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
- *   flags    Send flags (ignored for now)
+ *   flags    Send flags
  *   to       Address of recipient
  *   tolen    The length of the address structure
  *
+ *   NOTE: All input parameters were verified by sendto() before this
+ *   function was called.
+ *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately (see sendto() for the
- *   list of errno numbers).
+ *   a negated errno value is returned.  See the description in
+ *   net/socket/sendto.c for the list of appropriate return value.
  *
  ****************************************************************************/
 

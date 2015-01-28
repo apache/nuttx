@@ -43,6 +43,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <queue.h>
+
+#include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_UDP
 
@@ -95,9 +98,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+struct sockaddr;      /* Forward reference */
+struct socket;        /* Forward reference */
 struct net_driver_s;  /* Forward reference */
 
-/* Defined in udp_conn.c ****************************************************/
 /****************************************************************************
  * Name: udp_initialize
  *
@@ -197,7 +201,6 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 
 int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 
-/* Defined in udp_ipselect.c ************************************************/
 /****************************************************************************
  * Function: udp_ipv4_select
  *
@@ -222,7 +225,6 @@ void udp_ipv4_select(FAR struct net_driver_s *dev);
 void udp_ipv6_select(FAR struct net_driver_s *dev);
 #endif
 
-/* Defined in udp_poll.c ****************************************************/
 /****************************************************************************
  * Name: udp_poll
  *
@@ -243,7 +245,6 @@ void udp_ipv6_select(FAR struct net_driver_s *dev);
 
 void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
 
-/* Defined in udp_send.c ****************************************************/
 /****************************************************************************
  * Name: udp_send
  *
@@ -264,7 +265,6 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
 
 void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
 
-/* Defined in udp_input.c ***************************************************/
 /****************************************************************************
  * Name: udp_ipv4_input
  *
@@ -311,7 +311,6 @@ int udp_ipv4_input(FAR struct net_driver_s *dev);
 int udp_ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
-/* Defined in udp_callback.c ************************************************/
 /****************************************************************************
  * Function: udp_callback
  *
@@ -328,6 +327,35 @@ int udp_ipv6_input(FAR struct net_driver_s *dev);
 
 uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
+
+/****************************************************************************
+ * Function: psock_udp_sendto
+ *
+ * Description:
+ *   This function implements the UDP-specific logic of the standard
+ *   sendto() socket operation.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *   to       Address of recipient
+ *   tolen    The length of the address structure
+ *
+ *   NOTE: All input parameters were verified by sendto() before this
+ *   function was called.
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is returned.  See the description in
+ *   net/socket/sendto.c for the list of appropriate return value.
+ *
+ ****************************************************************************/
+
+ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
+                         size_t len, int flags, FAR const struct sockaddr *to,
+                         socklen_t tolen);
 
 #undef EXTERN
 #ifdef __cplusplus
