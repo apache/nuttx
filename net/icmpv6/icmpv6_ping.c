@@ -275,7 +275,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
           FAR struct icmpv6_echo_reply_s *reply = ICMPv6ECHOREPLY;
 
           nllvdbg("ECHO reply: id=%d seqno=%d\n",
-                  ntohs(reply->id), reply(reply->seqno));
+                  ntohs(reply->id), ntohs(reply->seqno));
 
           if (ntohs(reply->id) == pstate->png_id)
             {
