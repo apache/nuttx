@@ -162,7 +162,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       break;
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_LOCAL
     case AF_LOCAL:
       minlen = sizeof(sa_family_t);
       break;
