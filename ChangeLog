@@ -9561,3 +9561,11 @@
 	  are required to do.  From David Sidrane (2015-01-29).
 	* net/local:  Extend Unix domain socket support to include support
 	  for datagram Unix domain sockets (2015-01-29).
+	* net/socket/accept.c:  Fix a major TCP bug introduced with commit
+	  e71c09ce9777ff732cb60bd07fb43d85522f79d6.  Some connection logic was
+	  reordered; setting the socket as 'connected' got moved to BEFORE the point
+	  where the check was made if the socket was already connected.  The
+	  resulting behavior was odd:  Telnet would connect, but then when you
+	  exit and reconnect, it would fail to connect.  But then if try again, it
+	  would connect okay. So the symptom was connect-fail-connect-fail-...
+	  (2015-01-29).
