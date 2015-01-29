@@ -79,7 +79,7 @@ static inline void local_cs_name(FAR struct local_conn_s *conn,
 {
   (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_CS_SUFFIX,
                  conn->lc_path);
-   path[LOCAL_FULLPATH_LEN-1] = '\0';
+  path[LOCAL_FULLPATH_LEN-1] = '\0';
 }
 
 /****************************************************************************
@@ -95,7 +95,7 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
 {
   (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_SC_SUFFIX,
                  conn->lc_path);
-   path[LOCAL_FULLPATH_LEN-1] = '\0';
+  path[LOCAL_FULLPATH_LEN-1] = '\0';
 }
 
 /****************************************************************************
@@ -106,12 +106,10 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-static inline void local_hd_name(FAR struct local_conn_s *conn,
-                                 FAR char *path)
+static inline void local_hd_name(FAR const char *inpath, FAR char *outpath)
 {
-  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_HD_SUFFIX,
-                 conn->lc_path);
-   path[LOCAL_FULLPATH_LEN-1] = '\0';
+  (void)snprintf(outpath, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_HD_SUFFIX, inpath);
+  outpath[LOCAL_FULLPATH_LEN-1] = '\0';
 }
 
 /****************************************************************************
@@ -328,7 +326,7 @@ int local_create_halfduplex(FAR struct local_conn_s *conn)
 
   /* Create the half duplex FIFO if it does not already exist. */
 
-  local_hd_name(conn, path);
+  local_hd_name(conn->lc_path, path);
   return local_create_fifo(path);
 }
 
@@ -375,7 +373,7 @@ int local_destroy_halfduplex(FAR struct local_conn_s *conn)
 
   /* Destroy the half duplex FIFO if it exists. */
 
-  local_hd_name(conn, path);
+  local_hd_name(conn->lc_path, path);
   return local_destroy_fifo(path);
 }
 
@@ -477,7 +475,7 @@ int local_open_receiver(FAR struct local_conn_s *conn)
 
   /* Get the server-to-client path name */
 
-  local_hd_name(conn, path);
+  local_hd_name(conn->lc_path, path);
 
   /* Then open the file for read-only access */
 
@@ -492,17 +490,17 @@ int local_open_receiver(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_open_sender(FAR struct local_conn_s *conn)
+int local_open_sender(FAR struct local_conn_s *conn, FAR char *path)
 {
-  char path[LOCAL_FULLPATH_LEN];
+  char fullpath[LOCAL_FULLPATH_LEN];
 
   /* Get the server-to-client path name */
 
-  local_hd_name(conn, path);
+  local_hd_name(path, fullpath);
 
   /* Then open the file for read-only access */
 
-  return local_tx_open(conn, path);
+  return local_tx_open(conn, fullpath);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

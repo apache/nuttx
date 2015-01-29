@@ -42,7 +42,10 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include <errno.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
@@ -81,8 +84,76 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
                            size_t len, int flags, FAR const struct sockaddr *to,
                            socklen_t tolen)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
+  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
+  ssize_t nsent;
+  int ret;
+
+  /* We keep packet sizes in a uint16_t, so there is a upper limit to the
+   * 'len' that can be supported.
+   */
+
+  DEBUGASSERT(buf && len <= UINT16_MAX);
+
+  /* Verify that this is a bound, un-connected peer socket */
+
+  if (conn->lc_state != LOCAL_STATE_BOUND)
+    {
+      /* Either not bound to address or it is connected */
+
+      ndbg("ERROR: Connected or not bound\n");
+      return -EISCONN;
+    }
+
+  /* The outgoing FIFO should not be open */
+
+  DEBUGASSERT(conn->lc_outfd < 0);
+
+  /* At present, only standard pathname type address are support */
+
+  if (tolen < sizeof(sa_family_t) + 2)
+    {
+     /* EFAULT - An invalid user space address was specified for a parameter */
+
+     return -EFAULT;
+    }
+
+  /* Make sure that half duplex FIFO has been created.
+   * REVISIT:  Or should be just make sure that it already exists?
+   */
+
+  ret = local_create_halfduplex(conn);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to create FIFO for %s: %d\n",
+           conn->lc_path, ret);
+      return ret;
+    }
+
+  /* Open the sending side of the transfer */
+
+  ret = local_open_sender(conn, unaddr->sun_path);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to open FIFO for %s: %d\n",
+           unaddr->sun_path, ret);
+      return ret;
+    }
+
+  /* Send the packet */
+
+  nsent = local_send_packet(conn->lc_outfd, buf, len);
+  if (nsent < 0)
+    {
+      ndbg("ERROR: Failed to send the packet: %d\n", ret);
+    }
+
+  /* Now we can close the write-only socket descriptor */
+
+  close(conn->lc_outfd);
+  conn->lc_outfd = -1;
+
+  return nsent;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

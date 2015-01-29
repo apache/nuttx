@@ -582,7 +582,7 @@ int local_open_receiver(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_open_sender(FAR struct local_conn_s *conn);
+int local_open_sender(FAR struct local_conn_s *conn, FAR char *path);
 
 #undef EXTERN
 #ifdef __cplusplus
