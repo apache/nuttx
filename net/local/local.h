@@ -488,21 +488,41 @@ int local_sync(int fd);
  * Name: local_create_fifos
  *
  * Description:
- *   Create the FIFO pair needed for a connection.
+ *   Create the FIFO pair needed for a SOCK_STREAM connection.
  *
  ****************************************************************************/
 
-int local_create_fifos(FAR struct local_conn_s *client);
+int local_create_fifos(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_create_halfduplex
+ *
+ * Description:
+ *   Create the half-duplex FIFO needed for SOCK_DGRAM communication.
+ *
+ ****************************************************************************/
+
+int local_create_halfduplex(FAR struct local_conn_s *conn);
 
 /****************************************************************************
  * Name: local_destroy_fifos
  *
  * Description:
- *   Destroy the FIFO pair used for a connection.
+ *   Destroy the FIFO pair used for a SOCK_STREAM connection.
  *
  ****************************************************************************/
 
-int local_destroy_fifos(FAR struct local_conn_s *client);
+int local_destroy_fifos(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_destroy_halfduplex
+ *
+ * Description:
+ *   Destroy the FIFO used for SOCK_DGRAM communication
+ *
+ ****************************************************************************/
+
+int local_destroy_halfduplex(FAR struct local_conn_s *conn);
 
 /****************************************************************************
  * Name: local_open_client_rx
@@ -543,6 +563,26 @@ int local_open_server_rx(FAR struct local_conn_s *server);
  ****************************************************************************/
 
 int local_open_server_tx(FAR struct local_conn_s *server);
+
+/****************************************************************************
+ * Name: local_open_receiver
+ *
+ * Description:
+ *   Only the receiving side of the half duplex FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_receiver(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_open_sender
+ *
+ * Description:
+ *   Only the sending side of the half duplex FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_sender(FAR struct local_conn_s *conn);
 
 #undef EXTERN
 #ifdef __cplusplus

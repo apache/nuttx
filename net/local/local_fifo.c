@@ -55,8 +55,9 @@
  * Private Functions
  ****************************************************************************/
 
-#define LOCAL_RX_SUFFIX    "RX"
-#define LOCAL_TX_SUFFIX    "TX"
+#define LOCAL_CS_SUFFIX    "CS"  /* Name of the client-to-server FIFO */
+#define LOCAL_SC_SUFFIX    "SC"  /* Name of the server-to-client FIFO */
+#define LOCAL_HD_SUFFIX    "HD"  /* Name of the half duplex datagram FIFO */
 #define LOCAL_SUFFIX_LEN   2
 
 #define LOCAL_FULLPATH_LEN (UNIX_PATH_MAX + LOCAL_SUFFIX_LEN)
@@ -66,33 +67,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_rx_name
+ * Name: local_cs_name
  *
  * Description:
- *   Create the name of the RX (client-to-server) FIFO name.
+ *   Create the name of the client-to-server FIFO.
  *
  ****************************************************************************/
 
-static inline void local_rx_name(FAR struct local_conn_s *conn,
+static inline void local_cs_name(FAR struct local_conn_s *conn,
                                  FAR char *path)
 {
-  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_RX_SUFFIX,
+  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_CS_SUFFIX,
                  conn->lc_path);
    path[LOCAL_FULLPATH_LEN-1] = '\0';
 }
 
 /****************************************************************************
- * Name: local_tx_name
+ * Name: local_sc_name
  *
  * Description:
- *   Create the name of the TX (server-to-client) FIFO name.
+ *   Create the name of the server-to-client FIFO.
  *
  ****************************************************************************/
 
-static inline void local_tx_name(FAR struct local_conn_s *conn,
+static inline void local_sc_name(FAR struct local_conn_s *conn,
                                  FAR char *path)
 {
-  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_TX_SUFFIX,
+  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_SC_SUFFIX,
+                 conn->lc_path);
+   path[LOCAL_FULLPATH_LEN-1] = '\0';
+}
+
+/****************************************************************************
+ * Name: local_hd_name
+ *
+ * Description:
+ *   Create the name of the half duplex, datagram FIFO.
+ *
+ ****************************************************************************/
+
+static inline void local_hd_name(FAR struct local_conn_s *conn,
+                                 FAR char *path)
+{
+  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_HD_SUFFIX,
                  conn->lc_path);
    path[LOCAL_FULLPATH_LEN-1] = '\0';
 }
@@ -130,7 +147,7 @@ static bool local_fifo_exists(FAR const char *path)
  * Name: local_create_fifo
  *
  * Description:
- *   Create the one of FIFOs needed for a connection.
+ *   Create the one FIFO.
  *
  ****************************************************************************/
 
@@ -172,7 +189,12 @@ static int local_destroy_fifo(FAR const char *path)
 {
   int ret;
 
-  /* Unlink the client-to-server FIFO if it exists. */
+  /* Unlink the client-to-server FIFO if it exists.
+   * REVISIT:  This is wrong!  Un-linking the FIFO does not eliminate it.
+   * it only removes it from the namespace.  A new interface will be required
+   * to remove the FIFO and all of its resources.
+   */
+#warning Missing logic
 
   if (local_fifo_exists(path))
     {
@@ -268,24 +290,24 @@ static inline int local_tx_open(FAR struct local_conn_s *conn,
  * Name: local_create_fifos
  *
  * Description:
- *   Create the FIFO pair needed for a connection.
+ *   Create the FIFO pair needed for a SOCK_STREAM connection.
  *
  ****************************************************************************/
 
-int local_create_fifos(FAR struct local_conn_s *client)
+int local_create_fifos(FAR struct local_conn_s *conn)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
 
   /* Create the client-to-server FIFO if it does not already exist. */
 
-  local_tx_name(client, path);
+  local_cs_name(conn, path);
   ret = local_create_fifo(path);
   if (ret >= 0)
     {
       /* Create the server-to-client FIFO if it does not already exist. */
 
-      local_rx_name(client, path);
+      local_sc_name(conn, path);
       ret = local_create_fifo(path);
     }
 
@@ -293,14 +315,32 @@ int local_create_fifos(FAR struct local_conn_s *client)
 }
 
 /****************************************************************************
- * Name: local_destroy_fifos
+ * Name: local_create_halfduplex
  *
  * Description:
- *   Destroy the FIFO pair used for a connection.
+ *   Create the half-duplex FIFO needed for SOCK_DGRAM communication.
  *
  ****************************************************************************/
 
-int local_destroy_fifos(FAR struct local_conn_s *client)
+int local_create_halfduplex(FAR struct local_conn_s *conn)
+{
+  char path[LOCAL_FULLPATH_LEN];
+
+  /* Create the half duplex FIFO if it does not already exist. */
+
+  local_hd_name(conn, path);
+  return local_create_fifo(path);
+}
+
+/****************************************************************************
+ * Name: local_destroy_fifos
+ *
+ * Description:
+ *   Destroy the FIFO pair used for a SOCK_STREAM connection.
+ *
+ ****************************************************************************/
+
+int local_destroy_fifos(FAR struct local_conn_s *conn)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret1;
@@ -308,12 +348,12 @@ int local_destroy_fifos(FAR struct local_conn_s *client)
 
   /* Destroy the client-to-server FIFO if it exists. */
 
-  local_tx_name(client, path);
+  local_sc_name(conn, path);
   ret1 = local_destroy_fifo(path);
 
   /* Destroy the server-to-client FIFO if it exists. */
 
-  local_rx_name(client, path);
+  local_cs_name(conn, path);
   ret2 = local_create_fifo(path);
 
   /* Return a failure if one occurred. */
@@ -322,10 +362,28 @@ int local_destroy_fifos(FAR struct local_conn_s *client)
 }
 
 /****************************************************************************
+ * Name: local_destroy_halfduplex
+ *
+ * Description:
+ *   Destroy the FIFO used for SOCK_DGRAM communication
+ *
+ ****************************************************************************/
+
+int local_destroy_halfduplex(FAR struct local_conn_s *conn)
+{
+  char path[LOCAL_FULLPATH_LEN];
+
+  /* Destroy the half duplex FIFO if it exists. */
+
+  local_hd_name(conn, path);
+  return local_destroy_fifo(path);
+}
+
+/****************************************************************************
  * Name: local_open_client_rx
  *
  * Description:
- *   Only the client-side Rx FIFO.
+ *   Open the client-side of the server-to-client FIFO.
  *
  ****************************************************************************/
 
@@ -335,7 +393,7 @@ int local_open_client_rx(FAR struct local_conn_s *client)
 
   /* Get the server-to-client path name */
 
-  local_tx_name(client, path);
+  local_sc_name(client, path);
 
   /* Then open the file for read-only access */
 
@@ -346,7 +404,7 @@ int local_open_client_rx(FAR struct local_conn_s *client)
  * Name: local_open_client_tx
  *
  * Description:
- *   Only the client-side Tx FIFO.
+ *   Open the client-side of the client-to-server FIFO.
  *
  ****************************************************************************/
 
@@ -356,7 +414,7 @@ int local_open_client_tx(FAR struct local_conn_s *client)
 
   /* Get the client-to-server path name */
 
-  local_rx_name(client, path);
+  local_cs_name(client, path);
 
   /* Then open the file for write-only access */
 
@@ -367,7 +425,7 @@ int local_open_client_tx(FAR struct local_conn_s *client)
  * Name: local_open_server_rx
  *
  * Description:
- *   Only the server-side Rx FIFO.
+ *   Open the server-side of the client-to-server FIFO.
  *
  ****************************************************************************/
 
@@ -377,7 +435,7 @@ int local_open_server_rx(FAR struct local_conn_s *server)
 
   /* Get the client-to-server path name */
 
-  local_rx_name(server, path);
+  local_cs_name(server, path);
 
   /* Then open the file for write-only access */
 
@@ -388,7 +446,7 @@ int local_open_server_rx(FAR struct local_conn_s *server)
  * Name: local_open_server_tx
  *
  * Description:
- *   Only the server-side Tx FIFO.
+ *   Only the server-side of the server-to-client FIFO.
  *
  ****************************************************************************/
 
@@ -398,10 +456,53 @@ int local_open_server_tx(FAR struct local_conn_s *server)
 
   /* Get the server-to-client path name */
 
-  local_tx_name(server, path);
+  local_sc_name(server, path);
 
   /* Then open the file for read-only access */
 
   return local_tx_open(server, path);
 }
+
+/****************************************************************************
+ * Name: local_open_receiver
+ *
+ * Description:
+ *   Only the receiving side of the half duplex FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_receiver(FAR struct local_conn_s *conn)
+{
+  char path[LOCAL_FULLPATH_LEN];
+
+  /* Get the server-to-client path name */
+
+  local_hd_name(conn, path);
+
+  /* Then open the file for read-only access */
+
+  return local_rx_open(conn, path);
+}
+
+/****************************************************************************
+ * Name: local_open_sender
+ *
+ * Description:
+ *   Only the sending side of the half duplex FIFO.
+ *
+ ****************************************************************************/
+
+int local_open_sender(FAR struct local_conn_s *conn)
+{
+  char path[LOCAL_FULLPATH_LEN];
+
+  /* Get the server-to-client path name */
+
+  local_hd_name(conn, path);
+
+  /* Then open the file for read-only access */
+
+  return local_tx_open(conn, path);
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */
