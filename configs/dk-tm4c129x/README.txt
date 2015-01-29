@@ -969,6 +969,7 @@ Where <subdir> is one of the following:
 
          CONFIG_NET_IPv4=y
          CONFIG_NET_ARP=y
+         CONFIG_NET_ARP_SEND=y (optional)
          CONFIG_NET_ICMP=y
          CONFIG_NET_ICMP_PING=y
 
