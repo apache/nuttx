@@ -502,7 +502,8 @@ int local_create_fifos(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_create_halfduplex(FAR struct local_conn_s *conn);
+int local_create_halfduplex(FAR struct local_conn_s *conn,
+                            FAR const char *path);
 
 /****************************************************************************
  * Name: local_destroy_fifos
@@ -582,7 +583,7 @@ int local_open_receiver(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_open_sender(FAR struct local_conn_s *conn, FAR char *path);
+int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path);
 
 #undef EXTERN
 #ifdef __cplusplus

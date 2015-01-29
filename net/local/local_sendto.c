@@ -95,13 +95,17 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   DEBUGASSERT(buf && len <= UINT16_MAX);
 
-  /* Verify that this is a bound, un-connected peer socket */
+  /* Verify that this is not a connected peer socket.  It need not be
+   * bound, however.  If unbound, recvfrom will see this as a nameless
+   * connection.
+   */
 
-  if (conn->lc_state != LOCAL_STATE_BOUND)
+  if (conn->lc_state != LOCAL_STATE_UNBOUND &&
+      conn->lc_state != LOCAL_STATE_BOUND)
     {
       /* Either not bound to address or it is connected */
 
-      ndbg("ERROR: Connected or not bound\n");
+      ndbg("ERROR: Connected state\n");
       return -EISCONN;
     }
 
@@ -122,7 +126,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
    * REVISIT:  Or should be just make sure that it already exists?
    */
 
-  ret = local_create_halfduplex(conn);
+  ret = local_create_halfduplex(conn, unaddr->sun_path);
   if (ret < 0)
     {
       ndbg("ERROR: Failed to create FIFO for %s: %d\n",
@@ -146,6 +150,12 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
   if (nsent < 0)
     {
       ndbg("ERROR: Failed to send the packet: %d\n", ret);
+    }
+  else
+    {
+      /* local_send_packet returns 0 if all 'len' bytes were sent */
+
+      nsent = len;
     }
 
   /* Now we can close the write-only socket descriptor */

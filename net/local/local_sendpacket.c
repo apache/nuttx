@@ -152,7 +152,7 @@ int local_send_packet(int fd, FAR const uint8_t *buf, size_t len)
 
       len16 = len;
       ret = local_fifo_write(fd, (FAR const uint8_t *)&len16, sizeof(uint16_t));
-      if(ret == OK)
+      if (ret == OK)
         {
           /* Send the packet data */
 

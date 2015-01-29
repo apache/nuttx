@@ -266,7 +266,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Make sure that half duplex FIFO has been created */
 
-  ret = local_create_halfduplex(conn);
+  ret = local_create_halfduplex(conn, conn->lc_path);
   if (ret < 0)
     {
       ndbg("ERROR: Failed to create FIFO for %s: %d\n",

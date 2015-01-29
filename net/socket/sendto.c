@@ -127,7 +127,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   socklen_t minlen;
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
-  int ret;
+  ssize_t nsent;
 #endif
   int err;
 
@@ -209,7 +209,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   if (psock->s_domain == PF_LOCAL)
 #endif
     {
-      ret = psock_local_sendto(psock, buf, len, flags, to, tolen);
+      nsent = psock_local_sendto(psock, buf, len, flags, to, tolen);
     }
 #endif /* CONFIG_NET_LOCAL */
 
@@ -218,20 +218,20 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   else
 #endif
     {
-      ret = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+      nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
     }
 #endif /* CONFIG_NET_UDP */
 
   /* Check if the domain-specific sendto() logic failed */
 
-  if (ret < 0)
+  if (nsent < 0)
     {
-      ndbg("ERROR: Domain sendto() failed: %d\n", ret);
-      err = -ret;
+      ndbg("ERROR: Unix domain sendto() failed: %d\n", ret);
+      err = -nsent;
       goto errout;
     }
 
-  return OK;
+  return nsent;
 #else
   err = ENOSYS;
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */

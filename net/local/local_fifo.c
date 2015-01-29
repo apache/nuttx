@@ -320,14 +320,14 @@ int local_create_fifos(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_create_halfduplex(FAR struct local_conn_s *conn)
+int local_create_halfduplex(FAR struct local_conn_s *conn, FAR const char *path)
 {
-  char path[LOCAL_FULLPATH_LEN];
+  char fullpath[LOCAL_FULLPATH_LEN];
 
   /* Create the half duplex FIFO if it does not already exist. */
 
-  local_hd_name(conn->lc_path, path);
-  return local_create_fifo(path);
+  local_hd_name(path, fullpath);
+  return local_create_fifo(fullpath);
 }
 
 /****************************************************************************
@@ -490,7 +490,7 @@ int local_open_receiver(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_open_sender(FAR struct local_conn_s *conn, FAR char *path)
+int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path)
 {
   char fullpath[LOCAL_FULLPATH_LEN];
 
