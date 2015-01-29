@@ -288,6 +288,10 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
       goto errout;
     }
 
+#if !defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_UDP)
+  UNUSED(ipdomain);
+#endif
+
   /* Only SOCK_STREAM, SOCK_DGRAM and possible SOCK_RAW are supported */
 
   switch (type)
