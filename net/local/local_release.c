@@ -47,6 +47,8 @@
 
 #include <nuttx/net/net.h>
 
+#include <arch/irq.h>
+
 #include "local/local.h"
 
 /****************************************************************************

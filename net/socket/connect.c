@@ -545,7 +545,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
             {
               /* Connect to the local Unix domain server */
 
-              ret = local_connect(psock->s_conn, addr);
+              ret = psock_local_connect(psock, addr);
             }
 #endif /* CONFIG_NET_LOCAL */
 
@@ -579,7 +579,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
             {
               /* Perform the datagram connection logic */
 
-              ret = local_connect(psock->s_conn, addr);
+              ret = psock_local_connect(psock, addr);
             }
 #endif /* CONFIG_NET_LOCAL */
 

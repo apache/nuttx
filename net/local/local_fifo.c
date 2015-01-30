@@ -51,7 +51,6 @@
 #include <errno.h>
 #include <assert.h>
 
-
 #include "local/local.h"
 
 /****************************************************************************
@@ -194,7 +193,7 @@ static int local_release_fifo(FAR const char *path)
     {
       /* REVISIT:  This is wrong!  Un-linking the FIFO does not eliminate it;
        * it only removes it from the namespace.  A new interface will be
-       * required to destory the FIFO driver instance and all of its resources.
+       * required to destroy the FIFO driver instance and all of its resources.
        */
 #warning Missing logic
 #if 0
@@ -225,9 +224,12 @@ static int local_release_fifo(FAR const char *path)
  *
  ****************************************************************************/
 
-static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path)
+static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
+                         bool nonblock)
 {
-  conn->lc_infd = open(path, O_RDONLY);
+  int oflags = nonblock ? O_RDONLY | O_NONBLOCK : O_RDONLY;
+
+  conn->lc_infd = open(path, oflags);
   if (conn->lc_infd < 0)
     {
       int errcode = errno;
@@ -258,9 +260,12 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path)
  *
  ****************************************************************************/
 
-static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path)
+static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
+                         bool nonblock)
 {
-  conn->lc_outfd = open(path, O_WRONLY);
+  int oflags = nonblock ? O_WRONLY | O_NONBLOCK : O_WRONLY;
+
+  conn->lc_outfd = open(path, oflags);
   if (conn->lc_outfd < 0)
     {
       int errcode = errno;
@@ -418,7 +423,7 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_open_client_rx(FAR struct local_conn_s *client)
+int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -429,7 +434,7 @@ int local_open_client_rx(FAR struct local_conn_s *client)
 
   /* Then open the file for read-only access */
 
-  ret = local_rx_open(client, path);
+  ret = local_rx_open(client, path, nonblock);
   if (ret == OK)
     {
       /* Policy: Free FIFO resources when the last reference is closed */
@@ -448,7 +453,7 @@ int local_open_client_rx(FAR struct local_conn_s *client)
  *
  ****************************************************************************/
 
-int local_open_client_tx(FAR struct local_conn_s *client)
+int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -459,7 +464,7 @@ int local_open_client_tx(FAR struct local_conn_s *client)
 
   /* Then open the file for write-only access */
 
-  ret = local_tx_open(client, path);
+  ret = local_tx_open(client, path, nonblock);
   if (ret == OK)
     {
       /* Policy: Free FIFO resources when the last reference is closed */
@@ -478,7 +483,7 @@ int local_open_client_tx(FAR struct local_conn_s *client)
  *
  ****************************************************************************/
 
-int local_open_server_rx(FAR struct local_conn_s *server)
+int local_open_server_rx(FAR struct local_conn_s *server, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -489,7 +494,7 @@ int local_open_server_rx(FAR struct local_conn_s *server)
 
   /* Then open the file for write-only access */
 
-  ret = local_rx_open(server, path);
+  ret = local_rx_open(server, path, nonblock);
   if (ret == OK)
     {
       /* Policy: Free FIFO resources when the last reference is closed */
@@ -508,7 +513,7 @@ int local_open_server_rx(FAR struct local_conn_s *server)
  *
  ****************************************************************************/
 
-int local_open_server_tx(FAR struct local_conn_s *server)
+int local_open_server_tx(FAR struct local_conn_s *server, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -519,7 +524,7 @@ int local_open_server_tx(FAR struct local_conn_s *server)
 
   /* Then open the file for read-only access */
 
-  ret = local_tx_open(server, path);
+  ret = local_tx_open(server, path, nonblock);
   if (ret == OK)
     {
       /* Policy: Free FIFO resources when the last reference is closed */
@@ -538,7 +543,7 @@ int local_open_server_tx(FAR struct local_conn_s *server)
  *
  ****************************************************************************/
 
-int local_open_receiver(FAR struct local_conn_s *conn)
+int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -549,7 +554,7 @@ int local_open_receiver(FAR struct local_conn_s *conn)
 
   /* Then open the file for read-only access */
 
-  ret = local_rx_open(conn, path);
+  ret = local_rx_open(conn, path, nonblock);
   if (ret == OK)
     {
       /* Policy: Free FIFO resources when the buffer is empty. */
@@ -568,7 +573,8 @@ int local_open_receiver(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path)
+int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
+                      bool nonblock)
 {
   char fullpath[LOCAL_FULLPATH_LEN];
   int ret;
@@ -579,7 +585,7 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path)
 
   /* Then open the file for read-only access */
 
-  ret = local_tx_open(conn, fullpath);
+  ret = local_tx_open(conn, fullpath, nonblock);
   if (ret == OK)
     {
       /* Policy: Free FIFO resources when the buffer is empty. */

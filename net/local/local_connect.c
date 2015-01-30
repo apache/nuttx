@@ -49,7 +49,10 @@
 
 #include <nuttx/net/net.h>
 
+#include <arch/irq.h>
+
 #include "utils/utils.h"
+#include "socket/socket.h"
 #include "local/local.h"
 
 /****************************************************************************
@@ -100,7 +103,7 @@ static inline void _local_semtake(sem_t *sem)
 
 int inline local_stream_connect(FAR struct local_conn_s *client,
                                 FAR struct local_conn_s *server,
-                                net_lock_t state)
+                                bool nonblock, net_lock_t state)
 {
   int ret;
 
@@ -139,7 +142,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
    * prevent the server-side from blocking as well.
    */
 
-  ret = local_open_client_tx(client);
+  ret = local_open_client_tx(client, nonblock);
   if (ret < 0)
     {
       ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
@@ -176,7 +179,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
 
   /* Yes.. open the read-only FIFO */
 
-  ret = local_open_client_rx(client);
+  ret = local_open_client_rx(client, nonblock);
   if (ret < 0)
     {
       ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
@@ -202,7 +205,7 @@ errout_with_fifos:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_connect
+ * Name: psock_local_connect
  *
  * Description:
  *   Find a local connection structure that is the appropriate "server"
@@ -222,14 +225,16 @@ errout_with_fifos:
  *
  ****************************************************************************/
 
-int local_connect(FAR struct local_conn_s *client,
-                  FAR const struct sockaddr *addr)
+int psock_local_connect(FAR struct socket *psock,
+                        FAR const struct sockaddr *addr)
 {
+  FAR struct local_conn_s *client;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)addr;
   FAR struct local_conn_s *conn;
   net_lock_t state;
 
-  DEBUGASSERT(client);
+  DEBUGASSERT(psock && psock->s_conn);
+  client = (FAR struct local_conn_s *)psock->s_conn;
 
   if (client->lc_state == LOCAL_STATE_ACCEPT ||
       client->lc_state == LOCAL_STATE_CONNECTED)
@@ -284,7 +289,9 @@ int local_connect(FAR struct local_conn_s *client,
 
                 if (conn->lc_proto == SOCK_STREAM)
                   {
-                    ret = local_stream_connect(client, conn, state);
+                    ret = local_stream_connect(client, conn,
+                                               _SS_ISNONBLOCK(psock->s_flags),
+                                               state);
                   }
 
                 net_unlock(state);

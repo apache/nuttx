@@ -44,6 +44,8 @@
 
 #include <sys/types.h>
 #include <sys/un.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <queue.h>
 #include <stdint.h>
@@ -243,26 +245,26 @@ int psock_local_bind(FAR struct socket *psock,
                      FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
- * Name: local_connect
+ * Name: psock_local_connect
  *
  * Description:
  *   This function sets up a new local connection. The function will
  *   automatically allocate an unused local port for the new
  *   connection. However, another port can be chosen by using the
- *   psock_local_bind() call, after the local_connect() function has been
- *   called.
+ *   psock_local_bind() call, after the psock_local_connect() function has
+ *   been called.
  *
  *   This function is called as part of the implementation of sendto
  *   and recvfrom.
  *
  * Input Parameters:
- *   client - A reference to the client-side local connection structure
+ *   psock - A reference to the client-side socket structure
  *   addr - The address of the remote host.
  *
  ****************************************************************************/
 
-int local_connect(FAR struct local_conn_s *client,
-                  FAR const struct sockaddr *addr);
+int psock_local_connect(FAR struct socket *psock,
+                        FAR const struct sockaddr *addr);
 
 /****************************************************************************
  * Name: local_release
@@ -536,7 +538,7 @@ int local_release_halfduplex(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_open_client_rx(FAR struct local_conn_s *client);
+int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_client_tx
@@ -546,7 +548,7 @@ int local_open_client_rx(FAR struct local_conn_s *client);
  *
  ****************************************************************************/
 
-int local_open_client_tx(FAR struct local_conn_s *client);
+int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_server_rx
@@ -556,7 +558,7 @@ int local_open_client_tx(FAR struct local_conn_s *client);
  *
  ****************************************************************************/
 
-int local_open_server_rx(FAR struct local_conn_s *server);
+int local_open_server_rx(FAR struct local_conn_s *server, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_server_tx
@@ -566,7 +568,7 @@ int local_open_server_rx(FAR struct local_conn_s *server);
  *
  ****************************************************************************/
 
-int local_open_server_tx(FAR struct local_conn_s *server);
+int local_open_server_tx(FAR struct local_conn_s *server, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_receiver
@@ -576,7 +578,7 @@ int local_open_server_tx(FAR struct local_conn_s *server);
  *
  ****************************************************************************/
 
-int local_open_receiver(FAR struct local_conn_s *conn);
+int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_sender
@@ -586,7 +588,8 @@ int local_open_receiver(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path);
+int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
+                      bool nonblock);
 
 #undef EXTERN
 #ifdef __cplusplus
