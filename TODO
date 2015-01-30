@@ -15,7 +15,7 @@ nuttx/
   (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (14)  Network (net/, drivers/net)
+ (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -789,14 +789,6 @@ o Binary loaders (binfmt/)
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Title:       IPv6
-  Description: IPv6 support is incomplete.  Adam Dunkels has recently announced
-               IPv6 support for uIP (currently only as part of Contiki).  Those
-               changes need to be ported to NuttX.
-  Status:      Open.  No work will probably be done until there is a specific
-               requirement for IPv6.
-  Priority:    Medium
-
   Title:       LISTENING FOR UDP BROADCASTS
   Description: Incoming UDP broadcast should only be accepted if listening on
                INADDR_ANY(?)
@@ -823,27 +815,11 @@ o Network (net/, drivers/net)
   Priority:    Medium-Low.  This is an important issue for applications that
                send on the same TCP socket from multiple threads.
 
-  Title:       UDP READ-AHEAD?
-  Description: TCP supports read-ahead buffering to handle the receipt of
-               TCP/IP packets when there is no read() in place.  Should such
-               capability be useful for UDP?  PRO: Would reduce packet loss
-               and enable support for poll()/select().  CON: UDP is inherently
-               lossy so why waste memory footprint?
-  Status:      Open
-  Priority:    Medium
-
-  Title:       NO POLL/SELECT ON UDP SOCKETS
-  Description: poll()/select() is not implemented for UDP sockets because they do
-               do not support read-ahead buffering.  Therefore, there is never
-               a case where you can read from a UDP socket without blocking.
-  Status:      Open, depends on UDP read-ahead support
-  Priority:    Medium
-
-  Title:       POLL/SELECT ON TCP SOCKETS NEEDS READ-AHEAD
-  Description: poll()/select() only works for availability of buffered TCP
+  Title:       POLL/SELECT ON TCP/UDP SOCKETS NEEDS READ-AHEAD
+  Description: poll()/select() only works for availability of buffered TCP/UDP
                read data (when read-ahead is enabled).  The way writing is
-               handled in uIP, all sockets must wait when send and cannot
-               be notified when they can send without waiting.
+               handled in the network layer, all sockets must wait when send and
+               cannot be notified when they can send without waiting.
   Status:      Open, probably will not be fixed.
   Priority:    Medium... this does effect porting of applications that expect
                different behavior from poll()/select()
@@ -851,8 +827,12 @@ o Network (net/, drivers/net)
   Title:       SOCKETS DO NOT ALWAYS SUPPORT O_NONBLOCK
   Description: sockets do not support all modes for O_NONBLOCK. Sockets
                support only (1) TCP/IP non-blocking read operations when read-ahead
-               buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
-               connection backlog is enabled.
+               buffering is enabled, (2) TCP/IP accept() operations when TCP/IP
+               connection backlog is enabled, and (3) nonblocking operations on
+               Unix domain sockets.
+               REVISIT:  UDP read-ahead buffering has been implemented.  But I
+               do not think that the necessary bits of logic are in place to
+               permit non-clocking UDP reads.
   Status:      Open
   Priority:    Low.
 
@@ -942,6 +922,27 @@ o Network (net/, drivers/net)
                cmd_ifdown() and the network monitor thread to prevent this.
   Status:      Open
   Priority:    Low, this is just a nuisance in most cases.
+
+  Title:       FIFO CLEAN-UP AFTER CLOSING UNIX DOMAIN SOCKET
+  Description: FIFOs are used as the IPC underlying local Unix domain sockets.
+               In NuttX, FIFOs are implemented as device drivers (not as
+               special files).  The FIFO device driver is instantiated when
+               the Unix domain socket communications begin.  But there is no
+               mechanism in place now to delete the FIFO device driver
+               instance when the Unix domain socket is no longer used.  The
+               underlying buffer is deleted, but the driver instance itself
+               remains.  unlink() could be used to get rid of the driver
+               name in the pseudo-filesystem, making the drvier inaccessible.
+               But it will not free the driver.  A new interface, say rmfifo(),
+               would be required to do that.
+  Status:      Open
+  Priority:    Low for now because I don't have a situation where this is a
+               problem for me.  If you use the same Unix domain paths, then
+               it is not a issue; in fact it is more efficient if the FIFO
+               devices persiste.  But this would be a serious problem if,
+               for example, you create new Unix domain paths dynaically.  In
+               that case you would effectly have a memory leak and the number
+               of FIFO instances grow.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
