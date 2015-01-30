@@ -237,7 +237,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct tcp_conn_s *conn;
   struct accept_s state;
-  int err;
+  int err = OK;
   int ret;
 
   DEBUGASSERT(psock && newconn);
@@ -339,7 +339,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       /* If net_lockedwait failed, then we were probably reawakened by a
        * signal. In this case, logic above will have set 'err' to the
-       * ernno value returned by net_lockedwait().
+       * errno value returned by net_lockedwait().
        */
 
       if (ret < 0)
