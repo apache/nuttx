@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_vfcntl.c
  *
- *   Copyright (C) 2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arch/irq.h>
 #include <nuttx/net/net.h>
@@ -82,6 +83,8 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
   net_lock_t flags;
   int err = 0;
   int ret = 0;
+
+  nvdbg("sockfd=%d cmd=%d\n", sockfd, cmd);
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -131,27 +134,41 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          break;
 
       case F_GETFL:
-        /* Get the file status flags and file access modes, defined in <fcntl.h>,
-         * for the file description associated with fd. The file access modes
-         * can be extracted from the return value using the mask O_ACCMODE, which is
-         * defined  in <fcntl.h>. File status flags and file access modes are associated
-         * with the file description and do not affect other file descriptors that
-         * refer to the same file with different open file descriptions.
+        /* Get the file status flags and file access modes, defined in
+         * <fcntl.h>, for the file description associated with fd. The file
+         * access modes can be extracted from the return value using the
+         * mask O_ACCMODE, which is defined  in <fcntl.h>. File status flags
+         * and file access modes are associated with the file description
+         * and do not affect other file descriptors that refer to the same
+         * file with different open file descriptions.
          */
 
         {
-          /* This summarizes the behavior of the NuttX/uIP sockets */
+          /* This summarizes the behavior of all NuttX sockets */
 
           ret = O_RDWR | O_SYNC | O_RSYNC;
 
-#ifdef CONFIG_NET_TCP_READAHEAD
-          /* TCP/IP sockets may also be non-blocking if read-ahead is enabled */
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD) || \
+    defined(CONFIG_NET_UDP_READAHEAD)
+          /* Unix domain sockets may be non-blocking.  TCP/IP and UDP/IP
+           * sockets may also be non-blocking if read-ahead is enabled
+           */
 
-          if (psock->s_type == SOCK_STREAM && _SS_ISNONBLOCK(psock->s_flags))
+          if ((0
+#ifdef CONFIG_NET_TCP_LOCAL
+              || psock->s_domain == PF_LOCAL  /* Unix domain stream or datagram */
+#endif
+#ifdef CONFIG_NET_TCP_READAHEAD
+              || psock->s_type == SOCK_STREAM /* IP or Unix domain stream */
+#endif
+#ifdef CONFIG_NET_UDP_READAHEAD
+              || psock->s_type == SOCK_DGRAM  /* IP or Unix domain datagram */
+#endif
+              ) && _SS_ISNONBLOCK(psock->s_flags))
             {
               ret |= O_NONBLOCK;
             }
-#endif
+#endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD || CONFIG_NET_UDP_READAHEAD */
         }
         break;
 
@@ -165,13 +182,16 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          */
 
         {
-#ifdef CONFIG_NET_TCP_READAHEAD
-           /* Non-blocking is the only configurable option.  And it applies only to
-            * read operations on TCP/IP sockets when read-ahead is enabled.
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD) || \
+    defined(CONFIG_NET_UDP_READAHEAD)
+           /* Non-blocking is the only configurable option.  And it applies
+            * only Unix domain sockets and to read operations on TCP/IP
+            * and UDP/IP sockets when read-ahead is enabled.
             */
 
           int mode =  va_arg(ap, int);
-          if (psock->s_type == SOCK_STREAM)
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD)
+          if (psock->s_type == SOCK_STREAM) /* IP or Unix domain stream */
             {
                if ((mode & O_NONBLOCK) != 0)
                  {
@@ -182,7 +202,26 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
                    psock->s_flags &= ~_SF_NONBLOCK;
                  }
             }
+          else
 #endif
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_UDP_READAHEAD)
+          if (psock->s_type == SOCK_DGRAM)  /* IP or Unix domain datagram */
+            {
+               if ((mode & O_NONBLOCK) != 0)
+                 {
+                   psock->s_flags |= _SF_NONBLOCK;
+                 }
+               else
+                 {
+                   psock->s_flags &= ~_SF_NONBLOCK;
+                 }
+            }
+          else
+#endif
+#endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD || CONFIG_NET_UDP_READAHEAD */
+            {
+              ndbg("ERROR: Non-blocking not supported for this socket\n");
+            }
         }
         break;
 
