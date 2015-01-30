@@ -111,7 +111,7 @@ int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
         }
       else
         {
-          DEBUGASSERT(nread <= len);
+          DEBUGASSERT(nread <= remaining);
           remaining -= nread;
           buf       += nread;
         }
