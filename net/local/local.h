@@ -53,6 +53,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Not yet any support for poll/select operations on Unix domain sockets */
+
+#undef HAVE_LOCAL_POLL
 
 /* Packet format in FIFO:
  *

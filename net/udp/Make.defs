@@ -1,7 +1,7 @@
 ############################################################################
 # net/udp/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,15 @@ ifeq ($(CONFIG_NET_UDP),y)
 
 NET_CSRCS += udp_sendto.c
 
-# Tranport layer
+ifneq ($(CONFIG_DISABLE_POLL),y)
+ifeq ($(CONFIG_NET_UDP_READAHEAD),y)
+NET_CSRCS += udp_netpoll.c
+endif
+endif
 
-NET_CSRCS += udp_conn.c udp_poll.c udp_send.c udp_input.c udp_callback.c
+# Transport layer
+
+NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_callback.c
 NET_CSRCS += udp_ipselect.c
 
 # Include UDP build support

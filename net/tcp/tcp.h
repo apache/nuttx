@@ -53,6 +53,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Conditions for support TCP poll/select operations */
+
+#if !defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
+    defined(CONFIG_NET_TCP_READAHEAD)
+#  define HAVE_TCP_POLL
+#endif
 
 /* Allocate a new TCP data callback */
 
