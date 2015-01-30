@@ -1,6 +1,6 @@
 /****************************************************************************
- * net/tcp/tcp_poll.c
- * Poll for the availability of TCP TX data
+ * net/tcp/tcp_devpoll.c
+ * Driver poll for the availability of TCP TX data
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
