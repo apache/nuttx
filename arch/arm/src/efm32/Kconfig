@@ -212,6 +212,14 @@ config EFM32_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
+config EFM32_LECLOCK
+	bool "Enable LE clocking (unconditionally)
+	default n
+	---help---
+		Even you don't use core clock LE as source for LFA or LFB, to read
+		are write any register not clocked by HFPERCLK or HFCORECLK,
+		HFCORECLKLE should be enabled.
+
 if EFM32_DMA
 
 config EFM32_DMA_ALTDSEC
