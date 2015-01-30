@@ -9585,3 +9585,15 @@
 	  (2015-01-30).
 	* clock_systimespec():  Fixes for compilation errors in certain
 	  configurations.  From Macs N.
+	* drivers/pipes/fifo.c, include/nuttx/fs/ioctl.h, and net/local/local_fifo.c:
+	  Fix a race condition between FIFO buffer operations and the opening and
+	  closing of FIFOs which necessary when the FIFOs are used to support
+	  Unix domain, datagram sockets.  The default policy is the deallocate
+	  FIFO buffering when the last client closes the pipe.  When when used
+	  for datagram communications, packets left in the FIFO will be lost.
+	  Some like UDP read-ahead is needed:  The buffered data in the FIFO
+	  needs to be retained until the reader gets a chance to re-open the
+	  FIFO.  Added an ioctl (PIPEIOC_POLICY) to control the buffer policy.
+	  Default (0) is the legacy behavior; Unix domain datagram logic sets
+	  the alternative policy so that the packet data persists after the FIFO
+	  is closed (2015-01-30).
