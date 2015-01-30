@@ -509,24 +509,24 @@ int local_create_halfduplex(FAR struct local_conn_s *conn,
                             FAR const char *path);
 
 /****************************************************************************
- * Name: local_destroy_fifos
+ * Name: local_release_fifos
  *
  * Description:
- *   Destroy the FIFO pair used for a SOCK_STREAM connection.
+ *   Release references to the FIFO pair used for a SOCK_STREAM connection.
  *
  ****************************************************************************/
 
-int local_destroy_fifos(FAR struct local_conn_s *conn);
+int local_release_fifos(FAR struct local_conn_s *conn);
 
 /****************************************************************************
- * Name: local_destroy_halfduplex
+ * Name: local_release_halfduplex
  *
  * Description:
- *   Destroy the FIFO used for SOCK_DGRAM communication
+ *   Release a reference to the FIFO used for SOCK_DGRAM communication
  *
  ****************************************************************************/
 
-int local_destroy_halfduplex(FAR struct local_conn_s *conn);
+int local_release_halfduplex(FAR struct local_conn_s *conn);
 
 /****************************************************************************
  * Name: local_open_client_rx

@@ -125,7 +125,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   /* Destroy all FIFOs associted with the connection */
 
-  local_destroy_fifos(conn);
+  local_release_fifos(conn);
   sem_destroy(&conn->lc_waitsem);
 
   /* And free the connection structure */

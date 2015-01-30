@@ -192,7 +192,7 @@ errout_with_outfd:
   (void)close(client->lc_outfd);
 
 errout_with_fifos:
-  (void)local_destroy_fifos(client);
+  (void)local_release_fifos(client);
   client->lc_state = LOCAL_STATE_BOUND;
   return ret;
 }

@@ -141,7 +141,9 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
     {
       ndbg("ERROR: Failed to open FIFO for %s: %d\n",
            unaddr->sun_path, ret);
-      return ret;
+
+      nsent = ret;
+      goto errout_with_halfduplex;
     }
 
   /* Send the packet */
@@ -163,6 +165,10 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
   close(conn->lc_outfd);
   conn->lc_outfd = -1;
 
+errout_with_halfduplex:
+  /* Release our reference to the half duplex FIFO*/
+
+  (void)local_release_halfduplex(conn);
   return nsent;
 }
 

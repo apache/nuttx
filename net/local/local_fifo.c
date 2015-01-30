@@ -176,26 +176,27 @@ static int local_create_fifo(FAR const char *path)
 }
 
 /****************************************************************************
- * Name: local_destroy_fifo
+ * Name: local_release_fifo
  *
  * Description:
- *   Destroy one of the FIFOs used in a connection.
+ *   Release a reference from one of the FIFOs used in a connection.
  *
  ****************************************************************************/
 
-static int local_destroy_fifo(FAR const char *path)
+static int local_release_fifo(FAR const char *path)
 {
   int ret;
 
-  /* Unlink the client-to-server FIFO if it exists.
-   * REVISIT:  This is wrong!  Un-linking the FIFO does not eliminate it.
-   * it only removes it from the namespace.  A new interface will be required
-   * to remove the FIFO and all of its resources.
-   */
-#warning Missing logic
+  /* Unlink the client-to-server FIFO if it exists. */
 
   if (local_fifo_exists(path))
     {
+      /* REVISIT:  This is wrong!  Un-linking the FIFO does not eliminate it;
+       * it only removes it from the namespace.  A new interface will be
+       * required to destory the FIFO driver instance and all of its resources.
+       */
+#warning Missing logic
+#if 0
       ret = unlink(path);
       if (ret < 0)
         {
@@ -205,6 +206,7 @@ static int local_destroy_fifo(FAR const char *path)
           ndbg("ERROR: Failed to unlink FIFO %s: %d\n", path, errcode);
           return -errcode;
         }
+#endif
     }
 
   /* The FIFO does not exist or we successfully unlinked it. */
@@ -331,14 +333,14 @@ int local_create_halfduplex(FAR struct local_conn_s *conn, FAR const char *path)
 }
 
 /****************************************************************************
- * Name: local_destroy_fifos
+ * Name: local_release_fifos
  *
  * Description:
- *   Destroy the FIFO pair used for a SOCK_STREAM connection.
+ *   Release references to the FIFO pair used for a SOCK_STREAM connection.
  *
  ****************************************************************************/
 
-int local_destroy_fifos(FAR struct local_conn_s *conn)
+int local_release_fifos(FAR struct local_conn_s *conn)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret1;
@@ -347,7 +349,7 @@ int local_destroy_fifos(FAR struct local_conn_s *conn)
   /* Destroy the client-to-server FIFO if it exists. */
 
   local_sc_name(conn, path);
-  ret1 = local_destroy_fifo(path);
+  ret1 = local_release_fifo(path);
 
   /* Destroy the server-to-client FIFO if it exists. */
 
@@ -360,21 +362,21 @@ int local_destroy_fifos(FAR struct local_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: local_destroy_halfduplex
+ * Name: local_release_halfduplex
  *
  * Description:
- *   Destroy the FIFO used for SOCK_DGRAM communication
+ *   Release a reference to the FIFO used for SOCK_DGRAM communication
  *
  ****************************************************************************/
 
-int local_destroy_halfduplex(FAR struct local_conn_s *conn)
+int local_release_halfduplex(FAR struct local_conn_s *conn)
 {
   char path[LOCAL_FULLPATH_LEN];
 
   /* Destroy the half duplex FIFO if it exists. */
 
   local_hd_name(conn->lc_path, path);
-  return local_destroy_fifo(path);
+  return local_release_fifo(path);
 }
 
 /****************************************************************************
