@@ -378,14 +378,15 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
                          socklen_t tolen)
 {
   FAR struct udp_conn_s *conn;
-  FAR const struct sockaddr_in *into;
   struct sendto_s state;
   net_lock_t save;
   int ret;
 
+#ifdef CONFIG_NET_ARP_SEND
+  FAR const struct sockaddr_in *into;
+
   /* Make sure that the IP address mapping is in the ARP table */
 
-#ifdef CONFIG_NET_ARP_SEND
   into = (FAR const struct sockaddr_in *)to;
   ret = arp_send(into->sin_addr.s_addr);
   if (ret < 0)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp_callback.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
