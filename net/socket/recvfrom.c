@@ -424,10 +424,10 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
 
       if ( 0
 #ifdef CONFIG_NET_IPv6
-           || src_addr_size == 16
+           || src_addr_size == sizeof(struct sockaddr_in6)
 #endif
 #ifdef CONFIG_NET_IPv4
-           || src_addr_size == 4
+           || src_addr_size == sizeof(struct sockaddr_in)
 #endif
         )
         {
