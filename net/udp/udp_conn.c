@@ -60,6 +60,7 @@
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "iob/iob.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -488,6 +489,12 @@ void udp_free(FAR struct udp_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->node, &g_active_udp_connections);
+
+#ifdef CONFIG_NET_UDP_READAHEAD
+  /* Release any read-ahead buffers attached to the connection */
+
+  iob_free_queue(&conn->readahead);
+#endif
 
   /* Free the connection */
 
