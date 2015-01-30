@@ -254,7 +254,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       goto errout_with_socket;
     }
 
-  /* Initialize the socket structure and mark the socket as connected. */
+  /* Initialize the socket structure. */
 
   pnewsock->s_domain = psock->s_domain;
   pnewsock->s_type   = SOCK_STREAM;
@@ -304,7 +304,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
     }
 #endif /* CONFIG_NET_TCP */
 
-  /* Mark the socket as connected. */
+  /* Mark the new socket as connected. */
 
   pnewsock->s_flags |= _SF_CONNECTED;
   pnewsock->s_flags &= ~_SF_CLOSED;
