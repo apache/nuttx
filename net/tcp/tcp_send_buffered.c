@@ -307,7 +307,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 }
 
 #else /* CONFIG_NET_ETHERNET */
-#  psock_send_addrchck(r) (true)
+#  define psock_send_addrchck(r) (true)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************

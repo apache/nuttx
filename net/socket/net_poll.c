@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_poll.c
  *
- *   Copyright (C) 2008-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@
 
 #include <devif/devif.h>
 #include "tcp/tcp.h"
+#include "udp/udp.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -91,7 +92,7 @@ struct net_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: poll_interrupt
+ * Function: tcp_poll_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -111,8 +112,8 @@ struct net_poll_s
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static uint16_t poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                               FAR void *pvpriv, uint16_t flags)
+static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
+                                   FAR void *pvpriv, uint16_t flags)
 {
   FAR struct net_poll_s *info = (FAR struct net_poll_s *)pvpriv;
 
@@ -164,13 +165,76 @@ static uint16_t poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 #endif /* HAVE_NETPOLL */
 
 /****************************************************************************
- * Function: net_pollsetup
+ * Function: udp_poll_interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   UDP receive operation via by the device interface layer.
+ *
+ * Parameters:
+ *   dev      The structure of the network driver that caused the interrupt
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_NETPOLL
+static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
+                                   FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct net_poll_s *info = (FAR struct net_poll_s *)pvpriv;
+
+  nllvdbg("flags: %04x\n", flags);
+
+  DEBUGASSERT(!info || (info->psock && info->fds));
+
+  /* 'priv' might be null in some race conditions (?) */
+
+  if (info)
+    {
+      pollevent_t eventset = 0;
+
+      /* Check for data or connection availability events. */
+
+      if ((flags & (UDP_NEWDATA)) != 0)
+        {
+          eventset |= (POLLIN & info->fds->events);
+        }
+
+      /* A poll is a sign that we are free to send data. */
+
+      if ((flags & UDP_POLL) != 0)
+        {
+          eventset |= (POLLOUT & info->fds->events);
+        }
+
+      /* Awaken the caller of poll() is requested event occurred. */
+
+      if (eventset)
+        {
+          info->fds->revents |= eventset;
+          sem_post(info->fds->sem);
+        }
+    }
+
+  return flags;
+}
+#endif /* HAVE_NETPOLL */
+
+/****************************************************************************
+ * Function: tcp_pollsetup
  *
  * Description:
  *   Setup to monitor events on one TCP/IP socket
  *
  * Input Parameters:
- *   conn  - The TCP/IP connection of interest
+ *   psock - The TCP/IP socket of interest
  *   fds   - The structure describing the events to be monitored, OR NULL if
  *           this is a request to stop monitoring events.
  *
@@ -180,7 +244,7 @@ static uint16_t poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollsetup(FAR struct socket *psock,
+static inline int tcp_pollsetup(FAR struct socket *psock,
                                 FAR struct pollfd *fds)
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
@@ -233,7 +297,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
   cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_CLOSE |
                   TCP_ABORT | TCP_TIMEDOUT);
   cb->priv     = (FAR void *)info;
-  cb->event    = poll_interrupt;
+  cb->event    = tcp_poll_interrupt;
 
   /* Save the reference in the poll info structure as fds private as well
    * for use durring poll teardown as well.
@@ -323,16 +387,169 @@ errout_with_lock:
   net_unlock(flags);
   return ret;
 }
+
+/****************************************************************************
+ * Function: udp_pollsetup
+ *
+ * Description:
+ *   Setup to monitor events on one UDP/IP socket
+ *
+ * Input Parameters:
+ *   psock - The UDP/IP socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static inline int udp_pollsetup(FAR struct socket *psock,
+                                FAR struct pollfd *fds)
+{
+  FAR struct udp_conn_s *conn = psock->s_conn;
+  FAR struct net_poll_s *info;
+  FAR struct devif_callback_s *cb;
+  net_lock_t flags;
+  int ret;
+
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG
+  if (!conn || !fds)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Allocate a container to hold the poll information */
+
+  info = (FAR struct net_poll_s *)kmm_malloc(sizeof(struct net_poll_s));
+  if (!info)
+    {
+      return -ENOMEM;
+    }
+
+  /* Some of the  following must be atomic */
+
+  flags = net_lock();
+
+  /* Setup the UDP remote connection */
+
+  ret = udp_connect(conn, NULL);
+  if (ret)
+    {
+      goto errout_with_lock;
+    }
+
+  /* Allocate a TCP/IP callback structure */
+
+  cb = udp_callback_alloc(conn);
+  if (!cb)
+    {
+      ret = -EBUSY;
+      goto errout_with_lock;
+    }
+
+  /* Initialize the poll info container */
+
+  info->psock  = psock;
+  info->fds    = fds;
+  info->cb     = cb;
+
+  /* Initialize the callback structure.  Save the reference to the info
+   * structure as callback private data so that it will be available during
+   * callback processing.
+   */
+
+  cb->flags    = (0);
+  cb->priv     = (FAR void *)info;
+  cb->event    = udp_poll_interrupt;
+
+  if (info->fds->events & POLLOUT)
+    cb->flags |= UDP_POLL;
+  if (info->fds->events & POLLIN)
+    cb->flags |= UDP_NEWDATA;
+
+  /* Save the reference in the poll info structure as fds private as well
+   * for use durring poll teardown as well.
+   */
+
+  fds->priv    = (FAR void *)info;
+
+  /* Check for read data availability now */
+
+  if (!IOB_QEMPTY(&conn->readahead))
+    {
+      /* Normal data may be read without blocking. */
+
+      fds->revents |= (POLLRDNORM & fds->events);
+    }
+
+  /* Check if any requested events are already in effect */
+
+  if (fds->revents != 0)
+    {
+      /* Yes.. then signal the poll logic */
+      sem_post(fds->sem);
+    }
+
+  net_unlock(flags);
+  return OK;
+
+errout_with_lock:
+  kmm_free(info);
+  net_unlock(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Function: net_pollsetup
+ *
+ * Description:
+ *   Setup to monitor events on one socket
+ *
+ * Input Parameters:
+ *   psock - The socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static inline int net_pollsetup(FAR struct socket *psock,
+                                FAR struct pollfd *fds)
+{
+#ifdef CONFIG_NET_TCP
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_pollsetup(psock, fds);
+    }
+#endif
+
+#ifdef CONFIG_NET_UDP
+  if (psock->s_type != SOCK_STREAM)
+    {
+      return udp_pollsetup(psock, fds);
+    }
+#endif
+
+  return -ENOSYS;
+}
 #endif /* HAVE_NETPOLL */
 
 /****************************************************************************
- * Function: net_pollteardown
+ * Function: tcp_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an TCP/IP socket
  *
  * Input Parameters:
- *   conn  - The TCP/IP connection of interest
+ *   psock - The TCP/IP socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
  *
  * Returned Value:
  *  0: Success; Negated errno on failure
@@ -340,7 +557,7 @@ errout_with_lock:
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static inline int net_pollteardown(FAR struct socket *psock,
+static inline int tcp_pollteardown(FAR struct socket *psock,
                                    FAR struct pollfd *fds)
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
@@ -379,6 +596,98 @@ static inline int net_pollteardown(FAR struct socket *psock,
 
   return OK;
 }
+
+/****************************************************************************
+ * Function: udp_pollteardown
+ *
+ * Description:
+ *   Teardown monitoring of events on an UDP/IP socket
+ *
+ * Input Parameters:
+ *   psock - The TCP/IP socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static inline int udp_pollteardown(FAR struct socket *psock,
+                                   FAR struct pollfd *fds)
+{
+  FAR struct udp_conn_s *conn = psock->s_conn;
+  FAR struct net_poll_s *info;
+  net_lock_t flags;
+
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG
+  if (!conn || !fds->priv)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Recover the socket descriptor poll state info from the poll structure */
+
+  info = (FAR struct net_poll_s *)fds->priv;
+  DEBUGASSERT(info && info->fds && info->cb);
+  if (info)
+    {
+      /* Release the callback */
+
+      flags = net_lock();
+      udp_callback_free(conn, info->cb);
+      net_unlock(flags);
+
+      /* Release the poll/select data slot */
+
+      info->fds->priv = NULL;
+
+      /* Then free the poll info container */
+
+      kmm_free(info);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: net_pollteardown
+ *
+ * Description:
+ *   Teardown monitoring of events on an socket
+ *
+ * Input Parameters:
+ *   psock - The TCP/IP socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static inline int net_pollteardown(FAR struct socket *psock,
+                                   FAR struct pollfd *fds)
+{
+#ifdef CONFIG_NET_TCP
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_pollteardown(psock, fds);
+    }
+#endif
+
+#ifdef CONFIG_NET_UDP
+  if (psock->s_type != SOCK_STREAM)
+    {
+      return udp_pollteardown(psock, fds);
+    }
+#endif
+
+  return -ENOSYS;
+}
 #endif /* HAVE_NETPOLL */
 
 /****************************************************************************
@@ -407,15 +716,6 @@ static inline int net_pollteardown(FAR struct socket *psock,
 int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 {
   int ret;
-
-#ifdef CONFIG_NET_UDP
-  /* poll() not supported for UDP */
-
-  if (psock->s_type != SOCK_STREAM)
-    {
-      return -ENOSYS;
-    }
-#endif
 
   /* Check if we are setting up or tearing down the poll */
 

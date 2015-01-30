@@ -47,6 +47,10 @@
 
 #include <nuttx/net/ip.h>
 
+#ifdef CONFIG_NET_UDP_READAHEAD
+#  include <nuttx/net/iob.h>
+#endif
+
 #ifdef CONFIG_NET_UDP
 
 /****************************************************************************
@@ -76,6 +80,16 @@ struct udp_conn_s
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
   uint8_t  ttl;           /* Default time-to-live */
   uint8_t  crefs;         /* Reference counts on this instance */
+
+#ifdef CONFIG_NET_UDP_READAHEAD
+  /* Read-ahead buffering.
+   *
+   *   readahead - A singly linked list of type struct iob_qentry_s
+   *               where the UDP/IP read-ahead data is retained.
+   */
+
+  struct iob_queue_s readahead;   /* Read-ahead buffering */
+#endif
 
   /* Defines the list of UDP callbacks */
 

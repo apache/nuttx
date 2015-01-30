@@ -50,5 +50,10 @@ config NET_RXAVAIL
 		NOTE:  If this option is enabled, the driver must support the
 		rxavail() method in the net_driver_s structure.
 
+config NET_UDP_READAHEAD
+	bool "Enable UDP/IP read-ahead buffering"
+	default y
+	select NET_IOB
+
 endif # NET_UDP
 endmenu # UDP Networking
