@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
 
 #include "local/local.h"
 
