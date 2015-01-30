@@ -436,7 +436,8 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
               socklen_t len = *pstate->rf_fromlen;
               len = (socklen_t)src_addr_size > len ? len : (socklen_t)src_addr_size;
 
-              recvlen = iob_copyout(pstate->rf_from, iob, len, sizeof(uint8_t));
+              recvlen = iob_copyout((FAR uint8_t *)pstate->rf_from, iob,
+                                    len, sizeof(uint8_t));
               if (recvlen != len)
                 {
                   goto out;
@@ -444,7 +445,9 @@ static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
             }
         }
 
-      recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen, src_addr_size + sizeof(uint8_t));
+      recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen,
+                            src_addr_size + sizeof(uint8_t));
+
       nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
       /* Update the accumulated size of the data read */
