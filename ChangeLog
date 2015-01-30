@@ -9569,3 +9569,11 @@
 	  exit and reconnect, it would fail to connect.  But then if try again, it
 	  would connect okay. So the symptom was connect-fail-connect-fail-...
 	  (2015-01-29).
+	* net/socket/net_poll.c, recvfrom.c, and udp/udp_callback.c: Add UDP
+	  read-ahead support and support for poll/select on UDP sockets.  From
+	  Macs N (2015-01-30).
+	* net/local/local_netpoll.c, socket/net_poll.c, and udp/udp_netpoll.c:
+	  Separate out UDP poll logic from net_poll.c into a new udp_netpoll.c;
+	  Create a skeleton local_netpoll (2015-01-30).
+	* net/socket/net_poll.c and tcp/tcp_netpoll.c: Separate TCP poll logic
+	  out of net_poll.c and move it into the new tcp_netpoll.c (2015-01-30).
