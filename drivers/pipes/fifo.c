@@ -73,7 +73,7 @@ static const struct file_operations fifo_fops =
   pipecommon_read,  /* read */
   pipecommon_write, /* write */
   0,                /* seek */
-  0                 /* ioctl */
+  pipecommon_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , pipecommon_poll /* poll */
 #endif

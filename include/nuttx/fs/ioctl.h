@@ -73,6 +73,7 @@
 #define _TCIOCBASE      (0x1400) /* Timer ioctl commands */
 #define _DJOYBASE       (0x1500) /* Discrete joystick ioctl commands */
 #define _AJOYBASE       (0x1600) /* Analog joystick ioctl commands */
+#define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -315,6 +316,18 @@
 
 #define _AJOYIOCVALID(c)   (_IOC_TYPE(c)==_AJOYBASE)
 #define _AJOYIOC(nr)       _IOC(_AJOYBASE,nr)
+
+/* FIFOs and pipe driver ioctl definitions **********************************/
+
+#define _PIPEIOCVALID(c)   (_IOC_TYPE(c)==_PIPEBASE)
+#define _PIPEIOC(nr)       _IOC(_PIPEBASE,nr)
+
+#define PIPEIOC_POLICY     _PIPEIOC(0x0001)  /* Set buffer policy
+                                              * IN: unsigned long integer
+                                              *     0=free on last close
+                                              *       (default)
+                                              *     1=fre when empty
+                                              * OUT: None */
 
 /****************************************************************************
  * Public Type Definitions

@@ -96,6 +96,7 @@ struct pipe_dev_s
   uint8_t    d_refs;        /* References counts on pipe (limited to 255) */
   uint8_t    d_nwriters;    /* Number of reference counts for write access */
   uint8_t    d_pipeno;      /* Pipe minor number */
+  bool       d_policy;      /* Buffer policy: 0=free on close; 1=free on empty */
   uint8_t   *d_buffer;      /* Buffer allocated when device opened */
 
   /* The following is a list if poll structures of threads waiting for
@@ -119,14 +120,16 @@ extern "C" {
 #  define EXTERN extern
 #endif
 
-EXTERN FAR struct pipe_dev_s *pipecommon_allocdev(void);
-EXTERN void    pipecommon_freedev(FAR struct pipe_dev_s *dev);
-EXTERN int     pipecommon_open(FAR struct file *filep);
-EXTERN int     pipecommon_close(FAR struct file *filep);
-EXTERN ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
-EXTERN ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
+FAR struct pipe_dev_s *pipecommon_allocdev(void);
+void    pipecommon_freedev(FAR struct pipe_dev_s *dev);
+int     pipecommon_open(FAR struct file *filep);
+int     pipecommon_close(FAR struct file *filep);
+ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
+ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
+int     pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+
 #ifndef CONFIG_DISABLE_POLL
-EXTERN int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
+int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                                bool setup);
 #endif
 

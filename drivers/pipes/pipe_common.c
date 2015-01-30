@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipes/pipe_common.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -188,13 +189,7 @@ int pipecommon_open(FAR struct file *filep)
   int                sval;
   int                ret;
 
-  /* Some sanity checking */
-#if CONFIG_DEBUG
-  if (!dev)
-    {
-       return -EBADF;
-    }
-#endif
+  DEBUGASSERT(dev);
 
   /* Make sure that we have exclusive access to the device structure.  The
    * sem_wait() call should fail only if we are awakened by a signal.
@@ -208,9 +203,12 @@ int pipecommon_open(FAR struct file *filep)
       return -get_errno();
     }
 
-  /* If this the first reference on the device, then allocate the buffer */
+  /* If this the first reference on the device, then allocate the buffer.  In the
+   * case of d_policy == 1, the buffer already be present when the pipe is
+   * first opened.
+   */
 
-  if (dev->d_refs == 0)
+  if (dev->d_refs == 0 && dev->d_buffer == NULL)
     {
       dev->d_buffer = (uint8_t*)kmm_malloc(CONFIG_DEV_PIPE_SIZE);
       if (!dev->d_buffer)
@@ -243,11 +241,17 @@ int pipecommon_open(FAR struct file *filep)
         }
     }
 
-  /* If opened for read-only, then wait for at least one writer on the pipe */
+  /* If opened for read-only, then wait for either (1) at least one writer
+   * on the pipe (policy == 0), or (2) until there is buffered data to be
+   * read (policy == 1).
+   */
 
   sched_lock();
   (void)sem_post(&dev->d_bfsem);
-  if ((filep->f_oflags & O_RDWR) == O_RDONLY && dev->d_nwriters < 1)
+
+  if ((filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
+      dev->d_nwriters < 1 &&                     /* No writers on the pipe */
+      dev->d_wrndx == dev->d_rdndx)              /* Buffer is empty */
     {
       /* NOTE: d_rdsem is normally used when the read logic waits for more
        * data to be written.  But until the first writer has opened the
@@ -289,13 +293,7 @@ int pipecommon_close(FAR struct file *filep)
   struct pipe_dev_s *dev   = inode->i_private;
   int                sval;
 
-  /* Some sanity checking */
-#if CONFIG_DEBUG
-  if (!dev)
-    {
-       return -EBADF;
-    }
-#endif
+  DEBUGASSERT(dev && dev->d_refs > 0);
 
   /* Make sure that we have exclusive access to the device structure.
    * NOTE: close() is supposed to return EINTR if interrupted, however
@@ -304,15 +302,17 @@ int pipecommon_close(FAR struct file *filep)
 
   pipecommon_semtake(&dev->d_bfsem);
 
+  /* Decrement the number of references on the pipe.  Check if there are
+   * still oustanding references to the pipe.
+   */
+
   /* Check if the decremented reference count would go to zero */
 
-  if (dev->d_refs > 1)
+  if (--dev->d_refs > 0)
     {
-      /* No.. then just decrement the reference count */
-
-      dev->d_refs--;
-
-      /* If opened for writing, decrement the count of writers on on the pipe instance */
+      /* No more references.. If opened for writing, decrement the count of
+       * writers on the pipe instance.
+       */
 
       if ((filep->f_oflags & O_WROK) != 0)
         {
@@ -329,9 +329,16 @@ int pipecommon_close(FAR struct file *filep)
             }
         }
     }
-  else
+
+  /* What is the buffer management policy?  Do we free the buffe when the
+   * last client closes the pipe (d_policy == 0), or when the buffer becomes
+   * empty (d_policy).  In the latter case, the buffer data will remain
+   * valid and can be obtained when the pipe is re-opened.
+   */
+
+  else if (dev->d_policy == 0 || dev->d_wrndx == dev->d_rdndx)
     {
-      /* Yes... deallocate the buffer */
+      /* Policy 0 or the buffer is empty ... deallocate the buffer now. */
 
       kmm_free(dev->d_buffer);
       dev->d_buffer = NULL;
@@ -363,13 +370,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   int                sval;
   int                ret;
 
-  /* Some sanity checking */
-#if CONFIG_DEBUG
-  if (!dev)
-    {
-      return -ENODEV;
-    }
-#endif
+  DEBUGASSERT(dev);
 
   /* Make sure that we have exclusive access to the device structure */
 
@@ -453,15 +454,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
   int                nxtwrndx;
   int                sval;
 
-  /* Some sanity checking */
-
-#if CONFIG_DEBUG
-  if (!dev)
-    {
-      return -ENODEV;
-    }
-#endif
-
+  DEBUGASSERT(dev);
   pipe_dumpbuffer("To PIPE:", (uint8_t*)buffer, len);
 
   /* At present, this method cannot be called from interrupt handlers.  That is
@@ -581,14 +574,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                    ret      = OK;
   int                    i;
 
-  /* Some sanity checking */
-
-#if CONFIG_DEBUG
-  if (!dev || !fds)
-    {
-      return -ENODEV;
-    }
-#endif
+  DEBUGASSERT(dev && fds);
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -679,4 +665,23 @@ errout:
 }
 #endif
 
+/****************************************************************************
+ * Name: pipecommon_ioctl
+ ****************************************************************************/
+
+int  pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct inode      *inode    = filep->f_inode;
+  FAR struct pipe_dev_s *dev      = inode->i_private;
+
+  /* Only one command supported */
+
+  if (cmd == PIPEIOC_POLICY)
+    {
+      dev->d_policy = (arg != 0);
+      return OK;
+    }
+
+  return -ENOTTY;
+}
 #endif /* CONFIG_DEV_PIPE_SIZE > 0 */

@@ -41,6 +41,8 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -48,6 +50,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+
 
 #include "local/local.h"
 
@@ -185,8 +188,6 @@ static int local_create_fifo(FAR const char *path)
 
 static int local_release_fifo(FAR const char *path)
 {
-  int ret;
-
   /* Unlink the client-to-server FIFO if it exists. */
 
   if (local_fifo_exists(path))
@@ -197,6 +198,8 @@ static int local_release_fifo(FAR const char *path)
        */
 #warning Missing logic
 #if 0
+      int ret;
+
       ret = unlink(path);
       if (ret < 0)
         {
@@ -222,8 +225,7 @@ static int local_release_fifo(FAR const char *path)
  *
  ****************************************************************************/
 
-static inline int local_rx_open(FAR struct local_conn_s *conn,
-                                FAR const char *path)
+static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path)
 {
   conn->lc_infd = open(path, O_RDONLY);
   if (conn->lc_infd < 0)
@@ -256,8 +258,7 @@ static inline int local_rx_open(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-static inline int local_tx_open(FAR struct local_conn_s *conn,
-                                FAR const char *path)
+static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path)
 {
   conn->lc_outfd = open(path, O_WRONLY);
   if (conn->lc_outfd < 0)
@@ -277,6 +278,36 @@ static inline int local_tx_open(FAR struct local_conn_s *conn,
        */
 
       return errcode == ENOENT ? -EFAULT : -errcode;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: local_set_policy
+ *
+ * Description:
+ *   Set the FIFO buffer policy:
+ *
+ *     0=Free FIFO resources when the last reference is closed
+ *     1=Free FIFO resources when the buffer is empty.
+ *
+ ****************************************************************************/
+
+static int local_set_policy(int fd, unsigned long policy)
+{
+  int ret;
+
+  /* Set the buffer policy */
+
+  ret = ioctl(fd, PIPEIOC_POLICY, policy);
+  if (ret < 0)
+    {
+      int errcode = get_errno();
+      DEBUGASSERT(errcode > 0);
+
+      ndbg("ERROR: Failed to set FIFO buffer policty: %d\n", errcode);
+      return -errcode;
     }
 
   return OK;
@@ -390,6 +421,7 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
 int local_open_client_rx(FAR struct local_conn_s *client)
 {
   char path[LOCAL_FULLPATH_LEN];
+  int ret;
 
   /* Get the server-to-client path name */
 
@@ -397,7 +429,15 @@ int local_open_client_rx(FAR struct local_conn_s *client)
 
   /* Then open the file for read-only access */
 
-  return local_rx_open(client, path);
+  ret = local_rx_open(client, path);
+  if (ret == OK)
+    {
+      /* Policy: Free FIFO resources when the last reference is closed */
+
+      ret = local_set_policy(client->lc_infd, 0);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -411,6 +451,7 @@ int local_open_client_rx(FAR struct local_conn_s *client)
 int local_open_client_tx(FAR struct local_conn_s *client)
 {
   char path[LOCAL_FULLPATH_LEN];
+  int ret;
 
   /* Get the client-to-server path name */
 
@@ -418,7 +459,15 @@ int local_open_client_tx(FAR struct local_conn_s *client)
 
   /* Then open the file for write-only access */
 
-  return local_tx_open(client, path);
+  ret = local_tx_open(client, path);
+  if (ret == OK)
+    {
+      /* Policy: Free FIFO resources when the last reference is closed */
+
+      ret = local_set_policy(client->lc_outfd, 0);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -432,6 +481,7 @@ int local_open_client_tx(FAR struct local_conn_s *client)
 int local_open_server_rx(FAR struct local_conn_s *server)
 {
   char path[LOCAL_FULLPATH_LEN];
+  int ret;
 
   /* Get the client-to-server path name */
 
@@ -439,7 +489,15 @@ int local_open_server_rx(FAR struct local_conn_s *server)
 
   /* Then open the file for write-only access */
 
-  return local_rx_open(server, path);
+  ret = local_rx_open(server, path);
+  if (ret == OK)
+    {
+      /* Policy: Free FIFO resources when the last reference is closed */
+
+      ret = local_set_policy(server->lc_infd, 0);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -453,6 +511,7 @@ int local_open_server_rx(FAR struct local_conn_s *server)
 int local_open_server_tx(FAR struct local_conn_s *server)
 {
   char path[LOCAL_FULLPATH_LEN];
+  int ret;
 
   /* Get the server-to-client path name */
 
@@ -460,7 +519,15 @@ int local_open_server_tx(FAR struct local_conn_s *server)
 
   /* Then open the file for read-only access */
 
-  return local_tx_open(server, path);
+  ret = local_tx_open(server, path);
+  if (ret == OK)
+    {
+      /* Policy: Free FIFO resources when the last reference is closed */
+
+      ret = local_set_policy(server->lc_outfd, 0);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -474,6 +541,7 @@ int local_open_server_tx(FAR struct local_conn_s *server)
 int local_open_receiver(FAR struct local_conn_s *conn)
 {
   char path[LOCAL_FULLPATH_LEN];
+  int ret;
 
   /* Get the server-to-client path name */
 
@@ -481,7 +549,15 @@ int local_open_receiver(FAR struct local_conn_s *conn)
 
   /* Then open the file for read-only access */
 
-  return local_rx_open(conn, path);
+  ret = local_rx_open(conn, path);
+  if (ret == OK)
+    {
+      /* Policy: Free FIFO resources when the buffer is empty. */
+
+      ret = local_set_policy(conn->lc_infd, 1);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -495,6 +571,7 @@ int local_open_receiver(FAR struct local_conn_s *conn)
 int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path)
 {
   char fullpath[LOCAL_FULLPATH_LEN];
+  int ret;
 
   /* Get the server-to-client path name */
 
@@ -502,7 +579,15 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path)
 
   /* Then open the file for read-only access */
 
-  return local_tx_open(conn, fullpath);
+  ret = local_tx_open(conn, fullpath);
+  if (ret == OK)
+    {
+      /* Policy: Free FIFO resources when the buffer is empty. */
+
+      ret = local_set_policy(conn->lc_outfd, 1);
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */
