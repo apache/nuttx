@@ -9581,3 +9581,5 @@
 	  LE clocking. Even you don't use core clock LE as source for LFA or LFB,
 	  to read are write any register not clocked by HFPERCLK or HFCORECLK,
 	  HFCORECLKLE should be enabled.  From Pierre-noel Bouteville (2015-01-30).
+	* drivers/net/slip.c: SLIP interface improvements.  From Macs N
+	  (2015-01-30).
