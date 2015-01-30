@@ -9583,3 +9583,5 @@
 	  HFCORECLKLE should be enabled.  From Pierre-noel Bouteville (2015-01-30).
 	* drivers/net/slip.c: SLIP interface improvements.  From Macs N
 	  (2015-01-30).
+	* clock_systimespec():  Fixes for compilation errors in certain
+	  configurations.  From Macs N.
