@@ -85,6 +85,17 @@
 #  define BOARD_LFB_ULFCO_ENABLE false
 #endif
 
+#ifndef CONFIG_EFM32_LECLOCK
+#   if ( ( BOARD_LFACLKSEL       != _CMU_LFCLKSEL_LFA_DISABLED   ) || \
+         ( BOARD_LFBCLKSEL       != _CMU_LFCLKSEL_LFB_DISABLED   ) || \
+         ( defined ( CONFIG_EFM32_RTC_BURTC )                    ) || \
+         ( defined ( CONFIG_EFM32_LEUART0   )                    ) || \
+         ( defined ( CONFIG_EFM32_LEUART1   )                    )    \
+       )
+#       define CONFIG_EFM32_LECLOCK
+#   endif
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -211,40 +222,6 @@ static void efm32_enable_leclocking(void)
   putreg32(regval, EFM32_CMU_HFCORECLKEN0);
 }
 
-/****************************************************************************
- * Name: efm32_enable_leclocking
- *
- * Description:
- *   If the core frequency is higher than CMU_MAX_FREQ_HFLE on
- *   Giant/Leopard/Wonder, enable HFLE and DIV4.
- *
- ****************************************************************************/
-
-#ifdef CMU_CTRL_HFLE
-static void efm32_enable_hfle(uint32_t frequency)
-{
-  uint32_t regval;
-
-  /* Check if the core frequency is higher than CMU_MAX_FREQ_HFLE */
-
-   if (frequency > CMU_MAX_FREQ_HFLE)
-    {
-      /* Enable HFLE */
-
-      regval = getreg32(EFM32_CMU_CTRL);
-      regval |= CMU_CTRL_HFLE;
-      putreg32(regval, EFM32_CMU_CTRL);
-
-      /* Enable DIV4 factor for peripheral clock */
-
-      regval  = getreg32(EFM32_CMU_HFCORECLKDIV);
-      regval |= CMU_HFCORECLKDIV_HFCORECLKLEDIV_DIV4;
-      putreg32(regval, EFM32_CMU_HFCORECLKDIV);
-    }
-}
-#else
-#  define efm32_enable_hfle(f)
-#endif
 
 /****************************************************************************
  * Name: efm32_maxwaitstates
@@ -524,6 +501,72 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_EFM32_LECLOCK
+uint32_t efm32_coreleclk_config( int frequency )
+{
+  uint32_t regval;
+
+#ifdef CMU_CTRL_HFLE
+  /* Check if the core frequency is higher than CMU_MAX_FREQ_HFLE */
+
+   if (frequency > CMU_MAX_FREQ_HFLE)
+    {
+      /* Enable HFLE */
+
+      regval = getreg32(EFM32_CMU_CTRL);
+      regval |= CMU_CTRL_HFLE;
+      putreg32(regval, EFM32_CMU_CTRL);
+
+      /* Enable DIV4 factor for peripheral clock */
+
+      regval  = getreg32(EFM32_CMU_HFCORECLKDIV);
+      regval |= CMU_HFCORECLKDIV_HFCORECLKLEDIV_DIV4;
+      putreg32(regval, EFM32_CMU_HFCORECLKDIV);
+      frequency /= 4;
+    }
+#else
+  frequency /= 2;
+#endif
+
+  /* Enable core clocking to the LE */
+
+  efm32_enable_leclocking();
+
+  return frequency;
+}
+#else
+#   define efm32_coreleclk_config 0
+#endif
+
+/****************************************************************************
+ * Name: efm32_hfcoreclk_config
+ *
+ * Description:
+ *   Configure the High Frequency Core Clock, HFCORECLK.
+ *
+ *   HFCORECLK is a prescaled version of HFCLK. This clock drives the Core
+ *   Modules, which consists of the CPU and modules that are tightly coupled
+ *   to the CPU, e.g. MSC, DMA etc. This also includes the interface to the
+ *   Low Energy Peripherals. Some of the modules that are driven by this
+ *   clock can be clock gated completely when not in use. This is done by
+ *   clearing the clock enable bit for the specific module in
+ *   CMU_HFCORECLKEN0. The frequency of HFCORECLK is set using the
+ *   CMU_HFCORECLKDIV register. The setting can be changed dynamically and
+ *   the new setting takes effect immediately.
+ *
+ *   The USB Core clock (USBC) is always undivided regardless of the
+ *   HFCLKDIV setting. When the USB Core is active this clock must be
+ *   switched to a 32 kHz clock (LFRCO or LFXO) when entering EM2. The USB
+ *   Core uses this clock for monitoring the USB bus. The switch is done by
+ *   writing USBCCLKSEL in CMU_CMD. The currently active clock can be
+ *   checked by reading CMU_STATUS.  The clock switch can take up to 1.5 32
+ *   kHz cycle (45 us). To avoid polling the clock selection status when
+ *   switching switching from 32 kHz to HFCLK when coming up from EM2 the
+ *   USBCHFCLKSEL interrupt can be used. EM3 is not supported when the USB
+ *   is active.
+ *
+ ****************************************************************************/
+
 static inline uint32_t efm32_hfcoreclk_config(uint32_t hfcoreclkdiv,
                                               uint32_t hfclk)
 {
@@ -638,17 +681,6 @@ static inline uint32_t efm32_lfaclk_config(uint32_t lfaclksel, bool ulfrco,
 
           case _CMU_LFCLKSEL_LFA_HFCORECLKLEDIV2:
             {
-              /* Enable core clocking to the LE */
-
-              efm32_enable_leclocking();
-
-              /* Enable HFLE, if appropriate */
-
-              efm32_enable_hfle(hfcoreclk);
-
-              /* And, finally, enable the HFXO */
-
-              efm32_enable_hfxo();
               lfaclk = hfcoreclk >> 1;
             }
             break;
@@ -739,17 +771,6 @@ static inline uint32_t efm32_lfbclk_config(uint32_t lfbclksel, bool ulfrco,
 
           case _CMU_LFCLKSEL_LFB_HFCORECLKLEDIV2:
             {
-              /* Enable core clocking to the LE */
-
-              efm32_enable_leclocking();
-
-              /* Enable HFLE, if appropriate */
-
-              efm32_enable_hfle(hfcoreclk);
-
-              /* And, finally, enable the HFXO */
-
-              efm32_enable_hfxo();
               lfbclk = hfcoreclk >> 1;
             }
             break;
@@ -915,6 +936,7 @@ void efm32_clockconfig(void)
   uint32_t hfclk;
   uint32_t hfcoreclk;
   uint32_t hfperclk;
+  uint32_t coreleclk;
   uint32_t lfaclk;
   uint32_t lfbclk;
 
@@ -923,6 +945,7 @@ void efm32_clockconfig(void)
   hfclk     = efm32_hfclk_config(BOARD_HFCLKSEL, BOARD_HFCLKDIV);
   hfcoreclk = efm32_hfcoreclk_config(BOARD_HFCORECLKDIV, hfclk);
   hfperclk  = efm32_hfperclk_config(BOARD_HFPERCLKDIV, hfclk);
+  coreleclk = efm32_coreleclk_config(hfclk);
   lfaclk    = efm32_lfaclk_config(BOARD_LFACLKSEL, BOARD_LFA_ULFCO_ENABLE, hfcoreclk);
   lfbclk    = efm32_lfbclk_config(BOARD_LFBCLKSEL, BOARD_LFB_ULFCO_ENABLE, hfcoreclk);
 
@@ -931,6 +954,7 @@ void efm32_clockconfig(void)
   efm32_auxclk_config();
 
   UNUSED(hfperclk);
+  UNUSED(coreleclk);
   UNUSED(lfaclk);
   UNUSED(lfbclk);
 
