@@ -9609,3 +9609,8 @@
 	  unlinked, it will marked the pipe/FIFO as unlinked.  If/when all open
 	  references to the driver are closed, all of the driver resources will
 	  be freed (2015-01-31).
+	* arch/avr: Added architecture support for the Atmel AVR ATMega1284P
+	  MCU.  From Jedi Tek'Unum (2015-01-31).
+	* configs/moteino-mega: Added support for the LowPowerLab MoteinoMEGA
+	  that is based on the Atmel AVR ATMega1284P MCU.  From Jedi Tek'Unum
+	  (2015-01-31).
