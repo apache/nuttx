@@ -9599,4 +9599,9 @@
 	  is closed (2015-01-30).
 	* net/local:  Add configuration options so that Unix domain stream and
 	  datagram support can be separately enabled (2015-01-31).
-
+	* fs/vfs/fs_unlink.c and include/nuttx/fs/fs.h: Add an unlink method to
+	  the character driver interface.  This is important because if the
+	  character driver inode is unlinked and there are no open references to
+	  the driver, then the driver resources will be stranded.  On the unlink
+	  call, the driver has the opportunity (1) check if there an any open
+	  references, and (2) if not free the driver resources (2015-01-31).
