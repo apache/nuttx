@@ -234,15 +234,16 @@ static FAR struct nrf24l01_dev_s *g_nrf24l01dev;
 
 static const struct file_operations nrf24l01_fops =
 {
-  .open = nrf24l01_open,    /* open */
-  .close = nrf24l01_close,  /* close */
-  .read = nrf24l01_read,    /* read */
-  .write = nrf24l01_write,  /* write */
-  .seek = NULL,             /* seek */
-  .ioctl = nrf24l01_ioctl,  /* ioctl */
+  nrf24l01_open,    /* open */
+  nrf24l01_close,   /* close */
+  nrf24l01_read,    /* read */
+  nrf24l01_write,   /* write */
+  NULL,             /* seek */
+  nrf24l01_ioctl,   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  .poll = nrf24l01_poll     /* poll */
+  nrf24l01_poll,    /* poll */
 #endif
+  NULL              /* unlink */
 };
 
 /****************************************************************************
