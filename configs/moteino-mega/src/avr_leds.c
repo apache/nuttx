@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/moteino-mega/src/up_leds.c
+ * configs/moteino-mega/src/avr_leds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include "up_internal.h"
 
 #include "atmega_internal.h"
-#include "moteino_mega_internal.h"
+#include "moteino_mega.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

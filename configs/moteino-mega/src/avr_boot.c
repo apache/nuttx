@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/moteino-mega/src/up_boot.c
+ * configs/moteino-mega/src/avr_boot.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include "up_internal.h"
 
 #include "atmega_internal.h"
-#include "moteino_mega_internal.h"
+#include "moteino_mega.h"
 
 /************************************************************************************
  * Pre-processor Definitions

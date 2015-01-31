@@ -1,6 +1,5 @@
 /****************************************************************************
  * configs/moteino-mega/include/board.h
- * include/arch/board/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
