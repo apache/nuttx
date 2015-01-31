@@ -9605,3 +9605,7 @@
 	  the driver, then the driver resources will be stranded.  On the unlink
 	  call, the driver has the opportunity (1) check if there an any open
 	  references, and (2) if not free the driver resources (2015-01-31).
+	* drivers/pipes:  Implement the unlink method.  If the pipe/FIFO is
+	  unlinked, it will marked the pipe/FIFO as unlinked.  If/when all open
+	  references to the driver are closed, all of the driver resources will
+	  be freed (2015-01-31).
