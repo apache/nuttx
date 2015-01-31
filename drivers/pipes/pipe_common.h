@@ -134,6 +134,9 @@ extern "C" {
 #  define EXTERN extern
 #endif
 
+struct file;  /* Forward reference */
+struct inode; /* Forware reference */
+
 FAR struct pipe_dev_s *pipecommon_allocdev(void);
 void    pipecommon_freedev(FAR struct pipe_dev_s *dev);
 int     pipecommon_open(FAR struct file *filep);
@@ -145,7 +148,7 @@ int     pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                                bool setup);
 #endif
-int     pipecommon_unlink(FAR void *priv);
+int     pipecommon_unlink(FAR struct inode *priv);
 
 #undef EXTERN
 #ifdef __cplusplus

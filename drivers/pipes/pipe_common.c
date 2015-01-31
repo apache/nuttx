@@ -712,7 +712,7 @@ int pipecommon_unlink(FAR struct inode *inode)
   FAR struct pipe_dev_s *dev;
 
   DEBUGASSERT(inode && inode->i_private);
-  dev =  = (FAR struct pipe_dev_s *)inode->i_private;
+  dev = (FAR struct pipe_dev_s *)inode->i_private;
 
   /* Mark the pipe unlinked */
 
