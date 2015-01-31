@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipe/pipe_common.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,20 @@
 
 #define CONFIG_DEV_PIPE_MAXUSER 255
 
+/* d_flags values */
+
+#define PIPE_FLAG_POLICY    (1 << 0) /* Bit 0: Policy=Free buffer when empty */
+#define PIPE_FLAG_UNLINKED  (1 << 1) /* Bit 1: The driver has been unlinked */
+
+#define PIPE_POLICY_0(f)    do { (f) &= ~PIPE_FLAG_POLICY; } while (0)
+#define PIPE_POLICY_1(f)    do { (f) |= PIPE_FLAG_POLICY; } while (0)
+#define PIPE_IS_POLICY_0(f) (((f) & PIPE_FLAG_POLICY) == 0)
+#define PIPE_IS_POLICY_1(f) (((f) & PIPE_FLAG_POLICY) != 0)
+
+#define PIPE_UNLINK(f)      do { (f) |= PIPE_FLAG_UNLINKED; } while (0)
+#define PIPE_IS_UNLINKED(f) (((f) & PIPE_FLAG_UNLINKED) != 0)
+
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -96,7 +110,7 @@ struct pipe_dev_s
   uint8_t    d_refs;        /* References counts on pipe (limited to 255) */
   uint8_t    d_nwriters;    /* Number of reference counts for write access */
   uint8_t    d_pipeno;      /* Pipe minor number */
-  bool       d_policy;      /* Buffer policy: 0=free on close; 1=free on empty */
+  uint8_t    d_flags;       /* See PIPE_FLAG_* definitions */
   uint8_t   *d_buffer;      /* Buffer allocated when device opened */
 
   /* The following is a list if poll structures of threads waiting for
@@ -127,11 +141,11 @@ int     pipecommon_close(FAR struct file *filep);
 ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
 ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
 int     pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-
 #ifndef CONFIG_DISABLE_POLL
 int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                                bool setup);
 #endif
+int     pipecommon_unlink(FAR void *priv);
 
 #undef EXTERN
 #ifdef __cplusplus

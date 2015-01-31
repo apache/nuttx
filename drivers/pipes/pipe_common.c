@@ -172,10 +172,10 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 
 void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 {
-   sem_destroy(&dev->d_bfsem);
-   sem_destroy(&dev->d_rdsem);
-   sem_destroy(&dev->d_wrsem);
-   kmm_free(dev);
+  sem_destroy(&dev->d_bfsem);
+  sem_destroy(&dev->d_rdsem);
+  sem_destroy(&dev->d_wrsem);
+  kmm_free(dev);
 }
 
 /****************************************************************************
@@ -203,9 +203,9 @@ int pipecommon_open(FAR struct file *filep)
       return -get_errno();
     }
 
-  /* If this the first reference on the device, then allocate the buffer.  In the
-   * case of d_policy == 1, the buffer already be present when the pipe is
-   * first opened.
+  /* If this the first reference on the device, then allocate the buffer.
+   * In the case of policy 1, the buffer already be present when the pipe
+   * is first opened.
    */
 
   if (dev->d_refs == 0 && dev->d_buffer == NULL)
@@ -303,7 +303,7 @@ int pipecommon_close(FAR struct file *filep)
   pipecommon_semtake(&dev->d_bfsem);
 
   /* Decrement the number of references on the pipe.  Check if there are
-   * still oustanding references to the pipe.
+   * still outstanding references to the pipe.
    */
 
   /* Check if the decremented reference count would go to zero */
@@ -331,12 +331,12 @@ int pipecommon_close(FAR struct file *filep)
     }
 
   /* What is the buffer management policy?  Do we free the buffe when the
-   * last client closes the pipe (d_policy == 0), or when the buffer becomes
-   * empty (d_policy).  In the latter case, the buffer data will remain
-   * valid and can be obtained when the pipe is re-opened.
+   * last client closes the pipe policy 0, or when the buffer becomes empty.
+   * In the latter case, the buffer data will remain valid and can be
+   * obtained when the pipe is re-opened.
    */
 
-  else if (dev->d_policy == 0 || dev->d_wrndx == dev->d_rdndx)
+  else if (PIPE_IS_POLICY_0(dev->d_flags) || dev->d_wrndx == dev->d_rdndx)
     {
       /* Policy 0 or the buffer is empty ... deallocate the buffer now. */
 
@@ -349,6 +349,16 @@ int pipecommon_close(FAR struct file *filep)
       dev->d_rdndx    = 0;
       dev->d_refs     = 0;
       dev->d_nwriters = 0;
+
+      /* If, in addition, we have been unlinked, then also need to free the
+       * device structure as well to prevent a memory leak.
+       */
+
+      if (PIPE_IS_UNLINKED(dev->d_flags))
+        {
+          pipecommon_freedev(dev);
+          return OK;
+        }
    }
 
   sem_post(&dev->d_bfsem);
@@ -678,10 +688,57 @@ int  pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (cmd == PIPEIOC_POLICY)
     {
-      dev->d_policy = (arg != 0);
+      if (arg != 0)
+        {
+          PIPE_POLICY_1(dev->d_flags);
+        }
+      else
+        {
+          PIPE_POLICY_0(dev->d_flags);
+        }
+
       return OK;
     }
 
   return -ENOTTY;
 }
+
+/****************************************************************************
+ * Name: pipecommon_unlink
+ ****************************************************************************/
+
+int pipecommon_unlink(FAR void *priv)
+{
+  /* The value passed to pipcommon_unlink is the private data pointer from
+   * the inode that is being unlinked.  If there are no open references to
+   * the driver, then we must free up all resources used by the driver now.
+   */
+
+  FAR struct pipe_dev_s *dev = (FAR struct pipe_dev_s *)priv;
+
+  DEBUGASSERT(dev);
+
+  /* Mark the pipe unlinked */
+
+  PIPE_UNLINK(dev->d_flags);
+
+  /* Are the any open references to the driver? */
+
+  if (dev->d_refs == 0)
+    {
+      /* No.. free the buffer (if there is one) */
+
+      if (dev->d_buffer)
+        {
+          kmm_free(dev->d_buffer);
+        }
+
+      /* And free the device structure. */
+
+      pipecommon_freedev(dev);
+    }
+
+  return OK;
+}
+
 #endif /* CONFIG_DEV_PIPE_SIZE > 0 */

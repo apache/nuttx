@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipes/fifo.c
  *
- *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,10 +73,11 @@ static const struct file_operations fifo_fops =
   pipecommon_read,  /* read */
   pipecommon_write, /* write */
   0,                /* seek */
-  pipecommon_ioctl  /* ioctl */
+  pipecommon_ioctl, /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , pipecommon_poll /* poll */
+  pipecommon_poll,  /* poll */
 #endif
+  pipecommon_unlink /* unlink */
 };
 
 /****************************************************************************
@@ -92,15 +93,15 @@ static const struct file_operations fifo_fops =
  *
  * Description:
  *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
- *   Linux, a NuttX FIFO is not a special file type but simply a device driver
- *   instance.  'mode' specifies the FIFO's permissions.
+ *   Linux, a NuttX FIFO is not a special file type but simply a device
+ *   driver instance.  'mode' specifies the FIFO's permissions.
  *
  *   Once the FIFO has been created by mkfifo(), any thread can open it for
- *   reading or writing, in the same way as an ordinary file. However, it must
- *   have been opened from both reading and writing before input or output
- *   can be performed.  This FIFO implementation will block all attempts to
- *   open a FIFO read-only until at least one thread has opened the FIFO for
- *   writing.
+ *   reading or writing, in the same way as an ordinary file. However, it
+ *   must have been opened from both reading and writing before input or
+ *   output can be performed.  This FIFO implementation will block all
+ *   attempts to open a FIFO read-only until at least one thread has opened
+ *   the FIFO for  writing.
  *
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).
