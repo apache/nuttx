@@ -36,10 +36,10 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS		=
-CSRCS		= up_boot.c
+CSRCS		= avr_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
+CSRCS		+= avr_leds.c
 endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))

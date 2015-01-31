@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/moteino-mega/src/moteino-mega-internal.h
+ * configs/moteino-mega/src/moteino-mega.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_MOTEINO_MEGA_SRC_MOTEINO_MEGA_INTERNAL_H
-#define __CONFIGS_MOTEINO_MEGA_SRC_MOTEINO_MEGA_INTERNAL_H
+#ifndef __CONFIGS_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H
+#define __CONFIGS_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H
 
 /****************************************************************************
  * Included Files
@@ -99,4 +99,4 @@ void atmega_ledinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MOTEINO_MEGA_SRC_MOTEINO_MEGA_INTERNAL_H */
+#endif /* __CONFIGS_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H */
