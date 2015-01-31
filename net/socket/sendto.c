@@ -126,7 +126,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
                      socklen_t tolen)
 {
   socklen_t minlen;
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
   ssize_t nsent;
 #endif
   int err;
@@ -137,10 +137,10 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (!to || !tolen)
     {
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
       return psock_send(psock, buf, len, flags);
 #else
-      ndbg("ERROR: No to address\n");
+      ndbg("ERROR: No 'to' address\n");
       err = EINVAL;
       goto errout;
 #endif
@@ -162,7 +162,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       break;
 #endif
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
     case AF_LOCAL:
       minlen = sizeof(sa_family_t);
       break;
@@ -199,22 +199,22 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
   /* Now handle the sendto() operation according to the socket domain,
    * currently either IP or Unix domains.
    */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
   if (psock->s_domain == PF_LOCAL)
 #endif
     {
       nsent = psock_local_sendto(psock, buf, len, flags, to, tolen);
     }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
   else
 #endif
     {
@@ -234,7 +234,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   return nsent;
 #else
   err = ENOSYS;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
 errout:
   set_errno(err);

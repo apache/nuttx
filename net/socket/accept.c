@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
-    (defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL))
+    (defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM))
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -217,7 +217,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
           break;
 #endif /* CONFIG_NET_IPv6 */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
         case PF_LOCAL:
           {
             if (*addrlen < sizeof(sa_family_t))
@@ -261,7 +261,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   /* Perform the correct accept operation for this address domain */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
   if (psock->s_domain == PF_LOCAL)
 #endif
@@ -275,10 +275,10 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
           goto errout_with_socket;
         }
     }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
   else
 #endif
     {
@@ -318,4 +318,4 @@ errout:
   return ERROR;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && (CONFIG_NET_TCP || CONFIG_NET_LOCAL) */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && (CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM) */

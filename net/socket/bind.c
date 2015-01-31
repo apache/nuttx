@@ -216,10 +216,10 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
        * domain socket.
        */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
       case SOCK_STREAM:
         {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
           /* Is this a Unix domain socket? */
 
@@ -230,10 +230,10 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
               ret = psock_local_bind(psock, addr, addrlen);
             }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
           else
 #endif
             {
@@ -251,16 +251,16 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
             }
         }
         break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
 
       /* Bind a datagram socket which may either be TCP/IP or a local, Unix
        * domain socket.
        */
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
       case SOCK_DGRAM:
         {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
           /* Is this a Unix domain socket? */
 
@@ -271,10 +271,10 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
               ret = psock_local_bind(psock, addr, addrlen);
             }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
           else
 #endif
             {
@@ -292,7 +292,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
             }
         }
         break;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
       default:
         err = EBADF;

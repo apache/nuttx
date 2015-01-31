@@ -533,10 +533,10 @@ int psock_close(FAR struct socket *psock)
 
       switch (psock->s_type)
         {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
           case SOCK_STREAM:
             {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
               if (psock->s_domain == PF_LOCAL)
 #endif
@@ -545,10 +545,10 @@ int psock_close(FAR struct socket *psock)
 
                   local_close(psock);
                 }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
               else
 #endif
                 {
@@ -584,15 +584,15 @@ int psock_close(FAR struct socket *psock)
                       conn->crefs--;
                     }
                 }
-#endif /* CONFIG_NET_TCP */
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
             }
             break;
 #endif
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
           case SOCK_DGRAM:
             {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
               if (psock->s_domain == PF_LOCAL)
 #endif
@@ -601,10 +601,10 @@ int psock_close(FAR struct socket *psock)
 
                   local_close(psock);
                 }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
               else
 #endif
                 {
@@ -628,7 +628,7 @@ int psock_close(FAR struct socket *psock)
                       conn->crefs--;
                     }
                 }
-#endif /* CONFIG_NET_UDP */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
             }
             break;
 #endif

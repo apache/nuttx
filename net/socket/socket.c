@@ -296,10 +296,10 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   switch (type)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
       case SOCK_STREAM:
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
         if (ipdomain)
 #endif
           {
@@ -311,7 +311,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           }
 #endif /* CONFIG_NET_TCP */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
         else
 #endif
@@ -322,15 +322,15 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
                 goto errout;
               }
           }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
         break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
       case SOCK_DGRAM:
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
         if (ipdomain)
 #endif
           {
@@ -342,7 +342,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           }
 #endif /* CONFIG_NET_UDP */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
         else
 #endif
@@ -353,10 +353,10 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
                 goto errout;
               }
           }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
         break;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:
@@ -392,11 +392,11 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   err = ENOMEM; /* Assume failure to allocate connection instance */
   switch (type)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
       case SOCK_STREAM:
         {
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
           if (ipdomain)
 #endif
             {
@@ -406,7 +406,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
             }
 #endif /* CONFIG_NET_TCP */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
          else
 #endif
@@ -415,7 +415,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
               ret = psock_local_alloc(psock);
             }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
           /* Check for failures to allocate the connection structure. */
 
@@ -430,11 +430,11 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
         break;
 #endif
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
       case SOCK_DGRAM:
         {
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
           if (ipdomain)
 #endif
             {
@@ -444,7 +444,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
             }
 #endif /* CONFIG_NET_UDP */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
          else
 #endif
@@ -453,7 +453,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
               ret = psock_local_alloc(psock);
             }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
           /* Check for failures to allocate the connection structure. */
 

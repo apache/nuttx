@@ -47,7 +47,7 @@ else
 
 # Local Unix domain support
 
-ifeq ($(CONFIG_NET_LOCAL),y)
+ifeq ($(CONFIG_NET_LOCAL_STREAM),y)
 SOCK_CSRCS += send.c listen.c accept.c
 endif
 endif

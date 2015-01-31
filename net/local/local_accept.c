@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <string.h>
 #include <errno.h>
@@ -223,4 +223,4 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
     }
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET && CONFIG_NET_LOCAL_STREAM */

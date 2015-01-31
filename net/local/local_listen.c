@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <assert.h>
 #include <queue.h>
@@ -148,4 +148,4 @@ int local_listen(FAR struct local_conn_s *server, int backlog)
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET && CONFIG_NET_LOCAL_STREAM */

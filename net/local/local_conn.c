@@ -66,7 +66,9 @@
 
  void local_initialize(void)
 {
+#ifdef CONFIG_NET_LOCAL_STREAM
   dq_init(&g_local_listeners);
+#endif
 }
 
 /****************************************************************************
@@ -90,7 +92,9 @@ FAR struct local_conn_s *local_alloc(void)
 
       conn->lc_infd  = -1;
       conn->lc_outfd = -1;
+#ifdef CONFIG_NET_LOCAL_STREAM
       sem_init(&conn->lc_waitsem, 0, 0);
+#endif
     }
 
   return conn;
@@ -123,10 +127,12 @@ void local_free(FAR struct local_conn_s *conn)
       close(conn->lc_outfd);
     }
 
+#ifdef CONFIG_NET_LOCAL_STREAM
   /* Destroy all FIFOs associted with the connection */
 
   local_release_fifos(conn);
   sem_destroy(&conn->lc_waitsem);
+#endif
 
   /* And free the connection structure */
 

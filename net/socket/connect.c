@@ -525,7 +525,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   switch (psock->s_type)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
       case SOCK_STREAM:
         {
           /* Verify that the socket is not already connected */
@@ -538,7 +538,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           /* It's not ... connect it */
 
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
           if (psock->s_domain == PF_LOCAL)
 #endif
@@ -547,10 +547,10 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
               ret = psock_local_connect(psock, addr);
             }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
           else
 #endif
             {
@@ -567,12 +567,12 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
             }
         }
         break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
       case SOCK_DGRAM:
         {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
           if (psock->s_domain == PF_LOCAL)
 #endif
@@ -581,10 +581,10 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
               ret = psock_local_connect(psock, addr);
             }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
           else
 #endif
             {
@@ -599,7 +599,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
             }
         }
         break;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
       default:
         err = EBADF;

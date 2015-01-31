@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <sys/types.h>
 #include <errno.h>
@@ -101,4 +101,4 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
   return ret < 0 ? ret : len;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET && CONFIG_NET_LOCAL_STREAM */

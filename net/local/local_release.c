@@ -76,6 +76,7 @@ int local_release(FAR struct local_conn_s *conn)
   DEBUGASSERT(conn->lc_crefs == 0);
   state = net_lock();
 
+#ifdef CONFIG_NET_LOCAL_STREAM
   /* We should not bet here with state LOCAL_STATE_ACCEPT.  That is an
    * internal state that should be atomic with respect to socket operations.
    */
@@ -116,6 +117,7 @@ int local_release(FAR struct local_conn_s *conn)
 
       dq_rem(&conn->lc_node, &g_local_listeners);
     }
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
   /* For the remaining states (LOCAL_STATE_UNBOUND and LOCAL_STATE_UNBOUND),
    * we simply free the connection structure.

@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_DGRAM)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -174,4 +174,4 @@ errout_with_halfduplex:
   return nsent;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET && CONFIG_NET_LOCAL_DGRAM */

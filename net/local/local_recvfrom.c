@@ -141,6 +141,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 static inline ssize_t
 psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                       int flags, FAR struct sockaddr *from,
@@ -212,6 +213,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   return readlen;
 }
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 /****************************************************************************
  * Function: psock_dgram_recvfrom
@@ -234,6 +236,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
 static inline ssize_t
 psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                      int flags, FAR struct sockaddr *from,
@@ -377,6 +380,7 @@ errout_with_halfduplex:
   (void)local_release_halfduplex(conn);
   return ret;
 }
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 /****************************************************************************
  * Public Functions
@@ -418,15 +422,21 @@ ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   /* Check for a stream socket */
 
+#ifdef CONFIG_NET_LOCAL_STREAM
   if (psock->s_type == SOCK_STREAM)
     {
       return psock_stream_recvfrom(psock, buf, len, flags, from, fromlen);
     }
-  else if (psock->s_type == SOCK_DGRAM)
+  else
+#endif
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  if (psock->s_type == SOCK_DGRAM)
     {
       return psock_dgram_recvfrom(psock, buf, len, flags, from, fromlen);
     }
   else
+#endif
     {
       DEBUGPANIC();
       ndbg("ERROR: Unrecognized socket type: %s\n", psock->s_type);

@@ -14,6 +14,18 @@ config NET_LOCAL
 
 if NET_LOCAL
 
+config NET_LOCAL_STREAM
+	bool "Unix domain stream sockets"
+	default y
+	---help---
+		Enable support for Unix domain SOCK_STREAM type sockets
+
+config NET_LOCAL_DGRAM
+	bool "Unix domain datagram sockets"
+	default y
+	---help---
+		Enable support for Unix domain SOCK_DGRAM type sockets
+
 endif # NET_LOCAL
 
 endmenu # Unix Domain Sockets

@@ -1803,10 +1803,10 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       break;
 #endif /* CONFIG_NET_PKT */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
     case SOCK_STREAM:
       {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
 #ifdef CONFIG_NET_TCP
         if (psock->s_domain == PF_LOCAL)
 #endif
@@ -1814,10 +1814,10 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
             ret = psock_local_recvfrom(psock, buf, len, flags,
                                        from, fromlen);
           }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
 #ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_STREAM
         else
 #endif
           {
@@ -1826,12 +1826,12 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif /* CONFIG_NET_TCP */
       }
       break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
     case SOCK_DGRAM:
       {
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
 #ifdef CONFIG_NET_UDP
         if (psock->s_domain == PF_LOCAL)
 #endif
@@ -1839,10 +1839,10 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
             ret = psock_local_recvfrom(psock, buf, len, flags,
                                        from, fromlen);
           }
-#endif /* CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
 #ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL
+#ifdef CONFIG_NET_LOCAL_DGRAM
         else
 #endif
           {
@@ -1851,7 +1851,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif /* CONFIG_NET_UDP */
       }
       break;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL */
+#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
     default:
       {

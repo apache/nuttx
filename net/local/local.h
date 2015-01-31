@@ -140,6 +140,7 @@ struct local_conn_s
   int16_t lc_outfd;            /* File descriptor of write-only FIFO (peers) */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
 
+#ifdef CONFIG_NET_LOCAL_STREAM
   /* SOCK_STREAM fields common to both client and server */
 
   sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
@@ -174,6 +175,7 @@ struct local_conn_s
       uint16_t lc_remaining;   /* Bytes remaining in the incoming stream */
     } peer;
   } u;
+#endif /* CONFIG_NET_LOCAL_STREAM */
 };
 
 /****************************************************************************
@@ -188,9 +190,11 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 /* A list of all SOCK_STREAM listener connections */
 
 EXTERN dq_queue_t g_local_listeners;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -347,8 +351,10 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags);
+#endif
 
 /****************************************************************************
  * Function: psock_local_sendto
@@ -375,9 +381,11 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
 ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
                            size_t len, int flags, FAR const struct sockaddr *to,
                            socklen_t tolen);
+#endif
 
 /****************************************************************************
  * Name: local_send_packet
@@ -497,7 +505,9 @@ int local_sync(int fd);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_create_fifos(FAR struct local_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Name: local_create_halfduplex
@@ -507,8 +517,10 @@ int local_create_fifos(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
 int local_create_halfduplex(FAR struct local_conn_s *conn,
                             FAR const char *path);
+#endif
 
 /****************************************************************************
  * Name: local_release_fifos
@@ -518,7 +530,9 @@ int local_create_halfduplex(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_release_fifos(FAR struct local_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Name: local_release_halfduplex
@@ -528,7 +542,9 @@ int local_release_fifos(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
 int local_release_halfduplex(FAR struct local_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Name: local_open_client_rx
@@ -538,7 +554,9 @@ int local_release_halfduplex(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
+#endif
 
 /****************************************************************************
  * Name: local_open_client_tx
@@ -548,7 +566,9 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock);
+#endif
 
 /****************************************************************************
  * Name: local_open_server_rx
@@ -558,7 +578,9 @@ int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_open_server_rx(FAR struct local_conn_s *server, bool nonblock);
+#endif
 
 /****************************************************************************
  * Name: local_open_server_tx
@@ -568,7 +590,9 @@ int local_open_server_rx(FAR struct local_conn_s *server, bool nonblock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_open_server_tx(FAR struct local_conn_s *server, bool nonblock);
+#endif
 
 /****************************************************************************
  * Name: local_open_receiver
@@ -578,7 +602,9 @@ int local_open_server_tx(FAR struct local_conn_s *server, bool nonblock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
 int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock);
+#endif
 
 /****************************************************************************
  * Name: local_open_sender
@@ -588,8 +614,10 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
 int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
                       bool nonblock);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

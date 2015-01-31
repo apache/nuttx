@@ -155,7 +155,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
            */
 
           if ((0
-#ifdef CONFIG_NET_TCP_LOCAL
+#ifdef CONFIG_NET_LOCAL
               || psock->s_domain == PF_LOCAL  /* Unix domain stream or datagram */
 #endif
 #ifdef CONFIG_NET_TCP_READAHEAD
@@ -190,7 +190,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
             */
 
           int mode =  va_arg(ap, int);
-#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD)
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_TCP_READAHEAD)
           if (psock->s_type == SOCK_STREAM) /* IP or Unix domain stream */
             {
                if ((mode & O_NONBLOCK) != 0)
@@ -204,7 +204,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
             }
           else
 #endif
-#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_UDP_READAHEAD)
+#if defined(CONFIG_NET_LOCAL_DGRAM) || defined(CONFIG_NET_UDP_READAHEAD)
           if (psock->s_type == SOCK_DGRAM)  /* IP or Unix domain datagram */
             {
                if ((mode & O_NONBLOCK) != 0)
