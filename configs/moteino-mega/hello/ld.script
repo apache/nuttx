@@ -1,5 +1,5 @@
 /**************************************************************************************
- * configs/moteino-mega/hello/ld.script
+ * configs/moteino-mega/nsh/ld.script
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -127,6 +127,8 @@ SECTIONS
   {
     _stext = . ;
     *(.vectors)
+    *(.progmem.gcc*)
+    *(.progmem*)
     *(.init)
     *(.handlers)
     *(.text)
@@ -140,6 +142,8 @@ SECTIONS
   {
     _sdata = ABSOLUTE(.);
     *(.data .data.*)
+    *(.rodata)
+    *(.rodata*)
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
     _edata = ABSOLUTE(.);
