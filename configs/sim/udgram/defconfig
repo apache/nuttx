@@ -385,6 +385,8 @@ CONFIG_NET_NACTIVESOCKETS=16
 # Unix Domain Socket Support
 #
 CONFIG_NET_LOCAL=y
+# CONFIG_NET_LOCAL_STREAM is not set
+CONFIG_NET_LOCAL_DGRAM=y
 
 #
 # TCP/IP Networking
