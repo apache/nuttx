@@ -319,6 +319,11 @@ configs/mirtoo
   This is the port to the DTX1-4000L "Mirtoo" module.  This module uses MicroChip
   PIC32MX250F128D.  See http://www.dimitech.com/ for further information.
 
+configs/moteino-mega
+  This is placeholder for the LowPowerLab MoteinoMEGA that is based
+  on the Atmel AVR ATMega1284P MCU.  There is not much there yet and what is
+  there is untested due to tool-related issues.
+
 configs/mx1ads
   This is a port to the Motorola MX1ADS development board.  That board
   is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
