@@ -127,6 +127,8 @@ SECTIONS
   {
     _stext = . ;
     *(.vectors)
+    *(.progmem.gcc*)
+    *(.progmem*)
     *(.init)
     *(.handlers)
     *(.text)
@@ -140,6 +142,8 @@ SECTIONS
   {
     _sdata = ABSOLUTE(.);
     *(.data .data.*)
+    *(.rodata)
+    *(.rodata*)
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
     _edata = ABSOLUTE(.);
