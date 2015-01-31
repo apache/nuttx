@@ -70,6 +70,8 @@ endif
 
 ifeq ($(CONFIG_ARCH_CHIP_ATMEGA128),y)
   ARCHCPUFLAGS += -mmcu=atmega128
+else ifeq ($(CONFIG_ARCH_CHIP_ATMEGA1284P),y)
+  ARCHCPUFLAGS += -mmcu=atmega1284p
 else ifeq ($(CONFIG_ARCH_CHIP_AT90USB646),y)
   ARCHCPUFLAGS += -mmcu=at90usb646
 else ifeq ($(CONFIG_ARCH_CHIP_AT90USB647),y)

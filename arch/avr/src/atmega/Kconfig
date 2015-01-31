@@ -15,6 +15,11 @@ config ARCH_CHIP_ATMEGA128
 	---help---
 		Atmel ATMega128 8-bit AVR.
 
+config ARCH_CHIP_ATMEGA1284P
+	bool "ATMega1284P"
+	---help---
+		Atmel ATMega1284P 8-bit AVR.
+
 endchoice # ATMega Configuration Options
 
 menu "ATMega Peripheral Selections"

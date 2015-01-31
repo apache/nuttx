@@ -218,8 +218,13 @@ void usart0_reset(void)
 
   /* Unconfigure pins (no action needed */
 
+#ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
+  DDRD  &= ~(1 << 1);
+  PORTD &= ~(1 << 0);
+#else
   DDRE  &= ~(1 << 1);
   PORTE &= ~(1 << 0);
+#endif
 
   /* Unconfigure BAUD divisor */
 
@@ -309,6 +314,22 @@ void usart0_configure(void)
   UCSR0B = ucsr0b;
   UCSR0C = ucsr0c;
 
+#ifdef CONFIG_ARCH_CHIP_ATMEGA1284P
+  /* Pin Configuration: None necessary, Port D bits 0&1 are automatically
+   * configured:
+   *
+   * Port D, Bit 0: RXD0, USART0 Receive Pin. Receive Data (Data input pin
+   *   for the USART0). When the USART0 receiver is enabled this pin is
+   *   configured as an input regardless of the value of DDRD0. When the
+   *   USART0 forces this pin to be an input, a logical one in PORTD0 will
+   *   turn on the internal pull-up.
+   *
+   * Port D, Bit 1: TXD0, UART0 Transmit pin.
+   */
+
+  DDRD  |= (1 << 1);   /* Force Port D pin 1 to be an output -- should not be necessary */
+  PORTD |= (1 << 0);   /* Set pull-up on Port D pin 0 */
+#else
   /* Pin Configuration: None necessary, Port E bits 0&1 are automatically
    * configured:
    *
@@ -324,8 +345,9 @@ void usart0_configure(void)
    * However, this is not explicitly stated in the text.
    */
 
-  DDRE  |= (1 << 1);   /* Force Port E pin 1 to be an input -- might not be necessary */
+  DDRE  |= (1 << 1);   /* Force Port E pin 1 to be an output -- might not be necessary */
   PORTE |= (1 << 0);   /* Set pull-up on Port E pin 0 */
+#endif
 
   /* Set the baud rate divisor */
 

@@ -51,10 +51,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The ATmega128 has 35 interrupt vectors including vector 0, the reset
- * vector.  The remaining 34 are assigned IRQ numbers here:
+/* ATmega interrupt vectors other than vector 0, the reset vector, are
+ * assigned here:
  */
 
+#if defined(CONFIG_ARCH_CHIP_ATMEGA128)
 #define ATMEGA_IRQ_INT0     0  /* 0x0002 External Interrupt Request 0 */
 #define ATMEGA_IRQ_INT1     1  /* 0x0004 External Interrupt Request 1 */
 #define ATMEGA_IRQ_INT2     2  /* 0x0006 External Interrupt Request 2 */
@@ -89,6 +90,44 @@
 #define ATMEGA_IRQ_U1TX    31  /* 0x0040 USART1 Tx Complete */
 #define ATMEGA_IRQ_TWI     32  /* 0x0042 TWI Two-wire Serial Interface */
 #define ATMEGA_IRQ_SPMRDY  33  /* 0x0044 Store Program Memory Ready */
+#elif defined(CONFIG_ARCH_CHIP_ATMEGA1284P)
+#define ATMEGA_IRQ_INT0     0  /* 0x0002 External Interrupt Request 0 */
+#define ATMEGA_IRQ_INT1     1  /* 0x0004 External Interrupt Request 1 */
+#define ATMEGA_IRQ_INT2     2  /* 0x0006 External Interrupt Request 2 */
+#define ATMEGA_IRQ_PCINT0   3  /* 0x0008 Pin Change Interrupt Request 0 */
+#define ATMEGA_IRQ_PCINT1   4  /* 0x000a Pin Change Interrupt Request 1 */
+#define ATMEGA_IRQ_PCINT2   5  /* 0x000c Pin Change Interrupt Request 2 */
+#define ATMEGA_IRQ_PCINT3   6  /* 0x000e Pin Change Interrupt Request 3 */
+#define ATMEGA_IRQ_WDT      7  /* 0x0010 Watchdog Time-Out Interrupt */
+#define ATMEGA_IRQ_T2COMPA  8  /* 0x0012 TIMER2 COMPA Timer/Counter2 Compare Match */
+#define ATMEGA_IRQ_T2COMPB  9  /* 0x0014 TIMER2 COMPB Timer/Counter2 Compare Match */
+#define ATMEGA_IRQ_T2OVF   10  /* 0x0016 TIMER2 OVF Timer/Counter2 Overflow */
+#define ATMEGA_IRQ_T1CAPT  11  /* 0x0018 TIMER1 CAPT Timer/Counter1 Capture Event */
+#define ATMEGA_IRQ_T1COMPA 12  /* 0x001a TIMER1 COMPA Timer/Counter1 Compare Match A */
+#define ATMEGA_IRQ_T1COMPB 13  /* 0x001c TIMER1 COMPB Timer/Counter1 Compare Match B */
+#define ATMEGA_IRQ_T1OVF   14  /* 0x001e TIMER1 OVF Timer/Counter1 Overflow */
+#define ATMEGA_IRQ_T0COMPA 15  /* 0x0020 TIMER0 COMP Timer/Counter0 Compare Match */
+#define ATMEGA_IRQ_T0COMPB 16  /* 0x0022 TIMER0 COMP Timer/Counter0 Compare Match */
+#define ATMEGA_IRQ_T0OVF   17  /* 0x0024 TIMER0 OVF Timer/Counter0 Overflow */
+#define ATMEGA_IRQ_SPI     18  /* 0x0026 STC SPI Serial Transfer Complete */
+#define ATMEGA_IRQ_U0RX    19  /* 0x0028 USART0 Rx Complete */
+#define ATMEGA_IRQ_U0DRE   20  /* 0x002a USART0 Data Register Empty */
+#define ATMEGA_IRQ_U0TX    21  /* 0x002c USART0 Tx Complete */
+#define ATMEGA_IRQ_ANACOMP 22  /* 0x002e ANALOG COMP Analog Comparator */
+#define ATMEGA_IRQ_ADC     23  /* 0x0030 ADC Conversion Complete */
+#define ATMEGA_IRQ_EE      24  /* 0x0032 EEPROM Ready */
+#define ATMEGA_IRQ_TWI     25  /* 0x0034 TWI Two-wire Serial Interface */
+#define ATMEGA_IRQ_SPMRDY  26  /* 0x0036 Store Program Memory Ready */
+#define ATMEGA_IRQ_U1RX    27  /* 0x0038 USART1 Rx Complete */
+#define ATMEGA_IRQ_U1DRE   28  /* 0x003a USART1 Data Register Empty */
+#define ATMEGA_IRQ_U1TX    29  /* 0x003c USART1 Tx Complete */
+#define ATMEGA_IRQ_T3CAPT  30  /* 0x003e TIMER3 CAPT Timer/Counter3 Capture Event */
+#define ATMEGA_IRQ_T3COMPA 31  /* 0x0040 TIMER3 COMPA Timer/Counter3 Compare Match A */
+#define ATMEGA_IRQ_T3COMPB 32  /* 0x0042 TIMER3 COMPB Timer/Counter3 Compare Match B */
+#define ATMEGA_IRQ_T3OVF   33  /* 0x0044 TIMER3 OVF Timer/Counter3 Overflow */
+#else
+#error "Unrecognized chip"
+#endif
 
 #define NR_IRQS            34
 

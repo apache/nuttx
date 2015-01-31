@@ -77,6 +77,7 @@
 	.global	os_start		/* NuttX entry point */
 
 	.global	vectortab
+#if defined(CONFIG_ARCH_CHIP_ATMEGA128)
 	.global	atmega_int0		/* External interrupt request 0 */
 	.global	atmega_int1		/* External interrupt request 1 */
 	.global	atmega_int2		/* External interrupt request 2 */
@@ -111,6 +112,44 @@
 	.global	atmega_u1tx		/* USART1 TX complete */
 	.global	atmega_twi		/* TWI two-wire serial interface */
 	.global	atmega_spmrdy	/* Store program memory ready */
+#elif defined(CONFIG_ARCH_CHIP_ATMEGA1284P)
+  .global atmega_int0   /* External interrupt request 0 */
+  .global atmega_int1   /* External interrupt request 1 */
+  .global atmega_int2   /* External interrupt request 2 */
+  .global atmega_pcint0 /* Pin change interrupt request 0 */
+  .global atmega_pcint1 /* Pin change interrupt request 1 */
+  .global atmega_pcint2 /* Pin change interrupt request 2 */
+  .global atmega_pcint3 /* Pin change interrupt request 3 */
+  .global atmega_wdt    /* Watchdog time-out interrupt */
+  .global atmega_t2compa /* TIMER2 COMPA timer/counter2 compare match */
+  .global atmega_t2compb /* TIMER2 COMPB timer/counter2 compare match */
+  .global atmega_t2ovf  /* TIMER2 OVF timer/counter2 overflow */
+  .global atmega_t1capt /* TIMER1 CAPT timer/counter1 capture event */
+  .global atmega_t1compa  /* TIMER1 COMPA timer/counter1 compare match a */
+  .global atmega_t1compb  /* TIMER1 COMPB timer/counter1 compare match b */
+  .global atmega_t1ovf  /* TIMER1 OVF timer/counter1 overflow */
+  .global atmega_t0compa /* TIMER0 COMPA timer/counter0 compare match */
+  .global atmega_t0compb /* TIMER0 COMPB timer/counter0 compare match */
+  .global atmega_t0ovf  /* TIMER0 OVF timer/counter0 overflow */
+  .global atmega_spi    /* STC SPI serial transfer complete */
+  .global atmega_u0rx   /* USART0 RX complete */
+  .global atmega_u0dre  /* USART0 data register empty */
+  .global atmega_u0tx   /* USART0 TX complete */
+  .global atmega_anacomp  /* ANALOG COMP analog comparator */
+  .global atmega_adc    /* ADC conversion complete */
+  .global atmega_ee   /* EEPROM ready */
+  .global atmega_twi    /* TWI two-wire serial interface */
+  .global atmega_spmrdy /* Store program memory ready */
+  .global atmega_u1rx   /* USART1 RX complete */
+  .global atmega_u1dre  /* USART1 data register empty */
+  .global atmega_u1tx   /* USART1 TX complete */
+  .global atmega_t3capt /* TIMER3 CAPT timer/counter3 capture event */
+  .global atmega_t3compa  /* TIMER3 COMPA timer/counter3 compare match a */
+  .global atmega_t3compb  /* TIMER3 COMPB timer/counter3 compare match b */
+  .global atmega_t3ovf  /* TIMER3 OVF timer/counter3 overflow */
+#else
+#error "Unrecognized chip"
+#endif
 
 /****************************************************************************
  * Macros
@@ -132,6 +171,7 @@
 	.func	vectortab
 vectortab:
 	jmp		__start			/*  0: Vector 0 is the reset vector */
+#if defined(CONFIG_ARCH_CHIP_ATMEGA128)
 	vector	atmega_int0		/*  1: External interrupt request 0 */
 	vector	atmega_int1		/*  2: External interrupt request 1 */
 	vector	atmega_int2		/*  3: External interrupt request 2 */
@@ -166,6 +206,44 @@ vectortab:
 	vector	atmega_u1tx		/* 32: USART1 TX complete */
 	vector	atmega_twi		/* 33: TWI two-wire serial interface */
 	vector	atmega_spmrdy	/* 34: Store program memory ready */
+#elif defined(CONFIG_ARCH_CHIP_ATMEGA1284P)
+  vector  atmega_int0     /* External interrupt request 0 */
+  vector  atmega_int1     /* External interrupt request 1 */
+  vector  atmega_int2     /* External interrupt request 2 */
+  vector  atmega_pcint0   /* Pin change interrupt request 0 */
+  vector  atmega_pcint1   /* Pin change interrupt request 1 */
+  vector  atmega_pcint2   /* Pin change interrupt request 2 */
+  vector  atmega_pcint3   /* Pin change interrupt request 3 */
+  vector  atmega_wdt      /* Watchdog time-out interrupt */
+  vector  atmega_t2compa  /* TIMER2 COMPA timer/counter2 compare match */
+  vector  atmega_t2compb  /* TIMER2 COMPB timer/counter2 compare match */
+  vector  atmega_t2ovf    /* TIMER2 OVF timer/counter2 overflow */
+  vector  atmega_t1capt   /* TIMER1 CAPT timer/counter1 capture event */
+  vector  atmega_t1compa  /* TIMER1 COMPA timer/counter1 compare match a */
+  vector  atmega_t1compb  /* TIMER1 COMPB timer/counter1 compare match b */
+  vector  atmega_t1ovf    /* TIMER1 OVF timer/counter1 overflow */
+  vector  atmega_t0compa  /* TIMER0 COMPA timer/counter0 compare match */
+  vector  atmega_t0compb  /* TIMER0 COMPB timer/counter0 compare match */
+  vector  atmega_t0ovf    /* TIMER0 OVF timer/counter0 overflow */
+  vector  atmega_spi      /* STC SPI serial transfer complete */
+  vector  atmega_u0rx     /* USART0 RX complete */
+  vector  atmega_u0dre    /* USART0 data register empty */
+  vector  atmega_u0tx     /* USART0 TX complete */
+  vector  atmega_anacomp  /* ANALOG COMP analog comparator */
+  vector  atmega_adc      /* ADC conversion complete */
+  vector  atmega_ee       /* EEPROM ready */
+  vector  atmega_twi      /* TWI two-wire serial interface */
+  vector  atmega_spmrdy   /* Store program memory ready */
+  vector  atmega_u1rx     /* USART1 RX complete */
+  vector  atmega_u1dre    /* USART1 data register empty */
+  vector  atmega_u1tx     /* USART1 TX complete */
+  vector  atmega_t3capt   /* TIMER3 CAPT timer/counter3 capture event */
+  vector  atmega_t3compa  /* TIMER3 COMPA timer/counter3 compare match a */
+  vector  atmega_t3compb  /* TIMER3 COMPB timer/counter3 compare match b */
+  vector  atmega_t3ovf    /* TIMER3 OVF timer/counter3 overflow */
+#else
+#error "Unrecognized chip"
+#endif
 	.endfunc
 
 /****************************************************************************
