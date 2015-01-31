@@ -138,15 +138,6 @@ struct adxl345_dev_s
 
   struct work_s timeout;               /* Supports timeout work */
   struct adxl345_sample_s sample;      /* Last sampled accelerometer data */
-
-  /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
-   * retained in the f_priv field of the 'struct file'.
-   */
-
-#ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_ADXL345_NPOLLWAITERS];
-#endif
 };
 
 /********************************************************************************************
