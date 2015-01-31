@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/avr/src/atmega/atmega_exceptions.S
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,42 +97,42 @@
 	HANDLER	atmega_twi, ATMEGA_IRQ_TWI, excpt_common			/* TWI two-wire serial interface */
 	HANDLER	atmega_spmrdy, ATMEGA_IRQ_SPMRDY, excpt_common		/* Store program memory ready */
 #elif defined(CONFIG_ARCH_CHIP_ATMEGA1284P)
-  HANDLER atmega_int0, ATMEGA_IRQ_INT0, excpt_common        /* External interrupt request 0 */
-  HANDLER atmega_int1, ATMEGA_IRQ_INT1, excpt_common        /* External interrupt request 1 */
-  HANDLER atmega_int2, ATMEGA_IRQ_INT2, excpt_common        /* External interrupt request 2 */
-  HANDLER atmega_pcint0, ATMEGA_IRQ_PCINT0, excpt_common    /* Pin change interrupt request 0 */
-  HANDLER atmega_pcint1, ATMEGA_IRQ_PCINT1, excpt_common    /* Pin change interrupt request 1 */
-  HANDLER atmega_pcint2, ATMEGA_IRQ_PCINT2, excpt_common    /* Pin change interrupt request 2 */
-  HANDLER atmega_pcint3, ATMEGA_IRQ_PCINT3, excpt_common    /* Pin change interrupt request 3 */
-  HANDLER atmega_wdt, ATMEGA_IRQ_WDT, excpt_common          /* Watchdog time-out interrupt */
-  HANDLER atmega_t2compa, ATMEGA_IRQ_T2COMPA, excpt_common  /* TIMER2 COMPA timer/counter2 compare match */
-  HANDLER atmega_t2compb, ATMEGA_IRQ_T2COMPB, excpt_common  /* TIMER2 COMPB timer/counter2 compare match */
-  HANDLER atmega_t2ovf, ATMEGA_IRQ_T2OVF, excpt_common      /* TIMER2 OVF timer/counter2 overflow */
-  HANDLER atmega_t1capt, ATMEGA_IRQ_T1CAPT, excpt_common    /* TIMER1 CAPT timer/counter1 capture event */
-  HANDLER atmega_t1compa, ATMEGA_IRQ_T1COMPA, excpt_common  /* TIMER1 COMPA timer/counter1 compare match a */
-  HANDLER atmega_t1compb, ATMEGA_IRQ_T1COMPB, excpt_common  /* TIMER1 COMPB timer/counter1 compare match b */
-  HANDLER atmega_t1ovf, ATMEGA_IRQ_T1OVF, excpt_common      /* TIMER1 OVF timer/counter1 overflow */
-  HANDLER atmega_t0compa, ATMEGA_IRQ_T0COMPA, excpt_common  /* TIMER0 COMPA timer/counter0 compare match */
-  HANDLER atmega_t0compb, ATMEGA_IRQ_T0COMPB, excpt_common  /* TIMER0 COMPB timer/counter0 compare match */
-  HANDLER atmega_t0ovf, ATMEGA_IRQ_T0OVF, excpt_common      /* TIMER0 OVF timer/counter0 overflow */
-  HANDLER atmega_spi, ATMEGA_IRQ_SPI, excpt_common          /* STC SPI serial transfer complete */
-  HANDLER atmega_u0rx, ATMEGA_IRQ_U0RX, excpt_common        /* USART0 RX complete */
-  HANDLER atmega_u0dre, ATMEGA_IRQ_U0DRE, excpt_common      /* USART0 data register empty */
-  HANDLER atmega_u0tx, ATMEGA_IRQ_U0TX, excpt_common        /* USART0 TX complete */
-  HANDLER atmega_anacomp, ATMEGA_IRQ_ANACOMP, excpt_common  /* ANALOG COMP analog comparator */
-  HANDLER atmega_adc, ATMEGA_IRQ_ADC, excpt_common          /* ADC conversion complete */
-  HANDLER atmega_ee, ATMEGA_IRQ_EE, excpt_common            /* EEPROM ready */
-  HANDLER atmega_twi , ATMEGA_IRQ_TWI, excpt_common         /* TWI two-wire serial interface */
-  HANDLER atmega_spmrdy, ATMEGA_IRQ_SPMRDY, excpt_common    /* Store program memory ready */
-  HANDLER atmega_u1rx, ATMEGA_IRQ_U1RX, excpt_common        /* USART1 RX complete */
-  HANDLER atmega_u1dre, ATMEGA_IRQ_U1DRE, excpt_common      /* USART1 data register empty */
-  HANDLER atmega_u1tx, ATMEGA_IRQ_U1TX, excpt_common        /* USART1 TX complete */
-  HANDLER atmega_t3capt, ATMEGA_IRQ_T3CAPT, excpt_common    /* TIMER3 CAPT timer/counter3 capture event */
-  HANDLER atmega_t3compa, ATMEGA_IRQ_T3COMPA, excpt_common  /* TIMER3 COMPA timer/counter3 compare match a */
-  HANDLER atmega_t3compb, ATMEGA_IRQ_T3COMPB, excpt_common  /* TIMER3 COMPB timer/counter3 compare match b */
-  HANDLER atmega_t3ovf, ATMEGA_IRQ_T3OVF, excpt_common      /* TIMER3 OVF timer/counter3 overflow */
+	HANDLER atmega_int0, ATMEGA_IRQ_INT0, excpt_common			/* External interrupt request 0 */
+	HANDLER atmega_int1, ATMEGA_IRQ_INT1, excpt_common			/* External interrupt request 1 */
+	HANDLER atmega_int2, ATMEGA_IRQ_INT2, excpt_common			/* External interrupt request 2 */
+	HANDLER atmega_pcint0, ATMEGA_IRQ_PCINT0, excpt_common		/* Pin change interrupt request 0 */
+	HANDLER atmega_pcint1, ATMEGA_IRQ_PCINT1, excpt_common		/* Pin change interrupt request 1 */
+	HANDLER atmega_pcint2, ATMEGA_IRQ_PCINT2, excpt_common		/* Pin change interrupt request 2 */
+	HANDLER atmega_pcint3, ATMEGA_IRQ_PCINT3, excpt_common		/* Pin change interrupt request 3 */
+	HANDLER atmega_wdt, ATMEGA_IRQ_WDT, excpt_common			/* Watchdog time-out interrupt */
+	HANDLER atmega_t2compa, ATMEGA_IRQ_T2COMPA, excpt_common	/* TIMER2 COMPA timer/counter2 compare match */
+	HANDLER atmega_t2compb, ATMEGA_IRQ_T2COMPB, excpt_common	/* TIMER2 COMPB timer/counter2 compare match */
+	HANDLER atmega_t2ovf, ATMEGA_IRQ_T2OVF, excpt_common		/* TIMER2 OVF timer/counter2 overflow */
+	HANDLER atmega_t1capt, ATMEGA_IRQ_T1CAPT, excpt_common		/* TIMER1 CAPT timer/counter1 capture event */
+	HANDLER atmega_t1compa, ATMEGA_IRQ_T1COMPA, excpt_common	/* TIMER1 COMPA timer/counter1 compare match a */
+	HANDLER atmega_t1compb, ATMEGA_IRQ_T1COMPB, excpt_common	/* TIMER1 COMPB timer/counter1 compare match b */
+	HANDLER atmega_t1ovf, ATMEGA_IRQ_T1OVF, excpt_common		/* TIMER1 OVF timer/counter1 overflow */
+	HANDLER atmega_t0compa, ATMEGA_IRQ_T0COMPA, excpt_common	/* TIMER0 COMPA timer/counter0 compare match */
+	HANDLER atmega_t0compb, ATMEGA_IRQ_T0COMPB, excpt_common	/* TIMER0 COMPB timer/counter0 compare match */
+	HANDLER atmega_t0ovf, ATMEGA_IRQ_T0OVF, excpt_common		/* TIMER0 OVF timer/counter0 overflow */
+	HANDLER atmega_spi, ATMEGA_IRQ_SPI, excpt_common			/* STC SPI serial transfer complete */
+	HANDLER atmega_u0rx, ATMEGA_IRQ_U0RX, excpt_common			/* USART0 RX complete */
+	HANDLER atmega_u0dre, ATMEGA_IRQ_U0DRE, excpt_common		/* USART0 data register empty */
+	HANDLER atmega_u0tx, ATMEGA_IRQ_U0TX, excpt_common			/* USART0 TX complete */
+	HANDLER atmega_anacomp, ATMEGA_IRQ_ANACOMP, excpt_common	/* ANALOG COMP analog comparator */
+	HANDLER atmega_adc, ATMEGA_IRQ_ADC, excpt_common			/* ADC conversion complete */
+	HANDLER atmega_ee, ATMEGA_IRQ_EE, excpt_common				/* EEPROM ready */
+	HANDLER atmega_twi , ATMEGA_IRQ_TWI, excpt_common			/* TWI two-wire serial interface */
+	HANDLER atmega_spmrdy, ATMEGA_IRQ_SPMRDY, excpt_common		/* Store program memory ready */
+	HANDLER atmega_u1rx, ATMEGA_IRQ_U1RX, excpt_common			/* USART1 RX complete */
+	HANDLER atmega_u1dre, ATMEGA_IRQ_U1DRE, excpt_common		/* USART1 data register empty */
+	HANDLER atmega_u1tx, ATMEGA_IRQ_U1TX, excpt_common			/* USART1 TX complete */
+	HANDLER atmega_t3capt, ATMEGA_IRQ_T3CAPT, excpt_common		/* TIMER3 CAPT timer/counter3 capture event */
+	HANDLER atmega_t3compa, ATMEGA_IRQ_T3COMPA, excpt_common	/* TIMER3 COMPA timer/counter3 compare match a */
+	HANDLER atmega_t3compb, ATMEGA_IRQ_T3COMPB, excpt_common	/* TIMER3 COMPB timer/counter3 compare match b */
+	HANDLER atmega_t3ovf, ATMEGA_IRQ_T3OVF, excpt_common		/* TIMER3 OVF timer/counter3 overflow */
 #else
-#error "Unrecognized chip"
+#  error "Unrecognized chip"
 #endif
 
 /********************************************************************************************
@@ -162,7 +162,7 @@ excpt_common:
 	 */
 
 	in		r28, _SFR_IO_ADDR(SPL)	/* Get the save structure pointer in a Call-saved register pair */
-	in		r29, _SFR_IO_ADDR(SPH)  /* Pointer can be obtained from the stack pointer */
+	in		r29, _SFR_IO_ADDR(SPH)	/* Pointer can be obtained from the stack pointer */
 	adiw	r28, 1					/* Remembering that push post-decrements */
 	movw	r22, r28				/* Pass register save structure as the parameter 2 */
 	USE_INTSTACK rx, ry, rz			/* Switch to the interrupt stack */
@@ -206,4 +206,3 @@ up_interruptstack:
 	.size	up_interruptstack, .-up_interruptstack
 #endif
 	.end
-
