@@ -161,6 +161,26 @@ int unlink(FAR const char *pathname)
               goto errout_with_inode;
             }
 
+          /* Notify the character driver that it has been unlinked.  If
+           * there are no open references to the driver instance, then the
+           * driver should clean release all resources because it is no
+           * longer accessible.
+           */
+
+          if (INODE_IS_DRIVER(inode) && inode->u.i_ops->unlink)
+            {
+              /* The value passed to the driver is the same value that was
+               * provided to register_driver();
+               */
+
+              ret = inode->u.i_ops->unlink(inode->i_private);
+              if (ret < 0)
+                {
+                  errcode = -ret;
+                  goto errout_with_inode;
+                }
+            }
+
           /* Remove the old inode.  Because we hold a reference count on the
            * inode, it will not be deleted now.  It will be deleted when all
            * of the references to to the inode have been released (perhaps

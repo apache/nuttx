@@ -91,11 +91,13 @@ struct file_operations
   ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
+
+  /* The two structures need not be common after this point */
+
 #ifndef CONFIG_DISABLE_POLL
   int     (*poll)(FAR struct file *filep, struct pollfd *fds, bool setup);
 #endif
-
-  /* The two structures need not be common after this point */
+  int     (*unlink)(FAR void *priv);
 };
 
 /* This structure provides information about the state of a block driver */
@@ -234,7 +236,6 @@ union inode_ops_u
 #ifndef CONFIG_DISABLE_MQUEUE
   FAR struct mqueue_inode_s             *i_mqueue; /* POSIX message queue */
 #endif
-
 };
 
 /* This structure represents one inode in the Nuttx pseudo-file system */
