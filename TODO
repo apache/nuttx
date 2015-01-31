@@ -927,22 +927,24 @@ o Network (net/, drivers/net)
   Description: FIFOs are used as the IPC underlying local Unix domain sockets.
                In NuttX, FIFOs are implemented as device drivers (not as
                special files).  The FIFO device driver is instantiated when
-               the Unix domain socket communications begin.  But there is no
-               mechanism in place now to delete the FIFO device driver
-               instance when the Unix domain socket is no longer used.  The
-               underlying buffer is deleted, but the driver instance itself
-               remains.  unlink() could be used to get rid of the driver
-               name in the pseudo-filesystem, making the drvier inaccessible.
-               But it will not free the driver.  A new interface, say rmfifo(),
-               would be required to do that.
+               the Unix domain socket communications begin and will
+               automatically be released when (1) the driver is unlinked and
+               (2) all open references to the driver have been closed.  But
+               there is no mechanism in place now to unline the FIFO when
+               the Unix domain socket is no longer used.  The primary issue
+               is timing.. the FIFO should persist until it is no longer
+               needed.  Perhaps there should be a delayed call to unlink()
+               (using a watchdog or the work queue).  If the driver is re-
+               opened, the delayed unlink could be canceled?  Needs more
+               thought.
   Status:      Open
   Priority:    Low for now because I don't have a situation where this is a
                problem for me.  If you use the same Unix domain paths, then
                it is not a issue; in fact it is more efficient if the FIFO
-               devices persiste.  But this would be a serious problem if,
-               for example, you create new Unix domain paths dynaically.  In
-               that case you would effectly have a memory leak and the number
-               of FIFO instances grow.
+               devices persist.  But this would be a serious problem if,
+               for example, you create new Unix domain paths dynamically.
+               In that case you would effectively have a memory leak and the
+               number of FIFO instances grow.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
