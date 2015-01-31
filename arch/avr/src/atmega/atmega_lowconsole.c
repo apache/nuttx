@@ -52,7 +52,7 @@
 #include "atmega_internal.h"
 
 /******************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ******************************************************************************/
 
 /* USART0 Baud rate settings for normal and double speed modes  */
@@ -329,6 +329,7 @@ void usart0_configure(void)
 
   DDRD  |= (1 << 1);   /* Force Port D pin 1 to be an output -- should not be necessary */
   PORTD |= (1 << 0);   /* Set pull-up on Port D pin 0 */
+
 #else
   /* Pin Configuration: None necessary, Port E bits 0&1 are automatically
    * configured:
@@ -471,4 +472,3 @@ void up_lowputc(char ch)
 #  endif
 #endif
 }
-

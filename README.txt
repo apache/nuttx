@@ -1192,6 +1192,8 @@ nuttx
  |   |   `- README.txt
  |   |- mt-db-x3/
  |   |   `- README.txt
+ |   |- moteino-mega/
+ |   |   `- README.txt
  |   |- mx1ads/
  |   |   `- README.txt
  |   |- ne63badge/

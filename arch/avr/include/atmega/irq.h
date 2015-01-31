@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/include/atmega/irq.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,80 +56,80 @@
  */
 
 #if defined(CONFIG_ARCH_CHIP_ATMEGA128)
-#define ATMEGA_IRQ_INT0     0  /* 0x0002 External Interrupt Request 0 */
-#define ATMEGA_IRQ_INT1     1  /* 0x0004 External Interrupt Request 1 */
-#define ATMEGA_IRQ_INT2     2  /* 0x0006 External Interrupt Request 2 */
-#define ATMEGA_IRQ_INT3     3  /* 0x0008 External Interrupt Request 3 */
-#define ATMEGA_IRQ_INT4     4  /* 0x000a External Interrupt Request 4 */
-#define ATMEGA_IRQ_INT5     5  /* 0x000c External Interrupt Request 5 */
-#define ATMEGA_IRQ_INT6     6  /* 0x000e External Interrupt Request 6 */
-#define ATMEGA_IRQ_INT7     7  /* 0x0010 External Interrupt Request 7 */
-#define ATMEGA_IRQ_T2COMP   8  /* 0x0012 TIMER2 COMP Timer/Counter2 Compare Match */
-#define ATMEGA_IRQ_T2OVF    9  /* 0x0014 TIMER2 OVF Timer/Counter2 Overflow */
-#define ATMEGA_IRQ_T1CAPT  10  /* 0x0016 TIMER1 CAPT Timer/Counter1 Capture Event */
-#define ATMEGA_IRQ_T1COMPA 11  /* 0x0018 TIMER1 COMPA Timer/Counter1 Compare Match A */
-#define ATMEGA_IRQ_T1COMPB 12  /* 0x001a TIMER1 COMPB Timer/Counter1 Compare Match B */
-#define ATMEGA_IRQ_T1OVF   13  /* 0x001c TIMER1 OVF Timer/Counter1 Overflow */
-#define ATMEGA_IRQ_T0COMP  14  /* 0x001e TIMER0 COMP Timer/Counter0 Compare Match */
-#define ATMEGA_IRQ_T0OVF   15  /* 0x0020 TIMER0 OVF Timer/Counter0 Overflow */
-#define ATMEGA_IRQ_SPI     16  /* 0x0022 STC SPI Serial Transfer Complete */
-#define ATMEGA_IRQ_U0RX    17  /* 0x0024 USART0 Rx Complete */
-#define ATMEGA_IRQ_U0DRE   18  /* 0x0026 USART0 Data Register Empty */
-#define ATMEGA_IRQ_U0TX    19  /* 0x0028 USART0 Tx Complete */
-#define ATMEGA_IRQ_ADC     20  /* 0x002a ADC Conversion Complete */
-#define ATMEGA_IRQ_EE      21  /* 0x002c EEPROM Ready */
-#define ATMEGA_IRQ_ANACOMP 22  /* 0x002e ANALOG COMP Analog Comparator */
-#define ATMEGA_IRQ_T1COMPC 23  /* 0x0030 TIMER1 COMPC Timer/Countre1 Compare Match C */
-#define ATMEGA_IRQ_T3CAPT  24  /* 0x0032 TIMER3 CAPT Timer/Counter3 Capture Event */
-#define ATMEGA_IRQ_T3COMPA 25  /* 0x0034 TIMER3 COMPA Timer/Counter3 Compare Match A */
-#define ATMEGA_IRQ_T3COMPB 26  /* 0x0036 TIMER3 COMPB Timer/Counter3 Compare Match B */
-#define ATMEGA_IRQ_T3COMPC 27  /* 0x0038 TIMER3 COMPC Timer/Counter3 Compare Match C */
-#define ATMEGA_IRQ_T3OVF   28  /* 0x003a TIMER3 OVF Timer/Counter3 Overflow */
-#define ATMEGA_IRQ_U1RX    29  /* 0x003c USART1 Rx Complete */
-#define ATMEGA_IRQ_U1DRE   30  /* 0x003e USART1 Data Register Empty */
-#define ATMEGA_IRQ_U1TX    31  /* 0x0040 USART1 Tx Complete */
-#define ATMEGA_IRQ_TWI     32  /* 0x0042 TWI Two-wire Serial Interface */
-#define ATMEGA_IRQ_SPMRDY  33  /* 0x0044 Store Program Memory Ready */
+#  define ATMEGA_IRQ_INT0     0  /* 0x0002 External Interrupt Request 0 */
+#  define ATMEGA_IRQ_INT1     1  /* 0x0004 External Interrupt Request 1 */
+#  define ATMEGA_IRQ_INT2     2  /* 0x0006 External Interrupt Request 2 */
+#  define ATMEGA_IRQ_INT3     3  /* 0x0008 External Interrupt Request 3 */
+#  define ATMEGA_IRQ_INT4     4  /* 0x000a External Interrupt Request 4 */
+#  define ATMEGA_IRQ_INT5     5  /* 0x000c External Interrupt Request 5 */
+#  define ATMEGA_IRQ_INT6     6  /* 0x000e External Interrupt Request 6 */
+#  define ATMEGA_IRQ_INT7     7  /* 0x0010 External Interrupt Request 7 */
+#  define ATMEGA_IRQ_T2COMP   8  /* 0x0012 TIMER2 COMP Timer/Counter2 Compare Match */
+#  define ATMEGA_IRQ_T2OVF    9  /* 0x0014 TIMER2 OVF Timer/Counter2 Overflow */
+#  define ATMEGA_IRQ_T1CAPT  10  /* 0x0016 TIMER1 CAPT Timer/Counter1 Capture Event */
+#  define ATMEGA_IRQ_T1COMPA 11  /* 0x0018 TIMER1 COMPA Timer/Counter1 Compare Match A */
+#  define ATMEGA_IRQ_T1COMPB 12  /* 0x001a TIMER1 COMPB Timer/Counter1 Compare Match B */
+#  define ATMEGA_IRQ_T1OVF   13  /* 0x001c TIMER1 OVF Timer/Counter1 Overflow */
+#  define ATMEGA_IRQ_T0COMP  14  /* 0x001e TIMER0 COMP Timer/Counter0 Compare Match */
+#  define ATMEGA_IRQ_T0OVF   15  /* 0x0020 TIMER0 OVF Timer/Counter0 Overflow */
+#  define ATMEGA_IRQ_SPI     16  /* 0x0022 STC SPI Serial Transfer Complete */
+#  define ATMEGA_IRQ_U0RX    17  /* 0x0024 USART0 Rx Complete */
+#  define ATMEGA_IRQ_U0DRE   18  /* 0x0026 USART0 Data Register Empty */
+#  define ATMEGA_IRQ_U0TX    19  /* 0x0028 USART0 Tx Complete */
+#  define ATMEGA_IRQ_ADC     20  /* 0x002a ADC Conversion Complete */
+#  define ATMEGA_IRQ_EE      21  /* 0x002c EEPROM Ready */
+#  define ATMEGA_IRQ_ANACOMP 22  /* 0x002e ANALOG COMP Analog Comparator */
+#  define ATMEGA_IRQ_T1COMPC 23  /* 0x0030 TIMER1 COMPC Timer/Countre1 Compare Match C */
+#  define ATMEGA_IRQ_T3CAPT  24  /* 0x0032 TIMER3 CAPT Timer/Counter3 Capture Event */
+#  define ATMEGA_IRQ_T3COMPA 25  /* 0x0034 TIMER3 COMPA Timer/Counter3 Compare Match A */
+#  define ATMEGA_IRQ_T3COMPB 26  /* 0x0036 TIMER3 COMPB Timer/Counter3 Compare Match B */
+#  define ATMEGA_IRQ_T3COMPC 27  /* 0x0038 TIMER3 COMPC Timer/Counter3 Compare Match C */
+#  define ATMEGA_IRQ_T3OVF   28  /* 0x003a TIMER3 OVF Timer/Counter3 Overflow */
+#  define ATMEGA_IRQ_U1RX    29  /* 0x003c USART1 Rx Complete */
+#  define ATMEGA_IRQ_U1DRE   30  /* 0x003e USART1 Data Register Empty */
+#  define ATMEGA_IRQ_U1TX    31  /* 0x0040 USART1 Tx Complete */
+#  define ATMEGA_IRQ_TWI     32  /* 0x0042 TWI Two-wire Serial Interface */
+#  define ATMEGA_IRQ_SPMRDY  33  /* 0x0044 Store Program Memory Ready */
 #elif defined(CONFIG_ARCH_CHIP_ATMEGA1284P)
-#define ATMEGA_IRQ_INT0     0  /* 0x0002 External Interrupt Request 0 */
-#define ATMEGA_IRQ_INT1     1  /* 0x0004 External Interrupt Request 1 */
-#define ATMEGA_IRQ_INT2     2  /* 0x0006 External Interrupt Request 2 */
-#define ATMEGA_IRQ_PCINT0   3  /* 0x0008 Pin Change Interrupt Request 0 */
-#define ATMEGA_IRQ_PCINT1   4  /* 0x000a Pin Change Interrupt Request 1 */
-#define ATMEGA_IRQ_PCINT2   5  /* 0x000c Pin Change Interrupt Request 2 */
-#define ATMEGA_IRQ_PCINT3   6  /* 0x000e Pin Change Interrupt Request 3 */
-#define ATMEGA_IRQ_WDT      7  /* 0x0010 Watchdog Time-Out Interrupt */
-#define ATMEGA_IRQ_T2COMPA  8  /* 0x0012 TIMER2 COMPA Timer/Counter2 Compare Match */
-#define ATMEGA_IRQ_T2COMPB  9  /* 0x0014 TIMER2 COMPB Timer/Counter2 Compare Match */
-#define ATMEGA_IRQ_T2OVF   10  /* 0x0016 TIMER2 OVF Timer/Counter2 Overflow */
-#define ATMEGA_IRQ_T1CAPT  11  /* 0x0018 TIMER1 CAPT Timer/Counter1 Capture Event */
-#define ATMEGA_IRQ_T1COMPA 12  /* 0x001a TIMER1 COMPA Timer/Counter1 Compare Match A */
-#define ATMEGA_IRQ_T1COMPB 13  /* 0x001c TIMER1 COMPB Timer/Counter1 Compare Match B */
-#define ATMEGA_IRQ_T1OVF   14  /* 0x001e TIMER1 OVF Timer/Counter1 Overflow */
-#define ATMEGA_IRQ_T0COMPA 15  /* 0x0020 TIMER0 COMP Timer/Counter0 Compare Match */
-#define ATMEGA_IRQ_T0COMPB 16  /* 0x0022 TIMER0 COMP Timer/Counter0 Compare Match */
-#define ATMEGA_IRQ_T0OVF   17  /* 0x0024 TIMER0 OVF Timer/Counter0 Overflow */
-#define ATMEGA_IRQ_SPI     18  /* 0x0026 STC SPI Serial Transfer Complete */
-#define ATMEGA_IRQ_U0RX    19  /* 0x0028 USART0 Rx Complete */
-#define ATMEGA_IRQ_U0DRE   20  /* 0x002a USART0 Data Register Empty */
-#define ATMEGA_IRQ_U0TX    21  /* 0x002c USART0 Tx Complete */
-#define ATMEGA_IRQ_ANACOMP 22  /* 0x002e ANALOG COMP Analog Comparator */
-#define ATMEGA_IRQ_ADC     23  /* 0x0030 ADC Conversion Complete */
-#define ATMEGA_IRQ_EE      24  /* 0x0032 EEPROM Ready */
-#define ATMEGA_IRQ_TWI     25  /* 0x0034 TWI Two-wire Serial Interface */
-#define ATMEGA_IRQ_SPMRDY  26  /* 0x0036 Store Program Memory Ready */
-#define ATMEGA_IRQ_U1RX    27  /* 0x0038 USART1 Rx Complete */
-#define ATMEGA_IRQ_U1DRE   28  /* 0x003a USART1 Data Register Empty */
-#define ATMEGA_IRQ_U1TX    29  /* 0x003c USART1 Tx Complete */
-#define ATMEGA_IRQ_T3CAPT  30  /* 0x003e TIMER3 CAPT Timer/Counter3 Capture Event */
-#define ATMEGA_IRQ_T3COMPA 31  /* 0x0040 TIMER3 COMPA Timer/Counter3 Compare Match A */
-#define ATMEGA_IRQ_T3COMPB 32  /* 0x0042 TIMER3 COMPB Timer/Counter3 Compare Match B */
-#define ATMEGA_IRQ_T3OVF   33  /* 0x0044 TIMER3 OVF Timer/Counter3 Overflow */
+#  define ATMEGA_IRQ_INT0     0  /* 0x0002 External Interrupt Request 0 */
+#  define ATMEGA_IRQ_INT1     1  /* 0x0004 External Interrupt Request 1 */
+#  define ATMEGA_IRQ_INT2     2  /* 0x0006 External Interrupt Request 2 */
+#  define ATMEGA_IRQ_PCINT0   3  /* 0x0008 Pin Change Interrupt Request 0 */
+#  define ATMEGA_IRQ_PCINT1   4  /* 0x000a Pin Change Interrupt Request 1 */
+#  define ATMEGA_IRQ_PCINT2   5  /* 0x000c Pin Change Interrupt Request 2 */
+#  define ATMEGA_IRQ_PCINT3   6  /* 0x000e Pin Change Interrupt Request 3 */
+#  define ATMEGA_IRQ_WDT      7  /* 0x0010 Watchdog Time-Out Interrupt */
+#  define ATMEGA_IRQ_T2COMPA  8  /* 0x0012 TIMER2 COMPA Timer/Counter2 Compare Match */
+#  define ATMEGA_IRQ_T2COMPB  9  /* 0x0014 TIMER2 COMPB Timer/Counter2 Compare Match */
+#  define ATMEGA_IRQ_T2OVF   10  /* 0x0016 TIMER2 OVF Timer/Counter2 Overflow */
+#  define ATMEGA_IRQ_T1CAPT  11  /* 0x0018 TIMER1 CAPT Timer/Counter1 Capture Event */
+#  define ATMEGA_IRQ_T1COMPA 12  /* 0x001a TIMER1 COMPA Timer/Counter1 Compare Match A */
+#  define ATMEGA_IRQ_T1COMPB 13  /* 0x001c TIMER1 COMPB Timer/Counter1 Compare Match B */
+#  define ATMEGA_IRQ_T1OVF   14  /* 0x001e TIMER1 OVF Timer/Counter1 Overflow */
+#  define ATMEGA_IRQ_T0COMPA 15  /* 0x0020 TIMER0 COMP Timer/Counter0 Compare Match */
+#  define ATMEGA_IRQ_T0COMPB 16  /* 0x0022 TIMER0 COMP Timer/Counter0 Compare Match */
+#  define ATMEGA_IRQ_T0OVF   17  /* 0x0024 TIMER0 OVF Timer/Counter0 Overflow */
+#  define ATMEGA_IRQ_SPI     18  /* 0x0026 STC SPI Serial Transfer Complete */
+#  define ATMEGA_IRQ_U0RX    19  /* 0x0028 USART0 Rx Complete */
+#  define ATMEGA_IRQ_U0DRE   20  /* 0x002a USART0 Data Register Empty */
+#  define ATMEGA_IRQ_U0TX    21  /* 0x002c USART0 Tx Complete */
+#  define ATMEGA_IRQ_ANACOMP 22  /* 0x002e ANALOG COMP Analog Comparator */
+#  define ATMEGA_IRQ_ADC     23  /* 0x0030 ADC Conversion Complete */
+#  define ATMEGA_IRQ_EE      24  /* 0x0032 EEPROM Ready */
+#  define ATMEGA_IRQ_TWI     25  /* 0x0034 TWI Two-wire Serial Interface */
+#  define ATMEGA_IRQ_SPMRDY  26  /* 0x0036 Store Program Memory Ready */
+#  define ATMEGA_IRQ_U1RX    27  /* 0x0038 USART1 Rx Complete */
+#  define ATMEGA_IRQ_U1DRE   28  /* 0x003a USART1 Data Register Empty */
+#  define ATMEGA_IRQ_U1TX    29  /* 0x003c USART1 Tx Complete */
+#  define ATMEGA_IRQ_T3CAPT  30  /* 0x003e TIMER3 CAPT Timer/Counter3 Capture Event */
+#  define ATMEGA_IRQ_T3COMPA 31  /* 0x0040 TIMER3 COMPA Timer/Counter3 Compare Match A */
+#  define ATMEGA_IRQ_T3COMPB 32  /* 0x0042 TIMER3 COMPB Timer/Counter3 Compare Match B */
+#  define ATMEGA_IRQ_T3OVF   33  /* 0x0044 TIMER3 OVF Timer/Counter3 Overflow */
 #else
-#error "Unrecognized chip"
+  #error "Unrecognized chip"
 #endif
 
-#define NR_IRQS            34
+#define NR_IRQS              34
 
 /****************************************************************************
  * Public Types
@@ -153,7 +153,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
