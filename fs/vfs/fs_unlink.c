@@ -177,6 +177,7 @@ int unlink(FAR const char *pathname)
                   goto errout_with_inode;
                 }
             }
+#ifndef CONFIG_DISABLE_MOUNTPOINT
           else if (INODE_IS_BLOCK(inode) && inode->u.i_bops->unlink)
             {
               /* Notify the block driver that it has been unlinked */
@@ -188,6 +189,7 @@ int unlink(FAR const char *pathname)
                   goto errout_with_inode;
                 }
             }
+#endif
 
           /* Remove the old inode.  Because we hold a reference count on the
            * inode, it will not be deleted now.  It will be deleted when all
