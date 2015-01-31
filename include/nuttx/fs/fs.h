@@ -97,7 +97,7 @@ struct file_operations
 #ifndef CONFIG_DISABLE_POLL
   int     (*poll)(FAR struct file *filep, struct pollfd *fds, bool setup);
 #endif
-  int     (*unlink)(FAR void *priv);
+  int     (*unlink)(FAR struct inode *inode);
 };
 
 /* This structure provides information about the state of a block driver */
@@ -105,7 +105,7 @@ struct file_operations
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 struct geometry
 {
-  bool   geo_available;    /* true: The device is vailable */
+  bool   geo_available;    /* true: The device is available */
   bool   geo_mediachanged; /* true: The media has changed since last query */
   bool   geo_writeenabled; /* true: It is okay to write to this device */
   size_t geo_nsectors;     /* Number of sectors on the device */
@@ -129,6 +129,7 @@ struct block_operations
             size_t start_sector, unsigned int nsectors);
   int     (*geometry)(FAR struct inode *inode, FAR struct geometry *geometry);
   int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
+  int     (*unlink)(FAR struct inode *inode);
 };
 
 /* This structure is provided by a filesystem to describe a mount point.

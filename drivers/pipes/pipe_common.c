@@ -707,16 +707,12 @@ int  pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: pipecommon_unlink
  ****************************************************************************/
 
-int pipecommon_unlink(FAR void *priv)
+int pipecommon_unlink(FAR struct inode *inode)
 {
-  /* The value passed to pipcommon_unlink is the private data pointer from
-   * the inode that is being unlinked.  If there are no open references to
-   * the driver, then we must free up all resources used by the driver now.
-   */
+  FAR struct pipe_dev_s *dev;
 
-  FAR struct pipe_dev_s *dev = (FAR struct pipe_dev_s *)priv;
-
-  DEBUGASSERT(dev);
+  DEBUGASSERT(inode && inode->i_private);
+  dev =  = (FAR struct pipe_dev_s *)inode->i_private;
 
   /* Mark the pipe unlinked */
 
