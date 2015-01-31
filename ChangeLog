@@ -9570,8 +9570,8 @@
 	  would connect okay. So the symptom was connect-fail-connect-fail-...
 	  (2015-01-29).
 	* net/socket/net_poll.c, recvfrom.c, and udp/udp_callback.c: Add UDP
-	  read-ahead support and support for poll/select on UDP sockets.  From
-	  Macs N (2015-01-30).
+	  read-ahead support.  This enables support for for poll/select on UDP
+	  sockets and also non-blocking UDP sockets.  From Macs N (2015-01-30).
 	* net/local/local_netpoll.c, socket/net_poll.c, and udp/udp_netpoll.c:
 	  Separate out UDP poll logic from net_poll.c into a new udp_netpoll.c;
 	  Create a skeleton local_netpoll (2015-01-30).
@@ -9597,3 +9597,6 @@
 	  Default (0) is the legacy behavior; Unix domain datagram logic sets
 	  the alternative policy so that the packet data persists after the FIFO
 	  is closed (2015-01-30).
+	* net/local:  Add configuration options so that Unix domain stream and
+	  datagram support can be separately enabled (2015-01-31).
+
