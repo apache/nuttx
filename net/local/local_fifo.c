@@ -191,6 +191,7 @@ static int local_create_fifo(FAR const char *path)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM /* Currently not used by datagram code */
 static int local_release_fifo(FAR const char *path)
 {
   int ret;
@@ -220,6 +221,7 @@ static int local_release_fifo(FAR const char *path)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: local_rx_open
@@ -400,7 +402,7 @@ int local_release_fifos(FAR struct local_conn_s *conn)
   /* Destroy the server-to-client FIFO if it exists. */
 
   local_cs_name(conn, path);
-  ret2 = local_create_fifo(path);
+  ret2 = local_release_fifo(path);
 
   /* Return a failure if one occurred. */
 
@@ -418,26 +420,6 @@ int local_release_fifos(FAR struct local_conn_s *conn)
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
 int local_release_halfduplex(FAR struct local_conn_s *conn)
-{
-  char path[LOCAL_FULLPATH_LEN];
-
-  /* Destroy the half duplex FIFO if it exists. */
-
-  local_hd_name(conn->lc_path, path);
-  return local_release_fifo(path);
-}
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-/****************************************************************************
- * Name: local_open_client_rx
- *
- * Description:
- *   Open the client-side of the server-to-client FIFO.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
 {
 #if 1
   /* REVIST: We need to think about this carefully.  Unlike the connection-
@@ -458,6 +440,27 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
 
 #else
   char path[LOCAL_FULLPATH_LEN];
+
+  /* Destroy the half duplex FIFO if it exists. */
+
+  local_hd_name(conn->lc_path, path);
+  return local_release_fifo(path);
+#endif
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+/****************************************************************************
+ * Name: local_open_client_rx
+ *
+ * Description:
+ *   Open the client-side of the server-to-client FIFO.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_STREAM
+int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
+{
+  char path[LOCAL_FULLPATH_LEN];
   int ret;
 
   /* Get the server-to-client path name */
@@ -475,7 +478,6 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
     }
 
   return ret;
-#endif
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
