@@ -132,6 +132,11 @@ config EFM32_RMU
 	bool "Reset Management Unit (RMU) "
 	default n
 
+config EFM32_RMU_DEBUG
+	bool "Reset Management Unit (RMU) DEBUG "
+	default n
+	depends on EFM32_RMU && DEBUG
+
 config EFM32_USART0
 	bool "USART0"
 	default n
@@ -577,5 +582,11 @@ config EFM32_TIMER3_CHANNEL
 	---help---
 		If TIMER3 is enabled for PWM usage, you also need specifies the timer output
 		channel {0,1,2}
+
+config EFM32_RTC_BURTC
+	bool "Use BURTC as RTC"
+	default n
+	---help---
+		Enable RTC with EFM32 BURTC
 
 endif # ARCH_CHIP_EFM32
