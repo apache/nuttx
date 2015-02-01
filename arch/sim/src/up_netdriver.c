@@ -66,7 +66,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct ether_header*)g_sim_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)g_sim_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -182,7 +182,8 @@ void netdriver_loop(void)
        * MAC address
        */
 
-      if (g_sim_dev.d_len > ETH_HDRLEN && up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
+      if (g_sim_dev.d_len > ETH_HDRLEN &&
+          up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
         {
 #ifdef CONFIG_NET_PKT
           /* When packet sockets are enabled, feed the frame into the packet
