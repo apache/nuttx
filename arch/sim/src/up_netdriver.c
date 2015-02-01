@@ -166,6 +166,8 @@ static int sim_txpoll(struct net_driver_s *dev)
 
 void netdriver_loop(void)
 {
+ struct eth_hdr_s *eth;
+
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
   g_sim_dev.d_len = netdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_ETH_MTU);
@@ -182,8 +184,9 @@ void netdriver_loop(void)
        * MAC address
        */
 
+      eth = BUF;
       if (g_sim_dev.d_len > ETH_HDRLEN &&
-          up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
+          up_comparemac(eth->dest, &g_sim_dev.d_mac) == 0)
         {
 #ifdef CONFIG_NET_PKT
           /* When packet sockets are enabled, feed the frame into the packet
@@ -196,7 +199,7 @@ void netdriver_loop(void)
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-          if (BUF->type == HTONS(ETHTYPE_IP))
+          if (eth->type == HTONS(ETHTYPE_IP))
             {
               nllvdbg("IPv4 frame\n");
 
@@ -237,7 +240,7 @@ void netdriver_loop(void)
           else
 #endif
 #ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(ETHTYPE_IP6))
+          if (eth->type == HTONS(ETHTYPE_IP6))
             {
               nllvdbg("Iv6 frame\n");
 
@@ -275,7 +278,7 @@ void netdriver_loop(void)
           else
 #endif
 #ifdef CONFIG_NET_ARP
-          if (BUF->ether_type == htons(ETHTYPE_ARP))
+          if (eth->type == htons(ETHTYPE_ARP))
             {
               arp_arpin(&g_sim_dev);
 
