@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ea3152/src/up_usbmsc.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the SAM3U MMC/SD SDIO block driver.
@@ -103,7 +103,7 @@ int usbmsc_archinitialize(void)
                          pbuffer,
                          USBMSC_NSECTORS,
                          USBMSC_SECTORSIZE,
-                         true);
+                         RDFLAG_WRENABLED | RDFLAG_FUNLINK);
   if (ret < 0)
     {
       printf("create_ramdisk: Failed to register ramdisk at %s: %d\n",
