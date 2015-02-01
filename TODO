@@ -826,13 +826,12 @@ o Network (net/, drivers/net)
 
   Title:       SOCKETS DO NOT ALWAYS SUPPORT O_NONBLOCK
   Description: sockets do not support all modes for O_NONBLOCK. Sockets
-               support only (1) TCP/IP non-blocking read operations when read-ahead
-               buffering is enabled, (2) TCP/IP accept() operations when TCP/IP
-               connection backlog is enabled, and (3) nonblocking operations on
-               Unix domain sockets.
-               REVISIT:  UDP read-ahead buffering has been implemented.  But I
-               do not think that the necessary bits of logic are in place to
-               permit non-clocking UDP reads.
+               support nonblocking operations only (1) for TCP/IP non-
+               blocking read operations when read-ahead buffering is
+               enabled, (2) TCP/IP accept() operations when TCP/IP
+               connection backlog is enabled, (2) UDP/IP read() operations
+               when UDP read-ahead is enabled, and (3) non-blocking
+               operations on Unix domain sockets.
   Status:      Open
   Priority:    Low.
 
@@ -923,20 +922,23 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low, this is just a nuisance in most cases.
 
-  Title:       FIFO CLEAN-UP AFTER CLOSING UNIX DOMAIN SOCKET
-  Description: FIFOs are used as the IPC underlying local Unix domain sockets.
-               In NuttX, FIFOs are implemented as device drivers (not as
-               special files).  The FIFO device driver is instantiated when
-               the Unix domain socket communications begin and will
-               automatically be released when (1) the driver is unlinked and
-               (2) all open references to the driver have been closed.  But
-               there is no mechanism in place now to unline the FIFO when
-               the Unix domain socket is no longer used.  The primary issue
-               is timing.. the FIFO should persist until it is no longer
-               needed.  Perhaps there should be a delayed call to unlink()
-               (using a watchdog or the work queue).  If the driver is re-
-               opened, the delayed unlink could be canceled?  Needs more
-               thought.
+  Title:       FIFO CLEAN-UP AFTER CLOSING UNIX DOMAIN DATAGRAM SOCKET
+  Description: FIFOs are used as the IPC underlying all local Unix domain
+               sockets.  In NuttX, FIFOs are implemented as device drivers
+               (not as a special FIFO files).  The FIFO device driver is
+               instantiated when the Unix domain socket communications begin
+               and will automatically be released when (1) the driver is
+               unlinked and (2) all open references to the driver have been
+               closed.  But there is no mechanism in place now to unlink the
+               FIFO when the Unix domain datagram socket is no longer used.
+               The primary issue is timing.. the FIFO should persist until
+               it is no longer needed.  Perhaps there should be a delayed
+               call to unlink() (using a watchdog or the work queue).  If
+               the driver is re-opened, the delayed unlink could be
+               cancelled?  Needs more thought.
+               NOTE: This is not an issue for Unix domain streams sockets:
+               The end-of-life of the FIFO is well determined when sockets
+               are disconnected and support for that case is fully implemented.
   Status:      Open
   Priority:    Low for now because I don't have a situation where this is a
                problem for me.  If you use the same Unix domain paths, then

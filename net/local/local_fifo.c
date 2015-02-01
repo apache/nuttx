@@ -193,17 +193,17 @@ static int local_create_fifo(FAR const char *path)
 
 static int local_release_fifo(FAR const char *path)
 {
+  int ret;
+
   /* Unlink the client-to-server FIFO if it exists. */
 
   if (local_fifo_exists(path))
     {
-      /* REVISIT:  This is wrong!  Un-linking the FIFO does not eliminate it;
-       * it only removes it from the namespace.  A new interface will be
-       * required to destroy the FIFO driver instance and all of its resources.
+      /* Un-linking the FIFO removes the FIFO from the namespace.  It will
+       * also mark the FIFO device "unlinked".  When all of the open
+       * references to the FIFO device are closed, the resources consumed
+       * by the device instance will also be freed.
        */
-#warning Missing logic
-#if 0
-      int ret;
 
       ret = unlink(path);
       if (ret < 0)
@@ -214,7 +214,6 @@ static int local_release_fifo(FAR const char *path)
           ndbg("ERROR: Failed to unlink FIFO %s: %d\n", path, errcode);
           return -errcode;
         }
-#endif
     }
 
   /* The FIFO does not exist or we successfully unlinked it. */
@@ -440,6 +439,24 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
 #ifdef CONFIG_NET_LOCAL_STREAM
 int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
 {
+#if 1
+  /* REVIST: We need to think about this carefully.  Unlike the connection-
+   * oriented Unix domain socket, we don't really know the best time to
+   * release the FIFO resource.  It would be extremely inefficient to create
+   * and destroy the FIFO on each packet. But, on the other hand, failing
+   * to destory the FIFO will leave the FIFO resources in place after the
+   * communications have completed.
+   *
+   * I am thinking that ther should be something like a timer.  The timer
+   * would be started at the completion of each transfer and cancelled at
+   * the beginning of each transfer.  If the timer expires, then the FIFO
+   * would be destroyed.
+   */
+
+#  warning Missing logic
+  return OK;
+
+#else
   char path[LOCAL_FULLPATH_LEN];
   int ret;
 
@@ -458,6 +475,7 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
     }
 
   return ret;
+#endif
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
