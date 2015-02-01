@@ -142,13 +142,22 @@ static const struct block_operations g_bops =
 
 static void rd_destroy(FAR struct rd_struct_s *dev)
 {
-      /* And free the dev structure.
-       * REVISIT:  This is not very helpful.  What we really need to know
-       * is if we can free the RAM disk memory; that is the major resource
-       * consumed by this driver.  But we do not know if we can or should.
-       */
+  fvdbg("Destroying RAM disk\n");
 
-      kmm_free(dev);
+  /* We we configured to free the RAM disk memory when unlinked? */
+
+#ifdef CONFIG_FS_WRITABLE
+  if (RDFLAG_IS_UNLINKED(dev->rd_flags))
+    {
+      /* Yes.. do it */
+
+      kmm_free(dev->rd_buffer);
+    }
+#endif
+
+  /* And free the block driver itself */
+
+  kmm_free(dev);
 }
 
 /****************************************************************************
