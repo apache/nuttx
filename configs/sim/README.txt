@@ -92,7 +92,8 @@ longjmp().  This context switching is available for 32-bit and 64-bit
 targets.  You must, however, set the correct target in the configuration
 before you build: HOST_X86_64 or HOST_X86 for 62- and 32-bit targets,
 respectively.  On a 64-bit machine, you can also force the 32-bit build
-with CONFIG_SIM_M32=y.
+with CONFIG_SIM_M32=y (which does not seem to be supported by more
+contemporary x86_64 compilers).
 
 There are other 64-bit issues as well.  For example, addresses are retained in
 32-bit unsigned integer types in a few places.  On a 64-bit machine, the 32-bit

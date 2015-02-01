@@ -429,7 +429,7 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
    * to destory the FIFO will leave the FIFO resources in place after the
    * communications have completed.
    *
-   * I am thinking that ther should be something like a timer.  The timer
+   * I am thinking that there should be something like a timer.  The timer
    * would be started at the completion of each transfer and cancelled at
    * the beginning of each transfer.  If the timer expires, then the FIFO
    * would be destroyed.
