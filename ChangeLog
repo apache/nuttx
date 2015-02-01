@@ -9614,3 +9614,6 @@
 	* configs/moteino-mega: Added support for the LowPowerLab MoteinoMEGA
 	  that is based on the Atmel AVR ATMega1284P MCU.  From Jedi Tek'Unum
 	  (2015-01-31).
+	* EFM32 RTC:  RTC driver using BURTC. From Pierre-Noel Bouteville
+	  (2015-02-01).
+
