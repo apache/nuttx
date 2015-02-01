@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/efm32/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -129,6 +129,10 @@ endif
 
 ifeq ($(CONFIG_EFM32_DMA),y)
 CHIP_CSRCS += efm32_dma.c
+endif
+
+ifeq ($(CONFIG_EFM32_RTC_BURTC),y)
+CHIP_CSRCS += efm32_rtc_burtc.c
 endif
 
 ifeq ($(CONFIG_EFM32_OTGFS),y)
