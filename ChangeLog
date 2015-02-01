@@ -9616,4 +9616,9 @@
 	  (2015-01-31).
 	* EFM32 RTC:  RTC driver using BURTC. From Pierre-Noel Bouteville
 	  (2015-02-01).
-
+	* drivers/ramdisk.c, include/nuttx/fs/ramdisk.h, and other files:  Add
+	  logic to dispose of the drvier and RAM buffer when the RAM disk has
+	  been unlinked and all open references to the RAM disk have been
+	  closed.  Add new parameters to romdisk() to specify what should be
+	  done with the RAM/ROM buffer -- Should it be freed or not?  Changed
+	  all calls to ramdisk() to use these new parameters (2015-02-01).
