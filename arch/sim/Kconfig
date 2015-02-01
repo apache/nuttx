@@ -55,7 +55,7 @@ config SIM_LCDDRIVER
 
 config SIM_FRAMEBUFFER
 	bool "Build a simulated frame buffer driver"
-	default y
+	default n
 	depends on !NX_LCDDRIVER
 	---help---
 		Build a simulated frame buffer driver"
