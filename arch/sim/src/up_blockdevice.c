@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_blockdevice.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,5 +84,6 @@
 
 void up_registerblockdevice(void)
 {
-  ramdisk_register(0, (uint8_t*)up_deviceimage(), NSECTORS, LOGICAL_SECTOR_SIZE, true);
+  ramdisk_register(0, (uint8_t*)up_deviceimage(), NSECTORS,
+                   LOGICAL_SECTOR_SIZE, RDFLAG_WRENABLED | RDFLAG_FUNLINK);
 }

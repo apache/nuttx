@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_deviceimage.c
  *
- *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -207,107 +207,111 @@ static const unsigned char g_vfatdata[] =
 
 char *up_deviceimage(void)
 {
-    char    *pbuffer;
-    int      bufsize = 1024*1024;
-    int      offset  = 0;
-    z_stream strm;
-    int      ret;
+  char    *pbuffer;
+  int      bufsize = 1024*1024;
+  int      offset  = 0;
+  z_stream strm;
+  int      ret;
 
-    /* Ininitilize inflate state */
+  /* Initialize inflate state */
 
-    strm.zalloc   = Z_NULL;
-    strm.zfree    = Z_NULL;
-    strm.opaque   = Z_NULL;
-    strm.avail_in = 0;
-    strm.next_in  = Z_NULL;
-    ret           = inflateInit(&strm);
-    if (ret != Z_OK)
-      {
-        sdbg("inflateInit FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
-        return NULL;
-      }
+  strm.zalloc   = Z_NULL;
+  strm.zfree    = Z_NULL;
+  strm.opaque   = Z_NULL;
+  strm.avail_in = 0;
+  strm.next_in  = Z_NULL;
+  ret           = inflateInit(&strm);
+  if (ret != Z_OK)
+    {
+      sdbg("inflateInit FAILED: ret=%d msg=\"%s\"\n",
+           ret, strm.msg ? strm.msg : "No message" );
+      return NULL;
+    }
 
-    /* Allocate a buffer to hold the decompressed buffer.  We may have
-     * to reallocate this a few times to get the size right.
-     */
+  /* Allocate a buffer to hold the decompressed buffer.  We may have to
+   * reallocate this a few times to get the size right.
+   */
 
-    pbuffer = (char*)kmm_malloc(bufsize);
+  pbuffer = (char*)kmm_malloc(bufsize);
 
-    /* Set up the input buffer */
+  /* Set up the input buffer */
 
-    strm.avail_in = sizeof(g_vfatdata);
-    strm.next_in = (Bytef*)g_vfatdata;
+  strm.avail_in = sizeof(g_vfatdata);
+  strm.next_in = (Bytef*)g_vfatdata;
 
-    /* Run inflate() on input until output buffer not full */
+  /* Run inflate() on input until output buffer not full */
 
-    do {
-        /* Set up to catch the next output chunk in the output buffer */
+  do
+    {
+      /* Set up to catch the next output chunk in the output buffer */
 
-        strm.avail_out = bufsize - offset;
-        strm.next_out  = (Bytef*)&pbuffer[offset];
+      strm.avail_out = bufsize - offset;
+      strm.next_out  = (Bytef*)&pbuffer[offset];
 
-        /* inflate */
+      /* inflate */
 
-        ret = inflate(&strm, Z_NO_FLUSH);
+      ret = inflate(&strm, Z_NO_FLUSH);
 
-        /* Handle inflate() error return values */
+      /* Handle inflate() error return values */
 
-        switch (ret)
-          {
-            case Z_NEED_DICT:
-            case Z_DATA_ERROR:
-            case Z_MEM_ERROR:
-            case Z_STREAM_ERROR:
-                sdbg("inflate FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
-                (void)inflateEnd(&strm);
-                kmm_free(pbuffer);
-                return NULL;
-          }
+      switch (ret)
+        {
+          case Z_NEED_DICT:
+          case Z_DATA_ERROR:
+          case Z_MEM_ERROR:
+          case Z_STREAM_ERROR:
+              sdbg("inflate FAILED: ret=%d msg=\"%s\"\n",
+                    ret, strm.msg ? strm.msg : "No message" );
+              (void)inflateEnd(&strm);
+              kmm_free(pbuffer);
+              return NULL;
+        }
 
-        /* If avail_out is zero, then inflate() returned only
-         * because it is out of buffer space.  In this case, we
-         * will have to reallocate the buffer and try again.
-         */
+      /* If avail_out is zero, then inflate() returned only because it is
+       * out of buffer space.  In this case, we will have to reallocate
+       * the buffer and try again.
+       */
 
-        if (strm.avail_out == 0)
-          {
-            int newbufsize = bufsize + 128*1024;
-            char *newbuffer = kmm_realloc(pbuffer, newbufsize);
-            if (!newbuffer)
-              {
-                kmm_free(pbuffer);
-                return NULL;
-              }
-            else
-              {
-                pbuffer = newbuffer;
-                offset  = bufsize;
-                bufsize = newbufsize;
-              }
-          }
-        else
-          {
-             /* There are unused bytes in the buffer, reallocate to
-              * correct size.
-              */
+      if (strm.avail_out == 0)
+        {
+          int newbufsize = bufsize + 128*1024;
+          char *newbuffer = kmm_realloc(pbuffer, newbufsize);
+          if (!newbuffer)
+            {
+              kmm_free(pbuffer);
+              return NULL;
+            }
+          else
+            {
+              pbuffer = newbuffer;
+              offset  = bufsize;
+              bufsize = newbufsize;
+            }
+        }
+      else
+        {
+          /* There are unused bytes in the buffer, reallocate to
+           * correct size.
+           */
 
-             int newbufsize = bufsize - strm.avail_out;
-             char *newbuffer = kmm_realloc(pbuffer, newbufsize);
-             if (!newbuffer)
-               {
-                kmm_free(pbuffer);
-                return NULL;
-              }
-            else
-              {
-                pbuffer = newbuffer;
-                bufsize = newbufsize;
-              }
-          }
-    } while (strm.avail_out == 0 && ret != Z_STREAM_END);
+          int newbufsize = bufsize - strm.avail_out;
+          char *newbuffer = kmm_realloc(pbuffer, newbufsize);
+          if (!newbuffer)
+            {
+              kmm_free(pbuffer);
+              return NULL;
+            }
+          else
+            {
+              pbuffer = newbuffer;
+              bufsize = newbufsize;
+            }
+        }
+    }
+  while (strm.avail_out == 0 && ret != Z_STREAM_END);
 
-    (void)inflateEnd(&strm);
-    return pbuffer;
+  (void)inflateEnd(&strm);
+  return pbuffer;
 }
 
 /****************************************************************************

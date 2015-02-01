@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/ramdisk.h
  *
- *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Values for rdflags */
+
+#define RDFLAG_WRENABLED       (1 << 0) /* Bit 0: 1=Can write to RAM disk */
+#define RDFLAG_FUNLINK         (1 << 1) /* Bit 1: 1=Free memory when unlinked */
+
+/* For internal use by the driver only */
+
+#define RDFLAG_UNLINKED        (1 << 2) /* Bit 2: 1=Driver has been unlinked */
 
 /****************************************************************************
  * Type Definitions
@@ -59,7 +67,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -74,7 +83,7 @@ extern "C" {
  *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
  *   nsectors:      Number of sectors on device
  *   sectize:       The size of one sector
- *   writeenabled:  true: can write to ram disk
+ *   rdflags:       See RDFLAG_* definitions
  *   buffer:        RAM disk backup memory
  *
  * Returned Valued:
@@ -83,12 +92,12 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
-EXTERN int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
-                            uint16_t sectize, bool writeenabled);
+int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
+                     uint16_t sectize, uint8_t rdflags);
 #define romdisk_register(m,b,n,s) ramdisk_register(m,b,n,s,0)
 #else
-EXTERN int romdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
-                            uint16_t sectize);
+int romdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
+                     uint16_t sectize);
 #endif
 
 #undef EXTERN
