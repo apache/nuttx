@@ -345,8 +345,8 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify);
  *   timeout occurs.
  *
  * Assumptions:
- *   This function is called from ARP send and executes in the normal
- *   tasking environment.
+ *   This function is called from ARP send and mut execute with the network
+ *   un-locked.
  *
  ****************************************************************************/
 
@@ -366,7 +366,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout);
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   arp_arpin() and may be execute from the interrupt level.
+ *   arp_arpin() and will execute with the network locked.
  *
  ****************************************************************************/
 
