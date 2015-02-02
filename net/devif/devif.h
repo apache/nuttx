@@ -79,11 +79,12 @@
  *                       was last sent. (TCP only)
  *                  OUT: Not used
  *
- *   TCP_POLL       IN:  Used for polling the socket layer.  This is provided
- *   UDP_POLL            periodically from the drivers to support (1) timed
- *   PKT_POLL            operations, and (2) to check if the socket layer has
- *   ICMP_POLL           data that it wants to send
- *   ICMPv6_POLL    OUT: Not used
+ *   ARP_POLL       IN:  Used for polling the socket layer.  This is provided
+ *   TCP_POLL            periodically from the drivers to support (1) timed
+ *   UDP_POLL            operations, and (2) to check if the socket layer has
+ *   PKT_POLL            data that it wants to send
+ *   ICMP_POLL      OUT: Not used
+ *   ICMPv6_POLL
  *
  *   TCP_BACKLOG     IN: There is a new connection in the backlog list set
  *                       up by the listen() command. (TCP only)
@@ -128,11 +129,12 @@
 #define ICMPv6_NEWDATA   TCP_NEWDATA
 #define TCP_SNDACK       (1 << 2)
 #define TCP_REXMIT       (1 << 3)
-#define TCP_POLL         (1 << 4)
-#define UDP_POLL         TCP_POLL
-#define PKT_POLL         TCP_POLL
-#define ICMP_POLL        TCP_POLL
-#define ICMPv6_POLL      TCP_POLL
+#define ARP_POLL         (1 << 4)
+#define TCP_POLL         ARP_POLL
+#define UDP_POLL         ARP_POLL
+#define PKT_POLL         ARP_POLL
+#define ICMP_POLL        ARP_POLL
+#define ICMPv6_POLL      ARP_POLL
 #define TCP_BACKLOG      (1 << 5)
 #define TCP_CLOSE        (1 << 6)
 #define TCP_ABORT        (1 << 7)

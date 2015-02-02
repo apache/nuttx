@@ -32,6 +32,28 @@ config NET_ICMPv6_NEIGHBOR
 		the target IPv6 address mapping does not appear in the Neighbor
 		table.
 
+if NET_ICMPv6_NEIGHBOR
+
+config ICMPv6_NEIGHBOR_MAXTRIES
+	int "ICMPv6 solicitation retries"
+	default 5
+	---help---
+		Send the Neighbor solicitation this number of times before giving
+		up and deciding that the target IP6 address is non reachable.
+
+config ICMPv6_NEIGHBOR_DELAYMSEC
+	int "ICMPv6 re-solicit delay"
+	default 20
+	---help---
+		Wait this number of milliseconds after sending the Neighbor
+		Solicitation before checking if the IPv6 address mapping is present
+		in the Neighbor Table.  This time should be related to the maximum
+		round trip time on the network since it is basically the time from
+		when an Neighbor Solicitation is sent until the Neighbor
+		Advertisement is received.
+
+endif # NET_ICMPv6_NEIGHBOR
+
 endif # NET_ICMPv6
 endmenu # ICMPv6 Networking Support
 endif # NET_IPv6

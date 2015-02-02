@@ -238,7 +238,7 @@ int arp_send(in_addr_t ipaddr)
   /* ARP support is only built if the Ethernet data link is supported.
    * However, if we are supporting multiple network devices and using
    * different link level protocols then we can get here for other
-   * link protocals as well.  Continue and send the ARP request only
+   * link protocols as well.  Continue and send the ARP request only
    * if this device uses the Ethernet data link protocol.
    */
 
@@ -332,7 +332,7 @@ int arp_send(in_addr_t ipaddr)
       /* Arm/re-arm the callback */
 
       state.snd_sent      = false;
-      state.snd_cb->flags = PKT_POLL;
+      state.snd_cb->flags = ARP_POLL;
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = arp_send_interrupt;
 

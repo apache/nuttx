@@ -88,6 +88,8 @@
 
 void icmpv6_poll(FAR struct net_driver_s *dev)
 {
+  uint16_t flags;
+
   /* Setup for the application callback */
 
   dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPICMPv6_HDRLEN];
@@ -96,7 +98,30 @@ void icmpv6_poll(FAR struct net_driver_s *dev)
 
   /* Perform the application callback */
 
-  (void)devif_callback_execute(dev, NULL, ICMPv6_POLL, g_icmpv6_echocallback);
+#ifdef CONFIG_NET_ICMPv6_PING
+#ifdef CONFIG_NET_NET_ICMPv6_NEIGHBOR
+  flags = ICMPv6_POLL;
+#endif
+  if (g_icmpv6_echocallback)
+    {
+      flags = devif_callback_execute(dev, NULL, ICMPv6_POLL,
+                                     g_icmpv6_echocallback);
+    }
+#endif /* CONFIG_NET_ICMPv6_PING */
+
+#ifdef CONFIG_NET_NET_ICMPv6_NEIGHBOR
+  if (
+#ifdef CONFIG_NET_ICMPv6_PING
+       flags != 0 &&
+#endif
+       g_icmpv6_neighborcallback)
+    {
+      flags = devif_callback_execute(dev, NULL, ICMPv6_POLL,
+                                     g_icmpv6_neighborcallback);
+    }
+#endif /* CONFIG_NET_NET_ICMPv6_NEIGHBOR */
+
+  UNUSED(flags);
 }
 
 #endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_NET_ICMPv6_NEIGHBOR */

@@ -60,8 +60,6 @@ config ARP_SEND_DELAYMSEC
 		on the network since it is basically the time from when an ARP
 		request is sent until the response is received.
 
-#endif
-
 endif # NET_ARP_SEND
 
 config NET_ARP_DUMP

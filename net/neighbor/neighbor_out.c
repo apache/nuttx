@@ -165,7 +165,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
    * broadcast Ethernet address?
    */
 
-  if ((ip->destipaddr[0] & 0xff00) == 0xff00)
+  if ((ip->destipaddr[0] & HTONS(0xff00)) == HTONS(0xff00))
     {
       memcpy(eth->dest, g_broadcast_ethaddr.ether_addr_octet,
              ETHER_ADDR_LEN);

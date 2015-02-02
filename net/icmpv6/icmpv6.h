@@ -56,6 +56,29 @@
  * Public Type Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv6_NEIGHBOR
+/* For symmetry with other protocols, a "connection" structure is
+ * provided.  But it is a singleton for the case of ARP packet transfers.
+ */
+
+struct icmpv6_conn_s
+{
+  FAR struct devif_callback_s *list;   /* ARP callbacks */
+};
+#endif
+
+#ifdef CONFIG_NET_IPv6_NEIGHBOR
+/* Used to notify a thread waiting for a particular ARP response */
+
+struct icmpv6_notify_s
+{
+  FAR struct icmpv6_notify_s *nt_flink; /* Supports singly linked list */
+  in_addr_t nt_ipaddr;                  /* Waited for IP address in the mapping */
+  sem_t     nt_sem;                     /* Will wake up the waiter */
+  int       nt_result;                  /* The result of the wait */
+};
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -104,7 +127,7 @@ void icmpv6_input(FAR struct net_driver_s *dev);
  *   If the requested IPv6 address in not in the Neighbor Table, then this
  *   function will send the Neighbor Solicitation, delay, then check if the
  *   IP address is now in the Neighbor able.  It will repeat this sequence
- *   until either (1) the IPv6 address mapping is now in the Neibhbor table,
+ *   until either (1) the IPv6 address mapping is now in the Neighbor table,
  *   or (2) a configurable number of timeouts occur without receiving the
  *   ICMPv6 Neighbor Advertisement.
  *
