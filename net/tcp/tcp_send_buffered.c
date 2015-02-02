@@ -72,6 +72,7 @@
 #include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"
+#include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "devif/devif.h"
@@ -297,7 +298,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
   else
 #endif
     {
-#if !defined(CONFIG_NET_ICMPv6_SEND)
+#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
       return (neighbor_findentry(conn->u.ipv6.raddr) != NULL);
 #else
       return true;
@@ -938,19 +939,44 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  /* Make sure that the IP address mapping is in the ARP table */
+  /* Make sure that we have the IP address mapping */
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn);
 
+#if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
-  ret = arp_send(conn->u.ipv4.raddr);
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  if (psock->s_domain == PF_INET)
+#endif
+    {
+      /* Make sure that the IP address mapping is in the ARP table */
+
+      ret = arp_send(conn->u.ipv4.raddr);
+    }
+#endif /* CONFIG_NET_ARP_SEND */
+
+
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+#ifdef CONFIG_NET_ARP_SEND
+  else
+#endif
+    {
+      /* Make sure that the IP address mapping is in the Neighbor Table */
+
+      ret = icmpv6_neighbor(conn->u.ipv6.raddr);
+    }
+#endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
+
+  /* Did we successfully get the address mapping? */
+
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
       err = ENETUNREACH;
       goto errout;
     }
-#endif
+#endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
   /* Dump the incoming buffer */
 

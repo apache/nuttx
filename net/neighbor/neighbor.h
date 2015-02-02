@@ -138,7 +138,7 @@ void neighbor_initialize(void);
  *
  ****************************************************************************/
 
-FAR struct neighbor_entry *neighbor_findentry(net_ipv6addr_t ipaddr);
+FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr);
 
 /****************************************************************************
  * Name: neighbor_add
@@ -174,7 +174,7 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, FAR struct neighbor_addr_s *addr);
  *
  ****************************************************************************/
 
-FAR const struct neighbor_addr_s *neighbor_lookup(net_ipv6addr_t ipaddr);
+FAR const struct neighbor_addr_s *neighbor_lookup(const net_ipv6addr_t ipaddr);
 
 /****************************************************************************
  * Name: neighbor_update
@@ -192,7 +192,7 @@ FAR const struct neighbor_addr_s *neighbor_lookup(net_ipv6addr_t ipaddr);
  *
  ****************************************************************************/
 
-void neighbor_update(net_ipv6addr_t ipaddr);
+void neighbor_update(const net_ipv6addr_t ipaddr);
 
 /****************************************************************************
  * Name: neighbor_periodic

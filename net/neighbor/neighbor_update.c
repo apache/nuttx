@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-void neighbor_update(net_ipv6addr_t ipaddr)
+void neighbor_update(const net_ipv6addr_t ipaddr)
 {
   struct neighbor_entry *neighbor;
 

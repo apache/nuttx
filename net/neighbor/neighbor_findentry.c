@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-FAR struct neighbor_entry *neighbor_findentry(net_ipv6addr_t ipaddr)
+FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr)
 {
   int i;
 

@@ -74,11 +74,6 @@
 #define ICMPv6ECHOREPLY \
   ((struct icmpv6_echo_reply_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
-/* Allocate a new ICMPv6 data callback */
-
-#define icmpv6_callback_alloc()   devif_callback_alloc(&g_icmpv6_echocallback)
-#define icmpv6_callback_free(cb)  devif_callback_free(cb, &g_icmpv6_echocallback)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -405,18 +400,18 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
   struct icmpv6_ping_s state;
   net_lock_t save;
 
-#ifdef CONFIG_NET_ICMPv6_SEND
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   int ret;
 
   /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = neighbor_send(addr);
+  ret = icmpv6_neighbor(addr);
   if (ret < 0)
     {
       ndbg("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
-#endif
+#endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
 
   /* Initialize the state structure */
 

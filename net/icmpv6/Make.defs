@@ -43,14 +43,14 @@ ifeq ($(CONFIG_NET_ICMPv6_PING),y)
 NET_CSRCS += icmpv6_ping.c
 endif
 
-ifeq ($(CONFIG_NET_NET_ICMPv6_NEIGHBOR),y)
-NET_CSRCS += icmpv6_neighbor.c
+ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)
+NET_CSRCS += icmpv6_neighbor.c icmpv6_notify.c
 endif
 
 ifeq ($(CONFIG_NET_ICMPv6_PING),y)
 NET_CSRCS += icmpv6_poll.c
 else
-ifeq ($(CONFIG_NET_NET_ICMPv6_NEIGHBOR),y)
+ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)
 NET_CSRCS += icmpv6_poll.c
 endif
 endif

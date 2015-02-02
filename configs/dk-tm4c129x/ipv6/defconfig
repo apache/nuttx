@@ -601,6 +601,11 @@ CONFIG_NET_SOLINGER=y
 # CONFIG_NET_PKT is not set
 
 #
+# Unix Domain Socket Support
+#
+# CONFIG_NET_LOCAL is not set
+
+#
 # TCP/IP Networking
 #
 CONFIG_NET_TCP=y
@@ -622,6 +627,7 @@ CONFIG_NET_UDP_CHECKSUMS=y
 CONFIG_NET_UDP_CONNS=8
 CONFIG_NET_BROADCAST=y
 # CONFIG_NET_RXAVAIL is not set
+# CONFIG_NET_UDP_READAHEAD is not set
 
 #
 # ICMPv6 Networking Support

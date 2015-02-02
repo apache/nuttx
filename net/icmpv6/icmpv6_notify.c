@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/arp/arp_notify.c
+ * net/icmpv6/icmpv6_notify.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <time.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -48,9 +49,9 @@
 
 #include <arch/irq.h>
 
-#include "arp/arp.h"
+#include "icmpv6/icmpv6.h"
 
-#ifdef CONFIG_NET_ARP_SEND
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,9 +65,9 @@
  * Private Data
  ****************************************************************************/
 
-/* List of tasks waiting for ARP events */
+/* List of tasks waiting for Neighbor Discover events */
 
-static struct arp_notify_s *g_arp_waiters;
+static struct icmpv6_notify_s *g_icmpv6_waiters;
 
 /****************************************************************************
  * Private Functions
@@ -77,54 +78,56 @@ static struct arp_notify_s *g_arp_waiters;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arp_wait_setup
+ * Function: icmpv6_wait_setup
  *
  * Description:
- *   Called BEFORE an ARP request is sent.  This function sets up the ARP
- *   response timeout before the the ARP request is sent so that there is
- *   no race condition when arp_wait() is called.
+ *   Called BEFORE an Neighbor Solicitation is sent.  This function sets up
+ *   the Neighbor Advertisement timeout before the the Neighbor Solicitation
+ *   is sent so that there is no race condition when icmpv6_wait() is called.
  *
  * Assumptions:
- *   This function is called from ARP send and executes in the normal
+ *   This function is called from icmpv6_neighbor() and executes in the normal
  *   tasking environment.
  *
  ****************************************************************************/
 
-void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
+void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
+                       FAR struct icmpv6_notify_s *notify)
 {
   irqstate_t flags;
 
   /* Initialize the wait structure */
 
-  notify->nt_ipaddr = ipaddr;
+  net_ipv6addr_copy(notify->nt_ipaddr, ipaddr);
   notify->nt_result = -ETIMEDOUT;
   (void)sem_init(&notify->nt_sem, 0, 0);
 
   /* Add the wait structure to the list with interrupts disabled */
 
   flags             = irqsave();
-  notify->nt_flink  = g_arp_waiters;
-  g_arp_waiters     = notify;
+  notify->nt_flink  = g_icmpv6_waiters;
+  g_icmpv6_waiters  = notify;
   irqrestore(flags);
 }
 
 /****************************************************************************
- * Function: arp_wait_cancel
+ * Function: icmpv6_wait_cancel
  *
  * Description:
- *   Cancel any wait set after arp_wait_setup is called but before arp_wait()
- *   is called (arp_wait() will automatically cancel the wait).
+ *   Cancel any wait set after icmpv6_wait_setup is called but before
+ *   icmpv6_wait()is called (icmpv6_wait() will automatically cancel the
+ *   wait).
  *
  * Assumptions:
  *   This function may execute in the interrupt context when called from
- *   arp_wait().
+ *   icmpv6_wait().
  *
  ****************************************************************************/
 
-int arp_wait_cancel(FAR struct arp_notify_s *notify)
+int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
 {
-  FAR struct arp_notify_s *curr;
-  FAR struct arp_notify_s *prev;
+  FAR struct icmpv6_notify_s *curr;
+  FAR struct icmpv6_notify_s *prev;
   irqstate_t flags;
   int ret = -ENOENT;
 
@@ -133,7 +136,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
    */
 
   flags = irqsave();
-  for (prev = NULL, curr = g_arp_waiters;
+  for (prev = NULL, curr = g_icmpv6_waiters;
        curr && curr != notify;
        prev = curr, curr = curr->nt_flink);
 
@@ -146,7 +149,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
         }
       else
         {
-          g_arp_waiters = notify->nt_flink;
+          g_icmpv6_waiters = notify->nt_flink;
         }
 
       ret = OK;
@@ -158,27 +161,28 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
 }
 
 /****************************************************************************
- * Function: arp_wait
+ * Function: icmpv6_wait
  *
  * Description:
- *   Called each time that a ARP request is sent.  This function will sleep
- *   until either: (1) the matching ARP response is received, or (2) a
- *   timeout occurs.
+ *   Called each time that a Neighbor Solicitation is sent.  This function
+ *   will sleep until either: (1) the matching Neighbor Advertisement is
+ *   received, or (2) a timeout occurs.
  *
  * Assumptions:
- *   This function is called from ARP send and executes in the normal
+ *   This function is called from icmpv6_neighbor() and executes in the normal
  *   tasking environment.
  *
  ****************************************************************************/
 
-int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
+int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
+                FAR struct timespec *timeout)
 {
   struct timespec abstime;
   irqstate_t flags;
   int ret;
 
-  /* And wait for the ARP response (or a timeout).  Interrupts will be re-
-   * enabled while we wait.
+  /* And wait for the Neighbor Advertisement (or a timeout).  Interrupts will
+   * be re-enabled while we wait.
    */
 
   flags = irqsave();
@@ -203,7 +207,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
    * head of the list).
    */
 
-  (void)arp_wait_cancel(notify);
+  (void)icmpv6_wait_cancel(notify);
 
   /* Re-enable interrupts and return the result of the wait */
 
@@ -212,25 +216,26 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
 }
 
 /****************************************************************************
- * Function: arp_notify
+ * Function: icmpv6_notify
  *
  * Description:
- *   Called each time that a ARP response is received in order to wake-up
- *   any threads that may be waiting for this particular ARP response.
+ *   Called each time that a Neighbor Advertisement is received in order to
+ *   wake-up any threads that may be waiting for this particular Neighbor
+ *   Advertisement.
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   arp_arpin() and may be execute from the interrupt level.
+ *   icmpv6_icmpv6in() and may be execute from the interrupt level.
  *
  ****************************************************************************/
 
-void arp_notify(in_addr_t ipaddr)
+void icmpv6_notify(net_ipv6addr_t ipaddr)
 {
-  FAR struct arp_notify_s *curr;
+  FAR struct icmpv6_notify_s *curr;
 
   /* Find an entry with the matching IP address in the list of waiters */
 
-  for (curr = g_arp_waiters; curr; curr = curr->nt_flink)
+  for (curr = g_icmpv6_waiters; curr; curr = curr->nt_flink)
     {
       /* Does this entry match?  If the result is okay, then we have
        * already notified this waiter and it has not yet taken the
@@ -248,4 +253,4 @@ void arp_notify(in_addr_t ipaddr)
     }
 }
 
-#endif /* CONFIG_NET_ARP_SEND */
+#endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
