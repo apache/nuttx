@@ -42,7 +42,7 @@ config ICMPv6_NEIGHBOR_MAXTRIES
 
 config ICMPv6_NEIGHBOR_DELAYMSEC
 	int "ICMPv6 re-solicit delay"
-	default 100
+	default 20
 	---help---
 		Wait this number of milliseconds after sending the Neighbor
 		Solicitation before checking if the IPv6 address mapping is present
