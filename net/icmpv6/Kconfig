@@ -26,7 +26,6 @@ config NET_ICMPv6_PING
 config NET_ICMPv6_NEIGHBOR
 	bool "Solicit destination addresses"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enable logic to send ICMPv6 neighbor solicitation requests if
 		the target IPv6 address mapping does not appear in the Neighbor
@@ -43,7 +42,7 @@ config ICMPv6_NEIGHBOR_MAXTRIES
 
 config ICMPv6_NEIGHBOR_DELAYMSEC
 	int "ICMPv6 re-solicit delay"
-	default 20
+	default 100
 	---help---
 		Wait this number of milliseconds after sending the Neighbor
 		Solicitation before checking if the IPv6 address mapping is present
