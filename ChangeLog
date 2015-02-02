@@ -9622,3 +9622,8 @@
 	  closed.  Add new parameters to romdisk() to specify what should be
 	  done with the RAM/ROM buffer -- Should it be freed or not?  Changed
 	  all calls to ramdisk() to use these new parameters (2015-02-01).
+	* net/icmpv6/icmpv6_neighbor.c, icmpv6_notify.c (and other files): Adds
+	  basic logic to support verification that we have the IPv6 address in
+	  the Neighbor Table.  This feature is important because otherwise the
+	  first packet sent to a remote peer will fail (it will be replaced
+	  with a Neighbor Solicitation) (2015-01-02).
