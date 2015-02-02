@@ -9627,3 +9627,10 @@
 	  the Neighbor Table.  This feature is important because otherwise the
 	  first packet sent to a remote peer will fail (it will be replaced
 	  with a Neighbor Solicitation) (2015-01-02).
+	* net/arp/arp.h, arp_notify.c, and arp_send.c: Fixes another
+	  CONFIG_NET_NOINTS issues.  When called sem_timedwait() with the
+	  network locked, the network stays logcked while we wait which is not
+	  what we want (without CONFIG_NET_NOINTS, interrupts are re-enabled
+	  while we wait and all is well) (2015-02-02).
+	* net/icmpv6/icmpv6.h, icmpv6_neighbor.c, icmpv6_notify.c: Apply the
+	  same fix as for ARP to the Neighbor Solicitation logic (2015-02-02).
