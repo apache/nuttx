@@ -169,8 +169,9 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
  *   received, or (2) a timeout occurs.
  *
  * Assumptions:
- *   This function is called from icmpv6_neighbor() and executes in the normal
- *   tasking environment.
+ *   This function is called from icmpv6_neighbor() and must execute with
+ *   the network un-locked (interrupts may be disabled to keep the things
+ *   stable).
  *
  ****************************************************************************/
 
@@ -225,7 +226,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   icmpv6_icmpv6in() and may be execute from the interrupt level.
+ *   icmpv6_icmpv6in() will execute with the network locked.
  *
  ****************************************************************************/
 

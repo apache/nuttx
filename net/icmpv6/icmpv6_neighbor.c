@@ -210,6 +210,9 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   struct timespec delay;
   struct icmpv6_neighbor_s state;
   FAR const uint16_t *lookup;
+#ifdef CONFIG_NET_NOINTS
+  irqstate_t flags;
+#endif
   net_lock_t save;
   int ret;
 
@@ -376,12 +379,21 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
       /* Now wait for response to the ARP response to be received.  The
        * optimal delay would be the work case round trip time.
+       * NOTE: The network is locked.
        */
 
       delay.tv_sec  = CONFIG_ICMPv6_NEIGHBOR_DELAYSEC;
       delay.tv_nsec = CONFIG_ICMPv6_NEIGHBOR_DELAYNSEC;
 
+#ifdef CONFIG_NET_NOINTS
+      flags = irqsave();  /* Keep things stable */
+      net_unlock(save);   /* Unlock the network with interrupts disabled */
+#endif
       ret = icmpv6_wait(&notify, &delay);
+#ifdef CONFIG_NET_NOINTS
+      save = net_lock();  /* Re-lock the network with interrupts disabled */
+      irqrestore(flags);
+#endif
 
       /* icmpv6_wait will return OK if and only if the matching ARP response
        * is received.  Otherwise, it will return -ETIMEDOUT.
