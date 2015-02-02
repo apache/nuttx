@@ -40,7 +40,19 @@ ifeq ($(CONFIG_NET_ICMPv6),y)
 NET_CSRCS += icmpv6_input.c icmpv6_solicit.c
 
 ifeq ($(CONFIG_NET_ICMPv6_PING),y)
-NET_CSRCS += icmpv6_ping.c icmpv6_poll.c icmpv6_send.c
+NET_CSRCS += icmpv6_ping.c
+endif
+
+ifeq ($(CONFIG_NET_NET_ICMPv6_NEIGHBOR),y)
+NET_CSRCS += icmpv6_neighbor.c
+endif
+
+ifeq ($(CONFIG_NET_ICMPv6_PING),y)
+NET_CSRCS += icmpv6_poll.c
+else
+ifeq ($(CONFIG_NET_NET_ICMPv6_NEIGHBOR),y)
+NET_CSRCS += icmpv6_poll.c
+endif
 endif
 
 # Include ICMPv6 build support

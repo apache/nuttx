@@ -129,7 +129,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ICMPv6) && defined(CONFIG_NET_ICMPv6_PING)
+#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_NET_ICMPv6_NEIGHBOR)
 static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
                                     devif_poll_callback_t callback)
 {
@@ -141,7 +141,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 
   return callback(dev);
 }
-#endif /* CONFIG_NET_ICMPv6 && CONFIG_NET_ICMPv6_PING */
+#endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_NET_ICMPv6_NEIGHBOR*/
 
 /****************************************************************************
  * Function: devif_poll_igmp
@@ -374,7 +374,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#if defined(CONFIG_NET_ICMPv6) && defined(CONFIG_NET_ICMPv6_PING)
+#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_NET_ICMPv6_NEIGHBOR)
     {
       /* Traverse all of the tasks waiting to send an ICMPv6 ECHO request. */
 

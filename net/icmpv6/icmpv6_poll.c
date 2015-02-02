@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ICMPv6) && defined(CONFIG_NET_ICMPv6_PING)
+#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_NET_ICMPv6_NEIGHBOR)
 
 #include <debug.h>
 
@@ -99,4 +99,4 @@ void icmpv6_poll(FAR struct net_driver_s *dev)
   (void)devif_callback_execute(dev, NULL, ICMPv6_POLL, g_icmpv6_echocallback);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_ICMPv6 && CONFIG_NET_ICMPv6_PING */
+#endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_NET_ICMPv6_NEIGHBOR */

@@ -113,6 +113,11 @@
  *                  OUT: Cleared (only) by the socket layer logic to indicate
  *                       that the reply was processed, suppressing further
  *                       attempts to process the reply.
+ *
+ *   ICMPv6_ADVERTISE IN: An ICMPv6 Neighbor Advertisement has been received.
+ *                        Used to support ICMPv6 Neighbor Discovery Protocol.
+ *                   OUT: Cleared (only) by the socket layer logic to indicate
+ *                        that the reply was processed.
  */
 
 #define TCP_ACKDATA      (1 << 0)
@@ -135,6 +140,7 @@
 #define TCP_TIMEDOUT     (1 << 9)
 #define ICMP_ECHOREPLY   (1 << 10)
 #define ICMPv6_ECHOREPLY ICMP_ECHOREPLY
+#define ICMPv6_ADVERTISE (1 << 11)
 
 #define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT)
 

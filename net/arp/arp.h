@@ -247,11 +247,11 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
  * Function: arp_send
  *
  * Description:
- *   The arp_send() call may be to send an ARP request to resolve an IP
- *   address.  This function first checks if the IP address is already in
- *   ARP table.  If so, then it returns success immediately.
+ *   The arp_send() call may be to send an ARP request to resolve an IPv4
+ *   address.  This function first checks if the IPv4 address is already in
+ *   the ARP table.  If so, then it returns success immediately.
  *
- *   If the requested IP address in not in the ARP table, then this function
+ *   If the requested IPv4 address in not in the ARP table, then this function
  *   will send an ARP request, delay, then check if the IP address is now in
  *   the ARP table.  It will repeat this sequence until either (1) the IP
  *   address mapping is now in the ARP table, or (2) a configurable number

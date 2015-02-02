@@ -23,6 +23,15 @@ config NET_ICMPv6_PING
 		Provide interfaces to support application level support for
 		for sending ECHO (ping) requests and associating ECHO replies.
 
+config NET_ICMPv6_NEIGHBOR
+	bool "Solicit destination addresses"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable logic to send ICMPv6 neighbor solicitation requests if
+		the target IPv6 address mapping does not appear in the Neighbor
+		table.
+
 endif # NET_ICMPv6
 endmenu # ICMPv6 Networking Support
 endif # NET_IPv6

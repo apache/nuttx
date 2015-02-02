@@ -38,8 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ICMPv6) && \
-    defined(CONFIG_NET_ICMPv6_PING)
+#ifdef CONFIG_NET_ICMPv6_PING
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -483,4 +482,4 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
     }
 }
 
-#endif /* CONFIG_NET_ICMPv6 && CONFIG_NET_ICMPv6_PING  ... */
+#endif /* CONFIG_NET_ICMPv6_PING */

@@ -93,6 +93,43 @@ extern "C"
 void icmpv6_input(FAR struct net_driver_s *dev);
 
 /****************************************************************************
+ * Name: icmpv6_neighbor
+ *
+ * Description:
+ *   The icmpv6_solicit() call may be to send an ICMPv6 Neighbor
+ *   Solicitation to resolve an IPv6 address.  This function first checks if
+ *   the IPv6 address is already in the Neighbor Table.  If so, then it
+ *   returns success immediately.
+ *
+ *   If the requested IPv6 address in not in the Neighbor Table, then this
+ *   function will send the Neighbor Solicitation, delay, then check if the
+ *   IP address is now in the Neighbor able.  It will repeat this sequence
+ *   until either (1) the IPv6 address mapping is now in the Neibhbor table,
+ *   or (2) a configurable number of timeouts occur without receiving the
+ *   ICMPv6 Neighbor Advertisement.
+ *
+ * Parameters:
+ *   ipaddr   The IPv6 address to be queried.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success and the IP address mapping can now be
+ *   found in the ARP table.  On error a negated errno value is returned:
+ *
+ *     -ETIMEDOUT:    The number or retry counts has been exceed.
+ *     -EHOSTUNREACH: Could not find a route to the host
+ *
+ * Assumptions:
+ *   This function is called from the normal tasking context.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NET_ICMPv6_NEIGHBOR
+int icmpv6_neighbor(net_ipv6addr_t ipaddr);
+#else
+#  define icmpv6_neighbor(i) (0)
+#endif
+
+/****************************************************************************
  * Name: icmpv6_poll
  *
  * Description:
@@ -109,30 +146,9 @@ void icmpv6_input(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_ICMPv6_PING
+#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_NET_ICMPv6_NEIGHBOR)
 void icmpv6_poll(FAR struct net_driver_s *dev);
-#endif /* CONFIG_NET_ICMPv6_PING */
-
-/****************************************************************************
- * Name: icmpv6_send
- *
- * Description:
- *   Setup to send an ICMPv6 packet
- *
- * Parameters:
- *   dev - The device driver structure to use in the send operation
- *
- * Return:
- *   None
- *
- * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6_PING
-void icmpv6_send(FAR struct net_driver_s *dev, FAR net_ipv6addr_t *destaddr);
-#endif /* CONFIG_NET_ICMPv6_PING */
+#endif
 
 /****************************************************************************
  * Name: icmpv6_solicit
