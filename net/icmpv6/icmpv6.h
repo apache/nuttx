@@ -294,5 +294,25 @@ void icmpv6_notify(net_ipv6addr_t ipaddr);
 #  define icmpv6_notify(i)
 #endif
 
+/****************************************************************************
+ * Name: icmpv6_autoconfig
+ *
+ * Description:
+ *   Perform IPv6 auto-configuration to assign an IPv6 address to this
+ *   device.
+ *
+ * Parameters:
+ *   dev - The device driver structure to assign the address to
+ *
+ * Return:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+int icmpv6_autoconfig(FAR struct net_driver_s *dev);
+#endif
+
 #endif /* CONFIG_NET_ICMPv6 */
 #endif /* __NET_ICMPv6_ICMPv6_H */

@@ -53,6 +53,14 @@ config ICMPv6_NEIGHBOR_DELAYMSEC
 
 endif # NET_ICMPv6_NEIGHBOR
 
+config NET_ICMPv6_AUTOCONF
+	bool "ICMPv6 autoconfiguration"
+	default n
+	---help---
+		Enable ioctl() logic that implements ICMPv6 auto configuration.
+		ICMPv6 auto configuration is an alternative to DHCPv6 for obtaining
+		an IPv6 address from a router.
+
 endif # NET_ICMPv6
 endmenu # ICMPv6 Networking Support
 endif # NET_IPv6
