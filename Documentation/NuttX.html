@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 28, 2014</p>
+      <p>Last Updated: February 2, 2014</p>
     </td>
   </tr>
 </table>
@@ -1321,7 +1321,7 @@
     </ul>
   <li>Atmel AVR
     <ul>
-      <li><a href="#atmelavr">Atmel 8-bit AVR</a> (3) </li>
+      <li><a href="#atmelavr">Atmel 8-bit AVR</a> (4) </li>
       <li><a href="#atmelavr32">Atmel AVR32</a> (1) </li>
     </ul>
   </li>
@@ -1381,6 +1381,7 @@
   <li>Atmel
     <ul>
       <li><a href="#avratmega128">AVR ATMega128</a> <small>(8-bit AVR)</small></li>
+      <li><a href="#avratmega1284p">AVR ATMega1284p</a> <small>(8-bit AVR)</small></li>
       <li><a href="#avrat90usbxxx">AVR AT90USB64x and AT90USB6128x</a> <small>(8-bit AVR)</small></li>
       <li><a href="#at32uc3bxxx">AVR32 AT32UC3BXXX</a> <small>(32-bit AVR32)</small></li>
       <li><a href="#at91samd20">Atmel SAMD20</a> <small>(ARM Cortex-M0+)</small></li>
@@ -3763,7 +3764,6 @@ Mem:         29232       5920      23312      23312
   </p>
   </td>
 </tr>
-
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
@@ -3774,18 +3774,34 @@ Mem:         29232       5920      23312      23312
   <td><br></td>
   <td>
     <p>
-      <a name="avratmega128"><b>SoC Robotics ATMega128</b>.</a>
-      This port of NuttX to the Amber Web Server from <a href="http://www.soc-robotics.com/index.htm">SoC Robotics</a>
-      is partially completed.
-      The Amber Web Server is based on an Atmel ATMega128.
+      <b>AVR ATMega</b>.
     </p>
     <ul>
       <p>
-       <b>STATUS:</b>
-         Work on this port has stalled due to toolchain issues.  Complete, but untested
-         code for this port appears in the NuttX 6.5 release.
-         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/amber/README.txt">README</a> file for further information.
+        <a name="avratmega128"><b>SoC Robotics ATMega128</b>.</a>
+        This port of NuttX to the Amber Web Server from <a href="http://www.soc-robotics.com/index.htm">SoC Robotics</a>
+        is partially completed.
+        The Amber Web Server is based on an Atmel ATMega128.
       </p>
+      <ul>
+        <p>
+         <b>STATUS:</b>
+           Work on this port has stalled due to toolchain issues.  Complete, but untested code for this port appears in the NuttX 6.5 release.
+           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/amber/README.txt">README</a> file for further information.
+        </p>
+      </ul>
+      <p>
+        <a name="avratmega1284p"><b>LowPowerLab MoteinoMEGA</b>.</a>
+        This port of NuttX to the MoteinoMEGA from <a href="http://www.lowpowerlab.com">LowPowerLab</a>.
+        The MoteinoMEGA is based on an Atmel ATMega1284P.
+        See the LowPowerlab <a href="https://lowpowerlab.com/shop/index.php?_route_=Moteino/moteinomega">website</a> and the board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/moteio-mega/README.txt">README</a> file for further information.
+      </p>
+      <ul>
+        <p>
+         <b>STATUS:</b>
+           The basic function port support the NuttShell (NSH) was contribute by Jedi Tek'Enum and first appeard in the NuttX 7.8 release.
+        </p>
+      </ul>
     </ul>
   </td>
 </tr>
@@ -3847,12 +3863,13 @@ Mem:         29232       5920      23312      23312
   <td><br></td>
   <td>
     <p><b>AVR-Specific Issues</b>.
-      The basic AVR port is solid and biggest issue for using AVR is its tiny SRAM memory and its Harvard architecture.
+      The basic AVR port is solid.
+      The biggest issue for using AVR is its tiny SRAM memory and its Harvard architecture.
       Because of the Harvard architecture, constant data that resides to flash is inaccessible using &quot;normal&quot; memory reads and writes (only SRAM data can be accessed &quot;normally&quot;).
       Special AVR instructions are available for accessing data in FLASH, but these have not been integrated into the normal, general purpose OS.
     </p>
     <p>
-      Most NuttX test applications are console-oriented with lots of strings used for printf and debug output.
+      Most NuttX test applications are console-oriented with lots of strings used for <code>printf()</code> and debug output.
       These strings are all stored in SRAM now due to these data accessing issues and even the smallest console-oriented applications can quickly fill a 4-8K memory.
       So, in order for the AVR port to be useful, one of two things would need to be done:
     </p>
