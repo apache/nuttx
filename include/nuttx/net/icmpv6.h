@@ -109,9 +109,19 @@
 
 /* ICMPv6 Neighbor Advertisement message flags */
 
-#define ICMPv6_FLAG_R    (1 << 7) /* Router flag */
-#define ICMPv6_FLAG_S    (1 << 6) /* Solicited flag */
-#define ICMPv6_FLAG_O    (1 << 5) /* Override flag */
+#define ICMPv6_NADV_FLAG_R    (1 << 7) /* Router flag */
+#define ICMPv6_NADV_FLAG_S    (1 << 6) /* Solicited flag */
+#define ICMPv6_NADV_FLAG_O    (1 << 5) /* Override flag */
+
+/* ICMPv6 Router Advertisement message flags */
+
+#define ICMPv6_RADV_FLAG_M    (1 << 7) /* Managed address configuration flag */
+#define ICMPv6_RADV_FLAG_O    (1 << 6) /* Other configuration flag */
+
+/* Prefix option flags */
+
+#define ICMPv6_PRFX_FLAG_L    (1 << 7) /* On-link flag */
+#define ICMPv6_PRFX_FLAG_A    (1 << 6) /* Autonomous address-configuration flag
 
 /****************************************************************************
  * Public Type Definitions
@@ -152,8 +162,9 @@ struct icmpv6_neighbor_solicit_s
   uint16_t chksum;           /* Checksum of ICMP header and data */
   uint8_t  flags[4];         /* See ICMPv6_FLAG_ definitions */
   net_ipv6addr_t tgtaddr;    /* 128-bit Target IPv6 address */
+
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_SRCLLADDR */
-  uint8_t  optlen;           /* Option length: 8 octets */
+  uint8_t  optlen;           /* Option length: 1 octet */
 #ifdef CONFIG_NET_ETHERNET
   uint8_t  srclladdr[6];     /* Options: Source link layer address */
 #endif
@@ -166,14 +177,52 @@ struct icmpv6_neighbor_advertise_s
   uint8_t  type;             /* Message Type: ICMPv6_NEIGHBOR_ADVERTISE */
   uint8_t  code;             /* Further qualifies the ICMP messages */
   uint16_t chksum;           /* Checksum of ICMP header and data */
-  uint8_t  flags[4];         /* See ICMPv6_FLAG_ definitions */
+  uint8_t  flags[4];         /* See ICMPv6_NADV_FLAG_ definitions */
   net_ipv6addr_t tgtaddr;    /* Target IPv6 address */
+
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_TGTLLADDR */
-  uint8_t  optlen;           /* Option length: 8 octets */
+  uint8_t  optlen;           /* Option length: 1 octet */
 #ifdef CONFIG_NET_ETHERNET
   uint8_t  tgtlladdr[6];     /* Options: Target link layer address */
 #endif
 };
+
+/* This the message format for the ICMPv6 Router Solicitation message */
+
+struct icmpv6_router_solicit_s
+{
+  uint8_t  type;             /* Message Type: ICMPV6_ROUTER_SOLICIT */
+  uint8_t  code;             /* Further qualifies the ICMP messages */
+  uint16_t chksum;           /* Checksum of ICMP header and data */
+  uint8_t  flags[4];         /* See ICMPv6_RADV_FLAG_ definitions (must be zero) */
+
+  uint8_t  opttype;          /* Option Type: ICMPv6_OPT_SRCLLADDR */
+  uint8_t  optlen;           /* Option length: 1 octet */
+#ifdef CONFIG_NET_ETHERNET
+  uint8_t  srclladdr[6];     /* Options: Source link layer address */
+#endif
+};
+
+/* This the message format for the ICMPv6 Router Advertisement message:
+ * Options may include: ICMPv6_OPT_SRCLLADDR, ICMPv6_OPT_MTU, and/or
+ *                      ICMPv6_OPT_PREFIX
+ */
+
+struct icmpv6_router_advertise_s
+{
+  uint8_t  type;             /* Message Type: ICMPV6_ROUTER_ADVERTISE */
+  uint8_t  code;             /* Further qualifies the ICMP messages */
+  uint16_t chksum;           /* Checksum of ICMP header and data */
+  uint8_t  hoplimit;         /* Current hop limit */
+  uint8_t  flags;            /* See ICMPv6_RADV_FLAG_* definitions */
+  uint16_t lifetime;         /* Router lifetime */
+  uint16_t reachable[2];     /* Reachable time */
+  uint16_t retrans[2];       /* Retransmission timer */
+  uint8_t  options[1];       /* Options begin here */
+};
+
+#define ICMPv6_RADV_MINLEN    (16)
+#define ICMPv6_RADV_OPTLEN(n) ((n) - ICMPv6_RADV_MINLEN)
 
 /* This the message format for the ICMPv6 Echo Request message */
 
@@ -204,6 +253,61 @@ struct icmpv6_echo_reply_s
 
 #define SIZEOF_ICMPV6_ECHO_REPLY_S(n) \
   (sizeof(struct icmpv6_echo_reply_s) - 1 + (n))
+
+/* Option types */
+
+struct icmpv6_generic_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type */
+  uint8_t  optlen;           /* "   " ": Option length (in octets) */
+  uint16_t pad;              /* "   " ": The rest depends on the option */
+};
+
+struct icmpv6_srclladdr_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_SRCLLADDR */
+  uint8_t  optlen;           /* "   " ": Option length: 1 octet */
+#ifdef CONFIG_NET_ETHERNET
+  uint8_t  srclladdr[6];     /* "   " ": Options: Source link layer address */
+#endif
+};
+
+struct icmpv6_tgrlladdr_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_TGTLLADDR */
+  uint8_t  optlen;           /* "   " ": Option length: 1 octet */
+#ifdef CONFIG_NET_ETHERNET
+  uint8_t  tgtlladdr[6];     /* "   " ": Options: Target link layer address */
+#endif
+};
+
+struct icmpv6_prefixinfo_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_PREFIX */
+  uint8_t  optlen;           /* "   " ": Option length: 4 octets */
+  uint8_t  preflen;          /* "   " ": Prefix length */
+  uint8_t  flags;            /* "   " ": Flags */
+  uint16_t vlifetime[2];     /* "   " ": Valid lifetime */
+  uint16_t plifetime[2];     /* Octet 2: Preferred lifetime */
+  uint16_t reserved[2];      /* "   " ": Reserved */
+  uint16_t prefix[8];        /* Octets 3-4: Prefix */
+};
+
+struct icmpv6_redirect_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_REDIRECT */
+  uint8_t  optlen;           /* "   " ": Option length: 1 octet */
+  uint16_t reserved[3];      /* "   " ": Reserved */
+  uint8_t  header[1];        /* Octets 2-: Beginning of the IP header */
+};
+
+struct icmpv6_mtu_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_MTU */
+  uint8_t  optlen;           /* "   " ": Option length: 1 octet */
+  uint16_t reserved;         /* "   " ": Reserved */
+  uint16_t mtu[2];           /* "   " ": MTU */
+};
 
 /* The structure holding the ICMP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.

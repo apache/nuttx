@@ -40,9 +40,256 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
 
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
 #include <errno.h>
+#include <debug.h>
 
+#include <net/ethernet.h>
+
+#include <nuttx/net/net.h>
+#include <nuttx/net/netdev.h>
+
+#include "devif/devif.h"
 #include "icmpv6/icmpv6.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CONFIG_ICMPv6_AUTOCONF_DELAYSEC  \
+  (CONFIG_ICMPv6_AUTOCONF_DELAYMSEC / 1000)
+#define CONFIG_ICMPv6_AUTOCONF_DELAYNSEC \
+  ((CONFIG_ICMPv6_AUTOCONF_DELAYMSEC - 1000*CONFIG_ICMPv6_AUTOCONF_DELAYSEC) * 1000000)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure holds the state of the send operation until it can be
+ * operated upon from the interrupt level.
+ */
+
+struct icmpv6_router_s
+{
+  FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
+  sem_t snd_sem;                       /* Used to wake up the waiting thread */
+  volatile bool snd_sent;              /* True: if request sent */
+#ifdef CONFIG_NETDEV_MULTINIC
+  uint8_t snd_ifname[IFNAMSIZ];        /* Interface name */
+#endif
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: icmpv6_router_interrupt
+ ****************************************************************************/
+
+static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
+                                        FAR void *pvconn,
+                                        FAR void *priv, uint16_t flags)
+{
+  FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
+
+  nllvdbg("flags: %04x sent: %d\n", flags, state->snd_sent);
+
+  if (state)
+    {
+#ifdef CONFIG_NETDEV_MULTINIC
+      /* Is this the device that we need to route this request? */
+
+      if (strncmp((FAR const char *)dev->d_ifname,
+                  (FAR const char *)state->snd_ifname, IFNAMSIZ) != 0)
+        {
+          /* No... pass on this one and wait for the device that we want */
+
+          return flags;
+        }
+
+#endif
+
+      /* Check if the outgoing packet is available. It may have been claimed
+       * by a send interrupt serving a different thread -OR- if the output
+       * buffer currently contains unprocessed incoming data. In these cases
+       * we will just have to wait for the next polling cycle.
+       */
+
+      if (dev->d_sndlen > 0 || (flags & ICMPv6_NEWDATA) != 0)
+        {
+          /* Another thread has beat us sending data or the buffer is busy,
+           * Check for a timeout. If not timed out, wait for the next
+           * polling cycle and check again.
+           */
+
+          /* REVISIT: No timeout. Just wait for the next polling cycle */
+
+          return flags;
+        }
+
+      /* It looks like we are good to send the data */
+      /* Copy the packet data into the device packet buffer and send it */
+
+      icmpv6_rsolicit(dev);
+
+      /* Make sure no additional Router Solicitation overwrites this one.
+       * This flag will be cleared in icmpv6_out().
+       */
+
+      IFF_SET_NOARP(dev->d_flags);
+
+      /* Don't allow any further call backs. */
+
+      state->snd_sent         = true;
+      state->snd_cb->flags    = 0;
+      state->snd_cb->priv     = NULL;
+      state->snd_cb->event    = NULL;
+
+      /* Wake up the waiting thread */
+
+      sem_post(&state->snd_sem);
+    }
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: icmpv6_send_rsolicit
+ *
+ * Description:
+ *   Send an ICMPv6 Router Solicitation to resolve an IPv6 address.
+ *
+ * Parameters:
+ *   dev - The device to use to send the solicitation
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; On error a negated errno value is
+ *   returned.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int icmpv6_send_rsolicit(FAR struct net_driver_s *dev)
+{
+  struct icmpv6_router_s state;
+  int ret;
+
+  /* Initialize the state structure. This is done with interrupts
+   * disabled
+   */
+
+  (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* Remember the routing device name */
+
+  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
+          IFNAMSIZ);
+#endif
+
+  /* Allocate resources to receive a callback.  This and the following
+   * initialization is performed with the network lock because we don't
+   * want anything to happen until we are ready.
+   */
+
+  state.snd_cb = icmpv6_callback_alloc();
+  if (!state.snd_cb)
+    {
+      ndbg("ERROR: Failed to allocate a cllback\n");
+      ret = -ENOMEM;
+      goto errout_with_semaphore;
+    }
+
+  /* Arm the callback */
+
+  state.snd_sent      = false;
+  state.snd_cb->flags = ICMPv6_POLL;
+  state.snd_cb->priv  = (FAR void *)&state;
+  state.snd_cb->event = icmpv6_router_interrupt;
+
+  /* Notify the device driver that new TX data is available. */
+
+  dev->d_txavail(dev);
+
+  /* Wait for the send to complete or an error to occur: NOTES: (1)
+   * net_lockedwait will also terminate if a signal is received, (2)
+   * interrupts may be disabled! They will be re-enabled while the
+   * task sleeps and automatically re-enabled when the task restarts.
+   */
+
+  do
+    {
+      (void)net_lockedwait(&state.snd_sem);
+    }
+  while (!state.snd_sent);
+
+  icmpv6_callback_free(state.snd_cb);
+
+errout_with_semaphore:
+  sem_destroy(&state.snd_sem);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: icmpv6_wait_radvertise
+ *
+ * Description:
+ *   Wait for the receipt of the Router Advertisment matching the Router
+ *   Solicitation that we just sent.
+ *
+ * Parameters:
+ *   dev    - The device to use to send the solicitation
+ *   notify - The pre-initialized notification structure
+ *   save   - We will need this to temporarily release the net lock
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; On error a negated errno value is
+ *   returned.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
+                           FAR struct icmpv6_rnotify_s *notify,
+                           net_lock_t *save)
+{
+  struct timespec delay;
+#ifdef CONFIG_NET_NOINTS
+  irqstate_t flags;
+#endif
+  int ret;
+
+  /* Wait for response to the Router Advertisement to be received.  The
+   * optimal delay would be the work case round trip time.
+   * NOTE: The network is locked.
+   */
+
+  delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
+  delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
+
+#ifdef CONFIG_NET_NOINTS
+  flags = irqsave();  /* Keep things stable */
+  net_unlock(*save);   /* Unlock the network with interrupts disabled */
+#endif
+  ret = icmpv6_rwait(notify, &delay);
+#ifdef CONFIG_NET_NOINTS
+  *save = net_lock();  /* Re-lock the network with interrupts disabled */
+   irqrestore(flags);
+#endif
+
+ /* icmpv6_wait will return OK if and only if the matching Router
+  * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
+  */
+
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -74,7 +321,36 @@
 
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
+#ifndef CONFIG_NET_ETHERNET
+  /* Only Ethernet supported for now */
+
+  ndbg("ERROR: Only Ethernet is supported\n");
+  return -ENOSYS;
+
+#else
+  struct icmpv6_rnotify_s notify;
+  net_ipv6addr_t lladdr;
+  net_lock_t save;
+  int retries;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(dev);
+  nvdbg("Auto-configuring %s\n", dev->d_ifname);
+
+#ifdef CONFIG_NET_MULTILINK
+  /* Only Ethernet devices are supported for now */
+
+  if (dev->d_lltype != NET_LL_ETHERNET)
+    {
+      ndbg("ERROR: Only Ethernet is supported\n");
+      return -ENOSYS;
+    }
+#endif
+
   /* IPv6 Stateless Autoconfiguration
+   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfiguratinoandRenumbering.htm
    *
    * The following is a summary of the steps a device takes when using
    * stateless auto-configuration:
@@ -93,7 +369,17 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    simply take the EUI-64 address and change the 7th bit from the left
    *    (the"universal/local" or "U/L" bit) from a zero to a one.
    *
-   * 2. Link-Local Address Uniqueness Test: The node tests to ensure that
+   *    128  112  96   80    64   48   32   16
+   *    ---- ---- ---- ----  ---- ---- ---- ----
+   *    fe80 0000 0000 0000  0000 xxxx xxxx xxxx
+   */
+
+  lladdr[0] = 0xfe80;                                        /* 10-bit address + 6 zeroes */
+  memset(&lladdr[1], 0, 4* sizeof(uint16_t));                /* 64 more zeroes */
+  memcpy(&lladdr[5], dev->d_mac.ether_addr_octet, sizeof(struct ether_addr)); /* 48-bit Ethernet address */
+
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  /* 2. Link-Local Address Uniqueness Test: The node tests to ensure that
    *    the address it generated isn't for some reason already in use on the
    *    local network. (This is very unlikely to be an issue if the link-local
    *    address came from a MAC address but more likely if it was based on a
@@ -103,36 +389,97 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    already using its link-local address; if so, either a new address
    *    must be generated, or auto-configuration fails and another method
    *    must be employed.
-   *
-   * 3. Link-Local Address Assignment: Assuming the uniqueness test passes,
+   */
+
+  ret = icmpv6_neighbor(lladdr);
+  if (ret == OK)
+    {
+      /* Hmmm... someone else responded to our Neighbor Solicitation.  We
+       * have not back-up plan in place.  Just bail.
+       */
+
+      return -EEXIST;
+    }
+#endif
+
+  /* 3. Link-Local Address Assignment: Assuming the uniqueness test passes,
    *    the device assigns the link-local address to its IP interface. This
    *    address can be used for communication on the local network, but not
    *    on the wider Internet (since link-local addresses are not routed).
-   *
-   * 4. Router Contact: The node next attempts to contact a local router for
+   */
+
+  net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
+
+  /* 4. Router Contact: The node next attempts to contact a local router for
    *    more information on continuing the configuration. This is done either
    *    by listening for Router Advertisement messages sent periodically by
    *    routers, or by sending a specific Router Solicitation to ask a router
    *    for information on what to do next.
-   *
-   * 5. Router Direction: The router provides direction to the node on how to
+   */
+
+  save = net_lock();
+  for (retries = 0; retries < CONFIG_ICMPv6_AUTOCONF_MAXTRIES; retries++)
+    {
+      /* Set up the Router Advertisement BEFORE we send the Router
+       * Solicitation.
+       */
+
+      icmpv6_rwait_setup(dev, &notify);
+
+      /* Send the ICMPv6 Router solicitation message */
+
+      ret = icmpv6_send_rsolicit(dev);
+      if (ret < 0)
+        {
+          ndbg("ERROR: Failed send router solicitation: %d\n", ret);
+          break;
+        }
+
+      /* Wait to receive the Router Advertisement message */
+
+      ret = icmpv6_wait_radvertise(dev, &notify, &save);
+      if (ret != -ETIMEDOUT)
+        {
+          /* ETIMEDOUT is the only expected failure.  We will retry on that
+           * case only.
+           */
+
+          break;
+        }
+
+      nvdbg("Timed out... retrying\n");
+    }
+
+  net_unlock(save);
+
+  /* Check for failures */
+
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to get the router advertisement: %d (retries=%d)\n",
+           ret, retries);
+      return ret;
+    }
+
+  /* 5. Router Direction: The router provides direction to the node on how to
    *    proceed with the auto-configuration. It may tell the node that on this
    *    network "stateful" auto-configuration is in use, and tell it the
    *    address of a DHCP server to use. Alternately, it will tell the host
    *    how to determine its global Internet address.
-   *
-   * 6. Global Address Configuration: Assuming that stateless auto-
+   */
+#warning Missing logic
+
+  /* 6. Global Address Configuration: Assuming that stateless auto-
    *    configuration is in use on the network, the host will configure
    *    itself with its globally-unique Internet address. This address is
    *    generally formed from a network prefix provided to the host by the
    *    router, combined with the device's identifier as generated in the
    *    first step.
-   *
-   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfiguratinoandRenumbering.htm
    */
-
 #warning Missing logic
-  return -ENOSYS;
+
+  return ret;
+#endif
 }
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */

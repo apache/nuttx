@@ -56,7 +56,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NET_ICMPv6_AUTOCONF),y)
-NET_CSRCS += icmpv6_autoconfig.c
+NET_CSRCS += icmpv6_autoconfig.c icmpv6_rsolicit.c icmpv6_rnotify.c
 endif
 
 # Include ICMPv6 build support

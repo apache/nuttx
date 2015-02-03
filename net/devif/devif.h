@@ -70,6 +70,7 @@
  *   UDP_NEWDATA    OUT: Cleared (only) by the socket layer logic to indicate
  *   PKT_NEWDATA         that the new data was consumed, suppressing further
  *   ICMP_NEWDATA        attempts to process the new data.
+ *   ICMPv6_NEWDATA
  *
  *   TCP_SNDACK      IN: Not used; always zero
  *                  OUT: Set by the socket layer if the new data was consumed

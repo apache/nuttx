@@ -62,19 +62,20 @@
  * Public Type Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
+#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_ICMPv6_NEIGHBOR) || \
+    defined(CONFIG_NET_ICMPv6_AUTOCONF)
 /* For symmetry with other protocols, a "connection" structure is
- * provided.  But it is a singleton for the case of ARP packet transfers.
+ * provided.  But, in this case, it is a singleton.
  */
 
 struct icmpv6_conn_s
 {
-  FAR struct devif_callback_s *list;    /* ARP callbacks */
+  FAR struct devif_callback_s *list;    /* Neighbor discovery callbacks */
 };
 #endif
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-/* Used to notify a thread waiting for a particular ARP response */
+/* Used to notify a thread waiting for a particular Neighbor Advertisement */
 
 struct icmpv6_notify_s
 {
@@ -82,6 +83,24 @@ struct icmpv6_notify_s
   net_ipv6addr_t nt_ipaddr;             /* Waited for IP address in the mapping */
   sem_t nt_sem;                         /* Will wake up the waiter */
   int nt_result;                        /* The result of the wait */
+};
+#endif
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+/* Used to notify a thread waiting for a particular Router Advertisement */
+
+struct icmpv6_rnotify_s
+{
+#ifdef CONFIG_NET_MULTILINK
+  FAR struct icmpv6_notify_s *rn_flink; /* Supports singly linked list */
+#endif
+  net_ipv6addr_t rn_prefix;             /* Waited for router prefix */
+  uint8_t rn_preflen;                   /* Prefix length (# valid leading bits) */
+#ifdef CONFIG_NET_MULTILINK
+  char rn_ifname[IFNAMSIZ];             /* Device name */
+#endif
+  sem_t rn_sem;                         /* Will wake up the waiter */
+  int rn_result;                        /* The result of the wait */
 };
 #endif
 
@@ -212,11 +231,37 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: icmpv6_rsolicit
+ *
+ * Description:
+ *   Set up to send an ICMPv6 Router Solicitation message.  This version
+ *   is for a standalone solicitation.  If formats:
+ *
+ *   - The Ethernet header
+ *   - The IPv6 header
+ *   - The ICMPv6 Neighbor Router Message
+ *
+ *   The device IP address should have been set to the link local address
+ *   prior to calling this function.
+ *
+ * Parameters:
+ *   dev - Reference to an Ethernet device driver structure
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+void icmpv6_rsolicit(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
  * Function: icmpv6_wait_setup
  *
  * Description:
  *   Called BEFORE an Neighbor Solicitation is sent.  This function sets up
- *   the Neighbor Advertisement timeout before the the Neighbor Solicitation
+ *   the Neighbor Advertisement timeout before the Neighbor Solicitation
  *   is sent so that there is no race condition when icmpv6_wait() is called.
  *
  * Assumptions:
@@ -312,6 +357,91 @@ void icmpv6_notify(net_ipv6addr_t ipaddr);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
 int icmpv6_autoconfig(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Function: icmpv6_rwait_setup
+ *
+ * Description:
+ *   Called BEFORE an Router Solicitation is sent.  This function sets up
+ *   the Router Advertisement timeout before the Router Solicitation
+ *   is sent so that there is no race condition when icmpv6_rwait() is
+ *   called.
+ *
+ * Assumptions:
+ *   This function is called from icmpv6_autoconfig() and executes in the
+ *   normal tasking environment.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
+                        FAR struct icmpv6_rnotify_s *notify);
+#else
+#  define icmpv6_rwait_setup(d,n)
+#endif
+
+/****************************************************************************
+ * Function: icmpv6_rwait_cancel
+ *
+ * Description:
+ *   Cancel any wait set after icmpv6_rwait_setup() is called but before
+ *   icmpv6_rwait()is called (icmpv6_rwait() will automatically cancel the
+ *   wait).
+ *
+ * Assumptions:
+ *   This function may execute in the interrupt context when called from
+ *   icmpv6_rwait().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify);
+#else
+#  define icmpv6_rwait_cancel(n) (0)
+#endif
+
+/****************************************************************************
+ * Function: icmpv6_rwait
+ *
+ * Description:
+ *   Called each time that a Router Solicitation is sent.  This function
+ *   will sleep until either: (1) the matching Router Advertisement is
+ *   received, or (2) a timeout occurs.
+ *
+ * Assumptions:
+ *   This function is called from icmpv6_autoconfig() and must execute with
+ *   the network un-locked (interrupts may be disabled to keep the things
+ *   stable).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
+                 FAR struct timespec *timeout);
+#else
+#  define icmpv6_rwait(n,t) (0)
+#endif
+
+/****************************************************************************
+ * Function: icmpv6_rnotify
+ *
+ * Description:
+ *   Called each time that a Router Advertisement is received in order to
+ *   wake-up any threads that may be waiting for this particular Router
+ *   Advertisement.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver indirectly through
+ *   icmpv6_icmpv6in() will execute with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t prefix,
+                    unsigned int preflen);
+#else
+#  define icmpv6_rnotify(d,p,l)
 #endif
 
 #endif /* CONFIG_NET_ICMPv6 */

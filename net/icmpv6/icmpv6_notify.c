@@ -82,7 +82,7 @@ static struct icmpv6_notify_s *g_icmpv6_waiters;
  *
  * Description:
  *   Called BEFORE an Neighbor Solicitation is sent.  This function sets up
- *   the Neighbor Advertisement timeout before the the Neighbor Solicitation
+ *   the Neighbor Advertisement timeout before the Neighbor Solicitation
  *   is sent so that there is no race condition when icmpv6_wait() is called.
  *
  * Assumptions:
@@ -243,7 +243,7 @@ void icmpv6_notify(net_ipv6addr_t ipaddr)
        * entry from the list.
        */
 
-      if (curr->nt_result != OK && curr->nt_ipaddr == ipaddr)
+      if (curr->nt_result != OK && net_ipv6addr_cmp(curr->nt_ipaddr, ipaddr))
         {
           /* Yes.. Signal the waiting, returning success */
 

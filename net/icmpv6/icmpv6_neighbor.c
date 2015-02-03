@@ -357,11 +357,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = icmpv6_neighbor_interrupt;
 
-      /* Notify the device driver that new TX data is available.
-       * NOTES: This is in essence what netdev_ipv4_txnotify() does, which
-       * is not possible to call since it expects a icmpv6_neighbor as
-       * its single argument to lookup the network interface.
-       */
+      /* Notify the device driver that new TX data is available. */
 
       dev->d_txavail(dev);
 
