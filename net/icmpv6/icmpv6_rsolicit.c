@@ -112,9 +112,9 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
    * address: ff02::2
    */
 
-  icmp->destipaddr[0] = 0xff02;
-  memset(&icmp->destipaddr[0], 0, 6*sizeof(uint16_t));
-  icmp->destipaddr[7] = 0x0002;
+  icmp->destipaddr[0] = HTONS(0xff02);
+  memset(&icmp->destipaddr[1], 0, 6*sizeof(uint16_t));
+  icmp->destipaddr[7] = HTONS(0x0002);
 
   /* Add our link local IPv6 address as the source address */
 
@@ -155,25 +155,15 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   if (dev->d_lltype == NET_LL_ETHERNET)
 #endif
     {
-      /* Set the destination IPv6 multicast Ethernet address:
-       *
-       * For IPv6 multicast addresses, the Ethernet MAC is derived by
-       * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-       * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-       * to the Ethernet MAC address 33:33:00:01:00:03.
-        *
-       * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-       * Message, but the ICMPv6 Router Solicitation message seems to
-       * use 33:33:ff:01:00:03.
-       */
+      /* Set the destination IPv6 multicast Ethernet address */
 
       eth          = ETHBUF;
       eth->dest[0] = 0x33;
       eth->dest[1] = 0x33;
-      eth->dest[2] = 0xff;
-      eth->dest[3] = dev->d_ipv6addr[6] >> 8;
-      eth->dest[4] = dev->d_ipv6addr[7] & 0xff;
-      eth->dest[5] = dev->d_ipv6addr[7] >> 8;
+      eth->dest[2] = 0x00;
+      eth->dest[3] = 0x00;
+      eth->dest[4] = 0x00;
+      eth->dest[5] = 0x02;
 
       /* Move our source Ethernet addresses into the Ethernet header */
 
