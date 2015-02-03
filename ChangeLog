@@ -9634,3 +9634,9 @@
 	  while we wait and all is well) (2015-02-02).
 	* net/icmpv6/icmpv6.h, icmpv6_neighbor.c, icmpv6_notify.c: Apply the
 	  same fix as for ARP to the Neighbor Solicitation logic (2015-02-02).
+	* sched/sched/sched_timerexpiration.c, Kconfig, and include/nuttx/arch.h:
+	  On my platform I have just 16-bit timer clocked at 32kHz. As result
+	  oneshot timer max delay is 2s. The patch adds limit of maximum ticks
+	  in sched_timer_start(). From Macs N (2015-02-03).
+	* arch/arm/src/sam34:  Add support for Tickless mode of operation for
+	  the SAM4CM platfrom.  From Macs N (2015-02-03).
