@@ -9644,3 +9644,8 @@
 	  sending ICMPv6 Router Solicitation and receiving Router advertisement.
 	  This is a part of the ICMPv6 auto-configuration logic is still not
 	  complete (2015-02-03).
+	* libnx/nxfonts/nxfonts_getfont.c and nxfonts_sans39x48.h: Fixes a
+	  problem with one of the font files.  From Pierre-noel Bouteville
+	 (2015-02-03).
+	* arch/arm/src/efm32/efm32_rtc_burtc.c:  Remove a misbehaving assertion.
+	  From Pierre-noel Bouteville (2015-02-03).
