@@ -325,6 +325,7 @@
 
 #define TC_CMR_TCCLKS_SHIFT          (0)       /* Bits 0-2: Clock Selection */
 #define TC_CMR_TCCLKS_MASK           (7 << TC_CMR_TCCLKS_SHIFT)
+#  define TC_CMR_TCCLKS(n)           ((uint32_t)(n) << TC_CMR_TCCLKS_SHIFT)
 #  define TC_CMR_TCCLKS_TIMERCLOCK1  (0 << TC_CMR_TCCLKS_SHIFT)
 #  define TC_CMR_TCCLKS_TIMERCLOCK2  (1 << TC_CMR_TCCLKS_SHIFT)
 #  define TC_CMR_TCCLKS_TIMERCLOCK3  (2 << TC_CMR_TCCLKS_SHIFT)
@@ -335,11 +336,11 @@
 #  define TC_CMR_TCCLKS_XC2          (7 << TC_CMR_TCCLKS_SHIFT)
 #define TC_CMR_CLKI                  (1 << 3)  /* Bit 3: Clock Invert */
 #define TC_CMR_BURST_SHIFT           (4)       /* Bits 4-5: Burst Signal Selection */
-#define TC_CMR_BURST_MASK            (3 << TC_CMR_BURST_MASK)
-#  define TC_CMR_BURST_NOTGATED      (0 << TC_CMR_BURST_MASK) /* Nott gated by external signal */
-#  define TC_CMR_BURST_XC0           (1 << TC_CMR_BURST_MASK) /* XC0 ANDed with selected clock */
-#  define TC_CMR_BURST_XC1           (2 << TC_CMR_BURST_MASK) /* XC1 ANDed with selected clock */
-#  define TC_CMR_BURST_XC2           (3 << TC_CMR_BURST_MASK) /* XC2 ANDed with selected clock */
+#define TC_CMR_BURST_MASK            (3 << TC_CMR_BURST_SHIFT)
+#  define TC_CMR_BURST_NOTGATED      (0 << TC_CMR_BURST_SHIFT) /* Nott gated by external signal */
+#  define TC_CMR_BURST_XC0           (1 << TC_CMR_BURST_SHIFT) /* XC0 ANDed with selected clock */
+#  define TC_CMR_BURST_XC1           (2 << TC_CMR_BURST_SHIFT) /* XC1 ANDed with selected clock */
+#  define TC_CMR_BURST_XC2           (3 << TC_CMR_BURST_SHIFT) /* XC2 ANDed with selected clock */
 #define TC_CMR_WAVE                  (1 << 15) /* Bit 15: Waveform Mode */
 
 /* TC Channel Mode Register -- Capture mode only */

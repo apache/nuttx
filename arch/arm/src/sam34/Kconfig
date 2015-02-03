@@ -929,6 +929,139 @@ config SAM34_GPIOF_IRQ
 endif # SAM34_GPIO_IRQ
 endmenu # AT91SAM3/4 GPIO Interrupt Configuration
 
+menu "AT91SAM3/4 Timer/Counter Configuration"
+	depends on SAM34_TC
+
+config SAM34_TC0_CLK
+	bool "Enable TC channel 0 clock input pin"
+	default n
+	depends on SAM34_TC0
+
+config SAM34_TC0_TIOA
+	bool "Enable TC channel 0 output A"
+	default n
+	depends on SAM34_TC0
+
+config SAM34_TC0_TIOB
+	bool "Enable TC channel 0 output B"
+	default n
+	depends on SAM34_TC0
+
+config SAM34_TC1_CLK
+	bool "Enable TC channel 1 clock input pin"
+	default n
+	depends on SAM34_TC1
+
+config SAM34_TC1_TIOA
+	bool "Enable TC channel 1 output A"
+	default n
+	depends on SAM34_TC1
+
+config SAM34_TC1_TIOB
+	bool "Enable TC channel 1 output B"
+	default n
+	depends on SAM34_TC1
+
+config SAM34_TC2_CLK
+	bool "Enable TC channel 2 clock input pin"
+	default n
+	depends on SAM34_TC2
+
+config SAM34_TC2_TIOA2
+	bool "Enable TC channel 2 output A"
+	default n
+	depends on SAM34_TC2
+
+config SAM34_TC2_TIOB2
+	bool "Enable TC channel 2 output B"
+	default n
+	depends on SAM34_TC2
+
+config SAM34_TC3_CLK
+	bool "Enable TC channel 3 clock input pin"
+	default n
+	depends on SAM34_TC3
+
+config SAM34_TC3_TIOA
+	bool "Enable TC channel 3 output A"
+	default n
+	depends on SAM34_TC3
+
+config SAM34_TC3_TIOB
+	bool "Enable TC channel 3 output B"
+	default n
+	depends on SAM34_TC3
+
+config SAM34_TC4_CLK
+	bool "Enable TC channel 4 clock input pin"
+	default n
+	depends on SAM34_TC4
+
+config SAM34_TC4_TIOA
+	bool "Enable TC channel 4 output A"
+	default n
+	depends on SAM34_TC4
+
+config SAM34_TC4_TIOB
+	bool "Enable TC channel 4 output B"
+	default n
+	depends on SAM34_TC4
+
+config SAM34_TC5_CLK
+	bool "Enable TC channel 5 clock input pin"
+	default n
+	depends on SAM34_TC5
+
+config SAM34_TC5_TIOA
+	bool "Enable TC channel 5 output A"
+	default n
+	depends on SAM34_TC5
+
+config SAM34_TC5_TIOB
+	bool "Enable TC channel 5 output B"
+	default n
+	depends on SAM34_TC5
+
+config SAM34_ONESHOT
+	bool "TC one-shot wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config SAM34_FREERUN
+	bool "TC free-running wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+endif # ARCH_CHIP_SAM4CM
+
+if SCHED_TICKLESS
+
+config SAM34_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 0
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config SAM34_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 1
+	range 0 8
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif
+
+endmenu # AT91SAM3/4 Timer/Counter Configuration
+
 if SAM34_SPI0 || SAM34_SPI1
 
 menu "AT91SAM3/4 SPI device driver options"
