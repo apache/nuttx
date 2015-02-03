@@ -54,7 +54,7 @@ config ICMPv6_NEIGHBOR_DELAYMSEC
 endif # NET_ICMPv6_NEIGHBOR
 
 config NET_ICMPv6_AUTOCONF
-	bool "ICMPv6 autoconfiguration"
+	bool "ICMPv6 auto-configuration"
 	default n
 	---help---
 		Enable ioctl() logic that implements ICMPv6 auto configuration.
