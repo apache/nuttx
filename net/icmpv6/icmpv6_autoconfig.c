@@ -55,6 +55,14 @@
  *   Perform IPv6 auto-configuration to assign an IPv6 address to this
  *   device.
  *
+ *   Stateless auto-configuration exploits several other features in IPv6,
+ *   including link-local addresses, multi-casting, the Neighbor Discovery
+ *   protocol, and the ability to generate the interface identifier of an
+ *   address from the underlying data link layer address. The general idea
+ *   is to have a device generate a temporary address until it can determine
+ *   the characteristics of the network it is on, and then create a permanent
+ *   address it can use based on that information.
+ *
  * Parameters:
  *   dev - The device driver structure to assign the address to
  *
@@ -66,6 +74,63 @@
 
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
+  /* IPv6 Stateless Autoconfiguration
+   *
+   * The following is a summary of the steps a device takes when using
+   * stateless auto-configuration:
+   *
+   * 1. Link-Local Address Generation: The device generates a link-local
+   *    address. Recall that this is one of the two types of local-use IPv6
+   *    addresses. Link-local addresses have "1111 1110 10" for the first
+   *    ten bits. The generated address uses those ten bits followed by 54
+   *    zeroes and then the 64 bit interface identifier. Typically this
+   *    will be derived from the data link layer (MAC) address.
+   *
+   *    IEEE 802 MAC addresses, used by Ethernet and other IEEE 802 Project
+   *    networking technologies, have 48 bits.  The IEEE has also defined a
+   *    format called the 64-bit extended unique identifier, abbreviated
+   *    EUI-64.  To get the modified EUI-64 interface ID for a device, you
+   *    simply take the EUI-64 address and change the 7th bit from the left
+   *    (the"universal/local" or "U/L" bit) from a zero to a one.
+   *
+   * 2. Link-Local Address Uniqueness Test: The node tests to ensure that
+   *    the address it generated isn't for some reason already in use on the
+   *    local network. (This is very unlikely to be an issue if the link-local
+   *    address came from a MAC address but more likely if it was based on a
+   *    generated token.) It sends a Neighbor Solicitation message using the
+   *    Neighbor Discovery (ND) protocol. It then listens for a Neighbor
+   *    Advertisement in response that indicates that another device is
+   *    already using its link-local address; if so, either a new address
+   *    must be generated, or auto-configuration fails and another method
+   *    must be employed.
+   *
+   * 3. Link-Local Address Assignment: Assuming the uniqueness test passes,
+   *    the device assigns the link-local address to its IP interface. This
+   *    address can be used for communication on the local network, but not
+   *    on the wider Internet (since link-local addresses are not routed).
+   *
+   * 4. Router Contact: The node next attempts to contact a local router for
+   *    more information on continuing the configuration. This is done either
+   *    by listening for Router Advertisement messages sent periodically by
+   *    routers, or by sending a specific Router Solicitation to ask a router
+   *    for information on what to do next.
+   *
+   * 5. Router Direction: The router provides direction to the node on how to
+   *    proceed with the auto-configuration. It may tell the node that on this
+   *    network "stateful" auto-configuration is in use, and tell it the
+   *    address of a DHCP server to use. Alternately, it will tell the host
+   *    how to determine its global Internet address.
+   *
+   * 6. Global Address Configuration: Assuming that stateless auto-
+   *    configuration is in use on the network, the host will configure
+   *    itself with its globally-unique Internet address. This address is
+   *    generally formed from a network prefix provided to the host by the
+   *    router, combined with the device's identifier as generated in the
+   *    first step.
+   *
+   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfiguratinoandRenumbering.htm
+   */
+
 #warning Missing logic
   return -ENOSYS;
 }
