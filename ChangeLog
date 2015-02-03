@@ -9649,3 +9649,8 @@
 	 (2015-02-03).
 	* arch/arm/src/efm32/efm32_rtc_burtc.c:  Remove a misbehaving assertion.
 	  From Pierre-noel Bouteville (2015-02-03).
+	* net/icmpv6:  Implemented the ICMPv6 Autonomous Auto-Configuration
+	  logic.  This is an IPv6 alternative to DHCP.  It obtains the IPv6
+	  addresses and masks using ICMPv6 Router Solicitation and
+	  Advertisement messages (2015-02-03).
+
