@@ -90,10 +90,6 @@ struct icmpv6_neighbor_s
 };
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -130,7 +126,7 @@ static uint16_t icmpv6_neighbor_interrupt(FAR struct net_driver_s *dev,
        * we will just have to wait for the next polling cycle.
        */
 
-      if (dev->d_sndlen > 0 || (flags & PKT_NEWDATA) != 0)
+      if (dev->d_sndlen > 0 || (flags & ICMPv6_NEWDATA) != 0)
         {
           /* Another thread has beat us sending data or the buffer is busy,
            * Check for a timeout. If not timed out, wait for the next
@@ -147,8 +143,8 @@ static uint16_t icmpv6_neighbor_interrupt(FAR struct net_driver_s *dev,
 
       icmpv6_solicit(dev, state->snd_ipaddr);
 
-      /* Make sure no additional Neighbor Solicitation overwrites this one.  This
-       * flag will be cleared in icmpv6_out().
+      /* Make sure no additional Neighbor Solicitation overwrites this one.
+       * This flag will be cleared in icmpv6_out().
        */
 
       IFF_SET_NOARP(dev->d_flags);
@@ -321,10 +317,12 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Remember the routing device name */
 
-  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname, IFNAMSIZ);
+  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
+          IFNAMSIZ);
 #endif
 
-  /* Now loop, testing if the address mapping is in the Neighbor Table and re-sending the ARP request if it is not.
+  /* Now loop, testing if the address mapping is in the Neighbor Table and
+   * re-sending the Neighbor Solicitation if it is not.
    */
 
   ret = -ETIMEDOUT; /* Assume a timeout failure */
@@ -346,7 +344,9 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
           break;
         }
 
-      /* Set up the ARP response wait BEFORE we send the ARP request */
+      /* Set up the Neighbor Advertisement wait BEFORE we send the Neighbor
+       * Solicitation.
+       */
 
       icmpv6_wait_setup(lookup, &notify);
 
@@ -377,8 +377,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
         }
       while (!state.snd_sent);
 
-      /* Now wait for response to the ARP response to be received.  The
-       * optimal delay would be the work case round trip time.
+      /* Now wait for response to the Neighbor Advertisement to be received.
+       * The optimal delay would be the work case round trip time.
        * NOTE: The network is locked.
        */
 
@@ -395,8 +395,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       irqrestore(flags);
 #endif
 
-      /* icmpv6_wait will return OK if and only if the matching ARP response
-       * is received.  Otherwise, it will return -ETIMEDOUT.
+      /* icmpv6_wait will return OK if and only if the matching Neighbor
+       * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
        */
 
       if (ret == OK)
