@@ -85,6 +85,11 @@ void netdev_semtake(void);
 void netdev_semgive(void);
 #endif
 
+/* netdev_ioctl.c ************************************************************/
+
+void netdev_ifup(FAR struct net_driver_s *dev);
+void netdev_ifdown(FAR struct net_driver_s *dev);
+
 /* netdev_findbyname.c *******************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0

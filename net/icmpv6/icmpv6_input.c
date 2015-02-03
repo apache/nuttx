@@ -321,7 +321,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
               {
                 /* Yes.. Notify any waiting threads */
 
-                icmpv6_rnotify(dev, opt->prefix, opt->preflen);
+                icmpv6_rnotify(dev, icmp->srcipaddr, opt->prefix, opt->preflen);
                 goto icmpv_send_nothing;
               }
 

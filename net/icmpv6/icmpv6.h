@@ -93,10 +93,6 @@ struct icmpv6_rnotify_s
 {
 #ifdef CONFIG_NET_MULTILINK
   FAR struct icmpv6_notify_s *rn_flink; /* Supports singly linked list */
-#endif
-  net_ipv6addr_t rn_prefix;             /* Waited for router prefix */
-  uint8_t rn_preflen;                   /* Prefix length (# valid leading bits) */
-#ifdef CONFIG_NET_MULTILINK
   char rn_ifname[IFNAMSIZ];             /* Device name */
 #endif
   sem_t rn_sem;                         /* Will wake up the waiter */
@@ -431,6 +427,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
  *   wake-up any threads that may be waiting for this particular Router
  *   Advertisement.
  *
+ *   NOTE:  On success the network has the new address applied and is in
+ *   the down state.
+ *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
  *   icmpv6_icmpv6in() will execute with the network locked.
@@ -438,8 +437,8 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t prefix,
-                    unsigned int preflen);
+void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
+                    const net_ipv6addr_t prefix, unsigned int preflen);
 #else
 #  define icmpv6_rnotify(d,p,l)
 #endif

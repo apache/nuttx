@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -316,58 +316,6 @@ static void ioctl_setipv6addr(FAR net_ipv6addr_t outaddr,
 #endif
 
 /****************************************************************************
- * Name: ioctl_ifup / ioctl_ifdown
- *
- * Description:
- *   Bring the interface up/down
- *
- ****************************************************************************/
-
-static void ioctl_ifup(FAR struct net_driver_s *dev)
-{
-  /* Make sure that the device supports the d_ifup() method */
-
-  if (dev->d_ifup)
-    {
-      /* Is the interface already up? */
-
-      if ((dev->d_flags & IFF_UP) == 0)
-        {
-          /* No, bring the interface up now */
-
-          if (dev->d_ifup(dev) == OK)
-            {
-              /* Mark the interface as up */
-
-              dev->d_flags |= IFF_UP;
-            }
-        }
-    }
-}
-
-static void ioctl_ifdown(FAR struct net_driver_s *dev)
-{
-  /* Make sure that the device supports the d_ifdown() method */
-
-  if (dev->d_ifdown)
-    {
-      /* Is the interface already down? */
-
-      if ((dev->d_flags & IFF_UP) != 0)
-        {
-          /* No, take the interface down now */
-
-          if (dev->d_ifdown(dev) == OK)
-            {
-              /* Mark the interface as down */
-
-              dev->d_flags &= ~IFF_UP;
-            }
-        }
-    }
-}
-
-/****************************************************************************
  * Name: netdev_ifrdev
  *
  * Description:
@@ -445,9 +393,9 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              ioctl_ifdown(dev);
+              netdev_ifdown(dev);
               ioctl_setipv4addr(&dev->d_ipaddr, &req->ifr_addr);
-              ioctl_ifup(dev);
+              netdev_ifup(dev);
               ret = OK;
             }
         }
@@ -538,9 +486,9 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
-              ioctl_ifdown(dev);
+              netdev_ifdown(dev);
               ioctl_setipv6addr(dev->d_ipv6addr, &lreq->lifr_addr);
-              ioctl_ifup(dev);
+              netdev_ifup(dev);
               ret = OK;
             }
         }
@@ -650,7 +598,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
                 {
                   /* Yes.. bring the interface up */
 
-                  ioctl_ifup(dev);
+                  netdev_ifup(dev);
                 }
 
               /* Is this a request to take the interface down? */
@@ -659,7 +607,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
                 {
                   /* Yes.. take the interface down */
 
-                  ioctl_ifdown(dev);
+                  netdev_ifdown(dev);
                 }
             }
 
@@ -713,7 +661,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              ioctl_ifdown(dev);
+              netdev_ifdown(dev);
 #ifdef CONFIG_NET_IPv4
               dev->d_ipaddr = 0;
 #endif
@@ -1049,6 +997,58 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
 errout:
   errno = -ret;
   return ERROR;
+}
+
+/****************************************************************************
+ * Name: netdev_ifup / netdev_ifdown
+ *
+ * Description:
+ *   Bring the interface up/down
+ *
+ ****************************************************************************/
+
+void netdev_ifup(FAR struct net_driver_s *dev)
+{
+  /* Make sure that the device supports the d_ifup() method */
+
+  if (dev->d_ifup)
+    {
+      /* Is the interface already up? */
+
+      if ((dev->d_flags & IFF_UP) == 0)
+        {
+          /* No, bring the interface up now */
+
+          if (dev->d_ifup(dev) == OK)
+            {
+              /* Mark the interface as up */
+
+              dev->d_flags |= IFF_UP;
+            }
+        }
+    }
+}
+
+void netdev_ifdown(FAR struct net_driver_s *dev)
+{
+  /* Make sure that the device supports the d_ifdown() method */
+
+  if (dev->d_ifdown)
+    {
+      /* Is the interface already down? */
+
+      if ((dev->d_flags & IFF_UP) != 0)
+        {
+          /* No, take the interface down now */
+
+          if (dev->d_ifdown(dev) == OK)
+            {
+              /* Mark the interface as down */
+
+              dev->d_flags &= ~IFF_UP;
+            }
+        }
+    }
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
