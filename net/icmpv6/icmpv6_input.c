@@ -43,7 +43,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <stdint.h>
 #include <string.h>
@@ -410,4 +409,3 @@ icmpv_send_nothing:
 }
 
 #endif /* CONFIG_NET_ICMPv6 */
-#endif /* CONFIG_NET */

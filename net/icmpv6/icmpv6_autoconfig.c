@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
 
 #include <stdint.h>
 #include <string.h>
@@ -54,6 +53,8 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "icmpv6/icmpv6.h"
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -230,6 +231,7 @@ int icmpv6_send_rsolicit(FAR struct net_driver_s *dev)
   while (!state.snd_sent);
 
   icmpv6_callback_free(state.snd_cb);
+  ret = OK;
 
 errout_with_semaphore:
   sem_destroy(&state.snd_sem);
@@ -380,15 +382,22 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    fe80 0000 0000 0000  0000 xxxx xxxx xxxx
    */
 
-  lladdr[0] = 0xfe80;                                        /* 10-bit address + 6 zeroes */
-  memset(&lladdr[1], 0, 4* sizeof(uint16_t));                /* 64 more zeroes */
-  memcpy(&lladdr[5], dev->d_mac.ether_addr_octet, sizeof(struct ether_addr)); /* 48-bit Ethernet address */
+  lladdr[0] = HTONS(0xfe80);                        /* 10-bit address + 6 zeroes */
+  memset(&lladdr[1], 0, 4* sizeof(uint16_t));       /* 64 more zeroes */
+  memcpy(&lladdr[5], dev->d_mac.ether_addr_octet,
+        sizeof(struct ether_addr));                 /* 48-bit Ethernet address */
 
   nvdbg("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         lladdr[0], lladdr[1], lladdr[2], lladdr[3],
         lladdr[4], lladdr[6], lladdr[6], lladdr[7]);
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  /* Bring the interface up with no IP address */
+
+  save = net_lock();
+  netdev_ifup(dev);
+  net_unlock(save);
+
   /* 2. Link-Local Address Uniqueness Test: The node tests to ensure that
    *    the address it generated isn't for some reason already in use on the
    *    local network. (This is very unlikely to be an issue if the link-local
@@ -402,12 +411,20 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    */
 
   ret = icmpv6_neighbor(lladdr);
+
+  /* Take the interface back down */
+
+  save = net_lock();
+  netdev_ifdown(dev);
+  net_unlock(save);
+
   if (ret == OK)
     {
       /* Hmmm... someone else responded to our Neighbor Solicitation.  We
        * have not back-up plan in place.  Just bail.
        */
 
+      ndbg("ERROR: IP conflict\n");
       return -EEXIST;
     }
 #endif
@@ -418,11 +435,11 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    on the wider Internet (since link-local addresses are not routed).
    */
 
+  save = net_lock();
   net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
 
   /* Bring the interface up with the new, temporary IP address */
 
-  save = net_lock();
   netdev_ifup(dev);
 
   /* 4. Router Contact: The node next attempts to contact a local router for
