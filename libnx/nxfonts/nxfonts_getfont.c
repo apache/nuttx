@@ -138,7 +138,11 @@ extern const struct nx_fontpackage_s g_serif22x28b_package;
 extern const struct nx_fontpackage_s g_serif27x38b_package;
 #endif
 
-#ifdef CONFIG_NXFONT_SERIF38X49
+#ifdef CONFIG_NXFONT_SERIF38X48
+extern const struct nx_fontpackage_s g_serif38x48_package;
+#endif
+
+#ifdef CONFIG_NXFONT_SERIF38X49B
 extern const struct nx_fontpackage_s g_serif38x49b_package;
 #endif
 

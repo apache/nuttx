@@ -1,5 +1,5 @@
 /****************************************************************************
- * libnx/nxfonts/nxfonts_serif39x48.h
+ * libnx/nxfonts/nxfonts_sans39x48.h
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Jose Pablo Carballo Gomez <jcarballo@nx-engineering.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_SERIF39X48_H
-#define __LIBNX_NXFONTS_NXFONTS_SERIF39X48_H
+#ifndef __LIBNX_NXFONTS_NXFONTS_SANS39X48_H
+#define __LIBNX_NXFONTS_NXFONTS_SANS39X48_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,7 @@
 
 /* Font ID */
 
-#define NXFONT_ID         FONTID_SERIF39X48
+#define NXFONT_ID         FONTID_SANS39X48
 
 /* Ranges of 7-bit and 8-bit fonts */
 
@@ -846,4 +846,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __LIBNX_NXFONTS_NXFONTS_SERIF39X48_H */
+#endif /* __LIBNX_NXFONTS_NXFONTS_SANS39X48_H */
