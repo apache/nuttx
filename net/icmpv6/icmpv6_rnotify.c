@@ -1,0 +1,421 @@
+/****************************************************************************
+ * net/icmpv6/icmpv6_rnotify.c
+ *
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <string.h>
+#include <time.h>
+#include <semaphore.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <netinet/in.h>
+
+#include <nuttx/net/netdev.h>
+#include <arch/irq.h>
+
+#include "netdev/netdev.h"
+#include "icmpv6/icmpv6.h"
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* List of tasks waiting for Neighbor Discover events */
+
+static struct icmpv6_rnotify_s *g_icmpv6_rwaiters;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: icmpv6_setaddresses
+ *
+ * Description:
+ *   We successfully obtained the Router Advertisement.  See the new IPv6
+ *   addresses in the driver structure.
+ *
+ ****************************************************************************/
+
+static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
+                                const net_ipv6addr_t draddr,
+                                const net_ipv6addr_t prefix,
+                                unsigned int preflen)
+{
+  unsigned int bit;
+  unsigned int i;
+
+  /* Make sure that the network is down before changing any addresses */
+
+  netdev_ifdown(dev);
+
+  /* Set the network mask.  preflen is the number of MS bits under the mask.
+   *
+   * Eg. preflen = 38
+   *     NETMASK: ffff ffff fc00 0000  0000 0000 0000 0000
+   *     bit:                                       1 1..1
+   *                 1 1..3 3..4 4..6  6..7 8..9 9..1 1..2  
+   *              0..5 6..1 2..7 8..3  4..9 0..5 6..1 2..7
+   *     preflen:                                   1 1..1
+   *                 1 1..3 3..4 4..6  6..8 8..9 9..1 1..2
+   *              1..6 7..2 3..8 9..4  5..0 1..6 7..2 3..8
+   */
+
+  for (i = 0; i < 7; i++)
+    {
+      /* bit = {0, 16, 32, 48, 64, 80, 96, 112} */
+
+      bit = i << 4;
+
+      if (preflen > bit)
+        {
+          /* Eg. preflen = 38, bit = {0, 16, 32} */
+
+          if (preflen > (bit + 16))
+            {
+              /* Eg. preflen = 38, bit = {0, 16} */
+
+              dev->d_ipv6netmask[i] = 0xffff;
+            }
+          else
+            {
+              /* Eg. preflen = 38, bit = {32}
+               *     bit - preflen = 6
+               *     make = 0xffff << (16-6)
+               *          = 0xfc00
+               */
+
+              dev->d_ipv6netmask[i]  = 0xffff << (16 - (bit - preflen));
+            }
+        }
+      else
+        {
+          /* Eg. preflen=38, bit= {48, 64, 80, 112} */
+
+          dev->d_ipv6netmask[i] = 0x0000;
+        }
+    }
+
+  nvdbg("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        preflen, dev->d_ipv6netmask[0], dev->d_ipv6netmask[1],
+        dev->d_ipv6netmask[2], dev->d_ipv6netmask[3], dev->d_ipv6netmask[4],
+        dev->d_ipv6netmask[6], dev->d_ipv6netmask[6], dev->d_ipv6netmask[7]);
+
+  /* Copy prefix to the current IPv6 address, applying the mask */
+
+  for (i = 0; i < 7; i++)
+    {
+      dev->d_ipv6addr[i] = (dev->d_ipv6addr[i] & dev->d_ipv6netmask[i]) |
+                           (prefix[i] & ~dev->d_ipv6netmask[i]);
+    }
+
+  nvdbg("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        prefix[0], prefix[1], prefix[2], prefix[3],
+        prefix[4], prefix[6], prefix[6], prefix[7]);
+  nvdbg("IP address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[6],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+
+  /* Finally, copy the router address */
+
+  net_ipv6addr_copy(dev->d_ipv6draddr, draddr);
+
+  nvdbg("DR address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6draddr[0], dev->d_ipv6draddr[1], dev->d_ipv6draddr[2],
+        dev->d_ipv6draddr[3], dev->d_ipv6draddr[4], dev->d_ipv6draddr[6],
+        dev->d_ipv6draddr[6], dev->d_ipv6draddr[7]);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: icmpv6_rwait_setup
+ *
+ * Description:
+ *   Called BEFORE an Router Solicitation is sent.  This function sets up
+ *   the Router Advertisement timeout before the Router Solicitation
+ *   is sent so that there is no race condition when icmpv6_rwait() is
+ *   called.
+ *
+ * Assumptions:
+ *   This function is called from icmpv6_autoconfig() and executes in the
+ *   normal tasking environment.
+ *
+ ****************************************************************************/
+
+void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
+                        FAR struct icmpv6_rnotify_s *notify)
+{
+#ifdef CONFIG_NET_MULTILINK
+  irqstate_t flags;
+
+  /* Initialize the wait structure */
+
+  memcpy(notify->rn_ifname, dev->d_ifname, IFNAMSIZ);
+  notify->rn_result = -ETIMEDOUT;
+  (void)sem_init(&notify->rn_sem, 0, 0);
+
+  /* Add the wait structure to the list with interrupts disabled */
+
+  flags             = irqsave();
+  notify->rn_flink  = g_icmpv6_rwaiters;
+  g_icmpv6_rwaiters  = notify;
+  irqrestore(flags);
+
+#else
+  /* If there is only a single network device, then there can be only a
+   * single waiter.
+   */
+
+  /* Initialize and remember wait structure */
+
+  notify->rn_result = -ETIMEDOUT;
+  (void)sem_init(&notify->rn_sem, 0, 0);
+
+  DEBUGASSERT(g_icmpv6_rwaiters == NULL);
+  g_icmpv6_rwaiters = notify;
+#endif
+}
+
+/****************************************************************************
+ * Function: icmpv6_rwait_cancel
+ *
+ * Description:
+ *   Cancel any wait set after icmpv6_rwait_setup() is called but before
+ *   icmpv6_rwait()is called (icmpv6_rwait() will automatically cancel the
+ *   wait).
+ *
+ * Assumptions:
+ *   This function may execute in the interrupt context when called from
+ *   icmpv6_rwait().
+ *
+ ****************************************************************************/
+
+int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
+{
+#ifdef CONFIG_NET_MULTILINK
+  FAR struct icmpv6_rnotify_s *curr;
+  FAR struct icmpv6_rnotify_s *prev;
+  irqstate_t flags;
+  int ret = -ENOENT;
+
+  nvdbg("Cancelling...\n");
+
+  /* Remove our wait structure from the list (we may no longer be at the
+   * head of the list).
+   */
+
+  flags = irqsave();
+  for (prev = NULL, curr = g_icmpv6_rwaiters;
+       curr && curr != notify;
+       prev = curr, curr = curr->rn_flink);
+
+  DEBUGASSERT(curr && curr == notify);
+  if (curr)
+    {
+      if (prev)
+        {
+          prev->rn_flink = notify->rn_flink;
+        }
+      else
+        {
+          g_icmpv6_rwaiters = notify->rn_flink;
+        }
+
+      ret = OK;
+    }
+
+  irqrestore(flags);
+  (void)sem_destroy(&notify->rn_sem);
+  return ret;
+
+#else
+  nvdbg("Cancelling...\n");
+
+  /* If there is only one network device, then there can be only one entry
+   * in the list of waiters.
+   */
+
+  g_icmpv6_rwaiters = NULL;
+  (void)sem_destroy(&notify->rn_sem);
+  return OK;
+#endif
+}
+
+/****************************************************************************
+ * Function: icmpv6_rwait
+ *
+ * Description:
+ *   Called each time that a Router Solicitation is sent.  This function
+ *   will sleep until either: (1) the matching Router Advertisement is
+ *   received, or (2) a timeout occurs.
+ *
+ * Assumptions:
+ *   This function is called from icmpv6_autoconfig() and must execute with
+ *   the network un-locked (interrupts may be disabled to keep the things
+ *   stable).
+ *
+ ****************************************************************************/
+
+int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
+                 FAR struct timespec *timeout)
+{
+  struct timespec abstime;
+  irqstate_t flags;
+  int ret;
+
+  nvdbg("Waiting...\n");
+
+  /* And wait for the Neighbor Advertisement (or a timeout).  Interrupts will
+   * be re-enabled while we wait.
+   */
+
+  flags = irqsave();
+  DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
+
+  abstime.tv_sec  += timeout->tv_sec;
+  abstime.tv_nsec += timeout->tv_nsec;
+  if (abstime.tv_nsec > 1000000000)
+    {
+      abstime.tv_sec++;
+      abstime.tv_nsec -= 1000000000;
+    }
+
+   /* REVISIT:  If sem_timedwait() is awakened with  signal, we will return
+    * the wrong error code.
+    */
+
+  (void)sem_timedwait(&notify->rn_sem, &abstime);
+  ret = notify->rn_result;
+
+  /* Remove our wait structure from the list (we may no longer be at the
+   * head of the list).
+   */
+
+  (void)icmpv6_rwait_cancel(notify);
+
+  /* Re-enable interrupts and return the result of the wait */
+
+  irqrestore(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Function: icmpv6_rnotify
+ *
+ * Description:
+ *   Called each time that a Router Advertisement is received in order to
+ *   wake-up any threads that may be waiting for this particular Router
+ *   Advertisement.
+ *
+ *   NOTE:  On success the network has the new address applied and is in
+ *   the down state.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver indirectly through
+ *   icmpv6_icmpv6in() will execute with the network locked.
+ *
+ ****************************************************************************/
+
+void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
+                    const net_ipv6addr_t prefix, unsigned int preflen)
+{
+#ifdef CONFIG_NET_MULTILINK
+  FAR struct icmpv6_rnotify_s *curr;
+
+  nvdbg("Notified\n");
+
+  /* Find an entry with the matching device name in the list of waiters */
+
+  for (curr = g_icmpv6_rwaiters; curr; curr = curr->rn_flink)
+    {
+      /* Does this entry match?  If the result is okay, then we have
+       * already notified this waiter and it has not yet taken the
+       * entry from the list.
+       */
+
+      if (curr->rn_result != OK &&
+          strncmp(curr->rn_ifname, dev->d_ifname, IFNAMSIZ) == 0)
+        {
+          /* Yes.. Set the new network addresses. */
+
+          icmpv6_setaddresses(dev, draddr, prefix, preflen);
+
+          /* And signal the waiting, returning success */
+
+          curr->rn_result = OK;
+          sem_post(&curr->rn_sem);
+          break;
+        }
+    }
+
+#else
+  FAR struct icmpv6_rnotify_s *waiter = g_icmpv6_rwaiters;
+
+  nvdbg("Notified\n");
+
+  if (waiter)
+    {
+      /* Set the new network addresses. */
+
+      icmpv6_setaddresses(dev, draddr, prefix, preflen);
+
+      /* And signal the waiting, returning success */
+
+      waiter->rn_result = OK;
+      sem_post(&waiter->rn_sem);
+    }
+#endif
+}
+
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
