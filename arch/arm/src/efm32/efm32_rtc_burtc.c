@@ -107,15 +107,15 @@
 #   error "BOARD_BURTC_PRESC is setted with unknown value"
 #endif
 
-#if   (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_LFRCO )
+#if   (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_LFRCO)
 #   if (CONFIG_RTC_FREQUENCY*BURTC_CLK_DIV != BOARD_LFRCO_FREQUENCY)
 #       error "CONFIG_RTC_FREQUENCY is not well be setted"
 #   endif
-#elif (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_LFXO )
+#elif (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_LFXO)
 #   if (CONFIG_RTC_FREQUENCY*BURTC_CLK_DIV != BOARD_LFXO_FREQUENCY)
 #       error "CONFIG_RTC_FREQUENCY is not well be setted"
 #   endif
-#elif (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_ULFRCO )
+#elif (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_ULFRCO)
 #   if (CONFIG_RTC_FREQUENCY*BURTC_CLK_DIV != BOARD_ULFRCO_FREQUENCY)
 #       error "CONFIG_RTC_FREQUENCY is not well be setted"
 #   endif
@@ -129,6 +129,12 @@
 #ifdef CONFIG_RTC_HIRES
 #   define __CNT_OFF_REG           EFM32_BURTC_RET_REG(0)
 #   define __BASETIME_NSEC_OFF_REG EFM32_BURTC_RET_REG(1)
+#endif
+
+#ifndef CONFIG_DEBUG
+#  define burtcdbg lldbg
+#else
+#  define burtcdbg(x...)
 #endif
 
 /************************************************************************************
@@ -184,10 +190,13 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context)
 {
   uint32_t source = getreg32(EFM32_BURTC_IF);
 
-  ASSERT( source & BURTC_IF_LFXOFAIL );
+  if (source & BURTC_IF_LFXOFAIL)
+  {
+      burtcdbg("BURTC_IF_LFXOFAIL");
+  }
 
 #ifdef CONFIG_RTC_HIRES
-  if ( source & BURTC_IF_OF )
+  if (source & BURTC_IF_OF)
     {
       int regval;
 
@@ -198,9 +207,9 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context)
 #endif
 
 #ifdef CONFIG_RTC_ALARM
-  if ( source & BURTC_IFC_COMP0 )
+  if (source & BURTC_IFC_COMP0)
     {
-      if ( g_alarmcb != NULL )
+      if (g_alarmcb != NULL)
         {
           /* Alarm callback */
 
@@ -235,13 +244,13 @@ static void efm32_rtc_burtc_init(void)
 
   regval = g_efm32_rstcause;
 
-  if (   !(getreg32(EFM32_BURTC_CTRL) & BURTC_CTRL_RSTEN )
-      && !(regval & RMU_RSTCAUSE_BUBODREG     )
-      && !(regval & RMU_RSTCAUSE_BUBODUNREG   )
-      && !(regval & RMU_RSTCAUSE_BUBODBUVIN   )
-      && !(regval & RMU_RSTCAUSE_EXTRST       )
-      && !(regval & RMU_RSTCAUSE_PORST        )
-     )
+  if (!(getreg32(EFM32_BURTC_CTRL) & BURTC_CTRL_RSTEN)
+      && !(regval & RMU_RSTCAUSE_BUBODREG)
+      && !(regval & RMU_RSTCAUSE_BUBODUNREG)
+      && !(regval & RMU_RSTCAUSE_BUBODBUVIN)
+      && !(regval & RMU_RSTCAUSE_EXTRST)
+      && !(regval & RMU_RSTCAUSE_PORST)
+)
     {
       g_efm32_burtc_reset_status = getreg32(EFM32_BURTC_STATUS);
 
@@ -271,18 +280,18 @@ static void efm32_rtc_burtc_init(void)
 
   /* Restore all not setted BURTC registers to default value */
 
-//  putreg32(_BURTC_LPMODE_RESETVALUE,      EFM32_BURTC_LPMODE  );
+//  putreg32(_BURTC_LPMODE_RESETVALUE,      EFM32_BURTC_LPMODE);
 //  putreg32(_BURTC_LFXOFDET_RESETVALUE,    EFM32_BURTC_LFXOFDET);
-//  putreg32(_BURTC_COMP0_RESETVALUE,       EFM32_BURTC_COMP0   );
+//  putreg32(_BURTC_COMP0_RESETVALUE,       EFM32_BURTC_COMP0);
 
   /* New configuration */
 
-  regval = ((BOARD_BURTC_MODE             ) |
-            (BURTC_CTRL_DEBUGRUN_DEFAULT  ) |
-            (BURTC_CTRL_COMP0TOP_DEFAULT  ) |
-            (BURTC_CTRL_LPCOMP_DEFAULT    ) |
-            (BOARD_BURTC_PRESC            ) |
-            (BOARD_BURTC_CLKSRC           ) |
+  regval = ((BOARD_BURTC_MODE) |
+            (BURTC_CTRL_DEBUGRUN_DEFAULT) |
+            (BURTC_CTRL_COMP0TOP_DEFAULT) |
+            (BURTC_CTRL_LPCOMP_DEFAULT) |
+            (BOARD_BURTC_PRESC) |
+            (BOARD_BURTC_CLKSRC) |
             (BURTC_CTRL_BUMODETSEN_DEFAULT));
 
   /* Clear interrupts */
@@ -303,7 +312,7 @@ static void efm32_rtc_burtc_init(void)
 
   /* Enable BURTC interrupt on compare match and counter overflow */
 
-  putreg32(BURTC_IF_OF|BURTC_IF_LFXOFAIL, EFM32_BURTC_IEN );
+  putreg32(BURTC_IF_OF|BURTC_IF_LFXOFAIL, EFM32_BURTC_IEN);
 
   /* Lock BURTC to avoid modification */
 
@@ -386,7 +395,7 @@ time_t up_rtc_time(void)
     {
       /* pending IRQ so theat it */
 
-      if ( getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0 )
+      if (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0)
           efm32_rtc_burtc_interrupt(EFM32_IRQ_BURTC,NULL);
 
       t = getreg32(__SEC_OFF_REG) + getreg32(EFM32_BURTC_CNT);
@@ -394,7 +403,7 @@ time_t up_rtc_time(void)
 
   /* Retry if IRQ appear during register reading  */
 
-  while ( getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0 );
+  while (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0);
 
   irqrestore(flags);
 
@@ -431,7 +440,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
     {
       /* pending IRQ so theat it */
 
-      if ( getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0 )
+      if (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0)
           efm32_rtc_burtc_interrupt(EFM32_IRQ_BURTC,NULL);
 
       t         = getreg32(__SEC_OFF_REG);
@@ -440,7 +449,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
 
   /* Retry if IRQ appear during register reading  */
 
-  while ( getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0 );
+  while (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0);
 
   irqrestore(flags);
 
