@@ -1038,8 +1038,6 @@ config SAM34_FREERUN
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.
 
-endif # ARCH_CHIP_SAM4CM
-
 if SCHED_TICKLESS
 
 config SAM34_TICKLESS_ONESHOT
