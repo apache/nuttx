@@ -85,10 +85,11 @@ config SCHED_TICKLESS_LIMIT_MAX_SLEEP
 	bool "Max sleep period (in microseconds)"
 	default n
 	---help---
-		Enables g_oneshot_max_delay_usec variable. The variable is
+		Enables use of the g_oneshot_maxticks variable. This variable is
 		initialized by platform-specific logic at runtime to the maximum
-		delay that the timer can wait (in microseconds).  The RTOS tickless
-		logic will then limit all requested delays to this value (in ticks).
+		delay that the timer can wait (in configured clock ticks).  The
+		RTOS tickless logic will then limit all requested delays to this
+		value.
 
 endif
 

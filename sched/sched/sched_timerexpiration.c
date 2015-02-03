@@ -94,14 +94,14 @@
  * limit to the maximum timing interval that be represented by the timer,
  * then that limit must be respected.
  *
- * If CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP is defined, then a 64-bit global
- * variable called g_oneshot_max_delay_usec variable is enabled. The variable
+ * If CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP is defined, then a 32-bit global
+ * variable called g_oneshot_maxticks variable is enabled. The variable
  * is initialized by platform-specific logic at runtime to the maximum delay
  * that the timer can wait (in microseconds).  The RTOS tickless logic will
  * then limit all requested delays to this value (in ticks).
  */
 
-uint64_t g_oneshot_max_delay_usec;
+uint32_t g_oneshot_maxticks = UINT32_MAX;
 #endif
 
 /************************************************************************
@@ -445,9 +445,9 @@ static void sched_timer_start(unsigned int ticks)
       struct timespec ts;
 
 #if CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-      if (ticks > (g_oneshot_max_delay_usec / CONFIG_USEC_PER_TICK))
+      if (ticks > g_oneshot_maxticks)
         {
-          ticks = (g_oneshot_max_delay_usec / CONFIG_USEC_PER_TICK);
+          ticks = g_oneshot_maxticks;
         }
 #endif
 

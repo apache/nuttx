@@ -930,7 +930,7 @@ endif # SAM34_GPIO_IRQ
 endmenu # AT91SAM3/4 GPIO Interrupt Configuration
 
 menu "AT91SAM3/4 Timer/Counter Configuration"
-	depends on SAM34_TC
+	depends on SAM34_TC && ARCH_CHIP_SAM4CM
 
 config SAM34_TC0_CLK
 	bool "Enable TC channel 0 clock input pin"
@@ -1058,8 +1058,7 @@ config SAM34_TICKLESS_FREERUN
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the free-running timer needed by the OS.
 
-endif
-
+endif # SCHED_TICKLESS
 endmenu # AT91SAM3/4 Timer/Counter Configuration
 
 if SAM34_SPI0 || SAM34_SPI1
