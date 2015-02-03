@@ -120,7 +120,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
 
-  /* Set up the ICMPv6 Neighbor Solicitation message */
+  /* Set up the ICMPv6 Router Solicitation message */
 
   sol           = ICMPv6RSOLICIT;
   sol->type     = ICMPV6_ROUTER_SOLICIT;   /* Message type */
@@ -163,7 +163,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
        * to the Ethernet MAC address 33:33:00:01:00:03.
         *
        * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-       * Message, but the ICMPv6 Neighbor Solicitation message seems to
+       * Message, but the ICMPv6 Router Solicitation message seems to
        * use 33:33:ff:01:00:03.
        */
 
@@ -206,7 +206,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   /* SLIP has no link layer header */
 #endif
 
-  nllvdbg("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",
+  nllvdbg("Outgoing ICMPv6 Router Solicitation length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
