@@ -66,6 +66,7 @@ config SCHED_TICKLESS
 		defined include/nuttx/arch.h
 
 if SCHED_TICKLESS
+
 config SCHED_TICKLESS_ALARM
 	bool "Tickless alarm"
 	default n
@@ -79,6 +80,15 @@ config SCHED_TICKLESS_ALARM
 		The advantage of an alarm is that it avoids some small timing
 		errors; the advantage of the use of the interval timer is that
 		the hardware requirement may be less.
+
+config SCHED_TICKLESS_LIMIT_MAX_SLEEP
+	bool "Max sleep period (in microseconds)"
+	default n
+	---help---
+		Enables g_oneshot_max_delay_usec variable. The variable is
+		initialized by platform-specific logic at runtime to the maximum
+		delay that the timer can wait (in microseconds).  The RTOS tickless
+		logic will then limit all requested delays to this value (in ticks).
 
 endif
 

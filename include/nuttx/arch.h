@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/arch.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,6 +118,23 @@ typedef CODE void (*phy_enable_t)(bool enable);
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+/* By default, the RTOS tickless logic assumes that range of times that can
+ * be represented by the underlying hardware time is so large that no special
+ * precautions need to taken.  That is not always the case.  If there is a
+ * limit to the maximum timing interval that be represented by the timer,
+ * then that limit must be respected.
+ *
+ * If CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP is defined, then a 64-bit global
+ * variable called g_oneshot_max_delay_usec variable is enabled. The variable
+ * is initialized by platform-specific logic at runtime to the maximum delay
+ * that the timer can wait (in microseconds).  The RTOS tickless logic will
+ * then limit all requested delays to this value (in ticks).
+ */
+
+extern uint64_t g_oneshot_max_delay_usec;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
