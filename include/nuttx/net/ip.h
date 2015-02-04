@@ -209,6 +209,29 @@ struct ipv6_stats_s
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/* Well-known IP addresses */
+
+#ifdef CONFIG_NET_IPv4
+EXTERN const in_addr_t g_ipv4_alloneaddr;
+EXTERN const in_addr_t g_ipv4_allzeroaddr;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+EXTERN const net_ipv6addr_t g_ipv6_alloneaddr;
+EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr;
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+EXTERN const net_ipv6addr_t g_ipv6_allnodes;    /* All link local nodes */
+EXTERN const net_ipv6addr_t g_ipv6_allrouters;  /* All link local routers */
+#endif
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -397,5 +420,10 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
   do { \
     (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
   } while (0)
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __INCLUDE_NUTTX_NET_IP_H */

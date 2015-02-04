@@ -70,21 +70,69 @@ struct net_stats_s g_netstats;
 uint16_t g_ipid;
 
 #ifdef CONFIG_NET_IPv4
+
 const in_addr_t g_ipv4_alloneaddr  = 0xffffffff;
 const in_addr_t g_ipv4_allzeroaddr = 0x00000000;
 
 /* Reassembly timer (units: deci-seconds) */
 
 #ifdef CONFIG_NET_TCP_REASSEMBLY
+
 uint8_t g_reassembly_timer;
-#endif
+
+#endif /* CONFIG_NET_TCP_REASSEMBLY */
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
+
 const net_ipv6addr_t g_ipv6_alloneaddr =
-  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
+{
+  0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff
+};
+
 const net_ipv6addr_t g_ipv6_allzeroaddr =
-  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+{
+  0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+};
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+  /* IPv6 Multi-cast IP address */
+
+const net_ipv6addr_t g_ipv6_allnodes =    /* All link local nodes */
+{
+  HTONS(0xff02),
+  0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+  HTONS(0x0001)
+};
+
+const net_ipv6addr_t g_ipv6_allrouters =  /* All link local routers */
+{
+  HTONS(0xff02),
+  0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+  HTONS(0x0002)
+};
+
+#ifdef CONFIG_NET_ETHERNET
+
+/* IPv6 Multi-cast Ethernet addresses.  Formed from the 16-bit prefix:
+ *
+ *   0x33:0x33:xx:xx:xx:xx:
+ *
+ * and the last 32-bits of the IPv6 IP address
+ */
+
+const struct ether_addr g_ipv6_ethallnodes =     /* All link local nodes */
+{
+  { 0x33, 0x33, 0x00, 0x00, 0x00, 0x01 }
+};
+
+const struct ether_addr g_ipv6_ethallrouters =   /* All link local routers */
+{
+  { 0x33, 0x33, 0x00, 0x00, 0x00, 0x02 }
+};
+
+#endif /* CONFIG_NET_ETHERNET */
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************

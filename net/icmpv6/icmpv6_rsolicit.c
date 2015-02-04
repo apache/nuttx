@@ -108,13 +108,11 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
   icmp->ttl     = 255;                     /* Hop limit */
 
-  /* Set the multicast destination IP address to the IPv7 all routers
-   * address: ff02::2
+  /* Set the multicast destination IP address to the IPv6 all link-
+   * loocal routers address: ff02::2
    */
 
-  icmp->destipaddr[0] = HTONS(0xff02);
-  memset(&icmp->destipaddr[1], 0, 6*sizeof(uint16_t));
-  icmp->destipaddr[7] = HTONS(0x0002);
+  net_ipv6addr_copy(icmp->destipaddr, g_ipv6_allrouters);
 
   /* Add our link local IPv6 address as the source address */
 
@@ -139,7 +137,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
    * REVISIT:  What if the link layer is not Ethernet?
    */
 
-  memcpy(sol->srclladdr, &dev->d_mac, IFHWADDRLEN);
+  memcpy(sol->srclladdr, dev->d_mac.ether_addr_octet, sizeof(net_ipv6addr_t));
 
   /* Calculate the checksum over both the ICMP header and payload */
 
@@ -155,15 +153,12 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   if (dev->d_lltype == NET_LL_ETHERNET)
 #endif
     {
-      /* Set the destination IPv6 multicast Ethernet address */
+      /* Set the destination IPv6 all-routers multicast Ethernet
+       * address
+       */
 
-      eth          = ETHBUF;
-      eth->dest[0] = 0x33;
-      eth->dest[1] = 0x33;
-      eth->dest[2] = 0x00;
-      eth->dest[3] = 0x00;
-      eth->dest[4] = 0x00;
-      eth->dest[5] = 0x02;
+      eth = ETHBUF;
+      memcpy(eth->dest, g_ipv6_ethallrouters.ether_addr_octet, ETHER_ADDR_LEN);
 
       /* Move our source Ethernet addresses into the Ethernet header */
 
