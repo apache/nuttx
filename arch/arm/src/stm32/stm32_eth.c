@@ -3527,6 +3527,16 @@ static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv)
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   (void)stm32_addmac(dev, mac);
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
+   * address that we expect to receive ICMPv6 Router Advertisement
+   * packets.
+   */
+
+  (void)stm32_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 }
 #endif /* CONFIG_NET_ICMPv6 */
 
