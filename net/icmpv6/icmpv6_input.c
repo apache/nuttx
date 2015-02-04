@@ -109,7 +109,6 @@ struct icmpv6_conn_s g_icmpv6_conn;
 void icmpv6_input(FAR struct net_driver_s *dev)
 {
   FAR struct icmpv6_iphdr_s *icmp = ICMPv6BUF;
-  int ret;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;
@@ -136,13 +135,9 @@ void icmpv6_input(FAR struct net_driver_s *dev)
              * solicitation came from.
              */
 
-            ret = icmpv6_advertise(dev, icmp->srcipaddr);
-            if (ret < 0)
-              {
-                goto icmpv6_drop_packet;
-              }
+            icmpv6_advertise(dev, icmp->srcipaddr);
 
-            /* All statistics have been updated */
+            /* All statistics have been updated.  Nothing to do but exit. */
 
             return;
           }

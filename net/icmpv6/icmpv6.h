@@ -263,15 +263,15 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev);
  *         buffer
  *
  * Return:
- *   Zero (OK) on success; A negated errno value on return.
+ *   None.
  *
  * Assumptions:
  *   The network is locked
  *
  ****************************************************************************/
 
-int icmpv6_advertise(FAR struct net_driver_s *dev,
-                     const net_ipv6addr_t destipaddr);
+void icmpv6_advertise(FAR struct net_driver_s *dev,
+                      const net_ipv6addr_t destipaddr);
 
 /****************************************************************************
  * Function: icmpv6_wait_setup

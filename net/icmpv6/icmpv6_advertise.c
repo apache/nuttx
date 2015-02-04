@@ -83,15 +83,15 @@
  *         buffer
  *
  * Return:
- *   Zero (OK) on success; A negated errno value on return.
+ *   None
  *
  * Assumptions:
  *   The network is locked
  *
  ****************************************************************************/
 
-int icmpv6_advertise(FAR struct net_driver_s *dev,
-                     const net_ipv6addr_t destipaddr)
+void icmpv6_advertise(FAR struct net_driver_s *dev,
+                      const net_ipv6addr_t destipaddr)
 {
   FAR struct icmpv6_iphdr_s *icmp = ICMPv6BUF;
   FAR struct icmpv6_neighbor_advertise_s *adv;
@@ -186,7 +186,6 @@ int icmpv6_advertise(FAR struct net_driver_s *dev,
   g_netstats.icmpv6.sent++;
   g_netstats.ipv6.sent++;
 #endif
-  return OK;
 }
 
 #endif /* CONFIG_NET_ICMPv6 */

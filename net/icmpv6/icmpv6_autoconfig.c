@@ -78,6 +78,7 @@ struct icmpv6_router_s
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
   sem_t snd_sem;                       /* Used to wake up the waiting thread */
   volatile bool snd_sent;              /* True: if request sent */
+  bool snd_advertise;                  /* True: Send Neighbor Advertisement */
 #ifdef CONFIG_NETDEV_MULTINIC
   uint8_t snd_ifname[IFNAMSIZ];        /* Interface name */
 #endif
@@ -135,7 +136,18 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
       /* It looks like we are good to send the data */
       /* Copy the packet data into the device packet buffer and send it */
 
-      icmpv6_rsolicit(dev);
+      if (state->snd_advertise)
+        {
+          /* Send the ICMPv6 Neighbor Advertisement message */
+
+          icmpv6_advertise(dev, g_ipv6_allnodes);
+        }
+      else
+        {
+          /* Send the ICMPv6 Router Solicitation message */
+
+          icmpv6_rsolicit(dev);
+        }
 
       /* Make sure no additional Router Solicitation overwrites this one.
        * This flag will be cleared in icmpv6_out().
@@ -159,13 +171,14 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: icmpv6_send_rsolicit
+ * Name: icmpv6_send_message
  *
  * Description:
  *   Send an ICMPv6 Router Solicitation to resolve an IPv6 address.
  *
  * Parameters:
- *   dev - The device to use to send the solicitation
+ *   dev       - The device to use to send the solicitation
+ *   advertise - True: Send the Neighbor Advertisement message
  *
  * Returned Value:
  *   Zero (OK) is returned on success; On error a negated errno value is
@@ -176,7 +189,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int icmpv6_send_rsolicit(FAR struct net_driver_s *dev)
+static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 {
   struct icmpv6_router_s state;
   int ret;
@@ -210,6 +223,7 @@ int icmpv6_send_rsolicit(FAR struct net_driver_s *dev)
   /* Arm the callback */
 
   state.snd_sent      = false;
+  state.snd_advertise = advertise;
   state.snd_cb->flags = ICMPv6_POLL;
   state.snd_cb->priv  = (FAR void *)&state;
   state.snd_cb->event = icmpv6_router_interrupt;
@@ -242,7 +256,7 @@ errout_with_semaphore:
  * Name: icmpv6_wait_radvertise
  *
  * Description:
- *   Wait for the receipt of the Router Advertisment matching the Router
+ *   Wait for the receipt of the Router Advertisement matching the Router
  *   Solicitation that we just sent.
  *
  * Parameters:
@@ -259,9 +273,9 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
-                           FAR struct icmpv6_rnotify_s *notify,
-                           net_lock_t *save)
+static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
+                                  FAR struct icmpv6_rnotify_s *notify,
+                                  net_lock_t *save)
 {
   struct timespec delay;
 #ifdef CONFIG_NET_NOINTS
@@ -459,7 +473,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
       /* Send the ICMPv6 Router solicitation message */
 
-      ret = icmpv6_send_rsolicit(dev);
+      ret = icmpv6_send_message(dev, false);
       if (ret < 0)
         {
           ndbg("ERROR: Failed send router solicitation: %d\n", ret);
@@ -490,11 +504,25 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ndbg("ERROR: Failed to get the router advertisement: %d (retries=%d)\n",
            ret, retries);
 
-      /* Take the network down and return the failure */
+      /* Claim the link local address as ours by sending the ICMPv6 Neighbor
+       * Advertisement message.
+       */
 
-      netdev_ifdown(dev);
+      ret = icmpv6_send_message(dev, true);
+      if (ret < 0)
+        {
+          ndbg("ERROR: Failed send neighbor advertisement: %d\n", ret);
+          netdev_ifdown(dev);
+          net_unlock(save);
+          return ret;
+        }
+
+      /* Leave the network up and return success (even though things did not
+       * work out quite the way we wanted.
+       */
+
       net_unlock(save);
-      return ret;
+      return OK;
     }
 
   /* 5. Router Direction: The router provides direction to the node on how to
