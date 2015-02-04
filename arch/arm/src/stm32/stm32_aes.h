@@ -1,8 +1,8 @@
-/****************************************************************************
- * include/nuttx/crypto/crypto.h
+/************************************************************************************
+ * arch/arm/src/stm32/stm32_aes.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author:  Max Nekludov <macscomp@gmail.com>
+ *   Copyright (C) 2014 Haltian Ltd. All rights reserved.
+ *   Author:  Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,68 +31,41 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CRYPTO_CRYPTO_H
-#define __INCLUDE_NUTTX_CRYPTO_CRYPTO_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_AES_H
+#define __ARCH_ARM_SRC_STM32_STM32_AES_H
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
+#include <stdint.h>
 
-#if defined(CONFIG_CRYPTO_AES)
-#  define AES_MODE_MIN 1
+#include "chip.h"
 
-#  define AES_MODE_ECB 1
-#  define AES_MODE_CBC 2
-#  define AES_MODE_CTR 3
+/* Only the STM32L162 devices have AES, but we don't bother with exact macros for
+ * simplicity.
+ */
 
-#  define AES_MODE_MAX 3
-#endif
-
-#define CYPHER_ENCRYPT 1
-#define CYPHER_DECRYPT 0
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
+#ifdef CONFIG_STM32_STM32L15XX
+#  include "chip/stm32l15xxx_aes.h"
 #else
-#define EXTERN extern
+#  error "Unknown chip for AES"
 #endif
 
 /************************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ************************************************************************************/
 
-#if defined(CONFIG_CRYPTO_AES)
-int up_aesinitialize(void);
-int aes_cypher(FAR void *out, FAR const void *in, uint32_t size, FAR const void *iv,
-               FAR const void *key, uint32_t keysize, int mode, int encrypt);
-#endif
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
 
-#if defined(CONFIG_CRYPTO_ALGTEST)
-int crypto_test(void);
-#endif
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_CRYPTO_CRYPTO_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_AES_H */

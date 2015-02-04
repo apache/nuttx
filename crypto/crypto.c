@@ -64,7 +64,7 @@
  * Public Functions
  ****************************************************************************/
 
-void up_cryptoinitialize(void)
+int up_cryptoinitialize(void)
 {
 #if defined(CONFIG_CRYPTO_AES) || defined(CONFIG_CRYPTO_ALGTEST)
   int res;
