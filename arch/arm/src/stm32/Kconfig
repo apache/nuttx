@@ -169,6 +169,7 @@ config ARCH_CHIP_STM32L162ZD
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	select STM32_HIGHDENSITY
+	select STM32_HAVE_AES
 	---help---
 		STM32L 144-pin EnergyLite, 384KB FLASH, 48KB SRAM, 12KB EEPRROM with
 		8x40 LCD interface
@@ -1148,6 +1149,13 @@ config STM32_CCMDATARAM
 	bool "CMD/DATA RAM"
 	default n
 	depends on STM32_STM32F40XX
+
+config STM32_AES
+	bool "128-bit AES"
+	default n
+	depends on STM32_HAVE_AES
+	select CRYPTO_AES192_DISABLE
+	select CRYPTO_AES256_DISABLE
 
 config STM32_CEC
 	bool "CEC"

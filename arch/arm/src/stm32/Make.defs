@@ -227,6 +227,6 @@ ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS += stm32_dumpgpio.c
 endif
 
-ifeq ($(CONFIG_CRYPTO_AES),y)
+ifeq ($(CONFIG_STM32_AES),y)
 CHIP_CSRCS += stm32_aes.c
 endif

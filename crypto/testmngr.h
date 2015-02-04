@@ -73,6 +73,7 @@ struct cipher_testvec
 
 static struct cipher_testvec aes_enc_tv_template[] =
 {
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   { /* From FIPS-197 */
     .key  = "\x00\x01\x02\x03\x04\x05\x06\x07"
         "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
@@ -84,6 +85,8 @@ static struct cipher_testvec aes_enc_tv_template[] =
         "\xd8\xcd\xb7\x80\x70\xb4\xc5\x5a",
     .rlen = 16,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES192_DISABLE
   {
     .key  = "\x00\x01\x02\x03\x04\x05\x06\x07"
         "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
@@ -96,6 +99,8 @@ static struct cipher_testvec aes_enc_tv_template[] =
         "\x6e\xaf\x70\xa0\xec\x0d\x71\x91",
     .rlen = 16,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES256_DISABLE
   {
     .key  = "\x00\x01\x02\x03\x04\x05\x06\x07"
         "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
@@ -109,10 +114,12 @@ static struct cipher_testvec aes_enc_tv_template[] =
         "\xea\xfc\x49\x90\x4b\x49\x60\x89",
     .rlen = 16,
   },
+#endif
 };
 
 static struct cipher_testvec aes_dec_tv_template[] =
 {
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   { /* From FIPS-197 */
     .key  = "\x00\x01\x02\x03\x04\x05\x06\x07"
         "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
@@ -124,6 +131,8 @@ static struct cipher_testvec aes_dec_tv_template[] =
         "\x88\x99\xaa\xbb\xcc\xdd\xee\xff",
     .rlen = 16,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES192_DISABLE
   {
     .key  = "\x00\x01\x02\x03\x04\x05\x06\x07"
         "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
@@ -136,6 +145,8 @@ static struct cipher_testvec aes_dec_tv_template[] =
         "\x88\x99\xaa\xbb\xcc\xdd\xee\xff",
     .rlen = 16,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES256_DISABLE
   {
     .key  = "\x00\x01\x02\x03\x04\x05\x06\x07"
         "\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
@@ -149,10 +160,12 @@ static struct cipher_testvec aes_dec_tv_template[] =
         "\x88\x99\xaa\xbb\xcc\xdd\xee\xff",
     .rlen = 16,
   },
+#endif
 };
 
 static struct cipher_testvec aes_cbc_enc_tv_template[] =
 {
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   { /* From RFC 3602 */
     .key    = "\x06\xa9\x21\x40\x36\xb8\xa1\x5b"
         "\x51\x2e\x03\xd5\x34\x12\x00\x06",
@@ -165,6 +178,8 @@ static struct cipher_testvec aes_cbc_enc_tv_template[] =
         "\x27\x08\x94\x2d\xbe\x77\x18\x1a",
     .rlen   = 16,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   {
     .key    = "\xc2\x86\x69\x6d\x88\x7c\x9a\xa0"
         "\x61\x1b\xbb\x3e\x20\x25\xa4\x5a",
@@ -182,6 +197,8 @@ static struct cipher_testvec aes_cbc_enc_tv_template[] =
         "\x1b\x82\x66\xbe\xa6\xd6\x1a\xb1",
     .rlen   = 32,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES192_DISABLE
   { /* From NIST SP800-38A */
     .key  = "\x8e\x73\xb0\xf7\xda\x0e\x64\x52"
         "\xc8\x10\xf3\x2b\x80\x90\x79\xe5"
@@ -208,6 +225,8 @@ static struct cipher_testvec aes_cbc_enc_tv_template[] =
         "\xd9\x20\xa9\xe6\x4f\x56\x15\xcd",
     .rlen = 64,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES256_DISABLE
   {
     .key  = "\x60\x3d\xeb\x10\x15\xca\x71\xbe"
         "\x2b\x73\xae\xf0\x85\x7d\x77\x81"
@@ -235,10 +254,12 @@ static struct cipher_testvec aes_cbc_enc_tv_template[] =
         "\xda\x6c\x19\x07\x8c\x6a\x9d\x1b",
     .rlen = 64,
   },
+#endif
 };
 
 static struct cipher_testvec aes_cbc_dec_tv_template[] =
 {
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   { /* From RFC 3602 */
     .key    = "\x06\xa9\x21\x40\x36\xb8\xa1\x5b"
         "\x51\x2e\x03\xd5\x34\x12\x00\x06",
@@ -251,6 +272,8 @@ static struct cipher_testvec aes_cbc_dec_tv_template[] =
     .result = "Single block msg",
     .rlen   = 16,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   {
     .key    = "\xc2\x86\x69\x6d\x88\x7c\x9a\xa0"
         "\x61\x1b\xbb\x3e\x20\x25\xa4\x5a",
@@ -268,6 +291,8 @@ static struct cipher_testvec aes_cbc_dec_tv_template[] =
         "\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f",
     .rlen   = 32,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES192_DISABLE
   { /* From NIST SP800-38A */
     .key  = "\x8e\x73\xb0\xf7\xda\x0e\x64\x52"
         "\xc8\x10\xf3\x2b\x80\x90\x79\xe5"
@@ -294,6 +319,8 @@ static struct cipher_testvec aes_cbc_dec_tv_template[] =
         "\xad\x2b\x41\x7b\xe6\x6c\x37\x10",
     .rlen = 64,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES256_DISABLE
   {
     .key  = "\x60\x3d\xeb\x10\x15\xca\x71\xbe"
         "\x2b\x73\xae\xf0\x85\x7d\x77\x81"
@@ -321,10 +348,12 @@ static struct cipher_testvec aes_cbc_dec_tv_template[] =
         "\xad\x2b\x41\x7b\xe6\x6c\x37\x10",
     .rlen = 64,
   },
+#endif
 };
 
 static struct cipher_testvec aes_ctr_enc_tv_template[] =
 {
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   { /* From NIST Special Publication 800-38A, Appendix F.5 */
     .key  = "\x2b\x7e\x15\x16\x28\xae\xd2\xa6"
         "\xab\xf7\x15\x88\x09\xcf\x4f\x3c",
@@ -350,6 +379,8 @@ static struct cipher_testvec aes_ctr_enc_tv_template[] =
         "\x79\x21\x70\xa0\xf3\x00\x9c\xee",
     .rlen = 64,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES192_DISABLE
   {
     .key  = "\x8e\x73\xb0\xf7\xda\x0e\x64\x52"
         "\xc8\x10\xf3\x2b\x80\x90\x79\xe5"
@@ -376,6 +407,8 @@ static struct cipher_testvec aes_ctr_enc_tv_template[] =
         "\x5a\x97\xda\xec\x58\xc6\xb0\x50",
     .rlen = 64,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES256_DISABLE
   {
     .key  = "\x60\x3d\xeb\x10\x15\xca\x71\xbe"
         "\x2b\x73\xae\xf0\x85\x7d\x77\x81"
@@ -403,10 +436,12 @@ static struct cipher_testvec aes_ctr_enc_tv_template[] =
         "\x13\xc2\xdd\x08\x45\x79\x41\xa6",
     .rlen = 64,
   }
+#endif
 };
 
 static struct cipher_testvec aes_ctr_dec_tv_template[] =
 {
+#ifndef CONFIG_CRYPTO_AES128_DISABLE
   { /* From NIST Special Publication 800-38A, Appendix F.5 */
     .key  = "\x2b\x7e\x15\x16\x28\xae\xd2\xa6"
         "\xab\xf7\x15\x88\x09\xcf\x4f\x3c",
@@ -432,6 +467,8 @@ static struct cipher_testvec aes_ctr_dec_tv_template[] =
         "\xad\x2b\x41\x7b\xe6\x6c\x37\x10",
     .rlen = 64,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES192_DISABLE
   {
     .key  = "\x8e\x73\xb0\xf7\xda\x0e\x64\x52"
         "\xc8\x10\xf3\x2b\x80\x90\x79\xe5"
@@ -458,6 +495,8 @@ static struct cipher_testvec aes_ctr_dec_tv_template[] =
         "\xad\x2b\x41\x7b\xe6\x6c\x37\x10",
     .rlen = 64,
   },
+#endif
+#ifndef CONFIG_CRYPTO_AES256_DISABLE
   {
     .key  = "\x60\x3d\xeb\x10\x15\xca\x71\xbe"
         "\x2b\x73\xae\xf0\x85\x7d\x77\x81"
@@ -485,6 +524,7 @@ static struct cipher_testvec aes_ctr_dec_tv_template[] =
         "\xad\x2b\x41\x7b\xe6\x6c\x37\x10",
     .rlen = 64,
   }
+#endif
 };
 
 #endif /* CONFIG_CRYPTO_AES */

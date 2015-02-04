@@ -1,7 +1,7 @@
 /****************************************************************************
  * crypto/testmngr.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author:  Max Nekludov <macscomp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,15 +64,6 @@ static int do_test_aes(FAR struct cipher_testvec* test, int mode, int encrypt)
 {
   FAR void *out = kmm_zalloc(test->rlen);
 
-#ifdef CONFIG_STM32_STM32L15XX
-  /* This architecture only has 128-bit AES in chip. */
-
-  if (test->klen != 16)
-    {
-      return OK;
-    }
-#endif
-
   int res = aes_cypher(out, test->input, test->ilen, test->iv, test->key,
                        test->klen, mode, encrypt);
   if (res == OK)
@@ -124,11 +115,11 @@ int crypto_test(void)
   return OK;
 }
 
-#else
+#else /* CONFIG_CRYPTO_ALGTEST */
 
 int crypto_test(void)
 {
   return OK;
 }
 
-#endif
+#endif /* CONFIG_CRYPTO_ALGTEST */
