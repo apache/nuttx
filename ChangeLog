@@ -9653,4 +9653,6 @@
 	  logic.  This is an IPv6 alternative to DHCP.  It obtains the IPv6
 	  addresses and masks using ICMPv6 Router Solicitation and
 	  Advertisement messages (2015-02-03).
-
+	* arch/arm/src/stm32/stm32_aes.c, stm32_aes.h, and
+	  chip/stm32l15xxx_aes.h:  Add driver for STM32L162XX AES peripheral.
+	  From Juha Niskanen (2015-02-04).
