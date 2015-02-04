@@ -59,7 +59,6 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
-#include "arp/arp.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
