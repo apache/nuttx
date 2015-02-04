@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32/Make.defs
 #
-#   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -225,4 +225,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS += stm32_dumpgpio.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_AES),y)
+CHIP_CSRCS += stm32_aes.c
 endif
