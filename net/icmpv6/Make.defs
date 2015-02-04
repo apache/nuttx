@@ -37,7 +37,7 @@ ifeq ($(CONFIG_NET_ICMPv6),y)
 
 # ICMPv6 source files
 
-NET_CSRCS += icmpv6_input.c icmpv6_solicit.c
+NET_CSRCS += icmpv6_input.c icmpv6_solicit.c icmpv6_advertise.c
 
 ifeq ($(CONFIG_NET_ICMPv6_PING),y)
 NET_CSRCS += icmpv6_ping.c

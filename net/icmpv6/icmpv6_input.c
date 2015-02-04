@@ -48,17 +48,14 @@
 #include <string.h>
 #include <debug.h>
 
-#include <net/if.h>
-#include <arpa/inet.h>
-
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
-#include <nuttx/net/ip.h>
+#include <nuttx/net/icmpv6.h>
 
 #include "devif/devif.h"
-#include "utils/utils.h"
 #include "neighbor/neighbor.h"
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6
@@ -112,6 +109,7 @@ struct icmpv6_conn_s g_icmpv6_conn;
 void icmpv6_input(FAR struct net_driver_s *dev)
 {
   FAR struct icmpv6_iphdr_s *icmp = ICMPv6BUF;
+  int ret;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;
@@ -128,7 +126,6 @@ void icmpv6_input(FAR struct net_driver_s *dev)
     case ICMPv6_NEIGHBOR_SOLICIT:
       {
         FAR struct icmpv6_neighbor_solicit_s *sol;
-        FAR struct icmpv6_neighbor_advertise_s *adv;
 
         /* Check if we are the target of the solicitation */
 
@@ -137,93 +134,17 @@ void icmpv6_input(FAR struct net_driver_s *dev)
           {
             /* Yes..  Send a neighbor advertisement back to where the neighbor
              * solicitation came from.
-             *
-             * Set up the IPv6 header.  Most is probably already in place from
-             * the Neighbor Solicitation.  We could save some time here.
              */
 
-            icmp->vtc    = 0x60;                         /* Version/traffic class (MS) */
-            icmp->tcf    = 0;                            /* Traffic class (LS)/Flow label (MS) */
-            icmp->flow   = 0;                            /* Flow label (LS) */
-
-            /* Length excludes the IPv6 header */
-
-            icmp->len[0] = (sizeof(struct icmpv6_neighbor_advertise_s) >> 8);
-            icmp->len[1] = (sizeof(struct icmpv6_neighbor_advertise_s) & 0xff);
-
-            icmp->proto  = IP_PROTO_ICMP6;               /* Next header */
-            icmp->ttl    = 255;                          /* Hop limit */
-
-            /* Swap source for destination IP address, add our source IP
-             * address
-             */
-
-            net_ipv6addr_copy(icmp->destipaddr, icmp->srcipaddr);
-            net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
-
-            /* Set up the ICMPv6 Neighbor Advertise response */
-
-            adv            = ICMPv6ADVERTISE;
-            adv->type      = ICMPv6_NEIGHBOR_ADVERTISE;  /* Message type */
-            adv->code      = 0;                          /* Message qualifier */
-            adv->flags[0]  = ICMPv6_NADV_FLAG_S | ICMPv6_NADV_FLAG_O; /* Solicited+Override flags. */
-            adv->flags[1]  = 0;
-            adv->flags[2]  = 0;
-            adv->flags[3]  = 0;
-
-            /* Copy the target address into the Neighbor Advertisement message */
-
-            net_ipv6addr_copy(adv->tgtaddr, dev->d_ipv6addr);
-
-            /* Set up the options */
-
-            adv->opttype   = ICMPv6_OPT_TGTLLADDR;       /* Option type */
-            adv->optlen    = 1;                          /* Option length = 1 octet */
-
-            /* Copy our link layer address into the message
-             * REVISIT:  What if the link layer is not Ethernet?
-             */
-
-            memcpy(adv->tgtlladdr, &dev->d_mac, IFHWADDRLEN);
-
-            /* Calculate the checksum over both the ICMP header and payload */
-
-            icmp->chksum   = 0;
-            icmp->chksum   = ~icmpv6_chksum(dev);
-
-            /* Set the size to the size of the IPv6 header and the payload size */
-
-            dev->d_len     = IPv6_HDRLEN + sizeof(struct icmpv6_neighbor_advertise_s);
-
-#ifdef CONFIG_NET_ETHERNET
-            /* Add the size of the Ethernet header */
-
-            dev->d_len    += ETH_HDRLEN;
-
-            /* Move the source and to the destination addresses in the
-             * Ethernet header and use our MAC as the new source address.
-             */
-
-#ifdef CONFIG_NET_MULTILINK
-            if (dev->d_lltype == NET_LL_ETHERNET)
-#endif
+            ret = icmpv6_advertise(dev, icmp->srcipaddr);
+            if (ret < 0)
               {
-                FAR struct eth_hdr_s *eth = ETHBUF;
-
-                memcpy(eth->dest, eth->src, ETHER_ADDR_LEN);
-                memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-
-                /* Set the IPv6 Ethernet type */
-
-                eth->type  = HTONS(ETHTYPE_IP6);
+                goto icmpv6_drop_packet;
               }
-#endif
 
-            /* No additional neighbor lookup is required on this packet
-             * (We are using a multicast address).
-             */
+            /* All statistics have been updated */
 
-            IFF_SET_NOARP(dev->d_flags);
+            return;
           }
         else
           {
