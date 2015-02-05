@@ -236,6 +236,30 @@ int tm4c_at24_automount(int minor);
 int tiva_timer_initialize(void);
 #endif
 
+/************************************************************************************
+ * Name: board_adc_initialize
+ *
+ * Description:
+ *   Initialize and register the ADC driver
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_TIVA_ADC
+int board_adc_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: adc_devinit
+ *
+ * Description:
+ *   All Tiva architectures must provide the following interface to work with
+ *   examples/adc.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_TIVA_ADC) && defined(CONFIG_EXAMPLES_ADC)
+int adc_devinit(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H */
