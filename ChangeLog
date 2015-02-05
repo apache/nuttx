@@ -9662,3 +9662,7 @@
 	  stm32/stm32_eth.c: Add logic to behave like a router (if so
 	  configured):  NuttX will not send the router advertisement message
 	  in response to any router solicitation messages (2015-02-05).
+	* configs/stm32f4discovery/ipv6 and arch/arm/src/stm32/stm32_eth.c: Add
+	  an IPv6 configuration for the STM32F4-Discovery board (with the
+	  STM32-DISCO_BB base board).  Verify that the STM32 Ethernet driver
+	  works with IPv6 (2015-02-05).
