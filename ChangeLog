@@ -9672,3 +9672,5 @@
 	* arch/arm/src/tiva and configs/tm4c123g-launchpad:  Adds support for
 	  TM4C123G timers; integrates with the TM4C123G Launchpad.  From Calvin
 	  Maguranis (2015-02-05).
+	* arc/arc/src/tiva/tiva_adc.c and .h: Adds a Tiva ADC driver.  From
+	  Calvin Maguranis (2015-02-05).
