@@ -238,7 +238,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
          */
 
         adv = ICMPv6RADVERTISE;
-        for (ndx = 0; ndx + sizeof(struct icmpv6_prefixinfo_s) < optlen; )
+        for (ndx = 0; ndx + sizeof(struct icmpv6_prefixinfo_s) <= optlen; )
           {
             FAR struct icmpv6_prefixinfo_s *opt =
               (FAR struct icmpv6_prefixinfo_s *)&adv->options[ndx];
@@ -313,7 +313,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
     default:
       {
-        nlldbg("Unknown ICMPv6 cmd: %d\n", icmp->type);
+        nlldbg("Unknown ICMPv6 type: %d\n", icmp->type);
         goto icmpv6_type_error;
       }
     }

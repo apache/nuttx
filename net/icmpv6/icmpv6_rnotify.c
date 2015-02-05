@@ -152,8 +152,8 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 
   for (i = 0; i < 7; i++)
     {
-      dev->d_ipv6addr[i] = (dev->d_ipv6addr[i] & dev->d_ipv6netmask[i]) |
-                           (prefix[i] & ~dev->d_ipv6netmask[i]);
+      dev->d_ipv6addr[i] = (dev->d_ipv6addr[i] & ~dev->d_ipv6netmask[i]) |
+                           (prefix[i] & dev->d_ipv6netmask[i]);
     }
 
   nvdbg("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
