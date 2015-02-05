@@ -513,8 +513,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
         {
           ndbg("ERROR: Failed send neighbor advertisement: %d\n", ret);
           netdev_ifdown(dev);
-          net_unlock(save);
-          return ret;
         }
 
       /* Leave the network up and return success (even though things did not
@@ -522,7 +520,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
        */
 
       net_unlock(save);
-      return OK;
+      return ret;
     }
 
   /* 5. Router Direction: The router provides direction to the node on how to
