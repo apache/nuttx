@@ -996,3 +996,36 @@ Where <subdir> is one of the following:
        and Telnet again works from the host:
 
          telent 10.0.0.2
+
+    3. You can enable IPv6 autonomous address configuration with the
+       following changes to the configuration:
+
+       + CONFIG_NET_ICMPv6_AUTOCONF=y
+       + CONFIG_ICMPv6_AUTOCONF_DELAYMSEC=100
+       + CONFIG_ICMPv6_AUTOCONF_MAXTRIES=5
+
+       - CONFIG_NSH_DRIPv6ADDR_1=0xfc00
+       - CONFIG_NSH_DRIPv6ADDR_2=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_3=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_4=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_5=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_6=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_7=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_8=0x0001
+
+       - CONFIG_NSH_IPv6ADDR_1=0xfc00
+       - CONFIG_NSH_IPv6ADDR_2=0x0000
+       - CONFIG_NSH_IPv6ADDR_3=0x0000
+       - CONFIG_NSH_IPv6ADDR_4=0x0000
+       - CONFIG_NSH_IPv6ADDR_5=0x0000
+       - CONFIG_NSH_IPv6ADDR_6=0x0000
+       - CONFIG_NSH_IPv6ADDR_7=0x0000
+       - CONFIG_NSH_IPv6ADDR_8=0x0002
+       - CONFIG_NSH_IPv6NETMASK_1=0xffff
+       - CONFIG_NSH_IPv6NETMASK_2=0xffff
+       - CONFIG_NSH_IPv6NETMASK_3=0xffff
+       - CONFIG_NSH_IPv6NETMASK_4=0xffff
+       - CONFIG_NSH_IPv6NETMASK_5=0xffff
+       - CONFIG_NSH_IPv6NETMASK_6=0xffff
+       - CONFIG_NSH_IPv6NETMASK_7=0xffff
+       - CONFIG_NSH_IPv6NETMASK_8=0xff80
