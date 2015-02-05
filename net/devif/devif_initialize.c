@@ -95,8 +95,8 @@ const net_ipv6addr_t g_ipv6_allzeroaddr = /* An address of all zeroes */
   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* IPv6 Multi-cast IP address */
+#if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER)
+/* IPv6 Multi-cast IP addresses */
 
 const net_ipv6addr_t g_ipv6_allnodes =    /* All link local nodes */
 {
@@ -142,7 +142,7 @@ const struct ether_addr g_ipv6_ethallrouters =   /* All link local routers */
 };
 
 #endif /* CONFIG_NET_ETHERNET */
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF || CONFIG_NET_ICMPv6_ROUTER */
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
