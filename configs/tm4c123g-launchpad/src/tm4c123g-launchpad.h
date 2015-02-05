@@ -223,6 +223,20 @@ int tm4c_bringup(void);
 #ifdef HAVE_AT24
 int tm4c_at24_automount(int minor);
 #endif
+
+/****************************************************************************
+ * Name: tiva_timer_initialize
+ *
+ * Description:
+ *   Configure the timer driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER
+int tiva_timer_initialize(void);
+#endif
+
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H */
 

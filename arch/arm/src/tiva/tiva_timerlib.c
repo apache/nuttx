@@ -122,31 +122,31 @@ static void tiva_putreg(struct tiva_gptmstate_s *priv, unsigned int offset,
 
 #ifdef CONFIG_TIVA_TIMER_32BIT
 static int  tiva_timer32_interrupt(struct tiva_gptmstate_s *priv);
-#ifdef CONFIG_TIVA_TIMER0
+#  ifdef CONFIG_TIVA_TIMER0
 static int  tiva_gptm0_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER1
+#  endif
+#  ifdef CONFIG_TIVA_TIMER1
 static int  tiva_gptm1_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER2
+#  endif
+#  ifdef CONFIG_TIVA_TIMER2
 static int  tiva_gptm2_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER3
+#  endif
+#  ifdef CONFIG_TIVA_TIMER3
 static int  tiva_gptm3_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER4
+#  endif
+#  ifdef CONFIG_TIVA_TIMER4
 static int  tiva_gptm4_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER5
+#  endif
+#  ifdef CONFIG_TIVA_TIMER5
 static int  tiva_gptm5_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER6
+#  endif
+#  ifdef CONFIG_TIVA_TIMER6
 static int  tiva_gptm6_interrupt(int irq, FAR void *context);
-#endif
-#ifdef CONFIG_TIVA_TIMER7
+#  endif
+#  ifdef CONFIG_TIVA_TIMER7
 static int  tiva_gptm7_interrupt(int irq, FAR void *context);
 #endif
-#endif
+#endif /* CONFIG_TIVA_TIMER_32BIT */
 
 #ifdef CONFIG_TIVA_TIMER_16BIT
 static int  tiva_timer16_interrupt(struct tiva_gptmstate_s *priv,
@@ -183,14 +183,14 @@ static int  tiva_timer6b_interrupt(int irq, FAR void *context);
 static int  tiva_timer7a_interrupt(int irq, FAR void *context);
 static int  tiva_timer7b_interrupt(int irq, FAR void *context);
 #endif
-#endif
+#endif /* CONFIG_TIVA_TIMER_16BIT */
 
 /* Timer initialization and configuration */
 
 #ifdef CONFIG_TIVA_TIMER32_PERIODIC
 static int  tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
               const struct tiva_timer32config_s *timer);
-#endif
+#endif /* CONFIG_TIVA_TIMER32_PERIODIC */
 #ifdef CONFIG_TIVA_TIMER16_PERIODIC
 static int  tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
               const struct tiva_timer16config_s *timer, int tmndx);
@@ -213,7 +213,7 @@ static int  tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
 
 #endif
 #ifdef CONFIG_TIVA_TIMER_32BIT
-static int  tiva_timer32_configure(struct tiva_gptmstate_s *priv,
+static int tiva_timer32_configure(struct tiva_gptmstate_s *priv,
               const struct tiva_timer32config_s *timer);
 #endif
 #ifdef CONFIG_TIVA_TIMER_16BIT
@@ -780,7 +780,7 @@ static int tiva_timer7b_interrupt(int irq, FAR void *context)
  * Name: tiva_oneshot_periodic_mode32
  *
  * Description:
- *   Configure a 32-bit timer to operate in one-short or periodic mode
+ *   Configure a 32-bit timer to operate in one-shot or periodic mode
  *
  ****************************************************************************/
 
@@ -863,7 +863,9 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
   /* Setup defaults */
 
   regval &= (TIMER_TnMR_TnCDIR | TIMER_TnMR_TnWOT | TIMER_TnMR_TnCDIR);
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   regval |= TIMER_TnMR_TnCINTD;
+#endif
 
   /* Enable snapshot mode?
    *
@@ -897,7 +899,6 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
   tiva_putreg(priv, TIVA_TIMER_TAMR_OFFSET, regval);
 
   /* Enable and configure ADC trigger outputs */
-
   if (TIMER_ISADCTIMEOUT(timer) || TIMER_ISADCMATCH(timer))
     {
       /* Enable ADC trigger outputs by setting the TAOTE bit in the
@@ -908,6 +909,7 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
       regval |= TIMER_CTL_TAOTE;
       tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Enable timeout triggers now (match triggers will be
        * enabled when the first match value is set).
        */
@@ -916,6 +918,7 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
         {
           tiva_putreg(priv, TIVA_TIMER_ADCEV_OFFSET, TIMER_ADCEV_TATOADCEN);
         }
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
 
   /* In addition, if using CCP pins, the TCACT field can be programmed to
@@ -1068,7 +1071,9 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
   /* Setup defaults */
 
   regval &= (TIMER_TnMR_TnCDIR | TIMER_TnMR_TnWOT | TIMER_TnMR_TnCDIR);
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   regval |= TIMER_TnMR_TnCINTD;
+#endif
 
   /* Enable snapshot mode?
    *
@@ -1113,6 +1118,7 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
       regval |= tmndx ? TIMER_CTL_TBOTE : TIMER_CTL_TAOTE;
       tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Enable timeout triggers now (match triggers will be
        * enabled when the first match value is set).
        */
@@ -1122,6 +1128,7 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
           regval = tmndx ? TIMER_ADCEV_TBTOADCEN : TIMER_ADCEV_TATOADCEN;
           tiva_putreg(priv, TIVA_TIMER_ADCEV_OFFSET, regval);
         }
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
 
   /* TODO: Enable and configure uDMA trigger outputs */
@@ -1519,13 +1526,12 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
 #endif
 
 /****************************************************************************
- * Name: tiva_timer16_configure
+ * Name: tiva_timer32_configure
  *
  * Description:
  *   Configure the 32-bit timer to operate in the provided mode.
  *
  ****************************************************************************/
-
 #ifdef CONFIG_TIVA_TIMER_32BIT
 static int tiva_timer32_configure(struct tiva_gptmstate_s *priv,
                                   const struct tiva_timer32config_s *timer)
@@ -1536,7 +1542,7 @@ static int tiva_timer32_configure(struct tiva_gptmstate_s *priv,
     case TIMER32_MODE_ONESHOT:       /* 32-bit programmable one-shot timer */
     case TIMER32_MODE_PERIODIC:      /* 32-bit programmable periodic timer */
       return tiva_oneshot_periodic_mode32(priv, timer);
-#endif
+#endif /* CONFIG_TIVA_TIMER32_PERIODIC */
 
 #ifdef CONFIG_TIVA_TIMER32_RTC
     case TIMER32_MODE_RTC:           /* 32-bit RTC with external 32.768-KHz
@@ -1761,6 +1767,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
   if (config->alternate)
     {
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Enable the alternate clock source */
 
       regval  = tiva_getreg(priv, TIVA_TIMER_CC_OFFSET);
@@ -1770,6 +1777,10 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
       /* Remember the frequency of the input clock */
 
       priv->clkin = ALTCLK_FREQUENCY;
+#else
+       timvdbg("tiva_gptm_configure: Error: alternate clock only available on TM4C129 devices\n");
+       return (TIMER_HANDLE)NULL;
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
   else
     {
@@ -2301,11 +2312,13 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
   const struct tiva_timer32config_s *timer;
   irqstate_t flags;
   uintptr_t base;
-  uintptr_t moder;
   uintptr_t loadr;
   uintptr_t imrr;
+#ifdef CONFIG_ARCH_CHIP_TM4C129
+  uintptr_t moder;
   uint32_t modev1;
   uint32_t modev2;
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
   bool toints;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
@@ -2329,7 +2342,6 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
     }
 
   loadr = base + TIVA_TIMER_TAILR_OFFSET;
-  moder = base + TIVA_TIMER_TAMR_OFFSET;
   imrr  = base + TIVA_TIMER_IMR_OFFSET;
 
   /* Make the following atomic */
@@ -2344,13 +2356,15 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 
   if (toints)
     {
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Clearing the TACINTD bit allows the time-out interrupt to be
        * generated as normal
        */
-
+      moder = base + TIVA_TIMER_TAMR_OFFSET;
       modev1 = getreg32(moder);
       modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
       putreg32(modev2, moder);
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
 
       /* Set the new interrupt mask */
 
@@ -2366,8 +2380,10 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
   lldbg("%08x<-%08x\n", loadr, interval);
   if (toints)
     {
+#  ifdef CONFIG_ARCH_CHIP_TM4C129
       lldbg("%08x->%08x\n", moder, modev1);
       lldbg("%08x<-%08x\n", moder, modev2);
+#  endif /* CONFIG_ARCH_CHIP_TM4C129 */
       lldbg("%08x<-%08x\n", imrr, priv->imr);
     }
 #endif
@@ -2421,12 +2437,14 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
   const struct tiva_timer16config_s *timer;
   irqstate_t flags;
   uintptr_t base;
-  uintptr_t moder;
   uintptr_t loadr;
   uintptr_t imrr;
-  uint32_t intbit;
+#ifdef CONFIG_ARCH_CHIP_TM4C129
+  uintptr_t moder;
   uint32_t modev1;
   uint32_t modev2;
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
+  uint32_t intbit;
   bool toints;
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
@@ -2441,13 +2459,11 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
     {
       intbit = TIMER_INT_TBTO;
       loadr  = base + TIVA_TIMER_TBILR_OFFSET;
-      moder  = base + TIVA_TIMER_TBMR_OFFSET;
     }
   else
     {
       intbit = TIMER_INT_TATO;
       loadr  = base + TIVA_TIMER_TAILR_OFFSET;
-      moder  = base + TIVA_TIMER_TAMR_OFFSET;
     }
 
   imrr = base + TIVA_TIMER_IMR_OFFSET;
@@ -2478,6 +2494,16 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
 
   if (toints)
     {
+#ifdef CONFIG_ARCH_CHIP_TM4C129
+        if (tmndx)
+          {
+            moder  = base + TIVA_TIMER_TBMR_OFFSET;
+          }
+        else
+          {
+            moder  = base + TIVA_TIMER_TAMR_OFFSET;
+          }
+
       /* Clearing the TACINTD bit allows the time-out interrupt to be
        * generated as normal
        */
@@ -2485,6 +2511,7 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
       modev1 = getreg32(moder);
       modev2 = modev1 & ~TIMER_TnMR_TnCINTD;
       putreg32(modev2, moder);
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
 
       /* Set the new interrupt mask */
 
@@ -2500,8 +2527,10 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
   lldbg("%08x<-%08x\n", loadr, interval);
   if (toints)
     {
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       lldbg("%08x->%08x\n", moder, modev1);
       lldbg("%08x<-%08x\n", moder, modev2);
+#endif
       lldbg("%08x<-%08x\n", imrr, priv->imr);
     }
 #endif
@@ -2613,7 +2642,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
   irqrestore(flags);
   return remaining;
 }
-#endif
+#endif /* CONFIG_TIVA_TIMER32_PERIODIC */
 
 /****************************************************************************
  * Name: tiva_rtc_setalarm
@@ -2644,8 +2673,10 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
   uintptr_t base;
   uint32_t counter;
   uint32_t match;
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   uint32_t adcev;
   uint32_t adcbits;
+#endif
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode == TIMER32_MODE_RTC);
@@ -2667,7 +2698,6 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
    */
 
   base = priv->attr->base;
-  adcbits = TIMER_ISADCRTCM(config) ? TIMER_ADCEV_RTCADCEN : 0;
 
   flags = irqsave();
 
@@ -2679,12 +2709,15 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
   match   = counter + delay;
   putreg32(match, base + TIVA_TIMER_TAMATCHR_OFFSET);
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   /* Enable ADC trigger (if selected).  NOTE the TAOTE bit was already
    * selected in the GPTMCTL register when the timer was configured.
    */
 
   adcev = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  adcbits = TIMER_ISADCRTCM(config) ? TIMER_ADCEV_RTCADCEN : 0;
   putreg32(adcev | adcbits, base + TIVA_TIMER_ADCEV_OFFSET);
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
 
   /* TODO: Set uDMA trigger in the same manner */
 
@@ -2698,8 +2731,10 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
 
   lldbg("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   lldbg("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
 #endif
 }
@@ -2743,8 +2778,10 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
   irqstate_t flags;
   uint32_t counter;
   uint32_t match;
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   uint32_t adcev;
   uint32_t adcbits;
+#endif
 
   DEBUGASSERT(priv && priv->attr && priv->config &&
               priv->config->mode != TIMER16_MODE);
@@ -2766,8 +2803,6 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
    */
 
   base    = priv->attr->base;
-  adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CAMADCEN : 0;
-
   flags = irqsave();
 
   /* Set the match register to the current value of the timer counter plus
@@ -2780,12 +2815,15 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
   match   = counter + relmatch;
   putreg32(match, base + TIVA_TIMER_TAMATCHR_OFFSET);
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   /* Enable ADC trigger (if selected).  NOTE the TAOTE bit was already
    * selected in the GPTMCTL register when the timer was configured.
    */
 
-  adcev = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  adcev   = getreg32(base + TIVA_TIMER_ADCEV_OFFSET);
+  adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CAMADCEN : 0;
   putreg32(adcev | adcbits, base + TIVA_TIMER_ADCEV_OFFSET);
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
 
   /* Enable interrupts as necessary */
 
@@ -2797,12 +2835,15 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
 
   lldbg("%08x->%08x\n", base + TIVA_TIMER_TAR_OFFSET, counter);
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_TAMATCHR_OFFSET, match);
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   lldbg("%08x->%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev);
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_ADCEV_OFFSET, adcev | adcbits);
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
   lldbg("%08x<-%08x\n", base + TIVA_TIMER_IMR_OFFSET, priv->imr);
-#endif
+#endif /* CONFIG_TIVA_TIMER_REGDEBUG */
+
 }
-#endif
+#endif /* CONFIG_TIVA_TIMER32_PERIODIC */
 
 /****************************************************************************
  * Name: tiva_timer16_relmatch
@@ -2856,15 +2897,17 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   uintptr_t prescr;
   uintptr_t matchr;
   uintptr_t prematchr;
-  uintptr_t adcevr;
   uintptr_t imr;
+#ifdef CONFIG_ARCH_CHIP_TM4C129
+  uintptr_t adcevr;
+  uint32_t adcevv;
+  uint32_t adcbits;
+#endif
   uint32_t timerv;
   uint32_t prescv;
   uint32_t matchv;
   uint32_t prematchv;
-  uint32_t adcevv;
   uint32_t counter;
-  uint32_t adcbits;
   bool countup;
 
   DEBUGASSERT(priv && priv->attr &&  priv->config &&
@@ -2894,9 +2937,11 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
       matchr    = base + TIVA_TIMER_TBMATCHR_OFFSET;
       prematchr = base + TIVA_TIMER_TBPMR_OFFSET;
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Do we need to enable ADC trigger on the match? */
 
       adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CBMADCEN : 0;
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
   else
     {
@@ -2917,12 +2962,17 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
       matchr    = base + TIVA_TIMER_TAMATCHR_OFFSET;
       prematchr = base + TIVA_TIMER_TAPMR_OFFSET;
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Do we need to enable ADC trigger on the match? */
 
       adcbits = TIMER_ISADCMATCH(config) ? TIMER_ADCEV_CAMADCEN : 0;
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   adcevr   = base + TIVA_TIMER_ADCEV_OFFSET;
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
+
   imr      = base + TIVA_TIMER_IMR_OFFSET;
   countup  = TIMER_ISCOUNTUP(config);
 
@@ -2968,12 +3018,14 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   putreg32(matchv, matchr);
   putreg32(prematchv, prematchr);
 
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   /* Enable ADC trigger (if selected).  NOTE the TnOTE bit was already
    * selected in the GPTMCTL register when the timer was configured.
    */
 
   adcevv = getreg32(adcevr);
   putreg32(adcevv | adcbits, adcevr);
+#endif
 
   /* Enable interrupts as necessary */
 
@@ -2987,8 +3039,10 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
   lldbg("%08x->%08x\n", prescr, prescv);
   lldbg("%08x<-%08x\n", matchr, matchv);
   lldbg("%08x<-%08x\n", prematchr, prematchv);
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   lldbg("%08x->%08x\n", adcevr, adcevv);
   lldbg("%08x<-%08x\n", adcevr, adcevv | adcbits);
+#endif
   lldbg("%08x<-%08x\n", imr, priv->imr);
 #endif
 }

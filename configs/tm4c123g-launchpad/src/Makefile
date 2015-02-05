@@ -49,6 +49,10 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += tm4c_nsh.c
 endif
 
+ifeq ($(CONFIG_TIVA_TIMER),y)
+CSRCS += tm4c_timer.c
+endif
+
 ifeq ($(CONFIG_MTD_AT24XX),y)
 ifeq ($(CONFIG_TIVA_I2C0),y)
 CSRCS += tm4c_at24.c

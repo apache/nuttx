@@ -173,6 +173,9 @@ config ARCH_CHIP_TM4C
 	bool
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select TIVA_HAVE_ADC0
+	select TIVA_HAVE_ADC1
+	select TIVA_HAVE_GPIOP_IRQS
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_I2C2
 	select TIVA_HAVE_I2C3
@@ -185,6 +188,9 @@ config ARCH_CHIP_TM4C
 	select TIVA_HAVE_SSI1
 	select TIVA_HAVE_SSI2
 	select TIVA_HAVE_SSI3
+	select TIVA_HAVE_TIMER0
+	select TIVA_HAVE_TIMER1
+	select TIVA_HAVE_TIMER2
 	select TIVA_HAVE_TIMER3
 	select TIVA_HAVE_TIMER4
 	select TIVA_HAVE_TIMER5
@@ -202,6 +208,18 @@ config TIVA_BOARD_EARLYINIT
 	default n
 
 menu "Tiva/Stellaris Peripheral Support"
+
+config TIVA_ADC
+	bool
+	default n
+
+config TIVA_HAVE_ADC0
+	bool
+	default n
+
+config TIVA_HAVE_ADC1
+	bool
+	default n
 
 config TIVA_I2C
 	bool
@@ -291,6 +309,18 @@ config TIVA_TIMER
 	bool
 	default n
 
+config TIVA_HAVE_TIMER0
+	bool
+	default n
+
+config TIVA_HAVE_TIMER1
+	bool
+	default n
+
+config TIVA_HAVE_TIMER2
+	bool
+	default n
+
 config TIVA_HAVE_TIMER3
 	bool
 	default n
@@ -310,6 +340,17 @@ config TIVA_HAVE_TIMER6
 config TIVA_HAVE_TIMER7
 	bool
 	default n
+
+config TIVA_ADC0
+	bool "ADC0"
+	default n
+	select TIVA_ADC
+
+config TIVA_ADC1
+	bool "ADC1"
+	default n
+	depends on TIVA_HAVE_ADC0
+	select TIVA_ADC
 
 config TIVA_I2C0
 	bool "I2C0"
@@ -441,16 +482,19 @@ config TIVA_SSI3
 config TIVA_TIMER0
 	bool "16-/32-bit Timer 0"
 	default n
+	depends on TIVA_HAVE_TIMER0
 	select TIVA_TIMER
 
 config TIVA_TIMER1
 	bool "16-/32-bit Timer 1"
 	default n
+	depends on TIVA_HAVE_TIMER1
 	select TIVA_TIMER
 
 config TIVA_TIMER2
 	bool "16-/32-bit Timer 2"
 	default n
+	depends on TIVA_HAVE_TIMER2
 	select TIVA_TIMER
 
 config TIVA_TIMER3
@@ -792,7 +836,6 @@ endif # TIVA_TIMER_16BIT
 config TIVA_TIMER_REGDEBUG
 	bool "Register level debug"
 	default n
-	depends on DEBUG
 	---help---
 		Enables extremely detailed register access debug output.
 
@@ -1084,3 +1127,4 @@ config TIVA_FLASH_STARTPAGE
 
 endmenu
 endif
+
