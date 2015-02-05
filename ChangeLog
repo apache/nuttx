@@ -9656,3 +9656,5 @@
 	* arch/arm/src/stm32/stm32_aes.c, stm32_aes.h, and
 	  chip/stm32l15xxx_aes.h:  Add driver for STM32L162XX AES peripheral.
 	  From Juha Niskanen (2015-02-04).
+	* net/icmpv6/icmpv6_radvertise.c, Kconfig, and other files: Add option
+	  to send Router Advertisement Messages (2015-02-05).
