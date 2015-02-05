@@ -9658,3 +9658,7 @@
 	  From Juha Niskanen (2015-02-04).
 	* net/icmpv6/icmpv6_radvertise.c, Kconfig, and other files: Add option
 	  to send Router Advertisement Messages (2015-02-05).
+	* net/icmpv6/icmpv6_input.c, arch/arm/src/tiva/tm4c_ethernet.c, and
+	  stm32/stm32_eth.c: Add logic to behave like a router (if so
+	  configured):  NuttX will not send the router advertisement message
+	  in response to any router solicitation messages (2015-02-05).
