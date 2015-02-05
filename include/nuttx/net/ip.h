@@ -220,16 +220,17 @@ extern "C"
 /* Well-known IP addresses */
 
 #ifdef CONFIG_NET_IPv4
-EXTERN const in_addr_t g_ipv4_alloneaddr;
-EXTERN const in_addr_t g_ipv4_allzeroaddr;
+EXTERN const in_addr_t g_ipv4_alloneaddr;       /* An address of all ones */
+EXTERN const in_addr_t g_ipv4_allzeroaddr;      /* An address of all zeroes */
 #endif
 
 #ifdef CONFIG_NET_IPv6
-EXTERN const net_ipv6addr_t g_ipv6_alloneaddr;
-EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr;
+EXTERN const net_ipv6addr_t g_ipv6_alloneaddr;  /* An address of all ones */
+EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr; /* An address of all zeroes */
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
 EXTERN const net_ipv6addr_t g_ipv6_allnodes;    /* All link local nodes */
 EXTERN const net_ipv6addr_t g_ipv6_allrouters;  /* All link local routers */
+EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link address */
 #endif
 #endif
 

@@ -85,12 +85,12 @@ uint8_t g_reassembly_timer;
 
 #ifdef CONFIG_NET_IPv6
 
-const net_ipv6addr_t g_ipv6_alloneaddr =
+const net_ipv6addr_t g_ipv6_alloneaddr =  /* An address of all ones */
 {
   0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff
 };
 
-const net_ipv6addr_t g_ipv6_allzeroaddr =
+const net_ipv6addr_t g_ipv6_allzeroaddr = /* An address of all zeroes */
 {
   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
@@ -110,6 +110,11 @@ const net_ipv6addr_t g_ipv6_allrouters =  /* All link local routers */
   HTONS(0xff02),
   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
   HTONS(0x0002)
+};
+
+const net_ipv6addr_t g_ipv6_llnetmask =   /* Netmask for local link address */
+{
+  0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
 #ifdef CONFIG_NET_ETHERNET
