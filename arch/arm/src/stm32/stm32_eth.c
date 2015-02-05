@@ -2263,7 +2263,7 @@ static int stm32_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
 {
   uint32_t crc = 0xffffffff;
