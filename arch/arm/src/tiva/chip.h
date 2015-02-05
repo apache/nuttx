@@ -53,6 +53,7 @@
 #include "chip/tiva_ssi.h"        /* SSI modules */
 #include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
 #include "chip/tiva_flash.h"      /* FLASH */
+#include "chip/tiva_timer.h"      /* Timer */
 
 /************************************************************************************
  * Pre-processor Definitions

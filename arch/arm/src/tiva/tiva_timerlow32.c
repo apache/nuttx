@@ -572,7 +572,19 @@ int tiva_timer_register(FAR const char *devpath, int gptm, bool altclk)
   /* Initialize the non-zero elements of lower half state structure */
 
   priv->ops                          = &g_timer_ops;
+#ifdef CONFIG_ARCH_CHIP_TM4C129
   priv->clkin                        = altclk ? ALTCLK_FREQUENCY : SYSCLK_FREQUENCY;
+#else
+  if (altclk)
+    {
+      timdbg("ERROR: Alternate clock unsupported on TM4C123 architecture\n");
+      return -ENOMEM;
+    }
+  else
+    {
+      priv->clkin                    = SYSCLK_FREQUENCY;
+    }
+#endif /* CONFIG_ARCH_CHIP_TM4C129 */
 
   config                             = &priv->config;
   config->cmn.gptm                   = gptm;
