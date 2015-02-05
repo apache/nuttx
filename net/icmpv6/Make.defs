@@ -59,6 +59,9 @@ ifeq ($(CONFIG_NET_ICMPv6_AUTOCONF),y)
 NET_CSRCS += icmpv6_autoconfig.c icmpv6_rsolicit.c icmpv6_rnotify.c
 endif
 
+ifeq ($(CONFIG_NET_ICMPv6_ROUTER),y)
+NET_CSRCS += icmpv6_radvertise.c
+endif
 # Include ICMPv6 build support
 
 DEPPATH += --dep-path icmpv6

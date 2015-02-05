@@ -81,6 +81,103 @@ config ICMPv6_AUTOCONF_DELAYMSEC
 		Advertisement is received.
 
 endif # NET_ICMPv6_AUTOCONF
+
+config NET_ICMPv6_ROUTER
+	bool "Router Advertisement"
+	default n
+	---help---
+		In a router-less environment, NuttX can be configured to provide a
+		response to Router Solicitation messages and, hence, providing
+		addressing to IPv6 nodes on the network.
+
+if NET_ICMPv6_ROUTER
+
+config NET_ICMPv6_PREFLEN
+	int "Prefix length"
+	default 64
+	range 0 128
+	---help---
+		The length (in bits) of the IPv6 address prefix.  This is the number
+		of MS bits under the network mask.  The default of 64 would
+		correspond to a network mask of:
+
+			0xffff:0xffff:0xffff:0xffff:0x0000:0x0000:0x0000:0x0000.
+
+comment "Router Prefix"
+
+config NET_ICMPv6_PREFIX_1
+	hex "[0]"
+	default 0xfc00
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the first of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_2
+	hex "[1]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the second of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_3
+	hex "[2]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the third of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_4
+	hex "[3]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the fourth of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_5
+	hex "[4]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the fifth of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_6
+	hex "[5]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the sixth of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_7
+	hex "[6]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the seventh of the 8-values.  The
+		default for all eight values is fc00::0.
+
+config NET_ICMPv6_PREFIX_8
+	hex "[7]"
+	default 0x0000
+	range 0x0 0xffff
+	---help---
+		This the IPv6 address prefix that will be provided in the IPv6 Router
+		Advertisement message.  This is the last of the 8-values.  The
+		default for all eight values is fc00::0.
+
+endif # NET_ICMPv6_ROUTER
 endif # NET_ICMPv6
 endmenu # ICMPv6 Networking Support
 endif # NET_IPv6
