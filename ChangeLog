@@ -9666,3 +9666,6 @@
 	  an IPv6 configuration for the STM32F4-Discovery board (with the
 	  STM32-DISCO_BB base board).  Verify that the STM32 Ethernet driver
 	  works with IPv6 (2015-02-05).
+	* net/icmpv6/icmpv6_input.c and icmpv6_rnotify.c:  With these two
+	  changes both ICMPv6 autonomous autoconfiguration and router
+	  functionality appear to be working with no problems (2015-02-05).
