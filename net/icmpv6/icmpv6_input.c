@@ -194,6 +194,23 @@ void icmpv6_input(FAR struct net_driver_s *dev)
       }
       break;
 
+#ifdef CONFIG_NET_ICMPv6_ROUTER
+    /* Check if we received a Router Solicitation */
+
+    case ICMPV6_ROUTER_SOLICIT:
+      {
+        /* Just give a knee-jerk Router Advertisement in respond with no
+         * further examination of the Router Solicitation.
+         */
+
+        icmpv6_radvertise(dev);
+
+        /* All statistics have been updated.  Nothing to do but exit. */
+
+        return;
+      }
+#endif
+
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
     /* Check if we received a Router Advertisement */
 

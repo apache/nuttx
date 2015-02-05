@@ -274,6 +274,28 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
                       const net_ipv6addr_t destipaddr);
 
 /****************************************************************************
+ * Name: icmpv6_radvertise
+ *
+ * Description:
+ *   Send an ICMPv6 Router Advertisement
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the outgoing ICMPv6 packet
+ *         buffer
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_ROUTER
+void icmpv6_radvertise(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
  * Function: icmpv6_wait_setup
  *
  * Description:
