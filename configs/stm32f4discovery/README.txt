@@ -1301,6 +1301,32 @@ Where <subdir> is one of the following:
 
          telent 10.0.0.2
 
+    3. I have used this configuration to serve up IP address prefixes
+       in a local network with these modifications to the configuration:
+
+       +CONFIG_NET_ICMPv6_ROUTER=y
+       +CONFIG_NET_ICMPv6_PREFLEN=64
+       +CONFIG_NET_ICMPv6_PREFIX_1=0xfc00
+       +CONFIG_NET_ICMPv6_PREFIX_2=0x0000
+       +CONFIG_NET_ICMPv6_PREFIX_3=0x0000
+       +CONFIG_NET_ICMPv6_PREFIX_4=0x0000
+       +CONFIG_NET_ICMPv6_PREFIX_5=0x0000
+       +CONFIG_NET_ICMPv6_PREFIX_6=0x0000
+       +CONFIG_NET_ICMPv6_PREFIX_7=0x0000
+       +CONFIG_NET_ICMPv6_PREFIX_8=0x0000
+
+       +CONFIG_NSH_IPv6NETMASK_5=0x0000
+       -CONFIG_NSH_IPv6NETMASK_5=0xffff
+
+       +CONFIG_NSH_IPv6NETMASK_6=0x0000
+       -CONFIG_NSH_IPv6NETMASK_6=0xffff
+
+       +CONFIG_NSH_IPv6NETMASK_7=0x0000
+       -CONFIG_NSH_IPv6NETMASK_7=0xffff
+
+       +CONFIG_NSH_IPv6NETMASK_8=0x0000
+       -CONFIG_NSH_IPv6NETMASK_8=0xff80
+
   kostest:
   -------
     This is identical to the ostest configuration below except that NuttX
