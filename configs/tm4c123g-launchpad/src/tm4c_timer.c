@@ -1,8 +1,10 @@
 /****************************************************************************
- * config/tm4c123g-launchpad/src/tm4c_bringup.c
+ * config/tm4c123g-launchpad/src/tm4c_timer.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ *   With modifications from Calvin Maguranis
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,53 +41,50 @@
 
 #include <nuttx/config.h>
 
-#include <syslog.h>
+#include <debug.h>
 
+#include "tiva_timer.h"
 #include "tm4c123g-launchpad.h"
+
+#ifdef CONFIG_TIVA_TIMER
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_TIVA_TIMER32_PERIODIC
+#  error CONFIG_TIVA_TIMER32_PERIODIC is not defined
+#endif
+
+#define GPTM 0
+#define CONFIG_TM4C_TIMER_DEVNAME "/dev/timer0"
+#define ALTCLK false
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tm4c_bringup
+ * Name: tiva_timer_initialize
  *
  * Description:
- *   Bring up board features
+ *   Configure the timer driver
  *
  ****************************************************************************/
 
-int tm4c_bringup(void)
+int tiva_timer_initialize(void)
 {
-#if defined (HAVE_AT24) || defined (CONFIG_TIVA_TIMER)
   int ret;
-#endif /* defined (HAVE_AT24) || defined (CONFIG_TIVA_TIMER) */
 
-#ifdef HAVE_AT24
-  /* Initialize the AT24 driver */
+  timvdbg("Registering TIMER%d at %s\n", GPTM, CONFIG_TM4C_TIMER_DEVNAME);
 
-  ret = tm4c_at24_automount(AT24_MINOR);
+  ret = tiva_timer_register(CONFIG_TM4C_TIMER_DEVNAME, GPTM, ALTCLK);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: tm4c_at24_automount failed: %d\n", ret);
-      return ret;
+      timdbg("ERROR: Failed to register timer driver: %d\n", ret);
     }
-#endif /* HAVE_AT24 */
 
-#ifdef CONFIG_TIVA_TIMER
-  /* Initialize the timer driver */
-
-  ret = tiva_timer_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize timer driver: %d\n", ret);
-      return ret;
-    }
-#endif /* CONFIG_TIVA_TIMER */
-
-  return OK;
+  return ret;
 }
+#endif /* CONFIG_TIVA_TIMER */
