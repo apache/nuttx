@@ -846,28 +846,28 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
         {
           /* The target address and the netmask are required values */
 
-          if (!retentry || !rtentry->rt_target || !rtentry->rt_netmask)
+          if (!rtentry || !rtentry->rt_target || !rtentry->rt_netmask)
             {
               return -EINVAL;
             }
 
 #ifdef CONFIG_NET_IPv4
-          if (rtentry->rt_target.ss_family == AF_INET)
 #ifdef CONFIG_NET_IPv6
+          if (rtentry->rt_target->ss_family == AF_INET)
 #endif
             {
               ret = ioctl_addipv4route(rtentry);
             }
 #endif /* CONFIG_NET_IPv4 */
 
-#ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
           else
 #endif
             {
               ret = ioctl_addipv6route(rtentry);
             }
-#endif /* CONFIG_NET_IPv4 */
+#endif /* CONFIG_NET_IPv6 */
         }
         break;
 
@@ -875,28 +875,28 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
         {
           /* The target address and the netmask are required values */
 
-          if (!retentry || !rtentry->rt_target || !rtentry->rt_netmask)
+          if (!rtentry || !rtentry->rt_target || !rtentry->rt_netmask)
             {
               return -EINVAL;
             }
 
 #ifdef CONFIG_NET_IPv4
-          if (rtentry->rt_target.ss_family == AF_INET)
 #ifdef CONFIG_NET_IPv6
+          if (rtentry->rt_target->ss_family == AF_INET)
 #endif
             {
               ret = ioctl_delipv4route(rtentry);
             }
 #endif /* CONFIG_NET_IPv4 */
 
-#ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
           else
 #endif
             {
               ret = ioctl_delipv6route(rtentry);
             }
-#endif /* CONFIG_NET_IPv4 */
+#endif /* CONFIG_NET_IPv6 */
         }
         break;
 
