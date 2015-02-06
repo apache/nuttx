@@ -54,6 +54,7 @@
 #include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
 #include "chip/tiva_flash.h"      /* FLASH */
 #include "chip/tiva_timer.h"      /* Timer */
+#include "chip/tiva_adc.h"        /* ADC */
 
 /************************************************************************************
  * Pre-processor Definitions
