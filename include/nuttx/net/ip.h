@@ -409,24 +409,30 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
                           const net_ipv6addr_t mask);
 #endif
 
-/* Mask out the network part of an IP address, given the address and
- * the netmask.
+/****************************************************************************
+ * Function: net_ipaddr_mask
  *
- * Example:
+ * Description:
+ *    Mask out the network part of an IP address, given the address and
+ *    the netmask.
  *
- *   in_addr_t ipaddr1, ipaddr2, netmask;
+ *    Example:
  *
- *   net_ipaddr(&ipaddr1, 192,16,1,2);
- *   net_ipaddr(&netmask, 255,255,255,0);
- *   net_ipaddr_mask(&ipaddr2, &ipaddr1, &netmask);
+ *     in_addr_t ipaddr1, ipaddr2, netmask;
  *
- * In the example above, the variable "ipaddr2" will contain the IP
- * address 192.168.1.0.
+ *     net_ipaddr(&ipaddr1, 192,16,1,2);
+ *     net_ipaddr(&netmask, 255,255,255,0);
+ *     net_ipaddr_mask(&ipaddr2, &ipaddr1, &netmask);
  *
- * dest Where the result is to be placed.
- * src The IP address.
- * mask The netmask.
- */
+ *   In the example above, the variable "ipaddr2" will contain the IP
+ *   address 192.168.1.0.
+ *
+ * Parameters:
+ *   dest Where the result is to be placed.
+ *   src The IP address.
+ *   mask The netmask.
+ *
+ ****************************************************************************/
 
 #define net_ipaddr_mask(dest, src, mask) \
   do { \

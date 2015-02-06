@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
 
 #include "utils/utils.h"
