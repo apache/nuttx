@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/net/ip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -139,6 +140,26 @@ unsigned int net_dsec2tick(int dsec);
 unsigned int net_timeval2dsec(FAR struct timeval *tv);
 
 /****************************************************************************
+ * Function: net_ipv6_pref2mask
+ *
+ * Description:
+ *   Convert a IPv6 prefix length to a network mask.  The prefix length
+ *   specifies the number of MS bits under mask (0-128)
+ *
+ * Parameters:
+ *   preflen  - Determines the width of the netmask (in bits).  Range 0-128
+ *   mask  - The location to return the netmask.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
+#endif
+
+/****************************************************************************
  * Name: tcp_chksum, tcp_ipv4_chksum, and tcp_ipv6_chksum
  *
  * Description:
@@ -173,7 +194,6 @@ uint16_t tcp_chksum(FAR struct net_driver_s *dev);
 #else /* if defined(CONFIG_NET_IPv6) */
 #  define tcp_chksum(d) tcp_ipv6_chksum(d)
 #endif
-
 
 /****************************************************************************
  * Name: udp_ipv4_chksum

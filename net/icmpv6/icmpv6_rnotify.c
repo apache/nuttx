@@ -51,6 +51,7 @@
 #include <arch/irq.h>
 
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
@@ -89,64 +90,25 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
                                 const net_ipv6addr_t prefix,
                                 unsigned int preflen)
 {
-  unsigned int bit;
   unsigned int i;
 
   /* Make sure that the network is down before changing any addresses */
 
   netdev_ifdown(dev);
 
-  /* Set the network mask.  preflen is the number of MS bits under the mask.
-   *
-   * Eg. preflen = 38
-   *     NETMASK: ffff ffff fc00 0000  0000 0000 0000 0000
-   *     bit:                                       1 1..1
-   *                 1 1..3 3..4 4..6  6..7 8..9 9..1 1..2  
-   *              0..5 6..1 2..7 8..3  4..9 0..5 6..1 2..7
-   *     preflen:                                   1 1..1
-   *                 1 1..3 3..4 4..6  6..8 8..9 9..1 1..2
-   *              1..6 7..2 3..8 9..4  5..0 1..6 7..2 3..8
-   */
+  /* Create an address mask from the prefix */
 
-  for (i = 0; i < 7; i++)
+  if (preflen > 128)
     {
-      /* bit = {0, 16, 32, 48, 64, 80, 96, 112} */
-
-      bit = i << 4;
-
-      if (preflen > bit)
-        {
-          /* Eg. preflen = 38, bit = {0, 16, 32} */
-
-          if (preflen > (bit + 16))
-            {
-              /* Eg. preflen = 38, bit = {0, 16} */
-
-              dev->d_ipv6netmask[i] = 0xffff;
-            }
-          else
-            {
-              /* Eg. preflen = 38, bit = {32}
-               *     bit - preflen = 6
-               *     make = 0xffff << (16-6)
-               *          = 0xfc00
-               */
-
-              dev->d_ipv6netmask[i]  = 0xffff << (16 - (bit - preflen));
-            }
-        }
-      else
-        {
-          /* Eg. preflen=38, bit= {48, 64, 80, 112} */
-
-          dev->d_ipv6netmask[i] = 0x0000;
-        }
+      preflen = 128;
     }
+
+  net_ipv6_pref2mask(preflen, dev->d_ipv6netmask);
 
   nvdbg("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         preflen, dev->d_ipv6netmask[0], dev->d_ipv6netmask[1],
         dev->d_ipv6netmask[2], dev->d_ipv6netmask[3], dev->d_ipv6netmask[4],
-        dev->d_ipv6netmask[6], dev->d_ipv6netmask[6], dev->d_ipv6netmask[7]);
+        dev->d_ipv6netmask[5], dev->d_ipv6netmask[6], dev->d_ipv6netmask[7]);
 
   /* Copy prefix to the current IPv6 address, applying the mask */
 

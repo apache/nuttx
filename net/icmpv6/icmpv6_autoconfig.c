@@ -515,6 +515,10 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
           netdev_ifdown(dev);
         }
 
+      /* No off-link communications; No router address. */
+
+      net_ipv6addr_copy(dev->d_ipv6draddr, g_ipv6_allzeroaddr);
+
       /* Set a netmask for the local link address */
 
       net_ipv6addr_copy(dev->d_ipv6netmask, g_ipv6_llnetmask);

@@ -322,9 +322,9 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
           if (!net_ipv6addr_maskcmp(pstate->png_addr, dev->d_ipv6addr,
                                     dev->d_ipv6netmask))
             {
-              /* Destination address was not on the local network served by this
-               * device.  If a timeout occurs, then the most likely reason is
-               * that the destination address is not reachable.
+              /* Destination address was not on the local network served by
+               * this device.  If a timeout occurs, then the most likely
+               * reason is that the destination address is not reachable.
                */
 
               nlldbg("Not reachable\n");

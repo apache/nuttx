@@ -365,28 +365,37 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
    net_ipv6addr_cmp(addr1, addr2)
 #endif
 
-/* Compare two IP addresses under a netmask.  The mask is used to mask
- * out the bits that are to be compared:  Buts within the mask much
- * match exactly; bits outside if the mask are ignored.
+/****************************************************************************
+ * Function: net_ipv4addr_maskcmp and net_ipv6addr_maskcmp
  *
- * Example:
+ * Description:
+ *   Compare two IP addresses under a netmask.  The mask is used to mask
+ *   out the bits that are to be compared:  Buts within the mask much
+ *   match exactly; bits outside if the mask are ignored.
  *
- *   in_addr_t ipaddr1;
- *   in_addr_t ipaddr2;
- *   in_addr_t mask;
+ * IPv4 Example:
  *
- *   net_ipaddr(&mask, 255,255,255,0);
- *   net_ipaddr(&ipaddr1, 192,16,1,2);
- *   net_ipaddr(&ipaddr2, 192,16,1,3);
- *   if (net_ipv4addr_maskcmp(ipaddr1, ipaddr2, &mask))
+ *   net_ipv6addr_t ipaddr1;
+ *   net_ipv6addr_t ipaddr2;
+ *   net_ipv6addr_t mask;
+ *
+ *   net_ipv6addr(&mask, 255,255,255,0);
+ *   net_ipv6addr(&ipaddr1, 192,16,1,2);
+ *   net_iv6paddr(&ipaddr2, 192,16,1,3);
+ *   if (net_ipv6addr_maskcmp(ipaddr1, ipaddr2, &mask))
  *     {
  *       printf("They are the same");
  *     }
  *
- * addr1 The first IP address.
- * addr2 The second IP address.
- * mask The netmask.
- */
+ * Parameters:
+ *   addr1 - The first IP address.
+ *   addr2 - The second IP address.
+ *   mask  - The netmask.
+ *
+ * Returned Value:
+ *   True if the address under the mask are equal
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
 #  define net_ipv4addr_maskcmp(addr1, addr2, mask) \

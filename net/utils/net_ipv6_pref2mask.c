@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/utils/net_ipv6_maskcmp.c
+ * net/utils/net_ipv6_pref2mask.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,47 +51,72 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_ipv6addr_maskcmp
+ * Function: net_ipv6_pref2mask
  *
  * Description:
- *   Compare two IPv6 addresses under a netmask.  The mask is used to mask
- *   out the bits that are to be compared:  Buts within the mask much
- *   match exactly; bits outside if the mask are ignored.
+ *   Convert a IPv6 prefix length to a network mask.  The prefix length
+ *   specifies the number of MS bits under mask (0-128)
  *
  * Parameters:
- *   addr1 - The first IP address.
- *   addr2 - The second IP address.
- *   mask  - The netmask.
+ *   preflen  - Determines the width of the netmask (in bits).  Range 0-128
+ *   mask  - The location to return the netmask.
  *
  * Returned Value:
- *   True if the address under the mask are equal
+ *   None
  *
  ****************************************************************************/
 
-bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
-                          const net_ipv6addr_t addr2,
-                          const net_ipv6addr_t mask)
+void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
 {
-  int i;
+  unsigned int bit;
+  unsigned int i;
 
-  /* Start from the "bottom" where the addresses will most likely differ */
+  /* Set the network mask.  preflen is the number of MS bits under the mask.
+   *
+   * Eg. preflen = 38
+   *     NETMASK: ffff ffff fc00 0000  0000 0000 0000 0000
+   *     bit:                                       1 1..1
+   *                 1 1..3 3..4 4..6  6..7 8..9 9..1 1..2  
+   *              0..5 6..1 2..7 8..3  4..9 0..5 6..1 2..7
+   *     preflen:                                   1 1..1
+   *                 1 1..3 3..4 4..6  6..8 8..9 9..1 1..2
+   *              1..6 7..2 3..8 9..4  5..0 1..6 7..2 3..8
+   */
 
-  for (i = 7; i >= 0; i--)
+  for (i = 0; i < 7; i++)
     {
-      /* Same? */
+      /* bit = {0, 16, 32, 48, 64, 80, 96, 112} */
 
-      if ((addr1[i] & mask[i]) != (addr2[i] & mask[i]))
+      bit = i << 4;
+
+      if (preflen > bit)
         {
-          /* No.. the addresses are different */
+          /* Eg. preflen = 38, bit = {0, 16, 32} */
 
-          return false;
+          if (preflen > (bit + 16))
+            {
+              /* Eg. preflen = 38, bit = {0, 16} */
+
+              mask[i] = 0xffff;
+            }
+          else
+            {
+              /* Eg. preflen = 38, bit = {32}
+               *     bit - preflen = 6
+               *     make = 0xffff << (16-6)
+               *          = 0xfc00
+               */
+
+              mask[i]  = 0xffff << (16 - (bit - preflen));
+            }
+        }
+      else
+        {
+          /* Eg. preflen=38, bit= {48, 64, 80, 112} */
+
+          mask[i] = 0x0000;
         }
     }
-
-  /* The addresses are the same */
-
-  return true;
 }
 
 #endif /* CONFIG_NET_IPv6 */
-

@@ -41,7 +41,7 @@ NET_CSRCS += net_chksum.c
 # IPv6 utilities
 
 ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += net_ipv6_maskcmp.c
+NET_CSRCS += net_ipv6_maskcmp.c net_ipv6_pref2mask.c
 endif
 
 # Non-interrupt level support required?
