@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/tn4c123g-launchpad/tm4c_adc.c
+ * configs/tm4c123g-launchpad/tm4c_adc.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,13 +51,6 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-#define TIVA_KILO    1000
-#define TIVA_TIME_US (SYSCLK_FREQUENCY/KILO)
-#define TIVA_TIME_MS (TIME_US*KILO)
-
-#define TIVA_TIME_US_TO_TICKS(x) (x*TIME_US)
-#define TIVA_TIME_MS_TO_TICKS(x) (x*TIME_MS)
 
 /************************************************************************************
  * Private Data
@@ -138,6 +131,9 @@ int adc_devinit(void)
 #endif /* CONFIG_EXAMPLES_ADC */
 
 #if defined (CONFIG_TIVA_ADC) && defined (CONFIG_TIVA_TIMER)
+
+/* Tiva timer interface does not currently support user configuration */
+
 #  if 0
 /************************************************************************************
  * Name: adc_timer_init
@@ -167,5 +163,5 @@ TIMER_HANDLE adc_timer_init(void)
 
   return tiva_gptm_configure((const struct tiva_gptmconfig_s *)&adctimer);
 }
-#  endif /* 0 */
+#  endif
 #endif /* defined (CONFIG_TIVA_ADC) && defined (CONFIG_TIVA_TIMER) */
