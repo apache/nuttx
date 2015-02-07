@@ -115,6 +115,7 @@ static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t b
     {
       up_putc(*buffer++);
     }
+
   return ret;
 }
 
