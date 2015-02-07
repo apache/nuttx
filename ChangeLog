@@ -9676,3 +9676,6 @@
 	  Calvin Maguranis (2015-02-05).
 	* tmv4c123g-launchpad:  Add Tiva ADC support to the TM4C123G-Launchpad.
 	  From Calvin Maguranis (2015-02-05).
+	* arch/arm/src/stm32/stm32_spi.c: The source clock for SPI 4,5, and 6
+	  should be PCLK2, not PCLK1 (for F411, F427, and F429).  Per David
+	  Sidrane (2015-02-07).
