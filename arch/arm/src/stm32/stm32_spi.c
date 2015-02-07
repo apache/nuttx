@@ -409,7 +409,7 @@ static struct stm32_spidev_s g_spi4dev =
 {
   .spidev   = { &g_sp4iops },
   .spibase  = STM32_SPI4_BASE,
-  .spiclock = STM32_PCLK1_FREQUENCY,
+  .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI4,
 #endif
@@ -448,7 +448,7 @@ static struct stm32_spidev_s g_spi5dev =
 {
   .spidev   = { &g_sp5iops },
   .spibase  = STM32_SPI5_BASE,
-  .spiclock = STM32_PCLK1_FREQUENCY,
+  .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI5,
 #endif
@@ -487,7 +487,7 @@ static struct stm32_spidev_s g_spi6dev =
 {
   .spidev   = { &g_sp6iops },
   .spibase  = STM32_SPI6_BASE,
-  .spiclock = STM32_PCLK1_FREQUENCY,
+  .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI6,
 #endif
