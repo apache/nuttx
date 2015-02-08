@@ -47,6 +47,12 @@ ifeq ($(CONFIG_RAMLOG),y)
   CSRCS += ramlog.c
 endif
 
+# (Add other SYSLOG_CONSOLE drivers here)
+
+ifeq ($(CONFIG_SYSLOG_CONSOLE),y)
+  CSRCS += syslog_console.c
+endif
+
 # Include SYSLOG build support
 
 DEPPATH += --dep-path syslog

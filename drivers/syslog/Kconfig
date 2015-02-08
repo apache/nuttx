@@ -71,3 +71,15 @@ config RAMLOG_NPOLLWAITERS
 		The maximum number of threads that may be waiting on the poll method.
 
 endif
+
+config SYSLOG_CONSOLE
+	bool "Use SYSLOG for /dev/console"
+	default n
+	depends on DEV_CONSOLE
+	---help---
+		Use the syslog logging device as a system console. If this feature is enabled 
+		(along with DEV_CONSOLE), then all console output will be re-directed to syslog
+		output (syslog_putc). This is useful, for example, if the only console is a Telnet
+		console.  Then in that case, console output from non-Telnet threads will go to
+		the syslog output.
+

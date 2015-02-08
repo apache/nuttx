@@ -88,6 +88,9 @@
 #  if defined(CONFIG_RAMLOG_CONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  CONFIG_DEV_LOWCONSOLE
+#  elif defined(CONFIG_SYSLOG_CONSOLE)
+#    undef  USE_SERIALDRIVER
+#    undef  CONFIG_DEV_LOWCONSOLE
 #  elif defined(CONFIG_DEV_LOWCONSOLE)
 #    undef  USE_SERIALDRIVER
 #  else
@@ -166,6 +169,14 @@ void up_serialinit(void);
 void lowconsole_init(void);
 #else
 # define lowconsole_init()
+#endif
+
+/* Defined in drivers/syslog_console.c */
+
+#ifdef defined(CONFIG_SYSLOG_CONSOLE)
+  syslog_console_init();
+#else
+# define syslog_console_init()
 #endif
 
 /* Defined in drivers/ramlog.c */

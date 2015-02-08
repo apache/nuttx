@@ -46,6 +46,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/syslog/ramlog.h>
+#include <nuttx/syslog/syslog_console.h>
 
 #include "up_internal.h"
 
@@ -143,6 +144,8 @@ void up_initialize(void)
   /* Register a console (or not) */
 
   up_devconsole();          /* Our private /dev/console */
+#elif defined(CONFIG_SYSLOG_CONSOLE)
+  syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
