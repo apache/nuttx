@@ -904,6 +904,7 @@ config STM32_STM32F427
 	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
+	select STM32_HAVE_SPI6
 
 # This is really 429/439, but we treat the two the same.
 config STM32_STM32F429
@@ -937,6 +938,7 @@ config STM32_STM32F429
 	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
+	select STM32_HAVE_SPI6
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -1088,6 +1090,10 @@ config STM32_HAVE_SPI4
 	default n
 
 config STM32_HAVE_SPI5
+	bool
+	default n
+
+config STM32_HAVE_SPI6
 	bool
 	default n
 
@@ -1314,7 +1320,7 @@ config STM32_SPI5
 config STM32_SPI6
 	bool "SPI6"
 	default n
-	depends on STM32_STM32F427 || STM32_STM32F429
+	depends on STM32_HAVE_SPI6
 	select SPI
 	select STM32_SPI
 
