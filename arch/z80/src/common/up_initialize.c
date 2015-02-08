@@ -168,6 +168,8 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
+#elif defined(CONFIG_SYSLOG_CONSOLE)
+  syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
 #endif
