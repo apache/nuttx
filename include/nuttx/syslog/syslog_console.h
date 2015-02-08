@@ -55,7 +55,6 @@
  *   is useful, for example, if the only console is a Telnet console.  Then
  *   in that case, console output from non-Telnet threads will go to the
  *   syslog_putc output.
- *
  */
 
 #ifndef CONFIG_DEV_CONSOLE
@@ -70,7 +69,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -89,7 +89,7 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CONSOLE
-EXTERN int syslog_console_init(void);
+int syslog_console_init(void);
 #endif
 
 #undef EXTERN

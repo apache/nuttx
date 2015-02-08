@@ -9679,3 +9679,9 @@
 	* arch/arm/src/stm32/stm32_spi.c: The source clock for SPI 4,5, and 6
 	  should be PCLK2, not PCLK1 (for F411, F427, and F429).  Per David
 	  Sidrane (2015-02-07).
+	* drivers/syslog/syslog_console.c, include/nuttx/syslog/syslog_console.h,
+	  and the console device initialization logic for all architectures: Add
+	  an option to use the syslog'ing device as the system consolution.  This
+	  option enables a low-level, write-only console device at /dev/console
+	  (similar to the low-level UART console device).  From Pierre-noel
+	  Bouteville (2015-02-08).
