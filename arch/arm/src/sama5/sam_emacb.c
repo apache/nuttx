@@ -487,6 +487,7 @@ static int  sam_ifup(struct net_driver_s *dev);
 static int  sam_ifdown(struct net_driver_s *dev);
 static int  sam_txavail(struct net_driver_s *dev);
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+static unsigned int sam_hashindx(const uint8_t *mac);
 static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_IGMP
@@ -536,7 +537,7 @@ static void sam_emac_disableclk(struct sam_emac_s *priv);
 static void sam_emac_reset(struct sam_emac_s *priv);
 static void sam_macaddress(struct sam_emac_s *priv);
 #ifdef CONFIG_NET_ICMPv6
-static void sam_ipv6multicast(FAR struct sam_emac_s *priv);
+static void sam_ipv6multicast(struct sam_emac_s *priv);
 #endif
 static int  sam_emac_configure(struct sam_emac_s *priv);
 
@@ -2220,6 +2221,135 @@ static int sam_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: sam_hashindx
+ *
+ * Description:
+ *   Cacuclate the hash address register index.  The hash address register
+ *   is 64 bits long and takes up two locations in the memory map. The
+ *   destination address is reduced to a 6-bit index into the 64-bit Hash
+ *   Register using the following hash function: The hash function is an XOR
+ *   of every sixth bit of the destination address.
+ *
+ *   ndx:05 = da:05 ^ da:11 ^ da:17 ^ da:23 ^ da:29 ^ da:35 ^ da:41 ^ da:47
+ *   ndx:04 = da:04 ^ da:10 ^ da:16 ^ da:22 ^ da:28 ^ da:34 ^ da:40 ^ da:46
+ *   ndx:03 = da:03 ^ da:09 ^ da:15 ^ da:21 ^ da:27 ^ da:33 ^ da:39 ^ da:45
+ *   ndx:02 = da:02 ^ da:08 ^ da:14 ^ da:20 ^ da:26 ^ da:32 ^ da:38 ^ da:44
+ *   ndx:01 = da:01 ^ da:07 ^ da:13 ^ da:19 ^ da:25 ^ da:31 ^ da:37 ^ da:43
+ *   ndx:00 = da:00 ^ da:06 ^ da:12 ^ da:18 ^ da:24 ^ da:30 ^ da:36 ^ da:42
+ *
+ *   Where da:00 represents the least significant bit of the first byte
+ *   received and da:47 represents the most significant bit of the last byte
+ *   received.
+ *
+ * Input Parameters:
+ *   mac - The multicast address to be hashed
+ *
+ * Returned Value:
+ *   The 6-bit hash table index
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+static unsigned int sam_hashindx(const uint8_t *mac)
+{
+  unsigned int ndx;
+
+  /* Isolate: mac[0]
+  *           ... 05 04 03 02 01 00] */
+
+  ndx = mac[0];
+
+  /* Isolate: mac[1]           mac[0]
+   *          ...11 10 09 08] [07 06 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   */
+
+  ndx ^= (mac[1] << 2) | (mac[0] >> 6);
+
+  /* Isolate: mac[2]      mac[1]
+   *          ... 17 16] [15 14 13 12 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   */
+
+  ndx ^= (mac[2] << 4) | (mac[1] >> 4);
+
+  /* Isolate:  mac[2]
+   *          [23 22 21 20 19 18 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   */
+
+  ndx ^= (mac[2] >> 2);
+
+  /* Isolate:     mac[3]
+   *          ... 29 28 27 26 25 24]
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   */
+
+  ndx ^= mac[3];
+
+  /* Isolate:     mac[4]        mac[3]
+   *          ... 35 34 33 32] [31 30 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   *        XOR: 35 34 33 32 31 30
+   */
+
+  ndx ^= (mac[4] << 2) | (mac[3] >> 6);
+
+  /* Isolate:     mac[5]  mac[4]
+   *          ... 41 40] [39 38 37 36 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   *        XOR: 35 34 33 32 31 30
+   *        XOR: 41 40 39 38 37 36
+   */
+
+  ndx ^= (mac[5] << 4) | (mac[4] >> 4);
+
+  /* Isolate:  mac[5]
+   *          [47 46 45 44 43 42 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   *        XOR: 35 34 33 32 31 30
+   *        XOR: 41 40 39 38 37 36
+   *        XOR: 47 46 45 44 43 42
+   */
+
+  ndx ^= (mac[5] >> 2);
+
+  /* Mask out the garbage bits and return the 6-bit index */
+
+  return ndx & 0x3f;
+}
+#endif /* CONFIG_NET_IGMP || CONFIG_NET_ICMPv6 */
+
+/****************************************************************************
  * Function: sam_addmac
  *
  * Description:
@@ -2241,13 +2371,51 @@ static int sam_txavail(struct net_driver_s *dev)
 static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
+  uintptr_t regoffset;
+  uint32_t regval;
+  unsigned int ndx;
+  unsigned int bit;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  /* Add the MAC address to the hardware multicast routing table */
-  /* Add the MAC address to the hardware multicast routing table */
-#error "Missing logic"
+  /* Calculate the 6-bit has table index */
+
+  ndx = sam_hashindx(mac);
+
+  /* Add the multicast address to the hardware multicast hash table */
+
+  if (ndx >= 32)
+    {
+      regoffset = SAM_EMAC_HRT_OFFSET;  /* Hash Register Top [63:32] Register */
+      bit       = 1 << (ndx - 32);      /* Bit 0-31 */
+    }
+  else
+    {
+      regoffset = SAM_EMAC_HRB_OFFSET;  /* Hash Register Bottom [31:0] Register */
+      bit       = 1 << ndx;             /* Bit 0-31 */
+    }
+
+  regval = sam_getreg(priv, regoffset);
+  regval |= bit;
+  sam_putreg(priv, regoffset, regval);
+
+  /* The unicast hash enable and the multicast hash enable bits in the
+   * Network Configuration Register enable the reception of hash matched
+   * frames:
+   *
+   * - A multicast match will be signalled if the multicast hash enable bit
+   *   is set, da:00 is logic 1 and the hash index points to a bit set in
+   *   the Hash Register.
+   * - A unicast match will be signalled if the unicast hash enable bit is
+   *   set, da:00 is logic 0 and the hash index points to a bit set in the
+   *   Hash Register.
+   */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCFGR_OFFSET);
+  regval &= ~EMAC_NCFGR_UNIHEN;  /* Disable unicast matching */
+  regval |= EMAC_NCFGR_MTIHEN;   /* Enable multicast matching */
+  sam_putreg(priv, SAM_EMAC_NCFGR_OFFSET, regval);
 
   return OK;
 }
@@ -2275,12 +2443,60 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
+  uintptr_t regoffset1;
+  uintptr_t regoffset2;
+  uint32_t regval;
+  unsigned int ndx;
+  unsigned int bit;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  /* Add the MAC address to the hardware multicast routing table */
-#error "Missing logic"
+  /* Calculate the 6-bit has table index */
+
+  ndx = sam_hashindx(mac);
+
+  /* Remove the multicast address to the hardware multicast hast table */
+
+  if (ndx >= 32)
+    {
+      regoffset1 = SAM_EMAC_HRT_OFFSET;  /* Hash Register Top [63:32] Register */
+      regoffset2 = SAM_EMAC_HRB_OFFSET;  /* Hash Register Bottom [31:0] Register */
+      bit        = 1 << (ndx - 32);      /* Bit 0-31 */
+    }
+  else
+    {
+      regoffset1 = SAM_EMAC_HRB_OFFSET;  /* Hash Register Bottom [31:0] Register */
+      regoffset2 = SAM_EMAC_HRT_OFFSET;  /* Hash Register Top [63:32] Register */
+      bit        = 1 << ndx;             /* Bit 0-31 */
+    }
+
+  regval  = sam_getreg(priv, regoffset1);
+  regval &= ~bit;
+  sam_putreg(priv, regoffset1, regval);
+
+  /* The unicast hash enable and the multicast hash enable bits in the
+   * Network Configuration Register enable the reception of hash matched
+   * frames:
+   *
+   * - A multicast match will be signalled if the multicast hash enable bit
+   *   is set, da:00 is logic 1 and the hash index points to a bit set in
+   *   the Hash Register.
+   * - A unicast match will be signalled if the unicast hash enable bit is
+   *   set, da:00 is logic 0 and the hash index points to a bit set in the
+   *   Hash Register.
+   */
+
+  /* Are all multicast address matches disabled? */
+
+  if (regval == 0 && sam_getreg(priv, regoffset2) == 0)
+    {
+       /* Yes.. disable all address matching */
+
+      regval  = sam_getreg(priv, SAM_EMAC_NCFGR_OFFSET);
+      regval &= ~(EMAC_NCFGR_UNIHEN | EMAC_NCFGR_MTIHEN);
+      sam_putreg(priv, SAM_EMAC_NCFGR_OFFSET, regval);
+    }
 
   return OK;
 }
@@ -3749,7 +3965,7 @@ static void sam_macaddress(struct sam_emac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void sam_ipv6multicast(FAR struct sam_emac_s *priv)
+static void sam_ipv6multicast(struct sam_emac_s *priv)
 {
   struct net_driver_s *dev;
   uint16_t tmp16;
