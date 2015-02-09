@@ -879,7 +879,7 @@ o Network (net/, drivers/net)
 
                ARCHITECTURE   CONFIG_NET_NOINTS
                C5471          NO
-               STM32          NO
+               STM32          YES <<
                TIVA/LM3S      NO
                TIVA/TM4C      YES <<
                eZ80           NO
