@@ -3595,6 +3595,9 @@ Configurations
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
     elf:  Demonstrates execution of ELF file from a file system.
+    ipv6: This is another version of the NuttShell configuration.  It is
+      very similar to the nsh configuration except that it has IPv6 enabled
+      and IPv4 disabled.
     knsh: An NSH configuration used to test the SAMA5D kernel build
       configuration.  Uses a tiny NSH configuration that runs at
       start time from a mounted file system.
@@ -3861,6 +3864,88 @@ Configurations
       2014-8-29: System call interface verified.
       2014-9-16: Reverified after fixing changes for the knsh configuration
                  that broke this on.  All seems to be well now.
+
+  ipv6:
+  ----
+    This is another version of the NuttShell configuration.  It is very
+    similar to the nsh configuration except that it has IPv6 enabled and
+    IPv4 disabled.  Several network utilities that are not yet available
+    under IPv6 are disabled.
+
+    NOTES:
+
+    1. As of 2015-02-09, this configuration was identical to the nsh
+       configuration other than using IPv6.  So all of the notes below
+       regarding the nsh configuration apply.
+
+       Telnet does not work with IPv6.
+
+    2. This configuration can be modified to that both IPv4 and IPv6
+       are support.  Here is a summary of the additional configuration
+       settings requird to support both IPv4 and IPv6:
+
+         CONFIG_NET_IPv4=y
+         CONFIG_NET_ARP=y
+         CONFIG_NET_ARP_SEND=y (optional)
+         CONFIG_NET_ICMP=y
+         CONFIG_NET_ICMP_PING=y
+
+         CONFIG_NETUTILS_DNSCLIENT=y
+         CONFIG_NETUTILS_DNSCLIENT_IPv4=y
+         CONFIG_NETUTILS_TELNETD=y
+
+         CONFIG_NSH_IPADDR=0x0a000002
+         CONFIG_NSH_DRIPADDR=0x0a000001
+         CONFIG_NSH_NETMASK=0xffffff00
+         CONFIG_NSH_TELNET=y
+
+       Then from NSH, you have both ping and ping6 commands:
+
+         nsh> ping 10.0.0.1
+         nsh> ping6 fc00::1
+
+       And from the host you can do similar:
+
+         ping 10.0.0.2
+         ping6 fc00::2   (Linux)
+         ping -6 fc00::2 (Windows cmd)
+
+       and Telnet again works from the host:
+
+         telent 10.0.0.2
+
+    3. You can enable IPv6 autonomous address configuration with the
+       following changes to the configuration:
+
+       + CONFIG_NET_ICMPv6_AUTOCONF=y
+       + CONFIG_ICMPv6_AUTOCONF_DELAYMSEC=100
+       + CONFIG_ICMPv6_AUTOCONF_MAXTRIES=5
+
+       - CONFIG_NSH_DRIPv6ADDR_1=0xfc00
+       - CONFIG_NSH_DRIPv6ADDR_2=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_3=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_4=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_5=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_6=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_7=0x0000
+       - CONFIG_NSH_DRIPv6ADDR_8=0x0001
+
+       - CONFIG_NSH_IPv6ADDR_1=0xfc00
+       - CONFIG_NSH_IPv6ADDR_2=0x0000
+       - CONFIG_NSH_IPv6ADDR_3=0x0000
+       - CONFIG_NSH_IPv6ADDR_4=0x0000
+       - CONFIG_NSH_IPv6ADDR_5=0x0000
+       - CONFIG_NSH_IPv6ADDR_6=0x0000
+       - CONFIG_NSH_IPv6ADDR_7=0x0000
+       - CONFIG_NSH_IPv6ADDR_8=0x0002
+       - CONFIG_NSH_IPv6NETMASK_1=0xffff
+       - CONFIG_NSH_IPv6NETMASK_2=0xffff
+       - CONFIG_NSH_IPv6NETMASK_3=0xffff
+       - CONFIG_NSH_IPv6NETMASK_4=0xffff
+       - CONFIG_NSH_IPv6NETMASK_5=0xffff
+       - CONFIG_NSH_IPv6NETMASK_6=0xffff
+       - CONFIG_NSH_IPv6NETMASK_7=0xffff
+       - CONFIG_NSH_IPv6NETMASK_8=0xff80
 
   knsh:
     An NSH configuration used to test the SAMA5D kenel build configuration.
