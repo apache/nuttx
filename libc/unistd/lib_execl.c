@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/unistd/lib_execl.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,7 @@
 int execl(FAR const char *path, ...)
 {
   FAR char **argv = (FAR char **)NULL;
+  FAR char *arg;
   size_t nargs;
   va_list ap;
   int argc;
@@ -135,21 +136,29 @@ int execl(FAR const char *path, ...)
   /* Count the number of arguments */
 
   va_start(ap, path);
-  for (nargs = 0, argc = 0; argv[argc]; argc++)
+  nargs = 0;
+  do
     {
-      /* Increment the number of args.  Here is a sanity check to prevent
-       * running away with an unterminated argv[] list.  MAX_EXECL_ARGS
-       * should be sufficiently large that this never happens in normal
-       * usage.
-       */
+      /* Check if the next argument is present */
 
-      if (++nargs > MAX_EXECL_ARGS)
+      arg = va_arg(ap, FAR char *)
+      if (arg)
         {
-          set_errno(E2BIG);
-          va_end(ap);
-          return ERROR;
+          /* Yes.. increment the number of arguments.  Here is a sanity
+           * check to prevent running away with an unterminated argv[] list.
+           * MAX_EXECL_ARGS should be sufficiently large that this never
+           * happens in normal usage.
+           */
+
+          if (++nargs > MAX_EXECL_ARGS)
+            {
+              set_errno(E2BIG);
+              va_end(ap);
+              return ERROR;
+            }
         }
     }
+  while (arg);
 
   va_end(ap);
 
