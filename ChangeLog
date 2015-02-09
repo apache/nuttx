@@ -9711,3 +9711,13 @@
 	  (2015-02-09).
 	* SAMA5D4-EK: CONFIG_NET_NOINTS is now enabled in the nsh and ipv6
 	  configurations (2015-02-09).
+	* arch/arm/src/a1x, arm, c5471, common, dm320, imx, lpc2378, lpc31xx,
+	  sama5, str71x, hc/src.common, sh/src/common, x86/src/common,
+	  z16/src/common, z16f, z80/src/z8: Big, very risky change:  Remove all
+	  occurrences of up_maskack_irq() that disable and enable interrupts
+	  with up_ack_irq() that only acknowledges the interrupts.  This is only
+	  used in interrupt decoding logic.  Also remove the logic that
+	  unconditionally re-enables interrupts with the interrupt exits.  This
+	  interferes with the drivers ability to control the interrupt state.
+	  This is a necessary, sweeping, global change and unfortunately 
+	  to test (2015-02-09).
