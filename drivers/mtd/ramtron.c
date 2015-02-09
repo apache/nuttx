@@ -241,6 +241,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     3,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
   },
+#endif
   {
     NULL,                         /* name */
     0,                            /* id1 */
@@ -249,7 +250,6 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0,                            /* addr_len */
     0                             /* speed */
   }
-#endif
 };
 
 /************************************************************************************

@@ -888,7 +888,8 @@ o Network (net/, drivers/net)
                PIC32          NO
                RGMP           NO
                SAM3/4         NO
-               SAMA5D         NO
+               SAMA5D3        NO
+               SAMA5D4        YES <<
                SIM            N/A << Doesn't support interrupts
 
                The general outline of how this might be done is included in
