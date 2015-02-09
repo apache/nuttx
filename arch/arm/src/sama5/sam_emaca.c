@@ -4,7 +4,7 @@
  * 10/100 Base-T Ethernet driver for the SAMA5D3.  Denoted as 'A' to
  * distinguish it from the SAMA5D4 EMAC driver.
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -376,10 +376,15 @@ static void sam_txtimeout(int argc, uint32_t arg, ...);
 static int  sam_ifup(struct net_driver_s *dev);
 static int  sam_ifdown(struct net_driver_s *dev);
 static int  sam_txavail(struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+static unsigned int sam_hashindx(const uint8_t *mac);
 static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
+#endif
+#ifdef CONFIG_NET_IGMP
 static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
+
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
 #endif
@@ -412,6 +417,9 @@ static void sam_txreset(struct sam_emac_s *priv);
 static void sam_rxreset(struct sam_emac_s *priv);
 static void sam_emac_reset(struct sam_emac_s *priv);
 static void sam_macaddress(struct sam_emac_s *priv);
+#ifdef CONFIG_NET_ICMPv6
+static void sam_ipv6multicast(struct sam_emac_s *priv);
+#endif
 static int  sam_emac_configure(struct sam_emac_s *priv);
 
 /****************************************************************************
@@ -1700,6 +1708,12 @@ static int sam_ifup(struct net_driver_s *dev)
 
   sam_macaddress(priv);
 
+#ifdef CONFIG_NET_ICMPv6
+  /* Set up IPv6 multicast address filtering */
+
+  sam_ipv6multicast(priv);
+#endif
+
   /* Initialize for PHY access */
 
   ret = sam_phyinit(priv);
@@ -1829,6 +1843,135 @@ static int sam_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: sam_hashindx
+ *
+ * Description:
+ *   Cacuclate the hash address register index.  The hash address register
+ *   is 64 bits long and takes up two locations in the memory map. The
+ *   destination address is reduced to a 6-bit index into the 64-bit Hash
+ *   Register using the following hash function: The hash function is an XOR
+ *   of every sixth bit of the destination address.
+ *
+ *   ndx:05 = da:05 ^ da:11 ^ da:17 ^ da:23 ^ da:29 ^ da:35 ^ da:41 ^ da:47
+ *   ndx:04 = da:04 ^ da:10 ^ da:16 ^ da:22 ^ da:28 ^ da:34 ^ da:40 ^ da:46
+ *   ndx:03 = da:03 ^ da:09 ^ da:15 ^ da:21 ^ da:27 ^ da:33 ^ da:39 ^ da:45
+ *   ndx:02 = da:02 ^ da:08 ^ da:14 ^ da:20 ^ da:26 ^ da:32 ^ da:38 ^ da:44
+ *   ndx:01 = da:01 ^ da:07 ^ da:13 ^ da:19 ^ da:25 ^ da:31 ^ da:37 ^ da:43
+ *   ndx:00 = da:00 ^ da:06 ^ da:12 ^ da:18 ^ da:24 ^ da:30 ^ da:36 ^ da:42
+ *
+ *   Where da:00 represents the least significant bit of the first byte
+ *   received and da:47 represents the most significant bit of the last byte
+ *   received.
+ *
+ * Input Parameters:
+ *   mac - The multicast address to be hashed
+ *
+ * Returned Value:
+ *   The 6-bit hash table index
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+static unsigned int sam_hashindx(const uint8_t *mac)
+{
+  unsigned int ndx;
+
+  /* Isolate: mac[0]
+  *           ... 05 04 03 02 01 00] */
+
+  ndx = mac[0];
+
+  /* Isolate: mac[1]           mac[0]
+   *          ...11 10 09 08] [07 06 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   */
+
+  ndx ^= (mac[1] << 2) | (mac[0] >> 6);
+
+  /* Isolate: mac[2]      mac[1]
+   *          ... 17 16] [15 14 13 12 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   */
+
+  ndx ^= (mac[2] << 4) | (mac[1] >> 4);
+
+  /* Isolate:  mac[2]
+   *          [23 22 21 20 19 18 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   */
+
+  ndx ^= (mac[2] >> 2);
+
+  /* Isolate:     mac[3]
+   *          ... 29 28 27 26 25 24]
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   */
+
+  ndx ^= mac[3];
+
+  /* Isolate:     mac[4]        mac[3]
+   *          ... 35 34 33 32] [31 30 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   *        XOR: 35 34 33 32 31 30
+   */
+
+  ndx ^= (mac[4] << 2) | (mac[3] >> 6);
+
+  /* Isolate:     mac[5]  mac[4]
+   *          ... 41 40] [39 38 37 36 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   *        XOR: 35 34 33 32 31 30
+   *        XOR: 41 40 39 38 37 36
+   */
+
+  ndx ^= (mac[5] << 4) | (mac[4] >> 4);
+
+  /* Isolate:  mac[5]
+   *          [47 46 45 44 43 42 ...
+   *
+   * Accumulate: 05 04 03 02 01 00
+   *        XOR: 11 10 09 08 07 06
+   *        XOR: 17 16 15 14 13 12
+   *        XOR: 23 22 21 20 19 18
+   *        XOR: 29 28 27 26 25 24
+   *        XOR: 35 34 33 32 31 30
+   *        XOR: 41 40 39 38 37 36
+   *        XOR: 47 46 45 44 43 42
+   */
+
+  ndx ^= (mac[5] >> 2);
+
+  /* Mask out the garbage bits and return the 6-bit index */
+
+  return ndx & 0x3f;
+}
+#endif /* CONFIG_NET_IGMP || CONFIG_NET_ICMPv6 */
+
+/****************************************************************************
  * Function: sam_addmac
  *
  * Description:
@@ -1846,21 +1989,59 @@ static int sam_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
+  uintptr_t regaddr;
+  uint32_t regval;
+  unsigned int ndx;
+  unsigned int bit;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  /* Add the MAC address to the hardware multicast routing table */
-  /* Add the MAC address to the hardware multicast routing table */
-#error "Missing logic"
+  /* Calculate the 6-bit has table index */
+
+  ndx = sam_hashindx(mac);
+
+  /* Add the multicast address to the hardware multicast hash table */
+
+  if (ndx >= 32)
+    {
+      regaddr = SAM_EMAC_HRT;     /* Hash Register Top [63:32] Register */
+      bit     = 1 << (ndx - 32);  /* Bit 0-31 */
+    }
+  else
+    {
+      regaddr = SAM_EMAC_HRB;     /* Hash Register Bottom [31:0] Register */
+      bit     = 1 << ndx;         /* Bit 0-31 */
+    }
+
+  regval = sam_getreg(priv, regaddr);
+  regval |= bit;
+  sam_putreg(priv, regaddr, regval);
+
+  /* The unicast hash enable and the multicast hash enable bits in the
+   * Network Configuration Register enable the reception of hash matched
+   * frames:
+   *
+   * - A multicast match will be signalled if the multicast hash enable bit
+   *   is set, da:00 is logic 1 and the hash index points to a bit set in
+   *   the Hash Register.
+   * - A unicast match will be signalled if the unicast hash enable bit is
+   *   set, da:00 is logic 0 and the hash index points to a bit set in the
+   *   Hash Register.
+   */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval &= ~EMAC_NCFGR_UNIHEN;  /* Disable unicast matching */
+  regval |= EMAC_NCFGR_MTIHEN;   /* Enable multicast matching */
+  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
 
   return OK;
 }
-#endif
+#endif /* CONFIG_NET_IGMP || CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Function: sam_rmmac
@@ -1884,12 +2065,60 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
+  uint32_t regval;
+  unsigned int regaddr1;
+  unsigned int regaddr2;
+  unsigned int ndx;
+  unsigned int bit;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  /* Add the MAC address to the hardware multicast routing table */
-#error "Missing logic"
+  /* Calculate the 6-bit has table index */
+
+  ndx = sam_hashindx(mac);
+
+  /* Remove the multicast address to the hardware multicast hast table */
+
+  if (ndx >= 32)
+    {
+      regaddr1 = SAM_EMAC_HRT;    /* Hash Register Top [63:32] Register */
+      regaddr2 = SAM_EMAC_HRB;    /* Hash Register Bottom [31:0] Register */
+      bit      = 1 << (ndx - 32); /* Bit 0-31 */
+    }
+  else
+    {
+      regaddr1 = SAM_EMAC_HRB;    /* Hash Register Bottom [31:0] Register */
+      regaddr2 = SAM_EMAC_HRT;    /* Hash Register Top [63:32] Register */
+      bit      = 1 << ndx;        /* Bit 0-31 */
+    }
+
+  regval  = sam_getreg(priv, regaddr1);
+  regval &= ~bit;
+  sam_putreg(priv, regaddr1, regval);
+
+  /* The unicast hash enable and the multicast hash enable bits in the
+   * Network Configuration Register enable the reception of hash matched
+   * frames:
+   *
+   * - A multicast match will be signalled if the multicast hash enable bit
+   *   is set, da:00 is logic 1 and the hash index points to a bit set in
+   *   the Hash Register.
+   * - A unicast match will be signalled if the unicast hash enable bit is
+   *   set, da:00 is logic 0 and the hash index points to a bit set in the
+   *   Hash Register.
+   */
+
+  /* Are all multicast address matches disabled? */
+
+  if (regval == 0 && sam_getreg(priv, regaddr2) == 0)
+    {
+       /* Yes.. disable all address matching */
+
+      regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
+      regval &= ~(EMAC_NCFGR_UNIHEN | EMAC_NCFGR_MTIHEN);
+      sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+    }
 
   return OK;
 }
@@ -3059,6 +3288,79 @@ static void sam_macaddress(struct sam_emac_s *priv)
            (uint32_t)dev->d_mac.ether_addr_octet[5] << 8;
   sam_putreg(priv, SAM_EMAC_SA1T, regval);
 }
+
+/****************************************************************************
+ * Function: sam_ipv6multicast
+ *
+ * Description:
+ *   Configure the IPv6 multicast MAC address.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6
+static void sam_ipv6multicast(struct sam_emac_s *priv)
+{
+  struct net_driver_s *dev;
+  uint16_t tmp16;
+  uint8_t mac[6];
+
+  /* For ICMPv6, we need to add the IPv6 multicast address
+   *
+   * For IPv6 multicast addresses, the Ethernet MAC is derived by
+   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
+   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
+   * to the Ethernet MAC address 33:33:00:01:00:03.
+   *
+   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
+   * Message, but the ICMPv6 Neighbor Solicitation message seems to
+   * use 33:33:ff:01:00:03.
+   */
+
+  mac[0] = 0x33;
+  mac[1] = 0x33;
+
+  dev    = &priv->dev;
+  tmp16  = dev->d_ipv6addr[6];
+  mac[2] = 0xff;
+  mac[3] = tmp16 >> 8;
+
+  tmp16  = dev->d_ipv6addr[7];
+  mac[4] = tmp16 & 0xff;
+  mac[5] = tmp16 >> 8;
+
+  nvdbg("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  (void)sam_addmac(dev, mac);
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
+   * address that we expect to receive ICMPv6 Router Advertisement
+   * packets.
+   */
+
+  (void)sam_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
+#ifdef CONFIG_NET_ICMPv6_ROUTER
+  /* Add the IPv6 all link-local routers Ethernet address.  This is the
+   * address that we expect to receive ICMPv6 Router Solicitation
+   * packets.
+   */
+
+  (void)sam_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+
+#endif /* CONFIG_NET_ICMPv6_ROUTER */
+}
+#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Function: sam_emac_configure
