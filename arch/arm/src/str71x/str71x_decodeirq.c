@@ -116,9 +116,9 @@ void up_decodeirq(uint32_t *regs)
       savestate     = (uint32_t*)current_regs;
       current_regs = regs;
 
-      /* Mask and acknowledge the interrupt */
+      /* Acknowledge the interrupt */
 
-      up_maskack_irq(irq);
+      up_ack_irq(irq);
 
       /* Deliver the IRQ */
 
@@ -130,10 +130,6 @@ void up_decodeirq(uint32_t *regs)
        */
 
       current_regs = savestate;
-
-      /* Unmask the last interrupt (global interrupts are still disabled) */
-
-      up_enable_irq(irq);
     }
 #if CONFIG_DEBUG
   else

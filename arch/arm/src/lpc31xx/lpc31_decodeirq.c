@@ -101,9 +101,9 @@ void up_decodeirq(uint32_t *regs)
 
       if ((unsigned)irq < NR_IRQS)
         {
-          /* Mask and acknowledge the interrupt */
+          /* Acknowledge the interrupt */
 
-          up_maskack_irq(irq);
+          up_ack_irq(irq);
 
           /* Current regs non-zero indicates that we are processing an interrupt;
            * current_regs is also used to manage interrupt level context switches.
@@ -150,12 +150,6 @@ void up_decodeirq(uint32_t *regs)
            */
 
           current_regs = NULL;
-
-          /* Unmask the last interrupt (global interrupts are still
-           * disabled).
-           */
-
-          up_enable_irq(irq);
         }
     }
 #endif

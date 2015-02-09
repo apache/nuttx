@@ -201,48 +201,35 @@ void up_enable_irq(int irq)
 }
 
 /************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the interupt
  *
  ************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
-  /* Disable the interrupt by clearing the corresponding bit in
-   * the IRQ enable register.  And acknowlege it by setting the
-   * corresponding bit in the IRQ status register.
+  /* Acknowlege the interrupt by setting the corresponding bit in the
+   * IRQ status register.
    */
 
   if (irq < 16)
     {
-      /* IRQs0-15 are controlled by the IRQ0 enable register
-       * Clear the associated enable bit to disable the interrupt
-       * Set the associated status bit to clear the interrupt
-       */
+      /* Set the associated status bit to clear the interrupt */
 
-      putreg16((getreg16(DM320_INTC_EINT0) & ~(1<< irq)), DM320_INTC_EINT0);
       putreg16((1 << irq), DM320_INTC_IRQ0);
     }
   else if (irq < 32)
     {
-      /* IRQs16-31 are controlled by the IRQ1 enable register
-       * Clear the associated enable bit to disable the interrupt
-       * Set the associated status bit to clear the interrupt
-       */
+      /* Set the associated status bit to clear the interrupt  */
 
-      putreg16((getreg16(DM320_INTC_EINT1) & ~(1<< (irq-16))), DM320_INTC_EINT1);
       putreg16((1 << (irq-16)), DM320_INTC_IRQ1);
     }
   else
     {
-      /* IRQs32- are controlled by the IRQ2 enable register
-       * Clear the associated enable bit to disable the interrupt
-       * Set the associated status bit to clear the interrupt
-       */
+      /* Set the associated status bit to clear the interrupt */
 
-      putreg16((getreg16(DM320_INTC_EINT2) & ~(1<< (irq-32))), DM320_INTC_EINT2);
       putreg16((1 << (irq-32)), DM320_INTC_IRQ2);
     }
 }

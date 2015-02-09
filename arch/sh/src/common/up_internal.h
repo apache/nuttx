@@ -208,14 +208,6 @@ extern void up_wdtinit(void);
 
 extern void up_timer_initialize(void);
 
-/* Defined in chip-specific logic if CONFIG_ARCH_NOINTC is not set */
-
-#ifndef CONFIG_ARCH_NOINTC
-extern void up_maskack_irq(int irq);
-#else
-#  define up_maskack_irq(irq)
-#endif
-
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS

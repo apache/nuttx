@@ -174,14 +174,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the interrupt
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
   /* Get the address of the request register corresponding to this
    * interrupt source
@@ -189,12 +189,13 @@ void up_maskack_irq(int irq)
 
   uint32_t address = LPC31_INTC_REQUEST(irq+1);
 
-  /* Clear the pending interrupt (INTC_REQUEST_CLRSWINT=1) AND disable interrupts
-   * (ENABLE=0 && WE_ENABLE=1). Configuration settings will be preserved because
-   * WE_TARGET is zero.
+  /* Clear the pending interrupt (INTC_REQUEST_CLRSWINT=1) while keeping
+   * interrupts enabled (ENABLE=1 && WE_ENABLE=1). Configuration settings
+   * will be preserved because WE_TARGET is zero.
    */
 
-  putreg32(INTC_REQUEST_CLRSWINT|INTC_REQUEST_WEENABLE, address);
+  putreg32(INTC_REQUEST_CLRSWINT|INTC_REQUEST_ENABLE|INTC_REQUEST_WEENABLE,
+           address);
 }
 
 /****************************************************************************

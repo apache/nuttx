@@ -418,25 +418,6 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-  /* Disable the interrupt */
-
-  up_disable_irq(irq);
-
-  /* There is no need to acknowledge the interrupt.  The pending interrupt
-   * was cleared in arm_decodeirq() when the PEND register was read.
-   */
-}
-
-/****************************************************************************
  * Name: up_prioritize_irq
  *
  * Description:

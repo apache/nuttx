@@ -129,16 +129,3 @@ void up_enable_irq(int irq)
 {
   putreg32(irq, IMX_AITC_INTENNUM);
 }
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-  up_disable_irq(irq);
-}

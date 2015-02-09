@@ -785,19 +785,6 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-  up_disable_irq(irq);
-}
-
-/****************************************************************************
  * Name: up_prioritize_irq (and sam_prioritize_irq helper)
  *
  * Description:
