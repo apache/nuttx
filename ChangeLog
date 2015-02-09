@@ -9721,3 +9721,7 @@
 	  interferes with the drivers ability to control the interrupt state.
 	  This is a necessary, sweeping, global change and unfortunately 
 	  to test (2015-02-09).
+	* mtd/ramtron.c:  Table of parts is not terminated properly if
+	  CONFIG_RAMTRON_FRAM_NON_JEDEC is not defined.  Noted by David
+	  Sidrane (2015-02-09).
+
