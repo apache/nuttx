@@ -161,7 +161,7 @@ static void skel_poll_expiry(int argc, uint32_t arg, ...);
 
 static int skel_ifup(FAR struct net_driver_s *dev);
 static int skel_ifdown(FAR struct net_driver_s *dev);
-static inline int skel_txavail_process(FAR struct skel_driver_s *priv);
+static inline void skel_txavail_process(FAR struct skel_driver_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void skel_txavail_work(FAR void *arg);
 #endif
@@ -913,7 +913,7 @@ static int skel_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int inline skel_txavail_process(FAR struct skel_driver_s *priv)
+static inline void skel_txavail_process(FAR struct skel_driver_s *priv)
 {
   /* Ignore the notification if the interface is not yet up */
 
@@ -925,8 +925,6 @@ static int inline skel_txavail_process(FAR struct skel_driver_s *priv)
 
       (void)devif_poll(&priv->sk_dev, skel_txpoll);
     }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -1007,7 +1005,7 @@ static int skel_txavail(struct net_driver_s *dev)
 
   /* Perform the out-of-cycle poll now */
 
-  skel_poll_process(priv);
+  skel_txavail_process(priv);
   irqrestore(flags);
 #endif
 
