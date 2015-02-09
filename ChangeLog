@@ -9685,3 +9685,13 @@
 	  option enables a low-level, write-only console device at /dev/console
 	  (similar to the low-level UART console device).  From Pierre-noel
 	  Bouteville (2015-02-08).
+	* net/utils:  Clean up and consolidate some clunky stuff in ARP and
+	  ICMPv6 time waiting logic by adding new net_timedwait() function
+	  (2015-4-09).
+	* arch/arm/src/stm32/stm32_eth.c: Add logic so that STM32 Ethernet
+	  driver can avoid interrupt level processing and, instead, execute on
+	  the work thread (2015-4-09).
+	* configs/stm32f4discovery/netnsh and ipv6: Convert all STM32F4-
+	  Discovery configurations (with base board) to configure the Ethernet
+	  driver to use the work queue (vs. interrupt level processing)
+	  (2015-4-09).
