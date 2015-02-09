@@ -139,9 +139,9 @@ static void lpc23xx_decodeirq(uint32_t *regs)
       savestate    = (uint32_t*)current_regs;
       current_regs = regs;
 
-      /* Mask and acknowledge the interrupt */
+      /* Acknowledge the interrupt */
 
-      up_maskack_irq(irq);
+      up_ack_irq(irq);
 
       /* Deliver the IRQ */
 
@@ -163,13 +163,15 @@ void up_decodeirq(uint32_t *regs)
 {
   vic_vector_t vector = (vic_vector_t) vic_getreg(VIC_ADDRESS_OFFSET);
 
-  /* Mask and acknowledge the interrupt */
+  /* Acknowledge the interrupt */
 
-  up_maskack_irq(irq);
+  up_ack_irq(irq);
 
   /* Valid Interrupt */
 
   if (vector != NULL)
-    (vector) (regs);
+    {
+      (vector)(regs);
+    }
 }
 #endif

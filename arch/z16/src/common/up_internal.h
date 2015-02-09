@@ -180,7 +180,7 @@ extern void up_timer_initialize(void);
 
 /* Defined in up_irq.c */
 
-extern void up_maskack_irq(int irq);
+extern void up_ack_irq(int irq);
 
 /* Defined in board/up_leds.c */
 

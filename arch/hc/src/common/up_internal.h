@@ -173,7 +173,6 @@ extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 /* Interrupt handling */
 
 extern uint8_t *up_doirq(int irq, uint8_t *regs);
-extern void up_maskack_irq(int irq);
 
 /* Signal handling */
 

@@ -354,7 +354,6 @@ int  up_memfault(int irq, FAR void *context);
 
 /* Interrupt acknowledge and dispatch */
 
-void up_maskack_irq(int irq);
 uint32_t *arm_doirq(int irq, uint32_t *regs);
 
 /* Paging support */
@@ -379,7 +378,7 @@ uint32_t *arm_undefinedinsn(uint32_t *regs);
 
 /* Interrupt acknowledge and dispatch */
 
-void up_maskack_irq(int irq);
+void up_ack_irq(int irq);
 void up_doirq(int irq, uint32_t *regs);
 
 /* Paging support (and exception handlers) */

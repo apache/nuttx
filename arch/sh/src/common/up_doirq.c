@@ -88,12 +88,6 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
       DEBUGASSERT(current_regs == NULL);
       current_regs = regs;
 
-      /* Mask and acknowledge the interrupt (if supported by the chip) */
-
-#ifndef CONFIG_ARCH_NOINTC
-      up_maskack_irq(irq);
-#endif
-
       /* Deliver the IRQ */
 
       irq_dispatch(irq, regs);
@@ -136,14 +130,6 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
        */
 
       current_regs = NULL;
-
-      /* Unmask the last interrupt (global interrupts are still
-       * disabled.
-       */
-
-#ifndef CONFIG_ARCH_NOINTC
-      up_enable_irq(irq);
-#endif
     }
 
   board_led_off(LED_INIRQ);

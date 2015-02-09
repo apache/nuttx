@@ -1824,8 +1824,8 @@ static void dm320_ctrlinitialize(FAR struct dm320_usbdev_s *priv)
 
   /* Initialize interrupts *****************************************************/
 
-  up_maskack_irq(DM320_IRQ_USB0);      /* Clear USB controller interrupt */
-  up_maskack_irq(DM320_IRQ_USB1);      /* Clear USB DMA interrupt flag */
+  up_ack_irq(DM320_IRQ_USB0);                /* Clear USB controller interrupt */
+  up_ack_irq(DM320_IRQ_USB1);                /* Clear USB DMA interrupt flag */
 
   dm320_getreg8(DM320_USB_INTRTX1);          /* Clear TX interrupt */
   dm320_getreg8(DM320_USB_INTRRX1);          /* Clear RX interrupt */

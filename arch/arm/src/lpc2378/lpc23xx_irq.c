@@ -190,14 +190,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the interrupt
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
   uint32_t reg32;
 

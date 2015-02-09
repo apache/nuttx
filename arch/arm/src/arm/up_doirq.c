@@ -87,9 +87,9 @@ void up_doirq(int irq, uint32_t *regs)
 
   current_regs = regs;
 
-  /* Mask and acknowledge the interrupt */
+  /* Acknowledge the interrupt */
 
-  up_maskack_irq(irq);
+  up_ack_irq(irq);
 
   /* Deliver the IRQ */
 
@@ -128,10 +128,6 @@ void up_doirq(int irq, uint32_t *regs)
    */
 
   current_regs = NULL;
-
-  /* Unmask the last interrupt (global interrupts are still disabled) */
-
-  up_enable_irq(irq);
 #endif
   board_led_off(LED_INIRQ);
 }

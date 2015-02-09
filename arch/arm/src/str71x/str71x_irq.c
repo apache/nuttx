@@ -169,26 +169,20 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it.  No XTI support.. only used in
- *   interrupt handling logic.
+ *   Acknowledge the interrupt.  No XTI support.. only used in interrupt
+ *   handling logic.
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
   uint32_t reg32;
 
   if ((unsigned)irq < STR71X_NBASEIRQS)
     {
-      /* Mask the IRQ by clearing the associated bit in the IER register */
-
-      reg32  = getreg32(STR71X_EIC_IER);
-      reg32 &= ~(1 << irq);
-      putreg32(reg32, STR71X_EIC_IER);
-
       /* Clear the interrupt by writing a one to the corresponding bit in the
        * IPR register.
        */

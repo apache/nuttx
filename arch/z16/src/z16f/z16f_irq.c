@@ -164,37 +164,33 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the interrupt
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
   /* System exceptions cannot be disabled or acknowledged */
 
   if (irq >= Z16F_IRQ_IRQ0)
     {
-      /* Disable the interrupt by clearing the corresponding bit in the
-       * appropriate IRQ enable register and acknowledge it by setting the
-       * corresponding bit in the IRQ status register.
+      /* Acknowledge the interrupt by setting the corresponding bit in the
+       * IRQ status register.
        */
 
       if (irq < Z16F_IRQ_IRQ1)
         {
-           putreg8((getreg8(Z16F_IRQ0_ENH) & ~Z16F_IRQ0_BIT(irq)), Z16F_IRQ0_ENH);
            putreg8(Z16F_IRQ0_BIT(irq), Z16F_IRQ0);
         }
       else if (irq < Z16F_IRQ_IRQ2)
         {
-           putreg8((getreg8(Z16F_IRQ1_ENH) & ~Z16F_IRQ1_BIT(irq)), Z16F_IRQ1_ENH);
            putreg8(Z16F_IRQ1_BIT(irq), Z16F_IRQ2);
         }
       else if (irq < NR_IRQS)
         {
-           putreg8((getreg8(Z16F_IRQ2_ENH) & ~Z16F_IRQ2_BIT(irq)), Z16F_IRQ2_ENH);
            putreg8(Z16F_IRQ2_BIT(irq), Z16F_IRQ2);
         }
     }

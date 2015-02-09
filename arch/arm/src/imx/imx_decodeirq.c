@@ -110,10 +110,6 @@ void up_decodeirq(uint32_t* regs)
 
       if (irq < NR_IRQS)
         {
-          /* Mask and acknowledge the interrupt */
-
-          up_maskack_irq(irq);
-
           /* Deliver the IRQ */
 
           irq_dispatch(irq, regs);
@@ -145,11 +141,6 @@ void up_decodeirq(uint32_t* regs)
 #endif
             }
 #endif
-          /* Unmask the last interrupt (global interrupts are still
-           * disabled).
-           */
-
-          up_enable_irq(irq);
         }
     }
   while (irq < NR_IRQS);
