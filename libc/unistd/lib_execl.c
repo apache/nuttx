@@ -141,7 +141,7 @@ int execl(FAR const char *path, ...)
     {
       /* Check if the next argument is present */
 
-      arg = va_arg(ap, FAR char *)
+      arg = va_arg(ap, FAR char *);
       if (arg)
         {
           /* Yes.. increment the number of arguments.  Here is a sanity
