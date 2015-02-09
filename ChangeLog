@@ -9724,4 +9724,7 @@
 	* mtd/ramtron.c:  Table of parts is not terminated properly if
 	  CONFIG_RAMTRON_FRAM_NON_JEDEC is not defined.  Noted by David
 	  Sidrane (2015-02-09).
+	* arch/arm/src/sam34/sam_emac.c, sama5/sam_emaca.c, and sama5/sam_gmac.c:
+	  Clone the SAMA5D4 IPv6 support to the SAM4E EMAC and SAMAd3 EMAC and
+	  GMAC drivers  (2015-02-09).
 
