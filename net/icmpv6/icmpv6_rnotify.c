@@ -47,6 +47,7 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <arch/irq.h>
 
@@ -264,8 +265,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
  *
  * Assumptions:
  *   This function is called from icmpv6_autoconfig() and must execute with
- *   the network un-locked (interrupts may be disabled to keep the things
- *   stable).
+ *   the network locked.
  *
  ****************************************************************************/
 
@@ -293,11 +293,11 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
       abstime.tv_nsec -= 1000000000;
     }
 
-   /* REVISIT:  If sem_timedwait() is awakened with  signal, we will return
+   /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
     * the wrong error code.
     */
 
-  (void)sem_timedwait(&notify->rn_sem, &abstime);
+  (void)net_timedwait(&notify->rn_sem, &abstime);
   ret = notify->rn_result;
 
   /* Remove our wait structure from the list (we may no longer be at the

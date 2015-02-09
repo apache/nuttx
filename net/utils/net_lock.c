@@ -173,22 +173,24 @@ void net_unlock(net_lock_t flags)
 }
 
 /****************************************************************************
- * Function: net_lockedwait
+ * Function: net_timedwait
  *
  * Description:
- *   Atomically wait for sem while temporarily releasing g_netlock.
+ *   Atomically wait for sem (or a timeout( while temporarily releasing
+ *   the lock on the network.
  *
  * Input Parameters:
- *   sem - A reference to the semaphore to be taken.
+ *   sem     - A reference to the semaphore to be taken.
+ *   abstime - The absolute time to wait until a timeout is declared.
  *
  * Returned value:
- *   The returned value is the same as sem_wait():  Zero (OK) is returned
- *   on success; -1 (ERROR) is returned on a failure with the errno value
- *   set appropriately.
+ *   The returned value is the same as sem_wait() or sem_timedwait():  Zero
+ *   (OK) is returned on success; -1 (ERROR) is returned on a failure with
+ *   the errno value set appropriately.
  *
  ****************************************************************************/
 
-int net_lockedwait(sem_t *sem)
+int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
 {
   pid_t        me = getpid();
   unsigned int count;
@@ -206,9 +208,20 @@ int net_lockedwait(sem_t *sem)
       g_count  = 0;
       sem_post(&g_netlock);
 
-      /* Now take the semaphore */
+      /* Now take the semaphore, waiting if so requested. */
 
-      ret = sem_wait(sem);
+      if (abstime)
+        {
+          /* Wait until we get the lock or until the timeout expires */
+
+          ret = sem_timedwait(sem, abstime);
+        }
+      else
+        {
+          /* Wait as long as necessary to get the lot */
+
+          ret = sem_wait(sem);
+        }
 
       /* Recover the network lock at the proper count */
 
@@ -224,6 +237,27 @@ int net_lockedwait(sem_t *sem)
   sched_unlock();
   irqrestore(flags);
   return ret;
- }
+}
+
+/****************************************************************************
+ * Function: net_lockedwait
+ *
+ * Description:
+ *   Atomically wait for sem while temporarily releasing g_netlock.
+ *
+ * Input Parameters:
+ *   sem - A reference to the semaphore to be taken.
+ *
+ * Returned value:
+ *   The returned value is the same as sem_wait():  Zero (OK) is returned
+ *   on success; -1 (ERROR) is returned on a failure with the errno value
+ *   set appropriately.
+ *
+ ****************************************************************************/
+
+int net_lockedwait(sem_t *sem)
+{
+  return net_timedwait(sem, NULL);
+}
 
 #endif /* CONFIG_NET */

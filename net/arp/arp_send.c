@@ -190,9 +190,6 @@ int arp_send(in_addr_t ipaddr)
   struct arp_notify_s notify;
   struct timespec delay;
   struct arp_send_s state;
-#ifdef CONFIG_NET_NOINTS
-  irqstate_t flags;
-#endif
   net_lock_t save;
   int ret;
 
@@ -367,15 +364,7 @@ int arp_send(in_addr_t ipaddr)
       delay.tv_sec  = CONFIG_ARP_SEND_DELAYSEC;
       delay.tv_nsec = CONFIG_ARP_SEND_DELAYNSEC;
 
-#ifdef CONFIG_NET_NOINTS
-      flags = irqsave();  /* Keep things stable */
-      net_unlock(save);   /* Unlock the network with interrupts disabled */
-#endif
       ret = arp_wait(&notify, &delay);
-#ifdef CONFIG_NET_NOINTS
-      save = net_lock();  /* Re-lock the network with interrupts disabled */
-      irqrestore(flags);
-#endif
 
       /* arp_wait will return OK if and only if the matching ARP response
        * is received.  Otherwise, it will return -ETIMEDOUT.

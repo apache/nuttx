@@ -222,10 +222,35 @@ void net_unlock(net_lock_t flags);
 #endif
 
 /****************************************************************************
+ * Function: net_timedwait
+ *
+ * Description:
+ *   Atomically wait for sem (or a timeout( while temporarily releasing
+ *   the lock on the network.
+ *
+ * Input Parameters:
+ *   sem     - A reference to the semaphore to be taken.
+ *   abstime - The absolute time to wait until a timeout is declared.
+ *
+ * Returned value:
+ *   The returned value is the same as sem_timedwait():  Zero (OK) is
+ *   returned on success; -1 (ERROR) is returned on a failure with the
+ *   errno value set appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+struct timespec;
+int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
+#else
+#  define net_timedwait(s,t) sem_timedwait(s,t)
+#endif
+
+/****************************************************************************
  * Function: net_lockedwait
  *
  * Description:
- *   Atomically wait for sem while temporarily releasing g_netlock.
+ *   Atomically wait for sem while temporarily releasing lock on the network.
  *
  * Input Parameters:
  *   sem - A reference to the semaphore to be taken.

@@ -278,9 +278,6 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
                                   net_lock_t *save)
 {
   struct timespec delay;
-#ifdef CONFIG_NET_NOINTS
-  irqstate_t flags;
-#endif
   int ret;
 
   /* Wait for response to the Router Advertisement to be received.  The
@@ -291,15 +288,7 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
   delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
   delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
 
-#ifdef CONFIG_NET_NOINTS
-  flags = irqsave();  /* Keep things stable */
-  net_unlock(*save);   /* Unlock the network with interrupts disabled */
-#endif
   ret = icmpv6_rwait(notify, &delay);
-#ifdef CONFIG_NET_NOINTS
-  *save = net_lock();  /* Re-lock the network with interrupts disabled */
-   irqrestore(flags);
-#endif
 
  /* icmpv6_wait will return OK if and only if the matching Router
   * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
