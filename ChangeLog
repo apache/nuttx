@@ -9698,3 +9698,7 @@
 	* libc/unisted/lib_execl.c:   Fix bad logic in counting the number of
 	  arguments.  This could never have worked.  Noted by Pierre-noel
 	  Bouteville (2015-4-09).
+	* arch/arm/src/sama5/sam_emacb.c: Add support for Multicast address
+	  matching and IPv6 in the SAMA5D4 Ethernet driver (2015-02-09).
+	* configs/sama5d4-ek/ipv6: Add a configuration for testing IPv6 with
+	  the SAMA5D4-EK (2015-02-09).
