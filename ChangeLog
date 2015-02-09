@@ -9695,3 +9695,6 @@
 	  Discovery configurations (with base board) to configure the Ethernet
 	  driver to use the work queue (vs. interrupt level processing)
 	  (2015-4-09).
+	* libc/unisted/lib_execl.c:   Fix bad logic in counting the number of
+	  arguments.  This could never have worked.  Noted by Pierre-noel
+	  Bouteville (2015-4-09).
