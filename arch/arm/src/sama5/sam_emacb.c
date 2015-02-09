@@ -527,6 +527,7 @@ static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
+
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
 #endif
@@ -2736,8 +2737,8 @@ static unsigned int sam_hashindx(const uint8_t *mac)
 static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
-  uintptr_t regoffset;
   uint32_t regval;
+  unsigned int regoffset;
   unsigned int ndx;
   unsigned int bit;
 
@@ -2808,9 +2809,9 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
-  uintptr_t regoffset1;
-  uintptr_t regoffset2;
   uint32_t regval;
+  unsigned int regoffset1;
+  unsigned int regoffset2;
   unsigned int ndx;
   unsigned int bit;
 
