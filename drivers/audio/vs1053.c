@@ -1239,7 +1239,8 @@ static int vs1053_dreq_isr(int irq, FAR void *context)
   if (dev->running)
     {
       msg.msgId = AUDIO_MSG_DATA_REQUEST;
-      mq_send(dev->mq, &msg, sizeof(msg), CONFIG_VS1053_MSG_PRIO);
+      mq_send(dev->mq, (FAR const char *)&msg, sizeof(msg),
+              CONFIG_VS1053_MSG_PRIO);
     }
   else
     {
@@ -1303,7 +1304,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      size = mq_receive(dev->mq, &msg, sizeof(msg), &prio);
+      size = mq_receive(dev->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
@@ -1530,7 +1531,8 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  mq_send(dev->mq, &term_msg, sizeof(term_msg), CONFIG_VS1053_MSG_PRIO);
+  mq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+          CONFIG_VS1053_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -1643,7 +1645,8 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
         {
           term_msg.msgId = AUDIO_MSG_ENQUEUE;
           term_msg.u.data = 0;
-          mq_send(dev->mq, &term_msg, sizeof(term_msg), CONFIG_VS1053_MSG_PRIO);
+          mq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+                  CONFIG_VS1053_MSG_PRIO);
         }
     }
 

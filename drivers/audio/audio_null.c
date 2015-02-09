@@ -437,7 +437,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
     {
       /* Wait for messages from our message queue */
 
-      msglen = mq_receive(priv->mq, &msg, sizeof(msg), &prio);
+      msglen = mq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
@@ -589,7 +589,8 @@ static int null_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  mq_send(priv->mq, &term_msg, sizeof(term_msg), CONFIG_AUDIO_NULL_MSG_PRIO);
+  mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+          CONFIG_AUDIO_NULL_MSG_PRIO);
 
   /* Join the worker thread */
 

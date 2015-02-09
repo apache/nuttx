@@ -1336,7 +1336,8 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
    */
 
   msg.msgId = AUDIO_MSG_COMPLETE;
-  ret = mq_send(priv->mq, &msg, sizeof(msg), CONFIG_WM8904_MSG_PRIO);
+  ret = mq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
+                CONFIG_WM8904_MSG_PRIO);
   if (ret < 0)
     {
       audlldbg("ERROR: mq_send failed: %d\n", errno);
@@ -1597,7 +1598,8 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  mq_send(priv->mq, &term_msg, sizeof(term_msg), CONFIG_WM8904_MSG_PRIO);
+  mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+          CONFIG_WM8904_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -1712,7 +1714,8 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
       term_msg.msgId  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
 
-      ret = mq_send(priv->mq, &term_msg, sizeof(term_msg), CONFIG_WM8904_MSG_PRIO);
+      ret = mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+                    CONFIG_WM8904_MSG_PRIO);
       if (ret < 0)
         {
           int errcode = errno;
@@ -2028,7 +2031,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      msglen = mq_receive(priv->mq, &msg, sizeof(msg), &prio);
+      msglen = mq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
