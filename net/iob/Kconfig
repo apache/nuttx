@@ -34,8 +34,8 @@ config IOB_BUFSIZE
 
 config IOB_NCHAINS
 	int "Number of pre-allocated I/O buffer chain heads"
-	default 0 if !NET_TCP_READAHEAD
-	default 8 if NET_TCP_READAHEAD
+	default 0 if !NET_TCP_READAHEAD && !NET_UDP_READAHEAD
+	default 8 if NET_TCP_READAHEAD || NET_UDP_READAHEAD
 	---help---
 		These tiny nodes are used as "containers" to support queueing of
 		I/O buffer chains.  This will limit the number of I/O transactions
