@@ -9734,4 +9734,5 @@
 	  with parameter passing in the MULTINIC configuration(2015-02-09).
 	* net/iob/Kconfig: In IOB Configuration, the default number of IOB
 	  chains must be more than zero is UDP read-ahead is enabled (2015-02-10).
-
+	* net/tcp/tcp_conn.c and udp/udp_conn.c: Fix several build errors/warning
+	  with IPv4 + IPv6 + multiple networks are enabled (2015-02-10).
