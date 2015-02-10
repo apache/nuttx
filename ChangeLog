@@ -9732,3 +9732,6 @@
 	  confused with CONFIG_NET_MULTILINK.  Lots of code changed with IPv6
 	  that was never compiled with MULTINIC enabled.  Still some problem
 	  with parameter passing in the MULTINIC configuration(2015-02-09).
+	* net/iob/Kconfig: In IOB Configuration, the default number of IOB
+	  chains must be more than zero is UDP read-ahead is enabled (2015-02-10).
+
