@@ -1952,6 +1952,7 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t regval;
   unsigned int ndx;
   unsigned int bit;
+  UNUSED(priv);
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -2025,6 +2026,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   unsigned int regaddr2;
   unsigned int ndx;
   unsigned int bit;
+  UNUSED(priv);
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
