@@ -362,7 +362,7 @@ static void lpc17_txtimeout(int argc, uint32_t arg, ...);
 /* NuttX callback functions */
 
 #ifdef CONFIG_NET_ICMPv6
-static void lpc17_ipv6multicast(FAR struct lpc17_ethmac_s *priv);
+static void lpc17_ipv6multicast(FAR struct lpc17_driver_s *priv);
 #endif
 static int lpc17_ifup(struct net_driver_s *dev);
 static int lpc17_ifdown(struct net_driver_s *dev);
@@ -1445,7 +1445,7 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void lpc17_ipv6multicast(FAR struct lpc17_ethmac_s *priv)
+static void lpc17_ipv6multicast(FAR struct lpc17_driver_s *priv)
 {
   struct net_driver_s *dev;
   uint16_t tmp16;
@@ -1466,7 +1466,7 @@ static void lpc17_ipv6multicast(FAR struct lpc17_ethmac_s *priv)
   mac[0] = 0x33;
   mac[1] = 0x33;
 
-  dev    = &priv->dev;
+  dev    = &priv->lp_dev;
   tmp16  = dev->d_ipv6addr[6];
   mac[2] = 0xff;
   mac[3] = tmp16 >> 8;
@@ -1813,9 +1813,9 @@ static uint32_t lpc17_calcethcrc(const uint8_t *data, size_t length)
   int j;
 
   crc = 0xffffffff;
-  for (i = 0; i < frame_len; i++)
+  for (i = 0; i < length; i++)
     {
-      byte = *frame_no_fcs++;
+      byte = *data++;
       for (j = 0; j < 2; j++)
         {
           if (((crc >> 28) ^ (byte >> 3)) & 0x00000001)
