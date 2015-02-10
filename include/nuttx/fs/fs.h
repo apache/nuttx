@@ -73,8 +73,10 @@
  * system.  It is used to call back to perform device specific operations.
  */
 
-struct file;
-struct pollfd;
+struct file;   /* Forward reference */
+struct pollfd; /* Forward reference */
+struct inode;  /* Forward reference */
+
 struct file_operations
 {
   /* The device driver open method differs from the mountpoint open method */

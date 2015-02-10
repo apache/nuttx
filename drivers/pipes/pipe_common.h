@@ -135,7 +135,7 @@ extern "C" {
 #endif
 
 struct file;  /* Forward reference */
-struct inode; /* Forware reference */
+struct inode; /* Forward reference */
 
 FAR struct pipe_dev_s *pipecommon_allocdev(void);
 void    pipecommon_freedev(FAR struct pipe_dev_s *dev);
