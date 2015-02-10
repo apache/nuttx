@@ -100,7 +100,7 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
 FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
                                                 in_addr_t ripaddr);
 #else
@@ -109,7 +109,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr);
 #endif
 
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
 FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
                                                 const net_ipv6addr_t ripaddr);
 #else
@@ -128,7 +128,7 @@ FAR struct net_driver_s *netdev_default(void);
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_MULTILINK
+#  ifdef CONFIG_NETDEV_MULTINIC
 void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 #  else
 void netdev_ipv4_txnotify(in_addr_t ripaddr);
@@ -136,7 +136,7 @@ void netdev_ipv4_txnotify(in_addr_t ripaddr);
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_MULTILINK
+#  ifdef CONFIG_NETDEV_MULTINIC
 void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
                           FAR const net_ipv6addr_t ripaddr);
 #  else
@@ -150,7 +150,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr);
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
 
 #ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_MULTILINK
+#  ifdef CONFIG_NETDEV_MULTINIC
 void netdev_ipv4_rxnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 #  else
 void netdev_ipv4_rxnotify(in_addr_t ripaddr);
@@ -158,7 +158,7 @@ void netdev_ipv4_rxnotify(in_addr_t ripaddr);
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_MULTILINK
+#  ifdef CONFIG_NETDEV_MULTINIC
 void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t lipaddr,
                           FAR const net_ipv6addr_t ripaddr);
 #  else
@@ -168,7 +168,7 @@ void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t ripaddr);
 
 #else
 #ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_MULTILINK
+#  ifdef CONFIG_NETDEV_MULTINIC
 #    define netdev_ipv4_rxnotify(lipaddr,ripaddr)
 #  else
 #    define netdev_ipv4_rxnotify(ripaddr)
@@ -176,7 +176,7 @@ void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t ripaddr);
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_MULTILINK
+#  ifdef CONFIG_NETDEV_MULTINIC
 #    define netdev_ipv6_rxnotify(lipaddr,ripaddr)
 #  else
 #    define netdev_ipv6_rxnotify(ripaddr)

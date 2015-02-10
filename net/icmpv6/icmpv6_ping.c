@@ -439,7 +439,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
       /* Notify the device driver of the availability of TX data */
 
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_txnotify(g_ipv6_allzeroaddr, state.png_addr);
 #else
       netdev_ipv6_txnotify(state.png_addr);

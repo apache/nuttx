@@ -159,7 +159,7 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
                         FAR struct icmpv6_rnotify_s *notify)
 {
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
   irqstate_t flags;
 
   /* Initialize the wait structure */
@@ -206,7 +206,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 
 int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
 {
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct icmpv6_rnotify_s *curr;
   FAR struct icmpv6_rnotify_s *prev;
   irqstate_t flags;
@@ -332,7 +332,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
 void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
                     const net_ipv6addr_t prefix, unsigned int preflen)
 {
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct icmpv6_rnotify_s *curr;
 
   nvdbg("Notified\n");

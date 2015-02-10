@@ -369,7 +369,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
       /* Notify the device driver of the availability of TX data */
 
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv4_txnotify(g_ipv4_allzeroaddr, state.png_addr);
 #else
       netdev_ipv4_txnotify(state.png_addr);

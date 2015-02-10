@@ -225,7 +225,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv6addr(g_ipv6_allzeroaddr, ipaddr);
 #else
   dev = netdev_findby_ipv6addr(ipaddr);

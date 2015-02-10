@@ -354,6 +354,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       return -ENOSYS;
     }
 #endif
+
   /* The interface should be in the down state */
 
  save = net_lock();

@@ -1225,7 +1225,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
     {
       /* Notify the device driver of the receive ready */
 
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv4_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
       netdev_ipv4_rxnotify(conn->u.ipv4.raddr);
@@ -1241,7 +1241,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
       /* Notify the device driver of the receive ready */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_rxnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
 #else
       netdev_ipv6_rxnotify(conn->u.ipv6.raddr);

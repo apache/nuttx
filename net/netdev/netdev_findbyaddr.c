@@ -192,7 +192,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  *
  * Parameters:
  *   lipaddr - Local, bound address of a connection.  Used only if ripaddr
- *     is the broadcast address.  Used only if CONFIG_NET_MULTILINK.
+ *     is the broadcast address.  Used only if CONFIG_NETDEV_MULTINIC.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
@@ -204,7 +204,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
 FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
                                                 in_addr_t ripaddr)
 #else
@@ -221,7 +221,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 
   if (net_ipv4addr_cmp(ripaddr, g_ipv4_alloneaddr))
     {
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
       if (net_ipv4addr_cmp(lipaddr, g_ipv4_allzeroaddr))
@@ -283,7 +283,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
    * out subnet to a router and there is no routing information.
    */
 
-#ifndef CONFIG_NET_MULTILINK
+#ifndef CONFIG_NETDEV_MULTINIC
    /* If there is only a single, registered network interface, then the
     * decision is pretty easy.  Use that device and its default router
     * address.
@@ -310,7 +310,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
  *
  * Parameters:
  *   lipaddr - Local, bound address of a connection.  Used only if ripaddr
- *     is the broadcast address.  Used only if CONFIG_NET_MULTILINK.
+ *     is the broadcast address.  Used only if CONFIG_NETDEV_MULTINIC.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
@@ -322,7 +322,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
 FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
                                                 const net_ipv6addr_t ripaddr)
 #else
@@ -339,7 +339,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
 
   if (net_ipv6addr_cmp(ripaddr, g_ipv6_alloneaddr))
     {
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
       if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
@@ -401,7 +401,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
    * out subnet to a router and there is no routing information.
    */
 
-#ifndef CONFIG_NET_MULTILINK
+#ifndef CONFIG_NETDEV_MULTINIC
    /* If there is only a single, registered network interface, then the
     * decision is pretty easy.  Use that device and its default router
     * address.

@@ -320,7 +320,7 @@ static inline void sendto_txnotify(FAR struct socket *psock,
     {
       /* Notify the device driver that send data is available */
 
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
 #else
       netdev_ipv4_txnotify(conn->u.ipv4.raddr);
@@ -336,7 +336,7 @@ static inline void sendto_txnotify(FAR struct socket *psock,
       /* Notify the device driver that send data is available */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-#ifdef CONFIG_NET_MULTILINK
+#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
 #else
       netdev_ipv6_txnotify(conn->u.ipv6.raddr);

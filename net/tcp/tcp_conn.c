@@ -104,7 +104,7 @@ static uint16_t g_last_tcp_port;
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NETDEV_MULTINIC)
-static inline FAR struct tcp_conn_s *tcp_ipv4_listener(inaddr_t ipaddr,
+static inline FAR struct tcp_conn_s *tcp_ipv4_listener(in_addr_t ipaddr,
                                                        uint16_t portno)
 {
   FAR struct tcp_conn_s *conn;
@@ -207,7 +207,7 @@ static inline FAR struct tcp_conn_s *tcp_ipv6_ listener(net_ipv6addr_t ipaddr,
 
 #ifdef CONFIG_NETDEV_MULTINIC
 static FAR struct tcp_conn_s *
-  tcp_listener(uint8_t domain, FAR const union ip_binding_u *ipaddr,
+  tcp_listener(uint8_t domain, FAR const union ip_addr_u *ipaddr,
                uint16_t portno)
 {
 #ifdef CONFIG_NET_IPv4
@@ -521,7 +521,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
 #ifdef CONFIG_NETDEV_MULTINIC
   port = tcp_selectport(PF_INET,
-                       (FAR const union ip_addr_u ipaddr *)&addr->sin_addr.s_addr,
+                       (FAR const union ip_addr_u *)&addr->sin_addr.s_addr,
                         ntohs(addr->sin_port));
 #else
   port = tcp_selectport(ntohs(addr->sin_port));
@@ -539,7 +539,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
   conn->lport = addr->sin_port;
 
 #ifdef CONFIG_NETDEV_MULTINIC
-  net_ipv4addr_copy(conn->u.ipv4.laddr, ipaddr);
+  net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
 #endif
 
   return OK;
@@ -1100,7 +1100,13 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   flags = net_lock();
 #ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   port = tcp_selectport(conn->domain, &conn->u, ntohs(conn->lport));
+#elif defined(CONFIG_NET_IPv4)
+  port = tcp_selectport(PF_INET, &conn->u, ntohs(conn->lport));
+#else
+  port = tcp_selectport(PF_INET6, &conn->u, ntohs(conn->lport));
+#endif
 #else
   port = tcp_selectport(ntohs(conn->lport));
 #endif
