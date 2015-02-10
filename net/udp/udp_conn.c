@@ -619,7 +619,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        * interfaces for receiving (Sending will use the default port).
        */
 
-      net_ipv6addr_copy(conn->u.ipv6.laddr, ipaddr->sin6_addr.in6_u.u6_addr16);
+      net_ipv6addr_copy(conn->u.ipv6.laddr, inaddr->sin6_addr.in6_u.u6_addr16);
 #endif /* CONFIG_NETDEV_MULTINIC */
     }
 #endif /* CONFIG_NET_IPv6 */
