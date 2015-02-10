@@ -9741,3 +9741,6 @@
 	  can occur outside of interrupt level processing (2015-02-10).
 	* SAM4E-EK: The nsh configuration now configures the Ethernet driver
 	  for execution on the HP work thread (2015-02-10).
+	* arch/arm/src/lpc17xx/lpc17_ethernet.c: Add IPv6 support to the LPC17
+	  Ethernet driver.  Untested... I no longer have a proper environment
+	  for LPC17 debug (2015-02-10).
