@@ -60,7 +60,7 @@
 #endif
 
 /* Is networking enabled?  Is the LPC17xx Ethernet device enabled? Does this chip have
- * and Ethernet controlloer?  Yes... then we will replace the above default definitions.
+ * and Ethernet controller?  Yes... then we will replace the above default definitions.
  */
 
 #if defined(CONFIG_NET) && defined(CONFIG_LPC17_ETHERNET) && LPC17_NETHCONTROLLERS > 0
@@ -124,7 +124,7 @@
 /* EMAC DMA RAM and descriptor definitions.  The configured number of descriptors
  * will determine the organization and the size of the descriptor and status tables.
  * There is a complex interaction between the maximum packet size (CONFIG_NET_ETH_MTU)
- * and the number of Rx and Tx descriptors that can be suppored (CONFIG_NET_NRXDESC
+ * and the number of Rx and Tx descriptors that can be supported (CONFIG_NET_NRXDESC
  * and CONFIG_NET_NTXDESC): Small buffers -> more packets.  This is something that
  * needs to be tuned for you system.
  *
