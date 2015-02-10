@@ -111,7 +111,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* EMAC0 Configuration ******************************************************/
+/* Configuration ************************************************************/
+
 /* If processing is not done at the interrupt level, then high priority
  * work queue support is required.
  */
@@ -119,6 +120,8 @@
 #if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
 #  error High priority work queue support is required
 #endif
+
+/* EMAC0 Configuration ******************************************************/
 
 #ifdef CONFIG_SAMA5_EMAC0
   /* Number of buffers for RX */
@@ -386,10 +389,10 @@ struct sam_emacattr_s
     struct
     {
       uint16_t altmask;             /* Mask speed for mode bits */
-      uint16_t hdx10;               /* 10Base_T Half Duplux bit pattern */
-      uint16_t hdx100;              /* 100Base_T Half Duplux bit pattern */
-      uint16_t fdx10;               /* 10Base_T Half Duplux bit pattern */
-      uint16_t fdx100;              /* 100Base_T Half Duplux bit pattern */
+      uint16_t hdx10;               /* 10Base_T Half Duplex bit pattern */
+      uint16_t hdx100;              /* 100Base_T Half Duplex bit pattern */
+      uint16_t fdx10;               /* 10Base_T Half Duplex bit pattern */
+      uint16_t fdx100;              /* 100Base_T Half Duplex bit pattern */
     } alt;
   } u;
 
