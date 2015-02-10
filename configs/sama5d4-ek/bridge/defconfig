@@ -46,8 +46,9 @@ CONFIG_RAW_BINARY=y
 # Debug Options
 #
 # CONFIG_DEBUG is not set
-CONFIG_ARCH_HAVE_STACKCHECK=y
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
+CONFIG_ARCH_HAVE_STACKCHECK=y
+# CONFIG_STACK_COLORATION is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 CONFIG_ARCH_HAVE_CUSTOMOPT=y
 # CONFIG_DEBUG_NOOPT is not set
@@ -501,6 +502,7 @@ CONFIG_ARCH_HAVE_I2CRESET=y
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set
+# CONFIG_EEPROM is not set
 CONFIG_NETDEVICES=y
 
 #
@@ -578,6 +580,8 @@ CONFIG_USART3_ISUART=y
 CONFIG_MCU_SERIAL=y
 CONFIG_STANDARD_SERIAL=y
 CONFIG_SERIAL_NPOLLWAITERS=2
+# CONFIG_SERIAL_IFLOWCONTROL is not set
+# CONFIG_SERIAL_OFLOWCONTROL is not set
 # CONFIG_ARCH_HAVE_SERIAL_TERMIOS is not set
 CONFIG_USART3_SERIAL_CONSOLE=y
 # CONFIG_OTHER_SERIAL_CONSOLE is not set
@@ -594,8 +598,6 @@ CONFIG_USART3_PARITY=0
 CONFIG_USART3_2STOP=0
 # CONFIG_USART3_IFLOWCONTROL is not set
 # CONFIG_USART3_OFLOWCONTROL is not set
-# CONFIG_SERIAL_IFLOWCONTROL is not set
-# CONFIG_SERIAL_OFLOWCONTROL is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
 # CONFIG_WIRELESS is not set
@@ -608,6 +610,7 @@ CONFIG_USART3_2STOP=0
 # System Logging
 #
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_CONSOLE is not set
 
 #
 # Networking Support
@@ -621,7 +624,6 @@ CONFIG_NET=y
 #
 # Driver buffer configuration
 #
-CONFIG_NET_IPv4=y
 # CONFIG_NET_MULTIBUFFER is not set
 CONFIG_NET_ETH_MTU=590
 CONFIG_NET_GUARDSIZE=2
@@ -633,6 +635,17 @@ CONFIG_NET_GUARDSIZE=2
 CONFIG_NET_ETHERNET=y
 
 #
+# Network Device Operations
+#
+# CONFIG_NETDEV_PHY_IOCTL is not set
+
+#
+# Internet Protocol Selection
+#
+CONFIG_NET_IPv4=y
+# CONFIG_NET_IPv6 is not set
+
+#
 # Socket Support
 #
 CONFIG_NSOCKET_DESCRIPTORS=8
@@ -641,14 +654,14 @@ CONFIG_NET_SOCKOPTS=y
 # CONFIG_NET_SOLINGER is not set
 
 #
-# Network Device Operations
-#
-# CONFIG_NETDEV_PHY_IOCTL is not set
-
-#
 # Raw Socket Support
 #
 # CONFIG_NET_PKT is not set
+
+#
+# Unix Domain Socket Support
+#
+# CONFIG_NET_LOCAL is not set
 
 #
 # TCP/IP Networking
@@ -663,6 +676,7 @@ CONFIG_NET_UDP=y
 CONFIG_NET_UDP_CONNS=16
 CONFIG_NET_BROADCAST=y
 # CONFIG_NET_RXAVAIL is not set
+# CONFIG_NET_UDP_READAHEAD is not set
 
 #
 # ICMP Networking Support
@@ -783,6 +797,7 @@ CONFIG_LIB_HOMEDIR="/"
 # CONFIG_LIBM is not set
 # CONFIG_NOPRINTF_FIELDWIDTH is not set
 # CONFIG_LIBC_FLOATINGPOINT is not set
+# CONFIG_LIBC_IOCTL_VARIADIC is not set
 CONFIG_LIB_RAND_ORDER=1
 # CONFIG_EOL_IS_CR is not set
 # CONFIG_EOL_IS_LF is not set
@@ -925,13 +940,15 @@ CONFIG_EXAMPLES_BRIDGE_NET2_PRIORITY=100
 # Graphics Support
 #
 # CONFIG_TIFF is not set
+# CONFIG_GRAPHICS_TRAVELER is not set
 
 #
 # Interpreters
 #
-# CONFIG_INTERPRETERS_FICL is not set
 # CONFIG_INTERPRETERS_BAS is not set
+# CONFIG_INTERPRETERS_FICL is not set
 # CONFIG_INTERPRETERS_PCODE is not set
+# CONFIG_INTERPRETERS_MICROPYTHON is not set
 
 #
 # Network Utilities
@@ -987,6 +1004,11 @@ CONFIG_NETUTILS_NETLIB=y
 # EMACS-like Command Line Editor
 #
 # CONFIG_SYSTEM_CLE is not set
+
+#
+# CU Minimal Terminal
+#
+# CONFIG_SYSTEM_CUTERM is not set
 
 #
 # FLASH Program Installation
@@ -1058,6 +1080,10 @@ CONFIG_READLINE_ECHO=y
 # Sysinfo
 #
 # CONFIG_SYSTEM_SYSINFO is not set
+
+#
+# Temperature
+#
 
 #
 # VI Work-Alike Editor
