@@ -9727,4 +9727,8 @@
 	* arch/arm/src/sam34/sam_emac.c, sama5/sam_emaca.c, and sama5/sam_gmac.c:
 	  Clone the SAMA5D4 IPv6 support to the SAM4E EMAC and SAMAd3 EMAC and
 	  GMAC drivers  (2015-02-09).
-
+	* net/:  Lots of build problems introduced into multiple NIC support.
+	  Many places where conditional logic based on CONFIG_NETDEV_MULTINIC is
+	  confused with CONFIG_NET_MULTILINK.  Lots of code changed with IPv6
+	  that was never compiled with MULTINIC enabled.  Still some problem
+	  with parameter passing in the MULTINIC configuration(2015-02-09).
