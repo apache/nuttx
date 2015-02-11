@@ -248,6 +248,14 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/freedom-kl25z
+configs/freedom-kl26z
+  These configurations are for the Freescale Freedom KL25Z and very similar
+  KL26Z board.  The Freedom-KL25Z features the K25Z120LE3AN chip; the
+  Freedom-KL26Z has the K26Z128VLH4 chip.  These are separate configurations
+  because of minor differences in the on-board logic.  Both include a
+  built-in SDA debugger.
+
 configs/hymini-stm32v
   A configuration for the HY-Mini STM32v board.  This board is based on the
   STM32F103VCT chip.
