@@ -87,6 +87,45 @@
 #  undef  KL_NTAMPER                    /* No tamper detect */
 #  undef  KL_NCRC                       /* No CRC */
 
+#elif defined(CONFIG_ARCH_CHIP_MKL26Z128)
+
+#  define KL_Z128            1          /* Kinetics KL25Z128 family */
+#  define KL_FLASH_SIZE      (128*1024) /* 64Kb */
+#  define KL_SRAM_SIZE       (16*1024)  /* 16Kb */
+#  undef  KL_MPU                        /* No memory protection unit */
+#  undef  KL_EXTBUS                     /* No external bus interface */
+#  define KL_NDMACH          4          /* Up to 4 DMA channels */
+#  undef  KL_NENET                      /* No Ethernet controller */
+#  define KL_NUSBHOST        1          /* One USB host controller */
+#  define KL_NUSBOTG         1          /* With USB OTG controller */
+#  define KL_NUSBDEV         1          /* One USB device controller */
+#  undef  KL_NSDHC                      /* No SD host controller */
+#  define KL_NTOUCHIF        1          /* Xtrinsic touch sensing interface */
+#  define KL_NI2C            2          /* Two I2C modules */
+#  define KL_NUART           3          /* Three UARTs */
+#  define KL_NSPI            2          /* Two SPI modules */
+#  undef  KL_NCAN                       /* No CAN in 64-pin chips */
+#  define KL_NI2S            1          /* One I2S module */
+#  undef  KL_NSLCD                      /* One segment LCD interface (up to 25x8/29x4) */
+#  define KL_NADC16          1          /* One 16-bit ADC */
+#  undef  KL_NADC12                     /* No 12-channel ADC */
+#  undef  KL_NADC13                     /* No 13-channel ADC */
+#  undef  KL_NADC15                     /* No 15-channel ADC */
+#  undef  KL_NADC18                     /* No 18-channel ADC */
+#  undef  KL_NPGA                       /* No Programmable Gain Amplifiers */
+#  define KL_NCMP            1          /* One analog comparator */
+#  define KL_NDAC6           1          /* Three 6-bit DAC */
+#  define KL_NDAC12          1          /* Two 12-bit DAC */
+#  define KL_NVREF           1          /* Voltage reference */
+#  define KL_NTIMERS8        1          /* One 8 channel timers */
+#  undef  KL_NTIMERS12                  /* No 12 channel timers */
+#  undef  KL_NTIMERS20                  /* No 20 channel timers */
+#  undef  KL_NRNG                       /* No random number generator */
+#  define KL_NRTC            1          /* Real time clock */
+#  undef  KL_NMMCAU                     /* No hardware encryption */
+#  undef  KL_NTAMPER                    /* No tamper detect */
+#  undef  KL_NCRC                       /* No CRC */
+
 #else
 #  error "Unsupported Kinetis chip"
 #endif
