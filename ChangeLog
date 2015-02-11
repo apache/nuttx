@@ -9747,3 +9747,7 @@
 	* include/netinet/in.h and libc/net/lib_addrconfig.c: Some extensions
 	  to netinet/in.h adding some Linux compatible defintions.  From Macs N
 	  (2015-02-11).
+	* arch/arm/src/kl:  Add architectural support for the K26Z128VLH4 chip.
+	  From Derek B. Noonburg (2015-02-11).
+	* configs/freedom-kl26z: Add board support for the Freedom KL26Z board.
+	  From Derek B. Noonburg (2015-02-11).
