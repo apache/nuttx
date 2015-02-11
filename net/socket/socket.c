@@ -471,7 +471,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:
         {
-          ret = psock_pkt_alloc(FAR struct socket *psock)
+          ret = psock_pkt_alloc(psock);
           if (ret < 0)
             {
               /* Failed to reserve a connection structure */
