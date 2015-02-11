@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 3, 2014</p>
+      <p>Last Updated: February 11, 2014</p>
     </td>
   </tr>
 </table>
@@ -1323,7 +1323,7 @@
       <li><a href="#arm926ejs">ARM926EJS</a> (4)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
-      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (3)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (4)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (30)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (18)</li>
     </ul>
@@ -1408,6 +1408,7 @@
       <li><a href="#m68hcs12">M68HCS12</a></li>
       <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
       <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#kinetisk40">FreeScale Kinetis K40</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#kinetisk60">FreeScale Kinetis K60</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
@@ -2165,6 +2166,29 @@ nsh>
         A TSI and a SPI driver were added in NuttX-6.29.
         Alan contributed a PWM driver in NuttX-6.32.
         Refer to the Freedom KL25Z board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/freedom-kl25z/README.txt">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="freescalekl26z"><b>FreeScale Freedom KL26Z</b>.</a>
+      This is a port of NuttX to the Freedom KL25Z board that features the MK26Z128VLH4 Cortex-M0+ MCU, 128KB of FLASH and 16KB of SRAM.
+      See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL26Z&tid=vanFRDM-KL26Z">Freescale</a> website for further information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS</b>.
+        This work was contributed in NuttX 7.8 by Derek B. Noonburg.
+        The board support is very similar to the Freedom-KL25Z.
+        It was decided to support this a a separate board, however, due to some small board-level differences.
+        Refer to the Freedom KL26Z board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/freedom-kl26z/README.txt">README</a> file for further information.
       </p>
     </ul>
   </td>
