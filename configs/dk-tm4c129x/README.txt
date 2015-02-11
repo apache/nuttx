@@ -995,7 +995,7 @@ Where <subdir> is one of the following:
 
        and Telnet again works from the host:
 
-         telent 10.0.0.2
+         telnet 10.0.0.2
 
     3. You can enable IPv6 autonomous address configuration with the
        following changes to the configuration:
