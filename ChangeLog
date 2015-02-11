@@ -9513,7 +9513,7 @@
 	  lpc4357-evb. These changes are required to get USART 2 and 3 working
 	  on the Embest development board.  From Toby Duckworth.
 
-7.8 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.8 2015-02-11 Gregory Nutt <gnutt@nuttx.org>
 
 	* include/nuttx/math.h and libc/math: Add support for inverse
 	  hyperbolic functions.  From Brennan Ashton (2015-01-26).
@@ -9617,7 +9617,7 @@
 	* EFM32 RTC:  RTC driver using BURTC. From Pierre-Noel Bouteville
 	  (2015-02-01).
 	* drivers/ramdisk.c, include/nuttx/fs/ramdisk.h, and other files:  Add
-	  logic to dispose of the drvier and RAM buffer when the RAM disk has
+	  logic to dispose of the driver and RAM buffer when the RAM disk has
 	  been unlinked and all open references to the RAM disk have been
 	  closed.  Add new parameters to romdisk() to specify what should be
 	  done with the RAM/ROM buffer -- Should it be freed or not?  Changed
@@ -9629,7 +9629,7 @@
 	  with a Neighbor Solicitation) (2015-01-02).
 	* net/arp/arp.h, arp_notify.c, and arp_send.c: Fixes another
 	  CONFIG_NET_NOINTS issues.  When called sem_timedwait() with the
-	  network locked, the network stays logcked while we wait which is not
+	  network locked, the network stays locked while we wait which is not
 	  what we want (without CONFIG_NET_NOINTS, interrupts are re-enabled
 	  while we wait and all is well) (2015-02-02).
 	* net/icmpv6/icmpv6.h, icmpv6_neighbor.c, icmpv6_notify.c: Apply the
@@ -9681,7 +9681,7 @@
 	  Sidrane (2015-02-07).
 	* drivers/syslog/syslog_console.c, include/nuttx/syslog/syslog_console.h,
 	  and the console device initialization logic for all architectures: Add
-	  an option to use the syslog'ing device as the system consolution.  This
+	  an option to use the syslog'ing device as the system console.  This
 	  option enables a low-level, write-only console device at /dev/console
 	  (similar to the low-level UART console device).  From Pierre-noel
 	  Bouteville (2015-02-08).
@@ -9745,9 +9745,11 @@
 	  Ethernet driver.  Untested... I no longer have a proper environment
 	  for LPC17 debug (2015-02-10).
 	* include/netinet/in.h and libc/net/lib_addrconfig.c: Some extensions
-	  to netinet/in.h adding some Linux compatible defintions.  From Macs N
+	  to netinet/in.h adding some Linux compatible definitions.  From Macs N
 	  (2015-02-11).
 	* arch/arm/src/kl:  Add architectural support for the K26Z128VLH4 chip.
 	  From Derek B. Noonburg (2015-02-11).
 	* configs/freedom-kl26z: Add board support for the Freedom KL26Z board.
 	  From Derek B. Noonburg (2015-02-11).
+
+7.8 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
