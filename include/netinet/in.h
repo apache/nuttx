@@ -87,6 +87,11 @@
 #define MCAST_EXCLUDE         0
 #define MCAST_INCLUDE         1
 
+/* Test if an IPv4 address is a multicast address */
+
+#define IN_CLASSD(i)          (((uint32_t)(i) & 0xf0000000) == 0xe0000000)
+#define IN_MULTICAST(i)       IN_CLASSD(i)
+
 /* Special values of in_addr_t */
 
 #define INADDR_ANY            ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
@@ -112,6 +117,8 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+typedef uint16_t in_port_t;
 
 /* IPv4 Internet address */
 
@@ -149,7 +156,29 @@ struct sockaddr_in6
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/* Global IPv6 in6addr_any */
+
+EXTERN const struct in6_addr in6addr_any;
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __INCLUDE_NETINET_IN_H */
