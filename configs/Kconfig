@@ -202,6 +202,14 @@ config ARCH_BOARD_FREEDOM_KL25Z
 		This is the configuration for the Freescale Freedom KL25Z board.  This
 		board has the K25Z120LE3AN chip with a built-in SDA debugger.
 
+config ARCH_BOARD_FREEDOM_KL26Z
+	bool "Freescale Freedom KL26Z"
+	depends on ARCH_CHIP_MKL26Z128
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the configuration for the Freescale Freedom KL26Z board.  This
+		board has the K26Z128VLH4 chip with a built-in SDA debugger.
+
 config ARCH_BOARD_HYMINI_STM32V
 	bool "HY-Mini STM32v board"
 	depends on ARCH_CHIP_STM32F103VC
@@ -1059,6 +1067,7 @@ config ARCH_BOARD
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
+	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
 	default "lincoln60"                if ARCH_BOARD_LINCOLN60
@@ -1249,6 +1258,12 @@ source "configs/ez80f910200zco/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
 source "configs/fire-stm32v2/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_KL25Z
+source "configs/freedom-kl25z/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_KL26Z
+source "configs/freedom-kl26z/Kconfig"
 endif
 if ARCH_BOARD_HYMINI_STM32V
 source "configs/hymini-stm32v/Kconfig"

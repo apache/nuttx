@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/kwikstik-k40/include/board.h
- * include/arch/board/board.h
+ * configs/freedom-kl26z/include/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_FREEDOME_KL26Z_BOARD_H
+#define __CONFIGS_FREEDOME_KL26Z_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -47,11 +46,11 @@
 #endif
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The Kwikstik-K40 has a 4MHz crystal on board */
+/* The KL26Z has an 8MHz crystal on board */
 
 #undef  BOARD_EXTCLOCK                      /* Crystal */
 #define BOARD_XTAL_FREQ      8000000        /* 8MHz crystal frequency (REFCLK) */
@@ -154,19 +153,19 @@
 #define GPIO_TPM2_CH1OUT PIN_TPM2_CH1_1
 
 /* LED definitions ******************************************************************/
-/* The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
+/* The Freedom KL26Z has a single RGB LED driven by the KL26Z as follows:
  *
  *   ------------- --------
- *   RGB LED       KL25Z128
+ *   RGB LED       KL26Z128
  *   ------------- --------
- *   Red Cathode   PTB18
- *   Green Cathode PTB19
- *   Blue Cathode  PTD1
+ *   Red Cathode   PTBE29
+ *   Green Cathode PTE31
+ *   Blue Cathode  PTD5
  *
- * NOTE: PTD1 is also connected to the I/O header on J2 pin 10 (also known as D13).
+ * NOTE: PTD5 is also connected to the I/O header on J2 pin 12 (also known as D13).
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * Freedom KL25Z.  The following definitions describe how NuttX controls the LEDs:
+ * Freedom KL26Z.  The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
@@ -179,7 +178,7 @@
  *   LED_SIGNAL           In a signal handler      (no change)
  *   LED_ASSERTION        An assertion failed      (no change)
  *   LED_PANIC            The system has crashed   R=FLASHING G=OFF B=OFF
- *   LED_IDLE             K25Z1XX is in sleep mode (Optional, not used)
+ *   LED_IDLE             K26Z1XX is in sleep mode (Optional, not used)
  */
 
 #define LED_STARTED       0
@@ -192,10 +191,10 @@
 #define LED_PANIC         7
 
 /* Button definitions ***************************************************************/
-/* The Freedom KL25Z board has no standard GPIO contact buttons */
+/* The Freedom KL26Z board has no standard GPIO contact buttons */
 
 /* Alternative pin resolution *******************************************************/
-/* If there are alternative configurations for various pins in the k25z128_pinmux.h
+/* If there are alternative configurations for various pins in the k26z128_pinmux.h
  * header file, those alternative pins will be labeled with a suffix like _1, _2,
  * etc.  The logic in this file must select the correct pin configuration for the
  * board by defining a pin configuration (with no suffix) that maps to the correct
@@ -218,21 +217,6 @@
 #define PIN_SPI1_MISO  (PIN_SPI1_MISO_3 | PIN_ALT2_PULLUP)
 #define PIN_SPI1_MOSI  (PIN_SPI0_MOSI_7 | PIN_ALT2_PULLUP)
 
-/* These pins are used by CC3000 module */
-
-#define GPIO_WIFI_EN (GPIO_OUTPUT | GPIO_OUTPUT_ZER0 | PIN_PORTC | PIN12)
-#define GPIO_WIFI_IRQ (GPIO_INPUT | PIN_PORTA | PIN16)
-#define GPIO_WIFI_CS (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTE | PIN1)
-
-/* Interrupt pin used by ADXL345
- *
- *   CS = PTD0 (D10 at connector J2 pin 6 of Freedom Board)
- *   INT1 = PTA16 (at connector J2 pin 9 of Freedom Board)
- */
-
-#define GPIO_ADXL345_INT1 (GPIO_INPUT | PIN_PORTA | PIN_INT_RISING | PIN16)
-#define GPIO_ADXL345_CS   (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTD | PIN0)
-
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -242,7 +226,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -255,7 +240,7 @@ extern "C" {
  *
  * Description:
  *   All Kinetis L architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
+ *   point is called early in the initialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
@@ -267,7 +252,7 @@ void kl_boardinitialize(void);
  *
  * Description:
  *   Initialize the TSI hardware and interface for the sliders on board the Freedom
- *   KL25Z board.  Register a character driver at /dev/tsi that may be used to read
+ *   KL26Z board.  Register a character driver at /dev/tsi that may be used to read
  *   from each sensor.
  *
  ************************************************************************************/
@@ -282,4 +267,4 @@ void kl_tsi_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_FREEDOME_KL26Z_BOARD_H */
