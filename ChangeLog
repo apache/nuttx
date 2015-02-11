@@ -9744,3 +9744,6 @@
 	* arch/arm/src/lpc17xx/lpc17_ethernet.c: Add IPv6 support to the LPC17
 	  Ethernet driver.  Untested... I no longer have a proper environment
 	  for LPC17 debug (2015-02-10).
+	* include/netinet/in.h and libc/net/lib_addrconfig.c: Some extensions
+	  to netinet/in.h adding some Linux compatible defintions.  From Macs N
+	  (2015-02-11).
