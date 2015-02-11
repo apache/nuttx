@@ -52,7 +52,7 @@
  ************************************************************************************/
 /* FLASH dimensions ****************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_TM4C129XNC)
+#if defined(CONFIG_ARCH_CHIP_TM4C129XNC) || defined(CONFIG_ARCH_CHIP_TM4C1294NC)
 
 /* For the TM4C129X family, the Flash memory is configured in groups of four banks
  * four banks of 16K x 128 bits (4 * 256 KB total) which are two-way interleaved.
