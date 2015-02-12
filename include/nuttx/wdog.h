@@ -172,4 +172,4 @@ int     wd_gettime(WDOG_ID wdog);
 }
 #endif
 
-#endif /* _WDOG_H_ */
+#endif /* __INCLUDE_NUTTX_WDOG_H */

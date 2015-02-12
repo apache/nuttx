@@ -25,7 +25,7 @@ Description
 This README file describes the contents of the build configurations available
 for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
 user-space program under Linux or Cygwin.  It is a very "low fidelity" embedded
-system simulation: This environment does not support any kind of asynchonous
+system simulation: This environment does not support any kind of asynchronous
 events -- there are nothing like interrupts in this context.  Therefore, there
 can be no pre-empting events.
 
@@ -197,7 +197,7 @@ BASIC
     CONFIG_LIBC_EXECFUNCS=y      : exec*() functions are required
     CONFIG_LIBM=y                : Some floating point library is required
     CONFIG_LIBC_FLOATINGPOINT=y  : Floating point printing support is required
-    CONFIG_LIBC_TMPDIR="/tmp"    : Writable temporary files needed for some commands
+    CONFIG_LIBC_TMPDIR="/tmp"    : Writeable temporary files needed for some commands
 
   Enable the BASIC interpreter.  Other default options should be okay:
     CONFIG_INTERPRETERS_BAS=y    : Enables the interpreter

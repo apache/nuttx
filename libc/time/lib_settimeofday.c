@@ -81,6 +81,7 @@ int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz)
       return ERROR;
     }
 #endif
+
   /* Convert the timeval to a timespec */
 
  ts.tv_sec  = tv->tv_sec;
