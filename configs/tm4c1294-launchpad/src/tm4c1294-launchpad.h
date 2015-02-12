@@ -111,13 +111,8 @@
 /* I2C *****************************************************************************/
 /*   I2C3: PG4-5 are provide to the BoostPack 1 interface
  *   I2C7: PA4-5 are provide to the BoostPack 2 interface
- *   I2C6: PB6-7 are used for I2C to the TMP100 and the EM connector.
- *         J18 and J20 must be closed to connect the TMP100.
- *         I2C address is 0x4A
+ *   I2C6: PB6-7 are used for I2C to the connector.
  */
-
-#define TMP100_I2CBUS  6
-#define TMP100_I2CADDR 0x4a
 
 /* Speaker outputs *****************************************************************/
 /* PB2/PD4 are used for the speaker output */

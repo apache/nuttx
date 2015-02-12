@@ -205,9 +205,7 @@
  *
  *   I2C3: PG4-5 are provide to the BoostPack 1 interface
  *   I2C7: PA4-5 are provide to the BoostPack 2 interface
- *   I2C6: PB6-7 are used for I2C to the TMP100 and the EM connector.
- *         J18 and J20 must be closed to connect the TMP100.
- *         I2C address is 0x4A
+ *   I2C6: PB6-7 are used for I2C to the EM connector.
  */
 
 #define GPIO_I2C3_SCL     GPIO_I2C3_SCL_1
@@ -274,24 +272,6 @@ void tiva_boardinitialize(void);
 void tiva_ledinit(void);
 void tiva_setled(int led, bool ledon);
 void tiva_setleds(uint8_t ledset);
-#endif
-
-/************************************************************************************
- * Name: tiva_tmp100_initialize
- *
- * Description:
- *   Initialize and register the TMP-100 Temperature Sensor driver.
- *
- * Input parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ************************************************************************************/
-
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_TIVA_I2C6)
-int tiva_tmp100_initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */
