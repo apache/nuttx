@@ -589,6 +589,12 @@ configs/tm4c123g-launchpad
   platform for ARM® Cortex™-M4F-based microcontrollers from Texas
   Instruments.
 
+configs/tm4c1294-launchpad
+  This is the port of NuttX to the Tiva® TM4C1294 LaunchPad.  The
+  Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  Instruments.
+
 configs/twr-k60n512
   Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
   development board.

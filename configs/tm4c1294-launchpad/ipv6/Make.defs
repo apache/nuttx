@@ -1,5 +1,5 @@
 ############################################################################
-# configs/dk-tm4c129x/ipv6/Make.defs
+# configs/tm4c1294-launchpad/ipv6/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

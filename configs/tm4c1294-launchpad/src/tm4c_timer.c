@@ -101,9 +101,11 @@ int tiva_timer_initialize(void)
 {
   int ret;
 
-  timvdbg("Registering TIMER%d at %s\n", GPTM, CONFIG_TM4C1294_LAUNCHPAD_TIMER_DEVNAME);
+  timvdbg("Registering TIMER%d at %s\n",
+          GPTM, CONFIG_TM4C1294_LAUNCHPAD_TIMER_DEVNAME);
 
-  ret = tiva_timer_register(CONFIG_TM4C1294_LAUNCHPAD_TIMER_DEVNAME, GPTM, ALTCLK);
+  ret = tiva_timer_register(CONFIG_TM4C1294_LAUNCHPAD_TIMER_DEVNAME,
+                            GPTM, ALTCLK);
   if (ret < 0)
     {
       timdbg("ERROR: Failed to register timer driver: %d\n", ret);

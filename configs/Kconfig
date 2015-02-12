@@ -1460,6 +1460,9 @@ endif
 if ARCH_BOARD_TM4C123G_LAUNCHPAD
 source "configs/tm4c123g-launchpad/Kconfig"
 endif
+if ARCH_BOARD_TM4C1294_LAUNCHPAD
+source "configs/tm4c1294-launchpad/Kconfig"
+endif
 if ARCH_BOARD_CC3200_LAUNCHPAD
 source "configs/cc3200-launchpad/Kconfig"
 endif
