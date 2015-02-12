@@ -127,18 +127,18 @@
 
 /* LED index values for use with tiva_setled() */
 
-#define BOARD_LED_D1              0
-#define BOARD_LED_D2              1
-#define BOARD_LED_D3              2
-#define BOARD_LED_D4              3
-#define BOARD_NLEDS               4
+#define BOARD_LED_D1      0
+#define BOARD_LED_D2      1
+#define BOARD_LED_D3      2
+#define BOARD_LED_D4      3
+#define BOARD_NLEDS       4
 
 /* LED bits for use with tiva_setleds() */
 
-#define BOARD_LED_D1_BIT           (1 << BOARD_LED_D1)
-#define BOARD_LED_D2_BIT           (1 << BOARD_LED_D2)
-#define BOARD_LED_D3_BIT           (1 << BOARD_LED_D3)
-#define BOARD_LED_D4_BIT           (1 << BOARD_LED_D4)
+#define BOARD_LED_D1_BIT  (1 << BOARD_LED_D1)
+#define BOARD_LED_D2_BIT  (1 << BOARD_LED_D2)
+#define BOARD_LED_D3_BIT  (1 << BOARD_LED_D3)
+#define BOARD_LED_D4_BIT  (1 << BOARD_LED_D4)
 
 /* If CONFIG_ARCH_LEDS is defined, then automated support for the EK-TM4C1294XL LED
  * will be included in the build:
