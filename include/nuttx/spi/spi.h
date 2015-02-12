@@ -344,36 +344,36 @@
 typedef void (*spi_mediachange_t)(FAR void *arg);
 
 /* If the board supports multiple SPI devices, this enumeration identifies
- * which is selected or de-seleted.
+ * which is selected or de-selected.
  */
 
 enum spi_dev_e
 {
-  SPIDEV_NONE = 0,    /* Not a valid value */
-  SPIDEV_MMCSD,       /* Select SPI MMC/SD device */
-  SPIDEV_FLASH,       /* Select SPI FLASH device */
-  SPIDEV_ETHERNET,    /* Select SPI ethernet device */
-  SPIDEV_DISPLAY,     /* Select SPI LCD/OLED display device */
-  SPIDEV_CAMERA,      /* Select SPI imaging device */
-  SPIDEV_WIRELESS,    /* Select SPI Wireless device */
-  SPIDEV_TOUCHSCREEN, /* Select SPI touchscreen device */
-  SPIDEV_EXPANDER,    /* Select SPI I/O expander device */
-  SPIDEV_MUX,         /* Select SPI multiplexer device */
-  SPIDEV_AUDIO_DATA,  /* Select SPI audio codec device data port */
-  SPIDEV_AUDIO_CTRL,  /* Select SPI audio codec device control port */
-  SPIDEV_EEPROM,      /* Select SPI EEPROM device */
-  SPIDEV_GSENSOR,     /* Select SPI Accelerometer device */
-  SPIDEV_BAROMETER    /* Select SPI Pressure/Barometer device */
+  SPIDEV_NONE = 0,      /* Not a valid value */
+  SPIDEV_MMCSD,         /* Select SPI MMC/SD device */
+  SPIDEV_FLASH,         /* Select SPI FLASH device */
+  SPIDEV_ETHERNET,      /* Select SPI Ethernet device */
+  SPIDEV_DISPLAY,       /* Select SPI LCD/OLED display device */
+  SPIDEV_CAMERA,        /* Select SPI imaging device */
+  SPIDEV_WIRELESS,      /* Select SPI Wireless device */
+  SPIDEV_TOUCHSCREEN,   /* Select SPI touchscreen device */
+  SPIDEV_EXPANDER,      /* Select SPI I/O expander device */
+  SPIDEV_MUX,           /* Select SPI multiplexer device */
+  SPIDEV_AUDIO_DATA,    /* Select SPI audio codec device data port */
+  SPIDEV_AUDIO_CTRL,    /* Select SPI audio codec device control port */
+  SPIDEV_EEPROM,        /* Select SPI EEPROM device */
+  SPIDEV_ACCELEROMETER, /* Select SPI Accelerometer device */
+  SPIDEV_BAROMETER      /* Select SPI Pressure/Barometer device */
 };
 
 /* Certain SPI devices may required differnt clocking modes */
 
 enum spi_mode_e
 {
-  SPIDEV_MODE0 = 0,   /* CPOL=0 CHPHA=0 */
-  SPIDEV_MODE1,       /* CPOL=0 CHPHA=1 */
-  SPIDEV_MODE2,       /* CPOL=1 CHPHA=0 */
-  SPIDEV_MODE3        /* CPOL=1 CHPHA=1 */
+  SPIDEV_MODE0 = 0,     /* CPOL=0 CHPHA=0 */
+  SPIDEV_MODE1,         /* CPOL=0 CHPHA=1 */
+  SPIDEV_MODE2,         /* CPOL=1 CHPHA=0 */
+  SPIDEV_MODE3          /* CPOL=1 CHPHA=1 */
 };
 
 /* The SPI vtable */

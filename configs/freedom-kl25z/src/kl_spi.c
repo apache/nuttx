@@ -168,7 +168,7 @@ void kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
            (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_ADXL345_SPI
-  if (devid == SPIDEV_GSENSOR)
+  if (devid == SPIDEV_ACCELEROMETER)
     {
       /* Active low */
 

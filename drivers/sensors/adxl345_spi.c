@@ -99,7 +99,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Select the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, true);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
   
   /* Send register to read and get the next byte */
 
@@ -108,7 +108,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Deselect the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, false);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
 
   /* Unlock bus */
 
@@ -146,7 +146,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* Select the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, true);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
   
   /* Send register address and set the value */
 
@@ -155,7 +155,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* Deselect the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, false);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
 
   /* Unlock bus */
 #ifndef CONFIG_SPI_OWNBUS
@@ -184,7 +184,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Select the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, true);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
   
   /* Send register to read and get the next 2 bytes */
 
@@ -193,7 +193,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Deselect the ADXL345 */
 
-  SPI_SELECT(priv->spi, SPIDEV_GSENSOR, false);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
 
   /* Unlock bus */
 
