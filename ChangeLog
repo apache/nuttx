@@ -9758,3 +9758,10 @@
 	  Frank Sautter (2015-02-11).
 	* configs/tm4c1294-launchpad:  Add support for the TM4C1294 Launchpad.
 	  Contributed by Frank Sautter (2015-02-11).
+	* gettimeofday():  Move gettimeofdady() from sched/clock to libc/time.
+	  Remove gettimeofday() from NuttX system calls.  It is only a wrapper
+	  around clock_settime() and does not need a trap.  gettimeofday() is
+	  no longer treated as a core OS interface (2015-02-12).
+	* settimeofday(): gettimeofday has been decrecated in POSIX 2008.
+	  settimeofday() was never part of POSIX, but I decided to add it to
+	  libc as well just for symmetry (2015-02-12).
