@@ -1295,6 +1295,8 @@ nuttx
  |   |   `- README.txt
  |   |- tm4c123g-launchpad/
  |   |   `- README.txt
+ |   |- tm4c1294-launchpad/
+ |   |   `- README.txt
  |   |- twr-k60n512/
  |   |   `- README.txt
  |   |- ubw32/

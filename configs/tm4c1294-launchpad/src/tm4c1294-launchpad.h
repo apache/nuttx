@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/tm4c1294-launchpad/src/ek-tm4c1294xl.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,4 +177,3 @@ int tiva_timer_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H */
-

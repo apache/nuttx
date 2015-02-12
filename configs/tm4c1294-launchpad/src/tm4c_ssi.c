@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/tm4c1294-launchpad/src/tm4c_ssi.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "tiva_gpio.h"
 #include "tm4c1294-launchpad.h"
 
-/* The DK-TM4C129X microSD CS is on SSI0 */
+/* The TM4C1294-Launchpad microSD CS is on SSI0 */
 
 #if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
 
@@ -101,7 +101,7 @@ void weak_function tm4c_ssiinitialize(void)
  * The external functions, tiva_spiselect and tiva_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All othermethods (including tiva_spiinitialize()) are provided by common
+ * All other methods (including tiva_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
  *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
