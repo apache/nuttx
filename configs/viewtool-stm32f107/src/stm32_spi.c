@@ -105,6 +105,12 @@ void weak_function stm32_spiinitialize(void)
 
   (void)stm32_configgpio(GPIO_LCDTP_CS);
 #endif
+
+#if defined(CONFIG_STM32_SPI3) && defined(CONFIG_MPL115A)
+  /* Configure the MPL115A SPI3 CS pin as an output */
+
+  (void)stm32_configgpio(GPIO_MPL115A_CS);
+#endif
 }
 
 /****************************************************************************

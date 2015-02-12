@@ -28,6 +28,7 @@ Contents
   o USB Interface
   o microSD Card Interface
   o ViewTool DP83848 Ethernet Module
+  o Freescale MPL115A barometer sensor
   o LCD/Touchscreen Interface
   o Toolchains
     - NOTE about Windows native toolchains
@@ -397,6 +398,28 @@ ViewTool DP83848 Ethernet Module
 
       (also FTP, TFTP, WGET, NFS, etc. if you also have a mass storage
       device).
+
+Freescale MPL115A barometer sensor
+==================================
+
+  This board support package includes hooks that can be used to enable
+  testing of a Freescale MPL115A barometer sensor connected via SPI3 with
+  chip select on PB6,
+
+  Here are the configuration settings that would have to be included to
+  enabled support for the barometer:
+
+    System Type -> Peripherals
+      CONFIG_STM32_SPI3=y
+
+    Drivers -> SPI
+      CONFIG_SPI=y
+      CONFIG_SPI_EXCHANGE=y
+
+    Drivers -> Sensors
+      CONFIG_SENSORS=y
+      CONFIG_MPL115A=y
+      CONFIG_NSH_ARCHINIT=y
 
 LCD/Touchscreen Interface
 =========================
