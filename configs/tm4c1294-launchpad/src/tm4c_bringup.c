@@ -49,18 +49,8 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_TIVA_I2C6)
-#  define HAVE_TMP100
-#endif
-
 #ifdef CONFIG_DK_TM4C129X_TIMER
 #  define HAVE_TIMER
-#endif
-
-#ifdef CONFIG_SYSTEM_LM75_DEVNAME
-#  define TMP100_DEVNAME CONFIG_SYSTEM_LM75_DEVNAME
-#else
-#  define TMP100_DEVNAME "/dev/temp"
 #endif
 
 /****************************************************************************
@@ -77,18 +67,8 @@
 
 int tm4c_bringup(void)
 {
-#if defined(HAVE_TMP100) || defined(HAVE_TIMER)
+#ifdef HAVE_TIMER
   int ret;
-#endif
-
-#ifdef HAVE_TMP100
-  /* Initialize and register the TMP-100 Temperature Sensor driver. */
-
-  ret = tiva_tmp100_initialize(TMP100_DEVNAME);
-  if (ret < 0)
-    {
-      dbg("ERROR: Failed to initialize TMP100 driver: %d\n", ret);
-    }
 #endif
 
 #ifdef HAVE_TIMER
