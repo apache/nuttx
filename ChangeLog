@@ -9752,4 +9752,9 @@
 	* configs/freedom-kl26z: Add board support for the Freedom KL26Z board.
 	  From Derek B. Noonburg (2015-02-11).
 
-7.8 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.9 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/tiva:  Add support for the TM4C1294.  Contributed by
+	  Frank Sautter (2015-02-11).
+	* configs/tm4c1294-launchpad:  Add support for the TM4C1294 Launchpad.
+	  Contributed by Frank Sautter (2015-02-11).
