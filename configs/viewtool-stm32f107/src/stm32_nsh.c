@@ -62,7 +62,6 @@
 #    define CONFIG_NSH_MMCSDSLOTNO VIEWTOOL_MMCSD_SLOTNO
 #  endif
 #endif
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -78,6 +77,10 @@
 
 int nsh_archinitialize(void)
 {
+#ifdef CONFIG_MPL115A
+  stm32_mpl115ainitialize("/dev/press");
+#endif
+
 #ifdef HAVE_MMCSD
   return stm32_sdinitialize(CONFIG_NSH_MMCSDSLOTNO);
 #else

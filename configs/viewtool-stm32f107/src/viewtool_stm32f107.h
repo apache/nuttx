@@ -276,6 +276,15 @@
 #define GPIO_LCDTP_CS     (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN4)
 
+/* Freescale MPL115A barometer (optional add-on)
+ *
+ * This board support logic includes support for a Freescale MPL115A barometer
+ * using SPI3 with chip select on PB6.
+ */
+
+#define GPIO_MPL115A_CS   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN6)
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -325,6 +334,24 @@ int stm32_sdinitialize(int minor);
  ************************************************************************************/
 
 void stm32_ledinit(void);
+
+/************************************************************************************
+ * Name: stm32_mpl115ainitialize
+ *
+ * Description:
+ *   Initialize and register the MPL115A Pressure Sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/press0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SPI) && defined(CONFIG_MPL115A) && defined(CONFIG_STM32_SPI3)
+int stm32_mpl115ainitialize(FAR const char *devpath);
+#endif
 
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H */
