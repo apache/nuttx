@@ -859,6 +859,14 @@ config ARCH_BOARD_TM4C123G_LAUNCHPAD
 	---help---
 		Tiva TM4C123G LaunchPad.
 
+config ARCH_BOARD_TM4C1294_LAUNCHPAD
+	bool "Tiva EK-TM4C1294XL LaunchPad"
+	depends on ARCH_CHIP_TM4C1294NC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		Tiva EK-TM4C1294XL LaunchPad.
+
 config ARCH_BOARD_CC3200_LAUNCHPAD
 	bool "Tiva CC3200 Launchpad"
 	depends on ARCH_CHIP_CC3200
@@ -1132,6 +1140,7 @@ config ARCH_BOARD
 	default "sure-pic32mx"             if ARCH_BOARD_SUREPIC32MX
 	default "teensy"                   if ARCH_BOARD_TEENSY
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
+	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "cc3200-launchpad"         if ARCH_BOARD_CC3200_LAUNCHPAD
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
 	default "ubw32"                    if ARCH_BOARD_UBW32
