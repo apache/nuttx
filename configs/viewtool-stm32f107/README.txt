@@ -421,6 +421,13 @@ Freescale MPL115A barometer sensor
       CONFIG_MPL115A=y
       CONFIG_NSH_ARCHINIT=y
 
+
+  Note: this driver uses SPI3 then since PB3 pin is also use to JTAG TDO you
+  need to disable JTAG support to get this driver working:
+
+    System Type
+      CONFIG_STM32_JTAG_DISABLE=y
+
 LCD/Touchscreen Interface
 =========================
 

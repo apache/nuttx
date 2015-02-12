@@ -2,7 +2,7 @@
  * drivers/sensors/mpl115a.c
  * Character driver for the Freescale MPL115A1 Barometer Sensor
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,6 @@ struct mpl115a_dev_s
   uint16_t mpl115a_pressure;
 };
 
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -95,15 +94,16 @@ static ssize_t mpl115a_write(FAR struct file *filep, FAR const char *buffer, siz
 
 static const struct file_operations g_mpl115afops =
 {
-  mpl115a_open,
-  mpl115a_close,
-  mpl115a_read,
-  mpl115a_write,
-  0,
-  0
+  mpl115a_open,   /* open */
+  mpl115a_close,  /* close */
+  mpl115a_read,   /* read */
+  mpl115a_write,  /* write */
+  0,              /* seek */
+  0,              /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0
+  0,              /* poll */
 #endif
+  0               /* unlink */
 };
 
 /****************************************************************************
@@ -176,26 +176,28 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 static void mpl115a_updatecaldata(FAR struct mpl115a_dev_s *priv)
 {
   /* Get a0 coefficient */
+
   priv->mpl115a_cal_a0 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_A0_MSB << 1)) << 8;
   priv->mpl115a_cal_a0 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_A0_LSB << 1));
   sndbg("a0 = %d\n", priv->mpl115a_cal_a0);
 
   /* Get b1 coefficient */
+
   priv->mpl115a_cal_b1 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B1_MSB << 1)) << 8;
   priv->mpl115a_cal_b1 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B1_LSB << 1));
   sndbg("b1 = %d\n", priv->mpl115a_cal_b1);
 
   /* Get b2 coefficient */
+
   priv->mpl115a_cal_b2 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B2_MSB << 1)) << 8;
   priv->mpl115a_cal_b2 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_B2_LSB << 1));
   sndbg("b2 = %d\n", priv->mpl115a_cal_b2);
 
   /* Get c12 coefficient */
+
   priv->mpl115a_cal_c12 = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_C12_MSB << 1)) << 8;
   priv->mpl115a_cal_c12 |= mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_C12_LSB << 1));
   sndbg("c12 = %d\n", priv->mpl115a_cal_c12);
-
-  return;
 }
 
 /****************************************************************************
@@ -204,15 +206,19 @@ static void mpl115a_updatecaldata(FAR struct mpl115a_dev_s *priv)
  * Description:
  *   Read raw pressure and temperature from MPL115A and store it in the
  *   mpl115a_dev_s structure.
- */
+ *
+ ****************************************************************************/
+
 static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
 {
   uint16_t pressure;
 
-  /* Start a new convertion */
+  /* Start a new conversion */
+
   mpl115a_getreg8(priv, (MPL115A_CONVERT << 1));
 
   /* Delay 5ms */
+
   usleep(5000);
 
   priv->mpl115a_pressure = mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_PADC_MSB << 1)) << 8;
@@ -232,8 +238,8 @@ static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
  * Name: mpl115a_getpressure
  *
  * Description:
- *   Calculate the Barometrc Pressure using the temperature compensated
- *   See Freescale AN3785 and MPL115A1 datasheet for details
+ *   Calculate the Barometric Pressure using the temperature compensated
+ *   See Freescale AN3785 and MPL115A1 data sheet for details
  *
  ****************************************************************************/
 
@@ -243,6 +249,7 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
   uint16_t padc, tadc, pressure;
 
   /* Check if coefficient data were read correctly */
+
   if ( (priv->mpl115a_cal_a0 == 0) || (priv->mpl115a_cal_b1 == 0) ||
        (priv->mpl115a_cal_b2 == 0) || (priv->mpl115a_cal_c12 == 0) )
     {
@@ -250,11 +257,13 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
     }
 
   /* Read temperature and pressure */
+
   mpl115a_read_press_temp(priv);
   padc = priv->mpl115a_pressure;
   tadc = priv->mpl115a_temperature;
 
   /* These code are from Freescale AN3785 */
+
   c12x2 = ((int32_t)priv->mpl115a_cal_c12 * tadc) >> 11;
   a1 = (int32_t) (priv->mpl115a_cal_b1 + c12x2);
   a1x1 = a1 * padc;
@@ -263,11 +272,13 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
   pcomp = (y1 + a2x2) >> 9;
 
   /* Calculate the pressure in 1/16 kPa from compensated */
+
   pressure = (((((int32_t)pcomp) * 1041) >> 14) + 800);
 
   /* Note that the final pressure value is reported with 4 bit fractional
    * This may be eliminated by right shifting the result 4 bits.
    */
+
   sndbg("Final Pressure = %d\n", pressure >> 4);
   return pressure;
 }
@@ -321,9 +332,11 @@ static ssize_t mpl115a_read(FAR struct file *filep, FAR char *buffer, size_t buf
     }
 
   /* Get the pressure compensated */
+
   *press = mpl115a_getpressure(priv);
 
   /* Return size of uint16_t (2 bytes) */
+
   return 2;
 }
 
@@ -349,10 +362,11 @@ static ssize_t mpl115a_write(FAR struct file *filep, FAR const char *buffer,
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *   i2c - An instance of the I2C interface to use to communicate with MPL115A
- *   addr - The I2C address of the LM-75.  The base I2C address of the MPL115A
- *   is 0x48.  Bits 0-3 can be controlled to get 8 unique addresses from 0x48
- *   through 0x4f.
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             MPL115A
+ *   addr    - The I2C address of the LM-75.  The base I2C address of the
+ *             MPL115A is 0x48.  Bits 0-3 can be controlled to get 8 unique
+ *             addresses from 0x48 through 0x4f.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -380,6 +394,7 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   priv->mpl115a_cal_c12 = 0;
 
   /* Read the coefficient value */
+
   mpl115a_updatecaldata(priv);
 
   /* Register the character driver */

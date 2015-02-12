@@ -78,9 +78,9 @@
 #define MPL115A_B1_LSB              0x07  /* b1 coefficient LSB */
 #define MPL115A_B2_MSB              0x08  /* b2 coefficient MSB */
 #define MPL115A_B2_LSB              0x09  /* b2 coefficient LSB */
-#define MPL115A_C12_MSB             0x0A  /* c12 coefficient MSB */
-#define MPL115A_C12_LSB             0x0B  /* c12 coefficient LSB */
-                                          /* 0x0C - 0x11 are reserved */
+#define MPL115A_C12_MSB             0x0a  /* c12 coefficient MSB */
+#define MPL115A_C12_LSB             0x0b  /* c12 coefficient LSB */
+                                          /* 0x0c - 0x11 are reserved */
 #define MPL115A_CONVERT             0x12  /* Start Pressure and Temperature Conversion */
 
 /********************************************************************************************
@@ -89,7 +89,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -102,14 +103,15 @@ extern "C" {
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *   spi - An instance of the SPI interface to use to communicate with MPL115A
+ *   spi     - An instance of the SPI interface to use to communicate with
+ *             MPL115A
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-EXTERN int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
+int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -8,6 +8,13 @@ config LIS331DL
 	default n
 	select I2C
 
+config MPL115A
+	bool "Freescale MPL115A Barometer Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Freescale MPL115A barometer sensor.
+
 config SENSORS_ADXL345
 	bool "AnalogDevices ADXL345 Driver"
 	default n

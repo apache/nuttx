@@ -9765,3 +9765,9 @@
 	* settimeofday(): gettimeofday has been decrecated in POSIX 2008.
 	  settimeofday() was never part of POSIX, but I decided to add it to
 	  libc as well just for symmetry (2015-02-12).
+	* drivers/sensors/mpl115a.c and include/nuttx/sensors/mpl115a.h: Add
+	  driver for the Feescale MPL115A baramoter.  From Alan Carvalho de
+	  Assis (2015-02-12).
+	* configs/viewtool-stm32f107:  Add support for an optional, add-on
+	  Freescale MPL115A baramoter.  From Alan Carvalho de Assis
+	  (2015-02-12).
