@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/time.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,17 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+/* struct timeval is defined in time.h */
+
+/* The use of the struct timezone  is obsolete; the tz argument should
+ * normally be specified as NULL (and is ignored in any event).
+ */
+
+struct timezone
+{
+  int tz_minuteswest;     /* Minutes west of Greenwich */
+  int tz_dsttime;         /* Type of DST correction */
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -59,12 +70,58 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN int gettimeofday(struct timeval *tp, FAR void *tzp);
+/****************************************************************************
+ * Name: gettimeofday
+ *
+ * Description:
+ *   Get the current time
+ *
+ *   Conforming to SVr4, 4.3BSD. POSIX.1-2001 describes gettimeofday().
+ *   POSIX.1-2008 marks gettimeofday() as obsolete, recommending the use of
+ *   clock_gettime(2) instead.
+ *
+ *   NuttX implements gettimeofday() as a thin layer around clock_gettime();
+ *
+ * Input Parameters:
+ *   tv - The location to return the current time
+ *   tz - Ignored
+ *
+ * Returned value:
+ *   Zero (OK) on success;  -1 is returned on failure with the errno variable
+ *   set appropriately.
+ *
+ ****************************************************************************/
+
+int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz);
+
+/****************************************************************************
+ * Name: settimeofday
+ *
+ * Description:
+ *   Set the current time
+ *
+ *   Conforming to SVr4, 4.3BSD. POSIX.1-2001 describes gettimeofday() but
+ *   not settimeofday().
+ *
+ *   NuttX implements settimeofday() as a thin layer around clock_settime();
+ *
+ * Input Parameters:
+ *   tv - The net to time to be set
+ *   tz - Ignored
+ *
+ * Returned value:
+ *   Zero (OK) on success;  -1 is returned on failure with the errno variable
+ *   set appropriately.
+ *
+ ****************************************************************************/
+
+int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz);
 
 #undef EXTERN
 #if defined(__cplusplus)

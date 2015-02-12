@@ -130,7 +130,8 @@ extern volatile bool g_rtc_enabled;
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -150,7 +151,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN int up_rtcinitialize(void);
+int up_rtcinitialize(void);
 
 /************************************************************************************
  * Name: up_rtc_time
@@ -159,7 +160,7 @@ EXTERN int up_rtcinitialize(void);
  *   Get the current time in seconds.  This is similar to the standard time()
  *   function.  This interface is only required if the low-resolution RTC/counter
  *   hardware implementation selected.  It is only used by the RTOS during
- *   initializeation to set up the system time when CONFIG_RTC is set but neither
+ *   initialization to set up the system time when CONFIG_RTC is set but neither
  *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
@@ -171,7 +172,7 @@ EXTERN int up_rtcinitialize(void);
  ************************************************************************************/
 
 #ifndef CONFIG_RTC_HIRES
-EXTERN time_t up_rtc_time(void);
+time_t up_rtc_time(void);
 #endif
 
 /************************************************************************************
@@ -191,7 +192,7 @@ EXTERN time_t up_rtc_time(void);
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-EXTERN int up_rtc_gettime(FAR struct timespec *tp);
+int up_rtc_gettime(FAR struct timespec *tp);
 #endif
 
 /************************************************************************************
@@ -201,7 +202,7 @@ EXTERN int up_rtc_gettime(FAR struct timespec *tp);
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
  *   It is used to replace the system timer.  It is only used by the RTOS during
- *   initializeation to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
  *   are selected (and CONFIG_RTC_HIRES is not).
  *
  *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
@@ -218,7 +219,7 @@ EXTERN int up_rtc_gettime(FAR struct timespec *tp);
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_DATETIME
-EXTERN int up_rtc_getdatetime(FAR struct tm *tp);
+int up_rtc_getdatetime(FAR struct tm *tp);
 #endif
 
 /************************************************************************************
@@ -236,7 +237,7 @@ EXTERN int up_rtc_getdatetime(FAR struct tm *tp);
  *
  ************************************************************************************/
 
-EXTERN int up_rtc_settime(FAR const struct timespec *tp);
+int up_rtc_settime(FAR const struct timespec *tp);
 
 /************************************************************************************
  * Name: up_rtc_setalarm
@@ -254,7 +255,7 @@ EXTERN int up_rtc_settime(FAR const struct timespec *tp);
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-EXTERN int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 #endif
 
 /************************************************************************************
@@ -272,7 +273,7 @@ EXTERN int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-EXTERN int up_rtc_cancelalarm(void);
+int up_rtc_cancelalarm(void);
 #endif
 
 #undef EXTERN

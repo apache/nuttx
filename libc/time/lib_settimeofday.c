@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/clock/clock_gettimeofday.c
+ * libc/time/lib_settimeofday.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,74 +40,53 @@
 #include <nuttx/config.h>
 
 #include <sys/time.h>
+#include <time.h>
 #include <errno.h>
-#include <debug.h>
 
-#include "clock/clock.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/**************************************************************************
- * Public Constant Data
- **************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/**************************************************************************
- * Private Variables
- **************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gettimeofday
+ * Name: settimeofday
  *
  * Description:
- *  Get the current time
+ *   Set the current time
+ *
+ *   Conforming to SVr4, 4.3BSD. POSIX.1-2001 describes gettimeofday() but
+ *   not settimeofday().
+ *
+ *   NuttX implements settimeofday() as a thin layer around clock_settime();
+ *
+ * Input Parameters:
+ *   tv - The net to time to be set
+ *   tz - Ignored
+ *
+ * Returned value:
+ *   Zero (OK) on success;  -1 is returned on failure with the errno variable
+ *   set appropriately.
  *
  ****************************************************************************/
 
-int gettimeofday(struct timeval *tp, void *tzp)
+int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz)
 {
   struct timespec ts;
-  int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!tp)
+  if (!tv || tv->tv_usec >= USEC_PER_SEC)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
+  /* Convert the timeval to a timespec */
 
-  /* Let clock_gettime do most of the work */
+ ts.tv_sec  = tv->tv_sec;
+ ts.tv_nsec = tv->tv_usec * NSEC_PER_USEC;
+  
+  /* Let clock_settime do the work */
 
-  ret = clock_gettime(CLOCK_REALTIME, &ts);
-  if (ret == OK)
-    {
-       /* Convert the struct timespec to a struct timeval */
-
-       tp->tv_sec  = ts.tv_sec;
-       tp->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
-    }
-
-  return ret;
+  return clock_settime(CLOCK_REALTIME, &ts);
 }

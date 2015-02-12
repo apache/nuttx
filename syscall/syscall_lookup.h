@@ -142,7 +142,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(clock_getres,            2, STUB_clock_getres)
   SYSCALL_LOOKUP(clock_gettime,           2, STUB_clock_gettime)
   SYSCALL_LOOKUP(clock_settime,           2, STUB_clock_settime)
-  SYSCALL_LOOKUP(gettimeofday,            2, STUB_gettimeofday)
 
 /* The following are defined only if POSIX timers are supported */
 

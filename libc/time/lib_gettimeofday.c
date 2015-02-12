@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/time/lib_time.c
+ * libc/time/lib_gettimeofday.c
  *
- *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,54 +41,59 @@
 
 #include <sys/time.h>
 #include <time.h>
+#include <errno.h>
+
+#include <nuttx/clock.h>
 
 /****************************************************************************
- * Function:  time
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gettimeofday
  *
  * Description:
- *   Get the current calendar time as a time_t object.  The function returns
- *   this value, and if the argument is not a null pointer, the value is also
- *   set to the object pointed by tloc.
+ *   Get the current time
  *
- *   Note that this function is just a thin wrapper around clock_gettime()
- *   and is provided for compatibility.  clock_gettime() is the preferred way
- *   to obtain system time.
+ *   Conforming to SVr4, 4.3BSD. POSIX.1-2001 describes gettimeofday().
+ *   POSIX.1-2008 marks gettimeofday() as obsolete, recommending the use of
+ *   clock_gettime(2) instead.
  *
- * Parameters:
- *   Pointer to an object of type time_t, where the time value is stored.
- *   Alternatively, this parameter can be a null pointer, in which case the
- *   parameter is not used, but a time_t object is still returned by the
- *   function.
+ *   NuttX implements gettimeofday() as a thin layer around clock_gettime();
  *
- * Return Value:
- *   The current calendar time as a time_t object.  If the argument is not
- *   a null pointer, the return value is the same as the one stored in the
- *   location pointed by the argument.
+ * Input Parameters:
+ *   tv - The location to return the current time
+ *   tz - Ignored
  *
- *   If the function could not retrieve the calendar time, it returns a -1
- *   value.
+ * Returned value:
+ *   Zero (OK) on success;  -1 is returned on failure with the errno variable
+ *   set appropriately.
  *
  ****************************************************************************/
 
-time_t time(time_t *tloc)
+int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz)
 {
   struct timespec ts;
   int ret;
 
-  /* Get the current time from the system */
+#ifdef CONFIG_DEBUG
+  if (!tv)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+#endif
+
+  /* Let clock_gettime do most of the work */
 
   ret = clock_gettime(CLOCK_REALTIME, &ts);
   if (ret == OK)
     {
-      /* Return the seconds since the epoch */
+       /* Convert the struct timespec to a struct timeval */
 
-      if (tloc)
-        {
-          *tloc = ts.tv_sec;
-        }
-
-      return ts.tv_sec;
+       tv->tv_sec  = ts.tv_sec;
+       tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
     }
 
-  return (time_t)ERROR;
+  return ret;
 }

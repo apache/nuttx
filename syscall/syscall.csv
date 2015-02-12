@@ -26,7 +26,6 @@
 "getenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","FAR char*","FAR const char*"
 "getpid","unistd.h","","pid_t"
 "getsockopt","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","int","int","FAR void*","FAR socklen_t*"
-"gettimeofday","sys/time.h","","int","struct timeval*","FAR void*"
 "ioctl","sys/ioctl.h","!defined(CONFIG_LIBC_IOCTL_VARIADIC) && (CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0)","int","int","int","unsigned long"
 "kill","signal.h","!defined(CONFIG_DISABLE_SIGNALS)","int","pid_t","int"
 "listen","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","int"
