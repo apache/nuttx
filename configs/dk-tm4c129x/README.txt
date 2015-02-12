@@ -496,7 +496,7 @@ f Application Configuration -> Network Utilities
   you can enable like DHCP client (or server) or network name
   resolution.
 
-  By default, the IP address of the SAM4E-EK will be 10.0.0.2 and
+  By default, the IP address of the DK-TM4C129X will be 10.0.0.2 and
   it will assume that your host is the gateway and has the IP address
   10.0.0.1.
 
@@ -526,7 +526,7 @@ f Application Configuration -> Network Utilities
   the first time you ping due to the default handling of the ARP
   table.
 
-  On the host side, you should also be able to ping the SAM4E-EK:
+  On the host side, you should also be able to ping the DK-TM4C129X:
 
     $ ping 10.0.0.2
 
@@ -860,7 +860,7 @@ DK-TM4129X Configuration Options
 Configurations
 ==============
 
-Each DK-TM4129X configuration is maintained in a
+Each DK-TM4C129X configuration is maintained in a
 sub-directory and can be selected as follow:
 
     cd tools
@@ -909,9 +909,12 @@ Where <subdir> is one of the following:
          CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
          CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
 
-    4. This configuration has the network enabled by default.  This can be
-       easily disabled or reconfigured (See see the network related
-       configuration settings above in the section entitled "Networking").
+    4. This configuration has the network enabled by default.  See the
+       paragraph "Using the network with NSH" above).
+
+       Networking can be easily be disabled or reconfigured (See see the
+       network related configuration settings above in the section entitled
+       "Networking").
 
        By default, this configuration assumes a 10.0.0.xx network.  It
        uses a fixed IP address of 10.0.0.2 and assumes that the host is
@@ -932,7 +935,7 @@ Where <subdir> is one of the following:
        link status and gracefully take the network down when the link is
        lost (for example, if the cable is disconnected) and bring the
        network back up when the link becomes available again (for example,
-       if the cable is reconnected.  The paragraph "Network Monitor" above
+       if the cable is reconnected).  The paragraph "Network Monitor" above
        for additional information.
 
     5. I2C6 and support for the on-board TMP-100 temperature sensor are
