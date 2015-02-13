@@ -47,6 +47,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
+#include <stdbool.h>
+
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_RTC
@@ -314,7 +317,6 @@ struct rtc_wkalrm
 struct rtc_lowerhalf_s;
 struct rtc_ops_s
 {
-  
   /* rdtime() returns the current RTC time. */
 
   CODE int (*rdtime)(FAR struct rtc_lowerhalf_s *lower,

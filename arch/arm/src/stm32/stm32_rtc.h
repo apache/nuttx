@@ -99,6 +99,27 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: stm32_rtc_setdatetime
+ *
+ * Description:
+ *   Set the RTC to the provided time. RTC implementations which provide
+ *   up_rtc_getdatetime() (CONFIG_RTC_DATETIME is selected) should provide this
+ *   function.
+ *
+ * Input Parameters:
+ *   tp - the time to use
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_DATETIME
+struct tm;
+int stm32_rtc_setdatetime(FAR const struct tm *tp);
+#endif
+
+/************************************************************************************
  * Name: stm32_rtc_setalarm
  *
  * Description:
@@ -134,6 +155,33 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 
 #ifdef CONFIG_RTC_ALARM
 int stm32_rtc_cancelalarm(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_rtc_lowerhalf
+ *
+ * Description:
+ *   Instantiate the RTC lower half driver for the STM32.  General usage:
+ *
+ *     #include <nuttx/rtc.h>
+ *     #include "stm32_rtc.h>
+ *
+ *     struct rtc_lowerhalf_s *lower;
+ *     lower = stm32_rtc_lowerhalf();
+ *     rtc_initialize(0, lower);
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, a non-NULL RTC lower interface is returned.  NULL is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DRIVER
+struct rtc_lower_half_s;
+struct rtc_lower_half_s *stm32_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN
