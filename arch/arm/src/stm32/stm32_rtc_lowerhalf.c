@@ -77,7 +77,11 @@ struct stm32_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 /* Prototypes for static methods in struct rtc_ops_s */
-/* To be provided */
+
+#ifdef CONFIG_RTC_DATETIME
+static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
+                         FAR const struct rtc_time *rtctime);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -87,7 +91,11 @@ struct stm32_lowerhalf_s
 static const struct rtc_ops_s g_rtc_ops =
 {
   .rdtime     = NULL,
+#ifdef CONFIG_RTC_DATETIME
+  .settime    = stm32_settime,
+#else
   .settime    = NULL,
+#endif
   .almread    = NULL,
   .almset     = NULL,
   .irqpread   = NULL,
@@ -112,6 +120,34 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_settime
+ *
+ * Description:
+ *   Implements the settime() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower   - A reference to RTC lower half driver state structure
+ *   rcttime - The new time to set
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DATETIME
+static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
+                         FAR const struct rtc_time *rtctime)
+{
+  /* This operation depends on the fact that struct rtc_time is cast
+   * compatible with struct tm.
+   */
+
+  return stm32_rtc_setdatetime((FAR const struct tm *)rtctime);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -139,9 +175,9 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
  *
  ****************************************************************************/
 
-struct rtc_lower_half_s *stm32_rtc_lowerhalf(void)
+FAR struct rtc_lower_half_s *stm32_rtc_lowerhalf(void)
 {
-  return (struct rtc_lower_half_s *)&g_rtc_lowerhalf;
+  return (FAR struct rtc_lower_half_s *)&g_rtc_lowerhalf;
 }
 
 #endif /* CONFIG_RTC_DRIVER */
