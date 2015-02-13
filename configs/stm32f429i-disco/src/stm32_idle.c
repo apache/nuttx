@@ -42,12 +42,12 @@
 #include <arch/board/board.h>
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 
-#include <debug.h>
-#include <nuttx/rtc.h>
 #include <arch/irq.h>
 
 #include "up_internal.h"

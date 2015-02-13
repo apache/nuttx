@@ -71,9 +71,9 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/fs.h>
 #include <semaphore.h>
+#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/time.h>
-#include <nuttx/rtc.h>
 #include <nuttx/progmem.h>
 
 #include <nuttx/i2c.h>

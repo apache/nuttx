@@ -45,7 +45,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
-#include <nuttx/rtc.h>
 
 #include <arch/irq.h>
 
@@ -55,6 +54,7 @@
 #include "stm32_pm.h"
 #include "stm32_rcc.h"
 #include "stm32_exti.h"
+#include "stm32_rtc.h"
 
 #include "stm3210e-eval.h"
 
@@ -226,7 +226,7 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
   /* Set the alarm */
 
   g_alarmwakeup = false;
-  ret = up_rtc_setalarm(&alarmtime, stm32_alarmcb);
+  ret = stm32_rtc_setalarm(&alarmtime, stm32_alarmcb);
   if (ret < 0)
     {
       lldbg("Warning: The alarm is already set\n");
@@ -363,7 +363,7 @@ static void stm32_idlepm(void)
 
 #ifdef CONFIG_RTC_ALARM
             stm32_exti_cancel();
-            ret = up_rtc_cancelalarm();
+            ret = stm32_rtc_cancelalarm();
             if (ret < 0)
               {
                 lldbg("Warning: Cancel alarm failed\n");
