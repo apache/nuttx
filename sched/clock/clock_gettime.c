@@ -38,7 +38,6 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/rtc.h>
 
 #include <stdint.h>
 #include <time.h>

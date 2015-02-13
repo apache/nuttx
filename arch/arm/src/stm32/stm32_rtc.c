@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+#include "stm32_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

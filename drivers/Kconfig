@@ -225,7 +225,7 @@ menuconfig RTC
 	default n
 	---help---
 		This selection enables configuration of a real time clock (RTCdriver.
-		See include/nuttx/rtc.h for further watchdog timer driver information.
+		See include/nuttx/rtc.h for further RTC driver information.
 		Most RTC drivers are MCU specific and may require other specific
 		settings.
 

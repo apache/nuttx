@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_rtc.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
  *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
  *
@@ -71,12 +71,25 @@
 #define STM32_RTC_PRESCALER_SECOND      32767   /* Default prescaler to get a second base */
 #define STM32_RTC_PRESCALER_MIN         1       /* Maximum speed of 16384 Hz */
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 #ifndef __ASSEMBLY__
+
+/* The form of an alarm callback */
+
+typedef CODE void (*alarmcb_t)(void);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -85,9 +98,43 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
-/* Set alarm output pin */
+/************************************************************************************
+ * Name: stm32_rtc_setalarm
+ *
+ * Description:
+ *   Set up an alarm.
+ *
+ * Input Parameters:
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
 
-EXTERN void stm32_rtc_settalarmpin(bool activate);
+#ifdef CONFIG_RTC_ALARM
+struct timespec;
+int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+#endif
+
+/************************************************************************************
+ * Name: stm32_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel a pending alarm alarm
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int stm32_rtc_cancelalarm(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

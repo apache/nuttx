@@ -44,11 +44,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/rtc.h>
-
-#ifdef CONFIG_RTC_HIRES
-#  include <nuttx/rtc.h>
-#endif
 
 #include "clock/clock.h"
 

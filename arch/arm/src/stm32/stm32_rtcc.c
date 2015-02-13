@@ -39,13 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/rtc.h>
-
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 
 #include <arch/board/board.h>
 
@@ -904,7 +903,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 }
 
 /************************************************************************************
- * Name: up_rtc_setalarm
+ * Name: stm32_rtc_setalarm
  *
  * Description:
  *   Set up an alarm.  Up to two alarms can be supported (ALARM A and ALARM B).
@@ -919,7 +918,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
   irqstate_t flags;
   int ret = -EBUSY;
