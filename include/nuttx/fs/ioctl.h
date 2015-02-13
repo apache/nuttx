@@ -74,6 +74,7 @@
 #define _DJOYBASE       (0x1500) /* Discrete joystick ioctl commands */
 #define _AJOYBASE       (0x1600) /* Analog joystick ioctl commands */
 #define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
+#define _RTCBASE        (0x1800) /* RTC ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -328,6 +329,12 @@
                                               *       (default)
                                               *     1=fre when empty
                                               * OUT: None */
+
+/* RTC driver ioctl definitions *********************************************/
+/* (see nuttx/include/rtc.h */
+
+#define _RTCIOCVALID(c)   (_IOC_TYPE(c)==_RTCBASE)
+#define _RTCIOC(nr)       _IOC(_RTCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
