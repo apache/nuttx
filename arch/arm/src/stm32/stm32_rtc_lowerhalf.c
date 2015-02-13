@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/rtc.h>
 
 #include "chip.h"
@@ -79,6 +80,8 @@ struct stm32_lowerhalf_s
 /* Prototypes for static methods in struct rtc_ops_s */
 
 #ifdef CONFIG_RTC_DATETIME
+static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
+                        FAR struct rtc_time *rtctime);
 static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
                          FAR const struct rtc_time *rtctime);
 #endif
@@ -90,10 +93,11 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 
 static const struct rtc_ops_s g_rtc_ops =
 {
-  .rdtime     = NULL,
 #ifdef CONFIG_RTC_DATETIME
+  .rdtime     = stm32_rdtime,
   .settime    = stm32_settime,
 #else
+  .rdtime     = NULL,
   .settime    = NULL,
 #endif
   .almread    = NULL,
@@ -120,6 +124,34 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_rdtime
+ *
+ * Description:
+ *   Implements the rdtime() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower   - A reference to RTC lower half driver state structure
+ *   rcttime - The location in which to return the current RTC time.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DATETIME
+static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
+                        FAR struct rtc_time *rtctime)
+{
+  /* This operation depends on the fact that struct rtc_time is cast
+   * compatible with struct tm.
+   */
+
+  return up_rtc_getdatetime((FAR struct tm *)rtctime);
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_settime
