@@ -9788,3 +9788,7 @@
 	* include/nuttx/rtc.h and fs/ioctl.h:  Begin the definition of a proper,
 	  driver based RTC interfaces that is better suited to the architectural
 	  goals of nuttx (2015-02-13).
+	* drivers/timers/timer.c and watchdog.c: Move timer-related drivers from
+	  drivers/ to drivers/timers (2015-02-13).
+	* drivers/timers/rtc.c:  Add an RTC upper half driver.  This is the driver
+	  that is documented in include/nutt/rtc.h (2015-02-13).
