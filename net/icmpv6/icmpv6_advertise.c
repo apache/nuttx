@@ -51,6 +51,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/icmpv6.h>
 
 #include "utils/utils.h"
