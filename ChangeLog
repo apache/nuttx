@@ -9780,3 +9780,11 @@
 	  ticks.  Precision was lost in the millisecond conversion. The fix is
 	  to first convert time to a 64-bit microsecond value, then to the
 	  configured tick value. Noted by David Sidrane (2015-02-13).
+	* include/nuttx/rtc.h, arch.h, and arch/*/src/*_rtc.h: Removed all of the
+	  old, malformed RTC interface definitions from include/nuttx/rtc.h.  The
+	  necessary prototypes have been removed, renamed, scattered to the wind,
+	  hidden under rocks, -- whatever it takes to make it clear that there is
+	  no RTC interface callable from application code (2015-02-13).
+	* include/nuttx/rtc.h and fs/ioctl.h:  Begin the definition of a proper,
+	  driver based RTC interfaces that is better suited to the architectural
+	  goals of nuttx (2015-02-13).
