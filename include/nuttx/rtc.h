@@ -269,7 +269,8 @@
 /* Broken-out time representation used with RTC IOCTL commands:
  *
  * The fields in this structure have the same meaning and ranges as for the
- * tm structure described in gmtime(). 
+ * tm structure described in gmtime().  Further, it is REQUIRED that the
+ * structure be cast compatible with struct tm!  They must be interchangeable.
  */
 
 struct rtc_time 
