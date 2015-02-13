@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc17xx/lpc17_rtc.h
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,10 @@
  * Public Types
  ************************************************************************************/
 
+/* The form of an alarm callback */
+
+typedef void (*alarmcb_t)(void);
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -58,5 +62,25 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: lpc17_rtc_setalarm
+ *
+ * Description:
+ *   Set up an alarm.
+ *
+ * Input Parameters:
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+struct timespec;
+int lpc17_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+#endif
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_RTC_H */

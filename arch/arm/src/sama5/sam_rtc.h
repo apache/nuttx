@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_rtc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,25 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
 #ifndef __ASSEMBLY__
+
+/* The form of an alarm callback */
+
+typedef void (*alarmcb_t)(void);
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -62,6 +75,26 @@ extern "C" {
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: sam_rtc_setalarm
+ *
+ * Description:
+ *   Set up an alarm.
+ *
+ * Input Parameters:
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+struct timespec;
+int sam_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

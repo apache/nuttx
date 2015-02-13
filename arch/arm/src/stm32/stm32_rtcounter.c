@@ -247,7 +247,7 @@ static inline void stm32_rtc_wait4rsf(void)
 }
 
 /************************************************************************************
- * Name: up_rtc_breakout
+ * Name: stm32_rtc_breakout
  *
  * Description:
  *   Set the RTC to the provided time.
@@ -261,8 +261,8 @@ static inline void stm32_rtc_wait4rsf(void)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-static void up_rtc_breakout(FAR const struct timespec *tp,
-                            FAR struct rtc_regvals_s *regvals)
+static void stm32_rtc_breakout(FAR const struct timespec *tp,
+                               FAR struct rtc_regvals_s *regvals)
 {
   uint64_t frac;
   uint32_t cnt;
@@ -281,8 +281,8 @@ static void up_rtc_breakout(FAR const struct timespec *tp,
   regvals->ovf  = ovf;
 }
 #else
-static inline void up_rtc_breakout(FAR const struct timespec *tp,
-                                   FAR struct rtc_regvals_s *regvals)
+static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
+                                      FAR struct rtc_regvals_s *regvals)
 {
   /* The low-res timer is easy... tv_sec holds exactly the value needed by the
    * CNTH/CNTL registers.
@@ -572,7 +572,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Break out the time values */
 
-  up_rtc_breakout(tp, &regvals);
+  stm32_rtc_breakout(tp, &regvals);
 
   /* Then write the broken out values to the RTC counter and BKP overflow register
    * (hi-res mode only)
@@ -592,7 +592,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 }
 
 /************************************************************************************
- * Name: up_rtc_setalarm
+ * Name: stm32_rtc_setalarm
  *
  * Description:
  *   Set up an alarm.
@@ -607,7 +607,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
   struct rtc_regvals_s regvals;
   irqstate_t flags;
@@ -624,7 +624,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       /* Break out the time values */
 
-      up_rtc_breakout(tp, &regvals);
+      stm32_rtc_breakout(tp, &regvals);
 
       /* Enable RTC alarm */
 
@@ -648,7 +648,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 #endif
 
 /************************************************************************************
- * Name: up_rtc_cancelalarm
+ * Name: stm32_rtc_cancelalarm
  *
  * Description:
  *   Cancel a pending alarm alarm
@@ -662,7 +662,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int up_rtc_cancelalarm(void)
+int stm32_rtc_cancelalarm(void)
 {
   irqstate_t flags;
   int ret = -ENODATA;

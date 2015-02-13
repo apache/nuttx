@@ -55,6 +55,7 @@
 #include "chip/efm32_burtc.h"
 
 #include "efm32_rmu.h"
+#include "efm32_rtc.h"
 #include "clock/clock.h"
 
 /************************************************************************************
@@ -496,7 +497,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 }
 
 /************************************************************************************
- * Name: up_rtc_setalarm
+ * Name: efm32_rtc_setalarm
  *
  * Description:
  *   Set up an alarm.
@@ -512,7 +513,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
 #ifdef CONFIG_RTC_ALARM
 #error "Sorry ! not yet implemented, just copied from STM32"
-int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
   struct rtc_regvals_s regvals;
   irqstate_t flags;
@@ -529,7 +530,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       /* Break out the time values */
 
-      up_rtc_breakout(tp, &regvals);
+      efm32_rtc_breakout(tp, &regvals);
 
       /* Enable RTC alarm */
 
@@ -554,7 +555,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 #endif
 
 /************************************************************************************
- * Name: up_rtc_cancelalarm
+ * Name: efm32_rtc_cancelalarm
  *
  * Description:
  *   Cancel a pending alarm alarm
@@ -569,7 +570,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
 #ifdef CONFIG_RTC_ALARM
 #error "Sorry ! not yet implemented, just copied from STM32"
-int up_rtc_cancelalarm(void)
+int efm32_rtc_cancelalarm(void)
 {
   irqstate_t flags;
   int ret = -ENODATA;
