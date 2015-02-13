@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock/clock_systimer.c
  *
- *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,10 +135,9 @@ uint64_t clock_systimer64(void)
 
   (void)up_timer_gettime(&ts);
 
-  /* Convert to a 64-bit value */
+  /* Convert to a 64-bit value in microseconds, then in clock tick units */
 
-  return MSEC2TICK(1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000);
-
+  return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
 #else
   /* Return the current system time */
 
