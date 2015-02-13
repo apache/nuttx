@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/timer.c
+ * drivers/timers/timer.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
