@@ -465,12 +465,6 @@ void os_start(void)
   fs_initialize();
 #endif
 
-#ifdef CONFIG_NET
-  /* Initialize the network system */
-
-  net_initialize();
-#endif
-
   /* The processor specific details of running the operating system
    * will be handled here.  Such things as setting up interrupt
    * service routines and starting the clock are some of the things
@@ -478,6 +472,12 @@ void os_start(void)
    */
 
   up_initialize();
+
+#ifdef CONFIG_NET
+  /* Initialize the network system */
+
+  net_initialize();
+#endif
 
 #ifdef CONFIG_MM_SHM
   /* Initialize shared memory support */
