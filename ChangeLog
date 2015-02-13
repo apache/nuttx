@@ -9771,3 +9771,12 @@
 	* configs/viewtool-stm32f107:  Add support for an optional, add-on
 	  Freescale MPL115A baramoter.  From Alan Carvalho de Assis
 	  (2015-02-12).
+	* sched/clock/clock_systimer.c: Fix a problem in clock_systimer64 that
+	  occurs when (1) the 64-bit system time is enabled, and (2) the value
+	  of CONFIG_USEC_PER_TICK is less than 1 milliseconds (such as when using
+	  the tickless mode of operation).  In that case, the conversion of time
+	  to 64-bit millisecond value in clock_systmer64() causes some bad times
+	  to be returned.  Time was converted to milliseconds, then to configured
+	  ticks.  Precision was lost in the millisecond conversion. The fix is
+	  to first convert time to a 64-bit microsecond value, then to the
+	  configured tick value. Noted by David Sidrane (2015-02-13).
