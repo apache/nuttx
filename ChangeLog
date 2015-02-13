@@ -9792,3 +9792,11 @@
 	  drivers/ to drivers/timers (2015-02-13).
 	* drivers/timers/rtc.c:  Add an RTC upper half driver.  This is the driver
 	  that is documented in include/nutt/rtc.h (2015-02-13).
+	* arch/arm/src/stm32/stm32_rtcc.c and stm32_rtc.h: Break out a new internal
+	  interface, stm32_rtc_setdatetime().  This eliminates some un-necessary
+	  time conversions.  From Freddie Chopin (2015-02-13).
+	* arch/arm/src/stm32/stm32_rtc_lowerhalf.c, Make.defs, and stm32_rtc.h: Add
+	  a skeleton implementation of the RTC lower half interface at
+	  arch/arm/src/stm32/stm32_rtc_lowerhalf.c.  This is just the framework for
+	  the RTC lower half.  None of the interface methods have yet been
+	  implemented (2015-02-13).
