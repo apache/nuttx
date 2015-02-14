@@ -9803,3 +9803,10 @@
 	* net/icmpv6/icmpv6_advertise.c and icmpv6_solicit.c:  Add inclusion of
 	  nuttx/net.h to two files.  Without these there can be compilation errors
 	  in certain configurations.  From Max Neklyudov (2015-02-13).
+	* net/net_initialize.c, sched/init/os_start.c, and a few other files:
+	  Divide net_intiialize() into net_setup() and net_initialize() to solve
+	  a chicken-and-egg problem.  net_setup() must be called before
+	  up_initialize() is called so that networking data structures are ready
+	  to register new network devices.  net_initialize() now does only timer
+	  related operations and is called AFTER up_initialize() where the timers
+	  are configured.  Problem note by Max Neklyudov (2015-02-14).
