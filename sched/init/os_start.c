@@ -466,7 +466,9 @@ void os_start(void)
 #endif
 
 #ifdef CONFIG_NET
-  /* Initialize the network system */
+  /* Initialize the networking systeming.  This must be done prior to
+   * registering network drivers.
+   */
 
   net_initialize();
 #endif

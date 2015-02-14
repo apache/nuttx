@@ -9800,9 +9800,6 @@
 	  arch/arm/src/stm32/stm32_rtc_lowerhalf.c.  This is just the framework for
 	  the RTC lower half.  None of the interface methods have yet been
 	  implemented (2015-02-13).
-	* sched/init/os_start.c: Move the initialization of the networking
-	  subsystem to AFTER up_initialize is called.  From Macs Neklyudov
-	  (2015-02-13).
 	* net/icmpv6/icmpv6_advertise.c and icmpv6_solicit.c:  Add inclusion of
 	  nuttx/net.h to two files.  Without these there can be compilation errors
 	  in certain configurations.  From Max Neklyudov (2015-02-13).
