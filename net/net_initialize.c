@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_sockets.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,11 +83,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_initialize
+ * Name: net_setup
  *
  * Description:
  *   This is called from the OS initialization logic at power-up reset in
- *   order to configure the networking subsystem.
+ *   order to configure networking data structures.  This is called prior
+ *   to platform-specific driver initialization so that the networking
+ *   subsystem is prepared to deal with network driver initialization
+ *   actions.
+ *
+ *   Actions performed in this initialization phase assume that base OS
+ *   facilities such as semaphores are available but this logic cannot
+ *   depend upon OS resources such as interrupts or timers which are not
+ *   yet available.
  *
  * Input Parameters:
  *   None
@@ -97,7 +105,7 @@
  *
  ****************************************************************************/
 
-void net_initialize(void)
+void net_setup(void)
 {
   /* Initialize the locking facility */
 
@@ -108,9 +116,9 @@ void net_initialize(void)
   arp_reset();
 
 #ifdef CONFIG_NET_IPv6
-  /* Initialize the Neighbor Table */
+  /* Initialize the Neighbor Table data structures */
 
-  neighbor_initialize();
+  neighbor_setup();
 #endif
 
 #ifdef CONFIG_NET_IOB
@@ -173,6 +181,32 @@ void net_initialize(void)
   /* Initialize the socket layer */
 
   netdev_seminit();
+#endif
+}
+
+/****************************************************************************
+ * Name: net_initialize
+ *
+ * Description:
+ *   This function is called from the OS initialization logic at power-up
+ *   reset AFTER initialization of hardware facilities such as timers and
+ *   interrupts.   This logic completes the initialization started by
+ *   net_setup().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void net_initialize(void)
+{
+#ifdef CONFIG_NET_IPv6
+  /* Configure Neighbor Table ageing */
+
+  neighbor_initialize();
 #endif
 
   /* Initialize the periodic ARP timer */

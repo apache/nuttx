@@ -171,6 +171,50 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: net_setup
+ *
+ * Description:
+ *   This is called from the OS initialization logic at power-up reset in
+ *   order to configure networking data structures.  This is called prior
+ *   to platform-specific driver initialization so that the networking
+ *   subsystem is prepared to deal with network driver initialization
+ *   actions.
+ *
+ *   Actions performed in this initialization phase assume that base OS
+ *   facilities such as semaphores are available but this logic cannot
+ *   depend upon OS resources such as interrupts or timers which are not
+ *   yet available.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void net_setup(void);
+
+/****************************************************************************
+ * Name: net_initialize
+ *
+ * Description:
+ *   This function is called from the OS initialization logic at power-up
+ *   reset AFTER initialization of hardware facilities such as timers and
+ *   interrupts.   This logic completes the initialization started by
+ *   net_setup().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void net_initialize(void);
+
+/****************************************************************************
  * Critical section management.  The NuttX configuration setting
  * CONFIG_NET_NOINT indicates that uIP not called from the interrupt level.
  * If CONFIG_NET_NOINTS is defined, then these will map to semaphore
@@ -293,23 +337,6 @@ void net_setipid(uint16_t id);
  ****************************************************************************/
 
 int net_checksd(int fd, int oflags);
-
-/****************************************************************************
- * Name: net_initialize
- *
- * Description:
- *   This is called from the OS initialization logic at power-up reset in
- *   order to configure the networking subsystem.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void net_initialize(void);
 
 /****************************************************************************
  * Name:

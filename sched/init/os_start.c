@@ -466,11 +466,15 @@ void os_start(void)
 #endif
 
 #ifdef CONFIG_NET
-  /* Initialize the networking systeming.  This must be done prior to
-   * registering network drivers.
+  /* Initialize the networking system.  Network initialization is
+   * performed in two steps:  (1) net_setup() initializes static
+   * configuration of the network support.  This must be done prior
+   * to registering network drivers by up_initialize().  This step
+   * cannot require upon any hardware-depending features such as
+   * timers or interrupts.
    */
 
-  net_initialize();
+  net_setup();
 #endif
 
   /* The processor specific details of running the operating system
@@ -480,6 +484,14 @@ void os_start(void)
    */
 
   up_initialize();
+
+#ifdef CONFIG_NET
+  /* Complete initialization the networking system now that interrupts
+   * and timers have been configured by up_initialize().
+   */
+
+  net_initialize();
+#endif
 
 #ifdef CONFIG_MM_SHM
   /* Initialize shared memory support */

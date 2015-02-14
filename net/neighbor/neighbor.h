@@ -107,10 +107,33 @@ extern uint32_t g_neighbor_polltime;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: neighbor_setup
+ *
+ * Description:
+ *   Initialize Neighbor table data structures.  This function is called
+ *   prior to platform-specific driver initialization so that the networking
+ *   subsystem is prepared to deal with network driver initialization
+ *   actions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void neighbor_setup(void);
+
+/****************************************************************************
  * Name: neighbor_initialize
  *
  * Description:
- *  Initialize Neighbor table support
+ *  Initialize Neighbor ageing.  This function is called from the OS
+ *  initialization logic at power-up reset AFTER initialization of hardware
+ *  facilities such as timers and interrupts.  This logic completes the
+ *  initialization started by neighbor_setup.
+ *
  *
  * Input Parameters:
  *   None
