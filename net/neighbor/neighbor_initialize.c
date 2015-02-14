@@ -109,7 +109,7 @@ void neighbor_setup(void)
  *
  ****************************************************************************/
 
-void neighbor_initialize(void);
+void neighbor_initialize(void)
 {
   /* Initialize the time of the last poll */
 
