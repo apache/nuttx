@@ -50,6 +50,7 @@
 #include <winsock2.h>
 #include <iphlpapi.h>
 
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
