@@ -9810,3 +9810,5 @@
 	  to register new network devices.  net_initialize() now does only timer
 	  related operations and is called AFTER up_initialize() where the timers
 	  are configured.  Problem note by Max Neklyudov (2015-02-14).
+	* include/time.h and sys/time.h: Move struct timeval from include/time.h
+	  to include/sys/time.h where it belongs (2015-02-15).
