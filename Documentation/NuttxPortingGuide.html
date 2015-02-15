@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: November 15, 2014</p>
+      <p>Last Updated: February 15, 2014</p>
     </td>
   </tr>
 </table>
@@ -190,8 +190,10 @@
        <a href="#pwmdrivers">6.3.12 PWM Drivers</a><br>
        <a href="#candrivers">6.3.13 CAN Drivers</a><br>
        <a href="#quadencoder">6.3.14 Quadrature Encoder Drivers</a><br>
-       <a href="#wdogdriver">6.3.15 Watchdog Timer Drivers</a><br>
-       <a href="#kbddriver">6.3.16 Keyboard/Keypad Drivers</a><br>
+       <a href="#timerdriver">6.3.15 Timer Drivers</a><br>
+       <a href="#rtcriver">6.3.16 RTC Drivers</a><br>
+       <a href="#wdogdriver">6.3.17 Watchdog Timer Drivers</a><br>
+       <a href="#kbddriver">6.3.18 Keyboard/Keypad Drivers</a><br>
     </ul>
     <a href="#pwrmgmt">6.4 Power Management</a>
     <ul>
@@ -5184,7 +5186,65 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="wdogdriver">6.3.15 Watchdog Timer Drivers</a></h3>
+<h3><a name="timerdriver">6.3.15 Timer Drivers</a></h3>
+<p>
+  NuttX supports a low-level, two-part timer driver.
+</p>
+<ol>
+  <li>
+    An &quot;upper half&quot;, generic driver that provides the common timer interface to application level code, and
+  </li>
+  <li>
+    A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the timer functionality.
+  </li>
+</ol>
+<p>
+  Files supporting the timer driver can be found in the following locations:
+</p>
+<ul>
+  <li><b>Interface Definition</b>.
+    The header file for the NuttX timer driver reside at <code>include/nuttx/timer.h</code>.
+    This header file includes both the application level interface to the timer driver as well as the interface between the &quot;upper half&quot; and &quot;lower half&quot; drivers.
+    The timer driver uses a standard character driver framework.
+  </li>
+  <li><b>&quot;Upper Half&quot; Driver</b>.
+    The generic, &quot;upper half&quot; timer driver resides at <code>drivers/timers/timer.c</code>.
+  </li>
+  <li><b>&quot;Lower Half&quot; Drivers</b>.
+    Platform-specific timer drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> timer peripheral devices.
+  </li>
+</ul>
+
+<h3><a name="rtcriver">6.3.16 RTC Drivers</a></h3>
+<p>
+  NuttX supports a low-level, two-part RealTime Clock (RTC) driver.
+</p>
+<ol>
+  <li>
+    An &quot;upper half&quot;, generic driver that provides the common RTC interface to application level code, and
+  </li>
+  <li>
+    A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the RTC functionality.
+  </li>
+</ol>
+<p>
+  Files supporting the RTC driver can be found in the following locations:
+</p>
+<ul>
+  <li><b>Interface Definition</b>.
+    The header file for the NuttX RTC driver reside at <code>include/nuttx/rtc.h</code>.
+    This header file includes both the application level interface to the RTC driver as well as the interface between the &quot;upper half&quot; and &quot;lower half&quot; drivers.
+    The RTC driver uses a standard character driver framework.
+  </li>
+  <li><b>&quot;Upper Half&quot; Driver</b>.
+    The generic, &quot;upper half&quot; RTC driver resides at <code>drivers/timers/rtc.c</code>.
+  </li>
+  <li><b>&quot;Lower Half&quot; Drivers</b>.
+    Platform-specific RTC drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> RTC peripheral devices.
+  </li>
+</ul>
+
+<h3><a name="wdogdriver">6.3.17 Watchdog Timer Drivers</a></h3>
 <p>
   NuttX supports a low-level, two-part watchdog timer driver.
 </p>
@@ -5197,7 +5257,7 @@ void board_led_off(int led);
   </li>
 </ol>
 <p>
-  Files supporting the watchdog timer can be found in the following locations:
+  Files supporting the watchdog timer driver can be found in the following locations:
 </p>
 <ul>
   <li><b>Interface Definition</b>.
@@ -5206,14 +5266,14 @@ void board_led_off(int led);
     The watchdog timer driver uses a standard character driver framework.
   </li>
   <li><b>&quot;Upper Half&quot; Driver</b>.
-    The generic, &quot;upper half&quot; watchdog timer driver resides at <code>drivers/watchdog.c</code>.
+    The generic, &quot;upper half&quot; watchdog timer driver resides at <code>drivers/timers/watchdog.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
     Platform-specific watchdog timer drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> watchdog timer peripheral devices.
   </li>
 </ul>
 
-<h3><a name="kbddriver">6.3.16 Keyboard/Keypad Drivers</a></h3>
+<h3><a name="kbddriver">6.3.18 Keyboard/Keypad Drivers</a></h3>
 <p>
   <b>Keypads vs. Keyboards</b>
   Keyboards and keypads are really the same devices for NuttX.
