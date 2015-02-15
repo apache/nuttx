@@ -94,8 +94,9 @@
 #define PRIOR_OTHER_MIN   0
 #define PRIOR_OTHER_MAX 255
 
-/* Scheduling Priorities.  NOTE:  Only the idle task can take
- * the true minimum priority. */
+/* Scheduling Priorities.  NOTE:  Only the idle task can take the true
+ * minimum priority.
+ */
 
 #define SCHED_PRIORITY_MAX     255
 #define SCHED_PRIORITY_DEFAULT 100

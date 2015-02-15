@@ -79,6 +79,7 @@
  ****************************************************************************/
 
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <queue.h>
 #include <time.h>
 #include <netinet/in.h>

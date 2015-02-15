@@ -104,13 +104,15 @@ typedef uint32_t fd_set[__SELECT_NUINT32];
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
-                  FAR fd_set *exceptfds, FAR struct timeval *timeout);
+struct timeval;
+int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
+           FAR fd_set *exceptfds, FAR struct timeval *timeout);
 
 #undef EXTERN
 #if defined(__cplusplus)

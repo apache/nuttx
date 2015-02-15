@@ -159,12 +159,6 @@ struct sigevent;
  * Public Data
  ********************************************************************************/
 
-/* extern char *tznames[]; not supported */
-
-/********************************************************************************
- * Public Function Prototypes
- ********************************************************************************/
-
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -173,6 +167,19 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/* daylight - Daylight savings time flag */
+/* EXTERN int daylight; not supported */
+
+/* timezone - Difference from UTC and local standard time
+/* EXTERN long int timezone; not supported */
+
+/* tzname[] - Timezone strings */
+/* EXTERN FAR char *tzname[]; not supported */
+
+/********************************************************************************
+ * Public Function Prototypes
+ ********************************************************************************/
 
 clock_t clock(void);
 

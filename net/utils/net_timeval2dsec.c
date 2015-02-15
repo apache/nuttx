@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/time.h>
+
 #include <nuttx/clock.h>
 
 #include "utils/utils.h"

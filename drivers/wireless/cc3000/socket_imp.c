@@ -39,11 +39,13 @@
  * Included Files
  *****************************************************************************/
 
+#include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <debug.h>
 #include <stdlib.h>
+
 #include <nuttx/wireless/cc3000/hci.h>
 #include "cc3000_socket.h"
 #include <nuttx/wireless/cc3000/evnt_handler.h>

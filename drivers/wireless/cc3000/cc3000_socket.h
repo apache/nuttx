@@ -387,6 +387,8 @@ long cc3000_connect_impl(long sd, FAR const struct sockaddr *addr, socklen_t add
  *
  *****************************************************************************/
 
+struct timeval;
+
 int cc3000_select_impl(long nfds, TICC3000fd_set *readfds, TICC3000fd_set *writefds,TICC3000fd_set *exceptfds,
            struct timeval *timeout);
 
