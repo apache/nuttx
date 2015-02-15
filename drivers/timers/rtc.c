@@ -264,6 +264,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+#ifdef CONFIG_RTC_ALARM
     /* RTC_ALM_READ reads the alarm time (for RTCs that support alarms)
      *
      * Argument: A writeable reference to a struct rtc_time to receive the
@@ -298,7 +299,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_ALARM */
 
+#ifdef CONFIG_RTC_PERIODIC
     /* RTC_IRQP_READ read the frequency for periodic interrupts (for RTCs
      * that support periodic interrupts)
      *
@@ -331,7 +334,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_PERIODIC */
 
+#ifdef CONFIG_RTC_ALARM
     /* RTC_AIE_ON enable alarm interrupts (for RTCs that support alarms)
      *
      * Argument: None
@@ -360,7 +365,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_ALARM */
 
+#ifdef CONFIG_RTC_ONESEC
     /* RTC_UIE_ON enable the interrupt on every clock update (for RTCs that
      * support this once-per-second interrupt).
      *
@@ -390,7 +397,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_ONESEC */
 
+#ifdef CONFIG_RTC_PERIODIC
     /* RTC_PIE_ON enable the periodic interrupt (for RTCs that support these
      * periodic interrupts).
      *
@@ -420,7 +429,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_PERIODIC */
 
+#ifdef CONFIG_RTC_EPOCHYEAR
    /* RTC_EPOCH_READ read the Epoch.
     *
     * Argument: A reference to a writeable unsigned low variable that will
@@ -452,7 +463,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_EPOCHYEAR */
 
+#ifdef CONFIG_RTC_ALARM
     /* RTC_WKALM_RD read the current alarm
      *
      * Argument: A writeable reference to struct rtc_wkalrm to receive the
@@ -487,6 +500,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif /* CONFIG_RTC_ALARM */
 
     default:
       ret = -ENOTTY;

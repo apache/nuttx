@@ -79,12 +79,10 @@ struct stm32_lowerhalf_s
  ****************************************************************************/
 /* Prototypes for static methods in struct rtc_ops_s */
 
-#ifdef CONFIG_RTC_DATETIME
 static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
                         FAR struct rtc_time *rtctime);
 static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
                          FAR const struct rtc_time *rtctime);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -93,24 +91,33 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 
 static const struct rtc_ops_s g_rtc_ops =
 {
-#ifdef CONFIG_RTC_DATETIME
   .rdtime     = stm32_rdtime,
   .settime    = stm32_settime,
-#else
-  .rdtime     = NULL,
-  .settime    = NULL,
-#endif
+#ifdef CONFIG_RTC_ALARM
   .almread    = NULL,
   .almset     = NULL,
+#endif
+#ifdef CONFIG_RTC_PERIODIC
   .irqpread   = NULL,
   .irqpset    = NULL,
+#endif
+#ifdef CONFIG_RTC_ALARM
   .aie        = NULL,
+#endif
+#ifdef CONFIG_RTC_ONESEC
   .uie        = NULL,
+#endif
+#ifdef CONFIG_RTC_PERIODIC
   .pie        = NULL,
+#endif
+#ifdef CONFIG_RTC_EPOCHYEAR
   .rdepoch    = NULL,
   .setepoch   = NULL,
+#endif
+#ifdef CONFIG_RTC_ALARM
   .rdwkalm    = NULL,
   .setwkalm   = NULL,
+#endif
   .destroy    = NULL,
 };
 
@@ -141,17 +148,62 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_DATETIME
 static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
                         FAR struct rtc_time *rtctime)
 {
+#if defined(CONFIG_RTC_DATETIME)
   /* This operation depends on the fact that struct rtc_time is cast
    * compatible with struct tm.
    */
 
   return up_rtc_getdatetime((FAR struct tm *)rtctime);
-}
+
+#elif defined(CONFIG_RTC_HIRES)
+  FAR struct timespec ts;
+  int ret;
+
+  /* Get the higher resolution time */
+
+  int ret = up_rtc_gettime(&ts);
+  if (ret < 0)
+    {
+      goto errout_with_errno;
+    }
+
+  /* Convert the one second epoch time to a struct tm.  This operation
+   * depends on the fact that struct rtc_time and struct tm are cast
+   * compatible.
+   */
+
+  if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime)
+    {
+      goto errout_with_errno;
+    }
+
+errout_with_errno;
+  ret = get_errno();
+  DEBUGASSERT(ret > 0);
+  return -ret;
+
+#else
+  FAR struct time_t timer;
+
+  /* The resolution of time is only 1 second */
+
+  timer = up_rtc_time();
+
+  /* Convert the one second epoch time to a struct tm */
+
+  if (!gmtime_r(&timer, rtctime)
+    {
+      int errcode = get_errno();
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  return OK;
 #endif
+}
 
 /****************************************************************************
  * Name: stm32_settime
@@ -169,17 +221,32 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_DATETIME
 static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
                          FAR const struct rtc_time *rtctime)
 {
+#ifdef CONFIG_RTC_DATETIME
   /* This operation depends on the fact that struct rtc_time is cast
    * compatible with struct tm.
    */
 
   return stm32_rtc_setdatetime((FAR const struct tm *)rtctime);
-}
+
+#else
+  struct timespec ts;
+  int ret;
+
+  /* Convert the struct rtc_time to a time_t.  Here we assume that struct
+   * rtc_time is cast compatible with struct tm.
+   */
+
+  ts.tv_sec = mktime((FAR const struct tm *)rtctime)
+  ts.tv_nsec = 0;
+
+  /* Now set the time (to one second accuracy) */
+
+  return up_rtc_settime(&ts);
 #endif
+}
 
 /****************************************************************************
  * Public Functions

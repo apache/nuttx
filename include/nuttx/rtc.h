@@ -286,6 +286,7 @@ struct rtc_time
   int tm_isdst;    /* unused */
 };
 
+#ifdef CONFIG_RTC_ALARM
 /* Structure used with the RTC_WKALM_RD and RTC_WKALM_SET IOCTL commands.
  *
  * The enabled flag is used to enable or disable the alarm interrupt, or to
@@ -302,6 +303,7 @@ struct rtc_wkalrm
   unsigned char pending;
   struct rtc_time time;
 };
+#endif
 
 /* The RTC driver is implemented as a common, upper-half character driver
  * that provides the RTC driver structure and a lower-level, hardware
@@ -328,6 +330,7 @@ struct rtc_ops_s
   CODE int (*settime)(FAR struct rtc_lowerhalf_s *lower,
                       FAR const struct rtc_time *rtctime);
 
+#ifdef CONFIG_RTC_ALARM
   /* almread reads the alarm time (for RTCs that support alarms) */
 
   CODE int (*almread)(FAR struct rtc_lowerhalf_s *lower,
@@ -337,7 +340,9 @@ struct rtc_ops_s
 
   CODE int (*almset)(FAR struct rtc_lowerhalf_s *lower,
                      FAR const struct rtc_time *almtime);
+#endif
 
+#ifdef CONFIG_RTC_PERIODIC
   /* irqpread the frequency for periodic interrupts (for RTCs that support
    * periodic interrupts)
    */
@@ -351,23 +356,31 @@ struct rtc_ops_s
 
   CODE int (*irqpset)(FAR struct rtc_lowerhalf_s *lower,
                       unsigned long irqpfreq);
+#endif
 
+#ifdef CONFIG_RTC_ALARM
   /* aie enable/disable alarm interrupts (for RTCs that support alarms) */
 
   CODE int (*aie)(FAR struct rtc_lowerhalf_s *lower, bool enable);
+#endif
 
+#ifdef CONFIG_RTC_ONESEC
   /* uie enable/disable the interrupt on every clock update (for RTCs that
    * support this once-per-second interrupt).
    */
 
   CODE int (*uie)(FAR struct rtc_lowerhalf_s *lower, bool enable);
+#endif
 
+#ifdef CONFIG_RTC_PERIODIC
   /* pie enable the periodic interrupt (for RTCs that support these periodic
    * interrupts).
    */
 
   CODE int (*pie)(FAR struct rtc_lowerhalf_s *lower, bool enable);
+#endif
 
+#ifdef CONFIG_RTC_EPOCHYEAR
   /* rdepoch read the Epoch. */
 
   CODE int (*rdepoch)(FAR struct rtc_lowerhalf_s *lower,
@@ -377,7 +390,9 @@ struct rtc_ops_s
 
   CODE int (*setepoch)(FAR struct rtc_lowerhalf_s *lower,
                        unsigned long epoch);
+#endif
 
+#ifdef CONFIG_RTC_ALARM
   /* rdwkalm read the current alarm */
 
   CODE int (*rdwkalm)(FAR struct rtc_lowerhalf_s *lower,
@@ -387,6 +402,7 @@ struct rtc_ops_s
 
   CODE int (*setwkalm)(FAR struct rtc_lowerhalf_s *lower,
                        FAR const struct rtc_wkalrm *wkalrm);
+#endif
 
    /* The driver has been unlinked and there are no further open references
     * to the driver.

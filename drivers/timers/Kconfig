@@ -61,13 +61,6 @@ config RTC_FREQUENCY
 
 endif # !RTC_DATETIME
 
-config RTC_ALARM
-	bool "RTC Alarm Support"
-	default n
-	---help---
-		Enable if the RTC hardware supports setting of an alarm.  A callback
-		function will be executed when the alarm goes off.
-
 config RTC_DRIVER
 	bool "RTC Driver Support"
 	default n
@@ -76,6 +69,45 @@ config RTC_DRIVER
 		driver. See include/nuttx/rtc.h for further RTC driver
 		information.
 
+if RTC_DRIVER
+
+config RTC_ALARM
+	bool "RTC Alarm Support"
+	default n
+	---help---
+		Enable if the RTC hardware supports setting of an alarm.  A callback
+		function will be executed when the alarm goes off.
+
+config RTC_PERIODIC
+	bool "RTC Periodic Interrupts"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Add interrupt controls for RTCs that support periodic interrupts.
+
+config RTC_ONESEC
+	bool "RTC Once-per-second interrupts"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Add interrupt controls for RTCs that support once-per-second interrupts.
+
+config RTC_EPOCHYEAR
+	bool "RTC epoch year"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Add controls for RTCs that support epoch year settings.
+
+		Many RTCs encode the year in an 8-bit register which is either interpreted
+		as an 8-bit binary number or as a BCD number. In both cases, the number is
+		interpreted relative to this RTC's Epoch. The RTC's Epoch is initialized to
+		1900 on most systems but on Alpha and MIPS it might also be initialized to
+		1952, 1980, or 2000, depending on the value of an RTC register for the year.
+		With some RTCs, these operations can be used to read or to set the RTC's
+		Epoch, respectively.
+
+endif # RTC_DRIVER
 endif # RTC
 
 menuconfig WATCHDOG
