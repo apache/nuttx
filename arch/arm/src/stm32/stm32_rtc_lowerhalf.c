@@ -233,13 +233,12 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 
 #else
   struct timespec ts;
-  int ret;
 
   /* Convert the struct rtc_time to a time_t.  Here we assume that struct
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec = mktime((FAR const struct tm *)rtctime)
+  ts.tv_sec  = mktime((FAR const struct tm *)rtctime)
   ts.tv_nsec = 0;
 
   /* Now set the time (to one second accuracy) */
