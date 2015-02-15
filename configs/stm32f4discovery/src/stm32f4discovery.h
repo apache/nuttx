@@ -67,6 +67,7 @@
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
 #define HAVE_SDIO       1
+#define HAVE_RTC_DRIVER 1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
@@ -131,6 +132,12 @@
 #    warning "SDIO initialization cannot be perfomed on the IDLE thread"
 #    undef HAVE_SDIO
 #  endif
+#endif
+
+/* Check if we can support the RTC driver */
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
