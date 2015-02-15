@@ -180,8 +180,8 @@ int stm32_rtc_cancelalarm(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_DRIVER
-struct rtc_lower_half_s;
-FAR struct rtc_lower_half_s *stm32_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s;
+FAR struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN
