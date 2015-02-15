@@ -273,9 +273,9 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-FAR struct rtc_lower_half_s *stm32_rtc_lowerhalf(void)
+FAR struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void)
 {
-  return (FAR struct rtc_lower_half_s *)&g_rtc_lowerhalf;
+  return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 
 #endif /* CONFIG_RTC_DRIVER */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f4discovery/src/stm32_bringup.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,23 @@
 #  include <apps/usbmonitor.h>
 #endif
 
+#include "stm32.h"
+
 #ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"
 #endif
 
-#include "stm32.h"
 #include "stm32f4discovery.h"
+
+/* Conditional logic in stm32f4discover.h will determine if certain features
+ * are supported.  Tests for these features need to be made after including
+ * stm32f4discovery.h.
+ */
+
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/rtc.h>
+#  include "stm32_rtc.h"
+#endif
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -79,6 +90,9 @@
 
 int stm32_bringup(void)
 {
+#ifdef HAVE_RTC_DRIVER
+  FAR struct rtc_lowerhalf_s *lower;
+#endif
   int ret = OK;
 
 #ifdef HAVE_SDIO
@@ -87,7 +101,7 @@ int stm32_bringup(void)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-      fdbg("Failed to initialize MMC/SD driver: %d\n", ret);
+      fdbg("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
       return ret;
     }
 #endif
@@ -100,7 +114,7 @@ int stm32_bringup(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      udbg("Failed to initialize USB host: %d\n", ret);
+      udbg("ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif
@@ -111,7 +125,32 @@ int stm32_bringup(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      udbg("Start USB monitor: %d\n", ret);
+      udbg("ERROR: Failed to start USB monitor: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
+
+  lower = stm32_rtc_lowerhalf();
+  if (!lower)
+    {
+      sdbg("ERROR: Failed to instantiate the RTC lower-half driver\n");
+      return -ENOMEM;
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          sdbg("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          return ret;
+        }
     }
 #endif
 
