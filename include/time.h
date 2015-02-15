@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/time.h
  *
- *   Copyright (C) 2007-2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,6 @@
 
 #define CLOCK_REALTIME     0
 
-
 /* Clock that cannot be set and represents monotonic time since some
  * unspecified starting point. It is not affected by changes in the
  * system time-of-day clock.
@@ -104,10 +103,15 @@
 /********************************************************************************
  * Public Types
  ********************************************************************************/
+/* Scalar types */
 
 typedef uint32_t  time_t;         /* Holds time in seconds */
 typedef uint8_t   clockid_t;      /* Identifies one time base source */
 typedef FAR void *timer_t;        /* Represents one POSIX timer */
+
+/* struct timespec is the standard representation of time as seconds and
+ * nanoseconds.
+ */
 
 struct timespec
 {
@@ -115,24 +119,27 @@ struct timespec
   long   tv_nsec;                  /* Nanoseconds */
 };
 
-struct timeval
-{
-  time_t tv_sec;                   /* Seconds */
-  long tv_usec;                    /* Microseconds */
-};
+/* struct tm is the standard representation for "broken out" time.
+ *
+ * REVISIT: This structure could be packed better using uint8_t's and
+ * uint16_t's.  The standard definition does, however, call out type int for
+ * all of the members.  NOTE: Any changes to this structure must be also be
+ * reflected in struct rtc_time defined in include/nuttx/rtc.h; these two
+ * structures must be cast compatible.
+ */
 
 struct tm
 {
-  int tm_sec;     /* second (0-61, allows for leap seconds) */
-  int tm_min;     /* minute (0-59) */
-  int tm_hour;    /* hour (0-23) */
-  int tm_mday;    /* day of the month (1-31) */
-  int tm_mon;     /* month (0-11) */
-  int tm_year;    /* years since 1900 */
+  int tm_sec;     /* Seconds (0-61, allows for leap seconds) */
+  int tm_min;     /* Minutes (0-59) */
+  int tm_hour;    /* Hours (0-23) */
+  int tm_mday;    /* Day of the month (1-31) */
+  int tm_mon;     /* Month (0-11) */
+  int tm_year;    /* Years since 1900 */
 #ifdef CONFIG_LIBC_LOCALTIME
-  int tm_wday;    /* day of the week (0-6) */
-  int tm_yday;    /* day of the year (0-365) */
-  int tm_isdst;   /* non-0 if daylight savings time is in effect */
+  int tm_wday;    /* Day of the week (0-6) */
+  int tm_yday;    /* Day of the year (0-365) */
+  int tm_isdst;   /* Non-0 if daylight savings time is in effect */
 #endif
 };
 
@@ -161,7 +168,8 @@ struct sigevent;
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

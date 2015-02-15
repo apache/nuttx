@@ -275,15 +275,17 @@
 
 struct rtc_time 
 {
-  int tm_sec;
-  int tm_min;
-  int tm_hour;
-  int tm_mday;
-  int tm_mon;
-  int tm_year;
-  int tm_wday;     /* unused */
-  int tm_yday;     /* unused */
-  int tm_isdst;    /* unused */
+  int tm_sec;     /* Seconds (0-61, allows for leap seconds) */
+  int tm_min;     /* Minutes (0-59) */
+  int tm_hour;    /* Hours (0-23) */
+  int tm_mday;    /* Day of the month (1-31) */
+  int tm_mon;     /* Month (0-11) */
+  int tm_year;    /* Years since 1900 */
+#ifdef CONFIG_LIBC_LOCALTIME
+  int tm_wday;    /* Day of the week (0-6) (unused) */
+  int tm_yday;    /* Day of the year (0-365) (unused) */
+  int tm_isdst;   /* Non-0 if daylight savings time is in effect (unused) */
+#endif
 };
 
 #ifdef CONFIG_RTC_ALARM
@@ -427,7 +429,7 @@ struct rtc_lowerhalf_s
 
   FAR const struct rtc_ops_s *ops;
 
-  /* Data following this can vary from RTC driver to driver */
+  /* Data following this can vary from RTC driver-to-driver */
 };
 
 /****************************************************************************

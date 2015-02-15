@@ -74,7 +74,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -87,7 +88,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int clock_isleapyear(int year);
+int clock_isleapyear(int year);
 
 /****************************************************************************
  * Function:  clock_daysbeforemonth
@@ -97,7 +98,7 @@ EXTERN int clock_isleapyear(int year);
  *
  ****************************************************************************/
 
-EXTERN int clock_daysbeforemonth(int month, bool leapyear);
+int clock_daysbeforemonth(int month, bool leapyear);
 
 /****************************************************************************
  * Function:  clock_calendar2utc
@@ -110,7 +111,7 @@ EXTERN int clock_daysbeforemonth(int month, bool leapyear);
  *
  ****************************************************************************/
 
-EXTERN time_t clock_calendar2utc(int year, int month, int day);
+time_t clock_calendar2utc(int year, int month, int day);
 
 #undef EXTERN
 #ifdef __cplusplus

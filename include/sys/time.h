@@ -51,7 +51,13 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-/* struct timeval is defined in time.h */
+/* struct timeval represents time as seconds plus microseconds */
+
+struct timeval
+{
+  time_t tv_sec;         /* Seconds */
+  long tv_usec;          /* Microseconds */
+};
 
 /* The use of the struct timezone  is obsolete; the tz argument should
  * normally be specified as NULL (and is ignored in any event).

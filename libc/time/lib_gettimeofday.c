@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/time.h>
-#include <time.h>
 #include <errno.h>
 
 #include <nuttx/clock.h>
