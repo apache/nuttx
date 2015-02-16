@@ -220,14 +220,14 @@
 #define EFM32_USB_DIEP6DMAADDR_OFFSET              0x3c9d4  /* Device IN Endpoint 6 DMA Address Register */
 #define EFM32_USB_DIEP6TXFSTS_OFFSET               0x3c9d8  /* Device IN Endpoint 6 Transmit FIFO Status Register */
 
-#define EFM32_USB_DOEP_OFFSET(n)                   (0x3c900 + ((n) << 5))
-#define EFM32_USB_DOEP0_OFFSET                     0x3c900   /* Device OUT Endpoint 0 */
-#define EFM32_USB_DOEP1_OFFSET                     0x3c920   /* Device OUT Endpoint 1 */
-#define EFM32_USB_DOEP2_OFFSET                     0x3c940   /* Device OUT Endpoint 2 */
-#define EFM32_USB_DOEP3_OFFSET                     0x3c960   /* Device OUT Endpoint 3 */
-#define EFM32_USB_DOEP4_OFFSET                     0x3c980   /* Device OUT Endpoint 4 */
-#define EFM32_USB_DOEP5_OFFSET                     0x3c9a0   /* Device OUT Endpoint 5 */
-#define EFM32_USB_DOEP6_OFFSET                     0x3c9c0   /* Device OUT Endpoint 6 */
+#define EFM32_USB_DOEP_OFFSET(n)                   (0x3cb00 + ((n) << 5))
+#define EFM32_USB_DOEP0_OFFSET                     0x3cb00   /* Device OUT Endpoint 0 */
+#define EFM32_USB_DOEP1_OFFSET                     0x3cb20   /* Device OUT Endpoint 1 */
+#define EFM32_USB_DOEP2_OFFSET                     0x3cb40   /* Device OUT Endpoint 2 */
+#define EFM32_USB_DOEP3_OFFSET                     0x3cb60   /* Device OUT Endpoint 3 */
+#define EFM32_USB_DOEP4_OFFSET                     0x3cb80   /* Device OUT Endpoint 4 */
+#define EFM32_USB_DOEP5_OFFSET                     0x3cba0   /* Device OUT Endpoint 5 */
+#define EFM32_USB_DOEP6_OFFSET                     0x3cbc0   /* Device OUT Endpoint 6 */
 
 #define EFM32_USB_DOEPnCTL_OFFSET                  0x00000  /* Device OUT Endpoint n Control Register */
 #define EFM32_USB_DOEPnINT_OFFSET                  0x00008  /* Device OUT Endpoint n Interrupt Register */

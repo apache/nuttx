@@ -60,6 +60,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "chip/efm32_cmu.h"
+
 #include "efm32_usb.h"
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_EFM32_OTGFS))
@@ -237,7 +239,7 @@
 
 /* Number of endpoints */
 
-#define EFM32_NENDPOINTS             (4)          /* ep0-3 x 2 for IN and OUT */
+#define EFM32_NENDPOINTS             (7)          /* ep0-6 x 2 for IN and OUT */
 
 /* Odd physical endpoint numbers are IN; even are OUT */
 
@@ -2719,7 +2721,7 @@ static inline void efm32_epout_interrupt(FAR struct efm32_usbdev_s *priv)
 static inline void efm32_epin_runtestmode(FAR struct efm32_usbdev_s *priv)
 {
   uint32_t regval = efm32_getreg(EFM32_USB_DCTL);
-  regval &= _USB_DCTL_TSTCTL_MASK;
+  regval &= ~_USB_DCTL_TSTCTL_MASK;
   regval |= (uint32_t)priv->testmode << _USB_DCTL_TSTCTL_SHIFT;
   efm32_putreg(regval , EFM32_USB_DCTL);
 
@@ -3505,7 +3507,8 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
 
   /* Assure that we are in device mode */
 
-  DEBUGASSERT((efm32_getreg(EFM32_USB_GINTSTS) & USB_GINTSTS_CMOD) == USB_GINTSTS_DEVMODE);
+  DEBUGASSERT((efm32_getreg(EFM32_USB_GINTSTS) & USB_GINTSTS_CURMOD) ==
+              USB_GINTSTS_CURMOD_DEVICE);
 
   /* Get the state of all enabled interrupts.  We will do this repeatedly
    * some interrupts (like RXFLVL) will generate additional interrupting
@@ -3537,7 +3540,6 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_EPOUT), (uint16_t)regval);
           efm32_epout_interrupt(priv);
-          efm32_putreg(USB_GINTSTS_OEPINT, EFM32_USB_GINTSTS);
         }
 
       /* IN endpoint interrupt.  The core sets this bit to indicate that
@@ -3548,16 +3550,15 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_EPIN), (uint16_t)regval);
           efm32_epin_interrupt(priv);
-          efm32_putreg(USB_GINTSTS_IEPINT, EFM32_USB_GINTSTS);
         }
 
       /* Host/device mode mismatch error interrupt */
 
 #ifdef CONFIG_DEBUG_USB
-      if ((regval & USB_GINTSTS_MMIS) != 0)
+      if ((regval & USB_GINTSTS_MODEMIS) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_MISMATCH), (uint16_t)regval);
-          efm32_putreg(USB_GINTSTS_MMIS, EFM32_USB_GINTSTS);
+          efm32_putreg(USB_GINTSTS_MODEMIS, EFM32_USB_GINTSTS);
         }
 #endif
 
@@ -3597,7 +3598,6 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_RXFIFO), (uint16_t)regval);
           efm32_rxinterrupt(priv);
-          efm32_putreg(USB_GINTSTS_RXFLVL, EFM32_USB_GINTSTS);
         }
 
       /* USB reset interrupt */
@@ -3658,20 +3658,19 @@ static int efm32_usbinterrupt(int irq, FAR void *context)
       /* Session request/new session detected interrupt */
 
 #ifdef CONFIG_USBDEV_VBUSSENSING
-      if ((regval & USB_GINTSTS_SRQ) != 0)
+      if ((regval & USB_GINTSTS_SESSREQINT) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_SRQ), (uint16_t)regval);
           efm32_sessioninterrupt(priv);
-          efm32_putreg(USB_GINTSTS_SRQ, EFM32_USB_GINTSTS);
+          efm32_putreg(USB_GINTSTS_SESSREQINT, EFM32_USB_GINTSTS);
         }
 
       /* OTG interrupt */
 
-      if ((regval & USB_GINTSTS_OTG) != 0)
+      if ((regval & USB_GINTSTS_OTGINT) != 0)
         {
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_OTG), (uint16_t)regval);
           efm32_otginterrupt(priv);
-          efm32_putreg(USB_GINTSTS_OTG, EFM32_USB_GINTSTS);
         }
 #endif
     }
@@ -3919,7 +3918,8 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
           regval |= USB_DIEPCTL_CNAK;
         }
 
-      regval &= ~(_USB_DIEPCTL_MPS_MASK | _USB_DIEPCTL_EPTYPE_MASK | _USB_DIEPCTL_TXFNUM_MASK);
+      regval &= ~(_USB_DIEPCTL_MPS_MASK | _USB_DIEPCTL_EPTYPE_MASK |
+                  _USB_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << _USB_DIEPCTL_EPTYPE_SHIFT);
       regval |= (eptype << _USB_DIEPCTL_TXFNUM_SHIFT);
@@ -5184,7 +5184,11 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
    *     OUT endpoint 0, to receive a SETUP packet.
    *     - USB_DOEP0CTL.EPENA = 1"
    */
-#warning Review for missing logic
+
+  /* First Turn on USB clocking */
+
+  modifyreg32(EFM32_CMU_HFCORECLKEN0,0,
+              CMU_HFCORECLKEN0_USB|CMU_HFCORECLKEN0_USBC);
 
   /* At start-up the core is in FS mode. */
 
@@ -5193,7 +5197,18 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
    * interrupts will occur when the TxFIFO is truly empty (not just half full).
    */
 
+  /* I never saw this in original EFM32 lib
+   * and in refrence manual I found:
+   *    "Non-periodic TxFIFO Empty Level (can be enabled only when the core is
+   *    operating in Slave mode as a host.)"
+   */
+
   efm32_putreg(USB_GAHBCFG_NPTXFEMPLVL_EMPTY, EFM32_USB_GAHBCFG);
+  //efm32_putreg(0, EFM32_USB_GAHBCFG);
+
+  /* Enable PHY USB */
+
+  efm32_putreg(USB_ROUTE_PHYPEN, EFM32_USB_ROUTE);
 
   /* Common USB OTG core initialization */
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
@@ -5229,7 +5244,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
   /* Force Device Mode */
 
   regval  = efm32_getreg(EFM32_USB_GUSBCFG);
-  regval &= ~_USB_GUSBCFG_FORCEHSTMODE_MASK;
+  regval &= ~(_USB_GUSBCFG_FORCEHSTMODE_MASK | _USB_GUSBCFG_CORRUPTTXPKT_MASK);
   regval |= USB_GUSBCFG_FORCEDEVMODE;
   efm32_putreg(regval, EFM32_USB_GUSBCFG);
   up_mdelay(50);
@@ -5255,7 +5270,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
 
   /* Set Rx FIFO size */
 
-  efm32_putreg(EFM32_RXFIFO_WORDS, EFM32_USB_GRXFSIZ);
+  efm32_putreg(EFM32_RXFIFO_WORDS << _USB_GRXFSIZ_RXFDEP_SHIFT,EFM32_USB_GRXFSIZ);
 
   /* EP0 TX */
 
@@ -5449,7 +5464,6 @@ void up_usbinitialize(void)
    *     non-zero value. This takes approximately 20 48-MHz cycles.
    *  10. Start initializing the USB core ...
    */
-#warning Missing Logic
 
   /* Uninitialize the hardware so that we know that we are starting from a
    * known state. */
@@ -5514,6 +5528,11 @@ void up_usbuninitialize(void)
 
   usbtrace(TRACE_DEVUNINIT, 0);
 
+  /* To be sure that usb ref are writen, turn on USB clocking */
+
+  modifyreg32(EFM32_CMU_HFCORECLKEN0, 0,
+              CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC);
+
   if (priv->driver)
     {
       usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_DRIVERREGISTERED), 0);
@@ -5549,6 +5568,11 @@ void up_usbuninitialize(void)
 
   efm32_txfifo_flush(USB_GRSTCTL_TXFNUM_FALL);
   efm32_rxfifo_flush();
+
+  /* Turn off USB clocking */
+
+  modifyreg32(EFM32_CMU_HFCORECLKEN0,
+              CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC, 0);
 
   /* TODO: Turn off USB power and clocking */
 
