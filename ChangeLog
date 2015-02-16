@@ -9815,3 +9815,5 @@
 	* arch/arm/src/stm32/stm32_rtcc.c, stm32_rtc.h, and Kconfig: Extend the
 	  RTC interface to support reading subseconds.  From Jussi Kivilinna
 	  (2015-02-16).
+	* arch/arm/src/efm32/efm32_usbdev.c: EFM32 USB Device is now basically
+	  functional with this change.  From Pierre-noel Bouteville (2015-02-16).
