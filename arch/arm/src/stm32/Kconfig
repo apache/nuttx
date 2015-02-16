@@ -3254,6 +3254,10 @@ config SDIO_WIDTH_D1_ONLY
 
 endmenu
 
+config STM32_HAVE_RTC_SUBSECONDS
+	bool
+	default n
+
 choice
 	prompt "RTC clock source"
 	default RTC_LSECLOCK
