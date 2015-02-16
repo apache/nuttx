@@ -977,12 +977,14 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
               infrom6->sin6_port = udp->srcport;
               *fromlen = sizeof(struct sockaddr_in6);
 
-              memset(infrom6->sin6_addr.s6_addr, 0, sizeof(infrom6->sin6_addr.s6_addr) - sizeof(in_addr_t));
+              memset(infrom6->sin6_addr.s6_addr, 0,
+                     sizeof(infrom6->sin6_addr.s6_addr) - sizeof(in_addr_t));
 
-              infrom6->sin6_addr.s6_addr[10] = 0xFF;
-              infrom6->sin6_addr.s6_addr[11] = 0xFF;
+              infrom6->sin6_addr.s6_addr[10] = 0xff;
+              infrom6->sin6_addr.s6_addr[11] = 0xff;
 
-              memcpy(&infrom6->sin6_addr.s6_addr[12], ipv4->srcipaddr, sizeof(in_addr_t));
+              memcpy(&infrom6->sin6_addr.s6_addr[12], ipv4->srcipaddr
+                     sizeof(in_addr_t));
             }
           else
 #endif

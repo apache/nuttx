@@ -240,17 +240,23 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Construct an IPv4 address from four bytes.
+/****************************************************************************
+ * Macro: net_ipaddr
  *
- * This function constructs an IPv4 address in network byte order.
+ * Description:
+ *   Construct an IPv4 address from four bytes.
  *
+ *   This function constructs an IPv4 address in network byte order.
+ *
+ * Input Parameters:
  *   addr  A pointer to a in_addr_t variable that will be
  *         filled in with the IPv4 address.
  *   addr0 The first octet of the IPv4 address.
  *   addr1 The second octet of the IPv4 address.
  *   addr2 The third octet of the IPv4 address.
  *   addr3 The forth octet of the IPv4 address.
- */
+ *
+ ****************************************************************************/
 
 #define net_ipaddr(addr, addr0, addr1, addr2, addr3) \
   do { \
@@ -258,17 +264,32 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
                  (uint32_t)(addr2) << 8  | (uint32_t)(addr3)); \
   } while (0)
 
-/* Convert an IPv4 address of the form uint16_t[2] to an in_addr_t */
+/****************************************************************************
+ * Macro: net_ip4addr_conv32
+ *
+ * Description:
+ *   Convert an IPv4 address of the form uint16_t[2] to an in_addr_t
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
-#  define net_ip4addr_conv32(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16_t*)addr)[1])
+#  define net_ip4addr_conv32(addr) \
+    (((in_addr_t)((uint16_t*)addr)[0] << 16) | \
+     (in_addr_t)((uint16_t*)addr)[1])
 #else
-#  define net_ip4addr_conv32(addr) (((in_addr_t)((uint16_t*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
+#  define net_ip4addr_conv32(addr) \
+    (((in_addr_t)((uint16_t*)addr)[1] << 16) | \
+     (in_addr_t)((uint16_t*)addr)[0])
 #endif
 
-/* Extract individual bytes from a 32-bit IPv4 IP address that is in network
- * byte order.
- */
+/****************************************************************************
+ * Macro: ip4_addr1, ip4_addr2, ip4_addr3, and ip4_addr4
+ *
+ * Description:
+ *   Extract individual bytes from a 32-bit IPv4 IP address that is in
+ *   network byte order.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
    /* Big-endian byte order: 11223344 */
@@ -286,10 +307,13 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
 #  define ip4_addr4(ipaddr) (((ipaddr) >> 24) & 0xff)
 #endif
 
-/* Construct an IPv6 address from eight 16-bit words.
+/****************************************************************************
+ * Macro: ip6_addr
  *
- * This function constructs an IPv6 address.
- */
+ * Description:
+ *   Construct an IPv6 address from eight 16-bit words.
+ *
+ ****************************************************************************/
 
 #define ip6_addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
   do { \
@@ -303,7 +327,12 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
     ((uint16_t*)(addr))[7] = HTONS((addr7)); \
   } while (0)
 
-/* Copy an IP address from one place to another.
+/****************************************************************************
+ * Macro: net_ipv4addr_copy, net_ipv4addr_hdrcopy, net_ipv6addr_copy, and
+ *        net_ipv6addr_hdrcopy
+ *
+ * Description:
+ *   Copy an IP address from one place to another.
  *
  * Example:
  *
@@ -312,9 +341,11 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
  *   net_ipaddr_copy(&ipaddr2, &ipaddr1);
  *
- * dest The destination for the copy.
- * src The source from where to copy.
- */
+ * Input Parameters:
+ *   dest - The destination for the copy.
+ *   src  - The source from where to copy.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
 #  define net_ipv4addr_copy(dest, src) \
@@ -335,21 +366,28 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
    net_ipv6addr_copy(dest, src)
 #endif
 
-/* Compare two IP addresses
+/****************************************************************************
+ * Macro: net_ipv4addr_cmp, net_ipv4addr_hdrcmp, net_ipv6addr_cmp, and
+ *        net_ipv6addr_hdrcmp
  *
- * Example:
+ * Description:
+ *   Compare two IP addresses
  *
- *   in_addr_t ipaddr1, ipaddr2;
+ *   Example:
  *
- *   net_ipaddr(&ipaddr1, 192,16,1,2);
- *   if (net_ipv4addr_cmp(ipaddr2, ipaddr1))
- *     {
- *       printf("They are the same");
- *     }
+ *     in_addr_t ipaddr1, ipaddr2;
  *
- * addr1 The first IP address.
- * addr2 The second IP address.
- */
+ *     net_ipaddr(&ipaddr1, 192,16,1,2);
+ *     if (net_ipv4addr_cmp(ipaddr2, ipaddr1))
+ *       {
+ *         printf("They are the same");
+ *       }
+ *
+ * Input Parameters:
+ *   addr1 - The first IP address.
+ *   addr2 - The second IP address.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
 #  define net_ipv4addr_cmp(addr1, addr2) \
@@ -387,7 +425,7 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
  *       printf("They are the same");
  *     }
  *
- * Parameters:
+ * Input Parameters:
  *   addr1 - The first IP address.
  *   addr2 - The second IP address.
  *   mask  - The netmask.
@@ -427,7 +465,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *   In the example above, the variable "ipaddr2" will contain the IP
  *   address 192.168.1.0.
  *
- * Parameters:
+ * Input Parameters:
  *   dest Where the result is to be placed.
  *   src The IP address.
  *   mask The netmask.

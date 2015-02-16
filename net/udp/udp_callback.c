@@ -138,12 +138,14 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
           src_addr6.sin6_family = AF_INET6;
           src_addr6.sin6_port = udp->srcport;
 
-          memset(src_addr6.sin6_addr.s6_addr, 0, sizeof(src_addr6.sin6_addr.s6_addr) - sizeof(in_addr_t));
+          memset(src_addr6.sin6_addr.s6_addr, 0,
+                 sizeof(src_addr6.sin6_addr.s6_addr) - sizeof(in_addr_t));
 
-          src_addr6.sin6_addr.s6_addr[10] = 0xFF;
-          src_addr6.sin6_addr.s6_addr[11] = 0xFF;
+          src_addr6.sin6_addr.s6_addr[10] = 0xff;
+          src_addr6.sin6_addr.s6_addr[11] = 0xff;
 
-          memcpy(&src_addr6.sin6_addr.s6_addr[12], ipv4->srcipaddr, sizeof(in_addr_t));
+          memcpy(&src_addr6.sin6_addr.s6_addr[12], ipv4->srcipaddr,
+                 sizeof(in_addr_t));
 
           src_addr_size = sizeof(src_addr6);
           src_addr = &src_addr6;
