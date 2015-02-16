@@ -49,7 +49,7 @@
 #include <nuttx/net/ioctl.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define IMSFNAMSIZ 8

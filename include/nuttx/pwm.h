@@ -217,7 +217,8 @@ struct pwm_lowerhalf_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -250,7 +251,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
+int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
 
 /****************************************************************************
  * Name: pwm_expired
@@ -290,7 +291,7 @@ EXTERN int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
-EXTERN void pwm_expired(FAR void *handle);
+void pwm_expired(FAR void *handle);
 #endif
 
 /****************************************************************************

@@ -47,7 +47,7 @@
 #include <time.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Definitions required by POSIX */
 

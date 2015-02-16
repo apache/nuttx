@@ -295,7 +295,8 @@ struct i2c_dev_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -317,7 +318,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN FAR struct i2c_dev_s *up_i2cinitialize(int port);
+FAR struct i2c_dev_s *up_i2cinitialize(int port);
 
 /****************************************************************************
  * Name: up_i2cuninitialize
@@ -334,7 +335,7 @@ EXTERN FAR struct i2c_dev_s *up_i2cinitialize(int port);
  *
  ****************************************************************************/
 
-EXTERN int up_i2cuninitialize(FAR struct i2c_dev_s *dev);
+int up_i2cuninitialize(FAR struct i2c_dev_s *dev);
 
 /************************************************************************************
  * Name: up_i2creset
@@ -345,7 +346,7 @@ EXTERN int up_i2cuninitialize(FAR struct i2c_dev_s *dev);
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-EXTERN int up_i2creset(FAR struct i2c_dev_s *dev);
+int up_i2creset(FAR struct i2c_dev_s *dev);
 #endif
 
 #undef EXTERN

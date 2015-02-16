@@ -57,7 +57,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -77,7 +78,7 @@ extern "C" {
  ****************************************************************************/
 
 struct sdio_dev_s; /* See nuttx/sdio.h */
-EXTERN int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
+int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
 
 /****************************************************************************
  * Name: mmcsd_spislotinitialize
@@ -97,7 +98,7 @@ EXTERN int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
  ****************************************************************************/
 
 struct spi_dev_s; /* See nuttx/spi/spi.h */
-EXTERN int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi);
+int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi);
 
 #undef EXTERN
 #if defined(__cplusplus)

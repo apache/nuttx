@@ -54,7 +54,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -72,7 +73,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int match(const char *pattern, const char *string);
+int match(const char *pattern, const char *string);
 
 #undef EXTERN
 #ifdef __cplusplus

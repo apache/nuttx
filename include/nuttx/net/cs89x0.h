@@ -126,7 +126,8 @@ struct cs89x0_driver_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -159,7 +160,7 @@ extern "C" {
 
 /* Initialize the CS89x0 chip and driver */
 
-EXTERN int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno);
+int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno);
 
 #undef EXTERN
 #ifdef __cplusplus

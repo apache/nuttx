@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Terminal input modes (c_iflag in the termios structure) */

@@ -52,7 +52,7 @@
 #ifdef CONFIG_NET_ETHERNET
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Recognized values of the type bytes in the Ethernet header */

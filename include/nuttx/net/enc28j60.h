@@ -116,7 +116,8 @@ struct enc_lower_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -147,9 +148,8 @@ extern "C" {
  ****************************************************************************/
 
 struct spi_dev_s; /* see nuttx/spi/spi.h */
-EXTERN int enc_initialize(FAR struct spi_dev_s *spi,
-                          FAR const struct enc_lower_s *lower,
-                          unsigned int devno);
+int enc_initialize(FAR struct spi_dev_s *spi,
+                   FAR const struct enc_lower_s *lower, unsigned int devno);
 
 /****************************************************************************
  * Function: enc_stats
@@ -171,7 +171,7 @@ EXTERN int enc_initialize(FAR struct spi_dev_s *spi,
  ****************************************************************************/
 
 #ifdef CONFIG_ENC28J60_STATS
-EXTERN int enc_stats(unsigned int devno, struct enc_stats_s *stats);
+int enc_stats(unsigned int devno, struct enc_stats_s *stats);
 #endif
 
 #undef EXTERN

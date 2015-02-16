@@ -44,7 +44,7 @@
 #include <time.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* mode_t bit settings (most of these do not apply to Nuttx). This assumes

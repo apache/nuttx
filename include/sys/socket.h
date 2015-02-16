@@ -43,7 +43,7 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The socket()domain parameter specifies a communication domain; this selects

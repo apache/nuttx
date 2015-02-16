@@ -45,7 +45,7 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Mode bits:  The lower order 9-bit bits are the standard mode bits */

@@ -160,8 +160,8 @@ struct rwbuffer_s
 
 #undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN EXTERN "C"
-EXTERN "C"
+#define EXTERN extern "C"
+extern "C"
 {
 #else
 #define EXTERN extern

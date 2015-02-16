@@ -47,7 +47,7 @@
 #include <sys/socket.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The size of sun_path is not specified. Different implementations us

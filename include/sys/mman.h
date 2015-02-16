@@ -44,7 +44,7 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Protections are chosen from these bits, OR'd together.  NuttX does not

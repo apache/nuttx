@@ -313,7 +313,8 @@ struct canioctl_rtr_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -326,7 +327,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN int can_register(FAR const char *path, FAR struct can_dev_s *dev);
+int can_register(FAR const char *path, FAR struct can_dev_s *dev);
 
 /************************************************************************************
  * Name: can_receive
@@ -344,8 +345,8 @@ EXTERN int can_register(FAR const char *path, FAR struct can_dev_s *dev);
  *
  ************************************************************************************/
 
-EXTERN int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
-                       FAR uint8_t *data);
+int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
+                FAR uint8_t *data);
 
 /************************************************************************************
  * Name: can_txdone
@@ -361,7 +362,7 @@ EXTERN int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *
  ************************************************************************************/
 
-EXTERN int can_txdone(FAR struct can_dev_s *dev);
+int can_txdone(FAR struct can_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)
