@@ -835,16 +835,16 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       uint32_t prediv_s;
       uint32_t usecs;
 
-      prediv_s = getreg32(STM32_RTC_PRER) & RTC_PRER_PREDIV_S_MASK;
+      prediv_s   = getreg32(STM32_RTC_PRER) & RTC_PRER_PREDIV_S_MASK;
       prediv_s >>= RTC_PRER_PREDIV_S_SHIFT;
 
       ssr &= RTC_SSR_MASK;
 
       /* Maximum prediv_s is 0x7fff, thus we can multiply by 100000 and
-       * still fit 32-bit unsigned integer. */
+       * still fit 32-bit unsigned integer.
+       */
 
       usecs = (((prediv_s - ssr) * 100000) / (prediv_s + 1)) * 10;
-
       *nsec = usecs * 1000;
     }
 #endif /* CONFIG_STM32_HAVE_RTC_SUBSECONDS */
