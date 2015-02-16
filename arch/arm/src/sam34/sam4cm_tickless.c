@@ -262,7 +262,7 @@ void up_timer_initialize(void)
   max_delay /= CONFIG_USEC_PER_TICK;
   if (max_delay > UINT32_MAX)
     {
-      g_oneshot_maxticks = UINT32_MAX
+      g_oneshot_maxticks = UINT32_MAX;
     }
   else
     {
