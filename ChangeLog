@@ -9812,3 +9812,6 @@
 	  are configured.  Problem note by Max Neklyudov (2015-02-14).
 	* include/time.h and sys/time.h: Move struct timeval from include/time.h
 	  to include/sys/time.h where it belongs (2015-02-15).
+	* arch/arm/src/stm32/stm32_rtcc.c, stm32_rtc.h, and Kconfig: Extend the
+	  RTC interface to support reading subseconds.  From Jussi Kivilinna
+	  (2015-02-16).
