@@ -132,14 +132,34 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
       FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
 
-      src_addr4.sin_family = AF_INET;
-      src_addr4.sin_port   = udp->srcport;
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET6)
+        {
+          src_addr6.sin6_family = AF_INET6;
+          src_addr6.sin6_port = udp->srcport;
 
-      net_ipv4addr_copy(src_addr4.sin_addr.s_addr,
+          memset(src_addr6.sin6_addr.s6_addr, 0, sizeof(src_addr6.sin6_addr.s6_addr) - sizeof(in_addr_t));
+
+          src_addr6.sin6_addr.s6_addr[10] = 0xFF;
+          src_addr6.sin6_addr.s6_addr[11] = 0xFF;
+
+          memcpy(&src_addr6.sin6_addr.s6_addr[12], ipv4->srcipaddr, sizeof(in_addr_t));
+
+          src_addr_size = sizeof(src_addr6);
+          src_addr = &src_addr6;
+        }
+      else
+#endif
+        {
+          src_addr4.sin_family = AF_INET;
+          src_addr4.sin_port   = udp->srcport;
+
+          net_ipv4addr_copy(src_addr4.sin_addr.s_addr,
                             net_ip4addr_conv32(ipv4->srcipaddr));
 
-      src_addr_size = sizeof(src_addr4);
-      src_addr = &src_addr4;
+          src_addr_size = sizeof(src_addr4);
+          src_addr = &src_addr4;
+        }
     }
 #endif /* CONFIG_NET_IPv4 */
 

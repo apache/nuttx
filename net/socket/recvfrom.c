@@ -937,6 +937,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
     {
       FAR struct sockaddr_in6 *infrom =
         (FAR struct sockaddr_in6 *)pstate->rf_from;
+      FAR socklen_t *fromlen = pstate->rf_fromlen;
 
       if (infrom)
         {
@@ -945,6 +946,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
 
           infrom->sin6_family = AF_INET6;
           infrom->sin6_port   = udp->srcport;
+          *fromlen = sizeof(struct sockaddr_in6);
 
           net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
         }
@@ -958,17 +960,39 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
     {
       FAR struct sockaddr_in *infrom  =
         (FAR struct sockaddr_in *)pstate->rf_from;
+      FAR socklen_t *fromlen = pstate->rf_fromlen;
 
       if (infrom)
         {
           FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
           FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
 
-          infrom->sin_family = AF_INET;
-          infrom->sin_port   = udp->srcport;
+#ifdef CONFIG_NET_IPv6
+          FAR struct udp_conn_s *conn = (FAR struct udp_conn_s*)pstate->rf_sock->s_conn;
+          FAR struct sockaddr_in6 *infrom6 = (FAR struct sockaddr_in6 *)infrom;
 
-          net_ipv4addr_copy(infrom->sin_addr.s_addr,
-                            net_ip4addr_conv32(ipv4->srcipaddr));
+          if (conn->domain == PF_INET6)
+            {
+              infrom6->sin6_family = AF_INET6;
+              infrom6->sin6_port = udp->srcport;
+              *fromlen = sizeof(struct sockaddr_in6);
+
+              memset(infrom6->sin6_addr.s6_addr, 0, sizeof(infrom6->sin6_addr.s6_addr) - sizeof(in_addr_t));
+
+              infrom6->sin6_addr.s6_addr[10] = 0xFF;
+              infrom6->sin6_addr.s6_addr[11] = 0xFF;
+
+              memcpy(&infrom6->sin6_addr.s6_addr[12], ipv4->srcipaddr, sizeof(in_addr_t));
+            }
+          else
+#endif
+            {
+              infrom->sin_family = AF_INET;
+              infrom->sin_port   = udp->srcport;
+
+              net_ipv4addr_copy(infrom->sin_addr.s_addr,
+                                net_ip4addr_conv32(ipv4->srcipaddr));
+            }
         }
     }
 #endif /* CONFIG_NET_IPv4 */
