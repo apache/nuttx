@@ -802,6 +802,14 @@ config TIVA_TIMER32_PERIODIC
 	bool "32-bit one-shot/periodic timer support"
 	default n
 
+config TIVA_TIMER32_ADCEVENT
+	bool "32-bit one-shot/periodic timer ADC event support"
+	default n
+	depends on TIVA_TIMER32_PERIODIC
+	depends on TIVA_TIMER_32BIT
+	---help---
+		Enable timer support for triggering an ADC sample on timeout.
+
 config TIVA_TIMER32_RTC
 	bool "32-bit RTC (needs 32.768-KHz input)"
 	default n
@@ -818,17 +826,25 @@ config TIVA_TIMER16_PERIODIC
 	bool "16-bit one-shot/periodic timer support"
 	default n
 
-config TIVA_TIMER32_EDGECOUNT
+config TIVA_TIMER16_ADCEVENT
+	bool "16-bit one-shot/periodic timer ADC event support"
+	default n
+	depends on TIVA_TIMER16_PERIODIC
+	depends on TIVA_TIMER_16BIT
+	---help---
+		Enable timer support for triggering an ADC sample on timeout.
+
+config TIVA_TIMER16_EDGECOUNT
 	bool "16-bit input edge-count capture support"
 	default n
 	depends on EXPERIMENTAL
 
-config TIVA_TIMER32_TIMECAP
+config TIVA_TIMER16_TIMECAP
 	bool "16-bit input time capture support"
 	default n
 	depends on EXPERIMENTAL
 
-config TIVA_TIMER32_PWM
+config TIVA_TIMER16_PWM
 	bool "16-bit PWM output support"
 	default n
 	depends on EXPERIMENTAL
@@ -858,7 +874,6 @@ config TIVA_ADC_CLOCK
 		16 MHz to 32 MHz. The TM4C123 clock is limited to 16 MHz.
 
 if TIVA_ADC0
-menu "Tiva ADC0 configuration"
 
 menuconfig TIVA_ADC0_SSE0
 	bool "Enable and configure ADC0 SSE0"
@@ -1290,11 +1305,9 @@ config TIVA_ADC0_SSE3_STEP0_AIN
 	default 0
 	depends on TIVA_ADC0_SSE3_STEP0
 
-endmenu # Tiva ADC0 configuration
 endif # TIVA_ADC0
 
 if TIVA_ADC1
-menu "Tiva ADC1 configuration"
 
 menuconfig TIVA_ADC1_SSE0
 	bool "Enable and configure ADC1 SSE0"
@@ -1725,7 +1738,6 @@ config TIVA_ADC1_SSE3_TRIGGER
 		default 0
 		depends on TIVA_ADC1_SSE3_STEP0
 
-endmenu # Tiva ADC1 configuration
 endif # TIVA_ADC1
 
 config TIVA_ADC_REGDEBUG

@@ -901,14 +901,6 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
   /* Enable and configure ADC trigger outputs */
   if (TIMER_ISADCTIMEOUT(timer) || TIMER_ISADCMATCH(timer))
     {
-      /* Enable ADC trigger outputs by setting the TAOTE bit in the
-       * control register.
-       */
-
-      regval = tiva_getreg(priv, TIVA_TIMER_CTL_OFFSET);
-      regval |= TIMER_CTL_TAOTE;
-      tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
-
 #ifdef CONFIG_ARCH_CHIP_TM4C129
       /* Enable timeout triggers now (match triggers will be
        * enabled when the first match value is set).
@@ -918,7 +910,15 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
         {
           tiva_putreg(priv, TIVA_TIMER_ADCEV_OFFSET, TIMER_ADCEV_TATOADCEN);
         }
-#endif /* CONFIG_ARCH_CHIP_TM4C129 */
+#endif
+
+      /* Enable ADC trigger outputs by setting the TAOTE bit in the
+       * control register.
+       */
+
+      regval = tiva_getreg(priv, TIVA_TIMER_CTL_OFFSET);
+      regval |= TIMER_CTL_TAOTE;
+      tiva_putreg(priv, TIVA_TIMER_CTL_OFFSET, regval);
     }
 
   /* In addition, if using CCP pins, the TCACT field can be programmed to
