@@ -591,6 +591,9 @@ int tiva_timer_register(FAR const char *devpath, int gptm, bool altclk)
   config->cmn.mode                   = TIMER32_MODE_PERIODIC;
   config->cmn.alternate              = altclk;
   config->config.flags               = TIMER_FLAG_COUNTUP;
+#ifdef CONFIG_TIVA_TIMER32_ADCEVENT
+  config->config.flags              |= TIMER_FLAG_ADCTIMEOUT;
+#endif
   config->config.handler             = tiva_handler;
   config->config.arg                 = priv;
 

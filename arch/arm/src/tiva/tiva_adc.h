@@ -49,43 +49,19 @@
 
 #ifdef CONFIG_TIVA_ADC
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define TIVA_ADC_PWM_TRIG_IOCTL _ANIOC(0x00F0)
 
-/* PWM trigger support definitions *************************************************/
+/* PWM trigger ioctl support  ***********************************************/
 
-#define ADC_TRIG_PWM_MASK \
-    (0xE0000000 & ADC_EMUX_PWM0 & ADC_EMUX_PWM1 & ADC_EMUX_PWM2 & ADC_EMUX_PWM3)
+#define TIVA_ADC_PWM_TRIG(sse, pwm, mod) ((((mod) << 4) << ((pwm)  * 8)) + (sse))
 
-/* Encodes the PWM generator (0 to 3) value to the 2 MSB's of 32-bits;
- * PWM module (0 or 1) value in the 3rd MSB:
- *      0bGGM0.0000.0000.0000,0000.0000.0000.0000
- * To be OR'd with a trigger register value.
- */
-
-#define PWM_GEN_SHIFT (31)
-#define PWM_MOD_SHIFT (30)
-#  define ADC_TRIG_PWM_IOCTL(gen,mod) \
-    (((gen) << PWM_GEN_SHIFT) | ((mod) << PWM_MOD_SHIFT))
-
-/* Decodes PWM generator number from trigger */
-
-#define PWM_GEN_MASK             (0xC0000000)
-#  define ADC_TRIG_PWM_GEN(trig) \
-    (((trig)&PWM_GEN_MASK)>>(PWM_GEN_SHIFT-1))
-
-/* Decodes PWM module number from trigger */
-
-#define PWM_MOD_MASK             (0x20000000)
-#  define ADC_TRIG_PWM_MOD(trig) \
-    (((trig)&PWM_MOD_MASK)>>(PWM_MOD_SHIFT-1))
-
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  ifdef __cplusplus
