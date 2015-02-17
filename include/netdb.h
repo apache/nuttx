@@ -49,7 +49,7 @@
  * <netinet/in.h>, <sys/socket.h>, and <inttypes.h>.
  */
 
-#include <inttypes.h>
+#incldue <inttypes.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -219,6 +219,7 @@ struct addrinfo
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -270,7 +271,7 @@ void              setnetent(int);
 void              setprotoent(int);
 void              setservent(int);
 
-#endif /* No of these are yet supported */
+#endif /* None of these are yet supported */
 
 #undef EXTERN
 #ifdef __cplusplus
