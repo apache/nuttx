@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/tiva/tiva_i2c.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The basic structure of this driver derives in spirit (if nothing more) from the
@@ -2233,60 +2233,70 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       config = &tiva_i2c0_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C1
     case 1:
       priv   = &tiva_i2c1_priv;
       config = &tiva_i2c1_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C2
     case 2:
       priv   = &tiva_i2c2_priv;
       config = &tiva_i2c2_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C3
     case 3:
       priv   = &tiva_i2c3_priv;
       config = &tiva_i2c3_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C4
     case 4:
       priv   = &tiva_i2c4_priv;
       config = &tiva_i2c4_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C5
     case 5:
       priv   = &tiva_i2c5_priv;
       config = &tiva_i2c5_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C6
     case 6:
       priv   = &tiva_i2c6_priv;
       config = &tiva_i2c6_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C7
     case 7:
       priv   = &tiva_i2c7_priv;
       config = &tiva_i2c7_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C8
     case 8:
       priv   = &tiva_i2c8_priv;
       config = &tiva_i2c8_config;
       break;
 #endif
+
 #ifdef CONFIG_TIVA_I2C9
     case 9:
       priv   = &tiva_i2c9_priv;
       config = &tiva_i2c9_config;
       break;
 #endif
+
     default:
       i2cdbg("I2C%d: ERROR: Not supported\n", port);
       return NULL;
@@ -2294,8 +2304,10 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Allocate instance */
 
-  if (!(inst = kmm_malloc(sizeof(struct tiva_i2c_inst_s))))
+  inst = kmm_malloc(sizeof(struct tiva_i2c_inst_s));
+  if (!inst)
     {
+      i2cdbg("I2C%d: ERROR: Failed to allocate device instance\n", port);
       return NULL;
     }
 
