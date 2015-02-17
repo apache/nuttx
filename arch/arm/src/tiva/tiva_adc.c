@@ -204,20 +204,6 @@
 
 /* Debug ********************************************************************/
 
-/* CONFIG_DEBUG_ADC + CONFIG_DEBUG enables general ADC debug output. */
-
-#ifdef CONFIG_DEBUG_ADC
-#  define adcdbg    dbg
-#  define adcvdbg   vdbg
-#  define adclldbg  lldbg
-#  define adcllvdbg lldbg
-#else
-#  define adcdbg(x...)
-#  define adcvdbg(x...)
-#  define adclldbg(x...)
-#  define adcllvdbg(x...)
-#endif
-
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_TIVA_ADC_REGDEBUG
 #endif
@@ -494,7 +480,7 @@ static void tiva_adc_reset(struct adc_dev_s *dev)
 {
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
 
-  adcvdbg("Resetting...\n");
+  avdbg("Resetting...\n");
 
   /* Only if ADCs are active do we run the reset routine: - disable ADC
    * interrupts - clear interrupt bits - disable all active sequences
@@ -533,7 +519,7 @@ static void tiva_adc_reset(struct adc_dev_s *dev)
 
 static int tiva_adc_setup(struct adc_dev_s *dev)
 {
-  adcvdbg("Setup\n");
+  avdbg("Setup\n");
 
   /* Only if ADCs are active do we run the reset routine: - enable ADC
    * interrupts - clear interrupt bits - enable all active sequences - register
@@ -569,7 +555,7 @@ static void tiva_adc_shutdown(struct adc_dev_s *dev)
 {
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
 
-  adcvdbg("Shutdown\n");
+  avdbg("Shutdown\n");
 
   /* Reset the ADC peripheral */
 
@@ -606,7 +592,7 @@ static void tiva_adc_rxint(struct adc_dev_s *dev, bool enable)
 {
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
 
-  adcvdbg("rx enable=%d\n", enable);
+  avdbg("rx enable=%d\n", enable);
 
   uint8_t s = 0;
   for (s = 0; s < SSE_PER_BASE; ++s)
@@ -642,7 +628,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
   uint32_t regval = 0;
   uint8_t sse = 0;
 
-  adcvdbg("cmd=%d arg=%ld\n", cmd, arg);
+  avdbg("cmd=%d arg=%ld\n", cmd, arg);
 
   switch (cmd)
     {
@@ -1463,7 +1449,7 @@ static void sse_step_cfg(struct tiva_adc_s *adc, uint8_t sse, uint8_t chn,
 
 struct adc_dev_s *tiva_adc_initialize(int adc_num)
 {
-  adcvdbg("tiva_adc_initialize\n");
+  avdbg("tiva_adc_initialize\n");
 
   /* Initialize the private ADC device data structure */
 
@@ -1589,8 +1575,8 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
 
   if (adc_num > 1)
     {
-      adcdbg("ERROR: Invalid ADV devno given, must be 0 or 1! ADC Devno: %d\n",
-             adc_num);
+      adbg("ERROR: Invalid ADV devno given, must be 0 or 1! ADC Devno: %d\n",
+           adc_num);
       return NULL;
     }
 
@@ -1604,8 +1590,8 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
 
       if (adc_state(adc, TIVA_ADC_ENABLE) < 0)
         {
-          adcdbg("ERROR: failure to power ADC peripheral (devno=%d)\n",
-                 adc_num);
+          adbg("ERROR: failure to power ADC peripheral (devno=%d)\n",
+               adc_num);
           return NULL;
         }
 
@@ -1679,7 +1665,7 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
 
   /* Return a pointer to the device structure */
 
-  adcvdbg("Returning %x\n", adc->dev);
+  avdbg("Returning %x\n", adc->dev);
   return adc->dev;
 }
 
@@ -1695,7 +1681,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 {
   int ret;
 
-  adcvdbg("Locking\n");
+  avdbg("Locking\n");
 
   do
     {
@@ -1720,7 +1706,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 
 void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse)
 {
-  adcvdbg("Unlocking\n");
+  avdbg("Unlocking\n");
   sem_post(&priv->sse[sse]->exclsem);
 }
 
@@ -1847,7 +1833,7 @@ static void tiva_adc0_assign_interrupts(void)
   ret = irq_attach(sse00.irq, (xcpt_t)adc0_sse0_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse00.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse00.irq, ret);
       return;
     }
   up_enable_irq(sse00.irq);
@@ -1856,7 +1842,7 @@ static void tiva_adc0_assign_interrupts(void)
   ret = irq_attach(sse01.irq, (xcpt_t)adc0_sse1_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse01.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse01.irq, ret);
       return;
     }
   up_enable_irq(sse01.irq);
@@ -1865,7 +1851,7 @@ static void tiva_adc0_assign_interrupts(void)
   ret = irq_attach(sse02.irq, (xcpt_t)adc0_sse2_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse02.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse02.irq, ret);
       return;
     }
   up_enable_irq(sse02.irq);
@@ -1874,7 +1860,7 @@ static void tiva_adc0_assign_interrupts(void)
   ret = irq_attach(sse03.irq, (xcpt_t)adc0_sse3_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse03.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse03.irq, ret);
       return;
     }
   up_enable_irq(sse03.irq);
@@ -1890,7 +1876,7 @@ static void tiva_adc1_assign_interrupts(void)
   ret = irq_attach(sse10.irq, (xcpt_t)adc1_sse0_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse10.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse10.irq, ret);
       return;
     }
   up_enable_irq(sse10.irq);
@@ -1899,7 +1885,7 @@ static void tiva_adc1_assign_interrupts(void)
   ret = irq_attach(sse11.irq, (xcpt_t)adc1_sse1_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse11.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse11.irq, ret);
       return;
     }
   up_enable_irq(sse11.irq);
@@ -1908,7 +1894,7 @@ static void tiva_adc1_assign_interrupts(void)
   ret = irq_attach(sse12.irq, (xcpt_t)adc1_sse2_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse12.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse12.irq, ret);
       return;
     }
   up_enable_irq(sse12.irq);
@@ -1917,7 +1903,7 @@ static void tiva_adc1_assign_interrupts(void)
   ret = irq_attach(sse13.irq, (xcpt_t)adc1_sse3_interrupt);
   if (ret < 0)
     {
-      adcdbg("ERROR: Failed to attach IRQ %d: %d\n", sse13.irq, ret);
+      adbg("ERROR: Failed to attach IRQ %d: %d\n", sse13.irq, ret);
       return;
     }
   up_enable_irq(sse13.irq);
@@ -1957,7 +1943,7 @@ static void adc0_sse0_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse00.work, tiva_adc_read, &sse00, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d\n", ret);
+      adbg("ERROR: Failed to queue work: %d\n", ret);
     }
 }
 #    endif
@@ -1975,8 +1961,8 @@ static void adc0_sse1_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse01.work, tiva_adc_read, &sse01, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc0.devno, sse01.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc0.devno, sse01.num);
     }
 }
 #    endif
@@ -1994,8 +1980,8 @@ static void adc0_sse2_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse02.work, tiva_adc_read, &sse02, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc0.devno, sse02.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc0.devno, sse02.num);
     }
 }
 #    endif
@@ -2013,8 +1999,8 @@ static void adc0_sse3_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse03.work, tiva_adc_read, &sse03, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc0.devno, sse03.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc0.devno, sse03.num);
     }
 }
 #    endif
@@ -2035,8 +2021,8 @@ static void adc1_sse0_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse10.work, tiva_adc_read, &sse10, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc1.devno, sse10.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc1.devno, sse10.num);
     }
 }
 #    endif
@@ -2054,8 +2040,8 @@ static void adc1_sse1_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse11.work, tiva_adc_read, &sse11, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc1.devno, sse11.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc1.devno, sse11.num);
     }
 }
 #    endif
@@ -2073,8 +2059,8 @@ static void adc1_sse2_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse12.work, tiva_adc_read, &sse12, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc1.devno, sse12.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc1.devno, sse12.num);
     }
 }
 #    endif
@@ -2092,8 +2078,8 @@ static void adc1_sse3_interrupt(int irq, void *context)
   ret = work_queue(HPWORK, &sse13.work, tiva_adc_read, &sse13, 0);
   if (ret != 0)
     {
-      adcdbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
-             ret, adc1.devno, sse13.num);
+      adbg("ERROR: Failed to queue work: %d ADC.SSE: %d.%d\n",
+           ret, adc1.devno, sse13.num);
     }
 }
 #    endif
