@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -243,6 +243,7 @@
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
+# define restrict /* REVISIT */
 
 /* SDCC does not support the noreturn or packed attributes */
 
@@ -355,6 +356,7 @@
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
+# define restrict
 
 /* The Zilog compiler does not support the noreturn, packed, naked attributes */
 
@@ -446,6 +448,7 @@
 # define weak_alias(name, aliasname)
 # define weak_function
 # define weak_const_function
+# define restrict
 # define noreturn_function
 # define farcall_function
 # define packed_struct
