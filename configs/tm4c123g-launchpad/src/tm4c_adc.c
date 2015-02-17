@@ -101,6 +101,10 @@ int board_adc_initialize(void)
           return ret;
         }
 
+      /* Enable ADC interrupts */
+
+      adc->ad_ops->ao_rxint(adc, true);
+
       /* Now we are initialized */
 
       initialized = true;

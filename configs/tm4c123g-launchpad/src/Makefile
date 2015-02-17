@@ -54,7 +54,7 @@ CSRCS += tm4c_timer.c
 endif
 
 ifeq ($(CONFIG_TIVA_ADC),y)
-CHIP_CSRCS += tm4c_adc.c
+CSRCS += tm4c_adc.c
 endif
 
 ifeq ($(CONFIG_MTD_AT24XX),y)
