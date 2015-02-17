@@ -9825,3 +9825,8 @@
 	  (2015-02-17).
 	* include/netdb.h:  Add a mostly-commented-out version of the standard
 	  netdb.h header file (2015-02-17).
+	* arch/arm/src/tiva/:  Updated files to allow for ADC triggering by the
+	  timer. I’ve cleaned up some parts of the ADC code, too, and fleshed
+	  out the PWM triggering ioctl.  From Calvin Maguranis (2015-02-17).
+	* configs/tm4c123g-launchpad: Add ADC suppport.  From Calvin Maguranis
+	  (2015-02-17).
