@@ -9830,3 +9830,8 @@
 	  out the PWM triggering ioctl.  From Calvin Maguranis (2015-02-17).
 	* configs/tm4c123g-launchpad: Add ADC suppport.  From Calvin Maguranis
 	  (2015-02-17).
+	* fs/fat/fs_mkfatfs.c:  Use DMA memory for mkfatfs when needed. This makes
+	  mkfatfs use fat_dma_alloc() when CONFIG_FAT_DMAMEMORY is set. This is
+	  needed to ensure mkfatfs operates with boards that use DMA for microSD.
+	  From Andrew Tridgell via the PX4/NuttX repository (2015-02-17).
+
