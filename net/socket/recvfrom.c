@@ -971,20 +971,23 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
           FAR struct udp_conn_s *conn = (FAR struct udp_conn_s*)pstate->rf_sock->s_conn;
           FAR struct sockaddr_in6 *infrom6 = (FAR struct sockaddr_in6 *)infrom;
 
+          /* Hybrid dual-stack IPv6/IPv4 implementations recognize a special
+           * class of addresses, the IPv4-mapped IPv6 addresses.
+           */
+
           if (conn->domain == PF_INET6)
             {
+              in_addr_t ipv4addr;
+
+              /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
+
               infrom6->sin6_family = AF_INET6;
               infrom6->sin6_port = udp->srcport;
               *fromlen = sizeof(struct sockaddr_in6);
 
-              memset(infrom6->sin6_addr.s6_addr, 0,
-                     sizeof(infrom6->sin6_addr.s6_addr) - sizeof(in_addr_t));
-
-              infrom6->sin6_addr.s6_addr[10] = 0xff;
-              infrom6->sin6_addr.s6_addr[11] = 0xff;
-
-              memcpy(&infrom6->sin6_addr.s6_addr[12], ipv4->srcipaddr
-                     sizeof(in_addr_t));
+              ipv4addr = net_ip4addr_conv32(ipv4->srcipaddr);
+              ip6_map_ipv4addr(ipv4addr,
+                               (net_ipv6addr_t)src_addr6.sin6_addr.s6_addr16);
             }
           else
 #endif

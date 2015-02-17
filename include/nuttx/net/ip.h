@@ -328,17 +328,50 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
   } while (0)
 
 /****************************************************************************
+ * Macro: ip6_map_ipv4addr
+ *
+ * Description:
+ *   Hybrid dual-stack IPv6/IPv4 implementations recognize a special class
+ *   of addresses, the IPv4-mapped IPv6 addresses. These addresses consist
+ *   of:
+ *
+ *     1. An 80-bit prefix of zeros,
+ *     2. Te next 16 bits are one, and
+ *     3. he remaining, least-significant 32 bits contain the IPv4 address.
+ *
+ *   This macro encodes an IPv4 address in an IPv6 address in this fashion.
+ *
+ * Input Parameters:
+ *   ipv4addr - The IPv4 address to be mapped (scalar)
+ *   ipv6addr - The IPv6 address in which to map the IPv4 address (array)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define ip6_map_ipv4addr(ipv4addr, ipv6addr) \
+  do \
+    { \
+      memset(ipv6addr, 0, 5 * sizeof(uint16_t)); \
+      ipv6addr[5] = 0xffff; \
+      ipv6addr[6] = (uint16_t)((uint32_t)ip4addr >> 16); \
+      ipv6addr[7] = (uint16_t)ip4addr & 0xffff; \
+    } \
+  while (0)
+
+/****************************************************************************
  * Macro: ip6_get_ipv4addr
  *
  * Description:
- *   Decode an encoded IPv4 address.
+ *   Decode an IPv4-mapped IPv6 address.
  *
  * Input Parameters:
- *   ipv6addr - The IPv6 address (net_ipv6addr_t) containing the encoded
+ *   ipv6addr - The IPv6 address (net_ipv6addr_t array) containing the mapped
  *     IPv4 address
  *
  * Returned Value:
- *   The decode IPv4 addreses (in_addr_t)
+ *   The decoded IPv4 address (scalar in_addr_t)
  *
  ****************************************************************************/
 
@@ -352,13 +385,13 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
  * Macro: ip6_is_ipv4addr
  *
  * Description:
- *   Test if an IPv6 is an encoded IPv4 address.
+ *   Test if an IPv6 is an IPv4-mapped IPv6 address.
  *
  * Input Parameters:
  *   ipv6addr - The IPv6 address to be tested
  *
  * Returned Value:
- *   True is returned if ipv6addr holds an encoded IPv4 address.
+ *   True is returned if ipv6addr holds a mapped IPv4 address.
  *
  ****************************************************************************/
 

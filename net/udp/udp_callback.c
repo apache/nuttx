@@ -133,19 +133,22 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
 
 #ifdef CONFIG_NET_IPv6
+      /* Hybrid dual-stack IPv6/IPv4 implementations recognize a special
+       * class of addresses, the IPv4-mapped IPv6 addresses.
+       */
+
       if (conn->domain == PF_INET6)
         {
+          in_addr_t ipv4addr;
+
+          /* Encode the IPv4 address as an IPv-mapped IPv6 address */
+
           src_addr6.sin6_family = AF_INET6;
           src_addr6.sin6_port = udp->srcport;
 
-          memset(src_addr6.sin6_addr.s6_addr, 0,
-                 sizeof(src_addr6.sin6_addr.s6_addr) - sizeof(in_addr_t));
-
-          src_addr6.sin6_addr.s6_addr[10] = 0xff;
-          src_addr6.sin6_addr.s6_addr[11] = 0xff;
-
-          memcpy(&src_addr6.sin6_addr.s6_addr[12], ipv4->srcipaddr,
-                 sizeof(in_addr_t));
+          ipv4addr = net_ip4addr_conv32(ipv4->srcipaddr);
+          ip6_map_ipv4addr(ipv4addr,
+                           (net_ipv6addr_t)src_addr6.sin6_addr.s6_addr16);
 
           src_addr_size = sizeof(src_addr6);
           src_addr = &src_addr6;
