@@ -73,18 +73,6 @@
 #define UDPIPv6BUF \
   ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
-#define IN6_IS_ADDR_IPV4(a) \
-  ((a)->s6_addr32[0] == 0 && \
-   (a)->s6_addr32[1] == 0 && \
-   (a)->s6_addr16[4] == 0 && \
-   (a)->s6_addr16[5] == 0xffff)
-
-#define IN6_GET_ADDR_IPV4(a) \
-  (((in_addr_t)(a)->s6_addr[12]) | \
-   ((in_addr_t)(a)->s6_addr[13] << 8) | \
-   ((in_addr_t)(a)->s6_addr[14] << 16) | \
-   ((in_addr_t)(a)->s6_addr[15] << 24))
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -133,7 +121,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_IPv6
       if (conn->domain == PF_INET ||
           (conn->domain == PF_INET6 &&
-           IN6_IS_ADDR_IPV4((FAR struct in6_addr*)conn->u.ipv6.raddr)))
+           ip6_is_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr)))
 #endif
         {
           /* Get pointers to the IPv4 header and the offset TCP header */
@@ -159,9 +147,9 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
 #ifdef CONFIG_NET_IPv6
           if (conn->domain == PF_INET6 &&
-              IN6_IS_ADDR_IPV4((FAR struct in6_addr*)conn->u.ipv6.raddr))
+              ip6_is_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr))
             {
-              in_addr_t raddr = IN6_GET_ADDR_IPV4((FAR struct in6_addr*)conn->u.ipv6.raddr);
+              in_addr_t raddr = ip6_get_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr);
               net_ipv4addr_hdrcopy(ipv4->destipaddr, &raddr);
             }
           else
@@ -253,7 +241,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_IPv6
       if (conn->domain == PF_INET ||
           (conn->domain == PF_INET6 &&
-           IN6_IS_ADDR_IPV4((FAR struct in6_addr*)conn->u.ipv6.raddr)))
+           ip6_is_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr)))
 #endif
         {
           udp->udpchksum = ~udp_ipv4_chksum(dev);

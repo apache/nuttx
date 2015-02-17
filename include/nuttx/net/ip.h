@@ -328,6 +328,47 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
   } while (0)
 
 /****************************************************************************
+ * Macro: ip6_get_ipv4addr
+ *
+ * Description:
+ *   Decode an encoded IPv4 address.
+ *
+ * Input Parameters:
+ *   ipv6addr - The IPv6 address (net_ipv6addr_t) containing the encoded
+ *     IPv4 address
+ *
+ * Returned Value:
+ *   The decode IPv4 addreses (in_addr_t)
+ *
+ ****************************************************************************/
+
+#define ip6_get_ipv4addr(ipv6addr) \
+  (((in_addr_t)(ipv6addr)->s6_addr[12]) | \
+   ((in_addr_t)(ipv6addr)->s6_addr[13] << 8) | \
+   ((in_addr_t)(ipv6addr)->s6_addr[14] << 16) | \
+   ((in_addr_t)(ipv6addr)->s6_addr[15] << 24))
+
+/****************************************************************************
+ * Macro: ip6_is_ipv4addr
+ *
+ * Description:
+ *   Test if an IPv6 is an encoded IPv4 address.
+ *
+ * Input Parameters:
+ *   ipv6addr - The IPv6 address to be tested
+ *
+ * Returned Value:
+ *   True is returned if ipv6addr holds an encoded IPv4 address.
+ *
+ ****************************************************************************/
+
+#define ip6_is_ipv4addr(ipv6addr) \
+  ((ipv6addr)->s6_addr32[0] == 0 && \
+   (ipv6addr)->s6_addr32[1] == 0 && \
+   (ipv6addr)->s6_addr16[4] == 0 && \
+   (ipv6addr)->s6_addr16[5] == 0xffff)
+
+/****************************************************************************
  * Macro: net_ipv4addr_copy, net_ipv4addr_hdrcopy, net_ipv6addr_copy, and
  *        net_ipv6addr_hdrcopy
  *
