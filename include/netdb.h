@@ -49,7 +49,7 @@
  * <netinet/in.h>, <sys/socket.h>, and <inttypes.h>.
  */
 
-#incldue <inttypes.h>
+#include <inttypes.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
