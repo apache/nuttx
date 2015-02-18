@@ -9834,4 +9834,6 @@
 	  mkfatfs use fat_dma_alloc() when CONFIG_FAT_DMAMEMORY is set. This is
 	  needed to ensure mkfatfs operates with boards that use DMA for microSD.
 	  From Andrew Tridgell via the PX4/NuttX repository (2015-02-17).
-
+	* include/nuttx/rtc.h, fs/fs.h, drivers/ramdisk.c, pipes/, and
+	  timers/rtc.c: The inode unlink method should not be support if
+	  operations on the root pseudo-filesystem are disabled (2015-02-18).
