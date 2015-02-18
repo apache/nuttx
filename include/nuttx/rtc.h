@@ -416,11 +416,13 @@ struct rtc_ops_s
                        FAR const struct rtc_wkalrm *wkalrm);
 #endif
 
+#ifdef CONFIG_RTC_IOCTL
    /* Support for architecture-specific RTC operations */
 
   CODE int (*ioctl)(FAR struct rtc_lowerhalf_s *lower, int cmd,
                     unsigned long arg);
-   
+#endif
+
    /* The driver has been unlinked and there are no further open references
     * to the driver.
     */

@@ -107,6 +107,13 @@ config RTC_EPOCHYEAR
 		With some RTCs, these operations can be used to read or to set the RTC's
 		Epoch, respectively.
 
+config RTC_IOCTL
+	bool "RTC IOCTLs"
+	default n
+	---help---
+		Support the RTC interface ioctl() method.  This allows you to add
+		architecture-specific RTC operations to the RTC interface
+
 endif # RTC_DRIVER
 endif # RTC
 

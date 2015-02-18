@@ -509,10 +509,12 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     default:
       {
         ret = -ENOTTY;
+#ifdef CONFIG_RTC_IOCTL
         if (ops->ioctl)
           {
             ret = ops->ioctl(upper->lower, cmd, arg);
           }
+#endif
       }
       break;
     }

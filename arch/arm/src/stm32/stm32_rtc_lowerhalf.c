@@ -118,7 +118,9 @@ static const struct rtc_ops_s g_rtc_ops =
   .rdwkalm    = NULL,
   .setwkalm   = NULL,
 #endif
+#ifdef CONFIG_RTC_IOCTL
   .ioctl      = NULL,
+#endif
   .destroy    = NULL,
 };
 
