@@ -171,7 +171,7 @@ extern "C"
 /* daylight - Daylight savings time flag */
 /* EXTERN int daylight; not supported */
 
-/* timezone - Difference from UTC and local standard time
+/* timezone - Difference from UTC and local standard time */
 /* EXTERN long int timezone; not supported */
 
 /* tzname[] - Timezone strings */

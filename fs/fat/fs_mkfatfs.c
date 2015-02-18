@@ -300,7 +300,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
 #ifdef CONFIG_FAT_DMAMEMORY
   var.fv_sect = (uint8_t*)fat_dma_alloc(var.fv_sectorsize);
-+#else
+#else
   var.fv_sect = (uint8_t*)kmm_malloc(var.fv_sectorsize);
 #endif
 
