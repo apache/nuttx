@@ -56,8 +56,10 @@
 struct rtc_upperhalf_s
 {
   FAR struct rtc_lowerhalf_s *lower;  /* Contained lower half driver */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   uint8_t crefs;                      /* Number of open references */
   bool unlinked;                      /* True if the driver has been unlinked */
+#endif
 };
 
 /****************************************************************************
@@ -66,17 +68,25 @@ struct rtc_upperhalf_s
 
 /* Internal logic */
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void    rtc_destroy(FAR struct rtc_upperhalf_s *upper);
+#endif
 
 /* Character driver methods */
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     rtc_open(FAR struct file *filep);
 static int     rtc_close(FAR struct file *filep);
+#endif
+
 static ssize_t rtc_read(FAR struct file *filep, FAR char *, size_t);
 static ssize_t rtc_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     rtc_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -84,8 +94,13 @@ static int     rtc_unlink(FAR struct inode *inode);
 
 static const struct file_operations rtc_fops =
 {
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   rtc_open,      /* open */
   rtc_close,     /* close */
+#else
+  0,             /* open */
+  0,             /* close */
+#endif
   rtc_read,      /* read */
   rtc_write,     /* write */
   0,             /* seek */
@@ -93,7 +108,9 @@ static const struct file_operations rtc_fops =
 #ifndef CONFIG_DISABLE_POLL
   0,             /* poll */
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   rtc_unlink     /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -101,9 +118,10 @@ static const struct file_operations rtc_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rtc_read
+ * Name: rtc_destory
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void rtc_destroy(FAR struct rtc_upperhalf_s *upper)
 {
   /* If the lower half driver provided a destroy method, then call that
@@ -121,11 +139,13 @@ static void rtc_destroy(FAR struct rtc_upperhalf_s *upper)
 
   kmm_free(upper);
 }
+#endif
 
 /****************************************************************************
  * Name: rtc_open
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rtc_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
@@ -146,11 +166,13 @@ static int rtc_open(FAR struct file *filep)
   DEBUGASSERT(upper->crefs > 0);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: rtc_close
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rtc_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
@@ -181,6 +203,7 @@ static int rtc_close(FAR struct file *filep)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: rtc_read
@@ -526,6 +549,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: rtc_unlink
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rtc_unlink(FAR struct inode *inode)
 {
   FAR struct rtc_upperhalf_s *upper;
@@ -552,6 +576,7 @@ static int rtc_unlink(FAR struct inode *inode)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -593,8 +618,11 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower)
   /* Initialize the upper half container */
 
   upper->lower = lower;     /* Contain lower half driver */
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   upper->crefs = 0;         /* No open references */
   upper->unlinked = false;  /* Driver is not  unlinked */
+#endif
 
   /* Create the driver name.  There is space for the a minor number up to  6
    * characters

@@ -79,7 +79,9 @@ struct rd_struct_s
 {
   uint32_t rd_nsectors;         /* Number of sectors on device */
   uint16_t rd_sectsize;         /* The size of one sector */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   uint8_t rd_crefs;             /* Open reference count */
+#endif
   uint8_t rd_flags;             /* See RDFLAG_* definitions */
 #ifdef CONFIG_FS_WRITABLE
   FAR uint8_t *rd_buffer;       /* RAM disk backup memory */
@@ -92,10 +94,13 @@ struct rd_struct_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void    rd_destroy(FAR struct rd_struct_s *dev);
 
 static int     rd_open(FAR struct inode *inode);
 static int     rd_close(FAR struct inode *inode);
+#endif
+
 static ssize_t rd_read(FAR struct inode *inode, FAR unsigned char *buffer,
                  size_t start_sector, unsigned int nsectors);
 #ifdef CONFIG_FS_WRITABLE
@@ -107,7 +112,10 @@ static int     rd_geometry(FAR struct inode *inode,
                  FAR struct geometry *geometry);
 static int     rd_ioctl(FAR struct inode *inode, int cmd,
                  unsigned long arg);
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     rd_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -115,8 +123,13 @@ static int     rd_unlink(FAR struct inode *inode);
 
 static const struct block_operations g_bops =
 {
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   rd_open,     /* open     */
   rd_close,    /* close    */
+#else
+  0,           /* open     */
+  0,           /* close    */
+#endif
   rd_read,     /* read     */
 #ifdef CONFIG_FS_WRITABLE
   rd_write,    /* write    */
@@ -125,7 +138,9 @@ static const struct block_operations g_bops =
 #endif
   rd_geometry, /* geometry */
   rd_ioctl,    /* ioctl    */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   rd_unlink    /* unlink   */
+#endif
 };
 
 /****************************************************************************
@@ -140,6 +155,7 @@ static const struct block_operations g_bops =
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void rd_destroy(FAR struct rd_struct_s *dev)
 {
   fvdbg("Destroying RAM disk\n");
@@ -159,6 +175,7 @@ static void rd_destroy(FAR struct rd_struct_s *dev)
 
   kmm_free(dev);
 }
+#endif
 
 /****************************************************************************
  * Name: rd_open
@@ -167,6 +184,7 @@ static void rd_destroy(FAR struct rd_struct_s *dev)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rd_open(FAR struct inode *inode)
 {
   FAR struct rd_struct_s *dev;
@@ -182,6 +200,7 @@ static int rd_open(FAR struct inode *inode)
   fvdbg("rd_crefs: %d\n", dev->rd_crefs);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: rd_close
@@ -190,6 +209,7 @@ static int rd_open(FAR struct inode *inode)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rd_close(FAR struct inode *inode)
 {
   FAR struct rd_struct_s *dev;
@@ -203,6 +223,7 @@ static int rd_close(FAR struct inode *inode)
   dev->rd_crefs--;
   fvdbg("rd_crefs: %d\n", dev->rd_crefs);
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Was that the last open reference to the RAM disk? */
 
   if (dev->rd_crefs == 0)
@@ -216,9 +237,11 @@ static int rd_close(FAR struct inode *inode)
           rd_destroy(dev);
         }
     }
+#endif
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: rd_read
@@ -370,6 +393,7 @@ static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rd_unlink(FAR struct inode *inode)
 {
   FAR struct rd_struct_s *dev;
@@ -392,6 +416,7 @@ static int rd_unlink(FAR struct inode *inode)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions

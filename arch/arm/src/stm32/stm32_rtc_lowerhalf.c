@@ -121,7 +121,9 @@ static const struct rtc_ops_s g_rtc_ops =
 #ifdef CONFIG_RTC_IOCTL
   .ioctl      = NULL,
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .destroy    = NULL,
+#endif
 };
 
 /* STM32 RTC device state */

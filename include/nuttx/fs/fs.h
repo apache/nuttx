@@ -99,7 +99,9 @@ struct file_operations
 #ifndef CONFIG_DISABLE_POLL
   int     (*poll)(FAR struct file *filep, struct pollfd *fds, bool setup);
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int     (*unlink)(FAR struct inode *inode);
+#endif
 };
 
 /* This structure provides information about the state of a block driver */
@@ -131,7 +133,9 @@ struct block_operations
             size_t start_sector, unsigned int nsectors);
   int     (*geometry)(FAR struct inode *inode, FAR struct geometry *geometry);
   int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int     (*unlink)(FAR struct inode *inode);
+#endif
 };
 
 /* This structure is provided by a filesystem to describe a mount point.

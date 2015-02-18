@@ -423,11 +423,13 @@ struct rtc_ops_s
                     unsigned long arg);
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
    /* The driver has been unlinked and there are no further open references
     * to the driver.
     */
 
   CODE int (*destroy)(FAR struct rtc_lowerhalf_s *lower);
+#endif
 };
 
 /* When the RTC driver is instantiated, a reference to struct

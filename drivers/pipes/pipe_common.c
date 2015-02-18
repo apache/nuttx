@@ -350,6 +350,7 @@ int pipecommon_close(FAR struct file *filep)
       dev->d_refs     = 0;
       dev->d_nwriters = 0;
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
       /* If, in addition, we have been unlinked, then also need to free the
        * device structure as well to prevent a memory leak.
        */
@@ -359,6 +360,7 @@ int pipecommon_close(FAR struct file *filep)
           pipecommon_freedev(dev);
           return OK;
         }
+#endif
    }
 
   sem_post(&dev->d_bfsem);
@@ -707,6 +709,7 @@ int  pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: pipecommon_unlink
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 int pipecommon_unlink(FAR struct inode *inode)
 {
   FAR struct pipe_dev_s *dev;
@@ -736,5 +739,6 @@ int pipecommon_unlink(FAR struct inode *inode)
 
   return OK;
 }
+#endif
 
 #endif /* CONFIG_DEV_PIPE_SIZE > 0 */

@@ -4,7 +4,7 @@
 #
 
 menu "Unix Domain Socket Support"
-	depends on NET
+	depends on NET && !DISABLE_PSEUDOFS_OPERATIONS
 
 config NET_LOCAL
 	bool "Unix domain (local) sockets"
