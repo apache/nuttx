@@ -261,6 +261,16 @@
 
 #define RTC_WKALM_SET      _RTCIOC(0x0010)
 
+/* Architecture-specific RTC IOCTLS should begin at RTC_USER_IOCBASE.  For
+ * example:
+ *
+ *   #define MY_RTC_IOCTL1 _RTCIOC(RTC_USER_IOCBASE);
+ *   #define MY_RTC_IOCTL2 _RTCIOC(RTC_USER_IOCBASE + 1);
+ *   etc.
+ */
+
+#define RTC_USER_IOCBASE   0x0011
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -406,6 +416,11 @@ struct rtc_ops_s
                        FAR const struct rtc_wkalrm *wkalrm);
 #endif
 
+   /* Support for architecture-specific RTC operations */
+
+  CODE int (*ioctl)(FAR struct rtc_lowerhalf_s *lower, int cmd,
+                    unsigned long arg);
+   
    /* The driver has been unlinked and there are no further open references
     * to the driver.
     */
