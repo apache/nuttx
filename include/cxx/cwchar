@@ -48,7 +48,9 @@
 
 namespace std
 {
+#if 0 /* Not defined */
   using ::mbstate_t;
+#endif
   using ::wint_t;
   using ::size_t;
 };

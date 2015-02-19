@@ -105,13 +105,14 @@ typedef int wint_t;
  *   state, the results are unspecified.
  */
 
+#if 0 /* Not used */
 struct mbstate_s
 {
   int __fill[6];
 };
 
 typedef struct mbstate_s mbstate_t;
-
+#endif
 /* FILE
  *   As described in <stdio.h>.
  *
