@@ -53,7 +53,6 @@ namespace std
   using ::clockid_t;
   using ::timer_t;
   using ::timespec;
-  using ::timeval;
   using ::tm;
   using ::itimerspec;
   using ::sigevent;
