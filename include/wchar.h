@@ -89,8 +89,11 @@
  *
  * wint_t
  *   An integral type capable of storing any valid value of wchar_t, or WEOF.
- *
- * wctype_t
+ */
+
+typedef int wint_t;
+
+/* wctype_t
  *   A scalar type of a data object that can hold values which represent
  *   locale-specific character classification.
  *
@@ -100,8 +103,16 @@
  *   multibyte) characters and wide-characters. If a codeset is being used
  *   such that an mbstate_t needs to preserve more than 2 levels of reserved
  *   state, the results are unspecified.
- *
- * FILE
+ */
+
+struct mbstate_s
+{
+  int __fill[6];
+};
+
+typedef struct mbstate_s mbstate_t;
+
+/* FILE
  *   As described in <stdio.h>.
  *
  * size_t
@@ -109,8 +120,6 @@
  *
  * Reference: Opengroup.org
  */
-
-typedef int wint_t;
 
 /* "The tag tm is declared as naming an incomplete structure type, the
  *  contents of which are described in the header <time.h>."

@@ -46,4 +46,11 @@
 // Namespace
 //***************************************************************************
 
+namespace std
+{
+  using ::mbstate_t;
+  using ::wint_t;
+  using ::size_t;
+};
+
 #endif // __INCLUDE_CXX_CWCHAR
