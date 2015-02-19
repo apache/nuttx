@@ -106,6 +106,21 @@ typedef int wint_t;
  */
 
 #if 0 /* Not used */
+/* Commented out because this is dangerous.  This defines a type that would
+ * be internal to some wchar implementation.  NuttX does not implement the
+ * wchar functions.  Having this definition is a time bomb:  If this header
+ * file is inadvertently included in code that interacts with an external
+ * library and if the definition of mbstate_t does not EXACTLY match the
+ * usage in that external library, then a potentially fatal error could
+ * occur.
+ *
+ * It is better to let the build error out due to the lack of the mbstate_t
+ * definition.  At least that way, the problem can be avoided and the user
+ * can come up with some alternative way of dealing with the interfacing
+ * issue that does not require NuttX to be in lock-step with some external
+ * implementation.
+ */
+
 struct mbstate_s
 {
   int __fill[6];
@@ -113,6 +128,7 @@ struct mbstate_s
 
 typedef struct mbstate_s mbstate_t;
 #endif
+
 /* FILE
  *   As described in <stdio.h>.
  *
