@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/tiva/tiva_gpio.h
  *
- *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <nuttx/irq.h>
 
 #include "up_internal.h"
 #include "chip.h"
@@ -270,6 +272,37 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg);
  ************************************************************************************/
 
 int weak_function gpio_irqinitialize(void);
+
+/****************************************************************************
+ * Name: gpio_irqattach
+ *
+ * Description:
+ *   Attach the interrupt handler 'isr' to the GPIO IRQ 'irq'
+ *
+ ****************************************************************************/
+
+int gpio_irqattach(int irq, xcpt_t isr);
+#define gpio_irqdetach(isr) gpio_irqattach(isr, NULL)
+
+/****************************************************************************
+ * Name: gpio_irqenable
+ *
+ * Description:
+ *   Enable the GPIO IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void gpio_irqenable(int irq);
+
+/****************************************************************************
+ * Name: gpio_irqdisable
+ *
+ * Description:
+ *   Disable the GPIO IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void gpio_irqdisable(int irq);
 
 #if defined(__cplusplus)
 }
