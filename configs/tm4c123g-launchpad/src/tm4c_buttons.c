@@ -39,10 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
+#include <nuttx/arch.h>
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
+#include "tiva_gpio.h"
 #include "tm4c123g-launchpad.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -54,6 +55,10 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+static xcpt_t g_irquser;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -80,9 +85,7 @@ void board_button_initialize(void)
    * and see table 10-10 in datasheet for pins with special considerations.
    */
 
-  modifyreg32(TIVA_GPIOF_LOCK,  0, GPIO_LOCK_UNLOCK);
-  modifyreg32(TIVA_GPIOF_CR,    0, 0x01);
-  modifyreg32(TIVA_GPIOF_LOCK,  GPIO_LOCK_UNLOCK, GPIO_LOCK_LOCKED);
+  tiva_gpio_lockport(GPIO_SW2, false);
 
   /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
    * configured for some pins but NOT used in this file
@@ -90,10 +93,23 @@ void board_button_initialize(void)
 
   tiva_configgpio(GPIO_SW1);
   tiva_configgpio(GPIO_SW2);
+
+  /* Configure GPIO interrupts */
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+  (void)tiva_gpioirqinitialize();
+#endif
 }
 
 /****************************************************************************
  * Name: board_buttons
+ *
+ * Description:
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
+ *
  ****************************************************************************/
 
 uint8_t board_buttons(void)
@@ -117,51 +133,63 @@ uint8_t board_buttons(void)
   return ret;
 }
 
-/*****************************************************************************
- * Button support.
+/****************************************************************************
+ * Name: board_button_irq
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state
- *   of all buttons or board_button_irq() may be called to register button
- *   interrupt handlers.
- *
- *   After board_button_initialize() has been called, board_buttons() may be
- *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  See the
- *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
- *   of each bit.
- *
- *   board_button_irq() may be called to register an interrupt handler that
- *   will be called when a button is depressed or released.  The ID value is
- *   a button enumeration value that uniquely identifies a button resource.
- *   See the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning
- *   of enumeration values.  The previous interrupt handler address is
- *   returned (so that it may restored, if so desired).
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is one
+ *   of the BUTTON* definitions provided above. The previous interrupt
+ *   handler address is returned (so that it may restored, if so desired).
  *
  ****************************************************************************/
 
-#if 0
-#ifdef CONFIG_ARCH_IRQBUTTONS
+#  ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
-  uint16_t gpio;
+  xcpt_t oldhandler = NULL;
 
-  if (id == BUTTON_KEY1)
+  if (id == BUTTON_SW1 ||
+      id == BUTTON_SW2)
     {
-      gpio = GPIO_SW1;
-    }
-  else if (id == BUTTON_KEY2)
-    {
-      gpio = GPIO_SW2;
-    }
-  else
-    {
-      return NULL;
+      irqstate_t flags;
+
+      /* Disable interrupts until we are done.  This guarantees that the
+       * following operations are atomic.
+       */
+
+      flags = irqsave();
+
+      /* Get the old button interrupt handler and save the new one */
+
+      oldhandler = g_irquser;
+      g_irquser = irqhandler;
+
+      /* Are we attaching or detaching? */
+
+      if (irqhandler != NULL)
+        {
+          /* Configure the interrupt */
+
+          (void)tiva_gpioirqattach(CONFIG_TIVA_GPIOF_IRQS, irqhandler);
+          tiva_gpioirqenable(CONFIG_TIVA_GPIOF_IRQS);
+        }
+      else
+        {
+          /* Disable and detach the interrupt */
+
+          tiva_gpioirqdisable(CONFIG_TIVA_GPIOF_IRQS);
+          (void)tiva_gpioirqattach(CONFIG_TIVA_GPIOF_IRQS, NULL);
+        }
+      /* Configure the interrupt */
+
+      irqrestore(flags);
     }
 
-  return stm32_gpiosetevent(gpio, true, true, true, irqhandler);
+  /* Return the old button handler (so that it can be restored) */
+
+  return oldhandler;
 }
-#endif
-#endif // 0
+#  endif
+
 #endif /* CONFIG_ARCH_BUTTONS */
