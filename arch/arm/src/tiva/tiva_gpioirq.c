@@ -63,108 +63,6 @@
 
 static FAR xcpt_t g_gpioirqvector[NR_GPIO_IRQS];
 
-/* A table that maps a GPIO group to a GPIO base address.  Overly complicated
- * because we support disabling interrupt support for arbitrary ports.  This
- * must carefully match the IRQ numbers assigned in arch/arm/include/lm3s/irq.h
- */
-
-#define COMMA
-static const uintptr_t g_gpiobase[] =
-{
-#ifdef CONFIG_TIVA_GPIOA_IRQS
-  COMMA TIVA_GPIOA_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOB_IRQS
-  COMMA TIVA_GPIOB_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOC_IRQS
-  COMMA TIVA_GPIOC_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOD_IRQS
-  COMMA TIVA_GPIOD_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOE_IRQS
-  COMMA TIVA_GPIOE_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOF_IRQS
-  COMMA TIVA_GPIOF_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOG_IRQS
-  COMMA TIVA_GPIOG_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOH_IRQS
-  COMMA TIVA_GPIOH_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOJ_IRQS
-  COMMA TIVA_GPIOJ_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOK_IRQS
-  COMMA TIVA_GPIOK_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOL_IRQS
-  COMMA TIVA_GPIOL_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOM_IRQS
-  COMMA TIVA_GPIOM_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPION_IRQS
-  COMMA TIVA_GPION_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOP_IRQS
-  COMMA TIVA_GPIOP_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOQ_IRQS
-  COMMA TIVA_GPIOQ_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOR_IRQS
-  COMMA TIVA_GPIOR_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOS_IRQS
-  COMMA TIVA_GPIOS_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-#ifdef CONFIG_TIVA_GPIOT_IRQS
-  COMMA TIVA_GPIOT_BASE
-#undef  COMMA
-#define COMMA ,
-#endif
-};
-
-#define GPIO_NADDRS (sizeof(g_gpiobase)/sizeof(uintptr_t))
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -174,31 +72,7 @@ static const uintptr_t g_gpiobase[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_gpiobaseaddress
- *
- * Input:
- *   gpioirq - A pin number in the range of 0 to NR_GPIO_IRQS.
- *
- * Description:
- *   Given a GPIO enumeration value, return the base address of the
- *   associated GPIO registers.  NOTE that range checking was provided by
- *   callee
- *
- ****************************************************************************/
-
-static uintptr_t tiva_gpiobaseaddress(unsigned int gpioirq)
-{
-  unsigned int ndx = gpioirq >> 3;
-  if (ndx < GPIO_NADDRS)
-    {
-      return g_gpiobase[ndx];
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: tiva_gpio*handler
+ * Name: tiva_gpiohandler
  *
  * Description:
  *   Handle interrupts on each enabled GPIO port
@@ -371,14 +245,14 @@ static int tiva_gpiothandler(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gpio_irqinitialize
+ * Name: tiva_gpioirqinitialize
  *
  * Description:
  *   Initialize all vectors to the unexpected interrupt handler
  *
  ****************************************************************************/
 
-int gpio_irqinitialize(void)
+int tiva_gpioirqinitialize(void)
 {
   int i;
 
@@ -470,14 +344,14 @@ int gpio_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: gpio_irqattach
+ * Name: tiva_gpioirqattach
  *
  * Description:
  *   Attach in GPIO interrupt to the provide 'isr'
  *
  ****************************************************************************/
 
-int gpio_irqattach(int irq, xcpt_t isr)
+int tiva_gpioirqattach(int irq, xcpt_t isr)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
@@ -495,7 +369,7 @@ int gpio_irqattach(int irq, xcpt_t isr)
       if (isr == NULL)
         {
 #ifndef CONFIG_ARCH_NOINTC
-           gpio_irqdisable(gpioirq);
+           tiva_gpioirqdisable(gpioirq);
 #endif
            isr = irq_unexpected_isr;
         }
@@ -510,14 +384,14 @@ int gpio_irqattach(int irq, xcpt_t isr)
 }
 
 /****************************************************************************
- * Name: gpio_irqenable
+ * Name: tiva_gpioirqenable
  *
  * Description:
  *   Enable the GPIO IRQ specified by 'irq'
  *
  ****************************************************************************/
 
-void gpio_irqenable(int irq)
+void tiva_gpioirqenable(int irq)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
@@ -549,14 +423,14 @@ void gpio_irqenable(int irq)
 }
 
 /****************************************************************************
- * Name: gpio_irqdisable
+ * Name: tiva_gpioirqdisable
  *
  * Description:
  *   Disable the GPIO IRQ specified by 'irq'
  *
  ****************************************************************************/
 
-void gpio_irqdisable(int irq)
+void tiva_gpioirqdisable(int irq)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
@@ -586,3 +460,4 @@ void gpio_irqdisable(int irq)
       irqrestore(flags);
     }
 }
+

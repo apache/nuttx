@@ -222,7 +222,7 @@ static const uintptr_t g_gpiobase[TIVA_NPORTS] =
  *
  ****************************************************************************/
 
-static uintptr_t tiva_gpiobaseaddress(unsigned int port)
+uintptr_t tiva_gpiobaseaddress(unsigned int port)
 {
   uintptr_t gpiobase = 0;
   if (port < TIVA_NPORTS)
@@ -959,6 +959,49 @@ bool tiva_gpioread(uint32_t pinset)
    *  corresponding input pin when these are configured as inputs. All bits
    *  are cleared by a reset."
    */
-
   return (getreg32(base + TIVA_GPIO_DATA_OFFSET + (1 << (pinno + 2))) != 0);
+}
+
+/****************************************************************************
+ * Name: tiva_gpio_lockport
+ *
+ * Description:
+ *   Certain pins require to be unlocked from the NMI to use for normal GPIO
+ *   use. See table 10-10 in datasheet for pins with special considerations.
+ *
+ ****************************************************************************/
+
+void tiva_gpio_lockport(uint32_t pinset, bool lock)
+{
+  unsigned int port;
+  unsigned int pinno;
+  uintptr_t    base;
+
+  /* Decode the basics */
+
+  port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pinno = (pinset & GPIO_PIN_MASK);
+
+  /* Get the base address associated with the GPIO port */
+
+  base = tiva_gpiobaseaddress(port);
+
+  /* allow access to the TIVA_GPIO_CR_OFFSET register */
+
+  modifyreg32(base + TIVA_GPIO_LOCK_OFFSET,  0, GPIO_LOCK_UNLOCK);
+
+  /* lock or unlock the pin */
+
+  if (lock)
+    {
+      modifyreg32(base + TIVA_GPIO_CR_OFFSET, (1 << pinno), 0);
+    }
+  else
+    {
+      modifyreg32(base + TIVA_GPIO_CR_OFFSET, 0, (1 << pinno));
+    }
+
+  /* Restrict acess to the TIVA_GPIO_CR_OFFSET register */
+
+  modifyreg32(base + TIVA_GPIO_LOCK_OFFSET,  GPIO_LOCK_UNLOCK, GPIO_LOCK_LOCKED);
 }

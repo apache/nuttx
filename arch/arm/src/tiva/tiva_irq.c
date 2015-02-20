@@ -418,10 +418,10 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (gpio_irqinitialize != NULL)
+  if (tiva_gpioirqinitialize != NULL)
 #endif
     {
-      gpio_irqinitialize();
+      tiva_gpioirqinitialize();
     }
 #endif
 

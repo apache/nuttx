@@ -58,57 +58,6 @@
  * Private Types
  ****************************************************************************/
 
-/* NOTE: this is duplicated in tiva_gpio.c */
-
-static const uintptr_t g_gpiobase[TIVA_NPORTS] =
-{
-#if TIVA_NPORTS > 0
-    TIVA_GPIOA_BASE
-#endif
-#if TIVA_NPORTS > 1
-  , TIVA_GPIOB_BASE
-#endif
-#if TIVA_NPORTS > 2
-  , TIVA_GPIOC_BASE
-#endif
-#if TIVA_NPORTS > 3
-  , TIVA_GPIOD_BASE
-#endif
-#if TIVA_NPORTS > 4
-  , TIVA_GPIOE_BASE
-#endif
-#if TIVA_NPORTS > 5
-  , TIVA_GPIOF_BASE
-#endif
-#if TIVA_NPORTS > 6
-  , TIVA_GPIOG_BASE
-#endif
-#if TIVA_NPORTS > 7
-  , TIVA_GPIOH_BASE
-#endif
-#if TIVA_NPORTS > 8
-  , TIVA_GPIOJ_BASE
-#endif
-#if TIVA_NPORTS > 9
-  , TIVA_GPIOK_BASE
-#endif
-#if TIVA_NPORTS > 10
-  , TIVA_GPIOL_BASE
-#endif
-#if TIVA_NPORTS > 11
-  , TIVA_GPIOM_BASE
-#endif
-#if TIVA_NPORTS > 12
-  , TIVA_GPION_BASE
-#endif
-#if TIVA_NPORTS > 13
-  , TIVA_GPIOP_BASE
-#endif
-#if TIVA_NPORTS > 14
-  , TIVA_GPIOQ_BASE
-#endif
-};
-
 static const char g_portchar[TIVA_NPORTS] =
 {
 #if TIVA_NPORTS > 0
@@ -161,20 +110,6 @@ static const char g_portchar[TIVA_NPORTS] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tiva_gpiobaseaddress
- *
- * Description:
- *   Given a GPIO enumeration value, return the base address of the
- *   associated GPIO registers.
- *
- ****************************************************************************/
-
-static inline uintptr_t tiva_gpiobaseaddress(int port)
-{
-  return port < TIVA_NPORTS ? g_gpiobase[port] : 0;
-}
 
 /****************************************************************************
  * Name: tiva_gpioport

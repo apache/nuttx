@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/tiva/tiva_gpio.h
  *
- *   Copyright (C) 2009-2010, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,6 +223,8 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
+uintptr_t tiva_gpiobaseaddress(unsigned int port);
+
 /************************************************************************************
  * Name: tiva_configgpio
  *
@@ -263,6 +265,18 @@ bool tiva_gpioread(uint32_t pinset);
 
 int tiva_dumpgpio(uint32_t pinset, const char *msg);
 
+/****************************************************************************
+ * Name: tiva_gpio_lockport
+ *
+ * Description:
+ *   Certain pins require to be unlocked from the NMI to use for normal GPIO
+ *   use. See table 10-10 in datasheet for pins with special considerations.
+ *
+ ****************************************************************************/
+
+void tiva_gpio_lockport(uint32_t pinset, bool lock);
+
+# ifdef CONFIG_TIVA_GPIO_IRQS
 /************************************************************************************
  * Name: gpio_irqinitialize
  *
@@ -271,38 +285,40 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg);
  *
  ************************************************************************************/
 
-int weak_function gpio_irqinitialize(void);
+int weak_function tiva_gpioirqinitialize(void);
 
 /****************************************************************************
- * Name: gpio_irqattach
+ * Name: tiva_gpioirqattach
  *
  * Description:
  *   Attach the interrupt handler 'isr' to the GPIO IRQ 'irq'
  *
  ****************************************************************************/
 
-int gpio_irqattach(int irq, xcpt_t isr);
-#define gpio_irqdetach(isr) gpio_irqattach(isr, NULL)
+int tiva_gpioirqattach(int irq, xcpt_t isr);
+#    define tiva_gpioirqdetach(isr) tiva_gpioirqattach(isr, NULL)
 
 /****************************************************************************
- * Name: gpio_irqenable
+ * Name: tiva_gpioirqenable
  *
  * Description:
  *   Enable the GPIO IRQ specified by 'irq'
  *
  ****************************************************************************/
 
-void gpio_irqenable(int irq);
+void tiva_gpioirqenable(int irq);
 
 /****************************************************************************
- * Name: gpio_irqdisable
+ * Name: tiva_gpioirqdisable
  *
  * Description:
  *   Disable the GPIO IRQ specified by 'irq'
  *
  ****************************************************************************/
 
-void gpio_irqdisable(int irq);
+void tiva_gpioirqdisable(int irq);
+#  endif
+
 
 #if defined(__cplusplus)
 }
