@@ -9844,4 +9844,4 @@
 	  Maguranis (2015-02-20).
 	* "Tiva: Move GPIIO prototypes out of arch/arm/include/tiva/irq.h to
 	  arch/arm/tiva/tiva_gpio.h where they belong (2015-02-20).
-
+	* arch/arm/src/tiva: Tiva GPIO clean-up by Calvin Maguranis (2015-02-20).
