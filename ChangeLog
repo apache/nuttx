@@ -9842,3 +9842,6 @@
 	  value of nanoseconds in struct tm.  From Juha Niskanen (2015-02-20).
 	* tm4c123g-launchpad: Add board button interrupt logic.  From Calvin
 	  Maguranis (2015-02-20).
+	* "Tiva: Move GPIIO prototypes out of arch/arm/include/tiva/irq.h to
+	  arch/arm/tiva/tiva_gpio.h where they belong (2015-02-20).
+
