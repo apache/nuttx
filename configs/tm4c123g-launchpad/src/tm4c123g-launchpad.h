@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/tm4c123g-launchpad/src/tm4c123g-launchpad.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "tiva_gpio.h"
@@ -163,8 +164,8 @@
 
 /* The TM4C123G LaunchPad has a two buttons:
  *
- *   BOARD_SW1    -- Connected to PF4
- *   BOARD_SW2    -- Connected to PF0
+ *   BOARD_SW1    -- Connected to PF0
+ *   BOARD_SW2    -- Connected to PF4
  */
 
 #define GPIO_SW1     (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | \
@@ -263,4 +264,3 @@ int adc_devinit(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H */
-
