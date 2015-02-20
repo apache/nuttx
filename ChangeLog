@@ -9837,3 +9837,7 @@
 	* include/nuttx/rtc.h, fs/fs.h, drivers/ramdisk.c, pipes/, and
 	  timers/rtc.c: The inode unlink method should not be support if
 	  operations on the root pseudo-filesystem are disabled (2015-02-18).
+	* include/nuttx/sched timing functions:  Fix some nanosecond comparisons.
+	  Comparisons should be greate thatn OR EQUAL TO 1000000000 for maximum
+	  value of nanoseconds in struct tm.  From Juha Niskanen (2015-02-20).
+
