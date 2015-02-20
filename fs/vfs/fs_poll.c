@@ -327,7 +327,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
            abstime.tv_sec  += sec;
            abstime.tv_nsec += nsec;
-           if (abstime.tv_nsec > NSEC_PER_SEC)
+           if (abstime.tv_nsec >= NSEC_PER_SEC)
              {
                abstime.tv_sec++;
                abstime.tv_nsec -= NSEC_PER_SEC;

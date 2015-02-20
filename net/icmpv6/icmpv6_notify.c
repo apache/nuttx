@@ -191,7 +191,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
 
   abstime.tv_sec  += timeout->tv_sec;
   abstime.tv_nsec += timeout->tv_nsec;
-  if (abstime.tv_nsec > 1000000000)
+  if (abstime.tv_nsec >= 1000000000)
     {
       abstime.tv_sec++;
       abstime.tv_nsec -= 1000000000;

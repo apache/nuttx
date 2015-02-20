@@ -147,7 +147,7 @@ static void sem_timeout(int argc, uint32_t pid)
  *   abstime - The absolute time to wait until a timeout is declared.
  *
  * Return Value:
- *   One success, the length of the selected message in bytes.is
+ *   One success, the length of the selected message in bytes is
  *   returned.  On failure, -1 (ERROR) is returned and the errno
  *   is set appropriately:
  *
@@ -198,7 +198,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* We will disable interrupts until we have completed the semaphore
    * wait.  We need to do this (as opposed to just disabling pre-emption)
-   * because there could be interrupt handlers that are asynchronoulsy
+   * because there could be interrupt handlers that are asynchronously
    * posting semaphores and to prevent race conditions with watchdog
    * timeout.  This is not too bad because interrupts will be re-
    * enabled while we are blocked waiting for the semaphore.
@@ -223,7 +223,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
    * with a valid timeout.
    */
 
-  if (abstime->tv_sec < 0 || abstime->tv_nsec > 1000000000)
+  if (abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
     {
       err = EINVAL;
       goto errout_disabled;

@@ -187,7 +187,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
 
   abstime.tv_sec  += timeout->tv_sec;
   abstime.tv_nsec += timeout->tv_nsec;
-  if (abstime.tv_nsec > 1000000000)
+  if (abstime.tv_nsec >= 1000000000)
     {
       abstime.tv_sec++;
       abstime.tv_nsec -= 1000000000;

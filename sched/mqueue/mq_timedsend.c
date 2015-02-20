@@ -200,7 +200,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
       return ERROR;
     }
 
-  if (!abstime || abstime->tv_sec < 0 || abstime->tv_nsec > 1000000000)
+  if (!abstime || abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
     {
       set_errno(EINVAL);
       return ERROR;

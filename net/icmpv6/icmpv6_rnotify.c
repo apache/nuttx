@@ -287,7 +287,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
 
   abstime.tv_sec  += timeout->tv_sec;
   abstime.tv_nsec += timeout->tv_nsec;
-  if (abstime.tv_nsec > 1000000000)
+  if (abstime.tv_nsec >= 1000000000)
     {
       abstime.tv_sec++;
       abstime.tv_nsec -= 1000000000;
