@@ -174,7 +174,7 @@
   <ul>
     <a href="#chardrivers">6.1 Character Device Drivers</a><br>
     <a href="#blockdrivers">6.2 Block Device Drivers</a><br>
-    <a href="#blockdrivers">6.3 Specialized Device Drivers</a>
+    <a href="#specdrivers">6.3 Specialized Device Drivers</a>
     <ul>
        <a href="#ethdrivers">6.3.1 Ethernet Device Drivers</a><br>
        <a href="#spidrivers">6.3.2 SPI Device Drivers</a><br>
@@ -182,18 +182,19 @@
        <a href="#serialdrivers">6.3.4 Serial Device Drivers</a><br>
        <a href="#fbdrivers">6.3.5 Frame Buffer Drivers</a><br>
        <a href="#lcddrivers">6.3.6 LCD Drivers</a><br>
-       <a href="#mtddrivers">6.3.7 Memory Technology Device Drivers</a><br>
-       <a href="#sdiodrivers">6.3.8 SDIO Device Drivers</a><br>
-       <a href="#usbhostdrivers">6.3.9 USB Host-Side Drivers</a><br>
-       <a href="#usbdevdrivers">6.3.10 USB Device-Side Drivers</a><br>
-       <a href="#analogdrivers">6.3.11 Analog (ADC/DAC) Drivers</a><br>
-       <a href="#pwmdrivers">6.3.12 PWM Drivers</a><br>
-       <a href="#candrivers">6.3.13 CAN Drivers</a><br>
-       <a href="#quadencoder">6.3.14 Quadrature Encoder Drivers</a><br>
-       <a href="#timerdriver">6.3.15 Timer Drivers</a><br>
-       <a href="#rtcriver">6.3.16 RTC Drivers</a><br>
-       <a href="#wdogdriver">6.3.17 Watchdog Timer Drivers</a><br>
-       <a href="#kbddriver">6.3.18 Keyboard/Keypad Drivers</a><br>
+       <a href="#tscdrivers">6.3.7 Touchscreen Device Drivers</a><br>
+       <a href="#mtddrivers">6.3.8 Memory Technology Device Drivers</a><br>
+       <a href="#sdiodrivers">6.3.9 SDIO Device Drivers</a><br>
+       <a href="#usbhostdrivers">6.3.10 USB Host-Side Drivers</a><br>
+       <a href="#usbdevdrivers">6.3.11 USB Device-Side Drivers</a><br>
+       <a href="#analogdrivers">6.3.12 Analog (ADC/DAC) Drivers</a><br>
+       <a href="#pwmdrivers">6.3.13 PWM Drivers</a><br>
+       <a href="#candrivers">6.3.14 CAN Drivers</a><br>
+       <a href="#quadencoder">6.3.15 Quadrature Encoder Drivers</a><br>
+       <a href="#timerdriver">6.3.16 Timer Drivers</a><br>
+       <a href="#rtcriver">6.3.17 RTC Drivers</a><br>
+       <a href="#wdogdriver">6.3.18 Watchdog Timer Drivers</a><br>
+       <a href="#kbddriver">6.3.19 Keyboard/Keypad Drivers</a><br>
     </ul>
     <a href="#pwrmgmt">6.4 Power Management</a>
     <ul>
@@ -4299,7 +4300,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h2><a name="blockdrivers">6.3 Specialized Device Drivers</a></h2>
+<h2><a name="specdrivers">6.3 Specialized Device Drivers</a></h2>
 
 <h3><a name="ethdrivers">6.3.1 Ethernet Device Drivers</a></h3>
 
@@ -4636,7 +4637,39 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="mtddrivers">6.3.7 Memory Technology Device Drivers</a></h3>
+<h3><a name="tscdrivers">6.3.7 Touchscreen Device Drivers</a></h3>
+
+<p>
+  NuttX supports a two-part touchscreen driver architecture.
+</p>
+<ol>
+  <li>
+    An &quot;upper half&quot;, generic driver that provides the common touchscreen interface to application level code, and
+  </li>
+  <li>
+    A &quot;lower half&quot;, platform-specific driver that implements the low-level touchscreen controls to implement the touchscreen functionality.
+  </li>
+</ol>
+<p>
+  Files supporting the touchscreen controller (TSC) driver can be found in the following locations:
+</p>
+<ul>
+  <li><b>Interface Definition</b>.
+    The header files for NuttX touchscreen drivers reside in the <code>include/nuttx/include/input</code> directory.
+    The interface between the touchscreen controller &quot;upper half&quot; and &quot;lower half&quot; drivers are <i>not</i> common, but vary from controller-to-controller.
+    Because of this, each touchscreen driver has its own unique header file that describes the &quot;upper half&quot;/&quot;lower half&quot; interface in that directory.
+    The application level interface to each touchscreen driver, on the other hand, <i>is</i> the same for each touchscreen driver and is described <code>include/nuttx/include/input/touchscreen.h</code>.
+    The touchscreen driver uses a standard character driver framework but read operations return specially formatted data.
+  </li>
+  <li><b>&quot;Upper Half&quot; Driver</b>.
+    The controller-specific, &quot;upper half&quot; touchscreen drivers reside in the directory <code>drivers/input</code>.
+  </li>
+  <li><b>&quot;Lower Half&quot; Drivers</b>.
+    Platform-specific touchscreen drivers reside in either: (1) The <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the processor architectures that have build in touchscreen controllers or (2) the <code>configs/</code><i>&lt;board&gt;</i><code>/src/</code> directory for boards that use an external touchscreen controller chip.
+  </li>
+</ul>
+
+<h3><a name="mtddrivers">6.3.8 Memory Technology Device Drivers</a></h3>
 
 <ul>
   <li>
@@ -4718,7 +4751,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="sdiodrivers">6.3.8 SDIO Device Drivers</a></h3>
+<h3><a name="sdiodrivers">6.3.9 SDIO Device Drivers</a></h3>
 
 <ul>
   <li>
@@ -4810,7 +4843,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="usbhostdrivers">6.3.9 USB Host-Side Drivers</a></h3>
+<h3><a name="usbhostdrivers">6.3.10 USB Host-Side Drivers</a></h3>
 
 <ul>
   <li>
@@ -4942,7 +4975,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="usbdevdrivers">6.3.10 USB Device-Side Drivers</a></h3>
+<h3><a name="usbdevdrivers">6.3.11 USB Device-Side Drivers</a></h3>
 
 <ul>
   <li>
@@ -5015,7 +5048,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="analogdrivers">6.3.11 Analog (ADC/DAC) Drivers</a></h3>
+<h3><a name="analogdrivers">6.3.12 Analog (ADC/DAC) Drivers</a></h3>
 <p>
   The NuttX analog drivers are split into two parts:
 </p>
@@ -5040,7 +5073,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h4><a name="adcdrivers">6.3.11.1 ADC Drivers</a></h4>
+<h4><a name="adcdrivers">6.3.12.1 ADC Drivers</a></h4>
 <ul>
   <li>
     <code>include/nuttx/analog/adc.h</code>.
@@ -5065,7 +5098,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h4><a name="dacdrivers">6.3.11.2 DAC Drivers</a></h4>
+<h4><a name="dacdrivers">6.3.12.2 DAC Drivers</a></h4>
 <ul>
   <li>
     <code>include/nuttx/analog/dac.h</code>.
@@ -5090,7 +5123,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="pwmdrivers">6.3.12 PWM Drivers</a></h3>
+<h3><a name="pwmdrivers">6.3.13 PWM Drivers</a></h3>
 <p>
   For the purposes of this driver, a PWM device is any device that generates periodic output pulses of controlled frequency and pulse width.
   Such a device might be used, for example, to perform pulse-width modulated output or frequency/pulse-count modulated output
@@ -5126,7 +5159,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="candrivers">6.3.13 CAN Drivers</a></h3>
+<h3><a name="candrivers">6.3.14 CAN Drivers</a></h3>
 <p>
   NuttX supports only a very low-level CAN driver.
   This driver supports only the data exchange and does not include any high-level CAN protocol.
@@ -5157,7 +5190,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="quadencoder">6.3.14 Quadrature Encoder Drivers</a></h3>
+<h3><a name="quadencoder">6.3.15 Quadrature Encoder Drivers</a></h3>
 <p>
   NuttX supports a low-level, two-part Quadrature Encoder driver.
 </p>
@@ -5186,7 +5219,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="timerdriver">6.3.15 Timer Drivers</a></h3>
+<h3><a name="timerdriver">6.3.16 Timer Drivers</a></h3>
 <p>
   NuttX supports a low-level, two-part timer driver.
 </p>
@@ -5215,7 +5248,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="rtcriver">6.3.16 RTC Drivers</a></h3>
+<h3><a name="rtcriver">6.3.17 RTC Drivers</a></h3>
 <p>
   NuttX supports a low-level, two-part RealTime Clock (RTC) driver.
 </p>
@@ -5244,7 +5277,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="wdogdriver">6.3.17 Watchdog Timer Drivers</a></h3>
+<h3><a name="wdogdriver">6.3.18 Watchdog Timer Drivers</a></h3>
 <p>
   NuttX supports a low-level, two-part watchdog timer driver.
 </p>
@@ -5273,7 +5306,7 @@ void board_led_off(int led);
   </li>
 </ul>
 
-<h3><a name="kbddriver">6.3.18 Keyboard/Keypad Drivers</a></h3>
+<h3><a name="kbddriver">6.3.19 Keyboard/Keypad Drivers</a></h3>
 <p>
   <b>Keypads vs. Keyboards</b>
   Keyboards and keypads are really the same devices for NuttX.
