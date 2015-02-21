@@ -9844,4 +9844,13 @@
 	  Maguranis (2015-02-20).
 	* "Tiva: Move GPIIO prototypes out of arch/arm/include/tiva/irq.h to
 	  arch/arm/tiva/tiva_gpio.h where they belong (2015-02-20).
-	* arch/arm/src/tiva: Tiva GPIO clean-up by Calvin Maguranis (2015-02-20).
+	* arch/arm/src/stm32/stm32_pwr.c, stm32_pwr.h, and stm32_rtcc.c: Changes
+	  to support fully write protecting the backup domain. N.B.
+	  stm32_pwr_enablebkp did not account for the delay from enable to the
+	  domain being writable. The KISS solution is a up_udelay. A more
+	  complex solution would be a negated write test with restore.  From
+	  David Sidrane (2015-02-21).
+	* arch/arm/src/stm32/stm32_bbsram.c, stm32_bbsram.h, Kconfig, and
+	  Make.defs: Adds the ability to use the STM32F2 and STM32F4 Battery
+	  Backedup SRAM in the file system. With an option to Save Panic
+	  context to one of the files. From David Sidrane (2015-02-21).
