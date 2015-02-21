@@ -9844,6 +9844,7 @@
 	  Maguranis (2015-02-20).
 	* "Tiva: Move GPIIO prototypes out of arch/arm/include/tiva/irq.h to
 	  arch/arm/tiva/tiva_gpio.h where they belong (2015-02-20).
+	* arch/arm/src/tiva: Tiva GPIO clean-up by Calvin Maguranis (2015-02-20).
 	* arch/arm/src/stm32/stm32_pwr.c, stm32_pwr.h, and stm32_rtcc.c: Changes
 	  to support fully write protecting the backup domain. N.B.
 	  stm32_pwr_enablebkp did not account for the delay from enable to the
