@@ -102,7 +102,11 @@ void stm32_pwr_enablebkp(bool writable);
  *
  ************************************************************************************/
 
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 void stm32_pwr_enablebreg(bool regon);
+#else
+#  define stm32_pwr_enablebreg(regon)
+#endif
 
 /************************************************************************************
  * Name: stm32_pwr_setvos
