@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -43,6 +43,7 @@
 #include <nuttx/arch.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #include "up_arch.h"
@@ -85,16 +86,64 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  *   and backup SRAM).
  *
  * Input Parameters:
- *   None
+ *   protect - sets the write protections
  *
  * Returned Values:
  *   None
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebkp(void)
+void stm32_pwr_enablebkp(bool writable)
 {
-  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_DBP);
+  uint16_t regval;
+
+  /* Enable or disable the ability to write*/
+
+  regval  = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval &= ~PWR_CR_DBP;
+  regval |= writable ? PWR_CR_DBP : 0;
+  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+
+  if (writable)
+    {
+      /* Enable does not happen right away */
+
+      up_udelay(4);
+    }
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_enablebreg
+ *
+ * Description:
+ *   Enables the Backup regulator, the Backup regulator (used to maintain backup
+ *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
+ *   regulator is switched off. The backup SRAM can still be used but its content will
+ *   be lost in the Standby and VBAT modes. Once set, the application must wait that
+ *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
+ *   into the RAM will be maintained in the Standby and VBAT modes.
+ *
+ * Input Parameters:
+ *   regon - state to set it to
+ *
+ * Returned Values:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_enablebreg(bool regon)
+{
+  uint16_t regval;
+
+  regval  = stm32_pwr_getreg(STM32_PWR_CSR_OFFSET);
+  regval &= ~PWR_CSR_BRE;
+  regval |= regon ? PWR_CSR_BRE : 0;
+  stm32_pwr_putreg(STM32_PWR_CSR_OFFSET, regval);
+
+  if (regon)
+    {
+      while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_BRR) == 0);
+    }
 }
 
 /************************************************************************************

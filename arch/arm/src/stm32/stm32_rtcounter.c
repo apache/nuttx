@@ -6,7 +6,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,7 +164,7 @@ static alarmcb_t g_alarmcb;
  * Public Data
  ************************************************************************************/
 
-/* Variable determines the state of the LSE oscilator.
+/* Variable determines the state of the LSE oscillator.
  * Possible errors:
  *   - on start-up
  *   - during operation, reported by LSE interrupt
@@ -358,12 +358,17 @@ static int stm32_rtc_interrupt(int irq, void *context)
 
 int up_rtcinitialize(void)
 {
-  /* Set access to the peripheral, enable the backup domain (BKP) and the lower power
-   * extern 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the LSE to
-   * drive the RTC.
+  /* Enable write access to the backup domain (RTC registers, RTC backup data
+   * registers and backup SRAM).
    */
 
-  stm32_pwr_enablebkp();
+  stm32_pwr_enablebkp(true);
+
+  /* Set access to the peripheral, enable the backup domain (BKP) and the lower
+   * power external 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the
+   * LSE to drive the RTC.
+   */
+
   stm32_rcc_enablelse();
 
   /* TODO: Get state from this function, if everything is
@@ -397,11 +402,18 @@ int up_rtcinitialize(void)
     {
       up_waste();
     }
+
   modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
 
   /* Alarm Int via EXTI Line */
 
   /* STM32_IRQ_RTCALRM  41: RTC alarm through EXTI line interrupt */
+
+  /* Disable write access to the backup domain (RTC registers, RTC backup data
+   * registers and backup SRAM).
+   */
+
+  stm32_pwr_enablebkp(false);
 
   return OK;
 }
@@ -434,7 +446,7 @@ time_t up_rtc_time(void)
 
   /* The RTC counter is read from two 16-bit registers to form one 32-bit
    * value.  Because these are non-atomic operations, many things can happen
-   * between the two reads:  This thread could get suspended or interrrupted
+   * between the two reads:  This thread could get suspended or interrupted
    * or the lower 16-bit counter could rollover between reads.  Disabling
    * interrupts will prevent suspensions and interruptions:
    */
@@ -502,7 +514,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
 
   /* The RTC counter is read from two 16-bit registers to form one 32-bit
    * value.  Because these are non-atomic operations, many things can happen
-   * between the two reads:  This thread could get suspended or interrrupted
+   * between the two reads:  This thread could get suspended or interrupted
    * or the lower 16-bit counter could rollover between reads.  Disabling
    * interrupts will prevent suspensions and interruptions:
    */
@@ -643,6 +655,7 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       ret = OK;
     }
+
   return ret;
 }
 #endif
@@ -684,6 +697,7 @@ int stm32_rtc_cancelalarm(void)
 
       ret = OK;
     }
+
   return ret;
 }
 #endif

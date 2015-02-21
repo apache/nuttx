@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_pwr.h
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include "chip.h"
 #include "chip/stm32_pwr.h"
 
@@ -54,7 +56,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -71,14 +74,35 @@ extern "C" {
  *   and backup SRAM).
  *
  * Input Parameters:
- *   None
+ *   writable - sets the write protections
  *
  * Returned Values:
  *   None
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebkp(void);
+void stm32_pwr_enablebkp(bool writable);
+
+/************************************************************************************
+ * Name: stm32_pwr_enablebreg
+ *
+ * Description:
+ *   Enables the Backup regulator, the Backup regulator (used to maintain backup
+ *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
+ *   regulator is switched off. The backup SRAM can still be used but its content will
+ *   be lost in the Standby and VBAT modes. Once set, the application must wait that
+ *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
+ *   into the RAM will be maintained in the Standby and VBAT modes.
+ *
+ * Input Parameters:
+ *   regon - state to set it to
+ *
+ * Returned Values:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_enablebreg(bool regon);
 
 /************************************************************************************
  * Name: stm32_pwr_setvos
