@@ -1134,7 +1134,7 @@ config STM32_BKP
 	depends on STM32_STM32F10XX
 
 config STM32_BKPSRAM
-	bool "BKP RAM"
+	bool "Enable BKP RAM Domain"
 	default n
 	depends on STM32_STM32F207 || STM32_STM32F40XX
 
@@ -3253,6 +3253,22 @@ config SDIO_WIDTH_D1_ONLY
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 endmenu
+
+if STM32_BKPSRAM
+
+config STM32_BBSRAM
+	bool "BBSRAM File Support"
+	default n
+
+config STM32_BBSRAM_FILES
+	int "Max Files to support in BBSRAM"
+	default 4
+
+config STM32_SAVE_CRASHDUMP
+	bool "Enable Saving Panic to BBSRAM"
+	default n
+
+endif # STM32_BKPSRAM
 
 config STM32_HAVE_RTC_SUBSECONDS
 	bool
