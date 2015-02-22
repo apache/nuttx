@@ -28,6 +28,7 @@ endchoice
 config ARCH_CHIP_PIC32MZEC
 	bool
 	default n
+	select ARCH_MIPS_M14K
 
 config PIC32MZ_MVEC
 	bool
