@@ -41,12 +41,8 @@
 
 #include <debug.h>
 
-#include <arch/board/board.h>
+#include <nuttx/arch.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "pic32mz-internal.h"
 #include "pic32mz-starterkit.h"
 
 /************************************************************************************

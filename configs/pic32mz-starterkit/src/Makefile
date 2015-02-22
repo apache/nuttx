@@ -38,7 +38,7 @@
 CFLAGS += -I$(TOPDIR)/sched
 
 ASRCS =
-CSRCS = pic32mz_boot.c pic32mz_bringup.c pic32mz_leds.c pic32mz_spi.c
+CSRCS = pic32mz_boot.c pic32mz_bringup.c pic32mz_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += pic32mz_autoleds.c

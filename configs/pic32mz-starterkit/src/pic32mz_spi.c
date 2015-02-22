@@ -47,12 +47,12 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip.h"
-#include "pic32mz-internal.h"
+
 #include "pic32mz-starterkit.h"
 
 #if defined(CONFIG_PIC32MZ_SPI1) || defined(CONFIG_PIC32MZ_SPI2) || \
-    defined(CONFIG_PIC32MZ_SPI3) || defined(CONFIG_PIC32MZ_SPI4)
+    defined(CONFIG_PIC32MZ_SPI3) || defined(CONFIG_PIC32MZ_SPI4) || \
+    defined(CONFIG_PIC32MZ_SPI5) || defined(CONFIG_PIC32MZ_SPI6)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -219,4 +219,48 @@ int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #endif
 #endif
 
-#endif /* CONFIG_PIC32MZ_SPI1..4 */
+#ifdef CONFIG_PIC32MZ_SPI5
+void  pic32mz_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+#warning "Missing logic"
+}
+
+uint8_t pic32mz_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+#warning "Missing logic"
+  return 0;
+}
+#ifdef CONFIG_SPI_CMDDATA
+int pic32mz_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#warning "Missing logic"
+  return 0;
+}
+#endif
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI6
+void  pic32mz_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+#warning "Missing logic"
+}
+
+uint8_t pic32mz_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+#warning "Missing logic"
+  return 0;
+}
+#ifdef CONFIG_SPI_CMDDATA
+int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#warning "Missing logic"
+  return 0;
+}
+#endif
+#endif
+
+#endif /* CONFIG_PIC32MZ_SPI1..6 */

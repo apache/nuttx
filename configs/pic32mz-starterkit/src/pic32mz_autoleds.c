@@ -45,12 +45,10 @@
 
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "pic32mz-internal.h"
-#include "pic32mz-ioport.h"
+#include "pic32mz-gpio.h"
 #include "pic32mz-starterkit.h"
 
 #ifdef CONFIG_ARCH_LEDS

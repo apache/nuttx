@@ -47,7 +47,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#include "pic32mz-internal.h"
 #include "pic32mz-starterkit.h"
 
 /****************************************************************************
