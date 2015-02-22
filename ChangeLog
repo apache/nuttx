@@ -9862,4 +9862,8 @@
 	  using the Pinquino toolchain (2015-02-21).
 	* arch/mips/src/mips32/Toolchain.mk: Current Pinguino toolchain uses
 	  the prefix p32- instead of mips- (2015-02-21).
+	* configs/pic32mz-starterkit: Add basic board support for the PIC32MZ
+	  (can't build yet of course because there is not yet any PIC32MZ
+	  support) (2015-02-22).
+
 
