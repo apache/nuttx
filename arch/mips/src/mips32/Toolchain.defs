@@ -183,7 +183,8 @@ endif
 # Pinguino mips-elf toolchain under Windows
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
-  CROSSDEV ?= mips-
+  #CROSSDEV ?= mips-
+  CROSSDEV ?= p32-
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
