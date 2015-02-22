@@ -9865,5 +9865,8 @@
 	* configs/pic32mz-starterkit: Add basic board support for the PIC32MZ
 	  (can't build yet of course because there is not yet any PIC32MZ
 	  support) (2015-02-22).
-
+	* arch/mips/src/pic32mz and include/pic32mz:  Add some PIC32MZ header
+	  file definitions and just enough logic in the source directory so
+	  that we can run 'make menuconfig'.  Still a very long way from being
+	  complete (2015-02-22).
 
