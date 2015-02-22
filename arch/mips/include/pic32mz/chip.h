@@ -45,15 +45,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-config ARCH_CHIP_PIC32MZ2048ECH
-	bool "PIC32MZ2048ECH"
-	select ARCH_CHIP_PIC32MZEC
-	---help---
-		Microchip PIC32MZ2048ECH (MIPS32)
-		ARCH_CHIP_PIC32MZ1
-
-config ARCH_CHIP_PIC32MZ2048ECM
 
 /* Available in 64/100/124/144 pin packages.  Description here is specifically
  * for the 144 pin package (PIC32MZ2048ECH144) and should be reviewed for

@@ -49,8 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "pic32mz-internal.h"
-#include "pic32mz-ioport.h"
+#include "pic32mz-gpio.h"
 #include "pic32mz-starterkit.h"
 
 #ifndef CONFIG_ARCH_LEDS

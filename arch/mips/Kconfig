@@ -35,6 +35,14 @@ config ARCH_MIPS32
 	default n
 	select ARCH_HAVE_VFORK
 
+config ARCH_MIPS_24KC
+	bool
+	default n
+
+config ARCH_MIPS_M14K
+	bool
+	default n
+
 config ARCH_FAMILY
 	string
 	default "mips32"	if ARCH_MIPS32

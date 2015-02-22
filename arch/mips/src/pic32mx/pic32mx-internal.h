@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/mips/src/pic32mx/pic32mx-internal.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@
 #include "pic32mx-config.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* GPIO settings used in the configport, readport, writeport, etc.
  *
@@ -168,7 +168,8 @@ struct pic32mx_dmaregs_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -185,7 +186,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void pic32mx_lowinit(void);
+void pic32mx_lowinit(void);
 
 /************************************************************************************
  * Name: pic32mx_lowsetup
@@ -198,7 +199,7 @@ EXTERN void pic32mx_lowinit(void);
  ************************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
-EXTERN void pic32mx_consoleinit(void);
+void pic32mx_consoleinit(void);
 #else
 #  define pic32mx_consoleinit()
 #endif
@@ -212,7 +213,7 @@ EXTERN void pic32mx_consoleinit(void);
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-EXTERN void pic32mx_uartreset(uintptr_t uart_base);
+void pic32mx_uartreset(uintptr_t uart_base);
 #endif
 
 /******************************************************************************
@@ -224,9 +225,8 @@ EXTERN void pic32mx_uartreset(uintptr_t uart_base);
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
-                                  unsigned int parity, unsigned int nbits,
-                                  bool stop2);
+void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
+                           unsigned int parity, unsigned int nbits, bool stop2);
 #endif
 
 /************************************************************************************
@@ -238,7 +238,7 @@ EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
  *
  ************************************************************************************/
 
-EXTERN void pic32mx_boardinitialize(void);
+void pic32mx_boardinitialize(void);
 
 /************************************************************************************
  * Name: pic32mx_decodeirq
@@ -249,7 +249,7 @@ EXTERN void pic32mx_boardinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN uint32_t *pic32mx_decodeirq(uint32_t *regs);
+uint32_t *pic32mx_decodeirq(uint32_t *regs);
 
 /************************************************************************************
  * Name: pic32mx_exception
@@ -259,7 +259,7 @@ EXTERN uint32_t *pic32mx_decodeirq(uint32_t *regs);
  *
  ************************************************************************************/
 
-EXTERN uint32_t *pic32mx_exception(uint32_t *regs);
+uint32_t *pic32mx_exception(uint32_t *regs);
 
 /************************************************************************************
  * Name: pic32mx_configgpio
@@ -273,7 +273,7 @@ EXTERN uint32_t *pic32mx_exception(uint32_t *regs);
  *
  ************************************************************************************/
 
-EXTERN int pic32mx_configgpio(uint16_t cfgset);
+int pic32mx_configgpio(uint16_t cfgset);
 
 /************************************************************************************
  * Name: pic32mx_gpiowrite
@@ -283,7 +283,7 @@ EXTERN int pic32mx_configgpio(uint16_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN void pic32mx_gpiowrite(uint16_t pinset, bool value);
+void pic32mx_gpiowrite(uint16_t pinset, bool value);
 
 /************************************************************************************
  * Name: pic32mx_gpioread
@@ -293,7 +293,7 @@ EXTERN void pic32mx_gpiowrite(uint16_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool pic32mx_gpioread(uint16_t pinset);
+bool pic32mx_gpioread(uint16_t pinset);
 
 /************************************************************************************
  * Name: pic32mx_gpioirqinitialize
@@ -306,7 +306,7 @@ EXTERN bool pic32mx_gpioread(uint16_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void pic32mx_gpioirqinitialize(void);
+void pic32mx_gpioirqinitialize(void);
 #else
 #  define pic32mx_gpioirqinitialize()
 #endif
@@ -317,12 +317,12 @@ EXTERN void pic32mx_gpioirqinitialize(void);
  * Description:
  *   Attach an interrupt service routine to a GPIO interrupt.  This will also
  *   reconfigure the pin as an interrupting input.  The change notification number is
- *   associated with all interrupt-capabile GPIO pins.  The association could,
+ *   associated with all interrupt-capable GPIO pins.  The association could,
  *   however, differ from part to part and must be  provided by the caller.
  *
  *   When an interrupt occurs, it is due to a change on the GPIO input pin.  In that
  *   case, all attached handlers will be called.  Each handler must maintain state
- *   and determine if the unlying GPIO input value changed.
+ *   and determine if the underlying GPIO input value changed.
  *
  * Parameters:
  *  - pinset:  GPIO pin configuration
@@ -337,7 +337,7 @@ EXTERN void pic32mx_gpioirqinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
+xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
 #else
 #  define pic32mx_gpioattach(p,f) (NULL)
 #endif
@@ -351,7 +351,7 @@ EXTERN xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handle
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void pic32mx_gpioirqenable(unsigned int cn);
+void pic32mx_gpioirqenable(unsigned int cn);
 #else
 #  define pic32mx_gpioirqenable(irq)
 #endif
@@ -365,7 +365,7 @@ EXTERN void pic32mx_gpioirqenable(unsigned int cn);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void pic32mx_gpioirqdisable(unsigned int cn);
+void pic32mx_gpioirqdisable(unsigned int cn);
 #else
 #  define pic32mx_gpioirqdisable(irq)
 #endif
@@ -379,7 +379,7 @@ EXTERN void pic32mx_gpioirqdisable(unsigned int cn);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-EXTERN void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
+void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define pic32mx_dumpgpio(p,m)
 #endif
@@ -413,42 +413,38 @@ EXTERN void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI1
-EXTERN void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                                bool selected);
-EXTERN uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                         bool selected);
+uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                               bool cmd);
+int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI2
-EXTERN void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                                bool selected);
-EXTERN uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                         bool selected);
+uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                               bool cmd);
+int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-EXTERN void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                                bool selected);
-EXTERN uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                         bool selected);
+uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                               bool cmd);
+int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-EXTERN void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                                bool selected);
-EXTERN uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                         bool selected);
+uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                               bool cmd);
+int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
@@ -464,7 +460,7 @@ EXTERN int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_DMA
-EXTERN void pic32mx_dmainitilaize(void);
+void pic32mx_dmainitilaize(void);
 #endif
 
 /************************************************************************************
@@ -482,7 +478,7 @@ EXTERN void pic32mx_dmainitilaize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_DMA
-EXTERN DMA_HANDLE pic32mx_dmachannel(void);
+DMA_HANDLE pic32mx_dmachannel(void);
 #endif
 
 /************************************************************************************
@@ -498,7 +494,7 @@ EXTERN DMA_HANDLE pic32mx_dmachannel(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_DMA
-EXTERN void pic32mx_dmafree(DMA_HANDLE handle);
+void pic32mx_dmafree(DMA_HANDLE handle);
 #endif
 
 /************************************************************************************
@@ -510,10 +506,8 @@ EXTERN void pic32mx_dmafree(DMA_HANDLE handle);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_DMA
-EXTERN int pic32mx_dmarxsetup(DMA_HANDLE handle,
-                            uint32_t control, uint32_t config,
-                            uint32_t srcaddr, uint32_t destaddr,
-                            size_t nbytes);
+int pic32mx_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                       uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
 #endif
 
 /************************************************************************************
@@ -525,7 +519,7 @@ EXTERN int pic32mx_dmarxsetup(DMA_HANDLE handle,
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_DMA
-EXTERN int pic32mx_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
+int pic32mx_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 #endif
 
 /************************************************************************************
@@ -539,7 +533,7 @@ EXTERN int pic32mx_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *ar
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_DMA
-EXTERN void pic32mx_dmastop(DMA_HANDLE handle);
+void pic32mx_dmastop(DMA_HANDLE handle);
 #endif
 
 /************************************************************************************
@@ -552,7 +546,7 @@ EXTERN void pic32mx_dmastop(DMA_HANDLE handle);
 
 #ifdef CONFIG_PIC32MX_DMA
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void pic32mx_dmasample(DMA_HANDLE handle, struct pic32mx_dmaregs_s *regs);
+void pic32mx_dmasample(DMA_HANDLE handle, struct pic32mx_dmaregs_s *regs);
 #else
 #  define pic32mx_dmasample(handle,regs)
 #endif
@@ -568,8 +562,8 @@ EXTERN void pic32mx_dmasample(DMA_HANDLE handle, struct pic32mx_dmaregs_s *regs)
 
 #ifdef CONFIG_PIC32MX_DMA
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void pic32mx_dmadump(DMA_HANDLE handle, const struct pic32mx_dmaregs_s *regs,
-                          const char *msg);
+void pic32mx_dmadump(DMA_HANDLE handle, const struct pic32mx_dmaregs_s *regs,
+                     const char *msg);
 #else
 #  define pic32mx_dmadump(handle,regs,msg)
 #endif
@@ -582,14 +576,14 @@ EXTERN void pic32mx_dmadump(DMA_HANDLE handle, const struct pic32mx_dmaregs_s *r
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
  *   connect and disconnect), then the board software must provide pic32mx_pullup.
  *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
+ *   Alternatively, if no pull-up GPIO the following can be redefined to be
  *   NULL.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_USBDEV
 struct usbdev_s;
-EXTERN int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 #endif
 
 /************************************************************************************
@@ -604,7 +598,7 @@ EXTERN int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_USBDEV
-EXTERN void pic32mx_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void pic32mx_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 #endif
 
 /************************************************************************************
@@ -618,8 +612,8 @@ EXTERN void pic32mx_usbsuspend(FAR struct usbdev_s *dev, bool resume);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_USBDEV
-EXTERN void pic32mx_usbattach(void);
-EXTERN void pic32mx_usbdetach(void);
+void pic32mx_usbattach(void);
+void pic32mx_usbdetach(void);
 #endif
 
 #undef EXTERN

@@ -48,7 +48,7 @@
 #include <arch/pic32mz/chip.h>
 
 #if defined(CHIP_PIC32MZEC) || defined(CHIP_PIC32MZ2)
-#  include <arch/pic32mz/irq_pic32mzxxxec.h.h>
+#  include <arch/pic32mz/irq_pic32mzxxxec.h>
 #else
 #  error "Unknown PIC32MZ family
 #endif

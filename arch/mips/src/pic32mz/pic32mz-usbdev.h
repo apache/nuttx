@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/pic32mz-starterkit/src/pic32mz_boot.c
+ * arch/mips/src/pic32mz/pic32mz-usbdev.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,79 +33,96 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_USBDEV_H
+#define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_USBDEV_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <debug.h>
-
-#include <nuttx/arch.h>
-
-#include "pic32mz-starterkit.h"
+#include <stdbool.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Private Functions
+ * Public Types
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Name: pic32mz_usbpullup
+ *
+ * Description:
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide pic32mz_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
+ *   Alternatively, if no pull-up GPIO the following can be redefined to be
+ *   NULL.
+ *
  ************************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_USBDEV
+struct usbdev_s;
+int pic32mz_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+#endif
 
 /************************************************************************************
- * Name: pic32mz_boardinitialize
+ * Name: pic32mz_usbsuspend
  *
  * Description:
- *   All PIC32MZ architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   Board logic must provide the pic32mz_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc. while
+ *   the USB is suspended.
  *
  ************************************************************************************/
 
-void pic32mz_boardinitialize(void)
-{
-  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mz_spiinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_PIC32MZ_SPI1) || defined(CONFIG_PIC32MZ_SPI2) || \
-    defined(CONFIG_PIC32MZ_SPI3) || defined(CONFIG_PIC32MZ_SPI4)
-  if (pic32mz_spiinitialize)
-    {
-      pic32mz_spiinitialize();
-    }
+#ifdef CONFIG_PIC32MZ_USBDEV
+void pic32mz_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 #endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
+/************************************************************************************
 
-#ifdef CONFIG_ARCH_LEDS
-  pic32mz_ledinit();
-#endif
-}
-
-/****************************************************************************
- * Name: board_initialize
+ * Name: pic32mz_usbattach and pic32mz_usbdetach
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   The USB stack must be notified when the device is attached or detached by
+ *   calling one of these functions.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-  /* Perform board initialization */
+#ifdef CONFIG_PIC32MZ_USBDEV
+void pic32mz_usbattach(void);
+void pic32mz_usbdetach(void);
+#endif
 
-  (void)pic32mz_bringup();
+#undef EXTERN
+#if defined(__cplusplus)
 }
-#endif /* CONFIG_BOARD_INITIALIZE */
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_USBDEV_H */

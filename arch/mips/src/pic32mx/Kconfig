@@ -430,30 +430,37 @@ endchoice
 config ARCH_CHIP_PIC32MX1
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config ARCH_CHIP_PIC32MX2
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config ARCH_CHIP_PIC32MX3
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config ARCH_CHIP_PIC32MX4
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config ARCH_CHIP_PIC32MX5
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config ARCH_CHIP_PIC32MX6
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config ARCH_CHIP_PIC32MX7
 	bool
 	default n
+	select ARCH_MIPS_24KC
 
 config PIC32MX_MVEC
 	bool
