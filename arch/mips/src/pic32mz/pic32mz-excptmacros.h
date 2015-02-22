@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/mips/src/pic32mz/excptmacros.h
+ * arch/mips/src/pic32mz/pic32mz-excptmacros.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
