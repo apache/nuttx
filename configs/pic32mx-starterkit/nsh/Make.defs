@@ -37,6 +37,22 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/mips/src/mips32/Toolchain.defs
 
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF),y)
+LDSCRIPT = mips-release.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW),y)
+LDSCRIPT = mips-release.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW),y)
+LDSCRIPT = c32-release.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE),y)
+LDSCRIPT = c32-release.ld
+endif
+
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
@@ -44,13 +60,13 @@ ifeq ($(WINTOOL),y)
   MKDEP = $(TOPDIR)/tools/mknulldeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/ld.script}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
 else
   # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/ld.script
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
 endif
 
 CC = $(CROSSDEV)gcc
