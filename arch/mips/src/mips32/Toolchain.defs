@@ -1,7 +1,7 @@
 ############################################################################
 # arch/mips/src/mips32/Toolchain.defs
 #
-#   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,45 +41,45 @@
 # toolchain and allow the selected toolchain to be overridden by a
 # command-line selection.
 #
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_PINGUINOL) \
       $(CONFIG_MIPS32_TOOLCHAIN_PINGUINOL) \
       $(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= GNU_ELF
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_MICROCHIPL) \
       $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_MICROCHIPL_LITE) \
       $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_LITE) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL_LITE
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_MICROCHIPW) \
       $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPW
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_MICROCHIPW_LITE) \
       $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPW_LITE
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_MICROCHIPOPENL) \
       $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPOPENL) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPOPENL
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_PIC32MX_PINGUINOW) \
       $(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= PINGUINOW
