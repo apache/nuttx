@@ -9855,3 +9855,11 @@
 	  Make.defs: Adds the ability to use the STM32F2 and STM32F4 Battery
 	  Backedup SRAM in the file system. With an option to Save Panic
 	  context to one of the files. From David Sidrane (2015-02-21).
+	* configs/pic32mx-starterkit:  Rename from pic32-starterkit to make
+	  room on the namespace for a pic3mz-starterkit.  Update src/ directory
+	  file naming to match currnet standard.  Refresh configurations.  Move
+	  linker scripts to a new scripts/directory.  Make sure that it builds
+	  using the Pinquino toolchain (2015-02-21).
+	* arch/mips/src/mips32/Toolchain.mk: Current Pinguino toolchain uses
+	  the prefix p32- instead of mips- (2015-02-21).
+
