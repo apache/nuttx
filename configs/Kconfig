@@ -553,7 +553,7 @@ config ARCH_BOARD_PCDUINO_A10
 		but the others may be compatible.
 
 config ARCH_BOARD_PIC32MX_STARTERKIT
-	bool "Microchip PIC32 Ethernet Starter Kit (DM320004)"
+	bool "Microchip PIC32MX Ethernet Starter Kit (DM320004)"
 	depends on ARCH_CHIP_PIC32MX795F512L
 	select ARCH_HAVE_LEDS
 	---help---
@@ -568,6 +568,22 @@ config ARCH_BOARD_PIC32MX7MMB
 	---help---
 		This is the port NuttX to the Mikroelektronika PIC32MX7 Multimedia Board
 		(MMB).  See http://www.mikroe.com/ for further information.
+
+config ARCH_BOARD_PIC32MZ_STARTERKIT
+	bool "Microchip PIC32MZ Ethernet Starter Kit ((DM320006)"
+	depends on ARCH_CHIP_PIC32MZ2048ECH || ARCH_CHIP_PIC32MZ2048ECM
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the port of NuttX to the Microchip PIC32MZ Embedded
+		Connectivity (EC) Starter Kit.  There are two configurations of the
+		starter kit:
+
+		1) The PIC32MZ Embedded Connectivity Starter Kit based on the
+		   PIC32MZ2048ECH144-I/PH chip (DM320006), and
+		2) The PIC32MZ Embedded Connectivity Starter Kit based on the
+		   PIC32MZ2048ECM144-I/PH w/Crypto Engine (DM320006-C)
+
+		See www.microchip.com for further information.
 
 config ARCH_BOARD_PIRELLI_DPL10
 	bool "Pirelli DPL10 phone"
@@ -1111,6 +1127,7 @@ config ARCH_BOARD
 	default "pcduino-a10"              if ARCH_BOARD_PCDUINO_A10
 	default "pic32mx-starterkit"       if ARCH_BOARD_PIC32MX_STARTERKIT
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
+	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "pirelli_dpl10"            if ARCH_BOARD_PIRELLI_DPL10
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
@@ -1378,6 +1395,9 @@ source "configs/pic32mx-starterkit/Kconfig"
 endif
 if ARCH_BOARD_PIC32MX7MMB
 source "configs/pic32mx7mmb/Kconfig"
+endif
+if ARCH_BOARD_PIC32MZ_STARTERKIT
+source "configs/pic32mz-starterkit/Kconfig"
 endif
 if ARCH_BOARD_PIRELLI_DPL10
 source "configs/pirelli_dpl10/Kconfig"

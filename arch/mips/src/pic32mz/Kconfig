@@ -1,0 +1,740 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_CHIP_PIC32MZ
+comment "PIC32MZ Configuration Options"
+
+choice
+	prompt "PIC32MZ chip selection"
+	default ARCH_CHIP_PIC32MZ460F512L
+
+config ARCH_CHIP_PIC32MZ2048ECH
+	bool "PIC32MZ2048ECH"
+	select ARCH_CHIP_PIC32MZEC
+	---help---
+		Microchip PIC32MZ2048ECH (MIPS32)
+		ARCH_CHIP_PIC32MZ1
+
+config ARCH_CHIP_PIC32MZ2048ECM
+	bool "PIC32MZ2048ECH"
+	select ARCH_CHIP_PIC32MZEC
+	---help---
+		Microchip PIC32MZ2048ECH (MIPS32)
+
+endchoice
+
+config ARCH_CHIP_PIC32MZEC
+	bool
+	default n
+
+config PIC32MZ_MVEC
+	bool
+	default n
+
+config PIC32MZ_T1
+	bool
+	default y
+
+menu "PIC32MZ Peripheral Support"
+
+config PIC32MZ_WDT
+	bool "Watchdog timer (WDT)"
+	default n
+
+config PIC32MZ_T2
+	bool "Timer 2 (T2)"
+	default n
+
+config PIC32MZ_T3
+	bool "Timer 3 (T3)"
+	default n
+
+config PIC32MZ_T4
+	bool "Timer 4 (T4)"
+	default n
+
+config PIC32MZ_T5
+	bool "Timer 5 (T5)"
+	default n
+
+config PIC32MZ_IC1
+	bool "Input Capture 1 (IC1)"
+	default n
+
+config PIC32MZ_IC2
+	bool "Input Capture 2 (IC2)"
+	default n
+
+config PIC32MZ_IC3
+	bool "Input Capture 3 (IC3)"
+	default n
+
+config PIC32MZ_IC4
+	bool "Input Capture 4 (IC4)"
+	default n
+
+config PIC32MZ_IC5
+	bool "Input Capture 5 (IC5)"
+	default n
+
+config PIC32MZ_OC1
+	bool "Output Compare 1 (OC1)"
+	default n
+
+config PIC32MZ_OC2
+	bool "Output Compare 2 (OC2)"
+	default n
+
+config PIC32MZ_OC3
+	bool "Output Compare 3 (OC3)"
+	default n
+
+config PIC32MZ_OC4
+	bool "Output Compare 4 (OC4)"
+	default n
+
+config PIC32MZ_OC5
+	bool "Output Compare 5 (OC5)"
+	default n
+
+config PIC32MZ_I2C1
+	bool "I2C1"
+	default n
+
+config PIC32MZ_I2C2
+	bool "I2C2"
+	default n
+
+config PIC32MZ_I2C3
+	bool "I2C3"
+	default n
+
+config PIC32MZ_I2C4
+	bool "I2C4"
+	default n
+
+config PIC32MZ_I2C5
+	bool "I2C5"
+	default n
+
+config PIC32MZ_SPI1
+	bool "SPI1"
+	default n
+
+config PIC32MZ_SPI2
+	bool "SPI2"
+	default n
+
+config PIC32MZ_SPI3
+	bool "SPI3"
+	default n
+
+config PIC32MZ_SPI4
+	bool "SPI4"
+	default n
+
+config PIC32MZ_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_UART6
+	bool "UART6"
+	default n
+	select ARCH_HAVE_UART6
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config PIC32MZ_ADC
+	bool "ADC1"
+	default n
+
+config PIC32MZ_PMP
+	bool "Parallel Master Port (PMP)"
+	default n
+
+config PIC32MZ_CM1
+	bool "Comparator 1 (CM1)"
+	default n
+
+config PIC32MZ_CM2
+	bool "Comparator 2 (CM2)"
+	default n
+
+config PIC32MZ_CM3
+	bool "Comparator 3 (CM3)"
+	default n
+
+config PIC32MZ_RTCC
+	bool "Real-Time Clock and Calendar (RTCC)"
+	default n
+
+config PIC32MZ_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+
+config PIC32MZ_FLASH
+	bool "FLASH"
+	default n
+
+config PIC32MZ_USBDEV
+	bool "USB device"
+	default n
+
+config PIC32MZ_USBHOST
+	bool "USB host"
+	default n
+
+config PIC32MZ_CAN1
+	bool "Controller area network 1 (CAN1)"
+	default n
+
+config PIC32MZ_CAN2
+	bool "Controller area network 2 (CAN2)"
+	default n
+
+config PIC32MZ_ETHERNET
+	bool "Ethernet"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config PIC32MZ_CTMU
+	bool "Charge Time Measurement Unit (CMTU)"
+	default n
+
+endmenu
+
+menu "PIC32MZ Peripheral Interrupt Priorities"
+
+config PIC32MZ_CTPRIO
+	int "Core Timer Interrupt (CT)"
+	default 16
+	---help---
+		Core Timer Interrupt.  Range 4-31, Default 16.
+
+config PIC32MZ_CS0PRIO
+	int "Core Software Interrupt 0 (CS0)"
+	default 16
+	---help---
+		Core Software Interrupt 0.  Range 4-31, Default 16.
+
+config PIC32MZ_CS1PRIO
+	int "Core Software Interrupt 1 (CS1)"
+	default 16
+	---help---
+		Core Software Interrupt 1.  Range 4-31, Default 16.
+
+config PIC32MZ_INT0PRIO
+	int "External Interrupt 0 (INT0)"
+	default 16
+	---help---
+		External Interrupt 0.  Range 4-31, Default 16.
+
+config PIC32MZ_INT1PRIO
+	int "External Interrupt 1 (INT1)"
+	default 16
+	---help---
+		External Interrupt 1.  Range 4-31, Default 16.
+
+config PIC32MZ_INT2PRIO
+	int "External Interrupt 2 (INT2)"
+	default 16
+	---help---
+		External Interrupt 2.  Range 4-31, Default 16.
+
+config PIC32MZ_INT3PRIO
+	int "External Interrupt 3 (INT3)"
+	default 16
+	---help---
+		External Interrupt 3.  Range 4-31, Default 16.
+
+config PIC32MZ_INT4PRIO
+	int "External Interrupt 4 (INT4)"
+	default 16
+	---help---
+		External Interrupt 4.  Range 4-31, Default 16.
+
+config PIC32MZ_FSCMPRIO
+	int "Fail-Safe Clock Monitor (FSCM)"
+	default 16
+	depends on PIC32MZ_
+	---help---
+		Fail-Safe Clock Monitor.  Range 4-31, Default 16.
+
+config PIC32MZ_T1PRIO
+	int "Timer 1 (T1)"
+	default 16
+	---help---
+		Timer 1 (System timer) priority.  Range 4-31, Default 16.
+
+config PIC32MZ_T2PRIO
+	int "Timer 2 (T2)"
+	default 16
+	depends on PIC32MZ_T2
+	---help---
+		Timer 2 priority.  Range 4-31, Default 16.
+
+config PIC32MZ_T3PRIO
+	int "Timer 3 (T3)"
+	default 16
+	depends on PIC32MZ_T3
+	---help---
+		Timer 3 priority.  Range 4-31, Default 16.
+
+config PIC32MZ_T4PRIO
+	int "Timer 4 (T4)"
+	default 16
+	depends on PIC32MZ_T4
+	---help---
+		Timer 4 priority.  Range 4-31, Default 16.
+
+config PIC32MZ_T5PRIO
+	int "Timer 5 (T5)"
+	default 16
+	depends on PIC32MZ_
+	---help---
+		Timer 5 priority.  Range 4-31, Default 16.
+
+config PIC32MZ_IC1PRIO
+	int "Input Capture 1 (IC1)"
+	default 16
+	depends on PIC32MZ_IC1
+	---help---
+		Input Capture 1.  Range 4-31, Default 16.
+
+config PIC32MZ_IC2PRIO
+	int "Input Capture 2 (IC2)"
+	default 16
+	depends on PIC32MZ_IC2
+	---help---
+		Input Capture 2.  Range 4-31, Default 16.
+
+config PIC32MZ_IC3PRIO
+	int "Input Capture 3 (IC3)"
+	default 16
+	depends on PIC32MZ_IC3
+	---help---
+		Input Capture 3.  Range 4-31, Default 16.
+
+config PIC32MZ_IC4PRIO
+	int "Input Capture 4 (IC4)"
+	default 16
+	depends on PIC32MZ_IC4
+	---help---
+		Input Capture 4.  Range 4-31, Default 16.
+
+config PIC32MZ_IC5PRIO
+	int "Input Capture 5 (IC5)"
+	default 16
+	depends on PIC32MZ_IC5
+	---help---
+		Input Capture 5.  Range 4-31, Default 16.
+
+config PIC32MZ_OC1PRIO
+	int "Output Compare 1 (OC1)"
+	default 16
+	depends on PIC32MZ_OC1
+	---help---
+		Output Compare 1.  Range 4-31, Default 16.
+
+config PIC32MZ_OC2PRIO
+	int "Output Compare 2 (OC2)"
+	default 16
+	depends on PIC32MZ_OC2
+	---help---
+		Output Compare 2.  Range 4-31, Default 16.
+
+config PIC32MZ_OC3PRIO
+	int "Output Compare 3 (OC3)"
+	default 16
+	depends on PIC32MZ_OC3
+	---help---
+		Output Compare 3.  Range 4-31, Default 16.
+
+config PIC32MZ_OC4PRIO
+	int "Output Compare 4 (OC4)"
+	default 16
+	depends on PIC32MZ_OC4
+	---help---
+		Output Compare 4.  Range 4-31, Default 16.
+
+config PIC32MZ_OC5PRIO
+	int "Output Compare 5 (OC5)"
+	default 16
+	depends on PIC32MZ_OC5
+	---help---
+		Output Compare 5.  Range 4-31, Default 16.
+
+config PIC32MZ_I2C1PRIO
+	int "I2C1"
+	default 16
+	depends on PIC32MZ_I2C1
+	---help---
+		I2C 1.  Range 4-31, Default 16.
+
+config PIC32MZ_I2C2PRIO
+	int "I2C2"
+	default 16
+	depends on PIC32MZ_I2C3
+	---help---
+		I2C 2.  Range 4-31, Default 16.
+
+config PIC32MZ_I2C3PRIO
+	int "I2C3"
+	default 16
+	depends on PIC32MZ_I2C3
+	---help---
+		I2C 3.  Range 4-31, Default 16.
+
+config PIC32MZ_I2C4PRIO
+	int "I2C4"
+	default 16
+	depends on PIC32MZ_I2C4
+	---help---
+		I2C 4.  Range 4-31, Default 16.
+
+config PIC32MZ_I2C5PRIO
+	int "I2C5"
+	default 16
+	depends on PIC32MZ_I2C5
+	---help---
+		I2C 5.  Range 4-31, Default 16.
+
+config PIC32MZ_SPI1PRIO
+	int "SPI1"
+	default 16
+	depends on PIC32MZ_SPI1
+	---help---
+		SPI 2
+
+config PIC32MZ_SPI2PRIO
+	int "SPI2"
+	default 16
+	depends on PIC32MZ_SPI2
+	---help---
+		SPI 2
+
+config PIC32MZ_UART1PRIO
+	int "UART1"
+	default 16
+	depends on PIC32MZ_UART1
+	---help---
+		UART 1.  Range 4-31, Default 16.
+
+config PIC32MZ_UART2PRIO
+	int "UART2"
+	default 16
+	depends on PIC32MZ_UART2
+	---help---
+		UART 2.  Range 4-31, Default 16.
+
+config PIC32MZ_CNPRIO
+	int "CN"
+	default 16
+	depends on PIC32MZ_CN
+	---help---
+		Input Change Interrupt.  Range 4-31, Default 16.
+
+config PIC32MZ_ADCPRIO
+	int "ADC1"
+	default 16
+	depends on PIC32MZ_ADC1
+	---help---
+		ADC1 Convert Done.  Range 4-31, Default 16.
+
+config PIC32MZ_PMPPRIO
+	int "Parallel Master Port (PMP)"
+	default 16
+	depends on PIC32MZ_PMP
+	---help---
+		Parallel Master Port.  Range 4-31, Default 16.
+
+config PIC32MZ_CM1PRIO
+	int "Comparator 1 (CM1)"
+	default 16
+	depends on PIC32MZ_CM1
+	---help---
+		Comparator 1.  Range 4-31, Default 16.
+
+config PIC32MZ_CM2PRIO
+	int "Comparator 2 (CM2)"
+	default 16
+	depends on PIC32MZ_CM2
+	---help---
+		Comparator 2.  Range 4-31, Default 16.
+
+config PIC32MZ_RTCCPRIO
+	int "Real-Time Clock and Calendar (RTCC)"
+	default 16
+	depends on PIC32MZ_RTCC
+	---help---
+		Real-Time Clock and Calendar.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA0PRIO
+	int "DMA0"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 0.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA1PRIO
+	int "DMA1"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 1.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA2PRIO
+	int "DMA2"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 2.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA3PRIO
+	int "DMA3"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 3.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA4PRIO
+	int "DMA4"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 4.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA5PRIO
+	int "DMA5"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 5.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA6PRIO
+	int "DMA6"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 6.  Range 4-31, Default 16.
+
+config PIC32MZ_DMA7PRIO
+	int "DMA7"
+	default 16
+	depends on PIC32MZ_DMA
+	---help---
+		DMA Channel 7.  Range 4-31, Default 16.
+
+config PIC32MZ_FCEPRIO
+	int "FCE"
+	default 16
+	depends on PIC32MZ_FLASH
+	---help---
+		Flash Control Event.  Range 4-31, Default 16.
+
+config PIC32MZ_USBPRIO
+	int "USB"
+	default 16
+	depends on PIC32MZ_USBDEV || PIC32MZ_USBHOST
+	---help---
+		USB.  Range 4-31, Default 16.
+
+endmenu
+
+menu "PIC32MZ PHY/Ethernet device driver settings"
+	depends on PIC32MZ_ETHERNET
+
+config PHY_AUTONEG
+	bool "Auto-negotion"
+	default y
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable auto-negotion
+
+config PHY_SPEED100
+	bool "100Mbps spped"
+	default n
+	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
+	---help---
+		Select 100Mbit vs. 10Mbit speed.
+
+config PHY_FDUPLEX
+	bool "Full duplex"
+	default n
+	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
+	---help---
+		Select full (vs. half) duplex
+
+config NET_NTXDESC
+	int "Number Tx descriptors"
+	default 2
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Configured number of Tx descriptors. Default: 2
+
+config NET_NRXDESC
+	int "Number Rx descriptors"
+	default 4
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Configured number of Rx descriptors. Default: 4
+
+config NET_PRIORITY
+	int ""
+	default 28
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Ethernet interrupt priority.  The is default is the higest priority.
+
+config NET_WOL
+	bool "Wake-up on LAN"
+	default n
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable Wake-up on LAN (not fully implemented).
+
+config NET_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on PIC32MZ_ETHERNET && DEBUG
+	---help---
+		Enabled low level register debug.  Also needs DEBUG.
+
+config NET_HASH
+	bool "Hash"
+	default n
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable receipt of near-perfect match frames.
+
+config NET_MULTICAST
+	bool "Multicast"
+	default y if NET_IGMP
+	depends on PIC32MZ_ETHERNET
+	---help---
+		Enable receipt of multicast (and unicast) frames. Automatically set if
+		NET_IGMP is selected.
+
+endmenu
+
+menu "Device Configuration 0 (DEVCFG0)"
+
+config PIC32MZ_DEBUGGER
+	int "Debugger"
+	default 3
+	---help---
+		Background Debugger Enable. Default 3 (disabled). The value 2 enables.
+
+config PIC32MZ_ICESEL
+	int "ICE channel"
+	default 1
+	---help---
+		In-Circuit Emulator/Debugger Communication Channel Select. Default 1 (PG2)
+
+config PIC32MZ_PROGFLASHWP
+	hex "Program FLASH write protect"
+	default 0x3ff if ARCH_CHIP_PIC32MZ1 || ARCH_CHIP_PIC32MZ2
+	default 0xff if !ARCH_CHIP_PIC32MZ1 && !ARCH_CHIP_PIC32MZ2
+	---help---
+		Program FLASH write protect.  Default 0xff (disabled)
+
+config PIC32MZ_BOOTFLASHWP
+	int "Boot FLASH write protect"
+	default 1
+	---help---
+		Default 1 (disabled)
+
+config PIC32MZ_CODEWP
+	int "Code write protect"
+	default 1
+	---help---
+		Default 1 (disabled)
+
+endmenu
+
+menu "Device Configuration 1 (DEVCFG1)"
+
+config PIC32MZ_OSCOUT
+	int "USB ID"
+	default 0
+	depends on ARCH_CHIP_PIC32MZ1 || ARCH_CHIP_PIC32MZ2
+	---help---
+		USB USBID Selection.  Default 1 if USB enabled (USBID pin is controlled by the USB
+		module), but 0 (GPIO) otherwise.
+
+endmenu
+
+menu "Device Configuration 3 (DEVCFG3)"
+
+config PIC32MZ_USBIDO
+	int "USB ID"
+	default 1 if PIC32MZ_USB
+	default 0 if !PIC32MZ_USB
+	---help---
+		USB USBID Selection.  Default 1 if USB enabled (USBID pin is controlled by the USB
+		module), but 0 (GPIO) otherwise.
+
+config PIC32MZ_VBUSIO
+	int "USB VBUSON"
+	default 1 if PIC32MZ_USB
+	default 0 if !PIC32MZ_USB
+	---help---
+		USB VBUSON Selection (Default 1 if USB enabled (VBUSON pin is controlled by the USB
+		module, but 0 (GPIO) otherwise.
+
+config PIC32MZ_WDENABLE
+	bool "Watchdog enable"
+	default 0
+	---help---
+		Enabled watchdog on power up.  Default 0 (watchdog can be enabled later by software).
+
+config PIC32MZ_FETHIO
+	int "Ethernet I/O pins"
+	default 1
+	---help---
+		Ethernet I/O Pin Selection bit:
+
+		1 = Default Ethernet I/O Pins
+		0 = Alternate Ethernet I/O Pins
+
+config PIC32MZ_FMIIEN
+	int "Ethernet MII"
+	default 1
+	---help---
+		Ethernet MII Enable bit
+
+		1 = MII enabled
+		0 = RMII enabled
+
+endmenu
+
+endif

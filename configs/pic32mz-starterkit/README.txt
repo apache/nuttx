@@ -182,6 +182,9 @@ Where <subdir> is one of the following:
     2. Serial Output
 
        The OS test produces all of its test output on the serial console.
-       This configuration has UART1 enabled as a serial console.  I have
-       been unable to get this UART work on the MEB.  But on the Expansion
-       I/O board, this maps to RX = J11 pin 41 and TX = J11 pin 43
+       This configuration has UART1 enabled as a serial console.
+
+    3. Toolchain
+
+       By default, the Pinguino MIPs tool chain is used.  This toolchain
+       selection can easily be changed with 'make menuconfig'.

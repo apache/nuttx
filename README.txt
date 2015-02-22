@@ -1237,6 +1237,8 @@ nuttx
  |   |   `- README.txt
  |   |- pic32mx7mmb/
  |   |   `- README.txt
+ |   |- pic32mz-starterkit/
+ |   |   `- README.txt
  |   |- pirelli_dpl10/
  |   |   `- README.txt
  |   |- qemu-i486/

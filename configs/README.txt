@@ -463,6 +463,18 @@ configs/pic32mx7mmb
   http://www.mikroe.com/ for further information.
 
 configs/pirelli_dpl10
+configs/pic32mz-starterkit
+  This directory contains the port of NuttX to the Microchip PIC32MZ
+  Embedded Connectivity (EC) Starter Kit.  There are two configurations of
+  the starter kit:
+
+    1) The PIC32MZ Embedded Connectivity Starter Kit based on the
+       PIC32MZ2048ECH144-I/PH chip (DM320006), and
+    2) The PIC32MZ Embedded Connectivity Starter Kit based on the
+       PIC32MZ2048ECM144-I/PH w/Crypto Engine (DM320006-C)
+
+  See www.microchip.com for further information.
+
   This directory contains the board support for Pirelli "Discus" DP-L10 phones.
   It is a variant of the compal_e88 config with the small changes for the
   differences in the board.
