@@ -393,10 +393,14 @@ Toolchains
 
   C32 Toolchain Options:
 
-    CONFIG_PIC32MX_MICROCHIPW      - MicroChip full toolchain for Windows
-    CONFIG_PIC32MX_MICROCHIPL      - MicroChip full toolchain for Linux
-    CONFIG_PIC32MX_MICROCHIPW_LITE - MicroChip "Lite" toolchain for Windows
-    CONFIG_PIC32MX_MICROCHIPL_LITE - MicroChip "Lite" toolchain for Linux
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW      - MicroChip full toolchain for Windows
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL      - MicroChip full toolchain for Linux
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE - MicroChip "Lite" toolchain for Windows
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_LITE - MicroChip "Lite" toolchain for Linux
+    CONFIG_MIPS32_TOOLCHAIN_PINGUINOL       - Pinquino toolchain for Linux
+    CONFIG_MIPS32_TOOLCHAIN_PINGUINOW       - Pinquino toolchain for Windows
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPOPENL  - Microchip open toolchain for Linux
+    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF         - General mips-elf toolchain for Linux
 
   NOTE:  The "Lite" versions of the toolchain does not support C++.  Also
   certain optimization levels are not supported by the "Lite" toolchain.
