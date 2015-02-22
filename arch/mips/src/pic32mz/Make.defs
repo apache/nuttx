@@ -35,7 +35,7 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC = # pic32mz-head.S
+HEAD_ASRC = pic32mz-head.S
 
 # Common MIPS files
 
