@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/pic32-starterkit/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/pic32mx-starterkit/src/pic32mx_usbterm.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,18 +39,18 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
+#include <nuttx/usb/usbdev.h>
 
 #include "pic32mx-internal.h"
-#include "starterkit_internal.h"
+#include "pic32mx-starterkit.h"
+
+#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -62,33 +61,44 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: pic32mx_boardinitialize
+/****************************************************************************
+ * Name:
  *
  * Description:
- *   All PIC32MX architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
+ *   call this user provided function as part of its initialization.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void pic32mx_boardinitialize(void)
+int usbterm_devinit(void)
 {
-  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mx_spiinitialize() has been brought into the link.
+  /* The PIO32 Starter Kit has no way to know when the USB is connected.  So
+   * we will fake it and tell the USB driver that the USB is connected now.
+   *
+   * If examples/usbterm is built as an NSH built-in application, then
+   * pic32mx_usbattach() will be called in nsh_archinitialize().
    */
 
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
-    defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
-  if (pic32mx_spiinitialize)
-    {
-      pic32mx_spiinitialize();
-    }
+#ifndef CONFIG_NSH_BUILTIN_APPS
+  pic32mx_usbattach();
 #endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  pic32mx_ledinit();
-#endif
+  return OK;
 }
+
+/****************************************************************************
+ * Name:
+ *
+ * Description:
+ *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
+ *   call this user provided function as part of its termination sequence.
+ *
+ ****************************************************************************/
+
+void usbterm_devuninit(void)
+{
+  /* Tell the USB driver that the USB is no longer connected */
+
+  pic32mx_usbdetach();
+}
+
+#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */

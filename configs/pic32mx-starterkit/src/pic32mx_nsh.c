@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/pic32-starterkit/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/pic32mx-starterkit/src/pic32mx_nsh.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +49,7 @@
 #include <nuttx/usb/usbhost.h>
 
 #include "pic32mx-internal.h"
-#include "starterkit_internal.h"
+#include "pic32mx-starterkit.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -235,7 +234,7 @@ static int nsh_sdinitialize(void)
   /* Bind the SPI port to the slot */
 
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
-                               CONFIG_NSH_MMCSDSLOTNO, ssp);
+                                CONFIG_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
       syslog(LOG_ERR,
@@ -358,5 +357,6 @@ int nsh_archinitialize(void)
 
       ret = nsh_usbdevinitialize();
     }
+
   return ret;
 }

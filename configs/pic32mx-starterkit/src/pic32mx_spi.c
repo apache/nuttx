@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/pic32-starterkit/src/up_ssp.c
- * arch/arm/src/board/up_ssp.c
+ * configs/pic32mx-starterkit/src/pic32mx_spi.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,13 +49,13 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "pic32mx-internal.h"
-#include "starterkit_internal.h"
+#include "pic32mx-starterkit.h"
 
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* The following enable debug output from this file (needs CONFIG_DEBUG too).
@@ -155,20 +154,20 @@ int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI1
-void  pic31mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
-uint8_t pic31mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   sspdbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
 #ifdef CONFIG_SPI_CMDDATA
-int pic31mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
 #warning "Missing logic"
   return 0;

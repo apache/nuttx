@@ -1233,7 +1233,7 @@ nuttx
  |   |   `- README.txt
  |   |- pcduino-a10/
  |   |   `- README.txt
- |   |- pic32-starterkit/
+ |   |- pic32mx-starterkit/
  |   |   `- README.txt
  |   |- pic32mx7mmb/
  |   |   `- README.txt

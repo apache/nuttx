@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/pic32-starterkit/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/pic32mx-starterkit/src/pic32mx_leds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,13 +51,13 @@
 
 #include "pic32mx-internal.h"
 #include "pic32mx-ioport.h"
-#include "starterkit_internal.h"
+#include "pic32mx-starterkit.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* LED Configuration ********************************************************/
-/* The PIC32MX Ethernet Starter kit has 3 user LEDs labeled LED1-3 on the
+/* The PIC32MX Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board graphics (but referred to as LED4-6 in the schematic):
  *
  * PIN User's Guide  Board Stencil  Notes
@@ -170,11 +169,11 @@ static const uint16_t g_ledpincfg[PIC32MX_STARTERKIT_NLEDS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_setleds
+ * Name: pic32mx_setleds
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_setleds(FAR const struct led_setting_s *setting)
+static void pic32mx_setleds(FAR const struct led_setting_s *setting)
 {
   if (setting->led1 != LED_NC)
     {
@@ -246,7 +245,7 @@ void board_led_on(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {
-      up_setleds(&g_ledonvalues[led]);
+      pic32mx_setleds(&g_ledonvalues[led]);
     }
 }
 #endif
@@ -260,7 +259,7 @@ void board_led_off(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {
-      up_setleds(&g_ledoffvalues[led]);
+      pic32mx_setleds(&g_ledoffvalues[led]);
     }
 }
 #endif

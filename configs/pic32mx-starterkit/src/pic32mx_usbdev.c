@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/pic32-starterkit/src/up_usbdev.c
- * arch/arm/src/board/up_usbdev.c
+ * configs/pic32mx-starterkit/src/pic32mx_usbdev.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,12 +45,12 @@
 #include <nuttx/usb/usbdev.h>
 
 #include "pic32mx-internal.h"
-#include "starterkit_internal.h"
+#include "pic32mx-starterkit.h"
 
 #if defined(CONFIG_PIC32MX_USBDEV)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /*
  * PIN  NAME                            SIGNAL         NOTES

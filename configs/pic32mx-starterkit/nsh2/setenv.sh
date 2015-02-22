@@ -1,7 +1,7 @@
-############################################################################
-# configs/pic32-starterkit/src/Makefile
+#!/bin/bash
+# configs/pic32mx-starterkit/nsh2/setenv.sh
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,68 +31,31 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
--include $(TOPDIR)/Make.defs
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CFLAGS		+= -I$(TOPDIR)/sched
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
-ASRCS		=
-CSRCS		= up_boot.c up_leds.c up_spi.c
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-ifeq ($(CONFIG_PIC32MX_USBDEV),y)
-CSRCS		+= up_usbdev.c
-ifeq ($(CONFIG_EXAMPLES_USBTERM_DEVINIT),y)
-CSRCS		+= up_usbterm.c
-endif
-endif
+# This is the Cygwin path to the location where I installed the MicroChip
+# PIC32MX toolchain under windows.  This is *not* the default install
+# location so you will probably have to edit this.  You will also have
+# to edit this if you install a different version of if you install
+# the Linux PIC32MX toolchain as well
+export TOOLCHAIN_BIN="/cygdrive/c/MicroChip/mplabc32/v1.12/bin"
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
-endif
+# This is the path to the tools subdirectory
+export PIC32TOOL_DIR="${WD}/tools/pic32mx"
 
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS		+= up_usbmsc.c
-endif
+# Add the path to the toolchain to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:${PIC32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
-else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
-endif
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+echo "PATH : ${PATH}"
