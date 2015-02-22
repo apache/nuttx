@@ -1,4 +1,4 @@
-configs/pic32-starterkit README
+configs/pic32mx-starterkit README
 ===============================
 
 
@@ -802,11 +802,11 @@ PIC32MX Configuration Options
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=pic32-starterkit
+       CONFIG_ARCH_BOARD=pic32mx-starterkit
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_PIC32_STARTERKIT=y
+       CONFIG_ARCH_BOARD_PIC32MX_STARTERKIT=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -1019,7 +1019,7 @@ Each PIC32MX configuration is maintained in a sub-directory and can be
 selected as follow:
 
     cd tools
-    ./configure.sh pic32-starterkit/<subdir>
+    ./configure.sh pic32mx-starterkit/<subdir>
     cd -
     . ./setenv.sh
 

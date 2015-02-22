@@ -3,5 +3,5 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if ARCH_BOARD_PIC32_STARTERKIT
+if ARCH_BOARD_PIC32MX_STARTERKIT
 endif

@@ -452,7 +452,7 @@ configs/p112
   Dave Brooks was successfully funded through Kickstarter for and another
   run of P112 boards in November of 2012.
 
-configs/pic32-starterkit
+configs/pic32mx-starterkit
   This directory contains the port of NuttX to the Microchip PIC32 Ethernet
   Starter Kit (DM320004) with the Multimedia Expansion Board (MEB, DM320005).
   See www.microchip.com for further information.

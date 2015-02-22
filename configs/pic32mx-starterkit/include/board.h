@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32-starterkit/include/board.h
+ * configs/pic32mx-starterkit/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.

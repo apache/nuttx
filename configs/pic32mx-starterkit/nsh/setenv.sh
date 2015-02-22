@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/pic32-starterkit/nsh/setenv.sh
+# configs/pic32mx-starterkit/nsh/setenv.sh
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

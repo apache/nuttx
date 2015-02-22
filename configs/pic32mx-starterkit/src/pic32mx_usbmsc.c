@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pic32-starterkit/src/starterkit_internal.h
+ * configs/pic32mx-starterkit/src/up_usbmsc.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,90 +33,41 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PIC32_STARTERKIT_SRC_STARTERKIT_INTERNAL_H
-#define __CONFIGS_PIC32_STARTERKIT_SRC_STARTERKIT_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include "pic32mx-starterkit.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* The PIC32 starter kit has 3 user LEDs
- *
- *   RD0          User LED D4 (high illuminates)
- *   RD2          User LED D5 (high illuminates)
- *   RD1          User LED D6 (high illuminates)
- *
- * There are 5 LEDs available on the MEB:
- *
- *   RD1          LED1
- *   RD2          LED2
- *   RD3          LED3
- *   RC1          LED4
- *   RC2          LED5
- */
-
-/* The PIC32 starter kit has 3 switches:
- *
- *   RD7            Switch SW2 (low when closed)
- *   RD6            Switch SW1 (low when closed)
- *   RD13           Switch SW3 (low when closed)
- */
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Name: pic32mx_spiinitialize
+ * Name: usbmsc_archinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#if defined(CONFIG_PIC32MX_SPI2)
-EXTERN void weak_function pic32mx_spiinitialize(void);
-#endif
+int usbmsc_archinitialize(void)
+{
+  /* If system/usbmsc is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   */
 
-/************************************************************************************
- * Name: pic32mx_ledinit
- *
- * Description:
- *   Configure on-board LEDs if LED support has been selected.
- *
- ************************************************************************************/
+#ifndef CONFIG_NSH_BUILTIN_APPS
+#  warning "Missing Logic"
+#endif /* CONFIG_NSH_BUILTIN_APPS */
 
-#ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+   return 0;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PIC32_STARTERKIT_SRC_STARTERKIT_INTERNAL_H */
