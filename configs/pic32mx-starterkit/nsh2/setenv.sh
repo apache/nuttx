@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/pic32mx-starterkit/nsh2/setenv.sh
 #
-#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,12 +50,17 @@ fi
 # location so you will probably have to edit this.  You will also have
 # to edit this if you install a different version of if you install
 # the Linux PIC32MX toolchain as well
-export TOOLCHAIN_BIN="/cygdrive/c/MicroChip/mplabc32/v1.12/bin"
+export TOOLCHAIN_PREBIN="/cygdrive/c/MicroChip/mplabc32/v1.12/bin":
+
+# This is where I have the Pinquino toolchain installed
+# Careful with the ordering in the PATH variable... there is an incompatible
+# version of make in this directory too!
+#export TOOLCHAIN_POSTBIN=:"/cygdrive/c/pinguino-11/compilers/p32/bin"
 
 # This is the path to the tools subdirectory
 export PIC32TOOL_DIR="${WD}/tools/pic32mx"
 
 # Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:${PIC32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_PREBIN}${PIC32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}${TOOLCHAIN_POSTBIN}"
 
 echo "PATH : ${PATH}"
