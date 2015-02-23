@@ -9869,4 +9869,6 @@
 	  file definitions and just enough logic in the source directory so
 	  that we can run 'make menuconfig'.  Still a very long way from being
 	  complete (2015-02-22).
-
+	* libc/time/lib/lib_sfrtime.c:  Missing implementation of %C in
+	  sfrtime() C (was being treated as %y).  From Freddie Chopin
+	  (2015-02-23).
