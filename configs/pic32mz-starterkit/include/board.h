@@ -54,53 +54,28 @@
 /* Clocking *****************************************************************/
 /* Crystal frequencies */
 
-#define BOARD_POSC_FREQ        8000000  /* Primary OSC XTAL frequency (8MHz) */
-#define BOARD_SOSC_FREQ        32768    /* Secondary OSC XTAL frequency (32.768KHz) */
+#define BOARD_POSC_FREQ        24000000  /* Primary OSC XTAL frequency (24MHz) */
+#define BOARD_SOSC_FREQ        32768     /* Secondary OSC XTAL frequency (32.768KHz) */
 
 /* Oscillator modes */
 
-#define BOARD_FNOSC_POSCPLL    1        /* Use primary oscillator w/PLL */
-#define BOARD_POSC_HSMODE      1        /* High-speed crystal (HS) mode */
+#define BOARD_FNOSC_POSC       1         /* Use primary oscillator */
+#define BOARD_POSC_HSMODE      1         /* High-speed crystal (HS) mode */
 
 /* PLL configuration and resulting CPU clock.
  * CPU_CLOCK = ((POSC_FREQ / IDIV) * MULT) / ODIV
  */
 
 #define BOARD_PLL_INPUT        BOARD_POSC_FREQ
-#define BOARD_PLL_IDIV         2        /* PLL input divider */
-#define BOARD_PLL_MULT         20       /* PLL multiplier */
-#define BOARD_PLL_ODIV         1        /* PLL output divider */
+#define BOARD_PLL_IDIV         3         /* PLL input divider */
+#define BOARD_PLL_MULT         50        /* PLL multiplier */
+#define BOARD_PLL_ODIV         2         /* PLL output divider */
 
-#define BOARD_CPU_CLOCK        80000000 /* CPU clock (80MHz = 8MHz * 20 / 2) */
-
-/* USB PLL configuration.
- * USB_CLOCK = ((POSC_XTAL / IDIV) * 24) / 2
- */
-
-#define BOARD_UPLL_IDIV        2        /* USB PLL divider (revisit) */
-#define BOARD_USB_CLOCK        48000000 /* USB clock (8MHz / 2) * 24 / 2) */
-
-/* Peripheral clock is divided down from CPU clock.
- * PBCLOCK = CPU_CLOCK / PBDIV
- */
-
-#define BOARD_PBDIV            2        /* Peripheral clock divisor (PBDIV) */
-#define BOARD_PBCLOCK          40000000 /* Peripheral clock (PBCLK = 80MHz/2) */
+#define BOARD_CPU_CLOCK        200000000 /* CPU clock: 200MHz = (24MHz / 3) * 50 / 2) */
 
 /* Watchdog pre-scaler (re-visit) */
 
-#define BOARD_WD_ENABLE        0        /* Watchdog is disabled */
-#define BOARD_WD_PRESCALER     8        /* Watchdog pre-scaler */
-
-/* Ethernet MII clocking.
- *
- * The clock divider used to create the MII Management Clock (MDC).  The MIIM
- * module uses the SYSCLK as an input clock.  According to the IEEE 802.3
- * Specification this should be no faster than 2.5 MHz. However, some PHYs
- * support clock rates up to 12.5 MHz.
- */
-
-#define BOARD_EMAC_MIIM_DIV    32        /* Ideal: 80MHz/32 = 2.5MHz */
+#define BOARD_WD_PRESCALER     8         /* Watchdog pre-scaler */
 
 /* LED definitions **********************************************************/
 /* LED Configuration ********************************************************/
