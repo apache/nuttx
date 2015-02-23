@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/time/lib_strftime.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -210,12 +210,16 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
            /* %y: The year as a decimal number without a century (range 00 to 99). */
 
            case 'y':
+             {
+               len = snprintf(dest, chleft, "%02d", tm->tm_year % 100);
+             }
+             break;
 
            /* %C: The century number (year/100) as a 2-digit integer. */
 
            case 'C':
              {
-               len = snprintf(dest, chleft, "%02d", tm->tm_year % 100);
+               len = snprintf(dest, chleft, "%02d", tm->tm_year / 100);
              }
              break;
 
