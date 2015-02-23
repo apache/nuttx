@@ -203,20 +203,20 @@
 #  define CFGEBIA_EBIA7EN        (1 << 7)  /* Bit 7:  EBI address pin 7 enable */
 #  define CFGEBIA_EBIA8EN        (1 << 8)  /* Bit 8:  EBI address pin 8 enable */
 #  define CFGEBIA_EBIA9EN        (1 << 9)  /* Bit 9:  EBI address pin 9 enable */
-#  define CFGEBIA_EBIA0EN        (1 << 10) /* Bit 10: EBI address pin 10 enable */
-#  define CFGEBIA_EBIA1EN        (1 << 11) /* Bit 11: EBI address pin 11 enable */
-#  define CFGEBIA_EBIA2EN        (1 << 12) /* Bit 12: EBI address pin 12 enable */
-#  define CFGEBIA_EBIA3EN        (1 << 13) /* Bit 13: EBI address pin 13 enable */
-#  define CFGEBIA_EBIA4EN        (1 << 14) /* Bit 14: EBI address pin 14 enable */
-#  define CFGEBIA_EBIA5EN        (1 << 15) /* Bit 15: EBI address pin 15 enable */
-#  define CFGEBIA_EBIA6EN        (1 << 16) /* Bit 16: EBI address pin 16 enable */
-#  define CFGEBIA_EBIA7EN        (1 << 17) /* Bit 17: EBI address pin 17 enable */
-#  define CFGEBIA_EBIA8EN        (1 << 18) /* Bit 18: EBI address pin 18 enable */
-#  define CFGEBIA_EBIA9EN        (1 << 19) /* Bit 19: EBI address pin 19 enable */
-#  define CFGEBIA_EBIA0EN        (1 << 20) /* Bit 20: EBI address pin 20 enable */
-#  define CFGEBIA_EBIA1EN        (1 << 21) /* Bit 21: EBI address pin 21 enable */
-#  define CFGEBIA_EBIA2EN        (1 << 22) /* Bit 22: EBI address pin 22 enable */
-#  define CFGEBIA_EBIA3EN        (1 << 23) /* Bit 23: EBI address pin 23 enable */
+#  define CFGEBIA_EBIA10EN       (1 << 10) /* Bit 10: EBI address pin 10 enable */
+#  define CFGEBIA_EBIA11EN       (1 << 11) /* Bit 11: EBI address pin 11 enable */
+#  define CFGEBIA_EBIA12EN       (1 << 12) /* Bit 12: EBI address pin 12 enable */
+#  define CFGEBIA_EBIA13EN       (1 << 13) /* Bit 13: EBI address pin 13 enable */
+#  define CFGEBIA_EBIA14EN       (1 << 14) /* Bit 14: EBI address pin 14 enable */
+#  define CFGEBIA_EBIA15EN       (1 << 15) /* Bit 15: EBI address pin 15 enable */
+#  define CFGEBIA_EBIA16EN       (1 << 16) /* Bit 16: EBI address pin 16 enable */
+#  define CFGEBIA_EBIA17EN       (1 << 17) /* Bit 17: EBI address pin 17 enable */
+#  define CFGEBIA_EBIA18EN       (1 << 18) /* Bit 18: EBI address pin 18 enable */
+#  define CFGEBIA_EBIA19EN       (1 << 19) /* Bit 19: EBI address pin 19 enable */
+#  define CFGEBIA_EBIA20EN       (1 << 20) /* Bit 20: EBI address pin 20 enable */
+#  define CFGEBIA_EBIA21EN       (1 << 21) /* Bit 21: EBI address pin 21 enable */
+#  define CFGEBIA_EBIA22EN       (1 << 22) /* Bit 22: EBI address pin 22 enable */
+#  define CFGEBIA_EBIA23EN       (1 << 23) /* Bit 23: EBI address pin 23 enable */
 #define CFGEBIA_EBIPINEN         (1 << 31) /* Bit 31: EBI Pin Enable bit */
 
 /* External bus interface address pin control register */
@@ -308,11 +308,17 @@
 #define DEVCFG3_USERID_SHIFT     (0)       /* Bit 0-15: 16-bit user defined value */
 #define DEVCFG3_USERID_MASK      (0xffff << DEVCFG3_USERID_SHIFT)
 #  define DEVCFG3_USERID(n)      ((uint32_t)(n) << DEVCFG3_USERID_SHIFT)
+#define DEVCFG3_FMIIEN_SHIFT     (24)      /* Bit 24: Ethernet MII Enable Configuration bit */
 #define DEVCFG3_FMIIEN           (1 << 24) /* Bit 24: Ethernet MII Enable Configuration bit */
+#define DEVCFG3_FETHIO_SHIFT     (25)      /* Bit 25: Ethernet I/O Pin Selection Configuration bit */
 #define DEVCFG3_FETHIO           (1 << 25) /* Bit 25: Ethernet I/O Pin Selection Configuration bit */
+#define DEVCFG3_PGL1WAY_SHIFT    (27)      /* Bit 27: Permission Group Lock One Way Configuration bit */
 #define DEVCFG3_PGL1WAY          (1 << 27) /* Bit 27: Permission Group Lock One Way Configuration bit */
+#define DEVCFG3_PMDL1WAY_SHIFT   (28)      /* Bit 28: Peripheral Module Disable Configuration bit */
 #define DEVCFG3_PMDL1WAY         (1 << 28) /* Bit 28: Peripheral Module Disable Configuration bit */
+#define DEVCFG3_IOL1WAY_SHIFT    (29)      /* Bit 29: Peripheral Pin Select Configuration bit */
 #define DEVCFG3_IOL1WAY          (1 << 29) /* Bit 29: Peripheral Pin Select Configuration bit */
+#define DEVCFG3_FUSBIDIO_SHIFT   (30)      /* Bit 30: USB USBID Selection bit */
 #define DEVCFG3_FUSBIDIO         (1 << 30) /* Bit 30: USB USBID Selection bit */
 
 #define DEVCFG3_RWO              0x84ff0000 /* Bits 16-23, 31: Reserved, write as one */
@@ -357,12 +363,12 @@
 
 #define DEVCFG1_FNOSC_SHIFT      (0)       /* Bits 0-2: Oscillator Selection bits */
 #define DEVCFG1_FNOSC_MASK       (7 << DEVCFG1_FNOSC_SHIFT)
-#  define DEVCFG1_FNOSC_FRCDIV   (0 << DEVCFG1_FNOSC_SHIFT) /* FRC divided by FRCDIV */
+#  define DEVCFG1_FNOSC_FRC      (0 << DEVCFG1_FNOSC_SHIFT) /* FRC divided by FRCDIV */
 #  define DEVCFG1_FNOSC_SPLL     (1 << DEVCFG1_FNOSC_SHIFT) /* SPLL */
 #  define DEVCFG1_FNOSC_POSC     (2 << DEVCFG1_FNOSC_SHIFT) /* POSC (HS, EC) */
 #  define DEVCFG1_FNOSC_SOSC     (4 << DEVCFG1_FNOSC_SHIFT) /* SOSC */
 #  define DEVCFG1_FNOSC_LPRC     (5 << DEVCFG1_FNOSC_SHIFT) /* LPRC */
-#  define DEVCFG1_FNOSC_FRCDIV20 (7 << DEVCFG1_FNOSC_SHIFT) /* FRC divided by FRCDIV<2:0> */
+#  define DEVCFG1_FNOSC_FRCDIV   (7 << DEVCFG1_FNOSC_SHIFT) /* FRC divided by FRCDIV<2:0> */
 #define DEVCFG1_DMTINV_SHIFT     (3)       /* Bits 3-5: Deadman Timer Count Window Interval bits */
 #define DEVCFG1_DMTINV_MASK      (7 << DEVCFG1_DMTINV_SHIFT)
 #  define DEVCFG1_DMTINV_0       (0 << DEVCFG1_DMTINV_SHIFT) /* Window/Interval value zero */
@@ -410,9 +416,9 @@
 #  define DEVCFG1_WDTPS_262144   (18 << DEVCFG1_WDTPS_SHIFT) /* 1:262144 */
 #  define DEVCFG1_WDTPS_524288   (19 << DEVCFG1_WDTPS_SHIFT) /* 1:524288 */
 #  define DEVCFG1_WDTPS_1048576  (20 << DEVCFG1_WDTPS_SHIFT) /* 1:1048576 */
-#define DEVCFG1_WDTSPGM          (1 << 21)  /* Bit 21: Watchdog Timer Stop During Flash Programming bit */
-#define DEVCFG1_WINDIS           (1 << 22)  /* Bit 22: Watchdog Timer Window Enable bit */
-#define DEVCFG1_FWDTEN           (1 << 23)  /* Bit 23: Watchdog Timer Enable bit */
+#define DEVCFG1_WDTSPGM          (1 << 21) /* Bit 21: Watchdog Timer Stop During Flash Programming bit */
+#define DEVCFG1_WINDIS           (1 << 22) /* Bit 22: Watchdog Timer Window Enable bit */
+#define DEVCFG1_FWDTEN           (1 << 23) /* Bit 23: Watchdog Timer Enable bit */
 #define DEVCFG1_FWDTWINSZ_SHIFT  (24)      /* Bits 24-25: Watchdog Timer Window Size bits */
 #define DEVCFG1_FWDTWINSZ_MASK   (3 << DEVCFG1_FWDTWINSZ_SHIFT)
 # define DEVCFG1_FWDTWINSZ_75    (0 << DEVCFG1_FWDTWINSZ_SHIFT) /* Window size is 75% */
@@ -422,7 +428,7 @@
 #define DEVCFG1_DMTCNT_SHIFT     (26)      /* Bits 26-30: Deadman Timer Count Select bits */
 #define DEVCFG1_DMTCNT_MASK      (31 << DEVCFG1_DMTCNT_SHIFT)
 #  define DEVCFG1_DMTCNT(n)      ((uint32_t)((n)-8) << DEVCFG1_DMTCNT_SHIFT) /* 2**n, n=8..31 */
-#define DEVCFG1_FDMTEN           (1 << 31)  /* Bit 31: Deadman Timer enable bit */
+#define DEVCFG1_FDMTEN           (1 << 31) /* Bit 31: Deadman Timer enable bit */
 
 #define DEVCFG1_RWO              0x00003800 /* Bits 11-13: Reserved, write as one */
 
