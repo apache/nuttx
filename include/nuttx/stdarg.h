@@ -45,8 +45,8 @@
 /* If CONFIG_ARCH_STDARG_H is defined, then the top-level Makefile will copy
  * this header file to include/stdarg.h where it will become the system
  * stdarg.h header file.  In this case, the architecture specific code must
- * provide an arch/<architecture>/include/math.h file which will be included
- * below:
+ * provide an arch/<architecture>/include/stdarg.h file which will be
+ * included below:
  */
 
 #ifdef CONFIG_ARCH_STDARG_H

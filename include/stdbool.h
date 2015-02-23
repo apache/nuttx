@@ -42,9 +42,9 @@
 
 #include <nuttx/config.h>
 
-/* If CONFIG_ARCH_STDBOOL_H is set, then the archecture will provide its own
+/* If CONFIG_ARCH_STDBOOL_H is set, then the architecture will provide its own
  * stdbool.h file.  In this case, this header file will simply re-direct to
- * the architecture-specfiic stdbool.h header file.
+ * the architecture-specfic stdbool.h header file.
  */
 
 #ifdef CONFIG_ARCH_STDBOOL_H
