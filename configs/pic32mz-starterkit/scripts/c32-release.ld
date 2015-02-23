@@ -59,7 +59,8 @@ MEMORY
 	 *     JTAG        0x1fc00480 KSEG1  16         1168
 	 *   Exceptions    0x1fc00490 KSEG0  8192-1168  8192 (4Kb)
 	 *   Debug code    0x1fc02000 KSEG1  4096-16   12272
-	 *   DEVCFG3-0     0x1fc0ff40 KSEG1  16        12288 (12Kb)
+	 *   ADEVCFG3-0    0x1fc0ff40 KSEG1  16        12288 (12Kb)
+	 *   DEVCFG3-0     0x1fc0ffc0 KSEG1  16        12288 (12Kb)
 	 *
 	 * Exceptions assume:
 	 *
@@ -77,7 +78,8 @@ MEMORY
 	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
 	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 8192-1168
 	kseg1_dbgcode  (rx) : ORIGIN = 0xbfc02000, LENGTH = 4096-16
-	kseg1_devcfg    (r) : ORIGIN = 0x1fc0ff40, LENGTH = 192
+	kseg1_adevcfg   (r) : ORIGIN = 0x1fc0ff40, LENGTH = 128
+	kseg1_devcfg    (r) : ORIGIN = 0x1fc0ffc0, LENGTH = 128
 
 	/* The The PIC32MZ2048ECH144 and PIC32MZ2048ECM144 chips have has 512Kb
 	 * of data memory at physical address 0x00000000.  Since the PIC32MZ
@@ -158,6 +160,11 @@ SECTIONS
 	} > kseg0_bootmem
 
 	.dbg_code = ORIGIN(kseg1_dbgcode);
+
+	.adevcfg :
+	{
+		KEEP (*(.adevcfg))
+	} > kseg1_adevcfg
 
 	.devcfg :
 	{
