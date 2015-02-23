@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/mips32/up_syscall0.S
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,12 @@
 
 	.text
 	.set	noreorder
+	.set	nomips16
+#ifdef CONFIG_ARCH_MIPS_MICROMIPS
+	.set	micromips
+#endif
 	.ent	sys_call0
+
 sys_call0:	/* r4 holds the syscall number */
 sys_call1:	/* r4 holds the syscall number, argument in r5 */
 sys_call2:	/* r4 holds the syscall number, arguments in r5 and r6 */
