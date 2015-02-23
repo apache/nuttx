@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CHIP_PIC32MZEC) || defined(CHIP_PIC32MZ2)
+#if defined(CHIP_PIC32MZEC)
 #  include <chip/pic32mzec-memorymap.h>
 #else
 #  error "Unknown PIC32MZ family
