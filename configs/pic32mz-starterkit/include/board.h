@@ -59,7 +59,7 @@
 
 /* Oscillator modes */
 
-#define BOARD_FNOSC_POSC       1         /* Use primary oscillator */
+#define BOARD_FNOSC_SPLL       1         /* Use system PLL */
 #define BOARD_POSC_HSMODE      1         /* High-speed crystal (HS) mode */
 
 /* PLL configuration and resulting CPU clock.
