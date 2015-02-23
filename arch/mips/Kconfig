@@ -42,6 +42,11 @@ config ARCH_MIPS_24KC
 config ARCH_MIPS_M14K
 	bool
 	default n
+	select ARCH_MIPS_MICROMIPS
+
+config ARCH_MIPS_MICROMIPS
+	bool
+	default n
 
 config ARCH_FAMILY
 	string

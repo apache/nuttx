@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/mips/src/mips32/vfork.S
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,9 @@
 	.globl	vfork
 	.type	vfork, function
 	.set	nomips16
+#ifdef CONFIG_ARCH_MIPS_MICROMIPS
+	.set	micromips
+#endif
 	.ent	vfork
 
 vfork:
