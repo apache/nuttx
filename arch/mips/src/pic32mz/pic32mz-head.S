@@ -161,12 +161,14 @@
 	.ent	__reset
 
 __reset:
-	.word 0x10000003	/* MIPS32:    branch forward 0x10 bytes from here  */
-						/* MicroMIPS: ADDI32 $0, $0, 0x0007 (nop)          */
-						/* DO NOT change the relative branch               */
-	.word 0x00000000	/* NOP */
+	.word 0x10000004		/* 0x0000 */
+							/*   MIPS32:    Branch forward 0x14 bytes   */
+							/*   MicroMIPS: ADDI32 $0, $0, 0x0007 (NOP) */
+	.word 0x00000000		/* 0x0004 */
+							/*   MIPS32:    NOP   */
+							/*   MicroMIPS: NOP */
 
-	/* If se get here then we are in microMIPS mode.  That is because the
+	/* If we get here then we are in microMIPS mode.  That is because the
 	 * preceding instructions are all NOP in that case and we fall through
 	 * to here.  Otherwise, we branched to __reset_switch_isa
 	 */
@@ -174,17 +176,23 @@ __reset:
 	.set    micromips
 
 __reset_micromips:
-	la		k0, __start	/* Just jump to the startup initialization code */
-	jr		k0
-	nop
 
-	/* Device not in proper ISA mode */
+	/* Just jump to the startup initialization code */
+
+	la		k0, __start		/* 0x0008 */
+	jr		k0				/* 0x0010 */
+	nop						/* 0x0012 */
+
+	/* Device not in proper ISA mode.  If we are not in microMIPS mode then
+	 * we get here from the first instruction at __reset which will get
+	 * interpreted as a branch to this location.
+	 */
 
 	.align 2
 	.set nomicromips
 
 __reset_halt:
-	b		__reset_halt
+	b		__reset_halt	/* 0x0014 <- Branch target */
 	nop
 
 	.end	__reset
