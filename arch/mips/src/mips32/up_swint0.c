@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/mips32/up_swint0.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -309,9 +309,15 @@ int up_swint0(int irq, FAR void *context)
     }
 #endif
 
-  /* Clear the pending software interrupt 0 in the PIC32 interrupt block */
+  /* Clear the pending software interrupt 0 in the PIC32 interrupt block.
+   * REVISIT:  Does this PIC32 logic really have to be in the MIPS32 code?
+   */
 
+#if defined(CONFIG_ARCH_CHIP_PIC32MX)
   up_clrpend_irq(PIC32MX_IRQSRC_CS0);
+#elif defined(CONFIG_ARCH_CHIP_PIC32MZ)
+  up_clrpend_irq(PIC32MZ_IRQ_CS0);
+#endif
 
   /* And reset the software interrupt bit in the MIPS CAUSE register */
 
