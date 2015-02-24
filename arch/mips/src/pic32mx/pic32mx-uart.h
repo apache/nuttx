@@ -188,7 +188,7 @@
 #define UART_MODE_UEN_SHIFT         (8)       /* Bits: 8-9: UARTx enable */
 #define UART_MODE_UEN_MASK          (3 << UART_MODE_UEN_SHIFT)
 #  define UART_MODE_UEN_PORT        (0 << UART_MODE_UEN_SHIFT) /* UxCTS+UxRTS/UxBCLK=PORTx register */
-#  define UART_MODE_UEN_ENR_CPORT   (1 << UART_MODE_UEN_SHIFT) /* UxRTS=enabled; UxCTS=ORTx register */
+#  define UART_MODE_UEN_ENR_CPORT   (1 << UART_MODE_UEN_SHIFT) /* UxRTS=enabled; UxCTS=PORTx register */
 #  define UART_MODE_UEN_ENCR        (2 << UART_MODE_UEN_SHIFT) /* UxCTS+UxRTS=enabled */
 #  define UART_MODE_UEN_CPORT       (3 << UART_MODE_UEN_SHIFT) /* UxCTS=PORTx register */
 #define UART_MODE_RTSMD             (1 << 11) /* Bit 11: Mode selection for ~UxRTS pin */
