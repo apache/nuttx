@@ -101,7 +101,9 @@
  *   - Timer 1 uses SOSC
  */
 
-#undef BOARD_PBCLK3_ENABLE
+#define BOARD_PBCLK3_ENABLE    1         /* Enable PBCLK3 */
+#define BOARD_PB3DIV           4         /* Divider = 4 */
+#define BOARD_PBCLK3           50000000  /* PBCLK3 frequency = 200MHz/4 = 50MHz */
 
 /* PBCLK4
  *   Peripherals: Ports

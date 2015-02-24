@@ -103,6 +103,10 @@ CONFIG_PIC32MZ_T1=y
 # CONFIG_PIC32MZ_T3 is not set
 # CONFIG_PIC32MZ_T4 is not set
 # CONFIG_PIC32MZ_T5 is not set
+# CONFIG_PIC32MZ_T6 is not set
+# CONFIG_PIC32MZ_T7 is not set
+# CONFIG_PIC32MZ_T8 is not set
+# CONFIG_PIC32MZ_T9 is not set
 # CONFIG_PIC32MZ_IC1 is not set
 # CONFIG_PIC32MZ_IC2 is not set
 # CONFIG_PIC32MZ_IC3 is not set
@@ -142,6 +146,7 @@ CONFIG_PIC32MZ_UART1=y
 # CONFIG_PIC32MZ_CAN2 is not set
 # CONFIG_PIC32MZ_ETHERNET is not set
 # CONFIG_PIC32MZ_CTMU is not set
+# CONFIG_PIC32MZ_T1_SOSC is not set
 
 #
 # Device Configuration 0 (DEVCFG0)
