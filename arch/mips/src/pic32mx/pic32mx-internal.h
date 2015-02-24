@@ -189,7 +189,7 @@ extern "C"
 void pic32mx_lowinit(void);
 
 /************************************************************************************
- * Name: pic32mx_lowsetup
+ * Name: pic32mx_consoleinit
  *
  * Description:
  *   Performs low level initialization of the console UART.  This UART done early so
