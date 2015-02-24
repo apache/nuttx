@@ -112,11 +112,13 @@ static const struct file_operations g_canops =
   can_read,  /* read */
   can_write, /* write */
   0,         /* seek */
-  can_ioctl, /* ioctl */
+  can_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  0,         /* poll */
+  , 0        /* poll */
 #endif
-  0          /* unlink */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0        /* unlink */
+#endif
 };
 
 /****************************************************************************
