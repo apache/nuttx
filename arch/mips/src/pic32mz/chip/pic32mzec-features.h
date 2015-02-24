@@ -189,6 +189,9 @@
 
 /* System key register: 32-bit key value */
 
+#define UNLOCK_SYSKEY_0          (0xaa996655ul)
+#define UNLOCK_SYSKEY_1          (0x556699aaul)
+
 /* External bus interface address pin configuration register */
 
 #define CFGEBIA_EBIA0N_SHIFT     (0)       /* Bits 0-23: EBI address pin 0 enable */

@@ -47,7 +47,9 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "chip/pic32mz-features.h"
 #include "chip/pic32mz-prefetch.h"
+#include "chip/pic32mz-osc.h"
 
 #include "pic32mz-lowconsole.h"
 #include "pic32mz-lowinit.h"
@@ -57,9 +59,10 @@
  ****************************************************************************/
 /* Maximum Frequencies ******************************************************/
 
-#define MAX_FLASH_ECC_HZ   66000000 /* Maximum FLASH speed (Hz) with ECC */
-#define MAX_FLASH_NOECC_HZ 83000000 /* Maximum FLASH speed (Hz) without ECC */
-#define MAX_PBCLOCK        80000000 /* Max peripheral bus speed (Hz) */
+#define MAX_FLASH_ECC_HZ    66000000 /* Maximum FLASH speed (Hz) with ECC */
+#define MAX_FLASH_NOECC_HZ  83000000 /* Maximum FLASH speed (Hz) without ECC */
+#define MAX_PBCLK           100000000 /* Max peripheral bus speed (Hz) */
+#define MAX_PBCLK7          200000000 /* Max peripheral bus speed (Hz) for PBCLK7 */
 
 /* Sanity checks ************************************************************/
 
@@ -70,13 +73,90 @@
 #  error "Bad BOARD_CPU_CLOCK calculcation in board.h"
 #endif
 
-#define CALC_PBCLOCK  (CALC_SYSCLOCK / BOARD_PBDIV)
-#if CALC_PBCLOCK != BOARD_PBCLOCK
-#  error "Bad BOARD_PBCLOCK calculcation in board.h"
+#define CALC_PBCLK1  (CALC_SYSCLOCK / BOARD_PB1DIV)
+#if CALC_PBCLK1 != BOARD_PBCLK1
+#  error "Bad BOARD_PBCLK1 calculcation in board.h"
 #endif
 
-#if CALC_PBCLOCK > MAX_PBCLOCK
-#  error "PBCLOCK exceeds maximum value"
+#if CALC_PBCLK1 > MAX_PBCLK
+#  error "PBCLK1 exceeds maximum value"
+#endif
+
+#ifdef BOARD_PBCLK2_ENABLE
+#  define CALC_PBCLK2  (CALC_SYSCLOCK / BOARD_PB2DIV)
+#  if CALC_PBCLK2 != BOARD_PBCLK2
+#    error "Bad BOARD_PBCLK2 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK2 > MAX_PBCLK
+#    error "PBCLK2 exceeds maximum value"
+#  endif
+#endif
+
+#ifdef BOARD_PBCLK3_ENABLE
+#  define CALC_PBCLK3  (CALC_SYSCLOCK / BOARD_PB3DIV)
+#  if CALC_PBCLK3 != BOARD_PBCLK3
+#    error "Bad BOARD_PBCLK3 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK3 > MAX_PBCLK
+#    error "PBCLK3 exceeds maximum value"
+#  endif
+#endif
+
+#ifdef BOARD_PBCLK4_ENABLE
+#  define CALC_PBCLK4  (CALC_SYSCLOCK / BOARD_PB4DIV)
+#  if CALC_PBCLK4 != BOARD_PBCLK4
+#    error "Bad BOARD_PBCLK4 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK4 > MAX_PBCLK
+#    error "PBCLK4 exceeds maximum value"
+#  endif
+#endif
+
+#ifdef BOARD_PBCLK5_ENABLE
+#  define CALC_PBCLK5  (CALC_SYSCLOCK / BOARD_PB5DIV)
+#  if CALC_PBCLK5 != BOARD_PBCLK5
+#    error "Bad BOARD_PBCLK5 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK5 > MAX_PBCLK
+#    error "PBCLK5 exceeds maximum value"
+#  endif
+#endif
+
+#ifdef BOARD_PBCLK6_ENABLE
+#  define CALC_PBCLK6  (CALC_SYSCLOCK / BOARD_PB6DIV)
+#  if CALC_PBCLK6 != BOARD_PBCLK6
+#    error "Bad BOARD_PBCLK6 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK6 > MAX_PBCLK
+#    error "PBCLK6 exceeds maximum value"
+#  endif
+#endif
+
+#ifdef BOARD_PBCLK7_ENABLE
+#  define CALC_PBCLK7  (CALC_SYSCLOCK / BOARD_PB7DIV)
+#  if CALC_PBCLK7 != BOARD_PBCLK7
+#    error "Bad BOARD_PBCLK7 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK7 > MAX_PBCLK7
+#    error "PBCLK7 exceeds maximum value"
+#  endif
+#endif
+
+#ifdef BOARD_PBCLK8_ENABLE
+#  define CALC_PBCLK8  (CALC_SYSCLOCK / BOARD_PB8DIV)
+#  if CALC_PBCLK8 != BOARD_PBCLK8
+#    error "Bad BOARD_PBCLK8 calculcation in board.h"
+#  endif
+
+#  if CALC_PBCLK8 > MAX_PBCLK
+#    error "PBCLK8 exceeds maximum value"
+#  endif
 #endif
 
 /****************************************************************************
@@ -118,7 +198,6 @@ static inline void pic32mz_prefetch(void)
   unsigned int nwaits;
   unsigned int residual;
   uint32_t regval;
-  
 
   /* Configure pre-fetch cache FLASH wait states (assuming ECC is enabled) */
 
@@ -137,8 +216,8 @@ static inline void pic32mz_prefetch(void)
    * data.
    */
 
-  regval = (PREFETCH_PRECON_PREFEN_CPUID | PREFETCH_PRECON_PFMWS(nwaits));
-  putreg32(regval, PIC32MZ_PREFETCH_PRECON);
+  regval = (PRECON_PREFEN_CPUID | PRECON_PFMWS(nwaits));
+  putreg32(regval, PIC32MZ_PRECON);
 }
 
 /****************************************************************************
@@ -167,6 +246,123 @@ static inline void pic32mz_k0cache(void)
 }
 
 /****************************************************************************
+ * Name: pic32mz_pbclk
+ *
+ * Description:
+ *   Configure peripheral bus clocking
+ *
+ * Assumptions:
+ *   Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+static inline void pic32mz_pbclk(void)
+{
+  uint32_t regval;
+
+  /* Perform the unlock sequence */
+
+  putreg32(UNLOCK_SYSKEY_0, PIC32MZ_SYSKEY);
+  putreg32(UNLOCK_SYSKEY_1, PIC32MZ_SYSKEY);
+
+  /* PBCLK1
+   *   Peripherals: OSC2 pin
+   *
+   * NOTES:
+   *   - PBCLK1 is used by system modules and cannot be turned off
+   *   - PBCLK1 divided by 2 is available on the OSC2 pin in certain clock
+   *     modes.
+   */
+
+  regval = (PBDIV_ON | PBDIV(BOARD_PB1DIV));
+  putreg32(regval, PIC32MZ_PB1DIV);
+
+  /* PBCLK2
+   *   Peripherals: PMP, I2C, UART, SPI
+   */
+
+#ifdef BOARD_PBCLK2_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB2DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB2DIV);
+
+  /* PBCLK3
+   *   Peripherals: ADC, Comparator, Timers, Output Compare, Input Compare
+   *
+   * NOTES:
+   *   - Timer 1 uses SOSC
+   */
+
+#ifdef BOARD_PBCLK3_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB3DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB3DIV);
+
+/* PBCLK4
+ *   Peripherals: Ports
+ */
+
+#ifdef BOARD_PBCLK4_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB4DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB4DIV);
+
+/* PBCLK5
+ *   Peripherals: Flash, Crypto, RND, USB, CAN, Ethernet, SQI
+ *
+ * NOTES:
+ *   - PBCLK5 is used to fetch data from/to the Flash Controller, while the
+ *     FRC clock is used for programming
+ */
+
+#ifdef BOARD_PBCLK5_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB5DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB5DIV);
+
+/* PBCLK6
+ *   Peripherals:
+ */
+
+#ifdef BOARD_PBCLK6_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB6DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB6DIV);
+
+/* PBCLK7
+ *   Peripherals:  CPU, Deadman timer
+ */
+
+#ifdef BOARD_PBCLK7_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB7DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB7DIV);
+
+/* PBCLK8
+ *   Peripherals: EBI
+ */
+
+#ifdef BOARD_PBCLK8_ENABLE
+  regval = (PBDIV_ON | PBDIV(BOARD_PB8DIV));
+#else
+  regval = 0;
+#endif
+  putreg32(regval, PIC32MZ_PB8DIV);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -190,6 +386,8 @@ void pic32mz_lowinit(void)
   /* Enable caching in KSEG0 */
 
   pic32mz_k0cache();;
+
+  /* Configure peripheral clocking */
 
   /* Initialize a console (probably a serial console) */
 
