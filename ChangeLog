@@ -9872,3 +9872,8 @@
 	* libc/time/lib/lib_sfrtime.c:  Missing implementation of %C in
 	  sfrtime() C (was being treated as %y).  From Freddie Chopin
 	  (2015-02-23).
+	* drivers/can.c: In the can_open function: this line
+	  'dev->cd_ocount = tmp;' needs to be moved a few lines down otherwise
+	  the open count will only be incremented from 0 to 1. This causes
+	  problems when trying to open the can bus from two different tasks.
+	  SourceForge Patch #46 from Anonymous (2015-02-23).
