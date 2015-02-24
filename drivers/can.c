@@ -185,14 +185,20 @@ static int can_open(FAR struct file *filep)
                   /* Finally, Enable the CAN RX interrupt */
 
                   dev_rxint(dev, true);
+
+                  /* Save the new open count on success */
+
+                  dev->cd_ocount = 1;
                 }
 
               irqrestore(flags);
             }
+          else
+            {
+              /* Save the incremented open count on success */
 
-          /* Save the new open count on success */
-
-          dev->cd_ocount = tmp;
+              dev->cd_ocount = tmp;
+            }
         }
 
       sem_post(&dev->cd_closesem);
