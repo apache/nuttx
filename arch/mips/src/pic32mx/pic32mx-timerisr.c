@@ -56,7 +56,7 @@
 #include "pic32mx-internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Timer Setup **************************************************************/
 /* Timer 1 is a type A timer.  Setting the TCS bit in the timer control

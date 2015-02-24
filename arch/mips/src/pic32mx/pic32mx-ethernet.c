@@ -78,7 +78,7 @@
 #if CHIP_NETHERNET > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_PIC32MX_NINTERFACES determines the number of physical interfaces

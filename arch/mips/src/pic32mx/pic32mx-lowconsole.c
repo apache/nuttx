@@ -52,7 +52,7 @@
 #include "pic32mx-internal.h"
 
 /******************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ******************************************************************************/
 
 /* Select UART parameters for the selected console */
