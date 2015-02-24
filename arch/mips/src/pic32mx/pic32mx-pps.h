@@ -47,7 +47,7 @@
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Register Offsets *********************************************************/
 /* Peripheral pin select input registers */
