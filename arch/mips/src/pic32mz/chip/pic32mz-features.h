@@ -42,10 +42,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CHIP_PIC32MZEC) || defined(CHIP_PIC32MZ2)
+#if defined(CONFIG_ARCH_CHIP_PIC32MZEC)
 #  include <chip/pic32mzec-features.h>
 #else
-#  error "Unknown PIC32MZ family
+#  error Unknown PIC32MZ family
 #endif
 
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_FEATURES_H */

@@ -49,34 +49,34 @@
  ********************************************************************************************/
 /* Prefetch register offsets ****************************************************************/
 
-#define PIC32MZ_PREFETCH_PRECON_OFFSET   0x0000 /* Prefetch module control register */
-#define PIC32MZ_PREFETCH_PRESTAT_OFFSET  0x0000 /* Prefetch module status register */
+#define PIC32MZ_PRECON_OFFSET   0x0000 /* Prefetch module control register */
+#define PIC32MZ_PRESTAT_OFFSET  0x0000 /* Prefetch module status register */
 
 /* Prefetch register addresses **************************************************************/
 
-#define PIC32MZ_PREFETCH_PRECON          (PIC32MZ_PREFETCH_K1BASE+PIC32MZ_PREFETCH_PRECON_OFFSET)
-#define PIC32MZ_PREFETCH_PRESTAT         (PIC32MZ_PREFETCH_K1BASE+PIC32MZ_PREFETCH_PRESTAT_OFFSET)
+#define PIC32MZ_PRECON          (PIC32MZ_PREFETCH_K1BASE+PIC32MZ_PRECON_OFFSET)
+#define PIC32MZ_PRESTAT         (PIC32MZ_PREFETCH_K1BASE+PIC32MZ_PRESTAT_OFFSET)
 
 /* Prefetch register bit field definitions **************************************************/
 
 /* Prefetch module control register */
 
-#define PREFETCH_PRECON_PFMWS_SHIFT      (0)       /* Bits 0-2: PFM Access Time */
-#define PREFETCH_PRECON_PFMWS_MASK       (7 << PREFETCH_PRECON_PFMWS_SHIFT)
-#  define PREFETCH_PRECON_PFMWS(n)       ((uint32_t)(n) << PREFETCH_PRECON_PFMWS_SHIFT) /* n wait states, n=0..7 */
-#define PREFETCH_PRECON_PREFEN_SHIFT     (4)       /* Bit 4-5: Predictive Prefetch Enable */
-#define PREFETCH_PRECON_PREFEN_MASK      (3 << PREFETCH_PRECON_PREFEN_SHIFT)
-#  define PREFETCH_PRECON_PREFEN_DISABLE (0 << PREFETCH_PRECON_PREFEN_SHIFT) /* Disable predictive prefetch */
-#  define PREFETCH_PRECON_PREFEN_CPUI    (1 << PREFETCH_PRECON_PREFEN_SHIFT) /* Predictive prefetch CPU instructions */
-#  define PREFETCH_PRECON_PREFEN_CPUID   (2 << PREFETCH_PRECON_PREFEN_SHIFT) /* Predictive prefetch CPU instructions and data */
-#  define PREFETCH_PRECON_PREFEN_ANY     (3 << PREFETCH_PRECON_PREFEN_SHIFT) /* Predictive prefetch any address */
-#define PREFETCH_PRECON_PFMSECEN         (1 << 26) /* Bit 26: Flash SEC Interrupt Enable */
+#define PRECON_PFMWS_SHIFT      (0)       /* Bits 0-2: PFM Access Time */
+#define PRECON_PFMWS_MASK       (7 << PRECON_PFMWS_SHIFT)
+#  define PRECON_PFMWS(n)       ((uint32_t)(n) << PRECON_PFMWS_SHIFT) /* n wait states, n=0..7 */
+#define PRECON_PREFEN_SHIFT     (4)       /* Bit 4-5: Predictive Prefetch Enable */
+#define PRECON_PREFEN_MASK      (3 << PRECON_PREFEN_SHIFT)
+#  define PRECON_PREFEN_DISABLE (0 << PRECON_PREFEN_SHIFT) /* Disable predictive prefetch */
+#  define PRECON_PREFEN_CPUI    (1 << PRECON_PREFEN_SHIFT) /* Predictive prefetch CPU instructions */
+#  define PRECON_PREFEN_CPUID   (2 << PRECON_PREFEN_SHIFT) /* Predictive prefetch CPU instructions and data */
+#  define PRECON_PREFEN_ANY     (3 << PRECON_PREFEN_SHIFT) /* Predictive prefetch any address */
+#define PRECON_PFMSECEN         (1 << 26) /* Bit 26: Flash SEC Interrupt Enable */
 
 /* Prefetch module status register */
 
-#define PREFETCH_PRESTAT_PFMSECCNT_SHIFT (0)       /* Bits 0-7: Flash SEC Count bits */
-#define PREFETCH_PRESTAT_PFMSECCNT_MASK  (0xff << PREFETCH_PRESTAT_PFMSECCNT_SHIFT)
-#define PREFETCH_PRESTAT_PFMSEC          (1 << 26) /* Bit 26: Flash Single-bit Error Corrected Status */
-#define PREFETCH_PRESTAT_PFMDED          (1 << 27) /* Bit 27: Flash Double-bit Error Detected Status */
+#define PRESTAT_PFMSECCNT_SHIFT (0)       /* Bits 0-7: Flash SEC Count bits */
+#define PRESTAT_PFMSECCNT_MASK  (0xff << PRESTAT_PFMSECCNT_SHIFT)
+#define PRESTAT_PFMSEC          (1 << 26) /* Bit 26: Flash Single-bit Error Corrected Status */
+#define PRESTAT_PFMDED          (1 << 27) /* Bit 27: Flash Double-bit Error Detected Status */
 
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_PREFETCH_H */
