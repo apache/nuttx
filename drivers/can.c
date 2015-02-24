@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/can.c
  *
- *   Copyright (C) 2008-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,10 +112,11 @@ static const struct file_operations g_canops =
   can_read,  /* read */
   can_write, /* write */
   0,         /* seek */
-  can_ioctl  /* ioctl */
+  can_ioctl, /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
+  0,         /* poll */
 #endif
+  0          /* unlink */
 };
 
 /****************************************************************************
@@ -182,14 +183,16 @@ static int can_open(FAR struct file *filep)
                   /* Finally, Enable the CAN RX interrupt */
 
                   dev_rxint(dev, true);
-
-                  /* Save the new open count on success */
-
-                  dev->cd_ocount = tmp;
                 }
+
               irqrestore(flags);
             }
+
+          /* Save the new open count on success */
+
+          dev->cd_ocount = tmp;
         }
+
       sem_post(&dev->cd_closesem);
     }
 
@@ -336,9 +339,9 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
           int msglen = CAN_MSGLEN(msg->cm_hdr.ch_dlc);
 
           if (nread + msglen > buflen)
-           {
-             break;
-           }
+            {
+              break;
+            }
 
           /* Copy the message to the user buffer */
 
@@ -409,7 +412,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
 
   while (dev->cd_xmit.tx_queue != dev->cd_xmit.tx_tail && dev_txready(dev))
     {
-      /* No.. The fifo should not be empty in this case */
+      /* No.. The FIFO should not be empty in this case */
 
       DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail);
 
@@ -487,7 +490,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
           nexttail = 0;
         }
 
-      /* If the XMIT fifo becomes full, then wait for space to become available */
+      /* If the XMIT FIFO becomes full, then wait for space to become available */
 
       while (nexttail == fifo->tx_head)
         {
@@ -637,7 +640,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode     *inode = filep->f_inode;
   FAR struct can_dev_s *dev   = inode->i_private;
-  int               ret   = OK;
+  int                   ret   = OK;
 
   canvdbg("cmd: %d arg: %ld\n", cmd, arg);
 
