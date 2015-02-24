@@ -73,6 +73,72 @@
 
 #define BOARD_CPU_CLOCK        200000000 /* CPU clock: 200MHz = (24MHz / 3) * 50 / 2) */
 
+/* Peripheral clocks */
+/* PBCLK1
+ *   Peripherals: OSC2 pin
+ *
+ * NOTES:
+ *   - PBCLK1 is used by system modules and cannot be turned off
+ *   - PBCLK1 divided by 2 is available on the OSC2 pin in certain clock
+ *     modes.
+ */
+
+#define BOARD_PB1DIV           5         /* Divider = 5 */
+#define BOARD_PBCLK1           40000000  /* PBCLK1 frequency = 200MHz/5 = 40MHz */
+
+/* PBCLK2
+ *   Peripherals: PMP, I2C, UART, SPI
+ */
+
+#define BOARD_PBCLK2_ENABLE    1         /* Enable PBCLK2 */
+#define BOARD_PB2DIV           5         /* Divider = 5 */
+#define BOARD_PBCLK2           40000000  /* PBCLK2 frequency = 200MHz/5 = 40MHz */
+
+/* PBCLK3
+ *   Peripherals: ADC, Comparator, Timers, Output Compare, Input Compare
+ *
+ * NOTES:
+ *   - Timer 1 uses SOSC
+ */
+
+#undef BOARD_PBCLK3_ENABLE
+
+/* PBCLK4
+ *   Peripherals: Ports
+ */
+
+#define BOARD_PBCLK4_ENABLE    1         /* Enable PBCLK4 */
+#define BOARD_PB4DIV           2         /* Divider = 2 */
+#define BOARD_PBCLK4           100000000 /* PBCLK4 frequency = 200MHz/2 = 100MHz */
+
+/* PBCLK5
+ *   Peripherals: Flash, Crypto, RND, USB, CAN, Ethernet, SQI
+ *
+ * NOTES:
+ *   - PBCLK5 is used to fetch data from/to the Flash Controller, while the
+ *     FRC clock is used for programming
+ */
+
+#undef BOARD_PBCLK5_ENABLE
+
+/* PBCLK6
+ *   Peripherals:
+ */
+
+#undef BOARD_PBCLK6_ENABLE
+
+/* PBCLK7
+ *   Peripherals:  CPU, Deadman timer
+ */
+
+#undef BOARD_PBCLK7_ENABLE
+
+/* PBCLK8
+ *   Peripherals: EBI
+ */
+
+#undef BOARD_PBCLK8_ENABLE
+
 /* Watchdog pre-scaler (re-visit) */
 
 #define BOARD_WD_PRESCALER     8         /* Watchdog pre-scaler */
