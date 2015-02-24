@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/pic32mz/chip/pic32mz-memorymap.h
+ * arch/mips/src/pic32mz/pic32mz-lowinit.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,19 +33,70 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_MEMORYMAP_H
-#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_MEMORYMAP_H
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_LOWINIT_H
+#define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_LOWINIT_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#if defined(CONFIG_ARCH_CHIP_PIC32MZEC)
-#  include "chip/pic32mzec-memorymap.h"
+#include <stdbool.h>
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  error Unknown PIC32MZ family
+#define EXTERN extern
 #endif
 
-#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_MEMORYMAP_H */
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: pic32mz_lowinit
+ *
+ * Description:
+ *   This performs basic low-level initialization of the system.
+ *
+ ************************************************************************************/
+
+void pic32mz_lowinit(void);
+
+/************************************************************************************
+ * Name: pic32mz_boardinitialize
+ *
+ * Description:
+ *   This function must be provided by the board-specific logic in the  directory
+ *   <nuttx>/configs/<board-name>/pic32mz_boot.c.
+ *
+ ************************************************************************************/
+
+void pic32mz_boardinitialize(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_LOWINIT_H */
