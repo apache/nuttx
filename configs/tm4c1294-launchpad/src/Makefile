@@ -39,7 +39,7 @@ CFLAGS += -I$(TOPDIR)/sched
 
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
-CSRCS = tm4c_boot.c tm4c_bringup.c tm4c_ssi.c
+CSRCS = tm4c_boot.c tm4c_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += tm4c_autoleds.c
