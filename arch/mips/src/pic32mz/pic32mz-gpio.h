@@ -58,19 +58,15 @@
 #  define GPIO_OUTPUT     (2 << GPIO_MODE_SHIFT) /* 10 Normal output */
 #  define GPIO_OPENDRAN   (3 << GPIO_MODE_SHIFT) /* 11 Open drain output */
 
-#if defined(CHIP_PIC32MZ1) || defined(CHIP_PIC32MZ2)
 #define GPIO_ANALOG_MASK   (1 << 13) /* Bit 13: Analog */
 #  define GPIO_ANALOG      (1 << 13)
 #  define GPIO_DIGITAL     (0)
-#endif
 
 #define GPIO_VALUE_MASK   (1 << 12) /* Bit 12: Initial output value */
 #  define GPIO_VALUE_ONE  (1 << 12)
 #  define GPIO_VALUE_ZERO (0)
 
-#if defined(CHIP_PIC32MZ1) || defined(CHIP_PIC32MZ2)
-#  define GPIO_PULLUP     (1 << 11) /* Bit 11: Change notification pull-up */
-#endif
+#define GPIO_PULLUP       (1 << 11) /* Bit 11: Change notification pull-up */
 
 #define GPIO_INT_SHIFT    (10)      /* Bits 10-11: Interrupt mode */
 #define GPIO_INT_MASK     (3 << GPIO_INT_SHIFT)
@@ -78,9 +74,7 @@
 #  define GPIO_INT        (1 << GPIO_INT_SHIFT) /* Bit 01: Change notification enable */
 #  define GPIO_PUINT      (3 << GPIO_INT_SHIFT) /* Bit 11: Pulled-up interrupt input */
 
-#if defined(CHIP_PIC32MZ1) || defined(CHIP_PIC32MZ2)
-#  define GPIO_PULLDOWN   (1 << 9) /* Bit 11: Change notification pull-down */
-#endif
+#define GPIO_PULLDOWN     (1 << 9) /* Bit 11: Change notification pull-down */
 
 #define GPIO_PORT_SHIFT   (5)       /* Bits 5-8: Port number */
 #define GPIO_PORT_MASK    (15 << GPIO_PORT_SHIFT)
