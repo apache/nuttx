@@ -51,7 +51,7 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_PIC32MZ_MVEC0
+#ifdef CONFIG_PIC32MZ_MVEC
 #  error "Multi-vectors not supported"
 #  ifndef CONFIG_PIC32MZ_EBASE
 #    error "EBASE address provided"  /* Should come from the linker script */
