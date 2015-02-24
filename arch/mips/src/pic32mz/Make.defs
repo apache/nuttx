@@ -64,6 +64,6 @@ endif
 # Required PIC32MZ files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = pic32mz-lowinit.c pic32mz-irq.c
+CHIP_CSRCS  = pic32mz-lowinit.c pic32mz-irq.c pic32mz-timerisr.c
 
 # Configuration-dependent PIC32MZ files

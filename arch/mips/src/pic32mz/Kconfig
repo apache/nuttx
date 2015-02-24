@@ -59,6 +59,22 @@ config PIC32MZ_T5
 	bool "Timer 5 (T5)"
 	default n
 
+config PIC32MZ_T6
+	bool "Timer 6 (T6)"
+	default n
+
+config PIC32MZ_T7
+	bool "Timer 7 (T7)"
+	default n
+
+config PIC32MZ_T8
+	bool "Timer 8 (T8)"
+	default n
+
+config PIC32MZ_T9
+	bool "Timer 9 (T9)"
+	default n
+
 config PIC32MZ_IC1
 	bool "Input Capture 1 (IC1)"
 	default n
@@ -231,6 +247,11 @@ config PIC32MZ_CTMU
 	default n
 
 endmenu
+
+config PIC32MZ_T1_SOSC
+	bool
+	default n
+	depends on PIC32MZ_T1
 
 menu "PIC32MZ PHY/Ethernet device driver settings"
 	depends on PIC32MZ_ETHERNET
