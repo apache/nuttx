@@ -9877,3 +9877,8 @@
 	  the open count will only be incremented from 0 to 1. This causes
 	  problems when trying to open the can bus from two different tasks.
 	  SourceForge Patch #46 from Anonymous (2015-02-23).
+	* Tiva TM4c1294: Updates from Frank Sautter (2015-02-24).
+	* fs/aio: Corrrect some backward tests in aio_read() and aio_write():
+	  Socket descriptors have higher numbers than file descriptors.  In
+	  aio_contain(),  Copy u.ptr (void *) when initializing aioc and not
+	  the case specific u.aioc_filep.  From Michal Ulianko (2015-02-24).
