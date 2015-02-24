@@ -131,7 +131,7 @@ static void aio_write_worker(FAR void *arg)
   aiocbp = aioc_decant(aioc);
 
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
-  if (aiocbp->aio_fildes >= CONFIG_NFILE_DESCRIPTORS)
+  if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
 #endif
 #ifdef AIO_HAVE_FILEP
     {

@@ -107,7 +107,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 #endif
 
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
-  if (aiocbp->aio_fildes  >= CONFIG_NFILE_DESCRIPTORS)
+  if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
 #endif
 #ifdef AIO_HAVE_FILEP
     {
@@ -151,7 +151,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 
   memset(aioc, 0, sizeof(struct aio_container_s));
   aioc->aioc_aiocbp = aiocbp;
-  aioc->u.aioc_filep = u.ptr;
+  aioc->u.ptr = u.ptr;
   aioc->aioc_pid = getpid();
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
