@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/pic32mx/pic32mx-uart.h
+ * arch/mips/src/pic42mz/pic42mz-uart.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,11 +43,21 @@
 #include <nuttx/config.h>
 
 #include <arch/pic32mz/chip.h>
-#include "pic32mx-memorymap.h"
+#include "chip/pic32mz-memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* UART Peripheral Offsets **********************************************************/
+
+#define PIC32MZ_UARTn_OFFSET(n)     ((n) << 9)
+#  define PIC32MZ_UART1_OFFSET      0x0000
+#  define PIC32MZ_UART2_OFFSET      0x0200
+#  define PIC32MZ_UART3_OFFSET      0x0400
+#  define PIC32MZ_UART4_OFFSET      0x0600
+#  define PIC32MZ_UART5_OFFSET      0x0800
+#  define PIC32MZ_UART6_OFFSET      0x0a00
+
 /* Register Offsets *****************************************************************/
 
 #define PIC32MZ_UART_MODE_OFFSET    0x0000 /* UARTx mode register */
@@ -67,6 +77,19 @@
 #define PIC32MZ_UART_BRGCLR_OFFSET  0x0044 /* UARTx baud rate clear register */
 #define PIC32MZ_UART_BRGSET_OFFSET  0x0048 /* UARTx baud rate set register */
 #define PIC32MZ_UART_BRGINV_OFFSET  0x004c /* UARTx baud rate invert register */
+
+/* Timer Peripheral Addresses *******************************************************/
+
+#define PIC32MZ_UARTn_K1BASE(n)     (PIC32MZ_UART_K1BASE+PIC32MZ_UARTn_OFFSET(n))
+#  define PIC32MZ_UART1_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART1_OFFSET)
+#  define PIC32MZ_UART2_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART2_OFFSET)
+#  define PIC32MZ_UART3_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART3_OFFSET)
+#  define PIC32MZ_UART4_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART4_OFFSET)
+#  define PIC32MZ_UART5_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART5_OFFSET)
+#  define PIC32MZ_UART6_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART6_OFFSET)
+#  define PIC32MZ_UART7_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART7_OFFSET)
+#  define PIC32MZ_UART8_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART8_OFFSET)
+#  define PIC32MZ_UART9_K1BASE      (PIC32MZ_UART_K1BASE+PIC32MZ_UART9_OFFSET)
 
 /* Register Addresses ****************************************************************/
 
@@ -209,9 +232,9 @@
 #define UART_STA_ADDEN              (1 << 5)  /* Bit 5: Address character detect */
 #define UART_STA_URXISEL_SHIFT      (6)       /* Bits: 6-7: Receive interrupt mode selection */
 #define UART_STA_URXISEL_MASK       (3 << UART_STA_URXISEL_SHIFT)
-#define UART_STA_URXISEL_RECVD      (0 << UART_STA_URXISEL_SHIFT) /* Character received */
-#define UART_STA_URXISEL_RXB50      (1 << UART_STA_URXISEL_SHIFT) /* RX buffer 1/2 full */
-#define UART_STA_URXISEL_RXB75      (2 << UART_STA_URXISEL_SHIFT) /* RX buffer 3/4 full */
+#  define UART_STA_URXISEL_RECVD    (0 << UART_STA_URXISEL_SHIFT) /* Character received */
+#  define UART_STA_URXISEL_RXB50    (1 << UART_STA_URXISEL_SHIFT) /* RX buffer 1/2 full */
+#  define UART_STA_URXISEL_RXB75    (2 << UART_STA_URXISEL_SHIFT) /* RX buffer 3/4 full */
 #define UART_STA_UTRMT              (1 << 8)  /* Bit 8: Transmit shift register is empty */
 #define UART_STA_UTXBF              (1 << 9)  /* Bit 9: Transmit buffer full status */
 #define UART_STA_UTXEN              (1 << 10) /* Bit 10: Transmit enable */
