@@ -186,7 +186,7 @@ static int can_open(FAR struct file *filep)
 
                   dev_rxint(dev, true);
 
-                  /* Save the new open count on success */
+                  /* Save the new open count only on success */
 
                   dev->cd_ocount = 1;
                 }
@@ -195,7 +195,7 @@ static int can_open(FAR struct file *filep)
             }
           else
             {
-              /* Save the incremented open count on success */
+              /* Save the incremented open count */
 
               dev->cd_ocount = tmp;
             }
