@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/pic32mx/pic32mx_timerisr.c
+ * arch/mips/src/pic32mz/pic32mz_timerisr.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,25 +50,24 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "pic32mx-config.h"
-#include "pic32mx-timer.h"
-#include "pic32mx-int.h"
-#include "pic32mx-internal.h"
+#include "pic32mz-config.h"
+#include "chip/pic32mz-timer.h"
+#include "chip/pic32mz-int.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Timer Setup **************************************************************/
 /* Timer 1 is a type A timer.  Setting the TCS bit in the timer control
- * register will select the SOSC as the clock source.  Otherwise, PBCLOCK
+ * register will select the SOSC as the clock source.  Otherwise, PBCLK3
  * is the clock source.
  */
 
-#ifdef BOARD_TIMER1_SOSC
+#ifdef CONFIG_PIC32MZ_T1_SOSC
 #  define TIMER1_SRC_FREQ BOARD_SOSC_FREQ
 #  define TIMER1_CON_TCS  TIMER_CON_TCS
 #else
-#  define TIMER1_SRC_FREQ BOARD_PBCLOCK
+#  define TIMER1_SRC_FREQ BOARD_PBCLK3
 #  define TIMER1_CON_TCS  (0)
 #endif
 
@@ -97,7 +96,7 @@
  *
  * Example 2. Given:
  *   BOARD_TIMER1_SOSC      = Not defined
- *   BOARD_PBCLOCK          = 60000000
+ *   BOARD_PBCLK3           = 60000000
  *   CLOCKS_PER_SEC         = 100
  * Then:
  *   OPTIMAL_PRESCALE       = 9.2
@@ -149,7 +148,7 @@ int up_timerisr(int irq, uint32_t *regs)
 {
    /* Clear the pending timer interrupt */
 
-   putreg32(INT_T1, PIC32MX_INT_IFS0CLR);
+   up_clrpend_irq(PIC32MZ_IRQ_T1);
 
    /* Process timer interrupt */
 
@@ -173,23 +172,20 @@ void up_timer_initialize(void)
    * the external SOSC (TCS=1)
    */
 
-  putreg32((TIMER1_CON_TCKPS|TIMER1_CON_TCS), PIC32MX_TIMER1_CON);
-  putreg32(0, PIC32MX_TIMER1_CNT);
-  putreg32(TIMER1_MATCH-1, PIC32MX_TIMER1_PR);
-  putreg32(TIMER_CON_ON, PIC32MX_TIMER1_CONSET);
+  putreg32((TIMER1_CON_TCKPS|TIMER1_CON_TCS), PIC32MZ_TIMER1_CON);
+  putreg32(0, PIC32MZ_TIMER1_CNT);
+  putreg32(TIMER1_MATCH-1, PIC32MZ_TIMER1_PR);
+  putreg32(TIMER_CON_ON, PIC32MZ_TIMER1_CONSET);
 
   /* Configure the timer interrupt */
 
-  up_clrpend_irq(PIC32MX_IRQSRC_T1);
-#ifdef CONFIG_ARCH_IRQPRIO
-  (void)up_prioritize_irq(PIC32MX_IRQ_T1, CONFIG_PIC32MX_T1PRIO);
-#endif
+  up_clrpend_irq(PIC32MZ_IRQ_T1);
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(PIC32MX_IRQ_T1, (xcpt_t)up_timerisr);
+  (void)irq_attach(PIC32MZ_IRQ_T1, (xcpt_t)up_timerisr);
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(PIC32MX_IRQSRC_T1);
+  up_enable_irq(PIC32MZ_IRQ_T1);
 }
