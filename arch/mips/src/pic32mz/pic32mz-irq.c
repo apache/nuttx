@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/mips/src/pic32mx/pic32mx-irq.c
- * arch/mips/src/chip/pic32mx-irq.c
+ * arch/mips/src/pic32mz/pic32mz-irq.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,22 +47,26 @@
 #include <nuttx/arch.h>
 
 #include <arch/irq.h>
-#include <arch/pic32mx/cp0.h>
+#include <arch/pic32mz/cp0.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "pic32mx-int.h"
-#include "pic32mx-internal.h"
+#include "chip/pic32mz-int.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_PIC32MX_MVEC
+#ifdef CONFIG_PIC32MZ_MVEC
 #  error "Multi-vectors not supported"
 #endif
+
+/* Interrupt controller definitions *****************************************/
+/* Number of interrupt enable/interrupt status registers */
+
+#define INT_NREGS ((NR_IRQS + 31) >> 5)
 
 /****************************************************************************
  * Public Data
@@ -79,9 +82,85 @@ volatile uint32_t *current_regs;
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: pic32mz_prioritize_irq
+ ****************************************************************************/
+
 #ifndef CONFIG_ARCH_IRQPRIO
-static int up_prioritize_irq(int irq, int priority);
+static int pic32mz_prioritize_irq(int irq, int priority);
+#else
+#  define pic32mz_prioritize_irq(i,p) up_prioritize_irq(i,p)
 #endif
+
+/****************************************************************************
+ * Name: pic32mz_ifs
+ ****************************************************************************/
+
+static uintptr_t pic32mz_ifs(int irq)
+{
+  if ((unsigned)irq < NR_IRQS)
+    {
+      return PIC32MZ_INT_IFS(irq);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: pic32mz_ifsclr
+ ****************************************************************************/
+
+static uintptr_t pic32mz_ifsclr(int irq)
+{
+  if ((unsigned)irq < NR_IRQS)
+    {
+      return PIC32MZ_INT_IFSCLR(irq);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: pic32mz_iec
+ ****************************************************************************/
+
+static uintptr_t pic32mz_iec(int irq)
+{
+  if ((unsigned)irq < NR_IRQS)
+    {
+      return PIC32MZ_INT_IEC_OFFSET(irq);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: pic32mz_iecset
+ ****************************************************************************/
+
+static uintptr_t pic32mz_iecset(int irq)
+{
+  if ((unsigned)irq < NR_IRQS)
+    {
+      return PIC32MZ_INT_IECSET_OFFSET(irq);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: pic32mz_iecclr
+ ****************************************************************************/
+
+static uintptr_t pic32mz_iecclr(int irq)
+{
+  if ((unsigned)irq < NR_IRQS)
+    {
+      return PIC32MZ_INT_IECCLR_OFFSET(irq);
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Public Functions
@@ -98,17 +177,18 @@ void up_irqinitialize(void)
 
   /* Disable all interrupts */
 
-  putreg32(0xffff, PIC32MX_INT_IEC0CLR);
-  putreg32(0xffff, PIC32MX_INT_IEC1CLR);
-#ifdef PIC32MX_INT_IEC2CLR
-  putreg32(0xffff, PIC32MX_INT_IEC2CLR);
-#endif
+  putreg32(0xffff, PIC32MZ_INT_IEC0CLR); /* Interrupts 0-31 */
+  putreg32(0xffff, PIC32MZ_INT_IEC1CLR); /* Interrupts 32-63 */
+  putreg32(0xffff, PIC32MZ_INT_IEC2CLR); /* Interrupts 64-95 */
+  putreg32(0xffff, PIC32MZ_INT_IEC3CLR); /* Interrupts 96-127 */
+  putreg32(0xffff, PIC32MZ_INT_IEC4CLR); /* Interrupts 128-159 */
+  putreg32(0xffff, PIC32MZ_INT_IEC5CLR); /* Interrupts 160-191 */
 
   /* Set all interrupts to the default (middle) priority */
 
   for (irq = 0; irq < NR_IRQS; irq++)
     {
-      (void)up_prioritize_irq(irq, (INT_IPC_MID_PRIORITY << 2));
+      (void)pic32mz_prioritize_irq(irq, (INT_IPC_MID_PRIORITY << 2));
     }
 
   /* Set the BEV bit in the STATUS register */
@@ -141,22 +221,22 @@ void up_irqinitialize(void)
 
   /* Configure multi- or single- vector interrupts */
 
-#ifdef CONFIG_PIC32MX_MVEC
-  putreg32(INT_INTCON_MVEC, PIC32MX_INT_INTCONSET);
+#ifdef CONFIG_PIC32MZ_MVEC
+  putreg32(INT_INTCON_MVEC, PIC32MZ_INT_INTCONSET);
 #else
-  putreg32(INT_INTCON_MVEC, PIC32MX_INT_INTCONCLR);
+  putreg32(INT_INTCON_MVEC, PIC32MZ_INT_INTCONCLR);
 #endif
 
   /* Initialize GPIO change notification handling */
 
 #ifdef CONFIG_GPIO_IRQ
-  pic32mx_gpioirqinitialize();
+  pic32mz_gpioirqinitialize();
 #endif
 
   /* Attach and enable software interrupts */
 
-  irq_attach(PIC32MX_IRQ_CS0, up_swint0);
-  up_enable_irq(PIC32MX_IRQSRC_CS0);
+  irq_attach(PIC32MZ_IRQ_CS0, up_swint0);
+  up_enable_irq(PIC32MZ_IRQ_CS0);
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -195,39 +275,13 @@ void up_disable_irq(int irq)
 
   /* Disable the interrupt by clearing the associated bit in the IEC register */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST);
-  if (irq >= PIC32MX_IRQSRC_FIRST)
+  DEBUGASSERT((unsigned)irq < NR_IRQS)
+  regaddr = pic32mz_iecclr(irq);
+  bitno   = (unsigned)irq & 31;
+
+  DEBUGASSERT(regaddr);
+  if (regaddr)
     {
-      if (irq <= PIC32MX_IRQSRC0_LAST)
-        {
-          /* Use IEC0 */
-
-          regaddr = PIC32MX_INT_IEC0CLR;
-          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
-        }
-      else if (irq <= PIC32MX_IRQSRC1_LAST)
-        {
-          /* Use IEC1 */
-
-          regaddr = PIC32MX_INT_IEC1CLR;
-          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
-        }
-#ifdef PIC32MX_IRQSRC2_FIRST
-      else if (irq <= PIC32MX_IRQSRC2_LAST)
-        {
-          /* Use IEC2 */
-
-          regaddr = PIC32MX_INT_IEC2CLR;
-          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
-        }
-#endif
-      else
-        {
-          /* Value out of range.. just ignore */
-
-          return;
-        }
-
       /* Disable the interrupt */
 
       putreg32((1 << bitno), regaddr);
@@ -249,39 +303,13 @@ void up_enable_irq(int irq)
 
   /* Enable the interrupt by setting the associated bit in the IEC register */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST);
-  if (irq >= PIC32MX_IRQSRC_FIRST)
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+  regaddr = pic32mz_iecset(irq);
+  bitno   = (unsigned)irq & 31;
+
+  DEBUGASSERT(regaddr);
+  if (regaddr)
     {
-      if (irq <= PIC32MX_IRQSRC0_LAST)
-        {
-          /* Use IEC0 */
-
-          regaddr = PIC32MX_INT_IEC0SET;
-          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
-        }
-      else if (irq <= PIC32MX_IRQSRC1_LAST)
-        {
-          /* Use IEC1 */
-
-          regaddr = PIC32MX_INT_IEC1SET;
-          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
-        }
-#ifdef PIC32MX_IRQSRC2_FIRST
-      else if (irq <= PIC32MX_IRQSRC2_LAST)
-        {
-          /* Use IEC2 */
-
-          regaddr = PIC32MX_INT_IEC2SET;
-          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
-        }
-#endif
-      else
-        {
-          /* Value out of range.. just ignore */
-
-          return;
-        }
-
       /* Disable the interrupt */
 
       putreg32((1 << bitno), regaddr);
@@ -298,8 +326,8 @@ void up_enable_irq(int irq)
 
 bool up_pending_irq(int irq)
 {
-  uint32_t ifsaddr;
-  uint32_t iecaddr;
+  uintptr_t ifsaddr;
+  uintptr_t iecaddr;
   uint32_t regval;
   int bitno;
 
@@ -308,42 +336,14 @@ bool up_pending_irq(int irq)
    * the IFs and enabled in the IEC.
    */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST);
-  if (irq >= PIC32MX_IRQSRC_FIRST)
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+  ifsaddr = pic32mz_ifs(irq);
+  iecaddr = pic32mz_iec(irq);
+  bitno   = (unsigned)irq & 31;
+
+  DEBUGASSERT(ifsaddr && iecaddr);
+  if (ifsaddr && iecaddr)
     {
-      if (irq <= PIC32MX_IRQSRC0_LAST)
-        {
-          /* Use IFS0 */
-
-          ifsaddr = PIC32MX_INT_IFS0;
-          iecaddr = PIC32MX_INT_IEC0;
-          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
-        }
-      else if (irq <= PIC32MX_IRQSRC1_LAST)
-        {
-          /* Use IFS1 */
-
-          ifsaddr = PIC32MX_INT_IFS1;
-          iecaddr = PIC32MX_INT_IEC1;
-          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
-        }
-#ifdef PIC32MX_IRQSRC2_FIRST
-      else if (irq <= PIC32MX_IRQSRC2_LAST)
-        {
-          /* Use IFS2 */
-
-          ifsaddr = PIC32MX_INT_IFS2;
-          iecaddr = PIC32MX_INT_IEC2;
-          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
-        }
-#endif
-      else
-        {
-          /* Value out of range.. just ignore */
-
-          return false;
-        }
-
       /* Get the set of unmasked, pending interrupts.  Return true if the
        * interrupt is pending and unmask.
        */
@@ -365,7 +365,7 @@ bool up_pending_irq(int irq)
 
 void up_clrpend_irq(int irq)
 {
-  uint32_t regaddr;
+  uintptr_t regaddr;
   int bitno;
 
   /* Acknowledge the interrupt by clearing the associated bit in the IFS
@@ -373,39 +373,13 @@ void up_clrpend_irq(int irq)
    * priority level otherwise recursive interrupts would occur.
    */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST);
-  if (irq >= PIC32MX_IRQSRC_FIRST)
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+  regaddr = pic32mz_ifsclr(irq);
+  bitno   = (unsigned)irq & 31;
+
+  DEBUGASSERT(regaddr);
+  if (regaddr)
     {
-      if (irq <= PIC32MX_IRQSRC0_LAST)
-        {
-          /* Use IFS0 */
-
-          regaddr = PIC32MX_INT_IFS0CLR;
-          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
-        }
-      else if (irq <= PIC32MX_IRQSRC1_LAST)
-        {
-          /* Use IFS1 */
-
-          regaddr = PIC32MX_INT_IFS1CLR;
-          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
-        }
-#ifdef PIC32MX_IRQSRC2_FIRST
-      else if (irq <= PIC32MX_IRQSRC2_LAST)
-        {
-          /* Use IFS2 */
-
-          regaddr = PIC32MX_INT_IFS2CLR;
-          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
-        }
-#endif
-      else
-        {
-          /* Value out of range.. just ignore */
-
-          return;
-        }
-
       /* Acknowledge the interrupt */
 
       putreg32((1 << bitno), regaddr);
@@ -417,7 +391,7 @@ void up_clrpend_irq(int irq)
  *
  * Description:
  *   Set the priority of an IRQ by setting the priority and sub-priority
- *   fields in the PIC32MX IPC registers.  There are 12 IPC registers, IPC0
+ *   fields in the PIC32MZ IPC registers.  There are 12 IPC registers, IPC0
  *   through IPC11.  Each has sub-priority fields for 8 interrupts for a
  *   total of 96 interrupts max.
  *
@@ -439,9 +413,10 @@ void up_clrpend_irq(int irq)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_IRQPRIO
-static
-#endif
+static int pic32mz_prioritize_irq(int irq, int priority)
+#else
 int up_prioritize_irq(int irq, int priority)
+#endif
 {
   int regndx;
   int shift;
@@ -464,8 +439,8 @@ int up_prioritize_irq(int irq, int priority)
 
       /* Set the new interrupt priority (momentarily disabling interrupts) */
 
-      putreg32(0x1f << shift, PIC32MX_INT_IPCCLR(regndx));
-      putreg32(priority << shift, PIC32MX_INT_IPCSET(regndx));
+      putreg32(0x1f << shift, PIC32MZ_INT_IPCCLR(regndx));
+      putreg32(priority << shift, PIC32MZ_INT_IPCSET(regndx));
       return OK;
     }
 
