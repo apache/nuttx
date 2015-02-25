@@ -164,9 +164,9 @@
 #define PIC32MZ_IRQ_SPI1F      109 /* Vector: 109, SPI1 Fault */
 #define PIC32MZ_IRQ_SPI1RX     110 /* Vector: 110, SPI1 Receive Done */
 #define PIC32MZ_IRQ_SPI1TX     111 /* Vector: 111, SPI1 Transfer Done */
-#define PIC32MZ_IRQ_UART1F     112 /* Vector: 112, UART1 Fault */
-#define PIC32MZ_IRQ_UART1RX    113 /* Vector: 113, UART1 Receive Done */
-#define PIC32MZ_IRQ_UART1TX    114 /* Vector: 114, UART1 Transfer Done */
+#define PIC32MZ_IRQ_U1E        112 /* Vector: 112, UART1 Fault */
+#define PIC32MZ_IRQ_U1RX       113 /* Vector: 113, UART1 Receive Done */
+#define PIC32MZ_IRQ_U1TX       114 /* Vector: 114, UART1 Transfer Done */
 #define PIC32MZ_IRQ_I2C1COL    115 /* Vector: 115, I2C1 Bus Collision Event */
 #define PIC32MZ_IRQ_I2C1S      116 /* Vector: 116, I2C1 Slave Event */
 #define PIC32MZ_IRQ_I2C1M      117 /* Vector: 117, I2C1 Master Event */
@@ -197,9 +197,9 @@
 #define PIC32MZ_IRQ_SPI2F      142 /* Vector: 142, SPI2 Fault */
 #define PIC32MZ_IRQ_SPI2RX     143 /* Vector: 143, SPI2 Receive Done */
 #define PIC32MZ_IRQ_SPI2TX     144 /* Vector: 144, SPI2 Transfer Done */
-#define PIC32MZ_IRQ_UART2F     145 /* Vector: 145, UART2 Fault */
-#define PIC32MZ_IRQ_UART2RX    146 /* Vector: 146, UART2 Receive Done */
-#define PIC32MZ_IRQ_UART2TX    147 /* Vector: 147, UART2 Transfer Done */
+#define PIC32MZ_IRQ_U2E        145 /* Vector: 145, UART2 Fault */
+#define PIC32MZ_IRQ_U2RX       146 /* Vector: 146, UART2 Receive Done */
+#define PIC32MZ_IRQ_U2TX       147 /* Vector: 147, UART2 Transfer Done */
 #define PIC32MZ_IRQ_I2C2COL    148 /* Vector: 148, I2C2 Bus Collision Event */
 #define PIC32MZ_IRQ_I2C2S      149 /* Vector: 149, I2C2 Slave Event */
 #define PIC32MZ_IRQ_I2C2M      150 /* Vector: 150, I2C2 Master Event */
@@ -209,10 +209,10 @@
 #define PIC32MZ_IRQ_SPI3F      154 /* Vector: 154, SPI3 Fault */
 #define PIC32MZ_IRQ_SPI3RX     155 /* Vector: 155, SPI3 Receive Done */
 #define PIC32MZ_IRQ_SPI3TX     156 /* Vector: 156, SPI3 Transfer Done */
-#define PIC32MZ_IRQ_UART3F     157 /* Vector: 157, UART3 Fault */
-#define PIC32MZ_IRQ_UART3RX    158 /* Vector: 158, UART3 Receive Done */
-#define PIC32MZ_IRQ_UART3TX    159 /* Vector: 159, UART3 Transfer Done */
-#define PIC32MZ_IRQ_I2C3COL    160 /* Vector: 160, I2C3 Bus Collision Event */
+#define PIC32MZ_IRQ_U3E        157 /* Vector: 157, UART3 Fault */
+#define PIC32MZ_IRQ_U3RX       158 /* Vector: 158, UART3 Receive Done */
+#define PIC32MZ_IRQ_U3TX       159 /* Vector: 159, UART3 Transfer Done */
+#define PIC32MZ_IRQ_I2C3COL       160 /* Vector: 160, I2C3 Bus Collision Event */
 #define PIC32MZ_IRQ_I2C3S      161 /* Vector: 161, I2C3 Slave Event */
 #define PIC32MZ_IRQ_I2C3M      162 /* Vector: 162, I2C3 Master Event */
 #define PIC32MZ_IRQ_SPI4F      163 /* Vector: 163, SPI4 Fault */
@@ -222,27 +222,27 @@
 #define PIC32MZ_IRQ_FCE        167 /* Vector: 167, Flash Control Event */
 #define PIC32MZ_IRQ_PMSEC      168 /* Vector: 168, Prefetch Module SEC Event */
 #define PIC32MZ_IRQ_SQI1       169 /* Vector: 169, SQI1 Event */
-#define PIC32MZ_IRQ_UART4F     170 /* Vector: 170, UART4 Fault */
-#define PIC32MZ_IRQ_UART4RX    171 /* Vector: 171, UART4 Receive Done */
-#define PIC32MZ_IRQ_UART4TX    172 /* Vector: 172, UART4 Transfer Done */
+#define PIC32MZ_IRQ_U4E        170 /* Vector: 170, UART4 Fault */
+#define PIC32MZ_IRQ_U4RX       171 /* Vector: 171, UART4 Receive Done */
+#define PIC32MZ_IRQ_U4TX       172 /* Vector: 172, UART4 Transfer Done */
 #define PIC32MZ_IRQ_I2C4COL    173 /* Vector: 173, I2C4 Bus Collision Event */
 #define PIC32MZ_IRQ_I2C4S      174 /* Vector: 174, I2C4 Slave Event */
 #define PIC32MZ_IRQ_I2C4M      175 /* Vector: 175, I2C4 Master Event */
 #define PIC32MZ_IRQ_SPI5F      176 /* Vector: 176, SPI5 Fault */
 #define PIC32MZ_IRQ_SPI5RX     177 /* Vector: 177, SPI5 Receive Done */
 #define PIC32MZ_IRQ_SPI5TX     178 /* Vector: 178, SPI5 Transfer Done */
-#define PIC32MZ_IRQ_UART5F     179 /* Vector: 179, UART5 Fault */
-#define PIC32MZ_IRQ_UART5RX    180 /* Vector: 180, UART5 Receive Done */
-#define PIC32MZ_IRQ_UART5TX    181 /* Vector: 181, UART5 Transfer Done */
+#define PIC32MZ_IRQ_U5E        179 /* Vector: 179, UART5 Fault */
+#define PIC32MZ_IRQ_U5RX       180 /* Vector: 180, UART5 Receive Done */
+#define PIC32MZ_IRQ_U5TX       181 /* Vector: 181, UART5 Transfer Done */
 #define PIC32MZ_IRQ_I2C5COL    182 /* Vector: 182, I2C5 Bus Collision Event */
 #define PIC32MZ_IRQ_I2C5S      183 /* Vector: 183, I2C5 Slave Event */
 #define PIC32MZ_IRQ_I2C5M      184 /* Vector: 184, I2C5 Master Event */
 #define PIC32MZ_IRQ_SPI6F      185 /* Vector: 185, SPI6 Fault */
 #define PIC32MZ_IRQ_SPI6RX     186 /* Vector: 186, SPI6 Receive Done */
 #define PIC32MZ_IRQ_SPI6TX     187 /* Vector: 187, SPI6 Transfer Done */
-#define PIC32MZ_IRQ_UART6F     188 /* Vector: 188, UART6 Fault */
-#define PIC32MZ_IRQ_UART6RX    189 /* Vector: 189, UART6 Receive Done */
-#define PIC32MZ_IRQ_UART6TX    190 /* Vector: 190, UART6 Transfer Done */
+#define PIC32MZ_IRQ_U6E        188 /* Vector: 188, UART6 Fault */
+#define PIC32MZ_IRQ_U6RX       189 /* Vector: 189, UART6 Receive Done */
+#define PIC32MZ_IRQ_U6TX       190 /* Vector: 190, UART6 Transfer Done */
 
 #define PIC32MZ_IRQ_BAD        191 /* Not a real IRQ number */
 #define NR_IRQS                191
