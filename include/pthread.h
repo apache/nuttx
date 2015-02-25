@@ -183,7 +183,7 @@ struct pthread_cond_s
   sem_t sem;
 };
 typedef struct pthread_cond_s pthread_cond_t;
-#define PTHREAD_COND_INITIALIZER {{0, 0xffff}}
+#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0)}
 
 struct pthread_mutexattr_s
 {
