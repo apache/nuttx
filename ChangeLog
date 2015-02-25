@@ -9891,3 +9891,6 @@
 	  where the errno value was being overwritten by subsequent actions so
 	  that the returned errno value was incorrect.  From Max Neklyudov
 	  (2015-02-25).
+	* include/sys/select.h: Extend the fd_set type definition so that it
+	  can handle more than 32 descriptors (if so configured).  From Max
+	  Neklyudov (2015-02-25).
