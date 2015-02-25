@@ -9882,3 +9882,5 @@
 	  Socket descriptors have higher numbers than file descriptors.  In
 	  aio_contain(),  Copy u.ptr (void *) when initializing aioc and not
 	  the case specific u.aioc_filep.  From Michal Ulianko (2015-02-24).
+	* include/pthread.h: Fix PTHREAD_COND_INITIALIZER (2015-02-24).
+
