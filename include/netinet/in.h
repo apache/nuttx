@@ -110,6 +110,28 @@
 #define s6_addr16             in6_u.u6_addr16
 #define s6_addr32             in6_u.u6_addr32
 
+/* Checks for special IPv6 addresses */
+
+#define IN6_IS_ADDR_MULTICAST(a) \
+  ((a)->s6_addr[0] == 0xff)
+
+#define IN6_IS_ADDR_LOOPBACK(a) \
+  ((a)->s6_addr32[0] == 0 && \
+   (a)->s6_addr32[1] == 0 && \
+   (a)->s6_addr32[2] == 0 && \
+   (a)->s6_addr32[3] == HTONL(1))
+
+#define IN6_IS_ADDR_UNSPECIFIED(a) \
+  ((a)->s6_addr32[0] == 0 && \
+   (a)->s6_addr32[1] == 0 && \
+   (a)->s6_addr32[2] == 0 && \
+   (a)->s6_addr32[3] == 0)
+
+#define IN6_IS_ADDR_V4MAPPED(a) \
+  ((a)->s6_addr32[0] == 0 && \
+   (a)->s6_addr32[1] == 0 && \
+   (a)->s6_addr32[2] == HTONL(0xffff))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
