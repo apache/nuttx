@@ -102,7 +102,7 @@
 /* Increment RPC statistics */
 
 #ifdef CONFIG_NFS_STATISTICS
-#  define rpc_statistics(n) do { rpcstats.(n)++; } while (0)
+#  define rpc_statistics(n) do { rpcstats.n++; } while (0)
 #else
 #  define rpc_statistics(n)
 #endif
