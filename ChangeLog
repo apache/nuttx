@@ -9883,4 +9883,8 @@
 	  aio_contain(),  Copy u.ptr (void *) when initializing aioc and not
 	  the case specific u.aioc_filep.  From Michal Ulianko (2015-02-24).
 	* include/pthread.h: Fix PTHREAD_COND_INITIALIZER (2015-02-24).
+	* sched/clock/clock_systimespec.c:  When an RTC is used clock_systimespec()
+	  must subtract the basetime from the returned time.  It needs to
+	  return the time since power up, no the current time.  Issue noted
+	  by Max Neklyudov (2015-02-25).
 
