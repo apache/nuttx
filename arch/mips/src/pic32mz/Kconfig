@@ -367,7 +367,6 @@ config CONFIG_PIC32MZ_OSCIOFNC
 config PIC32MZ_WDTENABLE
 	bool "Watchdog enable"
 	default 0
-	range 0 1
 	---help---
 		Enabled watchdog on power up.  Default 0 (watchdog can be enabled later by software).
 
