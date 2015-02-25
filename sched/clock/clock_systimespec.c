@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
@@ -64,7 +65,7 @@
  *
  * Description:
  *   Return the current value of the system timer counter as a struct
- *   timespec.
+ *   timespec.  The returned time is the elapsed time since power up.
  *
  * Parameters:
  *   ts - Location to return the time
@@ -83,9 +84,48 @@ int clock_systimespec(FAR struct timespec *ts)
 
   if (g_rtc_enabled)
     {
-      /* Get the hi-resolution time from the RTC */
+      int ret;
 
-      return up_rtc_gettime(ts);
+      /* Get the hi-resolution time from the RTC.  This will return the
+       * current time, not the time since power up.
+       */
+
+      ret = up_rtc_gettime(ts);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Subtract the base time to this in order to convert this to the
+       * time since power up.
+       */
+
+      DEBUGASSERT(ts->tv_sec >= g_basetime.tv_sec);
+      if (ts->tv_sec < g_basetime.tv_sec)
+        {
+          /* Negative times are not supported */
+
+          return -ENOSYS;
+        }
+
+      ts->tv_sec -= g_basetime.tv_sec;
+      if (ts->tv_nsec < g_basetime.tv_nsec)
+        {
+          /* Borrow */
+
+          if (ts->tv_sec < 1)
+            {
+              /* Negative times are not supported */
+
+              return -ENOSYS;
+            }
+
+          ts->tv_sec--;
+          ts->tv_nsec += NSEC_PER_SEC;
+        }
+
+      ts->tv_nsec -= g_basetime.tv_nsec;
+      return OK;
     }
   else
 #endif

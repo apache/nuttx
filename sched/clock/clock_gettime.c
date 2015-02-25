@@ -130,7 +130,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
   if (clock_id == CLOCK_REALTIME)
     {
-      /* Get the elapsedcd s time since the time-of-day was last set.
+      /* Get the elapsed time since the time-of-day was last set.
        * clock_systimespec() provides the time since power was applied;
        * the bias value corresponds to the time when the time-of-day was
        * last set.
