@@ -63,7 +63,7 @@ struct sam_freerun_s
 {
   uint8_t chan;              /* The timer/counter in use */
   bool running;              /* True: the timer is running */
-  uint16_t overflow;         /* Timer counter overflow */
+  uint32_t overflow;         /* Timer counter overflow */
   TC_HANDLE tch;             /* Handle returned by sam_tc_initialize() */
 };
 
