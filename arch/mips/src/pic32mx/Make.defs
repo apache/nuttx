@@ -74,7 +74,7 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += pic32mx-timerisr.c
 endif
 
-ifeq ($(CONFIG_GPIO_IRQ),y)
+ifeq ($(CONFIG_PIC32MX_GPIOIRQ),y)
 CHIP_CSRCS += pic32mx_gpioirq.c
 endif
 

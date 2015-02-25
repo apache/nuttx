@@ -248,6 +248,13 @@ config PIC32MZ_CTMU
 
 endmenu
 
+config PIC32MZ_GPIOIRQ
+	bool "GPIO Interrupt"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Build in support for interrupts based on GPIO inputs from IOPorts
+
 config PIC32MZ_T1_SOSC
 	bool
 	default n
@@ -257,14 +264,14 @@ menu "PIC32MZ PHY/Ethernet device driver settings"
 	depends on PIC32MZ_ETHERNET
 
 config PHY_AUTONEG
-	bool "Auto-negotion"
+	bool "Auto-negotiation"
 	default y
 	depends on PIC32MZ_ETHERNET
 	---help---
-		Enable auto-negotion
+		Enable auto-negotiation
 
 config PHY_SPEED100
-	bool "100Mbps spped"
+	bool "100Mbps speed"
 	default n
 	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
 	---help---

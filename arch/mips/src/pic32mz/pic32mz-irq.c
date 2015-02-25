@@ -229,7 +229,7 @@ void up_irqinitialize(void)
 
   /* Initialize GPIO change notification handling */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
   pic32mz_gpioirqinitialize();
 #endif
 

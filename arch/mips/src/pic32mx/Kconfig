@@ -1003,6 +1003,13 @@ config PIC32MX_USBPRIO
 
 endmenu
 
+config PIC32MX_GPIOIRQ
+	bool "GPIO Interrupt"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Build in support for interrupts based on GPIO inputs from IOPorts
+
 menu "PIC32MX PHY/Ethernet device driver settings"
 	depends on PIC32MX_ETHERNET
 

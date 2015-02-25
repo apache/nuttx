@@ -69,3 +69,7 @@ CHIP_CSRCS += pic32mz-irq.c pic32mz-timerisr.c pic32mz-gpio.c
 CHIP_CSRCS += pic32mz-lowconsole.c pic32mz-serial.c
 
 # Configuration-dependent PIC32MZ files
+
+ifeq ($(CONFIG_PIC32MZ_GPIOIRQ),y)
+CHIP_CSRCS += pic32mz-gpioirq.c
+endif
