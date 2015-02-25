@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/pic32mx/pic32mx-gpio.c
+ * arch/mips/src/pic32mz/pic32mz-gpio.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "pic32mx-gpio.h"
-#include "pic32mx-internal.h"
+#include "chip/pic32mz-ioport.h"
+#include "pic32mz-gpio.h"
 
-#ifdef CONFIG_PIC32MX_GPIOIRQ
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,30 +78,30 @@ static xcpt_t g_cnisrs[IOPORT_NUMCN];
  * Name: Inline PIN set field extractors
  ****************************************************************************/
 
-static inline bool pic32mx_input(uint16_t pinset)
+static inline bool pic32mz_input(uint16_t pinset)
 {
   return ((pinset & GPIO_MODE_MASK) != GPIO_INPUT);
 }
 
-static inline bool pic32mx_interrupt(uint16_t pinset)
+static inline bool pic32mz_interrupt(uint16_t pinset)
 {
   return ((pinset & GPIO_INTERRUPT) != 0);
 }
 
-static inline bool pic32mx_pullup(uint16_t pinset)
+static inline bool pic32mz_pullup(uint16_t pinset)
 {
   return ((pinset & GPIO_INT_MASK) == GPIO_PUINT);
 }
 
 /****************************************************************************
- * Name: pic32mx_cninterrupt
+ * Name: pic32mz_cninterrupt
  *
  * Description:
  *  Change notification interrupt handler.
  *
  ****************************************************************************/
 
-static int pic32mx_cninterrupt(int irq, FAR void *context)
+static int pic32mz_cninterrupt(int irq, FAR void *context)
 {
   int status;
   int ret = OK;
@@ -129,7 +129,7 @@ static int pic32mx_cninterrupt(int irq, FAR void *context)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(PIC32MX_IRQ_CN);
+  up_clrpend_irq(PIC32MZ_IRQ_CN);
   return ret;
 }
 
@@ -138,7 +138,7 @@ static int pic32mx_cninterrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pic32mx_gpioirqinitialize
+ * Name: pic32mz_gpioirqinitialize
  *
  * Description:
  *   Initialize logic to support a GPIO change notification interrupts.
@@ -147,36 +147,36 @@ static int pic32mx_cninterrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-void pic32mx_gpioirqinitialize(void)
+void pic32mz_gpioirqinitialize(void)
 {
   int ret;
 
   /* Attach the change notice interrupt handler */
 
-  ret = irqattach(PIC32MX_IRQ_CN, pic32mx_cninterrupt);
+  ret = irqattach(PIC32MZ_IRQ_CN, pic32mz_cninterrupt);
   DEBUGASSERT(ret == OK);
 
   /* Set the interrupt priority */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-  ret = up_prioritize_irq(PIC32MX_IRQ_CN, CONFIG_PIC32MX_CNPRIO);
+  ret = up_prioritize_irq(PIC32MZ_IRQ_CN, CONFIG_PIC32MZ_CNPRIO);
   DEBUGASSERT(ret == OK);
 #endif
 
   /* Reset all registers and enable the CN module */
 
-  putreg32(IOPORT_CN_ALL, PIC32MX_IOPORT_CNENCLR);
-  putreg32(IOPORT_CN_ALL, PIC32MX_IOPORT_CNPUECLR);
-  putreg32(IOPORT_CNCON_ON, PIC32MX_IOPORT_CNCON);
+  putreg32(IOPORT_CN_ALL, PIC32MZ_IOPORT_CNENCLR);
+  putreg32(IOPORT_CN_ALL, PIC32MZ_IOPORT_CNPUECLR);
+  putreg32(IOPORT_CNCON_ON, PIC32MZ_IOPORT_CNCON);
 
   /* And enable the GPIO interrupt */
 
-  ret = up_enable_irq(PIC32MX_IRQSRC_CN);
+  ret = up_enable_irq(PIC32MZ_IRQSRC_CN);
   DEBUGASSERT(ret == OK);
 }
 
 /****************************************************************************
- * Name: pic32mx_gpioattach
+ * Name: pic32mz_gpioattach
  *
  * Description:
  *   Attach an interrupt service routine to a GPIO interrupt.  This will
@@ -201,7 +201,7 @@ void pic32mx_gpioirqinitialize(void)
  *
  ****************************************************************************/
 
-xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
+xcpt_t pic32mz_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
 {
   xcpt_t oldhandler = NULL;
   irqstate_t flags;
@@ -210,7 +210,7 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
 
   /* First verify that the pinset is configured as an interrupting input */
 
-  if (pic32mx_input(pinset) && pic32mx_interrupt(pinset))
+  if (pic32mz_input(pinset) && pic32mz_interrupt(pinset))
     {
       /* Get the previously attached handler as the return value */
 
@@ -225,17 +225,17 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
            * an input
            */
 
-          pic32mx_configgpio(pinset);
+          pic32mz_configgpio(pinset);
 
           /* Pull-up requested? */
 
-          if (pic32mx_pullup(pinset))
+          if (pic32mz_pullup(pinset))
             {
-              putreg32(1 << cn, PIC32MX_IOPORT_CNPUESET);
+              putreg32(1 << cn, PIC32MZ_IOPORT_CNPUESET);
             }
           else
             {
-              putreg32(1 << cn, PIC32MX_IOPORT_CNPUECLR);
+              putreg32(1 << cn, PIC32MZ_IOPORT_CNPUECLR);
             }
         }
       else
@@ -244,8 +244,8 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
             * (disable the pull-up as well).
             */
 
-           putreg32(1 << cn, PIC32MX_IOPORT_CNENCLR);
-           putreg32(1 << cn, PIC32MX_IOPORT_CNPUECLR);
+           putreg32(1 << cn, PIC32MZ_IOPORT_CNENCLR);
+           putreg32(1 << cn, PIC32MZ_IOPORT_CNPUECLR);
         }
 
       /* Set the new handler (perhaps NULLifying the current handler) */
@@ -258,31 +258,31 @@ xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler)
 }
 
 /****************************************************************************
- * Name: pic32mx_gpioirqenable
+ * Name: pic32mz_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
  ****************************************************************************/
 
-void pic32mx_gpioirqenable(unsigned int cn)
+void pic32mz_gpioirqenable(unsigned int cn)
 {
   DEBUGASSERT(cn < IOPORT_NUMCN);
-  putreg32(1 << cn, PIC32MX_IOPORT_CNENSET);
+  putreg32(1 << cn, PIC32MZ_IOPORT_CNENSET);
 }
 
 /****************************************************************************
- * Name: pic32mx_gpioirqdisable
+ * Name: pic32mz_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
  ****************************************************************************/
 
-void pic32mx_gpioirqdisable(unsigned int cn)
+void pic32mz_gpioirqdisable(unsigned int cn)
 {
   DEBUGASSERT(cn < IOPORT_NUMCN);
-  putreg32(1 << cn, PIC32MX_IOPORT_CNENCLR);
+  putreg32(1 << cn, PIC32MZ_IOPORT_CNENCLR);
 }
 
-#endif /* CONFIG_PIC32MX_GPIOIRQ */
+#endif /* CONFIG_PIC32MZ_GPIOIRQ */

@@ -175,7 +175,7 @@ bool pic32mz_gpioread(uint16_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
 void pic32mz_gpioirqinitialize(void);
 #else
 #  define pic32mz_gpioirqinitialize()
@@ -206,7 +206,7 @@ void pic32mz_gpioirqinitialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
 xcpt_t pic32mz_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
 #else
 #  define pic32mz_gpioattach(p,f) (NULL)
@@ -220,7 +220,7 @@ xcpt_t pic32mz_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
 void pic32mz_gpioirqenable(unsigned int cn);
 #else
 #  define pic32mz_gpioirqenable(irq)
@@ -234,7 +234,7 @@ void pic32mz_gpioirqenable(unsigned int cn);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_PIC32MZ_GPIOIRQ
 void pic32mz_gpioirqdisable(unsigned int cn);
 #else
 #  define pic32mz_gpioirqdisable(irq)
