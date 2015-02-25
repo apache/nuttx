@@ -123,7 +123,11 @@
 #  ifndef CONFIG_SCHED_WORKQUEUE
 #    error Work queue support is required (CONFIG_SCHED_WORKQUEUE) for ADC interrupts
 #  endif
+#  ifndef CONFIG_SCHED_HPWORK
+#    error High priority worker threads is required (CONFIG_SCHED_HPWORK) for ADC interrupts
+#  endif
 #endif
+
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_TIVA_ADC_REGDEBUG
@@ -282,8 +286,10 @@ struct tiva_adc_s
 struct tiva_adc_sse_s
 {
   struct tiva_adc_s *adc;     /* Parent peripheral */
+#ifdef TIVA_ADC_HAVE_INTERRUPTS
   sem_t exclsem;              /* Mutual exclusion semaphore */
   struct work_s work;         /* Supports the interrupt handling "bottom half" */
+#endif
   bool ena;                   /* Sample sequencer operation state */
   uint32_t irq;               /* SSE interrupt vectors */
   uint8_t num;                /* SSE number */
@@ -356,44 +362,64 @@ static void sse_step_cfg(struct tiva_adc_s *adc, uint8_t sse, uint8_t chn,
 #ifdef CONFIG_TIVA_ADC0
 static void tiva_adc0_sse_init(void);
 static void tiva_adc0_assign_channels(void);
+#  ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void tiva_adc0_assign_interrupts(void);
+#  endif
 #  ifdef CONFIG_TIVA_ADC0_SSE0
 static void adc0_sse0_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc0_sse0_interrupt(int irq, void *context);
+#    endif
 #  endif
 #  ifdef CONFIG_TIVA_ADC0_SSE1
 static void adc0_sse1_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc0_sse1_interrupt(int irq, void *context);
+#    endif
 #  endif
 #  ifdef CONFIG_TIVA_ADC0_SSE2
 static void adc0_sse2_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc0_sse2_interrupt(int irq, void *context);
+#    endif
 #  endif
 #  ifdef CONFIG_TIVA_ADC0_SSE3
 static void adc0_sse3_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc0_sse3_interrupt(int irq, void *context);
+#    endif
 #  endif
 #endif
 
 #ifdef CONFIG_TIVA_ADC1
 static void tiva_adc1_sse_init(void);
 static void tiva_adc1_assign_channels(void);
+#  ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void tiva_adc1_assign_interrupts(void);
+#  endif
 #  ifdef CONFIG_TIVA_ADC1_SSE0
 static void adc1_sse0_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc1_sse0_interrupt(int irq, void *context);
+#    endif
 #  endif
 #  ifdef CONFIG_TIVA_ADC1_SSE1
 static void adc1_sse1_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc1_sse1_interrupt(int irq, void *context);
+#    endif
 #  endif
 #  ifdef CONFIG_TIVA_ADC1_SSE2
 static void adc1_sse2_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc1_sse2_interrupt(int irq, void *context);
+#    endif
 #  endif
 #  ifdef CONFIG_TIVA_ADC1_SSE3
 static void adc1_sse3_chn_cfg(void);
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
 static void adc1_sse3_interrupt(int irq, void *context);
+#    endif
 #  endif
 #endif
 
@@ -1476,7 +1502,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse00.ena = false;
       sse00.irq = TIVA_IRQ_ADC0;
       sse00.num = 0;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse00.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc0.sse[0] = &sse00;
 #  endif                             /* CONFIG_TIVA_ADC0_SSE0 */
 
@@ -1484,7 +1512,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse01.ena = false;
       sse01.irq = TIVA_IRQ_ADC1;
       sse01.num = 1;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse01.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc0.sse[1] = &sse01;
 #  endif                             /* CONFIG_TIVA_ADC0_SSE1 */
 
@@ -1492,7 +1522,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse02.ena = false;
       sse02.irq = TIVA_IRQ_ADC2;
       sse02.num = 2;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse02.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc0.sse[2] = &sse02;
 #  endif                             /* CONFIG_TIVA_ADC0_SSE2 */
 
@@ -1500,7 +1532,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse03.ena = false;
       sse03.irq = TIVA_IRQ_ADC3;
       sse03.num = 3;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse03.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc0.sse[3] = &sse03;
 #  endif                             /* CONFIG_TIVA_ADC0_SSE3 */
 
@@ -1535,7 +1569,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse10.ena = false;
       sse10.irq = TIVA_IRQ_ADC1_0;
       sse10.num = 0;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse10.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc1.sse[0] = &sse10;
 #  endif                             /* CONFIG_TIVA_ADC1_SSE0 */
 
@@ -1543,7 +1579,10 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse11.ena = false;
       sse11.irq = TIVA_IRQ_ADC1_1;
       sse11.num = 1;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse11.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
+
       adc1.sse[1] = &sse11;
 #  endif                             /* CONFIG_TIVA_ADC1_SSE1 */
 
@@ -1551,7 +1590,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse12.ena = false;
       sse12.irq = TIVA_IRQ_ADC1_2;
       sse12.num = 2;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse12.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc1.sse[2] = &sse12;
 #  endif                             /* CONFIG_TIVA_ADC1_SSE2 */
 
@@ -1559,7 +1600,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
       sse13.ena = false;
       sse13.irq = TIVA_IRQ_ADC1_3;
       sse13.num = 3;
+#    ifdef TIVA_ADC_HAVE_INTERRUPTS
       sem_init(&sse13.exclsem, SEM_PROCESS_PRIVATE, 1);
+#    endif
       adc1.sse[3] = &sse13;
 #  endif                             /* CONFIG_TIVA_ADC1_SSE3 */
 
@@ -1628,7 +1671,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
 
           /* Configure channels & register interrupts */
 
+#  if TIVA_ADC_HAVE_INTERRUPTS
           tiva_adc0_assign_interrupts();
+#  endif
           tiva_adc0_assign_channels();
         }
 #endif
@@ -1642,7 +1687,9 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
 
           /* Configure channels & register interrupts */
 
+#  if TIVA_ADC_HAVE_INTERRUPTS
           tiva_adc1_assign_interrupts();
+#  endif
           tiva_adc1_assign_channels();
         }
 #endif
@@ -1679,6 +1726,7 @@ struct adc_dev_s *tiva_adc_initialize(int adc_num)
 
 void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 {
+#if TIVA_ADC_HAVE_INTERRUPTS
   int ret;
 
   avdbg("Locking\n");
@@ -1694,6 +1742,7 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
       DEBUGASSERT(ret == OK || errno == EINTR);
     }
   while (ret < 0);
+#endif
 }
 
 /****************************************************************************
@@ -1706,8 +1755,10 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 
 void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse)
 {
+#if TIVA_ADC_HAVE_INTERRUPTS
   avdbg("Unlocking\n");
   sem_post(&priv->sse[sse]->exclsem);
+#endif
 }
 
 /****************************************************************************
