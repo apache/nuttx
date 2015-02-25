@@ -85,7 +85,7 @@
 static void sam_freerun_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 {
   struct sam_freerun_s *freerun = (struct sam_freerun_s *)arg;
-  DEBUGASSERT(freerun && freerun->overflow < UINT16_MAX);
+  DEBUGASSERT(freerun && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
 }
 
