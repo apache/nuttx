@@ -61,6 +61,13 @@ config RTC_FREQUENCY
 
 endif # !RTC_DATETIME
 
+config RTC_ALARM
+	bool "RTC Alarm Support"
+	default n
+	---help---
+		Enable if the RTC hardware supports setting of an alarm.  A callback
+		function will be executed when the alarm goes off.
+
 config RTC_DRIVER
 	bool "RTC Driver Support"
 	default n
@@ -70,13 +77,6 @@ config RTC_DRIVER
 		information.
 
 if RTC_DRIVER
-
-config RTC_ALARM
-	bool "RTC Alarm Support"
-	default n
-	---help---
-		Enable if the RTC hardware supports setting of an alarm.  A callback
-		function will be executed when the alarm goes off.
 
 config RTC_PERIODIC
 	bool "RTC Periodic Interrupts"
