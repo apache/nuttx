@@ -66,10 +66,10 @@
 #  define PIC32MX_CP0_CONFIG1  $16,1  /* Configuration register 1 */
 #  define PIC32MX_CP0_CONFIG2  $16,2  /* Configuration register 3 */
 #  define PIC32MX_CP0_CONFIG3  $16,3  /* Configuration register 3 */
-#  define PIC32MX_CP0_DEBUG    $23,3  /* Debug control and exception status */
-#  define PIC32MX_CP0_DEPC     $24,3  /* Program counter at last debug exception */
-#  define PIC32MX_CP0_ERREPC   $30,3  /* Program counter at last error */
-#  define PIC32MX_CP0_DESAVE   $31,3  /* Debug handler scratchpad register */
+#  define PIC32MX_CP0_DEBUG    $23,0  /* Debug control and exception status */
+#  define PIC32MX_CP0_DEPC     $24,0  /* Program counter at last debug exception */
+#  define PIC32MX_CP0_ERREPC   $30,0  /* Program counter at last error */
+#  define PIC32MX_CP0_DESAVE   $31,0  /* Debug handler scratchpad register */
 #endif
 
 /* CP0 Registers ************************************************************/
@@ -264,18 +264,17 @@
 #undef CP0_CONFIG_IMPL_SHIFT
 #undef CP0_CONFIG_IMPL_MASK
 
-#define CP0_CONFIG_K23_SHIFT       (0)       /* Bits 28-30:  KSEG2 and KSEG3 cacheability */
-#define CP0_CONFIG_K23_MASK        (7 << CP0_CONFIG_K23_SHIFT)
-#  define CP0_CONFIG_K23_UNCACHED  (2 << CP0_CONFIG_K23_SHIFT)
-#  define CP0_CONFIG_K23_CACHEABLE (3 << CP0_CONFIG_K23_SHIFT)
-#define CP0_CONFIG_KU_SHIFT         (0)       /* Bits 0-2: KUSEG and USEG cacheability */
+#define CP0_CONFIG_DS               (1 << 16) /* Dual SRAM bit */
+#define CP0_CONFIG_SB               (1 << 21) /* Bit 32: Simple BE bus mode bit */
+#define CP0_CONFIG_UDI              (1 << 22) /* Bit 22: User defined bit */
+#define CP0_CONFIG_KU_SHIFT         (25)      /* Bits 25-27: KUSEG and USEG cacheability */
 #define CP0_CONFIG_KU_MASK          (7 << CP0_CONFIG_KU_SHIFT)
 #  define CP0_CONFIG_KU_UNCACHED    (2 << CP0_CONFIG_KU_SHIFT)
 #  define CP0_CONFIG_KU_CACHEABLE   (3 << CP0_CONFIG_KU_SHIFT)
-#define CP0_CONFIG_UDI              (1 << 22) /* Bit 22: User defined bit */
-#define CP0_CONFIG_SB               (1 << 21) /* Bit 32: Simple BE bus mode bit */
-#define CP0_CONFIG_MDU              (1 << 20) /* Multipley/Divide unit bit */
-#define CP0_CONFIG_DS               (1 << 16) /* Dual SRAM bit */
+#define CP0_CONFIG_K23_SHIFT        (28)      /* Bits 28-30:  KSEG2 and KSEG3 cacheability */
+#define CP0_CONFIG_K23_MASK         (7 << CP0_CONFIG_K23_SHIFT)
+#  define CP0_CONFIG_K23_UNCACHED   (2 << CP0_CONFIG_K23_SHIFT)
+#  define CP0_CONFIG_K23_CACHEABLE  (3 << CP0_CONFIG_K23_SHIFT)
 
 /* Register Number: 16 Sel: 1 Name: Config1
  * Function: Configuration register 1
