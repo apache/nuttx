@@ -384,10 +384,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int sam34_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
-
   wdvdbg("Entry\n");
-  DEBUGASSERT(priv);
   
   sam34_putreg((WDT_CR_KEY | WDT_CR_WDRSTT), SAM_WDT_CR);
   return OK;

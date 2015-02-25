@@ -619,6 +619,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 
   DEBUGASSERT(priv);
   rttvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  UNUSED(priv);
 
   return ret;
 }
