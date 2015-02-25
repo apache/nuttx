@@ -104,12 +104,14 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
 endif
 
 ifeq ($(CONFIG_ARCH_MIPS_M14K),y)
-  MIPS_MARCH = 24kc
-  MIPS_MPROCESSOR = elf32pic32mx
-  MIPS_MICROMIPS = -mmicromips
-else
   MIPS_MARCH = m14k
   MIPS_MPROCESSOR = elf32pic32mz
+# MIPS_MICROMIPS = -mmicromips
+# MIPS_MICROMIPS = -mmicromips -minterlink-mips16 -mno-jals
+  MIPS_MICROMIPS = -mmicromips -minterlink-compressed
+else
+  MIPS_MARCH = 24kc
+  MIPS_MPROCESSOR = elf32pic32mx
   MIPS_MICROMIPS =
 endif
 
