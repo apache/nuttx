@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/select.h
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,49 +53,58 @@
 
 /* Get the total number of descriptors that we will have to support */
 
-#define __SELECT_NDESCRIPTORS (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS)
+#define FD_SETSIZE (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS)
 
 /* We will use a 32-bit bitsets to represent the set of descriptors.  How
  * many uint32_t's do we need to span all descriptors?
  */
 
-#if __SELECT_NDESCRIPTORS <= 32
+#if FD_SETSIZE <= 32
 #  define __SELECT_NUINT32 1
-#elif __SELECT_NDESCRIPTORS <= 64
+#elif FD_SETSIZE <= 64
 #  define __SELECT_NUINT32 2
-#elif __SELECT_NDESCRIPTORS <= 96
+#elif FD_SETSIZE <= 96
 #  define __SELECT_NUINT32 3
-#elif __SELECT_NDESCRIPTORS <= 128
+#elif FD_SETSIZE <= 128
 #  define __SELECT_NUINT32 4
-#elif __SELECT_NDESCRIPTORS <= 160
+#elif FD_SETSIZE <= 160
 #  define __SELECT_NUINT32 5
-#elif __SELECT_NDESCRIPTORS <= 192
+#elif FD_SETSIZE <= 192
 #  define __SELECT_NUINT32 6
-#elif __SELECT_NDESCRIPTORS <= 224
+#elif FD_SETSIZE <= 224
 #  define __SELECT_NUINT32 7
-#elif __SELECT_NDESCRIPTORS <= 256
+#elif FD_SETSIZE <= 256
 #  define __SELECT_NUINT32 8
 #else
-#  warning "Large fd_set needed"
+#  warning "Larger fd_set needed"
 #endif
 
-/* These macros map a file descripto to an index and bit number */
+/* These macros map a file descriptor to an index and bit number */
 
 #define _FD_NDX(fd) ((fd) >> 5)
 #define _FD_BIT(fd) ((fd) & 0x1f)
 
 /* Standard helper macros */
 
-#define FD_CLR(fd,set)    (((uint32_t*)(set))[_FD_NDX(fd)] &= ~(1 << _FD_BIT(fd)))
-#define FD_SET(fd,set)    (((uint32_t*)(set))[_FD_NDX(fd)] |= (1 << _FD_BIT(fd)))
-#define FD_ISSET(fd,set)  ((((uint32_t*)(set))[_FD_NDX(fd)] & (1 << _FD_BIT(fd))) != 0)
-#define FD_ZERO(set)      memset(set, 0, sizeof(fd_set))
+#define FD_CLR(fd,set) \
+  ((((fd_set*)(set))->arr)[_FD_NDX(fd)] &= ~(1 << _FD_BIT(fd)))
+#define FD_SET(fd,set) \
+  ((((fd_set*)(set))->arr)[_FD_NDX(fd)] |= (1 << _FD_BIT(fd)))
+#define FD_ISSET(fd,set) \
+  (((((fd_set*)(set))->arr)[_FD_NDX(fd)] & (1 << _FD_BIT(fd))) != 0)
+#define FD_ZERO(set) \
+   memset((set), 0, sizeof(fd_set))
 
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
 
-typedef uint32_t fd_set[__SELECT_NUINT32];
+struct fd_set_s
+{
+  uint32_t arr[__SELECT_NUINT32];
+};
+
+typedef struct fd_set_s fd_set;
 
 /****************************************************************************
  * Public Function Prototypes
