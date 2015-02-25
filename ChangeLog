@@ -9887,4 +9887,7 @@
 	  must subtract the basetime from the returned time.  It needs to
 	  return the time since power up, no the current time.  Issue noted
 	  by Max Neklyudov (2015-02-25).
-
+	* fs/vfs/fs_select.c and sched/semaphore/sem_timedwait.c: Fix places
+	  where the errno value was being overwritten by subsequent actions so
+	  that the returned errno value was incorrect.  From Max Neklyudov
+	  (2015-02-25).
