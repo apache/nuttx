@@ -103,6 +103,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
            FAR fd_set *exceptfds, FAR struct timeval *timeout)
 {
   struct pollfd *pollset;
+  int errcode;
   int fd;
   int npfds;
   int msec;
@@ -198,6 +199,12 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   /* Then let poll do all of the real work. */
 
   ret = poll(pollset, npfds, msec);
+  if (ret < 0)
+    {
+      /* poll() failed! Save the errno value */
+
+      errcode = get_errno();
+    }
 
   /* Now set up the return values */
 
@@ -263,6 +270,16 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
     }
 
   kmm_free(pollset);
+
+  /* Did poll() fail above? */
+
+  if (ret < 0)
+    {
+      /* Yes.. restore the errno value */
+
+      set_errno(errcode);
+    }
+
   return ret;
 }
 
