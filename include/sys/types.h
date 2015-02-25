@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/types.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -240,11 +240,27 @@ typedef uint32_t     clock_t;
 typedef uint32_t     useconds_t;
 typedef int32_t      suseconds_t;
 
+/* BSD types provided only to support porting to NuttX. */
+
+typedef unsigned char  u_char;
+typedef unsigned short u_short;
+typedef unsigned int   u_int;
+typedef unsigned long  u_long;
+
+/* SYSV types provided only to support porting to NuttX.  */
+
+typedef unsigned char  unchar;
+typedef unsigned short ushort;
+typedef unsigned int   uint;
+typedef unsigned long  ulong;
+typedef signed char    s_char;
+typedef char          *caddr_t;
+
 /* Task entry point */
 
 typedef CODE int (*main_t)(int argc, char *argv[]);
 
-#endif
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Global Function Prototypes
