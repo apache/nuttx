@@ -258,6 +258,7 @@
 #  define UDP_IPv4_MSS(d)    UDP_MSS(d,IPv4_HDRLEN)
 #  define ETH_IPv4_UDP_MSS   ETH_UDP_MSS(IPv4_HDRLEN)
 #  define SLIP_IPv4_UDP_MSS  SLIP_UDP_MSS(IPv4_HDRLEN)
+#  define MIN_IPv4_UDP_MSS   __MIN_UDP_MSS(IPv4_HDRLEN)
 #  define MIN_UDP_MSS        __MIN_UDP_MSS(IPv4_HDRLEN)
 #  undef MAX_UDP_MSS
 #  define MAX_UDP_MSS        __MAX_UDP_MSS(IPv4_HDRLEN)
@@ -267,6 +268,7 @@
 
 #ifdef CONFIG_NET_IPv6
 #  undef MIN_UDP_MSS
+#  define MIN_IPv6_UDP_MSS   __MIN_UDP_MSS(IPv6_HDRLEN)
 #  define MIN_UDP_MSS        __MIN_UDP_MSS(IPv6_HDRLEN)
 #endif
 
