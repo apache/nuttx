@@ -33,6 +33,14 @@ Key features of the PIC32MZ Starter Kit include;
 
 The PIC32MZ starter kit comes complete with a LAN8740 PHY daughter board.
 
+Testing was performed with the following additional hardware:
+
+- Microchip PIC32MZ Embedded Connectivity (EC) Adapter Board (AC320006)
+  that allows connection of the PIC32MZEC Starter Kit to the Microchip
+  Multimedia Expansion Board (MEB, DM320005) or PIC32 I/O Expansion Board
+  (DM320002).  These were previously used with the PIC32MX bringup.
+- Microchip Multimedia Expansion Board II (MEB II,  DM320005-2).
+
 Contents
 ========
 
@@ -102,7 +110,44 @@ Creating Compatible NuttX HEX files
 Serial Console
 ==============
 
-To be provided
+  The Microchip PIC32MZ Embedded Connectivity (EC) Adapter Board (AC320006)
+  brings out UART signals as follows:
+
+  JP7 redirects J1 U3_TX to either J2 SOSCO/RC14 or U1_TX:
+
+    Adapter
+    -----------------------------------------------------------------------
+    JP7, Pin 1: J2 Pin 32, SOSCO/RC14
+         Pin 2: J1 Pin 17, U3_TX
+         Pin 3: J2 Pin 90, U1_TX
+
+    PIC32MZ Starter Kit
+    -----------------------------------------------------------------------
+                J1 Pin 17, SOSCO/RC14  PIC32MZ SOSCO/RPC14/T1CK/RC14
+
+    RPC14 supports U1RX, U4RX, and U3TX
+
+  JP8 redirects J1 RB3/AN3/SDO4/WIFI_SDI to either J2 AN3/SDO4/WIFI_SDI or U3_RX:
+
+    Adapter                                        PIC32MZ Starter Kit
+    ---------------------------------------------- -------------------------
+    JP8, Pin 1: J2, Pin 66,  AN3/SDO4/WIFI_SDI
+         Pin 2: J1, Pin 105, RB3/AN3/SDO4/WIFI_SDI
+         Pin 3: J2, Pin 88,  U3_RX
+
+    PIC32MZ Starter Kit
+    -----------------------------------------------------------------------
+                J1, Pin 105, AN3/C2INA/RPB3/RB3
+
+    RPB3 supports U3RX, U1TX, and U5TX
+
+  Thus UART1 or UART3 could be used as a serial console if only the
+  PIC32MZEC Adapter Board is connected.
+
+  The default serial configuration here in these configurations is UART1
+  using RPC14 and RPB3.  That UART selection can be change by running 'make
+  menuconfig'.  The UART pin selections would need to be changed by editing
+  configs/pc32mz-starterkit/include/board.h.
 
 LEDs and Buttons
 ================
