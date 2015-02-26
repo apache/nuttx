@@ -71,10 +71,18 @@
  * does not provide sufficient information.  The output pin definitions include both the
  * register value and the register address and the following helper macros can be used
  * extract one or the other.
+ *
+ * NOTE: These odd macro forms are used to work around a pre-processor issue.  The argument
+ * to PPS_OUTPUT_REGADDR is defined to have the form nn,xxxx but the preprocessor would
+ * claim that only one parameter is passed.  The following version takes only one parameter
+ * and keeps the pre-processor happy.
  */
 
-#define PPS_OUTPUT_REGADDR(a,b) ((uintptr_t)(b))
-#define PPS_OUTPUT_REGVAL(a,b)  ((uint32_t(a))
+#define __PPS_OUTPUT_REGADDR(a,b) ((uintptr_t)(b))
+#define PPS_OUTPUT_REGADDR(a)  __PPS_OUTPUT_REGADDR(a)
+
+#define __PPS_OUTPUT_REGVAL(a,b)  ((uint32_t)(a))
+#define PPS_OUTPUT_REGVAL(a)  __PPS_OUTPUT_REGVAL(a)
 
 /********************************************************************************************
  * Public Types
