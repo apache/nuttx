@@ -600,7 +600,7 @@
 /* DEVCFG3 */
 
 #ifndef CONFIG_PIC32MX_USERID               /* User ID */
-#  define CONFIG_PIC32MX_USERID   0x584e    /* "NutX" */
+#  define CONFIG_PIC32MX_USERID   0x584e    /* "NX" */
 #endif
 
 #ifndef CONFIG_PIC32MX_PMDL1WAY             /* Peripheral module disable configuration */

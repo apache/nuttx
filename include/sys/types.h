@@ -254,7 +254,7 @@ typedef unsigned short ushort;
 typedef unsigned int   uint;
 typedef unsigned long  ulong;
 typedef signed char    s_char;
-typedef char          *caddr_t;
+typedef FAR char      *caddr_t;
 
 /* Task entry point */
 
