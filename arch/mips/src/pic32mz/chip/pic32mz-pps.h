@@ -73,8 +73,8 @@
  * extract one or the other.
  */
 
-#define PPS_OUTPUT_REGADDR(a,b) (b)
-#define PPS_OTUPUT_REVAL(a,b)   (a)
+#define PPS_OUTPUT_REGADDR(a,b) ((uintptr_t)(b))
+#define PPS_OUTPUT_REGVAL(a,b)  ((uint32_t(a))
 
 /********************************************************************************************
  * Public Types
