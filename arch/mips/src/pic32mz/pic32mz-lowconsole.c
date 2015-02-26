@@ -43,13 +43,15 @@
 #include <debug.h>
 
 #include <arch/irq.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
 #include "pic32mz-config.h"
 #include "chip/pic32mz-uart.h"
+#include "chip/pic32mz-pps.h"
+
+#include <arch/board/board.h>
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -321,14 +323,151 @@ void pic32mz_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
  *
  ******************************************************************************/
 
-#ifdef HAVE_SERIAL_CONSOLE
 void pic32mz_consoleinit(void)
 {
+#ifdef HAVE_UART_DEVICE
+
+  /* Setup up pin selection registers for all configured UARTs.  The board.h
+   * header file must provide these definitions to select the correct pin
+   * configuration for each enabled UARt.
+   */
+
+#ifdef CONFIG_PIC32MZ_UART1
+  /* Configure UART1 RX (input) and TX (output) pins */
+
+  putreg32(BOARD_U1RX_PPS, PIC32MZ_U1RXR);
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U1TX_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U1TX_PPS));
+
+#ifdef CONFIG_UART1_OFLOWCONTROL
+  /* Configure the UART1 CTS input pin */
+
+  putreg32(BOARD_U1CTS_PPS, PIC32MZ_U1CTSR);
+#endif
+#ifdef CONFIG_UART1_IFLOWCONTROL
+  /* Configure the UART1 RTS output pin */
+
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U1RTS_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U1RTS_PPS));
+
+#endif /* CONFIG_UART1_IFLOWCONTROL */
+#endif /* CONFIG_PIC32MZ_UART1 */
+
+#ifdef CONFIG_PIC32MZ_UART2
+  /* Configure UART2 RX (input) and TX (output) pins */
+
+  putreg32(BOARD_U2RX_PPS, PIC32MZ_U2RXR);
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U2TX_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U2TX_PPS));
+
+#ifdef CONFIG_UART2_OFLOWCONTROL
+  /* Configure the UART2 CTS input pin */
+
+  putreg32(BOARD_U2CTS_PPS, PIC32MZ_U2CTSR);
+#endif
+#ifdef CONFIG_UART2_IFLOWCONTROL
+  /* Configure the UART2 RTS output pin */
+
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U2RTS_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U2RTS_PPS));
+
+#endif /* CONFIG_UART2_IFLOWCONTROL */
+#endif /* CONFIG_PIC32MZ_UART2 */
+
+#ifdef CONFIG_PIC32MZ_UART3
+  /* Configure UART3 RX (input) and TX (output) pins */
+
+  putreg32(BOARD_U3RX_PPS, PIC32MZ_U3RXR);
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U3TX_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U3TX_PPS));
+
+#ifdef CONFIG_UART3_OFLOWCONTROL
+  /* Configure the UART3 CTS input pin */
+
+  putreg32(BOARD_U3CTS_PPS, PIC32MZ_U3CTSR);
+#endif
+#ifdef CONFIG_UART3_IFLOWCONTROL
+  /* Configure the UART3 RTS output pin */
+
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U3RTS_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U3RTS_PPS));
+
+#endif /* CONFIG_UART3_IFLOWCONTROL */
+#endif /* CONFIG_PIC32MZ_UART3 */
+
+#ifdef CONFIG_PIC32MZ_UART4
+  /* Configure UART4 RX (input) and TX (output) pins */
+
+  putreg32(BOARD_U4RX_PPS, PIC32MZ_U4RXR);
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U4TX_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U4TX_PPS));
+
+#ifdef CONFIG_UART4_OFLOWCONTROL
+  /* Configure the UART4 CTS input pin */
+
+  putreg32(BOARD_U4CTS_PPS, PIC32MZ_U4CTSR);
+#endif
+#ifdef CONFIG_UART4_IFLOWCONTROL
+  /* Configure the UART4 RTS output pin */
+
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U4RTS_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U4RTS_PPS));
+
+#endif /* CONFIG_UART4_IFLOWCONTROL */
+#endif /* CONFIG_PIC32MZ_UART4 */
+
+#ifdef CONFIG_PIC32MZ_UART5
+  /* Configure UART5 RX (input) and TX (output) pins */
+
+  putreg32(BOARD_U5RX_PPS, PIC32MZ_U5RXR);
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U5TX_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U5TX_PPS));
+
+#ifdef CONFIG_UART5_OFLOWCONTROL
+  /* Configure the UART5 CTS input pin */
+
+  putreg32(BOARD_U5CTS_PPS, PIC32MZ_U5CTSR);
+#endif
+#ifdef CONFIG_UART5_IFLOWCONTROL
+  /* Configure the UART5 RTS output pin */
+
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U5RTS_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U5RTS_PPS));
+
+#endif /* CONFIG_UART5_IFLOWCONTROL */
+#endif /* CONFIG_PIC32MZ_UART5 */
+
+#ifdef CONFIG_PIC32MZ_UART6
+  /* Configure UART6 RX (input) and TX (output) pins */
+
+  putreg32(BOARD_U6RX_PPS, PIC32MZ_U6RXR);
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U6TX_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U6TX_PPS));
+
+#ifdef CONFIG_UART6_OFLOWCONTROL
+  /* Configure the UART6 CTS input pin */
+
+  putreg32(BOARD_U6CTS_PPS, PIC32MZ_U6CTSR);
+#endif
+#ifdef CONFIG_UART6_IFLOWCONTROL
+  /* Configure the UART6 RTS output pin */
+
+  putreg32(PPS_OUTPUT_REGVAL(BOARD_U6RTS_PPS),
+           PPS_OUTPUT_REGADDR(BOARD_U6RTS_PPS));
+
+#endif /* CONFIG_UART6_IFLOWCONTROL */
+#endif /* CONFIG_PIC32MZ_UART6 */
+
+#ifdef HAVE_SERIAL_CONSOLE
+  /* Configure the console uart */
+
   pic32mz_uartconfigure(PIC32MZ_CONSOLE_BASE, PIC32MZ_CONSOLE_BAUD,
                         PIC32MZ_CONSOLE_PARITY, PIC32MZ_CONSOLE_BITS,
                         PIC32MZ_CONSOLE_2STOP);
+
+#endif /* HAVE_SERIAL_CONSOLE */
+#endif /* HAVE_UART_DEVICE */
 }
-#endif
 
 /******************************************************************************
  * Name: up_lowputc

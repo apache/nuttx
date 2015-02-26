@@ -214,6 +214,17 @@
  * are grounded when pressed.
  */
 
+/* UARTS ********************************************************************/
+/* If the PIC32MZEC Adaptor Board is connected, then UART1 signals are
+ * available at these locations on the adaptor board:
+ *
+ *   JP7 Pin 2: RPC14
+ *   JP8 Pin 2: RPB3
+ */
+
+#define BOARD_U1RX_PPS  U1RXR_RPC14
+#define BOARD_U1TX_PPS  U1TX_RPB3R
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
