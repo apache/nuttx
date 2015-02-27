@@ -215,7 +215,7 @@ endif
 
 # These are here as placeholders of what could be added
 
-if CONFIG_AUDIO_PLANNED
+if AUDIO_PLANNED
 
 config AUDIO_MIXER
 	bool "Planned - Enable support for the software based Audio Mixer"

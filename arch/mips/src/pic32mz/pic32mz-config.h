@@ -176,9 +176,9 @@
 
 #ifndef CONFIG_PIC32MZ_FUSBIDIO              /* USB USBID selection: 0=GPIO 1=USB */
 #  ifdef CONFIG_PIC32MZ_USB
-#    define CONFIG_PIC32MZ_FUSBIDIO 0        /* USBID pin is controlled by the IOPORT configuration */
-#  else
 #    define CONFIG_PIC32MZ_FUSBIDIO 1        /* USBID pin is controlled by the USB module */
+#  else
+#    define CONFIG_PIC32MZ_FUSBIDIO 0        /* USBID pin is controlled by the IOPORT configuration */
 #  endif
 #endif
 
@@ -230,7 +230,7 @@
 
 #undef CONFIG_PIC32MZ_PLLMULT
 #if BOARD_PLL_MULT >= 1 && BOARD_PLL_MULT <= 128
-#  define CONFIG_PIC32MZ_PLLMULT  ((BOARD_PLL_MULT-1) << DEVCFG2_FPLLIDIV_SHIFT)
+#  define CONFIG_PIC32MZ_PLLMULT  ((BOARD_PLL_MULT-1) << DEVCFG2_FPLLMULT_SHIFT)
 #else
 #  error "Unsupported BOARD_PLL_MULT"
 #endif

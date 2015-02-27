@@ -340,8 +340,8 @@ menu "Device Configuration 0 (DEVCFG0)"
 
 config PIC32MZ_DEBUGGER_ENABLE
 	bool "Background debugger enable"
-	default y if CONFIG_DEBUG
-	default n if !CONFIG_DEBUG
+	default y if DEBUG
+	default n if !DEBUG
 	---help---
 		Background Debugger Enable
 
@@ -359,8 +359,8 @@ config PIC32MZ_ICESEL_CH2
 
 config PIC32MZ_TRACE_ENABLE
 	bool "Trace enable"
-	default y if CONFIG_DEBUG
-	default n if !CONFIG_DEBUG
+	default y if DEBUG
+	default n if !DEBUG
 	---help---
 		Trace Enable
 
@@ -368,7 +368,7 @@ endmenu
 
 menu "Device Configuration 1 (DEVCFG1)"
 
-config CONFIG_PIC32MZ_OSCIOFNC
+config PIC32MZ_OSCIOFNC
 	int "CLKO Enable"
 	default 1
 	range 0 1
@@ -434,7 +434,8 @@ config PIC32MZ_FETHIO
 
 config PIC32MZ_FUSBIDIO
 	int "USB USBID selection"
-	default 1
+	default 0 if !PIC32MZ_ETHERNET
+	default 1 if PIC32MZ_ETHERNET
 	range 0 1
 	---help---
 		USB USBID selection
