@@ -259,14 +259,6 @@ void weak_function sam_spiinitialize(void);
 int sam_sdinitialize(int port, int minor);
 #endif
 
-/************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMD20_XPLAINED_SRC_SAMD20_XPLAINED_H */
 

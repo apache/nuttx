@@ -307,18 +307,6 @@ void stm32_spiinitialize(void);
 
 void stm32_usbinitialize(void);
 
-/****************************************************************************
- * Name: board_led_initialize
- *
- * Description:
- *   Initialize LED GPIO outputs
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
 /************************************************************************************
  * Name: board_adc_initialize
  *

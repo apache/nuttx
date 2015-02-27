@@ -48,7 +48,7 @@
 #include "tiva_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
@@ -86,18 +86,6 @@
  ************************************************************************************/
 
 void weak_function lm_ssiinitialize(void);
-
-/****************************************************************************
- * Name: board_led_initialize
- *
- * Description:
- *   Initialize on-board LEDs.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H */

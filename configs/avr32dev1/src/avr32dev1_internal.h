@@ -111,17 +111,6 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: board_led_initializeialize
- *
- * Description:
- *   Configure on-board LEDs if LED support has been selected.
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-extern void board_led_initializeialize(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_AVR32DEV1_SRC_AVR32DEV1_INTERNAL_H */
 
