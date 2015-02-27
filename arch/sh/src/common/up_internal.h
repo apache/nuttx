@@ -208,18 +208,6 @@ extern void up_wdtinit(void);
 
 extern void up_timer_initialize(void);
 
-/* Defined in board/up_leds.c */
-
-#ifdef CONFIG_ARCH_LEDS
-extern void board_led_initialize(void);
-extern void board_led_on(int led);
-extern void board_led_off(int led);
-#else
-# define board_led_initialize()
-# define board_led_on(led)
-# define board_led_off(led)
-#endif
-
 /* Defined in board/up_lcd.c */
 
 #ifdef CONFIG_LCD_CONSOLE

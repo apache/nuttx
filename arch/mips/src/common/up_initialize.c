@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/common/up_initialize.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>

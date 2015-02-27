@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kinetis/kinetis_idle.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
+
 #include "up_internal.h"
 
 /****************************************************************************

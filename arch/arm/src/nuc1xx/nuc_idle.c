@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/nuc1xx/nuc_idle.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/power/pm.h>
 
 #include <arch/irq.h>
