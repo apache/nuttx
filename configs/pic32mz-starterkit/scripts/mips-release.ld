@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mz-starterkit/nsh/ld.script
+ * configs/pic32mz-starterkit/nsh/mips-release.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
