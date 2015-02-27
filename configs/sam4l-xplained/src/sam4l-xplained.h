@@ -358,14 +358,6 @@ int sam_sdinitialize(int minor);
 int sam_slcd_initialize(void);
 #endif
 
-/************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H */
 

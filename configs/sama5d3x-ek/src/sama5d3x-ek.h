@@ -844,14 +844,6 @@ int sam_wm8904_initialize(int minor);
 #endif /* HAVE_WM8904 */
 
 /************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
-/************************************************************************************
  * Name: nsh_archinitialize
  *
  * Description:

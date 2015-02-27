@@ -459,15 +459,5 @@ int sam_at25_automount(int minor);
 #  define sam_at25_automount(minor) (-ENOSYS)
 #endif
 
-/************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#else
-#  define board_led_initialize()
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAM4E_EK_SRC_SAM4E_EK_H */

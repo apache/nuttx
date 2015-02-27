@@ -734,14 +734,6 @@ void weak_function sam_netinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
-/************************************************************************************
  * Name: nsh_archinitialize
  *
  * Description:

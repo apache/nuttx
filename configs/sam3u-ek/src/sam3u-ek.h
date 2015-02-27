@@ -236,14 +236,6 @@ int weak_function sam_hsmciinit(void);
 #endif
 
 /************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
-/************************************************************************************
  * Name: sam_cardinserted
  *
  * Description:

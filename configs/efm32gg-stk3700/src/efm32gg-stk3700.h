@@ -89,12 +89,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_led_initialize
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-#endif
-
 #endif /* __CONFIGS_EFM32GG_STK3700_SRC_EFM32GG_STK3700_H */
