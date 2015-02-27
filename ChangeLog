@@ -9901,3 +9901,6 @@
 	  number is assigned to the device name by incrementing the device
 	  number individually for each interface link type.  From Max Neklyudov
 	  (2015-02-27).
+	* include/nuttx/board.h:  Remove common board function prototypes from
+	  other files and consolidate them in this new header file (2015-02-27).
+
