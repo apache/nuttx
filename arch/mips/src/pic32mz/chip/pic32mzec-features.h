@@ -359,6 +359,8 @@
 #  define DEVCFG2_FPLLODIV_16    (4 << DEVCFG2_FPLLODIV_SHIFT) /* PLL output divided by 16 */
 #  define DEVCFG2_FPLLODIV_32    (5 << DEVCFG2_FPLLODIV_SHIFT) /* PLL output divided by 32 */
 #define DEVCFG2_UPLLFSEL         (1 << 30) /* Bit 30: USB PLL Input Frequency Select bit */
+#  define DEVCFG2_UPLLFSEL_24MHZ (1 << 30) /*   Bit 30=1: UPLL input clock is 24 MHz */
+#  define DEVCFG2_UPLLFSEL_12MHZ (0 << 30) /*   Bit 30=0: UPLL input clock is 12 MHz */
 
 #define DEVCFG2_RWO 0xbff88008 /* Bits 3, 15, 19-29, 31: Reserved, write as one */
 
@@ -419,9 +421,15 @@
 #  define DEVCFG1_WDTPS_262144   (18 << DEVCFG1_WDTPS_SHIFT) /* 1:262144 */
 #  define DEVCFG1_WDTPS_524288   (19 << DEVCFG1_WDTPS_SHIFT) /* 1:524288 */
 #  define DEVCFG1_WDTPS_1048576  (20 << DEVCFG1_WDTPS_SHIFT) /* 1:1048576 */
-#define DEVCFG1_WDTSPGM          (1 << 21) /* Bit 21: Watchdog Timer Stop During Flash Programming bit */
+#define DEVCFG1_WDTSPGM          (1 << 21) /* Bit 21: WDT stop/run during flash programming bit */
+#  define DEVCFG1_WDTSPGM_STOP   (1 << 21) /*   Bit 21=1: WDT stops during flash programming */
+#  define DEVCFG1_WDTSPGM_RUN    (0 << 21) /*   Bit 21=0: WDT runs during flash programming */
 #define DEVCFG1_WINDIS           (1 << 22) /* Bit 22: Watchdog Timer Window Enable bit */
+#  define DEVCFG1_WDT_NORMAL     (1 << 22) /*   Bit 22=1: Watchdog normal mode */
+#  define DEVCFG1_WDT_WINDOW     (0 << 22) /*   Bit 22=0: Watchdog window mode */
 #define DEVCFG1_FWDTEN           (1 << 23) /* Bit 23: Watchdog Timer Enable bit */
+#  define DEVCFG1_FWDT_ENABLED   (1 << 23) /*   Bit 23=1: Watchdog enabled, cannot be disabled */
+#  define DEVCFG1_FWDT_DISABLED  (0 << 23) /*   Bit 23=0: Watchdog disabled, can be enabled */
 #define DEVCFG1_FWDTWINSZ_SHIFT  (24)      /* Bits 24-25: Watchdog Timer Window Size bits */
 #define DEVCFG1_FWDTWINSZ_MASK   (3 << DEVCFG1_FWDTWINSZ_SHIFT)
 # define DEVCFG1_FWDTWINSZ_75    (0 << DEVCFG1_FWDTWINSZ_SHIFT) /* Window size is 75% */
@@ -448,6 +456,8 @@
 #  define DEVCFG0_ICESEL_2       (2 << DEVCFG0_ICESEL_SHIFT) /* PGEC2/PGED2 pair is used */
 #define DEVCFG0_TRCEN            (1 << 5)  /* Bit 5: Trace Enable bit */
 #define DEVCFG0_BOOTISA          (1 << 6)  /* Bit 6: Boot ISA Selection bit */
+#  define DEVCFG0_BOOT_MIPS32    (1 << 6)  /*   Bit 6=1: Boot code and Exception code is MIPS32 */
+#  define DEVCFG0_BOOT_MICROMIPS (0 << 6)  /*   Bit 6=0: Boot code and Exception code is microMIPS */
 #define DEVCFG0_FECCCON_SHIFT    (8)       /* Bit 8-9: Dynamic Flash ECC Configuration bits */
 #define DEVCFG0_FECCCON_MASK     (3 << DEVCFG0_FECCCON_SHIFT)
 #  define DEVCFG0_FECCCON_ECC    (0 << DEVCFG0_FECCCON_SHIFT) /* Flash ECC enabled (locked) */
@@ -455,12 +465,17 @@
 #  define DEVCFG0_FECCCON_DISLCK (2 << DEVCFG0_FECCCON_SHIFT) /* ECC / dynamic ECC disabled (locked) */
 #  define DEVCFG0_FECCCON_DISWR  (3 << DEVCFG0_FECCCON_SHIFT) /* ECC / dynamic ECC disabled (writable) */
 #define DEVCFG0_FSLEEP           (1 << 10) /* Bit 10: Flash Sleep Mode bit */
+#  define DEVCFG0_FSLEEP_OFF     (1 << 10) /*   Bit 10=1: Flash powered down in sleep mode */
+#  define DEVCFG0_FSLEEP_ON      (0 << 10) /*   Bit 10=0: Flash powerdown controlled by VREGS bit */
 #define DEVCFG0_DBGPER_SHIFT     (12)      /* Bits 12-14: Debug Mode CPU Access Permission bits */
 #define DEVCFG0_DBGPER_MASK      (7 << DEVCFG0_DBGPER_SHIFT)
 #  define DEVCFG0_DBGPER_GROUP0  (1 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 0 regions */
 #  define DEVCFG0_DBGPER_GROUP1  (2 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 1 regions */
 #  define DEVCFG0_DBGPER_GROUP2  (4 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 2 regions */
+#  define DEVCFG0_DBGPER_ALL     (7 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to all regions */
 #define DEVCFG0_EJTAGBEN         (1 << 30) /* Bit 30: EJTAG Boot Enable bit */
+#  define DEVCFG0_EJTAG_NORMAL   (1 << 30) /*   Bit 30=1: Normal EJTAG functionality */
+#  define DEVCFG0_EJTAG_REDUCED  (0 << 30) /*   Bit 30=0: Reduced EJTAG functionality */
 
 #define DEVCFG0_RW0              0xbfff8880 /* Bits 7, 11, 15-29, 31: Reserved, write as one */
 

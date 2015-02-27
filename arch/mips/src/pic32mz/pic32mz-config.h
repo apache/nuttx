@@ -152,6 +152,7 @@
 #ifndef CONFIG_PIC32MZ_USERID               /* User ID */
 #  define CONFIG_PIC32MZ_USERID   0x584e    /* "NX" */
 #endif
+#define ADEVCFG3_USERID           0x1234
 
 #ifndef CONFIG_PIC32MZ_FMIIEN               /* Ethernet MII enable: 0=RMII 1=MII */
 #  define CONFIG_PIC32MZ_FMIIEN   1         /* MII enabled */
@@ -251,12 +252,17 @@
 #  error "Unsupported BOARD_PLL_ODIV"
 #endif
 
+#if BOARD_POSC_FREQ == 12000000
+#  define CONFIG_PIC32MZ_UPLLFSEL DEVCFG2_UPLLFSEL_12MHZ
+#else
+#  define CONFIG_PIC32MZ_UPLLFSEL DEVCFG2_UPLLFSEL_24MHZ
+#endif
+
 /* Not yet configurable settings (REVISIT) */
 
                                            /* System PLL Input Clock Select bit */
 #define CONFIG_PIC32MZ_FPLLICLK   0        /* POSC is selected as input to the System PLL */
                                            /* USB PLL Input Frequency Select bit */
-#define CONFIG_PIC32MZ_UPLLFSEL   DEVCFG2_UPLLFSEL
 
 /* DEVCFG1 */
 /* Configurable settings */
@@ -375,16 +381,17 @@
 
 #undef CONFIG_PIC32MZ_FWDTEN
 #if CONFIG_PIC32MZ_WDTENABLE
-#  define CONFIG_PIC32MZ_FWDTEN  DEVCFG1_FWDTEN
+#  define CONFIG_PIC32MZ_FWDTEN  DEVCFG1_FWDT_ENSABLED
 #else
-#  define CONFIG_PIC32MZ_FWDTEN  0
+#  define CONFIG_PIC32MZ_FWDTEN  DEVCFG1_FWDT_DISABLED
 #endif
+#define ADEVCFG1_FWDTEN          DEVCFG1_FWDT_DISABLED
 
 /* Not yet configurable settings */
 
-#define CONFIG_PIC32MZ_DMTINV    DEVCFG1_FNOSC_FRCDIV
-#define CONFIG_PIC32MZ_WDTSPGM   DEVCFG1_WDTSPGM
-#define CONFIG_PIC32MZ_WINDIS    DEVCFG1_WINDIS
+#define CONFIG_PIC32MZ_DMTINV    DEVCFG1_DMTINV_127_128
+#define CONFIG_PIC32MZ_WDTSPGM   DEVCFG1_WDTSPGM_STOP
+#define CONFIG_PIC32MZ_WINDIS    DEVCFG1_WDT_NORMAL
 #define CONFIG_PIC32MZ_FWDTWINSZ DEVCFG1_FWDTWINSZ_25
 #define CONFIG_PIC32MZ_DMTCNT    DEVCFG1_DMTCNT_MASK
 #define CONFIG_PIC32MZ_FDMTEN    0
@@ -422,11 +429,11 @@
 
 /* Not yet configurable settings */
 
-#define CONFIG_PIC32MZ_BOOTISA  0 /* microMIPS always */
+#define CONFIG_PIC32MZ_BOOTISA  DEVCFG0_BOOT_MICROMIPS
 #define CONFIG_PIC32MZ_FECCCON  DEVCFG0_FECCCON_DISWR
-#define CONFIG_PIC32MZ_FSLEEP   DEVCFG0_FSLEEP
-#define CONFIG_PIC32MZ_DBGPER   DEVCFG0_DBGPER_MASK
-#define CONFIG_PIC32MZ_EJTAGBEN DEVCFG0_EJTAGBEN
+#define CONFIG_PIC32MZ_FSLEEP   DEVCFG0_FSLEEP_OFF
+#define CONFIG_PIC32MZ_DBGPER   DEVCFG0_DBGPER_ALL
+#define CONFIG_PIC32MZ_EJTAGBEN DEVCFG0_EJTAG_NORMAL
 
 /************************************************************************************
  * Public Types
