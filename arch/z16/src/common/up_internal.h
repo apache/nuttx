@@ -44,7 +44,7 @@
 #include "chip/chip.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Bring-up debug configurations.  These are here (vs defconfig)
@@ -181,18 +181,6 @@ extern void up_timer_initialize(void);
 /* Defined in up_irq.c */
 
 extern void up_ack_irq(int irq);
-
-/* Defined in board/up_leds.c */
-
-#ifdef CONFIG_ARCH_LEDS
-extern void board_led_initialize(void);
-extern void board_led_on(int led);
-extern void board_led_off(int led);
-#else
-# define board_led_initialize()
-# define board_led_on(led)
-# define board_led_off(led)
-#endif
 
 /* Defined in board/up_network.c */
 

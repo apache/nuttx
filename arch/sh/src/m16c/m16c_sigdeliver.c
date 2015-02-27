@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/m16c/m16c_sigdeliver.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 
 #include "sched/sched.h"
 #include "up_internal.h"

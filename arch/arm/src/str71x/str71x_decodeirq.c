@@ -1,7 +1,7 @@
 /********************************************************************************
  * arch/arm/src/str71x/str71x_decodeirq.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

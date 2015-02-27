@@ -195,18 +195,6 @@ extern void up_puts(const char *str);
 
 void up_timer_initialize(void);
 
-/* Defined in board/up_leds.c */
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-void board_led_on(int led);
-void board_led_off(int led);
-#else
-# define board_led_initialize()
-# define board_led_on(led)
-# define board_led_off(led)
-#endif
-
 /* Architecture specific hook into the timer interrupt handler */
 
 #ifdef CONFIG_ARCH_TIMERHOOK

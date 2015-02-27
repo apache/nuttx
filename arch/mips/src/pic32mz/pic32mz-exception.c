@@ -45,6 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 
 #include <arch/board/board.h>
 #include <arch/pic32mz/cp0.h>

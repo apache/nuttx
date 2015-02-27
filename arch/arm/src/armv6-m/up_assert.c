@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/up_assert.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/board/board.h>

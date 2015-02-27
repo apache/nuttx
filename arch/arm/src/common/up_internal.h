@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -474,18 +474,6 @@ void up_addregion(void);
 /* Watchdog timer ***********************************************************/
 
 void up_wdtinit(void);
-
-/* LED interfaces provided by board-level logic *****************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
-void board_led_on(int led);
-void board_led_off(int led);
-#else
-# define board_led_initialize()
-# define board_led_on(led)
-# define board_led_off(led)
-#endif
 
 /* Networking ***************************************************************/
 

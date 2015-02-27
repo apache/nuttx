@@ -184,16 +184,6 @@ void lowconsole_init(void);
 
 extern void up_timer_initialize(void);
 
-/* Defined in configs/<board-name>/src/up_leds.c */
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_on(int led);
-void board_led_off(int led);
-#else
-# define board_led_on(led)
-# define board_led_off(led)
-#endif
-
 /* Defined in chip/xxx_ethernet.c */
 
 #ifdef CONFIG_NET

@@ -1,8 +1,7 @@
 /************************************************************************************
  * arch/arm/src/imx/imx_boot.c
- * arch/arm/src/chip/imx_boot.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +43,8 @@
 #include "chip.h"
 #include "up_internal.h"
 #include "up_arch.h"
+
+#include <nuttx/board.h>
 
 /************************************************************************************
  * Pre-processor Definitions
