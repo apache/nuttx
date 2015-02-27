@@ -340,13 +340,14 @@ menu "Device Configuration 0 (DEVCFG0)"
 
 config PIC32MZ_DEBUGGER_ENABLE
 	bool "Background debugger enable"
-	default n
+	default y if CONFIG_DEBUG
+	default n if !CONFIG_DEBUG
 	---help---
 		Background Debugger Enable
 
 config PIC32MZ_JTAG_ENABLE
 	bool "JTAG enable"
-	default y
+	default n
 	---help---
 		JTAG Enable
 
@@ -358,7 +359,8 @@ config PIC32MZ_ICESEL_CH2
 
 config PIC32MZ_TRACE_ENABLE
 	bool "Trace enable"
-	default n
+	default y if CONFIG_DEBUG
+	default n if !CONFIG_DEBUG
 	---help---
 		Trace Enable
 
@@ -368,14 +370,22 @@ menu "Device Configuration 1 (DEVCFG1)"
 
 config CONFIG_PIC32MZ_OSCIOFNC
 	int "CLKO Enable"
-	default 0
+	default 1
 	range 0 1
+	---help---
+		Enable CLK0 output on power up.  Options:
+
+		1: CLKO output disabled
+		0: CLKO output signal active on the OSC2 pin
 
 config PIC32MZ_WDTENABLE
 	bool "Watchdog enable"
 	default 0
 	---help---
-		Enabled watchdog on power up.  Default 0 (watchdog can be enabled later by software).
+		Enabled watchdog on power up.
+
+		1: Watchdog enabled, cannot be disabled
+		0:  Watchdog disabled, can be enabled
 
 endmenu
 

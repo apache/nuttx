@@ -61,6 +61,8 @@
 
 #define BOARD_FNOSC_SPLL       1         /* Use system PLL */
 #define BOARD_POSC_HSMODE      1         /* High-speed crystal (HS) mode */
+#define BOARD_POSC_SWITCH      1         /* Enable clock switching */
+#undef  BOARD_POSC_FSCM                  /* Disable clock monitoring */
 
 /* PLL configuration and resulting CPU clock.
  * CPU_CLOCK = ((POSC_FREQ / IDIV) * MULT) / ODIV
@@ -143,7 +145,7 @@
 
 /* Watchdog pre-scaler (re-visit) */
 
-#define BOARD_WD_PRESCALER     8         /* Watchdog pre-scaler */
+#define BOARD_WD_PRESCALER     1048576   /* Watchdog pre-scaler */
 
 /* LED definitions **********************************************************/
 /* LED Configuration ********************************************************/
