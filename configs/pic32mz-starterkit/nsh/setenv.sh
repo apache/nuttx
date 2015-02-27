@@ -58,7 +58,7 @@ fi
 export TOOLCHAIN_POSTBIN=:"/cygdrive/c/pinguino-11/compilers/p32/bin"
 
 # This is the path to the tools subdirectory
-export PIC32TOOL_DIR="${WD}/tools/pic32mz"
+export PIC32TOOL_DIR="${WD}/tools/pic32mx"
 
 # Add the path to the toolchain to the PATH varialble
 export PATH="${TOOLCHAIN_PREBIN}${PIC32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}${TOOLCHAIN_POSTBIN}"
