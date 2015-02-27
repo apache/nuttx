@@ -9894,3 +9894,10 @@
 	* include/sys/select.h: Extend the fd_set type definition so that it
 	  can handle more than 32 descriptors (if so configured).  From Max
 	  Neklyudov (2015-02-25).
+	* net/netdev/netdev_unregister.c:  Fix a list handling error in
+	  netdev_unregister().  From Max Neklyudov (2015-02-27).
+	* net/netdev/netdev_register.c: Improve the network device registration
+	  logic.  When multiple link types are used, modify how each interface
+	  number is assigned to the device name by incrementing the device
+	  number individually for each interface link type.  From Max Neklyudov
+	  (2015-02-27).
