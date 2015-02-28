@@ -112,7 +112,7 @@ CCASSERT(sizeof(cc3000_buffer_desc) <= CONFIG_MQ_MAXMSGSIZE);
 #define FREE_SLOT -1
 #define CLOSE_SLOT -2
 
-#if defined(CONFIG_CC3000_PROBES)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_CC3000_PROBES)
 #  define CC3000_GUARD (0xc35aa53c)
 #  define INIT_GUARD(p) p->guard = CC3000_GUARD
 #  define CHECK_GUARD(p) DEBUGASSERT(p->guard == CC3000_GUARD)
