@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpc4357-evb/src/lpc43_autoleds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -54,7 +55,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* LED definitions **********************************************************/
 /* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by

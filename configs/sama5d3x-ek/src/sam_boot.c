@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sam_boot.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+
+#include <nuttx/board.h>
 
 #include "sam_sckc.h"
 #include "sama5d3x-ek.h"

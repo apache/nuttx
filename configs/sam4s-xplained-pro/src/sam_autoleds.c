@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4s-xplained-pro/src/sam_autoleds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -44,6 +44,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -53,7 +54,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on
  * board the SAM4S Xplained Pro.  The following definitions describe how NuttX

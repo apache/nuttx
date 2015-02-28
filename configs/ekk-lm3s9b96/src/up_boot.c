@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/ekk-lm3s9b96/src/up_boot.c
- * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Jose Pablo Rojas V. <jrojas@nx-engineering.com>
  *
@@ -43,6 +42,7 @@
 
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -50,7 +50,7 @@
 #include "ekklm3s9b96_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

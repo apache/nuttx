@@ -1,8 +1,7 @@
 /****************************************************************************
  * configs/pic32mx7mmb/src/up_leds.c
- * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,16 +43,17 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "pic32mx-internal.h"
 #include "pic32mx7mmb_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* LED Configuration ********************************************************/
-/* The Mikroelektronika PIC32MX7 MMB has 3 user LEDs labeled LED0-2 in the
+/* The Mikroelektronika PIC32MX7 MMB has 3 user LEDs labelled LED0-2 in the
  * schematics:
  *
  * ---  ----- --------------------------------------------------------------

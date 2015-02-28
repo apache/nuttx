@@ -1,8 +1,7 @@
 /****************************************************************************
  * configs/lm3s8962-ek/src/up_leds.c
- * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +42,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

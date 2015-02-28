@@ -35,12 +35,9 @@
  *
  ****************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief VSN LED
- */
-
 #include <nuttx/config.h>
+
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_LEDS
@@ -54,7 +51,7 @@
 #include "vsn.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG

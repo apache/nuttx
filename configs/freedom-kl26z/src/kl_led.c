@@ -68,6 +68,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

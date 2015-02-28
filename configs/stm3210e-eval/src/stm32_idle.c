@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/stm32_idle.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -48,6 +48,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"

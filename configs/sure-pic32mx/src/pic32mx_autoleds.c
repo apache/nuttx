@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sure-pic32mx/src/pic32mx_leds.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -56,7 +57,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* LED Configuration ********************************************************/
 /* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not

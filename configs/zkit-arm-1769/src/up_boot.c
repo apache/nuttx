@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/zkit-arm-1769/src/up_boot.c
- * arch/arm/src/board/up_boot.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
@@ -47,6 +46,7 @@
 
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -55,7 +55,7 @@
 #include "zkitarm_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

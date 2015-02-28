@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4e-ek/src/sam_leds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -54,7 +55,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* The SAM4E-EK board has three, user-controllable LEDs labelled D2 (blue),
  * D3 (amber), and D4 (green) on the board.  Usage of these LEDs is defined

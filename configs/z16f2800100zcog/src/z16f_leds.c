@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/z16f2800100zcog/z16f_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,13 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

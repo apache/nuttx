@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4s-xplained/src/sam_boot.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 201, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+
+#include <nuttx/board.h>
 
 #include "sam4s-xplained.h"
 

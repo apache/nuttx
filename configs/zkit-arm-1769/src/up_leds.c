@@ -1,6 +1,5 @@
 /****************************************************************************
  * configs/zkit-arm-1769/src/up_leds.c
- * arch/arm/src/board/up_leds.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
@@ -48,6 +47,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -59,7 +59,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG

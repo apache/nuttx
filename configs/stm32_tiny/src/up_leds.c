@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32_tiny/src/up_leds.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -52,7 +53,7 @@
 #include "stm32_tiny-internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG

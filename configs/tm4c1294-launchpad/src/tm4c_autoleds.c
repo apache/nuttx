@@ -41,6 +41,7 @@
 
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "tiva_gpio.h"

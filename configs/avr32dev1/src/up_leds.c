@@ -1,8 +1,7 @@
 /****************************************************************************
  * configs/avr32dev1/src/up_leds.c
- * arch/avr/src/board/up_leds.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
+
 #include "at32uc3_internal.h"
 #include "avr32dev1_internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
