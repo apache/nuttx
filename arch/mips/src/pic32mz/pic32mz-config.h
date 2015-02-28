@@ -206,24 +206,29 @@
 #  error "Unsupported BOARD_PLL_IDIV"
 #endif
 
-/* System PLL Divided Input Clock Frequency Range bits */
+/* System PLL Divided Input Clock Frequency Range bits.
+ * REVISIT: Based on the name of this configuration value, the following
+ * comparisons do not seem correct (the input clock is not divided).
+ * These comparisons are used because this results in settings that match
+ * Microchip sample code.
+ */
 
-#if (BOARD_PLL_INPUT / BOARD_PLL_IDIV) < 5000000
+#if BOARD_PLL_INPUT < 5000000
 #  error BOARD_PLL_INPUT / BOARD_PLL_IDIV too low
-#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_BYPASS /* < 5 MHz */
-#elif (BOARD_PLL_INPUT / BOARD_PLL_IDIV) < 9000000
-#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_5_10MHZ /* 5-10 MHz */
-#elif (BOARD_PLL_INPUT / BOARD_PLL_IDIV) < 14500000
-#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_8_16MHZ /* 8-16 MHz */
-#elif (BOARD_PLL_INPUT / BOARD_PLL_IDIV) < 23500000
+#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_BYPASS   /* < 5 MHz */
+#elif BOARD_PLL_INPUT < 10000000
+#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_5_10MHZ  /* 5-10 MHz */
+#elif BOARD_PLL_INPUT < 16000000
+#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_8_16MHZ  /* 8-16 MHz */
+#elif BOARD_PLL_INPUT < 26000000
 #  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_13_26MHZ /* 13-26 MHz */
-#elif (BOARD_PLL_INPUT / BOARD_PLL_IDIV) < 39000000
+#elif BOARD_PLL_INPUT < 42000000
 #  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_21_42MHZ /* 21-42 MHz */
-#elif (BOARD_PLL_INPUT / BOARD_PLL_IDIV) < 64000000
+#elif BOARD_PLL_INPUT <= 64000000
 #  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_34_64MHZ /* 36-64 MHz */
 #else
-#  error BOARD_PLL_INPUT / BOARD_PLL_IDIV too high
-#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_34_64MHZ /* 36-64 MHz */
+#  error BOARD_PLL_INPUT too high
+#  define CONFIG_PIC32MZ_FPLLRNG  DEVCFG2_FPLLRNG_34_64MHZ /* > 64 MHz */
 #endif
 
 /* PLL multiplier */
