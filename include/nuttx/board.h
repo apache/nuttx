@@ -139,9 +139,16 @@ void board_initialize(void);
  *   things as, for example, configure GPIO pins to drive the LEDs and also
  *   putting the LEDs in their correct initial state.
  *
- *   In most architectures, board_led_initialize() is called fromo board-
- *   specific initialization logic.  But there are a few architectures where
- *   this initialization function is called from shared chip logic.
+ *   NOTE: In most architectures, board_led_initialize() is called from
+ *   board-specific initialization logic.  But there are a few architectures
+ *   where this initialization function is still called from common chip
+ *   architecture logic.  This interface is not, however, a common board
+ *  interface in any event.
+ *
+ *   WARNING: This interface name will eventually be removed; do not use it
+ *   in new board ports.  New implementations should use the naming
+ *   conventions for "Microprocessor-Specific Interfaces" or the "Board-
+ *   Specific Interfaces" as described above.
  *
  * Input Parameters:
  *   None
