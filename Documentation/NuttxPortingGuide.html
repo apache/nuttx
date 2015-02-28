@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 15, 2014</p>
+      <p>Last Updated: February 27, 2015</p>
     </td>
   </tr>
 </table>
@@ -4069,12 +4069,9 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
 <h3><a name="ledapis">4.9.3 Common LED interfaces</a></h3>
 
 <p>
-  The <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code> probably has definitions
-  like:
+  The <code>include/nuttx/board.h</code> has declarations like:
 </p>
 <ul><pre>
-/* Defined in board/up_leds.c */
-
 #ifdef CONFIG_ARCH_LEDS
 void board_led_initialize(void);
 void board_led_on(int led);
