@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32vldiscovery/src/stm32_buttons.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Freddie Chopin <freddie_chopin@op.pl>
  *
@@ -43,6 +43,7 @@
 #include <stdint.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "stm32vldiscovery.h"

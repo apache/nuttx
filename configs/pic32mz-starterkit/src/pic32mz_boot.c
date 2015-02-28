@@ -42,6 +42,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 
 #include "pic32mz-starterkit.h"
 

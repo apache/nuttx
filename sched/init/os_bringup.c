@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/init.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>

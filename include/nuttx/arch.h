@@ -50,6 +50,8 @@
  *    definitions provide the common interface between NuttX and the
  *    architecture-specific implementation in arch/
  *
+ *    This chip related declarations are retained in this header file.
+ *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
  *    Greek letter micron: µ. So it would be µP which is a common shortening
  *    of the word microprocessor.
@@ -73,6 +75,8 @@
  *    with board_ and should be prototyped in this header file. These
  *    board_ definitions provide the interface between the board-level
  *    logic and the architecture-specific logic.
+ *
+ *    Board related declarations are retained the file include/nuttx/board.h.
  *
  *    There is also a configs/<board>/include/board.h header file that
  *    can be used to communicate other board-specific information between
@@ -183,23 +187,6 @@ EXTERN volatile bool g_rtc_enabled;
  ****************************************************************************/
 
 void up_initialize(void);
-
-/****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void);
-#endif
 
 /****************************************************************************
  * Name: up_idle
@@ -1776,67 +1763,6 @@ size_t  up_check_intstack_remain(void);
 /****************************************************************************
  * Board-specific button interfaces exported by the board-specific logic
  ****************************************************************************/
-
-/****************************************************************************
- * Name: board_button_initialize
- *
- * Description:
- *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
- *
- *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
- *   will be defined.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: board_buttons
- *
- * Description:
- *   After board_button_initialize() has been called, board_buttons() may be
- *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  A bit set to
- *   "1" means that the button is depressed; a bit set to "0" means that
- *   the button is released.  The correspondence of the each button bit
- *   and physical buttons is board-specific.
- *
- *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports button interfaces, then
- *   CONFIG_ARCH_BUTTONS will be defined
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-uint8_t board_buttons(void);
-#endif
-
-/****************************************************************************
- * Name: board_button_irq
- *
- * Description:
- *   This function may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource.
- *   The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
- *
- *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports any button interfaces, then
- *   CONFIG_ARCH_BUTTONS will be defined; If the board supports interrupt
- *   buttons, then CONFIG_ARCH_IRQBUTTONS will also be defined.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler);
-#endif
 
 /****************************************************************************
  * Name: up_rtcinitialize

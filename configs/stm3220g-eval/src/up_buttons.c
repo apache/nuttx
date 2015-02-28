@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3220g-eval/src/board_buttons.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <stdint.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "stm3220g-internal.h"
@@ -49,7 +50,7 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
