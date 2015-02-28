@@ -179,6 +179,17 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 #ifndef __ASSEMBLY__
 
+/****************************************************************************
+ * Name: x86_boardinitialize
+ *
+ * Description:
+ *   This function must be provided by the board-specific logic in the
+ *   directory configs/<board-name>/src/.
+ *
+ ****************************************************************************/
+
+void x86_boardinitialize(void);
+
 /* Defined in files with the same name as the function */
 
 extern void up_boot(void);

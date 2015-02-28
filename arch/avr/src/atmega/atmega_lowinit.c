@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/avr/src/atmega/atmega_lowinit.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,7 +153,7 @@ void up_lowinit(void)
 
   /* Perform board-level initialization */
 
-  up_boardinitialize();
+  atmega_boardinitialize();
 }
 
 

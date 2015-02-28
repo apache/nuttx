@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/amber/src/up_boot.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
 #include "amber_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -62,16 +62,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_boardinitialize
+ * Name: atmega_boardinitialize
  *
  * Description:
  *   All ATMega architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
+ *   point is called early in the initialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void up_boardinitialize(void)
+void atmega_boardinitialize(void)
 {
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
    * function atmega_spiinitialize() has been brought into the link.

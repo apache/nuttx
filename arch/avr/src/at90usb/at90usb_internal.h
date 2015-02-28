@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/at90usb/at90usb_internal.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -84,11 +85,11 @@ extern "C" {
  * Name: up_clkinit
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
+ *   Initialize clock/PLL settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
-EXTERN void up_clkinitialize(void);
+void up_clkinitialize(void);
 
 /****************************************************************************
  * Name: usart1_reset
@@ -98,7 +99,7 @@ EXTERN void up_clkinitialize(void);
  *
  ****************************************************************************/
 
-EXTERN void usart1_reset(void);
+void usart1_reset(void);
 
 /****************************************************************************
  * Name: usart1_configure
@@ -108,30 +109,30 @@ EXTERN void usart1_reset(void);
  *
  ****************************************************************************/
 
-EXTERN void usart1_configure(void);
+void usart1_configure(void);
 
 /****************************************************************************
  * Name: up_consoleinit
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the initializeation sequence to configure the serial console
- *   uart (only).
+ *   early in the initialization sequence to configure the serial console
+ *   UART (only).
  *
  ****************************************************************************/
 
-EXTERN void up_consoleinit(void);
+void up_consoleinit(void);
 
 /****************************************************************************
- * Name: up_boardinit
+ * Name: at90usb_boardinitialize
  *
  * Description:
  *   This function must be provided by the board-specific logic in the
- *   directory configs/<board-name>/up_boot.c.
+ *   directory configs/<board-name>/src/.
  *
  ****************************************************************************/
 
-EXTERN void up_boardinitialize(void);
+void at90usb_boardinitialize(void);
 
 /****************************************************************************
  * Name: gpio_irqinitialize
@@ -150,7 +151,7 @@ EXTERN void up_boardinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN void weak_function gpio_irqinitialize(void);
+void weak_function gpio_irqinitialize(void);
 #endif
 
 /****************************************************************************
@@ -166,7 +167,7 @@ EXTERN void weak_function gpio_irqinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
+int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
 #endif
 
 /****************************************************************************
@@ -182,7 +183,7 @@ EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN void gpio_irqenable(int irq);
+void gpio_irqenable(int irq);
 #endif
 
 /*****************************************************************************
@@ -198,7 +199,7 @@ EXTERN void gpio_irqenable(int irq);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN void gpio_irqdisable(int irq);
+void gpio_irqdisable(int irq);
 #endif
 
 #undef EXTERN
