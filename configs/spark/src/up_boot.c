@@ -78,7 +78,7 @@ void stm32_boardinitialize(void)
   board_led_initialize();
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_BUTTONS
+#ifdef CONFIG_ARCH_BUTTONS
   board_button_initialize();
 #endif
 
@@ -128,9 +128,11 @@ void board_initialize(void)
   nsh_archinitialize();
 #endif
 
-  /* CC3000 wireless initialization */
+  /* CC3000 wireless initialization
+   * Avoid Double registration if CONFIG_EXAMPLES_CC3000BASIC is defined
+   */
 
-#ifdef CONFIG_WL_CC3000
+#if defined(CONFIG_WL_CC3000) && !defined(CONFIG_EXAMPLES_CC3000BASIC)
   wireless_archinitialize(0);
 #endif
 }
