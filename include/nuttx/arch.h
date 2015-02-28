@@ -1938,28 +1938,6 @@ int up_rtc_settime(FAR const struct timespec *tp);
 xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
 #endif
 
-/************************************************************************************
- * Relay control functions
- *
- * Description:
- *   Non-standard functions for relay control.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_RELAYS
-void up_relaysinit(void);
-void relays_setstat(int relays, bool stat);
-bool relays_getstat(int relays);
-void relays_setstats(uint32_t relays_stat);
-uint32_t relays_getstats(void);
-void relays_onoff(int relays, uint32_t mdelay);
-void relays_onoffs(uint32_t relays_stat, uint32_t mdelay);
-void relays_resetmode(int relays);
-void relays_powermode(int relays);
-void relays_resetmodes(uint32_t relays_stat);
-void relays_powermodes(uint32_t relays_stat);
-#endif
-
 /****************************************************************************
  * Debug interfaces exported by the architecture-specific logic
  ****************************************************************************/
