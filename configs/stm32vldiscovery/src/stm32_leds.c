@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32vldiscovery/src/stm32_leds.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Freddie Chopin <freddie_chopin@op.pl>
  *
@@ -44,8 +44,9 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
+#include <nuttx/board.h>
 #include <nuttx/power/pm.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"

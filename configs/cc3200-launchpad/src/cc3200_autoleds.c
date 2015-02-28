@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/cc3200/src/cc3200_autoleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Jim Ewing <jim@droidifi.com>
  *
@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/board.h>
 
 #include "cc3200_launchpad.h"
 

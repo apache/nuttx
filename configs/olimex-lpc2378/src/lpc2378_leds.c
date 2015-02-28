@@ -6,7 +6,7 @@
  *
  * This is part of the NuttX RTOS and based on the LPC2148 port:
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
+#include <nuttx/board.h>
 
 #include "chip.h"
 #include "up_arch.h"

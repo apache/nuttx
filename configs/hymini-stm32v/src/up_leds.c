@@ -1,8 +1,7 @@
 /****************************************************************************
  * configs/hymini-stm32v/src/up_leds.c
- * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -45,6 +44,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

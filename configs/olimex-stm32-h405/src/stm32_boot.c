@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-stm32-h405/src/stm32_boot.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,17 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
+
 #include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
+
 #include "olimex-stm32-h405.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

@@ -1,6 +1,5 @@
 /****************************************************************************
  * configs/mikroe_stm32f4/src/up_idle.c
- * arch/arm/src/board/up_idle.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -46,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 

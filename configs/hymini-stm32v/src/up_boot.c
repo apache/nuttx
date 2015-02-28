@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/hymini-stm32v/src/up_boot.c
- * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -43,13 +42,14 @@
 #include <nuttx/spi/spi.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "hymini_stm32v-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

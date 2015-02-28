@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4l-xplained/src/sam_autoleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 201, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@
  *   LED_PANIC           The system has crashed  FLASH
  *
  * Thus is LED0 is statically on, NuttX has successfully  booted and is,
- * apparently, running normmally.  If LED0 is flashing at approximately
+ * apparently, running normally.  If LED0 is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
@@ -69,6 +69,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "sam_gpio.h"

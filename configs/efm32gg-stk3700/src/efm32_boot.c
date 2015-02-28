@@ -1,7 +1,7 @@
 /*****************************************************************************
  * configs/efm32gg-stk3700/src/efm32_boot.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/board.h>
 
 #include "efm32_gpio.h"
 #include "efm32_start.h"

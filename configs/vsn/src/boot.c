@@ -2,7 +2,7 @@
  * configs/vsn/src/boot.c
  * arch/arm/src/board/boot.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
  *
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -37,14 +37,13 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Gregory Nutt, Uros Platise
- *  \brief VSN Button
- */
+#include <nuttx/config.h>
 
 #include <debug.h>
-#include "vsn.h"
 
+#include <nuttx/board.h>
+
+#include "vsn.h"
 
 /************************************************************************************
  * Public Functions
@@ -53,7 +52,7 @@
 /** Initialize Board
  *
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  **/

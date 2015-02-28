@@ -131,14 +131,14 @@ void lpc43_ledinit(void)
 {
   /* Configure LED pin as a GPIO outputs */
 
-  led_dumppins("board_led_initialize() Entry)");
+  led_dumppins("lpc43_ledinit() Entry)");
 
   /* Configure LED pin as a GPIO, then configure GPIO as an outputs */
 
   lpc43_pin_config(PINCONFIG_LED);
   lpc43_gpio_config(GPIO_LED);
 
-  led_dumppins("board_led_initialize() Exit");
+  led_dumppins("lpc43_ledinit() Exit");
 }
 
 /****************************************************************************

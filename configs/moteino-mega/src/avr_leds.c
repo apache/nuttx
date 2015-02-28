@@ -43,6 +43,8 @@
 #include <debug.h>
 #include <avr/io.h>
 
+#include <nuttx/board.h>
+
 #include "up_arch.h"
 #include "up_internal.h"
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/z8encore000zco/src/z8_leds.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,12 +46,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+
+#include <nuttx/board.h>
 #include <arch/board/board.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Port G:  Anode Bit Assignments (1 enables) */

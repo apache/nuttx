@@ -1,8 +1,7 @@
 /****************************************************************************
  * configs/mx1ads/src/up_leds.c
- * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/board.h>
 
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

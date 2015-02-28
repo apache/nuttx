@@ -43,8 +43,8 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
-#include <nuttx/power/pm.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -236,7 +236,7 @@ void efm32_led_pminitialize(void)
 
   int ret = pm_register(&g_ledscb);
   if (ret != OK)
-  {
+    {
       board_led_on(LED_ASSERTION);
     }
 }
