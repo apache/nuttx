@@ -449,7 +449,7 @@
 
 #define DEVCFG0_DEBUG_SHIFT      (0)       /* Bits 0-1: Background Debugger Enable bits */
 #define DEVCFG0_DEBUG_MASK       (3 << DEVCFG0_DEBUG_SHIFT)
-#  define DEVCFG0_DEBUG_ENABLED  (1 << DEVCFG0_DEBUG_SHIFT) /* Debugger is enabled */
+#  define DEVCFG0_DEBUG_ENABLED  (2 << DEVCFG0_DEBUG_SHIFT) /* Debugger is enabled */
 #  define DEVCFG0_DEBUG_DISABLED (3 << DEVCFG0_DEBUG_SHIFT) /* Debugger is disabled */
 #define DEVCFG0_JTAGEN           (1 << 2)  /* Bit 2: JTAG Enable bit(1) */
 #define DEVCFG0_ICESEL_SHIFT     (3)       /* Bits 3-4: ICE Communication Channel Select bits */
