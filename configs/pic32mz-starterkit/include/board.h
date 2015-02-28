@@ -52,15 +52,28 @@
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
-/* Crystal frequencies */
+/* Crystal frequencies
+ *
+ * - A 24 MHz oscillator circuit (Y4) is connected to the on-board
+ *   microcontroller. This oscillator circuit functions as the controller’s
+ *   primary oscillator. Depending on which is populated on the starter kit
+ *   board, a 24 MHz crystal (Y1) may be used instead of Y4.
+ * - The starter kit also has provisions for an external secondary 32 kHz
+ *   oscillator (Y2); however, this is not populated.
+ */
 
-#define BOARD_POSC_FREQ        24000000  /* Primary OSC XTAL frequency (24MHz) */
-#define BOARD_SOSC_FREQ        32768     /* Secondary OSC XTAL frequency (32.768KHz) */
+#define BOARD_POSC_FREQ        24000000  /* Primary OSC XTAL frequency (Y4, 24MHz) */
+#define BOARD_SOSC_FREQ        32000     /* Secondary OSC XTAL frequency (Y2, 32KHz) */
 
-/* Oscillator modes */
+/* Oscillator modes.
+ *
+ * - BOARD_POSC_ECMODE:  An external oscillator is connected to OSC1/OSC2
+ * - BOARD_POSC_HSMODE:  An external crystal or resonator is connected to
+ *                       OSC1/OSC2
+ */
 
 #define BOARD_FNOSC_SPLL       1         /* Use system PLL */
-#define BOARD_POSC_HSMODE      1         /* High-speed crystal (HS) mode */
+#define BOARD_POSC_ECMODE      1         /* External clock (EC) mode */
 #define BOARD_POSC_SWITCH      1         /* Enable clock switching */
 #undef  BOARD_POSC_FSCM                  /* Disable clock monitoring */
 
