@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_internal.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,7 +165,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -182,7 +183,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void up_clkinitialize(void);
+void up_clkinitialize(void);
 
 /****************************************************************************
  * Name: usart_reset
@@ -192,7 +193,7 @@ EXTERN void up_clkinitialize(void);
  *
  ****************************************************************************/
 
-EXTERN void usart_reset(uintptr_t usart_base);
+void usart_reset(uintptr_t usart_base);
 
 /****************************************************************************
  * Name: usart_configure
@@ -215,18 +216,18 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
  *
  ****************************************************************************/
 
-EXTERN void up_consoleinit(void);
+void up_consoleinit(void);
 
 /****************************************************************************
- * Name: up_boardinit
+ * Name: at32uc3_boardinitialize
  *
  * Description:
  *   This function must be provided by the board-specific logic in the
- *   directory configs/<board-name>/up_boot.c.
+ *   directory configs/<board-name>/src.
  *
  ****************************************************************************/
 
-EXTERN void up_boardinitialize(void);
+void at32uc3_boardinitialize(void);
 
 /****************************************************************************
  * Name: at32uc3_configgpio
@@ -236,7 +237,7 @@ EXTERN void up_boardinitialize(void);
  *
  ****************************************************************************/
 
-EXTERN int at32uc3_configgpio(uint16_t cfgset);
+int at32uc3_configgpio(uint16_t cfgset);
 
 /****************************************************************************
  * Name: at32uc3_gpiowrite
@@ -246,7 +247,7 @@ EXTERN int at32uc3_configgpio(uint16_t cfgset);
  *
  ****************************************************************************/
 
-EXTERN void at32uc3_gpiowrite(uint16_t pinset, bool value);
+void at32uc3_gpiowrite(uint16_t pinset, bool value);
 
 /****************************************************************************
  * Name: at32uc3_gpioread
@@ -256,7 +257,7 @@ EXTERN void at32uc3_gpiowrite(uint16_t pinset, bool value);
  *
  ****************************************************************************/
 
-EXTERN bool at32uc3_gpioread(uint16_t pinset);
+bool at32uc3_gpioread(uint16_t pinset);
 
 /****************************************************************************
  * Name: gpio_irqinitialize
@@ -277,7 +278,7 @@ EXTERN bool at32uc3_gpioread(uint16_t pinset);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-EXTERN void weak_function gpio_irqinitialize(void);
+void weak_function gpio_irqinitialize(void);
 #endif
 
 /****************************************************************************
@@ -295,7 +296,7 @@ EXTERN void weak_function gpio_irqinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
+int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
 #endif
 
 /****************************************************************************
@@ -313,7 +314,7 @@ EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-EXTERN void gpio_irqenable(int irq);
+void gpio_irqenable(int irq);
 #endif
 
 /*****************************************************************************
@@ -331,7 +332,7 @@ EXTERN void gpio_irqenable(int irq);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-EXTERN void gpio_irqdisable(int irq);
+void gpio_irqdisable(int irq);
 #endif
 
 #undef EXTERN

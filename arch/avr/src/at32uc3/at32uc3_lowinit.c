@@ -101,7 +101,7 @@ void up_lowinit(void)
 
   /* Perform board-level initialization */
 
-  up_boardinitialize();
+  at32uc3_boardinitialize();
 }
 
 

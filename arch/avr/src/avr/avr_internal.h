@@ -146,7 +146,7 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  *   including up_spiinitialize()) are provided by common LPC17xx logic.  To use
  *   this common SPI logic on your board:
  *
- *   1. Provide logic in up_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in <arch>_boardinitialize() to configure SPI chip select
  *      pins.
  *   2. Provide avr_spiselect() and avr_spistatus() functions in your board-specific
  *      logic.  These functions will perform chip selection and status operations

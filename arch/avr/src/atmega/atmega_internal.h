@@ -71,7 +71,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -88,7 +89,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void up_clkinitialize(void);
+void up_clkinitialize(void);
 
 /****************************************************************************
  * Name: usart0_reset and usart1_reset
@@ -98,8 +99,8 @@ EXTERN void up_clkinitialize(void);
  *
  ****************************************************************************/
 
-EXTERN void usart0_reset(void);
-EXTERN void usart1_reset(void);
+void usart0_reset(void);
+void usart1_reset(void);
 
 /****************************************************************************
  * Name: usart0_configure and usart1_configure
@@ -109,8 +110,8 @@ EXTERN void usart1_reset(void);
  *
  ****************************************************************************/
 
-EXTERN void usart0_configure(void);
-EXTERN void usart1_configure(void);
+void usart0_configure(void);
+void usart1_configure(void);
 
 /****************************************************************************
  * Name: up_consoleinit
@@ -122,18 +123,18 @@ EXTERN void usart1_configure(void);
  *
  ****************************************************************************/
 
-EXTERN void up_consoleinit(void);
+void up_consoleinit(void);
 
 /****************************************************************************
- * Name: up_boardinit
+ * Name: atmega_boardinitialize
  *
  * Description:
  *   This function must be provided by the board-specific logic in the
- *   directory configs/<board-name>/up_boot.c.
+ *   directory configs/<board-name>/src.
  *
  ****************************************************************************/
 
-EXTERN void up_boardinitialize(void);
+void atmega_boardinitialize(void);
 
 /****************************************************************************
  * Name: gpio_irqinitialize
@@ -152,7 +153,7 @@ EXTERN void up_boardinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN void weak_function gpio_irqinitialize(void);
+void weak_function gpio_irqinitialize(void);
 #endif
 
 /****************************************************************************
@@ -168,7 +169,7 @@ EXTERN void weak_function gpio_irqinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
+int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
 #endif
 
 /****************************************************************************
@@ -184,7 +185,7 @@ EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN void gpio_irqenable(int irq);
+void gpio_irqenable(int irq);
 #endif
 
 /*****************************************************************************
@@ -200,7 +201,7 @@ EXTERN void gpio_irqenable(int irq);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR_GPIOIRQ
-EXTERN void gpio_irqdisable(int irq);
+void gpio_irqdisable(int irq);
 #endif
 
 #undef EXTERN

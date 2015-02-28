@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/x86/src/qemu/qemu_lowsetup.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,6 +135,6 @@ void up_lowsetup(void)
 
   /* Now perform board-specific initializations */
 
-  up_boardinitialize();
+  x86_boardinitialize();
 }
 
