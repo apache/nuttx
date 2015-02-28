@@ -103,15 +103,24 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 endif
 
+# Pick correct MIPS architecture selection
+
 ifeq ($(CONFIG_ARCH_MIPS_M14K),y)
   MIPS_MARCH = m14k
   MIPS_MPROCESSOR = elf32pic32mz
+else
+  MIPS_MARCH = 24kc
+  MIPS_MPROCESSOR = elf32pic32mx
+endif
+
+# Handle builds for the microMIPS ISA.  Interlinking may be
+# necessary to integrate with MIPS32 ISA libraries.
+
+ifeq ($(CONFIG_MIPS_MICROMIPS),y)
 # MIPS_MICROMIPS = -mmicromips
 # MIPS_MICROMIPS = -mmicromips -minterlink-mips16 -mno-jals
   MIPS_MICROMIPS = -mmicromips -minterlink-compressed
 else
-  MIPS_MARCH = 24kc
-  MIPS_MPROCESSOR = elf32pic32mx
   MIPS_MICROMIPS =
 endif
 

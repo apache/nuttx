@@ -42,11 +42,20 @@ config ARCH_MIPS_24KC
 config ARCH_MIPS_M14K
 	bool
 	default n
-	select ARCH_MIPS_MICROMIPS
+	select ARCH_HAVE_MICROMIPS
 
-config ARCH_MIPS_MICROMIPS
+config ARCH_HAVE_MICROMIPS
 	bool
 	default n
+
+config MIPS_MICROMIPS
+	bool "Use microMIPS ISA"
+	default n
+	depends on ARCH_HAVE_MICROMIPS
+	---help---
+		The processor supports both the MIPS32 ISA and the microMIPS ISA.
+		If this option is selected, the microMIPS ISA will be used.
+		Otherwise, the MIPS32 ISA will be used.
 
 config ARCH_FAMILY
 	string

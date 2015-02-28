@@ -102,7 +102,7 @@
 	.globl	vfork
 	.type	vfork, function
 	.set	nomips16
-#ifdef CONFIG_ARCH_MIPS_MICROMIPS
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
 #endif
 	.ent	vfork
