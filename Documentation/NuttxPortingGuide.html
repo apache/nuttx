@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 27, 2015</p>
+      <p>Last Updated: February 28, 2015</p>
     </td>
   </tr>
 </table>
@@ -4087,17 +4087,32 @@ void board_led_off(int led);
 <p>
 <ul>
   <li>
+  <p>
     <code>void board_led_initialize(void)</code> is called early in power-up initialization to initialize the LED hardware.
+  </p>
+  <small><blockquote>
+    <b>NOTE:</b> In most architectures, <code>board_led_initialize()</code> is called from board-specific initialization logic.
+    But there are a few architectures where this initialization function is still called from common chip architecture logic.
+    This interface is nott, however, a common board interface in any event.
+  </blockquote>
+  <blockquote>
+    <b>WARNING:</b> This interface name will eventually be removed; do not use it in new board ports.
+    New implementations should not use the naming convention for common board interfaces, but should instted use the naming conventions for microprocessor-specific interfaces or the board-specific interfaces (such as <code>stm32_led_initialize()</code>).
+  </blockquote></small>
   </li>
   <li>
+  <p>
     <code>board_led_on(int led)</code> is called to instantiate the LED presentation of the event.
     The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
+  </p>
   </li>
+  <p>
   <li>
     <code>board_led_off(int led</code>is called to terminate the LED presentation of the event.
     The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
     Note that only <code>LED_INIRQ</code>, <code>LED_SIGNAL</code>, <code>LED_ASSERTION</code>, and <code>LED_PANIC</code>
     indications are terminated.
+  </p>
   </li>
 </ul>
 
