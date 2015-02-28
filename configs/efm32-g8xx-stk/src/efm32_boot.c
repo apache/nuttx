@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
+
 #include "efm32_gpio.h"
 #include "efm32_start.h"
 #include "efm32-g8xx-stk.h"

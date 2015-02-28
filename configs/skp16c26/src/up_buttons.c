@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/skp16c26/src/board_buttons.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+
+#include <nuttx/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The SKP62C26 has 3 buttons control by bits 1, 2, and 3 in port 8. */

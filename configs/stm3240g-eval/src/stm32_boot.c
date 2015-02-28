@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm3240g-eval/src/stm32_boot.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+
+#include <nuttx/board.h>
 
 #include "stm3240g-eval.h"
 

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
