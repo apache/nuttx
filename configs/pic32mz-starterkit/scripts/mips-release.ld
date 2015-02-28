@@ -44,8 +44,19 @@ MEMORY
 	kseg0_progmem  (rx) : ORIGIN = 0x9d000000, LENGTH = 2048K
 
 	/* The PIC32MZ2048ECH144 and PIC32MZ2048ECM144 chips have 160Kb of boot
-	 * FLASH at physical address 0x1fc00000.  The initial reset vector is in
-	 * KSEG1, but all other accesses are in KSEG0.
+	 * FLASH:  80Kb at physical address 0x1fc4000 (Boot Flash 1, boot1) and
+	 * 80Kb at physical address 0x1fc60000 (Boot Flash 2, boot2).  Either
+	 * may be mappled to the lower boot alias region (0x1fc00000,
+	 * boolalias1) or the upper boot alias region (0x1fc20000, bootalias2).
+	 * This linker script assumes that Boot Flash 1 is mapped to the lower
+	 * alias region and Boot Flash 2 to the upper region.
+	 *
+	 * NOTE: This linker script simply writes into the lower boot alias,
+	 * whichever boot FLASH that may correspond to.  The other boot FLASH
+	 * is simply ignored.
+	 *
+	 * The initial reset vector is in KSEG1, but all other accesses are in
+	 * KSEG0.
 	 *
 	 *   REGION        PHYSICAL   KSEG   SIZE
 	 *   DESCRIPTION   START ADDR        (BYTES)
@@ -85,11 +96,11 @@ MEMORY
 	 * of data memory at physical address 0x00000000.  Since the PIC32MZ
 	 * has no data cache, this memory is always accessed through KSEG1.
 	 *
-	 * When used with MPLAB, we need to set aside 512 bytes of memory
-	 * for use by MPLAB.
+	 * When used with MPLABX, we need to set aside 512 bytes of memory
+	 * for use by MPLABX and 128 for DSP register storage.
 	 */
 
-	kseg1_datamem (w!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 512
+	kseg1_datamem (w!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
 }
 
 OUTPUT_FORMAT("elf32-littlemips")
