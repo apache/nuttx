@@ -157,14 +157,17 @@
 	.align	2
 	.set	noreorder
 	.set	nomips16
-	.set	micromips
 	.ent	__reset
 
 __reset:
-	.word 0x10000004		/* 0x0000 */
+
+#ifdef CONFIG_MIPS_MICROMIPS
+	.set	micromips
+
+	.word	0x10000004		/* 0x0000 */
 							/*   MIPS32:    Branch forward 0x14 bytes   */
 							/*   MicroMIPS: ADDI32 $0, $0, 0x0007 (NOP) */
-	.word 0x00000000		/* 0x0004 */
+	.word	0x00000000		/* 0x0004 */
 							/*   MIPS32:    NOP   */
 							/*   MicroMIPS: NOP */
 
@@ -172,8 +175,6 @@ __reset:
 	 * preceding instructions are all NOP in that case and we fall through
 	 * to here.  Otherwise, we branched to __reset_switch_isa
 	 */
-
-	.set    micromips
 
 __reset_micromips:
 
@@ -188,13 +189,20 @@ __reset_micromips:
 	 * interpreted as a branch to this location.
 	 */
 
-	.align 2
-	.set nomicromips
+	.align	2
+	.set	nomicromips
 
 __reset_halt:
 	b		__reset_halt	/* 0x0014 <- Branch target */
 	nop
+#else
+	/* Just jump to the startup initialization code */
 
+	.set nomicromips
+	la		k0, __start
+	jr		k0
+	nop
+#endif
 	.end	__reset
 
 /****************************************************************************
@@ -216,7 +224,9 @@ __reset_halt:
 
 	.section .gen_excpt,"ax",@progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_gen_exception
 
 _gen_exception:
@@ -246,7 +256,9 @@ _gen_exception:
 
 	.section .ebase_excpt,"ax",@progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_ebase_exception
 
 _ebase_exception:
@@ -272,7 +284,9 @@ _ebase_exception:
 
 	.section .bev_excpt,"ax",@progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_bev_exception
 
 _bev_exception:
@@ -298,7 +312,9 @@ _bev_exception:
 
 	.section .int_excpt,"ax",@progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_int_exception
 
 _int_exception:
@@ -326,7 +342,9 @@ _int_exception:
 
 	.section .start, "ax", @progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	__start
 
 __start:
@@ -535,7 +553,9 @@ __start:
 
 	.section .bev_handler, "ax", @progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_exception_handler
 
 _exception_handler:
@@ -562,7 +582,9 @@ _exception_handler:
 
 	.section .int_handler, "ax", @progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_int_handler
 
 _int_handler:
@@ -590,7 +612,9 @@ _int_handler:
 #ifdef CONFIG_PIC32MZ_NMIHANDLER
 	.section .nmi_handler, "ax", @progbits
 	.set	noreorder
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	_nmi_handler
 
 _nmi_handler:
@@ -622,7 +646,9 @@ _nmi_handler:
  ****************************************************************************/
 
 	.text
+#ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
+#endif
 	.ent	__start_nuttx
 
 __start_nuttx:
