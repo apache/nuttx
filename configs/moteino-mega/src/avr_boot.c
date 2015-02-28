@@ -62,7 +62,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_boardinitialize
+ * Name: atmega_boardinitialize
  *
  * Description:
  *   All ATMega architectures must provide the following entry point.  This entry
@@ -71,7 +71,7 @@
  *
  ************************************************************************************/
 
-void up_boardinitialize(void)
+void atmega_boardinitialize(void)
 {
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
    * function atmega_spiinitialize() has been brought into the link.

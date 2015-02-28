@@ -63,16 +63,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_boardinitialize
+ * Name: at32uc3_boardinitialize
  *
  * Description:
- *   All AVR32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All AVR32 AT32UC3 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void up_boardinitialize(void)
+void at32uc3_boardinitialize(void)
 {
   /* Configure SPI chip selects */
 
