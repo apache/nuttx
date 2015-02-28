@@ -440,7 +440,7 @@
 #define DEVCFG1_DMTCNT_MASK      (31 << DEVCFG1_DMTCNT_SHIFT)
 #  define DEVCFG1_DMTCNT(n)      ((uint32_t)((n)-8) << DEVCFG1_DMTCNT_SHIFT) /* 2**n, n=8..31 */
 #  define DEVCFG1_DMTCNT_MIN     (0  << DEVCFG1_DMTCNT_SHIFT) /* 2**8   (256) */
-#  define DEVCFG1_DMTCNT_MAX     (12 << DEVCFG1_DMTCNT_SHIFT) /* 2**318 (2147483648) */
+#  define DEVCFG1_DMTCNT_MAX     (28 << DEVCFG1_DMTCNT_SHIFT) /* 2**318 (2147483648) */
 #define DEVCFG1_FDMTEN           (1 << 31) /* Bit 31: Deadman Timer enable bit */
 
 #define DEVCFG1_RWO              0x00003800 /* Bits 11-13: Reserved, write as one */
