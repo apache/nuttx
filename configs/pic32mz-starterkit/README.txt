@@ -32,8 +32,10 @@ Port Status
 
   3) However, I am still unable to write code to FLASH using MPLABX IDE.  It
   give me uninterpretable error messages, for example, saying that it could
-  ot write to FLASH location 0x1fc00480 "Expected 0xffffffff, found
-  0xffffffff). ???
+  not write to FLASH:
+
+    Address: 1fc00480 Expected Value: ffffffff Received Value: ffffffff
+    Failed to program device
 
   This could very well be some issue with my formatting of the nuttx.hex
   file, but I have no understanding of what the solution might be.
@@ -279,9 +281,18 @@ Where <subdir> is one of the following:
     2. Serial Output
 
        The OS test produces all of its test output on the serial console.
-       This configuration has UART1 enabled as a serial console.
+       This configuration has UART1 enabled as a serial console.  This
+       can easily be changed by reconfiguring with 'make menuconfig'.
 
     3. Toolchain
 
        By default, the Pinguino MIPs tool chain is used.  This toolchain
        selection can easily be changed with 'make menuconfig'.
+
+    4. Default configuration:  These are other things that you may want to
+       change in the configuration:
+
+       CONFIG_ARCH_CHIP_PIC32MZ2048ECM=y : Assumes part with Crypto Engine
+       CONFIG_PIC32MZ_DEBUGGER_ENABLE=n  : Debugger is disabled
+       CONFIG_PIC32MZ_TRACE_ENABLE=n     : Trace is disabled
+       CONFIG_PIC32MZ_JTAG_ENABLE=n      : JTAG is disabled
