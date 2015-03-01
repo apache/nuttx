@@ -2,8 +2,69 @@ configs/pic32mz-starterkit README
 ===============================
 
 This README file discusses the port of NuttX to the Microchip PIC32MZ
-Embedded Connectivity (EC) Starter Kit.  There are two configurations of the
-starter kit:
+Embedded Connectivity (EC) Starter Kit.
+
+Contents
+========
+
+  Port Status
+  Board Overview
+  On Board Debug Support
+  Creating Compatible NuttX HEX files
+  Serial Console
+  LEDs
+  Configurations
+
+Port Status
+===========
+
+  As of this writing (2015-03-01), the basic port is complete including
+  minimal support for the NuttShell (NSH) over UART1.  No testing has yet
+  been performed due to seemingly insurmountable debug problems:
+
+  1) On my test platform (Windows 8.1), Neither MPLABX IDE nor IPE recognize
+  the on-board OpenHCD debugger.  It appears completely useless to me.
+
+  2) By removing jumper JP2, I can disable the on-board OpenHCD debugger an
+  enable the RJ11 debug connector.  My ICD 3 does seems to work properly
+  using this configuration -- at least in the sense that it is recognized by
+  both MPLABX IDE and IPE.
+
+  3) However, I am still unable to write code to FLASH using MPLABX IDE.  It
+  give me uninterpretable error messages, for example, saying that it could
+  ot write to FLASH location 0x1fc00480 "Expected 0xffffffff, found
+  0xffffffff). ???
+
+  This could very well be some issue with my formatting of the nuttx.hex
+  file, but I have no understanding of what the solution might be.
+
+  4) I can write successfully using that same nuttx.hex file using MPLABX
+  IPE program.  No errors are observed and the flash content verifies
+  correctly.  But NuttX does not run.  I need a debugger to understand why.
+
+  5) I thought I might be able to write the flash image using MPLABX IPE,
+  then debug the flash image using MPLABX IDE.  But no, MPLABX IPE insists
+  on clearing the DEVCFG0 DEBUG bit whenever it writes the flash image and,
+  as a result, MPLABX IDE will always complain the board is not ready for
+  debugging.
+
+  6) My last hope is to use a Segger J-Link.  I can configure the PIC32MZ
+  to enable JTAG and the J-Link does support PIC32 debug.  However, I need
+  a 20-pin JTAG to either a 14-pin MIPS connector or a Microchip RJ11
+  connector.  Living in Costa Rica, those parts are not readily available.
+  I have a 20- to 14-pin JTAG adapter in transit, but living in Costa Rica
+  I don't expect to see that for around three weeks.  In the mean time, I
+  am dead in the water.
+
+  Given the way things have been going, I am not at all optimistic that the
+  job will become do-able, even after I have the adapter in hand.  Microchip
+  could certainly have made life easier on this one.
+
+Board Overview
+==============
+
+There are two configurations of the Microchip PIC32MZ Embedded Connectivity
+(EC) Starter Kit:
 
   1) The PIC32MZ Embedded Connectivity Starter Kit based on the
      PIC32MZ2048ECH144-I/PH chip (DM320006), and
@@ -40,15 +101,6 @@ Testing was performed with the following additional hardware:
   Multimedia Expansion Board (MEB, DM320005) or PIC32 I/O Expansion Board
   (DM320002).  These were previously used with the PIC32MX bringup.
 - Microchip Multimedia Expansion Board II (MEB II,  DM320005-2).
-
-Contents
-========
-
-  On Board Debug Support
-  Creating Compatible NuttX HEX files
-  Serial Console
-  LEDs
-  Configurations
 
 On Board Debug Support
 ======================
