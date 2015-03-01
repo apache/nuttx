@@ -364,6 +364,16 @@ config PIC32MZ_TRACE_ENABLE
 	---help---
 		Trace Enable
 
+config PIC32MZ_ECC_OPTION
+	int "PIC32 ECC control"
+	default 3
+	range 0 3
+	---help---
+		0: Flash ECC enabled (locked)
+		1: Dynamic Flash ECC enabled (locked) */
+		2: ECC / dynamic ECC disabled (locked) */
+		3: ECC / dynamic ECC disabled (writable) */
+
 endmenu
 
 menu "Device Configuration 1 (DEVCFG1)"
