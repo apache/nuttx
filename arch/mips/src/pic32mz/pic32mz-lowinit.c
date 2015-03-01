@@ -51,6 +51,7 @@
 #include "chip/pic32mz-prefetch.h"
 #include "chip/pic32mz-osc.h"
 
+#include "pic32mz-config.h"
 #include "pic32mz-lowconsole.h"
 #include "pic32mz-lowinit.h"
 
@@ -59,8 +60,12 @@
  ****************************************************************************/
 /* Maximum Frequencies ******************************************************/
 
-#define MAX_FLASH_ECC_HZ    66000000 /* Maximum FLASH speed (Hz) with ECC */
-#define MAX_FLASH_NOECC_HZ  83000000 /* Maximum FLASH speed (Hz) without ECC */
+#if CONFIG_PIC32MZ_ECC_OPTION == 3
+#  define MAX_FLASH_HZ       83000000 /* Maximum FLASH speed (Hz) without ECC */
+#else
+#  define MAX_FLASH_HZ       66000000 /* Maximum FLASH speed (Hz) with ECC */
+#endif
+
 #define MAX_PBCLK           100000000 /* Max peripheral bus speed (Hz) */
 #define MAX_PBCLK7          200000000 /* Max peripheral bus speed (Hz) for PBCLK7 */
 
@@ -199,15 +204,23 @@ static inline void pic32mz_prefetch(void)
   unsigned int residual;
   uint32_t regval;
 
-  /* Configure pre-fetch cache FLASH wait states (assuming ECC is enabled) */
+  /* Configure pre-fetch cache FLASH wait states (assuming ECC is enabled).
+   * REVISIT: Is this calculation right?  It seems like residual should be
+   *
+   *    residual = BOARD_CPU_CLOCK / nwaits
+   *
+   * This logic uses:
+   *
+   *    BOARD_CPU_CLOCK - nwaits * MAX_FLASH_HZ
+   */
 
   residual = BOARD_CPU_CLOCK;
   nwaits   = 0;
 
-  while (residual > MAX_FLASH_ECC_HZ)
+  while (residual > MAX_FLASH_HZ)
     {
       nwaits++;
-      residual -= MAX_FLASH_ECC_HZ;
+      residual -= MAX_FLASH_HZ;
     }
 
   DEBUGASSERT(nwaits < 8);
