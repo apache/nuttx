@@ -9909,4 +9909,7 @@
 	  (2015-03-01).
 	* include/nuttx/spi/spi.h:  Add an SPIDEV_USER so that there can be
 	  board-specific definitions of SPI devices (2015-03-01).
-
+	* arch/arm/src/stm32 and arch/arm/src/stm32: Adds architecture support
+	  for the STM32F372 and F373 (no board support yet). Only tested on
+	  STM32F373CC, but should work on the rest.  Contributed by  Marten
+	  Svanfeldt (2015-03-01).
