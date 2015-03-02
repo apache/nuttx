@@ -363,7 +363,8 @@ enum spi_dev_e
   SPIDEV_AUDIO_CTRL,    /* Select SPI audio codec device control port */
   SPIDEV_EEPROM,        /* Select SPI EEPROM device */
   SPIDEV_ACCELEROMETER, /* Select SPI Accelerometer device */
-  SPIDEV_BAROMETER      /* Select SPI Pressure/Barometer device */
+  SPIDEV_BAROMETER,     /* Select SPI Pressure/Barometer device */
+  SPIDEV_USER           /* Board-specific values start here */
 };
 
 /* Certain SPI devices may required differnt clocking modes */
