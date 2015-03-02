@@ -55,7 +55,8 @@
 #include "stm32_gpio.h"
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32_syscfg.h"
 #endif
 
@@ -420,7 +421,8 @@ int stm32_configgpio(uint32_t cfgset)
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
 int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
@@ -576,7 +578,7 @@ int stm32_configgpio(uint32_t cfgset)
             setting = GPIO_OSPEED_50MHz;
             break;
 
-#ifndef CONFIG_STM32_STM32F30XX
+#if !defined(CONFIG_STM32_STM32F30XX) && !defined(CONFIG_STM32_STM32F37XX)
           case GPIO_SPEED_100MHz:   /* 100 MHz High speed output */
             setting = GPIO_OSPEED_100MHz;
             break;
@@ -680,7 +682,8 @@ int stm32_unconfiggpio(uint32_t cfgset)
 #if defined(CONFIG_STM32_STM32F10XX)
   cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+      defined(CONFIG_STM32_STM32F40XX)
   cfgset |= GPIO_INPUT | GPIO_FLOAT;
 #else
 # error "Unsupported STM32 chip"
@@ -705,7 +708,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 #if defined(CONFIG_STM32_STM32F10XX)
   uint32_t offset;
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+      defined(CONFIG_STM32_STM32F40XX)
   uint32_t bit;
 #endif
   unsigned int port;
@@ -738,7 +742,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
       putreg32((1 << pin), base + offset);
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+      defined(CONFIG_STM32_STM32F40XX)
 
       if (value)
         {

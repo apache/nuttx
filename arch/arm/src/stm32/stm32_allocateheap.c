@@ -219,6 +219,31 @@
 #      endif
 #    endif
 
+/* All members of the STM32F37xxx families have 16-32 Kib ram in a single
+ * bank. No external RAM is supported (the F3 family has no FSMC).
+ */
+#elif defined(CONFIG_STM32_STM32F37XX)
+
+   /* Set the end of system SRAM */
+
+#  define SRAM1_END CONFIG_RAM_END
+
+   /* There is no FSMC */
+
+#  undef CONFIG_STM32_FSMC_SRAM
+
+   /* The STM32 F37xx has no CCM SRAM */
+
+#  undef CONFIG_STM32_CCMEXCLUDE
+#  define CONFIG_STM32_CCMEXCLUDE 1
+
+   /* Only one memory region can be support (internal SRAM) */
+
+#  if CONFIG_MM_REGIONS > 1
+#    error "CONFIG_MM_REGIONS > 1.  The STM32L15X has only one memory region."
+#  endif
+
+
 /* Most members of both the STM32F20xxx and STM32F40xxx families have 128Kib
  * in two banks:
  *
