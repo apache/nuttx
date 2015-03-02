@@ -9903,4 +9903,8 @@
 	  (2015-02-27).
 	* include/nuttx/board.h:  Remove common board function prototypes from
 	  other files and consolidate them in this new header file (2015-02-27).
+	* arch/mips/src/pic32mz/: Implement support IO port interrupts
+	  (2015-03-01).
+	* configs/pic32mz-starterkit/src: Add support for on-board buttons
+	  (2015-03-01).
 
