@@ -61,12 +61,12 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+/* This table can be used to map a port number to a IOPORT base address.  For
+ * example, an index of zero would correspond to IOPORTA, one with IOPORTB,
+ * etc.
+ */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const uintptr_t g_gpiobase[CHIP_NPORTS] =
+const uintptr_t g_gpiobase[CHIP_NPORTS] =
 {
   PIC32MZ_IOPORTA_K1BASE
 #if CHIP_NPORTS > 1
@@ -106,37 +106,37 @@ static const uintptr_t g_gpiobase[CHIP_NPORTS] =
  * Name: Inline PIN set field extractors
  ****************************************************************************/
 
-static inline bool pic32mz_output(uint16_t pinset)
+static inline bool pic32mz_output(pinset_t pinset)
 {
   return ((pinset & GPIO_OUTPUT) != 0);
 }
 
-static inline bool pic32mz_opendrain(uint16_t pinset)
+static inline bool pic32mz_opendrain(pinset_t pinset)
 {
   return ((pinset & GPIO_MODE_MASK) == GPIO_OPENDRAN);
 }
 
-static inline bool pic32mz_outputhigh(uint16_t pinset)
+static inline bool pic32mz_outputhigh(pinset_t pinset)
 {
   return ((pinset & GPIO_VALUE_MASK) != 0);
 }
 
-static inline bool pic32mz_value(uint16_t pinset)
+static inline bool pic32mz_value(pinset_t pinset)
 {
   return ((pinset & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
 }
 
-static inline unsigned int pic32mz_portno(uint16_t pinset)
+static inline unsigned int pic32mz_portno(pinset_t pinset)
 {
   return ((pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
 }
 
-static inline unsigned int pic32mz_pinno(uint16_t pinset)
+static inline unsigned int pic32mz_pinno(pinset_t pinset)
 {
   return ((pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
-static inline unsigned int pic32mz_analog(uint16_t pinset)
+static inline unsigned int pic32mz_analog(pinset_t pinset)
 {
   return ((pinset & GPIO_ANALOG_MASK) != 0);
 }
@@ -157,7 +157,7 @@ static inline unsigned int pic32mz_analog(uint16_t pinset)
  *
  ****************************************************************************/
 
-int pic32mz_configgpio(uint16_t cfgset)
+int pic32mz_configgpio(pinset_t cfgset)
 {
   unsigned int port = pic32mz_portno(cfgset);
   unsigned int pin  = pic32mz_pinno(cfgset);
@@ -242,7 +242,7 @@ int pic32mz_configgpio(uint16_t cfgset)
  *
  ****************************************************************************/
 
-void pic32mz_gpiowrite(uint16_t pinset, bool value)
+void pic32mz_gpiowrite(pinset_t pinset, bool value)
 {
   unsigned int port = pic32mz_portno(pinset);
   unsigned int pin  = pic32mz_pinno(pinset);
@@ -277,7 +277,7 @@ void pic32mz_gpiowrite(uint16_t pinset, bool value)
  *
  ****************************************************************************/
 
-bool pic32mz_gpioread(uint16_t pinset)
+bool pic32mz_gpioread(pinset_t pinset)
 {
   unsigned int port = pic32mz_portno(pinset);
   unsigned int pin  = pic32mz_pinno(pinset);

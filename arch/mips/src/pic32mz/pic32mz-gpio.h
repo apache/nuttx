@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/irq.h>
+#include <arch/pic32mz/irq.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -66,15 +68,9 @@
 #  define GPIO_VALUE_ONE  (1 << 12)
 #  define GPIO_VALUE_ZERO (0)
 
-#define GPIO_PULLUP       (1 << 11) /* Bit 11: Change notification pull-up */
-
-#define GPIO_INT_SHIFT    (10)      /* Bits 10-11: Interrupt mode */
-#define GPIO_INT_MASK     (3 << GPIO_INT_SHIFT)
-#  define GPIO_INT_NONE   (0 << GPIO_INT_SHIFT) /* Bit 00: No interrupt */
-#  define GPIO_INT        (1 << GPIO_INT_SHIFT) /* Bit 01: Change notification enable */
-#  define GPIO_PUINT      (3 << GPIO_INT_SHIFT) /* Bit 11: Pulled-up interrupt input */
-
-#define GPIO_PULLDOWN     (1 << 9) /* Bit 11: Change notification pull-down */
+#define GPIO_INTERRUPT    (1 << 11) /* Bit 11: Change notification enable */
+#define GPIO_PULLUP       (1 << 10) /* Bit 10: Change notification pull-up */
+#define GPIO_PULLDOWN     (1 << 9)  /* Bit 9:  Change notification pull-down */
 
 #define GPIO_PORT_SHIFT   (5)       /* Bits 5-8: Port number */
 #define GPIO_PORT_MASK    (15 << GPIO_PORT_SHIFT)
@@ -114,6 +110,8 @@
 
 #ifndef __ASSEMBLY__
 
+typedef uint16_t pinset_t;
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -126,6 +124,13 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/* This table can be used to map a port number to a IOPORT base address.  For
+ * example, an index of zero would correspond to IOPORTA, one with IOPORTB,
+ * etc.
+ */
+
+EXTERN const uintptr_t g_gpiobase[CHIP_NPORTS];
 
 /************************************************************************************
  * Public Function Prototypes
@@ -143,7 +148,7 @@ extern "C"
  *
  ************************************************************************************/
 
-int pic32mz_configgpio(uint16_t cfgset);
+int pic32mz_configgpio(pinset_t cfgset);
 
 /************************************************************************************
  * Name: pic32mz_gpiowrite
@@ -207,7 +212,7 @@ void pic32mz_gpioirqinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
-xcpt_t pic32mz_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
+xcpt_t pic32mz_gpioattach(uint32_t pinset, xcpt_t handler);
 #else
 #  define pic32mz_gpioattach(p,f) (NULL)
 #endif
@@ -221,7 +226,7 @@ xcpt_t pic32mz_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
-void pic32mz_gpioirqenable(unsigned int cn);
+void pic32mz_gpioirqenable(pinset_t pinset);
 #else
 #  define pic32mz_gpioirqenable(irq)
 #endif
@@ -235,7 +240,7 @@ void pic32mz_gpioirqenable(unsigned int cn);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
-void pic32mz_gpioirqdisable(unsigned int cn);
+void pic32mz_gpioirqdisable(pinset_t pinset);
 #else
 #  define pic32mz_gpioirqdisable(irq)
 #endif
