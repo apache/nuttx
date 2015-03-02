@@ -573,6 +573,8 @@ config ARCH_BOARD_PIC32MZ_STARTERKIT
 	bool "Microchip PIC32MZ Ethernet Starter Kit ((DM320006)"
 	depends on ARCH_CHIP_PIC32MZ2048ECH || ARCH_CHIP_PIC32MZ2048ECM
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if PIC32MZ_GPIOIRQ_PORTB
 	---help---
 		This is the port of NuttX to the Microchip PIC32MZ Embedded
 		Connectivity (EC) Starter Kit.  There are two configurations of the

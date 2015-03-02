@@ -229,6 +229,15 @@
  * are grounded when pressed.
  */
 
+#define BUTTON_SW1             0
+#define BUTTON_SW2             1
+#define BUTTON_SW3             2
+#define NUM_BUTTONS            3
+
+#define BUTTON_SW1_BIT         (1 << BUTTON_SW1)
+#define BUTTON_SW2_BIT         (1 << BUTTON_SW2)
+#define BUTTON_SW3_BIT         (1 << BUTTON_SW3)
+
 /* UARTS ********************************************************************/
 /* If the PIC32MZEC Adaptor Board is connected, then UART1 signals are
  * available at these locations on the adaptor board:

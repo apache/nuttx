@@ -128,9 +128,9 @@
  *   RH2  LED2  High illuminates (GREEN)
  */
 
-#define GPIO_LED_1   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTH|GPIO_PIN0)
-#define GPIO_LED_2   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTH|GPIO_PIN1)
-#define GPIO_LED_3   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTH|GPIO_PIN2)
+#define GPIO_LED_1  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTH | GPIO_PIN0)
+#define GPIO_LED_2  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTH | GPIO_PIN1)
+#define GPIO_LED_3  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTH | GPIO_PIN2)
 
 /* The PIC32MZ Ethernet Starter kit has 3 user push buttons labelled SW1-3
  * on the board:
@@ -145,6 +145,13 @@
  * up resistors. When Idle, the switches are pulled high (+3.3V), and they
  * are grounded when pressed.
  */
+
+#define GPIO_SW_1   (GPIO_INPUT | GPIO_INTERRUPT | GPIO_PULLUP | \
+                     GPIO_PORTB | GPIO_PIN12)
+#define GPIO_SW_2   (GPIO_INPUT | GPIO_INTERRUPT | GPIO_PULLUP | \
+                     GPIO_PORTB | GPIO_PIN13)
+#define GPIO_SW_3   (GPIO_INPUT | GPIO_INTERRUPT | GPIO_PULLUP | \
+                     GPIO_PORTB | GPIO_PIN14)
 
 /****************************************************************************
  * Public Types
