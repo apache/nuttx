@@ -67,38 +67,38 @@
 #define ADS125X_PGA32   0x05
 #define ADS125X_PGA64   0x06
 
-#define ADS125X_RDATA     0x01    //Read Data
-#define ADS125X_RDATAC    0x03    //Read Data Continuously
-#define ADS125X_SDATAC    0x0F    //Stop Read Data Continuously
-#define ADS125X_RREG      0x10    //Read from REG
-#define ADS125X_WREG      0x50    //Write to REG
-#define ADS125X_SELFCAL   0xF0    //Offset and Gain Self-Calibration
-#define ADS125X_SELFOCAL  0xF1    //Offset Self-Calibration
-#define ADS125X_SELFGCAL  0xF2    //Gain Self-Calibration
-#define ADS125X_SYSOCAL   0xF3    //System Offset Calibration
-#define ADS125X_SYSGCAL   0xF4    //System Gain Calibration
-#define ADS125X_SYNC      0xFC    //Synchronize the A/D Conversion
-#define ADS125X_STANDBY   0xFD    //Begin Standby Mode
-#define ADS125X_RESET     0xFE    //Reset to Power-Up Values
-#define ADS125X_WAKEUP    0xFF    //Completes SYNC and Exits Standby Mode
+#define ADS125X_RDATA     0x01    /* Read Data */
+#define ADS125X_RDATAC    0x03    /* Read Data Continuously */
+#define ADS125X_SDATAC    0x0F    /* Stop Read Data Continuously */
+#define ADS125X_RREG      0x10    /* Read from REG */
+#define ADS125X_WREG      0x50    /* Write to REG */
+#define ADS125X_SELFCAL   0xF0    /* Offset and Gain Self-Calibration */
+#define ADS125X_SELFOCAL  0xF1    /* Offset Self-Calibration */
+#define ADS125X_SELFGCAL  0xF2    /* Gain Self-Calibration */
+#define ADS125X_SYSOCAL   0xF3    /* System Offset Calibration */
+#define ADS125X_SYSGCAL   0xF4    /* System Gain Calibration */
+#define ADS125X_SYNC      0xFC    /* Synchronize the A/D Conversion */
+#define ADS125X_STANDBY   0xFD    /* Begin Standby Mode */
+#define ADS125X_RESET     0xFE    /* Reset to Power-Up Values */
+#define ADS125X_WAKEUP    0xFF    /* Completes SYNC and Exits Standby Mode */
 
 #ifndef CONFIG_ADS1255_FREQUENCY
-#define CONFIG_ADS1255_FREQUENCY  1000000
+#  define CONFIG_ADS1255_FREQUENCY  1000000
 #endif
 #ifndef CONFIG_ADS1255_MUX
-#define CONFIG_ADS1255_MUX      0x01
+#  define CONFIG_ADS1255_MUX      0x01
 #endif
 #ifndef CONFIG_ADS1255_CHMODE
-#define CONFIG_ADS1255_CHMODE   0x00
+#  define CONFIG_ADS1255_CHMODE   0x00
 #endif
 #ifndef CONFIG_ADS1255_BUFON
-#define CONFIG_ADS1255_BUFON    1
+#  define CONFIG_ADS1255_BUFON    1
 #endif
 #ifndef CONFIG_ADS1255_PGA
-#define CONFIG_ADS1255_PGA      ADS125X_PGA2
+#  define CONFIG_ADS1255_PGA      ADS125X_PGA2
 #endif
 #ifndef CONFIG_ADS1255_SPS
-#define CONFIG_ADS1255_SPS      50
+#  define CONFIG_ADS1255_SPS      50
 #endif
 
 /****************************************************************************
@@ -330,14 +330,15 @@ static int adc_interrupt(int irq, void *context)
  *   Initialize the selected adc port
  *
  * Input Parameter:
- *   Port number (for hardware that has mutiple adc interfaces)
+ *   Port number (for hardware that has multiple adc interfaces)
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid can device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned int devno)
+FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
+                                           unsigned int devno)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
 
@@ -348,4 +349,3 @@ FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned i
   return &g_adcdev;
 }
 #endif
-
