@@ -53,6 +53,7 @@
 #include "up_internal.h"
 
 #include "chip/pic32mz-int.h"
+#include "pic32mz-gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

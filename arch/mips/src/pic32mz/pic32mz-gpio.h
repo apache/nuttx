@@ -158,7 +158,7 @@ int pic32mz_configgpio(pinset_t cfgset);
  *
  ************************************************************************************/
 
-void pic32mz_gpiowrite(uint16_t pinset, bool value);
+void pic32mz_gpiowrite(pinset_t pinset, bool value);
 
 /************************************************************************************
  * Name: pic32mz_gpioread
@@ -168,7 +168,7 @@ void pic32mz_gpiowrite(uint16_t pinset, bool value);
  *
  ************************************************************************************/
 
-bool pic32mz_gpioread(uint16_t pinset);
+bool pic32mz_gpioread(pinset_t pinset);
 
 /************************************************************************************
  * Name: pic32mz_gpioirqinitialize
@@ -212,7 +212,7 @@ void pic32mz_gpioirqinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
-xcpt_t pic32mz_gpioattach(uint32_t pinset, xcpt_t handler);
+xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler);
 #else
 #  define pic32mz_gpioattach(p,f) (NULL)
 #endif

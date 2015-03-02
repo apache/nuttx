@@ -377,7 +377,7 @@ void pic32mz_gpioirqinitialize(void)
  *
  ****************************************************************************/
 
-xcpt_t pic32mz_gpioattach(uint32_t pinset, xcpt_t handler)
+xcpt_t pic32mz_gpioattach(pinset_t pinset, xcpt_t handler)
 {
   struct ioport_level2_s *handlers;
   xcpt_t oldhandler = NULL;
