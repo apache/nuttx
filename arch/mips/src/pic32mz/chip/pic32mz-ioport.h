@@ -51,16 +51,16 @@
  ********************************************************************************************/
 /* IOPort Peripheral Offsets ****************************************************************/
 
-#define PI32MZ_IOPORTA                 0
-#define PI32MZ_IOPORTB                 1
-#define PI32MZ_IOPORTC                 2
-#define PI32MZ_IOPORTD                 3
-#define PI32MZ_IOPORTE                 4
-#define PI32MZ_IOPORTF                 5
-#define PI32MZ_IOPORTG                 6
-#define PI32MZ_IOPORTH                 7
-#define PI32MZ_IOPORTJ                 8
-#define PI32MZ_IOPORTK                 9
+#define PIC32MZ_IOPORTA                0
+#define PIC32MZ_IOPORTB                1
+#define PIC32MZ_IOPORTC                2
+#define PIC32MZ_IOPORTD                3
+#define PIC32MZ_IOPORTE                4
+#define PIC32MZ_IOPORTF                5
+#define PIC32MZ_IOPORTG                6
+#define PIC32MZ_IOPORTH                7
+#define PIC32MZ_IOPORTJ                8
+#define PIC32MZ_IOPORTK                9
 
 #define PIC32MZ_IOPORTn_OFFSET(n)      ((n)<<8)
 #  define PIC32MZ_IOPORTA_OFFSET       0x0000
@@ -789,30 +789,37 @@
 /* Analog select register */
 
 #define IOPORT_ANSEL(n)                (1 << (n)) /* Bits 0-15: Analog select */
+#define IOPORT_ANSEL_ALL               0x0000ffff
 
 /* Tri-state register */
 
 #define IOPORT_TRIS(n)                 (1 << (n)) /* Bits 0-15: 1: Input 0: Output */
+#define IOPORT_TRIS_ALL                0x0000ffff
 
 /* Port register */
 
 #define IOPORT_PORT(n)                 (1 << (n)) /* Bits 0-15: Pin value */
+#define IOPORT_PORT_ALL                0x0000ffff
 
 /* Port data latch register */
 
 #define IOPORT_LAT(n)                  (1 << (n)) /* Bits 0-15: Port latch value */
+#define IOPORT_LAT_ALL                 0x0000ffff
 
 /* Open drain control register */
 
 #define IOPORT_ODC(n)                  (1 << (n)) /* Bits 0-15: 1: OD output enabled, 0: Disabled */
+#define IOPORT_ODC_ALL                 0x0000ffff
 
 /* Change Notice Pull-up register */
 
 #define IOPORT_CNPU(n)                 (1 << (n)) /* Bits 0:15: 1=Pull-up enabled */
+#define IOPORT_CNPU_ALL                0x0000ffff
 
 /* Change Notice Pull-down register */
 
 #define IOPORT_CNPD(n)                 (1 << (n)) /* Bits 0:15: 1=Pull-down enabled */
+#define IOPORT_CNPD_ALL                0x0000ffff
 
 /* Change Notice Control register */
 
@@ -822,10 +829,12 @@
 /* Change Notice Interrupt Enable register */
 
 #define IOPORT_CNEN(n)                 (1 << (n)) /* Bits 0-15: 1=Interrupt enabled */
+#define IOPORT_CNEN_ALL                0x0000ffff
 
-/* Change Notice Control register */
+/* Change Notice Status register */
 
-#define IOPORT_CNSTAT(n)               (1 << (n)  /* Bits 0-15: Change notice control pin n */
+#define IOPORT_CNSTAT(n)               (1 << (n)) /* Bits 0-15: Change notice control pin n */
+#define IOPORT_CNSTAT_ALL              0x0000ffff
 
 /********************************************************************************************
  * Public Types

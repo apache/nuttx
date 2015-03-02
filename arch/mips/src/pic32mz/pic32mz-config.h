@@ -48,6 +48,52 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* GPIO IRQs ************************************************************************/
+
+#ifndef PIC32MZ_GPIOIRQ
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTA
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTB
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTC
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTD
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTE
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTF
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTG
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTH
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTJ
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTK
+#endif
+
+#if CHIP_NPORTS < 1
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTA
+#endif
+#if CHIP_NPORTS < 2
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTB
+#endif
+#if CHIP_NPORTS < 3
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTC
+#endif
+#if CHIP_NPORTS < 4
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTD
+#endif
+#if CHIP_NPORTS < 5
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTE
+#endif
+#if CHIP_NPORTS < 6
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTF
+#endif
+#if CHIP_NPORTS < 7
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTG
+#endif
+#if CHIP_NPORTS < 8
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTH
+#endif
+#if CHIP_NPORTS < 9
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTJ
+#endif
+#if CHIP_NPORTS < 10
+#  undef CONFIG_PIC32MZ_GPIOIRQ_PORTK
+#endif
+
 /* UARTs ****************************************************************************/
 /* Don't enable UARTs not supported by the chip. */
 
