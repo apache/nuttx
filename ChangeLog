@@ -9907,4 +9907,6 @@
 	  (2015-03-01).
 	* configs/pic32mz-starterkit/src: Add support for on-board buttons
 	  (2015-03-01).
+	* include/nuttx/spi/spi.h:  Add an SPIDEV_USER so that there can be
+	  board-specific definitions of SPI devices (2015-03-01).
 
