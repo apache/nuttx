@@ -174,7 +174,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
             g_portchar[port], getreg32(STM32_RCC_AHBENR));
     }
 
-#elif defined(CONFIG_STM32_STM32F30XX)
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 

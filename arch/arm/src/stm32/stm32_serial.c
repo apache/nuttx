@@ -150,7 +150,7 @@
 #    endif
 
 #  elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F30XX)
 
 #    if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
       defined(CONFIG_USART3_RXDMA)
@@ -186,7 +186,7 @@
 
 #  ifndef CONFIG_USART_DMAPRIO
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #      define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
 #    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
@@ -195,7 +195,7 @@
 #    endif
 #  endif
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #    if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_DMAPRIO"
 #    endif
@@ -1154,7 +1154,7 @@ static void up_set_format(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t regval;
 
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
    */
@@ -1803,7 +1803,7 @@ static int up_interrupt_common(struct up_dev_s *priv)
 
       else if ((priv->sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
         {
-#ifdef CONFIG_STM32_STM32F30XX
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
           /* These errors are cleared by writing the corresponding bit to the
            * interrupt clear register (ICR).
            */

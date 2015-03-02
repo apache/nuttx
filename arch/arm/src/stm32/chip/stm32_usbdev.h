@@ -43,7 +43,8 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) \
+    || defined(CONFIG_STM32_STM32F37XX)
 
 /************************************************************************************
  * Definitions
@@ -231,6 +232,6 @@
 #define USB_COUNT_RX_SHIFT           (0)       /* Bits 9-0: Reception Byte Count */
 #define USB_COUNT_RX_MASK            (0x03ff << USB_COUNT_RX_SHIFT)
 
-#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F10XX */
+#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F37XX */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_USBDEV_H */
 

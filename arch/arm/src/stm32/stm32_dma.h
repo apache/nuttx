@@ -48,7 +48,7 @@
 /* Include the correct DMA register definitions for this STM32 family */
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f10xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_dma.h"
@@ -63,7 +63,7 @@
  */
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  define DMA_STATUS_FEIF         0                     /* (Not available in F1) */
 #  define DMA_STATUS_DMEIF        0                     /* (Not available in F1) */
 #  define DMA_STATUS_TEIF         DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
@@ -106,7 +106,7 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
 #ifdef CONFIG_DEBUG_DMA
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 struct stm32_dmaregs_s
 {
   uint32_t isr;

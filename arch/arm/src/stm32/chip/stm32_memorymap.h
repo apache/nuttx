@@ -51,6 +51,8 @@
 #  include "chip/stm32f20xxx_memorymap.h"
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_memorymap.h"
+#elif defined(CONFIG_STM32_STM32F37XX)
+#  include "chip/stm32f37xxx_memorymap.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_memorymap.h"
 #else

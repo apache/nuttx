@@ -177,6 +177,8 @@ _vectors:
 #  include "chip/stm32f20xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_vectors.h"
+#elif defined(CONFIG_STM32_STM32F37XX)
+#  include "chip/stm32f37xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
@@ -217,6 +219,8 @@ handlers:
 #  include "chip/stm32f20xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_vectors.h"
+#elif defined(CONFIG_STM32_STM32F37XX)
+#  include "chip/stm32f37xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
@@ -359,7 +363,7 @@ exception_common:
 	 *
 	 * Here:
 	 *   r0 = Address of the register save area
-	
+	 *
 	 * NOTE: It is a requirement that up_restorefpu() preserve the value of
 	 * r0!
 	 */

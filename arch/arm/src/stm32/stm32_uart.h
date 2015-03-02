@@ -50,7 +50,7 @@
 #  include "chip/stm32f10xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_uart.h"
-#elif defined(CONFIG_STM32_STM32F30XX)
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f30xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_uart.h"
