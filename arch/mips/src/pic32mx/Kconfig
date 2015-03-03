@@ -466,6 +466,10 @@ config PIC32MX_MVEC
 	bool
 	default n
 
+config PIC32MX_SPI
+	bool
+	default n
+
 config PIC32MX_T1
 	bool
 	default y
@@ -555,18 +559,22 @@ config PIC32MX_I2C5
 config PIC32MX_SPI1
 	bool "SPI1"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MX_SPI2
 	bool "SPI2"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MX_SPI3
 	bool "SPI3"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MX_SPI4
 	bool "SPI4"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MX_UART1
 	bool "UART1"
@@ -1009,6 +1017,29 @@ config PIC32MX_GPIOIRQ
 	depends on EXPERIMENTAL
 	---help---
 		Build in support for interrupts based on GPIO inputs from IOPorts
+
+menu "SPI Driver Configuration"
+	depends on PIC32MX_SPI
+
+config PIC32MX_SPI_INTERRUPTS
+	bool "SPI Interrupt Driven"
+	default n
+	depends on EXPERIMENTAL
+
+config PIC32MX_SPI_ENHBUF
+	bool "SPI Enhanced Buffer Mode"
+	default n
+	depends on EXPERIMENTAL
+
+config PIC32MX_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
+
+endmenu # SPI Driver Configuration
 
 menu "PIC32MX PHY/Ethernet device driver settings"
 	depends on PIC32MX_ETHERNET
