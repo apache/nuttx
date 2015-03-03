@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx-spi.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,17 +63,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Enables non-standard debug output from this file.
- *
- * CONFIG_SPI_DEBUG && CONFIG_DEBUG - Define to enable basic SPI debug
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SPI debug
- */
+/* Configuration */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_SPI_REGDEBUG
+#ifndef CONFIG_SPI_EXCHANGE
+  /* See arch/mips/src/pic32mz/pic32mz-spi.c for an implementation */
+
+#  error CONFIG_SPI_EXCHANGE not supported by this driver
 #endif
+
+/* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
@@ -91,7 +89,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure descibes the state of the SSP driver */
+/* This structure describes the state of the SSP driver */
 
 struct pic32mx_dev_s
 {
@@ -310,7 +308,7 @@ static struct pic32mx_dev_s g_spi4dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_REGDEBUG
+#ifdef CONFIG_PIC32MX_SPI_REGDEBUG
 static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
 {
   /* Last address, value, and count */
@@ -393,7 +391,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_REGDEBUG
+#ifdef CONFIG_PIC32MX_SPI_REGDEBUG
 static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
                        uint32_t value)
 {
