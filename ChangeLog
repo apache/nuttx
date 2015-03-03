@@ -9915,4 +9915,7 @@
 	  Svanfeldt (2015-03-01).
 	* arch/mips/src/pic32mz/pic32mz-spi.c and chip/pic32mz-spi.h:  Add
 	  support for a basic SPI driver for the PIC32MZ (2015-03-03).
+	* include/nuttx/i2c.h:  Add a user provided void * argument to the
+	  I2C callback method for the I2C slave interface.  Suggested by
+	  Nate Weibley (2015-03-03).
 
