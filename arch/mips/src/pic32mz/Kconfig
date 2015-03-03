@@ -317,15 +317,25 @@ config PIC32MZ_GPIOIRQ_PORTK
 endif # PIC32MZ_GPIOIRQ
 
 menu "SPI Driver Configuration"
-	depends on PIC32MZ_SPI && EXPERIMENTAL
+	depends on PIC32MZ_SPI
 
 config PIC32MZ_SPI_INTERRUPTS
 	bool "SPI Interrupt Driven"
 	default n
+	depends on EXPERIMENTAL
 
 config PIC32MZ_SPI_ENHBUF
 	bool "SPI Enhanced Buffer Mode"
 	default n
+	depends on EXPERIMENTAL
+
+config PIC32MZ_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
 
 endmenu # SPI Driver Configuration
 
