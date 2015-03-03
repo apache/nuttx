@@ -63,7 +63,7 @@
 #define PIC32MX_SPI_BRGINV_OFFSET  0x003c /* SPI baud rate invert register */
 
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)
-#define PIC32MX_SPI_CON2_OFFSET     0x0020 /* SPI control register 2*/
+#define PIC32MX_SPI_CON2_OFFSET    0x0040 /* SPI control register 2*/
 #endif
 
 /* Register Addresses *******************************************************/
@@ -168,10 +168,10 @@
 #  define SPI_CON_MODE_32BIT       (2 << SPI_CON_MODE_SHIFT) /* 32-bit data width */
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)
                                                              /* With AUDEN=1: */
-#  define SPI_CON_MODE_243232      (0 << SPI_CON_MODE_SHIFT) /* 24-bit data, 32-bit FIFO, 32-bit channel */
-#  define SPI_CON_MODE_323232      (0 << SPI_CON_MODE_SHIFT) /* 32-bit data, 32-bit FIFO, 32-bit channel */
-#  define SPI_CON_MODE_161632      (0 << SPI_CON_MODE_SHIFT) /* 16-bit data, 16-bit FIFO, 32-bit channel */
 #  define SPI_CON_MODE_161616      (0 << SPI_CON_MODE_SHIFT) /* 16-bit data, 16-bit FIFO, 16-bit channel */
+#  define SPI_CON_MODE_161632      (1 << SPI_CON_MODE_SHIFT) /* 16-bit data, 16-bit FIFO, 32-bit channel */
+#  define SPI_CON_MODE_323232      (2 << SPI_CON_MODE_SHIFT) /* 32-bit data, 32-bit FIFO, 32-bit channel */
+#  define SPI_CON_MODE_243232      (3 << SPI_CON_MODE_SHIFT) /* 24-bit data, 32-bit FIFO, 32-bit channel */
 #endif
 #define SPI_CON_DISSDO             (1 << 12) /* Bits 12: Disable SDOx pin */
 #define SPI_CON_SIDL               (1 << 13) /* Bits 13: Stop in idle mode */
@@ -215,7 +215,7 @@
 #    define SPI2_CON2_AUDMOD_RJ    (2 << SPI2_CON2_AUDMOD_SHIFT) /* Right Justified mode */
 #    define SPI2_CON2_AUDMOD_PCM   (3 << SPI2_CON2_AUDMOD_SHIFT) /* PCM/DSP mode */
                                              /* Bit 2: Reserved */
-#  define SPI2_CON2_AUDMONO        (1 << 6)  /* Bit 3:  Transmit Audio Data Format */
+#  define SPI2_CON2_AUDMONO        (1 << 3)  /* Bit 3:  Transmit Audio Data Format */
                                              /* Bits 5-6: Reserved */
 #  define SPI2_CON2_AUDEN          (1 << 7)  /* Bit 7:  Enable Audio CODEC Support */
 #  define SPI2_CON2_IGNTUR         (1 << 8)  /* Bit 8:  Ignore Transmit Underrun bit */

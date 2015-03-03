@@ -191,6 +191,47 @@
 #  undef HAVE_SERIAL_CONSOLE
 #endif
 
+/* SPI ******************************************************************************/
+/* Don't enable SPI peripherals not supported by the chip. */
+
+#if CHIP_NSPI < 1
+#  undef CONFIG_PIC32MZ_SPI1
+#  undef CONFIG_PIC32MZ_SPI2
+#  undef CONFIG_PIC32MZ_SPI3
+#  undef CONFIG_PIC32MZ_SPI4
+#  undef CONFIG_PIC32MZ_SPI5
+#  undef CONFIG_PIC32MZ_SPI6
+#elif CHIP_NSPI < 2
+#  undef CONFIG_PIC32MZ_SPI2
+#  undef CONFIG_PIC32MZ_SPI3
+#  undef CONFIG_PIC32MZ_SPI4
+#  undef CONFIG_PIC32MZ_SPI5
+#  undef CONFIG_PIC32MZ_SPI6
+#elif CHIP_NSPI < 3
+#  undef CONFIG_PIC32MZ_SPI3
+#  undef CONFIG_PIC32MZ_SPI4
+#  undef CONFIG_PIC32MZ_SPI5
+#  undef CONFIG_PIC32MZ_SPI6
+#elif CHIP_NSPI < 4
+#  undef CONFIG_PIC32MZ_SPI4
+#  undef CONFIG_PIC32MZ_SPI5
+#  undef CONFIG_PIC32MZ_SPI6
+#elif CHIP_NSPI < 5
+#  undef CONFIG_PIC32MZ_SPI5
+#  undef CONFIG_PIC32MZ_SPI6
+#elif CHIP_NSPI < 6
+#  undef CONFIG_PIC32MZ_SPI6
+#endif
+
+/* Are any SPI peripherals enabled? */
+
+#undef CONFIG_PIC32MZ_SPI
+#if defined(CONFIG_PIC32MZ_SPI1) || defined(CONFIG_PIC32MZ_SPI2) || \
+    defined(CONFIG_PIC32MZ_SPI4) || defined(CONFIG_PIC32MZ_SPI4) || \
+    defined(CONFIG_PIC32MZ_SPI5) || defined(CONFIG_PIC32MZ_SPI6)
+#  define CONFIG_PIC32MZ_SPI 1
+#endif
+
 /* Device Configuration *************************************************************/
 /* DEVCFG3 */
 /* Configurable settings */

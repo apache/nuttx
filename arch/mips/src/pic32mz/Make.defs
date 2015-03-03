@@ -73,3 +73,7 @@ CHIP_CSRCS += pic32mz-lowconsole.c pic32mz-serial.c
 ifeq ($(CONFIG_PIC32MZ_GPIOIRQ),y)
 CHIP_CSRCS += pic32mz-gpioirq.c
 endif
+
+ifeq ($(CONFIG_PIC32MZ_SPI),y)
+CHIP_CSRCS += pic32mz-spi.c
+endif
