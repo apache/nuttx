@@ -74,8 +74,7 @@ void pic32mz_boardinitialize(void)
    * function pic32mz_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_PIC32MZ_SPI1) || defined(CONFIG_PIC32MZ_SPI2) || \
-    defined(CONFIG_PIC32MZ_SPI3) || defined(CONFIG_PIC32MZ_SPI4)
+#ifdef CONFIG_PIC32MZ_SPI
   if (pic32mz_spiinitialize)
     {
       pic32mz_spiinitialize();
