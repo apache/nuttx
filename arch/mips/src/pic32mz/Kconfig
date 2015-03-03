@@ -142,32 +142,32 @@ config PIC32MZ_I2C5
 config PIC32MZ_SPI1
 	bool "SPI1"
 	default n
-	select PIC32MX_SPI
+	select PIC32MZ_SPI
 
 config PIC32MZ_SPI2
 	bool "SPI2"
 	default n
-	select PIC32MX_SPI
+	select PIC32MZ_SPI
 
 config PIC32MZ_SPI3
 	bool "SPI3"
 	default n
-	select PIC32MX_SPI
+	select PIC32MZ_SPI
 
 config PIC32MZ_SPI4
 	bool "SPI4"
 	default n
-	select PIC32MX_SPI
+	select PIC32MZ_SPI
 
 config PIC32MZ_SPI5
 	bool "SPI5"
 	default n
-	select PIC32MX_SPI
+	select PIC32MZ_SPI
 
 config PIC32MZ_SPI6
 	bool "SPI6"
 	default n
-	select PIC32MX_SPI
+	select PIC32MZ_SPI
 
 config PIC32MZ_UART1
 	bool "UART1"

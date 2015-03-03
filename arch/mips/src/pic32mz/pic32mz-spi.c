@@ -66,17 +66,7 @@
 
 #define BOARD_PBCLOCK BOARD_PBCLK2
 
-/* Enables non-standard debug output from this file.
- *
- * CONFIG_SPI_DEBUG && CONFIG_DEBUG - Define to enable basic SPI debug
- * CONFIG_DEBUG_VERBOSE - Define to enable verbose SPI debug
- */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_SPI
-#  undef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_SPI_REGDEBUG
-#endif
+/* Debug */
 
 #ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
@@ -93,12 +83,12 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* This structure describes the fixed (ROM-able) configuration of the SPI
+ * peripheral.
+ */
 
-/* This structure describes the state of the SSP driver */
-
-struct pic32mz_dev_s
+struct pic32mz_config_s
 {
-  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
   uint32_t         base;       /* SPI register base address */
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   uint8_t          firq;       /* SPI fault interrupt number */
@@ -108,6 +98,15 @@ struct pic32mz_dev_s
   uint8_t          sdipps;     /* SDI peripheral pin selection */
   uint8_t          sdopps;     /* SDO peripheral pin selection */
   uintptr_t        sdoreg;     /* SDO peripheral pin configuration register */
+};
+
+/* This structure describes the state of the SPI driver */
+
+struct pic32mz_dev_s
+{
+  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
+  FAR const struct pic32mz_config_s *config;
+
 #ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
@@ -168,9 +167,8 @@ static const struct spi_ops_s g_spi1ops =
 #endif
 };
 
-static struct pic32mz_dev_s g_spi1dev =
+static const struct pic32mz_config_s g_spi1config =
 {
-  .spidev            = { &g_spi1ops },
   .base              = PIC32MZ_SPI1_K1BASE,
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   .firq              = PIC32MZ_IRQ_SPI1F,
@@ -180,6 +178,12 @@ static struct pic32mz_dev_s g_spi1dev =
   .sdipps            = BOARD_SDI1_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO1_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO1_PPS),
+};
+
+static struct pic32mz_dev_s g_spi1dev =
+{
+  .spidev            = { &g_spi1ops },
+  .config            = &g_spi1config,
 };
 #endif
 
@@ -207,9 +211,8 @@ static const struct spi_ops_s g_spi2ops =
 #endif
 };
 
-static struct pic32mz_dev_s g_spi2dev =
+static const struct pic32mz_config_s g_spi2config =
 {
-  .spidev            = { &g_spi2ops },
   .base              = PIC32MZ_SPI2_K1BASE,
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   .firq              = PIC32MZ_IRQ_SPI2F,
@@ -219,6 +222,12 @@ static struct pic32mz_dev_s g_spi2dev =
   .sdipps            = BOARD_SDI2_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO2_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO2_PPS),
+};
+
+static struct pic32mz_dev_s g_spi2dev =
+{
+  .spidev            = { &g_spi2ops },
+  .config            = &g_spi2config,
 };
 #endif
 
@@ -246,9 +255,8 @@ static const struct spi_ops_s g_spi3ops =
 #endif
 };
 
-static struct pic32mz_dev_s g_spi3dev =
+static const struct pic32mz_config_s g_spi3config =
 {
-  .spidev            = { &g_spi3ops },
   .base              = PIC32MZ_SPI3_K1BASE,
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   .firq              = PIC32MZ_IRQ_SPI3F,
@@ -258,6 +266,12 @@ static struct pic32mz_dev_s g_spi3dev =
   .sdipps            = BOARD_SDI3_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO3_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO3_PPS),
+};
+
+static struct pic32mz_dev_s g_spi3dev =
+{
+  .spidev            = { &g_spi3ops },
+  .config            = &g_spi3config,
 };
 #endif
 
@@ -285,9 +299,8 @@ static const struct spi_ops_s g_spi4ops =
 #endif
 };
 
-static struct pic32mz_dev_s g_spi4dev =
+static const struct pic32mz_config_s g_spi4config =
 {
-  .spidev            = { &g_spi4ops },
   .base              = PIC32MZ_SPI4_K1BASE,
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   .firq              = PIC32MZ_IRQ_SPI4F,
@@ -297,6 +310,12 @@ static struct pic32mz_dev_s g_spi4dev =
   .sdipps            = BOARD_SDI4_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO4_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO4_PPS),
+};
+
+static struct pic32mz_dev_s g_spi4dev =
+{
+  .spidev            = { &g_spi4ops },
+  .config            = &g_spi4config,
 };
 #endif
 
@@ -324,9 +343,8 @@ static const struct spi_ops_s g_spi5ops =
 #endif
 };
 
-static struct pic32mz_dev_s g_spi5dev =
+static const struct pic32mz_config_s g_spi5config =
 {
-  .spidev            = { &g_spi5ops },
   .base              = PIC32MZ_SPI5_K1BASE,
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   .firq              = PIC32MZ_IRQ_SPI5F,
@@ -336,6 +354,12 @@ static struct pic32mz_dev_s g_spi5dev =
   .sdipps            = BOARD_SDI5_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO5_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO5_PPS),
+};
+
+static struct pic32mz_dev_s g_spi5dev =
+{
+  .spidev            = { &g_spi5ops },
+  .config            = &g_spi5config,
 };
 #endif
 
@@ -363,9 +387,8 @@ static const struct spi_ops_s g_spi6ops =
 #endif
 };
 
-static struct pic32mz_dev_s g_spi6dev =
+static const struct pic32mz_config_s g_spi6config =
 {
-  .spidev            = { &g_spi6ops },
   .base              = PIC32MZ_SPI6_K1BASE,
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   .firq              = PIC32MZ_IRQ_SPI6F,
@@ -375,6 +398,12 @@ static struct pic32mz_dev_s g_spi6dev =
   .sdipps            = BOARD_SDI6_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO6_PPS),
   .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO6_PPS),
+};
+
+static struct pic32mz_dev_s g_spi6dev =
+{
+  .spidev            = { &g_spi6ops },
+  .config            = &g_spi6config,
 };
 #endif
 
@@ -417,7 +446,7 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv, unsigned int offset)
 
   /* Read the value from the register */
 
-  addr  = priv->base + offset;
+  addr  = priv->config->base + offset;
   value = getreg32(addr);
 
   /* Is this the same value that we read from the same register last time?
@@ -464,7 +493,7 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv, unsigned int offset)
 #else
 static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv, unsigned int offset)
 {
-  return getreg32(priv->base + offset);
+  return getreg32(priv->config->base + offset);
 }
 #endif
 
@@ -492,7 +521,7 @@ static void spi_putreg(FAR struct pic32mz_dev_s *priv, unsigned int offset,
 
   /* Get the address to write to */
 
-  addr = priv->base + offset;
+  addr = priv->config->base + offset;
 
   /* Show the register value being written */
 
@@ -506,7 +535,7 @@ static void spi_putreg(FAR struct pic32mz_dev_s *priv, unsigned int offset,
 static void spi_putreg(FAR struct pic32mz_dev_s *priv, unsigned int offset,
                        uint32_t value)
 {
-  putreg32(value, priv->base + offset);
+  putreg32(value, priv->config->base + offset);
 }
 #endif
 
@@ -1051,9 +1080,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   flags = irqsave();
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
-  up_disable_irq(priv->firq);
-  up_disable_irq(priv->txirq);
-  up_disable_irq(priv->rxirq);
+  up_disable_irq(priv->config->firq);
+  up_disable_irq(priv->config->rxirq);
+  up_disable_irq(priv->config->txirq);
 #endif
 
   /* Stop and reset the SPI module by clearing the ON bit in the CON register. */
@@ -1068,32 +1097,35 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
    * managed as GPIOs; CLK (output) pins are not selectable.
    */
 
-  putreg32((uint32_t)priv->sdipps, regaddr);
-  putreg32((uint32_t)priv->sdopps, priv->sdoreg);
+  putreg32((uint32_t)priv->config->sdipps, regaddr);
+  putreg32((uint32_t)priv->config->sdopps, priv->config->sdoreg);
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   /* Attach the interrupt handlers.  We do this early to make sure that the
    * resources are available.
    */
 
-  ret = irq_attach(priv->rxirq, spi_interrupt);
+  ret = irq_attach(priv->config->rxirq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach RX interrupt: %d port: %d\n", priv->rxirq, port);
+      spidbg("Failed to attach RX interrupt: %d port: %d\n",
+             priv->config->rxirq, port);
       goto errout;
     }
 
-  ret = irq_attach(priv->txirq, spi_interrupt);
+  ret = irq_attach(priv->config->txirq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach TX interrupt: %d port: %d\n", priv->txirq, port);
+      spidbg("Failed to attach TX interrupt: %d port: %d\n",
+             priv->tconfig->xirq, port);
       goto errout_with_rxirq;
     }
 
-  ret = irq_attach(priv->firq, spi_interrupt);
+  ret = irq_attach(priv->config->firq, spi_interrupt);
   if (ret < 0)
     {
-      spidbg("Failed to attach fault interrupt: %d port: %d\n", priv->firq, port);
+      spidbg("Failed to attach fault interrupt: %d port: %d\n",
+             priv->config->firq, port);
       goto errout_with_txirq;
     }
 #endif
@@ -1137,9 +1169,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   /* Enable interrupts at the SPI controller */
 
-  up_enable_irq(priv->firq);
-  up_enable_irq(priv->txirq);
-  up_enable_irq(priv->rxirq);
+  up_enable_irq(priv->config->firq);
+  up_enable_irq(priv->config->rxirq);
+  up_enable_irq(priv->config->txirq);
 #endif
 
   /* Enable interrupts at the interrupt controller */
@@ -1149,9 +1181,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
 errout_with_txirq:
-  irq_detatch(priv->txirq);
+  irq_detatch(priv->config->txirq);
 errout_with_rxirq:
-  irq_detatch(priv->rxirq);
+  irq_detatch(priv->config->rxirq);
 errout:
   irqrestore(flags);
   return NULL;
