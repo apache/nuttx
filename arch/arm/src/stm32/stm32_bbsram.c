@@ -73,7 +73,7 @@
 #error Driver Requires CONFIG_STM32_BKPSRAM to be enabled
 #endif
 
-#define MAX_OPENCNT     (255) /* Limit of uint8_t */
+#define MAX_OPENCNT           (255) /* Limit of uint8_t */
 
 #if defined(CONFIG_BBSRAM_DEBUG)
 #  define BBSRAM_DEBUG_READ() stm32_bbsram_rd()
@@ -83,10 +83,11 @@
 #  define BBSRAM_DUMP(p,s)
 #endif
 
-#define BBSRAM_HEADER_SIZE   (sizeof(struct bbsramfh_s))
-#define BBSRAM_CRCED_OFFSET  (sizeof(((struct bbsramfh_s *)0)->crc))
-#define BBSRAM_CRCED_SIZE(l) (BBSRAM_HEADER_SIZE-BBSRAM_CRCED_OFFSET+(l))
-#define BBSRAM_ALIGNMENT (sizeof(((struct bbsramfh_s *)0)->crc))
+#define BBSRAM_HEADER_SIZE    (sizeof(struct bbsramfh_s))
+#define BBSRAM_CRCED_OFFSET   (sizeof(((struct bbsramfh_s *)0)->crc))
+#define BBSRAM_CRCED_SIZE(l)  (BBSRAM_HEADER_SIZE-(BBSRAM_CRCED_OFFSET)+(l))
+#define BBSRAM_ALIGNMENT      (sizeof(((struct bbsramfh_s *)0)->crc))
+#define BBSRAM_ALIGNMENT_MASK (BBSRAM_ALIGNMENT-1)
 
 /****************************************************************************
  * Private Types
@@ -657,13 +658,13 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
 
       if (size == -1)
         {
-          size = avail - (BBSRAM_HEADER_SIZE + BBSRAM_ALIGNMENT);
+          size = avail - (BBSRAM_HEADER_SIZE + BBSRAM_ALIGNMENT_MASK);
         }
 
       /* Add in header size and keep aligned */
 
-      alloc = size + BBSRAM_HEADER_SIZE + BBSRAM_ALIGNMENT;
-      alloc &= ~(BBSRAM_ALIGNMENT-1);
+      alloc = size + BBSRAM_HEADER_SIZE + BBSRAM_ALIGNMENT_MASK;
+      alloc &= ~(BBSRAM_ALIGNMENT_MASK);
 
       /* Does it fit? */
 
@@ -806,6 +807,7 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 {
   FAR struct bbsramfh_s *bbf;
   int fill;
+  int ret = -ENOMEM;
 
   /* on a bad day we could panic while panicking, (and we debug assert)
    * this is a potential feeble attempt at only writing the first
@@ -824,7 +826,13 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 
       DEBUGASSERT(bbf);
 
-      if (bbf)
+      /* As once ensures we will keep the first dump checking the time for
+       * 0 protects from over writing a previous crash dump that has not
+       * been saved to long term storage and erased.  The dreaded reboot
+       * loop.
+       */
+
+      if (bbf && (bbf->lastwrite.tv_sec == 0 && bbf->lastwrite.tv_nsec == 0))
         {
           /* Clamp length if too big  */
 
@@ -851,10 +859,11 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
           stm32_bbsram_internal_close(bbf);
 
           stm32_bbsram_lock();
+          ret = length;
         }
     }
 
-  return length;
+  return ret;
 }
 #endif
 
