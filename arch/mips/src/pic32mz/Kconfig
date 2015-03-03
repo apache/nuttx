@@ -35,7 +35,7 @@ config PIC32MZ_MVEC
 
 config PIC32MZ_SPI
 	bool
-	default y
+	default n
 
 config PIC32MZ_T1
 	bool
