@@ -111,8 +111,15 @@ struct pic32mz_dev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of word in bits (8 to 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
+#endif
+  uint8_t          nbits;      /* Width of word in bits (8 to 16) */
+
+#ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
+  bool             wrlast;     /* Last was a write */
+  uint32_t         addrlast;   /* Last address */
+  uint32_t         vallast;    /* Last value */
+  int              ntimes;     /* Number of times */
 #endif
 };
 
@@ -121,10 +128,27 @@ struct pic32mz_dev_s
  ****************************************************************************/
 /* Low-level register access */
 
+#ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
+static bool     spi_checkreg(FAR struct pic32mz_dev_s *priv,
+                  uintptr_t regaddr, uint32_t regvaql, bool wr);
 static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
                   unsigned int offset);
-static void     spi_putreg(FAR struct pic32mz_dev_s *priv,
+static void     spi_putaddr(FAR struct pic32mz_dev_s *priv,
+                  uintptr_t regaddr, uint32_t value);
+#else
+static inline uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
+                  unsigned int offset);
+static inline void     spi_putaddr(FAR struct pic32mz_dev_s *priv,
+                  uintptr_t regaddr, uint32_t value);
+#endif
+static inline void spi_putreg(FAR struct pic32mz_dev_s *priv,
                   unsigned int offset, uint32_t value);
+static void     spi_exchange16(FAR struct pic32mz_dev_s *priv,
+                   FAR const uint16_t *txbuffer, FAR uint16_t *rxbuffer,
+                   size_t nwords);
+static void     spi_exchange8(FAR struct pic32mz_dev_s *priv,
+                   FAR const uint8_t *txbuffer, FAR uint8_t *rxbuffer,
+                   size_t nbytes);
 
 /* SPI methods */
 
@@ -135,8 +159,15 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
-static void     spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
-static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+static void     spi_exchange(FAR struct spi_dev_s *dev,
+                   FAR const void *txbuffer, FAR void *rxbuffer,
+                   size_t nwords);
+#ifndef CONFIG_SPI_EXCHANGE
+static void     spi_sndblock(FAR struct spi_dev_s *dev,
+                   FAR const void *buffer, size_t nwords);
+static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                   size_t nwords);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -158,8 +189,12 @@ static const struct spi_ops_s g_spi1ops =
   .cmddata           = pic32mz_spi1cmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = pic32mz_spi1register, /* Provided externally */
 #else
@@ -202,8 +237,12 @@ static const struct spi_ops_s g_spi2ops =
   .cmddata           = pic32mz_spi2cmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = pic32mz_spi2register, /* Provided externally */
 #else
@@ -246,8 +285,12 @@ static const struct spi_ops_s g_spi3ops =
   .cmddata           = pic32mz_spi3cmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = pic32mz_spi3register, /* Provided externally */
 #else
@@ -290,8 +333,12 @@ static const struct spi_ops_s g_spi4ops =
   .cmddata           = pic32mz_spi4cmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = pic32mz_spi4register, /* Provided externally */
 #else
@@ -334,8 +381,12 @@ static const struct spi_ops_s g_spi5ops =
   .cmddata           = pic32mz_spi5cmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = pic32mz_spi5register, /* Provided externally */
 #else
@@ -378,8 +429,12 @@ static const struct spi_ops_s g_spi6ops =
   .cmddata           = pic32mz_spi6cmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = pic32mz_spi6register, /* Provided externally */
 #else
@@ -416,6 +471,62 @@ static struct pic32mz_dev_s g_spi6dev =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: spi_checkreg
+ *
+ * Description:
+ *   Check if the current register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   priv    - SPI driver instance
+ *   regaddr - The address of the register to write to
+ *   regval  - The value to be written
+ *   wr      - True: write access
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   false: This is the same as the preceding register access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
+static bool spi_checkreg(struct pic32mz_dev_s *priv, uintptr_t regaddr,
+                         uint32_t regval, bool wr)
+{
+  if (wr      == priv->wrlast &&   /* Same kind of access? */
+      regval  == priv->vallast &&  /* Same value? */
+      regaddr == priv->addrlast)   /* Same address? */
+    {
+      /* Yes, then just keep a count of the number of times we did this. */
+
+      priv->ntimes++;
+      return false;
+    }
+  else
+    {
+      /* Did we do the previous operation more than once? */
+
+      if (priv->ntimes > 0)
+        {
+          /* Yes... show how many times we did it */
+
+          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+        }
+
+      /* Save information about the new access */
+
+      priv->wrlast   = wr;
+      priv->vallast  = regval;
+      priv->addrlast = regaddr;
+      priv->ntimes   = 0;
+    }
+
+  /* Return true if this is the first time that we have done this operation */
+
+  return true;
+}
+#endif
+
+/****************************************************************************
  * Name: spi_getreg
  *
  * Description:
@@ -430,70 +541,81 @@ static struct pic32mz_dev_s g_spi6dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_REGDEBUG
-static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv, unsigned int offset)
+#ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
+static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
+                           unsigned int offset)
 {
-  /* Last address, value, and count */
+  uintptr_t regaddr;
+  uint32_t regval;
 
-  static uint32_t prevaddr = 0;
-  static uint32_t prevalue = 0;
-  static uint32_t count = 0;
+  /* Read the register value */
 
-  /* New address and value */
+  regaddr = priv->config->base + offset;
+  regval  = getreg32(regaddr);
 
-  uint32_t addr;
-  uint32_t value;
+  /* Should we print something? */
 
-  /* Read the value from the register */
-
-  addr  = priv->config->base + offset;
-  value = getreg32(addr);
-
-  /* Is this the same value that we read from the same register last time?
-   * Are we polling the register?  If so, suppress some of the output.
-   */
-
-  if (addr == prevaddr && value == prevalue)
+  if (spi_checkreg(priv, regaddr, regval, false))
     {
-      if (count == 0xffffffff || ++count > 3)
-        {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
-          return value;
-        }
+      /* Yes.. */
+
+      lldbg("%08lx->%08lx\n",
+            (unsigned long)regaddr, (unsigned long)regval);
     }
 
-  /* No this is a new address or value */
+  /* Return the value read */
 
-  else
-    {
-       /* Did we print "..." for the previous value? */
-
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
-
-           lldbg("[repeats %d more times]\n", count-3);
-         }
-
-       /* Save the new address, value, and count */
-
-       prevaddr = addr;
-       prevalue = value;
-       count    = 1;
-    }
-
-  /* Show the register value read */
-
-  lldbg("%08x->%08x\n", addr, value);
-  return value;
+  return regval;
 }
 #else
-static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv, unsigned int offset)
+static inline uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
+                                  unsigned int offset)
 {
   return getreg32(priv->config->base + offset);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_putaddr
+ *
+ * Description:
+ *   Write a 32-bit value value an absolute address
+ *
+ * Input Parameters:
+ *   priv    - A pointer to a PIC32MZ SPI state structure
+ *   regaddr - Address to write to
+ *   regval  - The value to write to the SPI register
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
+static void spi_putaddr(FAR struct pic32mz_dev_s *priv, uintptr_t regaddr,
+                        uint32_t regval)
+{
+  /* Should we print something? */
+
+  if (spi_checkreg(priv, regaddr, regval, true))
+    {
+      /* Yes.. */
+
+      lldbg("%08lx<-%08lx\n",
+      (unsigned long)regaddr, (unsigned long)regval);
+    }
+
+  /* Write the value to the register */
+
+  putreg32(regval, regaddr);
+}
+#else
+static inline void spi_putaddr(FAR struct pic32mz_dev_s *priv,
+                               uintptr_t regaddr, uint32_t regval)
+{
+  /* Write the value to the register */
+
+  putreg32(regval, regaddr);
 }
 #endif
 
@@ -513,31 +635,153 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_REGDEBUG
-static void spi_putreg(FAR struct pic32mz_dev_s *priv, unsigned int offset,
-                       uint32_t value)
+static inline void spi_putreg(FAR struct pic32mz_dev_s *priv,
+                              unsigned int offset, uint32_t regval)
 {
-  uint32_t addr;
-
-  /* Get the address to write to */
-
-  addr = priv->config->base + offset;
-
-  /* Show the register value being written */
-
-  lldbg("%08x<-%08x\n", addr, value);
-
-  /* Then do the write */
-
-  putreg32(value, addr);
+  spi_putaddr(priv, priv->config->base + offset, regval);
 }
+
+/****************************************************************************
+ * Name: spi_exchange8
+ *
+ * Description:
+ *   Exchange a block of 8-bit data from SPI.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to receive data
+ *   nwords   - the length of byres that to be exchanged
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
+                          FAR const uint8_t *txbuffer, FAR uint8_t *rxbuffer,
+                          size_t nbytes)
+{
+  uint32_t regval;
+  uint8_t data;
+
+  spivdbg("nbytes: %d\n", nbytes);
+  while (nbytes)
+    {
+      /* Write the data to transmitted to the SPI Data Register */
+
+      if (txbuffer)
+        {
+          data = *txbuffer++;
+        }
+      else
+        {
+          data = 0xff;
+        }
+
+      spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
+
+#ifdef CONFIG_PIC32MZ_SPI_ENHBUF
+      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
+       * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
+       * receive buffer is not empty.
+       */
+
+     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
 #else
-static void spi_putreg(FAR struct pic32mz_dev_s *priv, unsigned int offset,
-                       uint32_t value)
-{
-  putreg32(value, priv->config->base + offset);
-}
+      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
+       * normal mode, the SPIRBF bit will be set when receive data is available.
+       */
+
+     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
 #endif
+
+     /* Read from the buffer register to clear the status bit */
+
+     regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+     if (rxbuffer)
+       {
+         *rxbuffer++ = (uint8_t)regval;
+       }
+     else
+       {
+         UNUSED(regval);
+       }
+
+     nbytes--;
+    }
+}
+
+/****************************************************************************
+ * Name: spi_exchange16
+ *
+ * Description:
+ *   Exchange a block of 16-bit data from SPI.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
+                           FAR const uint16_t *txbuffer,
+                           FAR uint16_t *rxbuffer, size_t nwords)
+{
+  uint32_t regval;
+  uint16_t data;
+
+  spivdbg("nwords: %d\n", nwords);
+  while (nwords)
+    {
+      /* Write the data to transmitted to the SPI Data Register */
+
+      if (txbuffer)
+        {
+          data = *txbuffer++;
+        }
+      else
+        {
+          data = 0xffff;
+        }
+
+      spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
+
+#ifdef CONFIG_PIC32MZ_SPI_ENHBUF
+      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
+       * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
+       * receive buffer is not empty.
+       */
+
+     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+#else
+      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
+       * normal mode, the SPIRBF bit will be set when receive data is available.
+       */
+
+     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+#endif
+
+     /* Read from the buffer register to clear the status bit */
+
+     regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+     if (rxbuffer)
+       {
+         *rxbuffer++ = (uint16_t)regval;
+       }
+     else
+       {
+         UNUSED(regval);
+       }
+
+     nwords--;
+    }
+}
 
 /****************************************************************************
  * Name: spi_lock
@@ -789,19 +1033,13 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   uint32_t setting;
   uint32_t regval;
 
-#ifndef CONFIG_SPI_OWNBUS
   spivdbg("Old nbits: %d New nbits: %d\n", priv->nbits, nbits);
-#else
-  spivdbg("New nbits: %d\n", nbits);
-#endif
 
   /* Has the number of bits changed? */
 
   DEBUGASSERT(priv && nbits > 7 && nbits < 17);
-#ifndef CONFIG_SPI_OWNBUS
   if (nbits != priv->nbits)
     {
-#endif
       /* Yes... Set the CON register appropriately */
 
       if (nbits == 8)
@@ -828,12 +1066,12 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
       spivdbg("CON: %08x\n", regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster
+       */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->nbits = nbits;
     }
-#endif
 }
 
 /****************************************************************************
@@ -856,30 +1094,78 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
 
-  spivdbg("wd: %04x\n", wd);
+  DEBUGASSERT(priv);
+  if (priv->nbits > 8)
+    {
+      uint16_t txword;
+      uint16_t rxword;
 
-  /* Write the data to transmitted to the SPI Data Register */
+      /* spi_exchange16() can do this. */
 
-  spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)wd);
+      txword = wd;
+      rxword = 0;
+      spi_exchange16(priv, &txword, &rxword, 1);
 
-#ifdef CONFIG_PIC32MZ_SPI_ENHBUF
-  /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
-   * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
-   * receive buffer is not empty.
-   */
+      spivdbg("Sent %04x received %04x\n", txword, rxword);
+      return rxword;
+    }
+  else
+    {
+      uint8_t txbyte;
+      uint8_t rxbyte;
 
- while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
-#else
-  /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-   * normal mode, the SPIRBF bit will be set when receive data is available.
-   */
+      /* spi_exchange8() can do this. */
 
- while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
-#endif
+      txbyte = (uint8_t)wd;
+      rxbyte = (uint8_t)0;
+      spi_exchange8(priv, &txbyte, &rxbyte, 1);
 
- /* Return the SPI data */
+      spivdbg("Sent %02x received %02x\n", txbyte, rxbyte);
+      return (uint16_t)rxbyte;
+    }
+}
 
- return (uint16_t)spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+/****************************************************************************
+ * Name: spi_exchange
+ *
+ * Description:
+ *   Exchange a block of data from SPI..
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords)
+{
+  FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
+
+  DEBUGASSERT(priv);
+  if (priv->nbits > 8)
+    {
+      /* spi_exchange16() can do this. */
+
+      spi_exchange16(priv, (FAR const uint16_t *)txbuffer,
+                     (FAR uint16_t *)rxbuffer, nwords);
+    }
+  else
+    {
+      /* spi_exchange8() can do this. */
+
+      spi_exchange8(priv, (FAR const uint8_t *)txbuffer,
+                    (FAR uint8_t *)rxbuffer, nwords);
+    }
 }
 
 /*************************************************************************
@@ -891,53 +1177,26 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
- *   nwords - the length of data to send from the buffer in number of words.
- *            The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords - the length of data to send from the buffer in number of
+ *            words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+#ifndef CONFIG_SPI_EXCHANGE
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
-  FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
-  uint32_t regval;
-  uint8_t data;
+  /* spi_exchange() can do this. */
 
-  spivdbg("nwords: %d\n", nwords);
-  while (nwords)
-    {
-      /* Write the data to transmitted to the SPI Data Register */
-
-      data = *ptr++;
-      spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
-
-#ifdef CONFIG_PIC32MZ_SPI_ENHBUF
-      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
-       * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
-       * receive buffer is not empty.
-       */
-
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
-#else
-      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is available.
-       */
-
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
-#endif
-
-     /* Read from the buffer register to clear the status bit */
-
-     regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
-     UNUSED(regval);
-     nwords--;
-    }
+  spi_exchange(dev, buffer, NULL, nwords);
 }
+#endif
 
 /****************************************************************************
  * Name: spi_recvblock
@@ -946,53 +1205,28 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   Revice a block of data from SPI
  *
  * Input Parameters:
- *   dev -    Device-specific state data
+ *   dev   -  Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords - the length of data that can be received in the buffer in
+ *            number of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is  packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+#ifndef CONFIG_SPI_EXCHANGE
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords)
 {
-  FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  /* spi_exchange() can do this. */
 
-  spivdbg("nwords: %d\n", nwords);
-  while (nwords)
-    {
-      /* Write some dummy data to the SPI Data Register in order to clock the
-       * read data.
-       */
-
-      spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, 0xff);
-
-#ifdef CONFIG_PIC32MZ_SPI_ENHBUF
-      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
-       * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
-       * receive buffer is not empty.
-       */
-
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
-#else
-      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is available.
-       */
-
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
-#endif
-
-     /* Read the received data from the SPI Data Register */
-
-     *ptr++ = (uint8_t)spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
-     nwords--;
-    }
+  spi_exchange(dev, NULL, buffer, nwords);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -1097,8 +1331,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
    * managed as GPIOs; CLK (output) pins are not selectable.
    */
 
-  putreg32((uint32_t)priv->config->sdipps, regaddr);
-  putreg32((uint32_t)priv->config->sdopps, priv->config->sdoreg);
+  spi_putaddr(priv, regaddr, (uint32_t)priv->config->sdipps);
+  spi_putaddr(priv, priv->config->sdoreg, (uint32_t)priv->config->sdopps);
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   /* Attach the interrupt handlers.  We do this early to make sure that the

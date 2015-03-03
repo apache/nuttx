@@ -549,7 +549,7 @@ static void pic32mx_checkreg(uint32_t addr, uint32_t val, bool iswrite)
       count     = 0;
       prevwrite = iswrite;
 
-      /* Show the new regisgter access */
+      /* Show the new register access */
 
       pic32mx_printreg(addr, val, iswrite);
     }
