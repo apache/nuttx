@@ -33,6 +33,10 @@ config PIC32MZ_MVEC
 	bool
 	default n
 
+config PIC32MZ_SPI
+	bool
+	default y
+
 config PIC32MZ_T1
 	bool
 	default y
@@ -138,18 +142,32 @@ config PIC32MZ_I2C5
 config PIC32MZ_SPI1
 	bool "SPI1"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MZ_SPI2
 	bool "SPI2"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MZ_SPI3
 	bool "SPI3"
 	default n
+	select PIC32MX_SPI
 
 config PIC32MZ_SPI4
 	bool "SPI4"
 	default n
+	select PIC32MX_SPI
+
+config PIC32MZ_SPI5
+	bool "SPI5"
+	default n
+	select PIC32MX_SPI
+
+config PIC32MZ_SPI6
+	bool "SPI6"
+	default n
+	select PIC32MX_SPI
 
 config PIC32MZ_UART1
 	bool "UART1"
@@ -246,7 +264,7 @@ config PIC32MZ_CTMU
 	bool "Charge Time Measurement Unit (CMTU)"
 	default n
 
-endmenu
+endmenu # PIC32MX Peripheral Support
 
 menuconfig PIC32MZ_GPIOIRQ
 	bool "GPIO Interrupt Support"
@@ -256,47 +274,60 @@ menuconfig PIC32MZ_GPIOIRQ
 
 if PIC32MZ_GPIOIRQ
 
-menuconfig PIC32MZ_GPIOIRQ_PORTA
+config PIC32MZ_GPIOIRQ_PORTA
 	bool "I/O PORTA Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTB
+config PIC32MZ_GPIOIRQ_PORTB
 	bool "I/O PORTB Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTC
+config PIC32MZ_GPIOIRQ_PORTC
 	bool "I/O PORTC Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTD
+config PIC32MZ_GPIOIRQ_PORTD
 	bool "I/O PORTD Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTE
+config PIC32MZ_GPIOIRQ_PORTE
 	bool "I/O PORTE Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTF
+config PIC32MZ_GPIOIRQ_PORTF
 	bool "I/O PORTF Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTG
+config PIC32MZ_GPIOIRQ_PORTG
 	bool "I/O PORTG Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTH
+config PIC32MZ_GPIOIRQ_PORTH
 	bool "I/O PORTH Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTJ
+config PIC32MZ_GPIOIRQ_PORTJ
 	bool "I/O PORTJ Interrupt Support"
 	default n
 
-menuconfig PIC32MZ_GPIOIRQ_PORTK
+config PIC32MZ_GPIOIRQ_PORTK
 	bool "I/O PORTK Interrupt Support"
 	default n
 
 endif # PIC32MZ_GPIOIRQ
+
+menu "SPI Driver Configuration"
+	depends on PIC32MZ_SPI && EXPERIMENTAL
+
+config PIC32MZ_SPI_INTERRUPTS
+	bool "SPI Interrupt Driven"
+	default n
+
+config PIC32MZ_SPI_ENHBUF
+	bool "SPI Enhanced Buffer Mode"
+	default n
+
+endmenu # SPI Driver Configuration
 
 config PIC32MZ_T1_SOSC
 	bool
@@ -377,7 +408,7 @@ config NET_MULTICAST
 		Enable receipt of multicast (and unicast) frames. Automatically set if
 		NET_IGMP is selected.
 
-endmenu
+endmenu # PIC32MZ PHY/Ethernet device driver settings
 
 menu "Device Configuration 0 (DEVCFG0)"
 
@@ -417,7 +448,7 @@ config PIC32MZ_ECC_OPTION
 		2: ECC / dynamic ECC disabled (locked) */
 		3: ECC / dynamic ECC disabled (writable) */
 
-endmenu
+endmenu # Device configuration 0 (DEVCFG0)
 
 menu "Device Configuration 1 (DEVCFG1)"
 
@@ -440,7 +471,7 @@ config PIC32MZ_WDTENABLE
 		1: Watchdog enabled, cannot be disabled
 		0:  Watchdog disabled, can be enabled
 
-endmenu
+endmenu # Device Configuration 2 (DEVCFG2)
 
 menu "Device Configuration 3 (DEVCFG3)"
 
@@ -496,5 +527,5 @@ config PIC32MZ_FUSBIDIO
 		0 = USBID pin is controlled by the port function
 		1 = USBID pin is controlled by the USB module
 
-endmenu
+endmenu # Device Configuration 3 (DEVCFG3)
 endif
