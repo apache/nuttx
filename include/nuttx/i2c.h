@@ -250,18 +250,21 @@ struct i2c_ops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_dev_s *dev, uint32_t frequency);
   int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
-  int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
+  int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
+                  int buflen);
   int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 #ifdef CONFIG_I2C_WRITEREAD
-  int    (*writeread)(FAR struct i2c_dev_s *inst, const uint8_t *wbuffer, int wbuflen,
-                        uint8_t *rbuffer, int rbuflen);
+  int    (*writeread)(FAR struct i2c_dev_s *inst, const uint8_t *wbuffer,
+                      int wbuflen, uint8_t *rbuffer, int rbuflen);
 #endif
 #ifdef CONFIG_I2C_TRANSFER
-  int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count);
+  int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
+                     int count);
 #endif
 #ifdef CONFIG_I2C_SLAVE
   int    (*setownaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
-  int    (*registercallback)(FAR struct i2c_dev_s *dev, int (*callback)(void) );
+  int    (*registercallback)(FAR struct i2c_dev_s *dev,
+                             int (*callback)(FAR void *arg), FAR void *arg);
 #endif
 };
 
