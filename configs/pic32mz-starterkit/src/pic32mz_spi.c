@@ -50,31 +50,25 @@
 
 #include "pic32mz-starterkit.h"
 
-#if defined(CONFIG_PIC32MZ_SPI1) || defined(CONFIG_PIC32MZ_SPI2) || \
-    defined(CONFIG_PIC32MZ_SPI3) || defined(CONFIG_PIC32MZ_SPI4) || \
-    defined(CONFIG_PIC32MZ_SPI5) || defined(CONFIG_PIC32MZ_SPI6)
+#ifdef CONFIG_PIC32MZ_SPI
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* The following enable debug output from this file (needs CONFIG_DEBUG too).
- *
- * CONFIG_SPI_DEBUG - Define to enable basic SPI debug
- * CONFIG_SPI_VERBOSE - Define to enable verbose SPI debug
- */
+/* Debug */
 
-#ifdef CONFIG_SPI_DEBUG
-#  define sspdbg  lldbg
+#ifdef CONFIG_DEBUG_SPI
+#  define spidbg  lldbg
 #  ifdef CONFIG_SPI_VERBOSE
-#    define sspvdbg lldbg
+#    define spivdbg lldbg
 #  else
-#    define sspvdbg(x...)
+#    define spivdbg(x...)
 #  endif
 #else
 #  undef CONFIG_SPI_VERBOSE
-#  define sspdbg(x...)
-#  define sspvdbg(x...)
+#  define spidbg(x...)
+#  define spivdbg(x...)
 #endif
 
 /************************************************************************************
@@ -86,14 +80,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pic32mz_sspinitialize
+ * Name: pic32mz_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Sure PIC32MZ board.
  *
  ************************************************************************************/
 
-void weak_function pic32mz_sspinitialize(void)
+void weak_function pic32mz_spiinitialize(void)
 {
   /* Configure the SPI chip select GPIOs */
 
@@ -110,7 +104,7 @@ void weak_function pic32mz_sspinitialize(void)
  *   including up_spiinitialize()) are provided by common PIC32MZ logic.  To use
  *   this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mz_boardinitialize() to configure SPI/SSP chip select
+ *   1. Provide logic in pic32mz_boardinitialize() to configure SPI/SPI chip select
  *      pins.
  *   2. Provide pic32mz_spiNselect() and pic32mz_spiNstatus() functions
  *      in your board-specific logic.  These functions will perform chip selection
@@ -134,13 +128,13 @@ enum spi_dev_e;
 #ifdef CONFIG_PIC32MZ_SPI1
 void  pic32mz_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -153,21 +147,21 @@ int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #endif
 #endif
 
-#ifdef CONFIG_PIC32MZ_SPI1
-void  pic32mz_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_PIC32MZ_SPI2
+void  pic32mz_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
-uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t pic32mz_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
 #warning "Missing logic"
   return 0;
@@ -178,13 +172,13 @@ int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI3
 void  pic32mz_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -200,13 +194,13 @@ int pic32mz_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI4
 void  pic32mz_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -222,13 +216,13 @@ int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI5
 void  pic32mz_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -244,13 +238,13 @@ int pic32mz_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MZ_SPI6
 void  pic32mz_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mz_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -263,4 +257,4 @@ int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #endif
 #endif
 
-#endif /* CONFIG_PIC32MZ_SPI1..6 */
+#endif /* CONFIG_PIC32MZ_SPI */

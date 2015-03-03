@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -183,7 +184,7 @@ extern "C"
  *
  ************************************************************************************/
 
-#if defined(CONFIG_PIC32MZ_SPI2)
+#ifdef CONFIG_PIC32MZ_SPI
 void weak_function pic32mz_spiinitialize(void);
 #endif
 
