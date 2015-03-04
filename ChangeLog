@@ -9918,4 +9918,6 @@
 	* include/nuttx/i2c.h:  Add a user provided void * argument to the
 	  I2C callback method for the I2C slave interface.  Suggested by
 	  Nate Weibley (2015-03-03).
-
+	* crypto/, include/nuttx/crypto, and arm/src/common/up_initialize.c:
+	  Fix issues when AES support was added for the STM32L1.  From Juha
+	  Niskanen (2015-03-04).
