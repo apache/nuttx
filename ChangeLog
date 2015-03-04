@@ -9921,3 +9921,5 @@
 	* crypto/, include/nuttx/crypto, and arm/src/common/up_initialize.c:
 	  Fix issues when AES support was added for the STM32L1.  From Juha
 	  Niskanen (2015-03-04).
+	* arch/arm/src/stm32/stm32_spi.c and .h: Add missing SPI callback
+	  functions to the STM32 SPI driver.  From Freddie Chopin (2015-03-04).
