@@ -9923,3 +9923,6 @@
 	  Niskanen (2015-03-04).
 	* arch/arm/src/stm32/stm32_spi.c and .h: Add missing SPI callback
 	  functions to the STM32 SPI driver.  From Freddie Chopin (2015-03-04).
+	* arch/*/src/*/*_assert.c, configs/Kconfig, and include/nuttx/board.h:
+	  Add support for dumping board-specific information on assertion.
+	  From David Sidrane (2015-03-04).
