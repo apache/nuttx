@@ -146,7 +146,7 @@
 struct mmcsd_slot_s
 {
   FAR struct spi_dev_s *spi; /* SPI port bound to this slot */
-  sem_t  sem;                /* Assures mutually exclusive accesss to card and SPI */
+  sem_t  sem;                /* Assures mutually exclusive access to card and SPI */
   uint8_t  state;            /* State of the slot (see MMCSD_SLOTSTATUS_* definitions) */
   uint8_t  type;             /* Disk type */
   uint8_t  csd[16];          /* Copy of card CSD */
@@ -271,9 +271,9 @@ static struct mmcsd_slot_s g_mmcsdslot[CONFIG_MMCSD_NSLOTS];
 
 static const uint32_t g_transpeedru[8] =
 {
-     10000,   /*  0:  10 Kbit/sec / 10 */
-    100000,   /*  1:  1 Mbit/sec / 10 */
-   1000000,   /*  2:  10 Mbit/sec / 10 */
+     10000,   /*  0:   10 Kbit/sec / 10 */
+    100000,   /*  1:    1 Mbit/sec / 10 */
+   1000000,   /*  2:   10 Mbit/sec / 10 */
   10000000,   /*  3:  100 Mbit/sec / 10*/
 
   0, 0, 0, 0  /* 4-7: Reserved values */
@@ -297,8 +297,9 @@ static const uint32_t g_transpeedtu[16] =
  *
  *   taccess = TU*TV + NSAC/spifrequency
  *
- * g_taactu holds TU in units of nanoseconds and microseconds (you have to use
- * the index to distiguish).  g_taactv holds TV with 8-bits of fraction.
+ * g_taactu holds TU in units of nanoseconds and microseconds (you have to
+ * use the index to distinguish).  g_taactv holds TV with 8-bits of
+ * fraction.
  */
 
 #define MAX_USTUNDX 2
@@ -369,8 +370,8 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
   SPI_SETBITS(slot->spi, 8);
 #endif
 
-  /* Get exclusive access to the MMC/SD device (prossibly un-necessary if
-   * SPI_LOCK is also implemented as a semaphore.
+  /* Get exclusive access to the MMC/SD device (possibly unnecessary if
+   * SPI_LOCK is also implemented as a semaphore).
    */
 
   while (sem_wait(&slot->sem) != 0)
@@ -455,6 +456,7 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
         {
           return OK;
         }
+
       elapsed = ELAPSED_TIME(start);
     }
   while (elapsed < MMCSD_DELAY_500MS);
@@ -499,7 +501,7 @@ static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   SPI_SEND(spi, cmd->cmd);
 
-  /* Send command's arguments (should be zero if there are no arguements) */
+  /* Send command's arguments (should be zero if there are no arguments) */
 
   SPI_SEND(spi, (arg >> 24) & 0xff);
   SPI_SEND(spi, (arg >> 16) & 0xff);
@@ -655,8 +657,8 @@ static void mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32_t length)
 static uint32_t mmcsd_nsac(FAR struct mmcsd_slot_s *slot, uint8_t *csd,
                            uint32_t frequency)
 {
-  /* NSAC is 8-bits wide and is in units of 100 clock cycles.  Therefore, the
-   * maximum value is 25.5K clock cycles.
+  /* NSAC is 8-bits wide and is in units of 100 clock cycles.  Therefore,
+   * the maximum value is 25.5K clock cycles.
    */
 
   uint32_t nsac = MMCSD_CSD_NSAC(csd) * ((uint32_t)100*1000);
@@ -681,8 +683,8 @@ static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
    *
    *   taccess = TU*TV + NSAC/spifrequency
    *
-   * g_taactu holds TU in units of nanoseconds and microseconds (you have to use
-   * the index to distiguish.  g_taactv holds TV with 8-bits of fraction.
+   * g_taactu holds TU in units of nanoseconds and microseconds (you have to
+   * use the index to distinguish.  g_taactv holds TV with 8-bits of fraction.
    */
 
   tundx  = MMCSD_CSD_TAAC_TIMEUNIT(csd);
@@ -743,8 +745,8 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
 
   if (slot->type == MMCSD_CARDTYPE_MMC)
     {
-      /* The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value (TV).
-       * TAAC is in units of time; NSAC is in units of SPI clocks.
+      /* The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value
+       * (TV).  TAAC is in units of time; NSAC is in units of SPI clocks.
        * The access time we need is then given by:
        *
        *   taccess = TU*TV + NSAC/spifrequency
@@ -957,7 +959,8 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, uint8_t *buffer, int nbytes)
+static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
+                           int nbytes)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   uint32_t start;
@@ -1001,8 +1004,9 @@ static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, uint8_t *buffer, int n
  ****************************************************************************/
 
 #if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
-static int mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot, const uint8_t *buffer,
-                           int nbytes, uint8_t token)
+static int mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot,
+                           FAR const uint8_t *buffer, int nbytes,
+                           uint8_t token)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   uint8_t response;
@@ -1575,7 +1579,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   /* Check if there is a card present in the slot.  This is normally a matter is
    * of GPIO sensing and does not really involve SPI, but by putting this
-   * functionality in the SPI interface, we encapuslate the SPI MMC/SD
+   * functionality in the SPI interface, we encapsulate the SPI MMC/SD
    * interface
    */
 
@@ -1597,9 +1601,9 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   slot->taccess = SD_READACCESS;
 
-  /* The SD card wakes up in SD mode. It will enter SPI mode if the chip select signal is
-   * asserted (negative) during the reception of the reset command (CMD0) and the card is in
-   * IDLE state.
+  /* The SD card wakes up in SD mode. It will enter SPI mode if the chip
+   * select signal is asserted (negative) during the reception of the reset
+   * command (CMD0) and the card is in IDLE state.
    */
 
   for (i = 0; i < 2; i++)
@@ -1646,7 +1650,9 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   slot->type = MMCSD_CARDTYPE_UNKNOWN;
 
-  /* Check for SDHC Version 2.x.  CMD 8 is reserved on SD version 1.0 and MMC. */
+  /* Check for SDHC Version 2.x.  CMD 8 is reserved on SD version 1.0 and
+   * MMC.
+   */
 
   fvdbg("Send CMD8\n");
   result = mmcsd_sendcmd(slot, &g_cmd8, 0x1aa);
@@ -1865,7 +1871,9 @@ static void mmcsd_mediachanged(void *arg)
 
   /* Check if media was removed or inserted */
 
-  slot->state &= ~(MMCSD_SLOTSTATUS_NODISK|MMCSD_SLOTSTATUS_NOTREADY|MMCSD_SLOTSTATUS_MEDIACHGD);
+  slot->state &= ~(MMCSD_SLOTSTATUS_NODISK | MMCSD_SLOTSTATUS_NOTREADY |
+                   MMCSD_SLOTSTATUS_MEDIACHGD);
+
   if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) == 0)
     {
       /* Media is not present */
@@ -1881,13 +1889,13 @@ static void mmcsd_mediachanged(void *arg)
         }
     }
 
-  /* Media is present, was it just inserted? Or, if it was previously not ready,
-   * then try re-initializing it
+  /* Media is present, was it just inserted? Or, if it was previously not
+   * ready, then try re-initializing it
    */
 
   else if ((oldstate & (MMCSD_SLOTSTATUS_NODISK|MMCSD_SLOTSTATUS_NOTREADY)) != 0)
     {
-      /* (Re-)ininitialize for the media in the slot */
+      /* (Re-)initialize for the media in the slot */
 
       ret = mmcsd_mediainitialize(slot);
       if (ret == 0)
@@ -1913,9 +1921,9 @@ static void mmcsd_mediachanged(void *arg)
  * Input Parameters:
  *   minor - The MMC/SD minor device number.  The MMC/SD device will be
  *     registered as /dev/mmcsdN where N is the minor number
- *   slotno - The slot number to use.  This is only meaningful for architectures
- *     that support multiple MMC/SD slots.  This value must be in the range
- *     {0, ..., CONFIG_MMCSD_NSLOTS}.
+ *   slotno - The slot number to use.  This is only meaningful for
+ *     architectures that support multiple MMC/SD slots.  This value must be
+ *     in the range {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   spi - And instance of an SPI interface obtained by called
  *     up_spiinitialize() with the appropriate port number (see spi.h)
  *
@@ -1956,7 +1964,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   slot->spispeed = MMCSD_IDMODE_CLOCK;
 #endif
 
-  /* Get exclusvice access to the SPI bus and make sure that SPI is properly
+  /* Get exclusive access to the SPI bus and make sure that SPI is properly
    * configured for the MMC/SD card
    */
 
@@ -1989,7 +1997,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
       return ret;
     }
 
-  /* Register a media change callback to handler insertion and
+  /* Register a media change callback to handle insertion and
    * removal of cards.
    */
 
