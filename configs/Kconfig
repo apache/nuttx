@@ -1043,6 +1043,31 @@ config ARCH_BOARD_CUSTOM_DIR
 		to some location outside of the NuttX source tree (like
 		"~/projects/myboard").
 
+config BOARD_CRASHDUMP
+	bool "Enable Board level logging of crash dumps"
+	default n
+	---help---
+		If selected up_asseert will call out to board_crashdump, in the case
+		of an assertion failure, prior to calling exit. Or in the
+		case of a hardfault prior to looping indefinitely. board_crashdump
+		then has a chance to save the state of the machine.
+
+		The purpose of board_crashdump is to save as much information as it can
+		about the cause of the fault and then most likely reset the system.
+
+		 N.B. There is limited system resources that can be used, who knows
+		 what memory is trashed? So all we can expect to do is save the
+		"machine state" in a place where on the next reset can write it
+		to more sophisticated storage in a sane operating environment.
+
+config BOARD_RESET_ON_CRASH
+	bool "Eanble Board Reset after the crashdump is saved"
+	default n
+	depends on BOARD_CRASHDUMP
+	---help---
+		If selected the board_crashdump should reset the machine after
+		saveing the state of the machine
+
 config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
 	default n

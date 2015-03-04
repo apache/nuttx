@@ -487,6 +487,10 @@ void up_assert(const uint8_t *filename, int line)
 {
     fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
 
+#ifdef CONFIG_BOARD_CRASHDUMP
+    board_crashdump(up_getsp(), g_readytorun.head, filename, line);
+#endif
+
     // in interrupt context or idle task means kernel error
     // which will stop the OS
     // if in user space just terminate the task

@@ -81,5 +81,10 @@ int main(int argc, char **argv, char **envp)
 void up_assert(const uint8_t *filename, int line)
 {
   fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
+
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), g_readytorun.head, filename, line);
+#endif
+
   longjmp(sim_abort, 1);
 }
