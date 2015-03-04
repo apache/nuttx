@@ -64,13 +64,6 @@ struct cipher_testvec
 
 /* AES test vectors */
 
-#define AES_ENC_TEST_VECTORS 3
-#define AES_DEC_TEST_VECTORS 3
-#define AES_CBC_ENC_TEST_VECTORS 4
-#define AES_CBC_DEC_TEST_VECTORS 4
-#define AES_CTR_ENC_TEST_VECTORS 3
-#define AES_CTR_DEC_TEST_VECTORS 3
-
 static struct cipher_testvec aes_enc_tv_template[] =
 {
 #ifndef CONFIG_CRYPTO_AES128_DISABLE

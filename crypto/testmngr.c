@@ -54,6 +54,14 @@
 
 #include "testmngr.h"
 
+/*****************************************************************************
+ * Pre-processor Definitions
+ *****************************************************************************/
+
+#ifndef ARRAY_SIZE
+#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
+
 #if defined(CONFIG_CRYPTO_AES)
 
 /****************************************************************************
@@ -99,9 +107,15 @@ static int test_aes(void)
 {
   int i;
 
-  AES_CYPHER_TEST(AES_MODE_ECB, "ECB", AES_ENC_TEST_VECTORS,     AES_DEC_TEST_VECTORS,     aes_enc_tv_template,     aes_dec_tv_template)
-  AES_CYPHER_TEST(AES_MODE_CBC, "CBC", AES_CBC_ENC_TEST_VECTORS, AES_CBC_DEC_TEST_VECTORS, aes_cbc_enc_tv_template, aes_cbc_dec_tv_template)
-  AES_CYPHER_TEST(AES_MODE_CTR, "CTR", AES_CTR_ENC_TEST_VECTORS, AES_CTR_DEC_TEST_VECTORS, aes_ctr_enc_tv_template, aes_ctr_dec_tv_template)
+  AES_CYPHER_TEST(AES_MODE_ECB, "ECB", ARRAY_SIZE(aes_enc_tv_template),
+                  ARRAY_SIZE(aes_dec_tv_template), aes_enc_tv_template,
+                  aes_dec_tv_template)
+  AES_CYPHER_TEST(AES_MODE_CBC, "CBC", ARRAY_SIZE(aes_cbc_enc_tv_template),
+                  ARRAY_SIZE(aes_cbc_dec_tv_template),
+                  aes_cbc_enc_tv_template, aes_cbc_dec_tv_template)
+  AES_CYPHER_TEST(AES_MODE_CTR, "CTR", ARRAY_SIZE(aes_ctr_enc_tv_template),
+                  ARRAY_SIZE(aes_ctr_dec_tv_template),
+                  aes_ctr_enc_tv_template, aes_ctr_dec_tv_template)
 
   return OK;
 }

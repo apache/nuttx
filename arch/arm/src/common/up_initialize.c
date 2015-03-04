@@ -46,6 +46,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
+#include <nuttx/crypto/crypto.h>
 
 #include <arch/board/board.h>
 
@@ -196,14 +197,6 @@ void up_initialize(void)
   devnull_register();   /* Standard /dev/null */
 #endif
 
-#if defined(CONFIG_CRYPTO)
-  up_cryptoinitialize();
-#endif
-
-#if defined(CONFIG_CRYPTO_CRYPTODEV)
-  devcrypto_register(); /* /dev/crypto */
-#endif
-
 #if defined(CONFIG_DEV_ZERO)
   devzero_register();   /* Standard /dev/zero */
 #endif
@@ -226,6 +219,18 @@ void up_initialize(void)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
+#endif
+
+  /* Initialize the HW crypto and /dev/crypto */
+
+#if defined(CONFIG_CRYPTO)
+  up_cryptoinitialize();
+#endif
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+#if defined(CONFIG_CRYPTO_CRYPTODEV)
+  devcrypto_register();
+#endif
 #endif
 
   /* Initialize the Random Number Generator (RNG)  */
