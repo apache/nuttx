@@ -9926,3 +9926,5 @@
 	* arch/*/src/*/*_assert.c, configs/Kconfig, and include/nuttx/board.h:
 	  Add support for dumping board-specific information on assertion.
 	  From David Sidrane (2015-03-04).
+	* drivers/spi/Kconfig: Add missing CONFIG_SPI_CALLBACK selection.  Noted
+	  by Freddie Chopin (2015-03-04).
