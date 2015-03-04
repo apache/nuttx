@@ -175,6 +175,10 @@ void up_assert(const uint8_t *filename, int lineno)
 
   up_dumpstate();
 
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), g_readytorun.head, filename, lineno);
+#endif
+
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 

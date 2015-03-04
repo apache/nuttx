@@ -181,5 +181,9 @@ void up_assert(const uint8_t *filename, int lineno)
   (void)usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), g_readytorun.head, filename, lineno);
+#endif
+
   _up_assert(EXIT_FAILURE);
 }

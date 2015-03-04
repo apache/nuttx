@@ -367,5 +367,10 @@ void up_assert(const uint8_t *filename, int lineno)
         filename, lineno);
 #endif
   up_dumpstate();
+
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), g_readytorun.head, filename, lineno);
+#endif
+
   _up_assert(EXIT_FAILURE);
 }
