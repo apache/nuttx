@@ -442,4 +442,32 @@ config SAMV7_WDT1
 
 endmenu # SAMV7 Peripheral Selection
 
+menuconfig SAMV7_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+if SAMV7_GPIO_IRQ
+
+config SAMV7_GPIOA_IRQ
+	bool "GPIOA interrupts"
+	default n
+
+config SAMV7_GPIOB_IRQ
+	bool "GPIOB interrupts"
+	default n
+
+config SAMV7_GPIOC_IRQ
+	bool "GPIOC interrupts"
+	default n
+
+config SAMV7_GPIOD_IRQ
+	bool "GPIOD interrupts"
+	default n
+
+config SAMV7_GPIOE_IRQ
+	bool "GPIOE interrupts"
+	default n
+
+endif # SAMV7_GPIO_IRQ
 endif # ARCH_CHIP_SAMV7
