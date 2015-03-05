@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/Makefile
 #
-#   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,24 +38,18 @@
 
 ifeq ($(CONFIG_ARCH_CORTEXA5),y)   # Cortex-A5 is ARMv7-A
 ARCH_SUBDIR = armv7-a
-else
-ifeq ($(CONFIG_ARCH_CORTEXA8),y)   # Cortex-A8 is ARMv7-A
+else ifeq ($(CONFIG_ARCH_CORTEXA8),y)   # Cortex-A8 is ARMv7-A
 ARCH_SUBDIR = armv7-a
-else
-ifeq ($(CONFIG_ARCH_CORTEXM3),y)   # Cortex-M3 is ARMv7-M
+else ifeq ($(CONFIG_ARCH_CORTEXM3),y)   # Cortex-M3 is ARMv7-M
 ARCH_SUBDIR = armv7-m
-else
-ifeq ($(CONFIG_ARCH_CORTEXM4),y)   # Cortex-M4 is ARMv7E-M
+else ifeq ($(CONFIG_ARCH_CORTEXM4),y)   # Cortex-M4 is ARMv7E-M
 ARCH_SUBDIR = armv7-m
-else
-ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
+else ifeq ($(CONFIG_ARCH_CORTEXM7),y)   # Cortex-M4 is ARMv7E-M
+ARCH_SUBDIR = armv7-m
+else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
 ARCH_SUBDIR = armv6-m
 else
 ARCH_SUBDIR = arm
-endif
-endif
-endif
-endif
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
