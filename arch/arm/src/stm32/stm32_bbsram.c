@@ -807,9 +807,9 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 {
   FAR struct bbsramfh_s *bbf;
   int fill;
-  int ret = -ENOMEM;
+  int ret = -ENOSPC;
 
-  /* on a bad day we could panic while panicking, (and we debug assert)
+  /* On a bad day we could panic while panicking, (and we debug assert)
    * this is a potential feeble attempt at only writing the first
    * panic's context to the file
    */
@@ -826,13 +826,19 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 
       DEBUGASSERT(bbf);
 
-      /* As once ensures we will keep the first dump checking the time for
+      /* If the g_bbsram has been nulled out we return ENXIO.
+       *
+       * As once ensures we will keep the first dump. Checking the time for
        * 0 protects from over writing a previous crash dump that has not
        * been saved to long term storage and erased.  The dreaded reboot
        * loop.
        */
 
-      if (bbf && (bbf->lastwrite.tv_sec == 0 && bbf->lastwrite.tv_nsec == 0))
+      if (!bbf)
+        {
+          ret = -ENXIO;
+        }
+      else if ((bbf->lastwrite.tv_sec == 0 && bbf->lastwrite.tv_nsec == 0))
         {
           /* Clamp length if too big  */
 

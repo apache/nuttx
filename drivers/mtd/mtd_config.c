@@ -885,7 +885,7 @@ retry_relocate:
 
       if (dst_offset + sizeof(hdr) >= (dst_block + 1) * dev->erasesize)
         {
-          /* No room at end of dst block for another header.  Go to next block.  */
+          /* No room at end of dst block for another header.  Go to next block. */
 
           dst_block++;
           dst_offset = dst_block * dev->erasesize + CONFIGDATA_BLOCK_HDR_SIZE;
@@ -1271,7 +1271,8 @@ errout:
  * Name: mtdconfig_ioctl
  ****************************************************************************/
 
-static int  mtdconfig_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct mtdconfig_struct_s *dev = inode->i_private;
