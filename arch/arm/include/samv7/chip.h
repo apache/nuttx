@@ -101,7 +101,7 @@
 #  define SAMV7_NUHPHS                1             /* 1 USB high speed embedded Mini-Host */
 #  define SAMV7_NUDPFS                0             /* No USB full speed device */
 #  define SAMV7_NUHPFS                0             /* No USB full speed embedded host */
-#  define SAMV7_NACMP                 1             /* 1 Analog comparator */
+#  define SAMV7_NACC                  1             /* 1 Analog comparator */
 #  define SAMV7_NETM                  1             /* 1 Embedded Trace Macrocell (ETM) */
 
 /* SAMV71N19 -  512 Kbytes FLASH / 256 Kbytes SRAM
@@ -157,7 +157,7 @@
 #  define SAMV7_NUHPHS                1             /* 1 USB high speed embedded Mini-Host */
 #  define SAMV7_NUDPFS                0             /* No USB full speed device */
 #  define SAMV7_NUHPFS                0             /* No USB full speed embedded host */
-#  define SAMV7_NACMP                 1             /* 1 Analog comparator */
+#  define SAMV7_NACC                  1             /* 1 Analog comparator */
 #  define SAMV7_NETM                  1             /* 1 Embedded Trace Macrocell (ETM) */
 
 /* SAMV71J19 -  512 Kbytes FLASH / 256 Kbytes SRAM
@@ -213,7 +213,7 @@
 #  define SAMV7_NUHPHS                0             /* No USB high speed embedded Mini-Host */
 #  define SAMV7_NUDPFS                1             /* 1 USB full speed device */
 #  define SAMV7_NUHPFS                1             /* 1 USB full speed embedded host */
-#  define SAMV7_NACMP                 1             /* 1 Analog comparator */
+#  define SAMV7_NACC                  1             /* 1 Analog comparator */
 #  define SAMV7_NETM                  1             /* 1 Embedded Trace Macrocell (ETM) */
 
 #else

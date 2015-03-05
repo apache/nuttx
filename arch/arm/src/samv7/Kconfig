@@ -7,8 +7,6 @@ if ARCH_CHIP_SAMV7
 
 comment "SAMV7 Configuration Options"
 
-# Chip Capabilities
-
 # Chip Selection
 
 choice
@@ -17,33 +15,424 @@ choice
 
 config ARCH_CHIP_SAMV71Q19
 	bool "SAMV71Q19"
+	select ARCH_CHIP_SAMV71Q
 
 config ARCH_CHIP_SAMV71Q20
 	bool "SAMV71Q20"
+	select ARCH_CHIP_SAMV71Q
 
 config ARCH_CHIP_SAMV71Q21
 	bool "SAMV71Q21"
+	select ARCH_CHIP_SAMV71Q
 
 config ARCH_CHIP_SAMV71N19
 	bool "SAMV71N19"
+	select ARCH_CHIP_SAMV71N
 
 config ARCH_CHIP_SAMV71N20
 	bool "SAMV71N20"
+	select ARCH_CHIP_SAMV71N
 
 config ARCH_CHIP_SAMV71N21
 	bool "SAMV71N21"
+	select ARCH_CHIP_SAMV71N
 
 config ARCH_CHIP_SAMV71J19
 	bool "SAMV71J19"
+	select ARCH_CHIP_SAMV71J
 
 config ARCH_CHIP_SAMV71J20
 	bool "SAMV71J20"
+	select ARCH_CHIP_SAMV71J
 
 config ARCH_CHIP_SAMV71J21
 	bool "SAMV71J21"
+	select ARCH_CHIP_SAMV71J
 
 endchoice # Atmel SAMV7 Chip Selection
 
+# Chip Capabilities
+
+config SAMV7_HAVE_CAN1
+	bool
+	default n
+
+config SAMV7_HAVE_DAC1
+	bool
+	default n
+
+config SAMV7_HAVE_EBI
+	bool
+	default n
+
+config SAMV7_HAVE_HSMCI
+	bool
+	default n
+
+config SAMV7_HAVE_ISI8
+	bool
+	default n
+
+config SAMV7_HAVE_SDRAMC
+	bool
+	default n
+
+config SAMV7_HAVE_SPI0
+	bool
+	default n
+
+config SAMV7_HAVE_SPI1
+	bool
+	default n
+
+config SAMV7_QSPI_IS_SPI
+	bool
+	default n
+
+config SAMV7_HAVE_TWIHS2
+	bool
+	default n
+
+config SAMV7_HAVE_USBFS
+	bool
+	default n
+
+config SAMV7_HAVE_USBHS
+	bool
+	default n
+
+config SAMV7_HAVE_USART0
+	bool
+	default n
+
+config SAMV7_HAVE_USART1
+	bool
+	default n
+
+config SAMV7_HAVE_USART2
+	bool
+	default n
+
+config ARCH_CHIP_SAMV71Q
+	bool
+	default n
+	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAMV71N
+	bool
+	default n
+	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_HSMCI
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAMV71J
+	bool
+	default n
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
 # Peripheral Selection
 
-endif # Atmel SAMV7 Chip Selection
+menu "SAMV7 Peripheral Selection"
+
+config SAMV7_ACC
+	bool "Analog Comparator (ACC)"
+	default n
+
+config SAMV7_ADC
+	bool "12-bit ADC Controller (ADC)"
+	default n
+
+config SAMV7_AFEC0
+	bool "Analog Front End 0 (AFEC0)"
+	default n
+
+config SAMV7_AFEC1
+	bool "Analog Front End 1 (AFEC1)"
+	default n
+
+config SAMV7_CAN0
+	bool "CAN0"
+	default n
+
+config SAMV7_CAN1
+	bool "CAN1"
+	default n
+	depends on SAMV7_HAVE_CAN1
+
+config SAMV7_DAC0
+	bool "Digital To Analog Converter 0 (DAC0)"
+	default n
+
+config SAMV7_DAC1
+	bool "Digital To Analog Converter 1 (DAC1)"
+	default n
+	depends on SAMV7_HAVE_DAC1
+
+config SAMV7_EBI
+	bool "External Bus Interface (EBI)"
+	default n
+	depends on SAMV7_HAVE_EBI
+
+config SAMV7_EMAC
+	bool "Ethernet MAC (GMAC)"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config SAMV7_XDMAC
+	bool "Central DMA (XDMA)"
+	default n
+
+config SAMV7_HSMCI
+	bool "High Speed Multimedia Card Interface (HSMCI)"
+	default n
+	depends on SAMV7_HAVE_HSMCI
+	select ARCH_HAVE_SDIO
+	select MMCSD
+
+config SAMV7_ISI
+	bool "Image Sensor Interface (ISI)"
+	default n
+
+config SAMV7_MLB
+	bool "Media LB Interface"
+	default n
+
+config SAMV7_PWM0
+	bool "Pulse Width Modulation Controller 0 (PWM0)"
+	default n
+
+config SAMV7_PWM1
+	bool "Pulse Width Modulation Controller 0 (PWM1)"
+	default n
+
+config SAMV7_QSPI
+	bool "Quad SPI (QSPI)"
+	default n
+
+config SAMV7_RTC
+	bool "Real Time Clock (RTC)"
+	default n
+
+config SAMV7_RTT
+	bool "Real Time Timer (RTT)"
+	default n
+
+config SAMV7_SDRAMC
+	bool "SDRAM Controller (SDRAMC)"
+	default n
+	depends on SAMV7_HAVE_SDRAMC
+
+config SAMV7_SMC
+	bool "Static Memory Controller (SMC)"
+	default n
+
+config SAMV7_SPI0
+	bool "Serial Peripheral Interface 0 (SPI0)"
+	default n
+	depends on SAMV7_HAVE_SPI0
+	select SPI
+
+config SAMV7_SPI1
+	bool "Serial Peripheral Interface 1 (SPI1)"
+	default n
+	depends on SAMV7_HAVE_SPI1
+	select SPI
+
+config SAMV7_SSC
+	bool "Synchronous Serial Controller (SSC)"
+	default n
+
+config SAMV7_TC0
+	bool "Timer/Counter 0 (TC0)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC1
+	bool "Timer/Counter 1 (TC1)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC2
+	bool "Timer/Counter 2 (TC2)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC3
+	bool "Timer/Counter 3 (TC3)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC4
+	bool "Timer/Counter 4 (TC4)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC5
+	bool "Timer/Counter 5 (TC5)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC6
+	bool "Timer/Counter 6 (TC6)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC7
+	bool "Timer/Counter 7 (TC7)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC8
+	bool "Timer/Counter 8 (TC8)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC9
+	bool "Timer/Counter 9 (TC8)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC10
+	bool "Timer/Counter 10 (TC9)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TC11
+	bool "Timer/Counter 11 (TC8)"
+	default n
+	select SAMV7_TC
+
+config SAMV7_TRNG
+	bool "True Random Number Generator (TRNG)"
+	default n
+
+config SAMV7_TWIM0
+	bool "Two-wire Master Interface 0 (TWIHS0)"
+	default n
+
+config SAMV7_TWIS0
+	bool "Two-wire Slave Interface 0 (TWIHS0)"
+	default n
+	depends on EXPERIMENTAL
+
+config SAMV7_TWIM1
+	bool "Two-wire Master Interface 1 (TWIHS1)"
+	default n
+
+config SAMV7_TWIS1
+	bool "Two-wire Slave Interface 1 (TWIHS1)"
+	default n
+	depends on EXPERIMENTAL
+
+config SAMV7_TWIM2
+	bool "Two-wire Master Interface 2 (TWIHS2)"
+	default n
+	depends on SAMV7_HAVE_TWIHS2
+
+config SAMV7_TWIS2
+	bool "Two-wire Slave Interface 2 (TWIHS2)"
+	default n
+	depends on SAMV7_HAVE_TWIHS2 && EXPERIMENTAL
+
+config SAMV7_UART0
+	bool "UART 0"
+	default y
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART1
+	bool "UART 1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART2
+	bool "UART 2"
+	default y
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART3
+	bool "UART 3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART4
+	bool "UART 4"
+	default y
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USBDEVFS
+	bool "USB Device Full Speed (USBFS)"
+	default n
+	depends on SAMV7_HAVE_USBFS
+
+config SAMV7_USBDEVHS
+	bool "USB Device High Speed (USBHS)"
+	default n
+	depends on SAMV7_HAVE_USBHS
+
+config SAMV7_USBHOSTFS
+	bool "USB Host Full Speed (USBFS)"
+	default n
+	depends on SAMV7_HAVE_USBFS
+
+config SAMV7_USBHOSTHS
+	bool "USB Host High Speed (USBHS)"
+	default n
+	depends on SAMV7_HAVE_USBHS
+
+config SAMV7_USART0
+	bool "USART 0"
+	default n
+	depends on SAMV7_HAVE_USART0
+	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USART1
+	bool "USART 1"
+	default n
+	depends on SAMV7_HAVE_USART1
+	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USART2
+	bool "USART 2"
+	default n
+	depends on SAMV7_HAVE_USART2
+	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_WDT0
+	bool "Watchdog Timer (WDT0)"
+	default n
+
+config SAMV7_WDT1
+	bool "Watchdog Timer (WDT1)"
+	default n
+
+endmenu # SAMV7 Peripheral Selection
+
+endif # ARCH_CHIP_SAMV7
