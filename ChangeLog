@@ -9932,3 +9932,7 @@
 	  and configuration logic for the Atmel SAMV7 family (2015-03-05).
 	* arch/arm/src/Makefile, armv7-m/Toolchain.defs: Make ARM build system
 	  Cortex-M7 ready (2015-03-05).
+	* arch/arm/src/sam34/sam_start.c:  Leverage start-up logic from STM32
+	  to (1) Enable the FPU and (2) perform IDLE stack coloration
+	  (2015-03-05).
+
