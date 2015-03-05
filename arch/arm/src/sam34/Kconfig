@@ -542,7 +542,7 @@ config SAM34_TC7
 	select SAM34_TC
 
 config SAM34_TC8
-	bool "Timer/Counter 6 (TC8)"
+	bool "Timer/Counter 8 (TC8)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 	select SAM34_TC
