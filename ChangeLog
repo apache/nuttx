@@ -9928,3 +9928,6 @@
 	  From David Sidrane (2015-03-04).
 	* drivers/spi/Kconfig: Add missing CONFIG_SPI_CALLBACK selection.  Noted
 	  by Freddie Chopin (2015-03-04).
+	* arch/arm/src/samv7 and include/samv7:  Add basic build directories
+	  and configuration logic for the Atmel SAMV7 family (2015-03-05).
+
