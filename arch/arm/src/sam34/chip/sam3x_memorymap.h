@@ -144,7 +144,7 @@
 /* External RAM memory region */
 
 #define SAM_EXTCS_BASE         0x60000000 /* 0x60000000-0x63ffffff: Chip selects */
-#  define SAM_EXTCSN_BASE(n)   (0x60000000*((n)<<24))
+#  define SAM_EXTCSN_BASE(n)   (0x60000000 + ((n) << 24))
 #  define SAM_EXTCS0_BASE      0x60000000 /* 0x60000000-0x60ffffff:   Chip select 0 */
 #  define SAM_EXTCS1_BASE      0x61000000 /* 0x61000000-0x61ffffff:   Chip select 1 */
 #  define SAM_EXTCS2_BASE      0x62000000 /* 0x62000000-0x62ffffff:   Chip select 2 */
