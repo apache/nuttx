@@ -51,6 +51,49 @@ config ARCH_CHIP_SAMV71J21
 
 endchoice # Atmel SAMV7 Chip Selection
 
+config ARCH_CHIP_SAMV71
+	bool
+	default n
+
+config ARCH_CHIP_SAMV71Q
+	bool
+	default n
+	select ARCH_CHIP_SAMV71
+	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAMV71N
+	bool
+	default n
+	select ARCH_CHIP_SAMV71
+	select SAMV7_HAVE_CAN1
+	select SAMV7_HAVE_DAC1
+	select SAMV7_HAVE_HSMCI
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_SAMV71J
+	bool
+	default n
+	select ARCH_CHIP_SAMV71
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
 # Chip Capabilities
 
 config SAMV7_HAVE_CAN1
@@ -112,42 +155,6 @@ config SAMV7_HAVE_USART1
 config SAMV7_HAVE_USART2
 	bool
 	default n
-
-config ARCH_CHIP_SAMV71Q
-	bool
-	default n
-	select SAMV7_HAVE_CAN1
-	select SAMV7_HAVE_DAC1
-	select SAMV7_HAVE_EBI
-	select SAMV7_HAVE_HSMCI
-	select SAMV7_HAVE_SDRAMC
-	select SAMV7_HAVE_SPI0
-	select SAMV7_HAVE_SPI1
-	select SAMV7_HAVE_TWIHS2
-	select SAMV7_HAVE_USBHS
-	select SAMV7_HAVE_USART0
-	select SAMV7_HAVE_USART1
-	select SAMV7_HAVE_USART2
-
-config ARCH_CHIP_SAMV71N
-	bool
-	default n
-	select SAMV7_HAVE_CAN1
-	select SAMV7_HAVE_DAC1
-	select SAMV7_HAVE_HSMCI
-	select SAMV7_HAVE_SPI0
-	select SAMV7_HAVE_TWIHS2
-	select SAMV7_HAVE_USBHS
-	select SAMV7_HAVE_USART0
-	select SAMV7_HAVE_USART1
-	select SAMV7_HAVE_USART2
-
-config ARCH_CHIP_SAMV71J
-	bool
-	default n
-	select SAMV7_QSPI_IS_SPI
-	select SAMV7_HAVE_USBFS
-	select SAMV7_HAVE_ISI8
 
 # Peripheral Selection
 
