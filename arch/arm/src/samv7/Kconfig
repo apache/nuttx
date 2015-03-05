@@ -1,0 +1,49 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_CHIP_SAMV7
+
+comment "SAMV7 Configuration Options"
+
+# Chip Capabilities
+
+# Chip Selection
+
+choice
+	prompt "Atmel SAMV7 Chip Selection"
+	default ARCH_CHIP_SAMV71Q21
+
+config ARCH_CHIP_SAMV71Q19
+	bool "SAMV71Q19"
+
+config ARCH_CHIP_SAMV71Q20
+	bool "SAMV71Q20"
+
+config ARCH_CHIP_SAMV71Q21
+	bool "SAMV71Q21"
+
+config ARCH_CHIP_SAMV71N19
+	bool "SAMV71N19"
+
+config ARCH_CHIP_SAMV71N20
+	bool "SAMV71N20"
+
+config ARCH_CHIP_SAMV71N21
+	bool "SAMV71N21"
+
+config ARCH_CHIP_SAMV71J19
+	bool "SAMV71J19"
+
+config ARCH_CHIP_SAMV71J20
+	bool "SAMV71J20"
+
+config ARCH_CHIP_SAMV71J21
+	bool "SAMV71J21"
+
+endchoice # Atmel SAMV7 Chip Selection
+
+# Peripheral Selection
+
+endif # Atmel SAMV7 Chip Selection
