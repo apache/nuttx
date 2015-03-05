@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam_udphs.h
+ * arch/arm/src/sam34/sam_udp.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
