@@ -134,11 +134,14 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MCPU     := -mcpu=cortex-m7
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m7
+  # FIXME: Most tools do not yet support the cortex-m7 CPU type
+  # TOOLCHAIN_MCPU   := -mcpu=cortex-m7
+  # TOOLCHAIN_MTUNE  := -mtune=cortex-m7
+  TOOLCHAIN_MCPU     := -mcpu=cortex-m4
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m4
   TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
-    #TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard # Single precision
+    # TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard # Single precision
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16 -mfloat-abi=hard
   else
     TOOLCHAIN_MFLOAT := -mfloat-abi=soft
@@ -223,8 +226,8 @@ endif
 # devkitARM under Windows
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),DEVKITARM)
-  CROSSDEV ?= arm-eabi-
-  ARCROSSDEV ?= arm-eabi-
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif

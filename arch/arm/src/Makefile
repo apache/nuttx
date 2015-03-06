@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
-ifeq ($(CONFIG_ARCH_CORTEXA5),y)   # Cortex-A5 is ARMv7-A
+ifeq ($(CONFIG_ARCH_CORTEXA5),y)        # Cortex-A5 is ARMv7-A
 ARCH_SUBDIR = armv7-a
 else ifeq ($(CONFIG_ARCH_CORTEXA8),y)   # Cortex-A8 is ARMv7-A
 ARCH_SUBDIR = armv7-a
@@ -48,7 +48,7 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)   # Cortex-M4 is ARMv7E-M
 ARCH_SUBDIR = armv7-m
 else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
 ARCH_SUBDIR = armv6-m
-else
+else                                    # ARM9, ARM7TDMI
 ARCH_SUBDIR = arm
 endif
 
