@@ -538,6 +538,9 @@ configs/sam4s-xplained
 configs/sam4s-xplained-pro
   The port of NuttX to the Atmel SAM4S-Xplained Pro development board.
 
+configs/samv71-xult
+  The port of NuttX to the Atmel SAMV71 Xplained Ultra evaluation board.
+
 configs/sim
   A user-mode port of NuttX to the x86 Linux platform is available.
   The purpose of this port is primarily to support OS feature development.
