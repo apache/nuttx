@@ -9938,4 +9938,7 @@
 	* arch/arm/src/armv7-m/up_lazyexception.S, Kconfig and severl other
 	  files:  Add support for lazy FPU state saving.  Not yet verified.
 	  (2015-03-06).
-
+	* arch/arm/Kconfig, Make.defs, sam_start.c, configs/Kconfig,
+	  samv71-xult: Add a bare bones framework that will do nothing more than
+	  support configuration for the Atmel SAMV71 Xplained Ultra board.  Very
+	  much a work in progress (2015-03-06).
