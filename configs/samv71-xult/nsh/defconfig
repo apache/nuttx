@@ -974,7 +974,7 @@ CONFIG_NSH_FILEIOSIZE=512
 # Console Configuration
 #
 CONFIG_NSH_CONSOLE=y
-CONFIG_NSH_ARCHINIT=y
+# CONFIG_NSH_ARCHINIT is not set
 
 #
 # Networking Configuration
