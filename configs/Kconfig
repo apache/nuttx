@@ -704,6 +704,15 @@ config ARCH_BOARD_SAM4L_XPLAINED
 	---help---
 		The port of NuttX to the Atmel SAM4L-Xplained Pro development board.
 
+config ARCH_BOARD_SAM4S_XPLAINED
+	bool "Atmel SAM4S-Xplained development board"
+	depends on ARCH_CHIP_ATSAM4S16C
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAM4S-Xplained development board.
+
 config ARCH_BOARD_SAM4S_XPLAINED_PRO
 	bool "Atmel SAM4S-Xplained Pro development board"
 	depends on ARCH_CHIP_ATSAM4SD32C
@@ -713,14 +722,14 @@ config ARCH_BOARD_SAM4S_XPLAINED_PRO
 	---help---
 		The port of NuttX to the Atmel SAM4S-Xplained Pro development board.
 
-config ARCH_BOARD_SAM4S_XPLAINED
-	bool "Atmel SAM4S-Xplained development board"
-	depends on ARCH_CHIP_ATSAM4S16C
+config ARCH_BOARD_SAMV71_XULT
+	bool "Atmel SAMV71 Xplained Ultra evalutation board"
+	depends on ARCH_CHIP_SAMV71Q21
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		The port of NuttX to the Atmel SAM4S-Xplained development board.
+		The port of NuttX to the Atmel SAMV71 Xplained Ultra evalutation board.
 
 config ARCH_BOARD_SHENZHOU
 	bool "Shenzhou STM32F107 board"
@@ -1168,6 +1177,7 @@ config ARCH_BOARD
 	default "sam4l-xplained"           if ARCH_BOARD_SAM4L_XPLAINED
 	default "sam4s-xplained"           if ARCH_BOARD_SAM4S_XPLAINED
 	default "sam4s-xplained-pro"       if ARCH_BOARD_SAM4S_XPLAINED_PRO
+	default "samv71-xult"              if ARCH_BOARD_SAMV71_XULT
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
@@ -1464,6 +1474,9 @@ source "configs/sam4s-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAM4S_XPLAINED_PRO
 source "configs/sam4s-xplained-pro/Kconfig"
+endif
+if ARCH_BOARD_SAMV71_XULT
+source "configs/samv71-xult/Kconfig"
 endif
 if ARCH_BOARD_SHENZHOU
 source "configs/shenzhou/Kconfig"

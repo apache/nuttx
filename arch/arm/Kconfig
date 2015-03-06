@@ -171,6 +171,7 @@ config ARCH_CHIP_SAMV7
 	bool "Atmel SAMV7"
 	select ARCH_HAVE_CMNVECTOR
 	select ARMV7M_CMNVECTOR
+	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
 	---help---
