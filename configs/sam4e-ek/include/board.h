@@ -286,18 +286,13 @@ extern "C" {
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
+ *   All SAM4E architectures must provide the following entry point.  This entry point
  *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
 void sam_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
 
 /************************************************************************************
  * Name:  sam_ledinit, sam_setled, and sam_setleds
@@ -330,6 +325,11 @@ void sam_setleds(uint8_t ledset);
 void sam_lcdclear(uint16_t color);
 #else /* if defined(CONFIG_SAM4EEK_LCD_RGB24) defined(CONFIG_SAM4EEK_LCD_RGB32) */
 void sam_lcdclear(uint32_t color);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __ASSEMBLY__ */
