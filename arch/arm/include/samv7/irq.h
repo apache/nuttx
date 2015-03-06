@@ -66,6 +66,7 @@
 #define SAM_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
 #define SAM_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
 #define SAM_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
+                                   /* Vectors 7-10: Reserved */
 #define SAM_IRQ_SVCALL        (11) /* Vector 11: SVC call */
 #define SAM_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
                                    /* Vector 13: Reserved */

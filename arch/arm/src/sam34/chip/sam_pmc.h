@@ -284,8 +284,8 @@
 #  define PMC_CKGR_MOR_MOSCRCF_4MHz      (0 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 4MHz (default) */
 #  define PMC_CKGR_MOR_MOSCRCF_8MHz      (1 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 8MHz */
 #  define PMC_CKGR_MOR_MOSCRCF_12MHz     (2 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 12MHz */
-#define PMC_CKGR_MOR_MOSCXTST_SHIFT      (8)       /* Bits 8-16: Main Crystal Oscillator Start-up Time */
-#define PMC_CKGR_MOR_MOSCXTST_MASK       (0x1ff << PMC_CKGR_MOR_MOSCXTST_SHIFT)
+#define PMC_CKGR_MOR_MOSCXTST_SHIFT      (8)       /* Bits 8-15: Main Crystal Oscillator Start-up Time */
+#define PMC_CKGR_MOR_MOSCXTST_MASK       (0xff << PMC_CKGR_MOR_MOSCXTST_SHIFT)
 #  define PMC_CKGR_MOR_MOSCXTST(n)       ((uint32_t)(n) << PMC_CKGR_MOR_MOSCXTST_SHIFT)
 #define PMC_CKGR_MOR_KEY_SHIFT           (16)      /* Bits 16-23: Password */
 #define PMC_CKGR_MOR_KEY_MASK            (0xff << PMC_CKGR_MOR_KEY_SHIFT)
@@ -500,8 +500,8 @@
 #if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define PMC_FSMR_FLPM_SHIFT            (21)      /* Bit 21-22: Low Power Mode (MR only) */
 #  define PMC_FSMR_FLPM_MASK             (3 << PMC_FSMR_FLPM_SHIFT)
-#    define PMC_FSMR_FLPM_PWRDOWN        (0 << PMC_FSMR_FLPM_SHIFT) /* Flash Standby Mode */
-#    define PMC_FSMR_FLPM_STANDBY        (1 << PMC_FSMR_FLPM_SHIFT) /* Flash deep power down mode */
+#    define PMC_FSMR_FLPM_STANDBY        (0 << PMC_FSMR_FLPM_SHIFT) /* Flash Standby Mode */
+#    define PMC_FSMR_FLPM_PWRDOWN        (1 << PMC_FSMR_FLPM_SHIFT) /* Flash deep power down mode */
 #    define PMC_FSMR_FLPM_IDLE           (2 << PMC_FSMR_FLPM_SHIFT) /* Idle mode */
 #endif
 
