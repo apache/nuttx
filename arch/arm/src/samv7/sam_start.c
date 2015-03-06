@@ -49,13 +49,13 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "sam_clockconfig.h"
-#include "sam_lowputc.h"
-#include "sam_userspace.h"
-
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
 #endif
+
+#include "sam_clockconfig.h"
+#include "sam_userspace.h"
+#include "sam_start.h"
 
 /****************************************************************************
  * Private Function prototypes
