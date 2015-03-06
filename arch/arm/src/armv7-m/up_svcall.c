@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_svcall.c
  *
- *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -206,7 +206,8 @@ int up_svcall(int irq, FAR void *context)
         {
           DEBUGASSERT(regs[REG_R1] != 0);
           memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-#if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_ARMV7M_CMNVECTOR)
+#if defined(CONFIG_ARCH_FPU) && \
+    (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
           up_savefpu((uint32_t*)regs[REG_R1]);
 #endif
         }
@@ -254,7 +255,8 @@ int up_svcall(int irq, FAR void *context)
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
           memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-#if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_ARMV7M_CMNVECTOR)
+#if defined(CONFIG_ARCH_FPU) && \
+    (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
           up_savefpu((uint32_t*)regs[REG_R1]);
 #endif
           current_regs = (uint32_t*)regs[REG_R2];

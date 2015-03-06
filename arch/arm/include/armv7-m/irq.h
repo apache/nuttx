@@ -54,7 +54,7 @@
 
 /* Included implementation-dependent register save structure layouts */
 
-#ifdef CONFIG_ARMV7M_CMNVECTOR
+#if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
 #  include <arch/armv7-m/irq_cmnvector.h>
 #else
 #  include <arch/armv7-m/irq_lazyfpu.h>

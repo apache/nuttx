@@ -2,7 +2,7 @@
  * arch/arm/src/lpc43xx/lpc43_start.c
  * arch/arm/src/chip/lpc43_start.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -187,7 +187,7 @@ static inline void lpc43_enabuffering(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-#ifdef CONFIG_ARMV7M_CMNVECTOR
+#if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
 
 static inline void lpc43_fpuconfig(void)
 {
