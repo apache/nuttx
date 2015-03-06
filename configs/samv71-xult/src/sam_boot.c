@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samv7/sam_start.h
+ * configs/samv71-xult/src/sam_boot.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,93 +33,97 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_START_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_START_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <debug.h>
 
-#include "up_internal.h"
-#include "chip.h"
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "samv71-xult.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Public Types
+ * Private Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Inline Functions
+ * Public Functions
  ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the linker
- * script. _ebss lies at the end of the BSS region. The idle task stack starts at
- * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread is
- * the thread that the system boots on and, eventually, becomes the IDLE, do
- * nothing task that runs only when there is nothing else to run.  The heap
- * continues from there until the end of memory.  g_idle_topstack is a read-only
- * variable the provides this computed address.
- */
-
-EXTERN const uintptr_t g_idle_topstack;
-
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-/************************************************************************************
- * Name: sam_lowsetup
- *
- * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART done early so that the serial
- *   console is available for debugging very early in the boot sequence.
- *
- ************************************************************************************/
-
-void sam_lowsetup(void);
 
 /************************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAMV7 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All SAM3U architectures must provide the following entry point.  This entry point
+ *   is called early in the initialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void sam_boardinitialize(void);
+void sam_boardinitialize(void)
+{
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * sam_spiinitialize() has been brought into the link.
+   */
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+#ifdef CONFIG_SAMV7_SPI
+  if (sam_spiinitialize)
+    {
+      sam_spiinitialize();
+    }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_START_H */
+  /* Configure board resources to support networking if the 1) networking is enabled,
+   * 2) the EMAC module is enabled, and 2) the weak function sam_netinitialize()
+   * has been brought into the build.
+   */
+
+#ifdef HAVE_NETWORK
+  if (sam_netinitialize)
+    {
+      sam_netinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
+}
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intiialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+  (void)nsh_archinitialize();
+#endif
+}
+#endif /* CONFIG_BOARD_INITIALIZE */

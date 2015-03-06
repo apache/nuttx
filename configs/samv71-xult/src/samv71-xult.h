@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samv7/sam_start.h
+ * configs/samv71-xult/src/samv71-xult.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_START_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_START_H
+#ifndef __CONFIGS_SAMV71_XULT_SRC_SAMV71_XULT_H
+#define __CONFIGS_SAMV71_XULT_SRC_SAMV71_XULT_H
 
 /************************************************************************************
  * Included Files
@@ -43,83 +43,172 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <sys/types.h>
 #include <stdint.h>
-#include <stdbool.h>
 
-#include "up_internal.h"
-#include "chip.h"
+#include <arch/irq.h>
+#include <nuttx/irq.h>
+
+//#include "chip/sam_pinmap.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+
+#define HAVE_HSMCI      1
+#define HAVE_USBDEV     1
+#define HAVE_USBMONITOR 1
+#define HAVE_NETWORK    1
+
+/* HSMCI */
+/* Can't support MMC/SD if the card interface is not enabled */
+
+#if !defined(CONFIG_SAMV7_HSMCI)
+#  undef HAVE_HSMCI
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No MMC/SD support
+#  undef HAVE_HSMCI
+#endif
+
+/* We need PIO interrupts on GPIOA to support card detect interrupts */
+
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOA_IRQ)
+#  warning PIOA interrupts not enabled.  No MMC/SD support.
+#  undef HAVE_HSMCI
+#endif
+
+/* USB Device */
+/* CONFIG_SAMV7_UDP and CONFIG_USBDEV must be defined, or there is no USB
+ * device.
+ */
+
+#if !defined(CONFIG_SAMV7_UDP) || !defined(CONFIG_USBDEV)
+#  undef HAVE_USBDEV
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#if !defined(CONFIG_SYSTEM_USBMONITOR) || !defined(CONFIG_USBDEV_TRACE)
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Networking */
+
+#if !defined(CONFIG_NET) || !defined(CONFIG_SAMV7_EMAC)
+#  undef HAVE_NETWORK
+#endif
+
+/* SAMV71-XULT GPIO Pin Definitions *************************************************/
+
+/* LCD:
+ * To be provided
+ */
+
+/* Ethernet MAC.
+ * to be provided
+ */
+
+/* LEDs
+ * To be provided
+ */
+
+/* Buttons
+ * To be provided
+ */
+
+/* HSMCI SD Card Detect
+ * To be provided
+ */
+
+/* SPI Chip Selects
+ * to be provided
+ */
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
 /************************************************************************************
- * Inline Functions
+ * Public data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Public Data
+ * Public Functions
  ************************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
+/************************************************************************************
+ * Name: sam_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the SAM4E-EK board.
+ *
+ ************************************************************************************/
+
+void weak_function sam_spiinitialize(void);
+
+/************************************************************************************
+ * Name: sam_hsmci_initialize
+ *
+ * Description:
+ *   Initialize HSMCI support
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_HSMCI
+int sam_hsmci_initialize(int minor);
 #else
-#define EXTERN extern
+# define sam_hsmci_initialize(minor) (-ENOSYS)
 #endif
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the linker
- * script. _ebss lies at the end of the BSS region. The idle task stack starts at
- * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread is
- * the thread that the system boots on and, eventually, becomes the IDLE, do
- * nothing task that runs only when there is nothing else to run.  The heap
- * continues from there until the end of memory.  g_idle_topstack is a read-only
- * variable the provides this computed address.
- */
-
-EXTERN const uintptr_t g_idle_topstack;
-
 /************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-/************************************************************************************
- * Name: sam_lowsetup
+ * Name: sam_netinitialize
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART done early so that the serial
- *   console is available for debugging very early in the boot sequence.
+ *   Configure board resources to support networking.
  *
  ************************************************************************************/
 
-void sam_lowsetup(void);
+#ifdef HAVE_NETWORK
+void weak_function sam_netinitialize(void);
+#endif
 
 /************************************************************************************
- * Name: sam_boardinitialize
+ * Name: sam_cardinserted
  *
  * Description:
- *   All SAMV7 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   Check if a card is inserted into the selected HSMCI slot
  *
  ************************************************************************************/
 
-void sam_boardinitialize(void);
+#ifdef HAVE_HSMCI
+bool sam_cardinserted(int slotno);
+#else
+#  define sam_cardinserted(slotno) (false)
+#endif
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+/************************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMCSD slot is write protected
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_HSMCI
+bool sam_writeprotected(int slotno);
+#else
+#  define sam_writeprotected(slotno) (false)
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_START_H */
+#endif /* __CONFIGS_SAMV71_XULT_SRC_SAMV71_XULT_H */

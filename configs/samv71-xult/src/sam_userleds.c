@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samv7/sam_start.h
+ * configs/samv71-xult/src/sam_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,93 +33,22 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAM_START_H
-#define __ARCH_ARM_SRC_SAMV7_SAM_START_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "up_internal.h"
-#include "chip.h"
+#include "samv71-xult.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Public Types
+ * Private Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Inline Functions
+ * Public Functions
  ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the linker
- * script. _ebss lies at the end of the BSS region. The idle task stack starts at
- * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread is
- * the thread that the system boots on and, eventually, becomes the IDLE, do
- * nothing task that runs only when there is nothing else to run.  The heap
- * continues from there until the end of memory.  g_idle_topstack is a read-only
- * variable the provides this computed address.
- */
-
-EXTERN const uintptr_t g_idle_topstack;
-
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-/************************************************************************************
- * Name: sam_lowsetup
- *
- * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART done early so that the serial
- *   console is available for debugging very early in the boot sequence.
- *
- ************************************************************************************/
-
-void sam_lowsetup(void);
-
-/************************************************************************************
- * Name: sam_boardinitialize
- *
- * Description:
- *   All SAMV7 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void sam_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_SAM_START_H */

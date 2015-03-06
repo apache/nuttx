@@ -1,7 +1,7 @@
 ############################################################################
-# arch/arm/src/samv7/Make.defs
+# configs/samv71-xult/src/Makefile
 #
-#   Copyright (C) 2009-2011, 2013-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,64 +33,88 @@
 #
 ############################################################################
 
-# The start-up, "head", file.  Only common vectors are support so there
-# isn't one.
+-include $(TOPDIR)/Make.defs
 
-HEAD_ASRC =
+CFLAGS += -I$(TOPDIR)/sched
 
-# Common ARM and Cortex-M3 files
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CMN_UASRCS =
-CMN_UCSRCS =
+CSRCS = sam_boot.c
 
-CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
-CMN_ASRCS += vfork.S
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
-CMN_CSRCS += up_mdelay.c up_udelay.c up_exit.c up_idle.c up_initialize.c
-CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_memfault.c up_modifyreg8.c
-CMN_CSRCS += up_modifyreg16.c up_modifyreg32.c up_releasepending.c
-CMN_CSRCS += up_releasestack.c up_reprioritizertr.c up_schedulesigaction.c
-CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_unblocktask.c up_usestack.c
-CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
+ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
+CSRCS += sam_cxxinitialize.c
+endif
 
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
-ifeq ($(CONFIG_ARMV7M_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += up_lazyexception.S
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += sam_autoleds.c
 else
-CMN_ASRCS += up_exception.S
-endif
-CMN_CSRCS += up_vectors.c
+CSRCS += sam_userleds.c
 endif
 
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += sam_buttons.c
 endif
 
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += up_memcpy.S
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += sam_nsh.c
 endif
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS += up_signal_dispatch.c
-CMN_UASRCS += up_signal_handler.S
-endif
+ifeq ($(CONFIG_SAM34_HSMCI),y)
+CSRCS += sam_hsmci.c
 endif
 
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
+ifeq ($(CONFIG_SAM34_EMAC),y)
+CSRCS += sam_ethernet.c
 endif
 
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+ifeq ($(CONFIG_SAM34_SPI0),y)
+CSRCS += sam_spi.c
 endif
 
-# Required SAM3/4 files
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += sam_usbmsc.c
+endif
 
-CHIP_ASRCS  =
-CHIP_CSRCS  =  sam_start.c
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-# Configuration-dependent SAM3/4 files
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ifeq ($(WINTOOL),y)
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+else
+  CFLAGS += -I$(ARCH_SRCDIR)/chip
+  CFLAGS += -I$(ARCH_SRCDIR)/common
+  CFLAGS += -I$(ARCH_SRCDIR)/armv7-m
+endif
+
+all: libboard$(LIBEXT)
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+libboard$(LIBEXT): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
+
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
+
+depend: .depend
+
+clean:
+	$(call DELFILE, libboard$(LIBEXT))
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
+
+-include Make.dep
