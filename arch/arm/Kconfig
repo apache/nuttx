@@ -161,6 +161,7 @@ config ARCH_CHIP_SAMD
 
 config ARCH_CHIP_SAM34
 	bool "Atmel SAM3/SAM4"
+	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
 	---help---
@@ -168,6 +169,8 @@ config ARCH_CHIP_SAM34
 
 config ARCH_CHIP_SAMV7
 	bool "Atmel SAMV7"
+	select ARCH_HAVE_CMNVECTOR
+	select ARMV7M_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
 	---help---
@@ -305,6 +308,40 @@ config ARMV7M_CMNVECTOR
 		the common vector logic.  Some can use either their own built-in vector
 		logic or the common vector logic.  This applies only to ARMv7-M
 		architectures.
+
+config ARMV7M_LAZYFPU
+	bool "Lazy FPU storage"
+	default n
+	depends on ARCH_HAVE_CMNVECTOR
+	---help---
+		There are two forms of the common vector logic.  There are pros and
+		cons to each option:
+
+		1) The standard common vector logic exploits features of the ARMv7-M
+		   architecture to save the all of floating registers on entry into
+		   each interrupt and then to restore the floating registers when
+		   the interrupt returns.  The primary advantage to this approach is
+		   that floating point operations are available in interrupt
+		   handling logic.  Since the volatile registers are preserved,
+		   operations on the floating point registers by interrupt handling
+		   logic has no ill effect.  The downside is, of course, that more
+		   stack operations are required on each interrupt to save and store
+		   the floating point registers.  Because of the some special
+		   features of the ARMv-M, this is not as much overhead as you might
+		   expect, but overhead nonetheless.
+
+		2) The lazy FPU common vector logic does not save or restore
+		   floating point registers on entry and exit from the interrupt
+		   handler. Rather, the floating point registers are not restored
+		   until it is absolutely necessary to do so when a context switch
+		   occurs and the interrupt handler will be returning to a different
+		   floating point context.  Since floating point registers are not
+		   protected, floating point operations must not be performed in
+		   interrupt handling logic.  Better interrupt performance is be
+		   expected, however.
+
+		By default, the "standard" common vector logic is build.  This
+		option selects the alternate lazy FPU common vector logic.
 
 config ARCH_HAVE_FPU
 	bool
