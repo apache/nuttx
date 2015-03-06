@@ -9935,4 +9935,7 @@
 	* arch/arm/src/sam34/sam_start.c:  Leverage start-up logic from STM32
 	  to (1) Enable the FPU and (2) perform IDLE stack coloration
 	  (2015-03-05).
+	* arch/arm/src/armv7-m/up_lazyexception.S, Kconfig and severl other
+	  files:  Add support for lazy FPU state saving.  Not yet verified.
+	  (2015-03-06).
 
