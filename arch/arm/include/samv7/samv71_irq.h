@@ -65,7 +65,7 @@
 #define SAM_PID_PIOC          (12)  /* Parallel I/O Controller C */
 #define SAM_PID_USART0        (13)  /* USART 0 */
 #define SAM_PID_USART1        (14)  /* USART 1 */
-#define SAM_PID_USART1        (15)  /* USART 2 */
+#define SAM_PID_USART2        (15)  /* USART 2 */
 #define SAM_PID_PIOD          (16)  /* Parallel I/O Controller D */
 #define SAM_PID_PIOE          (17)  /* Parallel I/O Controller E */
 #define SAM_PID_HSMCI         (18)  /* High Speed Multimedia Card Interface */
