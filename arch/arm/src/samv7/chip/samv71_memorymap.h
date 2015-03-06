@@ -143,6 +143,7 @@
 #  define SAM_WDT0_BASE        0x400e1850 /* 0x400e1850-0x400e185f: Watchdog Timer 0 (WDT0) */
 #  define SAM_RTC_BASE         0x400e1860 /* 0x400e1860-0x400e188f: Real Time Clock (RTC) */
 #  define SAM_GPBR_BASE        0x400e1890 /* 0x400e1890-0x400e18ff: GPBR */
+#  define SAM_SYSC_BASE        0x400e18e0 /* 0x400e1890-0x400e18ff: System Controller Common */
 #  define SAM_WDT1_BASE        0x400e1900 /* 0x400e1850-0x400e19ff: Watchdog Timer 1 (WDT1) */
 #define SAM_UART2_BASE         0x400e1a00 /* 0x400e1a00-0x400e1bff: UART 2 */
 #define SAM_UART3_BASE         0x400e1c00 /* 0x400e1c00-0x400e1dff: UART 3 */
