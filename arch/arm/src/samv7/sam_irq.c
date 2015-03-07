@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_irq.c
+ * arch/arm/src/samv7/sam_irq.c
  *
- *   Copyright (C) 2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
 #  include "sam_gpio.h"
 #endif
 
@@ -470,7 +470,7 @@ void up_irqinitialize(void)
    * GPIO pins.
    */
 
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
   sam_gpioirqinitialize();
 #endif
 
@@ -513,7 +513,7 @@ void up_disable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
   else
     {
       /* Maybe it is a (derived) GPIO IRQ */
@@ -560,7 +560,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
   else
     {
       /* Maybe it is a (derived) GPIO IRQ */
