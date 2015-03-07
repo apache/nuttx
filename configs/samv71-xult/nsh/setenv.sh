@@ -51,17 +51,17 @@ fi
 # toolchain under Windows.  You will also have to edit this if you install
 # this toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Atmel Toolchain/ARM GCC/Native/4.7.3.99/arm-gnu-toolchain/bin"
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
-#export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # This is the Cygwin path to the location where I installed the CodeSourcery
 # toolchain under windows.  You will also have to edit this if you install
 # the CodeSourcery toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # This is the path to the location where I installed the devkitARM toolchain
 # You an get this free toolchain from http://devkitpro.org/ or http://sourceforge.net/projects/devkitpro/
-# export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/devkitARM/bin"
+export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/devkitARM/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
