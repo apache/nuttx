@@ -60,11 +60,11 @@
 
 /* EEFC register addresses **************************************************************/
 
-#define SAM_EEFC_FMR                (SAM_EEFC0_BASE+SAM_EEFC_FMR_OFFSET)
-#define SAM_EEFC_FCR                (SAM_EEFC0_BASE+SAM_EEFC_FCR_OFFSET)
-#define SAM_EEFC_FSR                (SAM_EEFC0_BASE+SAM_EEFC_FSR_OFFSET)
-#define SAM_EEFC_FRR                (SAM_EEFC0_BASE+SAM_EEFC_FRR_OFFSET)
-#define SAM_EEFC_WPMR               (SAM_EEFC0_BASE+SAM_EEFC_WPMR_OFFSET)
+#define SAM_EEFC_FMR                (SAM_EEFC_BASE+SAM_EEFC_FMR_OFFSET)
+#define SAM_EEFC_FCR                (SAM_EEFC_BASE+SAM_EEFC_FCR_OFFSET)
+#define SAM_EEFC_FSR                (SAM_EEFC_BASE+SAM_EEFC_FSR_OFFSET)
+#define SAM_EEFC_FRR                (SAM_EEFC_BASE+SAM_EEFC_FRR_OFFSET)
+#define SAM_EEFC_WPMR               (SAM_EEFC_BASE+SAM_EEFC_WPMR_OFFSET)
 
 /* EEFC register bit definitions ********************************************************/
 /* EEFC Flash Mode Register */

@@ -51,7 +51,7 @@
 #endif
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
@@ -82,7 +82,7 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 16 or 20
+ *   Multiplier = 16 or 20
  */
 
 #ifdef CONFIG_SAM4EEK_120MHZ
@@ -177,7 +177,7 @@
 
 /* FLASH wait states.
  *
- * SAM4E-EK documetion says:
+ * SAM4E-EK documentation says:
  * VDDCORE: "The voltage ranges from 1.08V to 1.32V."
  * VDDIO:   Looks like it is at 3.3V
  *
@@ -274,7 +274,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -311,10 +312,10 @@ void sam_setleds(uint8_t ledset);
 #endif
 
 /************************************************************************************
- * Name:  stm32_lcdclear
+ * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the Shenzhou board.  Because
+ *   This is a non-standard LCD interface just for the SAM4e-EK board.  Because
  *   of the various rotations, clearing the display in the normal way by writing a
  *   sequences of runs that covers the entire display can be very slow.  Here the
  *   display is cleared by simply setting all GRAM memory to the specified color.

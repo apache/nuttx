@@ -128,14 +128,14 @@
 #define SAM_UART0_BASE         0x400e0800 /* 0x400e0800-0x400e093f: UART 0 */
 #define SAM_CHIPID_BASE        0x400e0940 /* 0x400e0940-0x400e09ff: CHIP ID */
 #define SAM_UART1_BASE         0x400e0a00 /* 0x400e0a00-0x400e0bff: UART 1 */
-#define SAM_EFC_BASE           0x400e0c00 /* 0x400e0c00-0x400e0dff: Embedded Flash Controller (EFC) */
+#define SAM_EEFC_BASE          0x400e0c00 /* 0x400e0c00-0x400e0dff: Embedded Flash Controller (EEFC) */
 #define SAM_PIO_BASE           0x400e0e00 /* 0x400e0e00-0x400e13ff: Parallel I/O Controllers */
 #  define SAM_PION_BASE(n)     (0x400e0e00 + ((n) << 9))
 #  define SAM_PIOA_BASE        0x400e0e00 /* 0x400e0e00-0x400e0fff:   Parallel I/O Controller A */
 #  define SAM_PIOB_BASE        0x400e1000 /* 0x400e1000-0x400e11ff:   Parallel I/O Controller B */
 #  define SAM_PIOC_BASE        0x400e1200 /* 0x400e1200-0x400e13ff:   Parallel I/O Controller C */
-#  define SAM_PIOD_BASE        0x400e1400 /* 0x400e1400-0x400e15ff:   Parallel I/O Controller C */
-#  define SAM_PIOE_BASE        0x400e1600 /* 0x400e1600-0x400e17ff:   Parallel I/O Controller C */
+#  define SAM_PIOD_BASE        0x400e1400 /* 0x400e1400-0x400e15ff:   Parallel I/O Controller D */
+#  define SAM_PIOE_BASE        0x400e1600 /* 0x400e1600-0x400e17ff:   Parallel I/O Controller E */
 #define SAM_SYSCTRLR_BASE      0x400e0000 /* 0x400e0000-0x400e1bff: System Controller */
 #  define SAM_RSTC_BASE        0x400e1800 /* 0x400e1800-0x400e180f: Reset Controller (RSTC) */
 #  define SAM_SUPC_BASE        0x400e1810 /* 0x400e1810-0x400e182f: Supply Controller (SUPC) */
@@ -144,7 +144,7 @@
 #  define SAM_RTC_BASE         0x400e1860 /* 0x400e1860-0x400e188f: Real Time Clock (RTC) */
 #  define SAM_GPBR_BASE        0x400e1890 /* 0x400e1890-0x400e18ff: GPBR */
 #  define SAM_SYSC_BASE        0x400e18e0 /* 0x400e1890-0x400e18ff: System Controller Common */
-#  define SAM_WDT1_BASE        0x400e1900 /* 0x400e1850-0x400e19ff: Watchdog Timer 1 (WDT1) */
+#  define SAM_WDT1_BASE        0x400e1900 /* 0x400e1900-0x400e19ff: Watchdog Timer 1 (WDT1) */
 #define SAM_UART2_BASE         0x400e1a00 /* 0x400e1a00-0x400e1bff: UART 2 */
 #define SAM_UART3_BASE         0x400e1c00 /* 0x400e1c00-0x400e1dff: UART 3 */
 #define SAM_UART4_BASE         0x400e1e00 /* 0x400e1e00-0x400e1fff: UART 4 */

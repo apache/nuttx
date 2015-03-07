@@ -324,6 +324,9 @@ void __start(void)
   sam_lowsetup();
   showprogress('A');
 
+  /* Enable I- and D-Caches */
+#warning Missing Logic
+
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
