@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/samv7/Make.defs
 #
-#   Copyright (C) 2009-2011, 2013-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -91,6 +91,10 @@ endif
 # Required SAM3/4 files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  =  sam_start.c
+CHIP_CSRCS  =  sam_start.c sam_clockconfig.c
 
 # Configuration-dependent SAM3/4 files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += sam_timerisr.c
+endif

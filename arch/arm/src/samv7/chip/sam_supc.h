@@ -52,7 +52,7 @@
 
 /* SUPC register offsets ****************************************************************/
 
-#define SAM_SUPC_CR_OFFSET              000x00 /* Supply Controller Control Register */
+#define SAM_SUPC_CR_OFFSET              0x0000 /* Supply Controller Control Register */
 #define SAM_SUPC_SMMR_OFFSET            0x0004 /* Supply Controller Supply Monitor Mode Register */
 #define SAM_SUPC_MR_OFFSET              0x0008 /* Supply Controller Mode Register */
 #define SAM_SUPC_WUMR_OFFSET            0x000c /* Supply Controller Wake Up Mode Register */
@@ -82,16 +82,16 @@
 #define SUPC_SMMR_SMTH_SHIFT            (0)       /* Bits 0-3:  Supply Monitor Threshold */
 #define SUPC_SMMR_SMTH_MASK             (15 << SUPC_SMMR_SMTH_SHIFT)
 #  define SUPC_SMMR_SMTH(n)             ((uint32_t)(n) << SUPC_SMMR_SMTH_SHIFT)
-#  define SUPC_SMMR_SMTH_1p6V           (0  << SUPC_SMMR_SMTH_SHIFT) /* 1.58 < 1.60 < 1.62 */
-#  define SUPC_SMMR_SMTH_1p7V           (1  << SUPC_SMMR_SMTH_SHIFT) /* 1.70 < 1.72 < 1.74 */
-#  define SUPC_SMMR_SMTH_1p8V           (2  << SUPC_SMMR_SMTH_SHIFT) /* 1.82 < 1.84 < 1.86 */
-#  define SUPC_SMMR_SMTH_2p0V           (3  << SUPC_SMMR_SMTH_SHIFT) /* 1.94 < 1.96 < 1.98 */
-#  define SUPC_SMMR_SMTH_2p2V           (4  << SUPC_SMMR_SMTH_SHIFT) /* 2.05 < 2.08 < 2.11 */
-#  define SUPC_SMMR_SMTH_2p6V           (5  << SUPC_SMMR_SMTH_SHIFT) /* 2.17 < 2.20 < 2.23 */
-#  define SUPC_SMMR_SMTH_2p3V           (6  << SUPC_SMMR_SMTH_SHIFT) /* 2.29 < 2.32 < 2.35 */
-#  define SUPC_SMMR_SMTH_2p4V           (7  << SUPC_SMMR_SMTH_SHIFT) /* 2.41 < 2.44 < 2.47 */
-#  define SUPC_SMMR_SMTH_2p6V           (8  << SUPC_SMMR_SMTH_SHIFT) /* 2.53 < 2.56 < 2.59 */
-#  define SUPC_SMMR_SMTH_2p7V           (9  << SUPC_SMMR_SMTH_SHIFT) /* 2.65 < 2.68 < 2.71 */
+#  define SUPC_SMMR_SMTH_1p6V           (0  << SUPC_SMMR_SMTH_SHIFT)  /* 1.58 < 1.60 < 1.62 */
+#  define SUPC_SMMR_SMTH_1p7V           (1  << SUPC_SMMR_SMTH_SHIFT)  /* 1.70 < 1.72 < 1.74 */
+#  define SUPC_SMMR_SMTH_1p8V           (2  << SUPC_SMMR_SMTH_SHIFT)  /* 1.82 < 1.84 < 1.86 */
+#  define SUPC_SMMR_SMTH_2p0V           (3  << SUPC_SMMR_SMTH_SHIFT)  /* 1.94 < 1.96 < 1.98 */
+#  define SUPC_SMMR_SMTH_2p1V           (4  << SUPC_SMMR_SMTH_SHIFT)  /* 2.05 < 2.08 < 2.11 */
+#  define SUPC_SMMR_SMTH_2p2V           (5  << SUPC_SMMR_SMTH_SHIFT)  /* 2.17 < 2.20 < 2.23 */
+#  define SUPC_SMMR_SMTH_2p3V           (6  << SUPC_SMMR_SMTH_SHIFT)  /* 2.29 < 2.32 < 2.35 */
+#  define SUPC_SMMR_SMTH_2p4V           (7  << SUPC_SMMR_SMTH_SHIFT)  /* 2.41 < 2.44 < 2.47 */
+#  define SUPC_SMMR_SMTH_2p6V           (8  << SUPC_SMMR_SMTH_SHIFT)  /* 2.53 < 2.56 < 2.59 */
+#  define SUPC_SMMR_SMTH_2p7V           (9  << SUPC_SMMR_SMTH_SHIFT)  /* 2.65 < 2.68 < 2.71 */
 #  define SUPC_SMMR_SMTH_2p8V           (10  << SUPC_SMMR_SMTH_SHIFT) /* 2.77 < 2.80 < 2.83 */
 #  define SUPC_SMMR_SMTH_2p9V           (11  << SUPC_SMMR_SMTH_SHIFT) /* 2.90 < 2.92 < 2.95 */
 #  define SUPC_SMMR_SMTH_3p0V           (12  << SUPC_SMMR_SMTH_SHIFT) /* 3.00 < 3.04 < 3.07 */

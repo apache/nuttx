@@ -208,6 +208,8 @@
 #define PMC_CKGR_UCKR_UPLLEN           (1 << 16) /* Bit 16: UTMI PLL Enable */
 #define PMC_CKGR_UCKR_UPLLCOUNT_SHIFT  (20)      /* Bits 20-23: UTMI PLL Start-up Time */
 #define PMC_CKGR_UCKR_UPLLCOUNT_MASK   (15 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
+#  define PMC_CKGR_UCKR_UPLLCOUNT(n)   ((uint32_t)(n) << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
+
 
 /* PMC Clock Generator Main Oscillator Register */
 
@@ -252,6 +254,7 @@
 #define PMC_CKGR_PLLAR_COUNT_MASK      (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
 #define PMC_CKGR_PLLAR_MUL_SHIFT       (16)      /* Bits 16-26: PLLA Multiplier */
 #define PMC_CKGR_PLLAR_MUL_MASK        (0x7ff << PMC_CKGR_PLLAR_MUL_SHIFT)
+#  define PMC_CKGR_PLLAR_MUL(n)        ((uint32_t)(n) << PMC_CKGR_PLLAR_MUL_SHIFT)
 #define PMC_CKGR_PLLAR_ONE             (1 << 29) /* Bit 29: Always one */
 
 /* PMC Master Clock Register */
