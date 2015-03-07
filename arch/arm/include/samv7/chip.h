@@ -68,7 +68,7 @@
 #  define SAMV7_SRAM_SIZE             (384*1024)    /*  384KB */
 #else /* if defined(CONFIG_ARCH_CHIP_SAMV71Q21) */
 #  define SAMV7_FLASH_SIZE            (2048*1024)   /* 2048KB */
-#  define SAMV7_SRAM0_SIZE            (384*1024)    /*  384KB */
+#  define SAMV7_SRAM_SIZE             (384*1024)    /*  384KB */
 #endif
 
 #define SAMV7_BSRAM_SIZE              (1*1024)      /*    1KB */
@@ -124,7 +124,7 @@
 #  define SAMV7_SRAM_SIZE             (384*1024)    /*  384KB */
 #else /* if defined(CONFIG_ARCH_CHIP_SAMV71N21) */
 #  define SAMV7_FLASH_SIZE            (2048*1024)   /* 2048KB */
-#  define SAMV7_SRAM0_SIZE            (384*1024)    /*  384KB */
+#  define SAMV7_SRAM_SIZE             (384*1024)    /*  384KB */
 #endif
 
 #define SAMV7_BSRAM_SIZE              (1*1024)      /*    1KB */
@@ -180,7 +180,7 @@
 #  define SAMV7_SRAM_SIZE             (384*1024)    /*  384KB */
 #else /* if defined(CONFIG_ARCH_CHIP_SAMV71J21) */
 #  define SAMV7_FLASH_SIZE            (2048*1024)   /* 2048KB */
-#  define SAMV7_SRAM0_SIZE            (384*1024)    /*  384KB */
+#  define SAMV7_SRAM_SIZE             (384*1024)    /*  384KB */
 #endif
 
 #define SAMV7_BSRAM_SIZE              (1*1024)      /*    1KB */
