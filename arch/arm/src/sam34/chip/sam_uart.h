@@ -481,27 +481,27 @@
 /* LIN Mode Register (USART only) */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define UART_LINMR_
-#  define UART_LINMR_NACT_SHIFT          (0)       /* Bits 0-1: LIN Node Action */
-#  define UART_LINMR_NACT_MASK           (3 << UART_LINMR_NACT_SHIFT)
-#    define UART_LINMR_NACT_PUBLISH      (0 << UART_LINMR_NACT_SHIFT) /* USART transmits response */
-#    define UART_LINMR_NACT_SUBSCRIBE    (1 << UART_LINMR_NACT_SHIFT) /* USART receives response */
-#    define UART_LINMR_NACT_IGNORE       (2 << UART_LINMR_NACT_SHIFT) /* USART does not transmit or receive response */
-#  define UART_LINMR_PARDIS              (1 << 2)  /* Bit 2:  Parity Disable */
-#  define UART_LINMR_CHKDIS              (1 << 3)  /* Bit 3:  Checksum Disable */
-#  define UART_LINMR_CHKTYP              (1 << 4)  /* Bit 4:  Checksum Type */
-#  define UART_LINMR_DLM                 (1 << 5)  /* Bit 5:  Data Length Mode */
-#  define UART_LINMR_FSDIS               (1 << 6)  /* Bit 6:  Frame Slot Mode Disable */
-#  define UART_LINMR_WKUPTYP             (1 << 7)  /* Bit 7:  Wakeup Signal Type */
-#  define UART_LINMR_DLC_SHIFT           (8)       /* Bits 8-15: Data Length Control */
-#  define UART_LINMR_DLC_MASK            (0xff << UART_LINMR_DLC_SHIFT)
-#  define UART_LINMR_PDCM                (1 << 0)  /* Bit 0:  PDC Mode */
+#  define UART_LINMR_NACT_SHIFT       (0)       /* Bits 0-1: LIN Node Action */
+#  define UART_LINMR_NACT_MASK        (3 << UART_LINMR_NACT_SHIFT)
+#    define UART_LINMR_NACT_PUBLISH   (0 << UART_LINMR_NACT_SHIFT) /* USART transmits response */
+#    define UART_LINMR_NACT_SUBSCRIBE (1 << UART_LINMR_NACT_SHIFT) /* USART receives response */
+#    define UART_LINMR_NACT_IGNORE    (2 << UART_LINMR_NACT_SHIFT) /* USART does not transmit or receive response */
+#  define UART_LINMR_PARDIS          (1 << 2)  /* Bit 2:  Parity Disable */
+#  define UART_LINMR_CHKDIS          (1 << 3)  /* Bit 3:  Checksum Disable */
+#  define UART_LINMR_CHKTYP          (1 << 4)  /* Bit 4:  Checksum Type */
+#  define UART_LINMR_DLM             (1 << 5)  /* Bit 5:  Data Length Mode */
+#  define UART_LINMR_FSDIS           (1 << 6)  /* Bit 6:  Frame Slot Mode Disable */
+#  define UART_LINMR_WKUPTYP         (1 << 7)  /* Bit 7:  Wakeup Signal Type */
+#  define UART_LINMR_DLC_SHIFT       (8)       /* Bits 8-15: Data Length Control */
+#  define UART_LINMR_DLC_MASK        (0xff << UART_LINMR_DLC_SHIFT)
+#    define UART_LINMR_DLC(n)        ((uint32_t)(n) << UART_LINMR_DLC_SHIFT)
+#  define UART_LINMR_PDCM            (1 << 16) /* Bit 16: PDC Mode */
 #endif
 
 /* LIN Identifier Register (USART only) */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define UART_LINIR_MASK                0xff      /* Bits 0-7: Identifier Character */
+#  define UART_LINIR_MASK            0xff      /* Bits 0-7: Identifier Character */
 #endif
 
 /* USART Write Protect Mode Register (USART only) */
@@ -509,7 +509,8 @@
 #define UART_WPMR_WPEN               (1 << 0)  /* Bit 0: Write Protect Enable (USART only) */
 #define UART_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protect KEY (USART only) */
 #define UART_WPMR_WPKEY_MASK         (0x00ffffff << UART_WPMR_WPKEY_SHIFT)
-#  define UART_WPMR_WPKEY            (0x00555341 << UART_WPMR_WPKEY_SHIFT)
+#  define UART_WPMR_WPKEY            (0x00554152 << UART_WPMR_WPKEY_SHIFT)
+#  define USART_WPMR_WPKEY           (0x00555341 << UART_WPMR_WPKEY_SHIFT)
 
 /* USART Write Protect Status Register (USART only) */
 
