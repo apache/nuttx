@@ -113,7 +113,7 @@
                                           /* 0x00ec-0x00f8: Reserved */
 #define SAM_PIO_SCHMITT_OFFSET     0x0100 /* Schmitt Trigger Register */
                                           /* 0x0104-0x10c: Reserved */
-#define SAM_PIO_DELAYR_OFFSET      0x0100 /* IO Delay Register */
+#define SAM_PIO_DELAYR_OFFSET      0x0110 /* IO Delay Register */
                                           /* 0x0114-0x14c: Reserved */
 #define SAM_PIO_PCMR_OFFSET        0x0150 /* Parallel Capture Mode Register */
 #define SAM_PIO_PCIER_OFFSET       0x0154 /* Parallel Capture Interrupt Enable Register */
