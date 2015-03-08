@@ -100,7 +100,7 @@
 #  define SAM_UART0_RHR              (SAM_UART0_BASE+SAM_UART_RHR_OFFSET)
 #  define SAM_UART0_THR              (SAM_UART0_BASE+SAM_UART_THR_OFFSET)
 #  define SAM_UART0_BRGR             (SAM_UART0_BASE+SAM_UART_BRGR_OFFSET)
-#  define SAM_UART1_CMPR             (SAM_UART0_BASE+SAM_UART_CMPR_OFFSET)
+#  define SAM_UART0_CMPR             (SAM_UART0_BASE+SAM_UART_CMPR_OFFSET)
 #endif
 
 #if SAMV7_NUART > 1
@@ -285,7 +285,7 @@
 #  define UART_MR_MODE_LON           (9  << UART_MR_MODE_SHIFT) /* LON */
 #  define UART_MR_MODE_SPIMSTR       (14 << UART_MR_MODE_SHIFT) /* SPI Master (SPI mode only) */
 #  define UART_MR_MODE_SPISLV        (15 << UART_MR_MODE_SHIFT) /* SPI Slave (SPI mode only) */
-#define UART_MR_FILTER               (1 << 4)  /* Bit 4: Receiver Digital Filter (UART only) */
+#define UART_MR_DFILTER              (1 << 4)  /* Bit 4: Receiver Digital Filter (UART only) */
 #define UART_MR_USCLKS_SHIFT         (4)       /* Bits 4-5: Clock Selection (USART only) */
 #define UART_MR_USCLKS_MASK          (3 << UART_MR_USCLKS_SHIFT)
 #  define UART_MR_USCLKS_MCK         (0 << UART_MR_USCLKS_SHIFT) /* MCK */
@@ -327,7 +327,7 @@
 #define UART_MR_OVER                 (1 << 19) /* Bit 19: Oversampling Mode (USART, UART mode only) */
 #define UART_MR_WRDBT                (1 << 20) /* Bit 20: Wait Read Data Before Transfer (USART, SPI mode only) */
 #define UART_MR_VARSYNC              (1 << 22) /* Bit 22: Variable Synchronization of Command/Data Sync Start Frame Delimiter (USART, UART mode only) */
-#define UART_MR_FILTER               (1 << 28) /* Bit 28: Infrared Receive Line Filter (USART only) */
+#define UART_MR_IRFILTER             (1 << 28) /* Bit 28: Infrared Receive Line Filter (USART only) */
 #define UART_MR_MAN                  (1 << 29) /* Bit 29: Manchester Encoder/Decoder Enable (USART only) */
 #define UART_MR_MODSYNC              (1 << 30) /* Bit 30: Manchester Synchronization Mode (USART only) */
 #define UART_MR_ONEBIT               (1 << 31) /* Bit 31: Start Frame Delimiter Selector (USART only) */

@@ -120,6 +120,10 @@ config SAMV7_HAVE_SDRAMC
 	bool
 	default n
 
+config SAMV7_HAVE_SPI
+	bool
+	default n
+
 config SAMV7_HAVE_SPI0
 	bool
 	default n
@@ -257,12 +261,14 @@ config SAMV7_SPI0
 	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
 	depends on SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI
 	select SPI
 
 config SAMV7_SPI1
 	bool "Serial Peripheral Interface 1 (SPI1)"
 	default n
 	depends on SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_SPI
 	select SPI
 
 config SAMV7_SSC

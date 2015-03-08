@@ -91,7 +91,8 @@ endif
 # Required SAM3/4 files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  =  sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
+CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
+CHIP_CSRCS += sam_lowputc.c sam_serial.c
 
 # Configuration-dependent SAM3/4 files
 
