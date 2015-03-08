@@ -66,10 +66,10 @@
 #ifdef CONFIG_EFM32_RMU_DEBUG
 typedef struct
 {
-    const uint32_t val;
-    const uint32_t mask;
-    const char*    str;
-}efm32_reset_cause_list_t;
+  const uint32_t val;
+  const uint32_t mask;
+  const char*    str;
+} efm32_reset_cause_list_t;
 #endif
 
 /************************************************************************************
