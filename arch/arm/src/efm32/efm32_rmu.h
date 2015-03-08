@@ -85,6 +85,7 @@ extern uint32_t g_efm32_rstcause;
  ************************************************************************************/
 
 void efm32_rmu_initialize(void);
+const char* efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx);
 
 /************************************************************************************
  * Name: efm32_reset_cause_list_str
