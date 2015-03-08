@@ -50,7 +50,7 @@
  ************************************************************************************/
 /* GPIO IRQs ************************************************************************/
 
-#ifndef PIC32MZ_GPIOIRQ
+#ifndef CONFIG_PIC32MZ_GPIOIRQ
 #  undef CONFIG_PIC32MZ_GPIOIRQ_PORTA
 #  undef CONFIG_PIC32MZ_GPIOIRQ_PORTB
 #  undef CONFIG_PIC32MZ_GPIOIRQ_PORTC
@@ -130,7 +130,7 @@
 
 #undef HAVE_UART_DEVICE
 #if defined(CONFIG_PIC32MZ_UART1) || defined(CONFIG_PIC32MZ_UART2) || \
-    defined(CONFIG_PIC32MZ_UART4) || defined(CONFIG_PIC32MZ_UART4) || \
+    defined(CONFIG_PIC32MZ_UART3) || defined(CONFIG_PIC32MZ_UART4) || \
     defined(CONFIG_PIC32MZ_UART5) || defined(CONFIG_PIC32MZ_UART6)
 #  define HAVE_UART_DEVICE 1
 #endif
