@@ -54,21 +54,23 @@
 #define GPIO_HAVE_PULLDOWN         1
 #define GPIO_HAVE_PERIPHCD         1
 #define GPIO_HAVE_SCHMITT          1
-#define GPIO_HAVE_DELAYR           1
+#undef  GPIO_HAVE_DELAYR           1
+#define GPIO_HAVE_DRIVER           1
+#define GPIO_HAVE_KEYPAD           1
 
 /* Bit-encoded input to sam_configgpio() ********************************************/
 
 /* 32-bit Encoding:
  *
- *   MMMC CCCC IIIV PPPB BBBB
+ *   .... .... MMMC CCCC  IIIV D... PPPB BBBB
  */
 
 /* Input/Output mode:
  *
- *   MMM. .... .... .... ....
+ *   .... .... MMM. .... .... .... .... .... 
  */
 
-#define GPIO_MODE_SHIFT            (17)        /* Bits 17-19: GPIO mode */
+#define GPIO_MODE_SHIFT            (21)        /* Bits 21-23: GPIO mode */
 #define GPIO_MODE_MASK             (7 << GPIO_MODE_SHIFT)
 #  define GPIO_ALTERNATE           (0 << GPIO_MODE_SHIFT) /* PIO alternate function */
 #  define GPIO_INPUT               (1 << GPIO_MODE_SHIFT) /* PIO Input */
@@ -81,10 +83,10 @@
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
  *
- *   ...C CCCC .... .... ....
+ *   .... .... ...C CCCC .... .... .... ....
  */
 
-#define GPIO_CFG_SHIFT             (12)        /* Bits 12-16: GPIO configuration bits */
+#define GPIO_CFG_SHIFT             (16)        /* Bits 16-20: GPIO configuration bits */
 #define GPIO_CFG_MASK              (31 << GPIO_CFG_SHIFT)
 #  define GPIO_CFG_DEFAULT         (0  << GPIO_CFG_SHIFT) /* Default, no attribute */
 #  define GPIO_CFG_PULLUP          (1  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
@@ -95,10 +97,10 @@
 
 /* Additional interrupt modes:
  *
- *   .... .... III. .... ....
+ *   .... .... .... .... III. .... .... ....
  */
 
-#define GPIO_INT_SHIFT             (9)         /* Bits 9-11: GPIO interrupt bits */
+#define GPIO_INT_SHIFT             (13)        /* Bits 13-15: GPIO interrupt bits */
 #define GPIO_INT_MASK              (7 << GPIO_INT_SHIFT)
 #  define _GIO_INT_AIM             (1 << 10)   /* Bit 10: Additional Interrupt modes */
 #  define _GPIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
@@ -114,15 +116,23 @@
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  *
- *   .... .... ...V .... ....
+ *   .... .... .... .... ...V .... .... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Initial value of output */
+#define GPIO_OUTPUT_SET            (1 << 12)   /* Bit 12: Initial value of output */
+#define GPIO_OUTPUT_CLEAR          (0)
+
+/* If the pin is an GPIO output, then this identifies the output drive strength:
+ *
+ *   .... .... .... .... .... D... .... ....
+ */
+
+#define GPIO_OUTPUT_SET            (1 << 11)   /* Bit 11: Initial value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the GPIO port:
  *
- *   .... .... .... PPP. ....
+ *   .... .... .... .... .... PPP. ....
  */
 
 #define GPIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
@@ -135,7 +145,7 @@
 
 /* This identifies the bit in the port:
  *
- *   .... .... .... ...B BBBB
+ *   ..... .... ... .... .... ...B BBBB
  */
 
 #define GPIO_PIN_SHIFT             (0)         /* Bits 0-4: GPIO number: 0-31 */
