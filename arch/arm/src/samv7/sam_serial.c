@@ -756,6 +756,9 @@ static int sam_setup(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
+  uint32_t divb3;
+  uint32_t intpart;
+  uint32_t fracpart;
   uint32_t regval;
 
   /* Note: The logic here depends on the fact that that the USART module
@@ -867,18 +870,23 @@ static int sam_setup(struct uart_dev_s *dev)
    * for lower USART clocks.
    */
 
-  regval = (FAST_USART_CLOCK + (priv->baud << 3)) / (priv->baud << 4);
+  divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
+  intpart  = (divb3 >> 3);
+  fracpart = (divb3 & 7)
 
-  /* Retain the peripheral clock UNLESS unless using that clock would result
-   * in a very small BAUD divisor, say smaller than 8.
+  /* Retain the fast MR peripheral clock UNLESS unless using that clock
+   * would result in an excessively large divider.
+   *
+   * REVISIT: The fractional divider is not used.
    */
 
-  if (regval < 8)
+  if ((regval & UART_BRGR_CD_MASK) != 0)
     {
-      /* Use the devided USART clock */
+      /* Use the divided USART clock */
 
-      regval = (SLOW_USART_CLOCK + (priv->baud << 3)) / (priv->baud << 4);
-      sam_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
+      divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
+      intpart  = (divb3 >> 3);
+      fracpart = (divb3 & 7)
 
       /* Re-select the clock source */
 
@@ -887,12 +895,11 @@ static int sam_setup(struct uart_dev_s *dev)
       regval |= UART_MR_USCLKS_MCKDIV;
       sam_serialout(priv, SAM_UART_MR_OFFSET, regval);
     }
-  else
-    {
-      /* Use the undivided USART clock */
 
-      sam_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
-    }
+  /* Save the BAUD divider (the fractional part is not used for UARTs) */
+
+  regval = UART_BRGR_CD(intpart) | UART_BRGR_FP(fracpart);
+  sam_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
 
   /* Enable receiver & transmitter */
 
