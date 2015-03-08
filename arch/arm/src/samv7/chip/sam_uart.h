@@ -390,8 +390,10 @@
 
 #define UART_BRGR_CD_SHIFT           (0)       /* Bits 0-15: Clock Divisor (Common) */
 #define UART_BRGR_CD_MASK            (0xffff << UART_BRGR_CD_SHIFT)
+#  define UART_BRGR_CD(n)            ((uint32_t)(n) << UART_BRGR_CD_SHIFT)
 #define UART_BRGR_FP_SHIFT           (16)      /* Bits 16-18: Fractional Part (USART only) */
 #define UART_BRGR_FP_MASK            (7 << UART_BRGR_FP_SHIFT)
+#  define UART_BRGR_FP(n)            ((uint32_t)(n) << UART_BRGR_FP_SHIFT)
 
 /* Comparison Register (UART only) */
 
