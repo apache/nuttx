@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/efm32gg-stk3700/include/efm32_userleds.c
+ * configs/samv71-xult/include/sam_autoleds.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
- * These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
- * connected to pins PE2 and PE3 in an active high configuration:
+
+/* LEDs
  *
- * ------------------------------------- --------------------
- * EFM32 PIN                             BOARD SIGNALS
- * ------------------------------------- --------------------
- * E2/BCK_VOUT/EBI_A09 #0/               MCU_PE2 UIF_LED0
- *   TIM3_CC2 #1/U1_TX #3/ACMP0_O #1
- * E3/BCK_STAT/EBI_A10 #0/U1_RX #3/      MCU_PE3 UIF_LED1
- *   ACMP1_O #1
- * ------------------------------------- --------------------
+ * There are two yellow LED available on the SAM V71 Xplained Ultra board that
+ * can be turned on and off.  The LEDs can be activated by driving the
+ * connected I/O line to GND.
  *
- * All LEDs are grounded and so are illuminated by outputting a high
- * value to the LED.
+ *   ------ ----------- ---------------------
+ *   SAMV71 Function    Shared functionality
+ *   PIO
+ *   ------ ----------- ---------------------
+ *   PA23   Yellow LED0 EDBG GPIO
+ *   PC09   Yellow LED1 LCD, and Shield
+ *   ------ ----------- ---------------------
+ *
+ * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
+ *
+ *   -------------------  -----------------------  -------- --------
+ *   SYMBOL                Meaning                     LED state
+ *                                                   LED0     LED1
+ *   -------------------  -----------------------  -------- --------
+ *   LED_STARTED          NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED     Idle stack created         ON       OFF
+ *   LED_INIRQ            In an interrupt              No change
+ *   LED_SIGNAL           In a signal handler          No change
+ *   LED_ASSERTION        An assertion failed          No change
+ *   LED_PANIC            The system has crashed     N/C      Blinking
+ *   LED_IDLE             MCU is is sleep mode         Not used
+ *   -------------------  -----------------------  -------- --------
+ *
+ * Thus if LED0 is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.  If LED1 is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ *
+ * NOTE: That LED0 is not used after completion of booting and may
+ * be used by other board-specific logic.
  */
 
 /****************************************************************************
@@ -59,15 +85,16 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "efm32_gpio.h"
-#include "efm32gg-stk3700.h"
+#include "sam_gpio.h"
+#include "samv71-xult.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
@@ -87,14 +114,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -103,51 +122,59 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: efm32_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
-void efm32_ledinit(void)
+void board_led_initialize(void)
 {
   /* Configure LED PIOs for output */
 
-  efm32_configgpio(GPIO_LED0);
-  efm32_configgpio(GPIO_LED1);
+  sam_configgpio(GPIO_LED0);
+  sam_configgpio(GPIO_LED1);
 }
 
 /****************************************************************************
- * Name: efm32_setled
+ * Name: board_led_on
  ****************************************************************************/
 
-void efm32_setled(int led, bool ledon)
+void board_led_on(int led)
 {
-  uint32_t ledcfg;
+  bool led0on = false;  /* High illuminates */
+  bool led1on = false; /* High illuminates */
 
-  if (led == BOARD_LED0)
+  switch (led)
     {
-      ledcfg = GPIO_LED0;
-    }
-  else if (led == BOARD_LED1)
-    {
-      ledcfg = GPIO_LED1;
-    }
-  else
-    {
-      return;
+      case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
+        break;
+
+      case 1:  /* LED_STACKCREATED */
+        led0on = true;
+        break;
+
+      default:
+      case 2:  /* LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
+        return;
+
+      case 3:  /* LED_PANIC */
+        led1on = true;
+        break;
     }
 
-  efm32_gpiowrite(ledcfg, ledon); /* High illuminates */
+  sam_gpiowrite(GPIO_LED0, led0on);
+  sam_gpiowrite(GPIO_LED1, led1on);
 }
 
 /****************************************************************************
- * Name: efm32_setleds
+ * Name: board_led_off
  ****************************************************************************/
 
-void efm32_setleds(uint8_t ledset)
+void board_led_off(int led)
 {
-  /* Hight illuminates */
-
-  efm32_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) != 0);
-  efm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);
+  if (led != 2)
+    {
+      sam_gpiowrite(GPIO_LED0, false);  /* High illuminates */
+      sam_gpiowrite(GPIO_LED1, false);  /* High illuminates */
+    }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */
