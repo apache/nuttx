@@ -106,7 +106,7 @@ void arch_enable_dcache(void)
   ARM_DSB();
 
   /* Enable the D-Cache */
- 
+
   ccr  = getreg32(NVIC_CFGCON);
   ccr |= NVIC_CFGCON_DC;
   putreg32(ccr, NVIC_CFGCON);
@@ -150,7 +150,7 @@ void arch_disable_dcache(void)
   ARM_DSB();
 
   /* Disable the D-Cache */
- 
+
   ccr = getreg32(NVIC_CFGCON);
   ccr &= ~NVIC_CFGCON_DC;
   putreg32(ccr, NVIC_CFGCON);
