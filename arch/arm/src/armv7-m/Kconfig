@@ -5,6 +5,24 @@
 
 comment "ARMV7M Configuration Options"
 
+config ARMV7M_HAVE_ICACHE
+	bool
+	default n
+
+config ARMV7M_HAVE_DCACHE
+	bool
+	default n
+
+config ARMV7M_ICACHE
+	bool "Use I-Cache"
+	default n
+	depends on ARMV7M_HAVE_ICACHE
+
+config ARMV7M_DCACHE
+	bool "Use D-Cache"
+	default n
+	depends on ARMV7M_HAVE_DCACHE
+
 choice
 	prompt "Toolchain Selection"
 	default ARMV7M_TOOLCHAIN_GNU_EABIW if HOST_WINDOWS

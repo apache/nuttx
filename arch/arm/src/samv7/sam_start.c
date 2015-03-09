@@ -49,6 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "cache.h"
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
 #endif
@@ -325,7 +326,9 @@ void __start(void)
   showprogress('A');
 
   /* Enable I- and D-Caches */
-#warning Missing Logic
+
+  arch_enable_icache();
+  arch_enable_dcache();
 
   /* Perform early serial initialization */
 

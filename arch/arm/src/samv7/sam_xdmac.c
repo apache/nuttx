@@ -1086,15 +1086,25 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
 
               xdmach->lltail = descr;
 
+#if 0 /* REVISIT */
               /* Assume that we will be doing multiple buffer transfers and that
                * that hardware will be accessing the descriptor via DMA.
                */
 
               arch_clean_dcache((uintptr_t)descr,
                                 (uintptr_t)descr + sizeof(struct chnext_view1_s));
+#endif
               break;
             }
         }
+
+#if 1 /* REVISIT */
+      /* Assume that we will be doing multiple buffer transfers and that
+       * that hardware will be accessing the descriptors via DMA.
+       */
+
+      arch_clean_dcache_all();
+#endif
 
       /* Because we hold a count from the counting semaphore, the above
        * search loop should always be successful.
@@ -1492,10 +1502,12 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
    * to force reloads from memory.
    */
 
+#if 0 /* Revisit */
   if (xdmach->rx)
     {
       arch_invalidate_dcache(xdmach->rxaddr, xdmach->rxaddr + xdmach->rxsize);
     }
+#endif
 
   /* Perform the DMA complete callback */
 
@@ -1856,7 +1868,11 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Clean caches associated with the DMA memory */
 
+#if 0 /* REVISIT */
   arch_clean_dcache(maddr, maddr + nbytes);
+#else
+  arch_clean_dcache_all();
+#endif
   return ret;
 }
 
@@ -1937,7 +1953,11 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Clean caches associated with the DMA memory */
 
+#if 0 /* REVISIT */
   arch_clean_dcache(maddr, maddr + nbytes);
+#else
+  arch_clean_dcache_all();
+#endif
   return ret;
 }
 

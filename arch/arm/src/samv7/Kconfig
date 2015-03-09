@@ -54,6 +54,8 @@ endchoice # Atmel SAMV7 Chip Selection
 config ARCH_CHIP_SAMV71
 	bool
 	default n
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
 
 config ARCH_CHIP_SAMV71Q
 	bool
