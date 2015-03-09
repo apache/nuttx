@@ -51,7 +51,17 @@
 /****************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************/
- 
+/* Configuration ************************************************************************/
+
+#define GPIO_HAVE_PULLDOWN         1
+#define GPIO_HAVE_PERIPHCD         1
+#define GPIO_HAVE_SCHMITT          1
+#undef  GPIO_HAVE_DELAYR
+#define GPIO_HAVE_DRIVER           1
+#define GPIO_HAVE_KEYPAD           1
+
+/* Misc Helper Definitions **************************************************************/
+
 #define PIOA                       (0)
 #define PIOB                       (1)
 #define PIOC                       (2)
@@ -508,7 +518,7 @@
 
 #define PIO_KRCR_NBC_SHIFT         (0)       /* Bis 0-2: Number of Rows of the Keypad Matrix */
 #define PIO_KRCR_NBC_MASK          (7 << PIO_KRCR_NBC_SHIFT)
-#  define PIO_KRCR_NBC_MASK        ((uint32_t)(n) << PIO_KRCR_NBC_SHIFT)
+#  define PIO_KRCR_NBC(n)          ((uint32_t)(n) << PIO_KRCR_NBC_SHIFT)
 #define PIO_KRCR_NBR_SHIFT         (8)       /* Bis 8-10: Number of Columns of the Keypad Matrix */
 #define PIO_KRCR_NBR_MASK          (7 << PIO_KRCR_NBR_SHIFT)
 #  define PIO_KRCR_NBR(n)          ((uint32_t)(n) << PIO_KRCR_NBR_SHIFT)
