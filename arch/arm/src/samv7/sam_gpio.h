@@ -44,6 +44,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
+
+#include <arch/samv7/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
