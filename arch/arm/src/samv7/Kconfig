@@ -212,6 +212,7 @@ config SAMV7_EMAC
 config SAMV7_XDMAC
 	bool "Central DMA (XDMA)"
 	default n
+	select ARCH_DMA
 
 config SAMV7_HSMCI
 	bool "High Speed Multimedia Card Interface (HSMCI)"
