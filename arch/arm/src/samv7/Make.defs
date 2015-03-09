@@ -64,6 +64,10 @@ endif
 CMN_CSRCS += up_vectors.c
 endif
 
+ifeq ($(CONFIG_ARMV7M_DCACHE),y)
+CMN_CSRCS += up_dcache.c
+endif
+
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
