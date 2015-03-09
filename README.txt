@@ -1263,6 +1263,8 @@ nuttx
  |   |   `- README.txt
  |   |- sam4s-xplained-pro/
  |   |   `- README.txt
+ |   |- samv7i-xult/
+ |   |   `- README.txt
  |   |- sim/
  |   |   `- README.txt
  |   |- shenzhou/

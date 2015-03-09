@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "sam_gpio.h"
-#include "sam4e-ek.h"
+#include "samv7i-xult.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -62,10 +62,8 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t g_irq_scrollup;
-static xcpt_t g_irq_scrolldown;
-static xcpt_t g_irq_waku;
-static xcpt_t g_irq_tamp;
+static xcpt_t g_irq_sw0;
+static xcpt_t g_irq_sw1;
 #endif
 
 /****************************************************************************
@@ -141,10 +139,13 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
 
 void board_button_initialize(void)
 {
-  (void)sam_configgpio(GPIO_SCROLLUP);
-  (void)sam_configgpio(GPIO_SCROLLDWN);
-  (void)sam_configgpio(GPIO_WAKU);
-  (void)sam_configgpio(GPIO_TAMP);
+#warning Missing logic
+ *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
+ *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
+ *     the MATRIX module. For more information see the SAM V71 datasheet.
+
+  (void)sam_configgpio(GPIO_SW0);
+  (void)sam_configgpio(GPIO_SW1);
 }
 
 /****************************************************************************
@@ -162,10 +163,8 @@ uint8_t board_buttons(void)
 {
   uint8_t retval;
 
-  retval  = sam_gpioread(GPIO_SCROLLUP)  ? 0 : BUTTON_SCROLLUP;
-  retval |= sam_gpioread(GPIO_SCROLLDWN) ? 0 : BUTTON_SCROLLDOWN;
-  retval |= sam_gpioread(GPIO_WAKU)      ? 0 : BUTTON_WAKU;
-  retval |= sam_gpioread(GPIO_TAMP)      ? 0 : BUTTON_TAMP;
+  retval  = sam_gpioread(GPIO_SW0) ? 0 : BUTTON_SW0_BIT;
+  retval |= sam_gpioread(GPIO_SW1) ? 0 : BUTTON_SW1_BIT;
 
   return retval;
 }
@@ -177,7 +176,7 @@ uint8_t board_buttons(void)
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
  *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   handler address is returned (so that it may restored, if so desired).
  *
  * Configuration Notes:
  *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
@@ -193,21 +192,11 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   switch (id)
     {
-      case BUTTON_SCROLLUP:
-        return board_button_irqx(GPIO_SCROLLUP, IRQ_SCROLLUP,
-                                 irqhandler, &g_irq_scrollup);
+      case BUTTON_SW0:
+        return board_button_irqx(GPIO_SW0, IRQ_SW0, irqhandler, &g_irq_sw0);
 
-      case BUTTON_SCROLLDOWN:
-        return board_button_irqx(GPIO_SCROLLDWN, IRQ_SCROLLDWN,
-                                 irqhandler, &g_irq_scrolldown);
-
-      case BUTTON_WAKU:
-        return board_button_irqx(GPIO_WAKU, IRQ_WAKU,
-                                 irqhandler, &g_irq_waku);
-
-      case BUTTON_TAMP:
-        return board_button_irqx(GPIO_TAMP, IRQ_TAMP,
-                                 irqhandler, &g_irq_tamp);
+      case BUTTON_SW1:
+        return board_button_irqx(GPIO_SW1, IRQ_SW1, irqhandler, &g_irq_sw1);
 
       default:
         return NULL;

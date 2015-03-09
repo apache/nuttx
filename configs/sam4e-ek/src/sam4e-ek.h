@@ -291,10 +291,6 @@
 #define IRQ_SCROLLDWN  SAM_IRQ_PA2
 #define IRQ_WAKU       SAM_IRQ_PA19
 #define IRQ_TAMP       SAM_IRQ_PA20
-#define IRQ_SCROLLUP   SAM_IRQ_PA1
-#define IRQ_SCROLLDWN  SAM_IRQ_PA2
-#define IRQ_WAKU       SAM_IRQ_PA19
-#define IRQ_TAMP       SAM_IRQ_PA20
 
 /* USART1: To avoid any electrical conflict, the RS232 and RS485 transceiver
  * are isolated from the receiving line PA21.
