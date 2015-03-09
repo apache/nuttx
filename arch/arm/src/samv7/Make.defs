@@ -38,7 +38,7 @@
 
 HEAD_ASRC =
 
-# Common ARM and Cortex-M3 files
+# Common ARM and Cortex-M7 files
 
 CMN_UASRCS =
 CMN_UCSRCS =
@@ -88,13 +88,13 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-# Required SAM3/4 files
+# Required SAMV7 files
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
-CHIP_CSRCS += sam_lowputc.c sam_serial.c
+CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c
 
-# Configuration-dependent SAM3/4 files
+# Configuration-dependent SAMV7 files
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sam_timerisr.c

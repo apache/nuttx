@@ -49,15 +49,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Configuration ********************************************************************/
-
-#define GPIO_HAVE_PULLDOWN         1
-#define GPIO_HAVE_PERIPHCD         1
-#define GPIO_HAVE_SCHMITT          1
-#undef  GPIO_HAVE_DELAYR           1
-#define GPIO_HAVE_DRIVER           1
-#define GPIO_HAVE_KEYPAD           1
-
 /* Bit-encoded input to sam_configgpio() ********************************************/
 
 /* 32-bit Encoding:
@@ -67,7 +58,7 @@
 
 /* Input/Output mode:
  *
- *   .... .... MMM. .... .... .... .... .... 
+ *   .... .... MMM. .... .... .... .... ....
  */
 
 #define GPIO_MODE_SHIFT            (21)        /* Bits 21-23: GPIO mode */
@@ -127,8 +118,9 @@
  *   .... .... .... .... .... D... .... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 11)   /* Bit 11: Initial value of output */
-#define GPIO_OUTPUT_CLEAR          (0)
+#define GPIO_OUTPUT_DRIVE          (1 << 11)   /* Bit 11: Initial value of output */
+#  define GPIO_OUTPUT_HIGH_DRIVE   (1 << 11)
+  #define GPIO_OUTPUT_LOW_DRIVE    (0)
 
 /* This identifies the GPIO port:
  *
@@ -187,23 +179,11 @@
  * Public Types
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /* Must be big enough to hold the 32-bit encoding */
 
 typedef uint32_t gpio_pinset_t;
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Inline Functions
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /************************************************************************************
  * Public Data
@@ -217,6 +197,66 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+EXTERN const uintptr_t g_portchar[SAMV7_NPIO];
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+/****************************************************************************
+ * Name: sam_gpio_base
+ *
+ * Description:
+ *   Return the base address of the GPIO register set
+ *
+ ****************************************************************************/
+
+static inline uintptr_t sam_gpio_base(gpio_pinset_t cfgset)
+{
+  int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  DEBUGASSERT(port <SAMV7_NPIO);
+  return g_portchar[port];
+}
+
+/****************************************************************************
+ * Name: sam_gpio_port
+ *
+ * Description:
+ *   Return the PIO port number
+ *
+ ****************************************************************************/
+
+static inline int sam_gpio_port(gpio_pinset_t cfgset)
+{
+  return (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+}
+
+/****************************************************************************
+ * Name: sam_gpio_pin
+ *
+ * Description:
+ *   Return the PIO pin number
+ *
+ ****************************************************************************/
+
+static inline int sam_gpio_pin(gpio_pinset_t cfgset)
+{
+  return (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+}
+
+/****************************************************************************
+ * Name: sam_gpio_pinmask
+ *
+ * Description:
+ *   Return the PIO pin bit maskt
+ *
+ ****************************************************************************/
+
+static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
+{
+  return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
+}
 
 /************************************************************************************
  * Public Function Prototypes

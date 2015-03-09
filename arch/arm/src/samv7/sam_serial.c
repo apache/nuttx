@@ -871,8 +871,8 @@ static int sam_setup(struct uart_dev_s *dev)
    */
 
   divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
-  intpart  = (divb3 >> 3);
-  fracpart = (divb3 & 7)
+  intpart  = divb3 >> 3;
+  fracpart = divb3 & 7;
 
   /* Retain the fast MR peripheral clock UNLESS unless using that clock
    * would result in an excessively large divider.
@@ -885,8 +885,8 @@ static int sam_setup(struct uart_dev_s *dev)
       /* Use the divided USART clock */
 
       divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
-      intpart  = (divb3 >> 3);
-      fracpart = (divb3 & 7)
+      intpart  = divb3 >> 3;
+      fracpart = divb3 & 7;
 
       /* Re-select the clock source */
 
