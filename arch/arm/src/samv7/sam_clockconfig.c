@@ -309,7 +309,7 @@ static inline void sam_disabledefaultmaster(void)
  * Name: sam_clockconfig
  *
  * Description:
- *   Called to initialize the SAM3/4.  This does whatever setup is needed
+ *   Called to initialize the SAMV7.  This does whatever setup is needed
  *   to put the SoC in a usable state.  This includes the initialization of
  *   clocking using the settings in board.h.  (After power-on reset, the
  *   SAMV7 is initially running on a 4MHz internal RC clock).  This function

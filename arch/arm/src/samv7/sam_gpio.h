@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM_GPIO_H
-#define __ARCH_ARM_SRC_SAM34_SAM_GPIO_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_GPIO_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -270,7 +270,7 @@ static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirqinitialize(void);
 #else
 #  define sam_gpioirqinitialize()
@@ -314,7 +314,7 @@ bool sam_gpioread(gpio_pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirq(gpio_pinset_t pinset);
 #else
 #  define sam_gpioirq(pinset)
@@ -328,7 +328,7 @@ void sam_gpioirq(gpio_pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirqenable(int irq);
 #else
 #  define sam_gpioirqenable(irq)
@@ -342,7 +342,7 @@ void sam_gpioirqenable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_GPIO_IRQ
+#ifdef CONFIG_SAMV7_GPIO_IRQ
 void sam_gpioirqdisable(int irq);
 #else
 #  define sam_gpioirqdisable(irq)
@@ -368,4 +368,4 @@ int sam_dumpgpio(uint32_t pinset, const char *msg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAM34_SAM_GPIO_H */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_GPIO_H */

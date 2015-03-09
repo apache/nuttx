@@ -247,7 +247,24 @@
 #  define SAM_IRQ_PB12        (SAM_IRQ_GPIOB_PINS+12)         /* GPIOB, PIN 12 */
 #  define SAM_IRQ_PB13        (SAM_IRQ_GPIOB_PINS+13)         /* GPIOB, PIN 13 */
 #  define SAM_IRQ_PB14        (SAM_IRQ_GPIOB_PINS+14)         /* GPIOB, PIN 14 */
-#  define SAM_NGPIOBIRQS      15
+#  define SAM_IRQ_PB15        (SAM_IRQ_GPIOB_PINS+15)         /* GPIOB, PIN 15 */
+#  define SAM_IRQ_PB16        (SAM_IRQ_GPIOB_PINS+16)         /* GPIOB, PIN 16 */
+#  define SAM_IRQ_PB17        (SAM_IRQ_GPIOB_PINS+17)         /* GPIOB, PIN 17 */
+#  define SAM_IRQ_PB18        (SAM_IRQ_GPIOB_PINS+18)         /* GPIOB, PIN 18 */
+#  define SAM_IRQ_PB19        (SAM_IRQ_GPIOB_PINS+19)         /* GPIOB, PIN 19 */
+#  define SAM_IRQ_PB20        (SAM_IRQ_GPIOB_PINS+20)         /* GPIOB, PIN 20 */
+#  define SAM_IRQ_PB21        (SAM_IRQ_GPIOB_PINS+21)         /* GPIOB, PIN 21 */
+#  define SAM_IRQ_PB22        (SAM_IRQ_GPIOB_PINS+22)         /* GPIOB, PIN 22 */
+#  define SAM_IRQ_PB23        (SAM_IRQ_GPIOB_PINS+23)         /* GPIOB, PIN 23 */
+#  define SAM_IRQ_PB24        (SAM_IRQ_GPIOB_PINS+24)         /* GPIOB, PIN 24 */
+#  define SAM_IRQ_PB25        (SAM_IRQ_GPIOB_PINS+25)         /* GPIOB, PIN 25 */
+#  define SAM_IRQ_PB26        (SAM_IRQ_GPIOB_PINS+26)         /* GPIOB, PIN 26 */
+#  define SAM_IRQ_PB27        (SAM_IRQ_GPIOB_PINS+27)         /* GPIOB, PIN 27 */
+#  define SAM_IRQ_PB28        (SAM_IRQ_GPIOB_PINS+28)         /* GPIOB, PIN 28 */
+#  define SAM_IRQ_PB29        (SAM_IRQ_GPIOB_PINS+29)         /* GPIOB, PIN 29 */
+#  define SAM_IRQ_PB30        (SAM_IRQ_GPIOB_PINS+30)         /* GPIOB, PIN 30 */
+#  define SAM_IRQ_PB31        (SAM_IRQ_GPIOB_PINS+31)         /* GPIOB, PIN 31 */
+#  define SAM_NGPIOBIRQS      32
 #else
 #  define SAM_NGPIOBIRQS      0
 #endif
@@ -338,7 +355,33 @@
 #  define SAM_IRQ_PE3         (SAM_IRQ_GPIOE_PINS+3)          /* GPIOE, PIN 3 */
 #  define SAM_IRQ_PE4         (SAM_IRQ_GPIOE_PINS+4)          /* GPIOE, PIN 4 */
 #  define SAM_IRQ_PE5         (SAM_IRQ_GPIOE_PINS+5)          /* GPIOE, PIN 5 */
-#  define SAM_NGPIOEIRQS      6
+#  define SAM_IRQ_PE6         (SAM_IRQ_GPIOE_PINS+6)          /* GPIOE, PIN 6 */
+#  define SAM_IRQ_PE7         (SAM_IRQ_GPIOE_PINS+7)          /* GPIOE, PIN 7 */
+#  define SAM_IRQ_PE8         (SAM_IRQ_GPIOE_PINS+8)          /* GPIOE, PIN 8 */
+#  define SAM_IRQ_PE9         (SAM_IRQ_GPIOE_PINS+9)          /* GPIOE, PIN 9 */
+#  define SAM_IRQ_PE10        (SAM_IRQ_GPIOE_PINS+10)         /* GPIOE, PIN 10 */
+#  define SAM_IRQ_PE11        (SAM_IRQ_GPIOE_PINS+11)         /* GPIOE, PIN 11 */
+#  define SAM_IRQ_PE12        (SAM_IRQ_GPIOE_PINS+12)         /* GPIOE, PIN 12 */
+#  define SAM_IRQ_PE13        (SAM_IRQ_GPIOE_PINS+13)         /* GPIOE, PIN 13 */
+#  define SAM_IRQ_PE14        (SAM_IRQ_GPIOE_PINS+14)         /* GPIOE, PIN 14 */
+#  define SAM_IRQ_PE15        (SAM_IRQ_GPIOE_PINS+15)         /* GPIOE, PIN 15 */
+#  define SAM_IRQ_PE16        (SAM_IRQ_GPIOE_PINS+16)         /* GPIOE, PIN 16 */
+#  define SAM_IRQ_PE17        (SAM_IRQ_GPIOE_PINS+17)         /* GPIOE, PIN 17 */
+#  define SAM_IRQ_PE18        (SAM_IRQ_GPIOE_PINS+18)         /* GPIOE, PIN 18 */
+#  define SAM_IRQ_PE19        (SAM_IRQ_GPIOE_PINS+19)         /* GPIOE, PIN 19 */
+#  define SAM_IRQ_PE20        (SAM_IRQ_GPIOE_PINS+20)         /* GPIOE, PIN 20 */
+#  define SAM_IRQ_PE21        (SAM_IRQ_GPIOE_PINS+21)         /* GPIOE, PIN 21 */
+#  define SAM_IRQ_PE22        (SAM_IRQ_GPIOE_PINS+22)         /* GPIOE, PIN 22 */
+#  define SAM_IRQ_PE23        (SAM_IRQ_GPIOE_PINS+23)         /* GPIOE, PIN 23 */
+#  define SAM_IRQ_PE24        (SAM_IRQ_GPIOE_PINS+24)         /* GPIOE, PIN 24 */
+#  define SAM_IRQ_PE25        (SAM_IRQ_GPIOE_PINS+25)         /* GPIOE, PIN 25 */
+#  define SAM_IRQ_PE26        (SAM_IRQ_GPIOE_PINS+26)         /* GPIOE, PIN 26 */
+#  define SAM_IRQ_PE27        (SAM_IRQ_GPIOE_PINS+27)         /* GPIOE, PIN 27 */
+#  define SAM_IRQ_PE28        (SAM_IRQ_GPIOE_PINS+28)         /* GPIOE, PIN 28 */
+#  define SAM_IRQ_PE29        (SAM_IRQ_GPIOE_PINS+29)         /* GPIOE, PIN 29 */
+#  define SAM_IRQ_PE30        (SAM_IRQ_GPIOE_PINS+30)         /* GPIOE, PIN 30 */
+#  define SAM_IRQ_PE31        (SAM_IRQ_GPIOE_PINS+31)         /* GPIOE, PIN 31 */
+#  define SAM_NGPIOEIRQS      32
 #else
 #  define SAM_NGPIOEIRQS      0
 #endif

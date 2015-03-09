@@ -99,3 +99,7 @@ CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sam_timerisr.c
 endif
+
+ifeq ($(CONFIG_SAMV7_GPIO_IRQ),y)
+CHIP_CSRCS += sam_gpioirq.c
+endif
