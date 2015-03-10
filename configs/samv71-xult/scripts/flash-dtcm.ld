@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/samv71-xult/scripts/memory.ld
+ * configs/samv71-xult/scripts/flash-dtcm.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,47 +38,85 @@
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
- * the 0x0400:0000 address range.
+ * the 0x0400:0000 address range (Assuming that ITCM is not enable).
  *
  * NOTE: that the DTCM address of 0x2000:0000 is used for SRAM.  If DTCM is
  * disabled, then the accesses will actually occur on the AHB bus.
- *
- * The user space partition will be spanned with a single region of size
- * 2**n bytes.  The alignment of the user-space region must be the same.
- * As a consequence, as the user-space increases in size, the alignment
- * requirement also increases.  The sizes below give the largest possible
- * user address spaces (but leave far too much for the OS).
- *
- * The solution to this wasted memory is to (1) use more than one region to
- * span the user spaces, or (2) poke holes in a larger region to trim it
- * to fit better.
- *
- * A detailed memory map for the 384KB SRAM region is as follows:
- *
- *   0x20000 0000:  Kernel .data region.  Typical size: 0.1KB
- *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
- *   0x20000 0800:  Kernel IDLE thread stack (approximate).  Size is
- *                  determined by CONFIG_IDLETHREAD_STACKSIZE and
- *                  adjustments for alignment.  Typical is 1KB.
- *   ------- ----   Padded to 4KB
- *   0x20002 0000:  User .data region.  Size is variable.
- *   ------- ----   User .bss region  Size is variable.
- *   0x20000 2000:  Beginning of kernel heap.  Size determined by
- *                  CONFIG_MM_KERNEL_HEAPSIZE.
- *   ------- ----   Beginning of user heap.  Can vary with other settings.
- *   0x20004 0000:  End+1 of mappable internal SRAM
  */
 
 MEMORY
 {
-    /* 2048KiB of internal FLASH */
+	flash (rx) : ORIGIN = 0x00400000, LENGTH = 2048K
+	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 384K
+}
 
-    kflash (rx)      : ORIGIN = 0x00400000, LENGTH = 1M
-    uflash (rx)      : ORIGIN = 0x00500000, LENGTH = 1M
+OUTPUT_ARCH(arm)
+EXTERN(_vectors)
+ENTRY(_stext)
 
-    /* 384Kb of internal SRAM */
+SECTIONS
+{
+	.text : {
+		_stext = ABSOLUTE(.);
+		*(.vectors)
+		*(.text .text.*)
+		*(.fixup)
+		*(.gnu.warning)
+		*(.rodata .rodata.*)
+		*(.gnu.linkonce.t.*)
+		*(.glue_7)
+		*(.glue_7t)
+		*(.got)
+		*(.gcc_except_table)
+		*(.gnu.linkonce.r.*)
+		_etext = ABSOLUTE(.);
+	} > flash
 
-    ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 128K
-    usram (rwx)      : ORIGIN = 0x20020000, LENGTH = 128K
-    xsram (rwx)      : ORIGIN = 0x20040000, LENGTH = 128K
+	.init_section : {
+		_sinit = ABSOLUTE(.);
+		*(.init_array .init_array.*)
+		_einit = ABSOLUTE(.);
+	} > flash
+
+	.ARM.extab : {
+		*(.ARM.extab*)
+	} > flash
+
+	__exidx_start = ABSOLUTE(.);
+	.ARM.exidx : {
+		*(.ARM.exidx*)
+	} > flash
+	__exidx_end = ABSOLUTE(.);
+
+	_eronly = ABSOLUTE(.);
+
+	.data : {
+		_sdata = ABSOLUTE(.);
+		*(.data .data.*)
+		*(.gnu.linkonce.d.*)
+		CONSTRUCTORS
+		_edata = ABSOLUTE(.);
+	} > sram AT > flash
+
+	.bss : {
+		_sbss = ABSOLUTE(.);
+		*(.bss .bss.*)
+		*(.gnu.linkonce.b.*)
+		*(COMMON)
+		_ebss = ABSOLUTE(.);
+	} > sram
+
+	/* Stabs debugging sections. */
+	.stab 0 : { *(.stab) }
+	.stabstr 0 : { *(.stabstr) }
+	.stab.excl 0 : { *(.stab.excl) }
+	.stab.exclstr 0 : { *(.stab.exclstr) }
+	.stab.index 0 : { *(.stab.index) }
+	.stab.indexstr 0 : { *(.stab.indexstr) }
+	.comment 0 : { *(.comment) }
+	.debug_abbrev 0 : { *(.debug_abbrev) }
+	.debug_info 0 : { *(.debug_info) }
+	.debug_line 0 : { *(.debug_line) }
+	.debug_pubnames 0 : { *(.debug_pubnames) }
+	.debug_aranges 0 : { *(.debug_aranges) }
 }

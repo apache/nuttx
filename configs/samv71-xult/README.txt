@@ -11,6 +11,7 @@ Contents
   - Board Features
   - Serial Console
   - LEDs and Buttons
+  - Debugging
   - Configurations
 
 Board Features
@@ -170,33 +171,55 @@ NOTES:
     use the SW1, PB12 has to be configured as a normal regular I/O pin in
     the MATRIX module. For more information see the SAM V71 datasheet.
 
+Debugging
+=========
+
+The on-board EDBG appears to work only with Atmel Studio.  You can however,
+simply connect a SAM-ICE or J-Link to the JTAG/SWD connector on the board
+and that works great.  The only tricky thing is getting the correct
+orientation of the JTAG connection.
+
+I have been using Atmel Studio to write code to flash then I use the Segger
+J-Link GDB server to debug.  I have been using the 'Device Programming' I
+available under the Atmel Studio 'Tool' menu.  I have to disconnect the
+SAM-ICE while programming with the EDBG.  I am sure that you could come up
+with a GDB server-only solution if you wanted.
+
+I run GDB like this from the directory containing the NuttX ELF file:
+
+  arm-none-eabi-gdb
+  (gdb) target remote localhost:2331
+  (gdb) mon reset
+  (gdb) file nuttx
+  (gdb) ... start debugging ...
+
 Configurations
 ==============
 
-  Information Common to All Configurations
-  ----------------------------------------
-  Each SAMV71-XULT configuration is maintained in a sub-directory and
-  can be selected as follow:
+Information Common to All Configurations
+----------------------------------------
+Each SAMV71-XULT configuration is maintained in a sub-directory and
+can be selected as follow:
 
-    cd tools
-    ./configure.sh samv71-xult/<subdir>
-    cd -
-    . ./setenv.sh
+  cd tools
+  ./configure.sh samv71-xult/<subdir>
+  cd -
+  . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+Before sourcing the setenv.sh file above, you should examine it and perform
+edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
+than holds your toolchain binaries.
 
-  And then build NuttX by simply typing the following.  At the conclusion of
-  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+And then build NuttX by simply typing the following.  At the conclusion of
+the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
 
-    make oldconfig
-    make
+  make oldconfig
+  make
 
-  The <subdir> that is provided above as an argument to the tools/configure.sh
-  must be is one of the following.
+The <subdir> that is provided above as an argument to the tools/configure.sh
+must be is one of the following.
 
-  NOTES:
+NOTES:
 
   1. These configurations use the mconf-based configuration tool.  To
     change any of these configurations using that tool, you should:
@@ -225,8 +248,8 @@ Configurations
     You an get the free devkitARM toolchain from http://devkitpro.org/ or
     http://sourceforge.net/projects/devkitpro/
 
-  Configuration sub-directories
-  -----------------------------
+Configuration sub-directories
+-----------------------------
 
   nsh:
 
