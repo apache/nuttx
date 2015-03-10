@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 11, 2014</p>
+      <p>Last Updated: March 9, 2014</p>
     </td>
   </tr>
 </table>
@@ -1335,6 +1335,7 @@
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (4)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (30)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (19)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (1)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1408,6 +1409,7 @@
       <li><a href="#at91sam4e">Atmel SAM4E</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4l">Atmel SAM4L</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4s">Atmel SAM4S</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#at91samv71">Atmel SAMV71</a> <small>(ARM Cortex-M7)</small></li>
       <li><a href="#at91sama5d3">Atmel SAMA5D3</a> <small>(ARM Cortex-A5)</small></li>
       <li><a href="#at91sama5d4">Atmel SAMA5D4</a> <small>(ARM Cortex-A5)</small></li>
     </ul>
@@ -3827,8 +3829,48 @@ Mem:         29232       5920      23312      23312
     <b>Development Environments:</b>
     1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU Cortex-M3 or 4 toolchain, 3) Cygwin/MSYS with Windows native GNU Cortex-M3 or M4 toolchain (CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain for Linux or Cygwin is provided by the NuttX
     <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
-    I use FreeScale's <i>CodeWarrior</i> IDE only to work with the JTAG debugger built into the Kinetis boards.
-    I use the <i>Code Red</i> IDE with the some of the NXP parts and the <i>Atollic</i> toolchain with some of the STMicroelectronics parts.
+  </p>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="armcortexm7"><b>ARM Cortex-M7</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91samv71"><b>Atmel SAMV71</b>.</a>
+      This port uses Atmel SAM V71 Xplained Ultra Evaluation Kit (SAMV71-XULT).
+      This board features the ATSAMV71Q21 Cortex-M7 microcontroller.
+      Refer to the <a href="http://www.atmel.com/tools/atsamv71-xult.aspx">Atmel web site</a> for further information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        As of this writing (2015-03-09), this is a work in progress.
+        The basic port is code complete and just entering into the test phase.
+        The basic port includes a configuration for the NuttShell (NSH) and a serial console.
+        Additional drivers are expected.
+        The first release of the SAMV71-XULT port is expected in NuttX-7.9.
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/samv71-xult/README.txt">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+  <p>
+    <b>Development Environments:</b>
+    The same basic development environment is recommended for the Cortex-M7 as for the Cortex-M4.
+    It would be wise to use the last GNU toolchains for this part because as of this writing (2015-02-09), support for the Cortex-M7 is a very new GCC feature.
   </p>
   </td>
 </tr>
