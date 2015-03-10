@@ -177,13 +177,13 @@
 #if defined(CONFIG_SAMV7_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS2_DEV           g_uart1port  /* UART1 is ttyS2 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART2) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS2_DEV           g_uart2port  /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART3) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS2_DEV           g_uart3port  /* UART3 is ttyS2 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port  /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
@@ -202,13 +202,13 @@
  * these could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART2) && !defined(UART1_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS3_DEV           g_uart2port  /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART3) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS3_DEV           g_uart3port  /* UART3 is ttyS3 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart4port  /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
@@ -227,10 +227,10 @@
  * these could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART3) && !defined(UART1_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS4_DEV           g_uart3port  /* UART3 is ttyS4 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port  /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
@@ -249,7 +249,7 @@
  * of these could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART4) && !defined(UART1_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port  /* UART4 is ttyS5 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && !defined(USART0_ASSIGNED)
@@ -1003,7 +1003,7 @@ static int sam_interrupt(struct uart_dev_s *dev)
   int               passes;
   bool              handled;
 
-  DEBUGASSERT(dev && priv->priv);
+  DEBUGASSERT(dev && dev->priv);
   priv = (struct sam_dev_s*)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have

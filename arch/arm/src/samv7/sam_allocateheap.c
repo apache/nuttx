@@ -128,11 +128,17 @@
 
 /* Check internal SRAM configuration */
 
-#if CONFIG_RAM_END > (SAM_DTCM_BASE+SAMV7_SRAM_SIZE)
+#ifdef CONFIG_ARMV7M_DTCM
+#  define SRAM_BASE SAM_DTCM_BASE
+#else
+#  define SRAM_BASE SAM_SRAM_BASE
+#endif
+
+#if CONFIG_RAM_END > (SRAM_BASE+SAMV7_SRAM_SIZE)
 #  error "CONFIG_RAM_END is beyond the end of SRAM"
 #  undef CONFIG_RAM_END
-#  define CONFIG_RAM_END (SAM_DTCM_BASE+SAMV7_SRAM_SIZE)
-#elif CONFIG_RAM_END < (SAM_DTCM_BASE+SAMV7_SRAM_SIZE)
+#  define CONFIG_RAM_END (SRAM_BASE+SAMV7_SRAM_SIZE)
+#elif CONFIG_RAM_END < (SRAM_BASE+SAMV7_SRAM_SIZE)
 #  warning "CONFIG_RAM_END is before end of SRAM... not all of SRAM used"
 #endif
 
