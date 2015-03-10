@@ -34,11 +34,14 @@
  ****************************************************************************/
 
 /* The SAMV71Q21 has 2048Kb of FLASH beginning at address 0x0400:0000 and
- * 384Kb of SRAM beginining at 0x2000:0000
+ * 384Kb of SRAM beginining at 0x2040:0000
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
- * the 0x0800:0000 address range.
+ * the 0x0400:0000 address range.
+ *
+ * NOTE: that the DTCM address of 0x2000:0000 is used for SRAM.  If DTCM is
+ * disabled, then the accesses will actually occur on the AHB bus.
  *
  * The user space partition will be spanned with a single region of size
  * 2**n bytes.  The alignment of the user-space region must be the same.
