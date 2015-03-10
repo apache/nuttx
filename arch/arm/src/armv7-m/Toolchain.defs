@@ -128,7 +128,11 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m4
   TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
+  ifeq ($(CONFIG_ARCH_DPFPU),y)
+    TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp -mfloat-abi=hard
+  else
     TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+  endif
   else
     TOOLCHAIN_MFLOAT := -mfloat-abi=soft
   endif
@@ -140,9 +144,13 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_MCPU     := -mcpu=cortex-m4
   TOOLCHAIN_MTUNE    := -mtune=cortex-m4
   TOOLCHAIN_MARCH    := -march=armv7e-m
+  # FIXME: Most tools do not yet fpv5 FPU types either
   ifeq ($(CONFIG_ARCH_FPU),y)
-    # TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard # Single precision
+  ifeq ($(CONFIG_ARCH_DPFPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16 -mfloat-abi=hard
+  else
+    TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard
+  endif
   else
     TOOLCHAIN_MFLOAT := -mfloat-abi=soft
   endif

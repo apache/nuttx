@@ -23,6 +23,24 @@ config ARMV7M_DCACHE
 	default n
 	depends on ARMV7M_HAVE_DCACHE
 
+config ARMV7M_HAVE_ITCM
+	bool
+	default n
+
+config ARMV7M_HAVE_DTCM
+	bool
+	default n
+
+config ARMV7M_ITCM
+	bool "Use ITCM"
+	default n
+	depends on ARMV7M_HAVE_ITCM
+
+config ARMV7M_DTCM
+	bool "Use DTCM"
+	default n
+	depends on ARMV7M_HAVE_DTCM
+
 choice
 	prompt "Toolchain Selection"
 	default ARMV7M_TOOLCHAIN_GNU_EABIW if HOST_WINDOWS
