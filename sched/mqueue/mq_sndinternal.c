@@ -306,7 +306,7 @@ int mq_waitsend(mqd_t mqdes)
  *
  * Description:
  *   This is internal, common logic shared by both mq_send and mq_timesend.
- *   This function adds the specificied message (msg) to the message queue
+ *   This function adds the specified message (msg) to the message queue
  *   (mqdes).  Then it notifies any tasks that were waiting for message
  *   queue notifications setup by mq_notify.  And, finally, it awakens any
  *   tasks that were waiting for the message not empty event.

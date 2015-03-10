@@ -12,7 +12,7 @@ nuttx/
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
-  (1)  Message Queues (sched/mqueue)
+  (0)  Message Queues (sched/mqueue)
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
@@ -393,24 +393,8 @@ o pthreads (sched/pthreads)
                solution. So I discarded a few hours of programming. Not a
                big loss from the experience I gained."
 
-Message Queues (sched/mqueue)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       mq_timedsend() ERROR DETECTION
-  Description: mq_timedsend() will always return an error an invalid time is
-               provided.  However, OpenGroup.org says:
-
-               "Under no circumstance shall the operation fail with a timeout
-                if there is sufficient room in the queue to add the message
-                immediately. The validity of the abstime parameter need not be
-                checked when there is sufficient room in the queue."
-
-  Status:       Open
-  Priority:     Low.  This is a valid POSIX compliance issue, but not thought
-                to be really important in real work programming.  It could
-                be used to conditionally block like O_NONBLOCK by providing a
-                bad time to the function.  That seeks hokey and I can't think
-                of any other real world use case the demands this functionality.
+o Message Queues (sched/mqueue)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 o Kernel/Protected Build
   ^^^^^^^^^^^^^^^^^^^^^^

@@ -180,4 +180,3 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
   sched_unlock();
   return ret;
 }
-

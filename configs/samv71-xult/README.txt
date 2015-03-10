@@ -233,7 +233,11 @@ Configurations
     Configures the NuttShell (nsh) located at examples/nsh.
     NOTES:
 
-    1. Default stack sizes are large and should really be tuned to reduce
+    1. The serial console is configured by default for use with and Arduino
+       serial shield (UART3).  You will need to reconfigure if you will
+       to use a different U[S]ART.
+
+    2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
 
          CONFIG_ARCH_INTERRUPTSTACK=2048
@@ -242,10 +246,18 @@ Configurations
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          ... and others ...
 
-    2. NSH built-in applications are supported.
+    3. NSH built-in applications are supported.
 
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
 
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
+
+    4. Performance-related Configuration settings:
+
+       # CONFIG_ARMV7M_ICACHE is not set     : Can be enabled, not verified
+       # CONFIG_ARMV7M_DCACHE is not set     : Can be enabled, not verified
+       # CONFIG_ARCH_FPU is not set          : Can be enabled, not verified
+       # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
+       # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
