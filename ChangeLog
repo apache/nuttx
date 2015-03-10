@@ -9942,3 +9942,7 @@
 	  samv71-xult: Add a bare bones framework that will do nothing more than
 	  support configuration for the Atmel SAMV71 Xplained Ultra board.  Very
 	  much a work in progress (2015-03-06).
+	* sched/mqueue/mq_timedsend.c:  Should not check for valid time if
+	  there is space in the message queue.  Noted by Freddie Chopin
+	  (2015-03-10).
+
