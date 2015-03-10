@@ -348,13 +348,26 @@ config ARCH_HAVE_FPU
 	bool
 	default n
 
+config ARCH_HAVE_DPFPU
+	bool
+	default n
+
 config ARCH_FPU
 	bool "FPU support"
 	default y
 	depends on ARCH_HAVE_FPU
 	---help---
 		Build in support for the ARM Cortex-M4 Floating Point Unit (FPU).
-		Check your chip specifications first; not all Cortex-M4 chips support the FPU.
+		Check your chip specifications first; not all Cortex-M4 chips
+		support the FPU.
+
+config ARCH_DPFPU
+	bool "Double precision FPU support"
+	default y
+	depends on ARCH_FPU && ARCH_HAVE_DPFPU
+	---help---
+		Enable toolchain support for double precision (64-bit) floating
+		point if both the toolchain and the hardware support it.
 
 config ARMV7M_MPU
 	bool "MPU support"
