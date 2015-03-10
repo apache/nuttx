@@ -9945,4 +9945,5 @@
 	* sched/mqueue/mq_timedsend.c:  Should not check for valid time if
 	  there is space in the message queue.  Noted by Freddie Chopin
 	  (2015-03-10).
-
+	* arch/arm/src/tiva/tiva_timerlib.c:  Fix a typo in peripheral wait
+	  logic:  gptm, not gpio.  From Bradley Noyes (2015-03-10).
