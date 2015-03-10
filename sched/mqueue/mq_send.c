@@ -172,7 +172,13 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 
   if (mqmsg)
     {
-      /* Yes, perform the message send. */
+      /* Yes, perform the message send.
+       *
+       * NOTE: There is a race condition here: What if a message is added by
+       * interrupt related logic so that queue again becomes non-empty.
+       * That is handled because mq_dosend() will permit the maxmsgs limit
+       * to be exceeded in that case.
+       */
 
       ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
     }

@@ -202,8 +202,20 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
       return ERROR;
     }
 
+  /* Pre-allocate a message structure */
+
+  mqmsg = mq_msgalloc();
+  if (!mqmsg)
+    {
+      /* Failed to allocate the message */
+
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
   /* Get a pointer to the message queue */
 
+  sched_lock();
   msgq = mqdes->msgq;
 
   /* OpenGroup.org: "Under no circumstance shall the operation fail with a
@@ -213,16 +225,18 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
    *
    * Also ignore the time value if for some crazy reason we were called from
    * an interrupt handler.  This probably really should be an assertion.
+   *
+   * NOTE: There is a race condition here: What if a message is added by
+   * interrupt related logic so that queue again becomes non-empty.  That
+   * is handled because mq_dosend() will permit the maxmsgs limit to be
+   * exceeded in that case.
    */
 
-  sched_lock();
   if (msgq->nmsgs < msgq->maxmsgs || up_interrupt_context())
     {
-      /* The message queue is not full... Ignore the time parameter and
-       * let mq_send do the work.
-       */
+      /* Do the send with no further checks (possibly exceeding maxmsgs) */
 
-      ret = mq_send(mqdes, msg, msglen, prio);
+      ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
       sched_unlock();
       return ret;
     }
@@ -233,9 +247,8 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   if (!abstime || abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
     {
-      set_errno(EINVAL);
-      sched_unlock();
-      return ERROR;
+      result = EINVAL;
+      goto errout_with_mqmsg;
     }
 
   /* Create a watchdog.  We will not actually need this watchdog
@@ -246,9 +259,8 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   rtcb->waitdog = wd_create();
   if (!rtcb->waitdog)
     {
-      set_errno(EINVAL);
-      sched_unlock();
-      return ERROR;
+      result = EINVAL;
+      goto errout_with_mqmsg;
     }
 
   /* We are not in an interrupt handler and the message queue is full.
@@ -268,33 +280,35 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   if (result == OK && ticks <= 0)
     {
       result = ETIMEDOUT;
+      goto errout_with_irqsave;
     }
 
   /* Handle any time-related errors */
 
   if (result != OK)
     {
-      set_errno(result);
-      ret = ERROR;
+      goto errout_with_irqsave;
     }
 
   /* Start the watchdog and begin the wait for MQ not full */
 
-  else
+  wd_start(rtcb->waitdog, ticks, (wdentry_t)mq_sndtimeout, 1, getpid());
+
+  /* And wait for the message queue to be non-empty */
+
+  ret = mq_waitsend(mqdes);
+
+  /* This may return with an error and errno set to either EINTR
+   * or ETIMEOUT.  Cancel the watchdog timer in any event.
+   */
+
+  wd_cancel(rtcb->waitdog);
+
+  /* Check if the wait failed */
+
+  if (ret < 0)
     {
-      /* Start the watchdog */
-
-      wd_start(rtcb->waitdog, ticks, (wdentry_t)mq_sndtimeout, 1, getpid());
-
-      /* And wait for the message queue to be non-empty */
-
-      ret = mq_waitsend(mqdes);
-
-      /* This may return with an error and errno set to either EINTR
-       * or ETIMEOUT.  Cancel the watchdog timer in any event.
-       */
-
-      wd_cancel(rtcb->waitdog);
+      goto errout_with_irqsave;
     }
 
   /* That is the end of the atomic operations */
@@ -306,26 +320,30 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
    * the message structure.
    */
 
-  if (ret == OK)
-    {
-      mqmsg = mq_msgalloc();
-      if (!mqmsg)
-        {
-          /* Failed to allocate the message */
-
-          set_errno(ENOMEM);
-          ret = ERROR;
-        }
-      else
-        {
-          /* Perform the message send. */
-
-          ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
-        }
-    }
+  ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
 
   sched_unlock();
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
   return ret;
+
+/* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
+ * wdog allocated, and (4) interrupts disabled.  The error code is in
+ * 'result'
+ */
+
+errout_with_irqsave:
+  irqrestore(saved_state);
+  wd_delete(rtcb->waitdog);
+  rtcb->waitdog = NULL;
+
+/* Exit here with (1) the scheduler locked and 2) a message allocated.  The
+ * error code is in 'result'
+ */
+
+errout_with_mqmsg:
+  mq_msgfree(mqmsg);
+  set_errno(result);
+  sched_unlock();
+  return ERROR;
 }
