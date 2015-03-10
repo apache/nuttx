@@ -222,6 +222,55 @@ static inline void sam_fpuconfig(void)
 #endif
 
 /****************************************************************************
+ * Name: sam_tcmenable
+ *
+ * Description:
+ *   Enable/disable tightly coupled memories.  Size of tightly coupled
+ *   memory regions is controlled by GPNVM Bits 7-8.
+ *
+ ****************************************************************************/
+
+static inline void sam_tcmenable(void)
+{
+  uint32_t regval;
+
+  ARM_DSB();
+  ARM_ISB();
+
+  /* Assure that GPNVM 7-8 settings are as expected */
+#warning Missing logic
+
+  /* Enabled/disabled ITCM */
+
+#ifdef CONFIG_ARMV7M_ITCM
+  regval  = NVIC_TCMCR_EN | NVIC_TCMCR_RMW | NVIC_TCMCR_RETEN;
+#else
+  regval  = getreg32(NVIC_ITCMCR);
+  regval &= ~NVIC_TCMCR_EN;
+#endif
+  putreg32(regval, NVIC_ITCMCR);
+
+  /* Enabled/disabled DTCM */
+
+#ifdef CONFIG_ARMV7M_DTCM
+  regval  = NVIC_TCMCR_EN | NVIC_TCMCR_RMW | NVIC_TCMCR_RETEN;
+#else
+  regval  = getreg32(NVIC_DTCMCR);
+  regval &= ~NVIC_TCMCR_EN;
+#endif
+  putreg32(regval, NVIC_DTCMCR);
+
+  ARM_DSB();
+  ARM_ISB();
+
+#ifdef CONFIG_ARMV7M_ITCM
+  /* Copy TCM code from flash to ITCM */
+
+#warning Missing logic
+#endif
+}
+
+/****************************************************************************
  * Name: go_os_start
  *
  * Description:
@@ -324,6 +373,10 @@ void __start(void)
   sam_fpuconfig();
   sam_lowsetup();
   showprogress('A');
+
+  /* Enable/disable tightly coupled memories */
+
+  sam_tcmenable();
 
   /* Enable I- and D-Caches */
 
