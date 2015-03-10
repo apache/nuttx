@@ -199,6 +199,8 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   if (mq_verifysend(mqdes, msg, msglen, prio) != OK)
     {
+      /* mq_verifysend() will set the errno appropriately */
+
       return ERROR;
     }
 
@@ -234,7 +236,9 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   if (msgq->nmsgs < msgq->maxmsgs || up_interrupt_context())
     {
-      /* Do the send with no further checks (possibly exceeding maxmsgs) */
+      /* Do the send with no further checks (possibly exceeding maxmsgs)
+       * Currently mq_dosend() always returns OK.
+       */
 
       ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
       sched_unlock();
@@ -280,7 +284,6 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   if (result == OK && ticks <= 0)
     {
       result = ETIMEDOUT;
-      goto errout_with_irqsave;
     }
 
   /* Handle any time-related errors */
@@ -304,10 +307,13 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   wd_cancel(rtcb->waitdog);
 
-  /* Check if the wait failed */
+  /* Check if mq_waitsend() failed */
 
   if (ret < 0)
     {
+      /* mq_waitsend() will set the errno, but the error exit will reset it */
+
+      result = get_errno();
       goto errout_with_irqsave;
     }
 
@@ -318,6 +324,8 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   /* If any of the above failed, set the errno.  Otherwise, there should
    * be space for another message in the message queue.  NOW we can allocate
    * the message structure.
+   *
+   * Currently mq_dosend() always returns OK.
    */
 
   ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
