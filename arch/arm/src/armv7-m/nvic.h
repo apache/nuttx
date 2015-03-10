@@ -227,6 +227,12 @@
 #define NVIC_DCCSW_OFFSET               0x0f62 /* D-Cache Clean by Set-way (Cortex-M7) */
 #define NVIC_DCCIMVAC_OFFSET            0x0f70 /* D-Cache Clean and Invalidate by MVA to PoC (Cortex-M7) */
 #define NVIC_DCCISW_OFFSET              0x0f74 /* D-Cache Clean and Invalidate by Set-way (Cortex-M7) */
+#define NVIC_ITCMCR_OFFSET              0x0f90 /* Instruction Tightly-Coupled Memory Control Register */
+#define NVIC_DTCMCR_OFFSET              0x0f94 /* Data Tightly-Coupled Memory Control Registers */
+#define NVIC_AHBPCR_OFFSET              0x0f98 /* AHBP Control Register */
+#define NVIC_CACR_OFFSET                0x0f9c /* L1 Cache Control Register */
+#define NVIC_AHBSCR_OFFSET              0x0fa0 /* AHB Slave Control Register */
+#define NVIC_ABFSR_OFFSET               0x0fa8 /* Auxiliary Bus Fault Status */
 #define NVIC_PID4_OFFSET                0x0fd0 /* Peripheral identification register (PID4) */
 #define NVIC_PID5_OFFSET                0x0fd4 /* Peripheral identification register (PID5) */
 #define NVIC_PID6_OFFSET                0x0fd8 /* Peripheral identification register (PID6) */
@@ -409,6 +415,12 @@
 #define NVIC_DCCSW                      (ARMV7M_NVIC_BASE + NVIC_DCCSW_OFFSET)
 #define NVIC_DCCIMVAC                   (ARMV7M_NVIC_BASE + NVIC_DCCIMVAC_OFFSET)
 #define NVIC_DCCISW                     (ARMV7M_NVIC_BASE + NVIC_DCCISW_OFFSET)
+#define NVIC_ITCMCR                     (ARMV7M_NVIC_BASE + NVIC_ITCMCR_OFFSET)
+#define NVIC_DTCMCR                     (ARMV7M_NVIC_BASE + NVIC_DTCMCR_OFFSET)
+#define NVIC_AHBPCR                     (ARMV7M_NVIC_BASE + NVIC_AHBPCR_OFFSET)
+#define NVIC_CACR                       (ARMV7M_NVIC_BASE + NVIC_CACR_OFFSET)
+#define NVIC_AHBSCR                     (ARMV7M_NVIC_BASE + NVIC_AHBSCR_OFFSET)
+#define NVIC_ABFSR                      (ARMV7M_NVIC_BASE + NVIC_ABFSR_OFFSET)
 #define NVIC_PID4                       (ARMV7M_NVIC_BASE + NVIC_PID4_OFFSET)
 #define NVIC_PID5                       (ARMV7M_NVIC_BASE + NVIC_PID5_OFFSET)
 #define NVIC_PID6                       (ARMV7M_NVIC_BASE + NVIC_PID6_OFFSET)
@@ -626,6 +638,29 @@
 #define NVIC_DEMCR_MONSTEP              (1 << 18) /* Bit 18: Steps the core */
 #define NVIC_DEMCR_MONREQ               (1 << 19) /* Bit 19: Monitor wake-up mode */
 #define NVIC_DEMCR_TRCENA               (1 << 24) /* Bit 24: Enable trace and debug blocks */
+
+/* Instruction Tightly-Coupled Memory Control Register (ITCMCR) */
+/* Data Tightly-Coupled Memory Control Registers (DTCMCR */
+
+#define NVIC_TCMCR_EN                   (1 << 0)  /* Bit 9:  TCM enable */
+#define NVIC_TCMCR_RMW                  (1 << 1)  /* Bit 1:  Read-Modify-Write (RMW) enable */
+#define NVIC_TCMCR_RETEN                (1 << 2)  /* Bit 2:  Retry phase enable */
+#define NVIC_TCMCR_SZ_SHIFT             (3)       /* Bits 3-6: Size of the TCM */
+#define NVIC_TCMCR_SZ_MASK              (15 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_NONE            (0 << NVIC_TCMCR_SZ_SHIFT) /* No TCM implemented */
+#  define NVIC_TCMCR_SZ_4KB             (3 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_8KB             (4 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_16KB            (5 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_32KB            (6 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_64KB            (7 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_128KB           (8 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_256KB           (9 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_512KB           (10 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_1MB             (11 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_2MB             (12 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_4MB             (13 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_8MB             (14 << NVIC_TCMCR_SZ_SHIFT)
+#  define NVIC_TCMCR_SZ_16MB            (15 << NVIC_TCMCR_SZ_SHIFT)
 
 /********************************************************************************************
  * Public Types
