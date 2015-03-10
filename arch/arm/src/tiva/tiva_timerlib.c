@@ -1732,7 +1732,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
   /* Wait for the gptm to become ready before modifying its registers */
 
-  while (!tiva_gpio_periphrdy(config->gptm));
+  while (!tiva_gptm_periphrdy(config->gptm));
 
   /* Reset the timer to be certain that it is in the disabled state */
 
