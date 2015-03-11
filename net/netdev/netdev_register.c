@@ -62,6 +62,7 @@
 
 #define NETDEV_SLIP_FORMAT      "sl%d"
 #define NETDEV_ETH_FORMAT       "eth%d"
+#define NETDEV_TUN_FORMAT       "tun%d"
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
@@ -171,6 +172,9 @@ static int find_devnum(FAR const char *devfmt)
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 {
   FAR const char *devfmt;
+#ifdef CONFIG_NET_USER_DEVFMT
+  FAR const char devfmt_str[IFNAMSIZ];
+#endif
   int devnum;
 
   if (dev)
@@ -203,6 +207,17 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_recvwndo = CONFIG_NET_SLIP_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_SLIP_FORMAT;
+            break;
+#endif
+
+#ifdef CONFIG_NET_TUN
+          case NET_LL_TUN:       /* Virtual Network Device (TUN) */
+            dev->d_llhdrlen = 0;
+            dev->d_mtu      = CONFIG_NET_TUN_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_TUN_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_TUN_FORMAT;
             break;
 #endif
 
@@ -242,6 +257,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #else
       devnum = g_next_devnum++;
 #endif
+#ifdef CONFIG_NET_USER_DEVFMT
+      if (*dev->d_ifname)
+        {
+          strncpy(devfmt_str, dev->d_ifname, IFNAMSIZ);
+          devfmt = devfmt_str;
+        }
+#endif
+
       snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum );
 
       /* Add the device to the list of known network devices */

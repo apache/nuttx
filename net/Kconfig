@@ -102,6 +102,17 @@ config NET_SLIP_TCP_RECVWNDO
 		incoming data, or high (32768 bytes) if the application processes
 		data quickly.
 
+config NET_TUN_MTU
+	int "TUN packet buffer size (MTU)"
+	default 296
+	depends on NET_TUN
+	range 296 1518
+
+config NET_TUN_TCP_RECVWNDO
+	int "TUN TCP receive window size"
+	default 256
+	depends on NET_TUN && NET_TCP
+
 config NET_GUARDSIZE
 	int "Driver I/O guard size"
 	default 2
@@ -120,6 +131,13 @@ menu "Data link support"
 config NET_MULTILINK
 	bool
 	default n
+
+config NET_USER_DEVFMT
+	bool "User provided devfmt"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		netdev_register will get devfmt form d_ifname if it is initialized.
 
 config NET_ETHERNET
 	bool "Ethernet support"
@@ -179,6 +197,24 @@ config SLIP_DEFPRIO
 		The priority of the SLIP RX and TX tasks. Default: 128
 
 endif # NET_SLIP
+
+config NET_TUN
+	bool "TUN Virtual Network Device support"
+	default n
+
+if NET_TUN
+
+config TUN_NINTERFACES
+	int "Number of TUN interfaces"
+	default 1
+	range 1 8
+	---help---
+		Selects the number of TUN
+		interfaces to support.
+		Default: 1
+
+endif # NET_TUN
+
 endmenu # Data link support
 
 source "net/netdev/Kconfig"
