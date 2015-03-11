@@ -48,7 +48,7 @@ CMN_CSRCS += up_unblocktask.c up_usestack.c up_doirq.c up_hardfault.c
 CMN_CSRCS += up_svcall.c up_vfork.c
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
-ifeq ($(CONFIG_ARMV7M_ARMV7M_LAZYFPU),y)
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
 else
 CMN_ASRCS += up_exception.S

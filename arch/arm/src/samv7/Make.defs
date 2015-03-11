@@ -56,7 +56,7 @@ CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
 # Configuration-dependent common files
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
-ifeq ($(CONFIG_ARMV7M_ARMV7M_LAZYFPU),y)
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
 else
 CMN_ASRCS += up_exception.S
@@ -66,6 +66,13 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_DCACHE),y)
 CMN_CSRCS += up_dcache.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += up_fpu.S
+ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CMN_CSRCS += up_copyarmstate.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)

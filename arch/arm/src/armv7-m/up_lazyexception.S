@@ -334,7 +334,7 @@ exception_common:
 	 */
 
 	bx		r14						/* And return */
-	.size	handlers, .-handlers
+	.size	exception_common, .-exception_common
 
 /************************************************************************************************
  *  Name: g_intstackalloc/g_intstackbase
