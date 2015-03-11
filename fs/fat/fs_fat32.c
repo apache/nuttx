@@ -1763,8 +1763,8 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
     }
 
   /* Initialize the allocated mountpt state structure.  The filesystem is
-   * responsible for one reference ont the blkdriver inode and does not
-   * have to addref() here (but does have to release in ubind().
+   * responsible for one reference on the blkdriver inode and does not
+   * have to addref() here (but does have to release in unbind().
    */
 
   fs->fs_blkdriver = blkdriver;  /* Save the block driver reference */
@@ -1849,7 +1849,9 @@ static int fat_unbind(void *handle, FAR struct inode **blkdriver)
           fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);
         }
 
+      sem_destroy(&fs->fs_sem);
       kmm_free(fs);
+      return ret;
     }
 
   fat_semgive(fs);
