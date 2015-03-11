@@ -112,7 +112,7 @@
 
 	/* Exported symbols */
 
-	.globl	__reset
+	.global	__reset
 	.global __start
 	.global halt
 	.global	devcfg
@@ -371,7 +371,7 @@ __start:
 
 	la		sp, PIC32MZ_STACK_TOP
 
-	/* Initialize the globl pointer (gp).  _gp is initialized by the linker
+	/* Initialize the global pointer (gp).  _gp is initialized by the linker
 	 * script to point to the "middle" of the small variables region.
 	 */
 
