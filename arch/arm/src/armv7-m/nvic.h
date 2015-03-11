@@ -662,6 +662,23 @@
 #  define NVIC_TCMCR_SZ_8MB             (14 << NVIC_TCMCR_SZ_SHIFT)
 #  define NVIC_TCMCR_SZ_16MB            (15 << NVIC_TCMCR_SZ_SHIFT)
 
+/* AHBP Control Register (AHBPCR, Cortex-M7) */
+
+#define NVIC_AHBPCR_EN                  (1 << 0)  /* Bit 0: AHBP enable */
+#define NVIC_AHBPCR_SZ_SHIFT            (1)       /* Bits 1-3: AHBP size */
+#define NVIC_AHBPCR_SZ_MASK             (7 << NVIC_AHBPCR_SZ_SHIFT)
+#  define NVIC_AHBPCR_SZ_DISABLED       (0 << NVIC_AHBPCR_SZ_SHIFT)
+#  define NVIC_AHBPCR_SZ_64MB           (1 << NVIC_AHBPCR_SZ_SHIFT)
+#  define NVIC_AHBPCR_SZ_128MB          (2 << NVIC_AHBPCR_SZ_SHIFT)
+#  define NVIC_AHBPCR_SZ_256MB          (3 << NVIC_AHBPCR_SZ_SHIFT)
+#  define NVIC_AHBPCR_SZ_512MB          (4 << NVIC_AHBPCR_SZ_SHIFT)
+
+/* L1 Cache Control Register (CACR, Cortex-M7) */
+
+#define NVIC_CACR_SIWT                  (1 << 0)  /* Bit 0:  Shared cacheable-is-WT for data cache */
+#define NVIC_CACR_ECCDIS                (1 << 1)  /* Bit 1:  Enables ECC in the instruction and data cache */
+#define NVIC_CACR_FORCEWT               (1 << 2)  /* Bit 2:  Enables Force Write-Through in the data cache */
+
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
