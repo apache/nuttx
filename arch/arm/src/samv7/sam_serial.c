@@ -68,10 +68,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If we are not using the serial driver for the console, then we still must
- * provide some minimal implementation of up_putc.
- */
-
 #ifdef USE_SERIALDRIVER
 
 /* Which UART/USART with be tty0/console and which tty1-7? */
@@ -870,7 +866,8 @@ static int sam_setup(struct uart_dev_s *dev)
    * for lower USART clocks.
    */
 
-  divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
+  divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) /
+             (priv->baud << 4);
   intpart  = divb3 >> 3;
   fracpart = divb3 & 7;
 
@@ -880,11 +877,12 @@ static int sam_setup(struct uart_dev_s *dev)
    * REVISIT: The fractional divider is not used.
    */
 
-  if ((regval & UART_BRGR_CD_MASK) != 0)
+  if ((intpart & ~UART_BRGR_CD_MASK) != 0)
     {
       /* Use the divided USART clock */
 
-      divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
+      divb3    = ((SLOW_USART_CLOCK + (priv->baud << 3)) << 3) /
+                 (priv->baud << 4);
       intpart  = divb3 >> 3;
       fracpart = divb3 & 7;
 
