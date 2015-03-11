@@ -9949,3 +9949,6 @@
 	  logic:  gptm, not gpio.  From Bradley Noyes (2015-03-10).
 	* drivers/net/tun.c, Make.defs, include/nuttx/net/net.h, tun.h, and
 	  net/Kconfig: Add TUN device.  From Max Neklyudov (2015-03-11).
+	* fs/fat/fs_fat32.c: fat_unbind() was accessing 'fs->fs_sem' after
+	  freeing the 'fs' struct. From Juha Niskanen (2015-03-11).
+
