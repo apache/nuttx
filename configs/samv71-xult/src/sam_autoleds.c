@@ -139,16 +139,13 @@ void board_led_initialize(void)
 
 void board_led_on(int led)
 {
-  bool led0on = false;  /* High illuminates */
-  bool led1on = false; /* High illuminates */
-
   switch (led)
     {
       case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
         break;
 
       case 1:  /* LED_STACKCREATED */
-        led0on = true;
+        sam_gpiowrite(GPIO_LED0, false); /* Low illuminates */
         break;
 
       default:
@@ -156,12 +153,9 @@ void board_led_on(int led)
         return;
 
       case 3:  /* LED_PANIC */
-        led1on = true;
+        sam_gpiowrite(GPIO_LED1, false); /* Low illuminates */
         break;
     }
-
-  sam_gpiowrite(GPIO_LED0, led0on);
-  sam_gpiowrite(GPIO_LED1, led1on);
 }
 
 /****************************************************************************
@@ -170,10 +164,9 @@ void board_led_on(int led)
 
 void board_led_off(int led)
 {
-  if (led != 2)
+  if (led == 3)
     {
-      sam_gpiowrite(GPIO_LED0, false);  /* High illuminates */
-      sam_gpiowrite(GPIO_LED1, false);  /* High illuminates */
+      sam_gpiowrite(GPIO_LED1, true);  /* High extinguishes */
     }
 }
 

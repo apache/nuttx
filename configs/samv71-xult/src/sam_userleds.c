@@ -101,7 +101,7 @@ void sam_setled(int led, bool ledon)
 
 void sam_setleds(uint8_t ledset)
 {
-  /* Hight illuminates */
+  /* Low illuminates */
 
   sam_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0);
   sam_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
