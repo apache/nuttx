@@ -9947,3 +9947,5 @@
 	  (2015-03-10).
 	* arch/arm/src/tiva/tiva_timerlib.c:  Fix a typo in peripheral wait
 	  logic:  gptm, not gpio.  From Bradley Noyes (2015-03-10).
+	* drivers/net/tun.c, Make.defs, include/nuttx/net/net.h, tun.h, and
+	  net/Kconfig: Add TUN device.  From Max Neklyudov (2015-03-11).
