@@ -138,13 +138,9 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
-  # FIXME: Most tools do not yet support the cortex-m7 CPU type
-  # TOOLCHAIN_MCPU   := -mcpu=cortex-m7
-  # TOOLCHAIN_MTUNE  := -mtune=cortex-m7
-  TOOLCHAIN_MCPU     := -mcpu=cortex-m4
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m4
+  TOOLCHAIN_MCPU     := -mcpu=cortex-m7
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m7
   TOOLCHAIN_MARCH    := -march=armv7e-m
-  # FIXME: Most tools do not yet fpv5 FPU types either
   ifeq ($(CONFIG_ARCH_FPU),y)
   ifeq ($(CONFIG_ARCH_DPFPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16 -mfloat-abi=hard
