@@ -234,16 +234,26 @@ NOTES:
      output on USART3 (i.e., for the Arduino serial shield).
 
   3. All of these configurations are set up to build under Windows using the
-     CodeSourcery toolchain (unless stated otherwise in the description of
-     the configuration).  That build selection can easily be reconfigured
-     using 'make menuconfig'.  Here are the relevant current settings:
+     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+     (unless stated otherwise in the description of the configuration).
+
+       https://launchpad.net/gcc-arm-embedded
+
+     As of this writing (2015-03-11), full support is difficult to find
+     for the Cortex-M&, but is supported by at least this realeasse of
+     the ARM GNU tools:
+
+       https://launchpadlibrarian.net/192228215/release.txt
+
+     That toolchain selection can easily be reconfigured using
+     'make menuconfig'.  Here are the relevant current settings:
 
      Build Setup:
-       CONFIG_HOST_WINDOWS=y                   : Window environment
-       CONFIG_WINDOWS_CYGWIN=y                 : Cywin under Windows
+       CONFIG_HOST_WINDOWS=y               : Window environment
+       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : devkitARM toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
 Configuration sub-directories
 -----------------------------
