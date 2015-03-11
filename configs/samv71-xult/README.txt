@@ -276,8 +276,8 @@ Configuration sub-directories
 
     4. Performance-related Configuration settings:
 
-       # CONFIG_ARMV7M_ICACHE is not set     : Can be enabled, not verified
-       # CONFIG_ARMV7M_DCACHE is not set     : Can be enabled, not verified
+       CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
+       CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
        # CONFIG_ARCH_FPU is not set          : Can be enabled, not verified
        # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
        # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
