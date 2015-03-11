@@ -288,6 +288,7 @@ Configuration sub-directories
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
-       # CONFIG_ARCH_FPU is not set          : Can be enabled, not verified
+       CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
+       CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
        # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
        # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
