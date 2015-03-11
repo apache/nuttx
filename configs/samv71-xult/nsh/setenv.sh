@@ -57,11 +57,11 @@ fi
 # the CodeSourcery toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
-#export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
+export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # This is the path to the location where I installed the devkitARM toolchain
 # You an get this free toolchain from http://devkitpro.org/ or http://sourceforge.net/projects/devkitpro/
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/devkitARM/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/devkitARM/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
