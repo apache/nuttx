@@ -279,10 +279,39 @@ Configuration sub-directories
     3. NSH built-in applications are supported.
 
        Binary Formats:
-         CONFIG_BUILTIN=y                    : Enable support for built-in programs
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
 
        Application Configuration:
-         CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+    3. The button test at apps/examples/buttons is included in the
+       configuration.  This configuration illustrates (1) use of the buttons
+       on the evaluation board, and (2) the use of PIO interrupts.  Example
+       usage:
+
+       NuttShell (NSH) NuttX-7.8
+       nsh> help
+       help usage:  help [-v] [<cmd>]
+       ...
+       Builtin Apps:
+         buttons
+       nsh> buttons 3
+       maxbuttons: 3
+       Attached handler at 4078f7 to button 0 [SW0], oldhandler:0
+       Attached handler at 4078e9 to button 1 [SW1], oldhandler:0
+       IRQ:125 Button 1:SW1 SET:00:
+         SW1 released
+       IRQ:125 Button 1:SW1 SET:02:
+         SW1 depressed
+       IRQ:125 Button 1:SW1 SET:00:
+         SW1 released
+       IRQ:90 Button 0:SW0 SET:01:
+         SW0 depressed
+       IRQ:90 Button 0:SW0 SET:00:
+         SW0 released
+       IRQ:125 Button 1:SW1 SET:02:
+         SW1 depressed
+       nsh>
 
     4. Performance-related Configuration settings:
 
@@ -290,5 +319,6 @@ Configuration sub-directories
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
        CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
        CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
+
        # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
        # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
