@@ -290,7 +290,7 @@
 
 /* BAUD definitions
  *
- * The source clock is selectable and could be one of: 
+ * The source clock is selectable and could be one of:
  *
  *   - The peripheral clock
  *   - A division of the peripheral clock, where the divider is product-

@@ -65,7 +65,7 @@
 
 /* BAUD definitions
  *
- * The source clock is selectable and could be one of: 
+ * The source clock is selectable and could be one of:
  *
  *   - The peripheral clock
  *   - A division of the peripheral clock, where the divider is product-
@@ -406,7 +406,7 @@ void sam_lowsetup(void)
     {
       /* Use the divided USART clock */
 
-      divb3    = ((SLOW_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) << 3) / 
+      divb3    = ((SLOW_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) << 3) /
                  (SAM_CONSOLE_BAUD << 4);
       intpart  = (divb3 >> 3);
       fracpart = (divb3 & 7);

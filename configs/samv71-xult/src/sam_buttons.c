@@ -48,8 +48,10 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
+#include "up_arch.h"
 #include "sam_gpio.h"
-#include "samv7i-xult.h"
+#include "chip/sam_matrix.h"
+#include "samv71-xult.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -61,9 +63,18 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#define HAVE_IRQBUTTONS 1
+#if !defined(CONFIG_SAMV7_GPIO1_IRQ) && !defined(CONFIG_SAMV7_GPIOB_IRQ)
+#  undef HAVE_IRQBUTTONS
+#endif
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+#ifdef CONFIG_SAMV7_GPIOA_IRQ
 static xcpt_t g_irq_sw0;
+#endif
+#ifdef CONFIG_SAMV7_GPIOB_IRQ
 static xcpt_t g_irq_sw1;
+#endif
 #endif
 
 /****************************************************************************
@@ -78,7 +89,7 @@ static xcpt_t g_irq_sw1;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#ifdef HAVE_IRQBUTTONS
 static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
                                 xcpt_t irqhandler, xcpt_t *store)
 {
@@ -139,10 +150,18 @@ static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
 
 void board_button_initialize(void)
 {
-#warning Missing logic
- *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
- *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
- *     the MATRIX module. For more information see the SAM V71 datasheet.
+  uint32_t regval;
+
+ /* PB12 is set up as a system flash ERASE pin when the firmware boots. To
+  * use the SW1, PB12 has to be configured as a normal regular I/O pin in
+  * the MATRIX module. For more information see the SAM V71 datasheet.
+  */
+
+  regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
+  regval |= MATRIX_CCFG_SYSIO_SYSIO12;
+  putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
+
+  /* Configure button PIOs */
 
   (void)sam_configgpio(GPIO_SW0);
   (void)sam_configgpio(GPIO_SW1);
@@ -187,20 +206,32 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
+#ifdef HAVE_IRQBUTTONS
+
   switch (id)
     {
+#ifdef CONFIG_SAMV7_GPIOA_IRQ
       case BUTTON_SW0:
         return board_button_irqx(GPIO_SW0, IRQ_SW0, irqhandler, &g_irq_sw0);
+#endif
 
+#ifdef CONFIG_SAMV7_GPIOB_IRQ
       case BUTTON_SW1:
         return board_button_irqx(GPIO_SW1, IRQ_SW1, irqhandler, &g_irq_sw1);
+#endif
 
       default:
         return NULL;
     }
+
+#else
+
+  return NULL;
+
+#endif
 }
 #endif
 
