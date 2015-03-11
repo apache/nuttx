@@ -47,6 +47,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "sam_config.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_lowputc.h"
@@ -390,9 +391,10 @@ void sam_lowsetup(void)
    * for lower USART clocks.
    */
 
-  divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
+  divb3    = ((FAST_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) << 3) /
+             (SAM_CONSOLE_BAUD << 4);
   intpart  = (divb3 >> 3);
-  fracpart = (divb3 & 7)
+  fracpart = (divb3 & 7);
 
   /* Retain the fast MR peripheral clock UNLESS unless using that clock
    * would result in an excessively large divider.
@@ -400,20 +402,21 @@ void sam_lowsetup(void)
    * REVISIT: The fractional divider is not used.
    */
 
-  if ((regval & UART_BRGR_CD_MASK) != 0)
+  if ((intpart & ~UART_BRGR_CD_MASK) != 0)
     {
       /* Use the divided USART clock */
 
-      divb3    = ((FAST_USART_CLOCK + (priv->baud << 3)) << 3) / (priv->baud << 4);
+      divb3    = ((SLOW_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) << 3) / 
+                 (SAM_CONSOLE_BAUD << 4);
       intpart  = (divb3 >> 3);
-      fracpart = (divb3 & 7)
+      fracpart = (divb3 & 7);
 
       /* Re-select the clock source */
 
-      regval  = sam_serialin(priv, SAM_UART_MR_OFFSET);
+      regval  = getreg32(SAM_CONSOLE_BASE + SAM_UART_MR_OFFSET);
       regval &= ~UART_MR_USCLKS_MASK;
       regval |= UART_MR_USCLKS_MCKDIV;
-      sam_serialout(priv, SAM_UART_MR_OFFSET, regval);
+      putreg32(regval, SAM_CONSOLE_BASE + SAM_UART_MR_OFFSET);
     }
 
   /* Save the BAUD divider (the fractional part is not used for UARTs) */
