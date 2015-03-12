@@ -161,7 +161,7 @@
 #define SAM_IRQ_MCAN11        (SAM_IRQ_EXTINT+SAM_PID_MCAN11) /* CAN1 IRQ line 1 */
 #define SAM_IRQ_EMAC          (SAM_IRQ_EXTINT+SAM_PID_EMAC)   /*  Ethernet MAC */
 #define SAM_IRQ_AFEC1         (SAM_IRQ_EXTINT+SAM_PID_AFEC1)  /* Analog Front End 1 */
-#define SAM_IRQ_TWIHS1        (SAM_IRQ_EXTINT+SAM_PID_TWIHS2) /* Two-Wire Interface 2 */
+#define SAM_IRQ_TWIHS2        (SAM_IRQ_EXTINT+SAM_PID_TWIHS2) /* Two-Wire Interface 2 */
 #define SAM_IRQ_SPI1          (SAM_IRQ_EXTINT+SAM_PID_SPI1)   /* Serial Peripheral Interface 1 */
 #define SAM_IRQ_QSPI          (SAM_IRQ_EXTINT+SAM_PID_QSPI)   /*  Quad I/O Serial Peripheral Interface */
 #define SAM_IRQ_UART2         (SAM_IRQ_EXTINT+SAM_PID_UART2)  /* Universal Asynchronous Receiver Transmitter 2 */

@@ -88,7 +88,7 @@
 #  define SAMV7_NUART                 5             /* 5 UARTs */
 #  define SAMV7_NQSPI                 5             /* 1 Quad SPI */
 #  define SAMV7_NSPI                  2             /* 2 SPI, SPI0-1 */
-#  define SAMV7_NTWI                  3             /* 3 TWI */
+#  define SAMV7_NTWIHS                3             /* 3 TWIHS */
 #  define SAMV7_NHSMCI4               1             /* 1 4-bit HSMCI port */
 #  define SAMV7_NCAN                  2             /* 2 CAN ports */
 #  define SAMV7_NEMAC                 1             /* 1 Ethernet MAC (GMAC) */
@@ -144,7 +144,7 @@
 #  define SAMV7_NUART                 5             /* 5 UARTs */
 #  define SAMV7_NQSPI                 5             /* 1 Quad SPI */
 #  define SAMV7_NSPI                  1             /* 1 SPI, SPI0 */
-#  define SAMV7_NTWI                  3             /* 3 TWI */
+#  define SAMV7_NTWIHS                3             /* 3 TWIHS */
 #  define SAMV7_NHSMCI4               1             /* 1 4-bit HSMCI port */
 #  define SAMV7_NCAN                  2             /* 2 CAN ports */
 #  define SAMV7_NEMAC                 1             /* 1 Ethernet MAC (GMAC) */
@@ -200,7 +200,7 @@
 #  define SAMV7_NUART                 5             /* 5 UARTs */
 #  define SAMV7_NQSPI                 0             /* No Quad SPI */
 #  define SAMV7_NSPI                  1             /* 1 SPI, QSPI functions in SPI mode only */
-#  define SAMV7_NTWI                  2             /* 2 TWI */
+#  define SAMV7_NTWIHS                2             /* 2 TWIHS */
 #  define SAMV7_NHSMCI4               0             /* No 4-bit HSMCI port */
 #  define SAMV7_NCAN                  1             /* 1 CAN port */
 #  define SAMV7_NEMAC                 1             /* 1 Ethernet MAC (GMAC) */
