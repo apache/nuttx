@@ -411,9 +411,11 @@ Configuration sub-directories
          70: -- -- -- -- -- -- -- --
          nsh>
 
-         Where 0x1a us the address of the WM8904 Audio CODIE and 0x5f is the
-         address of the AT24 EEPROM (I am not sure what the others are as
-         this writing).
+       Where 0x1a us the address of the WM8904 Audio CODEC and 0x5f is the
+       address of the AT24 EEPROM (I am not sure what the others are as
+       this writing).
+
+       CAREFUL!!! You can trash your MAC address using the I2C tool!
 
     5. Performance-related Configuration settings:
 
