@@ -174,7 +174,7 @@ static const struct sam_pidmap_s g_xdmac_rxchan[] =
   { SAM_PID_UART2,  XDMACH_UART2_RX  }, /* UART2 Receive */
   { SAM_PID_UART3,  XDMACH_UART3_RX  }, /* UART3 Receive */
   { SAM_PID_UART4,  XDMACH_UART4_RX  }, /* UART4 Receive */
-  { SAM_PID_SSC,    XDMACH_SSC_RX    }, /* SSC Receive */
+  { SAM_PID_SSC0,   XDMACH_SSC_RX    }, /* SSC Receive */
   { SAM_PID_PIOA,   XDMACH_PIOA_RX   }, /* PIOA Receive */
   { SAM_PID_AFEC0,  XDMACH_AFEC0_RX  }, /* AFEC0 Receive */
   { SAM_PID_AFEC1,  XDMACH_AFEC1_RX  }, /* AFEC1 Receive */
@@ -207,7 +207,7 @@ static const struct sam_pidmap_s g_xdmac_txchan[] =
   { SAM_PID_UART3,  XDMACH_UART3_TX  }, /* UART3 Transmit */
   { SAM_PID_UART4,  XDMACH_UART4_TX  }, /* UART4 Transmit */
   { SAM_PID_DACC,   XDMACH_DACC_TX   }, /* DACC Transmit */
-  { SAM_PID_SSC,    XDMACH_SSC_TX    }, /* SSC Transmit */
+  { SAM_PID_SSC0,   XDMACH_SSC_TX    }, /* SSC Transmit */
   { SAM_PID_AES,    XDMACH_AES_TX    }, /* AES Transmit */
   { SAM_PID_PWM1,   XDMACH_PWM1_TX   }  /* PWM01Transmit */
 };

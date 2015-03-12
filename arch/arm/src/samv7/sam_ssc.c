@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_ssc.c
+ * arch/arm/src/samv7/sam_ssc.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,17 +63,16 @@
 #include "up_arch.h"
 #include "cache.h"
 
-#include "chip.h"
-#include "sam_pio.h"
-#include "sam_dmac.h"
-#include "sam_memories.h"
+#include "sam_gpio.h"
+#include "sam_xdmac.h"
+//#include "sam_memories.h"
 #include "sam_periphclks.h"
 #include "sam_ssc.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_ssc.h"
 #include "chip/sam_pinmap.h"
 
-#if defined(CONFIG_SAMA5_SSC0) || defined(CONFIG_SAMA5_SSC1)
+#if defined(CONFIG_SAMV7_SSC0) || defined(CONFIG_SAMV7_SSC1)
 
 /****************************************************************************
  * Definitions
@@ -88,8 +87,8 @@
 #  error CONFIG_AUDIO required by this driver
 #endif
 
-#ifndef CONFIG_SAMA5_SSC_MAXINFLIGHT
-#  define CONFIG_SAMA5_SSC_MAXINFLIGHT 16
+#ifndef CONFIG_SAMV7_SSC_MAXINFLIGHT
+#  define CONFIG_SAMV7_SSC_MAXINFLIGHT 16
 #endif
 
 /* Assume no RX/TX support until we learn better */
@@ -99,41 +98,35 @@
 
 /* Check for SSC0 support */
 
-#if defined(CONFIG_SAMA5_SSC0)
+#if defined(CONFIG_SAMV7_SSC0)
 
-#  if defined(CONFIG_SAMA5_HAVE_XDMA)
-#    if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
-#      error CONFIG_SAMA5_XDMAC0 or XDMAC1 required by SSC0
-#    endif
-#  else
-#    if !defined(CONFIG_SAMA5_DMAC0)
-#      error CONFIG_SAMA5_DMAC0 required by SSC0
-#    endif
+#  ifndef CONFIG_SAMV7_XDMAC
+#    error CONFIG_SAMV7_XDMAC required by SSC0
 #  endif
 
   /* The SSC can handle most any bit width from 2 to 32.  However, the DMA
    * logic here is constrained to byte, half-word, and word sizes.
    */
 
-#  ifndef CONFIG_SAMA5_SSC0_DATALEN
-#    define CONFIG_SAMA5_SSC0_DATALEN 16
+#  ifndef CONFIG_SAMV7_SSC0_DATALEN
+#    define CONFIG_SAMV7_SSC0_DATALEN 16
 #  endif
 
-#  if CONFIG_SAMA5_SSC0_DATALEN == 8
-#    define SAMA5_SSC0_DATAMASK  0
-#  elif CONFIG_SAMA5_SSC0_DATALEN == 16
-#    define SAMA5_SSC0_DATAMASK  1
-#  elif CONFIG_SAMA5_SSC0_DATALEN == 32
-#    define SAMA5_SSC0_DATAMASK  3
-#  elif  CONFIG_SAMA5_SSC0_DATALEN < 2 || CONFIG_SAMA5_SSC0_DATALEN > 32
-#    error Invalid value for CONFIG_SAMA5_SSC0_DATALEN
+#  if CONFIG_SAMV7_SSC0_DATALEN == 8
+#    define SAMV7_SSC0_DATAMASK  0
+#  elif CONFIG_SAMV7_SSC0_DATALEN == 16
+#    define SAMV7_SSC0_DATAMASK  1
+#  elif CONFIG_SAMV7_SSC0_DATALEN == 32
+#    define SAMV7_SSC0_DATAMASK  3
+#  elif  CONFIG_SAMV7_SSC0_DATALEN < 2 || CONFIG_SAMV7_SSC0_DATALEN > 32
+#    error Invalid value for CONFIG_SAMV7_SSC0_DATALEN
 #  else
-#    error Valid but supported value for CONFIG_SAMA5_SSC0_DATALEN
+#    error Valid but supported value for CONFIG_SAMV7_SSC0_DATALEN
 #  endif
 
 /* Check for SSC0 RX support */
 
-#  if defined(CONFIG_SAMA5_SSC0_RX)
+#  if defined(CONFIG_SAMV7_SSC0_RX)
 #    define SSC_HAVE_RX 1
 
 #    ifndef CONFIG_SSC0_RX_FSLEN
@@ -157,7 +150,7 @@
 
 /* Check for SSC0 TX support */
 
-#  if defined(CONFIG_SAMA5_SSC0_TX)
+#  if defined(CONFIG_SAMV7_SSC0_TX)
 #    define SSC_HAVE_TX 1
 
 #    ifndef CONFIG_SSC0_TX_FSLEN
@@ -187,41 +180,35 @@
 
 /* Check for SSC1 support */
 
-#if defined(CONFIG_SAMA5_SSC1)
+#if defined(CONFIG_SAMV7_SSC1)
 
-#  if defined(CONFIG_SAMA5_HAVE_XDMA)
-#    if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
-#      error CONFIG_SAMA5_XDMAC1 (or XDMAC0) required by SSC1
-#    endif
-#  else
-#    if !defined(CONFIG_SAMA5_DMAC1)
-#      error CONFIG_SAMA5_DMAC0 required by SSC1
-#    endif
+#  ifndef CONFIG_SAMV7_XDMAC
+#    error CONFIG_SAMV7_XDMAC required by SSC1
 #  endif
 
   /* The SSC can handle most any bit width from 2 to 32.  However, the DMA
    * logic here is constrained to byte, half-word, and word sizes.
    */
 
-#  ifndef CONFIG_SAMA5_SSC1_DATALEN
-#    define CONFIG_SAMA5_SSC1_DATALEN 16
+#  ifndef CONFIG_SAMV7_SSC1_DATALEN
+#    define CONFIG_SAMV7_SSC1_DATALEN 16
 #  endif
 
-#  if CONFIG_SAMA5_SSC1_DATALEN == 8
-#    define SAMA5_SSC1_DATAMASK  0
-#  elif CONFIG_SAMA5_SSC1_DATALEN == 16
-#    define SAMA5_SSC1_DATAMASK  1
-#  elif CONFIG_SAMA5_SSC1_DATALEN == 32
-#    define SAMA5_SSC1_DATAMASK  3
-#  elif  CONFIG_SAMA5_SSC1_DATALEN < 2 || CONFIG_SAMA5_SSC1_DATALEN > 32
-#    error Invalid value for CONFIG_SAMA5_SSC1_DATALEN
+#  if CONFIG_SAMV7_SSC1_DATALEN == 8
+#    define SAMV7_SSC1_DATAMASK  0
+#  elif CONFIG_SAMV7_SSC1_DATALEN == 16
+#    define SAMV7_SSC1_DATAMASK  1
+#  elif CONFIG_SAMV7_SSC1_DATALEN == 32
+#    define SAMV7_SSC1_DATAMASK  3
+#  elif  CONFIG_SAMV7_SSC1_DATALEN < 2 || CONFIG_SAMV7_SSC1_DATALEN > 32
+#    error Invalid value for CONFIG_SAMV7_SSC1_DATALEN
 #  else
-#    error Valid but supported value for CONFIG_SAMA5_SSC1_DATALEN
+#    error Valid but supported value for CONFIG_SAMV7_SSC1_DATALEN
 #  endif
 
 /* Check for SSC1 RX support */
 
-#  if defined(CONFIG_SAMA5_SSC1_RX)
+#  if defined(CONFIG_SAMV7_SSC1_RX)
 #    define SSC_HAVE_RX 1
 
 #    ifndef CONFIG_SSC1_RX_FSLEN
@@ -246,7 +233,7 @@
 
 /* Check for SSC1 TX support */
 
-#  if defined(CONFIG_SAMA5_SSC1_TX)
+#  if defined(CONFIG_SAMV7_SSC1_TX)
 #    define SSC_HAVE_TX 1
 
 #    ifndef CONFIG_SSC1_TX_FSLEN
@@ -284,13 +271,13 @@
 #undef SSC0_HAVE_MCK2
 #undef SSC1_HAVE_MCK2
 
-#if (defined(CONFIG_SAMA5_SSC0_RX) && defined(CONFIG_SAMA5_SSC0_RX_MCKDIV)) || \
-    (defined(CONFIG_SAMA5_SSC0_TX) && defined(CONFIG_SAMA5_SSC0_TX_MCKDIV))
+#if (defined(CONFIG_SAMV7_SSC0_RX) && defined(CONFIG_SAMV7_SSC0_RX_MCKDIV)) || \
+    (defined(CONFIG_SAMV7_SSC0_TX) && defined(CONFIG_SAMV7_SSC0_TX_MCKDIV))
 #  define SSC0_HAVE_MCK2 1
 #endif
 
-#if (defined(CONFIG_SAMA5_SSC1_RX) && defined(CONFIG_SAMA5_SSC1_RX_MCKDIV)) || \
-    (defined(CONFIG_SAMA5_SSC1_TX) && defined(CONFIG_SAMA5_SSC1_TX_MCKDIV))
+#if (defined(CONFIG_SAMV7_SSC1_RX) && defined(CONFIG_SAMV7_SSC1_RX_MCKDIV)) || \
+    (defined(CONFIG_SAMV7_SSC1_TX) && defined(CONFIG_SAMV7_SSC1_TX_MCKDIV))
 #  define SSC1_HAVE_MCK2 1
 #endif
 
@@ -309,8 +296,8 @@
  *                 |<-----DATALEN * DATNB----->|
  *
  * TK/RK is assumed to be a negative pulse
- * DATALEN is configurable: CONFIG_SAMA5_SSCx_DATALEN
- * FSLEN is configuration:  CONFIG_SAMA5_SSCx_RX/TX_FSLEN
+ * DATALEN is configurable: CONFIG_SAMV7_SSCx_DATALEN
+ * FSLEN is configuration:  CONFIG_SAMV7_SSCx_RX/TX_FSLEN
  * FSLEN and STTDLY are fixed at two clocks
  * DATNB is fixed a one work
  *
@@ -337,26 +324,19 @@
 #define SSC_CLKOUT_CONT   1 /* Continuous */
 #define SSC_CLKOUT_XFER   2 /* Only output clock during transfers */
 
-/* Bus configuration differ with chip */
+/* Bus configuration may differ with chip */
 
-#if defined(ATSAMA5D3)
-  /* System bus interfaces */
+#warning REVISIT
+/* System Bus Interfaces
+ *
+ * Both SSC0 and SSC1 are APB1.  Both are accessible on MATRIX IF1.
+ *
+ * Memory is available on either port 5 (IF0 for both XDMAC0 and 1) or
+ * port 6 (IF1 for both XDMAC0 and 1).
+ */
 
-#  define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF2
-#  define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
-
-#elif defined(ATSAMA5D4)
-  /* System Bus Interfaces
-   *
-   * Both SSC0 and SSC1 are APB1.  Both are accessible on MATRIX IF1.
-   *
-   * Memory is available on either port 5 (IF0 for both XDMAC0 and 1) or
-   * port 6 (IF1 for both XDMAC0 and 1).
-   */
-
-#  define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF1
-#  define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
-#endif
+#define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF1
+#define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
 
 /* DMA configuration */
 
@@ -402,14 +382,14 @@
 #endif
 
 #ifndef CONFIG_DEBUG_I2S
-#  undef CONFIG_SAMA5_SSC_DMADEBUG
-#  undef CONFIG_SAMA5_SSC_REGDEBUG
-#  undef CONFIG_SAMA5_SSC_QDEBUG
-#  undef CONFIG_SAMA5_SSC_DUMPBUFFERS
+#  undef CONFIG_SAMV7_SSC_DMADEBUG
+#  undef CONFIG_SAMV7_SSC_REGDEBUG
+#  undef CONFIG_SAMV7_SSC_QDEBUG
+#  undef CONFIG_SAMV7_SSC_DUMPBUFFERS
 #endif
 
 #ifndef CONFIG_DEBUG_DMA
-#  undef CONFIG_SAMA5_SSC_DMADEBUG
+#  undef CONFIG_SAMV7_SSC_DMADEBUG
 #endif
 
 #ifdef CONFIG_DEBUG_I2S
@@ -462,7 +442,7 @@ struct sam_transport_s
   sq_queue_t done;            /* A queue of completed transfers */
   struct work_s work;         /* Supports worker thread operations */
 
-#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+#ifdef CONFIG_SAMV7_SSC_DMADEBUG
   struct sam_dmaregs_s dmaregs[DMA_NSAMPLES];
 #endif
 };
@@ -507,16 +487,16 @@ struct sam_ssc_s
 
   sem_t bufsem;                   /* Buffer wait semaphore */
   struct sam_buffer_s *freelist;  /* A list a free buffer containers */
-  struct sam_buffer_s containers[CONFIG_SAMA5_SSC_MAXINFLIGHT];
+  struct sam_buffer_s containers[CONFIG_SAMV7_SSC_MAXINFLIGHT];
 
   /* Debug stuff */
 
-#ifdef CONFIG_SAMA5_SSC_REGDEBUG
+#ifdef CONFIG_SAMV7_SSC_REGDEBUG
    bool     wr;                /* Last was a write */
    uint32_t regaddr;           /* Last address */
    uint32_t regval;            /* Last value */
    int      count;             /* Number of times */
-#endif /* CONFIG_SAMA5_SSC_REGDEBUG */
+#endif /* CONFIG_SAMV7_SSC_REGDEBUG */
 };
 
 /****************************************************************************
@@ -525,7 +505,7 @@ struct sam_ssc_s
 
 /* Register helpers */
 
-#ifdef CONFIG_SAMA5_SSC_REGDEBUG
+#ifdef CONFIG_SAMV7_SSC_REGDEBUG
 static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
                   uint32_t regaddr);
 #else
@@ -535,7 +515,7 @@ static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
 static inline uint32_t ssc_getreg(struct sam_ssc_s *priv, unsigned int offset);
 static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
                   uint32_t regval);
-static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
+static inline uintptr_t ssc_regaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 
 #if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
@@ -544,7 +524,7 @@ static void     scc_dump_regs(struct sam_ssc_s *priv, const char *msg);
 #  define       scc_dump_regs(s,m)
 #endif
 
-#ifdef CONFIG_SAMA5_SSC_QDEBUG
+#ifdef CONFIG_SAMV7_SSC_QDEBUG
 static void     ssc_dump_queues(struct sam_transport_s *xpt,
                   const char *msg);
 #  define       ssc_dump_rxqueues(s,m) ssc_dump_queues(&(s)->rx,m)
@@ -554,7 +534,7 @@ static void     ssc_dump_queues(struct sam_transport_s *xpt,
 #  define       ssc_dump_txqueues(s,m)
 #endif
 
-#ifdef CONFIG_SAMA5_SSC_DUMPBUFFERS
+#ifdef CONFIG_SAMV7_SSC_DUMPBUFFERS
 #  define       ssc_init_buffer(b,s)   memset(b, 0x55, s);
 #  define       ssc_dump_buffer(m,b,s) lib_dumpbuffer(m,b,s)
 #else
@@ -580,12 +560,12 @@ static void     ssc_buf_initialize(struct sam_ssc_s *priv);
 
 /* DMA support */
 
-#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+#ifdef CONFIG_SAMV7_SSC_DMADEBUG
 static void     ssc_dma_sampleinit(struct sam_ssc_s *priv,
                   struct sam_transport_s *xpt);
 #endif
 
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
+#if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 #  define       ssc_rxdma_sample(s,i) sam_dmasample((s)->rx.dma, &(s)->rx.dmaregs[i])
 #  define       ssc_rxdma_sampleinit(s) ssc_dma_sampleinit(s, &(s)->rx)
 static void     ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result);
@@ -597,7 +577,7 @@ static void     ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result);
 
 #endif
 
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
+#if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 #  define       ssc_txdma_sample(s,i) sam_dmasample((s)->tx.dma, &(s)->tx.dmaregs[i])
 #  define       ssc_txdma_sampleinit(s) ssc_dma_sampleinit(s, &(s)->tx)
 static void     ssc_txdma_sampledone(struct sam_ssc_s *priv, int result);
@@ -651,10 +631,10 @@ static void     ssc_clocking(struct sam_ssc_s *priv);
 static int      ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags);
 static int      ssc_dma_allocate(struct sam_ssc_s *priv);
 static void     ssc_dma_free(struct sam_ssc_s *priv);
-#ifdef CONFIG_SAMA5_SSC0
+#ifdef CONFIG_SAMV7_SSC0
 static void     ssc0_configure(struct sam_ssc_s *priv);
 #endif
-#ifdef CONFIG_SAMA5_SSC1
+#ifdef CONFIG_SAMV7_SSC1
 static void     ssc1_configure(struct sam_ssc_s *priv);
 #endif
 
@@ -702,7 +682,7 @@ static const struct i2s_ops_s g_sscops =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SSC_REGDEBUG
+#ifdef CONFIG_SAMV7_SSC_REGDEBUG
 static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
                          uint32_t regaddr)
 {
@@ -754,7 +734,7 @@ static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
   uint32_t regaddr = priv->base + offset;
   uint32_t regval = getreg32(regaddr);
 
-#ifdef CONFIG_SAMA5_SSC_REGDEBUG
+#ifdef CONFIG_SAMV7_SSC_REGDEBUG
   if (ssc_checkreg(priv, false, regval, regaddr))
     {
       lldbg("%08x->%08x\n", regaddr, regval);
@@ -777,7 +757,7 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 {
   uint32_t regaddr = priv->base + offset;
 
-#ifdef CONFIG_SAMA5_SSC_REGDEBUG
+#ifdef CONFIG_SAMV7_SSC_REGDEBUG
   if (ssc_checkreg(priv, true, regval, regaddr))
     {
       lldbg("%08x<-%08x\n", regaddr, regval);
@@ -788,17 +768,16 @@ static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
 }
 
 /****************************************************************************
- * Name: ssc_physregaddr
+ * Name: ssc_regaddr
  *
  * Description:
- *   Return the physical address of an SSC register
+ *   Return the address of an SSC register
  *
  ****************************************************************************/
 
-static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
-                                        unsigned int offset)
+static inline uintptr_t ssc_regaddr(struct sam_ssc_s *priv, unsigned int offset)
 {
-  return sam_physregaddr(priv->base + offset);
+  return priv->base + offset;
 }
 
 /****************************************************************************
@@ -853,7 +832,7 @@ static void scc_dump_regs(struct sam_ssc_s *priv, const char *msg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SSC_QDEBUG
+#ifdef CONFIG_SAMV7_SSC_QDEBUG
 static void ssc_dump_queue(sq_queue_t *queue)
 {
   struct sam_buffer_s *bfcontainer;
@@ -1057,9 +1036,9 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
   int i;
 
   priv->freelist = NULL;
-  sem_init(&priv->bufsem, 0, CONFIG_SAMA5_SSC_MAXINFLIGHT);
+  sem_init(&priv->bufsem, 0, CONFIG_SAMV7_SSC_MAXINFLIGHT);
 
-  for (i = 0; i < CONFIG_SAMA5_SSC_MAXINFLIGHT; i++)
+  for (i = 0; i < CONFIG_SAMV7_SSC_MAXINFLIGHT; i++)
     {
       ssc_buf_free(priv, &priv->containers[i]);
     }
@@ -1069,7 +1048,7 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
  * Name: ssc_dma_sampleinit
  *
  * Description:
- *   Initialize sampling of DMA registers (if CONFIG_SAMA5_SSC_DMADEBUG)
+ *   Initialize sampling of DMA registers (if CONFIG_SAMV7_SSC_DMADEBUG)
  *
  * Input Parameters:
  *   priv - SSC state instance
@@ -1079,7 +1058,7 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
+#if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
                                struct sam_transport_s *xpt)
 {
@@ -1107,7 +1086,7 @@ static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
+#if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 {
   lldbg("result: %d\n", result);
@@ -1172,7 +1151,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
+#if defined(CONFIG_SAMV7_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 {
   lldbg("result: %d\n", result);
@@ -1283,8 +1262,8 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 {
   struct sam_buffer_s *bfcontainer;
   struct ap_buffer_s *apb;
-  uintptr_t paddr;
-  uintptr_t maddr;
+  uintptr_t regaddr;
+  uintptr_t memaddr;
   uint32_t timeout;
   bool notimeout;
   int ret;
@@ -1333,12 +1312,12 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
        * in RAM.
        */
 
-      paddr = ssc_physregaddr(priv, SAM_SSC_RHR_OFFSET);
-      maddr = sam_physramaddr((uintptr_t)apb->samp);
+      regaddr = ssc_regaddr(priv, SAM_SSC_RHR_OFFSET);
+      memaddr = (uintptr_t)apb->samp;
 
       /* Configure the RX DMA */
 
-      sam_dmarxsetup(priv->rx.dma, paddr, maddr, apb->nmaxbytes);
+      sam_dmarxsetup(priv->rx.dma, regaddr, memaddr, apb->nmaxbytes);
 
       /* Increment the DMA timeout */
 
@@ -1358,10 +1337,11 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
       /* Invalidate the data cache so that nothing gets flush into the
        * DMA buffer after starting the DMA transfer.
        */
-
+#warning Not yet supported
+#if 0
       arch_invalidate_dcache((uintptr_t)apb->samp,
                              (uintptr_t)apb->samp + apb->nmaxbytes);
-
+#endif
     }
 #if 1 /* REVISIT: Chained RX transfers */
   while (0);
@@ -1454,7 +1434,7 @@ static void ssc_rx_worker(void *arg)
 
   if (sq_empty(&priv->rx.act))
     {
-#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+#ifdef CONFIG_SAMV7_SSC_DMADEBUG
       bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->rx.done);
       if (bfcontainer)
         {
@@ -1697,8 +1677,8 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
   struct sam_buffer_s *bfcontainer;
   struct ap_buffer_s *apb;
   uintptr_t samp;
-  uintptr_t paddr;
-  uintptr_t maddr;
+  uintptr_t regaddr;
+  uintptr_t memaddr;
   uint32_t timeout;
   apb_samp_t nbytes;
   bool notimeout;
@@ -1748,12 +1728,12 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
        * in RAM.
        */
 
-      paddr = ssc_physregaddr(priv, SAM_SSC_THR_OFFSET);
-      maddr = sam_physramaddr(samp);
+      regaddr = ssc_regaddr(priv, SAM_SSC_THR_OFFSET);
+      memaddr = (uintptr_t)samp;
 
       /* Configure the TX DMA */
 
-      sam_dmatxsetup(priv->tx.dma, paddr, maddr, nbytes);
+      sam_dmatxsetup(priv->tx.dma, regaddr, memaddr, nbytes);
 
       /* Increment the DMA timeout */
 
@@ -1773,8 +1753,12 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
       /* Flush the data cache so that everything is in the physical memory
        * before starting the DMA.
        */
-
+#warning REVISIT
+#if 1
+      arch_invalidate_dcache_all();
+#else
       arch_clean_dcache(samp, samp + nbytes);
+#endif
     }
 #if 1 /* REVISIT: Chained TX transfers */
   while (0);
@@ -1866,7 +1850,7 @@ static void ssc_tx_worker(void *arg)
 
   if (sq_empty(&priv->tx.act))
     {
-#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+#ifdef CONFIG_SAMV7_SSC_DMADEBUG
       bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->tx.done);
       if (bfcontainer)
         {
@@ -2619,7 +2603,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
    *  SSC_RFMR_FSLENEXT   I Set to MS 4 bits of (CONFIG_SSCx_TX_FSLEN-1)
    */
 
-  regval = (SSC_RFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) | SSC_RFMR_MSBF |
+  regval = (SSC_RFMR_DATLEN(CONFIG_SAMV7_SSC0_DATALEN - 1) | SSC_RFMR_MSBF |
             SSC_RFMR_DATNB(SSC_DATNB - 1) | SSC_RFMR_FSOS_NONE);
 
   /* Set the RX frame synch  */
@@ -2880,7 +2864,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
   /* Determine the maximum SSC peripheral clock frequency */
 
   mck = BOARD_MCK_FREQUENCY;
-#ifdef SAMA5_HAVE_PMC_PCR_DIV
+#ifdef SAMV7_HAVE_PMC_PCR_DIV
   DEBUGASSERT((mck >> 3) <= SAM_SSC_MAXPERCLK);
 
   if (mck <= SAM_SSC_MAXPERCLK)
@@ -3122,22 +3106,22 @@ static void ssc_dma_free(struct sam_ssc_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SSC0
+#ifdef CONFIG_SAMV7_SSC0
 static void ssc0_configure(struct sam_ssc_s *priv)
 {
   /* Configure multiplexed pins as connected on the board.  Chip
    * select pins must be selected by board-specific logic.
    */
 
-#ifdef CONFIG_SAMA5_SSC0_RX
+#ifdef CONFIG_SAMV7_SSC0_RX
   priv->rxenab = true;
 
   /* Configure the receiver data (RD) and receiver frame synchro (RF) pins */
 
-  sam_configpio(PIO_SSC0_RD);
-  sam_configpio(PIO_SSC0_RF);
+  sam_configgpio(GPIO_SSC0_RD);
+  sam_configgpio(GPIO_SSC0_RF);
 
-#if defined(CONFIG_SAMA5_SSC0_RX_RKINPUT)
+#if defined(CONFIG_SAMV7_SSC0_RX_RKINPUT)
   /* Configure the RK pin only if we are using an external clock to drive
    * the receiver clock.
    *
@@ -3145,13 +3129,13 @@ static void ssc0_configure(struct sam_ssc_s *priv)
    * output on the RK pin.
    */
 
-  sam_configpio(PIO_SSC0_RK); /* External clock received on the RK I/O pad */
+  sam_configgpio(GPIO_SSC0_RK); /* External clock received on the RK I/O pad */
   priv->rxclk = SSC_CLKSRC_RKIN;
 
-#elif defined(CONFIG_SAMA5_SSC0_RX_TXCLK)
+#elif defined(CONFIG_SAMV7_SSC0_RX_TXCLK)
   priv->rxclk = SSC_CLKSRC_TXOUT;
 
-#elif defined(CONFIG_SAMA5_SSC0_RX_MCKDIV)
+#elif defined(CONFIG_SAMV7_SSC0_RX_MCKDIV)
   priv->rxclk = SSC_CLKSRC_MCKDIV;
 
 #else
@@ -3166,11 +3150,11 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   /* Remember the configured RX clock output */
 
-#if defined(CONFIG_SAMA5_SSC0_RX_RKOUTPUT_CONT)
+#if defined(CONFIG_SAMV7_SSC0_RX_RKOUTPUT_CONT)
   priv->rxout = SSC_CLKOUT_CONT; /* Continuous */
-#elif defined(CONFIG_SAMA5_SSC0_RX_RKOUTPUT_XFR)
+#elif defined(CONFIG_SAMV7_SSC0_RX_RKOUTPUT_XFR)
   priv->rxout = SSC_CLKOUT_XFER; /* Only output clock during transfers */
-#else /* if defined(CONFIG_SAMA5_SSC0_RX_RKOUTPUT_NONE) */
+#else /* if defined(CONFIG_SAMV7_SSC0_RX_RKOUTPUT_NONE) */
   priv->rxout = SSC_CLKOUT_NONE; /* No output clock */
 #endif
 
@@ -3179,19 +3163,19 @@ static void ssc0_configure(struct sam_ssc_s *priv)
   priv->rxclk  = SSC_CLKSRC_NONE; /* No input clock */
   priv->rxout  = SSC_CLKOUT_NONE; /* No output clock */
 
-#endif /* CONFIG_SAMA5_SSC0_RX */
+#endif /* CONFIG_SAMV7_SSC0_RX */
 
-#ifdef CONFIG_SAMA5_SSC0_TX
+#ifdef CONFIG_SAMV7_SSC0_TX
   priv->txenab = true;
 
   /* Configure the transmitter data (TD) and transmitter frame synchro (TF)
    * pins
    */
 
-  sam_configpio(PIO_SSC0_TD);
-  sam_configpio(PIO_SSC0_TF);
+  sam_configgpio(GPIO_SSC0_TD);
+  sam_configgpio(GPIO_SSC0_TF);
 
-#if defined(CONFIG_SAMA5_SSC0_TX_TKINPUT)
+#if defined(CONFIG_SAMV7_SSC0_TX_TKINPUT)
   /* Configure the TK pin only if we are using an external clock to drive
    * the transmitter clock.
    *
@@ -3199,13 +3183,13 @@ static void ssc0_configure(struct sam_ssc_s *priv)
    * output on the TK pin.
    */
 
-  sam_configpio(PIO_SSC0_TK); /* External clock received on the TK I/O pad */
+  sam_configgpio(GPIO_SSC0_TK); /* External clock received on the TK I/O pad */
   priv->txclk = SSC_CLKSRC_TKIN;
 
-#elif defined(CONFIG_SAMA5_SSC0_TX_RXCLK)
+#elif defined(CONFIG_SAMV7_SSC0_TX_RXCLK)
   priv->txclk = SSC_CLKSRC_RXOUT;
 
-#elif defined(CONFIG_SAMA5_SSC0_TX_MCKDIV)
+#elif defined(CONFIG_SAMV7_SSC0_TX_MCKDIV)
   priv->txclk = SSC_CLKSRC_MCKDIV;
 
 #else
@@ -3215,11 +3199,11 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   /* Remember the configured TX clock output */
 
-#if defined(CONFIG_SAMA5_SSC0_TX_TKOUTPUT_CONT)
+#if defined(CONFIG_SAMV7_SSC0_TX_TKOUTPUT_CONT)
   priv->txout = SSC_CLKOUT_CONT; /* Continuous */
-#elif defined(CONFIG_SAMA5_SSC0_TX_TKOUTPUT_XFR)
+#elif defined(CONFIG_SAMV7_SSC0_TX_TKOUTPUT_XFR)
   priv->txout = SSC_CLKOUT_XFER; /* Only output clock during transfers */
-#else /* if defined(CONFIG_SAMA5_SSC0_TX_TKOUTPUT_NONE) */
+#else /* if defined(CONFIG_SAMV7_SSC0_TX_TKOUTPUT_NONE) */
   priv->txout = SSC_CLKOUT_NONE; /* No output clock */
 #endif
 
@@ -3228,7 +3212,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
   priv->txclk  = SSC_CLKSRC_NONE; /* No input clock */
   priv->txout  = SSC_CLKOUT_NONE; /* No output clock */
 
-#endif /* CONFIG_SAMA5_SSC0_TX */
+#endif /* CONFIG_SAMV7_SSC0_TX */
 
   /* Remember parameters of the configured waveform */
 
@@ -3237,8 +3221,8 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   /* Set/clear loopback mode */
 
-#if defined(CONFIG_SAMA5_SSC0_RX) && defined(CONFIG_SAMA5_SSC0_TX) && \
-    defined(CONFIG_SAMA5_SSC0_LOOPBACK)
+#if defined(CONFIG_SAMV7_SSC0_RX) && defined(CONFIG_SAMV7_SSC0_TX) && \
+    defined(CONFIG_SAMV7_SSC0_LOOPBACK)
   priv->loopback = true;
 #else
   priv->loopback = false;
@@ -3247,38 +3231,38 @@ static void ssc0_configure(struct sam_ssc_s *priv)
   /* Does the receiver or transmitter need to have the MCK divider set up? */
 
 #if defined(SSC0_HAVE_MCK2)
-  priv->samplerate = CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE;
+  priv->samplerate = CONFIG_SAMV7_SSC0_MCKDIV_SAMPLERATE;
 #elif defined(SSC_HAVE_MCK2)
   priv->samplerate = 0;
 #endif
 
   /* Configure driver state specific to this SSC peripheral */
 
-  priv->base    = SAM_SSC0_VBASE;
-  priv->datalen = CONFIG_SAMA5_SSC0_DATALEN;
+  priv->base    = SAM_SSC0_BASE;
+  priv->datalen = CONFIG_SAMV7_SSC0_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = SAMA5_SSC0_DATAMASK;
+  priv->align   = SAMV7_SSC0_DATAMASK;
 #endif
   priv->pid     = SAM_PID_SSC0;
 }
 #endif
 
-#ifdef CONFIG_SAMA5_SSC1
+#ifdef CONFIG_SAMV7_SSC1
 static void ssc1_configure(struct sam_ssc_s *priv)
 {
   /* Configure multiplexed pins as connected on the board.  Chip
    * select pins must be selected by board-specific logic.
    */
 
-#ifdef CONFIG_SAMA5_SSC1_RX
+#ifdef CONFIG_SAMV7_SSC1_RX
   priv->rxenab = true;
 
   /* Configure the receiver data (RD) and receiver frame synchro (RF) pins */
 
-  sam_configpio(PIO_SSC1_RD);
-  sam_configpio(PIO_SSC1_RF);
+  sam_configgpio(GPIO_SSC1_RD);
+  sam_configgpio(GPIO_SSC1_RF);
 
-#ifdef CONFIG_SAMA5_SSC1_RX_RKINPUT
+#ifdef CONFIG_SAMV7_SSC1_RX_RKINPUT
   /* Configure the RK pin only if we are using an external clock to drive
    * the receiver clock.
    *
@@ -3286,13 +3270,13 @@ static void ssc1_configure(struct sam_ssc_s *priv)
    * output on the RK pin.
    */
 
-  sam_configpio(PIO_SSC1_RK); /* External clock received on the RK I/O pad */
+  sam_configgpio(GPIO_SSC1_RK); /* External clock received on the RK I/O pad */
   priv->rxclk = SSC_CLKSRC_RKIN;
 
-#elif defined(CONFIG_SAMA5_SSC1_RX_TXCLK)
+#elif defined(CONFIG_SAMV7_SSC1_RX_TXCLK)
   priv->rxclk = SSC_CLKSRC_TXOUT;
 
-#elif defined(CONFIG_SAMA5_SSC1_RX_MCKDIV)
+#elif defined(CONFIG_SAMV7_SSC1_RX_MCKDIV)
   priv->rxclk = SSC_CLKSRC_MCKDIV;
 
 #else
@@ -3307,11 +3291,11 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   /* Remember the configured RX clock output */
 
-#if defined(CONFIG_SAMA5_SSC1_RX_RKOUTPUT_CONT)
+#if defined(CONFIG_SAMV7_SSC1_RX_RKOUTPUT_CONT)
   priv->rxout = SSC_CLKOUT_CONT; /* Continuous */
-#elif defined(CONFIG_SAMA5_SSC1_RX_RKOUTPUT_XFR)
+#elif defined(CONFIG_SAMV7_SSC1_RX_RKOUTPUT_XFR)
   priv->rxout = SSC_CLKOUT_XFER; /* Only output clock during transfers */
-#else /* if defined(CONFIG_SAMA5_SSC1_RX_RKOUTPUT_NONE) */
+#else /* if defined(CONFIG_SAMV7_SSC1_RX_RKOUTPUT_NONE) */
   priv->rxout = SSC_CLKOUT_NONE; /* No output clock */
 #endif
 
@@ -3320,19 +3304,19 @@ static void ssc1_configure(struct sam_ssc_s *priv)
   priv->rxclk  = SSC_CLKSRC_NONE; /* No input clock */
   priv->rxout  = SSC_CLKOUT_NONE; /* No output clock */
 
-#endif /* CONFIG_SAMA5_SSC1_RX */
+#endif /* CONFIG_SAMV7_SSC1_RX */
 
-#ifdef CONFIG_SAMA5_SSC1_TX
+#ifdef CONFIG_SAMV7_SSC1_TX
   priv->txenab = true;
 
   /* Configure the transmitter data (TD) and transmitter frame synchro (TF)
    * pins
    */
 
-  sam_configpio(PIO_SSC1_TD);
-  sam_configpio(PIO_SSC1_TF);
+  sam_configgpio(GPIO_SSC1_TD);
+  sam_configgpio(GPIO_SSC1_TF);
 
-#if defined(CONFIG_SAMA5_SSC1_TX_TKINPUT)
+#if defined(CONFIG_SAMV7_SSC1_TX_TKINPUT)
   /* Configure the TK pin only if we are using an external clock to drive
    * the transmitter clock.
    *
@@ -3340,13 +3324,13 @@ static void ssc1_configure(struct sam_ssc_s *priv)
    * output on the TK pin.
    */
 
-  sam_configpio(PIO_SSC1_TK); /* External clock received on the TK I/O pad */
+  sam_configgpio(GPIO_SSC1_TK); /* External clock received on the TK I/O pad */
   priv->txclk = SSC_CLKSRC_TKIN;
 
-#elif defined(CONFIG_SAMA5_SSC1_TX_RXCLK)
+#elif defined(CONFIG_SAMV7_SSC1_TX_RXCLK)
   priv->txclk = SSC_CLKSRC_RXOUT;
 
-#elif defined(CONFIG_SAMA5_SSC1_TX_MCKDIV)
+#elif defined(CONFIG_SAMV7_SSC1_TX_MCKDIV)
   priv->txclk = SSC_CLKSRC_MCKDIV;
 
 #else
@@ -3356,11 +3340,11 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   /* Remember the configured TX clock output */
 
-#if defined(CONFIG_SAMA5_SSC1_TX_TKOUTPUT_CONT)
+#if defined(CONFIG_SAMV7_SSC1_TX_TKOUTPUT_CONT)
   priv->txout = SSC_CLKOUT_CONT; /* Continuous */
-#elif defined(CONFIG_SAMA5_SSC1_TX_TKOUTPUT_XFR)
+#elif defined(CONFIG_SAMV7_SSC1_TX_TKOUTPUT_XFR)
   priv->txout = SSC_CLKOUT_XFER;/* Only output clock during transfers */
-#else /* if defined(CONFIG_SAMA5_SSC1_TX_TKOUTPUT_NONE) */
+#else /* if defined(CONFIG_SAMV7_SSC1_TX_TKOUTPUT_NONE) */
   priv->txout = SSC_CLKOUT_NONE; /* No output clock */
 #endif
 
@@ -3369,7 +3353,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
   priv->txclk  = SSC_CLKSRC_NONE; /* No input clock */
   priv->txout  = SSC_CLKOUT_NONE; /* No output clock */
 
-#endif /* CONFIG_SAMA5_SSC1_TX */
+#endif /* CONFIG_SAMV7_SSC1_TX */
 
   /* Remember parameters of the configured waveform */
 
@@ -3378,8 +3362,8 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   /* Set/clear loopback mode */
 
-#if defined(CONFIG_SAMA5_SSC1_RX) && defined(CONFIG_SAMA5_SSC1_TX) && \
-    defined(CONFIG_SAMA5_SSC1_LOOPBACK)
+#if defined(CONFIG_SAMV7_SSC1_RX) && defined(CONFIG_SAMV7_SSC1_TX) && \
+    defined(CONFIG_SAMV7_SSC1_LOOPBACK)
   priv->loopback = true;
 #else
   priv->loopback = false;
@@ -3388,17 +3372,17 @@ static void ssc1_configure(struct sam_ssc_s *priv)
   /* Does the receiver or transmitter need to have the MCK divider set up? */
 
 #if defined(SSC1_HAVE_MCK2)
-  priv->samplerate = CONFIG_SAMA5_SSC1_MCKDIV_SAMPLERATE;
+  priv->samplerate = CONFIG_SAMV7_SSC1_MCKDIV_SAMPLERATE;
 #elif defined(SSC_HAVE_MCK2)
   priv->samplerate = 0;
 #endif
 
   /* Configure driver state specific to this SSC peripheral */
 
-  priv->base    = SAM_SSC1_VBASE;
-  priv->datalen = CONFIG_SAMA5_SSC1_DATALEN;
+  priv->base    = SAM_SSC1_BASE;
+  priv->datalen = CONFIG_SAMV7_SSC1_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = SAMA5_SSC1_DATAMASK;
+  priv->align   = SAMV7_SSC1_DATAMASK;
 #endif
   priv->pid     = SAM_PID_SSC1;
 }
@@ -3459,20 +3443,20 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
   ssc_buf_initialize(priv);
 
   flags = irqsave();
-#ifdef CONFIG_SAMA5_SSC0
+#ifdef CONFIG_SAMV7_SSC0
   if (port == 0)
     {
       ssc0_configure(priv);
     }
   else
-#endif /* CONFIG_SAMA5_SSC0 */
-#ifdef CONFIG_SAMA5_SSC1
+#endif /* CONFIG_SAMV7_SSC0 */
+#ifdef CONFIG_SAMV7_SSC1
   if (port == 1)
     {
       ssc1_configure(priv);
     }
   else
-#endif /* CONFIG_SAMA5_SSC1 */
+#endif /* CONFIG_SAMV7_SSC1 */
     {
       i2sdbg("ERROR:  Unsupported I2S port: %d\n", port);
       goto errout_with_alloc;
@@ -3528,4 +3512,4 @@ errout_with_alloc:
 }
 
 #endif /* SSC_HAVE_RX || SSC_HAVE_TX */
-#endif /* CONFIG_SAMA5_SSC0 || CONFIG_SAMA5_SSC1 */
+#endif /* CONFIG_SAMV7_SSC0 || CONFIG_SAMV7_SSC1 */

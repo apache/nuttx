@@ -72,7 +72,7 @@
 #define SAM_PID_TWIHS0        (19)  /* Two-Wire Interface 0 */
 #define SAM_PID_TWIHS1        (20)  /* Two-Wire Interface 1 */
 #define SAM_PID_SPI0          (21)  /* Serial Peripheral Interface 0 */
-#define SAM_PID_SSC           (22)  /* Synchronous Serial Controller */
+#define SAM_PID_SSC0          (22)  /* Synchronous Serial Controller */
 #define SAM_PID_TC0           (23)  /* Timer Counter 0 */
 #define SAM_PID_TC1           (24)  /* Timer Counter 1 */
 #define SAM_PID_TC2           (25)  /* Timer Counter 2 */
@@ -142,7 +142,7 @@
 #define SAM_IRQ_TWIHS0        (SAM_IRQ_EXTINT+SAM_PID_TWIHS0) /* Two-Wire Interface 0 */
 #define SAM_IRQ_TWIHS1        (SAM_IRQ_EXTINT+SAM_PID_TWIHS1) /* Two-Wire Interface 1 */
 #define SAM_IRQ_SPI0          (SAM_IRQ_EXTINT+SAM_PID_SPI0)   /* Serial Peripheral Interface 0 */
-#define SAM_IRQ_SSC           (SAM_IRQ_EXTINT+SAM_PID_SSC)    /* Synchronous Serial Controller */
+#define SAM_IRQ_SSC0          (SAM_IRQ_EXTINT+SAM_PID_SSC)    /* Synchronous Serial Controller */
 #define SAM_IRQ_TC0           (SAM_IRQ_EXTINT+SAM_PID_TC0)    /* Timer Counter 0 */
 #define SAM_IRQ_TC1           (SAM_IRQ_EXTINT+SAM_PID_TC1)    /* Timer Counter 1 */
 #define SAM_IRQ_TC2           (SAM_IRQ_EXTINT+SAM_PID_TC2)    /* Timer Counter 2 */
