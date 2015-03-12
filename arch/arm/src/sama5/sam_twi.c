@@ -253,7 +253,7 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
 #ifdef CONFIG_I2C_SLAVE
 static int twi_setownaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
 static int twi_registercallback(FAR struct i2c_dev_s *dev,
-          int (*callback)(void));
+          int (*callback)(FAR void *arg), FAR void *arg);
 #endif
 
 /* Initialization */
@@ -1118,8 +1118,8 @@ static int twi_setownaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *******************************************************************************/
 
 #ifdef CONFIG_I2C_SLAVE
-static int twi_registercallback(FAR struct i2c_dev_s *dev,
-                                int (*callback)(void))
+static int twi_registercallback((FAR struct i2c_dev_s *dev,
+                                int (*callback)(FAR void *arg), FAR void *arg)
 {
 #error Not implemented
   return -ENOSYS;
