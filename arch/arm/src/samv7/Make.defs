@@ -118,3 +118,9 @@ endif
 ifeq ($(CONFIG_SAMV7_XDMAC),y)
 CHIP_CSRCS += sam_xdmac.c
 endif
+
+ifeq ($(CONFIG_SAMV7_SPI0),y)
+CHIP_CSRCS += sam_spi.c
+else ifeq ($(CONFIG_SAMV7_SPI1),y)
+CHIP_CSRCS += sam_spi.c
+endif
