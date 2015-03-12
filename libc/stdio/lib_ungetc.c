@@ -94,10 +94,17 @@ int ungetc(int c, FAR FILE *stream)
   int nungotten;
 #endif
 
+  /* Verify that a non-NULL stream was provided */
+
+  if (!stream)
+    {
+      set_errno(EBADF);
+      return EOF;
+    }
+
   /* Stream must be open for read access */
 
-  if ((stream && stream->fs_fd < 0) ||
-      ((stream->fs_oflags & O_RDOK) == 0))
+  if ((stream->fs_fd < 0) || ((stream->fs_oflags & O_RDOK) == 0))
     {
       set_errno(EBADF);
       return EOF;
