@@ -500,7 +500,7 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
   l2size     = mpu_log2regionceil(size);
   subregions = mpu_subregion(base, size, l2size);
 
-  /* The configure the region */
+  /* Then configure the region */
 
   regval = MPU_RASR_ENABLE                              | /* Enable region */
            MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
@@ -508,7 +508,7 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
            MPU_RASR_S                                   | /* Shareable     */
            MPU_RASR_B                                   | /* Bufferable    */
            MPU_RASR_AP_RWNO                             | /* P:RW   U:None */
-           MPU_RASR_XN                                  | /* Instruction access disable */
+           MPU_RASR_XN;                                   /* Instruction access disable */
 
   putreg32(regval, MPU_RASR);
 }
