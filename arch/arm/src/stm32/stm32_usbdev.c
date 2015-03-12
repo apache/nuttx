@@ -1834,7 +1834,6 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
                     }
                   else
                     {
-                      privep     = &priv->eplist[epno];
                       response.w = 0; /* Not stalled */
                       nbytes     = 2; /* Response size: 2 bytes */
 
@@ -3157,7 +3156,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
 {
   struct stm32_ep_s *privep;
   struct stm32_usbdev_s *priv;
-  uint8_t epno = USB_EPNO(ep->eplog);
+  uint8_t epno;
   uint16_t status;
   irqstate_t flags;
 
@@ -3168,6 +3167,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
       return -EINVAL;
     }
 #endif
+
   privep = (struct stm32_ep_s *)ep;
   priv   = (struct stm32_usbdev_s *)privep->dev;
   epno   = USB_EPNO(ep->eplog);
@@ -3347,7 +3347,6 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, uint8_t epno,
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EPRESERVE), (uint16_t)epset);
       goto errout;
     }
-  epno = USB_EPNO(privep->ep.eplog);
 
   /* Allocate a PMA buffer for this endpoint */
 
@@ -3358,6 +3357,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, uint8_t epno,
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EPBUFFER), 0);
       goto errout_with_ep;
     }
+
   privep->bufno = (uint8_t)bufno;
   return &privep->ep;
 
