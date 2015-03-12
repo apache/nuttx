@@ -346,33 +346,18 @@ config SAMV7_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
 
-config SAMV7_TWIM0
-	bool "Two-wire Master Interface 0 (TWIHS0)"
+config SAMV7_TWIHS0
+	bool "Two-wire Interface 0 (TWIHS0)"
 	default n
 
-config SAMV7_TWIS0
-	bool "Two-wire Slave Interface 0 (TWIHS0)"
-	default n
-	depends on EXPERIMENTAL
-
-config SAMV7_TWIM1
-	bool "Two-wire Master Interface 1 (TWIHS1)"
+config SAMV7_TWIHS1
+	bool "Two-wire Interface 1 (TWIHS1)"
 	default n
 
-config SAMV7_TWIS1
-	bool "Two-wire Slave Interface 1 (TWIHS1)"
-	default n
-	depends on EXPERIMENTAL
-
-config SAMV7_TWIM2
-	bool "Two-wire Master Interface 2 (TWIHS2)"
+config SAMV7_TWIHS2
+	bool "Two-wire Interface 2 (TWIHS2)"
 	default n
 	depends on SAMV7_HAVE_TWIHS2
-
-config SAMV7_TWIS2
-	bool "Two-wire Slave Interface 2 (TWIHS2)"
-	default n
-	depends on SAMV7_HAVE_TWIHS2 && EXPERIMENTAL
 
 config SAMV7_UART0
 	bool "UART 0"
@@ -525,3 +510,33 @@ config SAMV7_SPI_REGDEBUG
 
 endmenu # SAMV7 SPI device driver options
 endif # SAMV7_SPI0 || SAMV7_SPI1
+
+if SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
+
+menu "TWIHS device driver options"
+
+config SAMV7_TWIHS0_FREQUENCY
+	int "TWIHS0 Frequency"
+	default 100000
+	depends on SAMV7_TWIHS0
+
+config SAMV7_TWIHS1_FREQUENCY
+	int "TWIHS1 Frequency"
+	default 100000
+	depends on SAMV7_TWIHS1
+
+config SAMV7_TWIHS2_FREQUENCY
+	int "TWIHS2 Frequency"
+	default 100000
+	depends on SAMV7_TWIHS2
+
+config SAMV7_TWIHS_REGDEBUG
+	bool "TWIHS register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level TWIHS device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # TWIHS device driver options
+endif # SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2

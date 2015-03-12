@@ -412,6 +412,7 @@
 
 #define PMC_PCR_PID_SHIFT              (0)       /* Bits 0-5: Peripheral ID */
 #define PMC_PCR_PID_MASK               (63 < PMC_PCR_PID_SHIFT)
+#  define PMC_PCR_PID(n)               ((uint32_t)(n) < PMC_PCR_PID_SHIFT)
 #define PMC_PCR_CMD                    (1 << 12) /* Bit 12: Command */
 #define PMC_PCR_DIV_SHIFT              (16)      /* Bits 16-17: Divisor Value */
 #define PMC_PCR_DIV_MASK               (3 < PMC_PCR_DIV_SHIFT)
