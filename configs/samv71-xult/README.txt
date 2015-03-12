@@ -11,6 +11,7 @@ Contents
   - Board Features
   - Serial Console
   - LEDs and Buttons
+  - AT24MAC402 Serial EEPROM
   - Debugging
   - Configurations
 
@@ -171,6 +172,31 @@ NOTES:
     use the SW1, PB12 has to be configured as a normal regular I/O pin in
     the MATRIX module. For more information see the SAM V71 datasheet.
 
+AT24MAC402 Serial EEPROM
+========================
+
+The SAM V71 Xplained Ultra features one external AT24MAC402 serial EEPROM
+with a EIA-48 MAC address connected to the SAM V71 through I2C. This device
+contains a MAC address for use with the Ethernet interface.
+
+Connectivity:
+
+  ------ -------- -------- ------------------------------------------
+  SAMV71 SAMV71   I2C      Shared
+  Pin    Function Function Functionality
+  ------ -------- -------- ------------------------------------------
+  PA03   TWID0    SDA      EXT1, EXT2, EDBG I2C, LCD, Camera, Audio,
+                           MediaLB, and Shield
+  PA04   TWICK0   SCL      EXT1, EXT2, EDBG I2C, LCD, Camera, Audio,
+                           MediaLB, and Shield
+  ------ -------- -------- ------------------------------------------
+
+I2C address:
+
+  The 7-bit address of the AT24 part is is 0b1011AAA where AAA is the state
+  of the A0, A1, and A3 pins on the part.  On the SAMV71-XULT board, these
+  are all pulled high so the full, 7-bit address is 0x5f.
+
 Debugging
 =========
 
@@ -313,7 +339,83 @@ Configuration sub-directories
          SW1 depressed
        nsh>
 
-    4. Performance-related Configuration settings:
+    4. TWI/I2C
+
+       TWIHS0 is enabled in this configuration.  The SAM V71 Xplained Ultra
+       supports two devices on the one on-board I2C device on the TWIHS0 bus:
+       (1) The AT24MAC402 serial EEPROM described above and (2) the Wolfson
+       WM8904 audio CODEC.  This device contains a MAC address for use with
+       the Ethernet interface.
+
+       In this configuration, the I2C tool at apps/system/i2ctool is
+       enabled.  This tools supports interactive access to I2C devices on
+       the enabled TWIHS bus.  Relevant configuration settings:
+
+         CONFIG_SAMV7_TWIHS0=y
+         CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
+
+         CONFIG_I2C=y
+         CONFIG_I2C_TRANSFER=y
+
+         CONFIG_SYSTEM_I2CTOOL=y
+         CONFIG_I2CTOOL_MINBUS=0
+         CONFIG_I2CTOOL_MAXBUS=0
+         CONFIG_I2CTOOL_MINADDR=0x03
+         CONFIG_I2CTOOL_MAXADDR=0x77
+         CONFIG_I2CTOOL_MAXREGADDR=0xff
+         CONFIG_I2CTOOL_DEFFREQ=400000
+
+       Example usage:
+
+         nsh> i2c
+         Usage: i2c <cmd> [arguments]
+         Where <cmd> is one of:
+
+           Show help     : ?
+           List busses   : bus
+           List devices  : dev [OPTIONS] <first> <last>
+           Read register : get [OPTIONS] [<repititions>]
+           Show help     : help
+           Write register: set [OPTIONS] <value> [<repititions>]
+           Verify access : verf [OPTIONS] [<value>] [<repititions>]
+
+         Where common "sticky" OPTIONS include:
+           [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
+           [-b bus] is the I2C bus number (decimal).  Default: 0 Current: 0
+           [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
+           [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
+           [-s|n], send/don't send start between command and data.  Default: -n Current: -n
+           [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+           [-f freq] I2C frequency.  Default: 400000 Current: 400000
+
+         NOTES:
+         o An environment variable like $PATH may be used for any argument.
+         o Arguments are "sticky".  For example, once the I2C address is
+           specified, that address will be re-used until it is changed.
+
+         WARNING:
+         o The I2C dev command may have bad side effects on your I2C devices.
+           Use only at your own risk.
+         nsh> i2c bus
+          BUS   EXISTS?
+         Bus 0: YES
+         nsh> i2c dev 3 77
+              0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+         00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+         10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+         20: -- -- -- -- -- -- -- -- 28 -- -- -- -- -- -- --
+         30: -- -- -- -- -- -- -- 37 -- -- -- -- -- -- -- --
+         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- 4e --
+         50: -- -- -- -- -- -- -- 57 -- -- -- -- -- -- -- 5f
+         60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         70: -- -- -- -- -- -- -- --
+         nsh>
+
+         Where 0x1a us the address of the WM8904 Audio CODIE and 0x5f is the
+         address of the AT24 EEPROM (I am not sure what the others are as
+         this writing).
+
+    5. Performance-related Configuration settings:
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
