@@ -142,6 +142,10 @@ config SAMV7_QSPI_IS_SPI
 	bool
 	default n
 
+config SAMV7_SSC
+	bool
+	default n
+
 config SAMV7_HAVE_TWIHS2
 	bool
 	default n
@@ -278,9 +282,10 @@ config SAMV7_SPI1
 	select SAMV7_HAVE_SPI
 	select SPI
 
-config SAMV7_SSC
+config SAMV7_SSC0
 	bool "Synchronous Serial Controller (SSC)"
 	default n
+	select SAMV7_SSC
 
 config SAMV7_TC0
 	bool "Timer/Counter 0 (TC0)"
@@ -540,3 +545,394 @@ config SAMV7_TWIHS_REGDEBUG
 
 endmenu # TWIHS device driver options
 endif # SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
+
+if SAMV7_SSC
+menu "SSC Configuration"
+
+config SAMV7_SSC_MAXINFLIGHT
+	int "SSC queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+if SAMV7_SSC0
+comment "SSC0 Configuration"
+
+config SAMV7_SSC0_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config SAMV7_SSC0_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMV7_SSC0_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMV7_SSC0_RX_MCKDIV
+
+config SAMV7_SSC0_RX_RKINPUT
+	bool "RK input"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC0_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
+
+config SAMV7_SSC0_RX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Receiver clock source
+
+if !SAMV7_SSC0_RX_RKINPUT
+choice
+	prompt "Receiver output clock"
+	default SAMV7_SSC0_RX_RKOUTPUT_NONE
+
+config SAMV7_SSC0_RX_RKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC0_RX_RKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC0_RX_RKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC0_RX_RKINPUT
+
+config SAMV7_SSC0_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+config SAMV7_SSC0_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC0_RX
+
+config SAMV7_SSC0_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMV7_SSC0_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMV7_SSC0_TX_MCKDIV
+
+config SAMV7_SSC0_TX_TKINPUT
+	bool "TK input"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC0_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
+
+config SAMV7_SSC0_TX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Transmitter clock source
+
+if !SAMV7_SSC0_TX_TKINPUT
+choice
+	prompt "Transmitter output clock"
+	default SAMV7_SSC0_TX_TKOUTPUT_NONE
+
+config SAMV7_SSC0_TX_TKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC0_TX_TKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC0_TX_TKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC0_TX_TKINPUT
+
+config SAMV7_SSC0_TX_FSLEN
+	int "Transmit Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting define the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
+config SAMV7_SSC0_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC0_TX
+
+config SAMV7_SSC0_MCKDIV_SAMPLERATE
+	int "Sample rate"
+	default 48000
+	depends on SAMV7_SSC0_RX_MCKDIV || SAMV7_SSC0_TX_MCKDIV
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the sample rate must be provided.  The bit rate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMV7_SSC0_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMV7_SSC0_TX && SAMV7_SSC0_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
+endif # SAMV7_SSC0
+
+if SAMV7_SSC1
+comment "SSC1 Configuration"
+
+config SAMV7_SSC1_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config SAMV7_SSC1_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMV7_SSC1_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMV7_SSC1_RX_MCKDIV
+
+config SAMV7_SSC1_RX_RKINPUT
+	bool "RK input"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC1_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
+
+config SAMV7_SSC1_RX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Receiver clock source
+
+if !SAMV7_SSC1_RX_RKINPUT
+choice
+	prompt "Receiver output clock"
+	default SAMV7_SSC1_RX_RKOUTPUT_NONE
+
+config SAMV7_SSC1_RX_RKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC1_RX_RKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC1_RX_RKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC1_RX_RKINPUT
+
+config SAMV7_SSC1_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+config SAMV7_SSC1_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data of
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC1_RX
+
+config SAMV7_SSC1_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMV7_SSC1_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMV7_SSC1_TX_MCKDIV
+
+config SAMV7_SSC1_TX_TKINPUT
+	bool "TK input"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.  Sample rate determined by the external clock frequency.
+
+config SAMV7_SSC1_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
+
+config SAMV7_SSC1_TX_MCKDIV
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
+
+endchoice # Transmitter clock source
+
+if !SAMV7_SSC1_TX_TKINPUT
+choice
+	prompt "Transmitter output clock"
+	default SAMV7_SSC1_TX_TKOUTPUT_NONE
+
+config SAMV7_SSC1_TX_TKOUTPUT_NONE
+	bool "None"
+
+config SAMV7_SSC1_TX_TKOUTPUT_CONT
+	bool "Continuous"
+
+config SAMV7_SSC1_TX_TKOUTPUT_XFR
+	bool "Only during transfers"
+
+endchoice # Receiver output clock
+endif # !SAMV7_SSC1_TX_TKINPUT
+
+config SAMV7_SSC1_TX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting define the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
+config SAMV7_SSC1_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
+endif # SAMV7_SSC1_TX
+
+config SAMV7_SSC1_MCKDIV_SAMPLERATE
+	int "Sample rate"
+	default 48000
+	depends on SAMV7_SSC1_RX_MCKDIV || SAMV7_SSC1_TX_MCKDIV
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the sample rate must be provided.  The bit rate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMV7_SSC1_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMV7_SSC1_TX && SAMV7_SSC1_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
+endif # SAMV7_SSC1
+
+config SAMV7_SSC_DMADEBUG
+	bool "SSC DMA transfer debug"
+	depends on DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SSC DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMV7_SSC_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+config SAMV7_SSC_QDEBUG
+	bool "SSC Queue debug"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to debug audio buffer queue logic.
+
+config SAMV7_SSC_DUMPBUFFERS
+	bool "Dump Buffers"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to dump TX and RX buffers.
+
+endmenu # SSC Configuration
+endif # SAMV7_SSC

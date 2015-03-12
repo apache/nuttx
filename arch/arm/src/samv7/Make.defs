@@ -132,3 +132,7 @@ CHIP_CSRCS += sam_twihs.c
 else ifeq ($(CONFIG_SAMV7_TWIHS2),y)
 CHIP_CSRCS += sam_twihs.c
 endif
+
+ifeq ($(CONFIG_SAMV7_SSC),y)
+CHIP_CSRCS += sam_ssc.c
+endif
