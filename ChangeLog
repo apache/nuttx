@@ -9951,4 +9951,23 @@
 	  net/Kconfig: Add TUN device.  From Max Neklyudov (2015-03-11).
 	* fs/fat/fs_fat32.c: fat_unbind() was accessing 'fs->fs_sem' after
 	  freeing the 'fs' struct. From Juha Niskanen (2015-03-11).
-
+	* fs/procfs/fs_procfsproc.c: fs_procfsproc: Fix potential NULL pointer
+	  dereference of 'node'.  From Juha Niskanen (2015-03-12).
+	* sched/sched/sched_waitpid.c: Do not use uninitialized boolean in
+	  waitpid().  From Juha Niskanen (2015-03-12).
+	* libc/stdio/lib_ungetc.c:Fix NULL pointer dereference in ungetc().
+	  If 'stream' was NULL, 'stream->fs_oflags' was evaluated.  From Juha
+	  Niskanen (2015-03-12).
+	* arch/arm/src/stm32/stm32_i2c.c: Add missing NULL check.  From Juha
+	  Niskanen (2015-03-12).
+	* drivers/usbdev/usbmsc_scsi.c: Add NULL pointer check.  From Juha
+	  Niskanen (2015-03-12).
+	* drivers/bch/bchdev_driver.c: Avoid NULL pointer dereference when
+	  bch->refs  == 255.  From Juha Niskanen (2015-03-12).
+	* arch/arm/src/armv7-m/mpu.h:  Bad syntax in ARMv7-M MPU logic would
+	  cause failure to write the correct value to the MPU_RASR register.
+	  From Juha Niskanen (2015-03-12).
+	* net/socket/net_dupsd.c: Do not call sockfd_socket() twice.  From
+	  Juha Niskanen (2015-03-12).
+	* arch/arm/src/stm32/stm32_usbdev.c: Fix stale initialization
+	  invalidating later NULL check.  From Juha Niskanen (2015-03-12).
