@@ -1399,7 +1399,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
        *  - or we close down by sending the stop bit
        */
 
-      if (priv->msgc > 0)
+      if (priv->msgc > 0 && priv->msgv != NULL)
         {
           if (priv->msgv->flags & I2C_M_NORESTART)
             {
