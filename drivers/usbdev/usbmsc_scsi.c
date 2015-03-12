@@ -1457,7 +1457,7 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
 {
   FAR struct usbmsc_lun_s *lun = NULL;
   uint32_t datlen;
-  uint8_t dir = flags & USBMSC_FLAGS_DIRMASK;
+  uint8_t dir;
   int ret = OK;
 
   /* Verify the LUN and set up the current LUN reference in the
@@ -1528,7 +1528,7 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
         {
           priv->u.alloclen = priv->cbwlen;
         }
-      else
+      else if (lun)
         {
           priv->u.xfrlen = priv->cbwlen / lun->sectorsize;
         }
