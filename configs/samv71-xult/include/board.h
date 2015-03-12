@@ -317,6 +317,14 @@
  *    There are no alternative pin selections for USART1.
  */
 
+/* SSC
+ *
+ * Alternative pin selections are available only for SSC0 TD.
+ * On the SAMV71-XULT board, PD26 supports the I2S TD function
+ */
+
+#define GPIO_SSC0_TD   GPIO_SSC0_TD_1
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
