@@ -307,7 +307,7 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)((uintptr_t)arg);
 
       bchlib_semtake(bch);
-      if (!bchr && bch->refs < 255)
+      if (!bchr || bch->refs == MAX_OPENCNT)
         {
           ret = -EINVAL;
         }
