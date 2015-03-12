@@ -1343,9 +1343,8 @@ static int proc_readdir(struct fs_dirent_s *dir)
            node = g_groupinfo[index];
            break;
 
-          default:
-            ret = -ENOENT;
-           break;
+         default:
+           return -ENOENT;
         }
 
       /* Save the filename and file type */
