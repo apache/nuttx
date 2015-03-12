@@ -184,7 +184,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
   FAR struct tcb_s *ctcb;
   FAR struct task_group_s *group;
-  bool mystat;
+  bool mystat = false;
   int err;
   int ret;
 
