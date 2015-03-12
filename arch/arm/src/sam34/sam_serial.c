@@ -179,10 +179,6 @@
 #  undef HAVE_CONSOLE
 #endif
 
-/* If we are not using the serial driver for the console, then we still must
- * provide some minimal implementation of up_putc.
- */
-
 #ifdef USE_SERIALDRIVER
 
 /* Which UART/USART with be tty0/console and which tty1? tty2? tty3? tty4? tty5? */
