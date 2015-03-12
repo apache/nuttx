@@ -484,3 +484,44 @@ config SAMV7_GPIOE_IRQ
 
 endif # SAMV7_GPIO_IRQ
 endif # ARCH_CHIP_SAMV7
+
+if SAMV7_SPI0 || SAMV7_SPI1
+
+menu "SAMV7 SPI device driver options"
+
+config SAMV7_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMV7_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on SAMV7_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMV7_SPI_DMATHRESHOLD.
+
+config SAMV7_SPI_DMADEBUG
+	bool "SPI DMA transfer debug"
+	depends on SAMV7_SPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMV7_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
+
+endmenu # SAMV7 SPI device driver options
+endif # SAMV7_SPI0 || SAMV7_SPI1
