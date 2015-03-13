@@ -942,10 +942,10 @@ config SAMV7_SSC_DUMPBUFFERS
 endmenu # SSC Configuration
 endif # SAMV7_SSC
 
-if SAMA5_HSMCI
+if SAMV7_HSMCI
 menu "HSMCI device driver options"
 
-config SAMA5_HSMCI_RDPROOF
+config SAMV7_HSMCI_RDPROOF
 	bool "Read Proof Enable"
 	default n
 	---help---
@@ -953,7 +953,7 @@ config SAMA5_HSMCI_RDPROOF
 		access if the internal FIFO is full. This will guarantee data
 		integrity, not bandwidth.
 
-config SAMA5_HSMCI_WRPROOF
+config SAMV7_HSMCI_WRPROOF
 	bool "Write Proof Enable"
 	default n
 	---help---
@@ -961,7 +961,7 @@ config SAMA5_HSMCI_WRPROOF
 		access if the internal FIFO is full. This will guarantee data
 		integrity, not bandwidth.
 
-config SAMA5_HSMCI_XFRDEBUG
+config SAMV7_HSMCI_XFRDEBUG
 	bool "HSMCI transfer debug"
 	depends on DEBUG_FS && DEBUG_VERBOSE
 	default n
@@ -973,7 +973,7 @@ config SAMA5_HSMCI_XFRDEBUG
 		enabled, then DMA register will be collected as well.  Requires also
 		DEBUG_FS and DEBUG_VERBOSE.
 
-config SAMA5_HSMCI_CMDDEBUG
+config SAMV7_HSMCI_CMDDEBUG
 	bool "HSMCI command debug"
 	depends on DEBUG_FS && DEBUG_VERBOSE
 	default n
@@ -985,7 +985,7 @@ config SAMA5_HSMCI_CMDDEBUG
 		register will be collected as well.  Requires also DEBUG_FS and
 		DEBUG_VERBOSE.
 
-config SAMA5_HSMCI_REGDEBUG
+config SAMV7_HSMCI_REGDEBUG
 	bool "HSMCI Register level debug"
 	depends on DEBUG
 	default n
@@ -994,4 +994,4 @@ config SAMA5_HSMCI_REGDEBUG
 		Very invasive! Requires also DEBUG.
 
 endmenu # HSMCI device driver options
-endif # SAMA5_HSMCI
+endif # SAMV7_HSMCI
