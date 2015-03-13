@@ -10,6 +10,8 @@ Contents
 
   - Board Features
   - Serial Console
+  - SD card
+  - Automounter
   - LEDs and Buttons
   - AT24MAC402 Serial EEPROM
   - Debugging
@@ -102,6 +104,131 @@ Any of these options can be selected as the serial console by:
      "System Type -> Peripheral Selection" menu, then
   2. Configuring the peripheral in the "Drivers -> Serial Configuration"
      menu.
+
+SD Card
+=======
+
+Card Slot
+---------
+The SAM V71 Xplained Ultra has one standard SD card connector which is
+connected to the High Speed Multimedia Card Interface (HSMCI) of the SAM
+V71. SD card connector:
+
+  ------ ----------------- ---------------------
+  SAMV71 SAMV71            Shared functionality
+  Pin    Function
+  ------ ----------------- ---------------------
+  PA30   MCDA0 (DAT0)
+  PA31   MCDA1 (DAT1)
+  PA26   MCDA2 (DAT2)
+  PA27   MCDA3 (DAT3)      Camera
+  PA25   MCCK (CLK)        Shield
+  PA28   MCCDA (CMD)
+  PD18   Card Detect (C/D) Shield
+  ------ ----------------- ---------------------
+
+Configuration Settings
+----------------------
+Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card slots.  The full size SD card slot connects via HSMCI0.  Support for the SD slots can be enabled with the following settings:
+
+  System Type->SAMV7 Peripheral Selection
+    CONFIG_SAMV7_HSMCI0=y                 : To enable HSMCI0 support
+    CONFIG_SAMV7_XDMAC=y                  : XDMAC is needed by HSMCI0/1
+
+  System Type
+    CONFIG_SAMV7_PIO_IRQ=y                : PIO interrupts needed
+    CONFIG_SAMV7_PIOD_IRQ=y               : Card detect pin is on PD18
+
+  Device Drivers -> MMC/SD Driver Support
+    CONFIG_MMCSD=y                        : Enable MMC/SD support
+    CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+    CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
+    CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+    CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
+    CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
+    CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+    CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+    CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+  RTOS Features -> Work Queue Support
+    CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+
+  Application Configuration -> NSH Library
+    CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, OR
+    CONFIG_BOARD_INITIALIZE=y
+
+Using the SD card
+-----------------
+
+1) After booting, the HSCMI device will appear as /dev/mmcsd0.
+
+2) If you try mounting an SD card with nothing in the slot, the mount will
+   fail:
+
+     nsh> mount -t vfat /dev/mmcsd0 /mnt/sd0
+     nsh: mount: mount failed: 19
+
+   NSH can be configured to provide errors as strings instead of
+   numbers.  But in this case, only the error number is reported.  The
+   error numbers can be found in nuttx/include/errno.h:
+
+     #define ENODEV              19
+     #define ENODEV_STR          "No such device"
+
+   So the mount command is saying that there is no device or, more
+   correctly, that there is no card in the SD card slot.
+
+3) Inserted the SD card.  Then the mount should succeed.
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt/sd0
+    nsh> ls /mnt/sd1
+    /mnt/sd1:
+     atest.txt
+    nsh> cat /mnt/sd1/atest.txt
+    This is a test
+
+   NOTE:  See the next section entitled "Auto-Mounter" for another way
+   to mount your SD card.
+
+4) Before removing the card, you must umount the file system.  This is
+   equivalent to "ejecting" or "safely removing" the card on Windows:  It
+   flushes any cached data to an SD card and makes the SD card unavailable
+   to the applications.
+
+     nsh> umount -t /mnt/sd0
+
+   It is now safe to remove the card.  NuttX provides into callbacks
+   that can be used by an application to automatically unmount the
+   volume when it is removed.  But those callbacks are not used in
+   these configurations.
+
+Auto-Mounter
+============
+
+  NuttX implements an auto-mounter than can make working with SD cards
+  easier.  With the auto-mounter, the file system will be automatically
+  mounted when the SD card is inserted into the HSMCI slot and automatically
+  unmounted when the SD card is removed.
+
+  Here is a sample configuration for the auto-mounter:
+
+    File System Configuration
+      CONFIG_FS_AUTOMOUNTER=y
+
+    Board-Specific Options
+      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_UDELAY=2000
+
+  WARNING:  SD cards should never be removed without first unmounting
+  them.  This is to avoid data and possible corruption of the file
+  system.  Certainly this is the case if you are writing to the SD card
+  at the time of the removal.  If you use the SD card for read-only access,
+  however, then I cannot think of any reason why removing the card without
+  mounting would be harmful.
 
 LEDs and Buttons
 ================

@@ -42,6 +42,12 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = sam_boot.c
 
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += sam_nsh.c sam_bringup.c
+else ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+CSRCS += sam_bringup.c
+endif
+
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
 CSRCS += sam_cxxinitialize.c
 endif
@@ -56,19 +62,15 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
-endif
-
-ifeq ($(CONFIG_SAM34_HSMCI),y)
+ifeq ($(CONFIG_SAMV7_HSMCI0),y)
 CSRCS += sam_hsmci.c
 endif
 
-ifeq ($(CONFIG_SAM34_EMAC),y)
+ifeq ($(CONFIG_SAMV7_EMAC),y)
 CSRCS += sam_ethernet.c
 endif
 
-ifeq ($(CONFIG_SAM34_SPI0),y)
+ifeq ($(CONFIG_SAMV7_SPI0),y)
 CSRCS += sam_spi.c
 endif
 
