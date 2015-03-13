@@ -208,7 +208,7 @@
 #    error "Unknown STM32 DMA"
 #  endif
 
-/* DMA control word */
+/* DMA control words */
 
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #    define SERIAL_DMA_CONTROL_WORD      \
@@ -220,6 +220,16 @@
                  CONFIG_USART_DMAPRIO  | \
                  DMA_SCR_PBURST_SINGLE | \
                  DMA_SCR_MBURST_SINGLE)
+#    ifdef CONFIG_SERIAL_IFLOWCONTROL
+#      define SERIAL_DMA_IFLOW_CONTROL_WORD \
+                (DMA_SCR_DIR_P2M       | \
+                 DMA_SCR_MINC          | \
+                 DMA_SCR_PSIZE_8BITS   | \
+                 DMA_SCR_MSIZE_8BITS   | \
+                 CONFIG_USART_DMAPRIO  | \
+                 DMA_SCR_PBURST_SINGLE | \
+                 DMA_SCR_MBURST_SINGLE)
+#    endif
 #  else
 #    define SERIAL_DMA_CONTROL_WORD      \
                 (DMA_CCR_CIRC          | \
@@ -227,6 +237,13 @@
                  DMA_CCR_PSIZE_8BITS   | \
                  DMA_CCR_MSIZE_8BITS   | \
                  CONFIG_USART_DMAPRIO)
+#    ifdef CONFIG_SERIAL_IFLOWCONTROL
+#      define SERIAL_DMA_IFLOW_CONTROL_WORD \
+                (DMA_CCR_MINC          | \
+                 DMA_CCR_PSIZE_8BITS   | \
+                 DMA_CCR_MSIZE_8BITS   | \
+                 CONFIG_USART_DMAPRIO)
+#    endif
 # endif
 
 #endif
@@ -1541,13 +1558,28 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
   priv->rxdma = stm32_dmachannel(priv->rxdma_channel);
 
-  /* Configure for circular DMA reception into the RX fifo */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      /* Configure for non-circular DMA reception into the RX FIFO */
 
-  stm32_dmasetup(priv->rxdma,
-                 priv->usartbase + STM32_USART_RDR_OFFSET,
-                 (uint32_t)priv->rxfifo,
-                 RXDMA_BUFFER_SIZE,
-                 SERIAL_DMA_CONTROL_WORD);
+      stm32_dmasetup(priv->rxdma,
+                     priv->usartbase + STM32_USART_RDR_OFFSET,
+                     (uint32_t)priv->rxfifo,
+                     RXDMA_BUFFER_SIZE,
+                     SERIAL_DMA_IFLOW_CONTROL_WORD);
+    }
+  else
+#endif
+    {
+      /* Configure for circular DMA reception into the RX FIFO */
+
+      stm32_dmasetup(priv->rxdma,
+                     priv->usartbase + STM32_USART_RDR_OFFSET,
+                     (uint32_t)priv->rxfifo,
+                     RXDMA_BUFFER_SIZE,
+                     SERIAL_DMA_CONTROL_WORD);
+    }
 
   /* Reset our DMA shadow pointer to match the address just
    * programmed above.
@@ -1561,12 +1593,26 @@ static int up_dma_setup(struct uart_dev_s *dev)
   regval |= USART_CR3_DMAR;
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
-  /* Start the DMA channel, and arrange for callbacks at the half and
-   * full points in the FIFO.  This ensures that we have half a FIFO
-   * worth of time to claim bytes before they are overwritten.
-   */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      /* Start the DMA channel, and arrange for callbacks at the full point
+       * in the FIFO. After buffer gets full, hardware flow-control kicks
+       * in and DMA transfer is stopped.
+       */
 
-  stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+      stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, false);
+    }
+  else
+#endif
+    {
+      /* Start the DMA channel, and arrange for callbacks at the half and
+       * full points in the FIFO.  This ensures that we have half a FIFO
+       * worth of time to claim bytes before they are overwritten.
+       */
+
+      stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+    }
 
   return OK;
 }
@@ -1721,7 +1767,7 @@ static void up_detach(struct uart_dev_s *dev)
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite uart_dev_s structure in order to call these functions.
+ *   appropriate uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 
@@ -2170,9 +2216,9 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16_t ie;
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
+    defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
@@ -2200,9 +2246,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
            * enable Rx interrupts.
            */
 
-          ie = priv->ie;
-          ie &= ~USART_CR1_RXNEIE;
-          up_restoreusartint(priv, ie);
+          uart_disablerxint(dev);
           return true;
         }
 
@@ -2215,7 +2259,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
            * received.
            */
 
-          up_rxint(dev, true);
+          uart_enablerxint(dev);
         }
     }
 #endif
@@ -2247,11 +2291,56 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
       priv->rxdmanext++;
       if (priv->rxdmanext == RXDMA_BUFFER_SIZE)
         {
-          priv->rxdmanext = 0;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+          if (priv->iflow)
+            {
+              /* RX DMA buffer full. RX paused, RTS line pulled up to prevent
+               * more input data from other end.
+               */
+            }
+          else
+#endif
+            {
+              priv->rxdmanext = 0;
+            }
         }
     }
 
   return c;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_dma_reenable
+ *
+ * Description:
+ *   Call to re-enable RX DMA.
+ *
+ ****************************************************************************/
+
+#if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
+static void up_dma_reenable(struct up_dev_s *priv)
+{
+  /* Configure for non-circular DMA reception into the RX fifo */
+
+  stm32_dmasetup(priv->rxdma,
+                 priv->usartbase + STM32_USART_RDR_OFFSET,
+                 (uint32_t)priv->rxfifo,
+                 RXDMA_BUFFER_SIZE,
+                 SERIAL_DMA_IFLOW_CONTROL_WORD);
+
+  /* Reset our DMA shadow pointer to match the address just
+   * programmed above.
+   */
+
+  priv->rxdmanext = 0;
+
+  /* Start the DMA channel, and arrange for callbacks at the full point in
+   * the FIFO. After buffer gets full, hardware flow-control kicks in and
+   * DMA transfer is stopped.
+   */
+
+  stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, false);
 }
 #endif
 
@@ -2277,6 +2366,15 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
    */
 
   priv->rxenable = enable;
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow && priv->rxenable && (priv->rxdmanext == RXDMA_BUFFER_SIZE))
+    {
+      /* Re-enable RX DMA. */
+
+      up_dma_reenable(priv);
+    }
+#endif
 }
 #endif
 
@@ -2312,10 +2410,14 @@ static bool up_dma_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
-    stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    {
+      stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    }
 #endif
+
   up_serialout(priv, STM32_USART_TDR_OFFSET, (uint32_t)ch);
 }
 
@@ -2474,6 +2576,16 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
   if (priv->rxenable && up_dma_rxavailable(&priv->dev))
     {
       uart_recvchars(&priv->dev);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow && priv->rxenable &&
+          (priv->rxdmanext == RXDMA_BUFFER_SIZE))
+        {
+          /* Re-enable RX DMA. */
+
+          up_dma_reenable(priv);
+        }
+#endif
     }
 }
 #endif
@@ -2488,7 +2600,7 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  * Input Parameters:
  *
  *    cb - Returned to the driver. The driver version of the callback
- *         strucure may include additional, driver-specific state data at
+ *         structure may include additional, driver-specific state data at
  *         the end of the structure.
  *
  *    pmstate - Identifies the new PM state
@@ -2553,7 +2665,7 @@ static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate)
  * Input Parameters:
  *
  *    cb - Returned to the driver. The driver version of the callback
- *         strucure may include additional, driver-specific state data at
+ *         structure may include additional, driver-specific state data at
  *         the end of the structure.
  *
  *    pmstate - Identifies the new PM state
@@ -2570,7 +2682,6 @@ static void up_pm_notify(struct pm_callback_s *cb, enum pm_state_e pmstate)
  *              lower power state change). Drivers are not permitted to
  *              return non-zero values when reverting back to higher power
  *              consumption modes!
- *
  *
  ****************************************************************************/
 
