@@ -136,3 +136,7 @@ endif
 ifeq ($(CONFIG_SAMV7_SSC),y)
 CHIP_CSRCS += sam_ssc.c
 endif
+
+ifeq ($(CONFIG_SAMV7_HSMCI),y)
+CHIP_CSRCS += sam_hsmci.c sam_hsmci_clkdiv.c
+endif

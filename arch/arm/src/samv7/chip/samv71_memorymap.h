@@ -72,7 +72,7 @@
                                           /* 0x20c00000-0x3fffffff: Reserved */
 /* Peripherals address region */
 
-#define SAM_HSMCI_BASE         0x40000000 /* 0x40000000-0x40003fff: High Speed Multimedia Card Interface */
+#define SAM_HSMCI0_BASE        0x40000000 /* 0x40000000-0x40003fff: High Speed Multimedia Card Interface */
 #define SAM_SSC0_BASE          0x40004000 /* 0x40004000-0x40007fff: Serial Synchronous Controller */
 #define SAM_SPI0_BASE          0x40008000 /* 0x40008000-0x4000bfff: Serial Peripheral Interface 0 */
 #define SAM_TC012_BASE         0x4000c000 /* 0x4000c000-0x4000ffff: Timer Counters 0-2 */
