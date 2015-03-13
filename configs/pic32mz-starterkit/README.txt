@@ -203,6 +203,55 @@ Serial Console
   menuconfig'.  The UART pin selections would need to be changed by editing
   configs/pc32mz-starterkit/include/board.h.
 
+  If using a AC320006 by itself, JP7 pin 2 and JP8 pin 2 is where you would
+  connect a 3.3 Volt ttl serial interface.
+
+  For a configuration using UART1 connect:
+   TX to AC320006-JP7 pin 2 which is PIC32MZ pin 106 (RPC14) used as U1RX
+   RX to AC320006-JP8 pin 2 which is PIC32MZ pin 31  (RPB3)) used as U1TX
+
+  For a configuration using For UART3 connect:
+   TX to AC320006-JP8 pin 2 which is PIC32MZ pin 31  (RPB3)) used as U3RX
+   RX to AC320006-JP7 pin 2 which is PIC32MZ pin 106 (RPC14) used as U3TX
+
+  If using a AC320006 plugged into a DM320002 then regardless of which UART,
+  UART1 or UART3 is configured in software, the jumpers on the AC320006 are
+  the same, just the signal directions and UART changes.
+
+                                          UART1   UART3
+  AC320006-JP7 connect pin 2 to pin 3.     U1RX   U3TX
+  AC320006-JP8 connect pin 2 to pin 3.     U1TX   U3RX
+
+  For the default configuration using UART1 the PIC32MZ pin 106 (RPC14)
+  will be configured as U1RX and is tied to the AC320006's JP7 Pin 2.
+  With the jupmpers as listed above, once the AC320006 is plugged into
+  the DM320002, the PIC32MZ U1RX will be connected to the DM320002's
+  J11 pin 43. The DM320002's J11 pin 43 should then be connnected to
+  the TX of a 3.3 volt ttl serial converter such as a FTDI TTL232RG.
+  For the FTDI TTL232RG TX is the oranage wire.
+
+  Likewise the PIC32MZ pin 31 (RPB3) will be configured as U1TX and
+  is tied to the AC320006's JP8 Pin 2.  With the jupmpers as listed above,
+  once the AC320006 is plugged into the DM320002, the PIC32MZ' U1TX will
+  be connected to the DM320002's J11 pin 41. The DM320002's J11 pin 41
+  should then be connnected to the RX signal of a 3.3 volt ttl serial
+  converter. For the FTDI TTL232RG RX is the yellow wire.
+
+  For the alternate configuration using UART3 the PIC32MZ pin 106 (RPC14)
+  will be configured as U3TX and is tied to the AC320006's JP7 Pin 2.
+  With the jupmpers as listed above, once the AC320006 is plugged into
+  the DM320002, the PIC32MZ U3TX will be connected to the DM320002's
+  J11 pin 43. The DM320002's J11 pin 43 should then be connnected to
+  the RX of a 3.3 volt ttl serial converter such as a FTDI TTL232RG.
+  For the FTDI TTL232RG TX is the yellow wire.
+
+  Likewise the PIC32MZ pin 31 (RPB3) will be configured as U3RX and
+  is tied to the AC320006's JP8 Pin 2.  With the jupmpers as listed above,
+  once the AC320006 is plugged into the DM320002, the PIC32MZ' U3RX will
+  be connected to the DM320002's J11 pin 41. The DM320002's J11 pin 41
+  should then be connnected to the TX signal of a 3.3 volt ttl serial
+  converter. For the FTDI TTL232RG RX is the orange wire.
+
 LEDs and Buttons
 ================
 
