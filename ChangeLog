@@ -9971,3 +9971,19 @@
 	  Juha Niskanen (2015-03-12).
 	* arch/arm/src/stm32/stm32_usbdev.c: Fix stale initialization
 	  invalidating later NULL check.  From Juha Niskanen (2015-03-12).
+	* arch/arm/src/stm32/stm32_serial.c and chip/stm32f10xxx_dma.h: Fix
+	  RX DMA setup for UART5.  From  Jussi Kivilinna (2015-03-13).
+	* arch/arm/src/stm32/stm32_serial.c: Make input hardware flow-control
+	  work with RX DMA.  From Jussi Kivilinna (2015-03-13).
+	* drivers/pipes/pipe_common.c: Fix zero-lenth writes to pipes/FIFOs.
+	  From Jussi Kivilinna (2015-03-13).
+	* drivers/serial/serial.c: Report correct number of bytes free in
+	  serial buffer with FIONWRITE.  From Sami Pelkonen via Jussi Kivilinna
+	  (2015-03-13).
+	* drivers/mmcsd/mmcsd_spi.c: Debugging and manuals (this one
+	  https://www.sdcard.org/downloads/pls/simplified_specs/part1_410.pdf
+	  and this one https://www.sdcard.org/downloads/pls/simplified_specs/part1_410.pdf)
+	  shows that ACMD23 must be preceeded with CMD55 command as any other
+	  ACMD commands. Also, after the block reading wait loop must be
+	  inserted before writing the next block of data to the sd card.  From
+	  Dmitry Nikolaev via Jussi Kivilinna (2015-03-13).
