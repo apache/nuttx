@@ -141,13 +141,25 @@
 /* HSMCI clocking
  *
  * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
- * divided by (2*(CLKDIV+1)).
+ * divided by (2*(CLKDIV) + CLOCKODD + 2).
  *
- *   MCI_SPEED = MCK / (2*(CLKDIV+1))
- *   CLKDIV = MCK / MCI_SPEED / 2 - 1
+ *   MCI_SPEED = MCK / (2*CLKDIV + CLOCKODD + 2)
  *
  * Where CLKDIV has a range of 0-255.
  */
+
+/* MCK = 150MHz, CLKDIV = 186, MCI_SPEED = 150MHz / (2*186 + 1 + 2) = 400 KHz */
+
+#define HSMCI_INIT_CLKDIV          ((186 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
+
+/* MCK = 150MHz, CLKDIV = 3 w/CLOCKODD, MCI_SPEED = 150MHz /(2*3 + 0 + 2) = 18.75 MHz */
+
+#define HSMCI_MMCXFR_CLKDIV        (2 << HSMCI_MR_CLKDIV_SHIFT)
+
+/* MCK = 150MHz, CLKDIV = 2, MCI_SPEED = 150MHz /(2*2 + 0 + 2) = 25 MHz */
+
+#define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
 
 /* FLASH wait states.
  *
