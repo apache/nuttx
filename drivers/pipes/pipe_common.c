@@ -384,6 +384,11 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   DEBUGASSERT(dev);
 
+  if (len == 0)
+    {
+      return 0;
+    }
+
   /* Make sure that we have exclusive access to the device structure */
 
   if (sem_wait(&dev->d_bfsem) < 0)
@@ -468,6 +473,11 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
   DEBUGASSERT(dev);
   pipe_dumpbuffer("To PIPE:", (uint8_t*)buffer, len);
+
+  if (len == 0)
+    {
+      return 0;
+    }
 
   /* At present, this method cannot be called from interrupt handlers.  That is
    * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
