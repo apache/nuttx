@@ -159,9 +159,9 @@
 #      endif
 #    endif
 
-#    if defined(CONFIG_UART4_RXDMA)
+#    if defined(CONFIG_UART4_RXDMA) || defined(CONFIG_UART5_RXDMA)
 #      ifndef CONFIG_STM32_DMA2
-#        error STM32 UART4 receive DMA requires CONFIG_STM32_DMA2
+#        error STM32 UART4/5 receive DMA requires CONFIG_STM32_DMA2
 #      endif
 #    endif
 
@@ -171,6 +171,7 @@
 #    define DMAMAP_USART2_RX  DMACHAN_USART2_RX
 #    define DMAMAP_USART3_RX  DMACHAN_USART3_RX
 #    define DMAMAP_UART4_RX   DMACHAN_UART4_RX
+#    define DMAMAP_UART5_RX   DMACHAN_UART5_RX
 
 #  endif
 
