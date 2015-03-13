@@ -82,12 +82,14 @@
 #  error "HSMCI support requires CONFIG_SAMV7_XDMAC"
 #endif
 
-/* System Bus Interfaces
- * REVISIT: The SAMV71 supports only a single APB
- */
+/* System Bus Interfaces */
 
-#define HSMCI_SYSBUS_IF  DMACH_FLAG_PERIPHAHB_AHB_IF0
-#define MEMORY_SYSBUS_IF DMACH_FLAG_MEMAHB_AHB_IF0
+#ifdef CONFIG_ARCH_CHIP_SAMV71
+#  define HSMCI_SYSBUS_IF  DMACH_FLAG_PERIPHAHB_AHB_IF1
+#  define MEMORY_SYSBUS_IF DMACH_FLAG_MEMAHB_AHB_IF0
+#else
+#  error Missing bus interface definitions
+#endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
