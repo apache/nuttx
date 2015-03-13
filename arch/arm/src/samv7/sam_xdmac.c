@@ -159,7 +159,7 @@ static const uint32_t g_chanwidth[3] =
 
 static const struct sam_pidmap_s g_xdmac_rxchan[] =
 {
-  { SAM_PID_HSMCI,  XDMACH_HSMCI     }, /* HSMCI Receive/Transmit */
+  { SAM_PID_HSMCI0, XDMACH_HSMCI     }, /* HSMCI Receive/Transmit */
   { SAM_PID_SPI0,   XDMACH_SPI0_RX   }, /* SPI0 Receive */
   { SAM_PID_SPI1,   XDMACH_SPI1_RX   }, /* SPI1 Receive */
   { SAM_PID_QSPI,   XDMACH_QSPI_RX   }, /* QSPI Receive */
@@ -190,7 +190,7 @@ static const struct sam_pidmap_s g_xdmac_rxchan[] =
 
 static const struct sam_pidmap_s g_xdmac_txchan[] =
 {
-  { SAM_PID_HSMCI,  XDMACH_HSMCI     }, /* HSMCI Receive/Transmit */
+  { SAM_PID_HSMCI0, XDMACH_HSMCI     }, /* HSMCI Receive/Transmit */
   { SAM_PID_SPI0,   XDMACH_SPI0_TX   }, /* SPI0 Transmit */
   { SAM_PID_SPI1,   XDMACH_SPI1_TX   }, /* SPI1 Transmit */
   { SAM_PID_QSPI,   XDMACH_QSPI_TX   }, /* QSPI Transmit */

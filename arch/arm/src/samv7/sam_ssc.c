@@ -324,18 +324,12 @@
 #define SSC_CLKOUT_CONT   1 /* Continuous */
 #define SSC_CLKOUT_XFER   2 /* Only output clock during transfers */
 
-/* Bus configuration may differ with chip */
-
-#warning REVISIT
 /* System Bus Interfaces
- *
- * Both SSC0 and SSC1 are APB1.  Both are accessible on MATRIX IF1.
- *
- * Memory is available on either port 5 (IF0 for both XDMAC0 and 1) or
- * port 6 (IF1 for both XDMAC0 and 1).
+ * REVISIT:  I believe that the SAMV1 has only a single APB.
  */
 
-#define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF1
+#warning REVISIT
+#define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF0
 #define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
 
 /* DMA configuration */
@@ -372,7 +366,7 @@
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
-/* Check if SSC debut is enabled (non-standard.. no support in
+/* Check if SSC debug is enabled (non-standard.. no support in
  * include/debug.h
  */
 
