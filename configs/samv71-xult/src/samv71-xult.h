@@ -44,26 +44,26 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <arch/irq.h>
 #include <nuttx/irq.h>
-
-//#include "chip/sam_pinmap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#define HAVE_HSMCI      1
-#define HAVE_USBDEV     1
-#define HAVE_USBMONITOR 1
-#define HAVE_NETWORK    1
+#define HAVE_HSMCI       1
+#define HAVE_AUTOMOUNTER 1
+#define HAVE_USBDEV      1
+#define HAVE_USBMONITOR  1
+#define HAVE_NETWORK     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
 
-#if !defined(CONFIG_SAMV7_HSMCI)
+#if !defined(CONFIG_SAMV7_HSMCI0)
 #  undef HAVE_HSMCI
 #endif
 
@@ -74,12 +74,68 @@
 #  undef HAVE_HSMCI
 #endif
 
-/* We need PIO interrupts on GPIOA to support card detect interrupts */
+/* We need PIO interrupts on GPIOD to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOA_IRQ)
-#  warning PIOA interrupts not enabled.  No MMC/SD support.
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOD_IRQ)
+#  warning PIOD interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
+
+/* MMC/SD minor numbers */
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#endif
+
+#if CONFIG_NSH_MMCSDMINOR != 0
+#  error SAMV71 has only one MMC/SD slot (CONFIG_NSH_MMCSDMINOR)
+#  undef CONFIG_NSH_MMCSDSLOTNO
+#  define CONFIG_NSH_MMCSDSLOTNO 0
+#endif
+
+#define HSMCI0_SLOTNO CONFIG_NSH_MMCSDSLOTNO
+#define HSMCI0_MINOR  CONFIG_NSH_MMCSDMINOR
+
+/* Automounter.  Currently only works with HSMCI. */
+
+#if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_HSMCI)
+#  undef HAVE_AUTOMOUNTER
+#  undef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT
+#endif
+
+#ifndef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT
+#  undef HAVE_AUTOMOUNTER
+#endif
+
+#ifdef HAVE_AUTOMOUNTER
+#  ifdef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT
+  /* HSMCI0 Automounter defaults */
+
+#    ifndef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_FSTYPE
+#      define CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_FSTYPE "vfat"
+#    endif
+
+#    ifndef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_BLKDEV
+#      define CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_BLKDEV "/dev/mmcds0"
+#    endif
+
+#    ifndef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT
+#      define CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
+#    endif
+
+#    ifndef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_DDELAY
+#      define CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_DDELAY 1000
+#    endif
+
+#    ifndef CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_UDELAY
+#      define CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_UDELAY 2000
+#    endif
+#  endif /* CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT */
+#endif /* HAVE_AUTOMOUNTER */
 
 /* USB Device */
 /* CONFIG_SAMV7_UDP and CONFIG_USBDEV must be defined, or there is no USB
@@ -171,8 +227,28 @@
 #define IRQ_SW1       SAM_IRQ_PB12
 
 /* HSMCI SD Card Detect
- * To be provided
+ *
+ * The SAM V71 Xplained Ultra has one standard SD card connector which is
+ * connected to the High Speed Multimedia Card Interface (HSMCI) of the SAM
+ * V71. SD card connector:
+ *
+ *   ------ ----------------- ---------------------
+ *   SAMV71 SAMV71            Shared functionality
+ *   Pin    Function
+ *   ------ ----------------- ---------------------
+ *   PA30   MCDA0 (DAT0)
+ *   PA31   MCDA1 (DAT1)
+ *   PA26   MCDA2 (DAT2)
+ *   PA27   MCDA3 (DAT3)      Camera
+ *   PA25   MCCK (CLK)        Shield
+ *   PA28   MCCDA (CMD)
+ *   PD18   Card Detect (C/D) Shield
+ *   ------ ----------------- ---------------------
  */
+
+#define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN18)
+#define IRQ_MCI0_CD   SAM_IRQ_PD18
 
 /* SPI Chip Selects
  * to be provided
@@ -193,6 +269,18 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: sam_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_NSH_ARCHINIT) || defined(CONFIG_BOARD_INITIALIZE)
+int sam_bringup(void);
+#endif
+
+/************************************************************************************
  * Name: sam_spiinitialize
  *
  * Description:
@@ -211,9 +299,9 @@ void weak_function sam_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef HAVE_HSMCI
-int sam_hsmci_initialize(int minor);
+int sam_hsmci_initialize(int slot, int minor);
 #else
-# define sam_hsmci_initialize(minor) (-ENOSYS)
+# define sam_hsmci_initialize(s,m) (-ENOSYS)
 #endif
 
 /************************************************************************************
@@ -240,6 +328,64 @@ void weak_function sam_netinitialize(void);
 bool sam_cardinserted(int slotno);
 #else
 #  define sam_cardinserted(slotno) (false)
+#endif
+
+/************************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMCSD slot is write protected
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_HSMCI
+bool sam_writeprotected(int slotno);
+#endif
+
+/************************************************************************************
+ * Name:  sam_automount_initialize
+ *
+ * Description:
+ *   Configure auto-mounters for each enable and so configured HSMCI
+ *
+ * Input Parameters:
+ *   None
+ *
+ *  Returned Value:
+ *    None
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void sam_automount_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name:  sam_automount_event
+ *
+ * Description:
+ *   The HSMCI card detection logic has detected an insertion or removal event.  It
+ *   has already scheduled the MMC/SD block driver operations.  Now we need to
+ *   schedule the auto-mount event which will occur with a substantial delay to make
+ *   sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There is a
+ *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
+ *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
+ *      number.
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void sam_automount_event(int slotno, bool inserted);
 #endif
 
 /************************************************************************************

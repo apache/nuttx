@@ -4,4 +4,34 @@
 #
 
 if ARCH_BOARD_SAMV71_XULT
+
+config SAMV7XULT_HSMCI0_AUTOMOUNT
+	bool "HSMCI0 automounter"
+	default n
+	depends on FS_AUTOMOUNTER && SAMA5_HSMCI0
+
+if SAMV7XULT_HSMCI0_AUTOMOUNT
+
+config SAMV7XULT_HSMCI0_AUTOMOUNT_FSTYPE
+	string "HSMCI0 file system type"
+	default "vfat"
+
+config SAMV7XULT_HSMCI0_AUTOMOUNT_BLKDEV
+	string "HSMCI0 block device"
+	default "/dev/mmcsd0"
+
+config SAMV7XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT
+	string "HSMCI0 mount point"
+	default "/mnt/sdcard0"
+
+config SAMV7XULT_HSMCI0_AUTOMOUNT_DDELAY
+	int "HSMCI0 debounce delay (milliseconds)"
+	default 1000
+
+config SAMV7XULT_HSMCI0_AUTOMOUNT_UDELAY
+	int "HSMCI0 unmount retry delay (milliseconds)"
+	default 2000
+
+endif # SAMV7XULT_HSMCI0_AUTOMOUNT
+
 endif # ARCH_BOARD_SAMV71_XULT
