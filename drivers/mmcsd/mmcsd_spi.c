@@ -1243,7 +1243,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
       response = mmcsd_sendcmd(slot, &g_cmd18, offset);
       if (response != MMCSD_SPIR1_OK)
         {
-          fdbg("CMD118 failed: R1=%02x\n", response);
+          fdbg("CMD18 failed: R1=%02x\n", response);
           goto errout_with_eio;
         }
 
@@ -1402,6 +1402,13 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
       if (IS_SD(slot->type))
         {
+          response = mmcsd_sendcmd(slot, &g_cmd55, 0);
+          if (response != MMCSD_SPIR1_OK)
+            {
+              fdbg("CMD55 failed: R1=%02x\n", response);
+              goto errout_with_sem;
+            }
+
           response = mmcsd_sendcmd(slot, &g_acmd23, nsectors);
           if (response != MMCSD_SPIR1_OK)
             {
@@ -1431,6 +1438,12 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
               goto errout_with_sem;
             }
           buffer += SECTORSIZE(slot);
+
+          if (mmcsd_waitready(slot) != OK)
+            {
+              fdbg("Failed: card is busy\n");
+              goto errout_with_sem;
+            }
         }
 
       /* Send the stop transmission token */
