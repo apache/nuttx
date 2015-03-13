@@ -877,7 +877,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 }
               else
                 {
-                  count = dev->xmit.size - (dev->xmit.head - dev->xmit.tail) - 1;
+                  count = dev->xmit.size - (dev->xmit.head - dev->xmit.tail);
                 }
 
               irqrestore(state);
