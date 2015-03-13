@@ -1113,7 +1113,7 @@ static inline void sam_cmdsample2(struct sam_dev_s *priv, int index,
  * Name: sam_cmddump
  *
  * Description:
- *   Dump all comand/response register data
+ *   Dump all command/response register data
  *
  ****************************************************************************/
 
@@ -2620,9 +2620,10 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
   /* Since interrupts not been enabled to this point, any relevant events
    * are pending and should not yet have occurred.
+   * REVISIT: Not true.  DMA interrupts are enabled.
    */
 
-  DEBUGASSERT(priv->waitevents != 0 && priv->wkupevent == 0);
+  // DEBUGASSERT(priv->waitevents != 0 && priv->wkupevent == 0);
 
   /* Now enable event-related interrupts. If the events are pending, they
    * may happen immediately here before entering the loop.

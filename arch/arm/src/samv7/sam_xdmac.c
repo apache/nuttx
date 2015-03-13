@@ -2102,7 +2102,6 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
                  const char *msg)
 {
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
-  struct sam_xdmac_s *xdmac = sam_controller(xdmach);
 
   dmadbg("%s\n", msg);
   dmadbg("  DMA Global Registers:\n");
