@@ -291,10 +291,12 @@ struct sam_hsmciregs_s
   uint32_t argr;  /* Argument Register */
   uint32_t blkr;  /* Block Register */
   uint32_t cstor; /* Completion Signal Timeout Register */
+#if 0 /* Reading these can cause loss of response data */
   uint32_t rsp0;  /* Response Register 0 */
   uint32_t rsp1;  /* Response Register 1 */
   uint32_t rsp2;  /* Response Register 2 */
   uint32_t rsp3;  /* Response Register 3 */
+#endif
   uint32_t sr;    /* Status Register */
   uint32_t imr;   /* Interrupt Mask Register */
   uint32_t dma;   /* DMA Configuration Register */
@@ -907,10 +909,12 @@ static void sam_hsmcisample(struct sam_dev_s *priv,
   regs->argr  = sam_getreg(priv, SAM_HSMCI_ARGR_OFFSET);
   regs->blkr  = sam_getreg(priv, SAM_HSMCI_BLKR_OFFSET);
   regs->cstor = sam_getreg(priv, SAM_HSMCI_CSTOR_OFFSET);
+#if 0 /* Reading these can cause loss of response data */
   regs->rsp0  = sam_getreg(priv, SAM_HSMCI_RSPR0_OFFSET);
   regs->rsp1  = sam_getreg(priv, SAM_HSMCI_RSPR1_OFFSET);
   regs->rsp2  = sam_getreg(priv, SAM_HSMCI_RSPR2_OFFSET);
   regs->rsp3  = sam_getreg(priv, SAM_HSMCI_RSPR3_OFFSET);
+#endif
   regs->sr    = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
   regs->imr   = sam_getreg(priv, SAM_HSMCI_IMR_OFFSET);
   regs->dma   = sam_getreg(priv, SAM_HSMCI_DMA_OFFSET);
@@ -939,10 +943,12 @@ static void sam_hsmcidump(struct sam_dev_s *priv,
   fdbg("    ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
   fdbg("    BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
   fdbg("   CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
+#if 0 /* Reading these can cause loss of response data */
   fdbg("   RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
   fdbg("   RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
   fdbg("   RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
   fdbg("   RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
+#endif
   fdbg("      SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
   fdbg("     IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
   fdbg("     DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
@@ -2475,6 +2481,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
 
   if ((priv->wkupevent & SDIOWAIT_TIMEOUT) != 0)
     {
+      fdbg("ERROR: timeout\n");
       ret = -EINVAL;
     }
 
@@ -2482,6 +2489,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong
 
   else if ((priv->wkupevent & SDIOWAIT_ERROR) != 0)
     {
+      fdbg("ERROR: Other error\n");
       ret = -EIO;
     }
 
