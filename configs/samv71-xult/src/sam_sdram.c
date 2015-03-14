@@ -187,17 +187,17 @@ void sam_sdram_config(void)
    *    SDRAMC_CR_TXSR(13)        70 ns min Exit self-refresh to active time
    */
 
-  regval = SDRAMC_CR_NC_COL8          | /* 8 column bits */
-           SDRAMC_CR_NR_ROW11         | /* 11 row bits */
-           SDRAMC_CR_NB_BANK2         | /* 2 banks */
-           SDRAMC_CR_CAS_LATENCY3     | /* 3 cycle CAS latency */
-           SDRAMC_CR_DBW              | /* 16 bit */
-           SDRAMC_CR_TWR(4)           | /* 4 cycle write recovery delay */
-           SDRAMC_CR_TRCTRFC(11)      | /* 63 ns min */
-           SDRAMC_CR_TRP(5)           | /* 21 ns min Command period (PRE to ACT) */
-           SDRAMC_CR_TRCD(5)          | /* 21 ns min Active Command to read/Write Command delay time */
-           SDRAMC_CR_TRAS(8)          | /* 42 ns min Command period (ACT to PRE) */
-           SDRAMC_CR_TXSR(13);          /* 70 ns min Exit self-refresh to active time */
+  regval = SDRAMC_CR_NC_COL8       |  /* 8 column bits */
+           SDRAMC_CR_NR_ROW11      |  /* 11 row bits */
+           SDRAMC_CR_NB_BANK2      |  /* 2 banks */
+           SDRAMC_CR_CAS_LATENCY3  |  /* 3 cycle CAS latency */
+           SDRAMC_CR_DBW           |  /* 16 bit */
+           SDRAMC_CR_TWR(4)        |  /* 4 cycle write recovery delay */
+           SDRAMC_CR_TRCTRFC(11)   |  /* 63 ns min */
+           SDRAMC_CR_TRP(5)        |  /* 21 ns min Command period (PRE to ACT) */
+           SDRAMC_CR_TRCD(5)       |  /* 21 ns min Active Command to read/Write Command delay time */
+           SDRAMC_CR_TRAS(8)       |  /* 42 ns min Command period (ACT to PRE) */
+           SDRAMC_CR_TXSR(13);        /* 70 ns min Exit self-refresh to active time */
 
   putreg32(regval, SAM_SDRAMC_CR);
 
@@ -205,6 +205,8 @@ void sam_sdram_config(void)
    *    strength (DS) and partial array self refresh (PASR) must be set in
    *    the Low Power Register.
    */
+
+  putreg32(0, SAM_SDRAMC_LPR);
 
   /* 3. The SDRAM memory type must be set in the Memory Device Register.*/
 
@@ -237,7 +239,7 @@ void sam_sdram_config(void)
    *    any SDRAM location eight times.
    */
 
-    for (i = 0 ; i< 8; i++)
+    for (i = 0 ; i < 8; i++)
       {
         putreg32(SDRAMC_MR_MODE_AUTOREFRESH, SAM_SDRAMC_MR);
         *psdram = 0;
