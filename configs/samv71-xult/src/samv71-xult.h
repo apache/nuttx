@@ -269,6 +269,30 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: sam_sdram_config
+ *
+ * Description:
+ *   Configures the on-board SDRAM.  SAMV71 Xplained Ultra features one external
+ *   IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected to chip select
+ *   NCS1.
+ *
+ *  Input Parameters:
+ *     None
+ *
+ *  Assumptions:
+ *    The DDR memory regions is configured as strongly ordered memory.  When we
+ *    complete initialization of SDRAM and it is ready for use, we will make DRAM
+ *    into normal memory.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMA5_SDRAMC
+void sam_sdram_config(void);
+#else
+#  define sam_sdram_config(t)
+#endif
+
+/************************************************************************************
  * Name: sam_bringup
  *
  * Description:
