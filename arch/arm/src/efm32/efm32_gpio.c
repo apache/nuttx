@@ -315,6 +315,22 @@ int efm32_configgpio(gpio_pinset_t cfgset)
 }
 
 /************************************************************************************
+ * Name: efm32_unconfiggpio
+ *
+ * Description:
+ *   unConfigure a PIO pin based on bit-encoded description of the pin.
+ *
+ ************************************************************************************/
+
+int efm32_unconfiggpio(gpio_pinset_t cfgset)
+{
+  cfgset &= GPIO_PIN_MASK | GPIO_PORT_MASK;
+  cfgset |= _GPIO_DISABLE;
+
+  return efm32_configgpio(cfgset);
+}
+
+/************************************************************************************
  * Name: efm32_gpiowrite
  *
  * Description:
