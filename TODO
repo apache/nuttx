@@ -18,7 +18,7 @@ nuttx/
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, libm/)
- (12)  File system/Generic drivers (fs/, drivers/)
+ (13)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1353,6 +1353,21 @@ o File system / Generic drivers (fs/, drivers/)
                anything anyway (because the file I/O will fail anyway).
   Status:      Open
   Priority:    Medium-High
+
+  Title:       AUTMOUNTER BROKEN
+  Description: A bug was recently fixed in the FAT file system umount() logic.
+               FAT (and all other file systems) implement logic to fail the umount()
+               with EBUSY if there are open references to any file.  For FAT, there
+               was a bug that prevented this from working so the busy check always
+               failed and FAT always permitted the umount(), whether there are open
+               file or not.
+
+               Unfortunately, the automounter depended on this bug to force the
+               un-mounting.  I have changed the umount() call in the automounter to
+               umount2(MNT_FORCE), but the automounter will be broken until that
+               forced unmount feature is implemented.
+  Status:      Open
+  Priority:    Medium
 
 o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
