@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -1098,7 +1098,8 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
 int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
 int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
                FAR void **handle);
-int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver);
+int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                 unsigned int flags);
 int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf);
 int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                FAR struct stat *buf);

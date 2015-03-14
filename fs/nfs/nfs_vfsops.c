@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_vfsops.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
  *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -144,7 +144,8 @@ static void    nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
                    FAR struct nfs_args *argp);
 static int     nfs_bind(FAR struct inode *blkdriver, const void *data,
                    void **handle);
-static int     nfs_unbind(void *handle, FAR struct inode **blkdriver);
+static int     nfs_unbind(void *handle, FAR struct inode **blkdriver.
+                   unsigned int flags);
 static int     nfs_statfs(struct inode *mountpt, struct statfs *buf);
 static int     nfs_remove(struct inode *mountpt, const char *relpath);
 static int     nfs_mkdir(struct inode *mountpt, const char *relpath,
@@ -1872,7 +1873,8 @@ bad:
  *
  ****************************************************************************/
 
-int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver)
+int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+               unsigned int flags)
 {
   FAR struct nfsmount *nmp = (FAR struct nfsmount *)handle;
   int error;
@@ -1893,7 +1895,12 @@ int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver)
   if (nmp->nm_head != NULL)
     {
       fdbg("ERROR;  There are open files: %p\n", nmp->nm_head);
-      error = EBUSY;
+
+      /* This implementation currently only supports unmounting if there are
+       * no open file references.
+       */
+
+      error = (flags != 0) ? ENOSYS : EBUSY;
       goto errout_with_semaphore;
     }
 

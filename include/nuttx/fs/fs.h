@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,7 +196,8 @@ struct mountpt_operations
 
   int     (*bind)(FAR struct inode *blkdriver, FAR const void *data,
             FAR void **handle);
-  int     (*unbind)(FAR void *handle, FAR struct inode **blkdriver);
+  int     (*unbind)(FAR void *handle, FAR struct inode **blkdriver,
+            unsigned int flags);
   int     (*statfs)(FAR struct inode *mountpt, FAR struct statfs *buf);
 
   /* Operations on paths */

@@ -93,7 +93,8 @@ static int     smartfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 
 static int     smartfs_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
-static int     smartfs_unbind(void *handle, FAR struct inode **blkdriver);
+static int     smartfs_unbind(void *handle, FAR struct inode **blkdriver,
+                        unsigned int flags);
 static int     smartfs_statfs(struct inode *mountpt, struct statfs *buf);
 
 static int     smartfs_unlink(struct inode *mountpt, const char *relpath);
@@ -1544,7 +1545,8 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
  *
  ****************************************************************************/
 
-static int smartfs_unbind(void *handle, FAR struct inode **blkdriver)
+static int smartfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                          unsigned int flags)
 {
   struct smartfs_mountpt_s *fs = (struct smartfs_mountpt_s*)handle;
   int ret;
@@ -1564,7 +1566,11 @@ static int smartfs_unbind(void *handle, FAR struct inode **blkdriver)
 
       smartfs_semgive(fs);
 
-      ret = -EBUSY;
+      /* This implementation currently only supports unmounting if there are
+       * no open file references.
+       */
+
+      return (flags != 0) ? -ENOSYS : -EBUSY;
     }
   else
     {
@@ -1575,7 +1581,6 @@ static int smartfs_unbind(void *handle, FAR struct inode **blkdriver)
 
   smartfs_semgive(fs);
   kmm_free(fs);
-
   return ret;
 }
 

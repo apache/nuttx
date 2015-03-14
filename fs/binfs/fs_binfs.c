@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/binfs/fs_binfs.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -370,7 +370,8 @@ static int binfs_bind(FAR struct inode *blkdriver, const void *data,
  *
  ****************************************************************************/
 
-static int binfs_unbind(void *handle, FAR struct inode **blkdriver)
+static int binfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                        unsigned int flags)
 {
   fvdbg("Entry\n");
   return OK;

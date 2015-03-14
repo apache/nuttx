@@ -92,7 +92,7 @@ int umount2(FAR const char *target, unsigned int flags)
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
   int errcode = OK;
-  int status;
+  int ret;
 
   /* Verify required pointer arguments */
 
@@ -137,15 +137,16 @@ int umount2(FAR const char *target, unsigned int flags)
    */
 
   inode_semtake(); /* Hold the semaphore through the unbind logic */
-  status = mountpt_inode->u.i_mops->unbind( mountpt_inode->i_private, &blkdrvr_inode);
-  if (status < 0)
+  ret = mountpt_inode->u.i_mops->unbind(mountpt_inode->i_private,
+                                       &blkdrvr_inode, flags);
+  if (ret < 0)
     {
       /* The inode is unhappy with the blkdrvr for some reason */
 
-      errcode = -status;
+      errcode = -ret;
       goto errout_with_semaphore;
     }
-  else if (status > 0)
+  else if (ret > 0)
     {
       errcode = EBUSY;
       goto errout_with_semaphore;
@@ -160,16 +161,16 @@ int umount2(FAR const char *target, unsigned int flags)
    * there is still at least reference on it (from the mount)
    */
 
-  status = inode_remove(target);
+  ret = inode_remove(target);
   inode_semgive();
 
   /* The return value of -EBUSY is normal (in fact, it should
    * not be OK)
    */
 
-  if (status != OK && status != -EBUSY)
+  if (ret != OK && ret != -EBUSY)
     {
-      errcode = -status;
+      errcode = -ret;
       goto errout_with_mountpt;
     }
 

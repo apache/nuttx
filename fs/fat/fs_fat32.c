@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.c
  *
- *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -97,7 +97,8 @@ static int     fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir);
 
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
-static int     fat_unbind(void *handle, FAR struct inode **blkdriver);
+static int     fat_unbind(void *handle, FAR struct inode **blkdriver,
+                          unsigned int flags);
 static int     fat_statfs(struct inode *mountpt, struct statfs *buf);
 
 static int     fat_unlink(struct inode *mountpt, const char *relpath);
@@ -116,7 +117,7 @@ static int     fat_stat(struct inode *mountpt, const char *relpath, struct stat 
  * Public Variables
  ****************************************************************************/
 
-/* See fs_mount.c -- this structure is explicitly externed there.
+/* See fs_mount.c -- this structure is explicitly extern'ed there.
  * We use the old-fashioned kind of initializers so that this will compile
  * with any compiler.
  */
@@ -197,7 +198,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   ret = fat_finddirentry(fs, &dirinfo, relpath);
 
-  /* Three possibililities: (1) a node exists for the relpath and
+  /* Three possibilities: (1) a node exists for the relpath and
    * dirinfo describes the directory entry of the entity, (2) the
    * node does not exist, or (3) some error occurred.
    */
@@ -1795,7 +1796,8 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
  *
  ****************************************************************************/
 
-static int fat_unbind(void *handle, FAR struct inode **blkdriver)
+static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                      unsigned int flags)
 {
   struct fat_mountpt_s *fs = (struct fat_mountpt_s*)handle;
   int ret;
@@ -1811,9 +1813,13 @@ static int fat_unbind(void *handle, FAR struct inode **blkdriver)
   fat_semtake(fs);
   if (fs->fs_head)
     {
-      /* We cannot unmount now.. there are open files */
+      /* We cannot unmount now.. there are open files
+       *
+       * This implementation currently only supports unmounting if there are
+       * no open file references.
+       */
 
-      ret = -EBUSY;
+      ret = (flags != 0) ? -ENOSYS : -EBUSY;
     }
   else
     {

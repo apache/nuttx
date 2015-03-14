@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_initialize.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -550,11 +550,21 @@ int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
  *
  ****************************************************************************/
 
-int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver)
+int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                 unsigned int flags)
 {
 #ifndef CONFIG_NXFFS_PREALLOCATED
 #  error "No design to support dynamic allocation of volumes"
 #else
+  /* This implementation currently only supports unmounting if there are no
+   * open file references.
+   */
+
+  if (flags != 0)
+    {
+      return -ENOSYS;
+    }
+
   return g_volume.ofiles ? -EBUSY : OK;
 #endif
 }

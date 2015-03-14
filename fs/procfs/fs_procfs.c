@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfs.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -170,7 +170,8 @@ static int     procfs_rewinddir(FAR struct inode *mountpt,
 
 static int     procfs_bind(FAR struct inode *blkdriver,
                  FAR const void *data, FAR void **handle);
-static int     procfs_unbind(FAR void *handle, FAR struct inode **blkdriver);
+static int     procfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                 unsigned int flags);
 static int     procfs_statfs(FAR struct inode *mountpt,
                  FAR struct statfs *buf);
 
@@ -861,7 +862,8 @@ static int procfs_bind(FAR struct inode *blkdriver, const void *data,
  *
  ****************************************************************************/
 
-static int procfs_unbind(void *handle, FAR struct inode **blkdriver)
+static int procfs_unbind(void *handle, FAR struct inode **blkdriver,
+                         unsigned int flags)
 {
   return OK;
 }

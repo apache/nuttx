@@ -92,7 +92,8 @@ static int     romfs_rewinddir(FAR struct inode *mountpt,
 
 static int     romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                           FAR void **handle);
-static int     romfs_unbind(FAR void *handle, FAR struct inode **blkdriver);
+static int     romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                            unsigned int flags);
 static int     romfs_statfs(FAR struct inode *mountpt,
                             FAR struct statfs *buf);
 
@@ -977,7 +978,8 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver)
+static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                        unsigned int flags)
 {
   FAR struct romfs_mountpt_s *rm = (FAR struct romfs_mountpt_s*)handle;
   int ret;
@@ -999,7 +1001,12 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver)
       /* We cannot unmount now.. there are open files */
 
       fdbg("There are open files\n");
-      ret = -EBUSY;
+
+      /* This implementation currently only supports unmounting if there are
+       * no open file references.
+       */
+
+      ret = (flags != 0) ? -ENOSYS : -EBUSY;
     }
   else
     {
