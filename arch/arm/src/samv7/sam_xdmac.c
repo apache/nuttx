@@ -1503,11 +1503,11 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
 
   sam_freelinklist(xdmach);
 
+#ifdef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
   /* If this was an RX DMA (peripheral-to-memory), then invalidate the cache
    * to force reloads from memory.
    */
 
-#ifdef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
   if (xdmach->rx)
     {
       arch_invalidate_dcache(xdmach->rxaddr, xdmach->rxaddr + xdmach->rxsize);
@@ -1988,12 +1988,24 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (xdmach->llhead)
     {
-      /* Save the callback info.  This will be invoked whent the DMA commpletes */
+      /* Save the callback info.  This will be invoked when the DMA completes */
 
       xdmach->callback = callback;
       xdmach->arg      = arg;
 
-      /* Is this a single block transfer?  Or a multiple block tranfer? */
+#ifndef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
+      /* If this is an RX DMA (peripheral-to-memory), then flush and
+       * invalidate the data cache to force reloading from memory when the
+       * DMA completes.
+       */
+
+     if (xdmach->rx)
+        {
+          arch_flush_dcache_all();
+        }
+#endif
+
+      /* Is this a single block transfer?  Or a multiple block transfer? */
 
       if (xdmach->llhead == xdmach->lltail)
         {
