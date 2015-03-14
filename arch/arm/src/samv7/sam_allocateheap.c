@@ -59,18 +59,22 @@
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
-/* All SAM's have SRAM0.and possibly NFCSRAM.  NFCSRAM may not be used,
- * however, if NAND support is enabled.  External memory may also be
- * available.
- *
- * REVISIT: Support for external SRAM at CS1-3 is not fully implemented.
+/* All SAM's have SRAM.  In addition, they may have external SRAM or SDRAM */
+
+#define HAVE_SDRAM_REGION     0 /* Assume no external SDRAM */
+#define HAVE_EXTSRAM0_REGION  0 /* Assume no external SRAM at CS0 */
+#define HAVE_EXTSRAM1_REGION  0 /* Assume no external SRAM at CS1 */
+#define HAVE_EXTSRAM2_REGION  0 /* Assume no external SRAM at CS2 */
+#define HAVE_EXTSRAM3_REGION  0 /* Assume no external SRAM at CS3 */
+
+/* Check if external SDRAM is supported and, if so, it is is intended
+ * to be used as heap.
  */
 
-#undef HAVE_NFCSRAM_REGION   /* Assume no available NFC SRAM */
-#undef HAVE_EXTSRAM0_REGION  /* Assume no external SRAM at CS0 */
-#undef HAVE_EXTSRAM1_REGION  /* Assume no external SRAM at CS1 */
-#undef HAVE_EXTSRAM2_REGION  /* Assume no external SRAM at CS2 */
-#undef HAVE_EXTSRAM3_REGION  /* Assume no external SRAM at CS3 */
+#if !defined(CONFIG_SAMV7_SDRAMC) || !defined(CONFIG_SAMV7_SDRAMHEAP)
+#  undef CONFIG_SAMV7_SDRAMSIZE
+#  define CONFIG_SAMV7_SDRAMSIZE 0
+#endif
 
 /* Check if external SRAM is supported and, if so, it is is intended
  * to be used as heap.
@@ -96,33 +100,52 @@
 #  define CONFIG_SAMV7_EXTSRAM3SIZE 0
 #endif
 
-/* NFCSRAM is not available is NAND is supported */
+/* Now lets reconcile the number of configured regions with the available
+ * memory resource configured for use as a heap region.
+ */
 
-#ifdef CONFIG_SAMV7_NAND
-#  undef SAMV7_NFCSRAM_SIZE
-#  define SAMV7_NFCSRAM_SIZE 0
+#if CONFIG_SAMV7_SDRAMSIZE > 0
+#  if CONFIG_MM_REGIONS > 1
+#     undef  HAVE_SDRAM_REGION
+#     define HAVE_SDRAM_REGION 1
+#  else
+#    warning "CONFIG_MM_REGIONS < 2: SDRAM not included in HEAP"
+#  endif
 #endif
 
-#if SAMV7_NFCSRAM_SIZE > 0
-#  if CONFIG_MM_REGIONS > 2
-#    define HAVE_NFCSRAM_REGION
-#  else
-#    warning "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
-#  endif
-
-#  if CONFIG_SAMV7_EXTSRAM0SIZE > 0
-#    if CONFIG_MM_REGIONS > 3
-#      define HAVE_EXTSRAM0_REGION 1
-#    else
-#      warning "CONFIG_MM_REGIONS < 4: External SRAM not included in HEAP"
-#    endif
-#  endif
-
-#elif CONFIG_SAMV7_EXTSRAM0SIZE > 0
-#  if CONFIG_MM_REGIONS > 2
+#if CONFIG_SAMV7_EXTSRAM0SIZE > 0
+#  if CONFIG_MM_REGIONS > (HAVE_SDRAM_REGION + 1)
+#     undef  HAVE_EXTSRAM0_REGION
 #     define HAVE_EXTSRAM0_REGION 1
 #  else
-#    warning "CONFIG_MM_REGIONS < 3: External SRAM not included in HEAP"
+#    warning "CONFIG_MM_REGIONS too small: External SRAM0 not included in HEAP"
+#  endif
+#endif
+
+#if CONFIG_SAMV7_EXTSRAM1SIZE > 0
+#  if CONFIG_MM_REGIONS > (HAVE_SDRAM_REGION + HAVE_EXTSRAM0_REGION + 1)
+#     undef  HAVE_EXTSRAM1_REGION
+#     define HAVE_EXTSRAM1_REGION 1
+#  else
+#    warning "CONFIG_MM_REGIONS too small: External SRAM1 not included in HEAP"
+#  endif
+#endif
+
+#if CONFIG_SAMV7_EXTSRAM2SIZE > 0
+#  if CONFIG_MM_REGIONS > (HAVE_SDRAM_REGION + HAVE_EXTSRAM0_REGION + HAVE_EXTSRAM1_REGION + 1)
+#     undef  HAVE_EXTSRAM2_REGION
+#     define HAVE_EXTSRAM2_REGION 1
+#  else
+#    warning "CONFIG_MM_REGIONS too small: External SRAM2 not included in HEAP"
+#  endif
+#endif
+
+#if CONFIG_SAMV7_EXTSRAM3SIZE > 0
+#  if CONFIG_MM_REGIONS > (HAVE_SDRAM_REGION + HAVE_EXTSRAM0_REGION + HAVE_EXTSRAM1_REGION + HAVE_EXTSRAM2_REGION + 1)
+#     undef  HAVE_EXTSRAM3_REGION
+#     define HAVE_EXTSRAM3_REGION 1
+#  else
+#    warning "CONFIG_MM_REGIONS too small: External SRAM3 not included in HEAP"
 #  endif
 #endif
 
@@ -287,24 +310,18 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-#ifdef HAVE_NFCSRAM_REGION
-  /* Clocking may need to be applied to the SMC module in order for the
-   * NFCS SRAM to be functional. 
-   */
-
-  sam_smc_enableclk();
-
+#if HAVE_SDRAM_REGION != 0
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_NFCSRAM_BASE, SAMV7_NFCSRAM_SIZE);
+  sam_mpu_uheap(SAM_SDRAMCS_BASE, CONFIG_SAMV7_SDRAMSIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_NFCSRAM_BASE, SAMV7_NFCSRAM_SIZE);
+  kumm_addregion((FAR void*)SAM_SDRAMCS_BASE, CONFIG_SAMV7_SDRAMSIZE);
 
-#endif /* HAVE_NFCSRAM_REGION */
+#endif /* HAVE_SDRAM_REGION */
 
-#ifdef HAVE_EXTSRAM0_REGION
+#if HAVE_EXTSRAM0_REGION != 0
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_EXTCS0_BASE, CONFIG_SAMV7_EXTSRAM0SIZE);
@@ -315,7 +332,7 @@ void up_addregion(void)
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
-#ifdef HAVE_EXTSRAM1_REGION
+#if HAVE_EXTSRAM1_REGION != 0
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_EXTCS1_BASE, CONFIG_SAMV7_EXTSRAM1SIZE);
@@ -326,7 +343,7 @@ void up_addregion(void)
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
-#ifdef HAVE_EXTSRAM2_REGION
+#if HAVE_EXTSRAM2_REGION != 0
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_EXTCS2_BASE, CONFIG_SAMV7_EXTSRAM2SIZE);
@@ -337,7 +354,7 @@ void up_addregion(void)
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
-#ifdef HAVE_EXTSRAM3_REGION
+#if HAVE_EXTSRAM3_REGION != 0
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_EXTCS3_BASE, CONFIG_SAMV7_EXTSRAM3SIZE);
