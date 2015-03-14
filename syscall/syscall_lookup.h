@@ -215,7 +215,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(mount,                   5, STUB_mount)
   SYSCALL_LOOKUP(rename,                  2, STUB_rename)
   SYSCALL_LOOKUP(rmdir,                   1, STUB_rmdir)
-  SYSCALL_LOOKUP(umount,                  1, STUB_umount)
+  SYSCALL_LOOKUP(umount2,                 2, STUB_umount2)
   SYSCALL_LOOKUP(unlink,                  1, STUB_unlink)
 #  endif
 #endif

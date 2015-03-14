@@ -290,7 +290,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
       /* Un-mount the volume */
 
-      ret = umount(lower->mountpoint);
+      ret = umount2(lower->mountpoint, MNT_FORCE);
       if (ret < 0)
         {
           int errcode = get_errno();
@@ -305,7 +305,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
             {
               fvdbg("WARNING: Volume is busy, try again later\n");
 
-              /* Start a timer to retry the umount after a delay */
+              /* Start a timer to retry the umount2 after a delay */
 
               ret = wd_start(priv->wdog, lower->udelay, automount_timeout, 1,
                              (uint32_t)((uintptr_t)priv));
@@ -323,7 +323,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
           else
             {
-              fvdbg("ERROR: umount failed: %d\n", errcode);
+              fvdbg("ERROR: umount2 failed: %d\n", errcode);
               return -errcode;
             }
         }

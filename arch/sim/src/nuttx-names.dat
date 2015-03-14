@@ -41,7 +41,7 @@ statfs         NXstatfs
 system         NXsystem
 tcgetattr      NXtcgetattr
 tcsetattr      NXtcsetattr
-umount         NXumount
+umount2        NXumount2
 unlink         NXunlink
 usleep         NXusleep
 vfork          NXvfork

@@ -144,7 +144,7 @@
 "timer_getoverrun","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","timer_t"
 "timer_gettime","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","timer_t","FAR struct itimerspec*"
 "timer_settime","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","timer_t","int","FAR const struct itimerspec*","FAR struct itimerspec*"
-"umount","sys/mount.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","const char*"
+"umount2","sys/mount.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char*","unsigned int"
 "unlink","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char*"
 "unsetenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","const char*"
 "up_assert","assert.h","","void","FAR const uint8_t*","int"

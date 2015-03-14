@@ -298,7 +298,7 @@
 #    define SYS_mount                  (__SYS_mountpoint+2)
 #    define SYS_rename                 (__SYS_mountpoint+3)
 #    define SYS_rmdir                  (__SYS_mountpoint+4)
-#    define SYS_umount                 (__SYS_mountpoint+5)
+#    define SYS_umount2                (__SYS_mountpoint+5)
 #    define SYS_unlink                 (__SYS_mountpoint+6)
 #    define __SYS_shm                  (__SYS_mountpoint+7)
 #  else

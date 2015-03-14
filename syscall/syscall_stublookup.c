@@ -223,7 +223,7 @@ uintptr_t STUB_mount(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 uintptr_t STUB_rename(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_rmdir(int nbr, uintptr_t parm1);
-uintptr_t STUB_umount(int nbr, uintptr_t parm1);
+uintptr_t STUB_umount2(int nbr, uintptr_t parm1, uintptr parm2);
 uintptr_t STUB_unlink(int nbr, uintptr_t parm1);
 
 /* Shared memory interfaces */

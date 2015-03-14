@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/mount/fs_umount.c
+ * fs/mount/fs_umount2.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: umount
+ * Name: umount2
  *
  * Description:
  *   umount() detaches the filesystem mounted at the path specified by
@@ -87,7 +87,7 @@
  *
  ****************************************************************************/
 
-int umount(const char *target)
+int umount2(FAR const char *target, unsigned int flags)
 {
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
@@ -203,4 +203,3 @@ errout:
   set_errno(errcode);
   return ERROR;
 }
-
