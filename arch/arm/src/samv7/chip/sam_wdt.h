@@ -42,8 +42,8 @@
  ****************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/armv7/chip.h>
 
-#include "chip.h"
 #include "chip/sam_memorymap.h"
 
 /****************************************************************************************
@@ -58,7 +58,7 @@
 
 /* WDT register addresses ***************************************************************/
 
-/* WDT9: Legacy Watchdog Timer */
+/* WDT0: Legacy Watchdog Timer */
 
 #define SAM_WDT0_CR               (SAM_WDT0_BASE+SAM_WDT_CR_OFFSET)
 #define SAM_WDT0_MR               (SAM_WDT0_BASE+SAM_WDT_MR_OFFSET)
