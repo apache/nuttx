@@ -353,7 +353,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
    */
 
   ff->ff_next = fs->fs_head;
-  fs->fs_head = ff->ff_next;
+  fs->fs_head = ff;
 
   fat_semgive(fs);
 
@@ -391,6 +391,8 @@ static int fat_close(FAR struct file *filep)
 {
   struct inode         *inode;
   struct fat_file_s    *ff;
+  struct fat_file_s    *currff;
+  struct fat_file_s    *prevff;
   struct fat_mountpt_s *fs;
   int                   ret;
 
@@ -411,6 +413,26 @@ static int fat_close(FAR struct file *filep)
   /* Synchronize the file buffers and disk content; update times */
 
   ret = fat_sync(filep);
+
+  /* Remove the file structure from the list of open files in the mountpoint
+   * structure.
+   */
+
+  for (prevff = NULL, currff = fs->fs_head; 
+       currff && currff != ff;
+       prevff = currff, currff = currff->ff_next);
+
+  if (currff)
+    {
+      if (prevff)
+        {
+          prevff->ff_next = ff->ff_next;
+        }
+      else
+        {
+          fs->fs_head = ff->ff_next;
+        }
+    }
 
   /* Then deallocate the memory structures created when the open method
    * was called.
@@ -1408,7 +1430,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    */
 
   newff->ff_next = fs->fs_head;
-  fs->fs_head = newff->ff_next;
+  fs->fs_head = newff;
 
   fat_semgive(fs);
   return OK;
