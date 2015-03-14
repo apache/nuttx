@@ -101,7 +101,7 @@ CHIP_ASRCS += efm32_vectors.S
 endif
 
 CHIP_CSRCS  = efm32_start.c efm32_clockconfig.c efm32_irq.c efm32_timerisr.c
-CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c efm32_timer.c
+CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c efm32_timer.c efm32_i2c.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += efm32_idle.c

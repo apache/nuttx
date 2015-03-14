@@ -257,6 +257,16 @@ void efm32_gpioirqinitialize(void);
 int efm32_configgpio(gpio_pinset_t cfgset);
 
 /************************************************************************************
+ * Name: efm32_unconfiggpio
+ *
+ * Description:
+ *   UnConfigure a PIO pin based on bit-encoded description of the pin.
+ *
+ ************************************************************************************/
+
+int efm32_unconfiggpio(gpio_pinset_t cfgset);
+
+/************************************************************************************
  * Name: efm32_gpiowrite
  *
  * Description:

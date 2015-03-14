@@ -137,6 +137,14 @@ config EFM32_RMU_DEBUG
 	default n
 	depends on EFM32_RMU && DEBUG
 
+config EFM32_I2C0
+	bool "I2C0"
+	default n
+
+config EFM32_I2C1
+	bool "I2C1"
+	default n
+
 config EFM32_USART0
 	bool "USART0"
 	default n
