@@ -118,27 +118,49 @@ void sam_sdram_config(void)
   sam_configgpio(GPIO_SMC_D14);
   sam_configgpio(GPIO_SMC_D15);
 
-  sam_configgpio(GPIO_SMC_A0);
-  sam_configgpio(GPIO_SMC_A1);
-  sam_configgpio(GPIO_SMC_A2);
-  sam_configgpio(GPIO_SMC_A3);
-  sam_configgpio(GPIO_SMC_A4);
-  sam_configgpio(GPIO_SMC_A5);
-  sam_configgpio(GPIO_SMC_A6);
-  sam_configgpio(GPIO_SMC_A7);
-  sam_configgpio(GPIO_SMC_A8);
-  sam_configgpio(GPIO_SMC_A9);
-  sam_configgpio(GPIO_SDRAMC_A10_1);
+  /*   SAMV71          SDRAM
+   *   --------------- -----------
+   *   PC20 A2         A0
+   *   PC21 A3         A1
+   *   PC22 A4         A2
+   *   PC23 A5         A3
+   *   PC24 A6         A4
+   *   PC25 A7         A5
+   *   PC26 A8         A6
+   *   PC27 A9         A7
+   *   PC28 A10        A8
+   *   PC29 A11        A9
+   *   PD13 SDA10      A10
+   *   PA20 BA0        A11
+   *   PD17 CAS        nCAS
+   *   PD14 SDCKE      CKE
+   *   PD23 SDCK       CLK
+   *   PC15 SDCS       nCS
+   *   PC18 A0/NBS0    LDQM
+   *   PD16 RAS        nRAS
+   *   PD15 NWR1/NBS1  UDQM
+   *   PD29 SDWE       nWE
+   */
 
-  sam_configgpio(GPIO_SDRAMC_CAS);
-  sam_configgpio(GPIO_SDRAMC_RAS);
-  sam_configgpio(GPIO_SDRAMC_CKE);
-  sam_configgpio(GPIO_SDRAMC_CK);
-  sam_configgpio(GPIO_SDRAMC_CS_1);
-  sam_configgpio(GPIO_SMC_NBS0);
-  sam_configgpio(GPIO_SMC_NBS1);
-  sam_configgpio(GPIO_SDRAMC_WE);
-  sam_configgpio(GPIO_SDRAMC_BA0);
+  sam_configgpio(GPIO_SMC_A2);        /* PC20 A2        -> A0 */
+  sam_configgpio(GPIO_SMC_A3);        /* PC21 A3        -> A1 */
+  sam_configgpio(GPIO_SMC_A4);        /* PC22 A4        -> A2 */
+  sam_configgpio(GPIO_SMC_A5);        /* PC23 A5        -> A3 */
+  sam_configgpio(GPIO_SMC_A6);        /* PC24 A6        -> A4 */
+  sam_configgpio(GPIO_SMC_A7);        /* PC25 A7        -> A5 */
+  sam_configgpio(GPIO_SMC_A8);        /* PC26 A8        -> A6 */
+  sam_configgpio(GPIO_SMC_A9);        /* PC27 A9        -> A7 */
+  sam_configgpio(GPIO_SDRAMC_A10_2);  /* PD13 SDA10     -> A10 */
+  sam_configgpio(GPIO_SDRAMC_BA0);    /* PA20 BA0       -> A11 */
+
+  sam_configgpio(GPIO_SDRAMC_CAS);    /* PD17 CAS       -> nCAS */
+  sam_configgpio(GPIO_SDRAMC_CKE);    /* PD14 SDCKE     -> CKE */
+  sam_configgpio(GPIO_SDRAMC_CK);     /* PD23 SDCK      -> CLK */
+  sam_configgpio(GPIO_SDRAMC_CS_1);   /* PC15 SDCS      -> nCS */
+  sam_configgpio(GPIO_SMC_NBS0);      /* PC18 A0/NBS0   -> LDQM */
+  sam_configgpio(GPIO_SDRAMC_RAS);    /* PD16 RAS       -> nRAS */
+  sam_configgpio(GPIO_SMC_NBS1);      /* PD15 NWR1/NBS1 -> UDQM */
+  sam_configgpio(GPIO_SDRAMC_WE);     /* PD29 SDWE      -> nWE */
 
   /* Enable the SDRAMC peripheral */
 

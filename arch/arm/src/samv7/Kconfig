@@ -480,9 +480,28 @@ config SAMV7_GPIOE_IRQ
 endif # SAMV7_GPIO_IRQ
 endif # ARCH_CHIP_SAMV7
 
-if SAMV7_SPI0 || SAMV7_SPI1
+menu "SDRAM Configuration"
+	depends on SAMV7_SDRAMC
+
+config SAMV7_SDRAMSIZE
+	int "SDRAM size (bytes)"
+	default 0
+	---help---
+		This is the usable size of the SDRAM.  This may be a value less that
+		the actual size of the SDRAM if, for some reason, you wish to
+		reserve the end of SDRAM memory for some other purpose.
+
+config SAMV7_SDRAMHEAP
+	bool "SDRAM heap"
+	default y
+	---help---
+		Add the first SAMV7_SDRAMSIZE bytes of SDRAM to the heap.  NOTE that
+		this requires also that MM_REGIONS be incremented to support another memory region.
+
+endmenu # SDRAM Configuration
 
 menu "SAMV7 SPI device driver options"
+	depends on AMV7_SPI0 || SAMV7_SPI1
 
 config SAMV7_SPI_DMA
 	bool "SPI DMA"
@@ -519,11 +538,9 @@ config SAMV7_SPI_REGDEBUG
 		Requires also DEBUG.
 
 endmenu # SAMV7 SPI device driver options
-endif # SAMV7_SPI0 || SAMV7_SPI1
-
-if SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
 
 menu "TWIHS device driver options"
+	depends on SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
 
 config SAMV7_TWIHS0_FREQUENCY
 	int "TWIHS0 Frequency"
@@ -549,10 +566,9 @@ config SAMV7_TWIHS_REGDEBUG
 		Very invasive! Requires also DEBUG.
 
 endmenu # TWIHS device driver options
-endif # SAMV7_TWIHS0 || SAMV7_TWIHS1 || SAMV7_TWIHS2
 
-if SAMV7_SSC
 menu "SSC Configuration"
+	depends on SAMV7_SSC
 
 config SAMV7_SSC_MAXINFLIGHT
 	int "SSC queue size"
@@ -940,10 +956,9 @@ config SAMV7_SSC_DUMPBUFFERS
 		Enable instrumentation to dump TX and RX buffers.
 
 endmenu # SSC Configuration
-endif # SAMV7_SSC
 
-if SAMV7_HSMCI
 menu "HSMCI device driver options"
+	depends on SAMV7_HSMCI
 
 config SAMV7_HSMCI_RDPROOF
 	bool "Read Proof Enable"
@@ -994,4 +1009,3 @@ config SAMV7_HSMCI_REGDEBUG
 		Very invasive! Requires also DEBUG.
 
 endmenu # HSMCI device driver options
-endif # SAMV7_HSMCI
