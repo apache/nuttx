@@ -437,7 +437,40 @@ Configuration sub-directories
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
 
-    3. The button test at apps/examples/buttons is included in the
+    4. SDRAM is not enabled in this configuration.  I have enabled SDRAM and
+       the apps/examples RAM test using this configuration settings:
+
+       System Type
+         CONFIG_SAMV7_SDRAMC=y
+         CONFIG_SAMV7_SDRAMSIZE=2097152
+
+       Application Configuration:
+         CONFIG_SYSTEM_RAMTEST=y
+
+       The RAM test can be executed as follows:
+
+         nsh> ramtest -w 70000000 209152
+
+       STATUS: As of this writing, SDRAM does not pass the RAM test.  This is the sympton:
+
+        nsh> mw 70000000
+          70000000 = 0x00000000
+        nsh> mw 70000000=55555555
+          70000000 = 0x00000000 -> 0x55555555
+        nsh> mw 70000000
+          70000000 = 0x55555555
+
+        nsh> mw 70100000
+          70100000 = 0x00000000
+        nsh> mw 70100000=aaaaaaaa
+          70100000 = 0x00000000 -> 0xaaaaaaaa
+        nsh> mw 70100000
+          70100000 = 0xaaaaaaaa
+
+        nsh> mw 70000000
+          70000000 = 0x00000000 <<< Lost RAM content
+
+    5. The button test at apps/examples/buttons is included in the
        configuration.  This configuration illustrates (1) use of the buttons
        on the evaluation board, and (2) the use of PIO interrupts.  Example
        usage:
@@ -466,7 +499,7 @@ Configuration sub-directories
          SW1 depressed
        nsh>
 
-    4. TWI/I2C
+    6. TWI/I2C
 
        TWIHS0 is enabled in this configuration.  The SAM V71 Xplained Ultra
        supports two devices on the one on-board I2C device on the TWIHS0 bus:
@@ -544,7 +577,7 @@ Configuration sub-directories
 
        CAREFUL!!! You can trash your MAC address using the I2C tool!
 
-    5. Performance-related Configuration settings:
+    7. Performance-related Configuration settings:
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
