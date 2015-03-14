@@ -9987,3 +9987,5 @@
 	  ACMD commands. Also, after the block reading wait loop must be
 	  inserted before writing the next block of data to the sd card.  From
 	  Dmitry Nikolaev via Jussi Kivilinna (2015-03-13).
+	* arch/arm/src/efm32/efm32_i2c.c:  Add I2C driver.  From Pierre-noel
+	  Bouteville (2015-03-14).
