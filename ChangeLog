@@ -9989,3 +9989,14 @@
 	  Dmitry Nikolaev via Jussi Kivilinna (2015-03-13).
 	* arch/arm/src/efm32/efm32_i2c.c:  Add I2C driver.  From Pierre-noel
 	  Bouteville (2015-03-14).
+	* fs/mount/, include.sys/mount, syscall/:  Add umount2().  umount() is
+	  now a macro that just calls umount2() with flags = 0 (2015-03-14).
+	* fs/mount/fs_umount2.c, all file systems, include/nuttx/fs/fs.h:  Pass
+	  the umount2() flags to every unbind() implementation.  That is where
+	  the decision to umount or not will be made (2015-03-14).
+	* fs/fat/fs_fat32.c: Fix a bug in the FAT unbind() logic.  There were
+	  problems with the way certain internal list handling was implemented.
+	  The end result is that newly opened or cloned file structures were
+	  never being added to the list of open files.  So when the unmount()
+	  happens, it always looked like there were not open files and a crash
+	  could ensue (2015-03-14).
