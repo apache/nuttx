@@ -42,7 +42,7 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = sam_boot.c
 
-ifeq ($(CONFIG_SAMA5_SDRAMC),y)
+ifeq ($(CONFIG_SAMV7_SDRAMC),y)
 CSRCS += sam_sdram.c
 endif
 

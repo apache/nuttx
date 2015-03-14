@@ -42,7 +42,7 @@
  ****************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/armv7/chip.h>
+#include <arch/samv7/chip.h>
 
 #include "chip/sam_memorymap.h"
 

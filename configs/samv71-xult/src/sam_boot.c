@@ -71,6 +71,14 @@
 
 void sam_boardinitialize(void)
 {
+#ifdef CONFIG_SAMV7_SDRAMC
+  /* Configure SDRAM if it has been enabled in the NuttX configuration.  Here we
+   * assume, of course, that we are not running out SDRAM.
+   */
+
+  sam_sdram_config();
+#endif
+
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * sam_spiinitialize() has been brought into the link.
    */

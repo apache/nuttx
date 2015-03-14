@@ -286,7 +286,7 @@
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMA5_SDRAMC
+#ifdef CONFIG_SAMV7_SDRAMC
 void sam_sdram_config(void);
 #else
 #  define sam_sdram_config(t)

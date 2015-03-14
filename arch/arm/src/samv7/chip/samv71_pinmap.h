@@ -333,7 +333,7 @@
 #define GPIO_SDRAMC_RAS      (GPIO_PERIPHC | GPIO_CFG_DEFAULT | GPIO_PORT_PIOD | GPIO_PIN16)
 #define GPIO_SDRAMC_WE       (GPIO_PERIPHC | GPIO_CFG_DEFAULT | GPIO_PORT_PIOD | GPIO_PIN29)
 
-/* Static Memory Controller (SMC) */
+/* Static Memory Controller (SMC).  Many pins shared with SDRAMC */
 
 #define GPIO_SMC_A0          (GPIO_PERIPHA | GPIO_CFG_PULLUP | GPIO_PORT_PIOC | GPIO_PIN18)
 #define GPIO_SMC_A1          (GPIO_PERIPHA | GPIO_CFG_PULLUP | GPIO_PORT_PIOC | GPIO_PIN19)
