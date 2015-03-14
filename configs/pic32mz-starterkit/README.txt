@@ -11,6 +11,7 @@ Contents
   Board Overview
   On Board Debug Support
   Creating Compatible NuttX HEX files
+  Tool Issues
   Serial Console
   LEDs
   Configurations
@@ -160,6 +161,22 @@ Creating Compatible NuttX HEX files
       mkpichex $PWD    #  Convert addresses in nuttx.hex.  $PWD is the path
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
+
+Tool Issues
+===========
+
+  If you use the Pinguino toolchain, you will probably see this error:
+
+  C:\pinguino-11\compilers\p32\bin\p32-ld.exe: target elf32-tradlittlemips not found
+
+  This is due to linker differences in the toolchains.  The linker script
+  at configs/pic32mz-starterkit has:
+
+    OUTPUT_FORMAT("elf32-tradlittlemips")
+
+  This error can be eliminated with the Pinguino toolchain by changing this to:
+
+    OUTPUT_FORMAT("elf32-littlemips")
 
 Serial Console
 ==============
