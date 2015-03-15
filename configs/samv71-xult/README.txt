@@ -68,10 +68,20 @@ The BASIC nsh configuration is fully function (as desribed below under
      is very low priority to me but might be important to you if you are need
      very high performance SD card accesses.
 
-  3. HSMCI TX DMA is currently does not work.
+  3. HSMCI TX DMA is currently disabled for the SAMV7.  There is some
+     issue with the TX DMA setup (HSMCI TX DMA the same driver works with
+     the SAMA5D4 which has a different DMA subsystem).  This is a bug that
+     needs to be resolved.
 
-  4. There not yet any support for the following: QSPI, USB, EMAC, AT24, or
-     WM8904.  So there is still plenty to be done.
+     DMA is enabled by these settings in the file arch/arm/src/samvy/sam_hsmci.c:
+
+     #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
+     #define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
+
+  4. There not yet any support for the following board features: QSPI, USB,
+     EMAC, AT24, or WM8904 nor for any non-board features).  Most of these
+     drivers will port easily from either the SAM3/4 or from the SAMA5Dx.
+     So there is still plenty to be done.
 
 Serial Console
 ==============
@@ -599,7 +609,16 @@ Configuration sub-directories
 
        CAREFUL!!! You can trash your MAC address using the I2C tool!
 
-    7. Performance-related Configuration settings:
+    7. Support for HSMCI is built-in by default. The SAMV71-XULT provides
+       one full-size SD memory card slot.  Refer to the section entitled
+       "SD card" for configuration-related information.
+
+       See "Open Issues" above for issues related to HSMCI.
+
+       The auto-mounter is not enabled.  See the section above entitled
+       "Auto-Mounter".
+
+    8. Performance-related Configuration settings:
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
