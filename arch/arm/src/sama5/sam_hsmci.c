@@ -3010,8 +3010,9 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
    */
 
   regval    = sam_getreg(priv, SAM_HSMCI_BLKR_OFFSET);
-  nblocks   = ((regval &  HSMCI_BLKR_BCNT_SHIFT) >> HSMCI_BLKR_BCNT_SHIFT);
+  nblocks   = ((regval &  HSMCI_BLKR_BCNT_MASK) >> HSMCI_BLKR_BCNT_SHIFT);
   blocksize = ((regval &  HSMCI_BLKR_BLKLEN_MASK) >> HSMCI_BLKR_BLKLEN_SHIFT);
+
   DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
 
   /* Physical address of the HSCMI source register, either the TDR (for
