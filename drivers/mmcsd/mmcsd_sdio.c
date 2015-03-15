@@ -1759,7 +1759,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   size_t nbytes;
   int ret;
 
-  fvdbg("startblockr=%d nblocks=%d\n", startblock, nblocks);
+  fvdbg("startblock=%d nblocks=%d\n", startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 1);
 
   /* Check if the card is locked or write protected (either via software or
@@ -2124,9 +2124,11 @@ static ssize_t mmcsd_write(FAR struct inode *inode, FAR const unsigned char *buf
 #endif
   ssize_t ret = nsectors;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
+
+  fvdbg("sector: %lu nsectors: %u sectorsize: %u\n",
+        (unsigned long)startsector, nsectors, priv->blocksize);
 
   mmcsd_takesem(priv);
 
