@@ -79,36 +79,43 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     fat_open(FAR struct file *filep, const char *relpath,
-                        int oflags, mode_t mode);
+static int     fat_open(FAR struct file *filep, FAR const char *relpath,
+                 int oflags, mode_t mode);
 static int     fat_close(FAR struct file *filep);
-static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen);
-static ssize_t fat_write(FAR struct file *filep, const char *buffer,
-                         size_t buflen);
+static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
 static off_t   fat_seek(FAR struct file *filep, off_t offset, int whence);
-static int     fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     fat_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
 
 static int     fat_sync(FAR struct file *filep);
 static int     fat_dup(FAR const struct file *oldp, FAR struct file *newp);
 
-static int     fat_opendir(struct inode *mountpt, const char *relpath,
-                           struct fs_dirent_s *dir);
-static int     fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir);
-static int     fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir);
+static int     fat_opendir(FAR struct inode *mountpt,
+                 FAR const char *relpath, FAR struct fs_dirent_s *dir);
+static int     fat_readdir(FAR struct inode *mountpt,
+                 FAR struct fs_dirent_s *dir);
+static int     fat_rewinddir(FAR struct inode *mountpt,
+                 FAR struct fs_dirent_s *dir);
 
-static int     fat_bind(FAR struct inode *blkdriver, const void *data,
-                        void **handle);
-static int     fat_unbind(void *handle, FAR struct inode **blkdriver,
-                          unsigned int flags);
-static int     fat_statfs(struct inode *mountpt, struct statfs *buf);
+static int     fat_bind(FAR struct inode *blkdriver, FAR const void *data,
+                 FAR void **handle);
+static int     fat_unbind(FAR void *handle,
+                 FAR struct inode **blkdriver, unsigned int flags);
+static int     fat_statfs(FAR struct inode *mountpt,
+                 FAR struct statfs *buf);
 
-static int     fat_unlink(struct inode *mountpt, const char *relpath);
-static int     fat_mkdir(struct inode *mountpt, const char *relpath,
-                         mode_t mode);
-static int     fat_rmdir(struct inode *mountpt, const char *relpath);
-static int     fat_rename(struct inode *mountpt, const char *oldrelpath,
-                          const char *newrelpath);
-static int     fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf);
+static int     fat_unlink(FAR struct inode *mountpt,
+                 FAR const char *relpath);
+static int     fat_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
+                 mode_t mode);
+static int     fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath);
+static int     fat_rename(FAR struct inode *mountpt,
+                 FAR const char *oldrelpath, FAR const char *newrelpath);
+static int     fat_stat(struct inode *mountpt, const char *relpath,
+                 FAR struct stat *buf);
 
 /****************************************************************************
  * Private Variables
@@ -245,7 +252,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
       /* If O_TRUNC is specified and the file is opened for writing,
        * then truncate the file.  This operation requires that the file is
-       * writable, but we have already checked that. O_TRUNC without write
+       * writeable, but we have already checked that. O_TRUNC without write
        * access is ignored.
        */
 
@@ -263,9 +270,8 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
       /* fall through to finish the file open operations */
     }
 
-  /* ENOENT would be returned by fat_finddirentry() if the full
-   * directory path was found, but the file was not found in the
-   * final directory.
+  /* ENOENT would be returned by fat_finddirentry() if the full directory
+   * path was found, but the file was not found in the final directory.
    */
 
   else if (ret == -ENOENT)
@@ -423,8 +429,7 @@ static int fat_close(FAR struct file *filep)
       ret = fat_sync(filep);
 
       /* Remove the file structure from the list of open files in the
-       * mountpoint
-       * structure.
+       * mountpoint structure.
        */
 
       for (prevff = NULL, currff = fs->fs_head;
@@ -466,7 +471,8 @@ static int fat_close(FAR struct file *filep)
  * Name: fat_read
  ****************************************************************************/
 
-static ssize_t fat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen)
 {
   FAR struct inode *inode;
   FAR struct fat_mountpt_s *fs;
@@ -522,8 +528,8 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   bytesleft = ff->ff_size - filep->f_pos;
 
-  /* Truncate read count so that it does not exceed the number
-   * of bytes left in the file.
+  /* Truncate read count so that it does not exceed the number of bytes left
+   * in the file.
    */
 
   if (buflen > bytesleft)
@@ -535,8 +541,8 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   if (!ff->ff_currentsector)
     {
-      /* The current sector can be determined from the current cluster
-       * and the file offset.
+      /* The current sector can be determined from the current cluster and
+       * the file offset.
        */
 
       ret = fat_currentsector(fs, ff, filep->f_pos);
@@ -546,9 +552,9 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
         }
     }
 
-  /* Loop until either (1) all data has been transferred, or (2) an
-   * error occurs.  We assume we start with the current sector
-  * (ff_currentsector) which may be uninitialized.
+  /* Loop until either (1) all data has been transferred, or (2) an error
+   * occurs.  We assume we start with the current sector (ff_currentsector)
+   * which may be uninitialized.
    */
 
   readsize    = 0;
@@ -584,9 +590,9 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 fat_read_restart:
 #endif
 
-      /* Check if the user has provided a buffer large enough to
-       * hold one or more complete sectors -AND- the read is
-       * aligned to a sector boundary.
+      /* Check if the user has provided a buffer large enough to hold one
+       * or more complete sectors -AND- the read is aligned to a sector
+       * boundary.
        */
 
       nsectors = buflen / fs->fs_hwsectorsize;
@@ -1614,7 +1620,9 @@ static int fat_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 
   fs = mountpt->i_private;
 
-  /* Make sure that the mount is still healthy */
+  /* Make sure that the mount is still healthy.
+   * REVISIT: What if a forced unmount was done since opendir() was called?
+   */
 
   fat_semtake(fs);
   ret = fat_checkmount(fs);
@@ -1755,7 +1763,9 @@ static int fat_rewinddir(FAR struct inode *mountpt,
 
   fs = mountpt->i_private;
 
-  /* Make sure that the mount is still healthy */
+  /* Make sure that the mount is still healthy
+   * REVISIT: What if a forced unmount was done since opendir() was called?
+   */
 
   fat_semtake(fs);
   ret = fat_checkmount(fs);
