@@ -442,7 +442,6 @@ static int fat_close(FAR struct file *filep)
 
   if (ff->ff_buffer)
     {
-      (void)fs; /* Unused if fat_io_free == free(). */
       fat_io_free(ff->ff_buffer, fs->fs_hwsectorsize);
     }
 
