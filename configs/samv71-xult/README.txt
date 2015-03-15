@@ -78,7 +78,11 @@ The BASIC nsh configuration is fully function (as desribed below under
      #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
      #define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
 
-  4. There not yet any support for the following board features: QSPI, USB,
+  4. There may also be some issues with removing and re-inserting SD cards
+     (of course with appropriate mounting and unmounting).  I all not sure
+     of this and need to do more testing to characterize if the issue.
+
+  5. There is not yet any support for the following board features: QSPI, USB,
      EMAC, AT24, or WM8904 nor for any non-board features).  Most of these
      drivers will port easily from either the SAM3/4 or from the SAMA5Dx.
      So there is still plenty to be done.
