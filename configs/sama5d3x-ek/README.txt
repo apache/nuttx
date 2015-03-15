@@ -3825,6 +3825,9 @@ To-Do List
    the SAMA5D4 which has a different DMA subsystem).  This is a bug that
    needs to be resolved.
 
+   UPDATE:  This problem may be fixed with a bug correct on 2015-03-15).
+   Ned to retest.
+
 4) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not
    appear to work with Windows.  Reformatting on Windows can resolve this.

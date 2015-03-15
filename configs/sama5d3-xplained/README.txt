@@ -3168,6 +3168,9 @@ To-Do List
    the SAMA5D4 which has a different DMA subsystem).  This is a bug that
    needs to be resolved.
 
+   UPDATE:  This problem may be fixed with a bug correct on 2015-03-15).
+   Ned to retest.
+
 3) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.
 
