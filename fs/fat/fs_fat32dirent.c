@@ -148,7 +148,8 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 #ifdef CONFIG_FAT_LFN
 static void fat_initlfname(uint8_t *chunk, int nchunk);
 static void fat_putlfnchunk(uint8_t *chunk, const uint8_t *src, int nchunk);
-static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+static int fat_putlfname(struct fat_mountpt_s *fs,
+                         struct fat_dirinfo_s *dirinfo);
 #endif
 static int fat_putsfdirentry(struct fat_mountpt_s *fs,
                              struct fat_dirinfo_s *dirinfo,
@@ -169,7 +170,9 @@ static int fat_putsfdirentry(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_lfnchecksum
  *
- * Desciption:  Caculate the checksum of .
+ * Description:
+ *   Verify that the checksum of the short file name matches the checksum
+ *   that we found in the long file name entries.
  *
  ****************************************************************************/
 
@@ -182,7 +185,7 @@ static uint8_t fat_lfnchecksum(const uint8_t *sfname)
   for (i = DIR_MAXFNAME; i; i--)
     {
       sum = ((sum & 1) << 7) + (sum >> 1) + *sfname++;
-	}
+    }
 
   return sum;
 }
@@ -604,7 +607,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
       tmp       = ext - (char*)dirinfo->fd_lfname;
       namechars = tmp;
 
-      /* And the rest, exluding the '.' is the extension. */
+      /* And the rest, excluding the '.' is the extension. */
 
       extchars  = len - namechars - 1;
       ext++;
@@ -617,9 +620,9 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
       extchars  = 0;
     }
 
+#ifdef CONFIG_FAT_LCNAMES
   /* Alias are always all upper case */
 
-#ifdef CONFIG_FAT_LCNAMES
   dirinfo->fd_ntflags = 0;
 #endif
 
@@ -628,7 +631,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
   memset(dirinfo->fd_name, ' ', DIR_MAXFNAME);
 
   /* Handle a special case where there is no name.  Windows seems to use
-   * the extension plus random stuff then ~1 to pat to 8 bytes.  Some
+   * the extension plus random stuff then ~1 to pad to 8 bytes.  Some
    * examples:
    *
    *   a.b          -> a.b          No long name
@@ -673,7 +676,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
       if (ch == '\0')
         {
           /* This is the end of the source string. Do we need to add ~1.  We
-           * will do that if we were parsing the name part when the endo of
+           * will do that if we were parsing the name part when the end of
            * string was encountered.
            */
 
@@ -2001,7 +2004,8 @@ static void fat_putlfnchunk(uint8_t *chunk, const uint8_t *src, int nchunk)
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
+static int fat_putlfname(struct fat_mountpt_s *fs,
+                         struct fat_dirinfo_s *dirinfo)
 {
   uint16_t diroffset;
   uint8_t *direntry;
@@ -2036,6 +2040,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       nentries++;
       remainder++;
     }
+
   DEBUGASSERT(nentries > 0 && nentries <= LDIR_MAXLFNS);
 
   /* Create the short file name alias */
@@ -2059,7 +2064,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
   startsector                 = fat_cluster2sector(fs, dirinfo->dir.fd_currcluster);
   dirinfo->dir.fd_index      += (dirinfo->dir.fd_currsector - startsector) * DIRSEC_NDIRS(fs);
 
-  /* Make sure that the alias is unique in this directory*/
+  /* Make sure that the alias is unique in this directory */
 
   ret = fat_uniquealias(fs, dirinfo);
   if (ret < 0)
@@ -2418,7 +2423,8 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
  *
  ****************************************************************************/
 
-int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
+int fat_allocatedirentry(struct fat_mountpt_s *fs,
+                         struct fat_dirinfo_s *dirinfo)
 {
   int32_t  cluster;
   int32_t  prevcluster;

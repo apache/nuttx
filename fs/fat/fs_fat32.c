@@ -1694,7 +1694,6 @@ static int fat_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
                */
 
 #ifdef CONFIG_FAT_LFN
-
               /* Get a reference to the current, short file name directory
                * entry.
                */

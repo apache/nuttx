@@ -17,7 +17,7 @@ nuttx/
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
- (11)  Libraries (libc/, libm/)
+ (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -1302,6 +1302,35 @@ o File system / Generic drivers (fs/, drivers/)
                suspecting that some evil has crept in.
   Status:      Open
   Priority:    Medium
+
+  Title:       MISSING FILES IN NSH 'LS' OF A DIRECTORY
+  Description: I have seen cases where (1) long file names are enabled,
+               but (2) a short file name is created like:
+
+                 nsh> echo "This is another thest" >/mnt/sdcard/another.txt
+
+               But then on subsequent 'ls' operations, the file does not appear:
+
+                 nsh> ls -l /mnt/sdcard
+
+               I have determined that the problem is because, for some as-
+               of-yet-unkown reason the short file name is treated as a long
+               file name.  The name then fails the long filename checksum
+               test and is skipped.
+
+               readdir() (and fat_readdir()) is the logic underlying the
+               failure and the problem appears to be something unique to the
+               fat_readdir() implementation.  Why?  Because the file is
+               visible when you put the SD card on a PC and because this
+               works fine:
+
+                 nsh> ls -l /mnt/sdcard/another.txt
+
+               The failure does not happen on all short file names.  I do
+               not understand the pattern.  But I have not had the opportunity
+               to dig into this deeply.
+  Status:      Open
+  Priority:    Medium-High
 
 o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
