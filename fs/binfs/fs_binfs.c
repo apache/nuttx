@@ -84,7 +84,8 @@ static int     binfs_rewinddir(FAR struct inode *mountpt,
 
 static int     binfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                           FAR void **handle);
-static int     binfs_unbind(FAR void *handle, FAR struct inode **blkdriver);
+static int     binfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                            unsigned int flags);
 static int     binfs_statfs(FAR struct inode *mountpt,
                             FAR struct statfs *buf);
 
