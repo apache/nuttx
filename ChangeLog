@@ -10000,3 +10000,5 @@
 	  never being added to the list of open files.  So when the unmount()
 	  happens, it always looked like there were not open files and a crash
 	  could ensue (2015-03-14).
+	* fs/fat/fs_fat32.c and fs_fat32.h: Add support for umount2(target,
+	  MNT_FORCE) in the FAT file system (2015-03-15).
