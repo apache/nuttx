@@ -9,6 +9,7 @@ Contents
 ========
 
   - Board Features
+  - Open Issues
   - Serial Console
   - SD card
   - Automounter
@@ -50,6 +51,27 @@ Board Features
 See the Atmel webite for further information about this board:
 
   - http://www.atmel.com/tools/atsamv71-xult.aspx
+
+Open Issues
+===========
+
+The BASIC nsh configuration is fully function (as desribed below under
+"Configurations").  There are still open issues that need to be resolved:
+
+  1. SDRAM support has been implemented and tested using the nsh
+     configuration (as desribed below).  Currently the memory test does not
+     pass.  I am suspecting that this is because D-Cache is enabled when
+     SDRAM is configured?
+
+  2. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+     transfers only because I have not yet had a chance to verify this.  The
+     is very low priority to me but might be important to you if you are need
+     very high performance SD card accesses.
+
+  3. HSMCI TX DMA is currently does not work.
+
+  4. There not yet any support for the following: QSPI, USB, EMAC, AT24, or
+     WM8904.  So there is still plenty to be done.
 
 Serial Console
 ==============
