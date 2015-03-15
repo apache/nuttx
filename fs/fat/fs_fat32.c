@@ -1890,7 +1890,6 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
                       unsigned int flags)
 {
   FAR struct fat_mountpt_s *fs = (FAR struct fat_mountpt_s*)handle;
-  int ret;
 
   if (!fs)
     {
@@ -1930,8 +1929,7 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
            */
 
           fat_semgive(fs);
-          ret = (flags != 0) ? -ENOSYS : -EBUSY;
-          return ret;
+          return (flags != 0) ? -ENOSYS : -EBUSY;
         }
     }
 
@@ -1950,8 +1948,7 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
           /* We hold a reference to the block driver but should not but
            * mucking with inodes in this context.  So, we will just return
            * our contained reference to the block driver inode and let the
-           * umount
-           * logic dispose of it.
+           * umount logic dispose of it.
            */
 
           if (blkdriver)
