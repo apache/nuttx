@@ -10002,3 +10002,10 @@
 	  could ensue (2015-03-14).
 	* fs/fat/fs_fat32.c and fs_fat32.h: Add support for umount2(target,
 	  MNT_FORCE) in the FAT file system (2015-03-15).
+	* drivers/mmcsd/mmcsd_sdio.c:  Fix some bad logic when file system debug
+	  is turned on:  Arguments to syslog were missing so that garbage was
+	  being printed (2015-03-15).
+	* arch/arm/src/sama5/sam_hsmci.c:  Fix a bug in SAMA5 HSMCI.  The
+	  bitfield mask and shift values were reversed resulting in a trashed
+	  value for the number of blocks in the BLOCKR register.  This was
+	  sufficient to prevent DMA writes from working (2015-03-15).
