@@ -118,16 +118,12 @@
 #  endif
 #endif
 
-/* There is some unresolved issue with the SAMV7D3 DMA.  TX DMA is currently
+/* There is some unresolved issue with the SAMV7 DMA.  TX DMA is currently
  * disabled.
  */
 
-#undef HSCMI_NORXDMA             /* Define to disable RX DMA */
-#undef HSCMI_NOTXDMA             /* Define to disable TX DMA */
-
-#ifdef ATSAMV7D3
-#  define HSCMI_NOTXDMA 1        /* Disabled */
-#endif
+#undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
+#define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
 
 /* Timing */
 
