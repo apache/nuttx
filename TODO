@@ -18,7 +18,7 @@ nuttx/
  (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, libm/)
- (13)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1300,72 +1300,6 @@ o File system / Generic drivers (fs/, drivers/)
                on Windows.  The long file name support has been around for a
                long time and I don't ever having seen this before so I am
                suspecting that some evil has crept in.
-  Status:      Open
-  Priority:    Medium
-
-  Title:       UNMOUNT WITH OPEN FILES
-  Description: What is the policy for umounting files that have open file
-               references?  Currently, umount() does the unmount
-               unconditionally and this has been noted to cause crashes in
-               some subsequent FAT file system operations.  umount() is not
-               a standard OS interface and so have no specification.  Here
-               are some possible behaviors or unmount() with open files:
-
-               1. Refuse to unmount() the file system if there are open
-                  references to files on the file system (i.e., the file
-                  system unbind() method returns a failure).
-               2. The file system knows that it has open references and so
-                  does not unbind() immediately, but defers until the last
-                  file is closed.
-               3. The file system performs the unbind() immediately, but
-                  returns an error for an any subsequent operations on the
-                  file system using one of the stale file handles.
-               4. In your application, do not un-mount until you have closed
-                  all references to files or directories in the file system.
-                  This would probably be a good practice anyway.
-
-               I lieu of any real specifications, I often just do what Linux
-               does.  Here is now Linux does things:
-               http://man7.org/linux/man-pages/man2/umount.2.html .
-               Linux has have a umount2() that takes flags that control these
-               behaviors.  They have a couple of other options as well.
-
-               It is not explicitly stated in the manpage, but it looks like
-               the Linux umount() does the first option:  It should return
-               EBUSY meaning that the "target could not be unmounted because
-               it is busy."  That one is pretty easy to implement within the
-               filesystem unbind() method.
-
-               I now think for an embedded system with mostly removable
-               storage devices, the option 3 is probably the most usable. For
-               example, NuttX has a little automounter at nuttx/fs/mount/fs_automount.c
-               That will automatically mount and unmount SD cards as they are
-               inserted or removed.  I think that is a desire-able feature on
-               an embedded device.  And I think it demands option 3 where the
-               umount occurs immediately, but then subsequent operations on
-               the volume fail.
-
-               The true lazy umount could also cause issues if the file is
-               never closed.  Of course if the media is gone, I would hope
-               that the file access also fail in that case.  But what if the
-               media is inserted and removed many times.  Seems like the lazy
-               unmount could cause some problems and won't really buy you
-               anything anyway (because the file I/O will fail anyway).
-  Status:      Open
-  Priority:    Medium-High
-
-  Title:       AUTMOUNTER BROKEN
-  Description: A bug was recently fixed in the FAT file system umount() logic.
-               FAT (and all other file systems) implement logic to fail the umount()
-               with EBUSY if there are open references to any file.  For FAT, there
-               was a bug that prevented this from working so the busy check always
-               failed and FAT always permitted the umount(), whether there are open
-               file or not.
-
-               Unfortunately, the automounter depended on this bug to force the
-               un-mounting.  I have changed the umount() call in the automounter to
-               umount2(MNT_FORCE), but the automounter will be broken until that
-               forced unmount feature is implemented.
   Status:      Open
   Priority:    Medium
 

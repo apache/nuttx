@@ -100,7 +100,7 @@ static int     binfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
  * Public Variables
  ****************************************************************************/
 
-/* See fs_mount.c -- this structure is explicitly externed there.
+/* See fs_mount.c -- this structure is explicitly extern'ed there.
  * We use the old-fashioned kind of initializers so that this will compile
  * with any compiler.
  */

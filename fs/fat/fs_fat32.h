@@ -271,11 +271,15 @@
 #define FSTYPE_FAT16        1
 #define FSTYPE_FAT32        2
 
-/* File buffer flags */
+/* File buffer flags (ff_bflags) */
 
 #define FFBUFF_VALID        1
 #define FFBUFF_DIRTY        2
 #define FFBUFF_MODIFIED     4
+
+/* Mount status flags (ff_bflags) */
+
+#define UMOUNT_FORCED       8
 
 /****************************************************************************
  * These offset describe the FSINFO sector
@@ -753,7 +757,7 @@ struct fat_mountpt_s
 struct fat_file_s
 {
   struct fat_file_s *ff_next;      /* Retained in a singly linked list */
-  uint8_t  ff_bflags;              /* The file buffer flags */
+  uint8_t  ff_bflags;              /* The file buffer/mount flags */
   uint8_t  ff_oflags;              /* Flags provided when file was opened */
   uint8_t  ff_sectorsincluster;    /* Sectors remaining in cluster */
   uint16_t ff_dirindex;            /* Index into ff_dirsector to directory entry */
