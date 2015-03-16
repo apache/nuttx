@@ -104,7 +104,7 @@
 #define SAM_ACC_BASE           0x40044000 /* 0x40044000-0x40047fff: Analog Comparator (ACC) */
 #define SAM_ICM_BASE           0x40048000 /* 0x40048000-0x4004bfff: Integrity Check Monitor (ICM) */
 #define SAM_ISI_BASE           0x4004c000 /* 0x4004c000-0x4004ffff: Image Sensor Interface (ISI) */
-#define SAM_EMAC_BASE          0x40050000 /* 0x40050000-0x40053fff: EMAC (aka GMAC) */
+#define SAM_EMAC0_BASE         0x40050000 /* 0x40050000-0x40053fff: EMAC0 (aka GMAC) */
 #define SAM_TC901_BASE         0x40054000 /* 0x40054000-0x40054fff: Timer Counters 9-11 */
 #  define SAM_TC9_BASE         0x40054000 /* 0x40054000-0x4005403f:   Timer Counter 9 */
 #  define SAM_TC10_BASE        0x40054040 /* 0x40054040-0x4005407f:   Timer Counter 10 */
