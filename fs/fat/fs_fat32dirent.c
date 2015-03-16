@@ -1198,9 +1198,10 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
     {
       nentries++;
     }
+
   DEBUGASSERT(nentries > 0 && nentries <= LDIR_MAXLFNS);
 
-  /* This is the first sequency number we are looking for, the sequence
+  /* This is the first sequence number we are looking for, the sequence
    * number of the last LFN entry (remember that they appear in reverse
    * order.. from last to first).
    */

@@ -1330,7 +1330,35 @@ o File system / Generic drivers (fs/, drivers/)
                not understand the pattern.  But I have not had the opportunity
                to dig into this deeply.
   Status:      Open
-  Priority:    Medium-High
+  Priority:    Perhaps not a problem???  I have analyzed this problem and
+               I am not sure what to do about it.  I am suspected that a
+               fat filesystem was used with a version of NuttX that does
+               not support long file name entries.  Here is the failure
+               scenario:
+
+               1) A file with a long file name is created under Windows.
+               2) Then the file is deleted.  I am not sure if Windows or
+                  NuttX deleted the file, but the resulting directory
+                  content is not compatible with NuttX with long file
+                  name support.
+
+                  The file deletion left the full sequence of long
+                  file name entries intact but apparently delete only
+                  the following short file name entry.  I am thinking
+                  that this might have happened because a version of NuttX
+                  with only short file name support was used to delete
+                  the file.
+
+               3) When a new file with a short file name was created, it
+                  re-used the short file name entry that was previously
+                  deleted.  This makes the new short file name entry
+                  look like a part of the long file name.
+
+               4) When comparing the checksum in the long file name
+                  entry with the checksum of the short file name, the
+                  checksum fails and the entire directlry sequence is
+                  ignored by readder() logic.  This the file does not
+                  appear in the 'ls'.
 
 o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
