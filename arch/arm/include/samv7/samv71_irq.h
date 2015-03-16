@@ -89,7 +89,7 @@
 #define SAM_PID_MCAN01        (36)  /* CAN0 IRQ line 1 */
 #define SAM_PID_MCAN10        (37)  /* CAN1 IRQ line 0 */
 #define SAM_PID_MCAN11        (38)  /* CAN1 IRQ line 1 */
-#define SAM_PID_EMAC          (39)  /* Ethernet MAC */
+#define SAM_PID_EMAC0         (39)  /* Ethernet MAC */
 #define SAM_PID_AFEC1         (40)  /* Analog Front End 1 */
 #define SAM_PID_TWIHS2        (41)  /* Two-Wire Interface 2 */
 #define SAM_PID_SPI1          (42)  /* Serial Peripheral Interface 1 */
@@ -159,7 +159,7 @@
 #define SAM_IRQ_MCAN01        (SAM_IRQ_EXTINT+SAM_PID_MCAN01) /* CAN0 IRQ line 1 */
 #define SAM_IRQ_MCAN10        (SAM_IRQ_EXTINT+SAM_PID_MCAN10) /* CAN1 IRQ line 0 */
 #define SAM_IRQ_MCAN11        (SAM_IRQ_EXTINT+SAM_PID_MCAN11) /* CAN1 IRQ line 1 */
-#define SAM_IRQ_EMAC          (SAM_IRQ_EXTINT+SAM_PID_EMAC)   /*  Ethernet MAC */
+#define SAM_IRQ_EMAC0         (SAM_IRQ_EXTINT+SAM_PID_EMAC0)  /*  Ethernet MAC */
 #define SAM_IRQ_AFEC1         (SAM_IRQ_EXTINT+SAM_PID_AFEC1)  /* Analog Front End 1 */
 #define SAM_IRQ_TWIHS2        (SAM_IRQ_EXTINT+SAM_PID_TWIHS2) /* Two-Wire Interface 2 */
 #define SAM_IRQ_SPI1          (SAM_IRQ_EXTINT+SAM_PID_SPI1)   /* Serial Peripheral Interface 1 */
