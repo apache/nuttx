@@ -169,8 +169,33 @@
  */
 
 /* Ethernet MAC.
- * to be provided
+ *
+ * KSZ8061RNBVA Connections
+ * ------------------------
+ *
+ *   ------ --------- --------- --------------------------
+ *   SAMV71 SAMV71    Ethernet  Shared functionality
+ *   Pin    Function  Function
+ *   ------ --------- --------- --------------------------
+ *   PD00   GTXCK     REF_CLK   Shield
+ *   PD01   GTXEN     TXEN
+ *   PD02   GTX0      TXD0
+ *   PD03   GTX1      TXD1
+ *   PD04   GRXDV     CRS_DV    Trace
+ *   PD05   GRX0      RXD0      Trace
+ *   PD06   GRX1      RXD1      Trace
+ *   PD07   GRXER     RXER      Trace
+ *   PD08   GMDC      MDC       Trace
+ *   PD09   GMDIO     MDIO
+ *   PA19   GPIO      INTERRUPT EXT1, Shield
+ *   PA29   GPIO      SIGDET
+ *   PC10   GPIO      RESET
+ *   ------ --------- --------- --------------------------
  */
+
+#define GPIO_INT_ETH0 (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                       GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN19)
+#define IRQ_INT_ETH0   SAM_IRQ_PA19
 
 /* LEDs
  *
