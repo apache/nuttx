@@ -56,6 +56,12 @@ ifeq ($(filter y, \
 endif
 
 ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL_XC32
+endif
+
+ifeq ($(filter y, \
       $(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_LITE) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= MICROCHIPL_LITE
@@ -144,6 +150,16 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL)
   MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = xc32-debug.ld
+endif
+
+# Microchip XC32 toolchain under Linux
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_XC32)
+  CROSSDEV ?= xc32-
+  MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
   LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
