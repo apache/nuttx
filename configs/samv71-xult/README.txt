@@ -362,8 +362,9 @@ Connectivity:
 
 I2C address:
 
-  The 7-bit address of the AT24 part is is 0b1011AAA where AAA is the state
-  of the A0, A1, and A3 pins on the part.  On the SAMV71-XULT board, these
+  The 7-bit addresses of the AT24 part are 0b1010AAA for the normal 2Kbit
+  memory and 0b1011aaa for the "extended memory" where aaa is the state of
+  the A0, A1, and A3 pins on the part.  On the SAMV71-XULT board, these
   are all pulled high so the full, 7-bit address is 0x5f.
 
 Networking
@@ -859,11 +860,11 @@ Configuration sub-directories
          70: -- -- -- -- -- -- -- --
          nsh>
 
-       Where 0x1a us the address of the WM8904 Audio CODEC and 0x5f is the
-       address of the AT24 EEPROM (I am not sure what the others are as
-       this writing).
-
-       CAREFUL!!! You can trash your MAC address using the I2C tool!
+       Where 0x1a us the address of the WM8904 Audio CODEC, 0x28 is the
+       address of TWI interface to the EDBG, 0x4e is the address of the
+       CP2100CP programmable PLL, and 0x57 and 0x5f are the addresses of
+       the AT2 EEPROM (I am not sure what the other address, 0x37, is are
+       as this writing).
 
     7. Support for HSMCI is built-in by default. The SAMV71-XULT provides
        one full-size SD memory card slot.  Refer to the section entitled
