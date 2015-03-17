@@ -271,9 +271,9 @@ config MTD_AT24XX
 if MTD_AT24XX
 
 config AT24XX_SIZE
-	int "AT24xx size (kbit)"
+	int "AT24xx size (Kbit)"
 	default 64
-		---help---
+	---help---
 		This is the XX in the AT24Cxx part number.  For example, if you have a
 		AT 24C512, then the correct value is 512.  This value is also the capacity
 		of the part in kilobits.  For example, the 24C512 supports 512 Kbits or
@@ -283,6 +283,31 @@ config AT24XX_ADDR
 	hex "AT24XX I2C address"
 	default 0x50
 	range 0x50 0x57
+	---help---
+		The I2C address of the FLASH part.  This is should be 0b01010aaa
+		(where aaa is determined by board/pin configuration).
+
+		For accesses to "extended memory" accesses, the driver will set
+		bit 3 of this address using 0xb01011aaa as the I2C address.
+
+config AT24XX_EXTENDED
+	bool "Extended memory"
+	default n
+	---help---
+		If the device supports extended memory, then this operion may be set
+		to enabled the MTDIOC_EXTENDED ioctl() operation.  When the
+		extended operation is selected, calls to the driver read method will
+		return data from the extended memory region.
+
+config AT24XX_EXTSIZE
+	int "Extended memory size (bytes)"
+	default 0
+	depends on AT24XX_EXTENDED
+	---help---
+		If the device supports extended memory, then this option provides
+		the size of the memory in bytes.
+
+		Other, block-oriented access are not effected by this setting
 
 endif
 

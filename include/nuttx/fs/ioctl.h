@@ -228,6 +228,10 @@
                                            * OUT: None */
 #define MTDIOC_SETSPEED   _MTDIOC(0x0004) /* IN:  New bus speed in Hz
                                            * OUT: None */
+#define MTDIOC_EXTENDED   _MTDIOC(0x0005) /* IN:  unsigned long
+                                           *      0=Use normal memory region
+                                           *      1=Use alternate/extended memory
+                                           * OUT: None */
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 

@@ -81,24 +81,34 @@
 
 /* Get the part configuration based on the size configuration */
 
-#if CONFIG_AT24XX_SIZE == 32      /* AT24C32: 32Kbits = 4KiB; 128 * 32 =  4096 */
+#if CONFIG_AT24XX_SIZE == 2       /* AT24C32: 2Kbits = 256; 16 * 16 =  256 */
+#  define AT24XX_NPAGES     16
+#  define AT24XX_PAGESIZE   16
+#  define AT24XX_ADDRSIZE   1
+#elif CONFIG_AT24XX_SIZE == 32    /* AT24C32: 32Kbits = 4KiB; 128 * 32 =  4096 */
 #  define AT24XX_NPAGES     128
 #  define AT24XX_PAGESIZE   32
+#  define AT24XX_ADDRSIZE   2
 #elif CONFIG_AT24XX_SIZE == 48    /* AT24C48: 48Kbits = 6KiB; 192 * 32 =  6144 */
 #  define AT24XX_NPAGES     192
 #  define AT24XX_PAGESIZE   32
+#  define AT24XX_ADDRSIZE   2
 #elif CONFIG_AT24XX_SIZE == 64    /* AT24C64: 64Kbits = 8KiB; 256 * 32 = 8192 */
 #  define AT24XX_NPAGES     256
 #  define AT24XX_PAGESIZE   32
+#  define AT24XX_ADDRSIZE   2
 #elif CONFIG_AT24XX_SIZE == 128   /* AT24C128: 128Kbits = 16KiB; 256 * 64 = 16384 */
 #  define AT24XX_NPAGES     256
 #  define AT24XX_PAGESIZE   64
+#  define AT24XX_ADDRSIZE   2
 #elif CONFIG_AT24XX_SIZE == 256   /* AT24C256: 256Kbits = 32KiB; 512 * 64 = 32768 */
 #  define AT24XX_NPAGES     512
 #  define AT24XX_PAGESIZE   64
+#  define AT24XX_ADDRSIZE   2
 #elif CONFIG_AT24XX_SIZE == 512   /* AT24C512: 512Kbits = 64KiB; 512 * 128 = 65536 */
 #  define AT24XX_NPAGES     512
 #  define AT24XX_PAGESIZE   128
+#  define AT24XX_ADDRSIZE   2
 #endif
 
 /* For applications where a file system is used on the AT24, the tiny page sizes
@@ -126,6 +136,10 @@ struct at24c_dev_s
 {
   struct mtd_dev_s      mtd;      /* MTD interface */
   FAR struct i2c_dev_s *dev;      /* Saved I2C interface instance */
+  bool                  initd;    /* True: The device has been initialize */
+#ifdef CONFIG_AT24XX_EXTENDED
+  bool                  extended; /* True: use extended memory region */
+#endif
   uint8_t               addr;     /* I2C address */
   uint16_t              pagesize; /* 32, 63 */
   uint16_t              npages;   /* 128, 256, 512, 1024 */
@@ -142,10 +156,8 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR uint8_t *buf);
 static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks, FAR const uint8_t *buf);
-#if 0 /* Not implemented */
-static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes,FAR uint8_t *buffer);
-#endif
+static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                          FAR uint8_t *buffer);
 static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
@@ -165,23 +177,28 @@ static struct at24c_dev_s g_at24c;
 static int at24c_eraseall(FAR struct at24c_dev_s *priv)
 {
   int startblock = 0;
-  uint8_t buf[AT24XX_PAGESIZE + 2];
+  uint8_t buf[AT24XX_PAGESIZE + AT24XX_ADDRSIZE];
 
-  memset(&buf[2],0xff,priv->pagesize);
-  I2C_SETADDRESS(priv->dev,priv->addr,7);
-  I2C_SETFREQUENCY(priv->dev,100000);
+  memset(&buf[AT24XX_ADDRSIZE], 0xff, priv->pagesize);
+  I2C_SETADDRESS(priv->dev, priv->addr, 7);
+  I2C_SETFREQUENCY(priv->dev, 100000);
 
   for (startblock = 0; startblock < priv->npages; startblock++)
     {
+#if AT24XX_ADDRSIZE == 2
       uint16_t offset = startblock * priv->pagesize;
       buf[1] = offset & 0xff;
       buf[0] = (offset >> 8) & 0xff;
+#else
+      buf[0] = startblock * priv->pagesize;
+#endif
 
-      while (I2C_WRITE(priv->dev, buf, 2) < 0)
+      while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
         {
           usleep(1000);
         }
-      I2C_WRITE(priv->dev, buf, priv->pagesize + 2);
+
+      I2C_WRITE(priv->dev, buf, AT24XX_PAGESIZE + AT24XX_ADDRSIZE);
     }
 
   return OK;
@@ -199,6 +216,54 @@ static int at24c_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
 }
 
 /************************************************************************************
+ * Name: at24c_read_internal
+ ************************************************************************************/
+
+static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
+                                   size_t nbytes, FAR uint8_t *buffer,
+                                   uint8_t address)
+{
+  uint8_t buf[AT24XX_ADDRSIZE];
+
+  fvdbg("offset: %lu nbytes: %lu address: %02x\n",
+        (unsigned long)offset, (unsigned long)nbytes, address);
+
+  I2C_SETADDRESS(priv->dev, address, 7);
+  I2C_SETFREQUENCY(priv->dev, 100000);
+
+  /* "Random Read: A Random Read requires a dummy byte write sequence to load in the
+   *  data word address. Once the device address word and data word address are clocked
+   *  in and acknowledged by the EEPROM, the microcontroller must generate another
+   *  Start condition. The microcontroller now initiates a current address read
+   *  by sending a device address with the read/write select bit high. The EEPROM
+   *  acknowledges the device address and serially clocks out the data word. To end the
+   *  random read sequence, the microcontroller does not respond with a zero but does
+   *  generate a Stop condition in the subsequent clock cycle."
+   *
+   * A repeated START after the address is suggested, however, this simple driver
+   * just performs the write as a sepate transfer with an additional, unnecessary STOP.
+   */
+
+#if AT24XX_ADDRSIZE == 2
+  buf[1] = offset & 0xff;
+  buf[0] = (offset >> 8) & 0xff;
+#else
+  buf[0] = (uint8_t)offset;
+#endif
+
+  while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
+    {
+      fvdbg("wait\n");
+      usleep(1000);
+    }
+
+  /* Then transfer the following bytes */
+
+  I2C_READ(priv->dev, buffer, nbytes);
+  return nbytes;
+}
+
+/************************************************************************************
  * Name: at24c_bread
  ************************************************************************************/
 
@@ -206,15 +271,17 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR uint8_t *buffer)
 {
   FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)dev;
-  size_t blocksleft;
+  off_t offset;
+  ssize_t nread;
+  size_t i;
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
   startblock *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
   nblocks    *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #endif
-  blocksleft  = nblocks;
 
-  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  fvdbg("startblock: %08lx nblocks: %lu\n",
+        (unsigned long)startblock, (unsigned long)nblocks);
 
   if (startblock >= priv->npages)
     {
@@ -226,31 +293,30 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
       nblocks = priv->npages - startblock;
     }
 
-  I2C_SETADDRESS(priv->dev,priv->addr,7);
-  I2C_SETFREQUENCY(priv->dev,100000);
+  /* Convert the access from startblock and number of blocks to a byte
+   * offset and number of bytes.
+   */
 
-  while (blocksleft-- > 0)
+  offset = startblock * priv->pagesize;
+
+  /* Then perform the byte-oriented read for each block separately */
+
+  for (i = 0; i < nblocks; i++)
     {
-      uint16_t offset = startblock * priv->pagesize;
-      uint8_t buf[2];
-      buf[1] = offset & 0xff;
-      buf[0] = (offset >> 8) & 0xff;
-
-      while (I2C_WRITE(priv->dev, buf, 2) < 0)
+      nread = at24c_read_internal(priv, offset, priv->pagesize, buffer,
+                                  priv->addr);
+      if (nread < 0)
         {
-          fvdbg("wait\n");
-          usleep(1000);
+          return nread;
         }
 
-      I2C_READ(priv->dev, buffer, priv->pagesize);
-      startblock++;
-      buffer += priv->pagesize;
+      offset += priv->pagesize;
     }
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
-  return nblocks / (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
+   return nblocks / (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #else
-  return nblocks;
+   return nblocks;
 #endif
 }
 
@@ -266,7 +332,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 {
   FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)dev;
   size_t blocksleft;
-  uint8_t buf[AT24XX_PAGESIZE+2];
+  uint8_t buf[AT24XX_PAGESIZE + AT24XX_ADDRSIZE];
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
   startblock *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
@@ -290,18 +356,23 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 
   while (blocksleft-- > 0)
     {
+#if AT24XX_ADDRSIZE
       uint16_t offset = startblock * priv->pagesize;
-      while (I2C_WRITE(priv->dev, (uint8_t *)&offset, 2) < 0)
+      buf[1] = offset & 0xff;
+      buf[0] = (offset >> 8) & 0xff;
+#else
+      buf[0] = startblock * priv->pagesize;
+#endif
+
+      while (I2C_WRITE(priv->dev, buf, AT24XX_ADDRSIZE) < 0)
         {
           fvdbg("wait\n");
           usleep(1000);
         }
 
-      buf[1] = offset & 0xff;
-      buf[0] = (offset >> 8) & 0xff;
-      memcpy(&buf[2], buffer, priv->pagesize);
+      memcpy(&buf[AT24XX_ADDRSIZE], buffer, priv->pagesize);
 
-      I2C_WRITE(priv->dev, buf, priv->pagesize + 2);
+      I2C_WRITE(priv->dev, buf, priv->pagesize + AT24XX_ADDRSIZE);
       startblock++;
       buffer += priv->pagesize;
     }
@@ -311,6 +382,54 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
 #else
   return nblocks;
 #endif
+}
+
+/************************************************************************************
+ * Name: at24c_read
+ ************************************************************************************/
+
+static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                          FAR uint8_t *buffer)
+{
+  FAR struct at24c_dev_s *priv = (FAR struct at24c_dev_s *)dev;
+  size_t  memsize;
+  uint8_t addr;
+
+  fvdbg("offset: %lu nbytes: %lu\n", (unsigned long)offset, (unsigned long)nbytes);
+
+  /* Don't permit reads beyond the end of the memory region */
+
+#ifdef MTDIOC_EXTENDED
+  if (priv->extended)
+    {
+      memsize = CONFIG_AT24XX_EXTSIZE;
+    }
+  else
+#endif
+    {
+      memsize = AT24XX_NPAGES * AT24XX_PAGESIZE;
+    }
+
+  if (offset + nbytes > memsize)
+    {
+      /* Return 0 meaning end-of-file */
+
+      return 0;
+    }
+
+  /* Get the I2C address, converting it to the extended I2C if needed */
+
+  addr = priv->addr;
+#ifdef MTDIOC_EXTENDED
+  if (priv->extended)
+    {
+      addr |= 0x08;
+    }
+#endif
+
+  /* Then perform the byte-oriented read using common logic */
+
+  return at24c_read_internal(priv, offset, nbytes, buffer, addr);
 }
 
 /************************************************************************************
@@ -373,6 +492,13 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         ret = at24c_eraseall(priv);
         break;
 
+#ifdef CONFIG_AT24XX_EXTENDED
+      case MTDIOC_EXTENDED:
+        priv->extended = (arg != 0);
+        ret = OK;
+        break;
+#endif
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
@@ -410,7 +536,7 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
    */
 
   priv = &g_at24c;
-  if (priv)
+  if (!priv->initd)
     {
       /* Initialize the allocated structure */
 
@@ -425,15 +551,17 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
       priv->mtd.erase  = at24c_erase;
       priv->mtd.bread  = at24c_bread;
       priv->mtd.bwrite = at24c_bwrite;
+      priv->mtd.read   = at24c_read;
       priv->mtd.ioctl  = at24c_ioctl;
       priv->dev        = dev;
-    }
 
-  /* Register the MTD with the procfs system if enabled */
+      /* Register the MTD with the procfs system if enabled */
 
 #ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "at24xx");
+      mtd_register(&priv->mtd, "at24xx");
 #endif
+      priv->initd      = true;
+    }
 
   /* Return the implementation-specific state structure as the MTD device */
 
@@ -441,4 +569,4 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
   return (FAR struct mtd_dev_s *)priv;
 }
 
-#endif
+#endif /* CONFIG_MTD_AT24XX */
