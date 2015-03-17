@@ -21,6 +21,10 @@ config MIPS32_TOOLCHAIN_MICROCHIPL
 	bool "Microchip C32 toolchain under Linux"
 	depends on HOST_LINUX
 
+config MIPS32_TOOLCHAIN_MICROCHIPL_XC32
+	bool "Microchip XC32 toolchain under Linux"
+	depends on HOST_LINUX
+
 config MIPS32_TOOLCHAIN_MICROCHIPL_LITE
 	bool "Microchip C32 toolchain under Linux (Lite edition)"
 	depends on HOST_LINUX

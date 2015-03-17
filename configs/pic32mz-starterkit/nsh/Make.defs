@@ -38,19 +38,27 @@ include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/mips/src/mips32/Toolchain.defs
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF),y)
-LDSCRIPT = mips-release.ld
+  LDSCRIPT = mips-release.ld
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW),y)
-LDSCRIPT = mips-release.ld
+  LDSCRIPT = mips-release.ld
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW),y)
-LDSCRIPT = c32-release.ld
+  LDSCRIPT = c32-release.ld
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE),y)
-LDSCRIPT = c32-release.ld
+  LDSCRIPT = c32-release.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+  #LDSCRIPT = mips-debug.ld
+  LDSCRIPT = mips-release.ld
+ifeq ($(MIPS_MPROCESSOR),elf32pic32mz)
+  MIPS_MPROCESSOR = 32MZ2048ECM144
+endif
 endif
 
 ifeq ($(WINTOOL),y)
@@ -92,13 +100,24 @@ ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHWARNINGSXX = -Wall -Wshadow
 ARCHDEFINES =
 
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+ifeq ($(CONFIG_DEBUG),y)
+  ARCHCFLAGS += -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist
+endif
+endif
+
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 AFLAGS = $(CFLAGS) -D__ASSEMBLY__
-LDFLAGS = # -no-isn32 --relax
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+  LDFLAGS = -nostdlib --defsym=__MPLAB_BUILD=1 --defsym=__MPLAB_DEBUG=1 --defsym=__DEBUG=1 --defsym=__MPLAB_DEBUGGER_PK3=1 --defsym=_min_heap_size=0 --gc-sections
+else
+  LDFLAGS = # -no-isn32 --relax
+endif
 
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
