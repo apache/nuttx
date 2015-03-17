@@ -316,11 +316,6 @@
 #define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
 #define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
 
-/* These cache operations are not yet available */
-
-#undef HAVE_CLEAN_DCACHE_RANGE
-#undef HAVE_INVALIDATE_DCACHE_RANGE
-
 /* Timing *******************************************************************/
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second
@@ -1118,11 +1113,8 @@ static int sam_transmit(struct sam_emac_s *priv)
       /* Driver managed the ring buffer */
 
       memcpy((void *)txdesc->addr, dev->d_buf, dev->d_len);
-
-#ifdef HAVE_CLEAN_DCACHE_RANGE
       arch_clean_dcache((uintptr_t)txdesc->addr,
                         (uintptr_t)txdesc->addr + dev->d_len);
-#endif
     }
 
   /* Update TX descriptor status. */
@@ -1136,13 +1128,8 @@ static int sam_transmit(struct sam_emac_s *priv)
   /* Update the descriptor status and flush the updated value to RAM */
 
   txdesc->status = status;
-
-#ifdef HAVE_CLEAN_DCACHE_RANGE
   arch_clean_dcache((uint32_t)txdesc,
                     (uint32_t)txdesc + sizeof(struct emac_txdesc_s));
-#else
-  arch_clean_dcache_all();
-#endif
 
   /* Increment the head index */
 
@@ -1346,13 +1333,13 @@ static int sam_recvframe(struct sam_emac_s *priv)
   rxdesc     = &priv->rxdesc[rxndx];
   isframe    = false;
 
-  /* Invalidate the RX descriptor to force re-fetching from RAM */
+  /* Invalidate the RX descriptor to force re-fetching from RAM.
+   * REVISIT:  If the rxdesc is not aligned with the cacheline boundary
+   * then won't this also invalidate some surrounding memory?
+   */
 
-#warning FIXME!!!
-#ifdef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
   arch_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-#endif
 
   nllvdbg("rxndx: %d\n", rxndx);
 
@@ -1373,14 +1360,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
               rxdesc = &priv->rxdesc[priv->rxndx];
               rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
               /* Flush the modified RX descriptor to RAM */
 
               arch_clean_dcache((uintptr_t)rxdesc,
                                 (uintptr_t)rxdesc +
                                 sizeof(struct emac_rxdesc_s));
-#endif
 
               /* Increment the RX index */
 
@@ -1421,14 +1405,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
                   rxdesc = &priv->rxdesc[priv->rxndx];
                   rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
                   /* Flush the modified RX descriptor to RAM */
 
                   arch_clean_dcache((uintptr_t)rxdesc,
                                     (uintptr_t)rxdesc +
                                     sizeof(struct emac_rxdesc_s));
-#endif
 
                   /* Increment the RX index */
 
@@ -1451,14 +1432,14 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
           /* Get the data source.  Invalidate the source memory region to
            * force reload from RAM.
+           *
+           * REVISIT:  If the rxdesc is not aligned with the cacheline
+           * boundary then won't this also invalidate some surrounding
+           * memory?
            */
 
           src = (const uint8_t *)(rxdesc->addr & EMACRXD_ADDR_MASK);
-
-#warning FIXME!!!
-#ifdef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
           arch_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
-#endif
 
           /* And do the copy */
 
@@ -1486,14 +1467,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
                   rxdesc = &priv->rxdesc[priv->rxndx];
                   rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
                   /* Flush the modified RX descriptor to RAM */
 
                   arch_clean_dcache((uintptr_t)rxdesc,
                                     (uintptr_t)rxdesc +
                                     sizeof(struct emac_rxdesc_s));
-#endif
 
                   /* Increment the RX index */
 
@@ -1529,14 +1507,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
           rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
           /* Flush the modified RX descriptor to RAM */
 
           arch_clean_dcache((uintptr_t)rxdesc,
                             (uintptr_t)rxdesc +
                             sizeof(struct emac_rxdesc_s));
-#endif
           priv->rxndx = rxndx;
         }
 
@@ -1544,13 +1519,14 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
     rxdesc = &priv->rxdesc[rxndx];
 
-#warning FIXME!!!
-#ifdef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
-    /* Invalidate the RX descriptor to force re-fetching from RAM */
+    /* Invalidate the RX descriptor to force re-fetching from RAM
+     *
+     * REVISIT:  If the rxdesc is not aligned with the cacheline boundary
+     * then won't this also invalidate some surrounding memory?
+     */
 
     arch_invalidate_dcache((uintptr_t)rxdesc,
                            (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-#endif
   }
 
   /* No packet was found */
@@ -1747,11 +1723,12 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       txdesc = &priv->txdesc[priv->txtail];
 
-#warning FIXME!!!
-#ifdef HAVE_INVALIDATE_DCACHE_RANGE /* Revisit */
+      /* REVISIT:  If the rxdesc is not aligned with the cacheline boundary
+       * then won't this also invalidate some surrounding memory?
+       */
+
       arch_invalidate_dcache((uintptr_t)txdesc,
                              (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
-#endif
 
       /* Is this TX descriptor still in use? */
 
@@ -1801,11 +1778,8 @@ static void sam_txdone(struct sam_emac_s *priv)
       /* Make sure that the USED bit is set */
 
       txdesc->status = (uint32_t)EMACTXD_STA_USED;
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
       arch_clean_dcache((uintptr_t)txdesc,
                         (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
-#endif
 #endif
 
       /* Increment the tail index */
@@ -4075,14 +4049,11 @@ static void sam_txreset(struct sam_emac_s *priv)
   txdesc[priv->attr->ntxbuffers - 1].status =
     EMACTXD_STA_USED | EMACTXD_STA_WRAP;
 
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
   /* Flush the entire TX descriptor table to RAM */
 
   arch_clean_dcache((uintptr_t)txdesc,
                     (uintptr_t)txdesc +
                     priv->attr->ntxbuffers * sizeof(struct emac_txdesc_s));
-#endif
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
@@ -4139,14 +4110,11 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   rxdesc[priv->attr->nrxbuffers - 1].addr |= EMACRXD_ADDR_WRAP;
 
-#warning FIXME!!!
-#ifdef HAVE_CLEAN_DCACHE_RANGE
   /* Flush the entire RX descriptor table to RAM */
 
   arch_clean_dcache((uintptr_t)rxdesc,
                     (uintptr_t)rxdesc +
                     priv->attr->nrxbuffers * sizeof(struct emac_rxdesc_s));
-#endif
 
   /* Set the Receive Buffer Queue Pointer Register */
 

@@ -289,12 +289,10 @@ void arch_disable_dcache(void);
  *
  ****************************************************************************/
 
-#if 0 /* Not implemented */
 #ifdef CONFIG_ARMV7M_DCACHE
 void arch_invalidate_dcache(uintptr_t start, uintptr_t end);
 #else
 #  define arch_invalidate_dcache(s,e)
-#endif
 #endif
 
 /****************************************************************************
@@ -338,12 +336,10 @@ void arch_invalidate_dcache_all(void);
  *
  ****************************************************************************/
 
-#if 0 /* Not implemented */
 #ifdef CONFIG_ARMV7M_DCACHE
 void arch_clean_dcache(uintptr_t start, uintptr_t end);
 #else
 #  define arch_clean_dcache(s,e)
-#endif
 #endif
 
 /****************************************************************************
@@ -393,12 +389,10 @@ void arch_clean_dcache_all(void);
  *
  ****************************************************************************/
 
-#if 0 /* Not implemented */
 #ifdef CONFIG_ARMV7M_DCACHE
 void arch_flush_dcache(uintptr_t start, uintptr_t end);
 #else
 #  define arch_flush_dcache(s,e)
-#endif
 #endif
 
 /****************************************************************************
