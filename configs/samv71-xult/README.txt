@@ -396,6 +396,8 @@ Selecting the GMAC peripheral
 
   System Type -> SAMV7 Peripheral Support
     CONFIG_SAMV7_EMAC0=y                 : Enable the GMAC peripheral (aka, EMAC0)
+    CONFIG_SAMV7_TWIHS0=y                : We will get the MAC address from the AT24 EEPROM
+   CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
 
   System Type -> EMAC device driver options
     CONFIG_SAMV7_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
@@ -434,6 +436,13 @@ Selecting the GMAC peripheral
     CONFIG_NETDEVICES=y                  : Enabled PHY selection
     CONFIG_ETH0_PHY_KSZ8061=y            : Select the KSZ8061 PHY used with EMAC0
 
+  Device drivers -> Memory Technology Devices
+    CONFIG_MTD_AT24XX=y                  : Enable the AT24 device driver
+    CONFIG_AT24XX_SIZE=2                 : Normal EEPROM is 2Kbit (256b)
+    CONFIG_AT24XX_ADDR=0x57              : Normal EEPROM address */
+    CONFIG_AT24XX_EXTENDED=y             : Supports an extended memory region
+    CONFIG_AT24XX_EXTSIZE=160            : Extended address up to 0x9f
+
   Application Configuration -> Network Utilities
     CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y            : Enable the Telnet daemon
@@ -446,7 +455,7 @@ Selecting the GMAC peripheral
     CONFIG_NSH_IPADDR=0x0a000002         : Select an IP address
     CONFIG_NSH_DRIPADDR=0x0a000001       : IP address of gateway/host PC
     CONFIG_NSH_NETMASK=0xffffff00        : Netmask
-    CONFIG_NSH_NOMAC=y                   : Need to make up a bogus MAC address
+    CONFIG_NSH_NOMAC=n                   : We will get the IP address from EEPROM
                                          : Defaults should be okay for other options
 
 Using the network with NSH
