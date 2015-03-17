@@ -3850,14 +3850,22 @@ static int sam_phyinit(struct sam_emac_s *priv)
   regval &= ~EMAC_NCFGR_CLK_MASK;
 
   mck = BOARD_MCK_FREQUENCY;
-  if (mck > (160*1000*1000))
+  if (mck > (240*1000*1000))
     {
       ndbg("ERROR: Cannot realize PHY clock\n");
       return -EINVAL;
     }
-  else if (mck > (80*1000*1000))
+  else if (mck > (160*1000*1000))
+    {
+      regval |= EMAC_NCFGR_CLK_DIV96; /* MCK divided by 64 (MCK up to 240 MHz) */
+    }
+  else if (mck > (120*1000*1000))
     {
       regval |= EMAC_NCFGR_CLK_DIV64; /* MCK divided by 64 (MCK up to 160 MHz) */
+    }
+  else if (mck > (80*1000*1000))
+    {
+      regval |= EMAC_NCFGR_CLK_DIV48; /* MCK divided by 64 (MCK up to 120 MHz) */
     }
   else if (mck > (40*1000*1000))
     {
