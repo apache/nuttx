@@ -50,12 +50,16 @@
 
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/mtd/mtd.h>
 
 #include "sam_gpio.h"
+#include "sam_twihs.h"
 #include "sam_ethernet.h"
 
 #include "samv71-xult.h"
@@ -67,6 +71,8 @@
  ************************************************************************************/
 
 #define SAMV7_EMAC0_DEVNAME "eth0"
+
+#define AT24XX_MACADDR_OFFSET 0x9a
 
 /* Debug ********************************************************************/
 /* Extra, in-depth debug output that is only available if
@@ -94,7 +100,7 @@ static xcpt_t g_emac0_handler;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_emac_phy_enable and sam_gmac_enable
+ * Name: sam_emac0_phy_enable
  ************************************************************************************/
 
 #ifdef CONFIG_SAMV7_PIOA_IRQ
@@ -126,9 +132,98 @@ static void sam_emac0_phy_enable(bool enable)
 
 void weak_function sam_netinitialize(void)
 {
+  /* Configure the PHY interrupt GPIO */
+
   phydbg("Configuring %08x\n", GPIO_INT_ETH0);
   sam_configgpio(GPIO_INT_ETH0);
 }
+
+/************************************************************************************
+ * Name: sam_emac0_setmac
+ *
+ * Description:
+ *   Read the Ethernet MAC address from the AT24 FLASH and configure the Ethernet
+ *   driver with that address.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_MACADDR
+int sam_emac0_setmac(void)
+{
+  struct i2c_dev_s *i2c;
+  struct mtd_dev_s *at24;
+  uint8_t mac[6];
+  ssize_t nread;
+  int ret;
+
+  /* Get an instance of the TWI0 interface */
+
+  i2c = up_i2cinitialize(0);
+  if (!i2c)
+    {
+      ndbg("ERROR: Failed to initialize TWI0\n");
+      return -ENODEV;
+    }
+
+  /* Initialize the AT24 driver */
+
+  at24 = at24c_initialize(i2c);
+  if (!at24)
+    {
+      ndbg("ERROR: Failed to initialize the AT24 driver\n");
+      (void)up_i2cuninitialize(i2c);
+      return -ENODEV;
+    }
+
+  /* Configure the AT24 to access the extended memory region */
+
+  ret = at24->ioctl(at24, MTDIOC_EXTENDED, 1);
+  if (ret < 0)
+    {
+      ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+      (void)up_i2cuninitialize(i2c);
+      return ret;
+    }
+
+  /* Read the MAC address */
+
+  nread = at24->read(at24, AT24XX_MACADDR_OFFSET, 6, mac);
+  if (nread < 6)
+    {
+      ndbg("ERROR: AT24 read(AT24XX_MACADDR_OFFSET) failed: ld\n", (long)nread);
+      (void)up_i2cuninitialize(i2c);
+      return (int)nread;
+    }
+
+  /* Put the AT24 back in normal memory access mode */
+
+  ret = at24->ioctl(at24, MTDIOC_EXTENDED, 0);
+  if (ret < 0)
+    {
+      ndbg("ERROR: AT24 ioctl(MTDIOC_EXTENDED) failed: %d\n", ret);
+    }
+
+  /* Release the I2C instance.
+   * REVISIT:  Need an interface to release the AT24 instance too
+   */
+
+  ret = up_i2cuninitialize(i2c);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to release the I2C interface: %d\n", ret);
+    }
+
+  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  /* Now configure the EMAC driver to use this MAC address */
+#warning Missing logic
+
+  return OK;
+}
+#else
+#  define sam_emac0_setmac()
+#endif
 
 /****************************************************************************
  * Name: arch_phy_irq
@@ -207,7 +302,6 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   nvdbg("%s: handler=%p\n", intf, handler);
   phydbg("EMAC0: devname=%s\n", SAMV7_EMAC0_DEVNAME);
-  phydbg("EMAC1: devname=%s\n", SAMV7_EMAC1_DEVNAME);
 
   if (strcmp(intf, SAMV7_EMAC0_DEVNAME) == 0)
     {

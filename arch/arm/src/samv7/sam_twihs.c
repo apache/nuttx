@@ -164,6 +164,7 @@ struct twi_dev_s
 #endif
   uint16_t            address;    /* Slave address */
   uint16_t            flags;      /* Transfer flags */
+  bool                initd;      /* True :device has been initialized */
   uint8_t             msgc;       /* Number of message in the message list */
 
   sem_t               exclsem;    /* Only one thread can access at a time */
@@ -1428,36 +1429,46 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
 
   flags = irqsave();
 
-  /* Allocate a watchdog timer */
+  /* Has the device already been initialized? */
 
-  priv->timeout = wd_create();
-  if (priv->timeout == NULL)
+  if (!priv->initd)
     {
-      idbg("ERROR: Failed to allocate a timer\n");
-      goto errout_with_irq;
+      /* Allocate a watchdog timer */
+
+      priv->timeout = wd_create();
+      if (priv->timeout == NULL)
+        {
+          idbg("ERROR: Failed to allocate a timer\n");
+          goto errout_with_irq;
+        }
+
+      /* Attach Interrupt Handler */
+
+      ret = irq_attach(priv->attr->irq, priv->attr->handler);
+      if (ret < 0)
+        {
+          idbg("ERROR: Failed to attach irq %d\n", priv->attr->irq);
+          goto errout_with_wdog;
+        }
+
+      /* Initialize the TWIHS driver structure */
+
+      priv->dev.ops = &g_twiops;
+      priv->address = 0;
+      priv->flags   = 0;
+
+      (void)sem_init(&priv->exclsem, 0, 1);
+      (void)sem_init(&priv->waitsem, 0, 0);
+
+      /* Perform repeatable TWIHS hardware initialization */
+
+      twi_hw_initialize(priv, frequency);
+
+      /* Now it has been initialized */
+
+      priv->initd = true;
     }
 
-  /* Attach Interrupt Handler */
-
-  ret = irq_attach(priv->attr->irq, priv->attr->handler);
-  if (ret < 0)
-    {
-      idbg("ERROR: Failed to attach irq %d\n", priv->attr->irq);
-      goto errout_with_wdog;
-    }
-
-  /* Initialize the TWIHS driver structure */
-
-  priv->dev.ops = &g_twiops;
-  priv->address = 0;
-  priv->flags   = 0;
-
-  (void)sem_init(&priv->exclsem, 0, 1);
-  (void)sem_init(&priv->waitsem, 0, 0);
-
-  /* Perform repeatable TWIHS hardware initialization */
-
-  twi_hw_initialize(priv, frequency);
   irqrestore(flags);
   return &priv->dev;
 
@@ -1481,11 +1492,13 @@ errout_with_irq:
 int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
+  irqstate_t flags;
 
   i2cvdbg("TWIHS%d Un-initializing\n", priv->attr->twi);
 
   /* Disable TWIHS interrupts */
 
+  flags = irqsave();
   up_disable_irq(priv->attr->irq);
 
   /* Reset data structures */
@@ -1501,6 +1514,9 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
   /* Detach Interrupt Handler */
 
   (void)irq_detach(priv->attr->irq);
+
+  priv->initd = false;
+  irqrestore(flags);
   return OK;
 }
 

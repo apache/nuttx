@@ -59,6 +59,7 @@
 #define HAVE_USBDEV      1
 #define HAVE_USBMONITOR  1
 #define HAVE_NETWORK     1
+#define HAVE_MACADDR     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -160,6 +161,12 @@
 
 #if !defined(CONFIG_NET) || !defined(CONFIG_SAMV7_EMAC)
 #  undef HAVE_NETWORK
+#  undef HAVE_MACADDR
+#endif
+
+#if defined(CONFIG_NSH_NOMAC) || !defined(CONFIG_SAMV7_TWIHS0) || \
+   !defined(CONFIG_MTD_AT24XX) || !defined(CONFIG_AT24XX_EXTENDED)
+#  undef HAVE_MACADDR
 #endif
 
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
@@ -363,6 +370,19 @@ int sam_hsmci_initialize(int slot, int minor);
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_emac0_setmac
+ *
+ * Description:
+ *   Read the Ethernet MAC address from the AT24 FLASH and configure the Ethernet
+ *   driver with that address.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_MACADDR
+int sam_emac0_setmac(void);
 #endif
 
 /************************************************************************************

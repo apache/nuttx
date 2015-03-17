@@ -89,10 +89,22 @@
 
 int sam_bringup(void)
 {
-#if defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || \
-    defined(HAVE_WM8904) || defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || \
-    defined(HAVE_ROMFS)
+#if defined(HAVE_MACADDR) || defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || \
+    defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
+    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS)
   int ret;
+#endif
+
+#ifdef HAVE_MACADDR
+  /* Read the Ethernet MAC address from the AT24 FLASH and configure the
+   * Ethernet driver with that address.
+    */
+
+  ret = sam_emac0_setmac();
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: sam_emac0_setmac() failed: %d\n", ret);
+    }
 #endif
 
 #ifdef HAVE_HSMCI
