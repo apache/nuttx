@@ -10009,3 +10009,11 @@
 	  bitfield mask and shift values were reversed resulting in a trashed
 	  value for the number of blocks in the BLOCKR register.  This was
 	  sufficient to prevent DMA writes from working (2015-03-15).
+	* drivers/mtd/at24xx.c, Kconfig, and include/nuttx/fs/ioctl.h:  Add
+	  support for (1) the byte-oriented read() method, (2) devices that
+	  have extended memory regions, and (3) devices that use 8-bit
+	  addressing (2015-03-17).
+	* arch/mips/src/mips32/Kconfig, Toolchain.defs, and
+	  configs/pic32mz-starterkit/nsh/Make.defs:  Change that will permit
+	  building of the PIC32MZ Start Kit configuration using MPLAB and the
+	  XC32 toolchain.  From David Sidrane (2015-03-17).
