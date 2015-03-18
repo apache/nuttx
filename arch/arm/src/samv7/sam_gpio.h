@@ -83,11 +83,11 @@
 #define GPIO_CFG_SHIFT             (16)        /* Bits 16-20: GPIO configuration bits */
 #define GPIO_CFG_MASK              (31 << GPIO_CFG_SHIFT)
 #  define GPIO_CFG_DEFAULT         (0  << GPIO_CFG_SHIFT) /* Default, no attribute */
-#  define GPIO_CFG_PULLUP          (1  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
-#  define GPIO_CFG_PULLDOWN        (2  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-down */
-#  define GPIO_CFG_DEGLITCH        (4  << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
-#  define GPIO_CFG_OPENDRAIN       (8  << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
-#  define GPIO_CFG_SCHMITT         (16 << GPIO_CFG_SHIFT) /* Bit 13: Schmitt trigger */
+#  define GPIO_CFG_PULLUP          (1  << GPIO_CFG_SHIFT) /* Bit 16: Internal pull-up */
+#  define GPIO_CFG_PULLDOWN        (2  << GPIO_CFG_SHIFT) /* Bit 17: Internal pull-down */
+#  define GPIO_CFG_DEGLITCH        (4  << GPIO_CFG_SHIFT) /* Bit 18: Internal glitch filter */
+#  define GPIO_CFG_OPENDRAIN       (8  << GPIO_CFG_SHIFT) /* Bit 19: Open drain */
+#  define GPIO_CFG_SCHMITT         (16 << GPIO_CFG_SHIFT) /* Bit 20: Schmitt trigger */
 
 /* Additional interrupt modes:
  *

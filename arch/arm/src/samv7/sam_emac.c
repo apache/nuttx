@@ -7,8 +7,9 @@
  *
  * This logic derives from the SAMA5 Ethernet driver which, in turn, derived
  * from the SAM4E Ethernet driver which used Atmel NoOS sample code for
- * reference (only).  That Atmel sample code has a BSD compatible license
- * that requires this copyright notice:
+ * reference (only).  Updates for SAMV7 queue logic derive Atmel sample code
+ * for the SAMV7-XULT evaluation board.  The Atmel sample code has a BSD
+ * compatible license that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *
@@ -119,10 +120,18 @@
 #    define CONFIG_SAMV7_EMAC0_NRXBUFFERS  16
 #  endif
 
+#  if CONFIG_SAMV7_EMAC0_NRXBUFFERS <= 1
+#    error CONFIG_SAMV7_EMAC0_NRXBUFFERS invalid
+#  endif
+
   /* Number of buffers for TX */
 
 #  ifndef CONFIG_SAMV7_EMAC0_NTXBUFFERS
 #    define CONFIG_SAMV7_EMAC0_NTXBUFFERS  8
+#  endif
+
+#  if CONFIG_SAMV7_EMAC0_NTXBUFFERS <= 1
+#    error CONFIG_SAMV7_EMAC0_NTXBUFFERS invalid
 #  endif
 
 #  ifndef CONFIG_SAMV7_EMAC0_PHYADDR
@@ -205,10 +214,18 @@
 #    define CONFIG_SAMV7_EMAC1_NRXBUFFERS  16
 #  endif
 
+#  if CONFIG_SAMV7_EMAC1_NRXBUFFERS <= 1
+#    error CONFIG_SAMV7_EMAC1_NRXBUFFERS invalid
+#  endif
+
   /* Number of buffers for TX */
 
 #  ifndef CONFIG_SAMV7_EMAC1_NTXBUFFERS
 #    define CONFIG_SAMV7_EMAC1_NTXBUFFERS  8
+#  endif
+
+#  if CONFIG_SAMV7_EMAC1_NTXBUFFERS <= 1
+#    error CONFIG_SAMV7_EMAC1_NTXBUFFERS invalid
 #  endif
 
 #  ifndef CONFIG_SAMV7_EMAC1_PHYADDR
@@ -316,17 +333,34 @@
 #define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
 #define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
 
+#define DUMMY_BUFSIZE    128
+#define DUMMY_NBUFFERS   2
+
+/* Queue identifiers/indices */
+
+#define EMAC_QUEUE_0     0
+#define EMAC_QUEUE_1     1
+#define EMAC_QUEUE_2     2
+#define EMAC_NQUEUES     3
+
+/* Interrupt settings */
+
+#define EMAC_RX_INTS     (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_ROVR)
+#define EMAC_TXERR_INTS  (EMAC_INT_TUR | EMAC_INT_RLEX | EMAC_INT_TFC | \
+                          EMAC_INT_HRESP)
+#define EMAC_TX_INTS     (EMAC_TXERR_INTS | EMAC_INT_TCOMP)
+
 /* Timing *******************************************************************/
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second
  */
 
-#define SAM_WDDELAY     (1*CLK_TCK)
-#define SAM_POLLHSEC    (1*2)
+#define SAM_WDDELAY      (1*CLK_TCK)
+#define SAM_POLLHSEC     (1*2)
 
 /* TX timeout = 1 minute */
 
-#define SAM_TXTIMEOUT   (60*CLK_TCK)
+#define SAM_TXTIMEOUT    (60*CLK_TCK)
 
 /* PHY read/write delays in loop counts */
 
@@ -399,11 +433,34 @@ struct sam_emacattr_s
 #ifdef CONFIG_SAMV7_EMAC_PREALLOCATE
   /* Attributes and addresses of preallocated buffers */
 
-  struct emac_txdesc_s *txdesc;      /* Preallocated TX descriptor list */
-  struct emac_rxdesc_s *rxdesc;      /* Preallocated RX descriptor list */
-  uint8_t              *txbuffer;    /* Preallocated TX buffers */
-  uint8_t              *rxbuffer;    /* Preallocated RX buffers */
+  struct emac_txdesc_s *tx0desc;     /* Preallocated TX descriptor list */
+  struct emac_rxdesc_s *rx0desc;     /* Preallocated RX descriptor list */
+  uint8_t              *tx0buffer;   /* Preallocated TX buffers */
+  uint8_t              *rx0buffer;   /* Preallocated RX buffers */
+
+  struct emac_txdesc_s *tx1desc;     /* Preallocated TX dummy descriptor list */
+  struct emac_rxdesc_s *rx1desc;     /* Preallocated RX dummy descriptor list */
+  uint8_t              *tx1buffer;   /* Preallocated TX dummy buffers */
+  uint8_t              *rx1buffer;   /* Preallocated RX dummy buffers */
+
 #endif
+};
+
+/* This structure describes one transfer queue */
+
+struct sam_queue_s
+{
+  struct emac_rxdesc_s *rxdesc;      /* Allocated RX descriptors */
+  struct emac_txdesc_s *txdesc;      /* Allocated TX descriptors */
+  uint8_t              *rxbuffer;    /* Allocated RX buffers */
+  uint8_t              *txbuffer;    /* Allocated TX buffers */
+  uint16_t              rxbufsize;   /* Size of one RX buffer */
+  uint16_t              txbufsize;   /* Size of one TX buffer */
+  uint8_t               nrxbuffers;  /* Number of RX buffers/TDs  */
+  uint8_t               rxndx;       /* Current RX TD index */
+  uint8_t               ntxbuffers;  /* Number of TX buffers/TDs */
+  uint16_t              txhead;      /* Buffer head pointer */
+  uint16_t              txtail;      /* Buffer tail pointer */
 };
 
 /* The sam_emac_s encapsulates all state information for the EMAC peripheral */
@@ -431,16 +488,12 @@ struct sam_emac_s
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint8_t               phytype;     /* See SAMV7_EMAC0/1_PHY_TYPE definitions */
 #endif
-  uint16_t              txhead;      /* Circular buffer head index */
-  uint16_t              txtail;      /* Circular buffer tail index */
-  uint16_t              rxndx;       /* RX index for current processing RX descriptor */
 
-  uint8_t              *rxbuffer;    /* Allocated RX buffers */
-  uint8_t              *txbuffer;    /* Allocated TX buffers */
-  struct emac_rxdesc_s *rxdesc;      /* Allocated RX descriptors */
-  struct emac_txdesc_s *txdesc;      /* Allocated TX descriptors */
+  /* Transfer queues */
 
-  /* Debug stuff */
+  struct sam_queue_s    xfrq[EMAC_NQUEUES];
+
+    /* Debug stuff */
 
 #ifdef CONFIG_SAMV7_EMAC_REGDEBUG
    bool               wrlast;     /* Last was a write */
@@ -465,23 +518,25 @@ static void sam_putreg(struct sam_emac_s *priv, uint16_t offset, uint32_t val);
 
 /* Buffer management */
 
-static uint16_t sam_txinuse(struct sam_emac_s *priv);
-static uint16_t sam_txfree(struct sam_emac_s *priv);
-static int  sam_buffer_initialize(struct sam_emac_s *priv);
+static uint16_t sam_txinuse(struct sam_emac_s *priv, int qid);
+static uint16_t sam_txfree(struct sam_emac_s *priv, int qid);
+static int  sam_buffer_allocate(struct sam_emac_s *priv);
 static void sam_buffer_free(struct sam_emac_s *priv);
 
 /* Common TX logic */
 
-static int  sam_transmit(struct sam_emac_s *priv);
+static int  sam_transmit(struct sam_emac_s *priv, int qid);
 static int  sam_txpoll(struct net_driver_s *dev);
-static void sam_dopoll(struct sam_emac_s *priv);
+static void sam_dopoll(struct sam_emac_s *priv, int qid);
 
 /* Interrupt handling */
 
-static int  sam_recvframe(struct sam_emac_s *priv);
-static void sam_receive(struct sam_emac_s *priv);
-static void sam_txdone(struct sam_emac_s *priv);
-static inline void sam_interrupt_process(FAR struct sam_emac_s *priv);
+static int  sam_recvframe(struct sam_emac_s *priv, int qid);
+static void sam_receive(struct sam_emac_s *priv, int qid);
+static void sam_txdone(struct sam_emac_s *priv, int qid);
+static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid);
+static inline void sam_interrupt_process(FAR struct sam_emac_s *priv,
+                                         int qid);
 #ifdef CONFIG_NET_NOINTS
 static void sam_interrupt_work(FAR void *arg);
 #endif
@@ -561,8 +616,8 @@ static int  sam_phyinit(struct sam_emac_s *priv);
 
 /* EMAC Initialization */
 
-static void sam_txreset(struct sam_emac_s *priv);
-static void sam_rxreset(struct sam_emac_s *priv);
+static void sam_txreset(struct sam_emac_s *priv, int qid);
+static void sam_rxreset(struct sam_emac_s *priv, int qid);
 static void sam_emac_enableclk(struct sam_emac_s *priv);
 #ifndef CONFIG_NETDEV_PHY_IOCTL
 static void sam_emac_disableclk(struct sam_emac_s *priv);
@@ -572,6 +627,9 @@ static void sam_macaddress(struct sam_emac_s *priv);
 #ifdef CONFIG_NET_ICMPv6
 static void sam_ipv6multicast(struct sam_emac_s *priv);
 #endif
+
+static int  sam_queue0_configure(struct sam_emac_s *priv);
+static int  sam_queue_configure(struct sam_emac_s *priv, int qid);
 static int  sam_emac_configure(struct sam_emac_s *priv);
 
 /****************************************************************************
@@ -584,12 +642,18 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
 #ifdef CONFIG_SAMV7_EMAC0
 /* EMAC0 TX descriptors list */
 
-static struct emac_txdesc_s g_emac0_txdesc[CONFIG_SAMV7_EMAC0_NTXBUFFERS]
+static struct emac_txdesc_s g_emac0_tx0desc[CONFIG_SAMV7_EMAC0_NTXBUFFERS]
+              __attribute__((aligned(8)));
+
+static struct emac_txdesc_s g_emac0_tx1desc[DUMMY_NBUFFERS]
               __attribute__((aligned(8)));
 
 /* EMAC0 RX descriptors list */
 
-static struct emac_rxdesc_s g_emac0_rxdesc[CONFIG_SAMV7_EMAC0_NRXBUFFERS]
+static struct emac_rxdesc_s g_emac0_rx0desc[CONFIG_SAMV7_EMAC0_NRXBUFFERS]
+              __attribute__((aligned(8)));
+
+static struct emac_rxdesc_s g_emac0_rx1desc[DUMMY_NBUFFERS]
               __attribute__((aligned(8)));
 
 /* EMAC0 Transmit Buffers
@@ -599,25 +663,37 @@ static struct emac_rxdesc_s g_emac0_rxdesc[CONFIG_SAMV7_EMAC0_NRXBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_emac0_txbuffer[CONFIG_SAMV7_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE];
+static uint8_t g_emac0_tx0buffer[CONFIG_SAMV7_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE];
+               __attribute__((aligned(8)))
+
+static uint8_t g_emac0_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
                __attribute__((aligned(8)))
 
 /* EMAC0 Receive Buffers */
 
-static uint8_t g_emac0_rxbuffer[CONFIG_SAMV7_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE]
+static uint8_t g_emac0_rx0buffer[CONFIG_SAMV7_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE]
                __attribute__((aligned(8)));
+
+static uint8_t pRxDummyBuffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
+               __attribute__((aligned(8)))
 
 #endif
 
 #ifdef CONFIG_SAMV7_EMAC1
 /* EMAC1 TX descriptors list */
 
-static struct emac_txdesc_s g_emac1_txdesc[CONFIG_SAMV7_EMAC1_NTXBUFFERS]
+static struct emac_txdesc_s g_emac1_tx0desc[CONFIG_SAMV7_EMAC1_NTXBUFFERS]
+              __attribute__((aligned(8)));
+
+static struct emac_txdesc_s g_emac1_tx1desc[DUMMY_NBUFFERS]
               __attribute__((aligned(8)));
 
 /* EMAC1 RX descriptors list */
 
-static struct emac_rxdesc_s g_emac1_rxdesc[CONFIG_SAMV7_EMAC1_NRXBUFFERS]
+static struct emac_rxdesc_s g_emac1_rx0desc[CONFIG_SAMV7_EMAC1_NRXBUFFERS]
+              __attribute__((aligned(8)));
+
+static struct emac_rxdesc_s g_emac1_rx1desc[DUMMY_NBUFFERS]
               __attribute__((aligned(8)));
 
 /* EMAC1 Transmit Buffers
@@ -627,13 +703,19 @@ static struct emac_rxdesc_s g_emac1_rxdesc[CONFIG_SAMV7_EMAC1_NRXBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_emac1_txbuffer[CONFIG_SAMV7_EMAC1_NTXBUFFERS * EMAC_TX_UNITSIZE];
+static uint8_t g_emac1_tx0buffer[CONFIG_SAMV7_EMAC1_NTXBUFFERS * EMAC_TX_UNITSIZE];
+               __attribute__((aligned(8)))
+
+static uint8_t g_emac1_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
                __attribute__((aligned(8)))
 
 /* EMAC1 Receive Buffers */
 
 static uint8_t g_emac1_rxbuffer[CONFIG_SAMV7_EMAC1_NRXBUFFERS * EMAC_RX_UNITSIZE]
                __attribute__((aligned(8)));
+
+static uint8_t g_emac1_rx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
+               __attribute__((aligned(8)))
 
 #endif
 #endif
@@ -698,10 +780,10 @@ static const struct sam_emacattr_s g_emac0_attr =
 #ifdef CONFIG_SAMV7_EMAC_PREALLOCATE
   /* Addresses of preallocated buffers */
 
-  .txdesc       = g_emac0_txdesc,
-  .rxdesc       = g_emac0_rxdesc,
-  .txbuffer     = g_emac0_txbuffer,
-  .rxbuffer     = g_emac0_rxbuffer,
+  .tx0desc      = g_emac0_tx0desc,
+  .rx0desc      = g_emac0_rx0desc,
+  .tx0buffer    = g_emac0_tx0buffer,
+  .rx0buffer    = g_emac0_rx0buffer,
 #endif
 };
 
@@ -766,9 +848,9 @@ static const struct sam_emacattr_s g_emac1_attr =
 #ifdef CONFIG_SAMV7_EMAC_PREALLOCATE
   /* Attributes and addresses of preallocated buffers */
 
-  .txdesc       = g_emac1_txdesc,
-  .rxdesc       = g_emac1_rxdesc,
-  .txbuffer     = g_emac1_txbuffer,
+  .txdesc       = g_emac1_tx0desc,
+  .rxdesc       = g_emac1_rx0desc,
+  .txbuffer     = g_emac1_tx0buffer,
   .rxbuffer     = g_emac1_rxbuffer,
 #endif
 };
@@ -888,21 +970,22 @@ static void sam_putreg(struct sam_emac_s *priv, uint16_t offset,
  *
  * Input Parameters:
  *   priv - The EMAC driver state
+ *   quid - The transfer queue to examine
  *
  * Returned Value:
  *   The number of TX buffers in-use
  *
  ****************************************************************************/
 
-static uint16_t sam_txinuse(struct sam_emac_s *priv)
+static uint16_t sam_txinuse(struct sam_emac_s *priv, int qid)
 {
-  uint32_t txhead32 = (uint32_t)priv->txhead;
-  if ((uint32_t)priv->txtail > txhead32)
+  uint32_t txhead32 = (uint32_t)priv->xfrq[qid].txhead;
+  if ((uint32_t)priv->xfrq[qid].txtail > txhead32)
     {
-      txhead32 += priv->attr->ntxbuffers;
+      txhead32 += priv->xfrq[qid].ntxbuffers;
     }
 
-  return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
+  return (uint16_t)(txhead32 - (uint32_t)priv->xfrq[qid].txtail);
 }
 
 /****************************************************************************
@@ -913,28 +996,29 @@ static uint16_t sam_txinuse(struct sam_emac_s *priv)
  *
  * Input Parameters:
  *   priv - The EMAC driver state
+ *   qid  - The transfer queue to examine
  *
  * Returned Value:
  *   The number of TX buffers available
  *
  ****************************************************************************/
 
-static uint16_t sam_txfree(struct sam_emac_s *priv)
+static uint16_t sam_txfree(struct sam_emac_s *priv, int qid)
 {
   /* The number available is equal to the total number of buffers, minus the
    * number of buffers in use.  Notice that that actual number of buffers is
    * the configured size minus 1.
    */
 
-  return (priv->attr->ntxbuffers-1) - sam_txinuse(priv);
+  return (priv->xfrq[qid].ntxbuffers-1) - sam_txinuse(priv, qid);
 }
 
 /****************************************************************************
- * Function: sam_buffer_initialize
+ * Function: sam_buffer_allocate
  *
  * Description:
  *   Allocate aligned TX and RX descriptors and buffers.  For the case of
- *   pre-allocated structures, the function degenerates to a few assignements.
+ *   pre-allocated structures, the function degenerates to a few assignments.
  *
  * Input Parameters:
  *   priv - The EMAC driver state
@@ -947,66 +1031,163 @@ static uint16_t sam_txfree(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_buffer_initialize(struct sam_emac_s *priv)
+static int sam_buffer_allocate(struct sam_emac_s *priv)
 {
 #ifdef CONFIG_SAMV7_EMAC_PREALLOCATE
+  int qid;
+
   /* Use pre-allocated buffers */
 
-  priv->txdesc   = priv->attr->txdesc;
-  priv->rxdesc   = priv->attr->rxdesc;
-  priv->txbuffer = priv->attr->txbuffer;
-  priv->rxbuffer = priv->attr->rxbuffer;
+  priv->xfrq[0].txdesc         = priv->attr->tx0desc;
+  priv->xfrq[0].ntxbuffers     = priv->attr->ntxbuffers;
+  priv->xfrq[0].rxdesc         = priv->attr->rx0desc;
+  priv->xfrq[0].nrxbuffers     = priv->attr->rtxbuffers;
+
+  priv->xfrq[0].txbuffer       = priv->attr->tx0buffer;
+  priv->xfrq[0].txbufsize      = EMAC_TX_UNITSIZE;
+  priv->xfrq[0].rxbuffer       = priv->attr->rx0buffer;
+  priv->xfrq[0].rxbufsize      = EMAC_RX_UNITSIZE;
+
+  for (qid = 0; qid < EMAC_NQUEUES; qid++)
+    {
+      priv->xfrq[qid].txdesc     = priv->attr->tx1desc;
+      priv->xfrq[qid].ntxbuffers = DUMMY_NBUFFERS;
+      priv->xfrq[qid].rxdesc     = priv->attr->rx1desc;
+      priv->xfrq[qid].nrxbuffers = DUMMY_NBUFFERS;
+
+      priv->xfrq[qid].txbuffer   = priv->attr->tx1buffer;
+      priv->xfrq[qid].txbufsize  = DUMMY_BUFSIZE;
+      priv->xfrq[qid].rxbuffer   = priv->attr->rx1buffer;
+      priv->xfrq[qid].rxbufsize  = DUMMY_BUFSIZE;
+    }
 
 #else
   size_t allocsize;
+  int qid;
 
-  /* Allocate buffers */
+  /* Allocate Queue 0 buffers */
 
   allocsize = priv->attr->ntxbuffers * sizeof(struct emac_txdesc_s);
-  priv->txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
-  if (!priv->txdesc)
+  priv->xfrq[0].txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[0].txdesc)
     {
       nlldbg("ERROR: Failed to allocate TX descriptors\n");
       return -ENOMEM;
     }
 
-  memset(priv->txdesc, 0, allocsize);
+  memset(priv->xfrq[0].txdesc, 0, allocsize);
+  priv->xfrq[0].ntxbuffers = priv->attr->ntxbuffers;
 
   allocsize = priv->attr->nrxbuffers * sizeof(struct emac_rxdesc_s);
-  priv->rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
-  if (!priv->rxdesc)
+  priv->xfrq[0].rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[0].rxdesc)
     {
       nlldbg("ERROR: Failed to allocate RX descriptors\n");
       sam_buffer_free(priv);
       return -ENOMEM;
     }
 
-  memset(priv->rxdesc, 0, allocsize);
+  memset(priv->xfrq[0].rxdesc, 0, allocsize);
+  priv->xfrq[0].nrxbuffers = priv->attr->nrxbuffers;
 
   allocsize = priv->attr->ntxbuffers * EMAC_TX_UNITSIZE;
-  priv->txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
-  if (!priv->txbuffer)
+  priv->xfrq[0].txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[0].txbuffer)
     {
       nlldbg("ERROR: Failed to allocate TX buffer\n");
       sam_buffer_free(priv);
       return -ENOMEM;
     }
 
+  priv->xfrq[0].txbufsize = EMAC_TX_UNITSIZE;
+
   allocsize = priv->attr->nrxbuffers * EMAC_RX_UNITSIZE;
-  priv->rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
-  if (!priv->rxbuffer)
+  priv->xfrq[0].rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[0].rxbuffer)
     {
       nlldbg("ERROR: Failed to allocate RX buffer\n");
       sam_buffer_free(priv);
       return -ENOMEM;
     }
 
+  priv->xfrq[0].rxbufsize = EMAC_RX_UNITSIZE;
+
+  /* Allocate Queue 1 buffers */
+
+  allocsize = DUMMY_NBUFFERS * sizeof(struct emac_txdesc_s);
+  priv->xfrq[1].txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[1].txdesc)
+    {
+      nlldbg("ERROR: Failed to allocate TX descriptors\n");
+      return -ENOMEM;
+    }
+
+  memset(priv->xfrq[1].txdesc, 0, allocsize);
+  priv->xfrq[1].ntxbuffers = DUMMY_NBUFFERS;
+
+  allocsize = DUMMY_NBUFFERS * sizeof(struct emac_rxdesc_s);
+  priv->xfrq[1].rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[1].rxdesc)
+    {
+      nlldbg("ERROR: Failed to allocate RX descriptors\n");
+      sam_buffer_free(priv);
+      return -ENOMEM;
+    }
+
+  memset(priv->xfrq[1].rxdesc, 0, allocsize);
+  priv->xfrq[1].nrxbuffers = DUMMY_NBUFFERS;
+
+  allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
+  priv->xfrq[1].txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[1].txbuffer)
+    {
+      nlldbg("ERROR: Failed to allocate TX buffer\n");
+      sam_buffer_free(priv);
+      return -ENOMEM;
+    }
+
+  priv->xfrq[1].txbufsize = DUMMY_BUFSIZE;
+
+  allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
+  priv->xfrq[1].rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  if (!priv->xfrq[1].rxbuffer)
+    {
+      nlldbg("ERROR: Failed to allocate RX buffer\n");
+      sam_buffer_free(priv);
+      return -ENOMEM;
+    }
+
+  priv->xfrq[1].rxbufsize = DUMMY_BUFSIZE;
+
+  /* Clone the Queue 1 allocations to the other queues */
+
+  for (qid = 2; qid < EMAC_NQUEUES; qid++)
+    {
+      priv->xfrq[qid].txdesc     = priv->xfrq[1].txdesc;
+      priv->xfrq[qid].rxdesc     = priv->xfrq[1].rxdesc;
+
+      priv->xfrq[qid].txbuffer   = priv->xfrq[1].txbuffer;
+      priv->xfrq[qid].rxbuffer   = priv->xfrq[1].rxbuffer;
+
+      priv->xfrq[qid].ntxbuffers = DUMMY_NBUFFERS;
+      priv->xfrq[qid].nrxbuffers = DUMMY_NBUFFERS;
+
+      priv->xfrq[qid].txbufsize  = DUMMY_BUFSIZE;
+      priv->xfrq[qid].rxbufsize  = DUMMY_BUFSIZE;
+    }
+
 #endif
 
-  DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) == 0 &&
-              ((uintptr_t)priv->rxbuffer & 7) == 0 &&
-              ((uintptr_t)priv->txdesc   & 7) == 0 &&
-              ((uintptr_t)priv->txbuffer & 7) == 0);
+  /* Verify Alignment */
+
+  DEBUGASSERT(((uintptr_t)priv->xfrq[0].rxdesc   & 7) == 0 &&
+              ((uintptr_t)priv->xfrq[0].rxbuffer & 7) == 0 &&
+              ((uintptr_t)priv->xfrq[0].txdesc   & 7) == 0 &&
+              ((uintptr_t)priv->xfrq[0].txbuffer & 7) == 0);
+  DEBUGASSERT(((uintptr_t)priv->xfrq[1].rxdesc   & 7) == 0 &&
+              ((uintptr_t)priv->xfrq[1].rxbuffer & 7) == 0 &&
+              ((uintptr_t)priv->xfrq[1].txdesc   & 7) == 0 &&
+              ((uintptr_t)priv->xfrq[1].txbuffer & 7) == 0);
   return OK;
 }
 
@@ -1028,30 +1209,43 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 static void sam_buffer_free(struct sam_emac_s *priv)
 {
 #ifndef CONFIG_SAMV7_EMAC_PREALLOCATE
+  int qid;
+
   /* Free allocated buffers */
 
-  if (priv->txdesc)
+  for (qid = 0; qid < EMAC_NQUEUES; qid++)
     {
-      kmm_free(priv->txdesc);
-      priv->txdesc = NULL;
-    }
+      if (qid < 2)
+        {
+          if (priv->xfrq[qid].txdesc)
+            {
+              kmm_free(priv->xfrq[qid].txdesc);
+              priv->xfrq[qid].txdesc = NULL;
+            }
 
-  if (priv->rxdesc)
-    {
-      kmm_free(priv->rxdesc);
-      priv->rxdesc = NULL;
-    }
+          if (priv->xfrq[qid].rxdesc)
+            {
+              kmm_free(priv->xfrq[qid].rxdesc);
+              priv->xfrq[qid].rxdesc = NULL;
+            }
 
-  if (priv->txbuffer)
-    {
-      kmm_free(priv->txbuffer);
-      priv->txbuffer = NULL;
-    }
+          if (priv->xfrq[qid].txbuffer)
+            {
+              kmm_free(priv->xfrq[qid].txbuffer);
+              priv->xfrq[qid].txbuffer = NULL;
+            }
 
-  if (priv->rxbuffer)
-    {
-      kmm_free(priv->rxbuffer);
-      priv->rxbuffer = NULL;
+          if (priv->xfrq[qid].rxbuffer)
+            {
+              kmm_free(priv->xfrq[qid].rxbuffer);
+              priv->xfrq[qid].rxbuffer = NULL;
+            }
+        }
+
+      priv->xfrq[qid].txdesc = NULL;
+      priv->xfrq[qid].rxdesc = NULL;
+      priv->xfrq[qid].txbuffer = NULL;
+      priv->xfrq[qid].rxbuffer = NULL;
     }
 #endif
 }
@@ -1063,8 +1257,11 @@ static void sam_buffer_free(struct sam_emac_s *priv)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
+ *   REVISIT:  This implementation does not support scatter-gather DMA.
+ *
  * Parameters:
  *   priv  - Reference to the driver state structure
+ *   qid   - The queue to send the frame
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -1076,14 +1273,15 @@ static void sam_buffer_free(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_transmit(struct sam_emac_s *priv)
+static int sam_transmit(struct sam_emac_s *priv, int qid)
 {
   struct net_driver_s *dev = &priv->dev;
   volatile struct emac_txdesc_s *txdesc;
   uint32_t regval;
   uint32_t status;
+  uint16_t txhead;
 
-  nllvdbg("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
+  nllvdbg("d_len: %d txhead: %d\n",  dev->d_len, priv->xfrq[qid].txhead);
   sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* Check parameter */
@@ -1096,11 +1294,12 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   /* Pointer to the current TX descriptor */
 
-  txdesc = &priv->txdesc[priv->txhead];
+  txhead = priv->xfrq[qid].txhead;
+  txdesc = &priv->xfrq[qid].txdesc[txhead];
 
   /* If no free TX descriptor, buffer can't be sent */
 
-  if (sam_txfree(priv) < 1)
+  if (sam_txfree(priv, qid) < 1)
     {
       nlldbg("ERROR: No free TX descriptors\n");
       return -EBUSY;
@@ -1120,7 +1319,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   /* Update TX descriptor status. */
 
   status = dev->d_len | EMACTXD_STA_LAST;
-  if (priv->txhead == priv->attr->ntxbuffers-1)
+  if (txhead == priv->xfrq[qid].ntxbuffers-1)
     {
       status |= EMACTXD_STA_WRAP;
     }
@@ -1133,10 +1332,12 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   /* Increment the head index */
 
-  if (++priv->txhead >= priv->attr->ntxbuffers)
+  if (++txhead >= priv->xfrq[qid].ntxbuffers)
     {
-      priv->txhead = 0;
+      txhead = 0;
     }
+
+  priv->xfrq[qid].txhead = txhead;
 
   /* Now start transmission (if it is not already done) */
 
@@ -1162,7 +1363,7 @@ static int sam_transmit(struct sam_emac_s *priv)
    * all RX packet processing.
    */
 
-  if (sam_txfree(priv) < 1)
+  if (sam_txfree(priv, qid) < 1)
     {
       nllvdbg("Disabling RX interrupts\n");
       sam_putreg(priv, SAM_EMAC_IDR_OFFSET, EMAC_INT_RCOMP);
@@ -1229,13 +1430,13 @@ static int sam_txpoll(struct net_driver_s *dev)
 
       /* Send the packet */
 
-      sam_transmit(priv);
+      sam_transmit(priv, EMAC_QUEUE_0);
 
       /* Check if the there are any free TX descriptors.  We cannot perform
        * the TX poll if we do not have buffering for another packet.
        */
 
-      if (sam_txfree(priv) == 0)
+      if (sam_txfree(priv, EMAC_QUEUE_0) == 0)
         {
           /* We have to terminate the poll if we have no more descriptors
            * available for another transfer.
@@ -1260,6 +1461,7 @@ static int sam_txpoll(struct net_driver_s *dev)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *   qid  - The transfer queue to send packets on
  *
  * Returned Value:
  *   None
@@ -1269,7 +1471,7 @@ static int sam_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void sam_dopoll(struct sam_emac_s *priv)
+static void sam_dopoll(struct sam_emac_s *priv, int qid)
 {
   struct net_driver_s *dev = &priv->dev;
 
@@ -1277,7 +1479,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
    * TX poll if we do not have buffering for another packet.
    */
 
-  if (sam_txfree(priv) > 0)
+  if (sam_txfree(priv, qid) > 0)
     {
       /* If we have the descriptor, then poll uIP for new XMIT data. */
 
@@ -1296,6 +1498,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
+ *   qid   - The transfer queue to receive the frame
  *
  * Returned Value:
  *   OK if a packet was successfully returned; -EAGAIN if there are no
@@ -1308,7 +1511,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_recvframe(struct sam_emac_s *priv)
+static int sam_recvframe(struct sam_emac_s *priv, int qid)
 {
   struct emac_rxdesc_s *rxdesc;
   struct net_driver_s *dev;
@@ -1329,8 +1532,8 @@ static int sam_recvframe(struct sam_emac_s *priv)
   dest       = dev->d_buf;
   pktlen     = 0;
 
-  rxndx      = priv->rxndx;
-  rxdesc     = &priv->rxdesc[rxndx];
+  rxndx      = priv->xfrq[qid].rxndx;
+  rxdesc     = &priv->xfrq[qid].rxdesc[rxndx];
   isframe    = false;
 
   /* Invalidate the RX descriptor to force re-fetching from RAM.
@@ -1353,11 +1556,11 @@ static int sam_recvframe(struct sam_emac_s *priv)
         {
           /* Skip previous fragments */
 
-          while (rxndx != priv->rxndx)
+          while (rxndx != priv->xfrq[qid].rxndx)
             {
               /* Give ownership back to the EMAC */
 
-              rxdesc = &priv->rxdesc[priv->rxndx];
+              rxdesc = &priv->xfrq[qid].rxdesc[priv->xfrq[qid].rxndx];
               rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
               /* Flush the modified RX descriptor to RAM */
@@ -1368,9 +1571,9 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               /* Increment the RX index */
 
-              if (++priv->rxndx >= priv->attr->nrxbuffers)
+              if (++priv->xfrq[qid].rxndx >= priv->xfrq[qid].nrxbuffers)
                 {
-                  priv->rxndx = 0;
+                  priv->xfrq[qid].rxndx = 0;
                 }
             }
 
@@ -1386,7 +1589,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
       /* Increment the working index */
 
-      if (++rxndx >= priv->attr->nrxbuffers)
+      if (++rxndx >= priv->xfrq[qid].nrxbuffers)
         {
           rxndx = 0;
         }
@@ -1395,14 +1598,14 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
       if (isframe)
         {
-          if (rxndx == priv->rxndx)
+          if (rxndx == priv->xfrq[qid].rxndx)
             {
               nllvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
 
-                  rxdesc = &priv->rxdesc[priv->rxndx];
+                  rxdesc = &priv->xfrq[qid].rxdesc[priv->xfrq[qid].rxndx];
                   rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
                   /* Flush the modified RX descriptor to RAM */
@@ -1413,12 +1616,12 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
                   /* Increment the RX index */
 
-                  if (++priv->rxndx >= priv->attr->nrxbuffers)
+                  if (++priv->xfrq[qid].rxndx >= priv->xfrq[qid].nrxbuffers)
                     {
-                      priv->rxndx = 0;
+                      priv->xfrq[qid].rxndx = 0;
                     }
                 }
-              while (rxndx != priv->rxndx);
+              while (rxndx != priv->xfrq[qid].rxndx);
               return -EIO;
             }
 
@@ -1454,17 +1657,18 @@ static int sam_recvframe(struct sam_emac_s *priv)
               /* Frame size from the EMAC */
 
               dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
-              nllvdbg("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
+              nllvdbg("packet %d-%d (%d)\n",
+                      priv->xfrq[qid].rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor
                */
 
-              while (priv->rxndx != rxndx)
+              while (priv->xfrq[qid].rxndx != rxndx)
                 {
                   /* Give ownership back to the EMAC */
 
-                  rxdesc = &priv->rxdesc[priv->rxndx];
+                  rxdesc = &priv->xfrq[qid].rxdesc[priv->xfrq[qid].rxndx];
                   rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
 
                   /* Flush the modified RX descriptor to RAM */
@@ -1475,9 +1679,9 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
                   /* Increment the RX index */
 
-                  if (++priv->rxndx >= priv->attr->nrxbuffers)
+                  if (++priv->xfrq[qid].rxndx >= priv->xfrq[qid].nrxbuffers)
                     {
-                      priv->rxndx = 0;
+                      priv->xfrq[qid].rxndx = 0;
                     }
                 }
 
@@ -1485,7 +1689,8 @@ static int sam_recvframe(struct sam_emac_s *priv)
                * all of the data.
                */
 
-              nllvdbg("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
+              nllvdbg("rxndx: %d d_len: %d\n",
+                      priv->xfrq[qid].rxndx, dev->d_len);
               if (pktlen < dev->d_len)
                 {
                   nlldbg("ERROR: Buffer size %d; frame size %d\n",
@@ -1512,12 +1717,12 @@ static int sam_recvframe(struct sam_emac_s *priv)
           arch_clean_dcache((uintptr_t)rxdesc,
                             (uintptr_t)rxdesc +
                             sizeof(struct emac_rxdesc_s));
-          priv->rxndx = rxndx;
+          priv->xfrq[qid].rxndx = rxndx;
         }
 
     /* Process the next buffer */
 
-    rxdesc = &priv->rxdesc[rxndx];
+    rxdesc = &priv->xfrq[qid].rxdesc[rxndx];
 
     /* Invalidate the RX descriptor to force re-fetching from RAM
      *
@@ -1531,8 +1736,8 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
   /* No packet was found */
 
-  priv->rxndx = rxndx;
-  nllvdbg("rxndx: %d\n", priv->rxndx);
+  priv->xfrq[qid].rxndx = rxndx;
+  nllvdbg("rxndx: %d\n", priv->xfrq[qid].rxndx);
   return -EAGAIN;
 }
 
@@ -1545,6 +1750,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
+ *   qid   - The transfer queue on which the packet was recieved
  *
  * Returned Value:
  *   None
@@ -1554,7 +1760,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_receive(struct sam_emac_s *priv)
+static void sam_receive(struct sam_emac_s *priv, int qid)
 {
   struct net_driver_s *dev = &priv->dev;
 
@@ -1562,7 +1768,7 @@ static void sam_receive(struct sam_emac_s *priv)
    * EMAC frames.
    */
 
-  while (sam_recvframe(priv) == OK)
+  while (sam_recvframe(priv, qid) == OK)
     {
       sam_dumppacket("Received packet", dev->d_buf, dev->d_len);
 
@@ -1619,7 +1825,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
               /* And send the packet */
 
-              sam_transmit(priv);
+              sam_transmit(priv, qid);
             }
         }
       else
@@ -1656,7 +1862,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
               /* And send the packet */
 
-              sam_transmit(priv);
+              sam_transmit(priv, qid);
             }
         }
       else
@@ -1676,7 +1882,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              sam_transmit(priv);
+              sam_transmit(priv, qid);
             }
         }
       else
@@ -1696,6 +1902,7 @@ static void sam_receive(struct sam_emac_s *priv)
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
+ *   qid   - The transfer queue on which the packet was sent
  *
  * Returned Value:
  *   None
@@ -1705,23 +1912,22 @@ static void sam_receive(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_txdone(struct sam_emac_s *priv)
+static void sam_txdone(struct sam_emac_s *priv, int qid)
 {
   struct emac_txdesc_s *txdesc;
-#ifndef __NO_KLUDGES__
-  int ntxdone = 0;
-#endif
+  uint16_t tail;
 
   /* Are there any outstanding transmissions?  Loop until either (1) all of
    * the TX descriptors have been examined, or (2) until we encounter the
    * first descriptor that is still in use by the hardware.
    */
 
-  while (priv->txhead != priv->txtail)
+  tail = priv->xfrq[qid].txtail;
+  while (tail != priv->xfrq[qid].txhead)
     {
       /* Yes.. check the next buffer at the tail of the list */
 
-      txdesc = &priv->txdesc[priv->txtail];
+      txdesc = &priv->xfrq[qid].txdesc[tail];
 
       /* REVISIT:  If the rxdesc is not aligned with the cacheline boundary
        * then won't this also invalidate some surrounding memory?
@@ -1730,65 +1936,44 @@ static void sam_txdone(struct sam_emac_s *priv)
       arch_invalidate_dcache((uintptr_t)txdesc,
                              (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
 
-      /* Is this TX descriptor still in use? */
-
-#ifndef __NO_KLUDGES__
-# warning REVISIT
-      /* I have seen cases where we receive interrupts, but the USED
-       * bit is never set in the TX descriptor.  This logic assumes
-       * that if we got the interrupt, then there most be at least
-       * one packet that completed.  This is not necessarily a safe
-       * assumption.
+      /* Break out of the loop if frame has not yet been sent.  On TX
+       * completion, the GMAC sets the USED bit only into the very first
+       * buffer descriptor of the sent frame.  Otherwise it updates this
+       * descriptor with status error bits.
        */
 
-      ntxdone++;
-      if ((txdesc->status & EMACTXD_STA_USED) == 0 && ntxdone > 1)
-#else
       if ((txdesc->status & EMACTXD_STA_USED) == 0)
-#endif
         {
-          /* Yes.. the descriptor is still in use.  However, I have seen a
-           * case (only repeatable on start-up) where the USED bit is never
-           * set.  Yikes!  If we have encountered the first still busy
-           * descriptor, then we should also have TQBD equal to the descriptor
-           * address.  If it is not, then treat is as used anyway.
-           */
+          /* The descriptor is still in use.  Break out of the loop now. */
 
-#if 0 /* The issue does not exist in the current configuration, but may return */
-#warning REVISIT
-          if (priv->txtail == 0 &&
-              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_EMAC_TBQB_OFFSET))
-            {
-              txdesc->status = (uint32_t)EMACTXD_STA_USED;
-              arch_clean_dcache((uintptr_t)txdesc,
-                                (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
-            }
-          else
-#endif
-            {
-              /* Otherwise, the descriptor is truly in use.  Break out of the
-               * loop now.
-               */
-
-              break;
-            }
+          break;
         }
 
-#ifndef __NO_KLUDGES__
-      /* Make sure that the USED bit is set */
+      /* Process all buffers of the current transmitted frame */
 
-      txdesc->status = (uint32_t)EMACTXD_STA_USED;
-      arch_clean_dcache((uintptr_t)txdesc,
-                        (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
-#endif
-
-      /* Increment the tail index */
-
-      if (++priv->txtail >= priv->attr->ntxbuffers)
+      while (tail != priv->xfrq[qid].txhead &&
+             (txdesc->status & EMACTXD_STA_LAST) == 0)
         {
-          /* Wrap to the beginning of the TX descriptor list */
+          /* Increment the tail index */
 
-          priv->txtail = 0;
+          if (++tail > priv->xfrq[qid].ntxbuffers)
+            {
+              tail = 0;
+            }
+
+          /* Get the next TX descriptor */
+
+          txdesc = &priv->xfrq[qid].txdesc[tail];
+          arch_invalidate_dcache((uintptr_t)txdesc,
+                                 (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+        }
+
+      /* Go to first buffer of the next frame */
+
+      if (tail != priv->xfrq[qid].txhead &&
+          ++tail > priv->xfrq[qid].ntxbuffers)
+        {
+          tail = 0;
         }
 
       /* At least one TX descriptor is available.  Re-enable RX interrupts.
@@ -1796,12 +1981,142 @@ static void sam_txdone(struct sam_emac_s *priv)
        * TX descriptors (see comments in sam_transmit()).
        */
 
-      sam_putreg(priv, SAM_EMAC_IER_OFFSET, EMAC_INT_RCOMP);
+      sam_putreg(priv, SAM_EMAC_IER_OFFSET, EMAC_RX_INTS);
     }
+
+  /* Save the new tail index */
+
+  priv->xfrq[qid].txtail = tail;
 
   /* Then poll uIP for new XMIT data */
 
-  sam_dopoll(priv);
+  sam_dopoll(priv, qid);
+}
+
+/****************************************************************************
+ * Function: sam_txerr_interrupt
+ *
+ * Description:
+ *   TX error interrupt processing.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *   quid - Index of the tranfer queue that generated the interrupt
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
+{
+  struct emac_txdesc_s *txdesc;
+  uint32_t regval;
+  uint16_t tail;
+
+  /* Clear TXEN bit into the Network Configuration Register.  This is a
+   * workaround to recover from TX lockups that occur on sama5d3 gmac
+   * (r1p24f2) when using  scatter-gather.   This issue has never been
+   * seen on sama5d4 gmac (r1p31).
+   */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+  regval &= ~EMAC_NCR_TXEN;
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+
+  /* The following step should be optional since this function is called
+   * directly by the IRQ handler. Indeed, according to Cadence
+   * documentation, the transmission is halted on errors such as
+   * too many retries or transmit under run.  However it would becom
+   * mandatory if the call of this function were scheduled as a task by
+   * the IRQ handler (this is how Linux driver works). Then this function
+   * might compete with GMACD_Send().
+   *
+   * Setting bit 10, tx_halt, of the Network Control Register is not enough:
+   * We should wait for bit 3, tx_go, of the Transmit Status Register to
+   * be cleared at transmit completion if a frame is being transmitted.
+   */
+
+  regval |= EMAC_NCR_THALT;
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+
+  while ((sam_getreg(priv, SAM_EMAC_TSR_OFFSET) & EMAC_TSR_TXGO) != 0);
+
+  /* Treat frames in TX queue including the ones that caused the error. */
+
+  tail = priv->xfrq[qid].txtail;
+  while (tail != priv->xfrq[qid].txhead)
+    {
+      txdesc = &priv->xfrq[qid].txdesc[tail];
+
+      /* Make hw descriptor updates visible to CPU.
+       * REVISIT:  This could possibily invalidate the memory outside of
+       * the txdesc, depending on the size and alignment of the cache lines.
+       */
+
+      arch_invalidate_dcache((uintptr_t)txdesc,
+                             (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+
+      /* Go to the last buffer descriptor of the frame */
+
+      while (tail != priv->xfrq[qid].txhead &&
+             (txdesc->status & EMACTXD_STA_LAST) == 0)
+        {
+          /* Increment the tail index */
+
+          if (++tail > priv->xfrq[qid].ntxbuffers)
+            {
+              tail = 0;
+            }
+
+          /* Get the next TX descriptor */
+
+          txdesc = &priv->xfrq[qid].txdesc[tail];
+          arch_invalidate_dcache((uintptr_t)txdesc,
+                                 (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+        }
+
+      /* Go to first buffer of the next frame */
+
+      if (tail != priv->xfrq[qid].txhead &&
+          ++tail > priv->xfrq[qid].ntxbuffers)
+        {
+          tail = 0;
+        }
+    }
+
+  /* Save the new tail index */
+
+  priv->xfrq[qid].txtail = tail;
+
+  /* Reset TX queue */
+
+  sam_txreset(priv, qid);
+
+  /* Clear status */
+
+  regval = sam_getreg(priv, SAM_EMAC_TSR_OFFSET);
+  sam_putreg(priv, SAM_EMAC_TSR_OFFSET, regval);
+
+  /* Now we are ready to start transmission again */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+  regval &= ~EMAC_NCR_TXEN;
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+
+  /* At least one TX descriptor is available.  Re-enable RX interrupts.
+   * RX interrupts may previously have been disabled when we ran out of
+   * TX descriptors (see comments in sam_transmit()).
+   */
+
+  sam_putreg(priv, SAM_EMAC_IER_OFFSET, EMAC_RX_INTS);
+
+  /* Then poll uIP for new XMIT data */
+
+  sam_dopoll(priv, qid);
 }
 
 /****************************************************************************
@@ -1813,6 +2128,7 @@ static void sam_txdone(struct sam_emac_s *priv)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *   quid - Index of the tranfer queue that generated the interrupt
  *
  * Returned Value:
  *   None
@@ -1822,7 +2138,7 @@ static void sam_txdone(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
+static inline void sam_interrupt_process(FAR struct sam_emac_s *priv, int qid)
 {
   uint32_t isr;
   uint32_t rsr;
@@ -1832,69 +2148,20 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
   uint32_t pending;
   uint32_t clrbits;
 
+  /* Read the interrupt status, RX status, and TX status registers.
+   * NOTE that the interrupt status register is cleared by this read.
+   */
+
   isr = sam_getreg(priv, SAM_EMAC_ISR_OFFSET);
   rsr = sam_getreg(priv, SAM_EMAC_RSR_OFFSET);
   tsr = sam_getreg(priv, SAM_EMAC_TSR_OFFSET);
+
+  /* Make the pending interrupt status (probably not necessary) */
+
   imr = sam_getreg(priv, SAM_EMAC_IMR_OFFSET);
-
   pending = isr & ~(imr | EMAC_INT_UNUSED);
+
   nllvdbg("isr: %08x pending: %08x\n", isr, pending);
-
-  /* Check for the completion of a transmission.  This should be done before
-   * checking for received data (because receiving can cause another transmission
-   * before we had a chance to handle the last one).
-   *
-   * ISR:TCOMP is set when a frame has been transmitted. Cleared on read.
-   * TSR:TXCOMP is set when a frame has been transmitted. Cleared by writing a
-   *   one to this bit.
-   */
-
-  if ((pending & EMAC_INT_TCOMP) != 0 || (tsr & EMAC_TSR_TXCOMP) != 0)
-    {
-      /* A frame has been transmitted */
-
-      clrbits = EMAC_TSR_TXCOMP;
-
-      /* Check for Retry Limit Exceeded (RLE) */
-
-      if ((tsr & EMAC_TSR_RLE) != 0)
-        {
-          /* Status RLE & Number of discarded buffers */
-
-          clrbits = EMAC_TSR_RLE | sam_txinuse(priv);
-          sam_txreset(priv);
-
-          nlldbg("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
-
-          regval = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
-          regval |= EMAC_NCR_TXEN;
-          sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
-        }
-
-      /* Check Collision Occurred (COL) */
-
-      if ((tsr & EMAC_TSR_COL) != 0)
-        {
-          nlldbg("ERROR: Collision occurred TSR: %08x\n", tsr);
-          clrbits |= EMAC_TSR_COL;
-        }
-
-      /* Check Transmit Frame Corruption due to AHB error (TFC) */
-
-      if ((tsr & EMAC_TSR_TFC) != 0)
-        {
-          nlldbg("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
-          clrbits |= EMAC_TSR_TFC;
-        }
-
-      /* Clear status */
-
-      sam_putreg(priv, SAM_EMAC_TSR_OFFSET, clrbits);
-
-      /* And handle the TX done event */
-
-      sam_txdone(priv);
-    }
 
   /* Check for the receipt of an RX packet.
    *
@@ -1904,7 +2171,7 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
    *   in memory. This indication is cleared by writing a one to this bit.
    */
 
-  if ((pending & EMAC_INT_RCOMP) != 0 || (rsr & EMAC_RSR_REC) != 0)
+  if ((pending & EMAC_RX_INTS) != 0 || (rsr & EMAC_RSR_REC) != 0)
     {
       clrbits = EMAC_RSR_REC;
 
@@ -1947,10 +2214,75 @@ static inline void sam_interrupt_process(FAR struct sam_emac_s *priv)
 
       /* Handle the received packet */
 
-       sam_receive(priv);
+       sam_receive(priv, qid);
+    }
+
+  /* Check for TX errors */
+
+  if ((pending & EMAC_TXERR_INTS) != 0)
+    {
+      sam_txerr_interrupt(priv, qid);
+    }
+
+  /* Check for the completion of a transmission.  This should be done before
+   * checking for received data (because receiving can cause another transmission
+   * before we had a chance to handle the last one).
+   *
+   * ISR:TCOMP is set when a frame has been transmitted. Cleared on read.
+   * TSR:TXCOMP is set when a frame has been transmitted. Cleared by writing a
+   *   one to this bit.
+   */
+
+  if ((pending & EMAC_INT_TCOMP) != 0 || (tsr & EMAC_TSR_TXCOMP) != 0)
+    {
+      /* A frame has been transmitted */
+      /* Check for Retry Limit Exceeded (RLE) */
+
+      if ((tsr & EMAC_TSR_RLE) != 0)
+        {
+          /* Status RLE & Number of discarded buffers */
+
+          clrbits = EMAC_TSR_RLE | sam_txinuse(priv, qid);
+          sam_txreset(priv, qid);
+
+          nlldbg("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+
+          regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+          regval |= EMAC_NCR_TXEN;
+          sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+        }
+
+      /* Check Collision Occurred (COL) */
+
+      if ((tsr & EMAC_TSR_COL) != 0)
+        {
+          nlldbg("ERROR: Collision occurred TSR: %08x\n", tsr);
+        }
+
+      /* Check Transmit Frame Corruption due to AHB error (TFC) */
+
+      if ((tsr & EMAC_TSR_TFC) != 0)
+        {
+          nlldbg("ERROR: Transmit Frame Corruption due to AHB error: %08x\n", tsr);
+        }
+
+      /* Clear status */
+
+      sam_putreg(priv, SAM_EMAC_TSR_OFFSET, tsr);
+
+      /* And handle the TX done event */
+
+      sam_txdone(priv, qid);
     }
 
 #ifdef CONFIG_DEBUG_NET
+  /* Check for response not OK */
+
+  if ((pending & EMAC_INT_HRESP) != 0)
+    {
+      nlldbg("ERROR: Hresp not OK\n");
+    }
+
   /* Check for PAUSE Frame received (PFRE).
    *
    * ISR:PFRE indicates that a pause frame has been received with non-zero
@@ -2000,7 +2332,7 @@ static void sam_interrupt_work(FAR void *arg)
   /* Process pending Ethernet interrupts */
 
   state = net_lock();
-  sam_interrupt_process(priv);
+  sam_interrupt_process(priv, EMAC_QUEUE_0);
   net_unlock(state);
 
   /* Re-enable Ethernet interrupts */
@@ -2067,7 +2399,7 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
 #else
   /* Process the interrupt now */
 
-  sam_interrupt_process(priv);
+  sam_interrupt_process(priv, EMAC_QUEUE_0);
 #endif
 
   return OK;
@@ -2135,7 +2467,7 @@ static inline void sam_txtimeout_process(FAR struct sam_emac_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  sam_dopoll(priv);
+  sam_dopoll(priv, EMAC_QUEUE_0);
 }
 
 /****************************************************************************
@@ -2241,7 +2573,7 @@ static inline void sam_poll_process(FAR struct sam_emac_s *priv)
    * TX poll if we do not have buffering for another packet.
    */
 
-  if (sam_txfree(priv) > 0)
+  if (sam_txfree(priv, EMAC_QUEUE_0) > 0)
     {
       /* Update TCP timing states and poll uIP for new XMIT data. */
 
@@ -2371,6 +2703,9 @@ static int sam_ifup(struct net_driver_s *dev)
 
   nllvdbg("Initialize the EMAC\n");
   sam_emac_configure(priv);
+  sam_queue0_configure(priv);
+  sam_queue_configure(priv, EMAC_QUEUE_1);
+  sam_queue_configure(priv, EMAC_QUEUE_2);
 
   /* Set the MAC address (should have been configured while we were down) */
 
@@ -2492,7 +2827,7 @@ static inline void sam_txavail_process(FAR struct sam_emac_s *priv)
     {
       /* Poll uIP for new XMIT data */
 
-      sam_dopoll(priv);
+      sam_dopoll(priv, EMAC_QUEUE_0);
     }
 }
 
@@ -4015,6 +4350,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
+ *   qid  - Identifies the queue to be reset
  *
  * Returned Value:
  *   None.
@@ -4023,11 +4359,12 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_txreset(struct sam_emac_s *priv)
+static void sam_txreset(struct sam_emac_s *priv, int qid)
 {
-  uint8_t *txbuffer = priv->txbuffer;
-  struct emac_txdesc_s *txdesc = priv->txdesc;
+  uint8_t *txbuffer = priv->xfrq[qid].txbuffer;
+  struct emac_txdesc_s *txdesc = priv->xfrq[qid].txdesc;
   uintptr_t bufaddr;
+  uintptr_t regaddr;
   uint32_t regval;
   int ndx;
 
@@ -4039,33 +4376,34 @@ static void sam_txreset(struct sam_emac_s *priv)
 
   /* Configure the TX descriptors. */
 
-  priv->txhead = 0;
-  priv->txtail = 0;
+  priv->xfrq[qid].txhead = 0;
+  priv->xfrq[qid].txtail = 0;
 
-  for (ndx = 0; ndx < priv->attr->ntxbuffers; ndx++)
-  {
-    bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
+  for (ndx = 0; ndx < priv->xfrq[qid].ntxbuffers; ndx++)
+    {
+      bufaddr = (uintptr_t)&txbuffer[ndx * priv->xfrq[qid].txbufsize];
 
-    /* Set the buffer address and mark the descriptor as in used by firmware */
+      /* Set the buffer address and mark the descriptor as in used by firmware */
 
-    txdesc[ndx].addr   = bufaddr;
-    txdesc[ndx].status = EMACTXD_STA_USED;
-  }
+      txdesc[ndx].addr   = bufaddr;
+      txdesc[ndx].status = EMACTXD_STA_USED;
+    }
 
   /* Mark the final descriptor in the list */
 
-  txdesc[priv->attr->ntxbuffers - 1].status =
+  txdesc[priv->xfrq[qid].ntxbuffers - 1].status =
     EMACTXD_STA_USED | EMACTXD_STA_WRAP;
 
   /* Flush the entire TX descriptor table to RAM */
 
   arch_clean_dcache((uintptr_t)txdesc,
                     (uintptr_t)txdesc +
-                    priv->attr->ntxbuffers * sizeof(struct emac_txdesc_s));
+                    priv->xfrq[qid].ntxbuffers * sizeof(struct emac_txdesc_s));
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
-  sam_putreg(priv, SAM_EMAC_TBQB_OFFSET, (uint32_t)txdesc);
+  regaddr = qid ? SAM_EMAC_ISRPQ_TBQBAPQ_OFFSET(qid) : SAM_EMAC_TBQB_OFFSET;
+  sam_putreg(priv, regaddr, (uint32_t)txdesc);
 }
 
 /****************************************************************************
@@ -4076,6 +4414,7 @@ static void sam_txreset(struct sam_emac_s *priv)
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
+ *   qid  - The transfer queue to be reset
  *
  * Returned Value:
  *   None.
@@ -4084,11 +4423,12 @@ static void sam_txreset(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_rxreset(struct sam_emac_s *priv)
+static void sam_rxreset(struct sam_emac_s *priv, int qid)
 {
-  struct emac_rxdesc_s *rxdesc = priv->rxdesc;
-  uint8_t *rxbuffer = priv->rxbuffer;
-  uint32_t bufaddr;
+  struct emac_rxdesc_s *rxdesc = priv->xfrq[qid].rxdesc;
+  uint8_t *rxbuffer = priv->xfrq[qid].rxbuffer;
+  uintptr_t bufaddr;
+  uintptr_t regaddr;
   uint32_t regval;
   int ndx;
 
@@ -4100,10 +4440,10 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Configure the RX descriptors. */
 
-  priv->rxndx = 0;
+  priv->xfrq[qid].rxndx = 0;
   for (ndx = 0; ndx < priv->attr->nrxbuffers; ndx++)
   {
-    bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
+    bufaddr = (uintptr_t)&rxbuffer[ndx * priv->xfrq[qid].rxbufsize];
     DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
 
     /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
@@ -4126,7 +4466,8 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Set the Receive Buffer Queue Pointer Register */
 
-  sam_putreg(priv, SAM_EMAC_RBQB_OFFSET, (uint32_t)rxdesc);
+  regaddr = qid ? SAM_EMAC_ISRPQ_RBQBAPQ_OFFSET(qid) : SAM_EMAC_RBQB_OFFSET;
+  sam_putreg(priv, regaddr, (uint32_t)rxdesc);
 }
 
 /****************************************************************************
@@ -4245,8 +4586,13 @@ static void sam_emac_reset(struct sam_emac_s *priv)
 
   /* Reset RX and TX logic */
 
-  sam_rxreset(priv);
-  sam_txreset(priv);
+  sam_rxreset(priv, EMAC_QUEUE_0);
+  sam_rxreset(priv, EMAC_QUEUE_1);
+  sam_rxreset(priv, EMAC_QUEUE_2);
+
+  sam_txreset(priv, EMAC_QUEUE_0);
+  sam_txreset(priv, EMAC_QUEUE_1);
+  sam_txreset(priv, EMAC_QUEUE_2);
 
   /* Disable Rx and Tx, plus the statistics registers. */
 
@@ -4261,8 +4607,13 @@ static void sam_emac_reset(struct sam_emac_s *priv)
 
   /* Reset RX and TX logic */
 
-  sam_rxreset(priv);
-  sam_txreset(priv);
+  sam_rxreset(priv, EMAC_QUEUE_0);
+  sam_rxreset(priv, EMAC_QUEUE_1);
+  sam_rxreset(priv, EMAC_QUEUE_2);
+
+  sam_txreset(priv, EMAC_QUEUE_0);
+  sam_txreset(priv, EMAC_QUEUE_1);
+  sam_txreset(priv, EMAC_QUEUE_2);
 
   /* Make sure that RX and TX are disabled; clear statistics registers */
 
@@ -4389,6 +4740,96 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
 #endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
+ * Function: sam_queue0_configure
+ *
+ * Description:
+ *  Put transfer queue 0 in the operational state
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int  sam_queue0_configure(struct sam_emac_s *priv)
+{
+  uint32_t regval;
+
+  /* Set up the DMA configuration register
+   *
+   * EMAC_DCFGR_FBLDO_INCR4 - Attempt to use INCR8 AHB bursts
+   *                        - No endian swap mode
+   * EMAC_DCFGR_RXBMS_FULL  - 4 Kbytes Memory Size
+   * EMAC_DCFGR_TXPBMS      - Full configured address space (4Kbytes)
+   *                        - No Checksum generation offload enable
+   * EMAC_DCFGR_DRBS        - Set configured receive buffer size
+   */
+
+  regval = EMAC_DCFGR_FBLDO_INCR4 | EMAC_DCFGR_RXBMS_FULL |
+           EMAC_DCFGR_DRBS(priv->xfrq[0].rxbufsize);
+  sam_putreg(priv, SAM_EMAC_DCFGR_OFFSET, regval);
+
+  /* Reset RX and TX */
+
+  sam_rxreset(priv, EMAC_QUEUE_0);
+  sam_txreset(priv, EMAC_QUEUE_0);
+
+  /* Enable Rx and Tx, plus the statistics registers. */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+  regval |= EMAC_NCR_RXEN | EMAC_NCR_TXEN | EMAC_NCR_WESTAT;
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+
+  /* Setup the interrupts for TX events, RX events, and error events */
+
+  regval = EMAC_RX_INTS | EMAC_TX_INTS;
+  sam_putreg(priv, SAM_EMAC_IER_OFFSET, regval);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: sam_queue_configure
+ *
+ * Description:
+ *  Put transfer queue n, n=1..(EMAC_NQUEUES-1), in the operational state
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *   qid  - Identifies the transfer queue to be configured
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int sam_queue_configure(struct sam_emac_s *priv, int qid)
+{
+  uint32_t regval;
+
+  /* Set the receive buffer size */
+
+  regval = (uint32_t)priv->xfrq[qid].rxbufsize >> 6;
+  sam_putreg(priv, SAM_EMAC_ISRPQ_RBSRPQ_OFFSET(qid), regval);
+
+  /* Reset RX and TX */
+
+  sam_rxreset(priv, qid);
+  sam_txreset(priv, qid);
+
+  /* Setup interrupts for RX/TX completion events */
+
+  regval = EMAC_RX_INTS | EMAC_TX_INTS;
+  sam_putreg(priv, SAM_EMAC_ISRPQ_IERPQ_OFFSET(qid), regval);
+  return OK;
+}
+
+/****************************************************************************
  * Function: sam_emac_configure
  *
  * Description:
@@ -4418,60 +4859,42 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, EMAC_NCR_CLRSTAT);
   sam_putreg(priv, SAM_EMAC_IDR_OFFSET, EMAC_INT_ALL);
+  sam_putreg(priv, SAM_EMAC_ISRPQ_IDRPQ_OFFSET(1), EMAC_INTPQ_ALL);
+  sam_putreg(priv, SAM_EMAC_ISRPQ_IDRPQ_OFFSET(2), EMAC_INTPQ_ALL);
 
   /* Clear all status bits in the receive status register. */
 
-  regval = (EMAC_RSR_RXOVR | EMAC_RSR_REC | EMAC_RSR_BNA);
+  regval = (EMAC_RSR_RXOVR | EMAC_RSR_REC | EMAC_RSR_BNA | EMAC_RSR_HNO);
   sam_putreg(priv, SAM_EMAC_RSR_OFFSET, regval);
 
   /* Clear all status bits in the transmit status register */
 
-  regval = (EMAC_TSR_UBR | EMAC_TSR_COL | EMAC_TSR_RLE | EMAC_TSR_TFC |
-            EMAC_TSR_TXCOMP);
+  regval = (EMAC_TSR_UBR | EMAC_TSR_COL | EMAC_TSR_RLE | EMAC_TSR_TXGO |
+            EMAC_TSR_TFC | EMAC_TSR_TXCOMP | EMAC_TSR_HRESP);
   sam_putreg(priv, SAM_EMAC_TSR_OFFSET, regval);
 
   /* Clear any pending interrupts */
 
   (void)sam_getreg(priv, SAM_EMAC_ISR_OFFSET);
+  (void)sam_getreg(priv, SAM_EMAC_ISRPQ_ISRPQ_OFFSET(1));
+  (void)sam_getreg(priv, SAM_EMAC_ISRPQ_ISRPQ_OFFSET(2));
 
   /* Enable/disable the copy of data into the buffers, ignore broadcasts.
    * Don't copy FCS.
    */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCFGR_OFFSET);
-  regval |= (EMAC_NCFGR_RFCS | EMAC_NCFGR_PEN);
+  regval = EMAC_NCFGR_FD | EMAC_NCFGR_DBW_ZERO | EMAC_NCFGR_CLK_DIV64 |
+           EMAC_NCFGR_MAXFS | EMAC_NCFGR_PEN | EMAC_NCFGR_RFCS;
 
 #ifdef CONFIG_NET_PROMISCUOUS
   regval |=  EMAC_NCFGR_CAF;
-#else
-  regval &= ~EMAC_NCFGR_CAF;
 #endif
 
 #ifdef CONFIG_SAMV7_EMAC_NBC
   regval |=  EMAC_NCFGR_NBC;
-#else
-  regval &= ~EMAC_NCFGR_NBC;
 #endif
 
   sam_putreg(priv, SAM_EMAC_NCFGR_OFFSET, regval);
-
-  /* Reset TX and RX */
-
-  sam_rxreset(priv);
-  sam_txreset(priv);
-
-  /* Enable Rx and Tx, plus the statistics registers. */
-
-  regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
-  regval |= (EMAC_NCR_RXEN | EMAC_NCR_TXEN | EMAC_NCR_WESTAT);
-  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
-
-  /* Setup the interrupts for TX events, RX events, and error events */
-
-  regval = (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_TUR  | EMAC_INT_RLEX |
-            EMAC_INT_TFC   | EMAC_INT_TCOMP | EMAC_INT_ROVR | EMAC_INT_HRESP |
-            EMAC_INT_PFNZ  | EMAC_INT_PTZ);
-  sam_putreg(priv, SAM_EMAC_IER_OFFSET, regval);
   return OK;
 }
 
@@ -4578,10 +5001,10 @@ int sam_emac_initialize(int intf)
 
   /* Allocate buffers */
 
-  ret = sam_buffer_initialize(priv);
+  ret = sam_buffer_allocate(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
+      ndbg("ERROR: sam_buffer_allocate failed: %d\n", ret);
       goto errout_with_txtimeout;
     }
 

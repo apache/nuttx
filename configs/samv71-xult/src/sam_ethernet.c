@@ -106,14 +106,14 @@ static xcpt_t g_emac0_handler;
 #ifdef CONFIG_SAMV7_PIOA_IRQ
 static void sam_emac0_phy_enable(bool enable)
 {
-  phydbg("IRQ%d: enable=%d\n", IRQ_INT_ETH0, enable);
+  phydbg("IRQ%d: enable=%d\n", IRQ_EMAC0_INT, enable);
   if (enable)
     {
-      sam_pioirqenable(IRQ_INT_ETH0);
+      sam_pioirqenable(IRQ_EMAC0_INT);
     }
   else
     {
-      sam_pioirqdisable(IRQ_INT_ETH0);
+      sam_pioirqdisable(IRQ_EMAC0_INT);
     }
 }
 #endif
@@ -134,8 +134,16 @@ void weak_function sam_netinitialize(void)
 {
   /* Configure the PHY interrupt GPIO */
 
-  phydbg("Configuring %08x\n", GPIO_INT_ETH0);
-  sam_configgpio(GPIO_INT_ETH0);
+  phydbg("Configuring %08x\n", GPIO_EMAC0_INT);
+  sam_configgpio(GPIO_EMAC0_INT);
+
+  /* Configure the PHY SIGDET input */
+
+  sam_configgpio(GPIO_EMAC0_SIGDET);
+
+  /* Configure PHY /RESET output */
+
+  sam_configgpio(GPIO_EMAC0_RESET);
 }
 
 /************************************************************************************
@@ -307,8 +315,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
     {
       phydbg("Select EMAC0\n");
       phandler = &g_emac0_handler;
-      pinset   = GPIO_INT_ETH0;
-      irq      = IRQ_INT_ETH0;
+      pinset   = GPIO_EMAC0_INT;
+      irq      = IRQ_EMAC0_INT;
       enabler  = sam_emac0_phy_enable;
     }
   else

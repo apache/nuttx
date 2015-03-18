@@ -200,9 +200,14 @@
  *   ------ --------- --------- --------------------------
  */
 
-#define GPIO_INT_ETH0 (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                       GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN19)
-#define IRQ_INT_ETH0   SAM_IRQ_PA19
+#define GPIO_EMAC0_INT    (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                           GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN19)
+#define GPIO_EMAC0_SIGDET (GPIO_INPUT | GPIO_CFG_DEFAULT | \
+                           GPIO_PORT_PIOA | GPIO_PIN29)
+#define GPIO_EMAC0_RESET  (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                           GPIO_PORT_PIOC | GPIO_PIN10)
+
+#define IRQ_EMAC0_INT     SAM_IRQ_PA19
 
 /* LEDs
  *
