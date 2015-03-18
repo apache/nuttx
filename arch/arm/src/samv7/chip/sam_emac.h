@@ -173,21 +173,21 @@
                                          /* 0x0200-0x03fc: Reserved */
 /* Priority Queue */
 
-#define SAM_EMAC_ISRPQ_ISRPQ_OFFSET(n)    0x03fc + ((n)<<2)) /* Interrupt Status Register Priority Queue, n=1-3 */
-#define SAM_EMAC_ISRPQ_TBQBAPQ_OFFSET(n)  0x043c + ((n)<<2)) /* Transmit Buffer Queue Base Address Register Priority Queue, n=1-3 */
-#define SAM_EMAC_ISRPQ_RBQBAPQ_OFFSET(n)  0x047c + ((n)<<2)) /* Receive Buffer Queue Base Address Register Priority Queue, n=1-3 */
-#define SAM_EMAC_ISRPQ_RBSRPQ_OFFSET(n)   0x049c + ((n)<<2)) /* Receive Buffer Size Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_ISRPQ_OFFSET(n)    (0x03fc+((n)<<2)) /* Interrupt Status Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_TBQBAPQ_OFFSET(n)  (0x043c+((n)<<2)) /* Transmit Buffer Queue Base Address Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_RBQBAPQ_OFFSET(n)  (0x047c+((n)<<2)) /* Receive Buffer Queue Base Address Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_RBSRPQ_OFFSET(n)   (0x049c+((n)<<2)) /* Receive Buffer Size Register Priority Queue, n=1-3 */
 #define SAM_EMAC_ISRPQ_CBSCR_OFFSET       0x04bc             /* Credit-Based Shaping Control Register */
 #define SAM_EMAC_ISRPQ_CBSISQA_OFFSET     0x04c0             /* Credit-Based Shaping IdleSlope Register for Queue A */
 #define SAM_EMAC_ISRPQ_CBSISQB_OFFSET     0x04c4             /* Credit-Based Shaping IdleSlope Register for Queue B */
-#define SAM_EMAC_ISRPQ_ST1RPQ_OFFSET(n)   0x0500 + ((n)<<2)) /* Screening Type 1 Register Priority Queue, 0=1-3 */
-#define SAM_EMAC_ISRPQ_ST2RPQ_OFFSET(n)   0x0540 + ((n)<<2)) /* Screening Type 2 Register Priority Queue, 0=1-7 */
-#define SAM_EMAC_ISRPQ_IERPQ_OFFSET(n)    0x05fc + ((n)<<2)) /* Interrupt Enable Register Priority Queue, n=1-3 */
-#define SAM_EMAC_ISRPQ_IDRPQ_OFFSET(n)    0x061c + ((n)<<2)) /* Interrupt Disable Register Priority Queue, n=1-3 */
-#define SAM_EMAC_ISRPQ_IMRPQ_OFFSET(n)    0x063c + ((n)<<2)) /* Interrupt Mask Register Priority Queue, n=1-3 */
-#define SAM_EMAC_ISRPQ_ST2ER_OFFSET(n)    0x06e0 + ((n)<<2)) /* Screening Type 2 Ethertype Register, n=0-3 */
-#define SAM_EMAC_ISRPQ_ST2CW0_OFFSET(n)   0x0700 + ((n)<<3)) /* Screening Type 2 Compare Word 0 Registerm, n=0-23 */
-#define SAM_EMAC_ISRPQ_ST2CW1_OFFSET(n)   0x0704 + ((n)<<3)) /* Screening Type 2 Compare Word 1 Register, n=0-23 */
+#define SAM_EMAC_ISRPQ_ST1RPQ_OFFSET(n)   (0x0500+((n)<<2)) /* Screening Type 1 Register Priority Queue, 0=1-3 */
+#define SAM_EMAC_ISRPQ_ST2RPQ_OFFSET(n)   (0x0540+((n)<<2)) /* Screening Type 2 Register Priority Queue, 0=1-7 */
+#define SAM_EMAC_ISRPQ_IERPQ_OFFSET(n)    (0x05fc+((n)<<2)) /* Interrupt Enable Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_IDRPQ_OFFSET(n)    (0x061c+((n)<<2)) /* Interrupt Disable Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_IMRPQ_OFFSET(n)    (0x063c+((n)<<2)) /* Interrupt Mask Register Priority Queue, n=1-3 */
+#define SAM_EMAC_ISRPQ_ST2ER_OFFSET(n)    (0x06e0+((n)<<2)) /* Screening Type 2 Ethertype Register, n=0-3 */
+#define SAM_EMAC_ISRPQ_ST2CW0_OFFSET(n)   (0x0700+((n)<<3)) /* Screening Type 2 Compare Word 0 Registerm, n=0-23 */
+#define SAM_EMAC_ISRPQ_ST2CW1_OFFSET(n)   (0x0704+((n)<<3)) /* Screening Type 2 Compare Word 1 Register, n=0-23 */
 
 /* EMAC Register Addresses **********************************************************/
 
@@ -866,8 +866,8 @@
  *   EMAC_INT_HRESP            Bit 11: Hresp not OK
  */
 
-#define EMAC_ISRPQ_ALL            (0x00000ce6)
-#define EMAC_ISRPG_UNUSED         (0xfffffe19)
+#define EMAC_INTPQ_ALL            (0x00000ce6)
+#define EMAC_INTPG_UNUSED         (0xfffffe19)
 
 /* Transmit Buffer Queue Base Address Register Priority Queue, n=1-3 */
 
