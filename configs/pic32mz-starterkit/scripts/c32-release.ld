@@ -87,7 +87,7 @@ MEMORY
 	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 128
 	kseg1_intexcpt (rx) : ORIGIN = 0xbfc00400, LENGTH = 128
 	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
-	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 8192-1168
+	kseg0_bootmem  (rx) : ORIGIN = 0x9fc004ac, LENGTH = 8192-1196
 	kseg1_dbgcode  (rx) : ORIGIN = 0xbfc02000, LENGTH = 4096-16
 	kseg1_adevcfg   (r) : ORIGIN = 0x1fc0ff40, LENGTH = 128
 	kseg1_devcfg    (r) : ORIGIN = 0x1fc0ffc0, LENGTH = 128

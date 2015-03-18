@@ -165,6 +165,8 @@ Creating Compatible NuttX HEX files
 Tool Issues
 ===========
 
+  Pinquino Toolchain
+  ------------------
   If you use the Pinguino toolchain, you will probably see this error:
 
   C:\pinguino-11\compilers\p32\bin\p32-ld.exe: target elf32-tradlittlemips not found
@@ -177,6 +179,17 @@ Tool Issues
   This error can be eliminated with the Pinguino toolchain by changing this to:
 
     OUTPUT_FORMAT("elf32-littlemips")
+
+  ICD3
+  ----
+  The onboard debugger is Slow and one is better off using an ICD3
+
+  Segger J-Link
+  -------------
+  If using a Jlink that only these versions work with PIC32:
+
+    J-Link BASE / EDU V9 or later
+    J-Link ULTRA+ / PRO V4 or later
 
 Serial Console
 ==============
