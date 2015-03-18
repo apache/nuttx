@@ -225,9 +225,14 @@ int sam_emac0_setmac(void)
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Now configure the EMAC driver to use this MAC address */
-#warning Missing logic
 
-  return OK;
+  ret = sam_emac_setmacaddr(EMAC0_INTF, mac);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to set MAC address: %d\n", ret);
+    }
+
+  return ret;
 }
 #else
 #  define sam_emac0_setmac()
