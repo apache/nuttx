@@ -187,7 +187,8 @@ extern "C"
  *   Initialize the EMAC driver.
  *
  * Input Parameters:
- *   None
+ *   intf - If multiple EMAC peripherals are supported, this identifies the
+ *     the EMAC peripheral being initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -199,6 +200,39 @@ extern "C"
 
 #ifdef CONFIG_SAMV7_EMAC
 int sam_emac_initialize(int intf);
+#endif
+
+/****************************************************************************
+ * Function: sam_emac_setmacaddr
+ *
+ * Description:
+ *   There are two ways that the Ethernet MAC address can be set:
+ *
+ *   1) Application level code can set the Ethernet MAC address using a
+ *      netdev ioctl.  The application level code have gotten the MAC
+ *      address from some configuration parameter or by accessing some
+ *      non-volatile storage containing the address.  This is the
+ *      "cannonically correct" way to set the MAC address.
+ *   2) Alterntively, the board logic may support some other less obvious
+ *      non-volatile storage and the board-level boot-up code may access
+ *      this and use this interface to set the Ethernet MAC address more
+ *      directly.  This is mostly a kludge for the case where you just don't
+ *      want to expose a application level storage interface.
+ *
+ * Input Parameters:
+ *   intf - If multiple EMAC peripherals are supported, this identifies the
+ *     the EMAC peripheral being initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   Called very early in the initialization sequence.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_EMAC
+int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
 #endif
 
 /************************************************************************************
