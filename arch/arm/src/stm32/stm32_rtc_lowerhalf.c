@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/rtc.h>
@@ -169,7 +170,7 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   /* Get the higher resolution time */
 
-  int ret = up_rtc_gettime(&ts);
+  ret = up_rtc_gettime(&ts);
   if (ret < 0)
     {
       goto errout_with_errno;
@@ -180,12 +181,14 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
    * compatible.
    */
 
-  if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime)
+  if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime))
     {
       goto errout_with_errno;
     }
 
-errout_with_errno;
+  return OK;
+
+errout_with_errno:
   ret = get_errno();
   DEBUGASSERT(ret > 0);
   return -ret;
@@ -243,7 +246,7 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = mktime((FAR const struct tm *)rtctime)
+  ts.tv_sec  = mktime((FAR struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Now set the time (to one second accuracy) */
