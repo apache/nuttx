@@ -10017,3 +10017,6 @@
 	  configs/pic32mz-starterkit/nsh/Make.defs:  Changes that will permit
 	  building of the PIC32MZ Start Kit configuration using MPLAB and the
 	  XC32 toolchain.  From David Sidrane (2015-03-17).
+	* arch/arm/src/stm32/stm32_rtc_lowerhalf.c:  Fix some errors in the
+	  STM32 RTC lower-half driver that cause compilation failures.  From
+	  shilo.xyz (2015-03-19).
