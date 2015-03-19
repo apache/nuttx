@@ -344,6 +344,8 @@ NOTES:
 AT24MAC402 Serial EEPROM
 ========================
 
+Ethernet MAC Address
+--------------------
 The SAM V71 Xplained Ultra features one external AT24MAC402 serial EEPROM
 with a EIA-48 MAC address connected to the SAM V71 through I2C. This device
 contains a MAC address for use with the Ethernet interface.
@@ -366,6 +368,29 @@ I2C address:
   memory and 0b1011aaa for the "extended memory" where aaa is the state of
   the A0, A1, and A3 pins on the part.  On the SAMV71-XULT board, these
   are all pulled high so the full, 7-bit address is 0x5f.
+
+Configuration
+-------------
+
+  System Type -> SAMV7 Peripheral Support
+    CONFIG_SAMV7_TWIHS0=y                : Used to access the EEPROM
+    CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
+
+  Device drivers -> Memory Technology Devices
+    CONFIG_MTD_AT24XX=y                  : Enable the AT24 device driver
+    CONFIG_AT24XX_SIZE=2                 : Normal EEPROM is 2Kbit (256b)
+    CONFIG_AT24XX_ADDR=0x57              : Normal EEPROM address */
+    CONFIG_AT24XX_EXTENDED=y             : Supports an extended memory region
+    CONFIG_AT24XX_EXTSIZE=160            : Extended address up to 0x9f
+
+MTD Configuration Data
+----------------------
+The AT24 EEPROM can also be used to storage of up to 256 bytes of
+configuration data:
+
+  Device drivers -> Memory Technology Devices
+
+The configuration data device will appear at /dev/config.
 
 Networking
 ==========
@@ -398,7 +423,7 @@ Selecting the GMAC peripheral
   System Type -> SAMV7 Peripheral Support
     CONFIG_SAMV7_EMAC0=y                 : Enable the GMAC peripheral (aka, EMAC0)
     CONFIG_SAMV7_TWIHS0=y                : We will get the MAC address from the AT24 EEPROM
-   CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
+    CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
 
   System Type -> EMAC device driver options
     CONFIG_SAMV7_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
@@ -866,7 +891,11 @@ Configuration sub-directories
        the AT2 EEPROM (I am not sure what the other address, 0x37, is are
        as this writing).
 
-    7. Support for HSMCI is built-in by default. The SAMV71-XULT provides
+    7. TWIHS0 is also used to support 256 byte non-volatile storage for
+       configuration data using the MTD configuration as described above
+       under the heading, "MTD Configuration Data".
+
+    8. Support for HSMCI is built-in by default. The SAMV71-XULT provides
        one full-size SD memory card slot.  Refer to the section entitled
        "SD card" for configuration-related information.
 
@@ -875,7 +904,7 @@ Configuration sub-directories
        The auto-mounter is not enabled.  See the section above entitled
        "Auto-Mounter".
 
-    8. Performance-related Configuration settings:
+    9. Performance-related Configuration settings:
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
