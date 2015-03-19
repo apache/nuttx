@@ -2703,9 +2703,9 @@ static int sam_ifup(struct net_driver_s *dev)
 
   nllvdbg("Initialize the EMAC\n");
   sam_emac_configure(priv);
-  sam_queue0_configure(priv);
   sam_queue_configure(priv, EMAC_QUEUE_1);
   sam_queue_configure(priv, EMAC_QUEUE_2);
+  sam_queue0_configure(priv);
 
   /* Set the MAC address (should have been configured while we were down) */
 
