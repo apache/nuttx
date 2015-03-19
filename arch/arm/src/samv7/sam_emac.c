@@ -1048,7 +1048,9 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].rxbuffer       = priv->attr->rx0buffer;
   priv->xfrq[0].rxbufsize      = EMAC_RX_UNITSIZE;
 
-  for (qid = 0; qid < EMAC_NQUEUES; qid++)
+  /* Priority queues */
+
+  for (qid = 1; qid < EMAC_NQUEUES; qid++)
     {
       priv->xfrq[qid].txdesc     = priv->attr->tx1desc;
       priv->xfrq[qid].ntxbuffers = DUMMY_NBUFFERS;
@@ -1159,7 +1161,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
 
   priv->xfrq[1].rxbufsize = DUMMY_BUFSIZE;
 
-  /* Clone the Queue 1 allocations to the other queues */
+  /* Clone the Priority Queue 1 allocations to the other priority queues */
 
   for (qid = 2; qid < EMAC_NQUEUES; qid++)
     {
@@ -3850,6 +3852,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
 static int sam_autonegotiate(struct sam_emac_s *priv)
 {
   uint32_t regval;
+  uint32_t ncr;
   uint16_t phyid1;
   uint16_t phyid2;
   uint16_t mcr;
@@ -4041,17 +4044,22 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
 
   /* Select RMII/MII */
 
-  regval = sam_getreg(priv, SAM_EMAC_UR_OFFSET);
-  regval &= ~EMAC_UR_RMII;  /* Assume MII */
+  ncr = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET,
+             ncr & ~(EMAC_NCR_TXEN | EMAC_NCR_RXEN));
 
-  if (priv->attr->rmii)
+  regval = sam_getreg(priv, SAM_EMAC_UR_OFFSET);
+  regval &= ~EMAC_UR_RMII;  /* Assume RMII */
+
+  if (!priv->attr->rmii)
     {
-      /* Not MII, select RMII */
+      /* Not RMII, select MII */
 
       regval |= EMAC_UR_RMII;
     }
 
   sam_putreg(priv, SAM_EMAC_UR_OFFSET, regval);
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, ncr);
 
 errout:
   /* Disable management port */
@@ -4755,7 +4763,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int  sam_queue0_configure(struct sam_emac_s *priv)
+static int sam_queue0_configure(struct sam_emac_s *priv)
 {
   uint32_t regval;
 
@@ -4767,10 +4775,11 @@ static int  sam_queue0_configure(struct sam_emac_s *priv)
    * EMAC_DCFGR_TXPBMS      - Full configured address space (4Kbytes)
    *                        - No Checksum generation offload enable
    * EMAC_DCFGR_DRBS        - Set configured receive buffer size
+   *                          (units of 64 bytes)
    */
 
-  regval = EMAC_DCFGR_FBLDO_INCR4 | EMAC_DCFGR_RXBMS_FULL |
-           EMAC_DCFGR_DRBS(priv->xfrq[0].rxbufsize);
+  regval = EMAC_DCFGR_FBLDO_INCR4 | EMAC_DCFGR_RXBMS_FULL | /* EMAC_DCFGR_TXPBMS | */
+           EMAC_DCFGR_DRBS(priv->xfrq[0].rxbufsize >> 6);
   sam_putreg(priv, SAM_EMAC_DCFGR_OFFSET, regval);
 
   /* Reset RX and TX */
