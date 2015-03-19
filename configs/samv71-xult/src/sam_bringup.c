@@ -89,11 +89,7 @@
 
 int sam_bringup(void)
 {
-#if defined(HAVE_MACADDR) || defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || \
-    defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
-    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS)
   int ret;
-#endif
 
 #ifdef HAVE_MACADDR
   /* Read the Ethernet MAC address from the AT24 FLASH and configure the
@@ -107,8 +103,19 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef HAVE_MTDCONFIG
+  /* Create an AT24xx-based MTD configuration device for storage device
+   * configuration information.
+   */
+
+  ret = sam_at24config();
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: sam_at24config() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_HSMCI
-#ifdef CONFIG_SAMV7_HSMCI0
   /* Initialize the HSMCI0 driver */
 
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
@@ -137,7 +144,6 @@ int sam_bringup(void)
     }
 
 #endif /* CONFIG_SAMV7XULT_HSMCI0_MOUNT */
-#endif /* CONFIG_SAMV7_HSMCI0 */
 #endif /* HAVE_HSMCI */
 
 #ifdef HAVE_AUTOMOUNTER
@@ -230,5 +236,6 @@ int sam_bringup(void)
    * capabilities.
    */
 
+  UNUSED(ret);
   return OK;
 }

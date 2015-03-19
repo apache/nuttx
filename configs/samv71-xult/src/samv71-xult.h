@@ -60,6 +60,7 @@
 #define HAVE_USBMONITOR  1
 #define HAVE_NETWORK     1
 #define HAVE_MACADDR     1
+#define HAVE_MTDCONFIG   1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -157,16 +158,24 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Networking */
+/* Networking and AT24-based MTD config */
 
 #if !defined(CONFIG_NET) || !defined(CONFIG_SAMV7_EMAC)
 #  undef HAVE_NETWORK
 #  undef HAVE_MACADDR
 #endif
 
-#if defined(CONFIG_NSH_NOMAC) || !defined(CONFIG_SAMV7_TWIHS0) || \
-   !defined(CONFIG_MTD_AT24XX) || !defined(CONFIG_AT24XX_EXTENDED)
+#if !defined(CONFIG_SAMV7_TWIHS0) || !defined(CONFIG_MTD_AT24XX)
 #  undef HAVE_MACADDR
+#  undef HAVE_MTDCONFIG
+#endif
+
+#if defined(CONFIG_NSH_NOMAC) || !defined(CONFIG_AT24XX_EXTENDED)
+#  undef HAVE_MACADDR
+#endif
+
+#if !defined(CONFIG_MTD_CONFIG)
+#  undef HAVE_MTDCONFIG
 #endif
 
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
@@ -474,6 +483,19 @@ void sam_automount_event(int slotno, bool inserted);
 bool sam_writeprotected(int slotno);
 #else
 #  define sam_writeprotected(slotno) (false)
+#endif
+
+/************************************************************************************
+ * Name: sam_at24config
+ *
+ * Description:
+ *   Create an AT24xx-based MTD configuration device for storage device configuration
+ *   information.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_MTDCONFIG
+int sam_at24config(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

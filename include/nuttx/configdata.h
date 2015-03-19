@@ -52,18 +52,9 @@
 
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_PLATFORM_CONFIGDATA
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* CONFIG_AUDIO - Enables Audio driver support
- * CONFIG_DEBUG_AUDIO - If enabled (with CONFIG_DEBUG and, optionally,
- *   CONFIG_DEBUG_VERBOSE), this will generate output that can be used to
- *   debug Audio drivers.
- */
-
 /* IOCTL Commands ***********************************************************/
 /* The Audio module uses a standard character driver framework.  However, a
  * lot of the Audio driver functionality is configured via a device control
@@ -134,6 +125,7 @@ extern "C"
  *
  ****************************************************************************/
 
+struct mtd_dev_s;
 int mtdconfig_register(FAR struct mtd_dev_s *mtd);
 
 #undef EXTERN
@@ -141,5 +133,4 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd);
 }
 #endif
 
-#endif /* CONFIG_PLATFORM_CONFIGDATA */
 #endif /* __INCLUDE_NUTTX_CONFIGDATA_H */

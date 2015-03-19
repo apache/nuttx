@@ -82,6 +82,14 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif
 
+ifeq ($(CONFIG_MTD_CONFIG),y)
+ifeq ($(CONFIG_SAMV7_TWIHS0),y)
+ifeq ($(CONFIG_MTD_AT24XX),y)
+CSRCS += sam_at24config.c
+endif
+endif
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
