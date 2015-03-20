@@ -155,7 +155,7 @@
 
 #define SAM_TC012_CHAN_BASE(n)   (SAM_TC012_VBASE+SAM_TC_CHAN_OFFSET(n))
 
-#define SAM_TC012_CCRn(n)        (SAM_TC012_VBASE+SAM_TC_CCR_OFFSET(n))
+#define SAM_TC012_CCR(n)         (SAM_TC012_VBASE+SAM_TCn_CCR_OFFSET(n))
 #define SAM_TC012_CMR(n)         (SAM_TC012_VBASE+SAM_TCn_CMR_OFFSET(n))
 #define SAM_TC012_SMMR(n)        (SAM_TC012_VBASE+SAM_TCn_SMMR_OFFSET(n))
 #define SAM_TC012_RAB(n)         (SAM_TC012_VBASE+SAM_TCn_RAB_OFFSET(n))
@@ -238,21 +238,21 @@
 
 #define SAM_TC345_CHAN_BASE(n)   (SAM_TC345_VBASE+SAM_TC_CHAN_OFFSET((n)-3))
 
-#define SAM_TC345_CCRn(n)        (SAM_TC345_VBASE+SAM_TC_CCR_OFFSET(n))
-#define SAM_TC345_CMR(n)         (SAM_TC345_VBASE+SAM_TCn_CMR_OFFSET(n))
-#define SAM_TC345_SMMR(n)        (SAM_TC345_VBASE+SAM_TCn_SMMR_OFFSET(n))
-#define SAM_TC345_RAB(n)         (SAM_TC345_VBASE+SAM_TCn_RAB_OFFSET(n))
-#define SAM_TC345_CV(n)          (SAM_TC345_VBASE+SAM_TCn_CV_OFFSET(n))
-#define SAM_TC345_RA(n)          (SAM_TC345_VBASE+SAM_TCn_RA_OFFSET(n))
-#define SAM_TC345_RB(n)          (SAM_TC345_VBASE+SAM_TCn_RB(n))
-#define SAM_TC345_RC(n)          (SAM_TC345_VBASE+SAM_TCn_RC_OFFSET(n))
-#define SAM_TC345_SR(n)          (SAM_TC345_VBASE+SAM_TCn_SR_OFFSET(n))
-#define SAM_TC345_IER(n)         (SAM_TC345_VBASE+SAM_TCn_IER_OFFSET(n))
-#define SAM_TC345_IDR(n)         (SAM_TC345_VBASE+SAM_TCn_IDR_OFFSET(n))
-#define SAM_TC345_IMR(n)         (SAM_TC345_VBASE+SAM_TCn_IMR_OFFSET(n))
+#define SAM_TC345_CCR(n)         (SAM_TC345_VBASE+SAM_TCn_CCR_OFFSET((n)-3))
+#define SAM_TC345_CMR(n)         (SAM_TC345_VBASE+SAM_TCn_CMR_OFFSET((n)-3))
+#define SAM_TC345_SMMR(n)        (SAM_TC345_VBASE+SAM_TCn_SMMR_OFFSET((n)-3))
+#define SAM_TC345_RAB(n)         (SAM_TC345_VBASE+SAM_TCn_RAB_OFFSET((n)-3))
+#define SAM_TC345_CV(n)          (SAM_TC345_VBASE+SAM_TCn_CV_OFFSET((n)-3))
+#define SAM_TC345_RA(n)          (SAM_TC345_VBASE+SAM_TCn_RA_OFFSET((n)-3))
+#define SAM_TC345_RB(n)          (SAM_TC345_VBASE+SAM_TCn_RB_OFFSET((n)-3))
+#define SAM_TC345_RC(n)          (SAM_TC345_VBASE+SAM_TCn_RC_OFFSET((n)-3))
+#define SAM_TC345_SR(n)          (SAM_TC345_VBASE+SAM_TCn_SR_OFFSET((n)-3))
+#define SAM_TC345_IER(n)         (SAM_TC345_VBASE+SAM_TCn_IER_OFFSET((n)-3))
+#define SAM_TC345_IDR(n)         (SAM_TC345_VBASE+SAM_TCn_IDR_OFFSET((n)-3))
+#define SAM_TC345_IMR(n)         (SAM_TC345_VBASE+SAM_TCn_IMR_OFFSET((n)-3))
 
 #ifdef ATSAMA5D4
-#  define SAM_TC345_EMR(n)       (SAM_TC345_VBASE+SAM_TCn_EMR_OFFSET(n))
+#  define SAM_TC345_EMR(n)       (SAM_TC345_VBASE+SAM_TCn_EMR_OFFSET((n)-3))
 #endif
 
 #define SAM_TC3_CCR              SAM_TC345_CCR(3)
@@ -321,21 +321,21 @@
 
 #define SAM_TC678_CHAN_BASE(n)   (SAM_TC678_VBASE+SAM_TC_CHAN_OFFSET((n)-6))
 
-#define SAM_TC678_CCRn(n)        (SAM_TC678_VBASE+SAM_TC_CCR_OFFSET(n))
-#define SAM_TC678_CMR(n)         (SAM_TC678_VBASE+SAM_TCn_CMR_OFFSET(n))
-#define SAM_TC678_SMMR(n)        (SAM_TC678_VBASE+SAM_TCn_SMMR_OFFSET(n))
-#define SAM_TC678_RAB(n)         (SAM_TC678_VBASE+SAM_TCn_RAB_OFFSET(n))
-#define SAM_TC678_CV(n)          (SAM_TC678_VBASE+SAM_TCn_CV_OFFSET(n))
-#define SAM_TC678_RA(n)          (SAM_TC678_VBASE+SAM_TCn_RA_OFFSET(n))
-#define SAM_TC678_RB(n)          (SAM_TC678_VBASE+SAM_TCn_RB(n))
-#define SAM_TC678_RC(n)          (SAM_TC678_VBASE+SAM_TCn_RC_OFFSET(n))
-#define SAM_TC678_SR(n)          (SAM_TC678_VBASE+SAM_TCn_SR_OFFSET(n))
-#define SAM_TC678_IER(n)         (SAM_TC678_VBASE+SAM_TCn_IER_OFFSET(n))
-#define SAM_TC678_IDR(n)         (SAM_TC678_VBASE+SAM_TCn_IDR_OFFSET(n))
-#define SAM_TC678_IMR(n)         (SAM_TC678_VBASE+SAM_TCn_IMR_OFFSET(n))
+#define SAM_TC678_CCRn(n)        (SAM_TC678_VBASE+SAM_TCn_CCR_OFFSET((n)-6))
+#define SAM_TC678_CMR(n)         (SAM_TC678_VBASE+SAM_TCn_CMR_OFFSET((n)-6))
+#define SAM_TC678_SMMR(n)        (SAM_TC678_VBASE+SAM_TCn_SMMR_OFFSET((n)-6))
+#define SAM_TC678_RAB(n)         (SAM_TC678_VBASE+SAM_TCn_RAB_OFFSET((n)-6))
+#define SAM_TC678_CV(n)          (SAM_TC678_VBASE+SAM_TCn_CV_OFFSET((n)-6))
+#define SAM_TC678_RA(n)          (SAM_TC678_VBASE+SAM_TCn_RA_OFFSET((n)-6))
+#define SAM_TC678_RB(n)          (SAM_TC678_VBASE+SAM_TCn_RB((n)-6))
+#define SAM_TC678_RC(n)          (SAM_TC678_VBASE+SAM_TCn_RC_OFFSET((n)-6))
+#define SAM_TC678_SR(n)          (SAM_TC678_VBASE+SAM_TCn_SR_OFFSET((n)-6))
+#define SAM_TC678_IER(n)         (SAM_TC678_VBASE+SAM_TCn_IER_OFFSET((n)-6))
+#define SAM_TC678_IDR(n)         (SAM_TC678_VBASE+SAM_TCn_IDR_OFFSET((n)-6))
+#define SAM_TC678_IMR(n)         (SAM_TC678_VBASE+SAM_TCn_IMR_OFFSET((n)-6))
 
 #ifdef ATSAMA5D4
-#  define SAM_TC678_EMR(n)       (SAM_TC678_VBASE+SAM_TCn_EMR_OFFSET(n))
+#  define SAM_TC678_EMR(n)       (SAM_TC678_VBASE+SAM_TCn_EMR_OFFSET((n)-6))
 #endif
 
 #define SAM_TC6_CCR              SAM_TC678_CCR(6)
