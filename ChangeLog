@@ -10020,3 +10020,5 @@
 	* arch/arm/src/stm32/stm32_rtc_lowerhalf.c:  Fix some errors in the
 	  STM32 RTC lower-half driver that cause compilation failures.  From
 	  shilo.xyz (2015-03-19).
+	* arch/arm/src/sama5/chip/sam_tc.h: Fix typos in timer/counter header
+	  file.  From Bob Doiron (2015-03-20).
