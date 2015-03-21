@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/avr32dev1/src/up_boot.c
+ * configs/avr32dev1/src/avr32_boot.c
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

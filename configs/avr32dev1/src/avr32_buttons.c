@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/src/up_leds.c
+ * configs/avr32dev1/src/avr32_buttons.c
  *
  *   Copyright (C) 2010-2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
