@@ -43,7 +43,7 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS = stm32_boot.c stm32_spi.c stm32_usbdev.c stm32_mmcsd.c
 
 ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS += up_lcd.c stm32_selectlcd.c
+CSRCS += stm32_lcd.c stm32_selectlcd.c
 endif
 
 ifeq ($(CONFIG_HAVE_CXX),y)

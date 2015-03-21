@@ -59,7 +59,7 @@ CSRCS += lpc43_buttons.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS += up_usbmsc.c
+CSRCS += lpc43_usbmsc.c
 endif
 
 ifeq ($(CONFIG_SPIFI_LIBRARY),y)
