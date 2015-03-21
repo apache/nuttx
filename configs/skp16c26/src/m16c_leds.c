@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/scp16c26/src/up_leds.c
+ * configs/scp16c26/src/m16c_leds.c
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

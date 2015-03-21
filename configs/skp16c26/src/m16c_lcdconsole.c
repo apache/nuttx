@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/scp16c26/src/up_lcd.c
+ * configs/scp16c26/src/m16c_lcdconsole.c
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@
 #if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD) && defined(CONFIG_LCD_CONSOLE)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
