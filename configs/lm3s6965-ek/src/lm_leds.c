@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lm3s6965-ek/src/up_leds.c
+ * configs/lm3s6965-ek/src/lm_leds.c
  *
  *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

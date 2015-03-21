@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/lm3s6965-ek/src/up_oled.c
- * arch/arm/src/board/up_oled.c
+ * config/lm3s6965-ek/src/lm_oled.c
  *
  *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,7 @@
 #include "lm3s6965ek_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you
