@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mikroe-stm32f4/kernel/up_userspace.c
+ * configs/mikroe-stm32f4/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

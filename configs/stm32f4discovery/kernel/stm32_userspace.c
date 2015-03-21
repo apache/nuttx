@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/kernel/up_userspace.c
+ * configs/stm32f4discovery/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
