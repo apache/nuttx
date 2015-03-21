@@ -59,7 +59,6 @@
 
 /* Capabilities and characteristics of endpoints */
 
-=== REVISIT
 #define SAM_USBHS_MAXPACKETSIZE(ep)       (((unsigned)(ep) < 1) ? 64 : 1024)
 #define SAM_USBHS_NBANKS(ep)              (((unsigned)(ep) < 1) ? 1 : (((unsigned)(ep) < 3) ? 3 : 2))
 #define SAM_USBHS_DMA(ep)                 (((unsigned)(ep) < 1) ? false : (((unsigned)(ep) < 8) ? true : false))
@@ -322,12 +321,6 @@
 #define USBHS_DEVEPTCFG_NBTRANS_SHIFT      (13)              /* Bits 13-14: Number Transaction per uframe */
 #define USBHS_DEVEPTCFG_NBTRANS_MASK       (3 << USBHS_DEVEPTCFG_NBTRANS_SHIFT)
 
-/* Device Endpoint Status Register
- *
- * (1) Control, Bulk, Interrupt endpoints only 
- * (2) Isochronous endpoints only
- */
-
 /* Common Endpoint Interrupt Bit Definitions
  *
  *   Device Endpoint Status Register
@@ -531,7 +524,7 @@
 
 #define USBHS_HSTADDR1_HSTADDRP_SHIFT(n)   ((n) << 3)         /* USB Host Address */
 #define USBHS_HSTADDR1_HSTADDRP_MASK(n)    (0x7f << USBHS_HSTADDR1_HSTADDRP_SHIFT(n))
-#  define USBHS_HSTADDR1_HSTADDRP0(n,v)    ((uint32_t)(v) << USBHS_HSTADDR1_HSTADDRP_SHIFT(n))
+#  define USBHS_HSTADDR1_HSTADDRP(n,v)     ((uint32_t)(v) << USBHS_HSTADDR1_HSTADDRP_SHIFT(n))
 
 #define USBHS_HSTADDR1_HSTADDRP0_SHIFT     (0)               /* Bits 0-6: USB Host Address */
 #define USBHS_HSTADDR1_HSTADDRP0_MASK      (0x7f << USBHS_HSTADDR1_HSTADDRP0_SHIFT)
@@ -550,7 +543,7 @@
 
 #define USBHS_HSTADDR2_HSTADDRP_SHIFT(n)   (((n)-4) << 3)         /* USB Host Address */
 #define USBHS_HSTADDR2_HSTADDRP_MASK(n)    (0x7f << USBHS_HSTADDR2_HSTADDRP_SHIFT(n))
-#  define USBHS_HSTADDR2_HSTADDRP0(n,v)    ((uint32_t)(v) << USBHS_HSTADDR2_HSTADDRP_SHIFT(n))
+#  define USBHS_HSTADDR2_HSTADDRP(n,v)     ((uint32_t)(v) << USBHS_HSTADDR2_HSTADDRP_SHIFT(n))
 
 #define USBHS_HSTADDR2_HSTADDRP4_SHIFT     (0)               /* Bits 0-6: USB Host Address */
 #define USBHS_HSTADDR2_HSTADDRP4_MASK      (0x7f << USBHS_HSTADDR2_HSTADDRP4_SHIFT)
@@ -569,7 +562,7 @@
 
 #define USBHS_HSTADDR3_HSTADDRP_SHIFT(n)   (((n)-8) << 3)         /* USB Host Address */
 #define USBHS_HSTADDR3_HSTADDRP_MASK(n)    (0x7f << USBHS_HSTADDR3_HSTADDRP_SHIFT(n))
-#  define USBHS_HSTADDR3_HSTADDRP0(n,v)    ((uint32_t)(v) << USBHS_HSTADDR3_HSTADDRP_SHIFT(n))
+#  define USBHS_HSTADDR3_HSTADDRP(n,v)     ((uint32_t)(v) << USBHS_HSTADDR3_HSTADDRP_SHIFT(n))
 
 #define USBHS_HSTADDR3_HSTADDRP8_SHIFT     (0)               /* Bits 0-6: USB Host Address */
 #define USBHS_HSTADDR3_HSTADDRP8_MASK      (0x7f << USBHS_HSTADDR3_HSTADDRP8_SHIFT)
