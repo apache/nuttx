@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/lm3s6965-ek/src/up_ssi.c
- * arch/arm/src/board/up_ssi.c
+ * configs/lm3s6965-ek/src/lm_ssi.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +56,7 @@
 #if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

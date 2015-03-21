@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/lm3s6965-ek/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/lm3s6965-ek/src/lm_nsh.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

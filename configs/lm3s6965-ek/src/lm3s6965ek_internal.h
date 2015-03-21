@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/lm3s6965-ek/src/lm3s6965ek_internal.h
- * arch/arm/src/board/lm3s6965ek_internal.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "tiva_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S6965 supports 1 SSI
