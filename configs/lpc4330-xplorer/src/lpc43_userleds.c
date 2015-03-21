@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/lpc4330-xplorer/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * configs/lpc4330-xplorer/src/lpc43_userleds.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,92 +39,73 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
 
 #include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
 
-#ifdef CONFIG_LPC43_SPIFI
-#  include <nuttx/mtd/mtd.h>
-#  include "lpc43_spifi.h"
+#include "xplorer_internal.h"
 
-#  ifdef CONFIG_SPFI_NXFFS
-#    include <sys/mount.h>
-#    include <nuttx/fs/nxffs.h>
+#ifndef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* LED definitions **********************************************************/
+/* The LPC4330-Xplorer has 2 user-controllable LEDs labeled D2 an D3 in the
+ * schematic and on but referred to has LED1 and LED2 here, respectively.
+ *
+ *  LED1   D2  GPIO1[12]
+ *  LED2   D3  GPIO1[11]
+ *
+ * LEDs are pulled high to a low output illuminates the LED.
+ */
+
+/* Debug definitions ********************************************************/
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define LED_VERBOSE 1
+#    define ledvdbg lldbg
+#  else
+#    undef LED_VERBOSE
+#    define ledvdbg(x...)
 #  endif
+#else
+#  undef LED_VERBOSE
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Private Data
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_SPIFI_DEVNO
-#  define CONFIG_SPIFI_DEVNO 0
-#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_spifi_initialize
- *
- * Description:
- *   Make the SPIFI (or part of it) into a block driver that can hold a
- *   file system.
- *
+ * Name: led_dumppins
  ****************************************************************************/
 
-#ifdef CONFIG_LPC43_SPIFI
-static int nsh_spifi_initialize(void)
+#ifdef LED_VERBOSE
+static void led_dumppins(FAR const char *msg)
 {
-  FAR struct mtd_dev_s *mtd;
-  int ret;
-
-  /* Initialize the SPIFI interface and create the MTD driver instance */
-
-  mtd = lpc43_spifi_initialize();
-  if (!mtd)
-    {
-      fdbg("ERROR: lpc43_spifi_initialize failed\n");
-      return -ENODEV;
-    }
-
-#ifndef CONFIG_SPFI_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(CONFIG_SPIFI_DEVNO, mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Initializing the FTL layer: %d\n", ret);
-      return ret;
-    }
-#else
-  /* Initialize to provide NXFFS on the MTD interface */
-
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
-      return ret;
-    }
-
-  /* Mount the file system at /mnt/spifi */
-
-  ret = mount(NULL, "/mnt/spifi", "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
-#endif
-
-  return OK;
+  lpc43_pin_dump(PINCONFIG_LED1, msg);
+  lpc43_gpio_dump(GPIO_LED2, msg);
 }
 #else
-#  define nsh_spifi_initialize() (OK)
+#  define led_dumppins(m)
 #endif
 
 /****************************************************************************
@@ -133,16 +113,44 @@ static int nsh_spifi_initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
+ * Name: lpc43_ledinit
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+void lpc43_ledinit(void)
 {
-  /* Initialize the SPIFI block device */
+  /* Configure all LED GPIO lines */
 
-  return nsh_spifi_initialize();
+  led_dumppins("lpc43_ledinit() Entry)");
+
+  /* Configure LED pins as GPIOs, then configure GPIOs as outputs */
+
+  lpc43_pin_config(PINCONFIG_LED1);
+  lpc43_gpio_config(GPIO_LED1);
+
+  lpc43_pin_config(PINCONFIG_LED2);
+  lpc43_gpio_config(GPIO_LED2);
+
+  led_dumppins("lpc43_ledinit() Exit");
 }
+
+/****************************************************************************
+ * Name: lpc43_setled
+ ****************************************************************************/
+
+void lpc43_setled(int led, bool ledon)
+{
+  uint16_t gpiocfg = (led == BOARD_LED1 ? GPIO_LED1 : GPIO_LED2);
+  lpc43_gpio_write(gpiocfg, !ledon);
+}
+
+/****************************************************************************
+ * Name: lpc43_setleds
+ ****************************************************************************/
+
+void lpc43_setleds(uint8_t ledset)
+{
+  lpc43_gpio_write(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
+  lpc43_gpio_write(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

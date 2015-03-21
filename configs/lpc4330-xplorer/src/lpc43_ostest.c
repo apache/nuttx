@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/lpc4330-xplorer/src/up_ostest.c
- * arch/arm/src/board/up_ostest.c
+ * configs/lpc4330-xplorer/src/lpc43_ostest.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "xplorer-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
