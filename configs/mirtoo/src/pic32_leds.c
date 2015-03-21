@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mirtoo/src/up_leds.c
+ * configs/mirtoo/src/pic32_leds.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

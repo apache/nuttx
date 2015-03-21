@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/mirtoo/src/up_spi2.c
- * arch/arm/src/board/up_spi2.c
+ * configs/mirtoo/src/pic32_spi2.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +55,7 @@
 #ifdef CONFIG_PIC32MX_SPI2
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* The Mirtoo module as two on-board SPI devices:
