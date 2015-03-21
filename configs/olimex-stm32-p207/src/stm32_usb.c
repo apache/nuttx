@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/olimex-stm32-p207/src/up_usbdev.c
- * arch/arm/src/board/up_usbdev.c
+ * configs/olimex-stm32-p207/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
