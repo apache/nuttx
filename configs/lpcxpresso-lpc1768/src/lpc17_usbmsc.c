@@ -1,8 +1,10 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc1768/src/up_leds.c
+ * configs/lpcxpresso-lpc1768/src/lpc17_usbmsc.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Configure and register the LPC17xx MMC/SD SPI block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,116 +41,82 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
-#include <nuttx/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "lpc17_gpio.h"
-#include "lpcxpresso_internal.h"
-
-#ifdef CONFIG_ARCH_LEDS
+#include <nuttx/spi/spi.h>
+#include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
+/* Configuration ************************************************************/
 
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define ledvdbg lldbg
-#  else
-#    define ledvdbg(x...)
-#  endif
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* PORT and SLOT number probably depend on the board configuration */
 
-static bool g_ncstate;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_ARCH_BOARD_LPCXPRESSO
+#  undef LPC17XX_MMCSDSPIPORTNO
+#  define LPC17XX_MMCSDSPIPORTNO 1
+#  undef LPC17XX_MMCSDSLOTNO
+#  define LPC17XX_MMCSDSLOTNO 0
+#else
+   /* Add configuration for new LPC17xx boards here */
+#  error "Unrecognized LPC17xx board"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: usbmsc_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
  ****************************************************************************/
 
-void board_led_initialize(void)
+int usbmsc_archinitialize(void)
 {
-  /* Configure all LED GPIO lines */
+  FAR struct spi_dev_s *spi;
+  int ret;
 
-  lpc17_configgpio(LPCXPRESSO_LED);
-  g_ncstate = true;
-}
+  /* Get the SPI port */
 
-/****************************************************************************
- * Name: board_led_on
- ****************************************************************************/
+  syslog(LOG_INFO, "Initializing SPI port %d\n", LPC17XX_MMCSDSPIPORTNO);
 
-void board_led_on(int led)
-{
-  bool off;
-
-  switch (led)
+  spi = lpc17_sspinitialize(LPC17XX_MMCSDSPIPORTNO);
+  if (!spi)
     {
-	case 0:
-	case 2:
-	  off = true;
-	  break;
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             LPC17XX_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
 
-	case 1:
-	  off       = false;
-      g_ncstate = false;
-	  break;
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+         LPC17XX_MMCSDSPIPORTNO);
 
-	default:
-	  return;
-	}
+  /* Bind the SPI port to the slot */
 
-  lpc17_gpiowrite(LPCXPRESSO_LED, off);
-}
+  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
+         LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
 
-/****************************************************************************
- * Name: board_led_off
- ****************************************************************************/
-
-void board_led_off(int led)
-{
-  bool off;
-
-  switch (led)
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, LPC17XX_MMCSDSLOTNO, spi);
+  if (ret < 0)
     {
-	case 0:
-	case 1:
-	  off = false;
-	  break;
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+             LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO, ret);
+      return ret;
+    }
 
-	case 2:
-	  off = g_ncstate;
-	  break;
-
-	default:
-	  return;
-	}
-
-  lpc17_gpiowrite(LPCXPRESSO_LED, off);
+  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
+         LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
+  return OK;
 }
-
-#endif /* CONFIG_ARCH_LEDS */

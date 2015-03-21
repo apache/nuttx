@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/lpcxpresso-lpc1768/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * configs/lpcxpresso-lpc1768/src/lpc17_leds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,68 +39,44 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <stdbool.h>
+#include <debug.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/mmcsd.h>
+#include <nuttx/board.h>
+
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "lpc17_gpio.h"
+#include "lpcxpresso_internal.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
 
-/* PORT and SLOT number probably depend on the board configuration */
-
-#ifdef CONFIG_ARCH_BOARD_LPCXPRESSO
-#  define NSH_HAVEUSBDEV 1
-#  ifdef CONFIG_LPC17_SSP1
-#    define NSH_HAVEMMCSD 1
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define ledvdbg lldbg
 #  else
-#    undef NSH_HAVEMMCSD
+#    define ledvdbg(x...)
 #  endif
 #else
-#  error "Unrecognized board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
-#endif
-
-/* Do we have SPI support for MMC/SD? */
-
-#ifdef NSH_HAVEMMCSD
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
-#    error "The LPCXpresso MMC/SD is on SSP1"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 1
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The LPCXpresso MMC/SD has only one slot (0)"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#endif
-
-/* Can't support USB device features if USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static bool g_ncstate;
 
 /****************************************************************************
  * Private Functions
@@ -112,44 +87,68 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
+ * Name: board_led_initialize
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+void board_led_initialize(void)
 {
-#ifdef NSH_HAVEMMCSD
-  FAR struct spi_dev_s *ssp;
-  int ret;
+  /* Configure all LED GPIO lines */
 
-  /* Get the SSP port */
-
-  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (!ssp)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",
-             CONFIG_NSH_MMCSDSPIPORTNO);
-      return -ENODEV;
-    }
-
-  syslog(LOG_INFO, "Successfully initialized SSP port %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO);
-
-  /* Bind the SSP port to the slot */
-
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
-#endif
-  return OK;
+  lpc17_configgpio(LPCXPRESSO_LED);
+  g_ncstate = true;
 }
+
+/****************************************************************************
+ * Name: board_led_on
+ ****************************************************************************/
+
+void board_led_on(int led)
+{
+  bool off;
+
+  switch (led)
+    {
+	case 0:
+	case 2:
+	  off = true;
+	  break;
+
+	case 1:
+	  off       = false;
+      g_ncstate = false;
+	  break;
+
+	default:
+	  return;
+	}
+
+  lpc17_gpiowrite(LPCXPRESSO_LED, off);
+}
+
+/****************************************************************************
+ * Name: board_led_off
+ ****************************************************************************/
+
+void board_led_off(int led)
+{
+  bool off;
+
+  switch (led)
+    {
+	case 0:
+	case 1:
+	  off = false;
+	  break;
+
+	case 2:
+	  off = g_ncstate;
+	  break;
+
+	default:
+	  return;
+	}
+
+  lpc17_gpiowrite(LPCXPRESSO_LED, off);
+}
+
+#endif /* CONFIG_ARCH_LEDS */
