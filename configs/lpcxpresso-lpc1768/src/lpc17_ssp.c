@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/lpcxpresso-lpc1768/src/up_ssp.c
- * arch/arm/src/board/up_ssp.c
+ * configs/lpcxpresso-lpc1768/src/lpc17_ssp.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +55,7 @@
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

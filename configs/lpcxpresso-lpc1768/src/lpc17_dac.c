@@ -1,7 +1,12 @@
 /************************************************************************************
- * configs/lpcxpresso-lpc1768/src/up_boot.c
+ * configs/zkit-arm-1769/src/lpc17_dac.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
+ *   Author: Kannan <code@nuttx.org>
+ *
+ * Based on configs/stm3220g-eval/src/lpc17_dac.c
+ *
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,55 +44,56 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/analog/dac.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "lpc17_ssp.h"
-#include "lpcxpresso_internal.h"
+#include "lpc17_dac.h"
+
+#ifdef CONFIG_DAC
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Name: lpc17_boardinitialize
+ * Name: dac_devinit
  *
  * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC17xx architectures must provide the following interface to work with
+ *   examples/diag.
  *
  ************************************************************************************/
 
-void lpc17_boardinitialize(void)
+int dac_devinit(void)
 {
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpcxpresso_sspinitialize() has been brought into the link.
-   */
+  static bool initialized = false;
+  struct dac_dev_s *dac;
+  int ret;
 
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
-  if (lpcxpresso_sspinitialize)
-    {
-      lpcxpresso_sspinitialize();
-    }
-#endif
+  if (!initialized)
+  {
+    /* Call lpc17_dacinitialize() to get an instance of the dac interface */
 
-  /* Configure on-board LEDs if LED support has been selected. */
+    dac = lpc17_dacinitialize();
+    if (dac == NULL)
+      {
+        adbg("ERROR: Failed to get dac interface\n");
+        return -ENODEV;
+      }
 
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+    ret = dac_register("/dev/dac0", dac);
+    if (ret < 0)
+      {
+        adbg("dac_register failed: %d\n", ret);
+        return ret;
+      }
+
+    initialized = true;
+  }
+
+  return OK;
 }
+
+#endif /* CONFIG_DAC */

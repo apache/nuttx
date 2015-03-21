@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/lpcxpresso-lpc1768/src/up_oled.c
- * arch/arm/src/board/up_oled.c
+ * config/lpcxpresso-lpc1768/src/lpc17_oled.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "lpcxpresso_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* This module is only built if CONFIG_NX_LCDDRIVER is selected.  In this

@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/lpcxpresso-lpc1768/src/lpcxpresso_internal.h
- * arch/arm/src/board/lpcxpresso_internal.n
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* LPCXpresso LPC1768 board pin usage ***********************************************/

@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/lpcexpresso-lpc1768/up_pwm.c
+ * configs/lpcxpresso-lpc1768/src/lpc17_boot.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,29 +38,21 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pwm.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
-#include "lpc17_pwm.h"
-#include "lpc17_timer.h"
+#include "up_internal.h"
+
+#include "lpc17_ssp.h"
 #include "lpcxpresso_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-
-#ifdef CONFIG_PWM
-
-FAR struct pwm_lowerhalf_s *lpc17_pwminitialize(int timer);
-FAR struct pwm_lowerhalf_s *lpc17_mcpwminitialize(int timer);
-FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
 
 /************************************************************************************
  * Private Functions
@@ -71,82 +63,31 @@ FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pwm_devinit
+ * Name: lpc17_boardinitialize
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   All LPC17xx architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-int pwm_devinit(void)
+void lpc17_boardinitialize(void)
 {
-  static bool initialized = false;
-  struct pwm_lowerhalf_s *pwm;
-  struct pwm_lowerhalf_s *mcpwm;
-  struct pwm_lowerhalf_s *timer;
-  int ret;
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
+   * function lpcxpresso_sspinitialize() has been brought into the link.
+   */
 
-  /* Have we already initialized? */
-
-  if (!initialized)
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
+  if (lpcxpresso_sspinitialize)
     {
-      /* Call lpc17_pwminitialize() to get an instance of the PWM interface */
-
-      pwm = lpc17_pwminitialize(0);
-      if (!pwm)
-        {
-          adbg("Failed to get the LPC17XX PWM lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the PWM driver at "/dev/pwm0" */
-
-      ret = pwm_register("/dev/pwm0", pwm);
-      if (ret < 0)
-        {
-          adbg("pwm_register failed: %d\n", ret);
-          return ret;
-        }
-
-      mcpwm = lpc17_mcpwminitialize(0);
-      if (!mcpwm)
-        {
-          adbg("Failed to get the LPC17XX MOTOR PWM lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the MOTOR CONTROL PWM driver at "/dev/mcpwm0" */
-
-      ret = pwm_register("/dev/mcpwm0", mcpwm);
-      if (ret < 0)
-        {
-          adbg("mcpwm_register failed: %d\n", ret);
-          return ret;
-        }
-
-      timer = lpc17_timerinitialize(0);
-      if (!timer)
-        {
-          adbg("Failed to get the LPC17XX TIMER lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the PWM driver at "/dev/timer0" */
-
-      ret = pwm_register("/dev/timer0", timer);
-      if (ret < 0)
-        {
-          adbg("timer_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+      lpcxpresso_sspinitialize();
     }
+#endif
 
-  return OK;
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
 }
-
-#endif /* CONFIG_PWM */
