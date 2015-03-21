@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_usbdev.c
+ * configs/sam3u-ek/src/sam_usbdev.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

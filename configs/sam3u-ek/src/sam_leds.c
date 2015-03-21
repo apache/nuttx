@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/src/up_leds.c
+ * configs/sam3u-ek/src/sam_leds.c
  *
  *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_mmcsd.c
+ * configs/sam3u-ek/src/sam_boot.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,36 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <debug.h>
 
-#include "sam_gpio.h"
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
 #include "sam3u-ek.h"
 
-#ifdef CONFIG_SAM34_HSMCI
-
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-
-/* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
- * when the interrupt indicating that a card has been inserted or removed is received,
- * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam34/sam_hsmci.h for more information.
- *
- * Also see the SAMA5D3x-EK implementation of this same logic.  The card detect
- * interrupt handling should be a drop-in.
- */
-
-#ifdef GPIO_MCI_CD
-#  warning "Card detect interrupt handling needed"
-#endif
-
-/* Usually defined in NuttX header files */
-
-#ifndef OK
-#  define OK 0
-#endif
 
 /************************************************************************************
  * Private Functions
@@ -79,69 +60,42 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_hsmciinit
+ * Name: sam_boardinitialize
  *
  * Description:
- *   Initialize HSMCI support.  This function is called very early in board
- *   initialization.
+ *   All SAM3U architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-int sam_hsmciinit(void)
+void sam_boardinitialize(void)
 {
-#ifdef GPIO_MCI_CD
-  sam_configgpio(GPIO_MCI_CD);
-#endif
-#ifdef GPIO_MCI_WP
-  sam_configgpio(GPIO_MCI_WP);
-#endif
-  return OK;
-}
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * sam_spiinitialize() has been brought into the link.
+   */
 
-/************************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ************************************************************************************/
-
-bool sam_cardinserted(unsigned char slot)
-{
-  if (slot == 0)
+#ifdef CONFIG_SAM34_SPI0
+  if (sam_spiinitialize)
     {
-#ifdef GPIO_MCI_CD
-      bool inserted = sam_gpioread(GPIO_MCI_CD);
-      fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
-      return !inserted;
-#else
-      return true;
-#endif
+      sam_spiinitialize();
     }
-  return false;
-}
+#endif
 
-/************************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ************************************************************************************/
+  /* Configure on-board LEDs if LED support has been selected. */
 
-bool sam_writeprotected(unsigned char slot)
-{
-  if (slot == 0)
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
+
+  /* Setup SD card-related PIOs if 1) HSMCI is selected and 2) the weak
+   * function sam_hsmciinit() has been brought into the build.
+    */
+
+#ifdef CONFIG_SAM34_HSMCI
+  if (sam_hsmciinit)
     {
-#ifdef GPIO_MCI_WP
-      bool protected = sam_gpioread(GPIO_MCI_WP);
-      fvdbg("protected: %s\n", inserted ? "YES" : "NO");
-      return protected;
-#else
-      return false;
-#endif
+      sam_hsmciinit();
     }
-  return false;
+#endif
 }
-
-#endif /* CONFIG_SAM34_HSMCI */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_spi.c
+ * configs/sam3u-ek/src/sam_spi.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
