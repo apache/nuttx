@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/ekk-lm3s9b96/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/ekk-lm3s9b96/src/lm_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +45,7 @@
 #include <errno.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
