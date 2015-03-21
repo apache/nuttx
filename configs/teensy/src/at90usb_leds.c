@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/teensy/src/up_leds.c
+ * configs/teensy/src/at90usb_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

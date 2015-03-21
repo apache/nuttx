@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/teensy/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/teensy/src/at90usb_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +55,7 @@
 #ifdef CONFIG_AVR_SPI
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Teensy SPI Connection
  *
