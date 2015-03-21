@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/ubw32/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * configs/ubw32/src/pic32_usbterm.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,18 +39,18 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <nuttx/usb/usbdev.h>
 
 #include "pic32mx-internal.h"
 #include "ubw32-internal.h"
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
+#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -59,45 +58,47 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_usbdevinitialize
- *
- * Description:
- *   Initialize SPI-based microSD.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV
-static int nsh_usbdevinitialize(void)
-{
-  /* The UBW32 has no way to know when the USB is connected.  So we will fake
-   * it and tell the USB driver that the USB is connected now.
-   */
-
-  pic32mx_usbattach();
-  return OK;
-}
-#else
-#  define nsh_usbdevinitialize() (OK)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name:
  *
  * Description:
- *   Perform architecture specific initialization
+ *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
+ *   call this user provided function as part of its initialization.
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int usbterm_devinit(void)
 {
-  int ret;
+  /* The UBW32 has no way to know when the USB is connected.  So we will fake
+   * it and tell the USB driver that the USB is connected now.
+   *
+   * If examples/usbterm is built as an NSH built-in application, then
+   * pic32mx_usbattach() will be called in nsh_archinitialize().
+   */
 
-  /* Initialize USB device */
-
-  ret = nsh_usbdevinitialize();
-  return ret;
+#ifndef CONFIG_NSH_BUILTIN_APPS
+  pic32mx_usbattach();
+#endif
+  return OK;
 }
+
+/****************************************************************************
+ * Name:
+ *
+ * Description:
+ *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
+ *   call this user provided function as part of its termination sequence.
+ *
+ ****************************************************************************/
+
+void usbterm_devuninit(void)
+{
+  /* Tell the USB driver that the USB is no longer connected */
+
+  pic32mx_usbdetach();
+}
+
+#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */

@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/ubw32/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/ubw32/src/pic32_boot.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "ubw32-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
