@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/demo9s12ne64/src/up_boot.c
+ * configs/demo9s12ne64/src/m9s12_boot.c
  *
  *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

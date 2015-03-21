@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/demo9s12ne64/src/demo9s12ne64.h
- * arch/arm/src/board/demo9s12ne64.n
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* DEMO9S12NE64 GPIOs ***************************************************************/
@@ -72,9 +71,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function hcs12_spiinitialize(void);
-
+void weak_function hcs12_spiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_DEMO9S12NE64_SRC_DEMO9S12NE64_H */
-

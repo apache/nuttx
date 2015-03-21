@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/demo9s12ne64/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/demo9s12ne64/src/m9s12_nsh.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +46,7 @@
 #include "demo9s12ne64.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

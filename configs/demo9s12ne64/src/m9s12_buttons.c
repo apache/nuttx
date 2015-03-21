@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/demo9s12ne64/src/up_leds.c
+ * configs/demo9s12ne64/src/m9s12_buttons.c
  *
- *   Copyright (C) 2009, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,28 +39,19 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "demo9s12ne64.h"
 
+#ifdef CONFIG_ARCH_BUTTONS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Data
@@ -75,32 +66,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
- *
- * Description:
- *   Configure and initialize on-board LEDs
- *
+ * Name: board_button_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void board_button_initialize(void)
 {
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: board_buttons
  ****************************************************************************/
 
-void board_led_on(int led)
+uint8_t board_buttons(void)
 {
+  return 0;
 }
 
-/****************************************************************************
- * Name: board_led_off
- ****************************************************************************/
-
-void board_led_off(int led)
-{
-}
-
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_BUTTONS */
