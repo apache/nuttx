@@ -352,7 +352,9 @@
 #define USBHS_DEVEPTINT_DATAXI             (1 << 9)          /* Bit 9:  DataX Interrupt (2) */
 #define USBHS_DEVEPTINT_ERRORTRANSI        (1 << 10)         /* Bit 10: Transaction Error Interrupt (2) */
 
-/* Device Endpoint Set, Device Endpoint Mask, Device Endpoint Disable, and Device Endpoint Enable Registers only */
+/* Device Endpoint Set, Device Endpoint Mask, Device Endpoint Disable, and Device Endpoint Enable
+ * Registers only
+ */
 
 #define USBHS_DEVEPTINT_NBUSYBKI           (1 << 12)         /* Bit 12: Number of Busy Banks Interrupt */
 
