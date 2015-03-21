@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/skp16c26/src/board_buttons.c
+ * configs/skp16c26/src/m16c_buttons.c
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
