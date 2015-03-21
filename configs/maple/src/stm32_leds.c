@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/maple/src/up_leds.c
+ * configs/maple/src/stm32_leds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

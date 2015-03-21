@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/maple/src/up_lcd.c
+ * configs/maple/src/stm32_lcd.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
