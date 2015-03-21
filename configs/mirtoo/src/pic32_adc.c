@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/mirtoo/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/mirtoo/src/pic32_adc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,116 +39,66 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
-#include <stdio.h>
 #include <errno.h>
-#include <syslog.h>
-
-#ifdef CONFIG_PIC32MX_SPI2
-#  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd/mtd.h>
-#  include <nuttx/fs/nxffs.h>
-#endif
+#include <debug.h>
 
 #include "pic32mx-internal.h"
+#include "mirtoo-internal.h"
+
+#ifdef CONFIG_PIC32MX_ADC
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
-/* Can't support the SST25 device if it SPI2 or SST25 support is not enabled */
-
-#define HAVE_SST25  1
-#if !defined(CONFIG_PIC32MX_SPI2) || !defined(CONFIG_MTD_SST25)
-#  undef HAVE_SST25
-#endif
-
-/* Can't support SST25 features if mountpoints are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef HAVE_SST25
-#endif
-
-/* Use minor device number 0 is not is provided */
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
-
-/* Can't support both FAT and NXFFS */
-
-#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
-#  warning "Can't support both FAT and NXFFS -- using FAT"
-#endif
+/* The Mirtoo features a PGA117 amplifier/multipexer that can be configured to
+ * bring any analog signal from PORT0,.. PORT7 to pin 19 of the PIC32MX:
+ *
+ * --- ------------------------------------------------ ----------------------------
+ * PIN PIC32 SIGNAL(s)                                  BOARD SIGNAL/USAGE
+ * --- ------------------------------------------------ ----------------------------
+ * 19  PGED3/VREF+/CVREF+/AN0/C3INC/RPA0/CTED1/PMD7/RA0 AIN PGA117 Vout
+  --- ------------------------------------------------ ----------------------------
+ *
+ * The PGA117 driver can be enabled by setting the following the nsh
+ * configuration:
+ *
+ *   CONFIG_ADC=y         : Enable support for analog input devices
+ *   CONFIG_PIC32MX_ADC=y : Enable support the PIC32 ADC driver
+ *   CONFIG_SPI_OWNBUS=n  : The PGA117 is *not* the only device on the bus
+ *   CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
+ *
+ * When CONFIG_PIC32MX_ADC=y is defined, the Mirtoo boot up logic will automatically
+ * configure pin 18 (AN0) as an analog input.
+ */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: pic32mx_adcinitialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific ADC initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+#if 0 /* Not used */
+int pic32mx_adcinitialize(void)
 {
-#ifdef HAVE_SST25
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
-  int ret;
+  /* Configure the pin 19 as an analog input */
+#warning "Missing logic"
 
-  /* Get the SPI port */
+  /* Initialize the PGA117 amplifier multiplexer */
+#warning "Missing logic"
 
-  spi = up_spiinitialize(2);
-  if (!spi)
-    {
-      fdbg("ERROR: Failed to initialize SPI port 2\n");
-      return -ENODEV;
-    }
+  /* Register the ADC device driver */
+#warning "Missing logic"
 
-  /* Now bind the SPI interface to the SST 25 SPI FLASH driver */
-
-  mtd = sst25_initialize(spi);
-  if (!mtd)
-    {
-      fdbg("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
-      return -ENODEV;
-    }
-
-#ifndef CONFIG_FS_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(CONFIG_NSH_MMCSDMINOR, mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Initialize the FTL layer\n");
-      return ret;
-    }
-#else
-  /* Initialize to provide NXFFS on the MTD interface */
-
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
-      return ret;
-    }
-
-  /* Mount the file system at /mnt/sst25 */
-
-  ret = mount(NULL, "/mnt/sst25", "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
-#endif
-#endif
   return OK;
 }
+#endif
+
+#endif /* CONFIG_PIC32MX_ADC */

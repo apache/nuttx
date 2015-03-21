@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/mirtoo/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/mirtoo/src/pic32_boot.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,7 @@
 #include "mirtoo-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #define GPIO_U1TX  (GPIO_OUTPUT|GPIO_PORTC|GPIO_PIN5)
