@@ -46,7 +46,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SPI modules does this chip support? Most support 2 SPI modules (others

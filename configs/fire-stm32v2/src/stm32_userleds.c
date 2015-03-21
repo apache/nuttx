@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/fire-stm32v2/src/up_w25.c
- * arch/arm/src/board/up_w25.c
+ * configs/fire-stm32v2/src/stm32_userleds.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,114 +39,98 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
+#include <stdint.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_STM32_SPI1
-#  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd/mtd.h>
-#  include <nuttx/fs/nxffs.h>
-#endif
+#include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+#include "stm32.h"
 #include "fire-internal.h"
 
+#ifndef CONFIG_ARCH_LEDS
+
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-/* Can't support the W25 device if it SPI1 or W25 support is not enabled */
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
 
-#define HAVE_W25  1
-#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_W25)
-#  undef HAVE_W25
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
 
-/* Can't support W25 features if mountpoints are disabled */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* This array maps an LED number to GPIO pin configuration */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef HAVE_W25
-#endif
+static uint32_t g_ledcfg[BOARD_NLEDS] =
+{
+  GPIO_LED1, GPIO_LED2, GPIO_LED3
+};
 
-/* Can't support both FAT and NXFFS */
-
-#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
-#  warning "Can't support both FAT and NXFFS -- using FAT"
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_w25initialize
+ * Name: stm32_ledinit
+ ****************************************************************************/
+
+void stm32_ledinit(void)
+{
+   /* Configure LED1-4 GPIOs for output */
+
+   stm32_configgpio(GPIO_LED1);
+   stm32_configgpio(GPIO_LED2);
+   stm32_configgpio(GPIO_LED3);
+}
+
+/****************************************************************************
+ * Name: stm32_setled
  *
  * Description:
- *   Initialize and register the W25 FLASH file system.
+ *   Set one LED to the 'ledon' state.  The LEDs are pulled up and, hence,
+ *   active low.
  *
  ****************************************************************************/
 
-int stm32_w25initialize(int minor)
+void stm32_setled(int led, bool ledon)
 {
-#ifdef HAVE_W25
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
-#ifdef CONFIG_FS_NXFFS
-  char devname[12];
-#endif
-  int ret;
-
-  /* Get the SPI port */
-
-  spi = up_spiinitialize(1);
-  if (!spi)
+  if ((unsigned)led < BOARD_NLEDS)
     {
-      fdbg("ERROR: Failed to initialize SPI port 2\n");
-      return -ENODEV;
+      stm32_gpiowrite(g_ledcfg[led], !ledon);
     }
-
-  /* Now bind the SPI interface to the W25 SPI FLASH driver */
-
-  mtd = w25_initialize(spi);
-  if (!mtd)
-    {
-      fdbg("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
-      return -ENODEV;
-    }
-
-#ifndef CONFIG_FS_NXFFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(minor, mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Initialize the FTL layer\n");
-      return ret;
-    }
-#else
-  /* Initialize to provide NXFFS on the MTD interface */
-
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
-      return ret;
-    }
-
-  /* Mount the file system at /mnt/w25 */
-
-  snprintf(devname, 12, "/mnt/w25%c", 'a' + minor);
-  ret = mount(NULL, devname, "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
-#endif
-#endif
-  return OK;
 }
+
+/****************************************************************************
+ * Name: stm32_setleds
+ *
+ * Description:
+ *   Set each LED to the bit encoded state.  The LEDs are pulled up and,
+ *   hence, active low.
+ *
+ ****************************************************************************/
+
+void stm32_setleds(uint8_t ledset)
+{
+  stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

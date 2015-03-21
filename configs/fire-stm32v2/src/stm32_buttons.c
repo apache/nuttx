@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/fire-stm32v2/src/up_userleds.c
- * arch/arm/src/board/up_userleds.c
+ * configs/fire-stm32v2/src/stm32_buttons.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,44 +40,22 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-#include "stm32.h"
 #include "fire-internal.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This array maps an LED number to GPIO pin configuration */
-
-static uint32_t g_ledcfg[BOARD_NLEDS] =
-{
-  GPIO_LED1, GPIO_LED2, GPIO_LED3
-};
 
 /****************************************************************************
  * Private Functions
@@ -89,49 +66,92 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: board_button_initialize
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state of
+ *   all buttons or board_button_irq() may be called to register button interrupt
+ *   handlers.
+ *
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void board_button_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
+   * configured for some pins but NOT used in this file
+   */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_BTN_KEY1);
+  stm32_configgpio(GPIO_BTN_KEY2);
 }
 
 /****************************************************************************
- * Name: stm32_setled
- *
- * Description:
- *   Set one LED to the 'ledon' state.  The LEDs are pulled up and, hence,
- *   active low.
- *
+ * Name: board_buttons
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+uint8_t board_buttons(void)
 {
-  if ((unsigned)led < BOARD_NLEDS)
+  uint8_t ret = 0;
+
+  /* Check that state of each key.  A LOW value means that the key is pressed, */
+
+  if (!stm32_gpioread(GPIO_BTN_KEY1))
     {
-      stm32_gpiowrite(g_ledcfg[led], !ledon);
+      ret |= BUTTON_KEY1_BIT;
     }
+
+  if (!stm32_gpioread(GPIO_BTN_KEY2))
+    {
+      ret |= BUTTON_KEY2_BIT;
+    }
+
+  return ret;
 }
 
-/****************************************************************************
- * Name: stm32_setleds
+/*****************************************************************************
+ * Button support.
  *
  * Description:
- *   Set each LED to the bit encoded state.  The LEDs are pulled up and,
- *   hence, active low.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state of all
+ *   buttons or board_button_irq() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
+ *   of each bit.
+ *
+ *   board_button_irq() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See
+ *   the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of
+ *   enumeration values.  The previous interrupt handler address is returned
+ *   (so that it may restored, if so desired).
  *
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+#ifdef CONFIG_ARCH_IRQBUTTONS
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
-  stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
-}
+  uint16_t gpio;
 
-#endif /* !CONFIG_ARCH_LEDS */
+  if (id == BUTTON_KEY1)
+    {
+      gpio = GPIO_KEY1;
+    }
+  else if (id == BUTTON_KEY2)
+    {
+      gpio = GPIO_KEY2;
+    }
+  else
+    {
+      return NULL;
+    }
+
+  return stm32_gpiosetevent(gpio, true, true, true, irqhandler);
+}
+#endif
+#endif /* CONFIG_ARCH_BUTTONS */

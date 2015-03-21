@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/fire-stm32v2/src/up_enc28j60.c
+ * configs/fire-stm32v2/src/stm32_enc28j60.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,7 +68,7 @@
 #ifdef CONFIG_ENC28J60
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* ENC28J60

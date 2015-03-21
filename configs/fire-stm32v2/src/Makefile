@@ -35,67 +35,67 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		=
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c up_spi.c up_usbdev.c up_mmcsd.c
+CSRCS = stm32_boot.c stm32_spi.c stm32_usbdev.c stm32_mmcsd.c
 
 ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS		+= up_lcd.c up_selectlcd.c
+CSRCS += up_lcd.c stm32_selectlcd.c
 endif
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS		+= up_cxxinitialize.c
+CSRCS += stm32_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_autoleds.c
+CSRCS += stm32_autoleds.c
 else
-CSRCS		+= up_userleds.c
+CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+=  up_buttons.c
+CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 ifeq ($(CONFIG_ENC28J60),y)
-CSRCS		+= up_enc28j60.c
+CSRCS += stm32_enc28j60.c
 endif
 
 ifeq ($(CONFIG_MTD_W25),y)
-CSRCS		+= up_w25.c
+CSRCS += stm32_w25.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS		+= up_usbmsc.c
+CSRCS += stm32_usbmsc.c
 endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
-CSRCS		+= up_composite.c
+CSRCS += stm32_composite.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS		+= up_watchdog.c
+CSRCS += stm32_watchdog.c
 endif
 
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)

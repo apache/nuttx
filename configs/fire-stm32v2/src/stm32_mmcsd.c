@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/fire-stm32v2/src/up_mmcsd.c
- * arch/arm/src/board/up_mmcsd.c
+ * config/fire-stm32v2/src/stm32_mmcsd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "fire-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
