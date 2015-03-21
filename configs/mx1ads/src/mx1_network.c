@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/mx1ads/src/up_leds.c
+ * configs/mx1ads/src/mx1_network.c
  *
- *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
+#if defined(CONFIG_NET) && defined(CONFIG_NET_CS8900)
 
+#include <debug.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
 #include "up_internal.h"
+
+extern void cs8900_initialize(void);
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,49 +65,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: up_netinitialize
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+void up_netinitialize(void)
 {
-  /* Configure Port A, Bit 2 as an output, initial value=1 */
-
-  imxgpio_configoutput(GPIOA, 2, 1);
+# error "Missing implementation"
 }
 
-/****************************************************************************
- * Name: board_led_on
- ****************************************************************************/
-
-void board_led_on(int led)
-{
-  switch (led)
-    {
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-        imxgpio_setoutput(GPIOA, 2);  /* Port A, Bit 2 = 1 */
-        break;
-
-      case LED_INIRQ:
-      case LED_SIGNAL:
-      case LED_ASSERTION:
-      case LED_PANIC:
-      default:
-        imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
-        break;
-    }
-}
-
-/****************************************************************************
- * Name: board_led_off
- ****************************************************************************/
-
-void board_led_off(int led)
-{
-  imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
-}
-
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* CONFIG_NET && CONFIG_NET_DM90x0 */

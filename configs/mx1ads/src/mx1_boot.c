@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/mx1ads/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/mx1ads/src/mx1_boot.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +48,7 @@
 #include "imx_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -65,7 +64,7 @@
  *
  * Description:
  *   All i.MX architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  ************************************************************************************/
 
