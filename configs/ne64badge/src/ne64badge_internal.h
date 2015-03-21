@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/ne64badge/src/ne64badge_internal.h
- * arch/arm/src/board/ne64badge_internal.n
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +46,7 @@
 #include "m9s12_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* NE64BADGE Pin Usage **************************************************************/
@@ -186,9 +185,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function hcs12_spiinitialize(void);
-
+void weak_function hcs12_spiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NE64BADGE_SRC_NE64BADGE_INTERNAL_H */
-

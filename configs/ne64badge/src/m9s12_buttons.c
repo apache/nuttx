@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/ne64badge/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * configs/ne64badge/src/m9s12_buttons.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,14 +39,54 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "ne64badge_internal.h"
 
+#ifdef CONFIG_ARCH_BUTTONS
+
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
+
+#undef BUTTON_DEBUG   /* Define to enable debug */
+#undef BUTTON_VERBOSE /* Define to enable verbose debug */
+
+#ifdef BUTTON_DEBUG
+#  define btndbg  lldbg
+#  ifdef BUTTON_VERBOSE
+#    define btnvdbg lldbg
+#  else
+#    define btnvdbg(x...)
+#  endif
+#else
+#  undef BUTTON_VERBOSE
+#  define btndbg(x...)
+#  define btnvdbg(x...)
+#endif
+
+/* Dump GPIO registers */
+
+#ifdef BUTTON_VERBOSE
+#  define btn_dumpgpio(m) m9s12_dumpgpio(m)
+#else
+#  define btn_dumpgpio(m)
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -55,16 +94,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
+ * Name: board_button_initialize
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+void board_button_initialize(void)
 {
-  /* Configure SPI-based devices */
+  /* Configure all button GPIO lines */
 
-  return OK;
+  btn_dumpgpio("board_button_initialize() Entry)");
+
+  hcs12_configgpio(NE64BADGE_BUTTON1);
+  hcs12_configgpio(NE64BADGE_BUTTON2);
+
+  btn_dumpgpio("board_button_initialize() Exit");
 }
+
+/****************************************************************************
+ * Name: board_buttons
+ ****************************************************************************/
+
+uint8_t board_buttons(void)
+{
+  uint8_t ret    = 0;
+
+  if (hcs12_gpioread(NE64BADGE_BUTTON1))
+    {
+      ret |= BUTTON1;
+    }
+
+  if (hcs12_gpioread(NE64BADGE_BUTTON2))
+    {
+      ret |= BUTTON2;
+    }
+
+  return ret;
+}
+
+#endif /* CONFIG_ARCH_BUTTONS */
