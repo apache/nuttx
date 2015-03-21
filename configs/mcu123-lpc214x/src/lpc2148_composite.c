@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/mcu123-lpc214x/src/up_usbmsc.c
+ * configs/mcu123-lpc214x/src/lpc2148_composite.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the LPC214x MMC/SD SPI block driver.
@@ -47,15 +47,16 @@
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/usb/composite.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_COMPOSITE_DEVMINOR1
+#  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
 #endif
 
 /* PORT and SLOT number probably depend on the board configuration */
@@ -75,22 +76,30 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: composite_archinitialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int composite_archinitialize(void)
 {
+  /* If system/composite is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   *
+   * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
+   * was built.
+   */
+
+#ifndef CONFIG_NSH_BUILTIN_APPS
   FAR struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */
 
-  syslog(LOG_INFO, "Initializing SPI port %d\n",
-         LPC214X_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Initializing SPI port %d\n", LPC214X_MMCSDSPIPORTNO);
 
   spi = up_spiinitialize(LPC214X_MMCSDSPIPORTNO);
   if (!spi)
@@ -108,7 +117,7 @@ int usbmsc_archinitialize(void)
   syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
          LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1,
                                 LPC214X_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
@@ -120,5 +129,8 @@ int usbmsc_archinitialize(void)
 
   syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
          LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
+
+#endif /* CONFIG_NSH_BUILTIN_APPS */
+
   return OK;
 }

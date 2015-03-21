@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/mcu123-lpc214x/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/mcu123-lpc214x/src/lpc2148_nsh.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
