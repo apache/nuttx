@@ -1,9 +1,8 @@
 /************************************************************************************
- * configs/stm32_tiny/src/up_usbdev.c
+ * configs/stm32_tiny/src/stm32_pwm.c
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,21 +39,27 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/pwm.h>
+#include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
-#include "stm32.h"
+#include "stm32_pwm.h"
 #include "stm32_tiny-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration *******************************************************************/
+/* PWM
+ *
+ * The STM32 Tiny board provides a LED on GPIO line B5.
+ */
+
+#ifdef CONFIG_PWM
 
 /************************************************************************************
  * Private Functions
@@ -65,53 +70,48 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_usbinitialize
+ * Name: pwm_devinit
  *
  * Description:
- *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/pwm.
  *
  ************************************************************************************/
 
-void stm32_usbinitialize(void)
+int pwm_devinit(void)
 {
-  ulldbg("called\n");
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-  /* USB Soft Connect Pullup */
-  stm32_configgpio(GPIO_USB_PULLUP);
-}
+  /* Have we already initialized? */
 
-/************************************************************************************
- * Name:  stm32_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide stm32_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
- *
- ************************************************************************************/
+  if (!initialized)
+    {
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
-{
-  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
-  stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
+      pwm = stm32_pwminitialize(STM32TINY_PWMTIMER);
+      if (!pwm)
+        {
+          adbg("Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          adbg("pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
   return OK;
 }
 
-/************************************************************************************
- * Name:  stm32_usbsuspend
- *
- * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
- *
- ************************************************************************************/
-
-void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
-{
-  ulldbg("resume: %d\n", resume);
-}
-
+#endif /* CONFIG_PWM */

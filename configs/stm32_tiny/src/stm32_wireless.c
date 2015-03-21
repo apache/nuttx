@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/stm_tiny/src/up_watchdog.c
+ * configs/stm32_tiny/src/stm32_wireless.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,97 +39,90 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/watchdog.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/wireless/nrf24l01.h>
 #include <arch/board/board.h>
 
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#include "up_arch.h"
+#include "chip.h"
+#include "stm32.h"
+#include "stm32_tiny-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Private Function Prototypes
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
 
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
-#endif
+static int stm32tiny_wl_irq_attach(xcpt_t isr);
 
-/* Select the path to the registered watchdog timer device */
+static void stm32tiny_wl_chip_enable(bool enable);
 
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
 
-/* Use the un-calibrated LSI frequency if we have nothing better */
+static FAR struct nrf24l01_config_s nrf_cfg =
+{
+  .irqattach = stm32tiny_wl_irq_attach,
+  .chipenable = stm32tiny_wl_chip_enable,
+};
 
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
+static xcpt_t g_isr;
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 
+static int stm32tiny_wl_irq_attach(xcpt_t isr)
+{
+  vdbg("Attach IRQ\n");
+  g_isr = isr;
+  stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr);
+  return OK;
+}
+
+static void stm32tiny_wl_chip_enable(bool enable)
+{
+  vdbg("CE:%d\n", enable);
+  stm32_gpiowrite(GPIO_NRF24L01_CE, enable);
+}
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
- *
- * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
- *
- ****************************************************************************/
-
-int up_wdginitialize(void)
+void stm32_wlinitialize(void)
 {
-  /* Initialize tha register the watchdog timer device */
+#  ifndef CONFIG_STM32_SPI2
+#   error "STM32_SPI2 is required to support nRF24L01 module on this board"
+#  endif
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
-#else
-  return -ENODEV;
-#endif
+  int result;
+  FAR struct spi_dev_s *spidev;
+
+  /* Setup CE & IRQ line IOs */
+
+  stm32_configgpio(GPIO_NRF24L01_CE);
+  stm32_configgpio(GPIO_NRF24L01_IRQ);
+
+  /* Init SPI bus */
+
+  spidev = up_spiinitialize(2);
+  if (!spidev)
+    {
+      dbg("Failed to initialize SPI bus\n");
+      return;
+    }
+
+  result = nrf24l01_register(spidev, &nrf_cfg);
+  if (result != OK)
+    {
+      dbg("Failed to register initialize SPI bus\n");
+      return;
+    }
 }
 
-#endif /* CONFIG_WATCHDOG */

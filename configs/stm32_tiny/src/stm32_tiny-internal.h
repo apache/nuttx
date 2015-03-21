@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
@@ -134,14 +134,14 @@ extern void stm32_spiinitialize(void);
 extern void stm32_usbinitialize(void);
 
 /************************************************************************************
- * Name: up_wlinitialize
+ * Name: stm32_wlinitialize
  *
  * Description:
  *   Called to configure wireless module (nRF24L01).
  *
  ************************************************************************************/
 
-extern void up_wlinitialize(void);
+extern void stm32_wlinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_HYMINI_STM32V_INTERNAL_H */
