@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/kwikstik-k40/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/kwikstik-k40/src/k40_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +54,7 @@
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

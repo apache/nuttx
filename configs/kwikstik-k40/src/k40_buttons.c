@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/kwikstik-k40/src/board_buttons.c
+ * configs/kwikstik-k40/src/k40_buttons.c
  *
  *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

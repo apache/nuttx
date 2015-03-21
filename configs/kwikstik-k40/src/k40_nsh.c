@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/kwikstik-k40/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/kwikstik-k40/src/k40_nsh.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +53,7 @@
 #include "kwikstik-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
