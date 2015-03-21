@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/ekk-lm3s9b96/src/ekklm3s9b96_internal.h
- * arch/arm/src/board/lm3s6965ek_internal.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +48,7 @@
 #include "tiva_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S9B96 supports 2 SSI
