@@ -1,11 +1,10 @@
 /************************************************************************************
- * configs/zkit-arm-1769/src/up_dac.c
- * arch/arm/src/board/up_dac.c
+ * configs/zkit-arm-1769/src/lpc17_adc.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Kannan <code@nuttx.org>
  *
- * Based on configs/stm3220g-eval/src/up_dac.c
+ * Based on configs/stm3220g-eval/src/lpc17_adc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,54 +47,76 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/analog/dac.h>
+#include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
-#include "up_internal.h"
 
+#include "lpc17_adc.h"
 #include "zkitarm_internal.h"
-#include "lpc17_dac.h"
 
-#ifdef CONFIG_DAC
+#ifdef CONFIG_ADC
 
 /************************************************************************************
- * Name: dac_devinit
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: adc_devinit
  *
  * Description:
- *   All LPC17xx architectures must provide the following interface to work with
- *   examples/diag.
+ *   All LPC17 architectures must provide the following interface to work with
+ *   examples/adc.
  *
  ************************************************************************************/
 
-int dac_devinit(void)
+int adc_devinit(void)
 {
   static bool initialized = false;
-  struct dac_dev_s *dac;
+  struct adc_dev_s *adc;
   int ret;
 
+  /* Check if we have already initialized */
+
   if (!initialized)
-  {
-    /* Call lpc17_dacinitialize() to get an instance of the dac interface */
+    {
+      /* Call lpc17_adcinitialize() to get an instance of the ADC interface */
 
-    dac = lpc17_dacinitialize();
-    if (dac == NULL)
-      {
-        adbg("ERROR: Failed to get dac interface\n");
-        return -ENODEV;
-      }
+      adc = lpc17_adcinitialize();
+      if (adc == NULL)
+        {
+          adbg("ERROR: Failed to get ADC interface\n");
+          return -ENODEV;
+        }
 
-    ret = dac_register("/dev/dac0", dac);
-    if (ret < 0)
-      {
-        adbg("dac_register failed: %d\n", ret);
-        return ret;
-      }
+      /* Register the ADC driver at "/dev/adc0" */
 
-    initialized = true;
-  }
+      ret = adc_register("/dev/adc0", adc);
+      if (ret < 0)
+        {
+          adbg("adc_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
 
   return OK;
 }
 
-#endif /* CONFIG_DAC */
+#endif /* CONFIG_ADC */

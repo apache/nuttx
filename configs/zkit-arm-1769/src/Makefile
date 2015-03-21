@@ -41,30 +41,30 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = up_boot.c up_leds.c up_ssp.c up_buttons.c up_lcd.c
+CSRCS = lpc17_boot.c lpc17_leds.c lpc17_ssp.c lpc17_buttons.c lpc17_lcd.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
+CSRCS += lpc17_nsh.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS += up_usbmsc.c
+CSRCS += lpc17_usbmsc.c
 endif
 
 ifeq ($(CONFIG_ADC),y)
-CSRCS += up_adc.c
+CSRCS += lpc17_adc.c
 endif
 
 ifeq ($(CONFIG_DAC),y)
-CSRCS += up_dac.c
+CSRCS += lpc17_dac.c
 endif
 
 ifeq ($(CONFIG_CAN),y)
-CSRCS += up_can.c
+CSRCS += lpc17_can.c
 endif
 
 ifeq ($(CONFIG_LPC17_SPI),y)
-CSRCS += up_spi.c
+CSRCS += lpc17_spi.c
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

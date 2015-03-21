@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/zkit-arm-1769/src/board_buttons.c
- *  arch/arm/src/board/board_buttons.c
+ * configs/zkit-arm-1769/src/lpc17_buttons.c
  *
  *   Copyright (C)  2011 Zilogic Systems. All rights reserved.
  *   Author: Kannan <code@zilogic.com>

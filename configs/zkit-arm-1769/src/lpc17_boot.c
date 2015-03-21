@@ -1,13 +1,12 @@
 /************************************************************************************
- * configs/zkit-arm-1769/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/zkit-arm-1769/src/lpc17_boot.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
- *   Author: Kannan <code@nuttx.org>
+ *   Author: BabuSubashChandar <code@zilogic.com>
  *
- * Based on configs/stm3220g-eval/src/up_adc.c
+ * Based on configs/lpcxpresso-lpc1768/src/lpc17_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,26 +44,18 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/analog/adc.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
+#include "up_internal.h"
 
-#include "lpc17_adc.h"
 #include "zkitarm_internal.h"
 
-#ifdef CONFIG_ADC
-
 /************************************************************************************
- * Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -76,48 +67,31 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: lpc17_boardinitialize
  *
  * Description:
- *   All LPC17 architectures must provide the following interface to work with
- *   examples/adc.
+ *   All LPC17xx architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+void lpc17_boardinitialize(void)
 {
-  static bool initialized = false;
-  struct adc_dev_s *adc;
-  int ret;
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
+   * function zkit_sspinitialize() has been brought into the link.
+   */
 
-  /* Check if we have already initialized */
-
-  if (!initialized)
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
+  if (zkit_sspinitialize)
     {
-      /* Call lpc17_adcinitialize() to get an instance of the ADC interface */
-
-      adc = lpc17_adcinitialize();
-      if (adc == NULL)
-        {
-          adbg("ERROR: Failed to get ADC interface\n");
-          return -ENODEV;
-        }
-
-      /* Register the ADC driver at "/dev/adc0" */
-
-      ret = adc_register("/dev/adc0", adc);
-      if (ret < 0)
-        {
-          adbg("adc_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+      zkit_sspinitialize();
     }
+#endif
 
-  return OK;
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
 }
-
-#endif /* CONFIG_ADC */

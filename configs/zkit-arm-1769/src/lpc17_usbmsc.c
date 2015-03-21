@@ -1,10 +1,10 @@
 /****************************************************************************
- * configs/zkit-arm-1769/src/up_usbmsc.c
+ * configs/zkit-arm-1769/src/lpc17_usbmsc.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
  *
- * Based on configs/lpcxpresso-lpc1768/src/up_usbmsc.c
+ * Based on configs/lpcxpresso-lpc1768/src/lpc17_usbmsc.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,7 @@
 #include "zkitarm_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

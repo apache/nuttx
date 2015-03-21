@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/zkit-arm-1769/src/up_lcd.c
+ * configs/zkit-arm-1769/src/lpc17_lcd.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Manikandan <code@zilogic.com>
@@ -64,7 +64,7 @@
 #ifdef CONFIG_NX_LCDDRIVER
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with

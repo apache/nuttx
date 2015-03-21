@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/zkit-arm-1769/src/zkitarm_internal.h
- * arch/arm/src/board/zkitarm_internal.n
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
@@ -50,7 +49,7 @@
 #include <nuttx/compiler.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /************************************************************************************
  * ZKit-ARM-1769 Pin Usage
