@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/sam3u-ek/src/up_usbmsc.c
+ * config/sam3u-ek/src/sam_nsh.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Configure and register the SAM3U MMC/SD SDIO block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
@@ -49,8 +48,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "sam_hsmci.h"
-
-#ifdef CONFIG_SAM34_HSMCI
+#include "sam3u-ek.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -58,69 +56,95 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+/* PORT and SLOT number probably depend on the board configuration */
+
+#define NSH_HAVE_USBDEV 1
+#define NSH_HAVE_MMCSD  1
+
+/* Can't support MMC/SD if the card interface is not enable */
+
+#ifndef CONFIG_SAM34_HSMCI
+#  undef NSH_HAVE_MMCSD
 #endif
 
-/* SLOT number(s) depends on the board configuration */
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+ * is not enabled.
+ */
 
-#undef SAM_MMCSDSLOTNO
-#define SAM_MMCSDSLOTNO 0
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM34_HSMCI)
+#  undef NSH_HAVE_MMCSD
+#endif
+
+#ifdef NSH_HAVE_MMCSD
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "Only one MMC/SD slot"
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#  endif
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+
+#  ifndef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
+#endif
+
+/* Can't support USB features if USB is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVE_USBDEV
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: nsh_archinitialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int nsh_archinitialize(void)
 {
+#ifdef NSH_HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
   int ret;
 
+  /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
-  syslg(LOG_INFO, "Initializing SDIO slot %d\n",
-          SAM_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Initializing SDIO slot %d\n",
+         CONFIG_NSH_MMCSDSLOTNO);
 
-  sdio = sdio_initialize(SAM_MMCSDSLOTNO);
+  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
-             SAM_MMCSDSLOTNO);
+             CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
-  /* Now bind the SPI interface to the MMC/SD driver */
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
-  syslog(LOG_INFO, ""
-         "Bind SDIO to the MMC/SD driver, minor=%d\n",
-         CONFIG_SYSTEM_USBMSC_DEVMINOR1);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
+         CONFIG_NSH_MMCSDMINOR);
 
-  ret = mmcsd_slotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-             ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
   syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the SAM3U10E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
-   */
+  /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
-   sdio_mediachange(sdio, true);
-   return OK;
+   sdio_mediachange(sdio, sam_cardinserted(0));
+#endif
+  return OK;
 }
-
-#endif /* CONFIG_SAM34_HSMCI */
