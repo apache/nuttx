@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mz-starterkit/nsh/c32-release.ld
+ * configs/pic32mz-starterkit/nsh/mips-debug.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@ MEMORY
 	 * at KSEG0 address 0x9d00:0000
 	 */
 
-	kseg0_progmem  (rx) : ORIGIN = 0x9d000000, LENGTH = 2048K
+	kseg0_program_mem  (rx) : ORIGIN = 0x9d000000, LENGTH = 2048K
 
 	/* The PIC32MZ2048ECH144 and PIC32MZ2048ECM144 chips have 160Kb of boot
 	 * FLASH:  80Kb at physical address 0x1fc4000 (Boot Flash 1, boot1) and
@@ -100,11 +100,11 @@ MEMORY
 	 * for use by MPLABX and 128 for DSP register storage.
 	 */
 
-	kseg1_datamem (rw!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
+	kseg1_data_mem (rw!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
 }
 
 OUTPUT_FORMAT("elf32-tradlittlemips")
-OUTPUT_ARCH(pic32mz)
+OUTPUT_ARCH(pic32mx)
 ENTRY(__start)
 
 SECTIONS
@@ -211,7 +211,7 @@ SECTIONS
 		*(.sbss2 .sbss2.*)
 		*(.gnu.linkonce.sb2.*)
 		_etext = ABSOLUTE(.);
-	} > kseg0_progmem
+	} > kseg0_program_mem
 
 	/* Initialization data begins here in progmem */
 
@@ -230,13 +230,13 @@ SECTIONS
 		_sramfunc =  ABSOLUTE(.);
 		*(.ramfunc	.ramfunc.*)
 		_eramfunc =  ABSOLUTE(.);
-	} > kseg1_datamem AT > kseg0_progmem
+	} > kseg1_data_mem AT > kseg0_program_mem
 
 	_ramfunc_loadaddr = LOADADDR(.ramfunc);
 	_ramfunc_sizeof   = SIZEOF(.ramfunc);
-	_bmxdkpba_address = _sramfunc - ORIGIN(kseg1_datamem) ;
-	_bmxdudba_address = LENGTH(kseg1_datamem) ;
-	_bmxdupba_address = LENGTH(kseg1_datamem) ;
+	_bmxdkpba_address = _sramfunc - ORIGIN(kseg1_data_mem) ;
+	_bmxdudba_address = LENGTH(kseg1_data_mem) ;
+	_bmxdupba_address = LENGTH(kseg1_data_mem) ;
 */
 
 	.data :
@@ -246,7 +246,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		KEEP (*(.gnu.linkonce.d.*personality*))
 		*(.data1)
-	} > kseg1_datamem AT > kseg0_progmem
+	} > kseg1_data_mem AT > kseg0_program_mem
 
 	.eh_frame : ONLY_IF_RW { KEEP (*(.eh_frame)) }
 	_gp = ALIGN(16) + 0x7FF0 ;
@@ -254,23 +254,23 @@ SECTIONS
 	.got :
 	{
 		*(.got.plt) *(.got)
-	} > kseg1_datamem AT > kseg0_progmem
+	} > kseg1_data_mem AT > kseg0_program_mem
 
 	.sdata :
 	{
 		*(.sdata .sdata.* .gnu.linkonce.s.*)
-	} > kseg1_datamem AT > kseg0_progmem
+	} > kseg1_data_mem AT > kseg0_program_mem
 
 	.lit8 :
 	{
 		*(.lit8)
-	} > kseg1_datamem AT > kseg0_progmem
+	} > kseg1_data_mem AT > kseg0_program_mem
 
 	.lit4 :
 	{
 		*(.lit4)
 		_edata = ABSOLUTE(.);
-	} >kseg1_datamem AT>kseg0_progmem
+	} >kseg1_data_mem AT>kseg0_program_mem
 
 	.sbss :
 	{
@@ -278,7 +278,7 @@ SECTIONS
 		*(.dynsbss)
 		*(.sbss .sbss.* .gnu.linkonce.sb.*)
 		*(.scommon)
-	} >kseg1_datamem
+	} >kseg1_data_mem
 
 	.bss :
 	{
@@ -287,7 +287,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > kseg1_datamem
+	} > kseg1_data_mem
 
 	/* Stabs debugging sections */
 

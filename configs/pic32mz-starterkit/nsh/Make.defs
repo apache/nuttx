@@ -38,27 +38,29 @@ include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/mips/src/mips32/Toolchain.defs
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF),y)
-  LDSCRIPT = mips-release.ld
+  LDSCRIPT = mips-debug.ld
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW),y)
-  LDSCRIPT = pinguino-release.ld
-endif
-
-ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW),y)
-  LDSCRIPT = c32-release.ld
-endif
-
-ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE),y)
-  LDSCRIPT = c32-release.ld
+  LDSCRIPT = pinguino-debug.ld
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
-  #LDSCRIPT = mips-debug.ld
-  LDSCRIPT = mips-release.ld
-ifeq ($(MIPS_MPROCESSOR),elf32pic32mz)
+  LDSCRIPT = xc32-debug.ld
   MIPS_MPROCESSOR = 32MZ2048ECM144
 endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_XC32),y)
+  LDSCRIPT = xc32-debug.ld
+  MIPS_MPROCESSOR = 32MZ2048ECM144
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW),y)
+  LDSCRIPT = c32-debug.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE),y)
+  LDSCRIPT = c32-debug.ld
 endif
 
 ifeq ($(WINTOOL),y)

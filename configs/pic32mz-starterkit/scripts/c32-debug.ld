@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mz-starterkit/nsh/mips-release.ld
+ * configs/pic32mz-starterkit/nsh/c32-debug.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -103,8 +103,8 @@ MEMORY
 	kseg1_datamem (rw!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
 }
 
-OUTPUT_FORMAT("elf32-littlemips")
-OUTPUT_ARCH(mips)
+OUTPUT_FORMAT("elf32-tradlittlemips")
+OUTPUT_ARCH(pic32mz)
 ENTRY(__start)
 
 SECTIONS

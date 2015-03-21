@@ -50,7 +50,7 @@ fi
 # location so you will probably have to edit this.  You will also have
 # to edit this if you install a different version of if you install
 # the Linux PIC32MZ toolchain as well
-#export TOOLCHAIN_PREBIN="/cygdrive/c/MicroChip/mplabc32/v1.12/bin":
+#export TOOLCHAIN_PREBIN="/cygdrive/c/Program Files (x86)/Microchip/xc32/v1.34/bin":
 
 # This is where I have the Pinquino toolchain installed
 # Careful with the ordering in the PATH variable... there is an incompatible
