@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/ea3152/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/ea3152/src/lpc31_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +56,7 @@
        * in arch/arm/src/lpc31xx */
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */
@@ -139,4 +138,3 @@ uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 #endif /* 0 */
 #endif /* CONFIG_LPC31_SPI  */
-

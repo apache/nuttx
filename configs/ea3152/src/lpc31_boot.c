@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/ea3152/src/up_boot.c
+ * configs/ea3152/src/lpc31_boot.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
