@@ -143,7 +143,7 @@ void board_initialize(void);
  *   board-specific initialization logic.  But there are a few architectures
  *   where this initialization function is still called from common chip
  *   architecture logic.  This interface is not, however, a common board
- *  interface in any event.
+ *   interface in any event.
  *
  *   WARNING: This interface name will eventually be removed; do not use it
  *   in new board ports.  New implementations should use the naming

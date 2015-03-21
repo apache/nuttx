@@ -486,9 +486,21 @@ config ARCH_BOARD_OLIMEX_STM32P207
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		This port uses the Olimex STM32 P207 board and a GNU arm-nuttx-elf toolchain* under
-		Linux or Cygwin. See the http://www.olimex.com for further information. This
-		 board features the STMicro STM32F207ZE MCU
+		This port uses the Olimex STM32 P207 board and a GNU arm-nuttx-elf
+		toolchain under Linux or Cygwin. See the http://www.olimex.com for
+		further information. This board features the STMicro STM32F207ZE MCU
+
+config ARCH_BOARD_OLIMEXINO_STM32
+	bool "Olimexino STM32 board"
+	depends on ARCH_CHIP_STM32F103RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Olimexino STM32 board and a GNU arm-nuttx-elf
+		toolchain under Linux or Cygwin. See the http://www.olimex.com for
+		further information. This board features the STMicro STM32F103RBT6 MCU.
+		Contribued by David Sidrane.
 
 config ARCH_BOARD_OPEN1788
 	bool "Wave Share Open1788"
@@ -1157,6 +1169,7 @@ config ARCH_BOARD
 	default "olimex-stm32-p107"        if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
+	default "olimexino-stm32"          if ARCH_BOARD_OLIMEXINO_STM32
 	default "open1788"                 if ARCH_BOARD_OPEN1788
 	default "p112"                     if ARCH_BOARD_P112
 	default "pcblogic-pic32mx"         if ARCH_BOARD_PCBLOGICPIC32MX
@@ -1417,6 +1430,9 @@ source "configs/olimex-stm32-p207/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STRP711
 source "configs/olimex-strp711/Kconfig"
+endif
+if ARCH_BOARD_OLIMEXINO_STM32
+source "configs/olimexino-stm32/Kconfig"
 endif
 if ARCH_BOARD_OPEN1788
 source "configs/open1788/Kconfig"

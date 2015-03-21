@@ -10022,3 +10022,5 @@
 	  shilo.xyz (2015-03-19).
 	* arch/arm/src/sama5/chip/sam_tc.h: Fix typos in timer/counter header
 	  file.  From Bob Doiron (2015-03-20).
+	* configs/olimexino-stm32: Board support for the Olimexino STM32 board
+	  from David Sidrane (2015-03-20).
