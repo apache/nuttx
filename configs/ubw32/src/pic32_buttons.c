@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ubw32/src/board_buttons.c
+ * configs/ubw32/src/pic32_buttons.c
  *
  *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
