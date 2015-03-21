@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleus2g/src/up_leds.c
+ * configs/nucleus2g/src/lpc17_leds.c
  *
  *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

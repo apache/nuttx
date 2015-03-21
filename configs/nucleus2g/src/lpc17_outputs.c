@@ -1,9 +1,12 @@
 /****************************************************************************
- * config/nucleus2g/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * configs/nucleus2g/src/lpc17_outputs.c
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012 Hal Glenn. All rights reserved.
+ *   Author: Hal Glenn <hglenn@2g-eng.com>
+ *
+ * This file is part of NuttX:
+ *
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,58 +43,25 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/mmcsd.h>
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "lpc17_gpio.h"
+
+#include "nucleus2g_internal.h"
+
+#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G_BMS
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-/* PORT and SLOT number probably depend on the board configuration */
-
-#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G
-#  define NSH_HAVEUSBDEV 1
-#  define NSH_HAVEMMCSD  1
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "The Nucleus-2G MMC/SD is on SSP0"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 0
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The Nucleus-2G MMC/SD is only one slot (0)"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#  ifndef CONFIG_LPC17_SSP0
-#    warning "CONFIG_LPC17_SSP0 is not enabled"
-#  endif
-#else
-#  error "Unrecognized board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
-#endif
-
-/* Can't support USB device features if USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
 
 /****************************************************************************
  * Private Data
@@ -106,43 +76,53 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: nucleus_bms_relay 1-4
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Once booted these functions control the 4 isolated FET outputs from the
+ *   master BMS controller
  *
- ****************************************************************************/
+ ***************************************************************************/
 
-int nsh_archinitialize(void)
+void nucleus_bms_relay1(enum output_state state)
 {
-  FAR struct spi_dev_s *ssp;
-  int ret;
-
-  /* Get the SSP port */
-
-  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (!ssp)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",
-             CONFIG_NSH_MMCSDSPIPORTNO);
-      return -ENODEV;
-    }
-
-  syslog(LOG_INFO, "Successfully initialized SSP port %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO);
-
-  /* Bind the SSP port to the slot */
-
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
-
-  return OK;
+  bool value   = (state == (enum output_state)RELAY_OPEN);
+  lpc17_gpiowrite(NUCLEUS_BMS_RELAY1, value);
 }
+
+void nucleus_bms_relay2(enum output_state state)
+{
+  bool value   = (state == (enum output_state)RELAY_OPEN);
+  lpc17_gpiowrite(NUCLEUS_BMS_RELAY2, value);
+}
+
+void nucleus_bms_relay3(enum output_state state)
+{
+  bool value   = (state == (enum output_state)RELAY_OPEN);
+  lpc17_gpiowrite(NUCLEUS_BMS_RELAY3, value);
+}
+
+void nucleus_bms_relay4(enum output_state state)
+{
+  bool value   = (state == (enum output_state)RELAY_OPEN);
+  lpc17_gpiowrite(NUCLEUS_BMS_RELAY4, value);
+}
+
+/***************************************************************************
+ * Name: up_relayinit
+ *
+ * Description:
+ *  This function is called on boot to init the GPIO for relay control
+ *
+ ***************************************************************************/
+
+void up_relayinit(void)
+{
+  lpc17_configgpio(NUCLEUS_BMS_RELAY1);
+  lpc17_configgpio(NUCLEUS_BMS_RELAY2);
+  lpc17_configgpio(NUCLEUS_BMS_RELAY3);
+  lpc17_configgpio(NUCLEUS_BMS_RELAY4);
+}
+
+#endif /* CONFIG_ARCH_BOARD_NUCLEUS2G_BMS */
+

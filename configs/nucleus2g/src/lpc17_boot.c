@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleus2g/src/up_boot.c
+ * configs/nucleus2g/src/lpc17_boot.c
  *
  *   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

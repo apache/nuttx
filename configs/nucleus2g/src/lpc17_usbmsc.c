@@ -1,13 +1,10 @@
 /****************************************************************************
- * configs/nucleus2g/src/up_outputs.c
- * arch/arm/src/board/up_outputs.c
+ * configs/nucleus2g/src/lpc17_usbmsc.c
  *
- *   Copyright (C) 2012 Hal Glenn. All rights reserved.
- *   Author: Hal Glenn <hglenn@2g-eng.com>
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This file is part of NuttX:
- *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ * Configure and register the LPC17xx MMC/SD SPI block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,86 +41,84 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
-#include <arch/board/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "lpc17_gpio.h"
-
-#include "nucleus2g_internal.h"
-
-#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G_BMS
+#include <nuttx/spi/spi.h>
+#include <nuttx/mmcsd.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* Configuration ************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+#endif
+
+/* PORT and SLOT number probably depend on the board configuration */
+
+#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G
+#  undef LPC17XX_MMCSDSPIPORTNO
+#  define LPC17XX_MMCSDSPIPORTNO 1
+#  undef LPC17XX_MMCSDSLOTNO
+#  define LPC17XX_MMCSDSLOTNO 0
+#else
+   /* Add configuration for new LPC17xx boards here */
+#  error "Unrecognized LPC17xx board"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nucleus_bms_relay 1-4
+ * Name: usbmsc_archinitialize
  *
  * Description:
- *   Once booted these functions control the 4 isolated FET outputs from the
- *   master BMS controller
+ *   Perform architecture specific initialization
  *
- ***************************************************************************/
+ ****************************************************************************/
 
-void nucleus_bms_relay1(enum output_state state)
+int usbmsc_archinitialize(void)
 {
-  bool value   = (state == (enum output_state)RELAY_OPEN);
-  lpc17_gpiowrite(NUCLEUS_BMS_RELAY1, value);
+  FAR struct spi_dev_s *spi;
+  int ret;
+
+  /* Get the SPI port */
+
+  syslog(LOG_INFO, "Initializing SPI port %d\n",
+         LPC17XX_MMCSDSPIPORTNO);
+
+  spi = lpc17_sspinitialize(LPC17XX_MMCSDSPIPORTNO);
+  if (!spi)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             LPC17XX_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
+
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+         LPC17XX_MMCSDSPIPORTNO);
+
+  /* Bind the SPI port to the slot */
+
+  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
+         LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
+
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
+                                LPC17XX_MMCSDSLOTNO, spi);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+             LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO, ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
+         LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
+  return OK;
 }
-
-void nucleus_bms_relay2(enum output_state state)
-{
-  bool value   = (state == (enum output_state)RELAY_OPEN);
-  lpc17_gpiowrite(NUCLEUS_BMS_RELAY2, value);
-}
-
-void nucleus_bms_relay3(enum output_state state)
-{
-  bool value   = (state == (enum output_state)RELAY_OPEN);
-  lpc17_gpiowrite(NUCLEUS_BMS_RELAY3, value);
-}
-
-void nucleus_bms_relay4(enum output_state state)
-{
-  bool value   = (state == (enum output_state)RELAY_OPEN);
-  lpc17_gpiowrite(NUCLEUS_BMS_RELAY4, value);
-}
-
-/***************************************************************************
- * Name: up_relayinit
- *
- * Description:
- *  This function is called on boot to init the GPIO for relay control
- *
- ***************************************************************************/
-
-void up_relayinit(void)
-{
-  lpc17_configgpio(NUCLEUS_BMS_RELAY1);
-  lpc17_configgpio(NUCLEUS_BMS_RELAY2);
-  lpc17_configgpio(NUCLEUS_BMS_RELAY3);
-  lpc17_configgpio(NUCLEUS_BMS_RELAY4);
-}
-
-#endif /* CONFIG_ARCH_BOARD_NUCLEUS2G_BMS */
-

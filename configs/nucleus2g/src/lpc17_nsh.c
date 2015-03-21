@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/nucleus2g/src/up_usbmsc.c
+ * config/nucleus2g/src/lpc17_nsh.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Configure and register the LPC17xx MMC/SD SPI block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,76 +47,101 @@
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
-#endif
-
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_NUCLEUS2G
-#  undef LPC17XX_MMCSDSPIPORTNO
-#  define LPC17XX_MMCSDSPIPORTNO 1
-#  undef LPC17XX_MMCSDSLOTNO
-#  define LPC17XX_MMCSDSLOTNO 0
+#  define NSH_HAVEUSBDEV 1
+#  define NSH_HAVEMMCSD  1
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
+#    error "The Nucleus-2G MMC/SD is on SSP0"
+#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 0
+#  endif
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "The Nucleus-2G MMC/SD is only one slot (0)"
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
+#  ifndef CONFIG_LPC17_SSP0
+#    warning "CONFIG_LPC17_SSP0 is not enabled"
+#  endif
 #else
-   /* Add configuration for new LPC17xx boards here */
-#  error "Unrecognized LPC17xx board"
+#  error "Unrecognized board"
+#  undef NSH_HAVEUSBDEV
+#  undef NSH_HAVEMMCSD
 #endif
+
+/* Can't support USB device features if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVEUSBDEV
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef NSH_HAVEMMCSD
+#endif
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: nsh_archinitialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int nsh_archinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
+  FAR struct spi_dev_s *ssp;
   int ret;
 
-  /* Get the SPI port */
+  /* Get the SSP port */
 
-  syslog(LOG_INFO, "Initializing SPI port %d\n",
-         LPC17XX_MMCSDSPIPORTNO);
-
-  spi = lpc17_sspinitialize(LPC17XX_MMCSDSPIPORTNO);
-  if (!spi)
+  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  if (!ssp)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
-             LPC17XX_MMCSDSPIPORTNO);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
-         LPC17XX_MMCSDSPIPORTNO);
+  syslog(LOG_INFO, "Successfully initialized SSP port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
 
-  /* Bind the SPI port to the slot */
+  /* Bind the SSP port to the slot */
 
-  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
-         LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
-                                LPC17XX_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-             LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO, ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
-         LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
+  syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+
   return OK;
 }

@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/nucleus2g/src/nucleus2g_internal.h
- * arch/arm/src/board/nucleus2g_internal.n
  *
  *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* NUCLEUS-2G GPIO Pin Definitions **************************************************/
