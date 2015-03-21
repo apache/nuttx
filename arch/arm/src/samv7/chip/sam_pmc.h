@@ -209,7 +209,7 @@
 #define PMC_CKGR_UCKR_UPLLCOUNT_SHIFT  (20)      /* Bits 20-23: UTMI PLL Start-up Time */
 #define PMC_CKGR_UCKR_UPLLCOUNT_MASK   (15 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
 #  define PMC_CKGR_UCKR_UPLLCOUNT(n)   ((uint32_t)(n) << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
-
+#  define PMC_CKGR_UCKR_UPLLCOUNT_MAX  (15 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
 
 /* PMC Clock Generator Main Oscillator Register */
 
