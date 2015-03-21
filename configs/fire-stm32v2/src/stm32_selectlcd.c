@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/fire-stm32v2/src/up_selectlcd.c
- * arch/arm/src/board/up_selectlcd.c
+ * configs/fire-stm32v2/src/stm32_selectlcd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
