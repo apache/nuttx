@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lm3s6432-s2e/src/up_leds.c
+ * configs/lm3s6432-s2e/src/lm_leds.c
  *
  *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
