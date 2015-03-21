@@ -35,37 +35,37 @@
 
 -include $(TOPDIR)/Make.defs
 
-ASRCS		=
-CSRCS		= up_boot.c
+ASRCS =
+CSRCS = atmega_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
+CSRCS += atmega_leds.c
 endif
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(CONFIG_ARCH_FAMILY_AVR32),y)
-ARCH_SUBDIR	= avr32
+ARCH_SUBDIR = avr32
 endif
 ifeq ($(CONFIG_ARCH_FAMILY_AVR),y)
-ARCH_SUBDIR	= avr
+ARCH_SUBDIR = avr
 endif
 
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
+  CFLAGS += -I "${shell cygpath -w $(TOPDIR)/sched}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
 else
-  CFLAGS	+= -I "$(TOPDIR)/sched"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/chip"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/common"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
+  CFLAGS += -I "$(TOPDIR)/sched"
+  CFLAGS += -I "$(ARCH_SRCDIR)/chip"
+  CFLAGS += -I "$(ARCH_SRCDIR)/common"
+  CFLAGS += -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
 endif
 
 all: libboard$(LIBEXT)
