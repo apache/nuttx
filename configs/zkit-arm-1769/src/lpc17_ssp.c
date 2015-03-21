@@ -1,11 +1,10 @@
 /************************************************************************************
- * configs/zkit-arm-1769/src/up_ssp.c
- * arch/arm/src/board/up_ssp.c
+ * configs/zkit-arm-1769/src/lpc17_ssp.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
  *
- * Based on configs/lpcxpresso-lpc1768/src/up_ssp.c
+ * Based on configs/lpcxpresso-lpc1768/src/lpc17_ssp.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +60,7 @@
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG too) */

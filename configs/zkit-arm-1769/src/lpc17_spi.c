@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/zkit-arm-1769/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/zkit-arm-1769/src/lpc17_spi.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Kannan <code@zilogic.com>
@@ -61,7 +60,7 @@
 #if defined(CONFIG_LPC17_SPI)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG too) */

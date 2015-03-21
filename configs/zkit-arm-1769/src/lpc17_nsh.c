@@ -1,11 +1,10 @@
 /****************************************************************************
- * config/zkit-arm-1769/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/zkit-arm-1769/src/lpc17_nsh.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
  *
- * Based on config/lpcxpresso-lpc1768/src/up_nsh.c
+ * Based on config/lpcxpresso-lpc1768/src/lpc17_nsh.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +53,7 @@
 #include "lpc17_spi.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
