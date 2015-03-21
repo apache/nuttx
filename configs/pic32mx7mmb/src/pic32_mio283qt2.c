@@ -1,6 +1,5 @@
 /**************************************************************************************
- * configs/stm32fdiscover/src/up_mio283qt2.c
- * arch/arm/src/board/up_mio283qt2.c
+ * configs/stm32fdiscover/src/pic32_mio283qt2.c
  *
  * Interface definition for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.
  * This LCD is based on the Himax HX8347-D LCD controller.

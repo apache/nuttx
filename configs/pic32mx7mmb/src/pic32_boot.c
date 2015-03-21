@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/pic32mx7mmb/src/pic32_boot.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "pic32mx7mmb_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

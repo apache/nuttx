@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/pic32mx7mmb/src/pic32_touchscreen.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,7 +65,7 @@
 #ifdef CONFIG_INPUT
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 /* Reference counting is partially implemented, but not needed in the current design.

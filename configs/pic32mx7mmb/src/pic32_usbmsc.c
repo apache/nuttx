@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mx7mmb/src/up_usbmsc.c
+ * configs/pic32mx7mmb/src/pic32_usbmsc.c
  *
  *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
 #include "pic32mx7mmb_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
