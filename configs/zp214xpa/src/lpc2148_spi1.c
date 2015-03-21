@@ -1,6 +1,5 @@
 /****************************************************************************
  * config/zp214xpa/src/up_spi1.c
- * arch/arm/src/board/up_spi1.c
  *
  *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,7 +82,7 @@
 #include "lpc214x_spi.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enables debug output from this file */

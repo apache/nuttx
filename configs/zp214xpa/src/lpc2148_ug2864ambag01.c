@@ -1,6 +1,5 @@
 /****************************************************************************
  * config/zp214xpa/src/up_ug2864ambag01.c
- * arch/arm/src/board/up_ug2864ambag01.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #ifdef CONFIG_LCD_UG2864AMBAG01
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* The pin configurations here requires that SPI1 is avaialable */
