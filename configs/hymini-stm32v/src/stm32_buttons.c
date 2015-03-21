@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/hymini-stm32v/src/board_buttons.c
+ * configs/hymini-stm32v/src/stm32_buttons.c
  *
  *   Copyright (C) 2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

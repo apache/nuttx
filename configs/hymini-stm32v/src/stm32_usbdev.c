@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/hymini-stm32v/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/hymini-stm32v/src/stm32_usbdev.c
  *
  *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "hymini_stm32v-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

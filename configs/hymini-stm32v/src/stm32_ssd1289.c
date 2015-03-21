@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/hymini-stm32v/src/ssd1289.c
- * arch/arm/src/board/ssd1289.c
+ * configs/hymini-stm32v/src/stm32_ssd1289.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
