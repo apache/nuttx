@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/ea3131/src/up_usbhost.c
+ * configs/ea3131/src/lpc31_usbhost.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

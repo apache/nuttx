@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/ea3131/src/up_usbmsc.c
+ * configs/ea3131/src/lpc31_buttons.c
  *
- *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Configure and register the SAM3U MMC/SD SDIO block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,89 +39,47 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
-#include <stdlib.h>
+#include <stdint.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/mkfatfs.h>
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "ea3131_internal.h"
+
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
-#endif
-
-#ifndef CONFIG_SYSTEM_USBMSC_DEVPATH1
-#  define CONFIG_SYSTEM_USBMSC_DEVPATH1  "/dev/ram"
-#endif
-
-static const char g_source[] = CONFIG_SYSTEM_USBMSC_DEVPATH1;
-static struct fat_format_s g_fmt = FAT_FORMAT_INITIALIZER;
-
-#define USBMSC_NSECTORS        64
-#define USBMSC_SECTORSIZE      512
-#define BUFFER_SIZE            (USBMSC_NSECTORS*USBMSC_SECTORSIZE)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
+ * Name: board_button_initialize
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+void board_button_initialize(void)
 {
-  uint8_t *pbuffer;
-  int ret;
+}
 
-  pbuffer = (uint8_t *)kmm_malloc(BUFFER_SIZE);
-  if (!pbuffer)
-    {
-      lowsyslog(LOG_ERR, "ERROR: Failed to allocate ramdisk of size %d\n",
-                BUFFER_SIZE);
-      return -ENOMEM;
-    }
+/****************************************************************************
+ * Name: board_buttons
+ ****************************************************************************/
 
-  /* Register a RAMDISK device to manage this RAM image */
-
-  ret = ramdisk_register(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
-                         pbuffer,
-                         USBMSC_NSECTORS,
-                         USBMSC_SECTORSIZE,
-                         RDFLAG_WRENABLED | RDFLAG_FUNLINK);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: create_ramdisk: Failed to register ramdisk at %s: %d\n",
-             g_source, -ret);
-      kmm_free(pbuffer);
-      return ret;
-    }
-
-  /* Create a FAT filesystem on the ramdisk */
-
-  ret = mkfatfs(g_source, &g_fmt);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
-             g_source);
-      /* kmm_free(pbuffer); -- RAM disk is registered */
-      return ret;
-    }
-
+uint8_t board_buttons(void)
+{
   return 0;
 }
+
+#endif /* CONFIG_ARCH_BUTTONS */

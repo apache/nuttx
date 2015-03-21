@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/ea3131/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/ea3131/src/lpc31_nsh.c
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "lpc31_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

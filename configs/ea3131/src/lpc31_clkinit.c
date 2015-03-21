@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/ea3131/src/up_clkinit.c
- * arch/arm/src/board/up_clkinit.c
+ * configs/ea3131/src/lpc31_clkinit.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "lpc31_cgudrvr.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Sub-domain Clock Bitsets *************************************************/
