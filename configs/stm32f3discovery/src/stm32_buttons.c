@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f3discovery/src/board_buttons.c
+ * configs/stm32f3discovery/src/stm32_buttons.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

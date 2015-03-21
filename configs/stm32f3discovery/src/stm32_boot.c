@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm32f3discovery/src/up_qencoder.c
- * arch/arm/src/board/up_qencoder.c
+ * configs/stm32f3discovery/src/stm32_boot.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,83 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/sensors/qencoder.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
-#include "stm32_qencoder.h"
 #include "stm32f3discovery-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Check if we have a timer configured for quadrature encoder -- assume YES. */
-
-#define HAVE_QENCODER 1
-
-/* If TIMn is not enabled (via CONFIG_STM32_TIMn), then the configuration cannot
- * specify TIMn as a quadrature encoder (via CONFIG_STM32_TIMn_QE).
- */
-
-#ifndef CONFIG_STM32_TIM1
-#  undef CONFIG_STM32_TIM1_QE
-#endif
-#ifndef CONFIG_STM32_TIM2
-#  undef CONFIG_STM32_TIM2_QE
-#endif
-#ifndef CONFIG_STM32_TIM3
-#  undef CONFIG_STM32_TIM3_QE
-#endif
-#ifndef CONFIG_STM32_TIM4
-#  undef CONFIG_STM32_TIM4_QE
-#endif
-#ifndef CONFIG_STM32_TIM5
-#  undef CONFIG_STM32_TIM5_QE
-#endif
-#ifndef CONFIG_STM32_TIM8
-#  undef CONFIG_STM32_TIM8_QE
-#endif
-
-/* If the upper-half quadrature encoder driver is not enabled, then we cannot
- * support the quadrature encoder.
- */
-
-#ifndef CONFIG_QENCODER
-#  undef HAVE_QENCODER
-#endif
-
-/* Which Timer should we use, TIMID={1,2,3,4,5,8}.  If multiple timers are
- * configured as quadrature encoders, this logic will arbitrarily select
- * the lowest numbered timer.
- *
- * At least one TIMn, n={1,2,3,4,5,8}, must be both enabled and configured
- * as a quadrature encoder in order to support the lower half quadrature
- * encoder driver.  The above check assures that if CONFIG_STM32_TIMn_QE
- * is defined, then the correspdonding TIMn is also enabled.
- */
-
-#if defined CONFIG_STM32_TIM1_QE
-#  define TIMID 1
-#elif defined CONFIG_STM32_TIM2_QE
-#  define TIMID 2
-#elif defined CONFIG_STM32_TIM3_QE
-#  define TIMID 3
-#elif defined CONFIG_STM32_TIM4_QE
-#  define TIMID 4
-#elif defined CONFIG_STM32_TIM5_QE
-#  define TIMID 5
-#elif defined CONFIG_STM32_TIM8_QE
-#  define TIMID 8
-#else
-#  undef HAVE_QENCODER
-#endif
-
-#ifdef HAVE_QENCODER
 
 /************************************************************************************
  * Private Functions
@@ -127,37 +60,43 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: qe_devinit
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/qencoder.
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-int qe_devinit(void)
+void stm32_boardinitialize(void)
 {
-  static bool initialized = false;
-  int ret;
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spiinitialize() has been brought into the link.
+   */
 
-  /* Check if we are already initialized */
-
-  if (!initialized)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+  if (stm32_spiinitialize)
     {
-      /* Initialize a quadrature encoder interface. */
-
-      snvdbg("Initializing the quadrature encoder using TIM%d\n", TIMID);
-      ret = stm32_qeinitialize("/dev/qe0", TIMID);
-      if (ret < 0)
-        {
-          sndbg("stm32_qeinitialize failed: %d\n", ret);
-          return ret;
-        }
-
-      initialized = true;
+      stm32_spiinitialize();
     }
+#endif
 
-  return OK;
+  /* Initialize USB if the 1) USB device controller is in the configuration and 2)
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
+   * into the build. Presumeably either CONFIG_USBDEV is also selected.
+   */
+
+#ifdef CONFIG_STM32_USB
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
 }
-
-#endif /* HAVE_QENCODER */

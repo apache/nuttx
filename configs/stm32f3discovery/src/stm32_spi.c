@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f3discovery/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/stm32f3discovery/src/stm32_spi.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

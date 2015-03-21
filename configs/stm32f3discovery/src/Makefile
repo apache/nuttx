@@ -40,40 +40,40 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c up_spi.c
+CSRCS = stm32_boot.c stm32_spi.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += up_cxxinitialize.c
+CSRCS += stm32_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_autoleds.c
+CSRCS += stm32_autoleds.c
 else
-CSRCS += up_userleds.c
+CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  up_buttons.c
+CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_STM32_USB),y)
-CSRCS += up_usb.c
+CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += up_pwm.c
+CSRCS += stm32_pwm.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)
-CSRCS += up_qencoder.c
+CSRCS += stm32_qencoder.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += up_watchdog.c
+CSRCS += stm32_watchdog.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

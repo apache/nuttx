@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f3discovery/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/stm32f3discovery/src/stm32_qencoder.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,36 +39,83 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/sensors/qencoder.h>
+#include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
-#include "stm32.h"
+#include "stm32_qencoder.h"
 #include "stm32f3discovery-internal.h"
 
-#ifdef CONFIG_STM32_USB
-
 /************************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************************/
+/* Configuration *******************************************************************/
+/* Check if we have a timer configured for quadrature encoder -- assume YES. */
 
-#ifdef CONFIG_USBDEV
-#  define HAVE_USB 1
-#else
-#  warning "CONFIG_STM32_USB is enabled but CONFIG_USBDEV is not"
-#  undef HAVE_USB
+#define HAVE_QENCODER 1
+
+/* If TIMn is not enabled (via CONFIG_STM32_TIMn), then the configuration cannot
+ * specify TIMn as a quadrature encoder (via CONFIG_STM32_TIMn_QE).
+ */
+
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_QE
+#endif
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_QE
+#endif
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_QE
+#endif
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_QE
+#endif
+#ifndef CONFIG_STM32_TIM5
+#  undef CONFIG_STM32_TIM5_QE
+#endif
+#ifndef CONFIG_STM32_TIM8
+#  undef CONFIG_STM32_TIM8_QE
 #endif
 
-/************************************************************************************
- * Private Data
- ************************************************************************************/
+/* If the upper-half quadrature encoder driver is not enabled, then we cannot
+ * support the quadrature encoder.
+ */
+
+#ifndef CONFIG_QENCODER
+#  undef HAVE_QENCODER
+#endif
+
+/* Which Timer should we use, TIMID={1,2,3,4,5,8}.  If multiple timers are
+ * configured as quadrature encoders, this logic will arbitrarily select
+ * the lowest numbered timer.
+ *
+ * At least one TIMn, n={1,2,3,4,5,8}, must be both enabled and configured
+ * as a quadrature encoder in order to support the lower half quadrature
+ * encoder driver.  The above check assures that if CONFIG_STM32_TIMn_QE
+ * is defined, then the correspdonding TIMn is also enabled.
+ */
+
+#if defined CONFIG_STM32_TIM1_QE
+#  define TIMID 1
+#elif defined CONFIG_STM32_TIM2_QE
+#  define TIMID 2
+#elif defined CONFIG_STM32_TIM3_QE
+#  define TIMID 3
+#elif defined CONFIG_STM32_TIM4_QE
+#  define TIMID 4
+#elif defined CONFIG_STM32_TIM5_QE
+#  define TIMID 5
+#elif defined CONFIG_STM32_TIM8_QE
+#  define TIMID 8
+#else
+#  undef HAVE_QENCODER
+#endif
+
+#ifdef HAVE_QENCODER
 
 /************************************************************************************
  * Private Functions
@@ -80,52 +126,37 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_usbinitialize
+ * Name: qe_devinit
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F3Discovery board.
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/qencoder.
  *
  ************************************************************************************/
 
-void stm32_usbinitialize(void)
+int qe_devinit(void)
 {
-  /* Does the STM32 F3 hava an external soft pull-up? */
-}
+  static bool initialized = false;
+  int ret;
 
-/************************************************************************************
- * Name:  stm32_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide stm32_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *
- ************************************************************************************/
+  /* Check if we are already initialized */
 
-int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
-{
-  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+  if (!initialized)
+    {
+      /* Initialize a quadrature encoder interface. */
+
+      snvdbg("Initializing the quadrature encoder using TIM%d\n", TIMID);
+      ret = stm32_qeinitialize("/dev/qe0", TIMID);
+      if (ret < 0)
+        {
+          sndbg("stm32_qeinitialize failed: %d\n", ret);
+          return ret;
+        }
+
+      initialized = true;
+    }
+
   return OK;
 }
 
-/************************************************************************************
- * Name:  stm32_usbsuspend
- *
- * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
- *
- ************************************************************************************/
-
-void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
-{
-  ulldbg("resume: %d\n", resume);
-}
-
-#endif /* CONFIG_STM32_USB */
-
-
-
+#endif /* HAVE_QENCODER */
