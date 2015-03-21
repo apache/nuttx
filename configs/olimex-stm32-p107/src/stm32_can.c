@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/olimex-stm32-p107/src/up_can.c
+ * configs/olimex-stm32-p107/src/stm32_can.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

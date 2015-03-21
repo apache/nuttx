@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p107/src/up_encx24j600.c
+ * configs/olimex-stm32-p107/src/stm32_encx24j600.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +56,7 @@
 #ifdef CONFIG_ENCX24J600
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
