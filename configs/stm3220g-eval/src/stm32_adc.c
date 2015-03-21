@@ -1,10 +1,8 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_selectlcd.c
- * arch/arm/src/board/up_selectlcd.c
+ * configs/stm3220g-eval/src/stm32_adc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,74 +39,64 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <errno.h>
 #include <debug.h>
+
+#include <nuttx/analog/adc.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32.h"
+#include "stm32_pwm.h"
 #include "stm3220g-internal.h"
 
-#ifdef CONFIG_STM32_FSMC
+#ifdef CONFIG_ADC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-#if STM32_NGPIO_PORTS < 6
-#  error "Required GPIO ports not enabled"
+/* Configuration ************************************************************/
+/* Up to 3 ADC interfaces are supported */
+
+#if STM32_NADC < 3
+#  undef CONFIG_STM32_ADC3
 #endif
 
-/* SRAM pin definitions */
+#if STM32_NADC < 2
+#  undef CONFIG_STM32_ADC2
+#endif
 
-#define LCD_NADDRLINES   1
-#define LCD_NDATALINES   16
+#if STM32_NADC < 1
+#  undef CONFIG_STM32_ADC1
+#endif
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+#ifndef CONFIG_STM32_ADC3
+#  warning "Channel information only available for ADC3"
+#endif
+
+/* The number of ADC channels in the conversion list */
+
+#define ADC3_NCHANNELS 1
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-
-/*   Pin Usage (per schematic)
- *                         SRAM       LCD
- *   D[0..15]              [0..15]    [0..15]
- *   A[0..25]              [0..22]    [0] RS
- *   FSMC_NBL0  PE0   OUT  ---        ---
- *   FSMC_NBL1  PE1   OUT  ---        ---
- *   FSMC_NE2   PG9   OUT  ---        ---
- *   FSMC_NE3   PG10  OUT  ---        ~CS
- *   FSMC_NE4   PG12  OUT  ---        ---
- *   FSMC_NWE   PD5   OUT  ---        ~WR/SCL
- *   FSMC_NOE   PD4   OUT  ---        ~RD
- *   FSMC_NWAIT PD6   IN   ---        ---
- *   FSMC_INT2  PG6*  IN   ---        ---
- *   FSMC_INT3
- *   FSMC_INTR
- *   FSMC_CD
- *   FSMC_CLK
- *   FSMC_NCE2
- *   FSMC_NCE3
- *   FSMC_NCE4_1
- *   FSMC_NCE4_2
- *   FSMC_NIORD
- *   FSMC_NIOWR
- *   FSMC_NL
- *   FSMC_NREG
+/* The STM3220G-EVAL has a 10 Kohm potentiometer RV1 connected to PF9 of
+ * STM32F207IGH6 on the board: TIM14_CH1/FSMC_CD/ADC3_IN7
  */
 
-/* GPIO configurations unique to the LCD  */
+/* Identifying number of each ADC channel: Variable Resistor. */
 
-static const uint32_t g_lcdconfig[] =
-{
-  /* NOE, NWE, and NE3  */
+#ifdef CONFIG_STM32_ADC3
+static const uint8_t  g_chanlist[ADC3_NCHANNELS] = {7};
 
-  GPIO_FSMC_NOE, GPIO_FSMC_NWE, GPIO_FSMC_NE3
-};
-#define NLCD_CONFIG (sizeof(g_lcdconfig)/sizeof(uint32_t))
+/* Configurations of pins used byte each ADC channels */
+
+static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -119,51 +107,61 @@ static const uint32_t g_lcdconfig[] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_selectlcd
+ * Name: adc_devinit
  *
  * Description:
- *   Initialize to the LCD
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/adc.
  *
  ************************************************************************************/
 
-void stm32_selectlcd(void)
+int adc_devinit(void)
 {
-  /* Configure new GPIO pins */
+#ifdef CONFIG_STM32_ADC3
+  static bool initialized = false;
+  struct adc_dev_s *adc;
+  int ret;
+  int i;
 
-  stm32_extmemaddr(LCD_NADDRLINES);             /* Common address lines: A0 */
-  stm32_extmemdata(LCD_NDATALINES);             /* Common data lines: D0-D15 */
-  stm32_extmemgpios(g_lcdconfig, NLCD_CONFIG);  /* LCD-specific control lines */
+  /* Check if we have already initialized */
 
-  /* Enable AHB clocking to the FSMC */
+  if (!initialized)
+    {
+      /* Configure the pins as analog inputs for the selected channels */
 
-  stm32_enablefsmc();
+      for (i = 0; i < ADC3_NCHANNELS; i++)
+        {
+          stm32_configgpio(g_pinlist[i]);
+        }
 
-  /* Color LCD configuration (LCD configured as follow):
-   *
-   *   - Data/Address MUX  = Disable   "FSMC_BCR_MUXEN" just not enable it.
-   *   - Extended Mode     = Disable   "FSMC_BCR_EXTMOD"
-   *   - Memory Type       = SRAM      "FSMC_BCR_SRAM"
-   *   - Data Width        = 16bit     "FSMC_BCR_MWID16"
-   *   - Write Operation   = Enable    "FSMC_BCR_WREN"
-   *   - Asynchronous Wait = Disable
-   */
+      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-  /* Bank3 NOR/SRAM control register configuration */
+      adc = stm32_adcinitialize(3, g_chanlist, ADC3_NCHANNELS);
+      if (adc == NULL)
+        {
+          adbg("ERROR: Failed to get ADC interface\n");
+          return -ENODEV;
+        }
 
-  putreg32(FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR3);
+      /* Register the ADC driver at "/dev/adc0" */
 
-  /* Bank3 NOR/SRAM timing register configuration */
+      ret = adc_register("/dev/adc0", adc);
+      if (ret < 0)
+        {
+          adbg("adc_register failed: %d\n", ret);
+          return ret;
+        }
 
-  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) | FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTRUN(0) |
-           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) | FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
+      /* Now we are initialized */
 
-  putreg32(0xffffffff, STM32_FSMC_BWTR3);
+      initialized = true;
+    }
 
-  /* Enable the bank by setting the MBKEN bit */
-
-  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR3);
+  return OK;
+#else
+  return -ENOSYS;
+#endif
 }
 
-#endif /* CONFIG_STM32_FSMC */
-
-
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
+#endif /* CONFIG_ADC */

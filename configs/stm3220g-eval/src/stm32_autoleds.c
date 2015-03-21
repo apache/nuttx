@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3220g_eval/src/up_autoleds.c
+ * configs/stm3220g_eval/src/stm32_autoleds.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

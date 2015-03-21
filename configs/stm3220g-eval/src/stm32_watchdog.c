@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/stm3220g-eval/src/stm32_watchdog.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,60 +42,61 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/analog/adc.h>
+#include <nuttx/watchdog.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "up_arch.h"
+#include "stm32_wdg.h"
 
-#include "stm32_pwm.h"
-#include "stm3220g-internal.h"
-
-#ifdef CONFIG_ADC
+#ifdef CONFIG_WATCHDOG
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration *******************************************************************/
+/* Wathdog hardware should be enabled */
 
-/* Configuration ************************************************************/
-/* Up to 3 ADC interfaces are supported */
-
-#if STM32_NADC < 3
-#  undef CONFIG_STM32_ADC3
+#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
+#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
 #endif
 
-#if STM32_NADC < 2
-#  undef CONFIG_STM32_ADC2
+/* Select the path to the registered watchdog timer device */
+
+#ifndef CONFIG_STM32_WDG_DEVPATH
+#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
+#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
+#  else
+#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
+#  endif
 #endif
 
-#if STM32_NADC < 1
-#  undef CONFIG_STM32_ADC1
+/* Use the un-calibrated LSI frequency if we have nothing better */
+
+#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
+#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
 #endif
 
-#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
-#ifndef CONFIG_STM32_ADC3
-#  warning "Channel information only available for ADC3"
+/* Debug ***************************************************************************/
+/* Non-standard debug that may be enabled just for testing the watchdog timer */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_WATCHDOG
 #endif
 
-/* The number of ADC channels in the conversion list */
-
-#define ADC3_NCHANNELS 1
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-/* The STM3220G-EVAL has a 10 Kohm potentiometer RV1 connected to PF9 of
- * STM32F207IGH6 on the board: TIM14_CH1/FSMC_CD/ADC3_IN7
- */
-
-/* Identifying number of each ADC channel: Variable Resistor. */
-
-#ifdef CONFIG_STM32_ADC3
-static const uint8_t  g_chanlist[ADC3_NCHANNELS] = {7};
-
-/* Configurations of pins used byte each ADC channels */
-
-static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
+#ifdef CONFIG_DEBUG_WATCHDOG
+#  define wdgdbg                 dbg
+#  define wdglldbg               lldbg
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define wdgvdbg              vdbg
+#    define wdgllvdbg            llvdbg
+#  else
+#    define wdgvdbg(x...)
+#    define wdgllvdbg(x...)
+#  endif
+#else
+#  define wdgdbg(x...)
+#  define wdglldbg(x...)
+#  define wdgvdbg(x...)
+#  define wdgllvdbg(x...)
 #endif
 
 /************************************************************************************
@@ -107,62 +107,29 @@ static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: adc_devinit
+/****************************************************************************
+ * Name: up_wdginitialize()
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   Perform architecuture-specific initialization of the Watchdog hardware.
+ *   This interface must be provided by all configurations using
+ *   apps/examples/watchdog
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int adc_devinit(void)
+int up_wdginitialize(void)
 {
-#ifdef CONFIG_STM32_ADC3
-  static bool initialized = false;
-  struct adc_dev_s *adc;
-  int ret;
-  int i;
+  /* Initialize tha register the watchdog timer device */
 
-  /* Check if we have already initialized */
-
-  if (!initialized)
-    {
-      /* Configure the pins as analog inputs for the selected channels */
-
-      for (i = 0; i < ADC3_NCHANNELS; i++)
-        {
-          stm32_configgpio(g_pinlist[i]);
-        }
-
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
-
-      adc = stm32_adcinitialize(3, g_chanlist, ADC3_NCHANNELS);
-      if (adc == NULL)
-        {
-          adbg("ERROR: Failed to get ADC interface\n");
-          return -ENODEV;
-        }
-
-      /* Register the ADC driver at "/dev/adc0" */
-
-      ret = adc_register("/dev/adc0", adc);
-      if (ret < 0)
-        {
-          adbg("adc_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
-    }
-
+#if defined(CONFIG_STM32_WWDG)
+  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
+  return OK;
+#elif defined(CONFIG_STM32_IWDG)
+  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
   return OK;
 #else
-  return -ENOSYS;
+  return -ENODEV;
 #endif
 }
 
-#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_WATCHDOG */

@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_cxxinitialize.c
- * arch/arm/src/board/up_cxxinitialize.c
+ * configs/stm3220g-eval/src/stm32_deselectsram.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,63 +41,23 @@
 
 #include <debug.h>
 
-#include <nuttx/arch.h>
+#include "up_arch.h"
+#include "stm32_fsmc.h"
+#include "stm3220g-internal.h"
 
-#include <arch/stm32/chip.h>
-#include "chip.h"
-
-#if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
-
-/************************************************************************************
- * Definitions
- ************************************************************************************/
-/* Debug ****************************************************************************/
-/* Non-standard debug that may be enabled just for testing the static constructors */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_CXX
-#endif
-
-#ifdef CONFIG_DEBUG_CXX
-#  define cxxdbg              dbg
-#  define cxxlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define cxxvdbg           vdbg
-#    define cxxllvdbg         llvdbg
-#  else
-#    define cxxvdbg(x...)
-#    define cxxllvdbg(x...)
-#  endif
-#else
-#  define cxxdbg(x...)
-#  define cxxlldbg(x...)
-#  define cxxvdbg(x...)
-#  define cxxllvdbg(x...)
-#endif
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
- * Private Types
+ * Pre-processor Definitions
  ************************************************************************************/
-/* This type defines one entry in initialization array */
-
-typedef void (*initializer_t)(void);
 
 /************************************************************************************
- * External references
+ * Public Data
  ************************************************************************************/
-/* _sinit and _einit are symbols exported by the linker script that mark the
- * beginning and the end of the C++ initialization section.
- */
 
-extern initializer_t _sinit;
-extern initializer_t _einit;
-
-/* _stext and _etext are symbols exported by the linker script that mark the
- * beginning and the end of text.
- */
-
-extern uint32_t _stext;
-extern uint32_t _etext;
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -108,48 +67,30 @@ extern uint32_t _etext;
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_cxxinitialize
+/************************************************************************************
+ * Name: stm32_deselectsram
  *
  * Description:
- *   If C++ and C++ static constructors are supported, then this function
- *   must be provided by board-specific logic in order to perform
- *   initialization of the static C++ class instances.
+ *   Disable SRAM
  *
- *   This function should then be called in the application-specific
- *   user_start logic in order to perform the C++ initialization.  NOTE
- *   that no component of the core NuttX RTOS logic is involved; This
- *   function defintion only provides the 'contract' between application
- *   specific C++ code and platform-specific toolchain support
- *
- ***************************************************************************/
+ ************************************************************************************/
 
-void up_cxxinitialize(void)
+void stm32_deselectsram(void)
 {
-  initializer_t *initp;
+  /* Restore registers to their power up settings */
 
-  cxxdbg("_sinit: %p _einit: %p _stext: %p _etext: %p\n",
-         &_sinit, &_einit, &_stext, &_etext);
+  putreg32(FSMC_BCR_RSTVALUE, STM32_FSMC_BCR2);
 
-  /* Visit each entry in the initialzation table */
+  /* Bank1 NOR/SRAM timing register configuration */
 
-  for (initp = &_sinit; initp != &_einit; initp++)
-    {
-      initializer_t initializer = *initp;
-      cxxdbg("initp: %p initializer: %p\n", initp, initializer);
+  putreg32(FSMC_BTR_RSTVALUE, STM32_FSMC_BTR2);
 
-      /* Make sure that the address is non-NULL and lies in the text region
-       * defined by the linker script.  Some toolchains may put NULL values
-       * or counts in the initialization table
-       */
+  /* Disable AHB clocking to the FSMC */
 
-      if ((void*)initializer > (void*)&_stext && (void*)initializer < (void*)&_etext)
-        {
-          cxxdbg("Calling %p\n", initializer);
-          initializer();
-        }
-    }
+  stm32_disablefsmc();
 }
 
-#endif /* CONFIG_HAVE_CXX && CONFIG_HAVE_CXXINITIALIZE */
+#endif /* CONFIG_STM32_FSMC */
+
+
 

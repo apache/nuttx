@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/stm3220g_eval/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/stm3220g_eval/src/stm32_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -63,7 +62,7 @@
 #include "stm3220g-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

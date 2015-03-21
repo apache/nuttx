@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_touchscreen.c
- * arch/arm/src/board/up_touchscreen.c
+ * configs/stm3220g-eval/src/stm32_stmpe811.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +54,7 @@
 #include "stm3220g-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 

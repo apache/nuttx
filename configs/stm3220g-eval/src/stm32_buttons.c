@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3220g-eval/src/board_buttons.c
+ * configs/stm3220g-eval/src/stm32_buttons.c
  *
  *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

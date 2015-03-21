@@ -1,9 +1,9 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_extmem.c
- * arch/arm/src/board/up_extmem.c
+ * configs/stm3220g-eval/src/stm32_deselectlcd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,56 +40,21 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-
-#include "chip.h"
 #include "up_arch.h"
-
 #include "stm32_fsmc.h"
-#include "stm32_gpio.h"
-#include "stm32.h"
 #include "stm3220g-internal.h"
+
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifndef CONFIG_STM32_FSMC
-#  warning "FSMC is not enabled"
-#endif
-
-#if STM32_NGPIO_PORTS < 6
-#  error "Required GPIO ports not enabled"
-#endif
-
-#define STM32_FSMC_NADDRCONFIGS 26
-#define STM32_FSMC_NDATACONFIGS 16
-
 /************************************************************************************
  * Public Data
  ************************************************************************************/
-
-/* GPIO configurations common to most external memories */
-
-static const uint32_t g_addressconfig[STM32_FSMC_NADDRCONFIGS] =
-{
-  GPIO_FSMC_A0,  GPIO_FSMC_A1 , GPIO_FSMC_A2,  GPIO_FSMC_A3,  GPIO_FSMC_A4 , GPIO_FSMC_A5,
-  GPIO_FSMC_A6,  GPIO_FSMC_A7,  GPIO_FSMC_A8,  GPIO_FSMC_A9,  GPIO_FSMC_A10, GPIO_FSMC_A11,
-  GPIO_FSMC_A12, GPIO_FSMC_A13, GPIO_FSMC_A14, GPIO_FSMC_A15, GPIO_FSMC_A16, GPIO_FSMC_A17,
-  GPIO_FSMC_A18, GPIO_FSMC_A19, GPIO_FSMC_A20, GPIO_FSMC_A21, GPIO_FSMC_A22, GPIO_FSMC_A23,
-  GPIO_FSMC_A24, GPIO_FSMC_A25
-};
-
-static const uint32_t g_dataconfig[STM32_FSMC_NDATACONFIGS] =
-{
-  GPIO_FSMC_D0,  GPIO_FSMC_D1 , GPIO_FSMC_D2,  GPIO_FSMC_D3,  GPIO_FSMC_D4 , GPIO_FSMC_D5,
-  GPIO_FSMC_D6,  GPIO_FSMC_D7,  GPIO_FSMC_D8,  GPIO_FSMC_D9,  GPIO_FSMC_D10, GPIO_FSMC_D11,
-  GPIO_FSMC_D12, GPIO_FSMC_D13, GPIO_FSMC_D14, GPIO_FSMC_D15
-};
 
 /************************************************************************************
  * Private Data
@@ -104,85 +69,29 @@ static const uint32_t g_dataconfig[STM32_FSMC_NDATACONFIGS] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_extmemgpios
+ * Name: stm32_deselectlcd
  *
  * Description:
- *   Initialize GPIOs for external memory usage
+ *   Disable the LCD
  *
  ************************************************************************************/
 
-void stm32_extmemgpios(const uint32_t *gpios, int ngpios)
+void stm32_deselectlcd(void)
 {
-  int i;
+  /* Restore registers to their power up settings */
 
-  /* Configure GPIOs */
+  putreg32(0xffffffff, STM32_FSMC_BCR4);
 
-  for (i = 0; i < ngpios; i++)
-    {
-      stm32_configgpio(gpios[i]);
-    }
-}
+  /* Bank1 NOR/SRAM timing register configuration */
 
-/************************************************************************************
- * Name: stm32_extmemaddr
- *
- * Description:
- *   Initialize adress line GPIOs for external memory access
- *
- ************************************************************************************/
-
-void stm32_extmemaddr(int naddrs)
-{
-  stm32_extmemgpios(g_addressconfig, naddrs);
-}
-
-/************************************************************************************
- * Name: stm32_extmemdata
- *
- * Description:
- *   Initialize data line GPIOs for external memory access
- *
- ************************************************************************************/
-
-void stm32_extmemdata(int ndata)
-{
-  stm32_extmemgpios(g_dataconfig, ndata);
-}
-
-/************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHB3ENR);
-  regval |= RCC_AHB3ENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
-}
-
-/************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_disablefsmc(void)
-{
-  uint32_t regval;
+  putreg32(0x0fffffff, STM32_FSMC_BTR4);
 
   /* Disable AHB clocking to the FSMC */
 
-  regval  = getreg32(STM32_RCC_AHB3ENR);
-  regval &= ~RCC_AHB3ENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
+  stm32_disablefsmc();
 }
+
+#endif /* CONFIG_STM32_FSMC */
+
+
+

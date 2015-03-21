@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_can.c
- * arch/arm/src/board/up_can.c
+ * configs/stm3220g-eval/src/stm32_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,51 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/can.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
-
-#include "stm32.h"
-#include "stm32_can.h"
 #include "stm3220g-internal.h"
-
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
-
-#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
-#  undef CONFIG_STM32_CAN2
-#endif
-
-#ifdef CONFIG_STM32_CAN1
-#  define CAN_PORT 1
-#else
-#  define CAN_PORT 2
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing CAN */
-
-#ifdef CONFIG_DEBUG_CAN
-#  define candbg    dbg
-#  define canvdbg   vdbg
-#  define canlldbg  lldbg
-#  define canllvdbg llvdbg
-#else
-#  define candbg(x...)
-#  define canvdbg(x...)
-#  define canlldbg(x...)
-#  define canllvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Functions
@@ -95,48 +60,49 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: can_devinit
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/can.
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-int can_devinit(void)
+void stm32_boardinitialize(void)
 {
-  static bool initialized = false;
-  struct can_dev_s *can;
-  int ret;
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spiinitialize() has been brought into the link.
+   */
 
-  /* Check if we have already initialized */
-
-  if (!initialized)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+  if (stm32_spiinitialize)
     {
-      /* Call stm32_caninitialize() to get an instance of the CAN interface */
-
-      can = stm32_caninitialize(CAN_PORT);
-      if (can == NULL)
-        {
-          candbg("ERROR:  Failed to get CAN interface\n");
-          return -ENODEV;
-        }
-
-      /* Register the CAN driver at "/dev/can0" */
-
-      ret = can_register("/dev/can0", can);
-      if (ret < 0)
-        {
-          candbg("ERROR: can_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+      stm32_spiinitialize();
     }
+#endif
 
-  return OK;
+  /* If the FSMC is enabled, then enable SRAM access */
+
+#ifdef CONFIG_STM32_FSMC
+  stm32_selectsram();
+#endif
+
+  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
+   * the weak function stm32_usbinitialize() has been brought into the build.
+   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+   */
+
+#ifdef CONFIG_STM32_OTGFS
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
 }
-
-#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */

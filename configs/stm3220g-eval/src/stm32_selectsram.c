@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_selectsram.c
- * arch/arm/src/board/up_selectsram.c
+ * configs/stm3220g-eval/src/stm32_selectsram.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

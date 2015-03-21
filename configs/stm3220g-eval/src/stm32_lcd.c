@@ -1,6 +1,5 @@
 /**************************************************************************************
- * configs/stm3220g-eval/src/up_lcd.c
- * arch/arm/src/board/up_lcd.c
+ * configs/stm3220g-eval/src/stm32_lcd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
