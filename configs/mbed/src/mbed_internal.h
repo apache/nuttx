@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/mbed/src/mbed_internal.h
- * arch/arm/src/board/mbed_internal.n
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* MBED GPIO Pin Definitions ********************************************************/

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/mbed/src/up_boot.c
+ * configs/mbed/src/lpc17_boot.c
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

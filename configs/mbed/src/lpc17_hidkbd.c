@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mbed/src/up_hidkbd.c
+ * configs/mbed/src/lpc17_hidkbd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
     defined(CONFIG_EXAMPLES_HIDKBD)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
