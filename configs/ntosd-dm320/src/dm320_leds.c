@@ -1,5 +1,5 @@
 /************************************************************************
- * confgs/ntosd-dm320/src/up_leds.c
+ * confgs/ntosd-dm320/src/dm320_leds.c
  *
  *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 #include "up_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * board/up_network.c
+ * configs/ntosd-dm320/src/dm320_network.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
 extern void dm9x_initialize(void);
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
