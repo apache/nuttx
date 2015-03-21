@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/up_usbterm.c
- * arch/arm/src/board/up_usbterm.c
+ * configs/pic32mx7mmb/src/pic32_usbterm.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

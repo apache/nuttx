@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/pic32mx7mmb/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/pic32mx7mmb/src/pic32_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "pic32mx7mmb_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Assume that we have MMC/SD, USB host (and USB device) */

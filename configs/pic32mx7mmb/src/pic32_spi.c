@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/pic32mx7mmb/src/pic32_spi.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +55,7 @@
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* SPI1 and SD Card
  *

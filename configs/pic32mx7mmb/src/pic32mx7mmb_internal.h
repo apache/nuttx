@@ -44,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* The Mikroelektronika PIC32MX7 MMB has 3 user LEDs labeled LED0-2 in the

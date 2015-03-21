@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/up_usbdev.c
- * arch/arm/src/board/up_usbdev.c
+ * configs/pic32mx7mmb/src/pic32_usbdev.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #if defined(CONFIG_PIC32MX_USBDEV)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /*
  * PIN  NAME                            SIGNAL         NOTES
