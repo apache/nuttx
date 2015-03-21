@@ -35,18 +35,18 @@
 
 -include $(TOPDIR)/Make.defs
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
 
-ASRCS		=
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= up_leds.c
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+CSRCS = sh1_leds.c
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-CFLAGS		+= -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS += -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 
 all: libboard$(LIBEXT)
 
