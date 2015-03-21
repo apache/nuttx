@@ -1,8 +1,10 @@
 /****************************************************************************
- * configs/ea3152/src/up_leds.c
+ * configs/ea3152/src/lpc31_usbmsc.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Configure and register the SAM3U MMC/SD SDIO block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,69 +41,87 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
+#include <stdlib.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-#include "lpc31_internal.h"
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/mkfatfs.h>
+#include <nuttx/fs/ramdisk.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
+/* Configuration ************************************************************/
 
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef CONFIG_SYSTEM_USBMSC_DEVPATH1
+#  define CONFIG_SYSTEM_USBMSC_DEVPATH1  "/dev/ram"
+#endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static const char g_source[] = CONFIG_SYSTEM_USBMSC_DEVPATH1;
+static struct fat_format_s g_fmt = FAT_FORMAT_INITIALIZER;
+
+#define USBMSC_NSECTORS        64
+#define USBMSC_SECTORSIZE      512
+#define BUFFER_SIZE            (USBMSC_NSECTORS*USBMSC_SECTORSIZE)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: usbmsc_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+int usbmsc_archinitialize(void)
 {
+  uint8_t *pbuffer;
+  int ret;
+
+  pbuffer = (uint8_t *)kmm_malloc(BUFFER_SIZE);
+  if (!pbuffer)
+    {
+      lowsyslog("usbmsc_archinitialize: Failed to allocate ramdisk of size %d\n",
+                BUFFER_SIZE);
+      return -ENOMEM;
+    }
+
+  /* Register a RAMDISK device to manage this RAM image */
+
+  ret = ramdisk_register(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
+                         pbuffer,
+                         USBMSC_NSECTORS,
+                         USBMSC_SECTORSIZE,
+                         RDFLAG_WRENABLED | RDFLAG_FUNLINK);
+  if (ret < 0)
+    {
+      printf("create_ramdisk: Failed to register ramdisk at %s: %d\n",
+             g_source, -ret);
+      kmm_free(pbuffer);
+      return ret;
+    }
+
+  /* Create a FAT filesystem on the ramdisk */
+
+  ret = mkfatfs(g_source, &g_fmt);
+  if (ret < 0)
+    {
+      printf("create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
+             g_source);
+      /* kmm_free(pbuffer); -- RAM disk is registered */
+      return ret;
+    }
+
+  return 0;
 }
-
-/****************************************************************************
- * Name: board_led_on
- ****************************************************************************/
-
-void board_led_on(int led)
-{
-}
-
-/****************************************************************************
- * Name: board_led_off
- ****************************************************************************/
-
-void board_led_off(int led)
-{
-}
-
-#endif /* CONFIG_ARCH_LEDS */

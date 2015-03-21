@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/ea3152/src/up_fillpage.c
- * arch/arm/src/board/up_fillpage.c
+ * configs/ea3152/src/lpc31_fillpage.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -70,7 +69,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
@@ -391,7 +390,7 @@ static inline void lpc31_initsrc(void)
  *
  * Assumptions:
  *   - This function is called from the normal tasking context (but
- *     interrupts siabled).  The implementation must take whatever actions
+ *     interrupts disabled).  The implementation must take whatever actions
  *     are necessary to assure that the operation is safe within this context.
  *   - Upon return, the caller will sleep waiting for the page fill callback
  *     to occur.  The callback function will perform the wakeup.

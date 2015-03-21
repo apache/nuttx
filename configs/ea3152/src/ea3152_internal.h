@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/ea3152/src/ea3152_internal.h
- * arch/arm/src/board/ea3152_internal.n
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "lpc31_ioconfig.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* EA3152L GPIOs ********************************************************************/
@@ -87,7 +86,7 @@
  ************************************************************************************/
 
 #ifdef CONFIG_LPC31_EXTDRAM
-extern void lpc31_meminitialize(void);
+void lpc31_meminitialize(void);
 #endif
 
 /************************************************************************************
@@ -98,7 +97,7 @@ extern void lpc31_meminitialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function lpc31_spiinitialize(void);
+void weak_function lpc31_spiinitialize(void);
 
 /************************************************************************************
  * Name: lpc31_usbinitialize
@@ -108,7 +107,7 @@ extern void weak_function lpc31_spiinitialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function lpc31_usbinitialize(void);
+void weak_function lpc31_usbinitialize(void);
 
 /************************************************************************************
  * Name: lpc31_pginitialize
@@ -119,9 +118,8 @@ extern void weak_function lpc31_usbinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PAGING
-extern void weak_function lpc31_pginitialize(void);
+void weak_function lpc31_pginitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_EA3152_SRC_EA3152_INTERNAL_H */
-

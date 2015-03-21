@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/ea3152/src/up_clkinit.c
- * arch/arm/src/board/up_clkinit.c
+ * configs/ea3152/src/lpc31_clkinit.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "lpc31_cgudrvr.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Sub-domain Clock Bitsets *************************************************/
@@ -428,7 +427,6 @@ const struct lpc31_clkinit_s g_boardclks =
   }
 #endif
 };
-
 
 /****************************************************************************
  * Private Functions

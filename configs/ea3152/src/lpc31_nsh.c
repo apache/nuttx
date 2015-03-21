@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/ea3152/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/ea3152/src/lpc31_nsh.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
