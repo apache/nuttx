@@ -39,7 +39,7 @@ ASRCS =
 CSRCS = at90usb_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_leds.c
+CSRCS += at90usb_leds.c
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
