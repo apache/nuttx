@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/c4371evm/src/up_leds.c
+ * configs/c5471evm/src/c5471_leds.c
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define CS2  *(volatile uint32_t*)0xffff2e08
@@ -107,4 +107,5 @@ void board_led_off(int led)
       LEDS        = g_ledstate;
     }
 }
+
 #endif /* CONFIG_ARCH_LEDS */

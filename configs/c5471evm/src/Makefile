@@ -39,7 +39,7 @@ CFLAGS += -I$(TOPDIR)/sched
 
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
-CSRCS = up_leds.c
+CSRCS = c5471_leds.c
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
