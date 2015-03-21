@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mikroe_stm32f4/src/up_idle.c
+ * configs/mikroe_stm32f4/src/stm32_idle.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

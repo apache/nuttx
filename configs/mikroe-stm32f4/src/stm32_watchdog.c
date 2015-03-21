@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/mikroe_stm32f4/src/up_watchdog.c
- * arch/arm/src/board/up_watchdog.c
+ * configs/mikroe_stm32f4/src/stm32_watchdog.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #ifdef CONFIG_WATCHDOG
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration *******************************************************************/
 /* Wathdog hardware should be enabled */

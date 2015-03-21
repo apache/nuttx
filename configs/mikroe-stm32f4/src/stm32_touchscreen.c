@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/mikroe-stm32f4/src/up_touchscreen.c
+ * configs/mikroe-stm32f4/src/stm32_touchscreen.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,7 +66,7 @@
 #ifdef CONFIG_INPUT
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 /* Reference counting is partially implemented, but not needed in the current design.

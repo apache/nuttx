@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/mikroe_stm32f4/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/mikroe_stm32f4/src/stm32_nsh.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -77,7 +76,7 @@
 #include "mikroe-stm32f4-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

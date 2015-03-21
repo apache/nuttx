@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/mikroe_stm32f4/src/up_pm.c
- * arch/arm/src/board/up_pm.c
+ * configs/mikroe_stm32f4/src/stm32_pm.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

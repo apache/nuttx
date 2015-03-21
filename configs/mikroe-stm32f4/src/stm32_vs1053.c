@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mikroe-stm32f4/src/up_vs1053.c
+ * configs/mikroe-stm32f4/src/stm32_vs1053.c
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -56,7 +56,7 @@
 #ifdef CONFIG_VS1053
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* VS1053 is on SPI3 */
