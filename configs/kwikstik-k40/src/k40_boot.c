@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/kwikstik-k40/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/kwikstik-k40/src/k40_boot.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,20 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "kinetis_internal.h"
 #include "kwikstik-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -65,51 +60,43 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: kinetis_usbinitialize
+ * Name: kinetis_boardinitialize
  *
  * Description:
- *   Called to setup USB-related GPIO pins for the KwikStik-K40 board.
+ *   All Kinetis architectures must provide the following entry point.  This entry
+ *   point is called early in the initialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void kinetis_usbinitialize(void)
+void kinetis_boardinitialize(void)
 {
-# warning "Missing logic"
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * kinetis_spiinitialize() has been brought into the link.
+   */
+
+#if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
+  if (kinetis_spiinitialize)
+    {
+      kinetis_spiinitialize();
+    }
+#endif
+
+   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+    * disabled, and 3) the weak function kinetis_usbinitialize() has been brought
+    * into the build.
+    */
+
+#if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USB)
+  if (kinetis_usbinitialize)
+    {
+      kinetis_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
 }
-
-/************************************************************************************
- * Name:  kinetis_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide kinetis_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
- *
- ************************************************************************************/
-
-int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
-{
-  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
-# warning "Missing logic"
-  return OK;
-}
-
-/************************************************************************************
- * Name:  kinetis_usbsuspend
- *
- * Description:
- *   Board logic must provide the kinetis_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
- *
- ************************************************************************************/
-
-void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume)
-{
-  ulldbg("resume: %d\n", resume);
-#warning "Missing logic"
-}
-

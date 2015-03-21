@@ -1,6 +1,5 @@
 /**************************************************************************************
- * configs/kwikstik-k40/src/up_lcd.c
- * arch/arm/src/board/up_lcd.c
+ * configs/kwikstik-k40/src/k40_lcd.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -71,7 +70,7 @@
  **************************************************************************************/
 
 /**************************************************************************************
- * Private Function Protototypes
+ * Private Function Prototypes
  **************************************************************************************/
 
 /**************************************************************************************
@@ -131,4 +130,3 @@ void up_lcduninitialize(void)
 {
 #warning "Missing logic"
 }
-

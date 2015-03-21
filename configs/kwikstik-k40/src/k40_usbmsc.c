@@ -1,8 +1,10 @@
 /****************************************************************************
- * configs/kwikstik-k40/src/up_leds.c
+ * configs/kwikstik-k40/src/k40_usbmsc.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Configure and register the Kinetis MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,68 +41,57 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
-#include <nuttx/board.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+
+#include "kinetis_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
+/* Configuration ************************************************************/
 
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* SLOT number(s) could depend on the board configuration */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_ARCH_BOARD_KWIKSTIK_K40
+#  undef KINETIS_MMCSDSLOTNO
+#  define KINETIS_MMCSDSLOTNO 0
+#else
+   /* Add configuration for new Kinetis boards here */
+#  error "Unrecognized Kinetis board"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: usbmsc_archinitialize
  *
  * Description:
- *   Initialize LED GPIOs so that LEDs can be controlled.
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+int usbmsc_archinitialize(void)
 {
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
+  /* If system/usbmsc is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   */
+
+#ifndef CONFIG_NSH_BUILTIN_APPS
+#  warning "Missing logic"
+#endif /* CONFIG_NSH_BUILTIN_APPS */
+
+   return OK;
 }
-
-/****************************************************************************
- * Name: board_led_on
- ****************************************************************************/
-
-void board_led_on(int led)
-{
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
-}
-
-/****************************************************************************
- * Name: board_led_off
- ****************************************************************************/
-
-void board_led_off(int led)
-{
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
-}
-
-#endif /* CONFIG_ARCH_LEDS */
