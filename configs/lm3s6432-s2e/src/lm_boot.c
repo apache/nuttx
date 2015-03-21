@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/lm3s6432-s2e/src/up_ssi.c
- * arch/arm/src/board/up_ssi.c
+ * configs/lm3s6432-s2e/src/lm_boot.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,48 +39,23 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip.h"
+#include "up_internal.h"
 #include "tiva_gpio.h"
 #include "lm3s6432s2e_internal.h"
 
-#if defined(CONFIG_TIVA_SSI0)
-
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
-
-#undef SSI_DEBUG   /* Define to enable debug */
-#undef SSI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSI_DEBUG
-#  define ssidbg  lldbg
-#  ifdef SSI_VERBOSE
-#    define ssivdbg lldbg
-#  else
-#    define ssivdbg(x...)
-#  endif
-#else
-#  undef SSI_VERBOSE
-#  define ssidbg(x...)
-#  define ssivdbg(x...)
-#endif
-
-/* Dump GPIO registers */
-
-#ifdef SSI_VERBOSE
-#  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
-#else
-#  define ssi_dumpgpio(m)
+#if defined(CONFIG_TIVA_UART1) && defined(CONFIG_TIVA_SSI0)
+#  error Only one of UART1 and SSI0 can be enabled on this board.
 #endif
 
 /************************************************************************************
@@ -93,60 +67,38 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_ssiinitialize
+ * Name: tiva_boardinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the MDL-S2E.
+ *   All Stellaris architectures must provide the following entry point.  This entry
+ *   point is called early in the intitialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void weak_function lm_ssiinitialize(void)
+void tiva_boardinitialize(void)
 {
-  /* Configure the SPI CS GPIO */
+  /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
+   * lm_ssiinitialize() has been brought into the link.
+   */
 
-  ssi_dumpgpio("lm_ssiinitialize() Entry)");
-  tiva_configgpio(SSICS_GPIO);
-  ssi_dumpgpio("lm_ssiinitialize() Exit");
-}
-
-/****************************************************************************
- * The external functions, tiva_spiselect and tiva_spistatus must be provided
- * by board-specific logic.  The are implementations of the select and status
- * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All othermethods (including up_spiinitialize()) are provided by common
- * logic.  To use this common SPI logic on your board:
- *
- *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
- *      board-specific logic.  This function will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   2. Add a call to up_spiinitialize() in your low level initialization
- *      logic
- *   3. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
- *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
- *      the SPI MMC/SD driver).
- *
- ****************************************************************************/
-
-void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-  ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssi_dumpgpio("tiva_spiselect() Entry");
-
-  if (devid == SPIDEV_MMCSD)
+#if defined(CONFIG_TIVA_SSI0)
+  if (lm_ssiinitialize)
     {
-      /* Assert the CS pin to the card */
-
-      tiva_gpiowrite(SDCCS_GPIO, !selected);
+      lm_ssiinitialize();
     }
+#endif
 
-  ssi_dumpgpio("tiva_spiselect() Exit");
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
+
+  /* Configure serial transciever */
+
+  tiva_configgpio(XCVR_INV_GPIO);
+  tiva_configgpio(XCVR_ENA_GPIO);
+  tiva_configgpio(XCVR_ON_GPIO);
+  tiva_configgpio(XCVR_OFF_GPIO);
 }
-
-uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  ssidbg("Returning SPI_STATUS_PRESENT\n");
-  return SPI_STATUS_PRESENT;
-}
-
-#endif /* CONFIG_TIVA_SSI0 */

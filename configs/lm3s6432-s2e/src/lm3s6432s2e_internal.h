@@ -47,7 +47,7 @@
 #include "tiva_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S6432 supports 1 SSI
