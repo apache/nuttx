@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lincoln60/src/board_buttons.c
+ * configs/lincoln60/src/lpc17_buttons.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

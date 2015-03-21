@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/lincoln60/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/lincoln60/src/lpc17_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

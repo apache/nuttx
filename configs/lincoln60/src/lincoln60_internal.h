@@ -1,6 +1,5 @@
 /****************************************************************************
  * configs/lincoln60/src/lincoln60_internal.h
- * arch/arm/src/board/lincoln60_internal.n
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

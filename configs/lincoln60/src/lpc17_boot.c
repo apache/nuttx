@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/lincoln60/src/up_boot.c
+ * configs/lincoln60/src/lpc17_boot.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
