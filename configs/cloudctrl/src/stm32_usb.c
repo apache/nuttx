@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/cloudctrl/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/cloudctrl/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

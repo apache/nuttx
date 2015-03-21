@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/cloudctrl/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/cloudctrl/src/stm32_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +55,7 @@
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI3)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/cloudctrl/src/up_phyinit.c
- * arch/arm/src/board/up_phyinit.c
+ * configs/cloudctrl/src/stm32_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -41,13 +40,16 @@
 
 #include <nuttx/config.h>
 
-#include "stm32_gpio.h"
-#include "stm32_eth.h"
+#include <debug.h>
 
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
 #include "cloudctrl-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -58,14 +60,44 @@
  * Public Functions
  ************************************************************************************/
 
-#if defined(CONFIG_ETH0_PHY_DM9161) && defined(CONFIG_STM32_PHYINIT)
-int stm32_phy_boardinitialize(int intf)
-{
-  /* Configure the DM9161 PHY reset pin and take it out of reset */
+/************************************************************************************
+ * Name: stm32_boardinitialize
+ *
+ * Description:
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the initialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
 
-  stm32_configgpio(GPIO_DM9161_RET);
-  stm32_gpiowrite(GPIO_DM9161_RET, true);
-  return 0;
-}
+void stm32_boardinitialize(void)
+{
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spiinitialize() has been brought into the link.
+   */
+
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI3)
+  if (stm32_spiinitialize)
+    {
+      stm32_spiinitialize();
+    }
 #endif
 
+  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
+   * into the build.
+   */
+
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
+#endif
+}

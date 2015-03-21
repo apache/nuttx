@@ -1,10 +1,11 @@
-/************************************************************************************
- * configs/cloudctrl/src/up_chipid.c
- * arch/arm/src/board/up_chipid.c
+/****************************************************************************
+ * configs/cloudctrl/src/stm32_usbmsc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
+ *
+ * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,61 +34,51 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
-#include <arch/board/board.h>
+#include "stm32.h"
 
-#include "up_arch.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Configuration ************************************************************/
 
-/************************************************************************************
- * Definitions
- ************************************************************************************/
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+#endif
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-const char *stm32_getchipid(void)
+/****************************************************************************
+ * Name: usbmsc_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ ****************************************************************************/
+
+int usbmsc_archinitialize(void)
 {
-  static char cpuid[12];
-  int i;
+  /* If system/usbmsc is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   */
 
-  for (i = 0; i < 12; i++)
-    {
-      cpuid[i] = getreg8(0x1ffff7e8+i);
-    }
-
-  return cpuid;
-}
-
-const char *stm32_getchipid_string(void)
-{
-  static char cpuid[27];
-  int c;
-  int i;
-
-  for (i = 0, c = 0; i < 12; i++)
-    {
-      sprintf(&cpuid[c], "%02X", getreg8(0x1ffff7e8+11-i));
-      c += 2;
-      if (i % 4 == 3)
-        {
-          cpuid[c++] = '-';
-        }
-    }
-
-  cpuid[26] = '\0';
-  return cpuid;
+#ifndef CONFIG_NSH_BUILTIN_APPS
+  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
+#else
+  return OK;
+#endif
 }

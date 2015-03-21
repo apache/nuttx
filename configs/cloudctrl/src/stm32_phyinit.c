@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/cloudctrl/src/up_watchdog.c
- * arch/arm/src/board/up_watchdog.c
+ * configs/cloudctrl/src/stm32_phyinit.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,65 +40,14 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
+#include "stm32_gpio.h"
+#include "stm32_eth.h"
 
-#include <nuttx/watchdog.h>
-#include <arch/board/board.h>
-
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#include "cloudctrl-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
-
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
-#endif
-
-/* Select the path to the registered watchdog timer device */
-
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
-
-/* Use the un-calibrated LSI frequency if we have nothing better */
-
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Functions
@@ -109,29 +57,14 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
- *
- * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
- *
- ****************************************************************************/
-
-int up_wdginitialize(void)
+#if defined(CONFIG_ETH0_PHY_DM9161) && defined(CONFIG_STM32_PHYINIT)
+int stm32_phy_boardinitialize(int intf)
 {
-  /* Initialize tha register the watchdog timer device */
+  /* Configure the DM9161 PHY reset pin and take it out of reset */
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
-#else
-  return -ENODEV;
-#endif
+  stm32_configgpio(GPIO_DM9161_RET);
+  stm32_gpiowrite(GPIO_DM9161_RET, true);
+  return 0;
 }
+#endif
 
-#endif /* CONFIG_WATCHDOG */
