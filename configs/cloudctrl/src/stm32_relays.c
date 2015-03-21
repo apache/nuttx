@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/cloudctrl/src/up_relays.c
+ * configs/cloudctrl/src/stm32_relays.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,11 +1,9 @@
 /****************************************************************************
- * configs/cloudctrl/src/up_usbmsc.c
+ * config/cloudctrl/src/stm32_w25.c
  *
- *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
- *
- * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,19 +40,43 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <sys/mount.h>
 
-#include "stm32.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
+#include <debug.h>
+
+#ifdef CONFIG_STM32_SPI1
+#  include <nuttx/spi/spi.h>
+#  include <nuttx/mtd/mtd.h>
+#  include <nuttx/fs/nxffs.h>
+#endif
+
+#include "cloudctrl-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+/* Configuration ************************************************************/
+/* Can't support the W25 device if it SPI1 or W25 support is not enabled */
+
+#define HAVE_W25  1
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_W25)
+#  undef HAVE_W25
+#endif
+
+/* Can't support W25 features if mountpoints are disabled */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef HAVE_W25
+#endif
+
+/* Can't support both FAT and NXFFS */
+
+#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
+#  warning "Can't support both FAT and NXFFS -- using FAT"
 #endif
 
 /****************************************************************************
@@ -62,23 +84,70 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
+ * Name: stm32_w25initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Initialize and register the W25 FLASH file system.
  *
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+int stm32_w25initialize(int minor)
 {
-  /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
-   * this case, there is nothing further to be done here.
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
-#else
-  return OK;
+#ifdef HAVE_W25
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_FS_NXFFS
+  char devname[12];
 #endif
+  int ret;
+
+  /* Get the SPI port */
+
+  spi = up_spiinitialize(1);
+  if (!spi)
+    {
+      fdbg("ERROR: Failed to initialize SPI port 2\n");
+      return -ENODEV;
+    }
+
+  /* Now bind the SPI interface to the W25 SPI FLASH driver */
+
+  mtd = w25_initialize(spi);
+  if (!mtd)
+    {
+      fdbg("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
+      return -ENODEV;
+    }
+
+#ifndef CONFIG_FS_NXFFS
+  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(minor, mtd);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Initialize the FTL layer\n");
+      return ret;
+    }
+#else
+  /* Initialize to provide NXFFS on the MTD interface */
+
+  ret = nxffs_initialize(mtd);
+  if (ret < 0)
+    {
+      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+      return ret;
+    }
+
+  /* Mount the file system at /mnt/w25 */
+
+  snprintf(devname, 12, "/mnt/w25%c", 'a' + minor);
+  ret = mount(NULL, devname, "nxffs", 0, NULL);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      return ret;
+    }
+#endif
+#endif
+  return OK;
 }
