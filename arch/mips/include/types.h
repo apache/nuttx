@@ -92,4 +92,3 @@ typedef unsigned int       irqstate_t;
  ****************************************************************************/
 
 #endif /* __ARCH_MIPS_INCLUDE_TYPES_H */
-
