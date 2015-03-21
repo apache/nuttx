@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/spark/src/up_boot.c
+ * configs/spark/src/stm32_boot.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/spark/src/up_composite.c
- * arch/arm/src/board/up_composit.c
+ * config/spark/src/stm32_composite.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,7 +65,7 @@
 #include "spark.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

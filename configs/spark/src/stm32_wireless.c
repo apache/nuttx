@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/spark/src/up_wireless.c
+ * configs/spark/src/stm32_wireless.c
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
@@ -55,7 +55,7 @@
 #include "spark.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 

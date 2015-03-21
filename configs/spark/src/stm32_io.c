@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/spark/src/board_buttons.c
+ * configs/spark/src/stm32_io.c
  *
- *   Copyright (C) 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,13 +41,12 @@
 
 #include <stdint.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
 #include <arch/board/board.h>
+#include "chip/stm32_tim.h"
 
 #include "spark.h"
 
-#ifdef CONFIG_ARCH_BUTTONS
+#ifndef CONFIG_CC3000_PROBES
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,71 +65,131 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_button_initialize
+ * Name: up_leds
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+void up_leds(int r, int g ,int b, int freqs)
+{
+  long fosc = 72000000;
+  long prescale = 2048;
+  long p1s = fosc/prescale;
+  long p0p5s  = p1s/2;
+  long p;
+
+  static struct stm32_tim_dev_s *tim1 = 0;
+
+  if (tim1 == 0)
+    {
+      tim1 = stm32_tim_init(1);
+      STM32_TIM_SETMODE(tim1, STM32_TIM_MODE_UP);
+      STM32_TIM_SETCLOCK(tim1, p1s-8);
+      STM32_TIM_SETPERIOD(tim1, p1s);
+      STM32_TIM_SETCOMPARE(tim1, 1, 0);
+      STM32_TIM_SETCOMPARE(tim1, 2, 0);
+      STM32_TIM_SETCOMPARE(tim1, 3, 0);
+      STM32_TIM_SETCHANNEL(tim1, 1, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+      STM32_TIM_SETCHANNEL(tim1, 2, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+      STM32_TIM_SETCHANNEL(tim1, 3, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+    }
+
+  p = freqs == 0 ? p1s : p1s / freqs;
+  STM32_TIM_SETPERIOD(tim1, p);
+
+  p = freqs == 0 ? p1s + 1 : p0p5s / freqs;
+
+  STM32_TIM_SETCOMPARE(tim1, 2, (r * p) / 255);
+  STM32_TIM_SETCOMPARE(tim1, 1, (b * p) / 255);
+  STM32_TIM_SETCOMPARE(tim1, 3, (g * p) / 255);
+}
+
+/****************************************************************************
+ * Name: up_ioinit
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+void up_ioinit(void)
 {
   /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
    * configured for all pins.
    */
 
-   stm32_configgpio(GPIO_BTN);
+  up_leds(0,0,0,0);
+  stm32_configgpio(GPIO_A0); /* Probes */
+  stm32_configgpio(GPIO_A1); /* Probes */
+  stm32_configgpio(GPIO_A2); /* Smart Config */
+  stm32_configgpio(GPIO_A3); /* not used */
+  stm32_configgpio(GPIO_D0); /* Sw 1 */
+  stm32_configgpio(GPIO_D1); /* Sw 2 */
+  stm32_configgpio(GPIO_D2); /* Activate */
 }
 
 /****************************************************************************
- * Name: board_buttons
+ * Name: up_read_inputs
  *
  * N.B The return state in true logic, the button polarity is dealt here in
+ *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint8_t up_read_inputs(void)
 {
-  return stm32_gpioread(GPIO_BTN)==0 ? BUTTON_USER_BIT : 0;
+  uint8_t bits = 0;
+  bits |= stm32_gpioread(GPIO_D0) == 0 ? 1 : 0;
+  bits |= stm32_gpioread(GPIO_D1) == 0 ? 2 : 0;
+  bits |= stm32_gpioread(GPIO_A2) == 0 ? 4 : 0;
+  bits |= stm32_gpioread(GPIO_A3) == 0 ? 8 : 0;
+  return bits;
 }
 
-/************************************************************************************
- * Button support.
+/****************************************************************************
+ * Name: up_write_outputs
+ *
+ * N.B The return state in true logic, the button polarity is dealt here in
+ *
+ ****************************************************************************/
+
+void up_write_outputs(int id, bool bits)
+{
+  if (id == 2)
+    {
+      stm32_gpiowrite(GPIO_D2, bits);
+    }
+  else if (id == 0)
+    {
+      stm32_gpiowrite(GPIO_A0, bits);
+    }
+  else if (id == 1)
+    {
+      stm32_gpiowrite(GPIO_A1, bits);
+    }
+}
+
+/****************************************************************************
+ * Name: up_irqio
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
  *
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT
- *   definitions in board.h for the meaning of each bit.
- *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t board_button_irq(int id, xcpt_t irqhandler)
+xcpt_t up_irqio(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
 
   /* The following should be atomic */
 
-  if (id == BUTTON_USER)
+  if (id == 0)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_BTN, true, true, true, irqhandler);
+      oldhandler = stm32_gpiosetevent(GPIO_D0, true, true, true, irqhandler);
     }
+  else if (id == 1)
+    {
+      oldhandler = stm32_gpiosetevent(GPIO_D1, true, true, true, irqhandler);
+    }
+
   return oldhandler;
 }
-#endif
-#endif /* CONFIG_ARCH_BUTTONS */
+#endif /* CONFIG_CC3000_PROBES */
