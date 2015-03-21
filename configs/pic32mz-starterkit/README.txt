@@ -41,6 +41,11 @@ Port Status
   This could very well be some issue with my formatting of the nuttx.hex
   file, but I have no understanding of what the solution might be.
 
+  UPDATE:  Davide Sidrane has debugged this and has determined that the
+  issue here was because the PIC32MZ requires more space for the the
+  DEBUG code at 1fc00480.  The modified linker scripts have been committed
+  and are purported to resolve this issue.
+
   4) I can write successfully using that same nuttx.hex file using MPLABX
   IPE program.  No errors are observed and the flash content verifies
   correctly.  But NuttX does not run.  I need a debugger to understand why.
