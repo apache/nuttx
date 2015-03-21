@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/shenzhou/src/up_can.c
+ * configs/shenzhou/src/stm32_can.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/shenzhou/src/up_ssd1289.c
- * arch/arm/src/board/up_ssd1289.c
+ * configs/shenzhou/src/stm32_ssd1289.c
  *
  * This logic supports the connection of an SSD1289-based LCD to the Shenzhou IV
  * board.

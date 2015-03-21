@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/shenzhou/src/up_watchdog.c
- * arch/arm/src/board/up_watchdog.c
+ * configs/shenzhou/src/stm32_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,65 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/watchdog.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "stm32_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
+#include "up_arch.h"
+#include "shenzhou-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
-
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
-#endif
-
-/* Select the path to the registered watchdog timer device */
-
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
-
-/* Use the un-calibrated LSI frequency if we have nothing better */
-
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
-#endif
-
-/* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
-#else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
-#endif
 
 /************************************************************************************
  * Private Functions
@@ -108,29 +59,44 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
+/************************************************************************************
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int up_wdginitialize(void)
+void stm32_boardinitialize(void)
 {
-  /* Initialize tha register the watchdog timer device */
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spiinitialize() has been brought into the link.
+   */
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
-  return OK;
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
-#else
-  return -ENODEV;
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI3)
+  if (stm32_spiinitialize)
+    {
+      stm32_spiinitialize();
+    }
+#endif
+
+  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
+   * into the build.
+   */
+
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_led_initialize();
 #endif
 }
-
-#endif /* CONFIG_WATCHDOG */

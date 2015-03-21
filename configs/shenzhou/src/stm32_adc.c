@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/shenzhou/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/shenzhou/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +54,7 @@
 #ifdef CONFIG_ADC
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 /* Up to 3 ADC interfaces are supported */

@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/shenzhou/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/shenzhou/src/stm32_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +48,7 @@
 #include "shenzhou-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
