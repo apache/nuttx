@@ -47,7 +47,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* During the development of the SparkCore, the hardware was in limited supply
  * As a work around david_s5 created a SparkCore Big board (http://nscdg.com/spark/sparkBB.png)

@@ -41,44 +41,44 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c up_spi.c
+CSRCS = stm32_boot.c stm32_spi.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += up_cxxinitialize.c
+CSRCS += stm32_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_autoleds.c
+CSRCS += stm32_autoleds.c
 else
-CSRCS += up_userleds.c
+CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  up_buttons.c
+CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
-CSRCS += up_usbdev.c
+CSRCS += stm32_usbdev.c
 endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
-CSRCS += up_composite.c
+CSRCS += stm32_composite.c
 endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
-CSRCS += up_wireless.c
+CSRCS += stm32_wireless.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += up_watchdog.c
+CSRCS += stm32_watchdog.c
 endif
 
 ifeq ($(CONFIG_CC3000_PROBES),)
-CSRCS += up_io.c
+CSRCS += stm32_io.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
