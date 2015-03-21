@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/twr-k60n512/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/twr-k60n512/src/k60_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +54,7 @@
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

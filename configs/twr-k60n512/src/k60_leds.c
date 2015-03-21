@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/twr-k60n512/src/up_leds.c
+ * configs/twr-k60n512/src/k60_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

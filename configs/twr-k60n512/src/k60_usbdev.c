@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/twr-k60n512/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/twr-k60n512/src/k60_usbdev.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "twrk60-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************

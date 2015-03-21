@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/twr-k60n512/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/twr-k60n512/src/k60_nsh.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +53,7 @@
 #include "twrk60-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
