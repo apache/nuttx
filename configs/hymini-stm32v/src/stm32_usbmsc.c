@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/hymini-stm32v/src/up_usbmsc.c
+ * configs/hymini-stm32v/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #ifdef CONFIG_STM32_SDIO
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

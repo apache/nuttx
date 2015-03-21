@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/hymini-stm32v/src/up_ts.c
- * arch/arm/src/board/up_ts.c
+ * configs/hymini-stm32v/src/stm32_ts.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,6 +34,10 @@
  *
  ************************************************************************************/
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/arch.h>
@@ -48,9 +51,17 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ads7843e.h>
 
+/************************************************************************************
+ * Pre-processor Defintiions
+ ************************************************************************************/
+
 #if !defined(CONFIG_STM32_SPI1)
 # error CONFIG_STM32_SPI1 must be defined to use the ADS7843 on this board
 #endif
+
+/************************************************************************************
+ * Private Function Prototypes
+ ************************************************************************************/
 
 static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr);
 static void hymini_ts_irq_enable(FAR struct ads7843e_config_s *state,

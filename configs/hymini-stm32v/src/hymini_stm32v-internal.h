@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/hymini-stm32v/src/hymini_stm32v-internal.h
- * arch/arm/src/board/hymini_stm32v-internal.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +46,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI

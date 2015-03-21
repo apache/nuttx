@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/hymini-stm32v/src/up_leds.c
+ * configs/hymini-stm32v/src/stm32_leds.c
  *
  *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +54,7 @@
 #include "hymini_stm32v-internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG

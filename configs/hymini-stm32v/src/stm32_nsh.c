@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/hymini-stm32v/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/hymini-stm32v/src/stm32_nsh.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +58,7 @@
 #include "hymini_stm32v-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

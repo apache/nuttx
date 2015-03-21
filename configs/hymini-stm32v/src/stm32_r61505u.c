@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/hymini-stm32v/src/up_r61505u.c
- * arch/arm/src/board/up_r61505u.c
+ * configs/hymini-stm32v/src/stm32_r61505u.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
