@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mcu123-lpc214x/src/up_leds.c
+ * configs/mcu123-lpc214x/src/lpc2148_leds.c
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
