@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/avr32dev1/src/avr32dev1_internal.h
- * arch/avr/src/board/avr32dev1_internal.n
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +45,7 @@
 #include "at32uc3_config.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
@@ -113,4 +112,3 @@
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_AVR32DEV1_SRC_AVR32DEV1_INTERNAL_H */
-
