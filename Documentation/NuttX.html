@@ -1333,7 +1333,7 @@
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (4)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (30)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (32)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (19)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (1)</li>
     </ul>
@@ -2729,6 +2729,14 @@ nsh>
             Most of this work is the result of the effort of David Sidrane.
          </p>
       </li>
+      <li>
+         <p>
+            <b>Olimexino-STM32</b>.
+            This port uses the Olimexino STM32 board (STM32F103RBT6).
+            See the http://www.olimex.com for further information.
+            Contribued by David Sidrane.
+         </p>
+      </li>
     </ol>
     <p>
       These ports uses a GNU arm-nuttx-elf toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
@@ -2786,6 +2794,13 @@ nsh>
             <b>Spark</b>.
               David Sidrane has the <i>emulated</i> Spark board up-and-running with a functional CC3000 network, SST25 FAT file system, an NSH shell, and a composite USB CDC/ACM and USBMSC devices.  This configuration is was first available NuttX 6.31 and completed in NuttX 6.32.
               That is really quite a lot of high end functionality on an STM32 that only has 20KB of RAM!  I am impressed!
+          </p>
+        </li>
+        <li>
+          <p>
+            <b>Olimexino-STM32</b>.
+            Contributed by David Sidrane and introduced with NuttX 7.9.
+            Configurations are included for the NuttShell (NSH), a tiny version of the NuttShell, USB composite CDC/ACM + MSC, CAN support, and two tiny, small-footprint NSH configurations.
           </p>
         </li>
       </ul>
