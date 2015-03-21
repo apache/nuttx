@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/us7032evb1/src/up_leds.c
+ * configs/us7032evb1/src/sh1_leds.c
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
