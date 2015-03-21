@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
@@ -63,7 +63,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -77,7 +78,7 @@ extern "C" {
  ************************************************************************************/
 
 #ifdef CONFIG_AVR_SPI
-EXTERN void weak_function at90usb_spiinitialize(void);
+void weak_function at90usb_spiinitialize(void);
 #endif
 
 /************************************************************************************
@@ -89,7 +90,7 @@ EXTERN void weak_function at90usb_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void at90usb_ledinit(void);
+void at90usb_ledinit(void);
 #endif
 
 #undef EXTERN

@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/teensy/src/up_usbmsc.c
- * arch/arm/src/board/up_usbmsc.c
+ * configs/teensy/src/at90usb_usbmsc.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +52,7 @@
 #include "teensy_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
