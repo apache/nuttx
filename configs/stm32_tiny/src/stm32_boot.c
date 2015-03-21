@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32_tiny/src/up_boot.c
+ * configs/stm32_tiny/src/stm32_boot.c
  *
  *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -36,41 +36,41 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		=
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c up_leds.c up_spi.c up_usbdev.c
+CSRCS = stm32_boot.c stm32_leds.c stm32_spi.c stm32_usbdev.c
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS		+= up_pwm.c
+CSRCS += stm32_pwm.c
 endif
 
 ifeq ($(CONFIG_WL_NRF24L01),y)
-CSRCS		+= up_wireless.c
+CSRCS += stm32_wireless.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS		+= up_watchdog.c
+CSRCS += stm32_watchdog.c
 endif
 
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)

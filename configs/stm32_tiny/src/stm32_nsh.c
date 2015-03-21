@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32_tiny/src/up_nsh.c
+ * config/stm32_tiny/src/stm32_nsh.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include "stm32_tiny-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,7 +67,7 @@ int nsh_archinitialize(void)
 {
 #if defined(CONFIG_WL_NRF24L01)
   syslog(LOG_INFO, "Register the nRF24L01 module");
-  up_wlinitialize();
+  stm32_wlinitialize();
 #endif
 
   return OK;

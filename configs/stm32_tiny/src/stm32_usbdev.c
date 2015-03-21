@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/stm32_tiny/src/up_wireless.c
+ * configs/stm32_tiny/src/stm32_usbdev.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
- *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,90 +40,78 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
-#include <errno.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/wireless/nrf24l01.h>
-#include <arch/board/board.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "chip.h"
 #include "stm32.h"
 #include "stm32_tiny-internal.h"
 
 /************************************************************************************
- * Private Function Prototypes
+ * Pre-processor Definitions
  ************************************************************************************/
-
-static int stm32tiny_wl_irq_attach(xcpt_t isr);
-
-static void stm32tiny_wl_chip_enable(bool enable);
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-static FAR struct nrf24l01_config_s nrf_cfg =
-{
-  .irqattach = stm32tiny_wl_irq_attach,
-  .chipenable = stm32tiny_wl_chip_enable,
-};
-
-static xcpt_t g_isr;
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 
-static int stm32tiny_wl_irq_attach(xcpt_t isr)
-{
-  vdbg("Attach IRQ\n");
-  g_isr = isr;
-  stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr);
-  return OK;
-}
-
-static void stm32tiny_wl_chip_enable(bool enable)
-{
-  vdbg("CE:%d\n", enable);
-  stm32_gpiowrite(GPIO_NRF24L01_CE, enable);
-}
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-void up_wlinitialize(void)
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the Hy-Mini STM32v board.
+ *
+ ************************************************************************************/
+
+void stm32_usbinitialize(void)
 {
-#  ifndef CONFIG_STM32_SPI2
-#   error "STM32_SPI2 is required to support nRF24L01 module on this board"
-#  endif
+  ulldbg("called\n");
 
-  int result;
-  FAR struct spi_dev_s *spidev;
+  /* USB Soft Connect Pullup */
+  stm32_configgpio(GPIO_USB_PULLUP);
+}
 
-  /* Setup CE & IRQ line IOs */
+/************************************************************************************
+ * Name:  stm32_usbpullup
+ *
+ * Description:
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide stm32_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
+ *   NULL.
+ *
+ ************************************************************************************/
 
-  stm32_configgpio(GPIO_NRF24L01_CE);
-  stm32_configgpio(GPIO_NRF24L01_IRQ);
+int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
+{
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+  stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
+  return OK;
+}
 
-  /* Init SPI bus */
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
 
-  spidev = up_spiinitialize(2);
-  if (!spidev)
-    {
-      dbg("Failed to initialize SPI bus\n");
-      return;
-    }
-
-  result = nrf24l01_register(spidev, &nrf_cfg);
-  if (result != OK)
-    {
-      dbg("Failed to register initialize SPI bus\n");
-      return;
-    }
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+{
+  ulldbg("resume: %d\n", resume);
 }
 
