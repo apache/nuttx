@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/lm3s8962-ek/src/up_ethernet.c
- * arch/arm/src/board/up_ethernet.c
+ * configs/lm3s8962-ek/src/lm_ethernet.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

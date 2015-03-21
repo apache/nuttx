@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/lm3s8962-ek/src/up_boot.c
+ * configs/lm3s8962-ek/src/lm_boot.c
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

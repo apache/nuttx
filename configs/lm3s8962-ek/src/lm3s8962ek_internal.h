@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/lm3s8962-ek/src/lm3s8962ek_internal.h
- * arch/arm/src/board/lm3s8962ek_internal.n
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "tiva_gpio.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S8962 supports 1 SSI
