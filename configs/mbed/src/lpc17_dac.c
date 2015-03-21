@@ -1,8 +1,14 @@
-/****************************************************************************
- * config/mbed/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+/************************************************************************************
+ * configs/mbed/src/lpc17_dac.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ * Based on configs/zkit-arm-1769/src/lpc17_dac.c
+ *
+ *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
+ *   Author: Kannan <code@nuttx.org>
+ *
+ * Based on configs/stm3220g-eval/src/stm32_dac.c
+ *
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,55 +38,64 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/mmcsd.h>
+#include <nuttx/analog/dac.h>
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
+#include "up_arch.h"
+#include "up_internal.h"
 
-/* Configuration ************************************************************/
+#include "lpc17_dac.h"
 
-/* PORT and SLOT number probably depend on the board configuration */
+#ifdef CONFIG_DAC
 
-#ifdef CONFIG_ARCH_BOARD_MBED
-#  define NSH_HAVEUSBDEV 1
-#else
-#  error "Unrecognized board"
-#  undef NSH_HAVEUSBDEV
-#endif
-
-/* Can't support USB features if USB is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nsh_archinitialize
+/************************************************************************************
+ * Name: dac_devinit
  *
  * Description:
- *   Perform architecture specific initialization
+ *   All LPC17xx architectures must provide the following interface to work with
+ *   examples/diag.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int nsh_archinitialize(void)
+int dac_devinit(void)
 {
+  static bool initialized = false;
+  struct dac_dev_s *dac;
+  int ret;
+
+  if (!initialized)
+  {
+    /* Call lpc17_dacinitialize() to get an instance of the dac interface */
+
+    dac = lpc17_dacinitialize();
+    if (dac == NULL)
+      {
+        adbg("ERROR: Failed to get dac interface\n");
+        return -ENODEV;
+      }
+
+    ret = dac_register("/dev/dac0", dac);
+    if (ret < 0)
+      {
+        adbg("dac_register failed: %d\n", ret);
+        return ret;
+      }
+
+    initialized = true;
+  }
+
   return OK;
 }
+
+#endif /* CONFIG_DAC */
