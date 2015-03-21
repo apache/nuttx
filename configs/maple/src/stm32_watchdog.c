@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/maple/src/up_watchdog.c
+ * configs/maple/src/stm32_watchdog.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

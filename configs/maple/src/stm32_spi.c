@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/maple/src/up_spi.c
+ * configs/maple/src/stm32_spi.c
  *
  *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

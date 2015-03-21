@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/maple/src/up_boot.c
+ * configs/maple/src/stm32_usbdev.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Librae <librae8226@gmail.com>
  *
@@ -39,21 +39,25 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi/spi.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
+#include "stm32.h"
 #include "maple-internal.h"
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Private Data
+ * Private Functions
  ************************************************************************************/
 
 /************************************************************************************
@@ -61,37 +65,53 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to setup USB-related GPIO pins.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+void stm32_usbinitialize(void)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
+  ulldbg("called\n");
 
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+  /* USB Soft Connect Pullup */
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
+  stm32_configgpio(GPIO_USB_PULLUP);
+}
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
-  stm32_spiinitialize();
-#endif
+/************************************************************************************
+ * Name:  stm32_usbpullup
+ *
+ * Description:
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide stm32_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
+ *   NULL.
+ *
+ ************************************************************************************/
 
-  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build.
-   */
+int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
+{
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+  stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
+  return OK;
+}
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  stm32_usbinitialize();
-#endif
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
+
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+{
+  ulldbg("resume: %d\n", resume);
 }
