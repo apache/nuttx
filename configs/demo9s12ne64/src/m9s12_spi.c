@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/demo9s12ne64/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/demo9s12ne64/src/m9s12_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,7 @@
 #if defined(CONFIG_HCS12_SPI)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */
