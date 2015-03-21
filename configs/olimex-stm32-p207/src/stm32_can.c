@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/olimex-stm32-p207/src/up_can.c
- * arch/arm/src/board/up_can.c
+ * configs/olimex-stm32-p207/src/stm32_can.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

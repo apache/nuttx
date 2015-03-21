@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p207/src/board_buttons.c
+ * configs/olimex-stm32-p207/src/stm32_buttons.c
  *
  *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

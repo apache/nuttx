@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/olimex-stm32-p207/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/olimex-stm32-p207/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #ifdef CONFIG_ADC
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
