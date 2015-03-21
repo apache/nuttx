@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f3discovery/src/up_autoleds.c
+ * configs/stm32f3discovery/src/stm32_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

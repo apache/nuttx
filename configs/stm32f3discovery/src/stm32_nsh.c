@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/stm32f3discovery/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/stm32f3discovery/src/stm32_nsh.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
