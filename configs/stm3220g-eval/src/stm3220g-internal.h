@@ -1,6 +1,5 @@
 /****************************************************************************************************
  * configs/stm3220g_eval/src/stm3220g_internal.h
- * arch/arm/src/board/stm3220g_internal.n
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +45,7 @@
 #include <stdint.h>
 
 /****************************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************************************/
 /* Configuration ************************************************************************************/
 /* How many SPI modules does this chip support? */

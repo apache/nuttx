@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_boot.c
+ * configs/stm3220g-eval/src/stm32_pwm.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,29 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/pwm.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
+#include "stm32_pwm.h"
 #include "stm3220g-internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration *******************************************************************/
+/* PWM
+ *
+ * The STM3220G-Eval has no real on-board PWM devices, but the board can be
+ * configured to output a pulse train using variously unused pins on the board for
+ * PWM output (see board.h for details of pins).
+ */
+
+#ifdef CONFIG_PWM
 
 /************************************************************************************
  * Private Functions
@@ -60,49 +72,48 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: pwm_devinit
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/pwm.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+int pwm_devinit(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  if (stm32_spiinitialize)
+  /* Have we already initialized? */
+
+  if (!initialized)
     {
-      stm32_spiinitialize();
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
+
+      pwm = stm32_pwminitialize(STM3220G_EVAL_PWMTIMER);
+      if (!pwm)
+        {
+          dbg("Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          adbg("pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
     }
-#endif
 
-  /* If the FSMC is enabled, then enable SRAM access */
-
-#ifdef CONFIG_STM32_FSMC
-  stm32_selectsram();
-#endif
-
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * the weak function stm32_usbinitialize() has been brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
-   */
-
-#ifdef CONFIG_STM32_OTGFS
-  if (stm32_usbinitialize)
-    {
-      stm32_usbinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+  return OK;
 }
+
+#endif /* CONFIG_PWM */

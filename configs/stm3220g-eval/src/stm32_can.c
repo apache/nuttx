@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_watchdog.c
- * arch/arm/src/board/up_watchdog.c
+ * configs/stm3220g-eval/src/stm32_can.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,61 +42,47 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/watchdog.h>
+#include <nuttx/can.h>
 #include <arch/board/board.h>
 
-#include "stm32_wdg.h"
+#include "chip.h"
+#include "up_arch.h"
 
-#ifdef CONFIG_WATCHDOG
+#include "stm32.h"
+#include "stm32_can.h"
+#include "stm3220g-internal.h"
+
+#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
+/* Configuration ********************************************************************/
 
-#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
-#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
+#  undef CONFIG_STM32_CAN2
 #endif
 
-/* Select the path to the registered watchdog timer device */
-
-#ifndef CONFIG_STM32_WDG_DEVPATH
-#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
-#  else
-#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
-#  endif
-#endif
-
-/* Use the un-calibrated LSI frequency if we have nothing better */
-
-#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
-#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
+#ifdef CONFIG_STM32_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
 #endif
 
 /* Debug ***************************************************************************/
-/* Non-standard debug that may be enabled just for testing the watchdog timer */
+/* Non-standard debug that may be enabled just for testing CAN */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_WATCHDOG
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG
-#  define wdgdbg                 dbg
-#  define wdglldbg               lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define wdgvdbg              vdbg
-#    define wdgllvdbg            llvdbg
-#  else
-#    define wdgvdbg(x...)
-#    define wdgllvdbg(x...)
-#  endif
+#ifdef CONFIG_DEBUG_CAN
+#  define candbg    dbg
+#  define canvdbg   vdbg
+#  define canlldbg  lldbg
+#  define canllvdbg llvdbg
 #else
-#  define wdgdbg(x...)
-#  define wdglldbg(x...)
-#  define wdgvdbg(x...)
-#  define wdgllvdbg(x...)
+#  define candbg(x...)
+#  define canvdbg(x...)
+#  define canlldbg(x...)
+#  define canllvdbg(x...)
 #endif
 
 /************************************************************************************
@@ -108,29 +93,49 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: up_wdginitialize()
+/************************************************************************************
+ * Name: can_devinit
  *
  * Description:
- *   Perform architecuture-specific initialization of the Watchdog hardware.
- *   This interface must be provided by all configurations using
- *   apps/examples/watchdog
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/can.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int up_wdginitialize(void)
+int can_devinit(void)
 {
-  /* Initialize tha register the watchdog timer device */
+  static bool initialized = false;
+  struct can_dev_s *can;
+  int ret;
 
-#if defined(CONFIG_STM32_WWDG)
-  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
+  /* Check if we have already initialized */
+
+  if (!initialized)
+    {
+      /* Call stm32_caninitialize() to get an instance of the CAN interface */
+
+      can = stm32_caninitialize(CAN_PORT);
+      if (can == NULL)
+        {
+          candbg("ERROR:  Failed to get CAN interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the CAN driver at "/dev/can0" */
+
+      ret = can_register("/dev/can0", can);
+      if (ret < 0)
+        {
+          candbg("ERROR: can_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
   return OK;
-#elif defined(CONFIG_STM32_IWDG)
-  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
-  return OK;
-#else
-  return -ENODEV;
-#endif
 }
 
-#endif /* CONFIG_WATCHDOG */
+#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */

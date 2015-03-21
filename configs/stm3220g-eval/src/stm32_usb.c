@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm3220g-eval/src/up_usb.c
- * arch/arm/src/board/up_usb.c
+ * configs/stm3220g-eval/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +58,7 @@
 #ifdef CONFIG_STM32_OTGFS
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)

@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm3220g_eval/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/stm3220g_eval/src/stm32_leds.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +54,7 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
