@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/eagle100/src/up_boot.c
+ * configs/eagle100/src/lm_ethernet.c
  *
- *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,16 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <debug.h>
+#include <assert.h>
 
-#include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <net/ethernet.h>
 
 #include "up_arch.h"
-#include "eagle100_internal.h"
+#include "chip.h"
+#include "tiva_ethernet.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -60,33 +63,36 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: tiva_boardinitialize
+ * Name: tiva_ethernetmac
  *
  * Description:
- *   All Stellaris architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   For the Ethernet Eval Kits, the MAC address will be stored in the non-volatile
+ *   USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined, this function
+ *   will obtain the MAC address from these registers.
  *
  ************************************************************************************/
 
-void tiva_boardinitialize(void)
+#ifdef CONFIG_TIVA_BOARDMAC
+void tiva_ethernetmac(struct ether_addr *ethaddr)
 {
-  /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
-   * lm_ssiinitialize() has been brought into the link.
-   */
+  uint32_t user0;
+  uint32_t user1;
 
-/* The Eagle100 microSD CS is on SSI0 */
+  /* Get the current value of the user registers */
 
-#if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
-  if (lm_ssiinitialize)
-    {
-      lm_ssiinitialize();
-    }
-#endif
+  user0 = getreg32(TIVA_FLASH_USERREG0);
+  user1 = getreg32(TIVA_FLASH_USERREG1);
 
-  /* Configure on-board LEDs if LED support has been selected. */
+  nlldbg("user: %06x:%06x\n", user1 & 0x00ffffff, user0 & 0x00ffffff);
+  DEBUGASSERT(user0 != 0xffffffff && user1 != 0xffffffff);
 
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+  /* Re-format that MAC address the way that uIP expects to see it */
+
+  ethaddr->ether_addr_octet[0] = ((user0 >>  0) & 0xff);
+  ethaddr->ether_addr_octet[1] = ((user0 >>  8) & 0xff);
+  ethaddr->ether_addr_octet[2] = ((user0 >> 16) & 0xff);
+  ethaddr->ether_addr_octet[3] = ((user1 >>  0) & 0xff);
+  ethaddr->ether_addr_octet[4] = ((user1 >>  8) & 0xff);
+  ethaddr->ether_addr_octet[5] = ((user1 >> 16) & 0xff);
 }
+#endif

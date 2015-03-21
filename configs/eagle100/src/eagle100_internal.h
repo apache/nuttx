@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/eagle100/src/eagle100_internal.h
- * arch/arm/src/board/eagle100_internal.n
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

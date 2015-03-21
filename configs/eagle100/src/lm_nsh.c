@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/eagle100/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/eagle100/src/lm_nsh.c
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
