@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/olimex-stm32-p107/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/olimex-stm32-p107/src/stm32_boot.c
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
