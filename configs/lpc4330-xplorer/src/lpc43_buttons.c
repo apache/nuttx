@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4330-xplorer/src/board_buttons.c
+ * configs/lpc4330-xplorer/src/lpc43_buttons.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

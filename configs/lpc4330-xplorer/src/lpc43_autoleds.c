@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/lpc4330-xplorer/src/up_userleds.c
- * arch/arm/src/board/up_userleds.c
+ * configs/lpc4330-xplorer/src/lpc43_autoleds.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -52,10 +52,10 @@
 
 #include "xplorer_internal.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* LED definitions **********************************************************/
 /* The LPC4330-Xplorer has 2 user-controllable LEDs labeled D2 an D3 in the
@@ -65,6 +65,28 @@
  *  LED2   D3  GPIO1[11]
  *
  * LEDs are pulled high to a low output illuminates the LED.
+ *
+ * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
+ * for NuttX debug functionality (where NC means "No Change").
+ *
+ *                                      ON            OFF
+ *                                  LED1   LED2   LED1   LED2
+ *   LED_STARTED                0   OFF    OFF     -      -
+ *   LED_HEAPALLOCATE           1   ON     OFF     -      -
+ *   LED_IRQSENABLED            1   ON     OFF     -      -
+ *   LED_STACKCREATED           1   ON     OFF     -      -
+ *   LED_INIRQ                  2   NC     ON      NC     OFF
+ *   LED_SIGNAL                 2   NC     ON      NC     OFF
+ *   LED_ASSERTION              2   NC     ON      NC     OFF
+ *   LED_PANIC                  2   NC     ON      NC     OFF
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
+ * control of the application.  The following interfaces are then available
+ * for application control of the LEDs:
+ *
+ *  void lpc43_ledinit(void);
+ *  void lpc43_setled(int led, bool ledon);
+ *  void lpc43_setleds(uint8_t ledset);
  */
 
 /* Debug definitions ********************************************************/
@@ -114,14 +136,14 @@ static void led_dumppins(FAR const char *msg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
-void lpc43_ledinit(void)
+void board_led_initialize(void)
 {
-  /* Configure all LED GPIO lines */
+  /* Configure all LED pins as GPIO outputs */
 
-  led_dumppins("lpc43_ledinit() Entry)");
+  led_dumppins("board_led_initialize() Entry)");
 
   /* Configure LED pins as GPIOs, then configure GPIOs as outputs */
 
@@ -131,27 +153,51 @@ void lpc43_ledinit(void)
   lpc43_pin_config(PINCONFIG_LED2);
   lpc43_gpio_config(GPIO_LED2);
 
-  led_dumppins("lpc43_ledinit() Exit");
+  led_dumppins("board_led_initialize() Exit");
 }
 
 /****************************************************************************
- * Name: lpc43_setled
+ * Name: board_led_on
  ****************************************************************************/
 
-void lpc43_setled(int led, bool ledon)
+void board_led_on(int led)
 {
-  uint16_t gpiocfg = (led == BOARD_LED1 ? GPIO_LED1 : GPIO_LED2);
-  lpc43_gpio_write(gpiocfg, !ledon);
+  switch (led)
+    {
+      default:
+      case 0:
+        lpc43_gpio_write(GPIO_LED1, true);   /* LED1 OFF */
+        lpc43_gpio_write(GPIO_LED2, true);   /* LED2 OFF */
+        break;
+
+      case 1:
+        lpc43_gpio_write(GPIO_LED1, false);  /* LED1 ON */
+        lpc43_gpio_write(GPIO_LED2, true);   /* LED2 OFF */
+        break;
+
+      case 2:
+        lpc43_gpio_write(GPIO_LED2, false);  /* LED2 ON */
+        break;
+    }
 }
 
 /****************************************************************************
- * Name: lpc43_setleds
+ * Name: board_led_off
  ****************************************************************************/
 
-void lpc43_setleds(uint8_t ledset)
+void board_led_off(int led)
 {
-  lpc43_gpio_write(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  lpc43_gpio_write(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
+  switch (led)
+    {
+      default:
+      case 0:
+      case 1:
+        break;
+
+      case 2:
+        lpc43_gpio_write(GPIO_LED2, true);  /* LED2 OFF */
+        break;
+    }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4330-xplorer/src/xplorer_internal.h
+ * config/lpc4330-xplorer/src/lpc43_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,96 +33,115 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_INTERNAL_H
-#define _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include "lpc43_pinconfig.h"
-#include "lpc43_gpio.h"
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "chip.h"
 
-/****************************************************************************
- *  LEDs GPIO                         PIN     SIGNAL NAME
- *  -------------------------------- ------- --------------
- *  gpio1[12] - LED D2                J10-20  LED1
- *  gpio1[11] - LED D3                J10-17  LED2
- ****************************************************************************/
+#ifdef CONFIG_LPC43_SPIFI
+#  include <nuttx/mtd/mtd.h>
+#  include "lpc43_spifi.h"
 
-/* Definitions to configure LED pins as GPIOs:
- *
- * - Floating
- * - Normal drive
- * - No buffering, glitch filtering, slew=slow
- */
-
-#define PINCONFIG_LED1 PINCONF_GPIO1p12
-#define PINCONFIG_LED2 PINCONF_GPIO1p11
-
-/* Definitions to configure LED GPIOs as outputs */
-
-#define GPIO_LED1      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN12)
-#define GPIO_LED2      (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN11)
-
-/****************************************************************************
- *  Buttons GPIO                      PIN     SIGNAL NAME
- *  -------------------------------- ------- --------------
- *  gpio0[7]  - User Button SW2       J8-25   BTN1
- ****************************************************************************/
-
-#define LPC4330_XPLORER_BUT1 (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN7)
-
-/* Button IRQ numbers */
-
-#define LPC4330_XPLORER_BUT1_IRQ  LPC43_IRQ_P0p23
-
-#define GPIO_SSP0_SCK  GPIO_SSP0_SCK_1
-#define GPIO_SSP0_SSEL GPIO_SSP0_SSEL_1
-#define GPIO_SSP0_MISO GPIO_SSP0_MISO_1
-#define GPIO_SSP0_MOSI GPIO_SSP0_MOSI_1
-
-/* We need to redefine USB_PWRD as GPIO to get USB Host working
- * Also remember to add 2 resistors of 15K to D+ and D- pins.
- */
-
-#ifdef CONFIG_USBHOST
-#  ifdef GPIO_USB_PWRD
-#    undef  GPIO_USB_PWRD
-#    define GPIO_USB_PWRD  (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
+#  ifdef CONFIG_SPFI_NXFFS
+#    include <sys/mount.h>
+#    include <nuttx/fs/nxffs.h>
 #  endif
 #endif
 
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_SPIFI_DEVNO
+#  define CONFIG_SPIFI_DEVNO 0
+#endif
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Name: nsh_spifi_initialize
+ *
+ * Description:
+ *   Make the SPIFI (or part of it) into a block driver that can hold a
+ *   file system.
+ *
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#ifdef CONFIG_LPC43_SPIFI
+static int nsh_spifi_initialize(void)
+{
+  FAR struct mtd_dev_s *mtd;
+  int ret;
+
+  /* Initialize the SPIFI interface and create the MTD driver instance */
+
+  mtd = lpc43_spifi_initialize();
+  if (!mtd)
+    {
+      fdbg("ERROR: lpc43_spifi_initialize failed\n");
+      return -ENODEV;
+    }
+
+#ifndef CONFIG_SPFI_NXFFS
+  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(CONFIG_SPIFI_DEVNO, mtd);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Initializing the FTL layer: %d\n", ret);
+      return ret;
+    }
+#else
+  /* Initialize to provide NXFFS on the MTD interface */
+
+  ret = nxffs_initialize(mtd);
+  if (ret < 0)
+    {
+      fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Mount the file system at /mnt/spifi */
+
+  ret = mount(NULL, "/mnt/spifi", "nxffs", 0, NULL);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      return ret;
+    }
+#endif
+
+  return OK;
+}
+#else
+#  define nsh_spifi_initialize() (OK)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_sspinitialize
+ * Name: nsh_archinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Lincoln 80 board.
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-void weak_function lpc43_sspinitialize(void);
+int nsh_archinitialize(void)
+{
+  /* Initialize the SPIFI block device */
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPC4330_XPLORER_SRC_XPLORER_INTERNAL_H */
+  return nsh_spifi_initialize();
+}
