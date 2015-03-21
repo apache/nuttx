@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/twr-k60n512/src/up_boot.c
+ * configs/twr-k60n512/src/k60_boot.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

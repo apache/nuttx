@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/twr-k60n512/src/up_usbmsc.c
+ * configs/twr-k60n512/src/k60_usbmsc.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include "kinetis_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

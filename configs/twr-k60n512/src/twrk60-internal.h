@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/twr-k60n512/src/twrk60-internal.h
- * arch/arm/src/board/twrk60-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +45,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
@@ -280,7 +279,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function kinetis_spiinitialize(void);
+void weak_function kinetis_spiinitialize(void);
 
 /************************************************************************************
  * Name: kinetis_usbinitialize
@@ -290,8 +289,7 @@ extern void weak_function kinetis_spiinitialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function kinetis_usbinitialize(void);
+void weak_function kinetis_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H */
-
