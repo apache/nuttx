@@ -42,7 +42,7 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF),y)
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW),y)
-  LDSCRIPT = mips-release.ld
+  LDSCRIPT = pinguino-release.ld
 endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW),y)

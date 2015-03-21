@@ -100,7 +100,7 @@ MEMORY
 	 * for use by MPLABX and 128 for DSP register storage.
 	 */
 
-	kseg1_datamem (w!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
+	kseg1_datamem (rw!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
 }
 
 OUTPUT_FORMAT("elf32-tradlittlemips")
@@ -217,7 +217,7 @@ SECTIONS
 
 	_data_loaddr = LOADADDR(.data);
 
-	.eh_frame_hdr : { *(.eh_frame_hdr) }
+	.eh_frame_hdr : { *(.eh_frame_hdr) *(.eh_frame_entry .eh_frame_entry.*) }
 	.eh_frame : ONLY_IF_RO { KEEP (*(.eh_frame)) }
 
 	/* RAM functions are positioned at the beginning of RAM so that
