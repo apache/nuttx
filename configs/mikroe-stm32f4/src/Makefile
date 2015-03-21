@@ -44,62 +44,62 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c up_spi.c
+CSRCS = stm32_boot.c stm32_spi.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += up_cxxinitialize.c
+CSRCS += stm32_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
-CSRCS += up_clockconfig.c
+CSRCS += stm32_clockconfig.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS),y)
-CSRCS += up_usb.c
+CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += up_pwm.c
+CSRCS += stm32_pwm.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)
-CSRCS += up_qencoder.c
+CSRCS += stm32_qencoder.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += up_watchdog.c
+CSRCS += stm32_watchdog.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
-CSRCS += up_pm.c
+CSRCS += stm32_pm.c
 endif
 
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CSRCS += up_idle.c
+CSRCS += stm32_idle.c
 endif
 
 ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS += up_extmem.c
+CSRCS += stm32_extmem.c
 endif
 
 ifeq ($(CONFIG_INPUT),y)
-CSRCS += up_touchscreen.c
+CSRCS += stm32_touchscreen.c
 endif
 
 ifeq ($(CONFIG_LCD_MIO283QT2),y)
-CSRCS += up_mio283qt2.c
+CSRCS += stm32_mio283qt2.c
 endif
 
 ifeq ($(CONFIG_LCD_MIO283QT9A),y)
-CSRCS += up_mio283qt9a.c
+CSRCS += stm32_mio283qt9a.c
 endif
 
 ifeq ($(CONFIG_VS1053),y)
-CSRCS += up_vs1053.c
+CSRCS += stm32_vs1053.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
@@ -113,8 +113,8 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 else
 ifeq ($(WINTOOL),y)
   CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-			-I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-			-I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
   CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
 endif

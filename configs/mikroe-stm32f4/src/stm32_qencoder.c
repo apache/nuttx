@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/mikroe_stm32f4/src/up_clockconfig.c
+ * configs/mikroe_stm32f4/src/stm32_qencoder.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,16 +39,83 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
+#include "stm32_qencoder.h"
 #include "mikroe-stm32f4-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration *******************************************************************/
+/* Check if we have a timer configured for quadrature encoder -- assume YES. */
+
+#define HAVE_QENCODER 1
+
+/* If TIMn is not enabled (via CONFIG_STM32_TIMn), then the configuration cannot
+ * specify TIMn as a quadrature encoder (via CONFIG_STM32_TIMn_QE).
+ */
+
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_QE
+#endif
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_QE
+#endif
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_QE
+#endif
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_QE
+#endif
+#ifndef CONFIG_STM32_TIM5
+#  undef CONFIG_STM32_TIM5_QE
+#endif
+#ifndef CONFIG_STM32_TIM8
+#  undef CONFIG_STM32_TIM8_QE
+#endif
+
+/* If the upper-half quadrature encoder driver is not enabled, then we cannot
+ * support the quadrature encoder.
+ */
+
+#ifndef CONFIG_QENCODER
+#  undef HAVE_QENCODER
+#endif
+
+/* Which Timer should we use, TIMID={1,2,3,4,5,8}.  If multiple timers are
+ * configured as quadrature encoders, this logic will arbitrarily select
+ * the lowest numbered timer.
+ *
+ * At least one TIMn, n={1,2,3,4,5,8}, must be both enabled and configured
+ * as a quadrature encoder in order to support the lower half quadrature
+ * encoder driver.  The above check assures that if CONFIG_STM32_TIMn_QE
+ * is defined, then the correspdonding TIMn is also enabled.
+ */
+
+#if defined CONFIG_STM32_TIM1_QE
+#  define TIMID 1
+#elif defined CONFIG_STM32_TIM2_QE
+#  define TIMID 2
+#elif defined CONFIG_STM32_TIM3_QE
+#  define TIMID 3
+#elif defined CONFIG_STM32_TIM4_QE
+#  define TIMID 4
+#elif defined CONFIG_STM32_TIM5_QE
+#  define TIMID 5
+#elif defined CONFIG_STM32_TIM8_QE
+#  define TIMID 8
+#else
+#  undef HAVE_QENCODER
+#endif
+
+#ifdef HAVE_QENCODER
 
 /************************************************************************************
  * Private Functions
@@ -59,92 +126,37 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_board_clockconfig
+ * Name: qe_devinit
  *
  * Description:
- *   The Mikroe-STM32F4 board does not have an external crystal, so it must rely
- *   on the internal 16Mhz RC oscillator.  The default clock configuration in the
- *   OS for the STM32 architecture assumes an external crystal, so we must provide
- *   a board specific clock configuration routine.
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/qencoder.
  *
  ************************************************************************************/
 
-#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
-void stm32_board_clockconfig(void)
+int qe_devinit(void)
 {
-  uint32_t regval;
+  static bool initialized = false;
+  int ret;
 
-  /* Configure chip clocking to use the internal 16Mhz RC oscillator.
-   *
-   * NOTE: We will assume the HSIRDY (High Speed Internal RC Ready) bit is
-   * set, otherwise we wouldn't be here executing code.
-   */
+  /* Check if we are already initialized */
 
-  regval  = getreg32(STM32_RCC_APB1ENR);
-  regval |= RCC_APB1ENR_PWREN;
-  putreg32(regval, STM32_RCC_APB1ENR);
+  if (!initialized)
+    {
+      /* Initialize a quadrature encoder interface. */
 
-  regval  = getreg32(STM32_PWR_CR);
-  regval |= PWR_CR_VOS;
-  putreg32(regval, STM32_PWR_CR);
+      snvdbg("Initializing the quadrature encoder using TIM%d\n", TIMID);
+      ret = stm32_qeinitialize("/dev/qe0", TIMID);
+      if (ret < 0)
+        {
+          sndbg("stm32_qeinitialize failed: %d\n", ret);
+          return ret;
+        }
 
-  /* Set the HCLK source/divider */
+      initialized = true;
+    }
 
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_HPRE_MASK;
-  regval |= STM32_RCC_CFGR_HPRE;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Set the PCLK2 divider */
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_PPRE2_MASK;
-  regval |= STM32_RCC_CFGR_PPRE2;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Set the PCLK1 divider */
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_PPRE1_MASK;
-  regval |= STM32_RCC_CFGR_PPRE1;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Set the PLL dividers and multipliers to configure the main PLL */
-
-  regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |
-            RCC_PLLCFG_PLLSRC_HSI | STM32_PLLCFG_PLLQ);
-  putreg32(regval, STM32_RCC_PLLCFG);
-
-  /* Enable the main PLL */
-
-  regval = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_PLLON;
-  putreg32(regval, STM32_RCC_CR);
-
-  /* Wait until the PLL is ready */
-
-  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
-    ;
-
-  /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
-
-#ifdef CONFIG_STM32_FLASH_PREFETCH
-  regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
-#else
-  regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
-#endif
-  putreg32(regval, STM32_FLASH_ACR);
-
-  /* Select the main PLL as system clock source */
-
-  regval  = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_SW_MASK;
-  regval |= RCC_CFGR_SW_PLL;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Wait until the PLL source is used as the system clock source */
-
-  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
-    ;
+  return OK;
 }
-#endif
+
+#endif /* HAVE_QENCODER */

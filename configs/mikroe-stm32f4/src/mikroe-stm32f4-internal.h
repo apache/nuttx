@@ -1,6 +1,5 @@
 /****************************************************************************************************
  * configs/mikroe-stm32f4/src/mikroe-stm32f4-internal.h
- * arch/arm/src/board/mikroe-stm32f4-internal.n
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +45,7 @@
 #include <stdint.h>
 
 /****************************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************************************/
 /* Configuration ************************************************************************************/
 /* How many SPI modules does this chip support? */

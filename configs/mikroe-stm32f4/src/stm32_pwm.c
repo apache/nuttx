@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/mikroe_stm32f4/src/up_pwm.c
- * arch/arm/src/board/up_pwm.c
+ * configs/mikroe_stm32f4/src/stm32_pwm.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,7 @@
 #include "mikroe-stm32f4-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration *******************************************************************/
 /* PWM

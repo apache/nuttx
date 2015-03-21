@@ -1,9 +1,8 @@
 /************************************************************************************
- * configs/mikroe_stm32f4/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/mikroe_stm32f4/src/stm32_clockconfig.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,7 +47,7 @@
 #include "mikroe-stm32f4-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -60,50 +59,92 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_board_clockconfig
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   The Mikroe-STM32F4 board does not have an external crystal, so it must rely
+ *   on the internal 16Mhz RC oscillator.  The default clock configuration in the
+ *   OS for the STM32 architecture assumes an external crystal, so we must provide
+ *   a board specific clock configuration routine.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+void stm32_board_clockconfig(void)
 {
-  /* First reset the VS1053 since it tends to produce noise out of power on reset */
+  uint32_t regval;
 
-#ifdef CONFIG_VS1053
-  (void)stm32_configgpio(GPIO_VS1053_RST);
-#endif
-
-  /* Configure GPIOs for controlling the LCD */
-
-#if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
-  stm32_lcdinitialize();
-#endif
-
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
+  /* Configure chip clocking to use the internal 16Mhz RC oscillator.
+   *
+   * NOTE: We will assume the HSIRDY (High Speed Internal RC Ready) bit is
+   * set, otherwise we wouldn't be here executing code.
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  if (stm32_spiinitialize)
-    {
-      stm32_spiinitialize();
-    }
-#endif
+  regval  = getreg32(STM32_RCC_APB1ENR);
+  regval |= RCC_APB1ENR_PWREN;
+  putreg32(regval, STM32_RCC_APB1ENR);
 
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
-   * selected.
-   */
+  regval  = getreg32(STM32_PWR_CR);
+  regval |= PWR_CR_VOS;
+  putreg32(regval, STM32_PWR_CR);
 
-#ifdef CONFIG_STM32_OTGFS
-  if (stm32_usbinitialize)
-    {
-      stm32_usbinitialize();
-    }
+  /* Set the HCLK source/divider */
+
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_HPRE_MASK;
+  regval |= STM32_RCC_CFGR_HPRE;
+  putreg32(regval, STM32_RCC_CFGR);
+
+  /* Set the PCLK2 divider */
+
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_PPRE2_MASK;
+  regval |= STM32_RCC_CFGR_PPRE2;
+  putreg32(regval, STM32_RCC_CFGR);
+
+  /* Set the PCLK1 divider */
+
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_PPRE1_MASK;
+  regval |= STM32_RCC_CFGR_PPRE1;
+  putreg32(regval, STM32_RCC_CFGR);
+
+  /* Set the PLL dividers and multipliers to configure the main PLL */
+
+  regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |
+            RCC_PLLCFG_PLLSRC_HSI | STM32_PLLCFG_PLLQ);
+  putreg32(regval, STM32_RCC_PLLCFG);
+
+  /* Enable the main PLL */
+
+  regval = getreg32(STM32_RCC_CR);
+  regval |= RCC_CR_PLLON;
+  putreg32(regval, STM32_RCC_CR);
+
+  /* Wait until the PLL is ready */
+
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
+    ;
+
+  /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+
+#ifdef CONFIG_STM32_FLASH_PREFETCH
+  regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
+#else
+  regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
 #endif
+  putreg32(regval, STM32_FLASH_ACR);
+
+  /* Select the main PLL as system clock source */
+
+  regval  = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_SW_MASK;
+  regval |= RCC_CFGR_SW_PLL;
+  putreg32(regval, STM32_RCC_CFGR);
+
+  /* Wait until the PLL source is used as the system clock source */
+
+  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
+    ;
 }
+#endif
