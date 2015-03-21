@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/ne64badge/src/up_boot.c
+ * configs/ne64badge/src/m9s12_spi.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,38 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
 #include "ne64badge_internal.h"
 
+#if defined(CONFIG_HCS12_SPI)
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+
+#undef SPI_DEBUG   /* Define to enable debug */
+#undef SPI_VERBOSE /* Define to enable verbose debug */
+
+#ifdef SPI_DEBUG
+#  define spidbg  lldbg
+#  ifdef SPI_VERBOSE
+#    define spivdbg lldbg
+#  else
+#    define spivdbg(x...)
+#  endif
+#else
+#  undef SPI_VERBOSE
+#  define spidbg(x...)
+#  define spivdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -59,31 +81,49 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: hcs12_boardinitialize
+ * Name: hcs12_spiinitialize
  *
  * Description:
- *   All HCS12 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to configure SPI chip select GPIO pins for the NE64 Badge board.
  *
  ************************************************************************************/
 
-void hcs12_boardinitialize(void)
+void weak_function hcs12_spiinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * hcs12_spiinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_INCLUDE_HCS12_ARCH_SPI)
-  if (hcs12_spiinitialize)
-    {
-      hcs12_spiinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
 }
+
+/****************************************************************************
+ * Name:  hcs12_spiselect and hcs12_spistatus
+ *
+ * Description:
+ *   The external functions, hcs12_spiselect and hcs12_spistatus must be
+ *   provided by board-specific logic.  They are implementations of the select
+ *   and status methods of the SPI interface defined by struct spi_ops_s (see
+ *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
+ *   are provided by common HCS12 logic.  To use this common SPI logic on your
+ *   board:
+ *
+ *   1. Provide logic in hcs12_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide hcs12_spiselect() and hcs12_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
+ *   3. Add a calls to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ****************************************************************************/
+
+void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+}
+
+uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return SPI_STATUS_PRESENT;
+}
+
+#endif /* CONFIG_HCS12_SPI */

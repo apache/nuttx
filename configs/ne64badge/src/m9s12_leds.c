@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ne64badge/src/up_leds.c
+ * configs/ne64badge/src/m9s12_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
