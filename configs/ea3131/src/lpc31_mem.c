@@ -1,6 +1,5 @@
 /****************************************************************************
  * configs/ea3131/src/lpc31_mem.c
- * arch/arm/src/board/lpc31_mem.c
  *
  *   Copyright (C) 2009-2010,2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
