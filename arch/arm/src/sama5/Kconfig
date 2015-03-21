@@ -2577,7 +2577,7 @@ endif # SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
 if SAMA5_UDPHS
 menu "USB High Speed Device Controller driver (DCD) options"
 
-config UDPHS_SCATTERGATHER
+config SAMA5_UDPHS_SCATTERGATHER
 	bool
 	default n
 	---help---
