@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/shenzhou/src/up_cxxinitialize.c
- * arch/arm/src/board/up_cxxinitialize.c
+ * configs/shenzhou/src/stm32_cxxinitialize.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Debug ****************************************************************************/
 /* Non-standard debug that may be enabled just for testing the static constructors */

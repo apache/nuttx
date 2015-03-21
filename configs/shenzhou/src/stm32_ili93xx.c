@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/shenzhou/src/up_ili93xx.c
- * arch/arm/src/board/up_ili93xx.c
+ * configs/shenzhou/src/stm32_ili93xx.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

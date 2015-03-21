@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/shenzhou/src/up_userleds.c
- * arch/arm/src/board/up_userleds.c
+ * config/shenzhou/src/stm32_mmcsd.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,90 +39,91 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <arch/board/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-#include "stm32.h"
-#include "shenzhou-internal.h"
-
-#ifndef CONFIG_ARCH_LEDS
+#include <nuttx/spi/spi.h>
+#include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* SPI1 connects to the SD CARD (and to the SPI FLASH) */
 
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
+#define HAVE_MMCSD           1 /* Assume that we have SD support */
+#define STM32_MMCSDSPIPORTNO 1 /* Port is SPI1 */
+#define STM32_MMCSDSLOTNO    0 /* There is only one slot */
 
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#ifndef CONFIG_STM32_SPI1
+#  undef HAVE_MMCSD
 #else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  ifdef CONFIG_SPI_OWNBUS
+#    warning "SPI1 is shared with SD and FLASH but CONFIG_SPI_OWNBUS is defined"
+#  endif
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-/* This array maps an LED number to GPIO pin configuration */
+/* Can't support MMC/SD features if MMC/SD driver support is not selected */
 
-static uint32_t g_ledcfg[BOARD_NLEDS] =
-{
-  GPIO_LED1, GPIO_LED2, GPIO_LED3, GPIO_LED4
-};
+#ifndef CONFIG_MMCSD
+#  undef HAVE_MMCSD
+#endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  undef HAVE_MMCSD
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: stm32_sdinitialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.  Requires CONFIG_DISABLE_MOUNTPOINT=n
+ *   and CONFIG_STM32_SPI1=y
+ *
  ****************************************************************************/
 
-void stm32_ledinit(void)
+int stm32_sdinitialize(int minor)
 {
-   /* Configure LED1-4 GPIOs for output */
+#ifdef HAVE_MMCSD
+  FAR struct spi_dev_s *spi;
+  int ret;
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
-}
+  /* Get the SPI port */
 
-/****************************************************************************
- * Name: stm32_setled
- ****************************************************************************/
+  fvdbg("Initializing SPI port %d\n", STM32_MMCSDSPIPORTNO);
 
-void stm32_setled(int led, bool ledon)
-{
-  if ((unsigned)led < BOARD_NLEDS)
+  spi = up_spiinitialize(STM32_MMCSDSPIPORTNO);
+  if (!spi)
     {
-      stm32_gpiowrite(g_ledcfg[led], ledon);
+      fdbg("Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);
+      return -ENODEV;
     }
+
+  fvdbg("Successfully initialized SPI port %d\n", STM32_MMCSDSPIPORTNO);
+
+  /* Bind the SPI port to the slot */
+
+  fvdbg("Binding SPI port %d to MMC/SD slot %d\n",
+          STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO);
+
+  ret = mmcsd_spislotinitialize(minor, STM32_MMCSDSLOTNO, spi);
+  if (ret < 0)
+    {
+      fdbg("Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+            STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO, ret);
+      return ret;
+    }
+
+  fvdbg("Successfuly bound SPI port %d to MMC/SD slot %d\n",
+        STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO);
+#endif
+  return OK;
 }
 
-/****************************************************************************
- * Name: stm32_setleds
- ****************************************************************************/
-
-void stm32_setleds(uint8_t ledset)
-{
-  stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED4, (ledset & BOARD_LED4_BIT) == 0);
-}
-
-#endif /* !CONFIG_ARCH_LEDS */

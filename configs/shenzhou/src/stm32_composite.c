@@ -1,9 +1,10 @@
 /****************************************************************************
- * config/shenzhou/src/up_mmcsd.c
- * arch/arm/src/board/up_mmcsd.c
+ * configs/shenzhou/src/stm32_composite.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,40 +42,17 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
-#include <errno.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/mmcsd.h>
+#include "shenzhou-internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* SPI1 connects to the SD CARD (and to the SPI FLASH) */
+/* Device minor number */
 
-#define HAVE_MMCSD           1 /* Assume that we have SD support */
-#define STM32_MMCSDSPIPORTNO 1 /* Port is SPI1 */
-#define STM32_MMCSDSLOTNO    0 /* There is only one slot */
-
-#ifndef CONFIG_STM32_SPI1
-#  undef HAVE_MMCSD
-#else
-#  ifdef CONFIG_SPI_OWNBUS
-#    warning "SPI1 is shared with SD and FLASH but CONFIG_SPI_OWNBUS is defined"
-#  endif
-#endif
-
-/* Can't support MMC/SD features if MMC/SD driver support is not selected */
-
-#ifndef CONFIG_MMCSD
-#  undef HAVE_MMCSD
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#ifdef CONFIG_DISABLE_MOUNTPOINT
-#  undef HAVE_MMCSD
+#ifndef CONFIG_SYSTEM_COMPOSITE_DEVMINOR1
+#  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
 #endif
 
 /****************************************************************************
@@ -82,49 +60,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_sdinitialize
+ * Name: composite_archinitialize
  *
  * Description:
- *   Initialize the SPI-based SD card.  Requires CONFIG_DISABLE_MOUNTPOINT=n
- *   and CONFIG_STM32_SPI1=y
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int stm32_sdinitialize(int minor)
+int composite_archinitialize(void)
 {
-#ifdef HAVE_MMCSD
-  FAR struct spi_dev_s *spi;
-  int ret;
+  /* If system/composite is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   *
+   * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
+   * was built.
+   */
 
-  /* Get the SPI port */
-
-  fvdbg("Initializing SPI port %d\n", STM32_MMCSDSPIPORTNO);
-
-  spi = up_spiinitialize(STM32_MMCSDSPIPORTNO);
-  if (!spi)
-    {
-      fdbg("Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);
-      return -ENODEV;
-    }
-
-  fvdbg("Successfully initialized SPI port %d\n", STM32_MMCSDSPIPORTNO);
-
-  /* Bind the SPI port to the slot */
-
-  fvdbg("Binding SPI port %d to MMC/SD slot %d\n",
-          STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(minor, STM32_MMCSDSLOTNO, spi);
-  if (ret < 0)
-    {
-      fdbg("Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-            STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO, ret);
-      return ret;
-    }
-
-  fvdbg("Successfuly bound SPI port %d to MMC/SD slot %d\n",
-        STM32_MMCSDSPIPORTNO, STM32_MMCSDSLOTNO);
-#endif
+#ifndef CONFIG_NSH_BUILTIN_APPS
+  return sd_mount(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1);
+#else
   return OK;
+#endif /* CONFIG_NSH_BUILTIN_APPS */
 }
-

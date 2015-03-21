@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/shenzhou/src/up_usbmsc.c
+ * configs/shenzhou/src/stm32_userleds.c
  *
- *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Configure and register the STM32 SPI-based MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,43 +39,90 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
 #include "stm32.h"
+#include "shenzhou-internal.h"
+
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
-#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
-#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+/* This array maps an LED number to GPIO pin configuration */
+
+static uint32_t g_ledcfg[BOARD_NLEDS] =
+{
+  GPIO_LED1, GPIO_LED2, GPIO_LED3, GPIO_LED4
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbmsc_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
+ * Name: stm32_ledinit
  ****************************************************************************/
 
-int usbmsc_archinitialize(void)
+void stm32_ledinit(void)
 {
-  /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
-   * this case, there is nothing further to be done here.
-   */
+   /* Configure LED1-4 GPIOs for output */
 
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
-#else
-  return OK;
-#endif
+   stm32_configgpio(GPIO_LED1);
+   stm32_configgpio(GPIO_LED2);
+   stm32_configgpio(GPIO_LED3);
+   stm32_configgpio(GPIO_LED4);
 }
+
+/****************************************************************************
+ * Name: stm32_setled
+ ****************************************************************************/
+
+void stm32_setled(int led, bool ledon)
+{
+  if ((unsigned)led < BOARD_NLEDS)
+    {
+      stm32_gpiowrite(g_ledcfg[led], ledon);
+    }
+}
+
+/****************************************************************************
+ * Name: stm32_setleds
+ ****************************************************************************/
+
+void stm32_setleds(uint8_t ledset)
+{
+  stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED4, (ledset & BOARD_LED4_BIT) == 0);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

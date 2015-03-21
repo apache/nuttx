@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/shenzhou/src/up_chipid.c
- * arch/arm/src/board/up_chipid.c
+ * configs/shenzhou/src/stm32_watchdog.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,15 +39,65 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
+#include <errno.h>
+#include <debug.h>
 
+#include <nuttx/watchdog.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "stm32_wdg.h"
+
+#ifdef CONFIG_WATCHDOG
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration *******************************************************************/
+/* Wathdog hardware should be enabled */
+
+#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
+#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
+#endif
+
+/* Select the path to the registered watchdog timer device */
+
+#ifndef CONFIG_STM32_WDG_DEVPATH
+#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
+#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
+#  else
+#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
+#  endif
+#endif
+
+/* Use the un-calibrated LSI frequency if we have nothing better */
+
+#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
+#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
+#endif
+
+/* Debug ***************************************************************************/
+/* Non-standard debug that may be enabled just for testing the watchdog timer */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_WATCHDOG
+#endif
+
+#ifdef CONFIG_DEBUG_WATCHDOG
+#  define wdgdbg                 dbg
+#  define wdglldbg               lldbg
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define wdgvdbg              vdbg
+#    define wdgllvdbg            llvdbg
+#  else
+#    define wdgvdbg(x...)
+#    define wdgllvdbg(x...)
+#  endif
+#else
+#  define wdgdbg(x...)
+#  define wdglldbg(x...)
+#  define wdgvdbg(x...)
+#  define wdgllvdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -58,35 +107,29 @@
  * Public Functions
  ************************************************************************************/
 
-const char *stm32_getchipid(void)
+/****************************************************************************
+ * Name: up_wdginitialize()
+ *
+ * Description:
+ *   Perform architecuture-specific initialization of the Watchdog hardware.
+ *   This interface must be provided by all configurations using
+ *   apps/examples/watchdog
+ *
+ ****************************************************************************/
+
+int up_wdginitialize(void)
 {
-  static char cpuid[12];
-  int i;
+  /* Initialize tha register the watchdog timer device */
 
-  for (i = 0; i < 12; i++)
-    {
-      cpuid[i] = getreg8(0x1ffff7e8+i);
-    }
-
-  return cpuid;
+#if defined(CONFIG_STM32_WWDG)
+  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
+  return OK;
+#elif defined(CONFIG_STM32_IWDG)
+  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
+  return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-const char *stm32_getchipid_string(void)
-{
-  static char cpuid[27];
-  int c;
-  int i;
-
-  for (i = 0, c = 0; i < 12; i++)
-    {
-      sprintf(&cpuid[c], "%02X", getreg8(0x1ffff7e8+11-i));
-      c += 2;
-      if (i % 4 == 3)
-        {
-          cpuid[c++] = '-';
-        }
-    }
-
-  cpuid[26] = '\0';
-  return cpuid;
-}
+#endif /* CONFIG_WATCHDOG */

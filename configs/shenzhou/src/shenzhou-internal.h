@@ -1,6 +1,5 @@
 /****************************************************************************************************
  * configs/shenzhou/src/shenzhou-internal.h
- * arch/arm/src/board/shenzhou-internal.n
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +45,7 @@
 #include <stdint.h>
 
 /****************************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************************************/
 /* Configuration ************************************************************************************/
 /* How many SPI modules does this chip support? */

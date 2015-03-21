@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/shenzhou/src/up_autoleds.c
+ * configs/shenzhou/src/stm32_autoleds.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
