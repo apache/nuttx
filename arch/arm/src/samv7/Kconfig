@@ -408,21 +408,25 @@ config SAMV7_USBDEVFS
 	bool "USB Device Full Speed (USBFS)"
 	default n
 	depends on SAMV7_HAVE_USBFS
+	select USBDEV
 
 config SAMV7_USBDEVHS
 	bool "USB Device High Speed (USBHS)"
 	default n
 	depends on SAMV7_HAVE_USBHS
+	select USBDEV
 
 config SAMV7_USBHOSTFS
 	bool "USB Host Full Speed (USBFS)"
 	default n
 	depends on SAMV7_HAVE_USBFS
+	select USBHOST
 
 config SAMV7_USBHOSTHS
 	bool "USB Host High Speed (USBHS)"
 	default n
 	depends on SAMV7_HAVE_USBHS
+	select USBHOST
 
 config SAMV7_USART0
 	bool "USART 0"
@@ -1236,3 +1240,37 @@ config SAMV7_EMAC_REGDEBUG
 		Enable very low-level register access debug.  Depends on DEBUG.
 
 endmenu # EMAC0 device driver options
+
+menu "USB High Speed Device Controller driver (DCD) options"
+	depends on SAMV7_USBDEVHS
+
+config SAMV7_USBHS_SCATTERGATHER
+	bool
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Scatter gather DMA is not yet supported
+
+config SAMV7_USBHS_NDTDS
+	int "Number of USBHS DMA transfer descriptors"
+	default 8
+	---help---
+		DMA transfer descriptors are allocated in a pool at boot time.  This
+		setting provides the number of DMA transfer descriptors to be
+		allocated.
+
+config SAMV7_USBHS_PREALLOCATE
+	bool "Pre-allocate DMA transfer descriptors"
+	default y
+	---help---
+		If this option is selected then DMA transfer descriptors will be
+		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
+		at start-up time with kmm_malloc().  This might be important if a larger
+		memory pool is available after startup.
+
+config SAMV7_USBHS_REGDEBUG
+	bool "Enable low-level USBHS register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB High Speed Device Controller driver (DCD) options

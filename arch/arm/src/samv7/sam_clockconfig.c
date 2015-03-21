@@ -72,7 +72,6 @@
                              BOARD_PMC_MCKR_MDIV | BOARD_PMC_MCKR_UPLLDIV2)
 #define BOARD_PMC_MCKR      (BOARD_PMC_MCKR_CSS | BOARD_PMC_MCKR_PRES | \
                              BOARD_PMC_MCKR_MDIV | BOARD_PMC_MCKR_UPLLDIV2)
-#define BOARD_CKGR_UCKR     (BOARD_CKGR_UCKR_UPLLCOUNT | PMC_CKGR_UCKR_UPLLEN)
 
 /****************************************************************************
  * Public Data
@@ -225,11 +224,22 @@ static inline void sam_pmcsetup(void)
   sam_pmcwait(PMC_INT_LOCKA);
 
 #ifdef CONFIG_USBDEV
-  /* Setup UTMI for USB and wait for LOCKU */
+  /* UTMI parallel mode, High/Full/Low Speed */
+  /* UUSBCLK is not used in this configuration (High Speed) */
 
-  regval = getreg32(SAM_PMC_CKGR_UCKR);
-  regval |= BOARD_CKGR_UCKR;
+  putreg32(PMC_USBCLK, SAM_PMC_SCDR);
+
+  /* Select the UTMI PLL as the USB clock input with divider = 1. */
+
+  putreg32(PMC_USB_USBS_UPLL, SAM_PMC_USB);
+
+  /* Enable the UTMI PLL with the maximum startup time */
+
+  regval = PMC_CKGR_UCKR_UPLLEN | PMC_CKGR_UCKR_UPLLCOUNT_MAX;
   putreg32(regval, SAM_PMC_CKGR_UCKR);
+
+  /* Wait for LOCKU */
+
   sam_pmcwait(PMC_INT_LOCKU);
 #endif
 

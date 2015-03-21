@@ -2580,13 +2580,13 @@ menu "USB High Speed Device Controller driver (DCD) options"
 config SAMA5_UDPHS_SCATTERGATHER
 	bool
 	default n
+	depends on EXPERIMENTAL
 	---help---
 		Scatter gather DMA is not yet supported
 
 config SAMA5_UDPHS_NDTDS
 	int "Number of UDPHS DMA transfer descriptors"
-	default 9
-	depends on UDPHS_SCATTERGATHER
+	default 8
 	---help---
 		DMA transfer descriptors are allocated in a pool at boot time.  This
 		setting provides the number of DMA transfer descriptors to be
@@ -2595,7 +2595,6 @@ config SAMA5_UDPHS_NDTDS
 config SAMA5_UDPHS_PREALLOCATE
 	bool "Pre-allocate DMA transfer descriptors"
 	default y
-	depends on UDPHS_SCATTERGATHER
 	---help---
 		If this option is selected then DMA transfer descriptors will be
 		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
