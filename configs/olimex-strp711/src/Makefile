@@ -35,31 +35,31 @@
 
 -include $(TOPDIR)/Make.defs
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/sched}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/sched}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I$(TOPDIR)/sched
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I$(TOPDIR)/sched
 endif
 
-ASRCS		=
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= up_spi.c up_leds.c up_buttons.c
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+CSRCS = str71_spi.c str71_leds.c str71_buttons.c
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS += str71_nsh.c
 endif
 ifeq ($(CONFIG_ENC28J60),y)
-CSRCS		+= up_enc28j60.c
+CSRCS += str71_enc28j60.c
 endif
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-CFLAGS		+= -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS += -I $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 
 all: libboard$(LIBEXT)
 

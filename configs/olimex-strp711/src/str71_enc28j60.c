@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-strp711/src/up_enc28j60.c
+ * configs/olimex-strp711/src/str71_enc28j60.c
  *
  *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -98,7 +98,7 @@
 #ifdef CONFIG_ENC28J60
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
