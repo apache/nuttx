@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/ea3131/src/ea3131_internal.h
- * arch/arm/src/board/ea3131_internal.n
  *
  *   Copyright (C) 2009-2010,2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "lpc31_ioconfig.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* EA3131L GPIOs ********************************************************************/
@@ -153,4 +152,3 @@ void weak_function lpc31_pginitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_EA3131_SRC_EA3131_INTERNAL_H */
-

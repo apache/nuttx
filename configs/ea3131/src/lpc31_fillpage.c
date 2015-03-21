@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/ea3131/src/up_fillpage.c
- * arch/arm/src/board/up_fillpage.c
+ * configs/ea3131/src/lpc31_fillpage.c
  *
  *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -70,7 +69,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

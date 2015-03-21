@@ -40,38 +40,38 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c up_clkinit.c
+CSRCS = lpc31_boot.c lpc31_clkinit.c
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += up_buttons.c
+CSRCS += lpc31_buttons.c
 endif
 
 ifeq ($(CONFIG_LPC31_EXTDRAM),y)
-CSRCS += up_mem.c
+CSRCS += lpc31_mem.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_leds.c
+CSRCS += lpc31_leds.c
 endif
 
 ifeq ($(CONFIG_LPC31_SPI),y)
-CSRCS += up_spi.c
+CSRCS += lpc31_spi.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
+CSRCS += lpc31_nsh.c
 endif
 
 ifeq ($(CONFIG_PAGING),y)
-CSRCS += up_fillpage.c
+CSRCS += lpc31_fillpage.c
 endif
 
 ifeq ($(CONFIG_LPC31_USBOTG),y)
 ifeq ($(CONFIG_USBHOST),y)
-CSRCS += up_usbhost.c
+CSRCS += lpc31_usbhost.c
 endif
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS += up_usbmsc.c
+CSRCS += lpc31_usbmsc.c
 endif
 endif
 
