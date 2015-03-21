@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/kernel/up_userspace.c
+ * configs/sam3u-ek/kernel/sam_userspace.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
