@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-strp711/src/up_leds.c
+ * configs/olimex-strp711/src/str71_leds.c
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

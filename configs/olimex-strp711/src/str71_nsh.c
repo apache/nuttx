@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/olimex-strp711/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/olimex-strp711/src/str71_nsh.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

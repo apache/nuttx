@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-strp711/src/up_spi.c
+ * config/olimex-strp711/src/str71_spi.c
  *
  *   Copyright (C) 2008-2010,2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,7 +58,7 @@
 #if defined(CONFIG_STR71X_BSPI0) || defined(CONFIG_STR71X_BSPI1)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
