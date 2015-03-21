@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/micropendous3/src/up_boot.c
+ * configs/micropendous3/src/at90usb_boot.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
