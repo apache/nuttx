@@ -152,8 +152,8 @@ Tool Issues
 
     https://sourcery.mentor.com/GNUToolchain/release2934 tools.
 
-  If you use this toolchain, you will need to add CROSSDEV=mips-sde-elf- either
-  to your Make.defs file.
+  If you use this toolchain, you will need to add CROSSDEV=mips-sde-elf- to
+  your Make.defs file.
 
   ICD3
   ----
@@ -200,6 +200,12 @@ Serial Console
 
     #define BOARD_U1RX_PPS  U1RXR_RPA14
     #define BOARD_U1TX_PPS  U1TX_RPA15R
+
+  PIC32MX I/O Expansion Board with Adapter Board
+  ------------------------------------------
+  If the MEB-II UART configuration when used with the I/O Expansion board
+  (with the adapter), then UART will be on J11 with Pin 35 being U1RX (into
+  MZ) and Pin 37 being TU1X (out od MZ).
 
   Directly from the Adapter Board
   -------------------------------
