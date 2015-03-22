@@ -182,7 +182,24 @@ Serial Console
   MEB-II
   ------
   By default, the UART1 is configured for the pins used by the MEB-II
-  board.
+  board.  The UART1 signals are available at the MEB-II PICTail
+  connector:
+
+    --------------- --------- -------------- ------------
+    PIC32MZ PIN     CONNECTOR MEB-II PIN     PICTAIL PIN
+    FUNCTION        J1        NAME           J2
+    --------------- --------- -------------- ------------
+    RPA14/SCL1/RA14 124       SCL1/TOUCH_SCL 4
+    RPA15/SDA1/RA15 126       SDA1/TOUCH_SDA 6
+                              +3.3V          1,26
+                              GND            28
+    --------------- --------- -------------- ------------
+
+  This pin selection is controlled by these definitions in
+  pic32mz-starterkit/include/board.h:
+
+    #define BOARD_U1RX_PPS  U1RXR_RPA14
+    #define BOARD_U1TX_PPS  U1TX_RPA15R
 
   Directly from the Adapter Board
   -------------------------------
