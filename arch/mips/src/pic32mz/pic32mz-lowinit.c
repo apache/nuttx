@@ -398,9 +398,11 @@ void pic32mz_lowinit(void)
 
   /* Enable caching in KSEG0 */
 
-  pic32mz_k0cache();;
+  pic32mz_k0cache();
 
   /* Configure peripheral clocking */
+
+  pic32mz_pbclk();
 
   /* Initialize a console (probably a serial console) */
 
