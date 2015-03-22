@@ -23,50 +23,12 @@ Port Status
   minimal support for the NuttShell (NSH) over UART1.  No testing has yet
   been performed due to seemingly insurmountable debug problems:
 
-  1) On my test platform (Windows 8.1), Neither MPLABX IDE nor IPE recognize
-  the on-board OpenHCD debugger.  It appears completely useless to me.
+  Thusfar, no one has been successful using NuttX with MPLABX.  All
+  debug is being performed using a J-Link debugger via some custom
+  interconnect boards.
 
-  2) By removing jumper JP2, I can disable the on-board OpenHCD debugger an
-  enable the RJ11 debug connector.  My ICD 3 does seems to work properly
-  using this configuration -- at least in the sense that it is recognized by
-  both MPLABX IDE and IPE.
-
-  3) However, I am still unable to write code to FLASH using MPLABX IDE.  It
-  give me uninterpretable error messages, for example, saying that it could
-  not write to FLASH:
-
-    Address: 1fc00480 Expected Value: ffffffff Received Value: ffffffff
-    Failed to program device
-
-  This could very well be some issue with my formatting of the nuttx.hex
-  file, but I have no understanding of what the solution might be.
-
-  UPDATE:  Davide Sidrane has debugged this and has determined that the
-  issue here was because the PIC32MZ requires more space for the the
-  DEBUG code at 1fc00480.  The modified linker scripts have been committed
-  and are purported to resolve this issue.
-
-  4) I can write successfully using that same nuttx.hex file using MPLABX
-  IPE program.  No errors are observed and the flash content verifies
-  correctly.  But NuttX does not run.  I need a debugger to understand why.
-
-  5) I thought I might be able to write the flash image using MPLABX IPE,
-  then debug the flash image using MPLABX IDE.  But no, MPLABX IPE insists
-  on clearing the DEVCFG0 DEBUG bit whenever it writes the flash image and,
-  as a result, MPLABX IDE will always complain the board is not ready for
-  debugging.
-
-  6) My last hope is to use a Segger J-Link.  I can configure the PIC32MZ
-  to enable JTAG and the J-Link does support PIC32 debug.  However, I need
-  a 20-pin JTAG to either a 14-pin MIPS connector or a Microchip RJ11
-  connector.  Living in Costa Rica, those parts are not readily available.
-  I have a 20- to 14-pin JTAG adapter in transit, but living in Costa Rica
-  I don't expect to see that for around three weeks.  In the mean time, I
-  am dead in the water.
-
-  Given the way things have been going, I am not at all optimistic that the
-  job will become do-able, even after I have the adapter in hand.  Microchip
-  could certainly have made life easier on this one.
+  Patches were provided by Kristopher Tate on 2015-03-21 that support the
+  serial console with the NuttShell, completing the basic bring-up.
 
 Board Overview
 ==============
@@ -185,9 +147,20 @@ Tool Issues
 
     OUTPUT_FORMAT("elf32-littlemips")
 
+  Mentor Toolchain
+  ----------------
+
+    https://sourcery.mentor.com/GNUToolchain/release2934 tools.
+
+  If you use this toolchain, you will need to add CROSSDEV=mips-sde-elf- either
+  to your Make.defs file.
+
   ICD3
   ----
-  The onboard debugger is Slow and one is better off using an ICD3
+  The onboard debugger is Slow and one is better off using an ICD3. By removing
+  jumper JP2, I can disable the on-board OpenHCD debugger an enable the RJ11
+  debug connector.  My ICD 3 does seems to work properly using this configuration,
+  at least in the sense that it is recognized by both MPLABX IDE and IPE.
 
   Segger J-Link
   -------------
@@ -196,11 +169,26 @@ Tool Issues
     J-Link BASE / EDU V9 or later
     J-Link ULTRA+ / PRO V4 or later
 
+  Oddly, you must use the G version in the command:
+
+    JLinkGDBServer  -device PIC32MZ2048ECG144 -if 2-wire-JTAG-PIC32 -speed 12000
+
+    Even though we have PIC32MZ2048ECM144 parts on our board. (JLinkGDBServer
+    will except anything and just mess up your weekend)
+
 Serial Console
 ==============
 
-  The Microchip PIC32MZ Embedded Connectivity (EC) Adapter Board (AC320006)
-  brings out UART signals as follows:
+  MEB-II
+  ------
+  By default, the UART1 is configured for the pins used by the MEB-II
+  board.
+
+  Directly from the Adapter Board
+  -------------------------------
+  But you can get serial port directly from the PIC32MZ Embedded
+  Connectivity (EC) Adapter Board (AC320006).  The Microchip
+  adapter board brings out UART signals as follows:
 
   JP7 redirects J1 U3_TX to either J2 SOSCO/RC14 or U1_TX:
 
@@ -239,7 +227,7 @@ Serial Console
   configs/pc32mz-starterkit/include/board.h.
 
   If using a AC320006 by itself, JP7 pin 2 and JP8 pin 2 is where you would
-  connect a 3.3 Volt ttl serial interface.
+  connect a 3.3 Volt TTL serial interface.
 
   For a configuration using UART1 connect:
    TX to AC320006-JP7 pin 2 which is PIC32MZ pin 106 (RPC14) used as U1RX
@@ -259,33 +247,44 @@ Serial Console
 
   For the default configuration using UART1 the PIC32MZ pin 106 (RPC14)
   will be configured as U1RX and is tied to the AC320006's JP7 Pin 2.
-  With the jupmpers as listed above, once the AC320006 is plugged into
+  With the jumpers as listed above, once the AC320006 is plugged into
   the DM320002, the PIC32MZ U1RX will be connected to the DM320002's
-  J11 pin 43. The DM320002's J11 pin 43 should then be connnected to
-  the TX of a 3.3 volt ttl serial converter such as a FTDI TTL232RG.
-  For the FTDI TTL232RG TX is the oranage wire.
+  J11 pin 43. The DM320002's J11 pin 43 should then be connected to
+  the TX of a 3.3 volt TTL serial converter such as a FTDI TTL232RG.
+  For the FTDI TTL232RG TX is the orange wire.
 
   Likewise the PIC32MZ pin 31 (RPB3) will be configured as U1TX and
-  is tied to the AC320006's JP8 Pin 2.  With the jupmpers as listed above,
+  is tied to the AC320006's JP8 Pin 2.  With the jumpers as listed above,
   once the AC320006 is plugged into the DM320002, the PIC32MZ' U1TX will
   be connected to the DM320002's J11 pin 41. The DM320002's J11 pin 41
-  should then be connnected to the RX signal of a 3.3 volt ttl serial
+  should then be connected to the RX signal of a 3.3 volt TTL serial
   converter. For the FTDI TTL232RG RX is the yellow wire.
 
   For the alternate configuration using UART3 the PIC32MZ pin 106 (RPC14)
   will be configured as U3TX and is tied to the AC320006's JP7 Pin 2.
-  With the jupmpers as listed above, once the AC320006 is plugged into
+  With the jumpers as listed above, once the AC320006 is plugged into
   the DM320002, the PIC32MZ U3TX will be connected to the DM320002's
-  J11 pin 43. The DM320002's J11 pin 43 should then be connnected to
-  the RX of a 3.3 volt ttl serial converter such as a FTDI TTL232RG.
+  J11 pin 43. The DM320002's J11 pin 43 should then be connected to
+  the RX of a 3.3 volt TTL serial converter such as a FTDI TTL232RG.
   For the FTDI TTL232RG TX is the yellow wire.
 
   Likewise the PIC32MZ pin 31 (RPB3) will be configured as U3RX and
-  is tied to the AC320006's JP8 Pin 2.  With the jupmpers as listed above,
+  is tied to the AC320006's JP8 Pin 2.  With the jumpers as listed above,
   once the AC320006 is plugged into the DM320002, the PIC32MZ' U3RX will
   be connected to the DM320002's J11 pin 41. The DM320002's J11 pin 41
-  should then be connnected to the TX signal of a 3.3 volt ttl serial
+  should then be connected to the TX signal of a 3.3 volt TTL serial
   converter. For the FTDI TTL232RG RX is the orange wire.
+
+  board.h Header File Changes
+  ---------------------------
+  The board configuration is currently set up to use the Serial console
+  on the MEB-II board.  If you  want to use the adapter board directly,
+  you willneed to change pic32mz-starterkit/include/board.h as follows:
+
+    -#define BOARD_U1RX_PPS  U1RXR_RPA14
+    -#define BOARD_U1TX_PPS  U1TX_RPA15R
+    +#define BOARD_U1RX_PPS  U1RXR_RPC14
+    +#define BOARD_U1TX_PPS  U1TX_RPB3R
 
 LEDs and Buttons
 ================
