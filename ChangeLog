@@ -10024,3 +10024,7 @@
 	  file.  From Bob Doiron (2015-03-20).
 	* configs/olimexino-stm32: Board support for the Olimexino STM32 board
 	  from David Sidrane (2015-03-20).
+	* PIC32MZ:  Incorporated a set of patches that makes the basic NSH
+	  configuration on the PIC32MZ Starter Kit.  From Kristopher Tate
+	  (2015-03-22).
+
