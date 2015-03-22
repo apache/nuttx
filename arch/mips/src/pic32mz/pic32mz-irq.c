@@ -101,7 +101,7 @@ static uintptr_t pic32mz_ifs(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      return PIC32MZ_INT_IFS(irq);
+      return PIC32MZ_INT_IFS(irq >> 5);
     }
 
   return 0;
@@ -115,7 +115,7 @@ static uintptr_t pic32mz_ifsclr(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      return PIC32MZ_INT_IFSCLR(irq);
+      return PIC32MZ_INT_IFSCLR(irq >> 5);
     }
 
   return 0;
@@ -129,7 +129,7 @@ static uintptr_t pic32mz_iec(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      return PIC32MZ_INT_IEC(irq);
+      return PIC32MZ_INT_IEC(irq >> 5);
     }
 
   return 0;
@@ -143,7 +143,7 @@ static uintptr_t pic32mz_iecset(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      return PIC32MZ_INT_IECSET(irq);
+      return PIC32MZ_INT_IECSET(irq >> 5);
     }
 
   return 0;
@@ -157,7 +157,7 @@ static uintptr_t pic32mz_iecclr(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      return PIC32MZ_INT_IECCLR(irq);
+      return PIC32MZ_INT_IECCLR(irq >> 5);
     }
 
   return 0;
