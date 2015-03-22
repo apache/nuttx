@@ -239,7 +239,23 @@
 #define BUTTON_SW3_BIT         (1 << BUTTON_SW3)
 
 /* UARTS ********************************************************************/
-/* The following pin assignment is used with the MEB-II board.  If you are
+/*  MEB-II
+ *
+ * By default, the UART1 is configured for the pins used by the MEB-II
+ * board.  The UART1 signals are available at the MEB-II PICTail
+ * connector:
+ *
+ *   --------------- --------- -------------- ------------
+ *   PIC32MZ PIN     CONNECTOR MEB-II PIN     PICTAIL PIN
+ *   FUNCTION        J1        NAME           J2
+ *   --------------- --------- -------------- ------------
+ *   RPA14/SCL1/RA14 124       SCL1/TOUCH_SCL 4
+ *   RPA15/SDA1/RA15 126       SDA1/TOUCH_SDA 6
+ *                             +3.3V          1,26
+ *                             GND            28
+ *   --------------- --------- -------------- ------------
+ *
+ * The following pin assignment is used with the MEB-II board.  If you are
  * using signals from PIC32MZEC Adaptor Board (as described in the the README
  * file), then UART1 signals are available at these locations on the adaptor
  * board:
