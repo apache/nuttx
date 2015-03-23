@@ -104,7 +104,8 @@ endif
 endif
 
 ifeq ($(CONFIG_TIVA_ADC),y)
-CHIP_CSRCS += tiva_adc.c
+CHIP_CSRCS += tiva_adclow.c
+CHIP_CSRCS += tiva_adclib.c
 endif
 
 ifeq ($(CONFIG_NET),y)
