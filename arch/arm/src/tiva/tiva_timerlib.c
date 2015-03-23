@@ -1644,7 +1644,6 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
     case 0:
       /* Enable GPTM0 clocking and power */
 
-
       attr = &g_gptm0_attr;
       priv = &g_gptm0_state;
       break;
@@ -2321,9 +2320,12 @@ void tiva_timer32_setinterval(TIMER_HANDLE handle, uint32_t interval)
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
   bool toints;
 
-  DEBUGASSERT(priv && priv->attr && priv->config &&
-              priv->config->mode != TIMER16_MODE);
+  DEBUGASSERT(priv);
+  DEBUGASSERT(priv->attr);
+  DEBUGASSERT(priv->config);
   config = (const struct tiva_gptm32config_s *)priv->config;
+
+  DEBUGASSERT(config->cmn.mode != TIMER16_MODE);
   timer  = &config->config;
 
   /* Do we need to enable timeout interrupts?  Interrupts are only enabled

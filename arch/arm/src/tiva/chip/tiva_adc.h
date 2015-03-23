@@ -48,53 +48,53 @@
 
 /* ADC register offsets *************************************************************/
 
-#define TIVA_ADC_ACTSS_OFFSET    0x00000000   /* ADC Active Sample Sequencer */
-#define TIVA_ADC_RIS_OFFSET      0x00000004   /* ADC Raw Interrupt Status */
-#define TIVA_ADC_IM_OFFSET       0x00000008   /* ADC Interrupt Mask */
-#define TIVA_ADC_ISC_OFFSET      0x0000000C   /* ADC Interrupt Status and Clear */
-#define TIVA_ADC_OSTAT_OFFSET    0x00000010   /* ADC Overflow Status */
-#define TIVA_ADC_EMUX_OFFSET     0x00000014   /* ADC Event Multiplexer Select */
-#define TIVA_ADC_USTAT_OFFSET    0x00000018   /* ADC Underflow Status */
-#define TIVA_ADC_TSSEL_OFFSET    0x0000001C   /* ADC Trigger Source Select */
-#define TIVA_ADC_SSPRI_OFFSET    0x00000020   /* ADC Sample Sequencer Priority */
-#define TIVA_ADC_SPC_OFFSET      0x00000024   /* ADC Sample Phase Control */
-#define TIVA_ADC_PSSI_OFFSET     0x00000028   /* ADC Processor Sample Sequence Initiate */
-#define TIVA_ADC_SAC_OFFSET      0x00000030   /* ADC Sample Averaging Control */
-#define TIVA_ADC_DCISC_OFFSET    0x00000034   /* ADC Digital Comparator Interrupt Status and Clear */
-#define TIVA_ADC_CTL_OFFSET      0x00000038   /* ADC Control */
+#define TIVA_ADC_ACTSS_OFFSET    0x000   /* ADC Active Sample Sequencer */
+#define TIVA_ADC_RIS_OFFSET      0x004   /* ADC Raw Interrupt Status */
+#define TIVA_ADC_IM_OFFSET       0x008   /* ADC Interrupt Mask */
+#define TIVA_ADC_ISC_OFFSET      0x00c   /* ADC Interrupt Status and Clear */
+#define TIVA_ADC_OSTAT_OFFSET    0x010   /* ADC Overflow Status */
+#define TIVA_ADC_EMUX_OFFSET     0x014   /* ADC Event Multiplexer Select */
+#define TIVA_ADC_USTAT_OFFSET    0x018   /* ADC Underflow Status */
+#define TIVA_ADC_TSSEL_OFFSET    0x01c   /* ADC Trigger Source Select */
+#define TIVA_ADC_SSPRI_OFFSET    0x020   /* ADC Sample Sequencer Priority */
+#define TIVA_ADC_SPC_OFFSET      0x024   /* ADC Sample Phase Control */
+#define TIVA_ADC_PSSI_OFFSET     0x028   /* ADC Processor Sample Sequence Initiate */
+#define TIVA_ADC_SAC_OFFSET      0x030   /* ADC Sample Averaging Control */
+#define TIVA_ADC_DCISC_OFFSET    0x034   /* ADC Digital Comparator Interrupt Status and Clear */
+#define TIVA_ADC_CTL_OFFSET      0x038   /* ADC Control */
 
-#define TIVA_ADC_SS_BASE         0x00000040   /* ADC Sample Sequence base address */
-#define TIVA_ADC_SSMUX_OFFSET    0x00000020   /* ADC Sample Sequence Input Multiplexer Select */
-#define TIVA_ADC_SSCTL_OFFSET    0x00000004   /* ADC Sample Sequence Control */
-#define TIVA_ADC_SSFIFO_OFFSET   0x00000008   /* ADC Sample Sequence Result FIFO */
-#define TIVA_ADC_SSFSTAT_OFFSET  0x0000000C   /* ADC Sample Sequence FIFO Status */
-#define TIVA_ADC_SSOP_OFFSET     0x00000010   /* ADC Sample Sequence Operation */
-#define TIVA_ADC_SSDC_OFFSET     0x00000014   /* ADC Sample Sequence Digital Comparator Select */
-#define TIVA_ADC_SSEMUX_OFFSET   0x00000018   /* ADC Sample Sequence Extended Input Multiplexer Select */
-#define TIVA_ADC_SSTSH_OFFSET    0x0000001C   /* ADC Sample Sequence Sample and Hold Time */
+#define TIVA_ADC_SS_BASE         0x040   /* ADC Sample Sequence base address */
+#define TIVA_ADC_SSMUX_OFFSET    0x020   /* ADC Sample Sequence Input Multiplexer Select */
+#define TIVA_ADC_SSCTL_OFFSET    0x004   /* ADC Sample Sequence Control */
+#define TIVA_ADC_SSFIFO_OFFSET   0x008   /* ADC Sample Sequence Result FIFO */
+#define TIVA_ADC_SSFSTAT_OFFSET  0x00c   /* ADC Sample Sequence FIFO Status */
+#define TIVA_ADC_SSOP_OFFSET     0x010   /* ADC Sample Sequence Operation */
+#define TIVA_ADC_SSDC_OFFSET     0x014   /* ADC Sample Sequence Digital Comparator Select */
+#define TIVA_ADC_SSEMUX_OFFSET   0x018   /* ADC Sample Sequence Extended Input Multiplexer Select */
+#define TIVA_ADC_SSTSH_OFFSET    0x01c   /* ADC Sample Sequence Sample and Hold Time */
 
-#define TIVA_ADC_DCRIC_OFFSET    0x00000D00   /* ADC Digital Comparator Reset Initial Conditions */
-#define TIVA_ADC_DCCTL0_OFFSET   0x00000E00   /* ADC Digital Comparator Control 0 */
-#define TIVA_ADC_DCCTL1_OFFSET   0x00000E04   /* ADC Digital Comparator Control 1 */
-#define TIVA_ADC_DCCTL2_OFFSET   0x00000E08   /* ADC Digital Comparator Control 2 */
-#define TIVA_ADC_DCCTL3_OFFSET   0x00000E0C   /* ADC Digital Comparator Control 3 */
-#define TIVA_ADC_DCCTL4_OFFSET   0x00000E10   /* ADC Digital Comparator Control 4 */
-#define TIVA_ADC_DCCTL5_OFFSET   0x00000E14   /* ADC Digital Comparator Control 5 */
-#define TIVA_ADC_DCCTL6_OFFSET   0x00000E18   /* ADC Digital Comparator Control 6 */
-#define TIVA_ADC_DCCTL7_OFFSET   0x00000E1C   /* ADC Digital Comparator Control 7 */
+#define TIVA_ADC_DCRIC_OFFSET    0xd00   /* ADC Digital Comparator Reset Initial Conditions */
+#define TIVA_ADC_DCCTL0_OFFSET   0xe00   /* ADC Digital Comparator Control 0 */
+#define TIVA_ADC_DCCTL1_OFFSET   0xe04   /* ADC Digital Comparator Control 1 */
+#define TIVA_ADC_DCCTL2_OFFSET   0xe08   /* ADC Digital Comparator Control 2 */
+#define TIVA_ADC_DCCTL3_OFFSET   0xe0c   /* ADC Digital Comparator Control 3 */
+#define TIVA_ADC_DCCTL4_OFFSET   0xe10   /* ADC Digital Comparator Control 4 */
+#define TIVA_ADC_DCCTL5_OFFSET   0xe14   /* ADC Digital Comparator Control 5 */
+#define TIVA_ADC_DCCTL6_OFFSET   0xe18   /* ADC Digital Comparator Control 6 */
+#define TIVA_ADC_DCCTL7_OFFSET   0xe1c   /* ADC Digital Comparator Control 7 */
 
-#define TIVA_ADC_DCCMP0_OFFSET   0x00000E40   /* ADC Digital Comparator Range 0 */
-#define TIVA_ADC_DCCMP1_OFFSET   0x00000E44   /* ADC Digital Comparator Range 1 */
-#define TIVA_ADC_DCCMP2_OFFSET   0x00000E48   /* ADC Digital Comparator Range 2 */
-#define TIVA_ADC_DCCMP3_OFFSET   0x00000E4C   /* ADC Digital Comparator Range 3 */
-#define TIVA_ADC_DCCMP4_OFFSET   0x00000E50   /* ADC Digital Comparator Range 4 */
-#define TIVA_ADC_DCCMP5_OFFSET   0x00000E54   /* ADC Digital Comparator Range 5 */
-#define TIVA_ADC_DCCMP6_OFFSET   0x00000E58   /* ADC Digital Comparator Range 6 */
-#define TIVA_ADC_DCCMP7_OFFSET   0x00000E5C   /* ADC Digital Comparator Range 7 */
+#define TIVA_ADC_DCCMP0_OFFSET   0xe40   /* ADC Digital Comparator Range 0 */
+#define TIVA_ADC_DCCMP1_OFFSET   0xe44   /* ADC Digital Comparator Range 1 */
+#define TIVA_ADC_DCCMP2_OFFSET   0xe48   /* ADC Digital Comparator Range 2 */
+#define TIVA_ADC_DCCMP3_OFFSET   0xe4c   /* ADC Digital Comparator Range 3 */
+#define TIVA_ADC_DCCMP4_OFFSET   0xe50   /* ADC Digital Comparator Range 4 */
+#define TIVA_ADC_DCCMP5_OFFSET   0xe54   /* ADC Digital Comparator Range 5 */
+#define TIVA_ADC_DCCMP6_OFFSET   0xe58   /* ADC Digital Comparator Range 6 */
+#define TIVA_ADC_DCCMP7_OFFSET   0xe5c   /* ADC Digital Comparator Range 7 */
 
-#define TIVA_ADC_PP_OFFSET       0x00000FC0   /* ADC Peripheral Properties */
-#define TIVA_ADC_PC_OFFSET       0x00000FC4   /* ADC Peripheral Configuration */
-#define TIVA_ADC_CC_OFFSET       0x00000FC8   /* ADC Clock Configuration */
+#define TIVA_ADC_PP_OFFSET       0xfc0   /* ADC Peripheral Properties */
+#define TIVA_ADC_PC_OFFSET       0xfc4   /* ADC Peripheral Configuration */
+#define TIVA_ADC_CC_OFFSET       0xfc8   /* ADC Clock Configuration */
 
 /* ADC register addresses ***********************************************************/
 
@@ -329,22 +329,22 @@
 
 /* Bit fields in the TIVA_ADC_ISC register. */
 
-#define ADC_ISC_SSE(n)          (1 << ((n)*4))
-#define ADC_ISC_DCIN_SHIFT      20
-#  define ADC_ISC_DCINSS3       (0x8)              /* Digital Comparator Interrupt Status on SS3 */
-#  define ADC_ISC_DCINSS2       (0x4)              /* Digital Comparator Interrupt Status on SS2 */
-#  define ADC_ISC_DCINSS1       (0x2)              /* Digital Comparator Interrupt Status on SS1 */
-#  define ADC_ISC_DCINSS0       (0x1)              /* Digital Comparator Interrupt Status on SS0 */
-#define ADC_ISC_DMAIN_SHIFT     8
-#  define ADC_ISC_DMAIN3        (0x8)               /* SS3 DMA Interrupt Status and Clear */
-#  define ADC_ISC_DMAIN2        (0x4)               /* SS2 DMA Interrupt Status and Clear */
-#  define ADC_ISC_DMAIN1        (0x2)               /* SS1 DMA Interrupt Status and Clear */
-#  define ADC_ISC_DMAIN0        (0x1)               /* SS0 DMA Interrupt Status and Clear */
-#define ADC_ISC_IN_SHIFT        0
-#  define ADC_ISC_IN3           (0x8)               /* SS3 Interrupt Status and Clear */
-#  define ADC_ISC_IN2           (0x4)               /* SS2 Interrupt Status and Clear */
-#  define ADC_ISC_IN1           (0x2)               /* SS1 Interrupt Status and Clear */
-#  define ADC_ISC_IN0           (0x1)               /* SS0 Interrupt Status and Clear */
+#define ADC_ISC_SSE(n)           (1 << ((n)*4))
+#define ADC_ISC_DCIN_SHIFT       20
+#  define ADC_ISC_DCINSS3        (0x8)                    /* Digital Comparator Interrupt Status on SS3 */
+#  define ADC_ISC_DCINSS2        (0x4)                    /* Digital Comparator Interrupt Status on SS2 */
+#  define ADC_ISC_DCINSS1        (0x2)                    /* Digital Comparator Interrupt Status on SS1 */
+#  define ADC_ISC_DCINSS0        (0x1)                    /* Digital Comparator Interrupt Status on SS0 */
+#define ADC_ISC_DMAIN_SHIFT      8
+#  define ADC_ISC_DMAIN3         (0x8)                    /* SS3 DMA Interrupt Status and Clear */
+#  define ADC_ISC_DMAIN2         (0x4)                    /* SS2 DMA Interrupt Status and Clear */
+#  define ADC_ISC_DMAIN1         (0x2)                    /* SS1 DMA Interrupt Status and Clear */
+#  define ADC_ISC_DMAIN0         (0x1)                    /* SS0 DMA Interrupt Status and Clear */
+#define ADC_ISC_IN_SHIFT         0
+#  define ADC_ISC_IN3            (0x8)                    /* SS3 Interrupt Status and Clear */
+#  define ADC_ISC_IN2            (0x4)                    /* SS2 Interrupt Status and Clear */
+#  define ADC_ISC_IN1            (0x2)                    /* SS1 Interrupt Status and Clear */
+#  define ADC_ISC_IN0            (0x1)                    /* SS0 Interrupt Status and Clear */
 
 /* Bit fields in the TIVA_ADC_OSTAT register. */
 
@@ -355,20 +355,20 @@
 
 /* Bit fields in the TIVA_ADC_EMUX register. */
 
-#define ADC_EMUX_SHIFT(n)         (4 * (n))                  /* SS EMUX Shift */
-#define ADC_EMUX_MASK(n)          (0xF << ADC_EMUX_SHIFT(n)) /* SS EMUX Mask */
-#  define ADC_EMUX_PROC           (0x0) /* Processor (default) */
-#  define ADC_EMUX_COMP0          (0x1) /* Analog Comparator 0 */
-#  define ADC_EMUX_COMP1          (0x2) /* Analog Comparator 1 */
-#  define ADC_EMUX_COMP2          (0x3) /* Analog Comparator 2 */
-#  define ADC_EMUX_EXTERNAL       (0x4) /* External (GPIO Pins) */
-#  define ADC_EMUX_TIMER          (0x5) /* Timer */
-#  define ADC_EMUX_PWM0           (0x6) /* PWM generator 0 */
-#  define ADC_EMUX_PWM1           (0x7) /* PWM generator 1 */
-#  define ADC_EMUX_PWM2           (0x8) /* PWM generator 2 */
-#  define ADC_EMUX_PWM3           (0x9) /* PWM generator 3 */
-#  define ADC_EMUX_NEVER          (0xE) /* Never Trigger */
-#  define ADC_EMUX_ALWAYS         (0xF) /* Always (continuously sample) */
+#define ADC_EMUX_SHIFT(n)        (4 * (n))                  /* SS EMUX Shift */
+#define ADC_EMUX_MASK(n)         (0xF << ADC_EMUX_SHIFT(n)) /* SS EMUX Mask */
+#  define ADC_EMUX_PROC          (0x0)                    /* Processor (default) */
+#  define ADC_EMUX_COMP0         (0x1)                    /* Analog Comparator 0 */
+#  define ADC_EMUX_COMP1         (0x2)                    /* Analog Comparator 1 */
+#  define ADC_EMUX_COMP2         (0x3)                    /* Analog Comparator 2 */
+#  define ADC_EMUX_EXTERNAL      (0x4)                    /* External (GPIO Pins) */
+#  define ADC_EMUX_TIMER         (0x5)                    /* Timer */
+#  define ADC_EMUX_PWM0          (0x6)                    /* PWM generator 0 */
+#  define ADC_EMUX_PWM1          (0x7)                    /* PWM generator 1 */
+#  define ADC_EMUX_PWM2          (0x8)                    /* PWM generator 2 */
+#  define ADC_EMUX_PWM3          (0x9)                    /* PWM generator 3 */
+#  define ADC_EMUX_NEVER         (0xe)                    /* Never Trigger */
+#  define ADC_EMUX_ALWAYS        (0xf)                    /* Always (continuously sample) */
 
 /* Bit fields in the TIVA_ADC_USTAT register. */
 
@@ -380,18 +380,19 @@
 /* Bit fields in the TIVA_ADC_TSSEL register. */
 
 #define ADC_TSSEL_PS_SHIFT(n)    (((n)+((n)+1))*4)
-#  define ADC_TSSEL_PS_M         (0x3)               /* PWM module trigger select */
-#  define ADC_TSSEL_PS_0         (0x0)               /* Use PWM module 0 */
-#  define ADC_TSSEL_PS_1         (0x1)               /* Use PWM module 1 */
+#define ADC_TSSEL_PS_MASK(n)     (0x3 << ADC_TSSEL_PS_SHIFT((n)))
+#  define ADC_TSSEL_PS_M         (0x3)                    /* PWM module trigger select */
+#  define ADC_TSSEL_PS_0         (0x0)                    /* Use PWM module 0 */
+#  define ADC_TSSEL_PS_1         (0x1)                    /* Use PWM module 1 */
 
 /* Bit fields in the TIVA_ADC_SSPRI register. */
 
 #define ADC_SSPRI_SHIFT(n)       ((n) * 4)                   /* SSE priority mask */
 #define ADC_SSPRI_MASK(n)        (0x3 << ADC_SSPRI_SHIFT(n)) /* SSE priority mask */
-#  define ADC_SSPRI_0            (0x0)        /* SSE priority value 0 (highest) */
-#  define ADC_SSPRI_1            (0x1)        /* SSE priority value 1 (high) */
-#  define ADC_SSPRI_2            (0x2)        /* SSE priority value 2 (low) */
-#  define ADC_SSPRI_3            (0x3)        /* SSE priority value 3 (lowest) */
+#  define ADC_SSPRI_0            (0x0)                    /* SSE priority value 0 (highest) */
+#  define ADC_SSPRI_1            (0x1)                    /* SSE priority value 1 (high) */
+#  define ADC_SSPRI_2            (0x2)                    /* SSE priority value 2 (low) */
+#  define ADC_SSPRI_3            (0x3)                    /* SSE priority value 3 (lowest) */
 
 /* Bit fields in the TIVA_ADC_SPC register. */
 
@@ -417,10 +418,12 @@
 
 #define ADC_PSSI_GSYNC           0x80000000               /* Global Synchronize */
 #define ADC_PSSI_SYNCWAIT        0x08000000               /* Synchronize Wait */
-#define ADC_PSSI_SS3             0x00000008               /* SS3 Initiate */
-#define ADC_PSSI_SS2             0x00000004               /* SS2 Initiate */
-#define ADC_PSSI_SS1             0x00000002               /* SS1 Initiate */
-#define ADC_PSSI_SS0             0x00000001               /* SS0 Initiate */
+
+#define ADC_PSSI_TRIG_MASK       0xf                      /* Enable triggering mask */
+#  define ADC_PSSI_SS3           0x8                      /* SS3 Initiate */
+#  define ADC_PSSI_SS2           0x4                      /* SS2 Initiate */
+#  define ADC_PSSI_SS1           0x2                      /* SS1 Initiate */
+#  define ADC_PSSI_SS0           0x1                      /* SS0 Initiate */
 
 /* Bit fields in the TIVA_ADC_SAC register. */
 
@@ -456,28 +459,28 @@
 #define ADC_SSMUX_MUX_SHIFT(n)   ((n)*4)                  /* nth Sample Input Select */
 #define ADC_SSMUX_MUX_MASK(n)    (0xF << ADC_SSMUX_MUX_SHIFT(n))
 
-
 /* Bit fields in the TIVA_ADC_SSCTL register. */
 
 #define ADC_SSCTL_SHIFT(n)       ((n)*4)
-#define ADC_SSCTL_TS             (0x8)               /* Sample Temp Sensor Select */
-#define ADC_SSCTL_IE             (0x4)               /* Sample Interrupt Enable */
-#define ADC_SSCTL_END            (0x2)               /* Sample is End of Sequence */
-#define ADC_SSCTL_D              (0x1)               /* Sample Differential Input Select */
+#define ADC_SSCTL_MASK(n)        (0xF << ADC_SSCTL_SHIFT((n)))
+#  define ADC_SSCTL_TS           (0x8)                    /* Sample Temp Sensor Select */
+#  define ADC_SSCTL_IE           (0x4)                    /* Sample Interrupt Enable */
+#  define ADC_SSCTL_END          (0x2)                    /* Sample is End of Sequence */
+#  define ADC_SSCTL_D            (0x1)                    /* Sample Differential Input Select */
 
 /* Bit fields in the TIVA_ADC_SSFIFO0 register. */
 
 #define ADC_SSFIFO0_DATA_MASK    0x00000FFF               /* Conversion Result Data */
-#  define ADC_SSFIFO0_DATA_SHIFT   0
+#  define ADC_SSFIFO0_DATA_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_SSFSTAT0 register. */
 
 #define ADC_SSFSTAT0_HPTR_MASK   0x000000F0               /* FIFO Head Pointer */
-#define ADC_SSFSTAT_TPTR_MASK   0x0000000F               /* FIFO Tail Pointer */
-#  define ADC_SSFSTAT_HPTR_SHIFT  4
-#  define ADC_SSFSTAT_TPTR_SHIFT  0
-#define ADC_SSFSTAT_FULL        0x00001000               /* FIFO Full */
-#define ADC_SSFSTAT_EMPTY       0x00000100               /* FIFO Empty */
+#define ADC_SSFSTAT_TPTR_MASK    0x0000000F               /* FIFO Tail Pointer */
+#  define ADC_SSFSTAT_HPTR_SHIFT 4
+#  define ADC_SSFSTAT_TPTR_SHIFT 0
+#define ADC_SSFSTAT_FULL         0x00001000               /* FIFO Full */
+#define ADC_SSFSTAT_EMPTY        0x00000100               /* FIFO Empty */
 
 /* Bit fields in the TIVA_ADC_SSOP0 register. */
 
@@ -517,21 +520,21 @@
 
 /* Bit fields in the TIVA_ADC_SSTSH register. */
 
-#define ADC_SSTSH_SHIFT(n)    ((n) * 4)
-#define ADC_SSTSH_MASK(n)     (0xF << (ADC_SSTSH_SHIFT(n))) /* nth Sample and Hold Period Select */
-#  define ADC_SSTH_SHOLD_4    (0x0)  /* Sample and hold 4 ADC clocks */
-#  define ADC_SSTH_SHOLD_8    (0x2)  /* Sample and hold 8 ADC clocks */
-#  define ADC_SSTH_SHOLD_16   (0x4)  /* Sample and hold 16 ADC clocks */
-#  define ADC_SSTH_SHOLD_32   (0x6)  /* Sample and hold 32 ADC clocks */
-#  define ADC_SSTH_SHOLD_64   (0x8)  /* Sample and hold 64 ADC clocks */
-#  define ADC_SSTH_SHOLD_128  (0xA)  /* Sample and hold 128 ADC clocks */
-#  define ADC_SSTH_SHOLD_256  (0xC)  /* Sample and hold 256 ADC clocks */
-#  define SSTSH_TSH_TS        ADC_SSTH_SHOLD_4 /* Same and hold time for the temp sensor should be at least 16 ADC ticks */
+#define ADC_SSTSH_SHIFT(n)       ((n) * 4)
+#define ADC_SSTSH_MASK(n)        (0xf << (ADC_SSTSH_SHIFT(n))) /* nth Sample and Hold Period Select */
+#  define ADC_SSTH_SHOLD_4       (0x0)                    /* Sample and hold 4 ADC clocks */
+#  define ADC_SSTH_SHOLD_8       (0x2)                    /* Sample and hold 8 ADC clocks */
+#  define ADC_SSTH_SHOLD_16      (0x4)                    /* Sample and hold 16 ADC clocks */
+#  define ADC_SSTH_SHOLD_32      (0x6)                    /* Sample and hold 32 ADC clocks */
+#  define ADC_SSTH_SHOLD_64      (0x8)                    /* Sample and hold 64 ADC clocks */
+#  define ADC_SSTH_SHOLD_128     (0xa)                    /* Sample and hold 128 ADC clocks */
+#  define ADC_SSTH_SHOLD_256     (0xc)                    /* Sample and hold 256 ADC clocks */
+#  define SSTSH_TSH_TS           ADC_SSTH_SHOLD_4         /* Same and hold time for the temp sensor should be at least 16 ADC ticks */
 
 /* Bit fields in the TIVA_ADC_SSFIFO1 register. */
 
 #define ADC_SSFIFO1_DATA_MASK    0x00000FFF               /* Conversion Result Data */
-#  define ADC_SSFIFO1_DATA_SHIFT   0
+#  define ADC_SSFIFO1_DATA_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_SSFSTAT1 register. */
 
@@ -607,15 +610,15 @@
 #define ADC_SSTSH2_TSH2_MASK     0x00000F00               /* 3rd Sample and Hold Period Select */
 #define ADC_SSTSH2_TSH1_MASK     0x000000F0               /* 2nd Sample and Hold Period Select */
 #define ADC_SSTSH2_TSH0_MASK     0x0000000F               /* 1st Sample and Hold Period Select */
-#  define ADC_SSTSH2_TSH3_SHIFT    12
-#  define ADC_SSTSH2_TSH2_SHIFT    8
-#  define ADC_SSTSH2_TSH1_SHIFT    4
-#  define ADC_SSTSH2_TSH0_SHIFT    0
+#  define ADC_SSTSH2_TSH3_SHIFT  12
+#  define ADC_SSTSH2_TSH2_SHIFT  8
+#  define ADC_SSTSH2_TSH1_SHIFT  4
+#  define ADC_SSTSH2_TSH0_SHIFT  0
 
 /* Bit fields in the TIVA_ADC_SSFIFO3 register. */
 
 #define ADC_SSFIFO3_DATA_MASK    0x00000FFF               /* Conversion Result Data */
-#  define ADC_SSFIFO3_DATA_SHIFT   0
+#  define ADC_SSFIFO3_DATA_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_SSFSTAT3 register. */
 
@@ -637,7 +640,7 @@
 /* Bit fields in the TIVA_ADC_SSTSH3 register. */
 
 #define ADC_SSTSH3_TSH0_MASK     0x0000000F               /* 1st Sample and Hold Period Select */
-#  define ADC_SSTSH3_TSH0_SHIFT    0
+#  define ADC_SSTSH3_TSH0_SHIFT  0
 
 /* Bit fields in the TIVA_ADC_DCRIC register. */
 
@@ -846,57 +849,57 @@
 
 #define ADC_DCCMP0_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP0_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP0_COMP1_SHIFT   16
-#  define ADC_DCCMP0_COMP0_SHIFT   0
+#  define ADC_DCCMP0_COMP1_SHIFT 16
+#  define ADC_DCCMP0_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP1 register. */
 
 #define ADC_DCCMP1_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP1_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP1_COMP1_SHIFT   16
-#  define ADC_DCCMP1_COMP0_SHIFT   0
+#  define ADC_DCCMP1_COMP1_SHIFT 16
+#  define ADC_DCCMP1_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP2 register. */
 
 #define ADC_DCCMP2_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP2_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP2_COMP1_SHIFT   16
-#  define ADC_DCCMP2_COMP0_SHIFT   0
+#  define ADC_DCCMP2_COMP1_SHIFT 16
+#  define ADC_DCCMP2_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP3 register. */
 
 #define ADC_DCCMP3_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP3_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP3_COMP1_SHIFT   16
-#  define ADC_DCCMP3_COMP0_SHIFT   0
+#  define ADC_DCCMP3_COMP1_SHIFT 16
+#  define ADC_DCCMP3_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP4 register. */
 
 #define ADC_DCCMP4_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP4_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP4_COMP1_SHIFT   16
-#  define ADC_DCCMP4_COMP0_SHIFT   0
+#  define ADC_DCCMP4_COMP1_SHIFT 16
+#  define ADC_DCCMP4_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP5 register. */
 
 #define ADC_DCCMP5_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP5_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP5_COMP1_SHIFT   16
-#  define ADC_DCCMP5_COMP0_SHIFT   0
+#  define ADC_DCCMP5_COMP1_SHIFT 16
+#  define ADC_DCCMP5_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP6 register. */
 
 #define ADC_DCCMP6_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP6_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP6_COMP1_SHIFT   16
-#  define ADC_DCCMP6_COMP0_SHIFT   0
+#  define ADC_DCCMP6_COMP1_SHIFT 16
+#  define ADC_DCCMP6_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_DCCMP7 register. */
 
 #define ADC_DCCMP7_COMP1_MASK    0x0FFF0000               /* Compare 1 */
 #define ADC_DCCMP7_COMP0_MASK    0x00000FFF               /* Compare 0 */
-#  define ADC_DCCMP7_COMP1_SHIFT   16
-#  define ADC_DCCMP7_COMP0_SHIFT   0
+#  define ADC_DCCMP7_COMP1_SHIFT 16
+#  define ADC_DCCMP7_COMP0_SHIFT 0
 
 /* Bit fields in the TIVA_ADC_PP register. */
 
@@ -906,9 +909,9 @@
 #define ADC_PP_CH_MASK           0x000003F0               /* ADC Channel Count */
 #define ADC_PP_MCR_MASK          0x0000000F               /* Maximum Conversion Rate */
 #define ADC_PP_MSR_MASK          0x0000000F               /* Maximum ADC Sample Rate */
-#  define ADC_PP_RSL_SHIFT         18
-#  define ADC_PP_DC_SHIFT          10
-#  define ADC_PP_CH_SHIFT          4
+#  define ADC_PP_RSL_SHIFT       18
+#  define ADC_PP_DC_SHIFT        10
+#  define ADC_PP_CH_SHIFT        4
 #define ADC_PP_APSHT             0x01000000               /* Application-Programmable Sample-and-Hold Time */
 #define ADC_PP_TS                0x00800000               /* Temperature Sensor */
 #define ADC_PP_TYPE_SAR          0x00000000               /* SAR */
@@ -933,11 +936,11 @@
 
 /* Bit fields in the TIVA_ADC_CC register. */
 
-#define ADC_CC_CLKDIV_MASK       (0x3F0)               /* PLL VCO Clock Divisor */
-#define ADC_CC_CS_MASK           (0x00F)               /* ADC Clock Source */
+#define ADC_CC_CLKDIV_MASK       (0x3F0)                  /* PLL VCO Clock Divisor */
+#define ADC_CC_CS_MASK           (0x00F)                  /* ADC Clock Source */
 #  define ADC_CC_CLKDIV_SHIFT    4
-#define ADC_CC_CS_SYSPLL         (0x000)               /* PLL VCO divided by CLKDIV */
-#define ADC_CC_CS_PIOSC          (0x001)               /* PIOSC */
-#define ADC_CC_CS_MOSC           (0x002)               /* MOSC */
+#define ADC_CC_CS_SYSPLL         (0x000)                  /* PLL VCO divided by CLKDIV */
+#define ADC_CC_CS_PIOSC          (0x001)                  /* PIOSC */
+#define ADC_CC_CS_MOSC           (0x002)                  /* MOSC */
 
 #endif // __ARCH_ARM_SRC_TIVA_CHIP_TIVA_ADC_H

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_timer.h
  *
- *   Copyright (C) 201r Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -831,7 +831,7 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
 #endif
 
 /****************************************************************************
- * Name: tiva_timer_register
+ * Name: tiva_timer_initialize
  *
  * Description:
  *   Bind the configuration timer to a timer lower half instance and
@@ -847,8 +847,7 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
  * Input Parameters:
  *   devpath - The full path to the timer device.  This should be of the
  *     form /dev/timer0
- *   gptm - General purpose timer number
- *   altlck - True: Use alternate clock source.
+ *   config - 32-bit timer configuration values.
  *
  * Returned Values:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -857,7 +856,8 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int tiva_timer_register(FAR const char *devpath, int gptm, bool altclk);
+int tiva_timer_initialize(FAR const char *devpath,
+                          struct tiva_gptm32config_s *config);
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_TIMER_H */
