@@ -635,6 +635,7 @@ static inline void tiva_initoutput(uint32_t pinset)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_TIVA_GPIO_IRQS
 static inline void tiva_interrupt(uint32_t pinset)
 {
   uint8_t   port    = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
@@ -742,6 +743,7 @@ static inline void tiva_interrupt(uint32_t pinset)
   vdbg("IEV 0x%08x 0x%08x\n", ievset, regval);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: tiva_portcontrol
@@ -862,12 +864,14 @@ int tiva_configgpio(uint32_t pinset)
       tiva_initoutput(pinset);
     }
 
+#ifdef CONFIG_TIVA_GPIO_IRQS
   /* Special setup for interrupt GPIO pins */
 
   else if (func == 7)
     {
       tiva_interrupt(pinset);
     }
+#endif
 
   irqrestore(flags);
   return OK;
