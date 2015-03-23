@@ -10027,4 +10027,13 @@
 	* PIC32MZ:  Incorporated a set of patches that makes the basic NSH
 	  configuration on the PIC32MZ Starter Kit.  From Kristopher Tate
 	  (2015-03-22).
-
+	* arch/arm/src/tiva: (1) ADC driver has been re-organized; configuration
+	  is now handled in code instead of Kconfig to help reduce bloat and
+	  confusion. (2) Timer changed to remove ADC coupling in Kconfig to code
+	  and moved configuration up from arch/arm/src/tiva to
+	  configs/tm4c123g-launchpad/src. (3) GPIO driver needed small fixes in
+	  the configuration routines and discovered false-positive bugs in
+	  interrupt testing: interrupts are now verified to actually be working
+	  reliably. (4) Attempt to apply some consistency in the tiva arch/
+	  level's interface to the config/board/ level driver configuration. 
+	  From Calvin Maguranis (2015-03-23).
