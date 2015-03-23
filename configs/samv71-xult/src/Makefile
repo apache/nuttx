@@ -74,6 +74,10 @@ ifeq ($(CONFIG_SAMV7_EMAC),y)
 CSRCS += sam_ethernet.c
 endif
 
+ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
+CSRCS += sam_usbdev.c
+endif
+
 ifeq ($(CONFIG_SAMV7_SPI0),y)
 CSRCS += sam_spi.c
 endif
