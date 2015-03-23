@@ -57,10 +57,6 @@
 #  error CONFIG_TIVA_TIMER32_PERIODIC is not defined
 #endif
 
-#define GPTM 0
-#define CONFIG_TM4C_TIMER_DEVNAME "/dev/timer0"
-#define ALTCLK false
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -69,20 +65,37 @@
  * Name: tiva_timer_initialize
  *
  * Description:
- *   Configure the timer driver
+ *   Configure the timer driver for the timer example application.
  *
  ****************************************************************************/
 
 int tiva_timer_initialize(void)
 {
-  int ret;
+  static bool initialized = false;
+  int ret = OK;
 
-  timvdbg("Registering TIMER%d at %s\n", GPTM, CONFIG_TM4C_TIMER_DEVNAME);
+  /* Check if we have already initialized */
 
-  ret = tiva_timer_register(CONFIG_TM4C_TIMER_DEVNAME, GPTM, ALTCLK);
-  if (ret < 0)
+  if (!initialized)
     {
-      timdbg("ERROR: Failed to register timer driver: %d\n", ret);
+      struct tiva_gptm32config_s timer_config;
+      timer_config.cmn.gptm      = 0;
+      timer_config.cmn.mode      = TIMER32_MODE_PERIODIC;
+      timer_config.cmn.alternate = false;
+
+      timer_config.config.flags   = TIMER_FLAG_COUNTUP;
+      timer_config.config.handler = 0;
+      timer_config.config.arg     = 0;
+
+      ret = tiva_timer_initialize(CONFIG_EXAMPLE_TIMER_DEVNAME, &timer_config);
+      if (ret < 0)
+      {
+        syslog(LOG_ERR, "ERROR: Failed to register timer driver: %d\n", ret);
+      }
+
+      /* now we are initialized */
+
+      initialized = true;
     }
 
   return ret;

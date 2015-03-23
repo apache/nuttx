@@ -169,11 +169,11 @@
  */
 
 #define GPIO_SW1     (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | \
-                      GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | GPIO_PORTF | \
-                      GPIO_PIN_4)
+                      GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \
+                      GPIO_PORTF | GPIO_PIN_4)
 #define GPIO_SW2     (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | \
-                      GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | GPIO_PORTF | \
-                      GPIO_PIN_0)
+                      GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \
+                      GPIO_PORTF | GPIO_PIN_0)
 
 /************************************************************************************
  * Public Functions

@@ -57,10 +57,6 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static xcpt_t g_irquser;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -95,6 +91,13 @@ void board_button_initialize(void)
   tiva_configgpio(GPIO_SW1);
   tiva_configgpio(GPIO_SW2);
 
+  /* These pins need to be set to logic high (3.3V) so that the buttons
+   * can pull them to logic low (0V)
+   */
+
+  tiva_gpiowrite(GPIO_SW1, true);
+  tiva_gpiowrite(GPIO_SW2, true);
+
   /* Configure GPIO interrupts */
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
@@ -115,7 +118,7 @@ void board_button_initialize(void)
 
 uint8_t board_buttons(void)
 {
-  uint8_t ret = 0x0;
+  uint8_t ret = 0;
 
   /* Check that state of each key.  A LOW value means that the key is
    * pressed.
@@ -123,12 +126,12 @@ uint8_t board_buttons(void)
 
   if (!tiva_gpioread(GPIO_SW1))
     {
-      ret |= (1 << GPIO_PIN_4);
+      ret |= BUTTON_SW1_BIT;
     }
 
   if (!tiva_gpioread(GPIO_SW2))
     {
-      ret |= (1 << GPIO_PIN_0);
+      ret |= BUTTON_SW2_BIT;
     }
 
   return ret;
@@ -145,52 +148,43 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-#  ifdef CONFIG_ARCH_IRQBUTTONS
+#ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
+  uint32_t pinset= 0;
 
-  if (id == BUTTON_SW1 ||
-      id == BUTTON_SW2)
+  /* Determine which switch to set the irq handler for */
+
+  switch (id)
     {
-      irqstate_t flags;
+      case BUTTON_SW1:
+        pinset = GPIO_SW1;
+        break;
 
-      /* Disable interrupts until we are done.  This guarantees that the
-       * following operations are atomic.
-       */
+      case BUTTON_SW2:
+        pinset = GPIO_SW2;
+        break;
 
-      flags = irqsave();
-
-      /* Get the old button interrupt handler and save the new one */
-
-      oldhandler = g_irquser;
-      g_irquser = irqhandler;
-
-      /* Are we attaching or detaching? */
-
-      if (irqhandler != NULL)
-        {
-          /* Configure the interrupt */
-
-          (void)tiva_gpioirqattach(CONFIG_TIVA_GPIOF_IRQS, irqhandler);
-          tiva_gpioirqenable(CONFIG_TIVA_GPIOF_IRQS);
-        }
-      else
-        {
-          /* Disable and detach the interrupt */
-
-          tiva_gpioirqdisable(CONFIG_TIVA_GPIOF_IRQS);
-          (void)tiva_gpioirqattach(CONFIG_TIVA_GPIOF_IRQS, NULL);
-        }
-      /* Configure the interrupt */
-
-      irqrestore(flags);
+      default:
+        return NULL;
     }
+
+    /* Are we attaching or detaching? */
+
+    if (irqhandler != NULL)
+      {
+        oldhandler = tiva_gpioirqattach(pinset, irqhandler);
+      }
+    else
+      {
+        oldhandler = tiva_gpioirqdetach(pinset);
+      }
 
   /* Return the old button handler (so that it can be restored) */
 
   return oldhandler;
 }
-#  endif
+#endif
 
 #endif /* CONFIG_ARCH_BUTTONS */
