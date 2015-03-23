@@ -311,6 +311,9 @@ config ETH0_PHY_DP83848C
 config ETH0_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
 
+config ETH0_PHY_LAN8740
+	bool "SMSC LAN8740 PHY"
+
 config ETH0_PHY_DM9161
 	bool "Davicom DM9161 PHY"
 

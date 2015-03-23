@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/mii.h
  *
- *   Copyright (C) 2008-2010, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -161,6 +161,20 @@
 #define MII_LAN8720_ISR              0x1d      /* Interrupt Source Register */
 #define MII_LAN8720_IMR              0x1e      /* Interrupt Mask Register */
 #define MII_LAN8720_SCSR             0x1f      /* PHY Special Control/Status Register */
+
+/* SMSC LAN8740 PHY Extended Registers */
+
+#define MII_LAN8740_CONFIG           0x10      /* EDPD NDL/Crossover Timer/EEE Configuration */
+#define MII_LAN8740_MCSR             0x11      /* Mode Control/Status Register */
+#define MII_LAN8740_MODES            0x12      /* Special modes */
+#define MII_LAN8740_TDRPAT           0x18      /* TDR Patterns/Delay Control Register */
+#define MII_LAN8740_TDRCTL           0x19      /* TDR Control/Status Register */
+#define MII_LAN8740_SECR             0x1a      /* Symbol Error Counter Register */
+#define MII_LAN8740_CSIR             0x1b      /* Control/Status Indicator Register */
+#define MII_LAN8740_CBLEN            0x1c      /* Cable Length Register */
+#define MII_LAN8740_ISR              0x1d      /* Interrupt Source Register */
+#define MII_LAN8740_IMR              0x1e      /* Interrupt Mask Register */
+#define MII_LAN8740_SCSR             0x1f      /* PHY Special Control/Status Register */
 
 /* MII register bit settings ************************************************/
 
@@ -329,6 +343,11 @@
 
 #define MII_PHYID1_LAN8720           0x0007    /* ID1 value for LAN8720 */
 #define MII_PHYID2_LAN8720           0xc0f1    /* ID2 value for LAN8720 */
+
+/* SMSC LAN8740 MII ID1/2 register bits */
+
+#define MII_PHYID1_LAN8740           0x0007    /* ID1 value for LAN8740 */
+#define MII_PHYID2_LAN8740           0xc110    /* ID2 value for LAN8740 */
 
 /* Am79c874-specific register bit settings **********************************/
 /* Am79c874 MII ID1/2 register bits */

@@ -241,6 +241,11 @@
 #  define PIC32MZ_PHYID1       MII_PHYID1_LAN8720
 #  define PIC32MZ_PHYID2       MII_PHYID2_LAN8720
 #  define PIC32MZ_HAVE_PHY     1
+#elif defined(CONFIG_ETH0_PHY_LAN8740)
+#  define PIC32MZ_PHYNAME      "LAN8740"
+#  define PIC32MZ_PHYID1       MII_PHYID1_LAN8740
+#  define PIC32MZ_PHYID2       MII_PHYID2_LAN8740
+#  define PIC32MZ_HAVE_PHY     1
 #else
 #  warning "No PHY specified!"
 #  undef PIC32MZ_HAVE_PHY
@@ -2952,7 +2957,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
-#elif defined(CONFIG_ETH0_PHY_LAN8720)
+#elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740)
   {
     uint16_t advertise;
     uint16_t lpa;
