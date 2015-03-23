@@ -271,6 +271,7 @@
 #  define USBHS_DEVEPT_EPEN7               (1 << 7)          /* Bit 7:  Endpoint 7 Enable */
 #  define USBHS_DEVEPT_EPEN8               (1 << 8)          /* Bit 8:  Endpoint 8 Enable */
 #  define USBHS_DEVEPT_EPEN9               (1 << 9)          /* Bit 9:  Endpoint 9 Enable */
+#  define USBHS_DEVEPT_ALLEPEN             0x000003ff
 #define USBHS_DEVEPT_EPRST(n)              (1 << ((n)+16))   /* Endpoint n Reset */
 #  define USBHS_DEVEPT_EPRST0              (1 << 16)         /* Bit 16:  Endpoint 0 Reset */
 #  define USBHS_DEVEPT_EPRST1              (1 << 17)         /* Bit 17:  Endpoint 1 Reset */
@@ -282,6 +283,7 @@
 #  define USBHS_DEVEPT_EPRST7              (1 << 23)         /* Bit 23:  Endpoint 7 Reset */
 #  define USBHS_DEVEPT_EPRST8              (1 << 24)         /* Bit 24:  Endpoint 8 Reset */
 #  define USBHS_DEVEPT_EPRST9              (1 << 25)         /* Bit 25:  Endpoint 9 Reset */
+#  define USBHS_DEVEPT_ALLEPRST            0x03ff0000
 
 /* Device Frame Number Register */
 
@@ -344,7 +346,7 @@
 #define USBHS_DEVEPTINT_OVERFI             (1 << 5)          /* Bit 5: Overflow Interrupt */
 #define USBHS_DEVEPTINT_STALLEDI           (1 << 6)          /* Bit 6: STALLed Interrupt (2) */
 #define USBHS_DEVEPTINT_CRCERRI            (1 << 6)          /* Bit 6: CRC Error Interrupt (3) */
-#define USBHS_DEVEPTINT_SHORTPACKETI       (1 << 7)          /* Bit 7: Short Packet Interrupt */
+#define USBHS_DEVEPTINT_SHRTPCKTI          (1 << 7)          /* Bit 7: Short Packet Interrupt */
 
 /* Device Endpoint Mask, Device Endpoint Disable, and Device Endpoint Enable Registers only */
 
@@ -643,7 +645,7 @@
 #define USBHS_HSTPIPINT_OVERFI             (1 << 5)          /* Bit 5:  Overflow Interrupt */
 #define USBHS_HSTPIPINT_RXSTALLDI          (1 << 6)          /* Bit 6:  Received STALLed Interrupt (1,2) */
 #define USBHS_HSTPIPINT_CRCERRI            (1 << 6)          /* Bit 6:  CRC Error Interrupt (3) */
-#define USBHS_HSTPIPINT_SHORTPACKETI       (1 << 7)          /* Bit 7:  Short Packet Interrupt */
+#define USBHS_HSTPIPINT_SHRTPCKTI          (1 << 7)          /* Bit 7:  Short Packet Interrupt */
 
 /* Host Pipe Set, Host Pipe Mask and Host Pipe Disable Registers only */
 
@@ -651,10 +653,10 @@
 
 /* Host Pipe Mask and Host Pipe Disable Registers only */
 
-#define USBHS_HSTPIPINT_FIFOCONI           (1 << 14)         /* Bit 14:  FIFO Control */
-#define USBHS_HSTPIPINT_PDISHDMAI          (1 << 16)         /* Bit 16:  Pipe Interrupts Disable HDMA Request Enable */
-#define USBHS_HSTPIPINT_PFREEZEI           (1 << 17)         /* Bit 17:  Pipe Freeze */
-#define USBHS_HSTPIPINT_RSTDTI             (1 << 18)         /* Bit 18:  Reset Data Toggle */
+#define USBHS_HSTPIPINT_FIFOCONI           (1 << 14)         /* Bit 14: FIFO Control */
+#define USBHS_HSTPIPINT_PDISHDMAI          (1 << 16)         /* Bit 16: Pipe Interrupts Disable HDMA Request Enable */
+#define USBHS_HSTPIPINT_PFREEZEI           (1 << 17)         /* Bit 17: Pipe Freeze */
+#define USBHS_HSTPIPINT_RSTDTI             (1 << 18)         /* Bit 18: Reset Data Toggle */
 
 /* Host Pipe Status Register only */
 
