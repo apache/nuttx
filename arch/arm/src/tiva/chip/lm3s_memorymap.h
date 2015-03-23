@@ -129,7 +129,7 @@
 #  define TIVA_TIMER2_BASE    (TIVA_PERIPH_BASE + 0x32000)  /* -0x32fff: Timer 2 */
 #  define TIVA_TIMER3_BASE    (TIVA_PERIPH_BASE + 0x33000)  /* -0x33fff: Timer 3 */
                                                             /* -0x37fff: Reserved */
-#  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
+#  define TIVA_ADC0_BASE      (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
 #  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x47fff: Reserved */
@@ -167,7 +167,7 @@
 #  define TIVA_TIMER1_BASE    (TIVA_PERIPH_BASE + 0x31000)  /* -0x31fff: Timer 1 */
 #  define TIVA_TIMER2_BASE    (TIVA_PERIPH_BASE + 0x32000)  /* -0x32fff: Timer 2 */
                                                             /* -0x37fff: Reserved */
-#  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
+#  define TIVA_ADC0_BASE      (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
 #  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x47fff: Reserved */
@@ -212,7 +212,7 @@
 #  define TIVA_TIMER2_BASE    (TIVA_PERIPH_BASE + 0x32000)  /* -0x32fff: Timer 2 */
 #  define TIVA_TIMER3_BASE    (TIVA_PERIPH_BASE + 0x33000)  /* -0x33fff: Timer 3 */
                                                             /* -0x37fff: Reserved */
-#  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
+#  define TIVA_ADC0_BASE      (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
 #  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x47fff: Reserved */
@@ -254,7 +254,7 @@
 #  define TIVA_TIMER2_BASE    (TIVA_PERIPH_BASE + 0x32000)  /* -0x32fff: Timer 2 */
 #  define TIVA_TIMER3_BASE    (TIVA_PERIPH_BASE + 0x33000)  /* -0x33fff: Timer 3 */
                                                             /* -0x37fff: Reserved */
-#  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
+#  define TIVA_ADC0_BASE      (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
 #  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x3fffff: Reserved */
