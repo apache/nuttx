@@ -9165,7 +9165,7 @@
 	* libc/stdio/lib_avsprintf.c: avsprintf():  Fix a bug in usage of
 	  va_list on x86.  On x86, va_list is a pointer to a single copy on the
 	  stack.  avsprintf() calls lib_vsprintf() twice and so traverses the
-	  va_list twice using va_start.  va_start modifies that single copy on 
+	  va_list twice using va_start.  va_start modifies that single copy on
 	  the stack so that the second call to lib_vsprintf() fails.  This appears
 	  to be an issue with x86 only so far (2014-12-8).
 	* stdint.h:  Don't use hex values to specify minimum values of fixed
@@ -9719,7 +9719,7 @@
 	  used in interrupt decoding logic.  Also remove the logic that
 	  unconditionally re-enables interrupts with the interrupt exits.  This
 	  interferes with the drivers ability to control the interrupt state.
-	  This is a necessary, sweeping, global change and unfortunately 
+	  This is a necessary, sweeping, global change and unfortunately
 	  to test (2015-02-09).
 	* mtd/ramtron.c:  Table of parts is not terminated properly if
 	  CONFIG_RAMTRON_FRAM_NON_JEDEC is not defined.  Noted by David
@@ -10035,5 +10035,5 @@
 	  the configuration routines and discovered false-positive bugs in
 	  interrupt testing: interrupts are now verified to actually be working
 	  reliably. (4) Attempt to apply some consistency in the tiva arch/
-	  level's interface to the config/board/ level driver configuration. 
+	  level's interface to the config/board/ level driver configuration.
 	  From Calvin Maguranis (2015-03-23).
