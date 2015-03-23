@@ -47,6 +47,7 @@
 #include "tiva_adc.h"
 #include "tiva_timer.h"
 #include "tm4c123g-launchpad.h"
+#include "chip/tiva_pinmap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -68,48 +69,68 @@
  * Name: board_adc_initialize
  *
  * Description:
- *   Initialize and register the ADC driver
+ *   Initialize and register the ADC driver.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_TIVA_ADC
 int board_adc_initialize(void)
-{
+ {
+#  if defined (CONFIG_TIVA_ADC) && defined (CONFIG_ADC)
   static bool initialized = false;
-  struct adc_dev_s *adc;
   int ret;
+  uint8_t srate = 0;
+
+  struct tiva_adc_sse_cfg_s sse_cfg0;
+  struct tiva_adc_cfg_s adc_cfg;
+  struct tiva_adc_step_cfg_s step_cfg[] =
+  {
+    {0, 0, 0, 0, (TIVA_ADC_FLAG_TS | TIVA_ADC_FLAG_IE | TIVA_ADC_FLAG_END), 0},
+  };
+
+  sse_cfg0.priority = 0;
+#    ifdef CONFIG_EXAMPLES_ADC_SWTRIG
+  sse_cfg0.trigger = TIVA_ADC_TRIG_SW;
+#    else
+  sse_cfg0.trigger = TIVA_ADC_TRIG_ALWAYS;
+#    endif
+
+  adc_cfg.adc = 0;
+  adc_cfg.sse[0] = true;
+  adc_cfg.sse[1] = false;
+  adc_cfg.sse[2] = false;
+  adc_cfg.sse[3] = false;
+  adc_cfg.ssecfg[0] = sse_cfg0;
+  adc_cfg.steps = 1;
+  adc_cfg.stepcfg = step_cfg;
+
+#    ifdef CONFIG_EXAMPLES_ADC_SWTRIG
+  srate = TIVA_ADC_SAMPLE_RATE_FASTEST;
+#    else
+  srate = TIVA_ADC_SAMPLE_RATE_SLOWEST;
+#    endif
 
   /* Check if we have already initialized */
 
   if (!initialized)
     {
-      /* Call tiva_adcinitialize() to get an instance of the ADC interface */
+      /* Call tiva_adc_initialize to configure an instance of the ADC
+       * interface and register it to the character level driver.
+       */
 
-      adc = tiva_adc_initialize(0);
-      if (adc == NULL)
-        {
-          adbg("ERROR: Failed to get ADC interface\n");
-          return -ENODEV;
-        }
-
-      /* Register the ADC driver at "/dev/adc0" */
-
-      ret = adc_register("/dev/adc0", adc);
+      ret = tiva_adc_initialize(CONFIG_EXAMPLES_ADC_DEVPATH, &adc_cfg,
+                                TIVA_ADC_CLOCK_MAX, srate);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to register /dev/adc0"
+                          " to character driver: %d\n", ret);
           return ret;
         }
-
-      /* Enable ADC interrupts */
-
-      adc->ad_ops->ao_rxint(adc, true);
 
       /* Now we are initialized */
 
       initialized = true;
     }
-
   return OK;
 }
 #endif /* CONFIG_ADC */
@@ -143,7 +164,7 @@ int adc_devinit(void)
  * Name: adc_timer_init
  *
  * Description:
- *   Inititalize timer specifically for ADC use.
+ *   Initialize timer specifically for ADC use.
  *
  ************************************************************************************/
 

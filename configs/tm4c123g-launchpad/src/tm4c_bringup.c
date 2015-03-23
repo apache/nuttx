@@ -61,9 +61,7 @@
 
 int tm4c_bringup(void)
 {
-#if defined (HAVE_AT24) || defined (CONFIG_TIVA_TIMER)
-  int ret;
-#endif /* defined (HAVE_AT24) || defined (CONFIG_TIVA_TIMER) */
+  int ret = OK;
 
 #ifdef HAVE_AT24
   /* Initialize the AT24 driver */
@@ -82,10 +80,10 @@ int tm4c_bringup(void)
   ret = tiva_timer_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize timer driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: tiva_timer_initialize failed: %d\n", ret);
       return ret;
     }
 #endif /* CONFIG_TIVA_TIMER */
 
-  return OK;
+  return ret;
 }
