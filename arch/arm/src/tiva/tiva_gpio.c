@@ -499,8 +499,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
   uint32_t pdrclr   = 0;
   uint32_t denset   = 0;
   uint32_t denclr   = 0;
+#if defined(LM4F) || defined(TM4C)
   uint32_t amselset = 0;
   uint32_t amselclr = 0;
+#endif
 
   /* Set the pin type. */
 
@@ -512,7 +514,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrclr = pin;
           denset = pin;
+#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
+#endif
         }
         break;
 
@@ -522,7 +526,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purset = pin;
           pdrclr = pin;
           denset = pin;
+#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
+#endif
         }
         break;
 
@@ -532,7 +538,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrset = pin;
           denset = pin;
+#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
+#endif
         }
         break;
 
@@ -542,7 +550,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrclr = pin;
           denset = pin;
+#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
+#endif
         }
         break;
 
@@ -552,7 +562,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purset = pin;
           pdrclr = pin;
           denclr = pin;
+#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
+#endif
         }
         break;
 
@@ -562,7 +574,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrset = pin;
           denclr = pin;
+#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
+#endif
         }
         break;
 
@@ -572,7 +586,9 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrclr = pin;
           denclr = pin;
+#if defined(LM4F) || defined(TM4C)
           amselset = pin;
+#endif
         }
         break;
 
@@ -584,7 +600,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
   modifyreg32(base + TIVA_GPIO_PUR_OFFSET,   purclr,   purset);
   modifyreg32(base + TIVA_GPIO_PDR_OFFSET,   pdrclr,   pdrset);
   modifyreg32(base + TIVA_GPIO_DEN_OFFSET,   denclr,   denset);
+
+#if defined(LM4F) || defined(TM4C)
   modifyreg32(base + TIVA_GPIO_AMSEL_OFFSET, amselclr, amselset);
+#endif
 
 #ifdef CONFIG_ARCH_CHIP_TM4C129
   /* Set the wake pin enable register and the wake level register.  These
