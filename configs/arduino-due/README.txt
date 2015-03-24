@@ -7,7 +7,7 @@ README
 
   Supported Shields
   -----------------
-  - ITEAD 2.4" TFT with Touch, Arduion Shield 1.0
+  - ITEAD 2.4" TFT with Touch, Arduino Shield 1.0
 
 Contents
 ^^^^^^^^
@@ -110,7 +110,7 @@ Rev 2 vs. Rev 3
 ^^^^^^^^^^^^^^^
 
   This port was performed on the Arduino Due Rev 2 board.  NuttX users
-  have reported issues with the serial port on his Aduino Due Rev 3 board.
+  have reported issues with the serial port on his Arduino Due Rev 3 board.
   That problem was resolved as by configuring the UART0 RXD with a pull-up
   (see include/board.h).  That fix as well as any others that we may find
   will be enabled by selecting
@@ -269,7 +269,7 @@ GNU Toolchain Options
 
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windows
     CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
@@ -306,7 +306,7 @@ GNU Toolchain Options
      An alias in your .bashrc file might make that less painful.
 
   3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
+     because the dependencies are generated using Windows paths which do not
      work with the Cygwin make.
 
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
@@ -391,7 +391,7 @@ NuttX EABI "buildroot" Toolchain
   NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
   the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
   more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
+  use the GCC 4.6.3 EABI toolchain; instead use the GCC 4.3.3 OABI toolchain.
   See instructions below.
 
 NuttX OABI "buildroot" Toolchain
@@ -487,8 +487,8 @@ Buttons and LEDs
     LED_IDLE             MCU is is sleep mode       ------ Not used --------
 
   Thus if LED L is statically on, NuttX has successfully booted and is,
-  apparently, running normmally.  If LED RX is glowing, then NuttX is
-  handling interupts (and also signals and assertions).  If TX is flashing
+  apparently, running normally.  If LED RX is glowing, then NuttX is
+  handling interrupts (and also signals and assertions).  If TX is flashing
   at approximately 2Hz, then a fatal error has been detected and the system
   has halted.
 
@@ -558,7 +558,7 @@ Loading Code
   Uploading NuttX to the Due Using Bossa:
   ---------------------------------------
   Where do you get it?
-    Generic BOSSA installation files are avaialable here:
+    Generic BOSSA installation files are available here:
     http://sourceforge.net/projects/b-o-s-s-a/?source=dlp
 
     However, DUE uses a patched version of BOSSA available as source code here:
@@ -582,7 +582,7 @@ Loading Code
     This is accomplished by simply configuring the programming port in 1200
     baud and sending something on the programming port.  Here is some sample
     output from a Windows CMD.exe shell.  NOTE that my Arduino programming
-    port shows up as COM26.  It may be different on yoursystem.
+    port shows up as COM26.  It may be different on your system.
 
     To enter boot mode, set the baud to 1200 and send anything to the
     programming port:
@@ -708,7 +708,7 @@ Loading Code
      9  GND            GNDDetect
      10 MASTER-RESET   nReset
 
-   You should be able to use a 10- to 20-pin adaptr to connect a SAM-ICE
+   You should be able to use a 10- to 20-pin adapter to connect a SAM-ICE
    debugger to the Arduino Due.  I have this Olimex adapter:
    https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ . But so far I
    have been unable to get the get the SAM-ICE to communicate with the Due.
@@ -740,7 +740,7 @@ Arduino DUE-specific Configuration Options
     CONFIG_ARCH_CHIP_SAM3X
     CONFIG_ARCH_CHIP_ATSAM3X8E
 
-  CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+  CONFIG_ARCH_BOARD - Identifies the configs/ subdirectory and
   hence, the board that supports the particular chip or SoC.
 
     CONFIG_ARCH_BOARD=arduino-due (for the Arduino Due development board)
@@ -777,7 +777,7 @@ Arduino DUE-specific Configuration Options
 
   CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
   cause a 100 second delay during boot-up.  This 100 second delay
-  serves no purpose other than it allows you to calibratre
+  serves no purpose other than it allows you to calibrate
   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
   the delay actually is 100 seconds.
@@ -1059,7 +1059,7 @@ Configuration sub-directories
          CONFIG_ADS7843E_SPIDEV=0          : (Doesn't matter)
          CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
          CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
-         CONFIG_ADS7843E_SWAPXY=y          : If landscpe orientation
+         CONFIG_ADS7843E_SWAPXY=y          : If landscape orientation
          CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
          CONFIG_ADS7843E_THRESHY=39
 
@@ -1086,4 +1086,3 @@ Configuration sub-directories
 
        STATUS:
        2013-7-2:  TSC is not responding.  All 0's received on SPI.
-
