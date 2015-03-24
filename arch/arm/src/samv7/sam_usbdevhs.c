@@ -465,7 +465,6 @@ static int    sam_usbhs_interrupt(int irq, void *context);
 
 /* Endpoint helpers *********************************************************/
 
-static void   sam_ep_halt(struct usbdev_ep_s *ep, bool resume);
 static void   sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno);
 static void   sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset);
 static inline struct sam_ep_s *
@@ -1253,6 +1252,8 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
       *fifo++ = *buf++;
     }
 
+  MEMORY_SYNC();
+
   /* Indicate that there is data in the TX packet memory.  This will
    * be cleared when the next data out interrupt is received.
    */
@@ -1489,6 +1490,8 @@ static void sam_req_rddone(struct sam_usbdev_s *priv,
     {
       *dest++ = *fifo++;
     }
+
+  MEMORY_SYNC();
 }
 
 /****************************************************************************
@@ -1733,6 +1736,8 @@ static void sam_ep0_read(uint8_t *buffer, size_t buflen)
     {
       *buffer++ = *fifo++;
     }
+
+  MEMORY_SYNC();
 }
 
 /****************************************************************************
@@ -1755,6 +1760,8 @@ static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
     {
       *fifo++ = *buffer++;
     }
+
+  MEMORY_SYNC();
 
   /* Initiate the transfer and configure to receive the transfer complete
    * interrupt.
@@ -3001,6 +3008,8 @@ static void sam_suspend(struct sam_usbdev_s *priv)
 
 static void sam_resume(struct sam_usbdev_s *priv)
 {
+  uint32_t regval;
+
   /* This function is called when either (1) a WKUP interrupt is received from
    * the host PC, or (2) the class device implementation calls the wakeup()
    * method.
@@ -3019,6 +3028,12 @@ static void sam_resume(struct sam_usbdev_s *priv)
        */
 
       sam_usbhs_enableclk();
+
+      /* Un-freeze clocking */
+
+      regval  = sam_getreg(SAM_USBHS_CTRL);
+      regval &= ~USBHS_CTRL_FRZCLK;
+      sam_putreg(regval, SAM_USBHS_CTRL);
 
       /* Revert to the previous state */
 
@@ -3782,7 +3797,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
           sam_putreg(USBHS_DEVEPTINT_STALLEDI, SAM_USBHS_DEVEPTIDR(epno));
 
-          regaddr = SAM_USBHS_DEVEPCFG(epno);
+          regaddr = SAM_USBHS_DEVEPTCFG(epno);
           regval  = sam_getreg(regaddr);
           regval |= USBHS_DEVEPTCFG_AUTOSW;
           sam_putreg(regval, regaddr);
@@ -3847,7 +3862,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
           privep->epstate = USBHS_EPSTATE_STALLED;
           privep->stalled = true;
 
-          regaddr = AM_USBHS_DEVEPCTG(epno);
+          regaddr = SAM_USBHS_DEVEPTCFG(epno);
           regval  = sam_getreg(regaddr);
           regval &= ~USBHS_DEVEPTCFG_AUTOSW;
           sam_putreg(regval, regaddr);
@@ -4100,28 +4115,25 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
 
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
-  /* DETACH PULLD_DIS DP        DM         Condition
-   *
-   *   0         1    Pull      High       VBUS present
-   *                  Up        Impedance
-   *   1         0    Pull      Pull       No VBUS
-   *                  Down      Down
-   *   1         1    High      High       VBUS present +
-   *                  Impedance Imedpance  Disconnect
-   */
-
-  regval = sam_getreg(SAM_USBHS_DEVCTRL);
   if (enable)
     {
       /* DETACH=0: USBHS is attached.  Pulls up the DP line */
 
+      regval = sam_getreg(SAM_USBHS_DEVCTRL);
       regval &= ~USBHS_DEVCTRL_DETACH;
       sam_putreg(regval, SAM_USBHS_DEVCTRL);
     }
   else
     {
+      /* Freeze clocking */
+
+      regval  = sam_getreg(SAM_USBHS_CTRL);
+      regval |= USBHS_CTRL_FRZCLK;
+      sam_putreg(regval, SAM_USBHS_CTRL);
+
       /* DETACH=1: USBHS is detached, UTMI transceiver is suspended. */
 
+      regval = sam_getreg(SAM_USBHS_DEVCTRL);
       regval |= USBHS_DEVCTRL_DETACH;
       sam_putreg(regval, SAM_USBHS_DEVCTRL);
 
@@ -4130,6 +4142,11 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
       if (priv->devstate > USBHS_DEVSTATE_POWERED)
         {
           priv->devstate = USBHS_DEVSTATE_POWERED;
+        }
+
+      if (priv->prevstate > USBHS_DEVSTATE_POWERED)
+        {
+          priv->prevstate = USBHS_DEVSTATE_POWERED;
         }
     }
 
@@ -4336,7 +4353,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   /* Initialization complete... Freeze the clock */
 
   regval  = sam_getreg(SAM_USBHS_CTRL);
-  regval |= ~USBHS_CTRL_FRZCLK;
+  regval |= USBHS_CTRL_FRZCLK;
   sam_putreg(regval, SAM_USBHS_CTRL);
 }
 
@@ -4444,9 +4461,15 @@ static void sam_hw_shutdown(struct sam_usbdev_s *priv)
            USBHS_DEVINT_SUSPD;
   sam_putreg(regval, SAM_USBHS_DEVICR);
 
-  /* Disconnect the device / disable the pull-up */
+  /* Disconnect the device */
 
   sam_pullup(&priv->usbdev, false);
+
+  /* Disable USB hardware */
+
+  regval = sam_getreg(SAM_USBHS_CTRL);
+  regval &= ~USBHS_CTRL_USBE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
 
   /* Disable clocking to the USBHS peripheral */
 
@@ -4531,13 +4554,13 @@ errout:
 
 void up_usbuninitialize(void)
 {
+  struct sam_usbdev_s *priv = &g_usbhs;
+  irqstate_t flags;
+
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
    * easier.
    */
-
-  struct sam_usbdev_s *priv = &g_usbhs;
-  irqstate_t flags;
 
   flags = irqsave();
   usbtrace(TRACE_DEVUNINIT, 0);
