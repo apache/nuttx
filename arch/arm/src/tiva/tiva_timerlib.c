@@ -3049,4 +3049,3 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx)
 #endif
 }
 #endif
-

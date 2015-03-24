@@ -1026,10 +1026,10 @@ static int ssi_interrupt(int irq, void *context)
 
   /* Check for Rx FIFO overruns */
 
-#ifdef CONFIG_DEBUG
+#ifdef SSI_DEBUG
   if ((regval & SSI_RIS_ROR) != 0)
     {
-      lldbg("Rx FIFO Overrun!\n");
+      ssidbg("Rx FIFO Overrun!\n");
     }
 #endif
 

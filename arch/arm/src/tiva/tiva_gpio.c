@@ -734,13 +734,13 @@ static inline void tiva_interrupt(uint32_t pinset)
 
 #ifdef CONFIG_DEBUG_GPIO
   uint32_t regval;
-  vdbg("reg expected actual: [interrupt type=%d]\n", inttype);
+  gpiovdbg("reg expected actual: [interrupt type=%d]\n", inttype);
   regval = (getreg32(base+TIVA_GPIO_IS_OFFSET) & pin) ? pin : 0;
-  vdbg("IS  0x%08x 0x%08x\n", isset, regval);
+  gpiovdbg("IS  0x%08x 0x%08x\n", isset, regval);
   regval = (getreg32(base+TIVA_GPIO_IBE_OFFSET) & pin) ? pin : 0;
-  vdbg("IBE 0x%08x 0x%08x\n", ibeset, regval);
+  gpiovdbg("IBE 0x%08x 0x%08x\n", ibeset, regval);
   regval = (getreg32(base+TIVA_GPIO_IEV_OFFSET) & pin) ? pin : 0;
-  vdbg("IEV 0x%08x 0x%08x\n", ievset, regval);
+  gpiovdbg("IEV 0x%08x 0x%08x\n", ievset, regval);
 #endif
 }
 #endif
@@ -988,14 +988,14 @@ void tiva_gpio_lockport(uint32_t pinset, bool lock)
   if (lock)
     {
 #ifdef CONFIG_DEBUG_GPIO
-      vdbg("  locking port=%d pin=%d\n", port, pinno);
+      gpiovdbg("  locking port=%d pin=%d\n", port, pinno);
 #endif
       modifyreg32(base + TIVA_GPIO_CR_OFFSET, pinmask, 0);
     }
   else
     {
 #ifdef CONFIG_DEBUG_GPIO
-      vdbg("unlocking port=%d pin=%d\n", port, pinno);
+      gpiovdbg("unlocking port=%d pin=%d\n", port, pinno);
 #endif
       modifyreg32(base + TIVA_GPIO_CR_OFFSET, 0, pinmask);
     }
