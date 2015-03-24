@@ -166,13 +166,13 @@
 #define SAM_TRACEERR_EP0SETUPSTALLED      0x0015
 #define SAM_TRACEERR_EPOUTNULLPACKET      0x0016
 #define SAM_TRACEERR_EPRESERVE            0x0017
-#define SAM_TRACEERR_EPTCFGMAPD           0x0018
+#define SAM_TRACEERR_NCFGOK               0x0018
 #define SAM_TRACEERR_INVALIDCTRLREQ       0x0019
 #define SAM_TRACEERR_INVALIDPARMS         0x001a
 #define SAM_TRACEERR_IRQREGISTRATION      0x001b
 #define SAM_TRACEERR_NOTCONFIGURED        0x001c
 #define SAM_TRACEERR_REQABORTED           0x001d
-#define SAM_TRACEERR_TXINERR             0x001e
+#define SAM_TRACEERR_TXINERR              0x001e
 
 /* Trace interrupt codes */
 
@@ -595,7 +595,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
   TRACE_STR(SAM_TRACEERR_EP0SETUPSTALLED),
   TRACE_STR(SAM_TRACEERR_EPOUTNULLPACKET),
   TRACE_STR(SAM_TRACEERR_EPRESERVE),
-  TRACE_STR(SAM_TRACEERR_EPTCFGMAPD),
+  TRACE_STR(SAM_TRACEERR_NCFGOK),
   TRACE_STR(SAM_TRACEERR_INVALIDCTRLREQ),
   TRACE_STR(SAM_TRACEERR_INVALIDPARMS),
   TRACE_STR(SAM_TRACEERR_IRQREGISTRATION),
@@ -3210,9 +3210,15 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   maxpacket = GETUINT16(desc->mxpacketsize);
   nbtrans   = 1;
 
+  /* Initialize the endpoint structure */
+
+  priv             = privep->dev;
+  privep->ep.eplog = desc->addr;              /* Includes direction */
+  privep->epstate  = USBHS_EPSTATE_IDLE;
+  privep->bank     = SAM_USBHS_NBANKS(epno);
+
   /* Special case maxpacket handling for high-speed endpoints */
 
-  priv = privep->dev;
   if (priv->usbdev.speed == USB_SPEED_HIGH)
     {
       /* HS Interval, 125us */
@@ -3228,17 +3234,26 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
           nbtrans++;
         }
 
+      /* nbtrans = 0: Reserved to endpoint that does not have the high-
+       *              bandwidth isochronous capability.
+       * nbtrans = 1: Default value: one transaction per microframe.
+       * nbtrans = 2: Two transactions per microframe. This endpoint
+       *              should be configured as double-bank.
+       * nbtrans = 3  Three transactions per microframe. This endpoint
+       *              should be configured as triple-bank
+       */
+
+      if (privep->bank < nbtrans)
+        {
+          nbtrans = privep->bank;
+        }
+
       /* Mask, bit 10..0 is the max packet size */
 
        maxpacket &= 0x7ff;
     }
 
-   /* Initialize the endpoint structure */
-
-   privep->ep.eplog     = desc->addr;              /* Includes direction */
-   privep->ep.maxpacket = maxpacket;
-   privep->epstate      = USBHS_EPSTATE_IDLE;
-   privep->bank         = SAM_USBHS_NBANKS(epno);
+  privep->ep.maxpacket = maxpacket;
 
   /* Initialize the endpoint hardware */
   /* Disable the endpoint */
@@ -3247,13 +3262,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   regval &= ~USBHS_DEVEPT_EPEN(epno);
   sam_putreg(regval, SAM_USBHS_DEVEPT);
 
-  sam_putreg(USBHS_DEVEPTINT_SHRTPCKTI | USBHS_DEVEPTINT_NBUSYBKI |
-             USBHS_DEVEPTINT_NAKOUTI | USBHS_DEVEPTINT_NAKINI |
-             USBHS_DEVEPTINT_STALLEDI | USBHS_DEVEPTINT_STALLRQI |
-             USBHS_DEVEPTINT_TXINI | USBHS_DEVEPTINT_RXOUTI |
-             USBHS_DEVEPTINT_OVERFI | USBHS_DEVEPTINT_MDATAI |
-             USBHS_DEVEPTINT_DATAXI | USBHS_DEVEPTINT_NYETDISI,
-             SAM_USBHS_DEVEPTIDR(epno));
+  sam_putreg(USBHS_DEVEPTIDR_ALLINTS, SAM_USBHS_DEVEPTIDR(epno));
 
   /* Reset Endpoint FIFOs */
 
@@ -3279,10 +3288,10 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   /* Configure the endpoint */
 
   regval = USBHS_DEVEPTCFG_ALLOC |
-           ((uint32_t)dirin << USBHS_DEVEPTCFG_EPDIR_SHIFT) |
-           ((uint32_t)eptype << USBHS_DEVEPTCFG_EPTYPE_SHIFT) |
-           ((uint32_t)(privep->bank) << USBHS_DEVEPTCFG_EPBK_SHIFT) |
-           ((uint32_t)nbtrans << USBHS_DEVEPTCFG_NBTRANS_SHIFT);
+           USBHS_DEVEPTCFG_EPDIR(dirin) |
+           USBHS_DEVEPTCFG_EPTYPE(eptype) |
+           USBHS_DEVEPTCFG_EPBK(privep->bank) |
+           USBHS_DEVEPTCFG_NBTRANS(nbtrans);
 
   if (maxpacket <= 8)
     {
@@ -3333,7 +3342,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   if ((sam_getreg(regaddr) & USBHS_DEVEPTISR_CFGOK) == 0)
     {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EPTCFGMAPD), epno);
+      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NCFGOK), epno);
       return -EINVAL;
     }
 
@@ -3364,6 +3373,32 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   regval  = sam_getreg(SAM_USBHS_DEVEPT);
   regval |= USBHS_DEVEPT_EPEN(epno);
   sam_putreg(regval, SAM_USBHS_DEVEPT);
+
+  /* If this is EP0, enable interrupts now */
+
+  if (eptype == USB_EP_ATTR_XFER_CONTROL)
+    {
+      /* Enable the endpoint 0 RX interrupts */
+
+      regaddr = SAM_USBHS_DEVEPTIER(epno);
+      regval  = USBHS_DEVEPTINT_RXOUTI | USBHS_DEVEPTINT_RXSTPI;
+      sam_putreg(regval, regaddr);
+
+      /* Enable endpoint 0 general interrupts */
+
+      sam_putreg(USBHS_DEVINT_PEP(epno), SAM_USBHS_DEVIER);
+    }
+#ifdef CONFIG_USBDEV_DMA
+  else
+    {
+      /* Enable automatic bank switching */
+
+      regaddr = SAM_USBHS_DEVEPTIER(epno);
+      regval  = sam_getreg(regaddr);
+      regval |= USBHS_DEVEPTCFG_AUTOSW;
+      sam_putreg(regval, regaddr);
+    }
+#endif
 
   sam_dumpep(priv, epno);
   return OK;
@@ -4232,37 +4267,23 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
       sam_putreg(regval, SAM_USBHS_DEVDMACTRL(i));
     }
 
-  /* Initialize Endpoints */
+  /* Disable all interrupts.  Disable all endpoints */
+
+  sam_putreg(USBHS_DEVEPT_ALLEPEN, SAM_USBHS_DEVIDR);
+  sam_putreg(0, SAM_USBHS_DEVEPT);
+
+  /* Disable each endpoint interrupt */
 
   for (i = 0; i < SAM_USBHS_NENDPOINTS; i++)
     {
-      /* Disable endpoint */
+      /* Disable endpoint interrupts */
 
-      regval  = sam_getreg(SAM_USBHS_DEVEPT);
-      regval &= ~USBHS_DEVEPT_EPEN(i);
-      sam_putreg(regval, SAM_USBHS_DEVEPT);
-
-      regval = USBHS_DEVEPTINT_SHRTPCKTI | USBHS_DEVEPTINT_NBUSYBKI |
-               USBHS_DEVEPTINT_NAKOUTI | USBHS_DEVEPTINT_NAKINI |
-               USBHS_DEVEPTINT_STALLEDI | USBHS_DEVEPTINT_STALLRQI |
-               USBHS_DEVEPTINT_TXINI | USBHS_DEVEPTINT_RXOUTI |
-               USBHS_DEVEPTINT_OVERFI | USBHS_DEVEPTINT_MDATAI |
-               USBHS_DEVEPTINT_DATAXI | USBHS_DEVEPTINT_NYETDISI |
-               USBHS_DEVEPTINT_EPDISHDMAI;
-      sam_putreg(regval, SAM_USBHS_DEVEPTIDR(i));
+      sam_putreg(USBHS_DEVEPTIDR_ALLINTS, SAM_USBHS_DEVEPTIDR(i));
 
       /* Clear endpoint status */
 
-      regval = USBHS_DEVEPTINT_STALLEDI | USBHS_DEVEPTINT_RXOUTI |
-               USBHS_DEVEPTINT_TXINI | USBHS_DEVEPTINT_RXSTPI |
-               USBHS_DEVEPTINT_STALLEDI | USBHS_DEVEPTINT_NAKINI |
-               USBHS_DEVEPTINT_NAKOUTI;
-      sam_putreg(regval, SAM_USBHS_DEVEPTICR(i));
-
-      /* Reset endpoint configuration */
-
-      sam_putreg(USBHS_DEVEPT_ALLEPEN, SAM_USBHS_DEVEPTIDR(i));
-    }
+      sam_putreg(USBHS_DEVEPTICR_ALLINTS, SAM_USBHS_DEVEPTICR(i));
+   }
 
   /* Disable all interrupts */
 
