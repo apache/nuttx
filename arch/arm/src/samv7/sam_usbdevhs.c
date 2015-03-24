@@ -11,6 +11,11 @@
  *
  *   Copyright (c) 2009, Atmel Corporation
  *
+ * Additional updates for the SAMV7 was taken from Atmel sample code for the
+ * SAMV71:
+ *
+ *   Copyright (c) 2014, Atmel Corporation
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -4065,15 +4070,13 @@ static void sam_reset(struct sam_usbdev_s *priv)
   uint32_t regval;
   uint8_t epno;
 
-  /* Make sure that clocking is enabled to the USBHS peripheral.
-   *
-   * NOTE: In the Atmel example code, they also enable USB clocking
-   * at this point (via the BIAS in the CKGR_UCKR register).  In this
-   * implementation, that should not be necessary here because we
-   * never disable BIAS to begin with.
-   */
+  /* Make sure that clocking is enabled to the USBHS peripheral. */
 
   sam_usbhs_enableclk();
+
+  regval  = sam_getreg(SAM_USBHS_CTRL);
+  regval &= ~USBHS_CTRL_FRZCLK;
+  sam_putreg(regval, SAM_USBHS_CTRL);
 
   /* Tell the class driver that we are disconnected.  The class driver
    * should then accept any new configurations.
@@ -4121,18 +4124,29 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
   priv->usbdev.speed = USB_SPEED_FULL;
 
-  /* Clear all pending interrupt status */
+  /* Enable normal operational interrupts (including endpoint 0) */
 
-  regval = USBHS_DEVINT_UPRSM | USBHS_DEVINT_EORSM | USBHS_DEVINT_WAKEUP |
-           USBHS_DEVINT_EORST | USBHS_DEVINT_SOF | USBHS_DEVINT_MSOF |
+  regval = USBHS_DEVINT_EORST | USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD |
+           USBHS_DEVINT_SOF | USBHS_DEVINT_PEP0;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  regval |= USBHS_DEVINT_MSOF;
+#endif
+  sam_putreg(regval, SAM_USBHS_DEVIER);
+
+  /* Reset following interrupts flag */
+
+  regval = USBHS_DEVINT_EORST | USBHS_DEVINT_SOF | USBHS_DEVINT_MSOF |
            USBHS_DEVINT_SUSPD;
   sam_putreg(regval, SAM_USBHS_DEVICR);
 
-  /* Enable normal operational interrupts (including endpoint 0) */
+  /* Raise the first suspend interrupt */
 
-  regval = USBHS_DEVINT_EORSM | USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD |
-           USBHS_DEVINT_PEP0;
-  sam_putreg(regval, SAM_USBHS_DEVIER);
+  regval  = sam_getreg(SAM_USBHS_DEVIFR);
+  regval |= USBHS_DEVINT_SUSPD;
+  sam_putreg(regval, SAM_USBHS_DEVIFR);
+
+  regval |= USBHS_DEVINT_WAKEUP;
+  sam_putreg(regval, SAM_USBHS_DEVIFR);
 
   sam_dumpep(priv, EP0);
 }
@@ -4146,57 +4160,55 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   uint32_t regval;
   int i;
 
-  /* Paragraph 32.5.1, "Power Management".  The USBHS is not continuously
-   * clocked.  For using the USBHS, the programmer must first enable the
-   * USBHS Clock in the Power Management Controller (PMC_PCER register).
-   * Then enable the PLL (PMC_UCKR register). Finally, enable BIAS in
-   * PMC_UCKR register. However, if the application does not require USBHS
-   * operations, the USBHS clock can be stopped when not needed and
-   * restarted later.
-   *
-   * Here, we set only the PCER.  PLL configuration was performed in
-   * sam_clockconfig() earlier in the boot sequence.
+  /* Enable clocking tot he USBHS peripheral.  Here, we set only the PCER.
+   * UPLL configuration was performed in sam_clockconfig() earlier in the
+   * boot sequence.
    */
 
   sam_usbhs_enableclk();
 
-  /* Reset and disable endpoints */
+  /* Disable USB hardware and select device mode */
+
+  regval  = sam_getreg(SAM_USBHS_CTRL);
+  regval &= ~USBHS_CTRL_USBE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  regval |= USBHS_CTRL_UIMOD_DEVICE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  /* Enable USB hardware and unfreeze clocking */
+
+  regval |= USBHS_CTRL_USBE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  regval &= ~USBHS_CTRL_FRZCLK;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  /* Select High Speed */
+
+  regval  = sam_getreg(SAM_USBHS_DEVCTRL);
+  regval |= USBHS_DEVCTRL_SPDCONF_NORMAL;
+  sam_putreg(regval, SAM_USBHS_DEVCTRL);
+
+  /* Wait for UTMI clocking to be usable */
+
+  while ((sam_getreg(SAM_USBHS_SR) & USBHS_SR_CLKUSABLE) == 0);
+
+  /* Make sure that we are not in Low-Speed mode */
+
+  regval  = sam_getreg(SAM_USBHS_DEVCTRL);
+  regval &= ~USBHS_DEVCTRL_LS;
+  sam_putreg(regval, SAM_USBHS_DEVCTRL);
+
+  /* Reset and disable all endpoints (including endpoint 0) */
 
   sam_epset_reset(priv, SAM_EPSET_ALL);
 
-  /* Configure the pull-up on D+ and disconnect it */
+  /* Disconnect the device */
 
   regval  = sam_getreg(SAM_USBHS_DEVCTRL);
   regval |= USBHS_DEVCTRL_DETACH;
   sam_putreg(regval, SAM_USBHS_DEVCTRL);
-
-  /* Reset the USBHS block
-   *
-   * Paragraph 33.5.1.  "One transceiver is shared with the USB High Speed
-   *   Device (port A). The selection between Host Port A and USB Device is
-   *   controlled by the USBHS enable bit (EN_USBHS) located in the USBHS_CTRL
-   *   control register.
-   *
-   *  "In the case the port A is driven by the USB High Speed Device, the ...
-   *   transceiver is automatically selected for Device operation once the
-   *   USB High Speed Device is enabled."
-   */
-
-#warning REVISIT
-#if 0
-  regval &= ~xxxx;
-  sam_putreg(regval, SAM_USBHS_DEVCTRL);
-
-  regval |= xxxx;
-  sam_putreg(regval, SAM_USBHS_DEVCTRL);
-#endif
-
-  /* REVISIT: Per recommendations and sample code, USB clocking (as
-   * configured in the PMC CKGR_UCKR) is set up after reseting the UDHPS.
-   * However, that initialation has already been done in sam_clockconfig().
-   * Also, that clocking is shared with the UHPHS USB host logic; the
-   * device logica cannot autonomously control USB clocking.
-   */
 
   /* Initialize DMA channels */
 
@@ -4256,10 +4268,11 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   sam_putreg(USBHS_DEVINT_ALL, SAM_USBHS_DEVIDR);
 
-  /* The Atmel sample code disables USB clocking here (via the PMC
-   * CKGR_UCKR).  However, we cannot really do that here because that
-   * clocking is also needed by the UHPHS host.
-   */
+  /* Initialization complete... Freeze the clock */
+
+  regval  = sam_getreg(SAM_USBHS_CTRL);
+  regval |= ~USBHS_CTRL_FRZCLK;
+  sam_putreg(regval, SAM_USBHS_CTRL);
 }
 
 /****************************************************************************
