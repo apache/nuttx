@@ -298,6 +298,7 @@
 #define USBHS_DEVEPTCFG_ALLOC              (1 << 0)          /* Bit 0: Endpoint Memory Allocate */
 #define USBHS_DEVEPTCFG_EPBK_SHIFT         (2)               /* Bits 2-3: Endpoint Banks */
 #define USBHS_DEVEPTCFG_EPBK_MASK          (3 << USBHS_DEVEPTCFG_EPBK_SHIFT)
+#  define USBHS_DEVEPTCFG_EPBK(n)          ((uint32_t)((n)-1) << USBHS_DEVEPTCFG_EPBK_SHIFT)
 #  define USBHS_DEVEPTCFG_EPBK_1BANK       (0 << USBHS_DEVEPTCFG_EPBK_SHIFT) /* Single-bank endpoint */
 #  define USBHS_DEVEPTCFG_EPBK_2BANK       (1 << USBHS_DEVEPTCFG_EPBK_SHIFT) /* Double-bank endpoint */
 #  define USBHS_DEVEPTCFG_EPBK_3BANK       (2 << USBHS_DEVEPTCFG_EPBK_SHIFT) /* Triple-bank endpoint */
@@ -312,16 +313,19 @@
 #  define USBHS_DEVEPTCFG_EPSIZE_512       (6 << USBHS_DEVEPTCFG_EPSIZE_SHIFT) /* 512 bytes */
 #  define USBHS_DEVEPTCFG_EPSIZE_1024      (7 << USBHS_DEVEPTCFG_EPSIZE_SHIFT) /* 1024 bytes */
 #define USBHS_DEVEPTCFG_EPDIR_SHIFT        (8)               /* Bit 8:  Endpoint Direction */
-#define USBHS_DEVEPTCFG_EPDIR              (1 << 8)          /* Bit 8:  Endpoint Direction */
+#define USBHS_DEVEPTCFG_EPDIR_MASK         (1 << 8)          /* Bit 8:  Endpoint Direction */
+#  define USBHS_DEVEPTCFG_EPDIR(n)         ((uint32_t)(n) << 8)
 #define USBHS_DEVEPTCFG_AUTOSW             (1 << 9)          /* Bit 9: Automatic Switch */
 #define USBHS_DEVEPTCFG_EPTYPE_SHIFT       (11)              /* Bits 11-12: Endpoint Type */
 #define USBHS_DEVEPTCFG_EPTYPE_MASK        (3 << USBHS_DEVEPTCFG_EPTYPE_SHIFT)
+#  define USBHS_DEVEPTCFG_EPTYPE(n)        ((uint32_t)(n) << USBHS_DEVEPTCFG_EPTYPE_SHIFT)
 #  define USBHS_DEVEPTCFG_EPTYPE_CTRL      (0 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Control endpoint */
 #  define USBHS_DEVEPTCFG_EPTYPE_ISO       (1 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Isochronous endpoint */
 #  define USBHS_DEVEPTCFG_EPTYPE_BLK       (2 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Bulk endpoint */
 #  define USBHS_DEVEPTCFG_EPTYPE_INTRPT    (3 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Interrupt endpoint */
 #define USBHS_DEVEPTCFG_NBTRANS_SHIFT      (13)              /* Bits 13-14: Number Transaction per uframe */
 #define USBHS_DEVEPTCFG_NBTRANS_MASK       (3 << USBHS_DEVEPTCFG_NBTRANS_SHIFT)
+#  define USBHS_DEVEPTCFG_NBTRANS(n)       ((uint32_t)(n) << USBHS_DEVEPTCFG_NBTRANS_SHIFT)
 
 /* Common Endpoint Interrupt Bit Definitions
  *
@@ -371,6 +375,11 @@
 #define USBHS_DEVEPTINT_NYETDISI           (1 << 17)         /* Bit 17: NYET Token Disable (1) */
 #define USBHS_DEVEPTINT_RSTDTI             (1 << 18)         /* Bit 18: Reset Data Toggle */
 #define USBHS_DEVEPTINT_STALLRQI           (1 << 19)         /* Bit 19: STALL Request (1) */
+
+#define USBHS_DEVEPTICR_ALLINTS            0x000000ff
+#define USBHS_DEVEPTIFR_ALLINTS            0x000010ff
+#define USBHS_DEVEPTIDR_ALLINTS            0x000d57ff
+#define USBHS_DEVEPTIER_ALLINTS            0x000f77ff
 
 /* Device Endpoint Status Register only */
 
