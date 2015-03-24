@@ -58,11 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
+/* Configuration ************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_LM3S) || defined(CONFIG_ARCH_CHIP_LM4F) || \
     defined(CONFIG_ARCH_CHIP_CC3200)
@@ -325,7 +321,11 @@
 
 /* Debug ********************************************************************/
 
-#ifdef CONFIG_DEBUG_SCHED
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_GPIO
+#endif
+
+#ifdef CONFIG_DEBUG_GPIO
 # define gpiodbg(format, ...)    dbg(format, ##__VA_ARGS__)
 # define gpiolldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
 # define gpiovdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
