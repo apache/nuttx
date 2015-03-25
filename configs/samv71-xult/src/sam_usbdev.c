@@ -48,6 +48,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
+#include "sam_gpio.h"
 #include "samv71-xult.h"
 
 /************************************************************************************
@@ -61,6 +62,24 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name:  sam_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_boardinitialize very early in initialization to setup USB-
+ *   related GPIO pins for the SAMV71-XULT board.
+ *
+ ************************************************************************************/
+
+void sam_usbinitialize(void)
+{
+  /* Initialize the VBUS enable signal to HI output in any event so that, by
+   * default, VBUS power is not provided at the USB connector.
+   */
+
+  sam_configgpio(GPIO_VBUSON);
+}
 
 /************************************************************************************
  * Name:  sam_usbsuspend

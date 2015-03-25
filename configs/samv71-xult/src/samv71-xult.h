@@ -41,7 +41,6 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -56,6 +55,7 @@
 
 #define HAVE_HSMCI       1
 #define HAVE_AUTOMOUNTER 1
+#define HAVE_USB         1
 #define HAVE_USBDEV      1
 #define HAVE_USBMONITOR  1
 #define HAVE_NETWORK     1
@@ -145,6 +145,7 @@
  */
 
 #if !defined(CONFIG_SAMV7_UDP) || !defined(CONFIG_USBDEV)
+#  undef HAVE_USB
 #  undef HAVE_USBDEV
 #endif
 
@@ -296,6 +297,17 @@
                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN18)
 #define IRQ_MCI0_CD   SAM_IRQ_PD18
 
+/* USB Host
+ *
+ * The SAM V71 Xplained Ultra has a Micro-USB connector for use with the SAM V71
+ * USB module labeled as TARGET USB on the kit. In USB host mode VBUS voltage is
+ * provided by the kit and has to be enabled by setting the "VBUS Host Enable"
+ * pin (PC16) low.
+ */
+
+#define GPIO_VBUSON (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                     GPIO_PORT_PIOC | GPIO_PIN16)
+
 /* SPI Chip Selects
  * to be provided
  */
@@ -358,7 +370,7 @@ int sam_bringup(void);
  *
  ************************************************************************************/
 
-void weak_function sam_spiinitialize(void);
+void sam_spiinitialize(void);
 
 /************************************************************************************
  * Name: sam_hsmci_initialize
@@ -375,6 +387,19 @@ int sam_hsmci_initialize(int slot, int minor);
 #endif
 
 /************************************************************************************
+ * Name:  sam_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_boardinitialize very early in initialization to setup USB-
+ *   related GPIO pins for the SAMV71-XULT board.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_USB
+void sam_usbinitialize(void);
+#endif
+
+/************************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
@@ -383,7 +408,7 @@ int sam_hsmci_initialize(int slot, int minor);
  ************************************************************************************/
 
 #ifdef HAVE_NETWORK
-void weak_function sam_netinitialize(void);
+void sam_netinitialize(void);
 #endif
 
 /************************************************************************************
