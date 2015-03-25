@@ -98,7 +98,7 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_SAMV7_USBDEVHS_REGDEBUG
+#  undef CONFIG_SAMV7_USBHS_REGDEBUG
 #endif
 
 /* Not yet supported */
@@ -396,7 +396,7 @@ struct sam_usbdev_s
 
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_SAMV7_USBDEVHS_REGDEBUG
+#ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void   sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
 static void   sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
 static uint32_t sam_getreg(uintptr_t regaddr);
@@ -436,7 +436,7 @@ static inline void
               sam_req_abort(struct sam_ep_s *privep,
                 struct sam_req_s *privreq, int16_t result);
 static void   sam_req_complete(struct sam_ep_s *privep, int16_t result);
-static void   sam_ep_txrdy(unsigned int epno);
+static void   sam_ep_fifcon(unsigned int epno);
 static void   sam_req_wrsetup(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, struct sam_req_s *privreq);
 static int    sam_req_write(struct sam_usbdev_s *priv,
@@ -678,7 +678,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  *******************************************************************************/
 
-#ifdef CONFIG_SAMV7_USBDEVHS_REGDEBUG
+#ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
   lldbg("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
@@ -694,7 +694,7 @@ static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_SAMV7_USBDEVHS_REGDEBUG
+#ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 {
   static uintptr_t prevaddr  = 0;
@@ -758,7 +758,7 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_SAMV7_USBDEVHS_REGDEBUG
+#ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static uint32_t sam_getreg(uintptr_t regaddr)
 {
   /* Read the value from the register */
@@ -785,7 +785,7 @@ static inline uint32_t sam_getreg(uintptr_t regaddr)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_SAMV7_USBDEVHS_REGDEBUG
+#ifdef CONFIG_SAMV7_USBHS_REGDEBUG
 static void sam_putreg(uint32_t regval, uintptr_t regaddr)
 {
   /* Check if we need to print this value */
@@ -807,7 +807,7 @@ static inline void sam_putreg(uint32_t regval, uint32_t regaddr)
  * Name: sam_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_USBDEVHS_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMV7_USBHS_REGDEBUG) && defined(CONFIG_DEBUG)
 static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   /* Global Registers */
@@ -1161,23 +1161,24 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 }
 
 /****************************************************************************
- * Name: sam_ep_txrdy
+ * Name: sam_ep_fifcon
  *
  * Description:
  *   IN data has been loaded in the endpoint FIFO.  Manage the endpoint to
- *   (1) initiate sending of the data and (2) receive the TXRDY interrupt
+ *   (1) initiate sending of the data and (2) receive the TXIN interrupt
  *   when the transfer completes.
  *
  ****************************************************************************/
 
-static void sam_ep_txrdy(unsigned int epno)
+static void sam_ep_fifcon(unsigned int epno)
 {
-  /* Clear FIFOCON to indicate that the packet is ready to send (this works even
-   * for zero length packets).  We will get an TXCOMP interrupt with TXRDY
-   * cleared.  Then we are able to send the next packet.
+  /* Clear FIFOCON to indicate that the packet is ready to send (this works
+   * even for zero length packets).  We will get an TXIN interrupt with
+   * FIFCON=1 when the transfer completes.  Then we are able to send the
+   * next packet.
    */
 
-  sam_putreg(USBHS_DEVEPTINT_FIFOCONI, SAM_USBHS_DEVEPTICR(epno));
+  sam_putreg(USBHS_DEVEPTINT_FIFOCONI, SAM_USBHS_DEVEPTIDR(epno));
 
   /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
    * have data ready to go.
@@ -1212,9 +1213,11 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
 
   epno = USB_EPNO(privep->ep.eplog);
 
-  /* Write access to the FIFO is not possible if TXDRY is set */
+  /* Write access to the FIFO is not possible if FIFOCON is clear (meaning
+   * that a write is already in progress.
+   */
 
-  DEBUGASSERT((sam_getreg(SAM_USBHS_DEVEPTISR(epno)) & USBHS_EPTSTA_TXRDY) == 0);
+  DEBUGASSERT((sam_getreg(SAM_USBHS_DEVEPTISR(epno)) & USBHS_DEVEPTINT_FIFOCONI) != 0);
 
   /* Get the number of bytes remaining to be sent. */
 
@@ -1264,7 +1267,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
    * interrupt.
    */
 
-  sam_ep_txrdy(epno);
+  sam_ep_fifcon(epno);
 }
 
 /****************************************************************************
@@ -1404,8 +1407,8 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           /* If we get here, then we sent the last of the data on the
            * previous pass and we need to send the zero length packet now.
            *
-           * A Zero Length Packet can be sent by setting just the TXRDY flag
-           * in the USBHS_EPTSETSTAx register
+           * A Zero Length Packet can be sent by clearing just the FIFOCON flag
+           * in the USBHS_DEVTEPTIDRx register
            */
 
           privep->epstate   = USBHS_EPSTATE_SENDING;
@@ -1417,7 +1420,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
            * transfer complete interrupt.
            */
 
-          sam_ep_txrdy(epno);
+          sam_ep_fifcon(epno);
         }
 
       /* If all of the bytes were sent (including any final zero length
@@ -1767,7 +1770,7 @@ static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
    * interrupt.
    */
 
-  sam_ep_txrdy(EP0);
+  sam_ep_fifcon(EP0);
 }
 
 /****************************************************************************
@@ -2545,9 +2548,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == USBHS_EPSTATE_SENDING ||
           privep->epstate == USBHS_EPSTATE_EP0STATUSIN)
         {
-          /* Continue/resume processing the write requests.  TXRDY will
-           * be disabled when the last transfer completes.
-           */
+          /* Continue/resume processing the write requests. */
 
           privep->epstate = USBHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
@@ -3388,9 +3389,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      /* Select AUTO_VALID so that the hardware will manage RXRDY_TXKL
-       * and TXRDY.
-       */
+      /* Select AUTO_VALID so that the hardware will manage FIFCON. */
 
       regaddr = SAM_USBHS_DEVEPTCFG(epno);
       regval |= USBHS_DEVEPTCFG_AUTOSW;
@@ -3398,7 +3397,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
     }
   else
     {
-      /* No DMA... Software will manage RXRDY_TXKL and TXRDY. */
+      /* No DMA... Software will manage FIFOCON. */
 
       regval = USBHS_DEVEPTINT_KILLBKI | USBHS_DEVEPTINT_RXSTPI;
       sam_putreg(regval, SAM_USBHS_DEVEPTIER(epno));
