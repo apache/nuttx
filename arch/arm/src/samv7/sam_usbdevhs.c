@@ -1704,7 +1704,7 @@ static void sam_req_cancel(struct sam_ep_s *privep, int16_t result)
   epno = USB_EPNO(privep->ep.eplog);
   if (epno != 0)
     {
-      sam_putreg(~USBHS_DEVINT_DMA(epno), SAM_USBHS_DEVIDR);
+      sam_putreg(USBHS_DEVINT_DMA(epno), SAM_USBHS_DEVIDR);
     }
 
   /* Then complete every queued request with the specified status */
@@ -4197,8 +4197,8 @@ static void sam_reset(struct sam_usbdev_s *priv)
     {
       struct sam_ep_s *privep = &priv->eplist[epno];
 
-      /* Cancel any queued requests.  Since they are canceled
-       * with status -ESHUTDOWN, then will not be requeued
+      /* Cancel any queued requests.  Since they are cancelled
+       * with status -ESHUTDOWN, then will not be re-queued
        * until the configuration is reset.  NOTE:  This should
        * not be necessary... the CLASS_DISCONNECT above should
        * result in the class implementation calling sam_ep_disable
@@ -4312,22 +4312,9 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
       /* Stop any DMA transfer */
 
       sam_putreg(0, SAM_USBHS_DEVDMACTRL(i));
-
-      /* Reset DMA channel (Buffer count and Control field) */
-
-      sam_putreg(USBHS_DEVDMACTRL_LDNXTDSC, SAM_USBHS_DEVDMACTRL(i));
-
-      /* Reset DMA channel */
-
-      sam_putreg(0, SAM_USBHS_DEVDMACTRL(i));
-
-      /* Clear DMA channel status (read to clear) */
-
-      regval = sam_getreg(SAM_USBHS_DEVDMASTA(i));
-      sam_putreg(regval, SAM_USBHS_DEVDMACTRL(i));
     }
 
-  /* Disable all interrupts.  Disable all endpoints */
+  /* Disable all endpoint interrupts.  Disable all endpoints */
 
   sam_putreg(USBHS_DEVEPT_ALLEPEN, SAM_USBHS_DEVIDR);
   sam_putreg(0, SAM_USBHS_DEVEPT);

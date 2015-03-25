@@ -232,7 +232,7 @@
 #define USBHS_DEVINT_UPRSM                 (1 << 6)          /* Bit 6:  Upstream Resume Interrupt */
 #define USBHS_DEVINT_PEP_SHIFT             (12)              /* Bits 12-23: Endpoint interrupts (1) */
 #define USBHS_DEVINT_PEP_MASK              (0xfff << USBHS_DEVINT_PEP_SHIFT)
-#  define USBHS_DEVINT_PEP(n)              (1 << +((n)+12))  /* Endpoint n Interrupt, n=0-11 (1) */
+#  define USBHS_DEVINT_PEP(n)              (1 << ((n)+12))   /* Endpoint n Interrupt, n=0-11 (1) */
 #  define USBHS_DEVINT_PEP0                (1 << 12)         /* Bit 12: Endpoint 0 Interrupt (1) */
 #  define USBHS_DEVINT_PEP1                (1 << 13)         /* Bit 13: Endpoint 1 Interrupt (1) */
 #  define USBHS_DEVINT_PEP2                (1 << 14)         /* Bit 14: Endpoint 2 Interrupt (1) */
@@ -747,9 +747,9 @@
 #define USBHS_CTRL_RDERRE                  (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt Enable */
 #define USBHS_CTRL_FRZCLK                  (1 << 14)         /* Bit 14: Freeze USB Clock */
 #define USBHS_CTRL_USBE                    (1 << 15)         /* Bit 15: USBHS Enable */
-#define USBHS_CTRL_UIMOD                   (1 << 25)         /* Bit 25: USBHS Mode */
+#define USBHS_CTRL_UIMOD_MASK              (1 << 25)         /* Bit 25: USBHS Mode */
 #  define USBHS_CTRL_UIMOD_HOST            (0 << 25)         /*   0=Host mode */
-#  define USBHS_CTRL_UIMOD_DEVICE          (1 << 25)         /*   1= Device mode */
+#  define USBHS_CTRL_UIMOD_DEVICE          (1 << 25)         /*   1=Device mode */
 
 /* General Status Register */
 
