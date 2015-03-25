@@ -4114,10 +4114,12 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
 static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
 {
   struct sam_usbdev_s *priv = (struct sam_usbdev_s *)dev;
+  irqstate_t flags;
   uint32_t regval;
 
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
+  flags = irqsave();
   if (enable)
     {
       /* Un-freeze clocking.
@@ -4161,8 +4163,7 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
        * get a SUSPend interrupt instead of a End of Reset.
        */
 
-      regval = USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD;
-      sam_putreg(regval, SAM_USBHS_DEVIER);
+      sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIER);
     }
   else
     {
@@ -4191,6 +4192,7 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
         }
     }
 
+  irqrestore(flags);
   return OK;
 }
 
@@ -4277,13 +4279,10 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   uint32_t regval;
   int i;
 
-  /* Disable USB hardware and select device mode */
+  /* Disable USB hardware.  Will perform a reset of most resisters. */
 
   regval  = sam_getreg(SAM_USBHS_CTRL);
   regval &= ~USBHS_CTRL_USBE;
-  sam_putreg(regval, SAM_USBHS_CTRL);
-
-  regval |= USBHS_CTRL_UIMOD_DEVICE;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
   /* Enable clocking to the USBHS peripheral.
@@ -4300,28 +4299,33 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
    * - Low-power mode (SPDCONF = 1) where Full speed and Low speed are
    *   available.
    *
-   * Only the normal mode is suppported by this driver.  For Normal mode:
+   * Only the normal mode is supported by this driver.  For Normal mode:
    *
    * 1. Enable the USBHS peripheral clock (PMC_PCER).
-   * 2. Enable the USBHS (UIMOD, USBE = 1, FRZCLK = 0).
+   * 2. Enable the USBHS (UIMOD = 1, USBE = 1, FRZCLK = 0).
    * 3. Enable the UPLL 480 MHz.
    * 4. Wait for the UPLL 480 MHz to be considered as locked by the PMC.
    */
 
-  /* Enable the peripheral clock */
+  /* Enable the USBHS peripheral clock (PMC_PCER) */
 
   sam_usbhs_enableclk();
 
-  /* Enable USBHS peripheral and unfreeze clocking */
-
-  regval |= USBHS_CTRL_USBE;
-  sam_putreg(regval, SAM_USBHS_CTRL);
+  /* Enable USBHS peripheral (USBE = 1) in device mode (UIMOD = 1) and
+   * unfreeze clocking (FRZCLK = 0)
+   */
 
   regval &= ~USBHS_CTRL_FRZCLK;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
+  regval |= USBHS_CTRL_USBE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  regval |= USBHS_CTRL_UIMOD_DEVICE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
   /* UTMI parallel mode, High/Full/Low Speed */
-  /* Disable USB FS Clock.  It is not used in this configuration */
+  /* Disable 48MHz USB FS Clock.  It is not used in this configuration */
 
   sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
 
@@ -4329,7 +4333,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   sam_putreg(PMC_USB_USBS_UPLL, SAM_PMC_USB);
 
-  /* Enable the UTMI PLL with the maximum startup time */
+  /* Enable the UTMI PLL with the maximum start-up time */
 
   regval = PMC_CKGR_UCKR_UPLLEN | PMC_CKGR_UCKR_UPLLCOUNT_MAX;
   sam_putreg(regval, SAM_PMC_CKGR_UCKR);
