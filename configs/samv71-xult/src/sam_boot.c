@@ -79,27 +79,24 @@ void sam_boardinitialize(void)
   sam_sdram_config();
 #endif
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam_spiinitialize() has been brought into the link.
-   */
-
 #ifdef CONFIG_SAMV7_SPI
-  if (sam_spiinitialize)
-    {
-      sam_spiinitialize();
-    }
+  /* Configure SPI chip selects if SPI has been enabled */
+
+  sam_spiinitialize();
 #endif
 
-  /* Configure board resources to support networking if the 1) networking is enabled,
-   * 2) the EMAC module is enabled, and 2) the weak function sam_netinitialize()
-   * has been brought into the build.
-   */
+#ifdef HAVE_USB
+  /* Setup USB-related GPIO pins for the SAMV71-XULT board. */
+
+  sam_usbinitialize();
+#endif
 
 #ifdef HAVE_NETWORK
-  if (sam_netinitialize)
-    {
-      sam_netinitialize();
-    }
+  /* Configure board resources to support networking if the 1) networking is
+   * enabled, and 2) the EMAC module is enabled
+   */
+
+  sam_netinitialize();
 #endif
 
   /* Configure on-board LEDs if LED support has been selected. */

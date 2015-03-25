@@ -4205,10 +4205,10 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   sam_putreg(regval, SAM_UDPHS_CTRL);
 
   /* REVISIT: Per recommendations and sample code, USB clocking (as
-   * configured in the PMC CKGR_UCKR) is set up after reseting the UDHPS.
-   * However, that initialation has already been done in sam_clockconfig().
+   * configured in the PMC CKGR_UCKR) is set up after resetting the UDHPS.
+   * However, that initialization has already been done in sam_clockconfig().
    * Also, that clocking is shared with the UHPHS USB host logic; the
-   * device logica cannot autonomously control USB clocking.
+   * device logic cannot autonomously control USB clocking.
    */
 
   /* Initialize DMA channels */

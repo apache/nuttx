@@ -72,6 +72,7 @@
 #include "cache.h"
 
 #include "sam_periphclks.h"
+#include "chip/sam_pmc.h"
 #include "chip/sam_usbhs.h"
 #include "sam_usbdev.h"
 
@@ -2825,14 +2826,17 @@ static int sam_usbhs_interrupt(int irq, void *context)
 
           sam_putreg(USBHS_DEVINT_WAKEUP | USBHS_DEVINT_EORSM, SAM_USBHS_DEVIER);
 
+          /* Acknowledge the suspend interrupt */
+
+          sam_putreg(USBHS_DEVINT_SUSPD | USBHS_DEVINT_WAKEUP, SAM_USBHS_DEVICR);
+
           /* Re-freeze the clock */
 
           regval |= USBHS_CTRL_FRZCLK;
           sam_putreg(regval, SAM_USBHS_CTRL);
 
-          /* Acknowledge interrupt */
+          /* Inform board logic that USB is suspended */
 
-          sam_putreg(USBHS_DEVINT_SUSPD | USBHS_DEVINT_WAKEUP, SAM_USBHS_DEVIFR);
           sam_suspend(priv);
         }
 
@@ -2843,7 +2847,7 @@ static int sam_usbhs_interrupt(int irq, void *context)
           /* Acknowledge interrupt */
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTSOF), (uint16_t)pending);
-          sam_putreg(USBHS_DEVINT_SOF, SAM_USBHS_DEVIFR);
+          sam_putreg(USBHS_DEVINT_SOF, SAM_USBHS_DEVICR);
         }
 
       /* MSOF interrupt */
@@ -2853,7 +2857,7 @@ static int sam_usbhs_interrupt(int irq, void *context)
           /* Acknowledge interrupt */
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTMSOF), (uint16_t)pending);
-          sam_putreg(USBHS_DEVINT_MSOF, SAM_USBHS_DEVIFR);
+          sam_putreg(USBHS_DEVINT_MSOF, SAM_USBHS_DEVICR);
         }
 
       /* Resume */
@@ -2873,7 +2877,7 @@ static int sam_usbhs_interrupt(int irq, void *context)
           /* Acknowledge interrupt */
 
           sam_putreg(USBHS_DEVINT_WAKEUP | USBHS_DEVINT_EORSM | USBHS_DEVINT_SUSPD,
-                     SAM_USBHS_DEVIFR);
+                     SAM_USBHS_DEVICR);
 
           /* Disable wakeup interrupts */
 
@@ -2884,9 +2888,17 @@ static int sam_usbhs_interrupt(int irq, void *context)
           sam_putreg(USBHS_DEVINT_EORSM | USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIER);
         }
 
-      /* End of Reset. Set by hardware when an End Of Reset has been
-       * detected by the USBHS controller. Automatically enabled after USB
-       * reset.
+      /* End of Reset.
+       *
+       * The USB bus reset is managed by hardware. It is initiated by a connected
+       * host.  When a USB reset is detected on the USB line, the following
+       * operations are performed by the controller:
+       *
+       *   - All endpoints are disabled, except the default control endpoint.
+       *   - The default control endpoint is reset
+       *   - The data toggle sequence of the default control endpoint is cleared.
+       *   - At the end of the reset process, the End of Reset (USBHS_DEVISR.EORST)
+       *     bit is set.
        */
 
       if ((pending & USBHS_DEVINT_EORST) != 0)
@@ -2898,11 +2910,12 @@ static int sam_usbhs_interrupt(int irq, void *context)
            */
 
           sam_putreg(USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD | USBHS_DEVINT_EORST,
-                     SAM_USBHS_DEVIFR);
+                     SAM_USBHS_DEVICR);
 
           /* Enable suspend interrupts */
 
           sam_putreg(USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIER);
+
           /* Handle the reset */
 
           sam_reset(priv);
@@ -2915,7 +2928,7 @@ static int sam_usbhs_interrupt(int irq, void *context)
           /* Acknowledge interrupt */
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_UPSTRRES), (uint16_t)pending);
-          sam_putreg(USBHS_DEVINT_UPRSM, SAM_USBHS_DEVIFR);
+          sam_putreg(USBHS_DEVINT_UPRSM, SAM_USBHS_DEVICR);
         }
 
 #ifdef CONFIG_USBDEV_DMA
@@ -3020,16 +3033,6 @@ static void sam_resume(struct sam_usbdev_s *priv)
 
   if (priv->devstate == USBHS_DEVSTATE_SUSPENDED)
     {
-      /* Enable clocking to the USBHS peripheral.
-       *
-       * NOTE: In the Atmel example code, they also enable USB clocking
-       * at this point (via the BIAS in the CKGR_UCKR register).  In this
-       * implementation, that should not be necessary here because we
-       * never disable BIAS to begin with.
-       */
-
-      sam_usbhs_enableclk();
-
       /* Un-freeze clocking */
 
       regval  = sam_getreg(SAM_USBHS_CTRL);
@@ -3040,6 +3043,7 @@ static void sam_resume(struct sam_usbdev_s *priv)
 
       priv->devstate = priv->prevstate;
 
+      /* Restore full power -- whatever that means forSC this particular board */
       /* Restore full power -- whatever that means for this particular board */
 
       sam_usbsuspend((struct usbdev_s *)priv, true);
@@ -4116,25 +4120,63 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
 
   if (enable)
     {
+      /* Un-freeze clocking.
+       *
+       * When the clock is frozen, on certain bits in the USBCH_CTRL
+       * register can be modified (FRZCLK, USBE, and LS).  In addtion,
+       * only the asynchronous interrupt sources can trigger the USB
+       * interrupt:
+       *
+       *  - Wake-up Interrupt (USBHS_DEVISR.WAKEUP)
+       *  - Host Wake-up Interrupt (USBHS_HSTISR.HWUPI)
+       */
+
+      regval  = sam_getreg(SAM_USBHS_CTRL);
+      regval &= ~USBHS_CTRL_FRZCLK;
+      sam_putreg(regval, SAM_USBHS_CTRL);
+
       /* DETACH=0: USBHS is attached.  Pulls up the DP line */
 
       regval = sam_getreg(SAM_USBHS_DEVCTRL);
       regval &= ~USBHS_DEVCTRL_DETACH;
       sam_putreg(regval, SAM_USBHS_DEVCTRL);
+
+      priv->usbdev.speed = USB_SPEED_FULL;
+
+      /* The next event that we expect to see is a reset from the connected
+       * host.  When a USB reset is detected on the USB line, the following
+       * operations are performed by the controller:
+       *
+       *   - All endpoints are disabled, except the default control endpoint.
+       *   - The default control endpoint is reset
+       *   - The data toggle sequence of the default control endpoint is cleared.
+       *   - At the end of the reset process, the End of Reset (USBHS_DEVISR.EORST)
+       *     bit is set.
+       *
+       * The class implementation should not call this method with
+       * enable == true until is is fully initialized and ready to accept
+       * connections.
+       *
+       * If there is no host connected (no bus activity), then we might
+       * get a SUSPend interrupt instead of a End of Reset.
+       */
+
+      regval = USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD;
+      sam_putreg(regval, SAM_USBHS_DEVIER);
     }
   else
     {
-      /* Freeze clocking */
-
-      regval  = sam_getreg(SAM_USBHS_CTRL);
-      regval |= USBHS_CTRL_FRZCLK;
-      sam_putreg(regval, SAM_USBHS_CTRL);
-
       /* DETACH=1: USBHS is detached, UTMI transceiver is suspended. */
 
       regval = sam_getreg(SAM_USBHS_DEVCTRL);
       regval |= USBHS_DEVCTRL_DETACH;
       sam_putreg(regval, SAM_USBHS_DEVCTRL);
+
+      /* Freeze clocking */
+
+      regval  = sam_getreg(SAM_USBHS_CTRL);
+      regval |= USBHS_CTRL_FRZCLK;
+      sam_putreg(regval, SAM_USBHS_CTRL);
 
       /* Device returns to the Powered state */
 
@@ -4165,9 +4207,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
   uint32_t regval;
   uint8_t epno;
 
-  /* Make sure that clocking is enabled to the USBHS peripheral. */
-
-  sam_usbhs_enableclk();
+  /* Unfreeze clocking to the USBHS peripheral. */
 
   regval  = sam_getreg(SAM_USBHS_CTRL);
   regval &= ~USBHS_CTRL_FRZCLK;
@@ -4222,26 +4262,8 @@ static void sam_reset(struct sam_usbdev_s *priv)
   /* Enable normal operational interrupts (including endpoint 0) */
 
   regval = USBHS_DEVINT_EORST | USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD |
-           USBHS_DEVINT_SOF | USBHS_DEVINT_PEP0;
-#ifdef CONFIG_USBDEV_DUALSPEED
-  regval |= USBHS_DEVINT_MSOF;
-#endif
+           USBHS_DEVINT_PEP0;
   sam_putreg(regval, SAM_USBHS_DEVIER);
-
-  /* Reset following interrupts flag */
-
-  regval = USBHS_DEVINT_EORST | USBHS_DEVINT_SOF | USBHS_DEVINT_MSOF |
-           USBHS_DEVINT_SUSPD;
-  sam_putreg(regval, SAM_USBHS_DEVICR);
-
-  /* Raise the first suspend interrupt */
-
-  regval  = sam_getreg(SAM_USBHS_DEVIFR);
-  regval |= USBHS_DEVINT_SUSPD;
-  sam_putreg(regval, SAM_USBHS_DEVIFR);
-
-  regval |= USBHS_DEVINT_WAKEUP;
-  sam_putreg(regval, SAM_USBHS_DEVIFR);
 
   sam_dumpep(priv, EP0);
 }
@@ -4255,13 +4277,6 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   uint32_t regval;
   int i;
 
-  /* Enable clocking tot he USBHS peripheral.  Here, we set only the PCER.
-   * UPLL configuration was performed in sam_clockconfig() earlier in the
-   * boot sequence.
-   */
-
-  sam_usbhs_enableclk();
-
   /* Disable USB hardware and select device mode */
 
   regval  = sam_getreg(SAM_USBHS_CTRL);
@@ -4271,7 +4286,33 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   regval |= USBHS_CTRL_UIMOD_DEVICE;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
-  /* Enable USB hardware and unfreeze clocking */
+  /* Enable clocking to the USBHS peripheral.
+   *
+   * The clock for the USBHS bus interface is generated by the Power
+   * Management Controller (PMC).  Before enabling the USB clock in the
+   * PMC, the USBHS must be enabled (by writing a one to the
+   * USBHS_CTRL.USBE bit and a zero to the USBHS_CTRL.FRZCLK bit).
+   *
+   * The USBHS can work in two modes:
+   *
+   * - Normal mode (SPDCONF = 0) where High speed, Full speed and Low
+   *   speed are available.
+   * - Low-power mode (SPDCONF = 1) where Full speed and Low speed are
+   *   available.
+   *
+   * Only the normal mode is suppported by this driver.  For Normal mode:
+   *
+   * 1. Enable the USBHS peripheral clock (PMC_PCER).
+   * 2. Enable the USBHS (UIMOD, USBE = 1, FRZCLK = 0).
+   * 3. Enable the UPLL 480 MHz.
+   * 4. Wait for the UPLL 480 MHz to be considered as locked by the PMC.
+   */
+
+  /* Enable the peripheral clock */
+
+  sam_usbhs_enableclk();
+
+  /* Enable USBHS peripheral and unfreeze clocking */
 
   regval |= USBHS_CTRL_USBE;
   sam_putreg(regval, SAM_USBHS_CTRL);
@@ -4279,9 +4320,28 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   regval &= ~USBHS_CTRL_FRZCLK;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
+  /* UTMI parallel mode, High/Full/Low Speed */
+  /* Disable USB FS Clock.  It is not used in this configuration */
+
+  sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
+
+  /* Select the UTMI PLL as the USB clock input with divider = 1. */
+
+  sam_putreg(PMC_USB_USBS_UPLL, SAM_PMC_USB);
+
+  /* Enable the UTMI PLL with the maximum startup time */
+
+  regval = PMC_CKGR_UCKR_UPLLEN | PMC_CKGR_UCKR_UPLLCOUNT_MAX;
+  sam_putreg(regval, SAM_PMC_CKGR_UCKR);
+
+  /* Wait for LOCKU */
+
+  while ((sam_getreg(SAM_PMC_SR) & PMC_INT_LOCKU) == 0);
+
   /* Select High Speed */
 
   regval  = sam_getreg(SAM_USBHS_DEVCTRL);
+  regval &= ~USBHS_DEVCTRL_SPDCONF_MASK;
   regval |= USBHS_DEVCTRL_SPDCONF_NORMAL;
   sam_putreg(regval, SAM_USBHS_DEVCTRL);
 
@@ -4289,7 +4349,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   while ((sam_getreg(SAM_USBHS_SR) & USBHS_SR_CLKUSABLE) == 0);
 
-  /* Make sure that we are not in Low-Speed mode */
+  /* Make sure that we are not in Forced Low-Speed mode */
 
   regval  = sam_getreg(SAM_USBHS_DEVCTRL);
   regval &= ~USBHS_DEVCTRL_LS;
@@ -4442,10 +4502,7 @@ static void sam_hw_shutdown(struct sam_usbdev_s *priv)
 
   /* Clear all pending interrupt status */
 
-  regval = USBHS_DEVINT_UPRSM | USBHS_DEVINT_EORSM | USBHS_DEVINT_WAKEUP |
-           USBHS_DEVINT_EORST | USBHS_DEVINT_SOF | USBHS_DEVINT_MSOF |
-           USBHS_DEVINT_SUSPD;
-  sam_putreg(regval, SAM_USBHS_DEVICR);
+  sam_putreg(USBHS_DEVINT_ALL, SAM_USBHS_DEVICR);
 
   /* Disconnect the device */
 
@@ -4501,7 +4558,7 @@ void up_usbinitialize(void)
   sam_sw_setup(priv);
 
   /* Power up and initialize USB controller.  Interrupts from the USBHS
-   * controller are initialized here, but will not be enabled at the AIC
+   * controller are initialized here, but will not be enabled at the NVIC
    * until the class driver is installed.
    */
 
@@ -4520,6 +4577,12 @@ void up_usbinitialize(void)
       goto errout;
     }
 
+
+  /* Enable USB controller interrupts at the NVIC.  Interrupts are still
+   * disabled at the USBHS.
+   */
+
+  up_enable_irq(SAM_IRQ_USBHS);
   return;
 
 errout:
@@ -4612,31 +4675,11 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   /* Then bind the class driver */
 
   ret = CLASS_BIND(driver, &priv->usbdev);
-  if (ret)
+  if (ret != OK)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BINDFAILED), (uint16_t)-ret);
       priv->driver = NULL;
     }
-  else
-    {
-      /* Enable USB controller interrupts at the AIC.
-       *
-       * NOTE that interrupts and clocking are left disabled in the USBHS
-       * peripheral.  The ENDRESET interrupt will automatically be enabled
-       * when the bus reset occurs.  The normal operating configuration will
-       * be established at that time.
-       */
-
-      up_enable_irq(SAM_IRQ_USBHS);
-
-      /* Enable pull-up to connect the device.  The host should enumerate us
-       * some time after this.  The next thing we expect the the ENDRESET
-       * interrupt.
-       */
-
-      sam_pullup(&priv->usbdev, true);
-      priv->usbdev.speed = USB_SPEED_FULL;
-   }
 
   return ret;
 }
