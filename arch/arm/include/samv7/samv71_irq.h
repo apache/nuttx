@@ -115,8 +115,12 @@
 #define SAM_PID_SDRAMC        (62)  /* SDRAM Controller */
 #define SAM_PID_WDT1          (63)  /* Watchdog Timer 1 */
 #define SAM_PID_CCW           (64)  /* ARM Cache ECC Warning */
+#define SAM_PID_CCF           (65)  /* ARM Cache ECC Fault */
+#define SAM_PID_EMACQ1        (66)  /* EMAC Queue 1 Interrupt */
+#define SAM_PID_EMACQ2        (67)  /* EMAC Queue 2 Interrupt */
+#define SAM_PID_FPIXC         (68)  /* ARM Cache ECC Warning */
 
-#define NR_PIDS               (65)  /* Number of peripheral identifiers */
+#define NR_PIDS               (69)  /* Number of peripheral identifiers */
 
 /* External interrupts (priority levels >= 256*/
 
@@ -185,6 +189,10 @@
 #define SAM_IRQ_SDRAMC        (SAM_IRQ_EXTINT+SAM_PID_SDRAMC) /* SDRAM Controller */
 #define SAM_IRQ_WDT1          (SAM_IRQ_EXTINT+SAM_PID_WDT1)   /* Watchdog Timer 1 */
 #define SAM_IRQ_CCW           (SAM_IRQ_EXTINT+SAM_PID_CCW)    /* ARM Cache ECC Warning */
+#define SAM_IRQ_CCF           (SAM_IRQ_EXTINT+SAM_PID_CCF)    /* ARM Cache ECC Fault */
+#define SAM_IRQ_EMACQ1        (SAM_IRQ_EXTINT+SAM_PID_EMACQ1) /* EMAC Queue 1 Interrupt */
+#define SAM_IRQ_EMACQ2        (SAM_IRQ_EXTINT+SAM_PID_EMACQ2) /* EMAC Queue 2 Interrupt */
+#define SAM_IRQ_FPIXC         (SAM_IRQ_EXTINTSAM_PID_FPIXC+)  /* ARM Cache ECC Warning */
 
 #define SAM_IRQ_NEXTINT       NR_PIDS                         /* Total number of external interrupt numbers */
 #define SAM_IRQ_NIRQS         (SAM_IRQ_EXTINT+NR_PIDS)        /* The number of real IRQs */

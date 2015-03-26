@@ -4176,10 +4176,34 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
        * connections.
        *
        * If there is no host connected (no bus activity), then we might
-       * get a SUSPend interrupt instead of a End of Reset.
+       * get a SUSPend interrupt instead of a End of Reset.  In the case, we
+       * would like to keep the clock frozen until the host is connected.
+       *
+       * The strategy here was taken from the SAMV7 sample code:   It will
+       * force a SUSPend event.  Then disable clocking.  We will take the
+       * SUSPend interrupt (because it is already pending), but after the
+       * clock is frozen, only a WAKEUP interrupt can be received.
        */
 
-      sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIER);
+      /* Enable expected interrupts */
+
+      sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_WAKEUP | USBHS_DEVINT_SUSPD,
+                 SAM_USBHS_DEVIER);
+
+      /* Clear pending interrupt interrupts */
+
+      sam_putreg(USBHS_DEVINT_EORST | USBHS_DEVINT_SUSPD, SAM_USBHS_DEVICR);
+
+      /* Force the first suspend event */
+
+      sam_putreg(USBHS_DEVINT_SUSPD, SAM_USBHS_DEVIFR);
+      sam_putreg(USBHS_DEVINT_WAKEUP, SAM_USBHS_DEVICR);
+
+      /* Refreeze the clock and wait for the wakeup event */
+
+      regval  = sam_getreg(SAM_USBHS_CTRL);
+      regval |= USBHS_CTRL_FRZCLK;
+      sam_putreg(regval, SAM_USBHS_CTRL);
     }
   else
     {
@@ -4333,13 +4357,13 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
    * unfreeze clocking (FRZCLK = 0)
    */
 
-  regval &= ~USBHS_CTRL_FRZCLK;
-  sam_putreg(regval, SAM_USBHS_CTRL);
-
   regval |= USBHS_CTRL_USBE;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
   regval |= USBHS_CTRL_UIMOD_DEVICE;
+  sam_putreg(regval, SAM_USBHS_CTRL);
+
+  regval &= ~USBHS_CTRL_FRZCLK;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
   /* Select High Speed */
@@ -4359,9 +4383,10 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   regval &= ~USBHS_DEVCTRL_LS;
   sam_putreg(regval, SAM_USBHS_DEVCTRL);
 
-  /* Reset and disable all endpoints (including endpoint 0) */
+  /* Reset and disable all endpoints, initializing endpoint 0. */
 
   sam_epset_reset(priv, SAM_EPSET_ALL);
+  sam_ep0_configure(priv);
 
   /* Disconnect the device */
 
