@@ -4341,19 +4341,38 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   /* UTMI parallel mode, High/Full/Low Speed */
 
-#if 1 /* REVISIT */
-  /* Disable 48MHz USB FS Clock.  It is not used in this configuration */
-
-  sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
-#else
+#if 0 /* REVISIT */
   /* UTMI Full/Low Speed mode */
 
   sam_putreg(PMC_USBCLK, SAM_PMC_SCER);
+#else
+  /* Disable 48MHz USB FS Clock.  It is not used in this configuration */
+
+  sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
 #endif
 
-  /* Select the UTMI PLL as the USB clock input with divider = 1. */
+  /* Select the UTMI PLL as the USB PLL clock input (480MHz) with divider
+   * to get to 48MHz.
+   */
 
-  sam_putreg(PMC_USB_USBS_UPLL, SAM_PMC_USB);
+  regval = PMC_USB_USBS_UPLL;
+
+#if 0 /* REVISIT */
+  if ((sam_getreg(SAM_PMC_MCKR) & PMC_MCKR_PLLADIV2) != 0)
+    {
+      /* Divider = 480 Mhz / 2 / 48 Mhz = 5 */
+
+      regval |=  PMC_USB_USBDIV(4);
+    }
+  else
+    {
+      /* Divider = 480 Mhz / 1 / 48 Mhz = 10 */
+
+      regval |=  PMC_USB_USBDIV(9);
+    }
+#endif
+
+  sam_putreg(regval, SAM_PMC_USB);
 
   /* Enable the UTMI PLL with the maximum start-up time */
 
