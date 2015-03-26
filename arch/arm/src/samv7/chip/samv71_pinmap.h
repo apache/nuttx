@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/chip/samv71_pinmap.h
+ * arch/arm/src/samv7/chip/samv71_pinmap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_CHIP_SAM4E_PINMAP_H
-#define __ARCH_ARM_SRC_SAMV7_CHIP_SAM4E_PINMAP_H
+#ifndef __ARCH_ARM_SRC_SAMV7_CHIP_SAMV71_PINMAP_H
+#define __ARCH_ARM_SRC_SAMV7_CHIP_SAMV71_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -571,4 +571,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMV7_CHIP_SAM4E_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMV7_CHIP_SAMV71_PINMAP_H */
