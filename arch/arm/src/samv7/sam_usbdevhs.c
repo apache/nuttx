@@ -66,6 +66,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -4324,10 +4325,31 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   regval |= USBHS_CTRL_UIMOD_DEVICE;
   sam_putreg(regval, SAM_USBHS_CTRL);
 
+  /* UTMI configuration: Enable port0, select 12/16 MHz MAINOSC crystal source */
+
+#if 0 /* REVISIT:  Does this apply only to OHCI? */
+  sam_putreg(UTMI_OHCIICR_RES0, SAM_UTMI_OHCIICR);
+#endif
+
+#if BOARD_MAINOSC_FREQUENCY == 12000000
+  sam_putreg(UTMI_CKTRIM_FREQ_XTAL12, SAM_UTMI_CKTRIM);
+#elif BOARD_MAINOSC_FREQUENCY == 12000000
+  sam_putreg(UTMI_CKTRIM_FREQ_XTAL16, SAM_UTMI_CKTRIM);
+#else
+#  error ERROR: Unrecognized MAINSOSC frequency
+#endif
+
   /* UTMI parallel mode, High/Full/Low Speed */
+
+#if 1 /* REVISIT */
   /* Disable 48MHz USB FS Clock.  It is not used in this configuration */
 
   sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
+#else
+  /* UTMI Full/Low Speed mode */
+
+  sam_putreg(PMC_USBCLK, SAM_PMC_SCER);
+#endif
 
   /* Select the UTMI PLL as the USB clock input with divider = 1. */
 
