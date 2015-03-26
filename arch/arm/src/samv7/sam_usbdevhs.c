@@ -106,6 +106,7 @@
 /* Not yet supported */
 
 #undef CONFIG_SAMV7_USBDEVHS_SCATTERGATHER
+#undef CONFIG_SAMV7_USBDEVHS_LOWPOWER
 
 /* Driver Definitions *******************************************************/
 /* Initial interrupt mask: Reset + Suspend + Correct Transfer */
@@ -572,7 +573,6 @@ static struct sam_dtd_s g_dtdpool[CONFIG_SAMV7_USBDEVHS_NDTDS]
                         __attribute__ ((aligned(16)));
 #endif
 #endif
-
 
 /* Device error strings that may be enabled for more desciptive USB trace
  * output.
@@ -4339,14 +4339,15 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 #  error ERROR: Unrecognized MAINSOSC frequency
 #endif
 
-  /* UTMI parallel mode, High/Full/Low Speed */
-
-#if 0 /* REVISIT */
+#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
   /* UTMI Full/Low Speed mode */
 
   sam_putreg(PMC_USBCLK, SAM_PMC_SCER);
 #else
-  /* Disable 48MHz USB FS Clock.  It is not used in this configuration */
+  /* UTMI parallel mode, High/Full/Low Speed
+   *
+   * Disable 48MHz USB FS Clock.  It is not used in this configuration
+   */
 
   sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
 #endif
@@ -4357,7 +4358,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   regval = PMC_USB_USBS_UPLL;
 
-#if 0 /* REVISIT */
+#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
   if ((sam_getreg(SAM_PMC_MCKR) & PMC_MCKR_PLLADIV2) != 0)
     {
       /* Divider = 480 Mhz / 2 / 48 Mhz = 5 */
