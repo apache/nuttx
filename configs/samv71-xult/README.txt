@@ -112,6 +112,19 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
       2    PD30   TX0     1       UTXD3
     ------ ------ ------- ------- --------
 
+    In this configuration, an external RS232 driver can also be used
+    instead of the shield.  Simply connext as follows:
+
+    --------- -----------
+    Arduino   RS-232
+    Pin Label Connection
+    --------- -----------
+    D0 (RXD)  RX
+    D1 (TXD)  TX
+    GND       GND
+    5VO       Vcc
+    --------- -----------
+
   - SAMV7-XULT EXTn connectors.  USART pins are also available the EXTn
     connectors.  The following are labelled in the User Guide for USART
     functionality:
