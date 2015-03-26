@@ -73,7 +73,6 @@
 #include "cache.h"
 
 #include "sam_periphclks.h"
-#include "chip/sam_pmc.h"
 #include "chip/sam_usbhs.h"
 #include "sam_usbdev.h"
 
@@ -118,7 +117,7 @@
 #define EP0                 (0)
 #define SAM_EPSET_ALL       (0xffff)  /* All endpoints */
 #define SAM_EPSET_NOTEP0    (0xfffe)  /* All endpoints except EP0 */
-#define SAM_EPSET_DMA       (0x00fe)  /* All endpoints that support DMA transfers */
+#define SAM_EPSET_DMA       (0x01fe)  /* All endpoints that support DMA transfers */
 #define SAM_EP_BIT(ep)      (1 << (ep))
 #define SAM_EP0_MAXPACKET   (64)      /* EP0 Max. packet size */
 
@@ -479,6 +478,8 @@ static inline bool
               sam_ep_reserved(struct sam_usbdev_s *priv, int epno);
 static int    sam_ep_configure_internal(struct sam_ep_s *privep,
                 const struct usb_epdesc_s *desc);
+static inline int
+              sam_ep0_configure(struct sam_usbdev_s *priv);
 
 /* Endpoint operations ******************************************************/
 
@@ -815,26 +816,26 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
   /* Global Registers */
 
   lldbg("Global Register:\n");
-  lldbg("  CTRL:    %04x\n", sam_getreg(SAM_USBHS_DEVCTRL));
-  lldbg("  IISR:    %04x\n", sam_getreg(SAM_USBHS_DEVISR));
-  lldbg("  IMR:     %04x\n", sam_getreg(SAM_USBHS_DEVIMR));
-  lldbg("  EPT:     %04x\n", sam_getreg(SAM_USBHS_DEVEPT));
-  lldbg("  FNUM:    %04x\n", sam_getreg(SAM_USBHS_DEVFNUM));
+  lldbg("  CTRL:    %08x\n", sam_getreg(SAM_USBHS_DEVCTRL));
+  lldbg("  IISR:    %08x\n", sam_getreg(SAM_USBHS_DEVISR));
+  lldbg("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVIMR));
+  lldbg("  EPT:     %08x\n", sam_getreg(SAM_USBHS_DEVEPT));
+  lldbg("  FNUM:    %08x\n", sam_getreg(SAM_USBHS_DEVFNUM));
 
   /* Endpoint registers */
 
   lldbg("Endpoint %d Register:\n", epno);
-  lldbg("  CFG:     %04x\n", sam_getreg(SAM_USBHS_DEVEPTCFG(epno)));
-  lldbg("  ISR:     %04x\n", sam_getreg(SAM_USBHS_DEVEPTISR(epno)));
-  lldbg("  IMR:     %04x\n", sam_getreg(SAM_USBHS_DEVEPTIMR(epno)));
+  lldbg("  CFG:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTCFG(epno)));
+  lldbg("  ISR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTISR(epno)));
+  lldbg("  IMR:     %08x\n", sam_getreg(SAM_USBHS_DEVEPTIMR(epno)));
 
   lldbg("DMA %d Register:\n", epno);
   if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      lldbg("  NXTDSC:  %04x\n", sam_getreg(SAM_USBHS_DEVDMANXTDSC(epno)));
-      lldbg("  ADDRESS: %04x\n", sam_getreg(SAM_USBHS_DEVDMAADDR(epno)));
-      lldbg("  CONTROL: %04x\n", sam_getreg(SAM_USBHS_DEVDMACTRL(epno)));
-      lldbg("  STATUS:  %04x\n", sam_getreg(SAM_USBHS_DEVDMASTA(epno)));
+      lldbg("  NXTDSC:  %08x\n", sam_getreg(SAM_USBHS_DEVDMANXTDSC(epno)));
+      lldbg("  ADDRESS: %08x\n", sam_getreg(SAM_USBHS_DEVDMAADDR(epno)));
+      lldbg("  CONTROL: %08x\n", sam_getreg(SAM_USBHS_DEVDMACTRL(epno)));
+      lldbg("  STATUS:  %08x\n", sam_getreg(SAM_USBHS_DEVDMASTA(epno)));
     }
   else
     {
@@ -3306,7 +3307,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   sam_putreg(USBHS_DEVEPTIDR_ALLINTS, SAM_USBHS_DEVEPTIDR(epno));
 
-  /* Reset Endpoint FIFOs */
+  /* Clear toggle and stall indications */
 
   sam_putreg(USBHS_DEVEPTISR_DTSEQ_MASK | USBHS_DEVEPTINT_STALLEDI,
              SAM_USBHS_DEVEPTICR(epno));
@@ -3382,6 +3383,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
    * the FIFO maximum capacity and the maximum number of allowed banks.
    */
 
+  regaddr = SAM_USBHS_DEVEPTISR(epno);
   if ((sam_getreg(regaddr) & USBHS_DEVEPTISR_CFGOK) == 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NCFGOK), epno);
@@ -3442,6 +3444,19 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   sam_dumpep(priv, epno);
   return OK;
+}
+
+/****************************************************************************
+ * Name: sam_ep0_configure
+ *
+ * Description:
+ *  Configure EP0 for normal operation.
+ *
+ ****************************************************************************/
+
+static inline int sam_ep0_configure(struct sam_usbdev_s *priv)
+{
+  return sam_ep_configure_internal(&priv->eplist[EP0], &g_ep0desc);
 }
 
 /****************************************************************************
@@ -4232,7 +4247,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
   /* Reset and disable all endpoints other.  Then re-configure EP0 */
 
   sam_epset_reset(priv, SAM_EPSET_ALL);
-  sam_ep_configure_internal(&priv->eplist[EP0], &g_ep0desc);
+  sam_ep0_configure(priv);
 
   /* Reset endpoint data structures */
 
@@ -4306,6 +4321,8 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
    * 2. Enable the USBHS (UIMOD = 1, USBE = 1, FRZCLK = 0).
    * 3. Enable the UPLL 480 MHz.
    * 4. Wait for the UPLL 480 MHz to be considered as locked by the PMC.
+   *
+   * Steps 1,3, and 4 were performed in sam_clockconfig.c.
    */
 
   /* Enable the USBHS peripheral clock (PMC_PCER) */
@@ -4324,65 +4341,6 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   regval |= USBHS_CTRL_UIMOD_DEVICE;
   sam_putreg(regval, SAM_USBHS_CTRL);
-
-  /* UTMI configuration: Enable port0, select 12/16 MHz MAINOSC crystal source */
-
-#if 0 /* REVISIT:  Does this apply only to OHCI? */
-  sam_putreg(UTMI_OHCIICR_RES0, SAM_UTMI_OHCIICR);
-#endif
-
-#if BOARD_MAINOSC_FREQUENCY == 12000000
-  sam_putreg(UTMI_CKTRIM_FREQ_XTAL12, SAM_UTMI_CKTRIM);
-#elif BOARD_MAINOSC_FREQUENCY == 12000000
-  sam_putreg(UTMI_CKTRIM_FREQ_XTAL16, SAM_UTMI_CKTRIM);
-#else
-#  error ERROR: Unrecognized MAINSOSC frequency
-#endif
-
-#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
-  /* UTMI Full/Low Speed mode */
-
-  sam_putreg(PMC_USBCLK, SAM_PMC_SCER);
-#else
-  /* UTMI parallel mode, High/Full/Low Speed
-   *
-   * Disable 48MHz USB FS Clock.  It is not used in this configuration
-   */
-
-  sam_putreg(PMC_USBCLK, SAM_PMC_SCDR);
-#endif
-
-  /* Select the UTMI PLL as the USB PLL clock input (480MHz) with divider
-   * to get to 48MHz.
-   */
-
-  regval = PMC_USB_USBS_UPLL;
-
-#ifdef CONFIG_SAMV7_USBDEVHS_LOWPOWER
-  if ((sam_getreg(SAM_PMC_MCKR) & PMC_MCKR_PLLADIV2) != 0)
-    {
-      /* Divider = 480 Mhz / 2 / 48 Mhz = 5 */
-
-      regval |=  PMC_USB_USBDIV(4);
-    }
-  else
-    {
-      /* Divider = 480 Mhz / 1 / 48 Mhz = 10 */
-
-      regval |=  PMC_USB_USBDIV(9);
-    }
-#endif
-
-  sam_putreg(regval, SAM_PMC_USB);
-
-  /* Enable the UTMI PLL with the maximum start-up time */
-
-  regval = PMC_CKGR_UCKR_UPLLEN | PMC_CKGR_UCKR_UPLLCOUNT_MAX;
-  sam_putreg(regval, SAM_PMC_CKGR_UCKR);
-
-  /* Wait for LOCKU */
-
-  while ((sam_getreg(SAM_PMC_SR) & PMC_INT_LOCKU) == 0);
 
   /* Select High Speed */
 
