@@ -4209,7 +4209,7 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
     {
       /* DETACH=1: USBHS is detached, UTMI transceiver is suspended. */
 
-      regval = sam_getreg(SAM_USBHS_DEVCTRL);
+      regval  = sam_getreg(SAM_USBHS_DEVCTRL);
       regval |= USBHS_DEVCTRL_DETACH;
       sam_putreg(regval, SAM_USBHS_DEVCTRL);
 
@@ -4533,13 +4533,20 @@ static void sam_hw_shutdown(struct sam_usbdev_s *priv)
 
   sam_putreg(USBHS_DEVINT_ALL, SAM_USBHS_DEVICR);
 
-  /* Disconnect the device */
+  /* DETACH=1: USBHS is detached, UTMI transceiver is suspended. */
 
-  sam_pullup(&priv->usbdev, false);
+  regval  = sam_getreg(SAM_USBHS_DEVCTRL);
+  regval |= USBHS_DEVCTRL_DETACH;
+  sam_putreg(regval, SAM_USBHS_DEVCTRL);
+
+  /* Freeze clocking */
+
+  regval  = sam_getreg(SAM_USBHS_CTRL);
+  regval |= USBHS_CTRL_FRZCLK;
+  sam_putreg(regval, SAM_USBHS_CTRL);
 
   /* Disable USB hardware */
 
-  regval = sam_getreg(SAM_USBHS_CTRL);
   regval &= ~USBHS_CTRL_USBE;
   sam_putreg(regval, SAM_USBHS_CTRL);
 

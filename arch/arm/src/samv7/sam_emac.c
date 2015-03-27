@@ -1041,7 +1041,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].txdesc         = priv->attr->tx0desc;
   priv->xfrq[0].ntxbuffers     = priv->attr->ntxbuffers;
   priv->xfrq[0].rxdesc         = priv->attr->rx0desc;
-  priv->xfrq[0].nrxbuffers     = priv->attr->rtxbuffers;
+  priv->xfrq[0].nrxbuffers     = priv->attr->nrxbuffers;
 
   priv->xfrq[0].txbuffer       = priv->attr->tx0buffer;
   priv->xfrq[0].txbufsize      = EMAC_TX_UNITSIZE;
@@ -1602,7 +1602,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
         {
           if (rxndx == priv->xfrq[qid].rxndx)
             {
-              nllvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
+              nllvdbg("ERROR: No EOF (Invalid or buffers too small)\n");
               do
                 {
                   /* Give ownership back to the EMAC */
@@ -1624,6 +1624,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                     }
                 }
               while (rxndx != priv->xfrq[qid].rxndx);
+
               return -EIO;
             }
 
