@@ -492,6 +492,11 @@ Selecting the GMAC peripheral
     CONFIG_AT24XX_EXTENDED=y             : Supports an extended memory region
     CONFIG_AT24XX_EXTSIZE=160            : Extended address up to 0x9f
 
+  RTOS Features ->Work Queue Support
+    CONFIG_SCHED_WORKQUEUE=y             : Work queue support is needed
+    CONFIG_SCHED_HPWORK=y
+    CONFIG_SCHED_HPWORKSTACKSIZE=2048    : Might need to be increased
+
   Application Configuration -> Network Utilities
     CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y            : Enable the Telnet daemon

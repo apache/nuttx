@@ -1010,7 +1010,7 @@ static uint16_t sam_txfree(struct sam_emac_s *priv, int qid)
    * the configured size minus 1.
    */
 
-  return (priv->xfrq[qid].ntxbuffers-1) - sam_txinuse(priv, qid);
+  return (priv->xfrq[qid].ntxbuffers - 1) - sam_txinuse(priv, qid);
 }
 
 /****************************************************************************
@@ -1321,7 +1321,7 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
   /* Update TX descriptor status. */
 
   status = dev->d_len | EMACTXD_STA_LAST;
-  if (txhead == priv->xfrq[qid].ntxbuffers-1)
+  if (txhead == priv->xfrq[qid].ntxbuffers - 1)
     {
       status |= EMACTXD_STA_WRAP;
     }
@@ -1556,7 +1556,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
       if ((rxdesc->status & EMACRXD_STA_SOF) != 0)
         {
-          /* Skip previous fragments */
+          /* Skip previous fragments.  Loop incrementing the index to the
+           * start fragment until it is equal to the index with the SOF mark
+           */
 
           while (rxndx != priv->xfrq[qid].rxndx)
             {
@@ -1571,7 +1573,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                                 (uintptr_t)rxdesc +
                                 sizeof(struct emac_rxdesc_s));
 
-              /* Increment the RX index */
+              /* Increment the RX index to the start fragment */
 
               if (++priv->xfrq[qid].rxndx >= priv->xfrq[qid].nrxbuffers)
                 {
@@ -1589,7 +1591,10 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
           isframe = true;
         }
 
-      /* Increment the working index */
+      /* Increment the working index. rxndx points to the next fragment
+       * in this frame (or, if the LAST bit was set, to the first fragment
+       * of the next frame).
+       */
 
       if (++rxndx >= priv->xfrq[qid].nrxbuffers)
         {
@@ -1664,7 +1669,8 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                       priv->xfrq[qid].rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
-               * release the RX descriptor
+               * release the RX descriptor(s).  Loop until all descriptors
+               * have been released up to the start of the next frame.
                */
 
               while (priv->xfrq[qid].rxndx != rxndx)
@@ -1680,7 +1686,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                                     (uintptr_t)rxdesc +
                                     sizeof(struct emac_rxdesc_s));
 
-                  /* Increment the RX index */
+                  /* Increment the RX index of the descriptor that was just
+                   * released.
+                   */
 
                   if (++priv->xfrq[qid].rxndx >= priv->xfrq[qid].nrxbuffers)
                     {
@@ -1705,8 +1713,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
             }
         }
 
-      /* We have not encountered the SOF yet... discard this fragment and
-       * keep looking
+      /* We found a descriptor that we own, but we have not encountered the
+       * SOF yet... discard this fragment and keep looking starting at the
+       * next fragment.
        */
 
       else
@@ -1720,10 +1729,17 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
           arch_clean_dcache((uintptr_t)rxdesc,
                             (uintptr_t)rxdesc +
                             sizeof(struct emac_rxdesc_s));
+
+          /* rxndx already points to the next fragment to be examined.
+           * Use it to update the candidate Start-of-Frame.
+           */
+
           priv->xfrq[qid].rxndx = rxndx;
         }
 
-    /* Process the next buffer */
+    /* Set-up rocess the next fragment.  Get the RX descriptor
+     * associated with the next fragment.
+     */
 
     rxdesc = &priv->xfrq[qid].rxdesc[rxndx];
 
@@ -1932,7 +1948,7 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
 
       txdesc = &priv->xfrq[qid].txdesc[tail];
 
-      /* REVISIT:  If the rxdesc is not aligned with the cacheline boundary
+      /* REVISIT:  If the txdesc is not aligned with the cacheline boundary
        * then won't this also invalidate some surrounding memory?
        */
 
@@ -1959,7 +1975,7 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
         {
           /* Increment the tail index */
 
-          if (++tail > priv->xfrq[qid].ntxbuffers)
+          if (++tail >= priv->xfrq[qid].ntxbuffers)
             {
               tail = 0;
             }
@@ -1974,7 +1990,7 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
       /* Go to first buffer of the next frame */
 
       if (tail != priv->xfrq[qid].txhead &&
-          ++tail > priv->xfrq[qid].ntxbuffers)
+          ++tail >= priv->xfrq[qid].ntxbuffers)
         {
           tail = 0;
         }
@@ -2070,7 +2086,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
         {
           /* Increment the tail index */
 
-          if (++tail > priv->xfrq[qid].ntxbuffers)
+          if (++tail >= priv->xfrq[qid].ntxbuffers)
             {
               tail = 0;
             }
@@ -2085,7 +2101,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
       /* Go to first buffer of the next frame */
 
       if (tail != priv->xfrq[qid].txhead &&
-          ++tail > priv->xfrq[qid].ntxbuffers)
+          ++tail >= priv->xfrq[qid].ntxbuffers)
         {
           tail = 0;
         }
@@ -5073,8 +5089,8 @@ errout:
  *      netdev ioctl.  The application level code have gotten the MAC
  *      address from some configuration parameter or by accessing some
  *      non-volatile storage containing the address.  This is the
- *      "cannonically correct" way to set the MAC address.
- *   2) Alterntively, the board logic may support some other less obvious
+ *      "canonically correct" way to set the MAC address.
+ *   2) Alternatively, the board logic may support some other less obvious
  *      non-volatile storage and the board-level boot-up code may access
  *      this and use this interface to set the Ethernet MAC address more
  *      directly.  This is mostly a kludge for the case where you just don't
