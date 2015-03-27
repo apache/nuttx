@@ -83,15 +83,25 @@ The BASIC nsh configuration is fully function (as desribed below under
      (of course with appropriate mounting and unmounting).  I all not sure
      of this and need to do more testing to characterize if the issue.
 
-  5. There is not yet any support for the following board features: QSPI, USB,
-     EMAC, AT24, or WM8904 nor for any non-board features).  Most of these
-     drivers will port easily from either the SAM3/4 or from the SAMA5Dx.
+  5. There is not yet any support for the following board features: QSPI or WM8904.
+     Many drivers will port easily from either the SAM3/4 or from the SAMA5Dx.
      So there is still plenty to be done.
 
   6. There has been a quick'n'dirty port of the SAMA5D4-EK Ethernet logic
-     for the SAMV71-XULT.  There are still some cache-related issues to
-     be verified.  No testing has yet been performed and so the driver should
-     be considered non-functional.
+     for the SAMV71-XULT.  It does not work properly.  Data on the line
+     appears to be corrupted, probably at the level of the PHY.
+
+  7. The USBHS device controller driver (DCD) is complete but non-functional.
+     At this point, work has stopped because I am stuck.  The problem is that
+     bus events are not occurring:  Nothing is detected by the USBHS when the
+     host is connected; no activity is seen on the bus by a USB analyzer when
+     the host is connected.  Possibilities: (1) the pullups on DM and DP are
+     not working.  This would prevent the host from detecting the presence of
+     the device.  the DETACH bit is, however, being correctly cleared  or (2)
+     some issue with clocking or configuration of the UTMI.  I see nothing
+     wrong this this case.   I have done extensive comparison of the Atmel
+     sample code and study of the data sheet, but I have not found the key to
+     solving this.
 
 Serial Console
 ==============
@@ -926,3 +936,7 @@ Configuration sub-directories
 
        # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
        # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
+
+       Stack sizes are also large to simplify the bring-up and should be
+       tuned for better memory usages.
+
