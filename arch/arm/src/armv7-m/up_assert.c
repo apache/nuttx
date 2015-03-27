@@ -167,7 +167,7 @@ static inline void up_showtasks(void)
   sched_foreach(up_taskdump, NULL);
 }
 #else
-#  define showtasks()
+#  define up_showtasks()
 #endif
 
 /****************************************************************************
