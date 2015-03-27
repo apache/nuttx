@@ -150,7 +150,7 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 #else
   lldbg("PID: %d Stack Used=%lu of %lu\n",
         tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        unsigned long)tcb->adj_stack_size);
+        (unsigned long)tcb->adj_stack_size);
 #endif
 }
 #endif
