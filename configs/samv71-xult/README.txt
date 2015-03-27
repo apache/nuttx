@@ -87,9 +87,15 @@ The BASIC nsh configuration is fully function (as desribed below under
      Many drivers will port easily from either the SAM3/4 or from the SAMA5Dx.
      So there is still plenty to be done.
 
-  6. There has been a quick'n'dirty port of the SAMA5D4-EK Ethernet logic
-     for the SAMV71-XULT.  It does not work properly.  Data on the line
-     appears to be corrupted, probably at the level of the PHY.
+  6. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
+     Some basic functionality is present, but there are issues:
+
+     - There is a compiler optimization problem.  At -O2, there is odd
+       behavior on pings and ARP messages.  But the behavior is OK with
+       optimization disabled.  This is clearly a compiler issue, but I
+       will need eventually to find something better than -O0.
+     - The driver has not been tested with I- and D-Caches enabled.  There
+       are likely issues in that configuration.
 
   7. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
@@ -102,6 +108,8 @@ The BASIC nsh configuration is fully function (as desribed below under
      wrong this this case.   I have done extensive comparison of the Atmel
      sample code and study of the data sheet, but I have not found the key to
      solving this.
+
+     - Could this be a compiler issue????
 
 Serial Console
 ==============
@@ -755,7 +763,103 @@ Configuration sub-directories
 
   nsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.
+    Configures the NuttShell (nsh) located at examples/nsh.  There are two
+    NSH configurations:
+
+      - nsh.  This configuration is focused on low level, command-line
+        driver testing.  It has not network.
+      - netnsh.  This configuration is focused on network testing and
+        has only limited command support.
+
+    NOTES:
+
+    1. The serial console is configured by default for use with and Arduino
+       serial shield (UART3).  You will need to reconfigure if you will
+       to use a different U[S]ART.
+
+    2. Default stack sizes are large and should really be tuned to reduce
+       the RAM footprint:
+
+         CONFIG_ARCH_INTERRUPTSTACK=2048
+         CONFIG_IDLETHREAD_STACKSIZE=1024
+         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_PTHREAD_STACK_DEFAULT=2048
+         ... and others ...
+
+    3. NSH built-in applications are supported.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+    4. The network initialization thread is NOT enabled in this configuration.
+       As a result, networking initialization is performed serially with 
+       NSH bring-up.  The time from reset to the NSH prompt will be determined
+       primarily by this network initialization time.  And can be especially
+       long, perhaps minutes, if the network cable is not connected!
+
+       If fast boot times are required, you need to perform asynchronous
+       network initializatino as described about under "Network Initialization
+       Thread"
+
+    5. SDRAM is NOT enabled in this configuration.
+
+    6. TWI/I2C
+
+       TWIHS0 is enabled in this configuration.  The SAM V71 Xplained Ultra
+       supports two devices on the one on-board I2C device on the TWIHS0 bus:
+       (1) The AT24MAC402 serial EEPROM described above and (2) the Wolfson
+       WM8904 audio CODEC.  This device contains a MAC address for use with
+       the Ethernet interface.
+
+       Relevant configuration settings:
+
+         CONFIG_SAMV7_TWIHS0=y
+         CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
+
+         CONFIG_I2C=y
+         CONFIG_I2C_TRANSFER=y
+
+    7. TWIHS0 is used to support 256 byte non-volatile storage.  This EEPROM
+       holds the assigned MAC address which is necessary for networking. The
+       EEPROM is also avaiable for storage of configuration data using the
+       MTD configuration as described above under the heading, "MTD
+       Configuration Data".
+
+    8. Support for HSMCI is built-in by default. The SAMV71-XULT provides
+       one full-size SD memory card slot.  Refer to the section entitled
+       "SD card" for configuration-related information.
+
+       See "Open Issues" above for issues related to HSMCI.
+
+       The auto-mounter is not enabled.  See the section above entitled
+       "Auto-Mounter".
+
+    9. Performance-related Configuration settings:
+
+       CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
+       CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
+       CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
+       CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
+
+       # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
+       # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
+
+       Stack sizes are also large to simplify the bring-up and should be
+       tuned for better memory usages.
+
+  nsh:
+
+    Configures the NuttShell (nsh) located at examples/nsh.  There are two
+    NSH configurations:
+
+      - nsh.  This configuration is focused on low level, command-line
+        driver testing.  It has not network.
+      - netnsh.  This configuration is focused on network testing and
+        has only limited command support.
+
     NOTES:
 
     1. The serial console is configured by default for use with and Arduino
