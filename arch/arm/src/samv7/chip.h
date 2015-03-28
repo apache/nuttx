@@ -58,6 +58,11 @@
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS NR_PIDS
 
+/* Cache line sizes (in bytes)for the SAMV71 */
+
+#define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
