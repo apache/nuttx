@@ -49,7 +49,7 @@ Board Features
   - Embedded Debugger with Data Gateway Interface and Virtual COM port (CDC)
   - External power input (5-14V) or USB powered
 
-See the Atmel webite for further information about this board:
+See the Atmel website for further information about this board:
 
   - http://www.atmel.com/tools/atsamv71-xult.aspx
 
@@ -475,6 +475,7 @@ Selecting the GMAC peripheral
 
   Networking Support
     CONFIG_NET=y                         : Enable Neworking
+    CONFIG_NET_NOINTS=y                  : Use the work queue, not interrupts for processing
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
     CONFIG_NET_ETH_MTU=562               : Maximum packet size (MTU) 1518 is more standard
     CONFIG_NET_ETH_TCP_RECVWNDO=562      : Should be the same as CONFIG_NET_ETH_MTU
@@ -801,7 +802,7 @@ Configuration sub-directories
        long, perhaps minutes, if the network cable is not connected!
 
        If fast boot times are required, you need to perform asynchronous
-       network initializatino as described about under "Network Initialization
+       network initialization as described about under "Network Initialization
        Thread"
 
     5. SDRAM is NOT enabled in this configuration.
@@ -824,7 +825,7 @@ Configuration sub-directories
 
     7. TWIHS0 is used to support 256 byte non-volatile storage.  This EEPROM
        holds the assigned MAC address which is necessary for networking. The
-       EEPROM is also avaiable for storage of configuration data using the
+       EEPROM is also available for storage of configuration data using the
        MTD configuration as described above under the heading, "MTD
        Configuration Data".
 
@@ -1048,4 +1049,3 @@ Configuration sub-directories
 
        Stack sizes are also large to simplify the bring-up and should be
        tuned for better memory usages.
-

@@ -1318,7 +1318,7 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
                         (uintptr_t)txdesc->addr + dev->d_len);
     }
 
-  /* Update TX descriptor status. */
+  /* Update TX descriptor status (with USED=0). */
 
   status = dev->d_len | EMACTXD_STA_LAST;
   if (txhead == priv->xfrq[qid].ntxbuffers - 1)
@@ -1345,6 +1345,13 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
 
   regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
   regval |= EMAC_NCR_TSTART;
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+
+  /* REVISIT: Sometimes TSTART is missed?  In this case, the symptom is
+   * that the packet is not sent until the next transfer when TXSTART
+   * is set again.
+   */
+
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
@@ -1515,7 +1522,7 @@ static void sam_dopoll(struct sam_emac_s *priv, int qid)
 
 static int sam_recvframe(struct sam_emac_s *priv, int qid)
 {
-  struct emac_rxdesc_s *rxdesc;
+  volatile struct emac_rxdesc_s *rxdesc;
   struct net_driver_s *dev;
   const uint8_t *src;
   uint8_t  *dest;
