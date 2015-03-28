@@ -88,14 +88,8 @@ The BASIC nsh configuration is fully function (as desribed below under
      So there is still plenty to be done.
 
   6. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
-     Some basic functionality is present, but there are issues:
-
-     - There is a compiler optimization problem.  At -O2, there is odd
-       behavior on pings and ARP messages.  But the behavior is OK with
-       optimization disabled.  This is clearly a compiler issue, but I
-       will need eventually to find something better than -O0.
-     - The driver has not been tested with I- and D-Caches enabled.  There
-       are likely issues in that configuration.
+     Some basic functionality is present, but there is at least one issue:
+     The driver does not yet work I- and D-Caches enabled.
 
   7. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
@@ -796,14 +790,13 @@ Configuration sub-directories
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
 
     4. The network initialization thread is NOT enabled in this configuration.
-       As a result, networking initialization is performed serially with 
+       As a result, networking initialization is performed serially with
        NSH bring-up.  The time from reset to the NSH prompt will be determined
        primarily by this network initialization time.  And can be especially
        long, perhaps minutes, if the network cable is not connected!
 
        If fast boot times are required, you need to perform asynchronous
-       network initialization as described about under "Network Initialization
-       Thread"
+       network initialization as described under "Network Initialization Thread"
 
     5. SDRAM is NOT enabled in this configuration.
 
