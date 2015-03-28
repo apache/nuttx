@@ -88,8 +88,16 @@ The BASIC nsh configuration is fully function (as desribed below under
      So there is still plenty to be done.
 
   6. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
-     Some basic functionality is present, but there is at least one issue:
-     The driver does not yet work I- and D-Caches enabled.
+     Some basic functionality is present, but there is at least two,
+     probably related issues:
+
+     - There is a compiler optimization problem.  At -O2, there is odd
+       behavior on pings and ARP messages.  But the behavior is OK with
+       optimization disabled.  This may or may not be a compiler issue; it
+       may be a timing issue.
+     - The driver does not work with I- and D-Caches enabled.  The behavior
+       is just as for when compiler optimization is enabled.  I have not
+       yet found in coherency issues so this migh also be timing related.
 
   7. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
@@ -103,7 +111,7 @@ The BASIC nsh configuration is fully function (as desribed below under
      sample code and study of the data sheet, but I have not found the key to
      solving this.
 
-     - Could this be a compiler issue????
+     - I need to try this as -O2 optimization as well.
 
 Serial Console
 ==============
@@ -844,6 +852,13 @@ Configuration sub-directories
        Stack sizes are also large to simplify the bring-up and should be
        tuned for better memory usages.
 
+    STATUS:
+    2015-03-28:  I- and D-caches are currently disabled.  Also -Os
+      optimization is not being used (-O2).  If either the caches or higher
+      levels of optimization are enabled, then there are failures when trying
+      to ping the target from a host.  This appears to be a timing-related
+      issue will probably not be easy to fix.
+
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  There are two
@@ -1042,3 +1057,7 @@ Configuration sub-directories
 
        Stack sizes are also large to simplify the bring-up and should be
        tuned for better memory usages.
+
+    STATUS:
+    2015-03-28: HSMCI TX DMA is disabled.  There are some issues with the TX
+      DMA that need to be corrected.
