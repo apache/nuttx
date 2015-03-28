@@ -317,7 +317,7 @@
 #  define sam_dumppacket(m,a,n)
 #endif
 
-/* EMAC buffer sizes, number of buffers, and number of descriptors **********
+/* EMAC buffer sizes, number of buffers, and number of descriptors ***********
  *
  * REVISIT: The CONFIG_NET_MULTIBUFFER might be useful.  It might be possible
  * to use this option to send and receive messages directly into the DMA
@@ -330,41 +330,94 @@
 #  error CONFIG_NET_MULTIBUFFER must not be set
 #endif
 
-#define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
-#define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
-
-#define DUMMY_BUFSIZE    128
-#define DUMMY_NBUFFERS   2
-
 /* Queue identifiers/indices */
 
-#define EMAC_QUEUE_0     0
-#define EMAC_QUEUE_1     1
-#define EMAC_QUEUE_2     2
-#define EMAC_NQUEUES     3
+#define EMAC_QUEUE_0        0
+#define EMAC_QUEUE_1        1
+#define EMAC_QUEUE_2        2
+#define EMAC_NQUEUES        3
 
 /* Interrupt settings */
 
-#define EMAC_RX_INTS     (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_ROVR)
-#define EMAC_TXERR_INTS  (EMAC_INT_TUR | EMAC_INT_RLEX | EMAC_INT_TFC | \
-                          EMAC_INT_HRESP)
-#define EMAC_TX_INTS     (EMAC_TXERR_INTS | EMAC_INT_TCOMP)
+#define EMAC_RX_INTS        (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_ROVR)
+#define EMAC_TXERR_INTS     (EMAC_INT_TUR | EMAC_INT_RLEX | EMAC_INT_TFC | \
+                             EMAC_INT_HRESP)
+#define EMAC_TX_INTS        (EMAC_TXERR_INTS | EMAC_INT_TCOMP)
+
+/* Buffer Alignment.
+ *
+ * The EMAC peripheral requires that descriptors and buffers be aligned
+ * the 8-byte (2 word boundaries).  However, if the data cache is enabled
+ * the a higher level of alignment is required.  That is because the data
+ * will need to be invalidated and that cache invalidation will occur in
+ * multiples of full change lines.
+ *
+ * In addition, padding may be required at the ends of the descriptors and
+ * buffers to protect data after the end of from invalidation.
+ */
+
+#ifdef CONFIG_ARMV7M_DCACHE
+/* Align to the cache line size which we assume is >= 8 */
+
+#  define EMAC_ALIGN        ARMV7M_DCACHE_LINESIZE
+#  define EMAC_ALIGN_MASK   (EMAC_ALIGN-1)
+#  define EMAC_ALIGN_UP(n)  (((n) + EMAC_ALIGN_MASK) & ~EMAC_ALIGN_MASK)
+
+#  define EMAC0_RX_DPADSIZE (EMAC0_RX_DESCSIZE & EMAC_ALIGN_MASK)
+#  define EMAC0_TX_DPADSIZE (EMAC0_TX_DESCSIZE & EMAC_ALIGN_MASK)
+#  define EMAC1_RX_DPADSIZE (EMAC1_RX_DESCSIZE & EMAC_ALIGN_MASK)
+#  define EMAC1_TX_DPADSIZE (EMAC1_TX_DESCSIZE & EMAC_ALIGN_MASK)
+
+#else
+/* Use the minimum alignment requirement */
+
+#  define EMAC_ALIGN        8
+#  define EMAC_ALIGN_MASK   7
+#  define EMAC_ALIGN_UP(n)  (((n) + 7) & ~7)
+
+#  define EMAC0_RX_DPADSIZE 0
+#  define EMAC0_TX_DPADSIZE 0
+#  define EMAC1_RX_DPADSIZE 0
+#  define EMAC1_TX_DPADSIZE 0
+
+#endif
+
+/* Buffer sizes.
+ *
+ * RX buffer size if fixed at 128 bytes since fragmented incoming packets
+ * are handled.
+ */
+
+#define EMAC_RX_UNITSIZE    EMAC_ALIGN_UP(128)
+#define EMAC_TX_UNITSIZE    EMAC_ALIGN_UP(CONFIG_NET_ETH_MTU)
+#define DUMMY_BUFSIZE       EMAC_ALIGN_UP(128)
+#define DUMMY_NBUFFERS      2
+
+#define EMAC0_RX_DESCSIZE   (CONFIG_SAMV7_EMAC0_NRXBUFFERS * sizeof(struct emac_rxdesc_s))
+#define EMAC0_TX_DESCSIZE   (CONFIG_SAMV7_EMAC0_NTXBUFFERS * sizeof(struct emac_txdesc_s))
+#define EMAC0_RX_BUFSIZE    (CONFIG_SAMV7_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE)
+#define EMAC0_TX_BUFSIZE    (CONFIG_SAMV7_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE)
+
+#define EMAC1_RX_DESCSIZE   (CONFIG_SAMV7_EMAC1_NRXBUFFERS * sizeof(struct emac_rxdesc_s))
+#define EMAC1_TX_DESCSIZE   (CONFIG_SAMV7_EMAC1_NTXBUFFERS * sizeof(struct emac_txdesc_s))
+#define EMAC1_RX_BUFSIZE    (CONFIG_SAMV7_EMAC1_NRXBUFFERS * EMAC_RX_UNITSIZE)
+#define EMAC1_TX_BUFSIZE    (CONFIG_SAMV7_EMAC1_NTXBUFFERS * EMAC_TX_UNITSIZE)
 
 /* Timing *******************************************************************/
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second
  */
 
-#define SAM_WDDELAY      (1*CLK_TCK)
-#define SAM_POLLHSEC     (1*2)
+#define SAM_WDDELAY         (1*CLK_TCK)
+#define SAM_POLLHSEC        (1*2)
 
 /* TX timeout = 1 minute */
 
-#define SAM_TXTIMEOUT    (60*CLK_TCK)
+#define SAM_TXTIMEOUT       (60*CLK_TCK)
 
 /* PHY read/write delays in loop counts */
 
-#define PHY_RETRY_MAX    1000000
+#define PHY_RETRY_MAX       1000000
 
 /* Helpers ******************************************************************/
 /* This is a helper pointer for accessing the contents of the EMAC
@@ -643,18 +696,26 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
 /* EMAC0 TX descriptors list */
 
 static struct emac_txdesc_s g_emac0_tx0desc[CONFIG_SAMV7_EMAC0_NTXBUFFERS]
-              __attribute__((aligned(8)));
+              __attribute__((aligned(EMAC_ALIGN)));
+
+#if EMAC0_TX_DPADSIZE > 0
+static uint8_t g_emac0_txdpad[EMAC0_TX_DPADSIZE] __atrribute__((used));
+#endif
 
 static struct emac_txdesc_s g_emac0_tx1desc[DUMMY_NBUFFERS]
-              __attribute__((aligned(8)));
+              __attribute__((aligned(EMAC_ALIGN)));
 
 /* EMAC0 RX descriptors list */
 
 static struct emac_rxdesc_s g_emac0_rx0desc[CONFIG_SAMV7_EMAC0_NRXBUFFERS]
-              __attribute__((aligned(8)));
+              __attribute__((aligned(EMAC_ALIGN)));
+
+#if EMAC0_RX_DPADSIZE > 0
+static uint8_t g_emac0_rxdpad[EMAC0_RX_DPADSIZE] __atrribute__((used));
+#endif
 
 static struct emac_rxdesc_s g_emac0_rx1desc[DUMMY_NBUFFERS]
-              __attribute__((aligned(8)));
+              __attribute__((aligned(EMAC_ALIGN)));
 
 /* EMAC0 Transmit Buffers
  *
@@ -663,38 +724,46 @@ static struct emac_rxdesc_s g_emac0_rx1desc[DUMMY_NBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_emac0_tx0buffer[CONFIG_SAMV7_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE];
-               __attribute__((aligned(8)))
+static uint8_t g_emac0_tx0buffer[EMAC0_TX_BUFSIZE];
+               __attribute__((aligned(EMAC_ALIGN)))
 
 static uint8_t g_emac0_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(8)))
+               __attribute__((aligned(EMAC_ALIGN)))
 
 /* EMAC0 Receive Buffers */
 
-static uint8_t g_emac0_rx0buffer[CONFIG_SAMV7_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE]
-               __attribute__((aligned(8)));
+static uint8_t g_emac0_rx0buffer[EMAC0_RX_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
 static uint8_t pRxDummyBuffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(8)))
+               __attribute__((aligned(EMAC_ALIGN)))
 
 #endif
 
 #ifdef CONFIG_SAMV7_EMAC1
 /* EMAC1 TX descriptors list */
 
-static struct emac_txdesc_s g_emac1_tx0desc[CONFIG_SAMV7_EMAC1_NTXBUFFERS]
-              __attribute__((aligned(8)));
+static struct emac_txdesc_s g_emac1_tx1desc[CONFIG_SAMV7_EMAC1_NTXBUFFERS]
+              __attribute__((aligned(EMAC_ALIGN)));
+
+#if EMAC1_TX_DPADSIZE > 0
+static uint8_t g_emac1_txdpad[EMAC1_TX_DPADSIZE] __atrribute__((used));
+#endif
 
 static struct emac_txdesc_s g_emac1_tx1desc[DUMMY_NBUFFERS]
-              __attribute__((aligned(8)));
+              __attribute__((aligned(EMAC_ALIGN)));
 
 /* EMAC1 RX descriptors list */
 
-static struct emac_rxdesc_s g_emac1_rx0desc[CONFIG_SAMV7_EMAC1_NRXBUFFERS]
-              __attribute__((aligned(8)));
+static struct emac_rxdesc_s g_emac1_rx1desc[CONFIG_SAMV7_EMAC1_NRXBUFFERS]
+              __attribute__((aligned(EMAC_ALIGN)));
+
+#if EMAC1_RX_DPADSIZE > 0
+static uint8_t g_emac1_rxdpad[EMAC1_RX_DPADSIZE] __atrribute__((used));
+#endif
 
 static struct emac_rxdesc_s g_emac1_rx1desc[DUMMY_NBUFFERS]
-              __attribute__((aligned(8)));
+              __attribute__((aligned(EMAC_ALIGN)));
 
 /* EMAC1 Transmit Buffers
  *
@@ -703,19 +772,19 @@ static struct emac_rxdesc_s g_emac1_rx1desc[DUMMY_NBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_emac1_tx0buffer[CONFIG_SAMV7_EMAC1_NTXBUFFERS * EMAC_TX_UNITSIZE];
-               __attribute__((aligned(8)))
+static uint8_t g_emac1_tx1buffer[EMAC1_TX_BUFSIZE];
+               __attribute__((aligned(EMAC_ALIGN)))
 
 static uint8_t g_emac1_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(8)))
+               __attribute__((aligned(EMAC_ALIGN)))
 
 /* EMAC1 Receive Buffers */
 
-static uint8_t g_emac1_rxbuffer[CONFIG_SAMV7_EMAC1_NRXBUFFERS * EMAC_RX_UNITSIZE]
-               __attribute__((aligned(8)));
+static uint8_t g_emac1_rxbuffer[EMAC1_RX_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
 static uint8_t g_emac1_rx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(8)))
+               __attribute__((aligned(EMAC_ALIGN)))
 
 #endif
 #endif
@@ -1069,8 +1138,8 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
 
   /* Allocate Queue 0 buffers */
 
-  allocsize = priv->attr->ntxbuffers * sizeof(struct emac_txdesc_s);
-  priv->xfrq[0].txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
+  allocsize = EMAC_ALIGN_UP(priv->attr->ntxbuffers * sizeof(struct emac_txdesc_s));
+  priv->xfrq[0].txdesc = (struct emac_txdesc_s *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].txdesc)
     {
       nlldbg("ERROR: Failed to allocate TX descriptors\n");
@@ -1080,8 +1149,8 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   memset(priv->xfrq[0].txdesc, 0, allocsize);
   priv->xfrq[0].ntxbuffers = priv->attr->ntxbuffers;
 
-  allocsize = priv->attr->nrxbuffers * sizeof(struct emac_rxdesc_s);
-  priv->xfrq[0].rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
+  allocsize = EMAC_ALIGN_UP(priv->attr->nrxbuffers * sizeof(struct emac_rxdesc_s));
+  priv->xfrq[0].rxdesc = (struct emac_rxdesc_s *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].rxdesc)
     {
       nlldbg("ERROR: Failed to allocate RX descriptors\n");
@@ -1093,7 +1162,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].nrxbuffers = priv->attr->nrxbuffers;
 
   allocsize = priv->attr->ntxbuffers * EMAC_TX_UNITSIZE;
-  priv->xfrq[0].txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  priv->xfrq[0].txbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].txbuffer)
     {
       nlldbg("ERROR: Failed to allocate TX buffer\n");
@@ -1104,7 +1173,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].txbufsize = EMAC_TX_UNITSIZE;
 
   allocsize = priv->attr->nrxbuffers * EMAC_RX_UNITSIZE;
-  priv->xfrq[0].rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  priv->xfrq[0].rxbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].rxbuffer)
     {
       nlldbg("ERROR: Failed to allocate RX buffer\n");
@@ -1116,8 +1185,8 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
 
   /* Allocate Queue 1 buffers */
 
-  allocsize = DUMMY_NBUFFERS * sizeof(struct emac_txdesc_s);
-  priv->xfrq[1].txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
+  allocsize = EMAC_ALIGN_UP(DUMMY_NBUFFERS * sizeof(struct emac_txdesc_s));
+  priv->xfrq[1].txdesc = (struct emac_txdesc_s *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].txdesc)
     {
       nlldbg("ERROR: Failed to allocate TX descriptors\n");
@@ -1127,8 +1196,8 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   memset(priv->xfrq[1].txdesc, 0, allocsize);
   priv->xfrq[1].ntxbuffers = DUMMY_NBUFFERS;
 
-  allocsize = DUMMY_NBUFFERS * sizeof(struct emac_rxdesc_s);
-  priv->xfrq[1].rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
+  allocsize = EMAC_ALIGN_UP(DUMMY_NBUFFERS * sizeof(struct emac_rxdesc_s));
+  priv->xfrq[1].rxdesc = (struct emac_rxdesc_s *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].rxdesc)
     {
       nlldbg("ERROR: Failed to allocate RX descriptors\n");
@@ -1140,7 +1209,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[1].nrxbuffers = DUMMY_NBUFFERS;
 
   allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
-  priv->xfrq[1].txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  priv->xfrq[1].txbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].txbuffer)
     {
       nlldbg("ERROR: Failed to allocate TX buffer\n");
@@ -1151,7 +1220,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[1].txbufsize = DUMMY_BUFSIZE;
 
   allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
-  priv->xfrq[1].rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  priv->xfrq[1].rxbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].rxbuffer)
     {
       nlldbg("ERROR: Failed to allocate RX buffer\n");
@@ -1182,14 +1251,15 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
 
   /* Verify Alignment */
 
-  DEBUGASSERT(((uintptr_t)priv->xfrq[0].rxdesc   & 7) == 0 &&
-              ((uintptr_t)priv->xfrq[0].rxbuffer & 7) == 0 &&
-              ((uintptr_t)priv->xfrq[0].txdesc   & 7) == 0 &&
-              ((uintptr_t)priv->xfrq[0].txbuffer & 7) == 0);
-  DEBUGASSERT(((uintptr_t)priv->xfrq[1].rxdesc   & 7) == 0 &&
-              ((uintptr_t)priv->xfrq[1].rxbuffer & 7) == 0 &&
-              ((uintptr_t)priv->xfrq[1].txdesc   & 7) == 0 &&
-              ((uintptr_t)priv->xfrq[1].txbuffer & 7) == 0);
+  DEBUGASSERT(((uintptr_t)priv->xfrq[0].rxdesc   & EMAC_ALIGN_MASK) == 0 &&
+              ((uintptr_t)priv->xfrq[0].rxbuffer & EMAC_ALIGN_MASK) == 0 &&
+              ((uintptr_t)priv->xfrq[0].txdesc   & EMAC_ALIGN_MASK) == 0 &&
+              ((uintptr_t)priv->xfrq[0].txbuffer & EMAC_ALIGN_MASK) == 0);
+  DEBUGASSERT(((uintptr_t)priv->xfrq[1].rxdesc   & EMAC_ALIGN_MASK) == 0 &&
+              ((uintptr_t)priv->xfrq[1].rxbuffer & EMAC_ALIGN_MASK) == 0 &&
+              ((uintptr_t)priv->xfrq[1].txdesc   & EMAC_ALIGN_MASK) == 0 &&
+              ((uintptr_t)priv->xfrq[1].txbuffer & EMAC_ALIGN_MASK) == 0);
+
   return OK;
 }
 
@@ -1545,15 +1615,12 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
   rxdesc     = &priv->xfrq[qid].rxdesc[rxndx];
   isframe    = false;
 
-  /* Invalidate the RX descriptor to force re-fetching from RAM.
-   * REVISIT:  If the rxdesc is not aligned with the cacheline boundary
-   * then won't this also invalidate some surrounding memory?
-   */
+  /* Invalidate the RX descriptor to force re-fetching from RAM. */
 
   arch_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
-  nllvdbg("rxndx: %d\n", rxndx);
+  nllvdbg("Entry rxndx[%d]: %d\n", qid, rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -1650,10 +1717,6 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
           /* Get the data source.  Invalidate the source memory region to
            * force reload from RAM.
-           *
-           * REVISIT:  If the rxdesc is not aligned with the cacheline
-           * boundary then won't this also invalidate some surrounding
-           * memory?
            */
 
           src = (const uint8_t *)(rxdesc->addr & EMACRXD_ADDR_MASK);
@@ -1744,17 +1807,13 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
           priv->xfrq[qid].rxndx = rxndx;
         }
 
-    /* Set-up rocess the next fragment.  Get the RX descriptor
+    /* Set-up to process the next fragment.  Get the RX descriptor
      * associated with the next fragment.
      */
 
     rxdesc = &priv->xfrq[qid].rxdesc[rxndx];
 
-    /* Invalidate the RX descriptor to force re-fetching from RAM
-     *
-     * REVISIT:  If the rxdesc is not aligned with the cacheline boundary
-     * then won't this also invalidate some surrounding memory?
-     */
+    /* Invalidate the RX descriptor to force re-fetching from RAM */
 
     arch_invalidate_dcache((uintptr_t)rxdesc,
                            (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
@@ -1763,7 +1822,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
   /* No packet was found */
 
   priv->xfrq[qid].rxndx = rxndx;
-  nllvdbg("rxndx: %d\n", priv->xfrq[qid].rxndx);
+  nllvdbg("Exit rxndx[%d]: %d\n", qid, priv->xfrq[qid].rxndx);
   return -EAGAIN;
 }
 
@@ -1954,11 +2013,6 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
       /* Yes.. check the next buffer at the tail of the list */
 
       txdesc = &priv->xfrq[qid].txdesc[tail];
-
-      /* REVISIT:  If the txdesc is not aligned with the cacheline boundary
-       * then won't this also invalidate some surrounding memory?
-       */
-
       arch_invalidate_dcache((uintptr_t)txdesc,
                              (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
 
@@ -2078,10 +2132,7 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
     {
       txdesc = &priv->xfrq[qid].txdesc[tail];
 
-      /* Make hw descriptor updates visible to CPU.
-       * REVISIT:  This could possibily invalidate the memory outside of
-       * the txdesc, depending on the size and alignment of the cache lines.
-       */
+      /* Make H/W updates to the TX descriptor visible to the CPU. */
 
       arch_invalidate_dcache((uintptr_t)txdesc,
                              (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
