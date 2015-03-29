@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_rtc.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "stm32_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,8 +67,8 @@
  * chip.h that can associate an STM32 part number with an STM32 family.
  */
 
-/* The STM32 F1 has a simple battery-backed counter for its RTC and has a separate
- * block for the BKP registers.
+/* The STM32 F1 has a simple battery-backed counter for its RTC and has a
+ * separate block for the BKP registers.
  */
 
 #if defined(CONFIG_STM32_STM32F10XX)
@@ -80,8 +79,7 @@
  * the RTCC in these families.
  */
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) ||\
-      defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 #  include "stm32_rtcc.c"
 #endif
-

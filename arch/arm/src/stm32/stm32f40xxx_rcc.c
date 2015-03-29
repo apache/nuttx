@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f40xxx_rcc.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 #include "stm32_pwr.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
@@ -458,7 +458,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_UART8EN;
 #endif
 
-
   putreg32(regval, STM32_RCC_APB1ENR);   /* Enable peripherals */
 }
 
@@ -611,16 +610,17 @@ static void stm32_stdclockconfig(void)
   /* Wait until the HSI is ready (or until a timeout elapsed) */
 
   for (timeout = HSIRDY_TIMEOUT; timeout > 0; timeout--)
-  {
-    /* Check if the HSIRDY flag is the set in the CR */
+    {
+      /* Check if the HSIRDY flag is the set in the CR */
 
-    if ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) != 0)
-      {
-        /* If so, then break-out with timeout > 0 */
+      if ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) != 0)
+        {
+          /* If so, then break-out with timeout > 0 */
 
-        break;
-      }
-  }
+          break;
+        }
+    }
+
 #else /* if STM32_BOARD_USEHSE */
   /* Enable External High-Speed Clock (HSE) */
 
@@ -631,16 +631,16 @@ static void stm32_stdclockconfig(void)
   /* Wait until the HSE is ready (or until a timeout elapsed) */
 
   for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
-  {
-    /* Check if the HSERDY flag is the set in the CR */
+    {
+      /* Check if the HSERDY flag is the set in the CR */
 
-    if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
-      {
-        /* If so, then break-out with timeout > 0 */
+      if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
+        {
+          /* If so, then break-out with timeout > 0 */
 
-        break;
-      }
-  }
+          break;
+        }
+    }
 #endif
 
   /* Check for a timeout.  If this timeout occurs, then we are hosed.  We
@@ -784,6 +784,22 @@ static void stm32_stdclockconfig(void)
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLSAIRDY) == 0)
         {
         }
+#endif
+
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+      /* Low speed internal clock source LSI */
+
+      stm32_rcc_enablelsi();
+#endif
+
+#if defined(CONFIG_RTC_LSECLOCK)
+      /* Low speed external clock source LSE
+       *
+       * TODO: There is another case where the LSE needs to
+       * be enabled: if the MCO1 pin selects LSE as source.
+       */
+
+      stm32_rcc_enablelse();
 #endif
     }
 }

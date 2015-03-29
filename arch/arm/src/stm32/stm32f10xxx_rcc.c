@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f10xxx_rcc.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
@@ -80,7 +80,8 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CFGR);       /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
-  regval &= ~(RCC_CFGR_SW_MASK|RCC_CFGR_HPRE_MASK|RCC_CFGR_PPRE1_MASK|RCC_CFGR_PPRE2_MASK|RCC_CFGR_ADCPRE_MASK|RCC_CFGR_MCO_MASK);
+  regval &= ~(RCC_CFGR_SW_MASK|RCC_CFGR_HPRE_MASK|RCC_CFGR_PPRE1_MASK|
+              RCC_CFGR_PPRE2_MASK|RCC_CFGR_ADCPRE_MASK|RCC_CFGR_MCO_MASK);
   putreg32(regval, STM32_RCC_CFGR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEON, CSSON and PLLON bits */
@@ -188,12 +189,12 @@ static inline void rcc_enableahb(void)
 static inline void rcc_enableapb1(void)
 {
   uint32_t regval;
+
 #ifdef CONFIG_STM32_USB
   /* USB clock divider for USB FS device.  This bit must be valid before
    * enabling the USB clock in the RCC_APB1ENR register. This bit can't be
    * reset if the USB clock is enabled.
    */
-
 
   regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_USBPRE;
@@ -208,6 +209,7 @@ static inline void rcc_enableapb1(void)
   regval  = getreg32(STM32_RCC_APB1ENR);
 #ifdef CONFIG_STM32_TIM2
   /* Timer 2 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM2EN;
 #endif
@@ -215,6 +217,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM3
   /* Timer 3 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM3EN;
 #endif
@@ -222,6 +225,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM4
   /* Timer 4 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM4EN;
 #endif
@@ -229,6 +233,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM5
   /* Timer 5 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM5EN;
 #endif
@@ -236,6 +241,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM6
   /* Timer 6 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM6EN;
 #endif
@@ -243,6 +249,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM7
   /* Timer 7 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM7EN;
 #endif
@@ -250,6 +257,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM12
   /* Timer 12 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM12EN;
 #endif
@@ -257,6 +265,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM13
   /* Timer 13 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM13EN;
 #endif
@@ -264,6 +273,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM14
   /* Timer 14 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM14EN;
 #endif
@@ -313,6 +323,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_I2C1
   /* I2C 1 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C1EN;
 #endif
@@ -320,6 +331,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_I2C2
   /* I2C 2 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C2EN;
 #endif
@@ -427,6 +439,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM1
   /* TIM1 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM1EN;
 #endif
@@ -440,6 +453,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM8
   /* TIM8 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM8EN;
 #endif
@@ -452,13 +466,14 @@ static inline void rcc_enableapb2(void)
 #endif
 
 #ifdef CONFIG_STM32_ADC3
-  /*ADC3 interface clock enable */
+  /* ADC3 interface clock enable */
 
   regval |= RCC_APB2ENR_ADC3EN;
 #endif
 
 #ifdef CONFIG_STM32_TIM15
   /* TIM15 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM15EN;
 #endif
@@ -466,6 +481,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM16
   /* TIM16 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM16EN;
 #endif
@@ -473,6 +489,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM17
   /* TIM17 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM17EN;
 #endif
@@ -492,7 +509,8 @@ static inline void rcc_enableapb2(void)
  *   power clocking modes!
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG) && defined(CONFIG_STM32_CONNECTIVITYLINE)
+#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG) && \
+    defined(CONFIG_STM32_CONNECTIVITYLINE)
 static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -550,9 +568,9 @@ static void stm32_stdclockconfig(void)
 
   while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0);
 
+#if defined(CONFIG_STM32_MII_MCO) || defined(CONFIG_STM32_RMII_MCO)
   /* Setup PLL3 for MII/RMII clock on MCO */
 
-#if defined(CONFIG_STM32_MII_MCO) || defined(CONFIG_STM32_RMII_MCO)
   regval = getreg32(STM32_RCC_CFGR2);
   regval &= ~(RCC_CFGR2_PLL3MUL_MASK);
   regval |= STM32_PLL_PLL3MUL;
@@ -606,7 +624,8 @@ static void stm32_stdclockconfig(void)
  *   power clocking modes!
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG) && !defined(CONFIG_STM32_CONNECTIVITYLINE)
+#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG) && \
+    !defined(CONFIG_STM32_CONNECTIVITYLINE)
 static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -614,7 +633,6 @@ static void stm32_stdclockconfig(void)
   /* If the PLL is using the HSE, or the HSE is the system clock */
 
 #if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
-
   {
     volatile int32_t timeout;
 
@@ -703,7 +721,7 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
-    /* Set the PLL divider and multipler */
+    /* Set the PLL divider and multiplier */
 
     regval = getreg32(STM32_RCC_CFGR);
     regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK);
@@ -732,6 +750,18 @@ static void stm32_stdclockconfig(void)
     /* Wait until the selected source is used as the system clock source */
 
     while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+    /* Low speed internal clock source LSI */
+
+    stm32_rcc_enablelsi();
+#endif
+
+#if defined(CONFIG_RTC_LSECLOCK)
+    /* Low speed external clock source LSE */
+
+    stm32_rcc_enablelse();
+#endif
 }
 #endif
 

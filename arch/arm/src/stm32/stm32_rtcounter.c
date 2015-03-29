@@ -117,6 +117,14 @@
 #  error "CONFIG_STM32_PWR is required for CONFIG_RTC"
 #endif
 
+#ifdef CONFIG_STM32_STM32F10XX
+#  if defined(CONFIG_RTC_HSECLOCK)
+#    error "RTC with HSE clock not yet implemented for STM32F10XXX"
+#  elif defined(CONFIG_RTC_LSICLOCK)
+#    error "RTC with LSI clock not yet implemented for STM32F10XXX"
+#  endif
+#endif
+
 /* RTC/BKP Definitions *************************************************************/
 /* STM32_RTC_PRESCALAR_VALUE
  *   RTC pre-scalar value.  The RTC is driven by a 32,768Hz input clock.  This input
