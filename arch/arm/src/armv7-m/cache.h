@@ -212,6 +212,31 @@ static inline void arch_invalidate_icache_all(void)
 }
 
 /****************************************************************************
+ * Name: arch_dcache_writethrough
+ *
+ * Description:
+ *   Configure the D-Cache for Write-Through operation.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARMV7M_DCACHE) && defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+static inline void arch_dcache_writethrough(void)
+{
+  uint32_t regval = getreg32(NVIC_CACR);
+  regval |= NVIC_CACR_FORCEWT;
+  putreg32(regval, NVIC_CACR);
+}
+#else
+#  define arch_dcache_writethrough()
+#endif
+
+/****************************************************************************
  * Public Variables
  ****************************************************************************/
 
@@ -322,6 +347,9 @@ void arch_invalidate_dcache_all(void);
  *   Clean the data cache within the specified region by flushing the
  *   contents of the data cache to memory.
  *
+ *   NOTE: This operation is un-necessary if the DCACHE is configured in
+ *   write-through mode.
+ *
  * Input Parameters:
  *   start - virtual start address of region
  *   end   - virtual end address of region + 1
@@ -336,7 +364,7 @@ void arch_invalidate_dcache_all(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_DCACHE
+#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
 void arch_clean_dcache(uintptr_t start, uintptr_t end);
 #else
 #  define arch_clean_dcache(s,e)
@@ -349,6 +377,9 @@ void arch_clean_dcache(uintptr_t start, uintptr_t end);
  *   Clean the entire data cache within the specified region by flushing the
  *   contents of the data cache to memory.
  *
+ *   NOTE: This operation is un-necessary if the DCACHE is configured in
+ *   write-through mode.
+ *
  * Input Parameters:
  *   None
  *
@@ -362,7 +393,7 @@ void arch_clean_dcache(uintptr_t start, uintptr_t end);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_DCACHE
+#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
 void arch_clean_dcache_all(void);
 #else
 #  define arch_clean_dcache_all()
@@ -374,6 +405,9 @@ void arch_clean_dcache_all(void);
  * Description:
  *   Flush the data cache within the specified region by cleaning and
  *   invalidating the D cache.
+ *
+ *   NOTE: If DCACHE write-through is configured, then this operation is the
+ *   same as arch_invalidate_cache().
  *
  * Input Parameters:
  *   start - virtual start address of region
@@ -390,7 +424,11 @@ void arch_clean_dcache_all(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARMV7M_DCACHE
+#ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+#  define arch_flush_dcache(s,e) arch_invalidate_dcache(s,e)
+#else
 void arch_flush_dcache(uintptr_t start, uintptr_t end);
+#endif
 #else
 #  define arch_flush_dcache(s,e)
 #endif
@@ -400,6 +438,9 @@ void arch_flush_dcache(uintptr_t start, uintptr_t end);
  *
  * Description:
  *   Flush the entire data cache by cleaning and invalidating the D cache.
+ *
+ *   NOTE: If DCACHE write-through is configured, then this operation is the
+ *   same as arch_invalidate_cache_all().
  *
  * Input Parameters:
  *   None
@@ -415,7 +456,11 @@ void arch_flush_dcache(uintptr_t start, uintptr_t end);
  ****************************************************************************/
 
 #ifdef CONFIG_ARMV7M_DCACHE
+#ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+#  define arch_flush_dcache_all() arch_invalidate_dcache_all()
+#else
 void arch_flush_dcache_all(void);
+#endif
 #else
 #  define arch_flush_dcache_all()
 #endif

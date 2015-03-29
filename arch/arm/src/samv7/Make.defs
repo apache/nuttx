@@ -66,9 +66,11 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_DCACHE),y)
 CMN_CSRCS += arch_enable_dcache.c arch_disable_dcache.c
+CMN_CSRCS += arch_invalidate_dcache.c arch_invalidate_dcache_all.c
+ifneq ($(CONFIG_ARMV7M_DCACHE_WRITETHROUGH),y)
 CMN_CSRCS += arch_clean_dcache.c arch_clean_dcache_all.c
 CMN_CSRCS += arch_flush_dcache.c arch_flush_dcache_all.c
-CMN_CSRCS += arch_invalidate_dcache.c arch_invalidate_dcache_all.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
