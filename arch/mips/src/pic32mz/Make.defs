@@ -77,3 +77,7 @@ endif
 ifeq ($(CONFIG_PIC32MZ_SPI),y)
 CHIP_CSRCS += pic32mz-spi.c
 endif
+
+ifeq ($(CONFIG_PIC32MZ_ETHERNET),y)
+CHIP_CSRCS += pic32mz-ethernet.c
+endif
