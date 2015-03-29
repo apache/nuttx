@@ -23,6 +23,11 @@ config ARMV7M_DCACHE
 	default n
 	depends on ARMV7M_HAVE_DCACHE
 
+config ARMV7M_DCACHE_WRITETHROUGH
+	bool "D-Cache Write-Through"
+	default n
+	depends on ARMV7M_DCACHE
+
 config ARMV7M_HAVE_ITCM
 	bool
 	default n

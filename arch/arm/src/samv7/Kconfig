@@ -117,6 +117,15 @@ config SAMV7_HAVE_EBI
 config SAMV7_EMAC
 	bool
 	default n
+	select ARMV7M_DCACHE_WRITETHROUGH if ARMV7M_DCACHE
+	---help---
+		NOTE that write-through caching is automatically selected.  This is
+		to work around issues with the RX and TX descriptors with are 8-bits
+		in size.  But the D-Cache cache line size is 32-bytes.  That means
+		that you cannot reload, clean or invalidate a descriptor without also
+		effecting three neighboring desciptors.  Setting write through mode
+		eliminates the need for cleaning.  If only reloading and invalidating
+		are done, then there is no problem.
 
 config SAMV7_HSMCI
 	bool

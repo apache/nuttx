@@ -46,7 +46,7 @@
 
 #include "cache.h"
 
-#ifdef CONFIG_ARMV7M_DCACHE
+#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -146,4 +146,4 @@ void arch_clean_dcache(uintptr_t start, uintptr_t end)
   ARM_ISB();
 }
 
-#endif  /* CONFIG_ARMV7M_DCACHE */
+#endif  /* CONFIG_ARMV7M_DCACHE && !CONFIG_ARMV7M_DCACHE_WRITETHROUGH */

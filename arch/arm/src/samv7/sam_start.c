@@ -380,6 +380,7 @@ void __start(void)
 
   /* Enable I- and D-Caches */
 
+  arch_dcache_writethrough();
   arch_enable_icache();
   arch_enable_dcache();
 
