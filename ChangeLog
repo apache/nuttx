@@ -10037,3 +10037,6 @@
 	  reliably. (4) Attempt to apply some consistency in the tiva arch/
 	  level's interface to the config/board/ level driver configuration.
 	  From Calvin Maguranis (2015-03-23).
+	* arch/mips/src/pic32mz: Various fixes for Ethernet support.  Still
+	  not fully functional.  From Kristopher Tate (2015-030-29).
+

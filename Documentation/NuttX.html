@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 9, 2014</p>
+      <p>Last Updated: March 29, 2014</p>
     </td>
   </tr>
 </table>
@@ -1358,7 +1358,8 @@
   </li>
   <li>MicroChip
     <ul>
-      <li><a href="#pic32mips">PIC32MX</a> (MIPS) (4)</li>
+      <li><a href="#pic32mxmips">PIC32MX</a> (MIPS 24Kc) (4)</li>
+      <li><a href="#pic32mzmips">PIC32MZ</a> (MIPS M14K) (1)</li>
     </ul>
   </li>
   <li>Renesas/Hitachi:
@@ -1437,9 +1438,10 @@
   </li>
   <li>MicroChip
     <ul>
-      <li><a href="#pic32mx2xx">PIC32MX2xx Family</a> <small>(Modified MIPS32)</small></li>
-      <li><a href="#pic32mx4xx">PIC32MX4xx Family</a> <small>(Modified MIPS32)</small></li>
-      <li><a href="#pic32mx7xx">PIC32MX7xx Family</a> <small>(Modified MIPS32)</small></a>
+      <li><a href="#pic32mx2xx">PIC32MX2xx Family</a> <small>(MIPS32 24Kc)</small></li>
+      <li><a href="#pic32mx4xx">PIC32MX4xx Family</a> <small>(MIPS32 24Kc)</small></li>
+      <li><a href="#pic32mx7xx">PIC32MX7xx Family</a> <small>(MIPS32 24Kc)</small></a>
+      <li><a href="#pic32mzec">PIC32MZEC Family</a> <small>(MIPS32 M14K)</small></a>
     </ul>
   </li>
   </td>
@@ -3865,11 +3867,27 @@ Mem:         29232       5920      23312      23312
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing (2015-03-09), this is a work in progress.
-        The basic port is code complete and just entering into the test phase.
-        The basic port includes a configuration for the NuttShell (NSH) and a serial console.
-        Additional drivers are expected.
+        The basic port is complete and there are several different, verified configurations available.
+        All configurations use the the NuttShell (NSH) and a serial console.
         The first release of the SAMV71-XULT port is expected in NuttX-7.9.
+      </p>
+      <p>
+        Additional drivers, with status as of 2015-03-29, include:
+      </p>
+      <ul>
+        <li>PIO configuration, including PIO interrupts,</li>
+        <li>On-board LEDs and buttons,</li>
+        <li>DMA,</li>
+        <li>SDRAM (not yet functional),</li>
+        <li>UART/USART-based serial drivers, including the NuttShell serial console,</li>
+        <li>High Speed Memory Card Interface (HSMCI) with support for the on board SD card slot,</li>
+        <li>SPI (not fully tested),</li>
+        <li>TWIHS/I2C, with the support for the on-board serial EEPROM,</li>
+        <li>SSC/I2S (not fully tested),</li>
+        <li>Ethernet MAC (works only with caches disabled),</li>
+        <li>USB device controller driver (not yet functional).</li>
+      </ul>
+      </p>
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/samv71-xult/README.txt">README</a> file for further information.
       </p>
     </ul>
@@ -4201,7 +4219,7 @@ Mem:         29232       5920      23312      23312
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <a name="pic32mips"><b>MicroChip PIC32 (MIPS)</b>.</a>
+    <a name="pic32mxmips"><b>MicroChip PIC32MX (MIPS 24Kc)</b>.</a>
   </td>
 </tr>
 <tr>
@@ -4365,8 +4383,73 @@ Mem:         29232       5920      23312      23312
       <li>
         The Pinguino MIPS ELF toolchain avaiable from the Pinquino <a href="http://code.google.com/p/pinguino32/downloads/list">website</a>.
       </li>
+      <li>
+        The MIPS SDE toolchain available from the <a href="http://www.mentor.com">Mentor Graphics</a> website.
+      </li>
     </ol>
   </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="pic32mzmips"><b>MicroChip PIC32MZ (MIPS M14K)</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="pic32mzec"><b>PIC32MZEC Family</b>.</a>
+      A port is in available for the PIC32MZ Embedded Connectivity (EC) Starter Kit.
+      There are two configurations of the Microchip PIC32MZ EC Starter Kit:
+    </p>
+    <ol>
+      <li> The PIC32MZ Embedded Connectivity Starter Kit based on the PIC32MZ2048ECH144-I/PH chip (DM320006), and</li>
+      <li> The PIC32MZ Embedded Connectivity Starter Kit based on the PIC32MZ2048ECM144-I/PH w/Crypto Engine (DM320006-C).</li>
+    </ol>
+    <p>
+      See the <a href="http://www.microchip.com">Microchip</a> website for further information.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        This is a collaborative effort between Kristopher Tate, David Sidrane and myself.
+        The basic port is functional and a NuttShell (NSH) configurqation is available.
+        The first official is expected in NuttX-7.9.
+        Current efforts are focused on driver development.
+        Many drivers port simply from the PIC32MX; others require more extensive efforts.
+        Driver status as of (2015-03-29) is provided below:
+      <p>
+      <ul>
+        <li>I/O ports include I/O port interrupts</li>
+        <li>UART serial driver that provides the NSH console,</li>
+        <li>Timer,</li>
+        <li>I2C (untested),</li>
+        <li>SPI (untested),</li>
+        <li>On-board buttons and LEDs,</li>
+        <li>Ethernet (code complete, but not yet functional),</li>
+      </ul>
+      </p>
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/pic32mz-starterkit/README.txt">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+</tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Development Environment:</b>
+      Same as for the PIC32MZ.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
 </tr>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
