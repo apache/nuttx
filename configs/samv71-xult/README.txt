@@ -95,9 +95,15 @@ The BASIC nsh configuration is fully function (as desribed below under
        behavior on pings and ARP messages.  But the behavior is OK with
        optimization disabled.  This may or may not be a compiler issue; it
        may be a timing issue.
+
+       Symptoms vary from build to build but usually result in a hang.
+
      - The driver does not work with I- and D-Caches enabled.  The behavior
        is just as for when compiler optimization is enabled.  I have not
-       yet found in coherency issues so this migh also be timing related.
+       yet found in coherency issues so this might also be timing related.
+
+       At -O2, many packets can be exchanged but eventually there is a
+       hardfault, presumably because of a misdirected DMA.
 
   7. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
