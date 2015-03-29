@@ -105,6 +105,12 @@ The BASIC nsh configuration is fully function (as desribed below under
        At -O2, many packets can be exchanged but eventually there is a
        hardfault, presumably because of a misdirected DMA.
 
+     I have no hard evidence, but I believe that the nature of the problem
+     related to fact that each descriptor in the arrays are 8-bytes each,
+     but cache operations are performed on 32-byte memory chunks.  So it is
+     impossible to clean or invalidate a single descriptor without also
+     cleaning or invalidaing adjacent descriptors.
+
   7. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
      bus events are not occurring:  Nothing is detected by the USBHS when the
@@ -117,9 +123,7 @@ The BASIC nsh configuration is fully function (as desribed below under
      sample code and study of the data sheet, but I have not found the key to
      solving this.
 
-     - I need to try this as -O2 optimization as well.
-
-Serial Console
++nmnmSerial Console
 ==============
 
 The SAMV71-XULT has no on-board RS-232 drivers so it will be necessary to
@@ -766,6 +770,12 @@ NOTES:
 
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+     NOTE: As of this writing, there are issues with using this tool at
+     the -Os level of optimization.  This has not been proven to be a
+     compiler issue (as least not one that might not be fixed with a
+     well placed volatile qualifier).  However, in any event, it is
+     recommend that you use not more that -O2 optimization.
 
 Configuration sub-directories
 -----------------------------
