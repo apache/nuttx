@@ -3,7 +3,7 @@
  * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-
  * based 32-bit MCUs
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,10 @@
  */
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
+
+/* HSE divisor to yield ~1MHz RTC clock (valid for HSE = 8MHz)*/
+
+#define HSE_DIVISOR RCC_CR_RTCPRE_HSEd8
 
 /****************************************************************************
  * Private Data
@@ -236,6 +240,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM2
   /* Timer 2 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM2EN;
 #endif
@@ -243,6 +248,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM3
   /* Timer 3 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM3EN;
 #endif
@@ -250,6 +256,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM4
   /* Timer 4 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM4EN;
 #endif
@@ -257,6 +264,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM5
   /* Timer 5 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM5EN;
 #endif
@@ -264,6 +272,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM6
   /* Timer 6 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM6EN;
 #endif
@@ -271,6 +280,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM7
   /* Timer 7 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM7EN;
 #endif
@@ -334,6 +344,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_I2C1
   /* I2C 1 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C1EN;
 #endif
@@ -341,6 +352,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_I2C2
   /* I2C 2 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C2EN;
 #endif
@@ -399,6 +411,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM9
   /* TIM9 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM9EN;
 #endif
@@ -406,6 +419,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM10
   /* TIM10 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM10EN;
 #endif
@@ -413,6 +427,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM11
   /* TIM11 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM11EN;
 #endif
@@ -505,6 +520,9 @@ static inline bool stm32_rcc_enablehse(void)
 static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
+#if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
+  uint16_t pwrcr;
+#endif
 
   /* Go to the high performance voltage range 1 if necessary.  In this mode,
    * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
@@ -516,6 +534,42 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_PLL_FREQUENCY > 48000000
   stm32_pwr_setvos(PWR_CR_VOS_SCALE_1);
+#endif
+
+#if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
+  /* If RTC / LCD selects HSE as clock source, the RTC prescaler
+   * needs to be set before HSEON bit is set.
+   */
+
+  /* The RTC domain has write access denied after reset,
+   * you have to enable write access using DBP bit in the PWR CR
+   * register before to selecting the clock source ( and the PWR
+   * peripheral must be enabled)
+   */
+
+  regval  = getreg32(STM32_RCC_APB1ENR);
+  regval |= RCC_APB1ENR_PWREN;
+  putreg32(regval, STM32_RCC_APB1ENR);
+
+  pwrcr = getreg16(STM32_PWR_CR);
+  putreg16(pwrcr | PWR_CR_DBP, STM32_PWR_CR);
+
+  /* Set the RTC clock divisor */
+
+  regval = getreg32(STM32_RCC_CSR);
+  regval &= ~RCC_CSR_RTCSEL_MASK;
+  regval |= RCC_CSR_RTCSEL_HSE;
+  putreg32(regval, STM32_RCC_CSR);
+
+  regval = getreg32(STM32_RCC_CR);
+  regval &= ~RCC_CR_RTCPRE_MASK;
+  regval |= HSE_DIVISOR);
+  putreg32(regval, STM32_RCC_CR);
+
+   /* Restore the previous state of the DBP bit */
+
+  putreg32(regval, STM32_PWR_CR);
+
 #endif
 
   /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI.
@@ -615,7 +669,7 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
-  /* Set the PLL divider and multipler.  NOTE:  The PLL needs to be disabled
+  /* Set the PLL divider and multiplier.  NOTE:  The PLL needs to be disabled
    * to do these operation.  We know this is the case here because pll_reset()
    * was previously called by stm32_clockconfig().
    */
@@ -647,6 +701,35 @@ static void stm32_stdclockconfig(void)
   /* Wait until the selected source is used as the system clock source */
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+
+#if defined(CONFIG_STM32_IWDG)   || \
+    defined(CONFIG_RTC_LSICLOCK) || defined(CONFIG_LCD_LSICLOCK)
+  /* Low speed internal clock source LSI */
+  /*
+   * TODO: There is another case where the LSI needs to
+   * be enabled: if the MCO pin selects LSI as source.
+   */
+
+  stm32_rcc_enablelsi();
+
+#endif
+
+#if defined(CONFIG_RTC_LSECLOCK) || defined(CONFIG_LCD_LSECLOCK)
+  /* Low speed external clock source LSE
+   *
+   * TODO: There is another case where the LSE needs to
+   * be enabled: if the MCO pin selects LSE as source.
+   *
+   * TODO: There is another case where the LSE needs to
+   * be enabled: if TIM9-10 Channel 1 selects LSE as input.
+   *
+   * TODO: There is another case where the LSE needs to
+   * be enabled: if TIM10-11 selects LSE as ETR Input.
+   *
+   */
+
+  stm32_rcc_enablelse();
+#endif
 }
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f37xxx_rcc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Modified for STM32F373 by Marten Svanfeldt <marten@svanfeldt.com>
  *
@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
@@ -187,6 +187,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM2
   /* Timer 2 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM2EN;
 #endif
@@ -194,6 +195,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM3
   /* Timer 3 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM3EN;
 #endif
@@ -201,6 +203,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM4
   /* Timer 4 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM4EN;
 #endif
@@ -208,6 +211,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM5
   /* Timer 5 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM4EN;
 #endif
@@ -215,6 +219,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM6
   /* Timer 6 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM6EN;
 #endif
@@ -222,6 +227,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM7
   /* Timer 7 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM7EN;
 #endif
@@ -229,6 +235,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM12
   /* Timer 12 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM12EN;
 #endif
@@ -236,6 +243,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM13
   /* Timer 13 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM13EN;
 #endif
@@ -243,6 +251,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM14
   /* Timer 14 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM14EN;
 #endif
@@ -250,6 +259,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_TIM18
   /* Timer 7 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM18EN;
 #endif
@@ -287,6 +297,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_I2C1
   /* I2C 1 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C1EN;
 #endif
@@ -294,6 +305,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_I2C2
   /* I2C 2 clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C2EN;
 #endif
@@ -329,7 +341,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_DAC1EN;
 #endif
 
-
   putreg32(regval, STM32_RCC_APB1ENR);
 }
 
@@ -357,7 +368,6 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SYSCFGEN;
 #endif
 
-
 #ifdef CONFIG_STM32_SPI1
   /* SPI 1 clock enable */
 
@@ -372,6 +382,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM15
   /* TIM15 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM15EN;
 #endif
@@ -379,6 +390,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM16
   /* TIM16 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM16EN;
 #endif
@@ -386,6 +398,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM17
   /* TIM17 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM17EN;
 #endif
@@ -393,6 +406,7 @@ static inline void rcc_enableapb2(void)
 
 #ifdef CONFIG_STM32_TIM19
   /* TIM17 Timer clock enable */
+
 #ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM17EN;
 #endif
@@ -419,7 +433,6 @@ static void stm32_stdclockconfig(void)
   /* If the PLL is using the HSE, or the HSE is the system clock */
 
 #if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
-
   {
     volatile int32_t timeout;
 
@@ -455,6 +468,7 @@ static void stm32_stdclockconfig(void)
   }
 
   /* If this is a value-line part and we are using the HSE as the PLL */
+
 # if (STM32_CFGR_PLLXTPRE >> 17) != (STM32_CFGR2_PREDIV1 & 1)
 #  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
 # endif
@@ -466,14 +480,12 @@ static void stm32_stdclockconfig(void)
 
 # endif
 
-
     /* Enable FLASH prefetch buffer and 2 wait states */
 
     regval  = getreg32(STM32_FLASH_ACR);
     regval &= ~FLASH_ACR_LATENCY_MASK;
     regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
     putreg32(regval, STM32_FLASH_ACR);
-
 
     /* Set the HCLK source/divider */
 
@@ -496,11 +508,9 @@ static void stm32_stdclockconfig(void)
     regval |= STM32_RCC_CFGR_PPRE1;
     putreg32(regval, STM32_RCC_CFGR);
 
-    /* If we are using the PLL, configure and start it */
-
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
-
-    /* Set the PLL divider and multipler */
+    /* If we are using the PLL, configure and start it */
+    /* Set the PLL divider and multiplier */
 
     regval = getreg32(STM32_RCC_CFGR);
     regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLMUL_MASK);
@@ -529,6 +539,32 @@ static void stm32_stdclockconfig(void)
     /* Wait until the selected source is used as the system clock source */
 
     while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+    /* Low speed internal clock source LSI
+     *
+     * TODO: There is another case where the LSI needs to
+     * be enabled: if the MCO pin selects LSI as source.
+     */
+
+    stm32_rcc_enablelsi();
+#endif
+
+#if defined(CONFIG_RTC_LSECLOCK)
+    /* Low speed external clock source LSE 
+     *
+     * TODO: There is another case where the LSE needs to
+     * be enabled: if the MCO pin selects LSE as source.
+     *
+     * TODO: There is another case where the LSE needs to
+     * be enabled: if USART1-2-3 selects LSE as source.
+     *
+     * TODO: There is another case where the LSE needs to
+     * be enabled: if CEC selects LSE as source.
+     */
+
+    stm32_rcc_enablelse();
+#endif
 }
 #endif
 

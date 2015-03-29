@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f20xxx_rcc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
  */
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
@@ -562,16 +562,16 @@ static void stm32_stdclockconfig(void)
   /* Wait until the HSE is ready (or until a timeout elapsed) */
 
   for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
-  {
-    /* Check if the HSERDY flag is the set in the CR */
+    {
+      /* Check if the HSERDY flag is the set in the CR */
 
-    if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
-      {
-        /* If so, then break-out with timeout > 0 */
+      if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
+        {
+          /* If so, then break-out with timeout > 0 */
 
-        break;
-      }
-  }
+          break;
+        }
+    }
 
   /* Check for a timeout.  If this timeout occurs, then we are hosed.  We
    * have no real back-up plan, although the following logic makes it look
@@ -657,6 +657,22 @@ static void stm32_stdclockconfig(void)
       /* Wait until the PLL source is used as the system clock source */
 
       while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL);
+
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+      /* Low speed internal clock source LSI */
+
+      stm32_rcc_enablelsi();
+#endif
+
+#if defined(CONFIG_RTC_LSECLOCK)
+      /* Low speed external clock source LSE
+       *
+       * TODO: There is another case where the LSE needs to
+       * be enabled: if the MCO1 pin selects LSE as source.
+       */
+
+      stm32_rcc_enablelse();
+#endif
     }
 }
 #endif
