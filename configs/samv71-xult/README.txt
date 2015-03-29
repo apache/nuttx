@@ -88,28 +88,21 @@ The BASIC nsh configuration is fully function (as desribed below under
      So there is still plenty to be done.
 
   6. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
-     Some basic functionality is present, but there is at least two,
-     probably related issues:
+     This driver appears to be 100% functional with the following caveats:
 
      - There is a compiler optimization problem.  At -O2, there is odd
        behavior on pings and ARP messages.  But the behavior is OK with
-       optimization disabled.  This may or may not be a compiler issue; it
-       may be a timing issue.
+       optimization set to -O2.  This may or may not be a compiler
+       optimization issue (it could also be a timing issue or a need
+       for some additional volatile qualifiers).
 
-       Symptoms vary from build to build but usually result in a hang.
-
-     - The driver does not work with I- and D-Caches enabled.  The behavior
-       is just as for when compiler optimization is enabled.  I have not
-       yet found in coherency issues so this might also be timing related.
-
-       At -O2, many packets can be exchanged but eventually there is a
-       hardfault, presumably because of a misdirected DMA.
-
-     I have no hard evidence, but I believe that the nature of the problem
-     related to fact that each descriptor in the arrays are 8-bytes each,
-     but cache operations are performed on 32-byte memory chunks.  So it is
-     impossible to clean or invalidate a single descriptor without also
-     cleaning or invalidaing adjacent descriptors.
+     - I- and D-Caches are enabled but the D-Cache must be enabled in
+       write-trough mode.  This is to work around issues with the RX and TX
+       descriptors with are 8-bytes in size.  But the D-Cache cache line size
+       is 32-bytes.  That means that you cannot reload, clean or invalidate a
+       descriptor without also effecting three neighboring descriptors.
+       Setting write through mode eliminates the need for cleaning the D-Cache.
+       If only reloading and invalidating are done, then there is no problem.
 
   7. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
