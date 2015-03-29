@@ -4563,28 +4563,28 @@ static void sam_rxreset(struct sam_emac_s *priv, int qid)
   /* Configure the RX descriptors. */
 
   xfrq->rxndx = 0;
-  for (ndx = 0; ndx < priv->attr->nrxbuffers; ndx++)
-  {
-    bufaddr = (uintptr_t)&rxbuffer[ndx * xfrq->rxbufsize];
-    DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
+  for (ndx = 0; ndx < xfrq->nrxbuffers; ndx++)
+    {
+      bufaddr = (uintptr_t)&rxbuffer[ndx * xfrq->rxbufsize];
+      DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
 
-    /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
-     * EMACRXD_ADDR_WRAP.
-     */
+      /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
+       * EMACRXD_ADDR_WRAP.
+       */
 
-    rxdesc[ndx].addr   = bufaddr;
-    rxdesc[ndx].status = 0;
-  }
+      rxdesc[ndx].addr   = bufaddr;
+      rxdesc[ndx].status = 0;
+    }
 
   /* Mark the final descriptor in the list */
 
-  rxdesc[priv->attr->nrxbuffers - 1].addr |= EMACRXD_ADDR_WRAP;
+  rxdesc[xfrq->nrxbuffers - 1].addr |= EMACRXD_ADDR_WRAP;
 
   /* Flush the entire RX descriptor table to RAM */
 
   arch_clean_dcache((uintptr_t)rxdesc,
                     (uintptr_t)rxdesc +
-                    priv->attr->nrxbuffers * sizeof(struct emac_rxdesc_s));
+                    xfrq->nrxbuffers * sizeof(struct emac_rxdesc_s));
 
   /* Set the Receive Buffer Queue Pointer Register */
 
