@@ -68,6 +68,8 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "up_internal.h"
+
 #include "pic32mz-config.h"
 #include "chip/pic32mz-ethernet.h"
 
@@ -188,7 +190,9 @@
  * pick the closest, actual divisor greater than or equal to this.
  */
 
-#if BOARD_EMAC_MIIM_DIV <= 4
+#ifndef BOARD_EMAC_MIIM_DIV
+#  error "MIIM divider is not defined"
+#elif BOARD_EMAC_MIIM_DIV <= 4
 #  define EMAC1_MCFG_CLKSEL_DIV EMAC1_MCFG_CLKSEL_DIV4
 #elif BOARD_EMAC_MIIM_DIV <= 6
 #  define EMAC1_MCFG_CLKSEL_DIV EMAC1_MCFG_CLKSEL_DIV6
@@ -245,6 +249,11 @@
 #  define PIC32MZ_PHYNAME      "LAN8740"
 #  define PIC32MZ_PHYID1       MII_PHYID1_LAN8740
 #  define PIC32MZ_PHYID2       MII_PHYID2_LAN8740
+#  define PIC32MZ_HAVE_PHY     1
+#elif defined(CONFIG_ETH0_PHY_LAN8740A)
+#  define PIC32MZ_PHYNAME      "LAN8740A"
+#  define PIC32MZ_PHYID1       MII_PHYID1_LAN8740A
+#  define PIC32MZ_PHYID2       MII_PHYID2_LAN8740A
 #  define PIC32MZ_HAVE_PHY     1
 #else
 #  warning "No PHY specified!"
@@ -1865,7 +1874,7 @@ static int pic32mz_interrupt(int irq, void *context)
 # if CONFIG_PIC32MZ_NINTERFACES > 1
   up_clrpend_irq(priv->pd_irqsrc);
 # else
-  up_clrpend_irq(PIC32MZ_IRQSRC_ETH);
+  up_clrpend_irq(PIC32MZ_IRQ_ETH);
 # endif
 
   return OK;
@@ -2143,6 +2152,12 @@ static int pic32mz_ifup(struct net_driver_s *dev)
   regval = pic32mz_getreg(PIC32MZ_EMAC1_SA2);
   priv->pd_dev.d_mac.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
   priv->pd_dev.d_mac.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
+
+  ndbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+         dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+         dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+         dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+
 #endif
 
   /* Continue Ethernet Controller Initialization ****************************/
@@ -2252,7 +2267,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
 #if CONFIG_PIC32MZ_NINTERFACES > 1
   up_enable_irq(priv->pd_irqsrc);
 #else
-  up_enable_irq(PIC32MZ_IRQSRC_ETH);
+  up_enable_irq(PIC32MZ_IRQ_ETH);
 #endif
   return OK;
 }
@@ -2284,7 +2299,7 @@ static int pic32mz_ifdown(struct net_driver_s *dev)
 #if CONFIG_PIC32MZ_NINTERFACES > 1
   up_disable_irq(priv->pd_irqsrc);
 #else
-  up_disable_irq(PIC32MZ_IRQSRC_ETH);
+  up_disable_irq(PIC32MZ_IRQ_ETH);
 #endif
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -2807,12 +2822,12 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
        */
 
        phyreg = (unsigned int)pic32mz_phyread(phyaddr, MII_PHYID1);
-       nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+       nvdbg("Addr: %d PHY ID1: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID1);
 
        if (phyreg == PIC32MZ_PHYID1)
         {
           phyreg = pic32mz_phyread(phyaddr, MII_PHYID2);
-          nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
+          nvdbg("Addr: %d PHY ID2: %04x EXPECT: %04x\n", phyaddr, phyreg, PIC32MZ_PHYID2);
 
           if (phyreg == PIC32MZ_PHYID2)
             {
@@ -2957,7 +2972,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
-#elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740)
+#elif defined(CONFIG_ETH0_PHY_LAN8720) || defined(CONFIG_ETH0_PHY_LAN8740) || defined(CONFIG_ETH0_PHY_LAN8740A)
   {
     uint16_t advertise;
     uint16_t lpa;
@@ -3116,7 +3131,7 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
 #if CONFIG_PIC32MZ_NINTERFACES > 1
   up_disable_irq(priv->pd_irqsrc);
 #else
-  up_disable_irq(PIC32MZ_IRQSRC_ETH);
+  up_disable_irq(PIC32MZ_IRQ_ETH);
 #endif
 
   /* Turn the Ethernet Controller off: Clear the ON, RXEN and TXRTS bits */
@@ -3125,7 +3140,8 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
 
   /* Wait activity abort by polling the ETHBUSY bit */
 
-  while ((pic32mz_getreg(PIC32MZ_ETH_STAT) & ETH_STAT_ETHBUSY) != 0);
+  while ((pic32mz_getreg(PIC32MZ_ETH_STAT) & ETH_STAT_ETHBUSY) != 0)
+    continue;
 
   /* Turn the Ethernet controller on. */
 
@@ -3143,7 +3159,7 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
 #if CONFIG_PIC32MZ_NINTERFACES > 1
   up_pending_irq(priv->pd_irqsrc);
 #else
-  up_pending_irq(PIC32MZ_IRQSRC_ETH);
+  up_pending_irq(PIC32MZ_IRQ_ETH);
 #endif
 
   /* Disable any Ethernet Controller interrupt generation by clearing the IEN
