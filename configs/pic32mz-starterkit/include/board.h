@@ -136,7 +136,10 @@
  *     FRC clock is used for programming
  */
 
-#undef BOARD_PBCLK5_ENABLE
+#define BOARD_PBCLK5_ENABLE    1         /* Enable PBCLK5 */
+#define BOARD_PB5DIV           2         /* Divider = 2 */
+#define BOARD_PBCLK5           100000000 /* PBCLK5 frequency = 200MHz/2 = 100MHz */
+
 
 /* PBCLK6
  *   Peripherals:
@@ -159,6 +162,16 @@
 /* Watchdog pre-scaler (re-visit) */
 
 #define BOARD_WD_PRESCALER     1048576   /* Watchdog pre-scaler */
+
+/* Ethernet MII clocking.
+ *
+ * The clock divider used to create the MII Management Clock (MDC).  The MIIM
+ * module uses the PBCLK5 as an input clock.  According to the IEEE 802.3
+ * Specification this should be no faster than 2.5 MHz. However, some PHYs
+ * support clock rates up to 12.5 MHz.
+ */
+
+#define BOARD_EMAC_MIIM_DIV    40        /* Ideal: 100MHz/40 = 2.5MHz */
 
 /* LED definitions **********************************************************/
 /* LED Configuration ********************************************************/
