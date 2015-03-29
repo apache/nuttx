@@ -349,6 +349,11 @@
 #define MII_PHYID1_LAN8740           0x0007    /* ID1 value for LAN8740 */
 #define MII_PHYID2_LAN8740           0xc110    /* ID2 value for LAN8740 */
 
+/* SMSC LAN8740A MII ID1/2 register bits */
+
+#define MII_PHYID1_LAN8740A          0x0007    /* ID1 value for LAN8740A */
+#define MII_PHYID2_LAN8740A          0xc111    /* ID2 value for LAN8740A */
+
 /* Am79c874-specific register bit settings **********************************/
 /* Am79c874 MII ID1/2 register bits */
 
