@@ -5,6 +5,8 @@ This README file discusses the port of NuttX to the Atmel SAM V71 Xplained
 Ultra Evaluation Kit (SAMV71-XULT).  This board features the ATSAMV71Q21 Cortex-M7
 microcontroller.
 
+Additional support of provided for the (optional) maXTouch Xplained Pro LCD.
+
 Contents
 ========
 
@@ -16,6 +18,7 @@ Contents
   - LEDs and Buttons
   - AT24MAC402 Serial EEPROM
   - Networking
+  - maXTouch Xplained Pro
   - Debugging
   - Configurations
 
@@ -116,7 +119,7 @@ The BASIC nsh configuration is fully function (as desribed below under
      sample code and study of the data sheet, but I have not found the key to
      solving this.
 
-+nmnmSerial Console
+Serial Console
 ==============
 
 The SAMV71-XULT has no on-board RS-232 drivers so it will be necessary to
@@ -294,12 +297,12 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
     Board-Specific Options
-      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT=y
-      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
-      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
-      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
-      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_DDELAY=1000
-      CONFIG_SAMV7XULT_HSMCI0_AUTOMOUNT_UDELAY=2000
+      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_UDELAY=2000
 
   WARNING:  SD cards should never be removed without first unmounting
   them.  This is to avoid data and possible corruption of the file
@@ -691,6 +694,81 @@ additional settings.
     CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
     CONFIG_NSH_NETINIT_SIGNO=18
 
+maXTouch Xplained Pro
+=====================
+
+Connectivity
+------------
+Testing has also been performed using the maXTouch Xplained Pro LCD
+(ATMXT-XPRO).  That LCD could be connected either via EXT1 or EXT2 using the 2x10
+20-pin cable and the maXTouch Xplained Pro standard extension header.  Access
+this then performed in SPI mode.
+
+  ---- -------- ---- ----------- ---- ----------- ------------------------------------------
+                        SAMV71-XULT               maxTouch Xplained Pro
+  PIN  FUNCTION EXT1 FUNC        EXT2 FUNC        Description
+  ---- -------- ---- ----------- ---- ----------- ------------------------------------------
+   1   ID        -    -           -    -          Communication line to ID chip
+   2   GND       -    -           -    -          Ground
+   3   N/C      PC31  -          PD30  -
+   4   N/C      PA19  -          PC13  -
+   5   GPIO     PB3  GPIO        PA6  GPIO        Command/Data Select
+   6   N/C      PB2   -          PD11  -
+   7   PWM      PA0  PWMC0_PWMH0 PC19 PWMC0_PMWH2 Backlight control
+   8   N/C      PC30  -          PD26  -
+   9   GPIO/IRQ PD28 GPIO        PA2  GPIO        IRQ from maXTouch controller
+   10  GPIO     PA5  GPIO        PA24 GPIO        RESET signal for maXTouch and LCD controller
+   11  I2C SDA  PA3  TWID0       PA3  TWID0       I2C Data line for maXTouch controller
+   12  I2C SCL  PA4  TWICK0      PA4  TWICK0      I2C Clock line for maXTouch controller
+   13  N/C      PB0   -          PA21  -
+   14  N/C      PB1   -          PB4   -
+   15  CS       PD25 GPIO        PD27 GPIO        CS line for LCD controller
+   16  SPI MOSI PD21 SPI0_MOSI   PD21 SPI0_MOSI   SPI Data to LCD controller
+   17  SPI MISO PD20 SPI0_MISO   PD20 SPI0_MISO   SPI Data from LCD controller
+   18  SPI SCK  PD22 SPI0_SPCK   PD22 SPI0_SPCK   SPI Clock line
+   19  GND       -    -           -      -        Ground
+   20  VCC       -    -           -      -        Target supply voltage
+  ---- -------- ---- ----------- ---- ----------- ------------------------------------------
+
+NOTE: Use of EXT1 conflicts with the Arduino RXD pin (PD28).  You cannot
+put the maXTouch Xplained in EXT1 and also use the Arduion RXD/TXD pins
+as your serial console.
+
+It ought be possible to connect the LCD via the flat cable to the EXT4 LCD
+connector.  In this case, you would use the SMC to communicate with the LCD.
+I have not tried this configuration.
+
+Configuration Options
+---------------------
+
+  System Type -> SAMV7 Peripheral Support
+    CONFIG_SAMV7_TWIHS0=y                : Needed by the MaXTouch controller
+    CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
+
+  Board Selection ->
+    CONFIG_SAMV71XULT_MXTXPLND=y          : MaXTouch Xplained is connected
+    CONFIG_SAMV71XULT_MXTXPLND_EXT1=y     : Connected on EXT1, or
+    CONFIG_SAMV71XULT_MXTXPLND_EXT2=y     : Connected on EXT2
+    CONFIG_SAMV71XULT_MXT_DEVMINOR=0      : Register as /dev/input0
+    CONFIG_SAMV71XULT_MXT_I2CFREQUENCY=400000
+
+  NOTE: When selecting EXT1 or EXT2, be conscious of possible pin conflicts.
+  EXT1, for example, will conflict with the use of the Arduino TXD and RXD
+  pins for the serial console
+
+  Device Drivers -> Input Devices
+    CONFIG_INPUT=y                        : Enable support for human input devices
+    CONFIG_INPUT_MXT=y                    : Enable support for the maXTouch controller
+
+  The following enables a small built-in application that can be used to
+  test the touchscreen:
+
+  Application Configuration -> Examples -> Touchscreen example
+    CONFIG_EXAMPLES_TOUCHSCREEN=y          : Enables the example
+    CONFIG_EXAMPLES_TOUCHSCREEN_ARCHINIT=y : Have board-specific intialization
+    CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
+    CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0
+
 Debugging
 =========
 
@@ -784,15 +862,70 @@ NOTES:
 Configuration sub-directories
 -----------------------------
 
-  nsh:
+  mxtxplned:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are two
-    NSH configurations:
+    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    very similar NSH configurations:
 
       - nsh.  This configuration is focused on low level, command-line
-        driver testing.  It has not network.
+        driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
         has only limited command support.
+      - mxtxplnd.  This configuration is identical to the nsh configuration
+        but assumes that you have a maXTouch Xplained Pro LCD attached
+        and includes extra tests for the touchscreen and LCD.
+
+    NOTES:
+
+    1. See the notes associated with the nsh configuration below.  Only
+       differences from that configuration will be addressed here.
+
+    2. Basic touchscreen/LCD configuration settings are discussed above in
+       the paragraph entitled, "maXTouch Xplained Pro".
+
+    3. Like the nsh configuration, this configuratino has the serial console
+       setup to used with an Aduino serial shield (UART3).  NOTE: Use of
+       EXT1 conflicts with the Arduino RXD pin (PD28).  You cannot put the
+       maXTouch Xplained in EXT1 and also use the Arduion RXD/TXD pins as
+       your serial console.  Hence, this configuration assumes that you
+       have the maXTouch Xplained Pro connected via EXT2.
+
+       If you need to use EXT1, you will have to re-configure the serial
+       console on a different UART/USART.
+
+    4. When the maXTouch Xplained is connect via EXT2, a new I2C address
+       appears at address 0x4a:
+
+        nsh> i2c dev 3 77
+             0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+        00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+        10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+        20: -- -- -- -- -- -- -- -- 28 -- -- -- -- -- -- --
+        30: -- -- -- -- -- -- -- 37 -- -- -- -- -- -- -- --
+        40: -- -- -- -- -- -- -- -- -- -- 4a -- -- -- 4e --
+        50: -- -- -- -- -- -- -- 57 -- -- -- -- -- -- -- 5f
+        60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        70: -- -- -- -- -- -- -- --
+
+       This is the I2C address of the maXTouch touchscreen controller.
+
+       (0x1a is the address of the WM8904 Audio CODEC, 0x28 is the
+       address of TWI interface to the EDBG, 0x4e is the address of the
+       CP2100CP programmable PLL, and 0x57 and 0x5f are the addresses of
+       the AT2 EEPROM. I am not sure what the other address, 0x37, is).
+
+  netnsh:
+
+    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    very similar NSH configurations:
+
+      - nsh.  This configuration is focused on low level, command-line
+        driver testing.  It has no network.
+      - netnsh.  This configuration is focused on network testing and
+        has only limited command support.
+      - mxtxplnd.  This configuration is identical to the nsh configuration
+        but assumes that you have a maXTouch Xplained Pro LCD attached
+        and includes extra tests for the touchscreen and LCD.
 
     NOTES:
 
@@ -897,13 +1030,16 @@ Configuration sub-directories
 
   nsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are two
-    NSH configurations:
+    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    very similar NSH configurations:
 
       - nsh.  This configuration is focused on low level, command-line
-        driver testing.  It has not network.
+        driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
         has only limited command support.
+      - mxtxplnd.  This configuration is identical to the nsh configuration
+        but assumes that you have a maXTouch Xplained Pro LCD attached
+        and includes extra tests for the touchscreen and LCD.
 
     NOTES:
 
@@ -1062,10 +1198,10 @@ Configuration sub-directories
          70: -- -- -- -- -- -- -- --
          nsh>
 
-       Where 0x1a us the address of the WM8904 Audio CODEC, 0x28 is the
+       Where 0x1a is the address of the WM8904 Audio CODEC, 0x28 is the
        address of TWI interface to the EDBG, 0x4e is the address of the
        CP2100CP programmable PLL, and 0x57 and 0x5f are the addresses of
-       the AT2 EEPROM (I am not sure what the other address, 0x37, is are
+       the AT2 EEPROM (I am not sure what the other address, 0x37, is
        as this writing).
 
     7. TWIHS0 is also used to support 256 byte non-volatile storage for
