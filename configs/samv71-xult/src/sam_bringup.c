@@ -64,8 +64,8 @@
  ****************************************************************************/
 
 #define NSECTORS(n) \
-  (((n)+CONFIG_SAMV7XULT_ROMFS_ROMDISK_SECTSIZE-1) / \
-   CONFIG_SAMV7XULT_ROMFS_ROMDISK_SECTSIZE)
+  (((n)+CONFIG_SAMV71XULT_ROMFS_ROMDISK_SECTSIZE-1) / \
+   CONFIG_SAMV71XULT_ROMFS_ROMDISK_SECTSIZE)
 
 /* Debug ********************************************************************/
 
@@ -125,25 +125,25 @@ int sam_bringup(void)
              HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
-#ifdef CONFIG_SAMV7XULT_HSMCI0_MOUNT
+#ifdef CONFIG_SAMV71XULT_HSMCI0_MOUNT
   else
     {
       /* REVISIT:  A delay seems to be required here or the mount will fail. */
       /* Mount the volume on HSMCI0 */
 
-      ret = mount(CONFIG_SAMV7XULT_HSMCI0_MOUNT_BLKDEV,
-                  CONFIG_SAMV7XULT_HSMCI0_MOUNT_MOUNTPOINT,
-                  CONFIG_SAMV7XULT_HSMCI0_MOUNT_FSTYPE,
+      ret = mount(CONFIG_SAMV71XULT_HSMCI0_MOUNT_BLKDEV,
+                  CONFIG_SAMV71XULT_HSMCI0_MOUNT_MOUNTPOINT,
+                  CONFIG_SAMV71XULT_HSMCI0_MOUNT_FSTYPE,
                   0, NULL);
 
       if (ret < 0)
         {
           SYSLOG("ERROR: Failed to mount %s: %d\n",
-                 CONFIG_SAMV7XULT_HSMCI0_MOUNT_MOUNTPOINT, errno);
+                 CONFIG_SAMV71XULT_HSMCI0_MOUNT_MOUNTPOINT, errno);
         }
     }
 
-#endif /* CONFIG_SAMV7XULT_HSMCI0_MOUNT */
+#endif /* CONFIG_SAMV71XULT_HSMCI0_MOUNT */
 #endif /* HAVE_HSMCI */
 
 #ifdef HAVE_AUTOMOUNTER
@@ -155,9 +155,9 @@ int sam_bringup(void)
 #ifdef HAVE_ROMFS
   /* Create a ROM disk for the /etc filesystem */
 
-  ret = romdisk_register(CONFIG_SAMV7XULT_ROMFS_ROMDISK_MINOR, romfs_img,
+  ret = romdisk_register(CONFIG_SAMV71XULT_ROMFS_ROMDISK_MINOR, romfs_img,
                          NSECTORS(romfs_img_len),
-                         CONFIG_SAMV7XULT_ROMFS_ROMDISK_SECTSIZE);
+                         CONFIG_SAMV71XULT_ROMFS_ROMDISK_SECTSIZE);
   if (ret < 0)
     {
       SYSLOG("ERROR: romdisk_register failed: %d\n", -ret);
@@ -166,14 +166,14 @@ int sam_bringup(void)
     {
       /* Mount the file system */
 
-      ret = mount(CONFIG_SAMV7XULT_ROMFS_ROMDISK_DEVNAME,
-                  CONFIG_SAMV7XULT_ROMFS_MOUNT_MOUNTPOINT,
+      ret = mount(CONFIG_SAMV71XULT_ROMFS_ROMDISK_DEVNAME,
+                  CONFIG_SAMV71XULT_ROMFS_MOUNT_MOUNTPOINT,
                   "romfs", MS_RDONLY, NULL);
       if (ret < 0)
         {
           SYSLOG("ERROR: mount(%s,%s,romfs) failed: %d\n",
-                 CONFIG_SAMV7XULT_ROMFS_ROMDISK_DEVNAME,
-                 CONFIG_SAMV7XULT_ROMFS_MOUNT_MOUNTPOINT, errno);
+                 CONFIG_SAMV71XULT_ROMFS_ROMDISK_DEVNAME,
+                 CONFIG_SAMV71XULT_ROMFS_MOUNT_MOUNTPOINT, errno);
         }
     }
 #endif

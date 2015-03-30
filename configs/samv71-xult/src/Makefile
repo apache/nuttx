@@ -94,6 +94,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_INPUT_MXT),y)
+CSRCS += sam_maxtouch.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)

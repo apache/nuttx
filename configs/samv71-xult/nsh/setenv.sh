@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/sam4e-ek/nsh/Make.defs
+# configs/samv7-xult/nsh/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
