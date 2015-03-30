@@ -90,14 +90,14 @@ The BASIC nsh configuration is fully function (as desribed below under
   6. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
      This driver appears to be 100% functional with the following caveats:
 
-     - There is a compiler optimization problem.  At -O2, there is odd
+     - There is a compiler optimization issue.  At -O2, there is odd
        behavior on pings and ARP messages.  But the behavior is OK with
        optimization set to -O2.  This may or may not be a compiler
        optimization issue (it could also be a timing issue or a need
        for some additional volatile qualifiers).
 
      - I- and D-Caches are enabled but the D-Cache must be enabled in
-       write-trough mode.  This is to work around issues with the RX and TX
+       write-through mode.  This is to work around issues with the RX and TX
        descriptors with are 8-bytes in size.  But the D-Cache cache line size
        is 32-bytes.  That means that you cannot reload, clean or invalidate a
        descriptor without also effecting three neighboring descriptors.
@@ -526,6 +526,17 @@ Selecting the GMAC peripheral
     CONFIG_NSH_NOMAC=n                   : We will get the IP address from EEPROM
                                          : Defaults should be okay for other options
 
+Cache-Related Issues
+--------------------
+
+I- and D-Caches can be enabled but the D-Cache must be enabled in write-
+through mode.  This is to work around issues with the RX and TX descriptors
+with are 8-bytes in size.  But the D-Cache cache line size is 32-bytes.
+That means that you cannot reload, clean or invalidate a descriptor without
+also effecting three neighboring descriptors. Setting write through mode
+eliminates the need for cleaning the D-Cache.  If only reloading and
+invalidating are done, then there is no problem.
+
 Using the network with NSH
 --------------------------
 
@@ -792,13 +803,19 @@ Configuration sub-directories
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
 
-         CONFIG_ARCH_INTERRUPTSTACK=2048
+         CONFIG_SCHED_HPWORKSTACKSIZE=2048
          CONFIG_IDLETHREAD_STACKSIZE=1024
          CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_PTHREAD_STACK_MIN=256
          CONFIG_PTHREAD_STACK_DEFAULT=2048
-         ... and others ...
+         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
+         CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
+         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
+         CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
+         CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
 
-    3. NSH built-in applications are supported.
+    3. NSH built-in applications are supported.  There are, however, not
+       enabled built-in applications.
 
        Binary Formats:
          CONFIG_BUILTIN=y           : Enable support for built-in programs
@@ -852,21 +869,31 @@ Configuration sub-directories
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
+       CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y   : Write through mode
        CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
        CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
 
        # CONFIG_ARMV7M_ITCM is not set       : Support not yet in place
        # CONFIG_ARMV7M_DTCM is not set       : Support not yet in place
 
+       I- and D-Caches are enabled but the D-Cache must be enabled in write-
+       through mode.  This is to work around issues with the RX and TX
+       descriptors with are 8-bytes in size.  But the D-Cache cache line
+       size is 32-bytes.  That means that you cannot reload, clean or
+       invalidate a descriptor without also effecting three neighboring
+       descriptors. Setting write through mode eliminates the need for
+       cleaning the D-Cache.  If only reloading and invalidating are done,
+       then there is no problem.
+
        Stack sizes are also large to simplify the bring-up and should be
        tuned for better memory usages.
 
     STATUS:
-    2015-03-28:  I- and D-caches are currently disabled.  Also -Os
-      optimization is not being used (-O2).  If either the caches or higher
-      levels of optimization are enabled, then there are failures when trying
-      to ping the target from a host.  This appears to be a timing-related
-      issue will probably not be easy to fix.
+    2015-03-29:  I- and D-caches are currently enabled, but as noted
+      above, the D-Cache must be enabled in write-through mode.  Also -Os
+      optimization is not being used (-O2).  If the cache is enabled in
+      Write-Back mode or if higher levels of optimization are enabled, then
+      there are failures when trying to ping the target from a host.
 
   nsh:
 
@@ -1058,6 +1085,7 @@ Configuration sub-directories
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
+       CONFIG_ARMV7M_DCACHE_WRITETHROUGH=n   : Write back mode
        CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
        CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
 
