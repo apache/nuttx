@@ -10085,4 +10085,9 @@
 	* configs/*/defconfig:  Make sure that all defconfig files that require
 	  external graphics intiialization also enable the correct boarctl()
 	  settings (2015-03-31).
-
+	* include/nuttx/board.h, include/sys/boardctl.h, nuttx/configs/Kconfig and
+	  boardctl.c, and board configurations and PWM implementations: Rename
+	  pwm_devinit() to board_pwm_setup().  Add CONFIG_BOARDCTL_PWMTEST that
+	  will enable calling board_pwm_setup() from boardctl().  In all
+	  configurations that enable the apps/examples/pwm test, make sure that
+	  boardctl() support is properly enabled (2015-03-31).
