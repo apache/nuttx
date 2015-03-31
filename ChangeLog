@@ -10055,3 +10055,4 @@
 	  for RTC and/or the IWDG, while the LSE only for the RTC (and to output
 	  the MCO1 pin). This change is not verifed for any other platforms.
 	  From Leo Aloe3132
+	* Rename arch_nshinitialize() to board_app_initialize() (2015-03-30).
