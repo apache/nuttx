@@ -58,16 +58,22 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL
  * DEPENDENCIES:  Board logic must provide board_app_initialization
  *
- * CMD:           BOARDIOC_TSCTEST
+ * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
- * ARG:           0: Setup touchscreen test, 1: Teardown touchscreen test
+ * ARG:           Touch controller device minor number
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
- * DEPENDENCIES:  Board logic must provide board_tsc_setup() and
- *                board_tsc_teardown().
+ * DEPENDENCIES:  Board logic must provide board_tsc_setup()
+ *
+ * CMD:           BOARDIOC_TSCTEST_TEARDOWN
+ * DESCRIPTION:   Touchscreen controller test configuration
+ * ARG:           None
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
+ * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
  */
 
-#define BOARDIOC_INIT     _BOARDIOC(0x0001)
-#define BOARDIOC_TSCTEST  _BOARDIOC(0x0002)
+#define BOARDIOC_INIT              _BOARDIOC(0x0001)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0002)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0003)
 
 /****************************************************************************
  * Public Type Definitions

@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/nx/nx.h>
@@ -83,7 +84,7 @@ static struct sim_touchscreen_s g_simtc;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_tcinitialize()
+ * Name: board_tsc_setup()
  *
  * Description:
  *   Perform architecuture-specific initialization of the touchscreen
@@ -92,7 +93,7 @@ static struct sim_touchscreen_s g_simtc;
  *
  ****************************************************************************/
 
-int arch_tcinitialize(int minor)
+int board_tsc_setup(int minor)
 {
   FAR NX_DRIVERTYPE *dev;
   nxgl_mxpixel_t color;
@@ -143,10 +144,10 @@ int arch_tcinitialize(int minor)
 
   /* Finally, initialize the touchscreen simulation on the X window */
 
-  ret = arch_tcinitialize(minor);
+  ret = board_tsc_setup(minor);
   if (ret < 0)
     {
-      idbg("arch_tcinitialize failed: %d\n", ret);
+      idbg("board_tsc_setup failed: %d\n", ret);
       goto errout_with_nx;
     }
   return OK;
@@ -161,7 +162,7 @@ errout:
 }
 
 /****************************************************************************
- * Name: arch_tcuninitialize()
+ * Name: board_tsc_teardown()
  *
  * Description:
  *   Perform architecuture-specific un-initialization of the touchscreen
@@ -170,7 +171,7 @@ errout:
  *
  ****************************************************************************/
 
-void arch_tcuninitialize(void)
+void board_tsc_teardown(void)
 {
   /* Shut down the touchscreen driver */
 

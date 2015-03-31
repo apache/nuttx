@@ -254,7 +254,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_tcinitialize
+ * Name: board_tsc_setup
  *
  * Description:
  *   Each board that supports a touchscreen device must provide this
@@ -271,7 +271,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  *
  ****************************************************************************/
 
-int arch_tcinitialize(int minor)
+int board_tsc_setup(int minor)
 {
   static bool initialized = false;
   FAR struct spi_dev_s *dev;
@@ -323,7 +323,7 @@ int arch_tcinitialize(int minor)
 }
 
 /****************************************************************************
- * Name: arch_tcuninitialize
+ * Name: board_tsc_teardown
  *
  * Description:
  *   Each board that supports a touchscreen device must provide this function.
@@ -338,7 +338,7 @@ int arch_tcinitialize(int minor)
  *
  ****************************************************************************/
 
-void arch_tcuninitialize(void)
+void board_tsc_teardown(void)
 {
   /* No support for un-initializing the touchscreen XPT2046 device yet */
 }

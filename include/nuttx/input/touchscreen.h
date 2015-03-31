@@ -134,44 +134,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: arch_tcinitialize
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
- *
- * Input Parameters:
- *   minor   - The input device minor number
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int arch_tcinitialize(int minor);
-
-/****************************************************************************
- * Name: arch_tcuninitialize
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void arch_tcuninitialize(void);
-
 #undef EXTERN
 #ifdef __cplusplus
 }

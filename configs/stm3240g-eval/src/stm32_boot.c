@@ -181,10 +181,10 @@ static int board_initthread(int argc, char *argv[])
   /* Initialize the touchscreen */
 
 #ifdef HAVE_TCINIT
-  ret = arch_tcinitialize(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
+  ret = board_tsc_setup(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
   if (ret < 0)
     {
-      gdbg("ERROR: arch_tcinitialize failed: %d\n", ret);
+      gdbg("ERROR: board_tsc_setup failed: %d\n", ret);
     }
 #endif
 

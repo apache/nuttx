@@ -52,6 +52,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
@@ -625,7 +626,7 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_tcinitialize
+ * Name: board_tsc_setup
  *
  * Description:
  *   Configure the simulated touchscreen.  This will register the driver as
@@ -640,7 +641,7 @@ errout:
  *
  ****************************************************************************/
 
-int arch_tcinitialize(int minor)
+int board_tsc_setup(int minor)
 {
   FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
@@ -687,7 +688,7 @@ errout_with_priv:
 }
 
 /****************************************************************************
- * Name: arch_tcuninitialize
+ * Name: board_tsc_teardown
  *
  * Description:
  *   Uninitialized the simulated touchscreen
@@ -700,7 +701,7 @@ errout_with_priv:
  *
  ****************************************************************************/
 
-void arch_tcuninitialize(void)
+void board_tsc_teardown(void)
 {
   FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
