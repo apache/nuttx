@@ -42,6 +42,8 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/board.h>
+
 #include "sam4l-xplained.h"
 
 /****************************************************************************
@@ -74,14 +76,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
   /* Initialize the SLCD and register the SLCD device as /dev/slcd */

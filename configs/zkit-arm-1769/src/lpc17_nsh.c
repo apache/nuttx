@@ -48,8 +48,10 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
+
 #include "lpc17_spi.h"
 
 /****************************************************************************
@@ -133,14 +135,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef CONFIG_NSH_HAVEMMCSD
   FAR struct spi_dev_s *spi;
@@ -151,7 +153,7 @@ int nsh_archinitialize(void)
   spi = lpc17_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port %d\n",
+      message("board_app_initialize: Failed to initialize SPI port %d\n",
               CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
@@ -164,7 +166,7 @@ int nsh_archinitialize(void)
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("nsh_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+      message("board_app_initialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
               CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }

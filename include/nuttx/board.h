@@ -131,6 +131,20 @@ void board_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface
+ *
+ *****************************************************************************/
+
+#ifdef CONFIG_LIB_BOARDCTL
+int board_app_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: board_led_initialize
  *
  * Description:

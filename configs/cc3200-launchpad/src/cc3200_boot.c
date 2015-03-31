@@ -45,6 +45,7 @@
 #include <debug.h>
 #include <stdio.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <arch/board/cc3200_utils.h>
 #include <apps/nsh.h>
@@ -67,7 +68,7 @@
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
@@ -81,7 +82,7 @@
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   return OK;
 }

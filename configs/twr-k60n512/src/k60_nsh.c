@@ -44,6 +44,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
+
 #ifdef CONFIG_KINETIS_SDHC
 #  include <nuttx/sdio.h>
 #  include <nuttx/mmcsd.h>
@@ -188,14 +190,14 @@ static int kinetis_cdinterrupt(int irq, FAR void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef NSH_HAVEMMCSD
   int ret;

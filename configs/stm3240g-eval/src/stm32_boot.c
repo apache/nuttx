@@ -161,10 +161,10 @@ static int board_initthread(int argc, char *argv[])
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-  ret = nsh_archinitialize();
+  ret = board_app_initialize();
   if (ret < 0)
     {
-      gdbg("ERROR: nsh_archinitialize failed: %d\n", ret);
+      gdbg("ERROR: board_app_initialize failed: %d\n", ret);
     }
 #endif
 

@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
+
 #include "samv71-xult.h"
 
 #if defined(CONFIG_NSH_ARCHINIT) && !defined(CONFIG_BUILD_KERNEL)
@@ -52,14 +54,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifndef CONFIG_BOARD_INITIALIZE
   /* Perform board initialization */

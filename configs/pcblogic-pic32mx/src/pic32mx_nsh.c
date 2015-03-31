@@ -41,6 +41,7 @@
 
 #include <syslog.h>
 
+#include <nuttx/board.h>
 #include <nuttx/lcd/hd4478ou.h>
 #include <arch/board/board.h>
 
@@ -61,14 +62,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   int ret = OK;
 

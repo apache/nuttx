@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
@@ -343,7 +344,7 @@ static int nsh_usbhostinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization for NSH.
@@ -357,7 +358,7 @@ static int nsh_usbhostinitialize(void)
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   int ret;
 

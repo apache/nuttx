@@ -46,6 +46,8 @@
 #include <errno.h>
 #include <syslog.h>
 
+#include <nuttx/board.h>
+
 #ifdef CONFIG_SYSTEM_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
@@ -61,14 +63,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #if defined(HAVE_NAND)  || defined(HAVE_AT25)    || defined(HAVE_AT24)       || \
     defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) ||\

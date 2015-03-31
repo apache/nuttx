@@ -43,6 +43,7 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
@@ -55,14 +56,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   return OK;
 }

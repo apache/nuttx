@@ -136,7 +136,7 @@ void board_initialize(void)
    * space but the initialization function must run in kernel space.
    */
 
-  nsh_archinitialize();
+  board_app_initialize();
 #endif
 
 #if defined(CONFIG_USBDEV)

@@ -44,6 +44,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
+
 #ifdef CONFIG_STM32_SPI1
 #  include <nuttx/spi/spi.h>
 #  include <nuttx/mtd/mtd.h>
@@ -122,14 +124,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
   FAR struct spi_dev_s *spi;

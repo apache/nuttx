@@ -44,6 +44,7 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/lcd/hd4478ou.h>
@@ -332,14 +333,14 @@ static int nsh_usbdevinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   int ret;
 

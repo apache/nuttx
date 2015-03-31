@@ -1581,3 +1581,7 @@ endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
 endif
+
+config LIB_BOARDCTL
+	bool "Enabled boardctl() interface"
+	default n

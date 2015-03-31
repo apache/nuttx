@@ -220,25 +220,6 @@ void stm32_ledpminitialize(void);
 void stm32_pmbuttons(void);
 #endif
 
-/****************************************************************************
- * Name: nsh_archinitialize
- *
- * Description:
- *   Perform architecture specific initialization for NSH.
- *
- *   CONFIG_NSH_ARCHINIT=y :
- *     Called from the NSH library
- *
- *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
- *   CONFIG_NSH_ARCHINIT=n :
- *     Called from board_initialize().
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NSH_LIBRARY
-int nsh_archinitialize(void);
-#endif
-
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341
 /****************************************************************************
  * Name:  stm32_ili93414ws_initialize

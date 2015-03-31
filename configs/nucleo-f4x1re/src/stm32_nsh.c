@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
@@ -85,14 +86,14 @@ void up_netinitialize(void)
 #endif
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #if defined(HAVE_MMCSD) || defined(CONFIG_AJOYSTICK)
   int ret;
