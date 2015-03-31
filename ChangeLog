@@ -10076,3 +10076,9 @@
 	  board_tsc_teardown().  These are not long called directly by
 	  applications but only indirectly throught the crappy boardctl() OS
 	  interface (2015-03-31).
+	* configs/Kconfig, boardctl.c, include/nuttx/board.h, include/sys/boardctl.h,
+	  and several ADC files in configs/<board>/src/:  Rename adc_devinit() to
+	  board_adc_setup().  Add support to the boardctl() interface so that it
+	  can call board_adc_setup() on behalf of an application.  Make sure that
+	  the proper features are enabled in the defconfig files that have
+	  CONFIG_EXAMPLES_ADC=y (2015-03-31).
