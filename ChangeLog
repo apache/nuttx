@@ -10065,3 +10065,7 @@
 	  and application driver test configuration.  It essentially formalizes
 	  and institutionalizes these rogue interface in to at least a single
 	  crazy call (2015-03-31).
+	* configs/: Modify all configurations:  Make sure that
+	  CONFIG_LIB_BOARDCTL=y appears wherever CONFIG_NSH_ARCHINIT=y appears.
+	  Remove support for CONFIG_NSH_ARCHMAC.  It is not used and there are
+	  better ways to do that operation (2015-03-31).
