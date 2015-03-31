@@ -69,11 +69,28 @@
  * ARG:           None
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
  * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
+ *
+ * CMD:           BOARDIOC_ADCTEST_SETUP
+ * DESCRIPTION:   ADC controller test configuration
+ * ARG:           None
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
+ * DEPENDENCIES:  Board logic must provide board_adc_setup()
+ *
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
 #define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0002)
 #define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0003)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0004)
+
+/* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
+ * In this case, all commands not recognized by boardctl() will be forwarded
+ * to the board-provided board_ioctl() function.
+ *
+ * User defined board commands may begin with this value:
+ */
+
+#define BOARDIOC_USER              _BOARDIOC(0x0005)
 
 /****************************************************************************
  * Public Type Definitions

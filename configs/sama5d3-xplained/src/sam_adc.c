@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 
 #include "sam_adc.h"
@@ -110,7 +111,7 @@ int board_adc_initialize(void)
 #endif /* CONFIG_ADC */
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: board_adc_setup
  *
  * Description:
  *   All SAMA5 architectures must provide the following interface to work with
@@ -119,7 +120,7 @@ int board_adc_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_ADC
-int adc_devinit(void)
+int board_adc_setup(void)
 {
 #ifdef CONFIG_SAMA5_ADC
   return board_adc_initialize();

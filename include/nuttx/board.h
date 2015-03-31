@@ -197,6 +197,32 @@ int board_tsc_setup(int minor);
 void board_tsc_teardown(void);
 
 /****************************************************************************
+ * Name: board_adc_setup
+ *
+ * Description:
+ *   All architectures must provide the following interface in order to
+ *   work with examples/adc.
+ *
+ ****************************************************************************/
+
+int board_adc_setup(void);
+
+/****************************************************************************
+ * Name: board_ioctl
+ *
+ * Description:
+ *   If CONFIG_LIB_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
+ *   enable board specific commands.  In this case, all commands not
+ *   recognized by boardctl() will be forwarded to the board-provided
+ *   board_ioctl() function.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg);
+#endif
+
+/****************************************************************************
  * Name: board_led_initialize
  *
  * Description:

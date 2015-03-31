@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 
 #include "sam_adc.h"
@@ -67,7 +68,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: board_adc_setup
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
@@ -75,7 +76,7 @@
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+int board_adc_setup(void)
 {
 #ifdef CONFIG_SAMA5_ADC
   static bool initialized = false;

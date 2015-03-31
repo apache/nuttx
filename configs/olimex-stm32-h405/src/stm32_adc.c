@@ -41,8 +41,11 @@
 
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
+
 #include "chip.h"
 #include "stm32_adc.h"
 #include "olimex-stm32-h405.h"
@@ -111,7 +114,7 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};/*,  GPIO_ADC
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: board_adc_setup
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
@@ -119,7 +122,7 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};/*,  GPIO_ADC
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+int board_adc_setup(void)
 {
   return stm32_adc_initialize();
 }

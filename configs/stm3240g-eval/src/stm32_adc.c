@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
 
@@ -107,7 +108,7 @@ static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: board_adc_setup
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
@@ -115,7 +116,7 @@ static const uint32_t g_pinlist[ADC3_NCHANNELS]  = {GPIO_ADC3_IN7};
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+int board_adc_setup(void)
 {
 #ifdef CONFIG_STM32_ADC3
   static bool initialized = false;
