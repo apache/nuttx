@@ -187,7 +187,7 @@ uintptr_t STUB_aio_cancel(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* Board support */
 
-uintptr-t STUB_boardctl(int nbr, uintptr_t parm1, uinptr_1 parm2);
+uintptr_t STUB_boardctl(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following are defined if file descriptors are enabled */
 

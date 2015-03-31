@@ -47,7 +47,7 @@ USERLIBS =
 
 # Add libraries for board support
 
-NUTTXLIBS = lib$(DELIM)libconfigs$(LIBEXT)
+NUTTXLIBS += lib$(DELIM)libconfigs$(LIBEXT)
 
 # Add libraries for syscall support.  The C library will be needed by
 # both the kernel- and user-space builds.  For now, the memory manager (mm)

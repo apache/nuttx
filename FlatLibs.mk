@@ -47,7 +47,7 @@ USERLIBS =
 
 # Add libraries for board support
 
-NUTTXLIBS = lib$(DELIM)libconfigs$(LIBEXT)
+NUTTXLIBS += lib$(DELIM)libconfigs$(LIBEXT)
 
 # Add libraries for syscall support.
 

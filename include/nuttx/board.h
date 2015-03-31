@@ -136,7 +136,7 @@ void board_initialize(void);
  * Description:
  *   Perform application specific initialization.  This function is never
  *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
  *****************************************************************************/
 
