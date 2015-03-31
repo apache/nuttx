@@ -180,6 +180,12 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #  endif
 #endif
 
+/* Board support */
+
+#ifdef CONFIG_LIB_BOARDCTL
+  SYSCALL_LOOKUP(boardctl,                2, STUB_boardctl)
+#endif
+
 /* The following are defined if file descriptors are enabled */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

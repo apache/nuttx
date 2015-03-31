@@ -1,7 +1,7 @@
 /****************************************************************************
- * syscall/syscall_funclookup.c
+ * include/sys/boardctl.h
  *
- *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,104 +33,79 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_SYS_BOARDCTL_H
+#define __INCLUDE_SYS_BOARDCTL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <syscall.h>
+#include <stdint.h>
 
-/* The content of this file is only meaningful during the kernel phase of
- * a kernel build.
- */
+#include <nuttx/fs/ioctl.h>
 
-#if defined(CONFIG_LIB_SYSCALL) && defined(__KERNEL__)
-
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/select.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/statfs.h>
-#include <sys/prctl.h>
-#include <sys/socket.h>
-#include <sys/mount.h>
-#include <sys/boardctl.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <poll.h>
-#include <time.h>
-#include <sched.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <signal.h>
-#include <mqueue.h>
-#include <spawn.h>
-#include <assert.h>
-
-/* Errno access is awkward. We need to generate get_errno() and set_errno()
- * interfaces to support the system calls, even though we don't use them
- * ourself.
- *
- * The "normal" pre-processor defintions for these functions is in errno.h
- * but we need the internal function prototypes in nuttx/errno.h.
- */
-
-#undef get_errno
-#undef set_errno
-
-#include <nuttx/errno.h>
-#include <nuttx/clock.h>
-
-/* clock_systimer is a special case:  In the kernel build, proxying for
- * clock_systimer() must be handled specially.  In the kernel phase of
- * the build, clock_systimer() is macro that simply accesses a global
- * variable.  In the user phase of the kernel build, clock_systimer()
- * is a proxy function.
- *
- * In order to fill out the table g_funclookup[], this function will stand
- * in during the kernel phase of the build so that clock_systemer() will
- * have an address that can be included in the g_funclookup[] table.
- */
-
-uint32_t syscall_clock_systimer(void);
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Function lookup tables.  This table is indexed by the system call numbers
- * defined above.  Given the system call number, this table provides the
- * address of the corresponding system function.
+/* Common commands
  *
- * This table is only available during the kernel phase of a kernel build.
+ * CMD:           BOARDIOC_INIT
+ * DESCRIPTION:   Perform one-time application initialization.
+ * ARG:           None
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL
+ * DEPENDENCIES:  Board logic must provide board_app_initialization
+ *
+ * CMD:           BOARDIOC_TSCTEST
+ * DESCRIPTION:   Touchscreen controller test configuration
+ * ARG:           0: Setup touchscreen test, 1: Teardown touchscreen test
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
+ * DEPENDENCIES:  Board logic must provide board_tsc_setup() and
+ *                board_tsc_teardown().
  */
 
-const uintptr_t g_funclookup[SYS_nsyscalls] =
-{
-#  undef SYSCALL_LOOKUP1
-#  define SYSCALL_LOOKUP1(f,n,p) (uintptr_t)f
-#  undef SYSCALL_LOOKUP
-#  define SYSCALL_LOOKUP(f,n,p)  , (uintptr_t)f
-#  include "syscall_lookup.h"
-};
+#define BOARDIOC_INIT     _BOARDIOC(0x0001)
+#define BOARDIOC_TSCTEST  _BOARDIOC(0x0002)
 
 /****************************************************************************
- * Private Functions
+ * Public Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* CONFIG_LIB_SYSCALL && __KERNEL__ */
+/****************************************************************************
+ * Name: boardctl
+ *
+ * Description:
+ *   In a small embedded system, there will typically be a much greater
+ *   interaction between application and low-level board features.  The
+ *   canonically correct to implement such interactions is by implementing a
+ *   character driver and performing the interactions via low level ioctl
+ *   calls.  This, however, may not be practical in many cases and will lead
+ *   to "correct" but awkward implementations.
+ *
+ *   boardctl() is non-standard OS interface to alleviate the problem.  It
+ *   basically circumvents the normal device driver ioctl interlace and allows
+ *   the application to perform direction IOCTL-like calls to the board-specific
+ *   logic.  In it is especially useful for setting up board operational and
+ *   test configurations.
+ *
+ * Input Parameters:
+ *   cmd - Identifies the board command to be executed
+ *   arg - The argument that accompanies the command.  The nature of the
+ *         argument is determined by the specific command.
+ *
+ * Returned Value:
+ *   On success zero (OK) is returned; -1 (ERROR) is returned on failure
+ *   with the errno variable to to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int boardctl(unsigned int cmd, uintptr_t arg);
+
+#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* __INCLUDE_SYS_BOARDCTL_H */

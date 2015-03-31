@@ -249,12 +249,21 @@
 #  ifndef CONFIG_DISABLE_POLL
 #    define SYS_poll                   __SYS_poll
 #    define SYS_select                 (__SYS_poll+1)
-#    define __SYS_filedesc             (__SYS_poll+2)
+#    define __SYS_boardctl             (__SYS_poll+2)
 #  else
-#    define __SYS_filedesc             __SYS_poll
+#    define __SYS_boardctl             __SYS_poll
 #  endif
 #else
-#  define __SYS_filedesc               __SYS_descriptors
+#  define __SYS_boardctl               __SYS_descriptors
+#endif
+
+/* Board support */
+
+#ifdef CONFIG_LIB_BOARDCTL
+#    define SYS_boardctl                __SYS_boardctl
+#  define __SYS_filedesc                (__SYS_boardctl+1)
+#else
+#  define __SYS_filedesc               __SYS_boardctl
 #endif
 
 /* The following are defined if file descriptors are enabled */

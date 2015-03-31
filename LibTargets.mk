@@ -77,6 +77,12 @@ net$(DELIM)libnet$(LIBEXT): context
 lib$(DELIM)libnet$(LIBEXT): net$(DELIM)libnet$(LIBEXT)
 	$(Q) install net$(DELIM)libnet$(LIBEXT) lib$(DELIM)libnet$(LIBEXT)
 
+configs$(DELIM)libconfigs$(LIBEXT): context
+	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" libconfigs$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+lib$(DELIM)libconfigs$(LIBEXT): configs$(DELIM)libconfigs$(LIBEXT)
+	$(Q) install configs$(DELIM)libconfigs$(LIBEXT) lib$(DELIM)libconfigs$(LIBEXT)
+
 crypto$(DELIM)libcrypto$(LIBEXT): context
 	$(Q) $(MAKE) -C crypto TOPDIR="$(TOPDIR)" libcrypto$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 

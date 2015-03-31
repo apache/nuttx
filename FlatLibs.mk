@@ -45,6 +45,10 @@
 NUTTXLIBS = lib$(DELIM)libsched$(LIBEXT)
 USERLIBS =
 
+# Add libraries for board support
+
+NUTTXLIBS = lib$(DELIM)libconfigs$(LIBEXT)
+
 # Add libraries for syscall support.
 
 NUTTXLIBS += lib$(DELIM)libc$(LIBEXT) lib$(DELIM)libmm$(LIBEXT)

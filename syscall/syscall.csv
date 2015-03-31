@@ -6,6 +6,7 @@
 "accept","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","struct sockaddr*","socklen_t*"
 "atexit","stdlib.h","defined(CONFIG_SCHED_ATEXIT)","int","void (*)(void)"
 "bind","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","FAR const struct sockaddr*","socklen_t"
+"boardctl","sys/boardctl.h","defined(CONFIG_LIB_BOARDCTL)","int","unsigned int","uintptr_t"
 "clearenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int"
 "clock_getres","time.h","","int","clockid_t","struct timespec*"
 "clock_gettime","time.h","","int","clockid_t","struct timespec*"

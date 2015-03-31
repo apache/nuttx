@@ -185,6 +185,10 @@ uintptr_t STUB_aio_write(int nbr, uintptr_t parm1);
 uintptr_t STUB_aio_fsync(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_aio_cancel(int nbr, uintptr_t parm1, uintptr_t parm2);
 
+/* Board support */
+
+uintptr-t STUB_boardctl(int nbr, uintptr_t parm1, uinptr_1 parm2);
+
 /* The following are defined if file descriptors are enabled */
 
 uintptr_t STUB_closedir(int nbr, uintptr_t parm1);
