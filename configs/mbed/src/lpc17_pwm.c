@@ -3,7 +3,7 @@
  *
  * Based on onfigs/lpcexpresso-lpc1768/lpc17_pwm.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,14 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/pwm.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -73,7 +75,7 @@ FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pwm_devinit
+ * Name: board_pwm_setup
  *
  * Description:
  *   All LPC17 architectures must provide the following interface to work with
@@ -81,7 +83,7 @@ FAR struct pwm_lowerhalf_s *lpc17_timerinitialize(int timer);
  *
  ************************************************************************************/
 
-int pwm_devinit(void)
+int board_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

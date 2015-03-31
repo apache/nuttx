@@ -2,7 +2,7 @@
  * configs/stm32ldiscovery/src/up_pwm.c
  * arch/arm/src/board/up_pwm.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/pwm.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -95,7 +97,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pwm_devinit
+ * Name: board_pwm_setup
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
@@ -103,7 +105,7 @@
  *
  ************************************************************************************/
 
-int pwm_devinit(void)
+int board_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

@@ -76,6 +76,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
  * DEPENDENCIES:  Board logic must provide board_adc_setup()
  *
+ * CMD:           BOARDIOC_PWMTEST_SETUP
+ * DESCRIPTION:   PWM controller test configuration
+ * ARG:           None
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_PWMTEST
+ * DEPENDENCIES:  Board logic must provide board_pwm_setup()
+ *
  * CMD:           BOARDIOC_GRAPHICS_SETUP
  * DESCRIPTION:   Configure graphics that require special initialization
  *                procedures
@@ -88,7 +94,8 @@
 #define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0002)
 #define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0003)
 #define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0004)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0005)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0005)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0006)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -97,7 +104,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0006)
+#define BOARDIOC_USER              _BOARDIOC(0x0007)
 
 /****************************************************************************
  * Public Type Definitions

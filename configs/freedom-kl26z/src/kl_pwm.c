@@ -40,11 +40,13 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/pwm.h>
-#include <sys/types.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -73,7 +75,7 @@ extern struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pwm_devinit
+ * Name: board_pwm_setup
  *
  * Description:
  *   All Kinetis KL architectures must provide the following interface to work with
@@ -81,7 +83,7 @@ extern struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
  *
  ************************************************************************************/
 
-int pwm_devinit(void)
+int board_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

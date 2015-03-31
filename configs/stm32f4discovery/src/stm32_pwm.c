@@ -94,7 +94,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pwm_devinit
+ * Name: board_pwm_setup
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
@@ -102,7 +102,7 @@
  *
  ************************************************************************************/
 
-int pwm_devinit(void)
+int board_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
