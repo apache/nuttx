@@ -47,6 +47,8 @@
 #include "sam_tsd.h"
 #include "sama5d3x-ek.h"
 
+#include <nuttx/board.h>
+
 #ifdef CONFIG_SAMA5_TSD
 
 /****************************************************************************
@@ -83,7 +85,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_tcinitialize
+ * Name: board_tsc_setup
  *
  * Description:
  *   Each board that supports a touchscreen device must provide this
@@ -100,7 +102,7 @@
  *
  ****************************************************************************/
 
-int arch_tcinitialize(int minor)
+int board_tsc_setup(int minor)
 {
   struct sam_adc_s *adc;
   static bool initialized = false;
@@ -141,7 +143,7 @@ int arch_tcinitialize(int minor)
 }
 
 /****************************************************************************
- * Name: arch_tcuninitialize
+ * Name: board_tsc_teardown
  *
  * Description:
  *   Each board that supports a touchscreen device must provide this function.
@@ -156,7 +158,7 @@ int arch_tcinitialize(int minor)
  *
  ****************************************************************************/
 
-void arch_tcuninitialize(void)
+void board_tsc_teardown(void)
 {
   /* No support for un-initializing the touchscreen  yet */
 }

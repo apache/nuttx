@@ -98,24 +98,31 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 
 #ifdef CONFIG_BOARDCTL_TSCTEST
-      /* CMD:           BOARDIOC_TSCTEST
+      /* CMD:           BOARDIOC_TSCTEST_SETUP
        * DESCRIPTION:   Touchscreen controller test configuration
-       * ARG:           0: Setup touchscreen test, 1: Teardown touchscreen test
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && 
-       * DEPENDENCIES:  Board logic must provide board_tsc_setup() and
-       *                board_tsc_teardown().
+       * ARG:           Touch controller device minor number
+       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
+       * DEPENDENCIES:  Board logic must provide board_tsc_setup()
        */
 
-      case BOARDIOC_TSCTEST:
-        if (arg)
-          {
-            ret = board_tsc_setup();
-          }
-        else
-          {
-            ret = board_tsc_teardown();
-          }
+      case BOARDIOC_TSCTEST_SETUP:
+        {
+          ret = board_tsc_setup((int)arg);
+        }
+        break;
 
+      /* CMD:           BOARDIOC_TSCTEST_TEARDOWN
+       * DESCRIPTION:   Touchscreen controller test configuration
+       * ARG:           None
+       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
+       * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
+       */
+
+      case BOARDIOC_TSCTEST_TEARDOWN:
+        {
+          board_tsc_teardown();
+          ret = OK;
+        }
         break;
 #endif
 

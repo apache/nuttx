@@ -1585,3 +1585,8 @@ endif
 config LIB_BOARDCTL
 	bool "Enabled boardctl() interface"
 	default n
+
+config BOARDCTL_TSCTEST
+	bool "Enable touchscreen test interfaces"
+	default n
+	depends on LIB_BOARDCTL
