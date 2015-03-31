@@ -10069,3 +10069,10 @@
 	  CONFIG_LIB_BOARDCTL=y appears wherever CONFIG_NSH_ARCHINIT=y appears.
 	  Remove support for CONFIG_NSH_ARCHMAC.  It is not used and there are
 	  better ways to do that operation (2015-03-31).
+	* configs/Kconfig, boardctl.c, all touchscreen driver setup functions,
+	  include/board.h, include/sys/boardctl.h, and
+	  include/nuttx/input/touchscreen.h: arch_tcinitialize() and
+	  arch_tcunitinitialize() renamed to board_tsc_setup() and
+	  board_tsc_teardown().  These are not long called directly by
+	  applications but only indirectly throught the crappy boardctl() OS
+	  interface (2015-03-31).
