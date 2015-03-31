@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/lm3s8962-ek/src/lm_oled.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/p14201.h>
@@ -84,27 +85,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_nxdrvinit
+ * Name: board_graphics_setup
  *
  * Description:
  *   Called NX initialization logic to configure the OLED.
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
+FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
 
   /* Configure the OLED GPIOs */
 
-  oledcs_dumpgpio("up_nxdrvinit: After OLEDCS setup");
-  oleddc_dumpgpio("up_nxdrvinit: On entry");
+  oledcs_dumpgpio("board_graphics_setup: After OLEDCS setup");
+  oleddc_dumpgpio("board_graphics_setup: On entry");
 
   tiva_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
   tiva_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
 
-  oleddc_dumpgpio("up_nxdrvinit: After OLEDDC/EN setup");
+  oleddc_dumpgpio("board_graphics_setup: After OLEDDC/EN setup");
 
   /* Get the SSI port (configure as a Freescale SPI port) */
 

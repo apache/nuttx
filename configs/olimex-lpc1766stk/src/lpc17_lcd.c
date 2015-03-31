@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/nokia6100.h>
@@ -176,24 +177,24 @@ void nokia_blinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_nxdrvinit
+ * Name: board_graphics_setup
  *
  * Description:
  *   Called NX initialization logic to configure the LCD.
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
+FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
 
   /* Configure the LCD GPIOs */
 
-  lcd_dumpgpio("up_nxdrvinit: On entry");
+  lcd_dumpgpio("board_graphics_setup: On entry");
   lpc17_configgpio(LPC1766STK_LCD_RST);
   lpc17_configgpio(LPC1766STK_LCD_BL);
-  lcd_dumpgpio("up_nxdrvinit: After GPIO setup");
+  lcd_dumpgpio("board_graphics_setup: After GPIO setup");
 
   /* Reset the LCD */
 
