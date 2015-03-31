@@ -42,6 +42,8 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/board.h>
+
 #include "pic32mx-internal.h"
 #include "ubw32-internal.h"
 
@@ -84,14 +86,14 @@ static int nsh_usbdevinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   int ret;
 

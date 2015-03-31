@@ -44,6 +44,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
+
 #include "stm32.h"
 #include "stm32_tiny-internal.h"
 
@@ -56,14 +58,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #if defined(CONFIG_WL_NRF24L01)
   syslog(LOG_INFO, "Register the nRF24L01 module");

@@ -42,6 +42,8 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/board.h>
+
 #include "sam_config.h"
 #include "samd20-xplained.h"
 
@@ -96,14 +98,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */

@@ -45,6 +45,7 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 
 #ifdef CONFIG_MTD_SST25
@@ -124,14 +125,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef HAVE_SST25
   FAR struct spi_dev_s *spi;
@@ -289,6 +290,6 @@ int usbmsc_archinitialize(void)
 #if defined(CONFIG_NSH_ARCHINIT)
   return OK;
 #else
- return nsh_archinitialize();
+ return board_app_initialize();
 #endif
 }

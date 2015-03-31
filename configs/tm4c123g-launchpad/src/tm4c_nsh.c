@@ -39,26 +39,27 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
+
 #include "tm4c123g-launchpad.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   /* If CONFIG_BOARD_INITIALIZE is selected then board initialization was
    * already performed in board_initialize.

@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
+
 #include "stm32f4discovery.h"
 
 /****************************************************************************
@@ -54,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture-specific initialization (if this was not already
@@ -62,7 +64,7 @@
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef CONFIG_BOARD_INITIALIZE
   /* Board initialization already performed by board_initialize() */

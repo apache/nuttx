@@ -43,6 +43,8 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/board.h>
+
 #ifdef CONFIG_NSH_LIBRARY
 
 /****************************************************************************
@@ -54,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
@@ -68,7 +70,7 @@
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
   return OK;
 }

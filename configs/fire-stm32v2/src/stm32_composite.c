@@ -70,8 +70,8 @@
 int composite_archinitialize(void)
 {
   /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
-   * this case, there is nothing further to be done here.
+   * already have been initialized in board_app_initialize() (see stm32_nsh.c).
+   * In this case, there is nothing further to be done here.
    *
    * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
    * was built.

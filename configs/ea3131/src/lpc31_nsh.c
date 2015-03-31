@@ -44,6 +44,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
+
 #ifdef CONFIG_LPC31_MCI
 #  include <nuttx/sdio.h>
 #  include <nuttx/mmcsd.h>
@@ -100,14 +102,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: board_app_initialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int board_app_initialize(void)
 {
 #ifdef NSH_HAVEMMCSD
   FAR struct sdio_dev_s *sdio;
