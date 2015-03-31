@@ -126,8 +126,35 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_ADCTEST
+      /* CMD:           BOARDIOC_ADCTEST_SETUP
+       * DESCRIPTION:   ADC controller test configuration
+       * ARG:           None
+       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_ADCTEST
+       * DEPENDENCIES:  Board logic must provide board_adc_setup()
+       */
+
+      case BOARDIOC_ADCTEST_SETUP:
+        {
+          ret = board_adc_setup(();
+        }
+        break;
+#endif
+
        default:
-         ret = -ENOTTY;
+         {
+#ifdef CONFIG_BOARDCTL_IOCTL
+           /* Boards may also select CONFIG_BOARDCTL_IOCTL=y to enable board-
+            * specific commands.  In this case, all commands not recognized
+            * by boardctl() will be forwarded to the board-provided board_ioctl()
+            * function.
+            */
+
+           ret = board_ioctl(cmd, arg);
+#else
+           ret = -ENOTTY;
+#endif
+         }
          break;
     }
 

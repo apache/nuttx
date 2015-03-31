@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 
 #include "tiva_adc.h"
@@ -136,7 +137,7 @@ int board_adc_initialize(void)
 #endif /* CONFIG_ADC */
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: board_adc_setup
  *
  * Description:
  *   All Tiva architectures must provide the following interface to work with
@@ -145,7 +146,7 @@ int board_adc_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_EXAMPLES_ADC
-int adc_devinit(void)
+int board_adc_setup(void)
 {
 #ifdef CONFIG_TIVA_ADC
   return board_adc_initialize();
@@ -159,7 +160,7 @@ int adc_devinit(void)
 
 /* Tiva timer interface does not currently support user configuration */
 
-#  if 0
+#if 0
 /************************************************************************************
  * Name: adc_timer_init
  *
@@ -188,5 +189,6 @@ TIMER_HANDLE adc_timer_init(void)
 
   return tiva_gptm_configure((const struct tiva_gptmconfig_s *)&adctimer);
 }
-#  endif
+
+#endif
 #endif /* defined (CONFIG_TIVA_ADC) && defined (CONFIG_TIVA_TIMER) */
