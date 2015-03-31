@@ -3100,7 +3100,7 @@ set FOOBAR ABC_${FOO}_${BAR}
     <td valign="top"><b><code>CONFIG_NSH_ARCHINIT</code></b></td>
     <td>
       Set <code>CONFIG_NSH_ARCHINIT</code> if your board provides architecture
-      specific initialization  via the board-specific function <code>nsh_archinitialize()</code>.
+      specific initialization  via the board-specific function <code>board_app_initialize()</code>.
       This function will be called early in NSH initialization to allow board logic to
       do such things as configure MMC/SD slots.
     </td>
@@ -3498,7 +3498,7 @@ mount -t vfat /dev/ram1 /tmp
     </p>
   <li>
     <p>
-      <code>nsh_archinitialize()</code>:
+      <code>board_app_initialize()</code>:
       Next any architecture-specific NSH initialization will be performed (if any).
       For the STM3240G-EVAL, this architecture specific initialization can be found at <code>configs/stm3240g-eval/src/up_nsh.c</code>.
       This it does things like:  (1) Initialize SPI devices, (2) Initialize SDIO, and (3) mount any SD cards that may be inserted.
@@ -4144,6 +4144,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdoverview">Background commands</a></li>
   <li><a href="#cmdoverview">Background command priority</a></li>
   <li><a href="#custapps"><code>binfs</code></a></li>
+  <li><a href="#custonshlib"><code>board_app_initialize()</code></a></li>
   <li><a href="#cmdbreak"><code>break</code></a></li>
   <li><a href="#custapps">Built-In applications</a></li>
   <li><a href="#custapps">Built-In application start-up <code>main()</code></a></li>
@@ -4268,7 +4269,6 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdoverview"><code>nice</code></a></li>
   <li><a href="#custonshlib">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#nshlibrary">NSH library (<code>nshlib</code>)</a></li>
-  <li><a href="#custonshlib"><code>nsh_archinitialize()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_initialize()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_main()</code></a></li>
