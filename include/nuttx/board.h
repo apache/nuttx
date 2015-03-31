@@ -208,6 +208,29 @@ void board_tsc_teardown(void);
 int board_adc_setup(void);
 
 /****************************************************************************
+ * Name: board_graphics_setup
+ *
+ * Description:
+ *   If the driver for the graphics device on the platform some unusual
+ *   initialization, then this board interface should be provided.
+ *
+ *   This is an internal OS interface but may be invoked indirectly from
+ *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
+ *   CONFIG_BOARDCTL_GRAPHICS=y, then this functions will be invoked via the
+ *   (non-standard) boardctl() interface using the commands
+ *   BOARDIOC_GRAPHICS_SETUP command.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_LCDDRIVER
+struct lcd_dev_s;
+FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
+#else
+struct fb_vtable_s;
+FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
+#endif
+
+/****************************************************************************
  * Name: board_ioctl
  *
  * Description:

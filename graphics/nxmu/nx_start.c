@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <nuttx/kthread.h>
 #include <nuttx/nx/nx.h>
 
@@ -96,10 +97,10 @@ int nx_server(int argc, char *argv[])
 #if defined(CONFIG_NXSTART_EXTERNINIT)
   /* Use external graphics driver initialization */
 
-  dev = up_nxdrvinit(CONFIG_NXSTART_DEVNO);
+  dev = board_graphics_setup(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gdbg("ERROR: up_nxdrvinit failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gdbg("ERROR: board_graphics_setup failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/lpcxpresso-lpc1768/src/lpc17_oled.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ug-9664hswag01.h>
@@ -98,14 +99,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_nxdrvinit
+ * Name: board_graphics_setup
  *
  * Description:
  *   Called by NX initialization logic to configure the OLED.
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
+FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
@@ -114,13 +115,13 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
    * J43, J45 pin1-2 and J46 pin 1-2.
    */
 
-  oledcs_dumpgpio("up_nxdrvinit: After OLED CS setup");
-  oleddc_dumpgpio("up_nxdrvinit: On entry");
+  oledcs_dumpgpio("board_graphics_setup: After OLED CS setup");
+  oleddc_dumpgpio("board_graphics_setup: On entry");
 
   (void)lpc17_configgpio(LPCXPRESSO_OLED_POWER); /* OLED 11V power */
   (void)lpc17_configgpio(LPCXPRESSO_OLED_DC);    /* OLED Command/Data */
 
-  oleddc_dumpgpio("up_nxdrvinit: After OLED Power/DC setup");
+  oleddc_dumpgpio("board_graphics_setup: After OLED Power/DC setup");
 
   /* Get the SPI1 port (configure as a Freescale SPI port) */
 
