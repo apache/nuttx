@@ -54,6 +54,7 @@
 #include "sam_twihs.h"
 
 #include "samv71-xult.h"
+#include "atmxt-xpro.h"
 
 #ifdef HAVE_MAXTOUCH
 
