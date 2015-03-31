@@ -339,9 +339,11 @@
 
 /* maXTouch Xplained Pro LCD
  *
+ * maXTouch Xplained Pro Standard Extension Header
+ * -----------------------------------------------
  * This LCD could be connected either via EXT1 or EXT2 using the 2x10
  * 20-pin cable and the maXTouch Xplained Pro standard extension
- * header.  Access this then performed in SPI mode.
+ * header.  Access is then performed in SPI mode.
  *
  * ---- -------- ---- ----------- ---- ----------- ------------------------------------------
  *                       SAMV71-XULT               maxTouch Xplained Pro
@@ -374,19 +376,93 @@
  */
 
 #ifdef CONFIG_SAMV71XULT_MXTXLND
-#  ifdef CONFIG_SAMV71XULT_MXTXLND_EXT1
+#  if defined(CONFIG_SAMV71XULT_MXTXLND_EXT1)
 
 #    define GPIO_PWMC0_H0     GPIO_PWMC0_H0_1
 #    define GPIO_MXTXLND_PWM  GPIO_PWMC0_H0_1
 #    define GPIO_SPI0_NPCS1   GPIO_SPI0_NPCS1_2
 
-#  else /* CONFIG_SAMV71XULT_MXTXLND_EXT2 */
+#  elif defined(CONFIG_SAMV71XULT_MXTXLND_EXT2)
 
 #    define GPIO_PWMC0_H2     GPIO_PWMC0_H2_5
 #    define GPIO_MXTXLND_PWM  GPIO_PWMC0_H2_5
 
+/* maXTouch Xplained Pro Xplained Pro LCD Connector
+ * ------------------------------------------------
+ * It is also possible to connect the LCD via the flat cable to the EXT4 LCD
+ * connector.  In this case, you would use the SMC/EBI to communicate with the
+ * LCD.
+ *
+ *   ---- ------------ ---- -------- -----------------------------------------------------------
+ *          LCD              SAMV71  Description
+ *   Pin  Function     Pin  Function
+ *   ---- ------------ ---- -------- -----------------------------------------------------------
+ *    1   ID            -    -       Communication line to ID chip on extension board
+ *    2   GND           -   GND      Ground
+ *    3   D0           PC0  D0       Data line
+ *    4   D1           PC1  D1       Data line
+ *    5   D2           PC2  D2       Data line
+ *    6   D3           PC3  D3       Data line
+ *    7   GND           -   GND      Ground
+ *    8   D4           PC4  D4       Data line
+ *    9   D5           PC5  D5       Data line
+ *   10   D6           PC6  D6       Data line
+ *   11   D7           PC7  D7       Data line
+ *   12   GND           -   GND      Ground
+ *   13   D8           PE0  D8       Data line
+ *   14   D9           PE1  D9       Data line
+ *   15   D10          PE2  D10      Data line
+ *   16   D11          PE3  D11      Data line
+ *   17   GND           -   GND      Ground
+ *   18   D12          PE4  D12      Data line
+ *   19   D12          PE5  D13      Data line
+ *   20   D14          PA15 D14      Data line
+ *   21   D15          PA16 D15      Data line
+ *   22   GND           -   GND      Ground
+ *   23   D16           -    -       Data line
+ *   24   D17           -    -       Data line
+ *   25   N/C           -    -
+ *   26   N/C           -    -
+ *   27   GND           -   GND      Ground
+ *   28   N/C           -    -
+ *   29   N/C           -    -
+ *   30   N/C           -    -
+ *   31   N/C           -    -
+ *   32   GND           -   GND      Ground
+ *   33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
+ *        CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
+ *                                        is possible to select either the register or the
+ *                                        data interface
+ *   34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization
+ *                                   MCU: Chip select
+ *   35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
+ *                                   MCU: Write enable signal
+ *   36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
+ *        RE                         MCU: Read enable signal
+ *   37   SPI SCK       -    -       MCU: Clock for SPI
+ *   38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
+ *   39   SPI MISO      -    -       MCU: Master in slave out line of SPI
+ *   40   SPI SS        -    -       MCU: Slave select for SPI
+ *   41   N/C           -    -
+ *   42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
+ *   43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)
+ *   44   IRQ1         PD28 WKUP5    maXTouch interrupt line
+ *   45   N/C          PA2  WKUP2
+ *   46   PWM          PC9  TIOB7    Backlight control
+ *   47   RESET        PC13 GPIO     Reset for both display and maxTouch
+ *   48   VCC           -    -       3.3V power supply for extension board
+ *   49   VCC           -    -       3.3V power supply for extension board
+ *   50   GND           -    -       Ground
+ *   ---- ------------ ---- -------- -----------------------------------------------------------
+ *
+ * There are no alternatives for SMC/EBI, TWI0, or TIOB pins.  No pin disambiguration
+ * is necessary.
+ */
+
+#  elif defined(CONFIG_SAMV71XULT_MXTXLND_LCD)
+
 #  endif
-#endif
+#endif /* CONFIG_SAMV71XULT_MXTXLND */
 
 /************************************************************************************
  * Public Types

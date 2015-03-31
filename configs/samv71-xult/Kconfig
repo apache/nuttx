@@ -16,10 +16,13 @@ choice
 	default SAMV71XULT_MXTXPLND_EXT1
 
 config SAMV71XULT_MXTXPLND_EXT1
-	bool "Connected on EXT1"
+	bool "Connected on EXT1 (2x10 pin)"
 
 config SAMV71XULT_MXTXPLND_EXT2
-	bool "Connected on EXT2"
+	bool "Connected on EXT2 (2x10 pin)"
+
+config SAMV71XULT_MXTXPLND_LCD
+	bool "Connected on LCD (50-pin)"
 
 endchoice # MaXTouch Xplained connection
 
