@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 28, 2015</p>
+      <p>Last Updated: April 1, 2015</p>
     </td>
   </tr>
 </table>
@@ -30,7 +30,7 @@
   <a href="#Introduction">1.0 Introduction</a><br>
   <a href="#DirectoryStructure">2.0 Directory Structure</a>
   <ul>
-    <a href="#DirStructDocumentation">2.1 Documentation</a></br>
+    <a href="#DirStructDocumentation">2.1 Documentation</a><br>
     <a href="#DirStructArch">2.2 arch/</a>
     <ul>
       <a href="#archdirectorystructure">2.2.1 Subdirectory Structure</a><br>
@@ -93,14 +93,14 @@
       <a href="#upinterruptcontext">4.2.16 <code>up_interrupt_context()</code></a><br>
       <a href="#updisableirq">4.2.17 <code>up_disable_irq()</code></a><br>
       <a href="#upenableirq">4.2.18 <code>up_enable_irq()</code></a><br>
-      <a href="#upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a></br>
-      <a href="#upputc">4.2.20 <code>up_putc()</code></a></br>
+      <a href="#upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a><br>
+      <a href="#upputc">4.2.20 <code>up_putc()</code></a><br>
     </ul>
     <a href="#systemtime">4.3 System Time and Clock</a>
     <ul>
-      <a href="#basictimer">4.3.1 Basic System Timer</a></br>
-      <a href="#timerhw">4.3.2 Hardware</a></br>
-      <a href="#systcktime">4.3.3 System Tick and Time</a></br>
+      <a href="#basictimer">4.3.1 Basic System Timer</a><br>
+      <a href="#timerhw">4.3.2 Hardware</a><br>
+      <a href="#systcktime">4.3.3 System Tick and Time</a><br>
       <a href="#tickless">4.3.4 Tickless OS</a><br>
       <a href="#Watchdogs">4.3.5 Watchdog Timer Interfaces</a>
     </ul>
@@ -130,43 +130,44 @@
     </ul>
     <a href="#addrenv">4.5 Address Environments</a>
     <ul>
-      <a href="#up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a></br>
-      <a href="#up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a></br>
-      <a href="#up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a></br>
-      <a href="#up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a></br>
-      <a href="#up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a></br>
-      <a href="#up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a></br>
-      <a href="#up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a></br>
-      <a href="#up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a></br>
-      <a href="#up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a></br>
-      <a href="#up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a></br>
-      <a href="#up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a></br>
-      <a href="#up_addrenv_ustackfree">4.5.12 <code>up_addrenv_ustackfree()</code></a></br>
-      <a href="#up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a></br>
-      <a href="#up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a></br>
-      <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a></br>
+      <a href="#up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a><br>
+      <a href="#up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a><br>
+      <a href="#up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a><br>
+      <a href="#up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a><br>
+      <a href="#up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a><br>
+      <a href="#up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a><br>
+      <a href="#up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a><br>
+      <a href="#up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a><br>
+      <a href="#up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a><br>
+      <a href="#up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a><br>
+      <a href="#up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a><br>
+      <a href="#up_addrenv_ustackfree">4.5.12 <code>up_addrenv_ustackfree()</code></a><br>
+      <a href="#up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a><br>
+      <a href="#up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a><br>
+      <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a><br>
       <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
-    <a href="#exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#boardctl">4.6 <code>boardctl()</code> Application Interface</a><br>
+    <a href="#exports">4.7 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#osstart">4.6.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.6.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a><br>
-      <a href="#schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a></br>
-      <a href="#schedalarmexpiration">4.6.5 <code>sched_alarm_expiration()</code></a></br>
-      <a href="#irqdispatch">4.6.6 <code>irq_dispatch()</code></a>
+      <a href="#osstart">4.7.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.7.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.7.3 <code>sched_process_timer()</code></a><br>
+      <a href="#schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a><br>
+      <a href="#schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a><br>
+      <a href="#irqdispatch">4.7.6 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#shm">4.7 Shared Memory</a>
+    <a href="#shm">4.8 Shared Memory</a>
     <ul>
-      <a href="#upshmat">4.7.1 <code>up_shmat()</code></a><br>
-      <a href="#upshmdt">4.7.2 <code>up_shmdt()</code></a><br>
+      <a href="#upshmat">4.8.1 <code>up_shmat()</code></a><br>
+      <a href="#upshmdt">4.8.2 <code>up_shmdt()</code></a><br>
     </ul>
-    <a href="#demandpaging">4.8 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.9 LED Support</a>
+    <a href="#demandpaging">4.9 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.10 LED Support</a>
     <ul>
-      <a href="#ledheaders">4.9.1 Header Files</a><br>
-      <a href="#leddefinitions">4.9.2 LED Definitions</a><br>
-      <a href="#ledapis">4.9.3 Common LED interfaces</a>
+      <a href="#ledheaders">4.10.1 Header Files</a><br>
+      <a href="#leddefinitions">4.10.2 LED Definitions</a><br>
+      <a href="#ledapis">4.10.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -3813,23 +3814,73 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h2><a name="exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<h2><a name="boardctl">4.6 <code>boardctl()</code> Application Interface</a></h2>
+
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>
+  include &lt;sys/boardctl.h&gt;<br>
+  int boardctl(unsigned int cmd, uintptr_t arg);
+  </code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    In a small embedded system, there will typically be a much greater interaction between application and low-level board features.
+    The canonically correct to implement such interactions is by implementing a character driver and performing the interactions via low level <code>ioctl()</code> calls.
+    This, however, may not be practical in many cases and will lead to &quot;correct&quot; but awkward implementations.
+  </p>
+  <p>
+    <code>boardctl()</code> is <i>non-standard</i> OS interface to alleviate the problem.
+    It basically circumvents the normal device driver <code>ioctl()</code> interlace and allows the application to perform direction IOCTL-like calls to the board-specific logic.
+    It is especially useful for setting up board operational and test configurations.
+  </p>
+  <p>
+    <b>NOTE:</b> The other interfaces described in this document are internal OS interface.
+    <code>boardctl()</code> is an application interface to the OS.
+    There is not point, in fact, of using <code>boardctl()</code> within the OS;
+    the board interfaces prototyped in <code>include/nuttx/board.h</code> may be called directly from within the OS.
+  </p>
+  <p>
+    Application interfaces are described in the <a href="NuttxUserGuide.html">NuttX User Guide</a>.
+    This application interface interface is described here only because it is so non-standard and because it is so closely tied to board porting logic.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>cmd</code>: Identifies the board command to be executed.
+    See <code>include/sys/boardctl.h</code> for the complete list of common board commands.
+    Provisions are made to support non-common, board-specific commands as well.
+  </li>
+  <li>
+    <code>arg</code>: The argument that accompanies the command.
+    The nature of the argument is determined by the specific command.
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  On success zero (<code>OK</code>) is returned;
+  -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
+</ul>
+
+<h2><a name="exports">4.7 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
 <p>
   These are standard interfaces that are exported by the OS
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.6.1 <code>os_start()</code></a></h3>
+<h3><a name="osstart">4.7.1 <code>os_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="listmgmt">4.6.2 OS List Management APIs</a></h3></h3>
+<h3><a name="listmgmt">4.7.2 OS List Management APIs</a></h3></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a></h3>
+<h3><a name="schedprocesstimer">4.7.3 <code>sched_process_timer()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void sched_process_timer(void);</code></p>
 
 <p><b>Description</b>.
@@ -3840,7 +3891,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   <code>MSEC_PER_TICK</code>.
 </p>
 
-<h3><a name="schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a></h3>
+<h3><a name="schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3863,7 +3914,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.6.5 <code>sched_alaram_expiration()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.7.5 <code>sched_alaram_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3886,7 +3937,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="irqdispatch">4.6.6 <code>irq_dispatch()</code></a></h3>
+<h3><a name="irqdispatch">4.7.6 <code>irq_dispatch()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
@@ -3895,7 +3946,7 @@ void sched_timer_expiration(void);
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="shm">4.7 Shared Memory</a></h2>
+<h2><a name="shm">4.8 Shared Memory</a></h2>
 <p>
   Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
   These interfaces support user memory regions that can be shared between multiple user processes.
@@ -3904,7 +3955,7 @@ void sched_timer_expiration(void);
   Those interfaces are described below:
 </p>
 
-<h3><a name="upshmat">4.7.1 <code>up_shmat()</code></a></h3>
+<h3><a name="upshmat">4.8.1 <code>up_shmat()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3933,7 +3984,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h3><a name="upshmdt">4.7.2 <code>up_shmdt()</code></a></h3>
+<h3><a name="upshmdt">4.8.2 <code>up_shmdt()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3959,7 +4010,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h2><a name="demandpaging">4.8 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.9 On-Demand Paging</a></h2>
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
   If the platform meets certain requirements, then NuttX can provide on-demand paging:
@@ -3968,7 +4019,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.9 LED Support</a></h2>
+<h2><a name="ledsupport">4.10 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -3978,7 +4029,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.9.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.10.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -4002,7 +4053,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.9.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.10.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -4066,7 +4117,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </li>
 </ul>
 
-<h3><a name="ledapis">4.9.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.10.3 Common LED interfaces</a></h3>
 
 <p>
   The <code>include/nuttx/board.h</code> has declarations like:
