@@ -18,6 +18,7 @@ Contents
   - LEDs and Buttons
   - AT24MAC402 Serial EEPROM
   - Networking
+  - Audio Interface
   - maXTouch Xplained Pro
   - Debugging
   - Configurations
@@ -693,6 +694,27 @@ additional settings.
     CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
     CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
     CONFIG_NSH_NETINIT_SIGNO=18
+
+Audio Interface
+===============
+
+WM8904 Audio Codec
+------------------
+
+  SAMV71 Interface        WM8904 Interface
+  ---- ------------ ------- ----------------------------------
+  PIO  Usage        Pin     Function
+  ---- ------------ ------- ----------------------------------
+  PA3  TWD0         SDA     I2C control interface, data line
+  PA4  TWCK0        SCLK    I2C control interface, clock line
+  PA10 RD           ADCDAT  Digital audio output (microphone)
+  PB18 PCK2         MCLK    Master clock
+  PB0  TF           LRCLK   Left/right data alignment clock
+  PB1  TK           BCLK    Bit clock, for synchronization
+  PD11 GPIO         IRQ     Audio interrupt
+  PD24 RF           LRCLK   Left/right data alignment clock
+  PD26 TD           DACDAT  Digital audio input (headphone)
+  ---- ------------ ------- ----------------------------------
 
 maXTouch Xplained Pro
 =====================
