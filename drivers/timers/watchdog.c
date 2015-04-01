@@ -52,7 +52,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/watchdog.h>
+#include <nuttx/timers/watchdog.h>
 
 #ifdef CONFIG_WATCHDOG
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/rtc.h
+ * include/nuttx/timers/rtc.h
  *
  *   Copyright(C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -38,8 +38,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RTC_H
-#define __INCLUDE_NUTTX_RTC_H
+#ifndef __INCLUDE_NUTTX_TIMERS_RTC_H
+#define __INCLUDE_NUTTX_TIMERS_RTC_H
 
 /****************************************************************************
  * Included Files
@@ -487,4 +487,4 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower);
 
 #endif /* CONFIG_RTC_DRIVER */
 #endif /* CONFIG_RTC */
-#endif /* __INCLUDE_NUTTX_RTC_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_RTC_H */

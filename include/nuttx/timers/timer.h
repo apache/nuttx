@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/timer.h
+ * include/nuttx/timers/timer.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_TIMER_H
-#define __INCLUDE_NUTTX_TIMER_H
+#ifndef __INCLUDE_NUTTX_TIMERS_TIMER_H
+#define __INCLUDE_NUTTX_TIMERS_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -262,4 +262,4 @@ void timer_unregister(FAR void *handle);
 #endif
 
 #endif /* CONFIG_TIMER */
-#endif  /* __INCLUDE_NUTTX_TIMER_H */
+#endif  /* __INCLUDE_NUTTX_TIMERS_TIMER_H */

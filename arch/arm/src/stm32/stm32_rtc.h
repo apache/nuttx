@@ -189,7 +189,7 @@ int stm32_rtc_cancelalarm(void);
  * Description:
  *   Instantiate the RTC lower half driver for the STM32.  General usage:
  *
- *     #include <nuttx/rtc.h>
+ *     #include <nuttx/timers/rtc.h>
  *     #include "stm32_rtc.h>
  *
  *     struct rtc_lowerhalf_s *lower;

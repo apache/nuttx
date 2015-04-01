@@ -61,7 +61,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/rtc.h>
+#include <nuttx/timers/rtc.h>
 #include <arch/board/board.h>
 
 #include <stdlib.h>

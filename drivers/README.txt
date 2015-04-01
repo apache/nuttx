@@ -38,7 +38,7 @@ ramdisk.c
 
 timer.c
   Provides the "upper half" for a generic timer driver.  See
-  include/nuttx/timer.h for more information.
+  include/nuttx/timers/timer.h for more information.
 
 rwbuffer.c
   A facility that can be use by any block driver in-order to add
@@ -46,7 +46,7 @@ rwbuffer.c
 
 watchdog.c
   Provides the "upper half" for a generic watchdog driver.  See
-  include/nuttx/watchdog.h for more information.
+  include/nuttx/timers/watchdog.h for more information.
 
 Subdirectories of this directory:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

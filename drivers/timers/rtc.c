@@ -47,7 +47,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/rtc.h>
+#include <nuttx/timers/rtc.h>
 
 /****************************************************************************
  * Private Types

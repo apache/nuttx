@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/watchdog.h
+ * include/nuttx/timers/watchog.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WATCHDOG_H
-#define __INCLUDE_NUTTX_WATCHDOG_H
+#ifndef __INCLUDE_NUTTX_TIMERS_WATCHDOG_H
+#define __INCLUDE_NUTTX_TIMERS_WATCHDOG_H
 
 /****************************************************************************
  * Included Files
@@ -291,4 +291,4 @@ int up_wdginitialize(void);
 #endif
 
 #endif /* CONFIG_WATCHDOG */
-#endif  /* __INCLUDE_NUTTX_WATCHDOG_H */
+#endif  /* __INCLUDE_NUTTX_TIMERS_WATCHDOG_H */

@@ -8,7 +8,7 @@ menuconfig TIMER
 	default n
 	---help---
 		This selection enables building of the "upper-half" timer
-		driver. See include/nuttx/timer.h for further timer driver
+		driver. See include/nuttx/timers/timer.h for further timer driver
 		information.
 
 menuconfig RTC
@@ -16,7 +16,7 @@ menuconfig RTC
 	default n
 	---help---
 		This selection enables configuration of a real time clock (RTCdriver.
-		See include/nuttx/rtc.h for further RTC driver information.
+		See include/nuttx/timers/rtc.h for further RTC driver information.
 		Most RTC drivers are MCU specific and may require other specific
 		settings.
 
@@ -73,7 +73,7 @@ config RTC_DRIVER
 	default n
 	---help---
 		This selection enables building of the "upper-half" RTC
-		driver. See include/nuttx/rtc.h for further RTC driver
+		driver. See include/nuttx/timers/rtc.h for further RTC driver
 		information.
 
 if RTC_DRIVER
@@ -122,7 +122,7 @@ menuconfig WATCHDOG
 	default n
 	---help---
 		This selection enables building of the "upper-half" watchdog timer
-		driver. See include/nuttx/watchdog.h for further watchdog timer driver
+		driver. See include/nuttx/timers/watchdog.h for further watchdog timer driver
 		information.
 
 if WATCHDOG

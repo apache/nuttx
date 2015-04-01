@@ -48,7 +48,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-#include <nuttx/watchdog.h>
+#include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
 #include <nuttx/kthread.h>

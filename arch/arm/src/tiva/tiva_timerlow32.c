@@ -48,7 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/timer.h>
+#include <nuttx/timers/timer.h>
 
 #include <arch/board/board.h>
 

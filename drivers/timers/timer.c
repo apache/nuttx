@@ -53,7 +53,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/timer.h>
+#include <nuttx/timers/timer.h>
 
 #ifdef CONFIG_TIMER
 
