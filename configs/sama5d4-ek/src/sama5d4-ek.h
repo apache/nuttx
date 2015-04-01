@@ -415,7 +415,7 @@
 
 #  if !defined(CONFIG_SAMA5_PIOE_IRQ)
 #    warning CONFIG_SAMA5_PIOE_IRQ is required for audio support
-#    undef HAVE_HSMCI
+#    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_AUDIO_FORMAT_PCM

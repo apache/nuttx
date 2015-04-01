@@ -61,6 +61,8 @@
 #define HAVE_NETWORK     1
 #define HAVE_MACADDR     1
 #define HAVE_MTDCONFIG   1
+#define HAVE_WM8904      1
+#define HAVE_AUDIO_NULL  1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -177,6 +179,63 @@
 
 #if !defined(CONFIG_MTD_CONFIG)
 #  undef HAVE_MTDCONFIG
+#endif
+
+/* Audio */
+/* PCM/WM8904 driver */
+
+#ifndef CONFIG_AUDIO_WM8904
+#  undef HAVE_WM8904
+#endif
+
+#ifdef HAVE_WM8904
+#  ifndef CONFIG_SAMV7_TWI0
+#    warning CONFIG_SAMV7_TWI0 is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_SAMV7_SSC0
+#    warning CONFIG_SAMV7_SSC0 is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  if !defined(CONFIG_SAMV7_PIOD_IRQ)
+#    warning CONFIG_SAMV7_PIOD_IRQ is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_AUDIO_FORMAT_PCM
+#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY
+#    warning Defaulting to maximum WM8904 I2C frequency
+#    define CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY 400000
+#  endif
+
+#  if CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY > 400000
+#    warning WM8904 I2C frequency cannot exceed 400KHz
+#    undef CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY
+#    define CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY 400000
+#  endif
+#endif
+
+/* PCM/null driver */
+
+#ifndef CONFIG_AUDIO_NULL
+#  undef HAVE_AUDIO_NULL
+#endif
+
+#ifndef HAVE_WM8904
+#  undef HAVE_AUDIO_NULL
+#endif
+
+#ifdef HAVE_AUDIO_NULL
+#  ifndef CONFIG_AUDIO_FORMAT_PCM
+#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    undef HAVE_AUDIO_NULL
+#  endif
 #endif
 
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
@@ -304,9 +363,40 @@
 #define GPIO_VBUSON (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                      GPIO_PORT_PIOC | GPIO_PIN16)
 
-/* SPI Chip Selects
- * to be provided
+/* WM8904 Audio Codec ***************************************************************/
+/* SAMV71 Interface        WM8904 Interface
+ * ---- ------------ ------- ----------------------------------
+ * PIO  Usage        Pin     Function
+ * ---- ------------ ------- ----------------------------------
+ * PA3  TWD0         SDA     I2C control interface, data line
+ * PA4  TWCK0        SCLK    I2C control interface, clock line
+ * PA10 RD           ADCDAT  Digital audio output (microphone)
+ * PB18 PCK2         MCLK    Master clock
+ * PB0  TF           LRCLK   Left/right data alignment clock
+ * PB1  TK           BCLK    Bit clock, for synchronization
+ * PD11 GPIO         IRQ     Audio interrupt
+ * PD24 RF           LRCLK   Left/right data alignment clock
+ * PD26 TD           DACDAT  Digital audio input (headphone)
+ * ---- ------------ ------- ----------------------------------
  */
+
+/* Audio Interrupt. All interrupts are default, active high level.  Pull down
+ * internally in the WM8904.  So we want no pull-up/downs and we want to
+ * interrupt on the high level.
+ */
+
+#define GPIO_INT_WM8904    (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
+                            PIO_INT_HIGHLEVEL | PIO_PORT_PIOD | PIO_PIN11)
+#define IRQ_INT_WM8904     SAM_IRQ_PD11
+
+/* The MW8904 communicates on TWI0, I2C address 0x1a for control operations */
+
+#define WM8904_TWI_BUS     0
+#define WM8904_I2C_ADDRESS 0x1a
+
+/* The MW8904 transfers data on SSC0 */
+
+#define WM8904_SSC_BUS     0
 
 /************************************************************************************
  * Public Types
@@ -518,6 +608,46 @@ bool sam_writeprotected(int slotno);
 #ifdef HAVE_MTDCONFIG
 int sam_at24config(void);
 #endif
+
+/****************************************************************************
+ * Name: sam_wm8904_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the WM8904 device.  This function will register the driver
+ *   as /dev/wm8904[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_WM8904
+int sam_wm8904_initialize(int minor);
+#endif /* HAVE_WM8904 */
+
+/****************************************************************************
+ * Name: sam_audio_null_initialize
+ *
+ * Description:
+ *   Set up to use the NULL audio device for PCM unit-level testing.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AUDIO_NULL
+int sam_audio_null_initialize(int minor);
+#endif /* HAVE_AUDIO_NULL */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMV71_XULT_SRC_SAMV71_XULT_H */

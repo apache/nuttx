@@ -329,7 +329,24 @@
  *    There are no alternative pin selections for USART1.
  */
 
-/* SSC
+/* WM8904 Audio Codec
+ *
+ * SAMV71 Interface        WM8904 Interface
+ * ---- ------------ ------- ----------------------------------
+ * PIO  Usage        Pin     Function
+ * ---- ------------ ------- ----------------------------------
+ * PA3  TWD0         SDA     I2C control interface, data line
+ * PA4  TWCK0        SCLK    I2C control interface, clock line
+ * PA10 RD           ADCDAT  Digital audio output (microphone)
+ * PB18 PCK2         MCLK    Master clock
+ * PB0  TF           LRCLK   Left/right data alignment clock
+ * PB1  TK           BCLK    Bit clock, for synchronization
+ * PD11 GPIO         IRQ     Audio interrupt
+ * PD24 RF           LRCLK   Left/right data alignment clock
+ * PD26 TD           DACDAT  Digital audio input (headphone)
+ * ---- ------------ ------- ----------------------------------
+ *
+ * SSC
  *
  * Alternative pin selections are available only for SSC0 TD.
  * On the SAMV71-XULT board, PD26 supports the I2S TD function

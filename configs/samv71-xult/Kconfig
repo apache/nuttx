@@ -68,4 +68,30 @@ config SAMV71XULT_HSMCI0_AUTOMOUNT_UDELAY
 
 endif # SAMV71XULT_HSMCI0_AUTOMOUNT
 
+if AUDIO_WM8904
+
+config SAMV71XULT_WM8904_I2CFREQUENCY
+	int "WM8904 I2C Frequency"
+	default 400000
+	range 1 400000
+	---help---
+		This option selects the I2C frequency to use when communicating with
+		the WM8904 device.  The default, 400KHz, is the maximum supported by
+		the WM8904.  If you have problems communicating with the WM8904,
+		then you might want to try lowering this rate.
+
+choice
+	prompt "WM8904 MCLK source"
+	default SAMV71XULT_WM8904_SRCMAIN
+
+config SAMV71XULT_WM8904_SRCMAIN
+	bool "Main Clock (12MHz)"
+
+config SAMV71XULT_WM8904_SRCSCK
+	bool "Slow XTAL (32.768KHz)"
+	select SAMV71XULT_SLOWCLOCK
+
+endchoice # WM8904 MCLK source
+endif # AUDIO_WM8904
+
 endif # ARCH_BOARD_SAMV71_XULT
