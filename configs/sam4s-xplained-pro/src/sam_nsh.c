@@ -60,7 +60,7 @@
 #endif
 
 #ifdef CONFIG_TIMER
-#  include <nuttx/timer.h>
+#  include <nuttx/timers/timer.h>
 #endif
 
 #ifdef CONFIG_SYSTEM_USBMONITOR
