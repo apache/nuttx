@@ -10091,3 +10091,5 @@
 	  will enable calling board_pwm_setup() from boardctl().  In all
 	  configurations that enable the apps/examples/pwm test, make sure that
 	  boardctl() support is properly enabled (2015-03-31).
+	* Move include/nuttx/timer.h, rtc.h and watchdog.h to include/nuttx/timers/.
+	  (2015-04-01).
