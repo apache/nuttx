@@ -44,7 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/rtc.h>
+#include <nuttx/timers/rtc.h>
 
 #include "chip.h"
 #include "stm32_rtc.h"
@@ -265,7 +265,7 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
  * Description:
  *   Instantiate the RTC lower half driver for the STM32.  General usage:
  *
- *     #include <nuttx/rtc.h>
+ *     #include <nuttx/timers/rtc.h>
  *     #include "stm32_rtc.h>
  *
  *     struct rtc_lowerhalf_s *lower;

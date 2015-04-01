@@ -48,7 +48,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
-#include <nuttx/watchdog.h>
+#include <nuttx/timers/watchog.h>
 #include <arch/watchdog.h>
 
 #include "chip.h"

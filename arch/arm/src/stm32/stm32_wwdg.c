@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/watchdog.h>
+#include <nuttx/timers/watchog.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
