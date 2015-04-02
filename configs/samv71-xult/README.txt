@@ -716,6 +716,21 @@ WM8904 Audio Codec
   PD26 TD           DACDAT  Digital audio input (headphone)
   ---- ------------ ------- ----------------------------------
 
+CP2100-CP Fractional-N Clock Multiplier
+--------------------------------------
+
+  SAMV71 Interface          CP2100-CP Interface
+  ---- ------------ ------- ----------------------------------
+  PIO  Usage        Pin     Function
+  ---- ------------ ------- ----------------------------------
+  PA3  TWD0         SDA     I2C control interface, data line
+  PA4  TWCK0        SCLK    I2C control interface, clock line
+  PD21 TIOA11       CLK_IN  PLL input
+   -    -           XTI/XTO 12.0MHz crystal
+  PA22 RK           CLK_OUT PLL output
+   -    -           AUX_OUT N/C
+  ---- ------------ ------- ----------------------------------
+
 maXTouch Xplained Pro
 =====================
 
