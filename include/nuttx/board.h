@@ -100,6 +100,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
+#include <nuttx/compiler.h>
+
 #ifdef CONFIG_ARCH_IRQBUTTONS
 #  include <nuttx/irq.h>
 #endif
