@@ -10093,3 +10093,5 @@
 	  boardctl() support is properly enabled (2015-03-31).
 	* Move include/nuttx/timer.h, rtc.h and watchdog.h to include/nuttx/timers/.
 	  (2015-04-01).
+	* drivers/timer/cs2100-cp.c and include/nuttx/timers/cs2100-cp.h: Add a
+	  very basic driver for the CS2100-CP Fractional-N Multipler chip (2015-04-02).
