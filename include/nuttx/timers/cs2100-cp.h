@@ -45,9 +45,29 @@
 #include <stdint.h>
 #include <nuttx/i2c.h>
 
+#ifdef CONFIG_TIMERS_CS2100CP
+
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_I2C
+#  error I2C driver support is required (CONFIG_I2C)
+#else
+#  ifndef CONFIG_I2C_TRANSFER
+#    error I2C transfer method is required (CONFIG_I2C_TRANSFER)
+#  endif
+#endif
+
+#ifndef CONFIG_TIMERS_CS2100CP_CLKINBW
+# define CONFIG_TIMERS_CS2100CP_CLKINBW 16
+#endif
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_CS2100CP_DEBUG
+#  undef CONFIG_CS2100CP_REGDEBUG
+#endif
 
 /* Register Addresses ***********************************************************************/
 
@@ -77,7 +97,7 @@
 
 #define CS2100_DEVCTL_CLKOUTDIS            (1 << 0)  /* Bit 0:  CLK_OUT disable */
 #define CS2100_DEVCTL_AUXOUTDIS            (1 << 1)  /* Bit 1:  AUX_OUT disable */
-#define CS2100_DEVCTL_UNLOCK               (1 << 31) /* Bit 31: Unlock PLL */
+#define CS2100_DEVCTL_UNLOCK               (1 << 7)  /* Bit 7:  Unlock PLL */
 
 /* Device Configuration 1 */
 
@@ -141,6 +161,17 @@
  * Public Types
  ********************************************************************************************/
 
+struct cs2100_config_s
+{
+  FAR struct i2c_dev_s *i2c;      /* Instance of an I2C interface */
+  uint32_t              refclk;   /* RefClk/XTAL frequency */
+  uint32_t              clkin;    /* Frequency CLK_IN provided to the CS2100-CP */
+  uint32_t              clkout;   /* Desired CLK_OUT frequency */
+  uint8_t               i2caddr;  /* CP2100-CP I2C address */
+  uint8_t               loopbw;   /* Minimum loop bandwidth: 1-128 */
+  bool                  xtal;     /* false: Refclck, true: Crystal on XTI/XTO */
+};
+
 /********************************************************************************************
  * Public Data
  ********************************************************************************************/
@@ -157,9 +188,62 @@ extern "C"
  * Public Function Prototypes
  ********************************************************************************************/
 
+struct i2c_dev_s;  /* Forward reference */
+
+/********************************************************************************************
+ * Name: cs2100_enable
+ *
+ * Description:
+ *   Enable CS2100 CLK_OUT using the provide parameters
+ *
+ * Input Parameters:
+ *   config  - CS2100-CP configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ********************************************************************************************/
+
+int cs2100_enable(FAR const struct cs2100_config_s *config);
+
+/********************************************************************************************
+ * Name: cs2100_disable
+ *
+ * Description:
+ *   Disable CS2100 CLK_OUT
+ *
+ * Input Parameters:
+ *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ********************************************************************************************/
+
+int cs2100_disable(FAR const struct cs2100_config_s *config);
+
+/********************************************************************************************
+ * Name: cs2100_dump
+ *
+ * Description:
+ *   Dump CS2100-CP registers to the SysLog
+ *
+ * Input Parameters:
+ *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ********************************************************************************************/
+
+#ifdef CONFIG_CS2100CP_DEBUG
+int cs2100_dump(FAR const struct cs2100_config_s *config);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
+#endif  /* CONFIG_TIMERS_CS2100CP */
 #endif  /* __INCLUDE_NUTTX_TIMERS_CS2100_CP_H */

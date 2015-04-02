@@ -57,6 +57,12 @@ ifeq ($(CONFIG_RTC_DRIVER),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_TIMERS_CS2100CP),y)
+  CSRCS += cs2100-cp.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 # Include timer build support (if any were selected)
 
 DEPPATH += $(TMRDEPPATH)

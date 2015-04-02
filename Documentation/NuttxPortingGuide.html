@@ -3832,7 +3832,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   </p>
   <p>
     <code>boardctl()</code> is <i>non-standard</i> OS interface to alleviate the problem.
-    It basically circumvents the normal device driver <code>ioctl()</code> interlace and allows the application to perform direction IOCTL-like calls to the board-specific logic.
+    It basically circumvents the normal device driver <code>ioctl()</code> interlace and allows the application to perform direct IOCTL-like calls to the board-specific logic.
     It is especially useful for setting up board operational and test configurations.
   </p>
   <p>

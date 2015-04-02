@@ -3,6 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+menu "Timer Driver Support"
+
 menuconfig TIMER
 	bool "Timer Support"
 	default n
@@ -132,3 +134,21 @@ config WATCHDOG_DEVPATH
 	default "/dev/watchdog0"
 
 endif # WATCHDOG
+
+config TIMERS_CS2100CP
+	bool "CS2100-CP Fraction-N Clock Multiplier"
+	depends on I2C
+	select I2C_TRANSFER
+
+if TIMERS_CS2100CP
+
+config CS2100CP_DEBUG
+	bool "Enable CS2100-CP Debug Features"
+	depends on DEBUG
+
+config CS2100CP_REGDEBUG
+	bool "Enable CS2100-CP Register Debug"
+	depends on DEBUG
+
+endif # TIMERS_CS2100CP
+endmenu  # Timer Driver Support
