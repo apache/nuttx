@@ -106,8 +106,13 @@ endif
 endif
 endif
 
+ifeq ($(SAMV71XULT_MXTXPLND),y)
+ifeq ($(CONFIG_LCD),y)
+CSRCS += sam_ili9488.c
+endif
 ifeq ($(CONFIG_INPUT_MXT),y)
 CSRCS += sam_maxtouch.c
+endif
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

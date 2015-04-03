@@ -70,13 +70,13 @@
  * Private Types
  ****************************************************************************/
 
-struct samv7xult_mwinfo_s
+struct samv71xult_mwinfo_s
 {
   /* Standard MW8904 interface */
 
   struct wm8904_lower_s lower;
 
-  /* Extensions for the samv7xult board */
+  /* Extensions for the samv71xult board */
 
   wm8904_handler_t handler;
   FAR void *arg;
@@ -113,7 +113,7 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower,
  * by the driver and is presumed to persist while the driver is active.
  */
 
-static struct samv7xult_mwinfo_s g_wm8904info =
+static struct samv71xult_mwinfo_s g_wm8904info =
 {
   .lower =
   {

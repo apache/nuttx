@@ -34,6 +34,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* ILI9488 ID code */
+
+#define ILI9488_DEVICE_CODE                         0x9488
+#define ILI9488_LCD_WIDTH                           320
+#define ILI9488_LCD_HEIGHT                          480
+#define ILI9488_SELF_TEST_OK                        0xc0
+
 /* Level 1 Commands (from the display Datasheet) */
 
 #define ILI9488_CMD_NOP                             0x00
