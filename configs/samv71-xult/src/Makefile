@@ -87,8 +87,8 @@ CSRCS += sam_usbmsc.c
 endif
 
 ifeq ($(CONFIG_AUDIO_WM8904),y)
-ifeq ($(CONFIG_SAMA5_TWI0),y)
-ifeq ($(CONFIG_SAMA5_SSC0),y)
+ifeq ($(CONFIG_SAMV7_TWIHS0),y)
+ifeq ($(CONFIG_SAMV7_SSC0),y)
 CSRCS += sam_wm8904.c
 endif
 endif

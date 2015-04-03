@@ -189,8 +189,8 @@
 #endif
 
 #ifdef HAVE_WM8904
-#  ifndef CONFIG_SAMV7_TWI0
-#    warning CONFIG_SAMV7_TWI0 is required for audio support
+#  ifndef CONFIG_SAMV7_TWIHS0
+#    warning CONFIG_SAMV7_TWIHS0 is required for audio support
 #    undef HAVE_WM8904
 #  endif
 
@@ -199,8 +199,8 @@
 #    undef HAVE_WM8904
 #  endif
 
-#  if !defined(CONFIG_SAMV7_PIOD_IRQ)
-#    warning CONFIG_SAMV7_PIOD_IRQ is required for audio support
+#  if !defined(CONFIG_SAMV7_GPIOD_IRQ)
+#    warning CONFIG_SAMV7_GPIOD_IRQ is required for audio support
 #    undef HAVE_WM8904
 #  endif
 
@@ -209,15 +209,15 @@
 #    undef HAVE_WM8904
 #  endif
 
-#  ifndef CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY
+#  ifndef CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY
 #    warning Defaulting to maximum WM8904 I2C frequency
-#    define CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY 400000
+#    define CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY 400000
 #  endif
 
-#  if CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY > 400000
+#  if CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY > 400000
 #    warning WM8904 I2C frequency cannot exceed 400KHz
-#    undef CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY
-#    define CONFIG_SAMV7D4EK_WM8904_I2CFREQUENCY 400000
+#    undef CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY
+#    define CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY 400000
 #  endif
 #endif
 
