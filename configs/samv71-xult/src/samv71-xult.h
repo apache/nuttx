@@ -398,6 +398,81 @@
 
 #define WM8904_SSC_BUS     0
 
+/* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************/
+/*
+ * Only the RGB is supported by this BSP (via SMC/EBI).  The switch mode
+ * selector on the back of the maXtouch should be set in the OFF-ON-OFF
+ * positions to select 16-bit color mode.
+ *
+ * ----------------- ------------- --------------------------------------------------
+ *        LCD            SAMV71    Description
+ * Pin  Function     Pin  Function
+ * ---- ------------ ---- -------- --------------------------------------------------
+ *  1   ID            -    -       Chip ID communication line
+ *  2   GND           -   GND      Ground
+ *  3   D0           PC0  D0       Data line
+ *  4   D1           PC1  D1       Data line
+ *  5   D2           PC2  D2       Data line
+ *  6   D3           PC3  D3       Data line
+ *  7   GND           -   GND      Ground
+ *  8   D4           PC4  D4       Data line
+ *  9   D5           PC5  D5       Data line
+ * 10   D6           PC6  D6       Data line
+ * 11   D7           PC7  D7       Data line
+ * 12   GND           -   GND      Ground
+ * 13   D8           PE0  D8       Data line
+ * 14   D9           PE1  D9       Data line
+ * 15   D10          PE2  D10      Data line
+ * 16   D11          PE3  D11      Data line
+ * 17   GND           -   GND      Ground
+ * 18   D12          PE4  D12      Data line
+ * 19   D13          PE5  D13      Data line
+ * 20   D14          PA15 D14      Data line
+ * 21   D15          PA16 D15      Data line
+ * 22   GND           -   GND      Ground
+ * 23   D16           -    -       Data line
+ * 24   D17           -    -       Data line
+ * 25   N/C           -    -
+ * 26   N/C           -    -
+ * 27   GND           -   GND      Ground
+ * 28   N/C           -    -
+ * 29   N/C           -    -
+ * 30   N/C           -    -
+ * 31   N/C           -    -
+ * 32   GND           -   GND      Ground
+ * 33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
+ *      CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
+ *                                      is possible to select either the register or the
+ *                                      data interface
+ * 34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization.
+ *                                 MCU: Chip select
+ * 35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
+ *                                 MCU: Write enable signal
+ * 36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
+ *      RE                         MCU: Read enable signal
+ * 37   SPI SCK       -    -       MCU: Clock for SPI
+ * 38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
+ * 39   SPI MISO      -    -       MCU: Master in slave out line of SPI
+ * 40   SPI SS        -    -       MCU: Slave select for SPI
+ * 41   N/C           -    -
+ * 42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
+ * 43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)
+ * 44   IRQ1         PD28 WKUP5    maXTouch interrupt line
+ * 45   N/C          PA2  WKUP2
+ * 46   PWM          PC9  TIOB7    Backlight control
+ * 47   RESET        PC13 GPIO     Reset for both display and maxTouch
+ * 48   VCC           -    -       3.3V power supply for extension board
+ * 49   VCC           -    -       3.3V power supply for extension board
+ * 50   GND           -    -       Ground
+ * ---- ------------ ---- -------- --------------------------------------------------
+ */
+
+#define GPIO_ILI9488_CDS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOC | GPIO_PIN30)
+#define GPIO_ILI9488_RST   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOC | GPIO_PIN13)
+#define GPIO_ILI9488_BKL   GPIO_TC7_TIOB
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
