@@ -42,23 +42,6 @@ endif # INPUT_MXT
 
 if LCD
 
-choice
-	prompt "LCD Color Configuration"
-	default SAMV71XULT_LCD_RGB565
-
-config SAMV71XULT_LCD_RGB565
-	bool "RGB565"
-
-config SAMV71XULT_LCD_RGB24
-	bool "RGB24 / RGB888"
-	depends on EXPERIMENTAL
-
-config SAMV71XULT_LCD_RGB32
-	bool "RGB32"
-	depends on EXPERIMENTAL
-
-endchoice # LCD Color Configuration
-
 config SAMV71XULT_LCD_BGCOLOR
 	hex "Initial background color"
 	default 0x00

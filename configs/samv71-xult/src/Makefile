@@ -106,7 +106,7 @@ endif
 endif
 endif
 
-ifeq ($(SAMV71XULT_MXTXPLND),y)
+ifeq ($(CONFIG_SAMV71XULT_MXTXPLND),y)
 ifeq ($(CONFIG_LCD),y)
 CSRCS += sam_ili9488.c
 endif
