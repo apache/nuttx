@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/samv71-xult/src/sam_ili9488.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -9,9 +9,9 @@
  * - Atmel ILI93241 Sample code for the SAM4E
  * - Atmel ILI9488 Sample code for the SAMV71
  *
- * Some the LCD and SMC initialization logic comes from Atmel sample code for the
- * SAMV7.  The Atmel sample code has two-clause BSD-like license which does not
- * require this copyright statement, but here it is anyway:
+ * Some the LCD and SMC initialization logic comes from Atmel sample code
+ * for the SAMV7.  The Atmel sample code has two-clause BSD-like license
+ * which does not require this copyright statement, but here it is anyway:
  *
  *   Copyright (c) 2014, Atmel Corporation
  *
@@ -42,18 +42,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************
+/* maXTouch Xplained Pro Xplained Pro LCD Connector *************************
  *
  * Only the RGB is supported by this BSP (via SMC/EBI).  The switch mode
  * selector on the back of the maXtouch should be set in the OFF-ON-OFF
  * positions to select 16-bit color mode.
  *
- * ----------------- ------------- --------------------------------------------------
+ * ----------------- ------------- ------------------------------------------
  *        LCD            SAMV71    Description
  * Pin  Function     Pin  Function
- * ---- ------------ ---- -------- --------------------------------------------------
+ * ---- ------------ ---- -------- ------------------------------------------
  *  1   ID            -    -       Chip ID communication line
  *  2   GND           -   GND      Ground
  *  3   D0           PC0  D0       Data line
@@ -110,24 +110,27 @@
  * 48   VCC           -    -       3.3V power supply for extension board
  * 49   VCC           -    -       3.3V power supply for extension board
  * 50   GND           -    -       Ground
- * ---- ------------ ---- -------- --------------------------------------------------
+ * ---- ------------ ---- -------- ------------------------------------------
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ili9488.h>
 #include <nuttx/video/rgbcolors.h>
@@ -135,18 +138,21 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
+#include "cache.h"
 #include "up_arch.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
+#include "sam_xdmac.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_smc.h"
-#include "samv7-xult.h"
+#include "chip/sam_pinmap.h"
+#include "samv71-xult.h"
 
-#ifdef CONFIG_LCD
+#ifdef HAVE_ILI9488
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 /* SMC must be selected */
 
 #if !defined(CONFIG_SAMV7_SMC)
@@ -162,12 +168,6 @@
 /* Check power setting */
 
 #if !defined(CONFIG_LCD_MAXPOWER)
-#  define CONFIG_LCD_MAXPOWER 16
-#endif
-
-#if CONFIG_LCD_MAXPOWER < 16
-#  error CONFIG_LCD_MAXPOWER should be >= 16
-#  undef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 16
 #endif
 
@@ -215,7 +215,7 @@
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties **************************************************/
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -228,40 +228,20 @@
 
 /* Color depth and format */
 
-#if defined(CONFIG_SAMV71XULT_LCD_RGB565)
-#  define SAM_BPP             16
-#  define SAM_COLORFMT        FB_FMT_RGB16_565
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB24)
-#  define SAM_BPP             24
-#  define SAM_COLORFMT        FB_FMT_RGB24
-#else /* if defined(CONFIG_SAMV71XULT_LCD_RGB32) -- without ALPHA */
-#  define SAM_BPP             32
-#  define SAM_COLORFMT        FB_FMT_RGB32
-#endif
+#define SAM_BPP               16
+#define SAM_COLORFMT          FB_FMT_RGB16_565
 
 /* Color decoding macros */
 
-#ifdef CONFIG_SAMV71XULT_LCD_RGB565
-#  define RGB_RED(rgb)        RGB16RED(rgb)
-#  define RGB_GREEN(rgb)      RGB16GREEN(rgb)
-#  define RGB_BLUE(rgb)       RGB16BLUE(rgb)
-#  define RGB_COLOR(r,g,b)    RGBTO16(r,g,b)
-#else /* RGB888 or RGB32 without ALPHA */
-#  define RGB_RED(rgb)        RGB24RED(rgb)
-#  define RGB_GREEN(rgb)      RGB24GREEN(rgb)
-#  define RGB_BLUE(rgb)       RGB24BLUE(rgb)
-#  define RGB_COLOR(r,g,b)    RGBTO24(r,g,b)
-#endif
+#define RGB_RED(rgb)          RGB16RED(rgb)
+#define RGB_GREEN(rgb)        RGB16GREEN(rgb)
+#define RGB_BLUE(rgb)         RGB16BLUE(rgb)
+#define RGB_COLOR(r,g,b)      RGBTO16(r,g,b)
 
-/* SAM4E-EK LCD Hardware Definitions **************************************************/
-/* LCD /CS is CE4,  Bank 3 of NOR/SRAM Bank 1~4 */
+/* SAMV7-XULT LCD Hardware Definitions ***************************************/
+/* LCD /CS is NCS3 */
 
 #define SAM_LCD_BASE          ((uintptr_t)SAM_EXTCS3_BASE)
-#define LCD_INDEX             (*(volatile uint8_t *)(SAM_LCD_BASE))
-#define LCD_DATA              (*(volatile uint8_t *)(SAM_LCD_BASE + 2))
-
-/* LCD SMC chip select number to be set */
-
 #define SAM_LCD_CS            3
 
 /* Backlight */
@@ -271,7 +251,51 @@
 #define BKL_ENABLE_DURATION   (128*1024)
 #define BKL_DISABLE_DURATION  (128*1024)
 
-/* Debug ******************************************************************************/
+/* DMA */
+
+#define DMA_FLAGS \
+  DMACH_FLAG_PERIPHPID(0) | DMACH_FLAG_PERIPHAHB_AHB_IF1 | \
+  DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+  DMACH_FLAG_MEMPID(0) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+  DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
+  DMACH_FLAG_MEMCHUNKSIZE_1 | DMACH_FLAG_MEMBURST_1
+
+/* DMA timeout.  The value is not critical; we just don't want the system to
+ * hang in the event that a DMA does not finish.  This is set to
+ */
+
+#define DMA_TIMEOUT_MS        (800)
+#define DMA_TIMEOUT_TICKS     MSEC2TICK(DMA_TIMEOUT_MS)
+
+/* Buffer Alignment.
+ *
+ * If the data cache is enabled the a higher level of alignment is required.  That is
+ * because the data will need to be invalidated and that cache invalidation will occur
+ * in multiples of full change lines.
+ */
+
+#ifdef CONFIG_ARMV7M_DCACHE
+/* Align to the cache line size which we assume is >= 8 */
+
+#  define LCD_ALIGN            ARMV7M_DCACHE_LINESIZE
+#  define LCD_ALIGN_MASK       (LCD_ALIGN-1)
+#  define LCD_ALIGN_UP(n)      (((n) + LCD_ALIGN_MASK) & ~LCD_ALIGN_MASK)
+
+#  define LCD_RUNBUFFER_BYTES  LCD_ALIGN_UP(SAM_XRES * sizeof(uint16_t))
+#  define LCD_RUNBUFFER_PIXELS (LCD_RUNBUFFER_BYTES / sizeof(uint16_t))
+
+#else
+/* Align to 2-byte boundaries */
+
+#  define LCD_ALIGN            2
+#  define LCD_ALIGN_MASK       1
+#  define LCD_ALIGN_UP(n)      (((n) + 1) & ~1)
+
+#  define LCD_RUNBUFFER_BYTES  SAM_XRES * sizeof(uint16_t)
+#  define LCD_RUNBUFFER_PIXELS SAM_XRES
+#endif
+
+/* Debug *********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
 #  define lcddbg              dbg
@@ -281,11 +305,21 @@
 #  define lcdvdbg(x...)
 #endif
 
-/************************************************************************************
- * Private Type Definition
- ************************************************************************************/
+#ifdef CONFIG_DEBUG_DMA
+#  define SAMPLENDX_BEFORE_SETUP  0
+#  define SAMPLENDX_AFTER_SETUP   1
+#  define SAMPLENDX_DMA_CALLBACK  2
+#  define SAMPLENDX_TIMEOUT       3
+#  define DEBUG_NDMASAMPLES       4
+#endif
 
-/* Type definition for the correct size of one pixel (from the application standpoint). */
+/****************************************************************************
+ * Private Type Definition
+ ****************************************************************************/
+
+/* Type definition for the correct size of one pixel (from the application
+ * standpoint).
+ */
 
 #ifdef CONFIG_SAMV71XULT_LCD_RGB565
 typedef uint16_t sam_color_t;
@@ -309,31 +343,66 @@ struct sam_dev_s
 
   struct lcd_dev_s dev;
 
+  /* Allocated DMA channel */
+
+  DMA_HANDLE dmach;
+  WDOG_ID dmadog;         /* For DMA timeout detection */
+  volatile int result;    /* Result of the DMA transfer */
+  sem_t waitsem;          /* Used to way for DMA completion */
+  volatile bool dmabusy;  /* True: DMA is in progress */
+  volatile bool cmd;      /* True: Command transefer */
+
   /* Private LCD-specific information follows */
 
-  uint8_t  power;       /* Current power setting */
-  bool     output;      /* True: Configured for output */
+  uint8_t power;          /* Current power setting */
+  bool output;            /* True: Configured for output */
+#ifdef CONFIG_DEBUG_DMA
+  uint8_t smplset;
+  struct sam_dmaregs_s samples[DEBUG_NDMASAMPLES];
+#endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 /* Low Level LCD access */
 
-static void sam_putreg(uint8_t regaddr, FAR const uint8_t *buffer, unsigned int buflen);
-static void sam_getreg(uint8_t regaddr, FAR uint8_t *buffer, unsigned int buflen);
-static void sam_setwindow(sam_color_t row, sam_color_t col,
-                          sam_color_t width, sam_color_t height);
-static inline void sam_gram_wrprepare(void);
-static inline void sam_gram_rdprepare(void);
-static inline void sam_gram_write(sam_color_t color);
-static inline sam_color_t sam_gram_read(void);
+static int  sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd);
+static int  sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
+              FAR const uint16_t *buffer, unsigned int buflen);
+static int  sam_lcd_get(FAR struct sam_dev_s *priv, uint8_t cmd,
+              FAR uint16_t *buffer, unsigned int buflen);
+static int  sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
+              sam_color_t col, sam_color_t width, sam_color_t height);
 
 /* Backlight/power controls */
 
 static void sam_disable_backlight(void);
-static void sam_set_backlight(unsigned int power);
+static int  sam_set_backlight(unsigned int power);
 static int  sam_poweroff(FAR struct sam_dev_s *priv);
+
+/* DMA Helpers */
+
+#ifdef CONFIG_DMA_DEBUG
+static void sam_lcd_sample(FAR struct sam_dev_s *priv, int index);
+static void sam_lcd_sampleinit(FAR struct sam_dev_s *priv);
+static void sam_lcd_dumpone(FAR struct sam_dev_s *priv, int index,
+              FAR const char *msg);
+static void sam_lcd_dump(struct sam_dev_s *priv);
+#else
+#  define sam_lcd_sample(priv, index)
+#  define sam_lcd_sampleinit(priv)
+#  define sam_lcd_dump(priv)
+#endif
+
+static void sam_lcd_endwait(struct sam_dev_s *priv, int result);
+static void sam_lcd_dmatimeout(int argc, uint32_t arg);
+static int  sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout);
+static void sam_lcd_dmacallback(DMA_HANDLE handle, void *arg, int result);
+static int  sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
+              FAR const uint16_t *buffer, unsigned int buflen);
+static int  sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
+              FAR const uint16_t *buffer, unsigned int buflen);
 
 /* LCD Data Transfer Methods */
 
@@ -363,21 +432,20 @@ static int  sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 /* LCD Specific Controls */
 
-static int  sam_getpower(struct lcd_dev_s *dev);
-static int  sam_setpower(struct lcd_dev_s *dev, int power);
-static int  sam_getcontrast(struct lcd_dev_s *dev);
-static int  sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int  sam_getpower(FAR struct lcd_dev_s *dev);
+static int  sam_setpower(FAR struct lcd_dev_s *dev, int power);
+static int  sam_getcontrast(FAR struct lcd_dev_s *dev);
+static int  sam_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast);
 
 /* Initialization */
 
 static void sam_gpio_initialize(void);
 static inline void sam_smc_initialize(void);
-static void sam_lcd9488_initialize(void);
 static inline int sam_lcd_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 /* LCD GPIO configurations */
 
 static const uint32_t g_lcdpin[] =
@@ -402,7 +470,7 @@ static const uint32_t g_lcdpin[] =
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint16_t g_runbuffer[SAM_XRES];
+static uint16_t g_runbuffer[LCD_RUNBUFFER_BYTES] __attribute__((aligned(LCD_ALIGN)));
 
 /* This structure describes the overall LCD video controller */
 
@@ -424,10 +492,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .bpp    = SAM_BPP,               /* Bits-per-pixel */
 };
 
-/* This is the standard, NuttX LCD driver object */
+/* This is the ILI9488 LCD driver object */
 
 static struct sam_dev_s g_lcddev =
 {
+  /* This is the contained standard, NuttX LCD driver object */
+
   .dev =
   {
     /* LCD Configuration */
@@ -447,64 +517,124 @@ static struct sam_dev_s g_lcddev =
   },
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Name:  sam_putreg
+/****************************************************************************
+ * Name: sam_sendcmd
+ *
+ * Description:
+ *  Send an ILI9488 command byte
+ *
+ ****************************************************************************/
+
+static int sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd)
+{
+  volatile int i;
+  int ret;
+
+  /* Set the CDS GPIO output low (command) */
+
+  sam_gpiowrite(GPIO_ILI9488_CDS, false);
+
+  /* Send the command */
+
+  ret = sam_lcd_txtransfer(priv, &cmd, sizeof(uint16_t));
+  if (ret < 0)
+    {
+      lcddbg("ERROR: Failed to send command %02x: %d\n", cmd, ret);
+    }
+
+  /* Make sure that the CMD/DATA GPIO is reset for commands.  I don't understand
+   * the delay loop... it comes from the SAMV7 sample code and is, apparently, a
+   * work-around for some issue.
+   */
+
+  for (i = 0; i < 15; i++);
+
+  /* Set the CDS OUTPUT to high (data) */
+
+  sam_gpiowrite(GPIO_ILI9488_CDS, true);
+  return ret;
+}
+
+/****************************************************************************
+ * Name:  sam_lcd_put
  *
  * Description:
  *   Write to a multi-byte ILI9488 register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void sam_putreg(uint8_t regaddr, FAR const uint8_t *buffer, unsigned int buflen)
+static int sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
+                       FAR const uint16_t *buffer, unsigned int buflen)
 {
-  LCD_INDEX = 0;
-  LCD_INDEX = regaddr;
+  int ret;
 
-  /* Write the multi-byte register value */
+  /* Send the command */
 
-  for (; buflen > 0; buflen--) 
+  ret = sam_sendcmd(priv, cmd);
+  if (ret < 0)
     {
-      LCD_DATA = *buffer++;
+      return ret;
     }
+
+  /* If the command was sent successfully, then send any accompanying data */
+
+  if (buflen > 0)
+    {
+      ret = sam_lcd_txtransfer(priv, buffer, buflen);
+      if (ret < 0)
+        {
+          lcddbg("ERROR: Failed to send command %02x data: %d\n", cmd, ret);
+       }
+    }
+
+  return ret;
 }
 
-/************************************************************************************
- * Name:  sam_getreg
+/****************************************************************************
+ * Name:  sam_lcd_get
  *
  * Description:
  *   Read from a multi-byte ILI9488 register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void sam_getreg(uint8_t regaddr, FAR uint8_t *buffer, unsigned int buflen)
+static int sam_lcd_get(FAR struct sam_dev_s *priv, uint8_t cmd,
+                       FAR uint16_t *buffer, unsigned int buflen)
 {
-  LCD_INDEX = 0;
-  LCD_INDEX = regaddr;
+  int ret;
 
-  /* Read the multi-byte register value */
+  /* Send the command */
 
-  for (; buflen > 0; buflen--) 
+  ret = sam_sendcmd(priv, cmd);
+
+  /* If the command was sent successfully, then receive any accompanying data */
+
+  if (ret == OK && buflen > 0)
     {
-      *buffer++ = LCD_DATA;
+      ret = sam_lcd_rxtransfer(priv, buffer, buflen);
     }
+
+  return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_setwindow
  *
  * Description:
  *   Setup drawing window
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void sam_setwindow(sam_color_t row, sam_color_t col,
-                          sam_color_t width, sam_color_t height)
+static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
+                         sam_color_t col, sam_color_t width,
+                         sam_color_t height)
 {
   uint8_t buffer[4];
+  int ret;
 
   lcdvdbg("row=%d col=%d width=%d height=%d\n", row, col, width, height);
 
@@ -514,7 +644,17 @@ static void sam_setwindow(sam_color_t row, sam_color_t col,
   buffer[1] = col & 0xff;
   buffer[2] = ((col + width - 1) >> 8) & 0xff;
   buffer[3] = (col + width - 1) & 0xff;
-  sam_putreg(ILI9488_COLUMN_ADDRESS_SET, buffer, 4);
+  ret = sam_lcd_put(priv, ILI9488_CMD_COLUMN_ADDRESS_SET, (FAR uint16_t*)buffer, 4);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = sam_sendcmd(priv, ILI9488_CMD_NOP);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set Page Address Position */
 
@@ -522,81 +662,16 @@ static void sam_setwindow(sam_color_t row, sam_color_t col,
   buffer[1] = row & 0xff;
   buffer[2] = ((row + height - 1) >> 8) & 0xff;
   buffer[3] = (row + height - 1) & 0xff;
-  sam_putreg(ILI9488_PAGE_ADDRESS_SET, buffer, 4);
+  ret = sam_lcd_put(priv, ILI9488_CMD_PAGE_ADDRESS_SET, (FAR uint16_t*)buffer, 4);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return sam_sendcmd(priv, ILI9488_CMD_NOP);
 }
 
-/************************************************************************************
- * Name:  sam_gram_wrprepare
- *
- * Description:
- *   Setup to write multiple pixels to the GRAM memory
- *
- ************************************************************************************/
-
-static inline void sam_gram_wrprepare(void)
-{
-  /* Memory write command */
-
-  LCD_INDEX = ILI9488_MEMORY_WRITE;
-  LCD_INDEX = 0;
-  LCD_INDEX = ILI9488_WRITE_MEMORY_CONTINUE;
-}
-
-/************************************************************************************
- * Name:  sam_gram_rdprepare
- *
- * Description:
- *   Setup to read multiple pixels from the GRAM memory
- *
- ************************************************************************************/
-
-static inline void sam_gram_rdprepare(void)
-{
-  /* Write Data to GRAM */
-
-  LCD_INDEX = 0;
-  LCD_INDEX = ILI9488_MEMORY_READ;
-}
-
-/************************************************************************************
- * Name:  sam_gram_write
- *
- * Description:
- *   Write one pixel to the GRAM memory
- *
- ************************************************************************************/
-
-static inline void sam_gram_write(sam_color_t color)
-{
-  LCD_DATA = RGB_RED(color);
-  LCD_DATA = RGB_GREEN(color);
-  LCD_DATA = RGB_BLUE(color);
-}
-
-/************************************************************************************
- * Name:  sam_gram_read
- *
- * Description:
- *   Read one 16-bit pixel to the GRAM memory
- *
- ************************************************************************************/
-
-static inline sam_color_t sam_gram_read(void)
-{
-  uint8_t buffer[3];
-
-  buffer[0] = LCD_DATA;       /* Dummy read */
-  buffer[0] = LCD_DATA;       /* R */
-  buffer[1] = LCD_DATA;       /* G */
-  buffer[2] = LCD_DATA;       /* B */
-
-  /* Return the converted color */
-
-  return RGB_COLOR((sam_color_t)buffer[0], (sam_color_t)buffer[1],
-                   (sam_color_t)buffer[2]);
-}
-
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_dumprun
  *
  * Description:
@@ -605,7 +680,7 @@ static inline sam_color_t sam_gram_read(void)
  *  run     - The buffer in containing the run read to be dumped
  *  npixels - The number of pixels to dump
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Sometimes useful */
 static void sam_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
@@ -627,83 +702,72 @@ static void sam_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_disable_backlight
  *
  * Description:
  *   Turn the backlight off.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_disable_backlight(void)
 {
-  volatile int delay;
+  /* PWM support is not yet available.  Backlight is currently just configured as a
+   * GPIO output.
+   */
+#warning Missing logic
 
   sam_gpiowrite(GPIO_ILI9488_BKL, false);
-  for (delay = 0; delay < BKL_DISABLE_DURATION; delay++);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_set_backlight
  *
  * Description:
  *   The the backlight to the level associated with the specified power value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void sam_set_backlight(unsigned int power)
+static int sam_set_backlight(unsigned int power)
 {
-  volatile int delay;
-  unsigned int level;
-  int i;
-
   lcdvdbg("power=%d\n", power);
 
-  /* Scale the power setting to the range 1...BKL_LEVELS */
+  /* PWM support is not yet available.  Backlight is currently just
+   * configured as a GPIO output.
+   */
+#warning Missing logic
 
-  DEBUGASSERT(power > 0 && power <= CONFIG_LCD_MAXPOWER);
-  level = (power * BKL_LEVELS) / CONFIG_LCD_MAXPOWER;
-  if (level < 1)
+  if (power > 0)
     {
-      level = 1;
-    }
-
-  level = BKL_LEVELS - level + 1;
-
-  /* Set the new backlight level */
-
-  for (i = 0; i < level; i++)
-    {
-      /* Generate a pulse to the charge pump */
-
-      sam_gpiowrite(GPIO_ILI9488_BKL, false);
-      for (delay = 0; delay < BKL_PULSE_DURATION; delay++);
-
       sam_gpiowrite(GPIO_ILI9488_BKL, true);
-      for (delay = 0; delay < BKL_PULSE_DURATION; delay++);
+    }
+  else
+    {
+      sam_gpiowrite(GPIO_ILI9488_BKL, false);
     }
 
-  /* Lock in this level */
-
-  for (delay = 0; delay < BKL_ENABLE_DURATION; delay++);
+  return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_poweroff
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER:
+  *  full on). On backlit LCDs, this setting may correspond to the backlight
+  *  setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_poweroff(FAR struct sam_dev_s *priv)
 {
+  int ret;
+
   lcdvdbg("OFF\n");
 
   /* Turn the display off */
 
-   sam_putreg(ILI9488_DISPLAY_OFF, NULL, 0);
+  ret = sam_lcd_put(priv, ILI9488_CMD_DISPLAY_OFF, NULL, 0);
 
   /* Disable the backlight */
 
@@ -712,10 +776,321 @@ static int sam_poweroff(FAR struct sam_dev_s *priv)
   /* Remember the power off state */
 
   priv->power = 0;
-  return OK;
+  return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
+ * Name: sam_lcd_sample
+ *
+ * Description:
+ *   Sample HSMCI/DMA registers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DMA_DEBUG
+static void sam_lcd_sample(struct sam_dev_s *priv, int index)
+{
+  /* On a multiple block transfer, only sample on the first block */
+
+  if ((priv->smplset & (1 << index)) == 0)
+    {
+      sam_dmasample(priv->dmach, &priv->samples[index]);
+      priv->smplset |= (1 << index);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_lcd_sampleinit
+ *
+ * Description:
+ *   Setup prior to collecting DMA samples
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DMA_DEBUG
+static void sam_lcd_sampleinit(struct sam_dev_s *priv)
+{
+  priv->smplset = 0;
+  memset(priv->samples, 0xff, DEBUG_NDMASAMPLES * sizeof(struct sam_dmaregs_s));
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_lcd_dumpone
+ *
+ * Description:
+ *   Dump one transfer register sample
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DMA_DEBUG
+static void sam_lcd_dumpone(struct sam_dev_s *priv, int index,
+                                const char *msg)
+{
+  if ((priv->smplset & (1 << index)) != 0)
+    {
+      sam_dmadump(priv->dmach, &priv->samples[index], msg);
+    }
+  else
+    {
+      fdbg("%s: Not collected\n", msg);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_lcd_dump
+ *
+ * Description:
+ *   Dump all transfer-related, sampled register data
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DMA_DEBUG
+static void  sam_lcd_dump(struct sam_dev_s *priv)
+{
+  sam_lcd_dumpone(priv, SAMPLENDX_BEFORE_SETUP, "Before setup");
+  sam_lcd_dumpone(priv, SAMPLENDX_AFTER_SETUP, "After setup");
+  sam_lcd_dumpone(priv, SAMPLENDX_END_TRANSFER, "End of transfer");
+  sam_lcd_dumpone(priv, SAMPLENDX_DMA_CALLBACK, "DMA Callback");
+  sam_lcd_dumpone(priv, SAMPLENDX_TIMEOUT, "Timeout");
+  priv->smplset = 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_lcd_endwait
+ *
+ * Description:
+ *   Wake up a waiting thread if the waited-for event has occurred.
+ *
+ * Input Parameters:
+ *   priv      - An instance of the HSMCI device interface
+ *   wkupevent - The event that caused the wait to end
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
+{
+  /* Save the result and cancel the watchdog timeout */
+
+  (void)wd_cancel(priv->dmadog);
+  priv->result = result;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&priv->waitsem);
+}
+
+/****************************************************************************
+ * Name: sam_lcd_dmatimeout
+ *
+ * Description:
+ *   The watchdog timeout setup when the DMA was startd.  Indicates a DMA
+ *   timeout failure.
+ *
+ * Input Parameters:
+ *   argc   - The number of arguments (should be 1)
+ *   arg    - The argument (state structure reference cast to uint32_t)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+static void sam_lcd_dmatimeout(int argc, uint32_t arg)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
+
+  DEBUGASSERT(argc == 1 && priv != NULL);
+  sam_lcd_sample((struct sam_dev_s *)arg, SAMPLENDX_TIMEOUT);
+
+  /* Make sure that any hung DMA is stopped.  dmabusy == false is the cue
+   * so the DMA callback is ignored.
+   */
+
+  priv->dmabusy = false;
+  sam_dmastop(priv->dmach);
+
+  /* The wake up the waiting client a timeout error */
+
+  sam_lcd_endwait(priv, -ETIMEDOUT);
+}
+
+/****************************************************************************
+ * Name: sam_lcd_dmawait
+ *
+ * Description:
+ *   Wait for one either (1) the DMA to complete, or (2) a DMA timeout to
+ *   occur.
+ *
+ * Input Parameters:
+ *   dev     - An instance of the SDIO device interface
+ *   timeout - Maximum time in milliseconds to wait.  Zero means immediate
+ *             timeout with no wait.
+ *
+ * Returned Value:
+ *   The result of the DMA transfer
+ *
+ ****************************************************************************/
+
+static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
+{
+  int ret;
+
+  /* Started ... setup the timeout */
+
+  ret = wd_start(priv->dmadog, timeout, (wdentry_t)sam_lcd_dmatimeout,
+                 1, (uint32_t)priv);
+  if (ret < 0)
+    {
+      lcddbg("ERROR: wd_start failed: %d\n", errno);
+    }
+
+  /* Loop until the event (or the timeout occurs). */
+
+  while (priv->result == -EBUSY)
+    {
+      /* Wait for an event in event set to occur.  If this the event has
+       * already occurred, then the semaphore will already have been
+       * incremented and there will be no wait.
+       */
+
+      ret = sem_wait(&priv->waitsem);
+
+      /* The only expected failure is EINTR */
+
+      DEBUGASSERT(ret == OK || errno == EINTR);
+    }
+
+  /* Dump the collect DMA sample data */
+
+  sam_lcd_dump(priv);
+  return priv->result;
+}
+
+/****************************************************************************
+ * Name: sam_lcd_dmacallback
+ *
+ * Description:
+ *   Called when HSMCI DMA completes
+ *
+ ****************************************************************************/
+
+static void sam_lcd_dmacallback(DMA_HANDLE handle, void *arg, int result)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
+
+  /* Is DMA still active?  We can get this callback when sam_dmastop() is
+   * called too.
+   */
+
+  if (priv->dmabusy)
+    {
+      /* Sample DMA registers */
+
+      priv->dmabusy = false;
+      sam_lcd_sample((struct sam_dev_s *)arg, SAMPLENDX_DMA_CALLBACK);
+
+      /* Wake-up the waiting client */
+
+      sam_lcd_endwait(priv, result);
+    }
+}
+
+/****************************************************************************
+ * Name: sam_lcd_txtransfer
+ *
+ * Description:
+ *   Perform a TX DMA transfer (memory-to-LCD)
+ *
+ ****************************************************************************/
+
+static int sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
+                              FAR const uint16_t *buffer, unsigned int buflen)
+{
+  irqstate_t flags;
+  int ret;
+
+  priv->dmabusy = true;
+  priv->result  = -EBUSY;
+
+  /* Set up to transfer to the LCD */
+
+  ret = sam_dmatxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE, (uint32_t)buffer, buflen);
+  if (ret == OK)
+    {
+      flags = irqsave();
+
+      /* The setup was successful, start the DMA */
+
+      ret = sam_dmastart(priv->dmach, sam_lcd_dmacallback, priv);
+      if (ret == OK)
+        {
+          /* Started ... Wait for the DMA (or timeout) to complete */
+
+          ret = sam_lcd_dmawait(priv, DMA_TIMEOUT_TICKS);
+        }
+
+      irqrestore(flags);
+    }
+
+  priv->dmabusy = false;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sam_lcd_rxtransfer
+ *
+ * Description:
+ *   Perform a RX DMA transfer (LCD-to-memory)
+ *
+ ****************************************************************************/
+
+static int sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
+                              FAR const uint16_t *buffer, unsigned int buflen)
+{
+  irqstate_t flags;
+  int ret;
+
+  priv->dmabusy = true;
+  priv->result  = -EBUSY;
+
+  /* Set up to transfer to the LCD */
+
+  ret = sam_dmarxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE, (uint32_t)buffer, buflen);
+  if (ret == OK)
+    {
+      flags = irqsave();
+
+      /* The setup was successful, start the DMA */
+
+      ret = sam_dmastart(priv->dmach, sam_lcd_dmacallback, priv);
+      if (ret == OK)
+        {
+          /* Started ... Wait for the DMA (or timeout) to complete */
+
+          ret = sam_lcd_dmawait(priv, DMA_TIMEOUT_TICKS);
+        }
+
+      irqrestore(flags);
+    }
+
+  priv->dmabusy = false;
+  return ret;
+}
+
+/****************************************************************************
  * Name:  sam_putrun
  *
  * Description:
@@ -727,53 +1102,36 @@ static int sam_poweroff(FAR struct sam_dev_s *priv)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int sam_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer, size_t npixels)
 {
-#if defined(CONFIG_SAMV71XULT_LCD_RGB565)
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB24)
-  FAR const uint8_t  *src = (FAR const uint8_t*)buffer;
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB32)
-  FAR const uint32_t *src = (FAR const uint32_t*)buffer;
-#endif
+  FAR struct sam_dev_s *priv = &g_lcddev;
+  int ret;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-
-#if defined(CONFIG_SAMV71XULT_LCD_RGB565)
   DEBUGASSERT(src && ((uintptr_t)src & 1) == 0);
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB24)
-  DEBUGASSERT(src);
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB32)
-  DEBUGASSERT(src && ((uintptr_t)src & 3) == 0);
-#endif
 
   /* Determine the refresh window area */
 
-  sam_setwindow(row, col, npixels, 1);
-
-  /* Prepare to write in GRAM */
-
-  sam_gram_wrprepare();
-
-  /* Write the run into GRAM memory */
-
-  while (npixels-- > 0)
+  ret = sam_setwindow(priv, row, col, npixels, 1);
+  if (ret < 0)
     {
-      sam_gram_write(*src++);
+      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      return ret;
     }
 
-  /* Reset the refresh window area */
+  /* Write the run into the LCD */
 
-  sam_setwindow(0, 0, SAM_XRES, SAM_YRES);
-  return OK;
+  return sam_lcd_put(priv, ILI9488_CMD_MEMORY_WRITE,
+                    (FAR const uint16_t *)buffer,
+                     npixels * sizeof(uint16_t));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getrun
  *
  * Description:
@@ -785,77 +1143,61 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
 {
-#if defined(CONFIG_SAMV71XULT_LCD_RGB565)
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB24)
-  FAR uint8_t  *dest = (FAR uint8_t*)buffer;
-#elif defined(dest)
-  FAR uint32_t *dest = (FAR uint32_t*)buffer;
-#endif
+  FAR struct sam_dev_s *priv = &g_lcddev;
+  int ret;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-
-#if defined(CONFIG_SAMV71XULT_LCD_RGB565)
   DEBUGASSERT(dest && ((uintptr_t)dest & 1) == 0);
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB24)
-  DEBUGASSERT(dest);
-#elif defined(CONFIG_SAMV71XULT_LCD_RGB32)
-  DEBUGASSERT(dest && ((uintptr_t)dest & 3) == 0);
-#endif
 
   /* Determine the refresh window area */
 
-  sam_setwindow(row, col, npixels, 1);
-
-  /* Prepare to read GRAM data */
-
-  sam_gram_rdprepare();
-
-  /* Write the run into GRAM memory */
-
-  while (npixels-- > 0)
+  ret = sam_setwindow(priv, row, col, npixels, 1);
+  if (ret < 0)
     {
-      *dest++ = sam_gram_read();
+      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      return ret;
     }
 
-  /* Reset the refresh window area */
+  /* Write the run into the LCD */
 
-  sam_setwindow(0, 0, SAM_XRES, SAM_YRES);
-  return OK;
+  return sam_lcd_get(priv, ILI9488_CMD_MEMORY_READ, (FAR uint16_t *)buffer,
+                     npixels * sizeof(uint16_t));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
+          g_videoinfo.nplanes);
+
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
@@ -866,14 +1208,15 @@ static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on). On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getpower(struct lcd_dev_s *dev)
 {
@@ -883,18 +1226,20 @@ static int sam_getpower(struct lcd_dev_s *dev)
   return priv->power;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on). On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_setpower(struct lcd_dev_s *dev, int power)
 {
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
+  int ret;
 
   lcdvdbg("power: %d\n", power);
   DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
@@ -903,33 +1248,55 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
 
   if (power > 0)
     {
-      /* Then turn the display on */
+      /* If the display was off, then turn the display on */
 
-      sam_putreg(ILI9488_DISPLAY_ON, NULL, 0);
+      if (priv->power == 0)
+        {
+          ret = sam_sendcmd(priv, ILI9488_CMD_PIXEL_OFF);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ret = sam_sendcmd(priv, ILI9488_CMD_DISPLAY_ON);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ret = sam_sendcmd(priv, ILI9488_CMD_NORMAL_DISP_MODE_ON);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
 
       /* Set the backlight level */
 
-      sam_set_backlight((unsigned int)power);
+      ret = sam_set_backlight((unsigned int)power);
       up_mdelay(50);
+
+      /* Remember the power setting */
+
       priv->power = power;
     }
   else
     {
       /* Turn the display off */
 
-      sam_poweroff(priv);
+      ret = sam_poweroff(priv);
     }
 
-  return OK;
+  return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getcontrast(struct lcd_dev_s *dev)
 {
@@ -937,13 +1304,13 @@ static int sam_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -951,13 +1318,13 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_gpio_initialize
  *
  * Description:
  *   Configure LCD GPIO pins
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_gpio_initialize(void)
 {
@@ -975,17 +1342,17 @@ static inline void sam_gpio_initialize(void)
   sam_gpiowrite(GPIO_ILI9488_BKL, true);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_smc_initialize
  *
  * Description:
  *   Configure LCD SMC interface
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_smc_initialize(void)
 {
-  uintptr_t smcbase =  SAM_SMCCS_BASE(SAM_LCD_CS);
+  uintptr_t smcbase = SAM_SMCCS_BASE(SAM_LCD_CS);
   uint32_t regval;
 
   /* Enable the SMC peripheral clock */
@@ -1006,200 +1373,139 @@ static inline void sam_smc_initialize(void)
   putreg32(regval, smcbase + SAM_SMCCS_CYCLE_OFFSET);
 
   regval = SMCCS_MODE_READMODE | SMCCS_MODE_WRITEMODE | SMCCS_EXNWMODE_DISABLED |
-           SMCCS_MODE_DBW_16BITS | SMCCS_MODE_TDFCYCLES(15);
+           SMCCS_MODE_DBW_16BIT | SMCCS_MODE_TDFCYCLES(15);
   putreg32(regval, smcbase + SAM_SMCCS_MODE_OFFSET);
 }
 
-/************************************************************************************
- * Name:  sam_lcd9488_initialize
- *
- * Description:
- *   Initialize the ILI9488 LCD.
- *
- ************************************************************************************/
-
-static void sam_lcd9488_initialize(void)
-{
-  uint8_t buffer[5];
-
-  /* Power control A configuration*/
-
-  buffer[0] = 0x39;
-  buffer[1] = 0x2C;
-  buffer[2] = 0x00;
-  buffer[3] = 0x34;
-  buffer[4] = 0x02;
-  sam_putreg(ILI9488_POWER_CONTROL_A, buffer, 5);
-
-  /* Power control B configuration */
-
-  buffer[0] = 0x00;
-  buffer[1] = 0xaa;
-  buffer[2] = 0xb0;
-  sam_putreg(ILI9488_POWER_CONTROL_B, buffer, 3);
-
-  /* Pump Ratio Control configuration */
-
-  buffer[0] = 0x30;
-  sam_putreg(ILI9488_PUMP_RATIO_CONTROL, buffer, 1);
-
-  /* Power Control 1 configuration */
-
-  buffer[0] = 0x25;
-  sam_putreg(ILI9488_POWER_CONTROL_1, buffer, 1);
-
-  /* Power Control 2 configuration */
-
-  buffer[0] = 0x11;
-  sam_putreg(ILI9488_POWER_CONTROL_2, buffer, 1);
-
-  /* VOM Control 1 configuration */
-
-  buffer[0] = 0x5C;
-  buffer[1] = 0x4C;
-  sam_putreg(ILI9488_VCOM_CONTROL_1, buffer, 2);
-
-  /* VOM control 2 configuration */
-
-  buffer[0] = 0x94;
-  sam_putreg(ILI9488_VCOM_CONTROL_2, buffer, 1);
-
-  /* Driver Timing Control A configuration */
-
-  buffer[0] = 0x85;
-  buffer[1] = 0x01;
-  buffer[2] = 0x78;
-  sam_putreg(ILI9488_DRIVER_TIMING_CTL_A, buffer, 3);
-
-  /* Driver Timing Control B configuration */
-
-  buffer[0] = 0x00;
-  buffer[1] = 0x00;
-  sam_putreg(ILI9488_DRIVER_TIMING_CTL_B, buffer, 2);
-
-  /* Memory Access Control configuration */
-
-#if defined(CONFIG_LCD_LANDSCAPE)
-  /* Horizontal refresh order (MH): 0
-   * RGB/BGR order (BGR)          : 1
-   * Vertical refresh order (ML)  : 0
-   * Row/column exchange (MV)     : 1
-   * Column address order (MX)    : 0
-   * Row address order (MY)       : 1
-   */
-
-  buffer[0] = ILI9488_MEMORY_ACCESS_CONTROL_BGR |
-              ILI9488_MEMORY_ACCESS_CONTROL_MV;
-
-#elif defined(CONFIG_LCD_PORTRAIT)
-  /* Horizontal refresh order (MH): 0
-   * RGB/BGR order (BGR)          : 1
-   * Vertical refresh order (ML)  : 0
-   * Row/column exchange (MV)     : 0
-   * Column address order (MX)    : 0
-   * Row address order (MY)       : 0
-   */
-
-  buffer[0] = ILI9488_MEMORY_ACCESS_CONTROL_BGR;
-
-#elif defined(CONFIG_LCD_RLANDSCAPE)
-  /* Horizontal refresh order (MH): 0
-   * RGB/BGR order (BGR)          : 1
-   * Vertical refresh order (ML)  : 0
-   * Row/column exchange (MV)     : 1
-   * Column address order (MX)    : 1
-   * Row address order (MY)       : 0
-   */
-
-  buffer[0] = ILI9488_MEMORY_ACCESS_CONTROL_BGR |
-              ILI9488_MEMORY_ACCESS_CONTROL_MV |
-              ILI9488_MEMORY_ACCESS_CONTROL_MX;
-
-#elif defined(CONFIG_LCD_RPORTRAIT)
-  /* Horizontal refresh order (MH): 0
-   * RGB/BGR order (BGR)          : 1
-   * Vertical refresh order (ML)  : 0
-   * Row/column exchange (MV)     : 1
-   * Column address order (MX)    : 0
-   * Row address order (MY)       : 1
-   */
-
-  buffer[0] = ILI9488_MEMORY_ACCESS_CONTROL_BGR |
-              ILI9488_MEMORY_ACCESS_CONTROL_MX |
-              ILI9488_MEMORY_ACCESS_CONTROL_MY;
-
-#endif
-
-  sam_putreg(ILI9488_MEMORY_ACCESS_CONTROL, buffer, 1);
-
-  /* Colmod Pixel Format Set configuration */
-
-  buffer[0] = 0x06;
-  sam_putreg(ILI9488_PIXEL_FORMAT_SET, buffer, 1);
-
-  /* Display Function Control */
-
-  buffer[0] = 0x02;
-  buffer[1] = 0x82;
-  buffer[2] = 0x27;
-  buffer[3] = 0x00;
-  sam_putreg(ILI9488_DISPLAY_FUNCTION_CTL, buffer, 4);
-    
-  /* Set window area*/
-
-  sam_setwindow(0, 0, SAM_XRES, SAM_YRES);
-
-  /* Leave sleep mode*/
-
-  sam_putreg(ILI9488_SLEEP_OUT, buffer, 0);
-  up_mdelay(10);
-
-  /* Initial state: LCD off */
-
-  sam_putreg(ILI9488_DISPLAY_OFF, buffer, 0);
-}
-
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcd_initialize
  *
  * Description:
  *   Initialize the LCD panel
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int sam_lcd_initialize(void)
 {
+  FAR struct sam_dev_s *priv = &g_lcddev;
   uint8_t buffer[4];
   uint16_t id;
+  uint16_t param;
+  int ret;
+
+  /* Reset the LCD and bring it out of sleep mode */
+
+  ret = sam_lcd_put(priv, ILI9488_CMD_SOFTWARE_RESET, &param, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  up_mdelay(200);
+
+  sam_lcd_put(priv, ILI9488_CMD_SLEEP_OUT, &param, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  up_mdelay(200);
+
+  /* Configure for tRGB and reverse the column order */
+
+  param = 0x48;
+  ret = sam_lcd_put(priv, ILI9488_CMD_MEMORY_ACCESS_CONTROL, &param,
+                   sizeof(uint16_t));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  up_mdelay(100);
+
+  param = 0x04;
+  ret = sam_lcd_put(priv, ILI9488_CMD_CABC_CONTROL_9, &param,
+                   sizeof(uint16_t));
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check the LCD ID */
 
-  sam_getreg(ILI9488_READ_ID4, buffer, 4);
+  ret = sam_lcd_get(priv, ILI9488_CMD_READ_ID4, (FAR uint16_t *)buffer, 4);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   id = ((uint16_t)buffer[2] << 8) | (uint16_t)buffer[3];
   if (id != ILI9488_DEVICE_CODE)
     {
-      lcddbg("ERROR: Unsupported LCD: %04x\n", id);
       return -ENODEV;
     }
 
-  sam_lcd9488_initialize();
-  return OK;
+  /* Set the RGB565 format */
+
+  param = 5;
+  ret = sam_lcd_put(priv, ILI9488_CMD_COLMOD_PIXEL_FORMAT_SET, &param,
+                   sizeof(uint16_t));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = sam_lcd_put(priv, ILI9488_CMD_NORMAL_DISP_MODE_ON, &param, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = sam_lcd_put(priv, ILI9488_CMD_DISPLAY_ON, &param, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Landscape/portrait mode */
+
+#if defined(CONFIG_LCD_LANDSCAPE)
+  param = 0xe8;
+#elif defined(CONFIG_LCD_PORTRAIT)
+  param = 0x48;
+#else
+#  error Unsupported LCD orientation
+#endif
+
+  ret = sam_lcd_put(priv, ILI9488_CMD_MEMORY_ACCESS_CONTROL, &param,
+                    sizeof(uint16_t));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Disable the backlight */
+
+  sam_disable_backlight();
+
+  /* Reset the refresh window area */
+
+  return sam_setwindow(priv, 0, 0, SAM_XRES, SAM_YRES);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  up_lcdinitialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the
- *   power setting at 0 (full off).
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the power setting at 0 (full off).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_lcdinitialize(void)
 {
@@ -1216,35 +1522,76 @@ int up_lcdinitialize(void)
 
   sam_smc_initialize();
 
-  /* Configure DMA */
-#warning Missing logic
+  /* Initialize the LCD state structure */
+
+  sem_init(&priv->waitsem, 0, 0);
+
+  /* Allocate a DMA channel */
+
+  priv->dmach = sam_dmachannel(0, DMA_FLAGS);
+  if (!priv->dmach)
+    {
+      lcddbg("ERROR: Failed to allocate a DMA channel\n");
+      ret =  -EAGAIN;
+      goto errout_with_waitsem;
+    }
+
+  /* Allocate a watchdog timer to catch DMA timeouts */
+
+  priv->dmadog = wd_create();
+  if (!priv->dmadog)
+    {
+      lcddbg("ERROR: Failed to allocate a timer\n");
+      ret = -EAGAIN;
+      goto errout_with_dmach;
+    }
 
   /* Identify and configure the LCD */
 
   up_mdelay(50);
   ret = sam_lcd_initialize();
-  if (ret == OK)
+  if (ret < 0)
     {
-      /* Clear the display (setting it to the color 0=black) */
-
-      sam_lcdclear(CONFIG_SAMV71XULT_LCD_BGCOLOR);
-
-      /* Turn the display off */
-
-      sam_poweroff(priv);
+      lcddbg("ERROR: sam_lcd_initialize failed: %d\n", ret);
+      goto errout_with_dmadog;
     }
 
+  /* Clear the display (setting it to the color 0=black) */
+
+  sam_lcdclear(CONFIG_SAMV71XULT_LCD_BGCOLOR);
+
+  /* Turn the display off */
+
+  ret = sam_poweroff(priv);
+  if (ret < 0)
+    {
+      lcddbg("ERROR: sam_poweroff failed: %d\n", ret);
+      goto errout_with_dmadog;
+    }
+
+  return OK;
+
+errout_with_dmadog:
+  wd_delete(priv->dmadog);
+  priv->dmadog = NULL;
+
+errout_with_dmach:
+  sam_dmafree(priv->dmach);
+  priv->dmach = NULL;
+
+errout_with_waitsem:
+  sem_destroy(&priv->waitsem);
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_lcdgetdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows
- *   support for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
 {
@@ -1252,49 +1599,81 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
   return &g_lcddev.dev;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  up_lcduninitialize
  *
  * Description:
  *   Uninitialize the LCD support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void up_lcduninitialize(void)
 {
   FAR struct sam_dev_s *priv = &g_lcddev;
+
+  /* Free the DMA channel */
+
+  if (priv->dmach)
+    {
+      sam_dmafree(priv->dmach);
+      priv->dmach = NULL;
+    }
+
+  /* Free other resources */
+
+  wd_delete(priv->dmadog);
+  priv->dmadog = NULL;
+
+  sem_destroy(&priv->waitsem);
 
   /* Put the LCD in the lowest possible power state */
 
   sam_poweroff(priv);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the SAM4E-EK board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the SAMV7-XULT board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#if defined(CONFIG_SAMV71XULT_LCD_RGB565)
 void sam_lcdclear(uint16_t color)
-#else /* if defined(CONFIG_SAMV71XULT_LCD_RGB24) defined(CONFIG_SAMV71XULT_LCD_RGB32) */
-void sam_lcdclear(uint32_t color)
-#endif
 {
-  unsigned long i;
+  FAR struct sam_dev_s *priv = &g_lcddev;
+  unsigned int row;
+  unsigned int col;
+  int ret;
 
-  sam_setwindow(0, 0, SAM_XRES, SAM_YRES);
-  sam_gram_wrprepare();
+  /* Create a full width run of the requested color */
 
-  for (i = SAM_XRES * SAM_YRES; i > 0; i--)
+  for (col = 0; col < SAM_XRES; col++)
     {
-      sam_gram_write(color);
+      g_runbuffer[col] = color;
+    }
+
+  /* Then write the run into the LCD for each line */
+
+  ret = sam_setwindow(priv, 0, 0, SAM_XRES, SAM_YRES);
+  if (ret < 0)
+    {
+      lcddbg("ERROR: sam_setwindow failed: %d\n",  ret);
+      return;
+    }
+
+  for (row = 0; row < SAM_YRES; row++)
+    {
+      ret = sam_putrun(row, col, (FAR const uint8_t *)g_runbuffer, SAM_XRES);
+      if (ret < 0)
+        {
+          lcddbg("ERROR: sam_putrun failed on row %d: %d\n", row, ret);
+          return;
+        }
     }
 }
 
-#endif /* CONFIG_LCD */
+#endif /* HAVE_ILI9488 */

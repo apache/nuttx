@@ -724,19 +724,19 @@ static struct emac_rxdesc_s g_emac0_rx1desc[DUMMY_NBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_emac0_tx0buffer[EMAC0_TX_BUFSIZE];
-               __attribute__((aligned(EMAC_ALIGN)))
+static uint8_t g_emac0_tx0buffer[EMAC0_TX_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
-static uint8_t g_emac0_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(EMAC_ALIGN)))
+static uint8_t g_emac0_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
 /* EMAC0 Receive Buffers */
 
 static uint8_t g_emac0_rx0buffer[EMAC0_RX_BUFSIZE]
                __attribute__((aligned(EMAC_ALIGN)));
 
-static uint8_t pRxDummyBuffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(EMAC_ALIGN)))
+static uint8_t pRxDummyBuffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
 #endif
 
@@ -772,19 +772,19 @@ static struct emac_rxdesc_s g_emac1_rx1desc[DUMMY_NBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_emac1_tx1buffer[EMAC1_TX_BUFSIZE];
-               __attribute__((aligned(EMAC_ALIGN)))
+static uint8_t g_emac1_tx1buffer[EMAC1_TX_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
-static uint8_t g_emac1_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(EMAC_ALIGN)))
+static uint8_t g_emac1_tx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
 /* EMAC1 Receive Buffers */
 
 static uint8_t g_emac1_rxbuffer[EMAC1_RX_BUFSIZE]
                __attribute__((aligned(EMAC_ALIGN)));
 
-static uint8_t g_emac1_rx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE];
-               __attribute__((aligned(EMAC_ALIGN)))
+static uint8_t g_emac1_rx1buffer[DUMMY_NBUFFERS * DUMMY_BUFSIZE]
+               __attribute__((aligned(EMAC_ALIGN)));
 
 #endif
 #endif

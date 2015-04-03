@@ -390,14 +390,14 @@
  * disambiguration.
  */
 
-#ifdef CONFIG_SAMV71XULT_MXTXLND
-#  if defined(CONFIG_SAMV71XULT_MXTXLND_EXT1)
+#ifdef CONFIG_SAMV71XULT_MXTXPLND
+#  if defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1)
 
 #    define GPIO_PWMC0_H0     GPIO_PWMC0_H0_1
 #    define GPIO_MXTXLND_PWM  GPIO_PWMC0_H0_1
 #    define GPIO_SPI0_NPCS1   GPIO_SPI0_NPCS1_2
 
-#  elif defined(CONFIG_SAMV71XULT_MXTXLND_EXT2)
+#  elif defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
 
 #    define GPIO_PWMC0_H2     GPIO_PWMC0_H2_5
 #    define GPIO_MXTXLND_PWM  GPIO_PWMC0_H2_5
@@ -471,12 +471,12 @@
  * ---- ------------ ---- -------- --------------------------------------------------
  */
 
-#  elif defined(CONFIG_SAMV71XULT_MXTXLND_LCD)
+#  elif defined(CONFIG_SAMV71XULT_MXTXPLND_LCD)
 
 #    define GPIO_SMC_NCS3     GPIO_SMC_NCS3_2
 
 #  endif
-#endif /* CONFIG_SAMV71XULT_MXTXLND */
+#endif /* CONFIG_SAMV71XULT_MXTXPLND */
 
 /************************************************************************************
  * Public Types
@@ -528,11 +528,7 @@ void sam_setleds(uint8_t ledset);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_SAM4EEK_LCD_RGB565)
 void sam_lcdclear(uint16_t color);
-#else /* if defined(CONFIG_SAM4EEK_LCD_RGB24) defined(CONFIG_SAM4EEK_LCD_RGB32) */
-void sam_lcdclear(uint32_t color);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

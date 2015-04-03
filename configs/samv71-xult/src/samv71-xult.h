@@ -63,6 +63,7 @@
 #define HAVE_MTDCONFIG   1
 #define HAVE_WM8904      1
 #define HAVE_AUDIO_NULL  1
+#define HAVE_ILI9488     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -235,6 +236,32 @@
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
 #    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
 #    undef HAVE_AUDIO_NULL
+#  endif
+#endif
+
+/* ILI9488 LCD */
+/* Must have the maXTouch Xplained Pro board attached */
+
+#ifndef CONFIG_SAMV71XULT_MXTXPLND
+#  undef HAVE_ILI9488
+#endif
+
+/* Requires SMC and DMA support */
+
+#ifdef HAVE_ILI9488
+#  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
+#    warning The ILI8488 LCD must be connect on EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
+#    undef HAVE_ILI9488
+#  endif
+
+#  ifndef CONFIG_SAMV7_SMC
+#    warning The ILI8488 LCD requires SMC support (CONFIG_SAMV7_SMC)
+#    undef HAVE_ILI9488
+#  endif
+
+#  ifndef CONFIG_SAMV7_XDMAC
+#    warning The ILI8488 LCD requires DMA support (CONFIG_SAMV7_XDMAC)
+#    undef HAVE_ILI9488
 #  endif
 #endif
 
@@ -471,7 +498,13 @@
                             GPIO_PORT_PIOC | GPIO_PIN30)
 #define GPIO_ILI9488_RST   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                             GPIO_PORT_PIOC | GPIO_PIN13)
+
+#if 1 /* Until PWM support is available */
+#define GPIO_ILI9488_BKL   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOC | GPIO_PIN9)
+#else
 #define GPIO_ILI9488_BKL   GPIO_TC7_TIOB
+#endif
 
 /************************************************************************************
  * Public Types
