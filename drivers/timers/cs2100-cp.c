@@ -525,22 +525,22 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
         }
       else if (rudb24 >= (1ull << (32+10)))
         {
-          rud  = (uint32_t)rudb24 >> 11;  /* RUD  = 2*RUDb20 */
+          rud  = (uint32_t)rudb24 >> 11;  /* RUD  = 2*RUDb12 */
           rmod = 4;                       /* Reff = RUD / 2 */
         }
       else if (rudb24 >= (1ull << (32+9)))
         {
-          rud  = (uint32_t)rudb24 >> 10;  /* RUD  = 4*RUDb20 */
+          rud  = (uint32_t)rudb24 >> 10;  /* RUD  = 4*RUDb12 */
           rmod = 5;                       /* Reff = RUD / 4 */
         }
       else if (rudb24 >= (1ull << (32+8)))
         {
-          rud  = (uint32_t)rudb24 >> 9;  /* RUD  = 8*RUDb20 */
+          rud  = (uint32_t)rudb24 >> 9;  /* RUD  = 8*RUDb12 */
           rmod = 6;                       /* Reff = RUD / 8 */
         }
       else /* if (rudb24 >= (1ull << (32+7))) */
         {
-          rud  = (uint32_t)rudb24 >> 8;  /* RUD  = 16*RUDb20 */
+          rud  = (uint32_t)rudb24 >> 8;  /* RUD  = 16*RUDb12 */
           rmod = 7;                       /* Reff = RUD / 16 */
         }
     }
@@ -573,7 +573,7 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
     }
 
   /* Set High Resolution mode if needed.  NOTE: this depends on the fact
-   * that High Multipler mode was previously selected.
+   * that High Multiplier mode was previously selected.
    */
 
   if (!highmul)
