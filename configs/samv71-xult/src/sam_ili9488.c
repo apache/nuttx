@@ -670,7 +670,7 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
                          sam_color_t col, sam_color_t width,
                          sam_color_t height)
 {
-  uint8_t buffer[4];
+  uint16_t buffer[4];
   int ret;
 
   lcdvdbg("row=%d col=%d width=%d height=%d\n", row, col, width, height);
@@ -681,7 +681,8 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
   buffer[1] = col & 0xff;
   buffer[2] = ((col + width - 1) >> 8) & 0xff;
   buffer[3] = (col + width - 1) & 0xff;
-  ret = sam_lcd_put(priv, ILI9488_CMD_COLUMN_ADDRESS_SET, (FAR uint16_t*)buffer, 4);
+  ret = sam_lcd_put(priv, ILI9488_CMD_COLUMN_ADDRESS_SET, buffer,
+                    4 * sizeof(uint16_t));
   if (ret < 0)
     {
       return ret;
@@ -699,7 +700,8 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
   buffer[1] = row & 0xff;
   buffer[2] = ((row + height - 1) >> 8) & 0xff;
   buffer[3] = (row + height - 1) & 0xff;
-  ret = sam_lcd_put(priv, ILI9488_CMD_PAGE_ADDRESS_SET, (FAR uint16_t*)buffer, 4);
+  ret = sam_lcd_put(priv, ILI9488_CMD_PAGE_ADDRESS_SET, buffer,
+                    4 * sizeof(uint16_t));
   if (ret < 0)
     {
       return ret;
