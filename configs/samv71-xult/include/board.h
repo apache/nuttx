@@ -290,10 +290,31 @@
  *      2    PD30   TX0     1       UTXD3
  *    ------ ------ ------- ------- --------
  *
- *    There are alternative pin selections only for UTXD3:
+ *    There are alternative pin selections only for UART3 TXD:
  */
 
 #define GPIO_UART3_TXD  GPIO_UART3_TXD_1
+
+
+/* - Arduino Communications.  Additional UART/USART connections are available
+ *  on the Arduino Communications connection J505:
+ *
+ *   ------ ------ ------- ------- --------
+ *   Pin on SAMV71 Arduino Arduino SAMV71
+ *   J503   PIO    Name    Pin     Function
+ *   ------ ------ ------- ------- --------
+ *     3    PD18   RX1     0       URXD4
+ *     4    PD19   TX1     0       UTXD4
+ *     5    PD15   RX2     0       RXD2
+ *     6    PD16   TX2     0       TXD2
+ *     7    PB0    RX3     0       RXD0
+ *     8    PB1    TX3     1       TXD0
+ *   ------ ------ ------- ------- --------
+ *
+ *    There are alternative pin selections only for UART4 TXD:
+ */
+
+#define GPIO_UART4_TXD  GPIO_UART4_TXD_1
 
 /*  - SAMV7-XULT EXTn connectors.  USART pins are also available the EXTn
  *    connectors.  The following are labelled in the User Guide for USART

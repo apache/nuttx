@@ -152,6 +152,21 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
     5VO       Vcc
     --------- -----------
 
+  - Arduino Communications.  Additional UART/USART connections are available
+    on the Arduino Communications connection J505:
+
+    ------ ------ ------- ------- --------
+    Pin on SAMV71 Arduino Arduino SAMV71
+    J503   PIO    Name    Pin     Function
+    ------ ------ ------- ------- --------
+      3    PD18   RX1     0       URXD4
+      4    PD19   TX1     0       UTXD4
+      5    PD15   RX2     0       RXD2
+      6    PD16   TX2     0       TXD2
+      7    PB0    RX3     0       RXD0
+      8    PB1    TX3     1       TXD0
+    ------ ------ ------- ------- --------
+
   - SAMV7-XULT EXTn connectors.  USART pins are also available the EXTn
     connectors.  The following are labelled in the User Guide for USART
     functionality:
@@ -848,6 +863,22 @@ in the OFF-ON-OFF positions to select 16-bit color mode.
   50   GND           -    -       Ground
   ---- ------------ ---- -------- -----------------------------------------------------------
 
+Connecting the flat cable.  I was embarrassed to say that I did not know how
+the connectors worked.  Let me share this so that, perhaps, I can save you
+the same embarrassment:
+
+- The maXTouch Xplained Pro has an Omron XF2M-5015-1A connector.  There is a
+  black bar at back (toward the baord).  Raise that bar and insert the cable
+  with the contacts away from the board.  Lower that bar to lock the cable
+  in place.
+
+- The SAMV71-Xult has a TE Connectivity 5-1734839-0 FPC connector that works
+  differently.  On each size of the connector are two small white tabs.  Pull
+  these out and away from the board.  Insert the ribbon with the contacts
+  toward the board.  Lock the cable in place by pushing the tabs back in
+  place.
+
+
 MXT Configuration Options
 -------------------------
 
@@ -982,7 +1013,7 @@ NOTES:
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on USART3 (i.e., for the Arduino serial shield).
+     output on UART3 (i.e., for the Arduino serial shield).
 
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
@@ -1015,7 +1046,7 @@ NOTES:
 Configuration sub-directories
 -----------------------------
 
-  mxtxplned:
+  mxtxplnd:
 
     Configures the NuttShell (nsh) located at examples/nsh.  There are three
     very similar NSH configurations:
@@ -1036,15 +1067,42 @@ Configuration sub-directories
     2. Basic touchscreen/LCD configuration settings are discussed above in
        the paragraph entitled, "maXTouch Xplained Pro".
 
-    3. Like the nsh configuration, this configuration has the serial console
-       setup to used with an Aduino serial shield (UART3).  NOTE: Use of
-       EXT1 conflicts with the Arduino RXD pin (PD28).  You cannot put the
-       maXTouch Xplained in EXT1 and also use the Arduion RXD/TXD pins as
-       your serial console.
+    3. Unlike the nsh configuration, this configuration has the serial console
+       setup to USART0 which is available on EXT1:
 
-       If you need to use EXT1, you will have to re-configure the serial
-       console on a different UART/USART.  The LCD (EXT4) is configured
-       by default.
+         ----------- --- ------- -----
+         Connector   PIO Arduino SAMV7
+         ----------- --- ------- -----
+         EXT1 pin 13 PB0 RX3     RXD0
+         EXT1 pin 14 PB1 TX3     TXD0
+         ----------- --- ------- -----
+
+       and also on the Arduino Communications connector (J505):
+
+         ----------- --- ------- -----
+         Connector   PIO Arduino SAMV7
+         ----------- --- ------- -----
+         J505 pin 7  PB0 RX3     RXD0
+         J505 pin 8  PB1 TX3     TXD0
+         ----------- --- ------- -----
+
+       Use of either the EXT1 or the LCD/EXT4 connectors conflict with the
+       Arduino RXD pin (UART3, PD28).  You cannot put the maXTouch Xplained
+       in EXT1 or LCD/EXT4 and also use the Arduino RXD/TXD pins as your
+       serial console.
+
+       The LCD (EXT4) is configured by default because only the RGB LCD
+       interface is currently supported and that is only available on that
+       connector.
+
+       If you plan to use EXT2 for some reason, you may re-configure the
+       serial console to use UART3, the standard Arduino RXD/TXD.  You
+       would also, of course, have to disable the LCD.
+
+       NOTE that the USART0 pins PB0 and PB1 conflict with SSC TF and TK
+       pins as connected to the WM8904 audio CODEC.  So, unless yet a
+       different U[S]ART option is selected, Audio cannot be used with
+       this configuration.
 
     4. Support for the ILI8488 LCD is enabled.  Only the RGB mode is support
        at present.  As a consequence, the maXTouch Xplained Pro must be
