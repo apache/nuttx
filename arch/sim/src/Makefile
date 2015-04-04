@@ -69,7 +69,7 @@ ifeq ($(CONFIG_DEV_CONSOLE),y)
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
-  CSRCS += up_lcd.c
+  CSRCS += board_lcd.c
 else
   CSRCS += up_framebuffer.c
 ifeq ($(CONFIG_SIM_X11FB),y)
