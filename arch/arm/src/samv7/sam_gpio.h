@@ -130,7 +130,7 @@
  *   .... .... .... .... .... PPP. ....
  */
 
-#define GPIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
+#define GPIO_PORT_SHIFT            (5)         /* Bit 5-7:  Port number */
 #define GPIO_PORT_MASK             (7 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOA           (0 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOB           (1 << GPIO_PORT_SHIFT)
@@ -201,7 +201,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN const uintptr_t g_portchar[SAMV7_NPIO];
+EXTERN const uintptr_t g_portbase[SAMV7_NPIO];
 
 /************************************************************************************
  * Inline Functions
@@ -219,7 +219,7 @@ static inline uintptr_t sam_gpio_base(gpio_pinset_t cfgset)
 {
   int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   DEBUGASSERT(port <SAMV7_NPIO);
-  return g_portchar[port];
+  return g_portbase[port];
 }
 
 /****************************************************************************

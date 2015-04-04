@@ -89,7 +89,7 @@ static const char g_portchar[SAMV7_NPIO] =
  * Public Data
  ****************************************************************************/
 
-const uintptr_t g_portchar[SAMV7_NPIO] =
+const uintptr_t g_portbase[SAMV7_NPIO] =
 {
  SAM_PIOA_BASE
 #if SAMV7_NPIO > 1
