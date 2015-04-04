@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
@@ -1122,7 +1123,7 @@ static inline void stm3220g_lcdinitialize(void)
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -1131,7 +1132,7 @@ static inline void stm3220g_lcdinitialize(void)
  *
  **************************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   lcdvdbg("Initializing\n");
 
@@ -1155,7 +1156,7 @@ int up_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  up_lcdgetdev
+ * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
@@ -1163,21 +1164,21 @@ int up_lcdinitialize(void)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return &g_lcddev.dev;
 }
 
 /**************************************************************************************
- * Name:  up_lcduninitialize
+ * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD support
  *
  **************************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   stm3220g_poweroff();
   stm32_deselectlcd();

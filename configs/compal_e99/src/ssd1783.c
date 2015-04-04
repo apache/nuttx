@@ -40,6 +40,10 @@
  *
  ************************************************************************************/
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/video/fb.h>
 
@@ -50,19 +54,26 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <nuttx/board.h>
 #include <arch/calypso/uwire.h>
 #include <arch/calypso/clock.h>
 
 #include "up_arch.h"
 #include "ssd1783.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
 /* Color depth and format */
+
 #define LCD_BPP          16
 #define LCD_COLORFMT     FB_FMT_RGB16_555
 
 /* Display Resolution */
-#  define LCD_XRES       98
-#  define LCD_YRES       67
+
+#define LCD_XRES         98
+#define LCD_YRES         67
 
 /* Debug ******************************************************************************/
 
@@ -448,7 +459,7 @@ static inline void lcd_initialize(void)
 
 
 /**************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -457,7 +468,7 @@ static inline void lcd_initialize(void)
  *
  **************************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   gvdbg("Initializing\n");
 
@@ -470,7 +481,7 @@ int up_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  up_lcdgetdev
+ * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
@@ -478,7 +489,7 @@ int up_lcdinitialize(void)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return &g_lcddev.dev;
@@ -486,14 +497,14 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
 
 
 /**************************************************************************************
- * Name:  up_lcduninitialize
+ * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Un-initialize the LCD support
  *
  **************************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   lcd_setpower(&g_lcddev.dev, 0);
 }

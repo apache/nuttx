@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/mio283qt9a.h>
 
@@ -485,7 +486,7 @@ void stm32_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -494,7 +495,7 @@ void stm32_lcdinitialize(void)
  *
  **************************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   /* Only initialize the driver once.  NOTE: The LCD GPIOs were already configured
    * by stm32_lcdinitialize.
@@ -531,7 +532,7 @@ int up_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  up_lcdgetdev
+ * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
@@ -539,21 +540,21 @@ int up_lcdinitialize(void)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return g_stm32f4_lcd.drvr;
 }
 
 /**************************************************************************************
- * Name:  up_lcduninitialize
+ * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Uninitialize the LCD support
  *
  **************************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   /* Turn the display off */
 

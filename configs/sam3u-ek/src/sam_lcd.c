@@ -118,6 +118,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/video/rgbcolors.h>
 
@@ -856,7 +857,7 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -865,7 +866,7 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  **************************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
 #ifdef CONFIG_DEBUG_LCD
   uint16_t hxregval;
@@ -1038,7 +1039,7 @@ int up_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  up_lcdgetdev
+ * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows
@@ -1046,21 +1047,21 @@ int up_lcdinitialize(void)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   lcdvdbg("lcddev: %d\n", lcddev);
   return lcddev == 0 ? &g_lcddev_s.dev : NULL;
 }
 
 /**************************************************************************************
- * Name:  up_lcduninitialize
+ * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the framebuffer support.
  *
  **************************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   /* Turn the LCD off */
 

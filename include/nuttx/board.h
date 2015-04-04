@@ -273,6 +273,32 @@ int board_ioctl(unsigned int cmd, uintptr_t arg);
 #endif
 
 /****************************************************************************
+ * Name: board_lcd_initialize, board_lcd_getdev, board_lcd_uninitialize
+ *
+ * Description:
+ *   If an architecture supports a parallel or serial LCD, then it must
+ *   provide APIs to access the LCD as follows:
+ *
+ *   board_lcd_initialize   - Initialize the LCD video hardware.  The initial
+ *                            state of the LCD is fully initialized, display
+ *                            memory cleared, and the LCD ready to use, but
+ *                            with the power setting at 0 (full off).
+ *   board_lcd_getdev       - Return a a reference to the LCD object for
+ *                            the specified LCD.  This allows support for
+ *                            multiple LCD devices.
+ *   board_lcd_uninitialize - Uninitialize the LCD support
+ *
+ ***************************************************************************/
+
+#ifdef CONFIG_LCD
+struct lcd_dev_s; /* Forward reference */
+
+int board_lcd_initialize(void);
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev);
+void board_lcd_uninitialize(void);
+#endif
+
+/****************************************************************************
  * Name: board_led_initialize
  *
  * Description:

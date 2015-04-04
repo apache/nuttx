@@ -107,19 +107,19 @@ int nx_server(int argc, char *argv[])
 #elif defined(CONFIG_NX_LCDDRIVER)
   /* Initialize the LCD device */
 
-  ret = up_lcdinitialize();
+  ret = board_lcd_initialize();
   if (ret < 0)
     {
-      gdbg("ERROR: up_lcdinitialize failed: %d\n", ret);
+      gdbg("ERROR: board_lcd_initialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
   /* Get the device instance */
 
-  dev = up_lcdgetdev(CONFIG_NXSTART_DEVNO);
+  dev = board_lcd_getdev(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gdbg("ERROR: up_lcdgetdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gdbg("ERROR: board_lcd_getdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 

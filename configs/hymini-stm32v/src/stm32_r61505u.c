@@ -50,6 +50,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
@@ -907,7 +908,7 @@ static void lcd_backlight(void)
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -916,7 +917,7 @@ static void lcd_backlight(void)
  *
  **************************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   unsigned short id;
 
@@ -937,7 +938,7 @@ int up_lcdinitialize(void)
     {
       /* Not a R61505U ? */
 
-      gdbg("up_lcdinitialize: LCD ctrl is not a R61505U");
+      gdbg("board_lcd_initialize: LCD ctrl is not a R61505U");
       return ERROR;
     }
 
@@ -956,7 +957,7 @@ int up_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  up_lcdgetdev
+ * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
@@ -964,21 +965,21 @@ int up_lcdinitialize(void)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return &g_lcddev.dev;
 }
 
 /**************************************************************************************
- * Name:  up_lcduninitialize
+ * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Un-initialize the LCD support
  *
  **************************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   lcd_setpower(&g_lcddev.dev, 0);
   stm32_deselectlcd();

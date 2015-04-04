@@ -43,6 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/lcd/ili9341.h>
 #include <nuttx/video/fb.h>
 
@@ -413,7 +414,7 @@ static int stm32_ili9341_initialize(void)
 
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE
 /****************************************************************************
- * Name: up_lcduninitialize
+ * Name: board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD Device.
@@ -424,7 +425,7 @@ static int stm32_ili9341_initialize(void)
  *
  ***************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   /* Set display off */
 
@@ -435,7 +436,7 @@ void up_lcduninitialize(void)
 
 
 /****************************************************************************
- * Name: up_lcdgetdev
+ * Name: board_lcd_getdev
  *
  * Description:
  *   Return a reference to the LCD object for the specified LCD Device.
@@ -449,7 +450,7 @@ void up_lcduninitialize(void)
  *
  ***************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   if (lcddev == ILI9341_LCD_DEVICE)
     {
@@ -461,7 +462,7 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
 
 
 /****************************************************************************
- * Name: up_lcdinitialize
+ * Name: board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware. The initial state of the LCD is
@@ -476,7 +477,7 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
  *
  ****************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   /* check if always initialized */
 
