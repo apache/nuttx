@@ -49,7 +49,7 @@
 
 #define HAVE_MAXTOUCH    1
 #define HAVE_ILI9488_RGB 1
-#define HAVE_ILI9488_MCU 1
+#undef HAVE_ILI9488_MCU    /* Not yet suppported */
 
 /* maXTouch and LCD only available if the maXTouch Xplained Pro is connected */
 
@@ -76,65 +76,71 @@
 /* Verify the maXTouch connector configuration */
 
 #ifdef HAVE_MAXTOUCH
+/* maXTouch Explained Pro connect on EXT1 */
+
 #  if defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1)
 #    ifndef CONFIG_SAMV7_GPIOD_IRQ
 #      warning maXTouch on EXT1 requires CONFIG_SAMV7_GPIOD_IRQ
 #      undef HAVE_MAXTOUCH
 #    endif
+
+/* maXTouch Explained Pro connect on EXT2 */
+
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
 #    ifndef CONFIG_SAMV7_GPIOA_IRQ
-#      warning maXTouch on EXT1 requires CONFIG_SAMV7_GPIOA_IRQ
+#      warning maXTouch on EXT2 requires CONFIG_SAMV7_GPIOA_IRQ
 #      undef HAVE_MAXTOUCH
 #    endif
+
+/* maXTouch Explained Pro connect on LCD (EXT4) */
+
+#  elif defined(CONFIG_SAMV71XULT_MXTXPLND_LCD)
+#    ifndef CONFIG_SAMV7_GPIOD_IRQ
+#      warning maXTouch on EXT4 requires CONFIG_SAMV7_GPIOD_IRQ
+#      undef HAVE_MAXTOUCH
+#    endif
+
 #  else
 #    warning maXTouch requires CONFIG_SAMV71XULT_MXTXPLND_EXT1 or EXT2
 #    undef HAVE_MAXTOUCH
 #  endif
 #endif
 
-/* LCD supports requires the ILI9488 driver */
+/* ILI9488 LCD */
 
-#if (defined(HAVE_ILI9488_RGB) || defined(HAVE_ILI9488_MCU)) && !defined(CONFIG_LCD_ILI9488)
-#  undef HAVE_ILI9488_RGB
-#  undef HAVE_ILI9488_MCU
+#ifdef HAVE_ILI9488_RGB
+/* ILI9488 RGB requires use of LCD connector and SMC and DMA support */
+
+#  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
+#    warning The ILI8488 LCD must be connect on EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
+#    undef HAVE_ILI9488_RGB
+#  endif
+
+/* ILI9488 RGB requires SMC/EBI and XDMAC support */
+
+#  ifndef CONFIG_SAMV7_SMC
+#    warning The ILI8488 LCD requires SMC support (CONFIG_SAMV7_SMC)
+#    undef HAVE_ILI9488_RGB
+#  endif
+
+#  ifndef CONFIG_SAMV7_XDMAC
+#    warning The ILI8488 LCD requires DMA support (CONFIG_SAMV7_XDMAC)
+#    undef HAVE_ILI9488_RGB
+#  endif
 #endif
-
-/* ILI9488 RGB support requires the SMC/EBI interface */
-
-#if defined(HAVE_ILI9488_RGB) && !defined(CONFIG_SAMV7_SMC)
-#  warning ILI9488 RGB support requires SMC
-#  undef HAVE_ILI9488_RGB
-#endif
-
-/* ILI9488 MCU support requires SPI0 */
-
-#if defined(HAVE_ILI9488_MCU) && !defined(CONFIG_SAMV7_SPI0)
-#  warning ILI9488 MCU support requires SPI0
-#  undef HAVE_ILI9488_MCU
-#endif
-
-/* Verify the ILI9488 MCU/SPI connector configuration */
 
 #ifdef HAVE_ILI9488_MCU
+/* ILI9488 MCU requires use of EXT1 or EXT2 connector */
+
 #  if !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1) && !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
 #    warning ILI9488 MCU requires CONFIG_SAMV71XULT_MXTXPLND_EXT1 or EXT2
 #    undef HAVE_ILI9488_MCU
 #  endif
-#  ifdef CONFIG_SAMV71XULT_MXTXPLND_LCD
-#    warning ILI9488 MCU not available at the LCD connector
-#    undef HAVE_ILI9488_MCU
-#  endif
-#endif
 
-/* Verify the ILI9488 RGB/SMC connector configuration */
+/* ILI9488 MCU requires SPI0 */
 
-#ifdef HAVE_ILI9488_RGB
-#  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
-#    warning ILI9488 RGB requires CONFIG_SAMV71XULT_MXTXPLND_LCD
-#    undef HAVE_ILI9488_MCU
-#  endif
-#  if defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1) ||defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
-#    warning ILI9488 MCU not available at the EXT1 or EXT2 connectors
+#  ifndef CONFIG_SAMV7_SPI0
+#    warning ILI9488 MCU support requires SPI0
 #    undef HAVE_ILI9488_MCU
 #  endif
 #endif
@@ -149,10 +155,10 @@
  * 20-pin cable and the maXTouch Xplained Pro standard extension
  * header.  Access is then performed in SPI mode.
  *
- * ---- -------- ---- ----------- ---- ----------- ------------------------------------------
+ * ---- -------- ---- ----------- ---- ----------- ----------------------------------
  *                       SAMV71-XULT               maxTouch Xplained Pro
  * PIN  FUNCTION EXT1 FUNC        EXT2 FUNC        Description
- * ---- -------- ---- ----------- ---- ----------- ------------------------------------------
+ * ---- -------- ---- ----------- ---- ----------- ----------------------------------
  *  1   ID        -    -           -    -          Communication line to ID chip
  *  2   GND       -    -           -    -          Ground
  *  3   N/C      PC31  -          PD30  -
@@ -173,158 +179,166 @@
  *  18  SPI SCK  PD22 SPI0_SPCK   PD22 SPI0_SPCK   SPI Clock line
  *  19  GND       -    -           -      -        Ground
  *  20  VCC       -    -           -      -        Target supply voltage
- * ---- -------- ---- ----------- ---- ----------- ------------------------------------------
+ * ---- -------- ---- ----------- ---- ----------- ----------------------------------
  */
 
 #ifdef CONFIG_SAMV71XULT_MXTXPLND
 #  if defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1)
-#    define GPIO_MXTXPLND_RESET \
-       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
-        GPIO_PORT_PIOA | GPIO_PIN5)
-#    define GPIO_ILI9488_BLOFF \
-       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-        GPIO_PORT_PIOA | GPIO_PIN0)
+#    define GPIO_ILI9488_RST    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                                 GPIO_PORT_PIOA | GPIO_PIN5)
+#    define GPIO_ILI9488_BLOFF  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORT_PIOA | GPIO_PIN0)
+
+/* maXTouch definitions when connected via EXT1 */
 
 #    ifdef HAVE_MAXTOUCH
-#      define GPIO_MXT_CHG \
-         (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | GPIO_INT_FALLING | \
-          GPIO_PORT_PIOD | GPIO_PIN28)
-#      define IRQ_MXT_CHG \
-         SAM_IRQ_PD28
+#      define GPIO_MXT_CHG      (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                                 GPIO_INT_FALLING | GPIO_PORT_PIOD | GPIO_PIN28)
+#      define IRQ_MXT_CHG       SAM_IRQ_PD28
 #    endif /* HAVE_MAXTOUCH */
 
-#    ifdef HAVE_ILI9488_MCU
-#      define GPIO_ILI9488_CMDDAT \
-         (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-          GPIO_PORT_PIOB | GPIO_PIN3)
+/* ILI9488 MCU mode definitions when connected via EXT1 */
 
-#      define GPIO_ILI9488_CS \
-         (PIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-          GPIO_PORT_PIOD | GPIO_PIN25)
-#      define ILI9488_PORT \
-         SPI0_CS1
+#    ifdef HAVE_ILI9488_MCU
+#      define GPIO_ILI9488_CDS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORT_PIOB | GPIO_PIN3)
+#      define GPIO_ILI9488_CS   (PIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                                 GPIO_PORT_PIOD | GPIO_PIN25)
+#      define ILI9488_PORT      SPI0_CS1
 #    endif /* HAVE_ILI9488_MCU */
 
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
-#    define GPIO_MXTXPLND_RESET \
-       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
-        GPIO_PORT_PIOA | GPIO_PIN24)
+/* General definitions when connected via EXT2 */
 
-#    define GPIO_ILI9488_BLOFF \
-       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-        GPIO_PORT_PIOC | GPIO_PIN19)
+#    define GPIO_ILI9488_RST    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                                 GPIO_PORT_PIOA | GPIO_PIN24)
+#    define GPIO_ILI9488_BLOFF  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORT_PIOC | GPIO_PIN19)
+
+/* maXTouch definitions when connected via EXT2 */
 
 #    ifdef HAVE_MAXTOUCH
-#      define GPIO_MXT_CHG \
-         (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | GPIO_INT_FALLING | \
-          GPIO_PORT_PIOA | GPIO_PIN2)
-#      define IRQ_MXT_CHG \
-         SAM_IRQ_PA2
+#      define GPIO_MXT_CHG      (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                                 GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN2)
+#      define IRQ_MXT_CHG       SAM_IRQ_PA2
 #    endif /* HAVE_MAXTOUCH */
+
+/* ILI9488 MCU mode definitions when connected via EXT2 */
 
 #    ifdef HAVE_ILI9488_MCU
-#      define GPIO_ILI9488_CMDDAT \
-         (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-          GPIO_PORT_PIOA | GPIO_PIN6)
-
-#      define GPIO_ILI9488_CS \
-         (PIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-          GPIO_PORT_PIOD | GPIO_PIN27)
-#      define MXTXLPND_PORT \
-         SPI0_CS3
+#      define GPIO_ILI9488_CDS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORT_PIOA | GPIO_PIN6)
+#      define GPIO_ILI9488_CS   (PIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                                 GPIO_PORT_PIOD | GPIO_PIN27)
+#      define MXTXLPND_PORT     SPI0_CS3
 #    endif /* HAVE_ILI9488_MCU */
 
-/* maXTouch Xplained Pro Xplained Pro LCD Connector
- * ------------------------------------------------
- * It is also possible to connect the LCD via the flat cable to the EXT4 LCD
- * connector.  In this case, you would use the SMC/EBI to communicate with the
- * LCD.
- * 
- *   ---- ------------ ---- -------- -----------------------------------------------------------
- *          LCD              SAMV71  Description
- *   Pin  Function     Pin  Function
- *   ---- ------------ ---- -------- -----------------------------------------------------------
- *    1   ID            -    -       Communication line to ID chip on extension board
- *    2   GND           -   GND      Ground
- *    3   D0           PC0  D0       Data line
- *    4   D1           PC1  D1       Data line
- *    5   D2           PC2  D2       Data line
- *    6   D3           PC3  D3       Data line
- *    7   GND           -   GND      Ground
- *    8   D4           PC4  D4       Data line
- *    9   D5           PC5  D5       Data line
- *   10   D6           PC6  D6       Data line
- *   11   D7           PC7  D7       Data line
- *   12   GND           -   GND      Ground
- *   13   D8           PE0  D8       Data line
- *   14   D9           PE1  D9       Data line
- *   15   D10          PE2  D10      Data line
- *   16   D11          PE3  D11      Data line
- *   17   GND           -   GND      Ground
- *   18   D12          PE4  D12      Data line
- *   19   D12          PE5  D13      Data line
- *   20   D14          PA15 D14      Data line
- *   21   D15          PA16 D15      Data line
- *   22   GND           -   GND      Ground
- *   23   D16           -    -       Data line
- *   24   D17           -    -       Data line
- *   25   N/C           -    -
- *   26   N/C           -    -
- *   27   GND           -   GND      Ground
- *   28   N/C           -    -
- *   29   N/C           -    -
- *   30   N/C           -    -
- *   31   N/C           -    -
- *   32   GND           -   GND      Ground
- *   33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
- *        CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
- *                                        is possible to select either the register or the
- *                                        data interface
- *   34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization
- *                                   MCU: Chip select
- *   35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
- *                                   MCU: Write enable signal
- *   36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
- *        RE                         MCU: Read enable signal
- *   37   SPI SCK       -    -       MCU: Clock for SPI
- *   38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
- *   39   SPI MISO      -    -       MCU: Master in slave out line of SPI
- *   40   SPI SS        -    -       MCU: Slave select for SPI
- *   41   N/C           -    -
- *   42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
- *   43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)
- *   44   IRQ1         PD28 WKUP5    maXTouch interrupt line
- *   45   N/C          PA2  WKUP2
- *   46   PWM          PC9  TIOB7    Backlight control
- *   47   RESET        PC13 GPIO     Reset for both display and maxTouch
- *   48   VCC           -    -       3.3V power supply for extension board
- *   49   VCC           -    -       3.3V power supply for extension board
- *   50   GND           -    -       Ground
- *   ---- ------------ ---- -------- -----------------------------------------------------------
+/* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************/
+/*
+ * Only the RGB is supported by this BSP (via SMC/EBI).  The switch mode
+ * selector on the back of the maXtouch should be set in the OFF-ON-OFF
+ * positions to select 16-bit color mode.
+ *
+ * ----------------- ------------- --------------------------------------------------
+ *        LCD            SAMV71    Description
+ * Pin  Function     Pin  Function
+ * ---- ------------ ---- -------- --------------------------------------------------
+ *  1   ID            -    -       Chip ID communication line
+ *  2   GND           -   GND      Ground
+ *  3   D0           PC0  D0       Data line
+ *  4   D1           PC1  D1       Data line
+ *  5   D2           PC2  D2       Data line
+ *  6   D3           PC3  D3       Data line
+ *  7   GND           -   GND      Ground
+ *  8   D4           PC4  D4       Data line
+ *  9   D5           PC5  D5       Data line
+ * 10   D6           PC6  D6       Data line
+ * 11   D7           PC7  D7       Data line
+ * 12   GND           -   GND      Ground
+ * 13   D8           PE0  D8       Data line
+ * 14   D9           PE1  D9       Data line
+ * 15   D10          PE2  D10      Data line
+ * 16   D11          PE3  D11      Data line
+ * 17   GND           -   GND      Ground
+ * 18   D12          PE4  D12      Data line
+ * 19   D13          PE5  D13      Data line
+ * 20   D14          PA15 D14      Data line
+ * 21   D15          PA16 D15      Data line
+ * 22   GND           -   GND      Ground
+ * 23   D16           -    -       Data line
+ * 24   D17           -    -       Data line
+ * 25   N/C           -    -
+ * 26   N/C           -    -
+ * 27   GND           -   GND      Ground
+ * 28   N/C           -    -
+ * 29   N/C           -    -
+ * 30   N/C           -    -
+ * 31   N/C           -    -
+ * 32   GND           -   GND      Ground
+ * 33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
+ *      CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
+ *                                      is possible to select either the register or the
+ *                                      data interface
+ * 34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization.
+ *                                 MCU: Chip select
+ * 35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
+ *                                 MCU: Write enable signal
+ * 36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
+ *      RE                         MCU: Read enable signal
+ * 37   SPI SCK       -    -       MCU: Clock for SPI
+ * 38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
+ * 39   SPI MISO      -    -       MCU: Master in slave out line of SPI
+ * 40   SPI SS        -    -       MCU: Slave select for SPI
+ * 41   N/C           -    -
+ * 42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
+ * 43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)
+ * 44   IRQ1         PD28 WKUP5    maXTouch interrupt line
+ * 45   N/C          PA2  WKUP2
+ * 46   PWM          PC9  TIOB7    Backlight control
+ * 47   RESET        PC13 GPIO     Reset for both display and maxTouch
+ * 48   VCC           -    -       3.3V power supply for extension board
+ * 49   VCC           -    -       3.3V power supply for extension board
+ * 50   GND           -    -       Ground
+ * ---- ------------ ---- -------- --------------------------------------------------
  */
 
-#  elif defined(CONFIG_SAMV71XULT_MXTXLND_LCD)
-#    define GPIO_MXTXPLND_RESET \
-       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
-        GPIO_PORT_PIOC | GPIO_PIN13)
-#    define GPIO_ILI9488_BLOFF \
-       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-        GPIO_PORT_PIOC | GPIO_PIN9)
+#  elif defined(CONFIG_SAMV71XULT_MXTXPLND_LCD)
+/* General definitions when connected via LCD (EXT4) */
+
+#    define GPIO_ILI9488_RST    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                                 GPIO_PORT_PIOC | GPIO_PIN13)
+#    define GPIO_ILI9488_BLOFF  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORT_PIOC | GPIO_PIN9)
+
+/* maXTouch definitions when connected via LCD (EXT4) */
 
 #    ifdef HAVE_MAXTOUCH
-#      define GPIO_MXT_CHG \
-         (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | GPIO_INT_FALLING | \
-          GPIO_PORT_PIOD | GPIO_PIN28)
-#      define IRQ_MXT_CHG \
-         SAM_IRQ_PD28
+#      define GPIO_MXT_CHG      (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                                 GPIO_INT_FALLING | GPIO_PORT_PIOD | GPIO_PIN28)
+#      define IRQ_MXT_CHG        SAM_IRQ_PD28
 #    endif /* HAVE_MAXTOUCH */
+
+/* ILI9488 RGB mode definitions when connected via LCd (EXT4) */
+
+#    define GPIO_ILI9488_CDS    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                                 GPIO_PORT_PIOC | GPIO_PIN30)
+
+#  if 1 /* Until PWM support is available */
+#    define GPIO_ILI9488_BKL    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORT_PIOC | GPIO_PIN9)
+#  else
+#    define GPIO_ILI9488_BKL    GPIO_TC7_TIOB
+#  endif
 #  endif /* CONFIG_SAMV71XULT_MXTXLND_xyz */
 
-/* In any event, touchscreen communicates on TWI0, I2C address 0x4a */
+/* In all configurations, the touchscreen communicates on TWI0, I2C address 0x4a */
 
-#  define MXT_TWI_BUS      0
-#  define MXT_I2C_ADDRESS  0x4a
+#  ifdef HAVE_MAXTOUCH
 
+#    define MXT_TWI_BUS         0
+#    define MXT_I2C_ADDRESS     0x4a
+
+#  endif /* HAVE_MAXTOUCH */
 #endif /* CONFIG_SAMV71XULT_MXTXPLND */
 
 /************************************************************************************
