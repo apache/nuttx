@@ -352,7 +352,7 @@ struct sam_dev_s
   volatile int result;    /* Result of the DMA transfer */
   sem_t waitsem;          /* Used to way for DMA completion */
   volatile bool dmabusy;  /* True: DMA is in progress */
-  volatile bool cmd;      /* True: Command transefer */
+  volatile bool cmd;      /* True: Command transfer */
 
   /* Private LCD-specific information follows */
 
@@ -374,6 +374,8 @@ static int  sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
               FAR const uint16_t *buffer, unsigned int buflen);
 static int  sam_lcd_get(FAR struct sam_dev_s *priv, uint8_t cmd,
               FAR uint16_t *buffer, unsigned int buflen);
+static int  sam_lcd_getreg(FAR struct sam_dev_s *priv, uint8_t cmd,
+              FAR uint8_t *buffer, unsigned int nbytes);
 static int  sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
               sam_color_t col, sam_color_t width, sam_color_t height);
 
@@ -540,7 +542,7 @@ static int sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd)
 
   sam_gpiowrite(GPIO_ILI9488_CDS, false);
 
-  /* Send the command */
+  /* Send the command via TX DMA */
 
   ret = sam_lcd_txtransfer(priv, &cmd, sizeof(uint16_t));
   if (ret < 0)
@@ -600,7 +602,7 @@ static int sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
  * Name:  sam_lcd_get
  *
  * Description:
- *   Read from a multi-byte ILI9488 register
+ *   Send a command and read 16-bit data from the ILI9488
  *
  ****************************************************************************/
 
@@ -618,6 +620,39 @@ static int sam_lcd_get(FAR struct sam_dev_s *priv, uint8_t cmd,
   if (ret == OK && buflen > 0)
     {
       ret = sam_lcd_rxtransfer(priv, buffer, buflen);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name:  sam_lcd_getreg
+ *
+ * Description:
+ *   Read from a multi-byte ILI9488 register
+ *
+ ****************************************************************************/
+
+static int sam_lcd_getreg(FAR struct sam_dev_s *priv, uint8_t cmd,
+                          FAR uint8_t *buffer, unsigned int nbytes)
+{
+  uint32_t tmp[4];
+  int ret;
+  int i;
+
+  DEBUGASSERT(nbytes <= 4);
+
+  /* Read the request number of byes (as 16-bit values) plus a leading
+   * dummy read.
+   */
+
+  ret = sam_lcd_get(priv, cmd, (FAR uint16_t *)tmp, nbytes << 2);
+  if (ret == OK)
+    {
+      for (i = 0; i < nbytes; i++)
+        {
+          buffer[i] = tmp[i] & 0xff;
+        }
     }
 
   return ret;
@@ -1435,15 +1470,19 @@ static inline int sam_lcd_initialize(void)
 
   /* Check the LCD ID */
 
-  ret = sam_lcd_get(priv, ILI9488_CMD_READ_ID4, (FAR uint16_t *)buffer, 4);
+  ret = sam_lcd_getreg(priv, ILI9488_CMD_READ_ID4, buffer, 4);
   if (ret < 0)
     {
       return ret;
     }
 
-  id = ((uint16_t)buffer[2] << 8) | (uint16_t)buffer[3];
+  id = ((uint16_t)buffer[2] << 8) | ((uint16_t)buffer[3] & 0xff);
+  lcdvdbg("ID: %04x\n", id);
+
   if (id != ILI9488_DEVICE_CODE)
     {
+      lcddbg("ERROR: Unsupported LCD ID: %04x (vs. %04x)\n",
+             id, ILI9488_DEVICE_CODE);
       return -ENODEV;
     }
 
