@@ -146,9 +146,11 @@
 #include "chip/sam_pmc.h"
 #include "chip/sam_smc.h"
 #include "chip/sam_pinmap.h"
-#include "samv71-xult.h"
 
-#ifdef HAVE_ILI9488
+#include "samv71-xult.h"
+#include "atmxt-xpro.h"
+
+#ifdef HAVE_ILI9488_RGB
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1676,4 +1678,4 @@ void sam_lcdclear(uint16_t color)
     }
 }
 
-#endif /* HAVE_ILI9488 */
+#endif /* HAVE_ILI9488_RGB */
