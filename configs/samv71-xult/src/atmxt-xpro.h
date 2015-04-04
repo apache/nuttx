@@ -112,7 +112,7 @@
 /* ILI9488 RGB requires use of LCD connector and SMC and DMA support */
 
 #  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
-#    warning The ILI8488 LCD must be connect on EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
+#    warning The ILI8488 LCD must be connected on LCD EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
 #    undef HAVE_ILI9488_RGB
 #  endif
 
@@ -133,7 +133,7 @@
 /* ILI9488 MCU requires use of EXT1 or EXT2 connector */
 
 #  if !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1) && !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
-#    warning ILI9488 MCU requires CONFIG_SAMV71XULT_MXTXPLND_EXT1 or EXT2
+#    warning ILI9488 MCU must be connected or EXT1 or EXT2 (CONFIG_SAMV71XULT_MXTXPLND_EXT1/2)
 #    undef HAVE_ILI9488_MCU
 #  endif
 
@@ -318,7 +318,7 @@
 #      define IRQ_MXT_CHG        SAM_IRQ_PD28
 #    endif /* HAVE_MAXTOUCH */
 
-/* ILI9488 RGB mode definitions when connected via LCd (EXT4) */
+/* ILI9488 RGB mode definitions when connected via LCD (EXT4) */
 
 #    define GPIO_ILI9488_CDS    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                                  GPIO_PORT_PIOC | GPIO_PIN30)

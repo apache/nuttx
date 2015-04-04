@@ -1115,7 +1115,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-  DEBUGASSERT(src && ((uintptr_t)src & 1) == 0);
+  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Determine the refresh window area */
 
@@ -1156,7 +1156,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-  DEBUGASSERT(dest && ((uintptr_t)dest & 1) == 0);
+  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Determine the refresh window area */
 
