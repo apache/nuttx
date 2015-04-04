@@ -848,7 +848,7 @@ in the OFF-ON-OFF positions to select 16-bit color mode.
   50   GND           -    -       Ground
   ---- ------------ ---- -------- -----------------------------------------------------------
 
-MXI Configuration Options
+MXT Configuration Options
 -------------------------
 
   System Type -> SAMV7 Peripheral Support
@@ -879,6 +879,48 @@ MXI Configuration Options
     CONFIG_EXAMPLES_TOUCHSCREEN_ARCHINIT=y : Have board-specific intialization
     CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
     CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0
+
+ILI9488 Configuration Options
+-----------------------------
+
+Currently only the RGB mode is supported.  This means that the LCD can only
+be used in connected in the LCD (EXT4) connection.
+
+  System Type -> SAMV7 Peripheral Support
+    CONFIG_SAMV7_SMC=y                    : Needed by the ILI9466 driver controller
+    CONFIG_SAMV7_XDMAC=y                  : Needed by the ILI9466 driver
+    CONFIG_SAMV7_TWIHS0_FREQUENCY=100000
+
+  Board Selection ->
+    CONFIG_SAMV71XULT_MXTXPLND=y          : MaXTouch Xplained is connected
+    CONFIG_SAMV71XULT_MXTXPLND_LCD=y      : Must be connected on LCD
+
+  NOTE: When selecting EXT1 or EXT2, be conscious of possible pin conflicts.
+  EXT1, for example, will conflict with the use of the Arduino TXD and RXD
+  pins for the serial console
+
+  Device Drivers -> LCD drivers
+    CONFIG_LCD=y                          : Enable support for LCDs
+
+  Graphics
+    CONFIG_NX=y                           : Enable Graphics supported
+    CONFIG_NX_LCDDRIVER=y                 : Enable LCD driver support
+    CONFIG_NX_DISABLE_*BPP=y              : When * is {1,2,4,8,24, and 32}
+    CONFIG_NXFONTS_CHARBITS=7
+    CONFIG_NXFONT_SANS23X27=y             : One font must be enabled
+
+  There are several graphics examples that can be enabled under apps/examples.
+  nxlines is one of these and can be enabled as follows.  See
+  apps/examples/README.txt for information about configuring other graphics
+  examples.
+
+  The following enables a small built-in application that can be used to
+  test the touchscreen:
+
+  Application Configuration -> Examples -> NX lines example
+    CONFIG_EXAMPLES_NXLINES=y              : Enables the nxlines example
+    CONFIG_EXAMPLES_NXLINES_VPLANE=0
+    CONFIG_EXAMPLES_NXLINES_DEVNO=0
 
 Debugging
 =========
@@ -994,18 +1036,28 @@ Configuration sub-directories
     2. Basic touchscreen/LCD configuration settings are discussed above in
        the paragraph entitled, "maXTouch Xplained Pro".
 
-    3. Like the nsh configuration, this configuratino has the serial console
+    3. Like the nsh configuration, this configuration has the serial console
        setup to used with an Aduino serial shield (UART3).  NOTE: Use of
        EXT1 conflicts with the Arduino RXD pin (PD28).  You cannot put the
        maXTouch Xplained in EXT1 and also use the Arduion RXD/TXD pins as
-       your serial console.  Hence, this configuration assumes that you
-       have the maXTouch Xplained Pro connected via EXT2.
+       your serial console.
 
        If you need to use EXT1, you will have to re-configure the serial
-       console on a different UART/USART.
+       console on a different UART/USART.  The LCD (EXT4) is configured
+       by default.
 
-    4. When the maXTouch Xplained is connect via EXT2, a new I2C address
-       appears at address 0x4a:
+    4. Support for the ILI8488 LCD is enabled.  Only the RGB mode is support
+       at present.  As a consequence, the maXTouch Xplained Pro must be
+       connected at the LCD (EXT4) connector.  This mode requires:
+
+         CONFIG_SAMV71XULT_MXTXPLND_LCD=y : Must be connect in LCD (EXT4)
+         CONFIG_SAMV7_SMC=y               : SMC/EBI support
+         CONFIG_SAMV7_XDMAC=y             : XDMAC support
+
+    5. The appx/examples/nxlines is enalbed as a built-in application.
+
+    6. When the maXTouch Xplained is connected (in any position), a new I2C
+       address appears at address 0x4a:
 
         nsh> i2c dev 3 77
              0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -1021,9 +1073,9 @@ Configuration sub-directories
        This is the I2C address of the maXTouch touchscreen controller.
 
        (0x1a is the address of the WM8904 Audio CODEC, 0x28 is the
-       address of TWI interface to the EDBG, 0x4e is the address of the
-       CP2100CP programmable PLL, and 0x57 and 0x5f are the addresses of
-       the AT2 EEPROM. I am not sure what the other address, 0x37, is).
+        address of TWI interface to the EDBG, 0x4e is the address of the
+        CP2100CP programmable PLL, and 0x57 and 0x5f are the addresses of
+        the AT2 EEPROM. I am not sure what the other address, 0x37, is).
 
     STATUS:
       2015-03-30:  Currently contains on a touchscreen test. The touchscreen
