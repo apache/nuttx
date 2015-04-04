@@ -96,11 +96,11 @@
 
 #define GPIO_INT_SHIFT             (13)        /* Bits 13-15: GPIO interrupt bits */
 #define GPIO_INT_MASK              (7 << GPIO_INT_SHIFT)
-#  define _GIO_INT_AIM             (1 << 10)   /* Bit 10: Additional Interrupt modes */
-#  define _GPIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
-#  define _GPIO_INT_EDGE           (0)         /*        (vs. Edge detection interrupt) */
-#  define _GPIO_INT_RH             (1 << 8)    /* Bit 9: Rising edge/High level detection interrupt */
-#  define _GPIO_INT_FL             (0)         /*        (vs. Falling edge/Low level detection interrupt) */
+#  define _GIO_INT_AIM             (1 << 15)   /* Bit 15: Additional Interrupt modes */
+#  define _GPIO_INT_LEVEL          (1 << 14)   /* Bit 14: Level detection interrupt */
+#  define _GPIO_INT_EDGE           (0)         /*         (vs. Edge detection interrupt) */
+#  define _GPIO_INT_RH             (1 << 13)   /* Bit 13: Rising edge/High level detection interrupt */
+#  define _GPIO_INT_FL             (0)         /*         (vs. Falling edge/Low level detection interrupt) */
 
 #  define GPIO_INT_HIGHLEVEL       (_GIO_INT_AIM | _GPIO_INT_LEVEL | _GPIO_INT_RH)
 #  define GPIO_INT_LOWLEVEL        (_GIO_INT_AIM | _GPIO_INT_LEVEL | _GPIO_INT_FL)
