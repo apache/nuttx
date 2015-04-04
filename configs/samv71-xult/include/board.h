@@ -425,7 +425,7 @@
 
 /* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************
  *
- * Only the RGB is supported by this BSP (via SMC/EBI).  The switch mode
+ * Only the parallel is supported by this BSP (via SMC/EBI).  The switch mode
  * selector on the back of the maXtouch should be set in the OFF-ON-OFF
  * positions to select 16-bit color mode.
  *
@@ -465,20 +465,20 @@
  * 30   N/C           -    -
  * 31   N/C           -    -
  * 32   GND           -   GND      Ground
- * 33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
- *      CMD_DATA_SEL               MCU: One address line of the MCU for displays where
+ * 33   PCLK/        PC30 GPIO     SMC: Pixel clock Display RAM select.
+ *      CMD_DATA_SEL               SPI: One address line of the MCU for displays where
  *                                      it is possible to select either the register
  *                                      or the data interface
- * 34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization.
- *                                 MCU: Chip select
- * 35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
- *                                 MCU: Write enable signal
- * 36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
- *      RE                         MCU: Read enable signal
- * 37   SPI SCK       -    -       MCU: Clock for SPI
- * 38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
- * 39   SPI MISO      -    -       MCU: Master in slave out line of SPI
- * 40   SPI SS        -    -       MCU: Slave select for SPI
+ * 34   VSYNC/CS     PD19 NCS3     SMC: Vertical synchronization.
+ *                                 SPI: Chip select
+ * 35   HSYNC/WE     PC8  NWE      SMC: Horizontal synchronization
+ *                                 SPI: Write enable signal
+ * 36   DATA ENABLE/ PC11 NRD      SMC: Data enable signal
+ *      RE                         SPI: Read enable signal
+ * 37   SPI SCK       -    -       SPI: Clock for SPI
+ * 38   SPI MOSI      -    -       SPI: Master out slave in line of SPI
+ * 39   SPI MISO      -    -       SPI: Master in slave out line of SPI
+ * 40   SPI SS        -    -       SPI: Slave select for SPI
  * 41   N/C           -    -
  * 42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
  * 43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)

@@ -48,15 +48,15 @@
 /* Configuration ********************************************************************/
 
 #define HAVE_MAXTOUCH    1
-#define HAVE_ILI9488_RGB 1
-#undef HAVE_ILI9488_MCU    /* Not yet suppported */
+#define HAVE_ILI9488_SMC 1
+#undef HAVE_ILI9488_SPI    /* Not yet suppported */
 
 /* maXTouch and LCD only available if the maXTouch Xplained Pro is connected */
 
 #ifndef CONFIG_SAMV71XULT_MXTXPLND
 #  undef HAVE_MAXTOUCH
-#  undef HAVE_ILI9488_RGB
-#  undef HAVE_ILI9488_MCU
+#  undef HAVE_ILI9488_SMC
+#  undef HAVE_ILI9488_SPI
 #endif
 
 /* maXTouch is only available if the maXTouch driver is enabled */
@@ -108,40 +108,40 @@
 
 /* ILI9488 LCD */
 
-#ifdef HAVE_ILI9488_RGB
-/* ILI9488 RGB requires use of LCD connector and SMC and DMA support */
+#ifdef HAVE_ILI9488_SMC
+/* ILI9488 parallel mode requires use of LCD connector and SMC and DMA support */
 
 #  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
 #    warning The ILI8488 LCD must be connected on LCD EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
-#    undef HAVE_ILI9488_RGB
+#    undef HAVE_ILI9488_SMC
 #  endif
 
-/* ILI9488 RGB requires SMC/EBI and XDMAC support */
+/* ILI9488 parallel mode requires SMC/EBI and XDMAC support */
 
 #  ifndef CONFIG_SAMV7_SMC
 #    warning The ILI8488 LCD requires SMC support (CONFIG_SAMV7_SMC)
-#    undef HAVE_ILI9488_RGB
+#    undef HAVE_ILI9488_SMC
 #  endif
 
 #  ifndef CONFIG_SAMV7_XDMAC
 #    warning The ILI8488 LCD requires DMA support (CONFIG_SAMV7_XDMAC)
-#    undef HAVE_ILI9488_RGB
+#    undef HAVE_ILI9488_SMC
 #  endif
 #endif
 
-#ifdef HAVE_ILI9488_MCU
-/* ILI9488 MCU requires use of EXT1 or EXT2 connector */
+#ifdef HAVE_ILI9488_SPI
+/* ILI9488 serial mode requires use of EXT1 or EXT2 connector */
 
 #  if !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1) && !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
-#    warning ILI9488 MCU must be connected or EXT1 or EXT2 (CONFIG_SAMV71XULT_MXTXPLND_EXT1/2)
-#    undef HAVE_ILI9488_MCU
+#    warning serial ILI9488 must be connected or EXT1 or EXT2 (CONFIG_SAMV71XULT_MXTXPLND_EXT1/2)
+#    undef HAVE_ILI9488_SPI
 #  endif
 
-/* ILI9488 MCU requires SPI0 */
+/* ILI9488 serial mode requires SPI0 */
 
 #  ifndef CONFIG_SAMV7_SPI0
-#    warning ILI9488 MCU support requires SPI0
-#    undef HAVE_ILI9488_MCU
+#    warning Serial ILI9488 requires SPI0 support
+#    undef HAVE_ILI9488_SPI
 #  endif
 #endif
 
@@ -197,15 +197,15 @@
 #      define IRQ_MXT_CHG       SAM_IRQ_PD28
 #    endif /* HAVE_MAXTOUCH */
 
-/* ILI9488 MCU mode definitions when connected via EXT1 */
+/* ILI9488 serial mode definitions when connected via EXT1 */
 
-#    ifdef HAVE_ILI9488_MCU
+#    ifdef HAVE_ILI9488_SPI
 #      define GPIO_ILI9488_CDS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                                  GPIO_PORT_PIOB | GPIO_PIN3)
 #      define GPIO_ILI9488_CS   (PIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                                  GPIO_PORT_PIOD | GPIO_PIN25)
 #      define ILI9488_PORT      SPI0_CS1
-#    endif /* HAVE_ILI9488_MCU */
+#    endif /* HAVE_ILI9488_SPI */
 
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
 /* General definitions when connected via EXT2 */
@@ -223,21 +223,21 @@
 #      define IRQ_MXT_CHG       SAM_IRQ_PA2
 #    endif /* HAVE_MAXTOUCH */
 
-/* ILI9488 MCU mode definitions when connected via EXT2 */
+/* ILI9488 serial mode definitions when connected via EXT2 */
 
-#    ifdef HAVE_ILI9488_MCU
+#    ifdef HAVE_ILI9488_SPI
 #      define GPIO_ILI9488_CDS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                                  GPIO_PORT_PIOA | GPIO_PIN6)
 #      define GPIO_ILI9488_CS   (PIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                                  GPIO_PORT_PIOD | GPIO_PIN27)
 #      define MXTXLPND_PORT     SPI0_CS3
-#    endif /* HAVE_ILI9488_MCU */
+#    endif /* HAVE_ILI9488_SPI */
 
 /* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************/
 /*
- * Only the RGB is supported by this BSP (via SMC/EBI).  The switch mode
- * selector on the back of the maXtouch should be set in the OFF-ON-OFF
- * positions to select 16-bit color mode.
+ * Only the parallel mode is supported by this BSP (via SMC/EBI).  The switch mode
+ * selector on the back of the maXtouch should be set in the OFF-ON-OFF positions
+ * to select 16-bit color mode.
  *
  * ----------------- ------------- --------------------------------------------------
  *        LCD            SAMV71    Description
@@ -275,20 +275,20 @@
  * 30   N/C           -    -
  * 31   N/C           -    -
  * 32   GND           -   GND      Ground
- * 33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
- *      CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
+ * 33   PCLK/        PC30 GPIO     SMC: Pixel clock Display RAM select.
+ *      CMD_DATA_SEL               SPI: One address line of the MCU for displays where it
  *                                      is possible to select either the register or the
  *                                      data interface
- * 34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization.
- *                                 MCU: Chip select
- * 35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
- *                                 MCU: Write enable signal
- * 36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
- *      RE                         MCU: Read enable signal
- * 37   SPI SCK       -    -       MCU: Clock for SPI
- * 38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
- * 39   SPI MISO      -    -       MCU: Master in slave out line of SPI
- * 40   SPI SS        -    -       MCU: Slave select for SPI
+ * 34   VSYNC/CS     PD19 NCS3     SMC: Vertical synchronization.
+ *                                 SPI: Chip select
+ * 35   HSYNC/WE     PC8  NWE      SMC: Horizontal synchronization
+ *                                 SPI: Write enable signal
+ * 36   DATA ENABLE/ PC11 NRD      SMC: Data enable signal
+ *      RE                         SPI: Read enable signal
+ * 37   SPI SCK       -    -       SPI: Clock for SPI
+ * 38   SPI MOSI      -    -       SPI: Master out slave in line of SPI
+ * 39   SPI MISO      -    -       SPI: Master in slave out line of SPI
+ * 40   SPI SS        -    -       SPI: Slave select for SPI
  * 41   N/C           -    -
  * 42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
  * 43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)
@@ -318,7 +318,7 @@
 #      define IRQ_MXT_CHG        SAM_IRQ_PD28
 #    endif /* HAVE_MAXTOUCH */
 
-/* ILI9488 RGB mode definitions when connected via LCD (EXT4) */
+/* ILI9488 parallel mode definitions when connected via LCD (EXT4) */
 
 #    define GPIO_ILI9488_CDS    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                                  GPIO_PORT_PIOC | GPIO_PIN30)
