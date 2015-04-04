@@ -67,7 +67,7 @@
  * 45 PE14 DB14           To TFT LCD (CN13, pin 17)
  * 46 PE15 DB15           To TFT LCD (CN13, pin 18)
  *
- * NOTE:  The backlight signl NC_BL (CN13, pin 24) is pulled high and not under
+ * NOTE:  The backlight signal NC_BL (CN13, pin 24) is pulled high and not under
  * software control
  *
  * On LCD module:
@@ -120,6 +120,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
@@ -1863,7 +1864,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
  ************************************************************************************/
 
 /************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -1872,7 +1873,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
  *
  ************************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   FAR struct stm32_dev_s *priv = &g_lcddev;
   int ret;
@@ -1912,7 +1913,7 @@ int up_lcdinitialize(void)
 }
 
 /************************************************************************************
- * Name:  up_lcdgetdev
+ * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
@@ -1920,21 +1921,21 @@ int up_lcdinitialize(void)
  *
  ************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return &g_lcddev.dev;
 }
 
 /************************************************************************************
- * Name:  up_lcduninitialize
+ * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD support
  *
  ************************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   FAR struct stm32_dev_s *priv = &g_lcddev;
 

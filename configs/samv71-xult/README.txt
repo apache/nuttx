@@ -755,8 +755,11 @@ Testing has also been performed using the maXTouch Xplained Pro LCD
 maXTouch Xplained Pro Standard Extension Header
 -----------------------------------------------
 The LCD could be connected either via EXT1 or EXT2 using the 2x10 20-pin
-cable and the maXTouch Xplained Pro standard extension header. Access is
-then performed in SPI mode.
+cable and the maXTouch Xplained Pro standard extension header. Access would
+then be performed in SPI mode.
+
+NOTE: There is currently no support for use of the LCD in SPI mode.  See
+the next paragraph where the LCD/EXT4 connection is discussion.
 
 NOTE the 3 switch mode selector on the back of the maXtouch.  All switches
 should be in the ON position to select 4-wire SPI mode.
@@ -863,6 +866,10 @@ in the OFF-ON-OFF positions to select 16-bit color mode.
   50   GND           -    -       Ground
   ---- ------------ ---- -------- -----------------------------------------------------------
 
+NOTE: Use of LCD/EXT4 conflicts with the Arduino RXD pin (PD28).  You cannot
+put the maXTouch Xplained in LCD/EXT4 and also use the Arduino RXD/TXD pins
+as your serial console.
+
 Connecting the flat cable.  I was embarrassed to say that I did not know how
 the connectors worked.  Let me share this so that, perhaps, I can save you
 the same embarrassment:
@@ -877,7 +884,6 @@ the same embarrassment:
   these out and away from the board.  Insert the ribbon with the contacts
   toward the board.  Lock the cable in place by pushing the tabs back in
   place.
-
 
 MXT Configuration Options
 -------------------------

@@ -49,10 +49,11 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7567.h>
-#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -103,10 +104,10 @@ FAR struct lcd_dev_s *dev;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lcdinitialize
+ * Name: board_lcd_initialize
  ****************************************************************************/
 
-int up_lcdinitialize(void)
+int board_lcd_initialize(void)
 {
   lpc17_configgpio(ZKITARM_OLED_RST);
   lpc17_configgpio(ZKITARM_OLED_RS);
@@ -128,10 +129,10 @@ int up_lcdinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_lcdgetdev
+ * Name: board_lcd_getdev
  ****************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   dev = st7567_initialize(spi, lcddev);
   if (!dev)
@@ -151,10 +152,10 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
 }
 
 /****************************************************************************
- * Name: up_lcduninitialize
+ * Name: board_lcd_uninitialize
  ****************************************************************************/
 
-void up_lcduninitialize(void)
+void board_lcd_uninitialize(void)
 {
   /* TO-FIX */
 }

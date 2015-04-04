@@ -254,19 +254,6 @@ void stm32_lcdinitialize(void);
 #endif
 
 /****************************************************************************************************
- * Name:  up_lcdinitialize
- *
- * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully initialized, display
- *   memory cleared, and the LCD ready to use, but with the power setting at 0 (full off).
- *
- ****************************************************************************************************/
-
-#if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
-int up_lcdinitialize(void);
-#endif
-
-/****************************************************************************************************
  * Name:  up_vs1053initialize
  *
  * Description:

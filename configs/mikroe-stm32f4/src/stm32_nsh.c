@@ -348,7 +348,7 @@ int board_app_initialize(void)
 
   syslog(LOG_INFO, "Initializing TFT LCD module\n");
 
-  ret = up_lcdinitialize();
+  ret = board_lcd_initialize();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize TFT LCD module\n");
