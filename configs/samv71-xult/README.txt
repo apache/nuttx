@@ -800,9 +800,9 @@ It is also possible to connect the LCD via the flat cable to the EXT4 LCD
 connector.  In this case, you would use the SMC/EBI to communicate with the
 LCD.
 
-NOTE: (1) Only the RGB interface is supported by the SAMV71-XULT and (2) the
-3 switch mode selector on the back of the maXtouch.  These switches should be
-in the OFF-ON-OFF positions to select 16-bit color mode.
+NOTE: (1) Only the parallel interface is supported by the SAMV71-XULT and (2)
+the 3 switch mode selector on the back of the maXtouch.  These switches should
+be in the OFF-ON-OFF positions to select 16-bit color mode.
 
   ----------------- ------------- -----------------------------------------------------------
          LCD            SAMV71    Description
@@ -840,20 +840,20 @@ in the OFF-ON-OFF positions to select 16-bit color mode.
   30   N/C           -    -
   31   N/C           -    -
   32   GND           -   GND      Ground
-  33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
-       CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
+  33   PCLK/        PC30 GPIO     SMC: Pixel clock Display RAM select.
+       CMD_DATA_SEL               SPI: One address line of the MCU for displays where it
                                        is possible to select either the register or the
                                        data interface
-  34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization.
-                                  MCU: Chip select
-  35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
-                                  MCU: Write enable signal
-  36   DATA ENABLE/ PC11 NRD      RGB: Data enable signal
-       RE                         MCU: Read enable signal
-  37   SPI SCK       -    -       MCU: Clock for SPI
-  38   SPI MOSI      -    -       MCU: Master out slave in line of SPI
-  39   SPI MISO      -    -       MCU: Master in slave out line of SPI
-  40   SPI SS        -    -       MCU: Slave select for SPI
+  34   VSYNC/CS     PD19 NCS3     SMC: Vertical synchronization.
+                                  SPI: Chip select
+  35   HSYNC/WE     PC8  NWE      SMC: Horizontal synchronization
+                                  SPI: Write enable signal
+  36   DATA ENABLE/ PC11 NRD      SMC: Data enable signal
+       RE                         SPI: Read enable signal
+  37   SPI SCK       -    -       SPI: Clock for SPI
+  38   SPI MOSI      -    -       SPI: Master out slave in line of SPI
+  39   SPI MISO      -    -       SPI: Master in slave out line of SPI
+  40   SPI SS        -    -       SPI: Slave select for SPI
   41   N/C           -    -
   42   TWI SDA      PA3  TWD0     I2C data line (maXTouch®)
   43   TWI SCL      PA4  TWCK0    I2C clock line (maXTouch)
@@ -920,8 +920,8 @@ MXT Configuration Options
 ILI9488 Configuration Options
 -----------------------------
 
-Currently only the RGB mode is supported.  This means that the LCD can only
-be used in connected in the LCD (EXT4) connection.
+Currently only the parallel mode is supported.  This means that the LCD can
+only be used in connected in the LCD (EXT4) connection.
 
   System Type -> SAMV7 Peripheral Support
     CONFIG_SAMV7_SMC=y                    : Needed by the ILI9466 driver controller
@@ -1097,7 +1097,7 @@ Configuration sub-directories
        in EXT1 or LCD/EXT4 and also use the Arduino RXD/TXD pins as your
        serial console.
 
-       The LCD (EXT4) is configured by default because only the RGB LCD
+       The LCD (EXT4) is configured by default because only the parallel LCD
        interface is currently supported and that is only available on that
        connector.
 
@@ -1110,9 +1110,9 @@ Configuration sub-directories
        different U[S]ART option is selected, Audio cannot be used with
        this configuration.
 
-    4. Support for the ILI8488 LCD is enabled.  Only the RGB mode is support
-       at present.  As a consequence, the maXTouch Xplained Pro must be
-       connected at the LCD (EXT4) connector.  This mode requires:
+    4. Support for the ILI8488 LCD is enabled.  Only the parallel mode is
+       supported at present.  As a consequence, the maXTouch Xplained Pro
+       must be connected at the LCD (EXT4) connector.  This mode requires:
 
          CONFIG_SAMV71XULT_MXTXPLND_LCD=y : Must be connect in LCD (EXT4)
          CONFIG_SAMV7_SMC=y               : SMC/EBI support

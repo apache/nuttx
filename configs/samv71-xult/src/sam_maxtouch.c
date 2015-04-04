@@ -262,7 +262,7 @@ int board_tsc_setup(int minor)
           return -ENODEV;
         }
 
-       /* Configure maXTouch CHG interrupts */
+      /* Configure maXTouch CHG interrupts */
 
       sam_gpioirq(GPIO_MXT_CHG);
       (void)irq_attach(IRQ_MXT_CHG, mxt_interrupt);
