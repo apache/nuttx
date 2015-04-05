@@ -1124,6 +1124,10 @@ Configuration sub-directories
          CONFIG_SAMV7_XDMAC=y             : XDMAC support
 
     6. The appx/examples/nxlines is enabled as a built-in application.
+       This is a test that displays some simple graphis and can be
+       executed from the NSH command line like:
+
+         nsh> nxlines
 
     7. When the maXTouch Xplained is connected (in any position), a new I2C
        address appears at address 0x4a:

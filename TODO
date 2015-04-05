@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 14, 2015)
+NuttX TODO List (Last updated April 5, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (9)  Graphics subystem (graphics/)
+  (8)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (2)  Build system / Toolchains
@@ -1439,17 +1439,6 @@ o Graphics subsystem (graphics/)
   Status:      Open
   Priority:    Medium-ish.  This would definitely improve graphics rendering
                and line drawing.
-
-  Title:       LINE JOINS
-  Description: Lines are currently draw as rectangles with the width of the
-               rectangle being the line width.  So when shapes, like circles,
-               are drawn with fat lines, they do not join cleanly from
-               segment to segment.
-
-               The fix would be to draw a circle at each endpoint that has a
-               radius equal to the width of the line.
-  Status:      Open
-  Priority:    Medium-ish.  This would definitely improve line drawing.
 
   Title:       PER-WINDOW FRAMEBUFFERS
   Description: One of the most awkard things to handle in the NX windowing
