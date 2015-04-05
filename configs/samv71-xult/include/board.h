@@ -96,7 +96,7 @@
  *    PMC_MCKR_CSS_SLOW   Slow Clock
  *    PMC_MCKR_CSS_MAIN   Main Clock
  *    PMC_MCKR_CSS_PLLA   PLLA Clock
- *    MC_MCKR_CSS_UPLL    Divided UPLL Clock
+ *    PMC_MCKR_CSS_UPLL   Divided UPLL Clock
  *
  *  BOARD_PMC_MCKR_PRES - Source clock pre-scaler.  May be one of:
  *
@@ -105,7 +105,7 @@
  *    PMC_MCKR_PRES_DIV4  Selected clock divided by 4
  *    PMC_MCKR_PRES_DIV8  Selected clock divided by 8
  *    PMC_MCKR_PRES_DIV16 Selected clock divided by 16
- *    MC_MCKR_PRES_DIV32  Selected clock divided by 32
+ *    PMC_MCKR_PRES_DIV32 Selected clock divided by 32
  *    PMC_MCKR_PRES_DIV64 Selected clock divided by 64
  *    PMC_MCKR_PRES_DIV3  Selected clock divided by 3
  *
@@ -115,7 +115,7 @@
  *
  *  BOARD_PMC_MCKR_MDIV - MCK divider.  May be one of:
  *
- *    PMC_MCKR_MDIV_DIV1  Master Clock is Prescaler Output Clock / 1
+ *    PMC_MCKR_MDIV_DIV1  Master Clock = Prescaler Output Clock / 1
  *    PMC_MCKR_MDIV_DIV2  Master Clock = Prescaler Output Clock / 2
  *    PMC_MCKR_MDIV_DIV4  Master Clock = Prescaler Output Clock / 4
  *    PMC_MCKR_MDIV_DIV3  Master Clock = Prescaler Output Clock / 3
