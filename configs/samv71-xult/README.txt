@@ -1110,7 +1110,9 @@ Configuration sub-directories
        different U[S]ART option is selected, Audio cannot be used with
        this configuration.
 
-    4. Support for the ILI8488 LCD is enabled.  Only the parallel mode is
+    4. SDRAM is NOT enabled in this configuration.
+
+    5. Support for the ILI8488 LCD is enabled.  Only the parallel mode is
        supported at present.  As a consequence, the maXTouch Xplained Pro
        must be connected at the LCD (EXT4) connector.  This mode requires:
 
@@ -1118,9 +1120,9 @@ Configuration sub-directories
          CONFIG_SAMV7_SMC=y               : SMC/EBI support
          CONFIG_SAMV7_XDMAC=y             : XDMAC support
 
-    5. The appx/examples/nxlines is enalbed as a built-in application.
+    6. The appx/examples/nxlines is enabled as a built-in application.
 
-    6. When the maXTouch Xplained is connected (in any position), a new I2C
+    7. When the maXTouch Xplained is connected (in any position), a new I2C
        address appears at address 0x4a:
 
         nsh> i2c dev 3 77
@@ -1295,12 +1297,28 @@ Configuration sub-directories
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
 
-    4. SDRAM is not enabled in this configuration.  I have enabled SDRAM and
-       the apps/examples RAM test using this configuration settings:
+    4. SDRAM is enabled in this configuration.  Here are the relevant
+       configuration settings:
+
+       System Type
+         CONFIG_ARMV7M_ICACHE=y
+         CONFIG_ARMV7M_DCACHE=y
+         CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y
+
+       The system is configured with DCACHE in write through mode.  The
+       configuration runs with the DCACHE in write back mode, but the SDRAM
+       configuration fails.  That is because the SDRAM initialization
+       occurs after the D-Cache is initialized (I have not actually tried
+       in write back mode, it just seems that there woulc be issues.
 
        System Type
          CONFIG_SAMV7_SDRAMC=y
          CONFIG_SAMV7_SDRAMSIZE=2097152
+
+       SDRAM is not added to the heap in this configuration.  To do that
+       you would need to set CONFIG_SAMV7_SDRAMHEAP=y and CONFIG_MM_REGIONS=2.
+       Instead, the SDRAM is set up so that is can be used with a destructive
+       RAM test enabled with this option:
 
        Application Configuration:
          CONFIG_SYSTEM_RAMTEST=y
@@ -1309,7 +1327,19 @@ Configuration sub-directories
 
          nsh> ramtest -w 70000000 2097152
 
-       STATUS: As of this writing, SDRAM does not pass the RAM test.
+         NuttShell (NSH) NuttX-7.8
+         nsh> ramtest -w 70000000 2097152
+         RAMTest: Marching ones: 70000000 2097152
+         RAMTest: Marching zeroes: 70000000 2097152
+         RAMTest: Pattern test: 70000000 2097152 55555555 aaaaaaaa
+         RAMTest: Pattern test: 70000000 2097152 66666666 99999999
+         RAMTest: Pattern test: 70000000 2097152 33333333 cccccccc
+         RAMTest: Address-in-address test: 70000000 2097152
+         nsh>
+
+       STATUS:  I suspect that the RAM timing configuration is not perfect.
+       If you run the above RAM test you will see occasional failures after
+       booting into a certain state.
 
     5. The button test at apps/examples/buttons is included in the
        configuration.  This configuration illustrates (1) use of the buttons
