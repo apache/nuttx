@@ -47,7 +47,7 @@
 #include <nuttx/nx/nxtk.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define NCIRCLE_TRAPS 8
@@ -111,5 +111,6 @@ int nxtk_fillcirclewindow(NXWINDOW hfwnd, FAR const struct nxgl_point_s *center,
           return ret;
         }
     }
+
   return OK;
 }

@@ -48,7 +48,7 @@
 #include <nuttx/nx/nxtk.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -109,9 +109,15 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
     }
 #endif
 
+  /* Split the line into trapezoids */
+
   ret = nxgl_splitline(vector, trap, &rect, width);
   switch (ret)
     {
+      /* 0: Line successfully broken up into three trapezoids.  Values in
+       *    traps[0], traps[1], and traps[2] are valid.
+       */
+
       case 0:
         ret = nxtk_filltrapwindow(hfwnd, &trap[0], color);
         if (ret == OK)
@@ -124,17 +130,44 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
           }
         break;
 
+      /* 1: Line successfully represented by one trapezoid. Value in traps[1]
+       *    is valid.
+       */
+
       case 1:
         ret = nxtk_filltrapwindow(hfwnd, &trap[1], color);
          break;
 
-      case 2:
+      /* 2: Line successfully represented by one rectangle. Value in rect is
+       *    valid
+       */
+
+       case 2:
          ret = nxtk_fillwindow(hfwnd, &rect, color);
          break;
+
+      /* <0: On errors, a negated errno value is returned. */
 
       default:
          set_errno(EINVAL);
          return ERROR;
+    }
+
+  /* Draw circular caps at each end of the line to support better line joins */
+
+  if (capped && width >= 3)
+    {
+      nxgl_coord_t radius = width >> 1;
+
+      /* Draw a circle at pt1 */
+
+      ret = nxtk_fillcirclewindow(hfwnd, &vector->pt1, radius, color);
+      if (ret == OK)
+        {
+          /* Draw a circle at pt2 */
+
+          ret = nxtk_fillcirclewindow(hfwnd, &vector->pt2, radius, color);
+        }
     }
 
   return ret;
