@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nx/nx_drawcircle.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,7 +128,7 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
       vector.pt1.y = pts[i].y;
       vector.pt2.x = pts[i+1].x;
       vector.pt2.y = pts[i+1].y;
-      ret = nx_drawline(hwnd, &vector, width, color);
+      ret = nx_drawline(hwnd, &vector, width, color, true);
       if (ret != OK)
         {
           return ret;
@@ -141,5 +141,5 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
   vector.pt1.y = pts[POINT_337p5].y;
   vector.pt2.x = pts[POINT_0p0].x;
   vector.pt2.y = pts[POINT_0p0].y;
-  return nx_drawline(hwnd, &vector, width, color);
+  return nx_drawline(hwnd, &vector, width, color, true);
 }

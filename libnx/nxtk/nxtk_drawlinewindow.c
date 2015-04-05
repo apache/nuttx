@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxtk/nxtk_drawlinewindow.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,8 @@
  *   vector - Describes the line to be drawn
  *   width  - The width of the line
  *   color  - The color to use to fill the line
+ *   capped - Draw a circular cap both ends of the line to support better
+ *            line joins
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -91,7 +93,8 @@
  ****************************************************************************/
 
 int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
-                        nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+                        nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                        bool capped)
 
 {
   struct nxgl_trapezoid_s trap[3];

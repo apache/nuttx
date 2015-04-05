@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nx.h
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -776,6 +776,8 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
  *   vector - Describes the line to be drawn
  *   width  - The width of the line
  *   color  - The color to use to fill the line
+ *   capped - Draw a circular cap both ends of the line to support better
+ *            line joins
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -783,7 +785,8 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
  ****************************************************************************/
 
 int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
-                nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+                nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                bool capped);
 
 /****************************************************************************
  * Name: nx_drawcircle

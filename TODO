@@ -880,20 +880,24 @@ o Network (net/, drivers/net)
                should be eliminated).  This applies to almost all Ethernet
                drivers:
 
-               ARCHITECTURE   CONFIG_NET_NOINTS
-               C5471          NO
-               STM32          YES <<
-               TIVA/LM3S      NO
-               TIVA/TM4C      YES <<
-               eZ80           NO
-               LPC17xx        YES <<
-               DMxxx NIC      NO
-               PIC32          NO
-               RGMP           NO
-               SAM3/4         YES <<
-               SAMA5D3        NO
-               SAMA5D4        YES <<
-               SIM            N/A << Doesn't support interrupts
+               ARCHITECTURE   CONFIG_NET_NOINTS?      ADDRESS FILTER SUPPORT?
+               C5471          NO                      NO
+               STM32          YES                     YES
+               TIVA           ----------------------- ------
+                 LM3S         NO                      NO
+                 TM4C         YES                     YES
+               eZ80           NO                      NO
+               LPC17xx        YES (could be issues)   YES (not tested)
+               DMxxx NIC      NO                      NO
+               PIC32          NO                      NO
+               RGMP           ???                     ???
+               SAM3/4         YES                     YES
+               SAMA5D         ----------------------- ------
+                 EMACA        NO                      YES (not tested)
+                 EMACB        YES                     YES
+                 GMAC         NO                      YES (not tested)
+               SAMV7          YES                     YES
+               SIM            N/A  (No interrupts)    NO
 
                The general outline of how this might be done is included in
                drivers/net/skeleton.c
