@@ -1760,7 +1760,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
 
 int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
                nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-               bool capped);
+               uint8_t caps);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -1781,8 +1781,17 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
       <dd>The width of the line
     <dt><code>color</code>
       <dd>The color to use to fill the line
-    <dt><code>capped</code>
-      <dd>Draw a circular cap both ends of the line to support better line joins
+    <dt><code>caps</code>
+      <dd>Draw a circular cap on the ends of the line to support better line joins.
+        One of:
+<ul><pre>
+/* Line caps */
+
+#define NX_LINECAP_NONE  0x00, /* No line caps */
+#define NX_LINECAP_PT1   0x01  /* Line cap on pt1 on of the vector only */
+#define NX_LINECAP_PT2   0x02  /* Line cap on pt2 on of the vector only */
+#define NX_LINECAP_BOTH  0x03  /* Line cap on both ends of the vector only */
+</pre></ul>
   </dl></ul>
 </p>
 <p>
@@ -2389,7 +2398,7 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
 
 int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                        bool capped);
+                        uint8_t caps);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -2410,8 +2419,17 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
       <dd>The width of the line
     <dt><code>color</code>
       <dd>The color to use to fill the line
-    <dt><code>capped</code>
-      <dd>Draw a circular cap both ends of the line to support better line joins
+    <dt><code>caps</code>
+      <dd>Draw a circular cap on the ends of the line to support better line joins.
+        One of:
+<ul><pre>
+/* Line caps */
+
+#define NX_LINECAP_NONE  0x00, /* No line caps */
+#define NX_LINECAP_PT1   0x01  /* Line cap on pt1 on of the vector only */
+#define NX_LINECAP_PT2   0x02  /* Line cap on pt2 on of the vector only */
+#define NX_LINECAP_BOTH  0x03  /* Line cap on both ends of the vector only */
+</pre></ul>
   </dl></ul>
 </p>
 <p>
@@ -2745,7 +2763,7 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tr
 
 int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
                          nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                         capped);
+                         uint8_t caps);
 
 </pre></ul>
 <p>
@@ -2766,8 +2784,17 @@ int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
       <dd>The width of the line
     <dt><code>color</code>
       <dd>The color to use to fill the line
-    <dt><code>capped</code>
-      <dd>Draw a circular cap both ends of the line to support better line joins
+    <dt><code>caps</code>
+      <dd>Draw a circular cap on the ends of the line to support better line joins.
+        One of:
+<ul><pre>
+/* Line caps */
+
+#define NX_LINECAP_NONE  0x00, /* No line caps */
+#define NX_LINECAP_PT1   0x01  /* Line cap on pt1 on of the vector only */
+#define NX_LINECAP_PT2   0x02  /* Line cap on pt2 on of the vector only */
+#define NX_LINECAP_BOTH  0x03  /* Line cap on both ends of the vector only */
+</pre></ul>
   </dl></ul>
 </p>
 <p>
