@@ -63,17 +63,12 @@ Open Issues
 The BASIC nsh configuration is fully function (as desribed below under
 "Configurations").  There are still open issues that need to be resolved:
 
-  1. SDRAM support has been implemented and tested using the nsh
-     configuration (as desribed below).  Currently the memory test does not
-     pass.  I am suspecting that this is because D-Cache is enabled when
-     SDRAM is configured?
-
-  2. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+  1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
      transfers only because I have not yet had a chance to verify this.  The
      is very low priority to me but might be important to you if you are need
      very high performance SD card accesses.
 
-  3. HSMCI TX DMA is currently disabled for the SAMV7.  There is some
+  2. HSMCI TX DMA is currently disabled for the SAMV7.  There is some
      issue with the TX DMA setup (HSMCI TX DMA the same driver works with
      the SAMA5D4 which has a different DMA subsystem).  This is a bug that
      needs to be resolved.
@@ -83,15 +78,11 @@ The BASIC nsh configuration is fully function (as desribed below under
      #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
      #define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
 
-  4. There may also be some issues with removing and re-inserting SD cards
+  3. There may also be some issues with removing and re-inserting SD cards
      (of course with appropriate mounting and unmounting).  I all not sure
      of this and need to do more testing to characterize if the issue.
 
-  5. There is not yet any support for the following board features: QSPI or WM8904.
-     Many drivers will port easily from either the SAM3/4 or from the SAMA5Dx.
-     So there is still plenty to be done.
-
-  6. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
+  4. There is a port of the SAMA5D4-EK Ethernet driver to the SAMV71-XULT.
      This driver appears to be 100% functional with the following caveats:
 
      - There is a compiler optimization issue.  At -O2, there is odd
@@ -108,7 +99,7 @@ The BASIC nsh configuration is fully function (as desribed below under
        Setting write through mode eliminates the need for cleaning the D-Cache.
        If only reloading and invalidating are done, then there is no problem.
 
-  7. The USBHS device controller driver (DCD) is complete but non-functional.
+  5. The USBHS device controller driver (DCD) is complete but non-functional.
      At this point, work has stopped because I am stuck.  The problem is that
      bus events are not occurring:  Nothing is detected by the USBHS when the
      host is connected; no activity is seen on the bus by a USB analyzer when
@@ -1301,19 +1292,6 @@ Configuration sub-directories
        configuration settings:
 
        System Type
-         CONFIG_ARMV7M_ICACHE=y
-         CONFIG_ARMV7M_DCACHE=y
-         CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y
-
-       The system is configured with DCACHE in write through mode.  The
-       configuration runs with the DCACHE in write back mode, but the SDRAM
-       configuration fails.  That is because the SDRAM initialization
-       occurs after the D-Cache is initialized (I have not actually tried
-       in write back mode, it just seems that there woulc be issues. This
-       could be eliminated by changing the order of some initialization in
-       sam_start.c.
-
-       System Type
          CONFIG_SAMV7_SDRAMC=y
          CONFIG_SAMV7_SDRAMSIZE=2097152
 
@@ -1338,13 +1316,6 @@ Configuration sub-directories
          RAMTest: Pattern test: 70000000 2097152 33333333 cccccccc
          RAMTest: Address-in-address test: 70000000 2097152
          nsh>
-
-       STATUS:  I suspect that the RAM timing configuration is not perfect.
-       If you run the above RAM test you will see occasional failures after
-       booting into a certain state.  Sometimes it boots and the RAM test
-       fails 100% of the time.  Other times it boots and the RAM test passes
-       100% of the time.  So it seems like some timing issue in the SRAM
-       setup.
 
     5. The button test at apps/examples/buttons is included in the
        configuration.  This configuration illustrates (1) use of the buttons
@@ -1470,7 +1441,7 @@ Configuration sub-directories
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
-       CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y   : Write through mode (see SDRAM discussion above)
+       CONFIG_ARMV7M_DCACHE_WRITETHROUGH=n   : Write back mode
        CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
        CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
 

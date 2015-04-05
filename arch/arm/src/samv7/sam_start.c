@@ -118,20 +118,6 @@ void __start(void) __attribute__ ((no_instrument_function));
 #endif
 
 /****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
-/****************************************************************************
  * Name: sam_fpuconfig
  *
  * Description:
@@ -372,11 +358,14 @@ void __start(void)
   sam_clockconfig();
   sam_fpuconfig();
   sam_lowsetup();
-  showprogress('A');
 
   /* Enable/disable tightly coupled memories */
 
   sam_tcmenable();
+
+  /* Initialize onboard resources */
+
+  sam_boardinitialize();
 
   /* Enable I- and D-Caches */
 
@@ -389,7 +378,6 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
-  showprogress('B');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -399,29 +387,9 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   sam_userspace();
-  showprogress('C');
-#endif
-
-  /* Initialize onboard resources */
-
-  sam_boardinitialize();
-  showprogress('D');
-
-#ifdef CONFIG_SAMV7_CMCC
-  /* Enable the Cortex-M Cache
-   *
-   * REVISIT:  This logic is complete but I have not yet tried to enable it.
-   * I have some questions about how the cache will effect memory mapped
-   * register accesses.
-   */
-
-  sam_cmcc_enable();
 #endif
 
   /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
 
 #ifdef CONFIG_STACK_COLORATION
   /* Set the IDLE stack to the coloration value and jump into os_start() */
