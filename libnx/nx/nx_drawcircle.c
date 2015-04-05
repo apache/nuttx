@@ -113,7 +113,6 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
 {
   struct nxgl_point_s pts[NCIRCLE_POINTS];
   FAR struct nxgl_vector_s vector;
-  bool capped;
   int i;
   int ret;
 
@@ -123,7 +122,6 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
 
   /* Draw each pair of points as a vector */
 
-  capped = false;
   for (i = POINT_0p0; i < POINT_337p5; i++)
     {
       /* Draw one line segment */
@@ -133,17 +131,11 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
       vector.pt2.x = pts[i+1].x;
       vector.pt2.y = pts[i+1].y;
 
-      ret = nx_drawline(hwnd, &vector, width, color, capped);
+      ret = nx_drawline(hwnd, &vector, width, color, NX_LINECAP_PT1);
       if (ret != OK)
         {
           return ret;
         }
-
-      /* Every other line segment needs to have a circular line caps to join
-       * cleanly with the surround lines segments without line caps.
-       */
-
-      capped = !capped;
     }
 
   /* The final, closing vector is a special case */
@@ -152,5 +144,5 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
   vector.pt1.y = pts[POINT_337p5].y;
   vector.pt2.x = pts[POINT_0p0].x;
   vector.pt2.y = pts[POINT_0p0].y;
-  return nx_drawline(hwnd, &vector, width, color, capped);
+  return nx_drawline(hwnd, &vector, width, color, NX_LINECAP_PT1);
 }

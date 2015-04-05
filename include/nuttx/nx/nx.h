@@ -50,6 +50,17 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_NX_NPLANES
+#  define CONFIG_NX_NPLANES   1  /* Max number of color planes supported */
+#endif
+
+/* Check if the underlying graphic device supports read operations */
+
+#if !defined(CONFIG_NX_WRITEONLY) && defined(CONFIG_NX_LCDDRIVER) && defined(CONFIG_LCD_NOGETRUN)
+#  define CONFIG_NX_WRITEONLY 1
+#endif
 
 /* Default server MQ name used by nx_run() macro */
 
@@ -62,21 +73,16 @@
 #define NX_MOUSE_CENTERBUTTON 0x02
 #define NX_MOUSE_RIGHTBUTTON  0x04
 
+/* Line caps */
+
+#define NX_LINECAP_NONE       0x00  /* No line caps */
+#define NX_LINECAP_PT1        0x01  /* Line cap on pt1 of the vector only */
+#define NX_LINECAP_PT2        0x02  /* Line cap on pt2 of the vector only */
+#define NX_LINECAP_BOTH       0x03  /* Line cap on both ends of the vector only */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_NX_NPLANES
-#  define CONFIG_NX_NPLANES      1  /* Max number of color planes supported */
-#endif
-
-/* Check if the underlying graphic device supports read operations */
-
-#if !defined(CONFIG_NX_WRITEONLY) && defined(CONFIG_NX_LCDDRIVER) && defined(CONFIG_LCD_NOGETRUN)
-#  define CONFIG_NX_WRITEONLY 1
-#endif
-
 /* Handles ******************************************************************/
 
 /* The interface to the NX server is managed using a opaque handle: */
@@ -776,7 +782,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
  *   vector - Describes the line to be drawn
  *   width  - The width of the line
  *   color  - The color to use to fill the line
- *   capped - Draw a circular cap both ends of the line to support better
+ *   caps   - Draw a circular on the both ends of the line to support better
  *            line joins
  *
  * Return:
@@ -786,7 +792,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
 
 int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
                 nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                bool capped);
+                uint8_t caps);
 
 /****************************************************************************
  * Name: nx_drawcircle

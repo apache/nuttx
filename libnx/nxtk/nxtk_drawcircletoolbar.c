@@ -113,7 +113,6 @@ int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cent
 {
   struct nxgl_point_s pts[NCIRCLE_POINTS];
   FAR struct nxgl_vector_s vector;
-  bool capped;
   int i;
   int ret;
 
@@ -132,17 +131,11 @@ int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cent
       vector.pt2.x = pts[i+1].x;
       vector.pt2.y = pts[i+1].y;
 
-      ret = nxtk_drawlinetoolbar(hfwnd, &vector, width, color, capped);
+      ret = nxtk_drawlinetoolbar(hfwnd, &vector, width, color, NX_LINECAP_PT1);
       if (ret != OK)
         {
           return ret;
         }
-
-      /* Every other line segment needs to have a circular line caps to join
-       * cleanly with the surround lines segments without line caps.
-       */
-
-      capped = !capped;
     }
 
   /* The final, closing vector is a special case */
@@ -151,5 +144,5 @@ int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cent
   vector.pt1.y = pts[POINT_337p5].y;
   vector.pt2.x = pts[POINT_0p0].x;
   vector.pt2.y = pts[POINT_0p0].y;
-  return nxtk_drawlinetoolbar(hfwnd, &vector, width, color, capped);
+  return nxtk_drawlinetoolbar(hfwnd, &vector, width, color, NX_LINECAP_PT1);
 }

@@ -84,7 +84,7 @@
  *   vector - Describes the line to be drawn
  *   width  - The width of the line
  *   color  - The color to use to fill the line
- *   capped - Draw a circular cap both ends of the line to support better
+ *   caps   - Draw a circular cap on the ends of the line to support better
  *            line joins
  *
  * Return:
@@ -94,7 +94,7 @@
 
 int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                        bool capped)
+                        bool caps)
 
 {
   struct nxgl_trapezoid_s trap[3];
@@ -155,17 +155,22 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
 
   /* Draw circular caps at each end of the line to support better line joins */
 
-  if (capped && width >= 3)
+  if (caps != NX_LINECAP_NONE && width >= 3)
     {
       nxgl_coord_t radius = width >> 1;
 
       /* Draw a circle at pt1 */
 
-      ret = nxtk_fillcirclewindow(hfwnd, &vector->pt1, radius, color);
-      if (ret == OK)
+      ret = OK;
+      if ((caps & NX_LINECAP_PT1) != 0)
         {
-          /* Draw a circle at pt2 */
+          ret = nxtk_fillcirclewindow(hfwnd, &vector->pt1, radius, color);
+        }
 
+      /* Draw a circle at pt2 */
+
+      if (ret == OK && (caps & NX_LINECAP_PT2) != 0)
+        {
           ret = nxtk_fillcirclewindow(hfwnd, &vector->pt2, radius, color);
         }
     }
