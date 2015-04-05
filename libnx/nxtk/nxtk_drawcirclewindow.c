@@ -113,6 +113,7 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cente
 {
   struct nxgl_point_s pts[NCIRCLE_POINTS];
   FAR struct nxgl_vector_s vector;
+  bool capped;
   int i;
   int ret;
 
@@ -124,15 +125,24 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cente
 
   for (i = POINT_0p0; i < POINT_337p5; i++)
     {
+      /* Draw one line segment */
+
       vector.pt1.x = pts[i].x;
       vector.pt1.y = pts[i].y;
       vector.pt2.x = pts[i+1].x;
       vector.pt2.y = pts[i+1].y;
-      ret = nxtk_drawlinewindow(hfwnd, &vector, width, color, true);
+
+      ret = nxtk_drawlinewindow(hfwnd, &vector, width, color, capped);
       if (ret != OK)
         {
           return ret;
         }
+
+      /* Every other line segment needs to have a circular line caps to join
+       * cleanly with the surround lines segments without line caps.
+       */
+
+      capped = !capped;
     }
 
   /* The final, closing vector is a special case */
@@ -141,5 +151,5 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cente
   vector.pt1.y = pts[POINT_337p5].y;
   vector.pt2.x = pts[POINT_0p0].x;
   vector.pt2.y = pts[POINT_0p0].y;
-  return nxtk_drawlinewindow(hfwnd, &vector, width, color, true);
+  return nxtk_drawlinewindow(hfwnd, &vector, width, color, capped);
 }
