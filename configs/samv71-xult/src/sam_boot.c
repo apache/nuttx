@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/samv71-xult/src/sam_boot.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,35 +45,37 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "sam_start.h"
 #include "samv71-xult.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All SAMV7 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after clocking and
+ *   memory have been configured but before caches have been enabled and
+ *   before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void)
 {
 #ifdef CONFIG_SAMV7_SDRAMC
-  /* Configure SDRAM if it has been enabled in the NuttX configuration.  Here we
-   * assume, of course, that we are not running out SDRAM.
+  /* Configure SDRAM if it has been enabled in the NuttX configuration.
+   * Here we assume, of course, that we are not running out SDRAM.
    */
 
   sam_sdram_config();
@@ -113,7 +115,7 @@ void sam_boardinitialize(void)
  *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
  *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
+ *   called immediately after up_intitialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.
  *

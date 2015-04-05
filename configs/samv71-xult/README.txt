@@ -111,6 +111,18 @@ The BASIC nsh configuration is fully function (as desribed below under
      sample code and study of the data sheet, but I have not found the key to
      solving this.
 
+  6. Partial support for the maXTouch Xplained Pro LCD is in place.  The
+     ILI9488-based LCD is working well with a SMC DMA-based interface.  Very
+     nice performance.
+
+     However, the maXTouch touchscreen driver is not working.  I tried re-
+     using the maXTouch driver that was used with the SAMA5D4-EK TM7000
+     LCD, but the maXTouch Xplained Pro has a different maXTouch part.
+     The driver claims that all operations are success, but there are no
+     interrupts signalling touch event.  I assume that the different
+     maXTouch part is not being configured correctly but there is no
+     avaiable technical documentation or sample code to debug with.
+
 Serial Console
 ==============
 
@@ -1134,9 +1146,23 @@ Configuration sub-directories
         CP2100CP programmable PLL, and 0x57 and 0x5f are the addresses of
         the AT2 EEPROM. I am not sure what the other address, 0x37, is).
 
+    8. Support for the touchscreen test is enabled (see apps/examples/touchscreen),
+       however, the maXTouch is not yet working (see STATUS below).
+
     STATUS:
-      2015-03-30:  Currently contains on a touchscreen test. The touchscreen
-        does not yet work.
+      2015-04-05:  Partial support for the maXTouch Xplained Pro LCD is in
+        place.  The ILI9488-based LCD is working well with a SMC DMA-based
+        interface.  Very nice performance.
+
+        However, the maXTouch touchscreen driver is not working.  I tried
+        re-using the maXTouch driver that was used with the SAMA5D4-EK
+        TM7000 LCD, but the maXTouch Xplained Pro has a different maXTouch
+        part.  The driver claims that all operations are success, but
+        there are no interrupts signalling touch event.  I assume that the
+        different maXTouch part is not being configured correctly but there
+        is no available technical documentation or sample code to debug
+        with.
+
 
   netnsh:
 

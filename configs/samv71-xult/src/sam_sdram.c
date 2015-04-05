@@ -90,9 +90,11 @@
  *     None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When
- *    we complete initialization of SDRAM and it is ready for use, we will
- *    make DRAM into normal, cached memory.
+ *    This test runs early in initialization before I- and D-caches are
+ *    enabled.
+ *
+ *    NOTE: Since the delay loop is calibrate with caches in enabled, the
+ *    calls to up_udelay() are wrong ty orders of magnitude.
  *
  ****************************************************************************/
 

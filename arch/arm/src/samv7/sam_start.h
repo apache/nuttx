@@ -109,8 +109,9 @@ void sam_lowsetup(void);
  *
  * Description:
  *   All SAMV7 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   point is called early in the initialization -- after clocking and memory have
+ *   been configured but before caches have been enabled and before any devices have
+ *   been initialized.
  *
  ************************************************************************************/
 
