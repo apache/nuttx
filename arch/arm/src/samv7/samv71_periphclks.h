@@ -118,7 +118,7 @@
 #define sam_isi_enableclk()        sam_enableperiph1(SAM_PID_ISI)
 #define sam_pwm1_enableclk()       sam_enableperiph1(SAM_PID_PWM1)
 #define sam_fpu_enableclk()
-#define sam_sdramc_enableclk()
+#define sam_sdramc_enableclk()     sam_enableperiph1(SAM_PID_SDRAMC)
 #define sam_wdt1_enableclk()
 
 #define sam_ccw_enableclk()
@@ -186,7 +186,7 @@
 #define sam_isi_disableclk()       sam_disableperiph1(SAM_PID_ISI)
 #define sam_pwm1_disableclk()      sam_disableperiph1(SAM_PID_PWM1)
 #define sam_fpu_disableclk()
-#define sam_sdramc_disableclk()
+#define sam_sdramc_disableclk()    sam_disableperiph1(SAM_PID_SDRAMC)
 #define sam_wdt1_disableclk()
 
 #define sam_ccw_disableclk()
