@@ -1309,7 +1309,9 @@ Configuration sub-directories
        configuration runs with the DCACHE in write back mode, but the SDRAM
        configuration fails.  That is because the SDRAM initialization
        occurs after the D-Cache is initialized (I have not actually tried
-       in write back mode, it just seems that there woulc be issues.
+       in write back mode, it just seems that there woulc be issues. This
+       could be eliminated by changing the order of some initialization in
+       sam_start.c.
 
        System Type
          CONFIG_SAMV7_SDRAMC=y
@@ -1339,7 +1341,10 @@ Configuration sub-directories
 
        STATUS:  I suspect that the RAM timing configuration is not perfect.
        If you run the above RAM test you will see occasional failures after
-       booting into a certain state.
+       booting into a certain state.  Sometimes it boots and the RAM test
+       fails 100% of the time.  Other times it boots and the RAM test passes
+       100% of the time.  So it seems like some timing issue in the SRAM
+       setup.
 
     5. The button test at apps/examples/buttons is included in the
        configuration.  This configuration illustrates (1) use of the buttons
@@ -1465,7 +1470,7 @@ Configuration sub-directories
 
        CONFIG_ARMV7M_ICACHE=y                : Instruction cache is enabled
        CONFIG_ARMV7M_DCACHE=y                : Data cache is enabled
-       CONFIG_ARMV7M_DCACHE_WRITETHROUGH=n   : Write back mode
+       CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y   : Write through mode (see SDRAM discussion above)
        CONFIG_ARCH_FPU=y                     : H/W floating point support is enabled
        CONFIG_ARCH_DPFPU=y                   : 64-bit H/W floating point support is enabled
 
