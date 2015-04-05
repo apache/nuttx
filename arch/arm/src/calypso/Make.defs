@@ -1,7 +1,7 @@
 ############################################################################
 # calypso/Make.defs
 #
-#   Copyright (C) 2007, 2013-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2013-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 #   Copyright (C) 2011 Stefan Richter. All rights reserved.
@@ -57,8 +57,12 @@ CMN_CSRCS += up_checkstack.c
 endif
 
 CHIP_ASRCS  = calypso_lowputc.S
-CHIP_CSRCS  = calypso_irq.c calypso_heap.c calypso_serial.c calypso_spi.c
-CHIP_CSRCS += clock.c calypso_uwire.c calypso_armio.c calypso_keypad.c
+CHIP_CSRCS  = calypso_irq.c calypso_heap.c calypso_serial.c clock.c
+CHIP_CSRCS += calypso_uwire.c calypso_armio.c calypso_keypad.c
+
+ifeq ($(CONFIG_SPI),y)
+CHIP_CSRCS += calypso_spi.c
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += calypso_timer.c
