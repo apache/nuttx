@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: December 28, 2013</p>
+      <p>Last Updated: April 5, 2015</p>
     </td>
   </tr>
 </table>
@@ -1759,7 +1759,8 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
 #include &lt;nuttx/nx/nx.h&gt;
 
 int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
-               nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+               nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+               bool capped);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -1780,6 +1781,8 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
       <dd>The width of the line
     <dt><code>color</code>
       <dd>The color to use to fill the line
+    <dt><code>capped</code>
+      <dd>Draw a circular cap both ends of the line to support better line joins
   </dl></ul>
 </p>
 <p>
@@ -2385,7 +2388,8 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
 #include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
-                        nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+                        nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                        bool capped);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -2406,6 +2410,8 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
       <dd>The width of the line
     <dt><code>color</code>
       <dd>The color to use to fill the line
+    <dt><code>capped</code>
+      <dd>Draw a circular cap both ends of the line to support better line joins
   </dl></ul>
 </p>
 <p>
@@ -2738,7 +2744,8 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tr
 #include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
-                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                         capped);
 
 </pre></ul>
 <p>
@@ -2759,6 +2766,8 @@ int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
       <dd>The width of the line
     <dt><code>color</code>
       <dd>The color to use to fill the line
+    <dt><code>capped</code>
+      <dd>Draw a circular cap both ends of the line to support better line joins
   </dl></ul>
 </p>
 <p>
