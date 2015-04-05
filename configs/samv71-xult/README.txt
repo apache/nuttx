@@ -1307,26 +1307,9 @@ Configuration sub-directories
 
        The RAM test can be executed as follows:
 
-         nsh> ramtest -w 70000000 209152
+         nsh> ramtest -w 70000000 2097152
 
-       STATUS: As of this writing, SDRAM does not pass the RAM test.  This is the sympton:
-
-        nsh> mw 70000000
-          70000000 = 0x00000000
-        nsh> mw 70000000=55555555
-          70000000 = 0x00000000 -> 0x55555555
-        nsh> mw 70000000
-          70000000 = 0x55555555
-
-        nsh> mw 70100000
-          70100000 = 0x00000000
-        nsh> mw 70100000=aaaaaaaa
-          70100000 = 0x00000000 -> 0xaaaaaaaa
-        nsh> mw 70100000
-          70100000 = 0xaaaaaaaa
-
-        nsh> mw 70000000
-          70000000 = 0x00000000 <<< Lost RAM content
+       STATUS: As of this writing, SDRAM does not pass the RAM test.
 
     5. The button test at apps/examples/buttons is included in the
        configuration.  This configuration illustrates (1) use of the buttons

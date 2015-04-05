@@ -67,31 +67,34 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define SDRAM_BA0 (1 << 20)
+#define SDRAM_BA1 (1 << 21)
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
- *   Configures the on-board SDRAM.  SAMV71 Xplained Ultra features one external
- *   IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected to chip select
- *   NCS1.
+ *   Configures the on-board SDRAM.  SAMV71 Xplained Ultra features one
+ *   external IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected
+ *   to chip select NCS1.
  *
  *  Input Parameters:
  *     None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When we
- *    complete initialization of SDRAM and it is ready for use, we will make DRAM
- *    into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.  When
+ *    we complete initialization of SDRAM and it is ready for use, we will
+ *    make DRAM into normal, cached memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_sdram_config(void)
 {
@@ -150,17 +153,19 @@ void sam_sdram_config(void)
   sam_configgpio(GPIO_SMC_A7);        /* PC25 A7        -> A5 */
   sam_configgpio(GPIO_SMC_A8);        /* PC26 A8        -> A6 */
   sam_configgpio(GPIO_SMC_A9);        /* PC27 A9        -> A7 */
+  sam_configgpio(GPIO_SMC_A10);       /* PC28 A10       -> A8 */
+  sam_configgpio(GPIO_SMC_A11);       /* PC29 A11       -> A9 */
   sam_configgpio(GPIO_SDRAMC_A10_2);  /* PD13 SDA10     -> A10 */
   sam_configgpio(GPIO_SDRAMC_BA0);    /* PA20 BA0       -> A11 */
 
-  sam_configgpio(GPIO_SDRAMC_CAS);    /* PD17 CAS       -> nCAS */
   sam_configgpio(GPIO_SDRAMC_CKE);    /* PD14 SDCKE     -> CKE */
   sam_configgpio(GPIO_SDRAMC_CK);     /* PD23 SDCK      -> CLK */
   sam_configgpio(GPIO_SDRAMC_CS_1);   /* PC15 SDCS      -> nCS */
-  sam_configgpio(GPIO_SMC_NBS0);      /* PC18 A0/NBS0   -> LDQM */
   sam_configgpio(GPIO_SDRAMC_RAS);    /* PD16 RAS       -> nRAS */
-  sam_configgpio(GPIO_SMC_NBS1);      /* PD15 NWR1/NBS1 -> UDQM */
+  sam_configgpio(GPIO_SDRAMC_CAS);    /* PD17 CAS       -> nCAS */
   sam_configgpio(GPIO_SDRAMC_WE);     /* PD29 SDWE      -> nWE */
+  sam_configgpio(GPIO_SMC_NBS0);      /* PC18 A0/NBS0   -> LDQM */
+  sam_configgpio(GPIO_SMC_NBS1);      /* PD15 NWR1/NBS1 -> UDQM */
 
   /* Enable the SDRAMC peripheral */
 
