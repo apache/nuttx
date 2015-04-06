@@ -3406,6 +3406,17 @@ config STM32_HAVE_RTC_SUBSECONDS
 	bool
 	default n
 
+config RTC_MAGIC_REG
+	int "The BKP register used to store/check the Magic value to determine if RTC is set already"
+	default 0
+	range  0 19
+	depends on RTC
+
+config RTC_MAGIC
+	hex "Value used as Magic to determine if RTC is set already"
+	default 0xfacefeee
+	depends on RTC
+
 choice
 	prompt "RTC clock source"
 	default RTC_LSECLOCK
