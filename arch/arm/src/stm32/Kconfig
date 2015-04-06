@@ -746,6 +746,7 @@ config STM32_STM32F10XX
 	default n
 	select STM32_HAVE_SPI2 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
+	select STM32_HAVE_RTC_COUNTER
 
 config STM32_VALUELINE
 	bool
@@ -3402,6 +3403,10 @@ config STM32_SAVE_CRASHDUMP
 
 endif # STM32_BKPSRAM
 
+config STM32_HAVE_RTC_COUNTER
+	bool
+	default n
+
 config STM32_HAVE_RTC_SUBSECONDS
 	bool
 	default n
@@ -3410,12 +3415,12 @@ config RTC_MAGIC_REG
 	int "The BKP register used to store/check the Magic value to determine if RTC is set already"
 	default 0
 	range  0 19
-	depends on RTC
+	depends on RTC && !STM32_HAVE_RTC_COUNTER
 
 config RTC_MAGIC
 	hex "Value used as Magic to determine if RTC is set already"
 	default 0xfacefeee
-	depends on RTC
+	depends on RTC && !STM32_HAVE_RTC_COUNTER
 
 choice
 	prompt "RTC clock source"
