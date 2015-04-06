@@ -103,12 +103,13 @@ The BASIC nsh configuration is fully function (as desribed below under
      At this point, work has stopped because I am stuck.  The problem is that
      bus events are not occurring:  Nothing is detected by the USBHS when the
      host is connected; no activity is seen on the bus by a USB analyzer when
-     the host is connected.  Possibilities: (1) the pullups on DM and DP are
+     the host is connected.  Possibilities: (1) the pull-ups on DM and DP are
      not working.  This would prevent the host from detecting the presence of
-     the device.  the DETACH bit is, however, being correctly cleared  or (2)
-     some issue with clocking or configuration of the UTMI.  I see nothing
-     wrong this this case.   I have done extensive comparison of the Atmel
-     sample code and study of the data sheet, but I have not found the key to
+     the device.  The DETACH bit is, however, being correctly cleared and the
+     USB is in the suspend sate.  Or (2) some issue with clocking or
+     configuration of the UTMI.  I see nothing wrong in this case.   I have
+     done extensive comparison of the Atmel sample code and study of the data
+     sheet, but I have not found the key to
      solving this.
 
   6. Partial support for the maXTouch Xplained Pro LCD is in place.  The
