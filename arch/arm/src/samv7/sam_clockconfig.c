@@ -59,11 +59,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***********************************************************/
-/* Not yet supported */
-
-#undef CONFIG_SAMV7_USBDEVHS_LOWPOWER
-
 /* Board Settings **********************************************************/
 /* PMC register settings based on the board configuration values defined
  * in board.h

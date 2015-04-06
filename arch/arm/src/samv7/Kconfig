@@ -1253,6 +1253,19 @@ endmenu # EMAC0 device driver options
 menu "USB High Speed Device Controller driver (DCD) options"
 	depends on SAMV7_USBDEVHS
 
+config SAMV7_USBDEVHS_LOWPOWER
+	bool "Low-power mode"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		The USBHS can work in two modes:
+
+		- Normal mode where High speed, Full speed and Low speed are
+		  available.
+		- Low-power mode where only Full speed and Low speed are available.
+
+		This options selects the low-power mode.
+
 config SAMV7_USBHS_SCATTERGATHER
 	bool
 	default n
