@@ -711,7 +711,6 @@
 /* Host DMA Channel Address Register (32-bit address) */
 
 /* Host DMA Channel Control Register */
-#define USBHS_HSTDMACTRL_
 
 #define USBHS_HSTDMACTRL_CMD_SHIFT         (0)               /* Bits 0-1: Command */
 #define USBHS_HSTDMACTRL_CMD_MASK          (3 << USBHS_HSTDMACTRL_CMD_SHIFT)
@@ -754,21 +753,23 @@
 /* General Status Register */
 
 #define USBHS_SR_RDERRI                    (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt (host mode) */
+#defien USBHS_SR_VBUSRQ                    (1 << 9)          /* Bit 9:  VBus Request (host mode) */
 #define USBHS_SR_SPEED_SHIFT               (12)              /* Bits 12-13: Speed Status (device mode) */
 #define USBHS_SR_SPEED_MASK                (3 << USBHS_SR_SPEED_SHIFT)
-
-#define USBHS_SR_SPEED_FULL                (0 << USBHS_SR_SPEED_SHIFT) /* Full-Speed mode */
-#define USBHS_SR_SPEED_HIGH                (1 << USBHS_SR_SPEED_SHIFT) /* High-Speed mode */
-#define USBHS_SR_SPEED_LOW                 (2 << USBHS_SR_SPEED_SHIFT) /* Low-Speed mode */
+#  define USBHS_SR_SPEED_FULL              (0 << USBHS_SR_SPEED_SHIFT) /* Full-Speed mode */
+#  define USBHS_SR_SPEED_HIGH              (1 << USBHS_SR_SPEED_SHIFT) /* High-Speed mode */
+#  define USBHS_SR_SPEED_LOW               (2 << USBHS_SR_SPEED_SHIFT) /* Low-Speed mode */
 #define USBHS_SR_CLKUSABLE                 (1 << 14)         /* Bit 14: UTMI Clock Usable */
 
 /* General Status Clear Register */
 
 #define USBHS_SCR_RDERRIC                  (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt Clear */
+#define USBHS_SCR_VBUSRQC                  (1 << 9)          /* Bit 9:   VBus Request Clear */
 
 /* General Status Set Register */
 
 #define USBHS_SFR_RDERRIS                  (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt Set */
+#define USBHS_SFR_VBUSRQS                  (1 << 9)          /* Bit 9:  VBus Request Set */
 
 /************************************************************************************************************
  * Public Types
