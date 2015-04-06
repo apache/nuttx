@@ -92,7 +92,7 @@
 #endif
 
 #if !defined(CONFIG_RTC_MAGIC_REG)
-# define CONFIG_RTC_MAGIC_REG STM32_RTC_BKR(0)
+# define CONFIG_RTC_MAGIC_REG (0)
 #endif
 
 /* Constants ************************************************************************/
@@ -100,7 +100,7 @@
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
 #define RTC_MAGIC        CONFIG_RTC_MAGIC
-#define RTC_MAGIC_REG    CONFIG_RTC_MAGIC_REG
+#define RTC_MAGIC_REG    STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
 /* Proxy definitions to make the same code work for all the STM32 series ************/
 
