@@ -87,11 +87,20 @@
 #  endif
 #endif
 
+#if !defined(CONFIG_RTC_MAGIC)
+# define CONFIG_RTC_MAGIC (0xfacefeee)
+#endif
+
+#if !defined(CONFIG_RTC_MAGIC_REG)
+# define CONFIG_RTC_MAGIC_REG STM32_RTC_BKR(0)
+#endif
+
 /* Constants ************************************************************************/
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
-#define RTC_MAGIC        (0xfacefeee)
+#define RTC_MAGIC        CONFIG_RTC_MAGIC
+#define RTC_MAGIC_REG    CONFIG_RTC_MAGIC_REG
 
 /* Proxy definitions to make the same code work for all the STM32 series ************/
 
@@ -189,7 +198,7 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
   rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
   rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
-  rtclldbg("     BK0: %08x\n", getreg32(STM32_RTC_BK0R));
+  rtclldbg("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -616,7 +625,7 @@ int up_rtcinitialize(void)
   /* Select the clock source */
   /* Save the token before losing it when resetting */
 
-  regval = getreg32(STM32_RTC_BK0R);
+  regval = getreg32(RTC_MAGIC_REG);
 
   stm32_pwr_enablebkp(true);
 
@@ -688,7 +697,7 @@ int up_rtcinitialize(void)
 
             /* Remember that the RTC is initialized */
 
-            putreg32(RTC_MAGIC, STM32_RTC_BK0R);
+            putreg32(RTC_MAGIC, RTC_MAGIC_REG);
 
             /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
 
@@ -751,7 +760,7 @@ int up_rtcinitialize(void)
 
       /* Remember that the RTC is initialized */
 
-      putreg32(RTC_MAGIC, STM32_RTC_BK0R);
+      putreg32(RTC_MAGIC, RTC_MAGIC_REG);
     }
   else
     {
