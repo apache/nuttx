@@ -118,11 +118,14 @@ The BASIC nsh configuration is fully function (as desribed below under
 
      However, the maXTouch touchscreen driver is not working.  I tried re-
      using the maXTouch driver that was used with the SAMA5D4-EK TM7000
-     LCD, but the maXTouch Xplained Pro has a different maXTouch part.
-     The driver claims that all operations are success, but there are no
-     interrupts signalling touch event.  I assume that the different
-     maXTouch part is not being configured correctly but there is no
-     avaiable technical documentation or sample code to debug with.
+     LCD, but the maXTouch Xplained Pro has a different maXTouch part
+     (ATMXT112S).  No data sheet is available for this part.
+
+     The existing maXTouch driver claims that all operations on the ATMXT112S
+     are success, but there are no interrupts signalling touch event.  I
+     assume that the different maXTouch part is not being configured
+     correctly but there is no available technical documentation or sample
+     code to debug with.
 
 Serial Console
 ==============

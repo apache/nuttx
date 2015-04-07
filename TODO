@@ -9,17 +9,17 @@ board port.
 nuttx/
 
  (11)  Task/Scheduler (sched/)
-  (1)  Memory Managment (mm/)
+  (1)  Memory Management (mm/)
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (11)  Network (net/, drivers/net)
+ (12)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics subystem (graphics/)
+  (8)  Graphics subsystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -306,7 +306,7 @@ o Signals (sched/signal, arch/)
                (e.g., SIGINT, SIGSEGV, etc).
 
                Update:  SIGCHLD is supported if so configured.
-  Status:      Open.  No changes are planned.
+  Status:      Open.  No further changes are planned.
   Priority:    Low, required by standards but not so critical for an
                embedded system.
 
@@ -336,7 +336,7 @@ o pthreads (sched/pthreads)
   Priority:    Low, probably not that useful
 
   Title:       PTHREAD_PRIO_PROTECT
-  Description: Extended pthread_mutexattr_setprotocol() suport PTHREAD_PRIO_PROTECT:
+  Description: Extended pthread_mutexattr_setprotocol() support PTHREAD_PRIO_PROTECT:
                "When a thread owns one or more mutexes initialized with the
                PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its
                priority  or  the  highest  of the priority ceilings of all the mutexes
@@ -800,8 +800,20 @@ o Network (net/, drivers/net)
 
   Title:       STANDARDIZE ETHERNET DRIVER STATISTICS
   Description: Need to standardize collection of statistics from network
-               drivers.  apps/nshlib ifconfig command should present
-               statistics.
+               drivers.  Currently they are useless because they are not
+               accessible.  The solution is to standardize the structure
+               that holds the drivers statistics.  Then apps/nshlib
+               ifconfig command could present the driver statistics.
+
+               Currently these drivers support non-standard statistics:
+
+                 arch/arm/src/kinetis/kinetis_enet.c
+                 arch/arm/src/lpc17xx/lpc17_ethernet.c
+                 arch/arm/src/tiva/lm3s_ethernet.c
+                 arch/mips/src/pic32mx/pic32mx-ethernet.c
+                 arch/z80/src/ez80/ez80_emac.c
+
+               The other Ethernet drivers support no statistics.
   Status:      Open
   Priority:    Low.  This is not a bug but an enhancement idea.
 
@@ -955,6 +967,24 @@ o Network (net/, drivers/net)
                for example, you create new Unix domain paths dynamically.
                In that case you would effectively have a memory leak and the
                number of FIFO instances grow.
+
+  Title:       TCP IPv4-MAPPED IPv6 ADDRESSES
+  Description: The UDP implementation in net/udp contains support for Hybrid
+               dual-stack IPv6/IPv4 implementations that utilize a special
+               class of addresses, the IPv4-mapped IPv6 addresses.  You can
+               see that UDP implementation in:
+
+                 udp_callback.c:
+                   ip6_map_ipv4addr(ipv4addr,
+                 udp_send.c:
+                   ip6_is_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr)))
+                   ip6_is_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr))
+                   in_addr_t raddr = ip6_get_ipv4addr((FAR struct in6_addr*)conn->u.ipv6.raddr);
+
+               There is no corresponding support for TCP sockets.
+  Status:      Open
+  Priority:    Low.  I don't know of any issues now, but I am sure that
+               someone will encounter this in the future.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
