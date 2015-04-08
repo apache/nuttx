@@ -50,7 +50,7 @@
 #include <nuttx/nx/nxbe.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* These are the values for the clipping order provided to nx_clipper */

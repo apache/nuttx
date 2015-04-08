@@ -49,7 +49,7 @@
 #include "nxglib_fillrun.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef NXGLIB_SUFFIX

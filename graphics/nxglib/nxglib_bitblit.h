@@ -47,7 +47,7 @@
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Make sure the bits-per-pixel value has been set by the includer of

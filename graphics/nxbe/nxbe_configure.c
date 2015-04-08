@@ -46,7 +46,7 @@
 #include "nxbe.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_NX_BGCOLOR

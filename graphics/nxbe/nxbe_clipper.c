@@ -50,7 +50,7 @@
 #include "nxbe.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define NX_INITIAL_STACKSIZE (32)

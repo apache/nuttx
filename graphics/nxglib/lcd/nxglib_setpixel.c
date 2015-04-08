@@ -48,7 +48,7 @@
 #include "nxglib_bitblit.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef NXGLIB_SUFFIX

@@ -45,7 +45,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #if NXGLIB_BITSPERPIXEL < 16
