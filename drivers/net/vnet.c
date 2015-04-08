@@ -67,7 +67,7 @@
 #include <rgmp/stdio.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_VNET_NINTERFACES determines the number of physical interfaces

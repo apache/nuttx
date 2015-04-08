@@ -56,7 +56,7 @@
 #ifdef CONFIG_AUDIO
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* So far, I have not been able to get FLL lock interrupts. Worse, I have
  * been able to get the FLL to claim that it is locked at all even when

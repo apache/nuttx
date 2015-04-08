@@ -63,7 +63,7 @@
 #include <nuttx/fs/smart.h>
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 //#define CONFIG_SMART_LOCAL_CHECKFREE

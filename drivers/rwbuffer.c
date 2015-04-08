@@ -57,7 +57,7 @@
 #if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
 
 /****************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/

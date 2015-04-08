@@ -45,7 +45,7 @@
 #include <debug.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enable excessive debug options */

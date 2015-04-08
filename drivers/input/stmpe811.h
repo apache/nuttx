@@ -56,7 +56,7 @@
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_STMPE811)
 
 /********************************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ********************************************************************************************/
 /* Configuration ****************************************************************************/
 /* Reference counting is partially implemented, but not needed in the current design.

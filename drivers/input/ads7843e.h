@@ -63,7 +63,7 @@
 #include <nuttx/input/ads7843e.h>
 
 /********************************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ********************************************************************************************/
 /* Configuration ****************************************************************************/
 /* Reference counting is partially implemented, but not needed in the current design. */

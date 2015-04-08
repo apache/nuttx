@@ -60,7 +60,7 @@
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define CONFIG_CC3000_MT              /* Indicate multi threaded version */

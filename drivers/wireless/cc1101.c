@@ -107,7 +107,7 @@
 #include <nuttx/wireless/cc1101.h>
 
 /****************************************************************************
- * Pre-rocessor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define CC1101_SPIFREQ_BURST    6500000 /* Hz, no delay */

@@ -54,7 +54,7 @@
 #include "cc3000drv.h"
 
 /*****************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  *****************************************************************************/
 
 #define SMART_CONFIG_PROFILE_SIZE        67   /* 67 = 32 (max ssid) + 32 (max key) +

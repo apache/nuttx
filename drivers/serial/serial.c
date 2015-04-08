@@ -57,7 +57,7 @@
 #include <nuttx/fs/ioctl.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* The architecture must provide up_putc for this driver */

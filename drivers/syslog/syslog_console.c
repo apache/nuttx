@@ -48,7 +48,7 @@
 #include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The architecture must provide syslog_putc for this driver */
