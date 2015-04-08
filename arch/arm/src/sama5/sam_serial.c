@@ -728,16 +728,34 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 }
 
 /****************************************************************************
+ * Name: up_restoreusartint
+ ****************************************************************************/
+
+static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
+{
+  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+
+  up_serialout(priv, SAM_UART_IER_OFFSET, imr);
+}
+
+/****************************************************************************
  * Name: up_disableallints
  ****************************************************************************/
 
-static void up_disableallints(struct up_dev_s *priv)
+static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
 {
   irqstate_t flags;
 
   /* The following must be atomic */
 
   flags = irqsave();
+
+  /* Return the current interrupt state */
+
+  if (imr)
+    {
+      *imr = up_serialin(priv, SAM_UART_IMR_OFFSET);
+    }
 
   /* Disable all interrupts */
 
@@ -887,7 +905,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Disable all interrupts */
 
-  up_disableallints(priv);
+  up_disableallints(priv, NULL);
 }
 
 /****************************************************************************
@@ -1243,13 +1261,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            imr = up_serialin(priv, SAM_UART_IMR_OFFSET);
-            up_disableallints(priv);
+            up_disableallints(priv, &imr);
             ret = up_setup(dev);
 
             /* Restore the interrupt state */
 
-            up_serialout(priv, SAM_UART_IER_OFFSET, imr);
+            up_restoreusartint(priv, imr);
           }
       }
       break;
@@ -1437,25 +1454,25 @@ void sam_earlyserialinit(void)
   /* Disable all USARTS */
 
 #ifdef TTYS0_DEV
-  up_disableallints(TTYS0_DEV.priv);
+  up_disableallints(TTYS0_DEV.priv, NULL);
 #endif
 #ifdef TTYS1_DEV
-  up_disableallints(TTYS1_DEV.priv);
+  up_disableallints(TTYS1_DEV.priv, NULL);
 #endif
 #ifdef TTYS2_DEV
-  up_disableallints(TTYS2_DEV.priv);
+  up_disableallints(TTYS2_DEV.priv, NULL);
 #endif
 #ifdef TTYS3_DEV
-  up_disableallints(TTYS3_DEV.priv);
+  up_disableallints(TTYS3_DEV.priv, NULL);
 #endif
 #ifdef TTYS4_DEV
-  up_disableallints(TTYS4_DEV.priv);
+  up_disableallints(TTYS4_DEV.priv, NULL);
 #endif
 #ifdef TTYS5_DEV
-  up_disableallints(TTYS5_DEV.priv);
+  up_disableallints(TTYS5_DEV.priv, NULL);
 #endif
 #ifdef TTYS6_DEV
-  up_disableallints(TTYS6_DEV.priv);
+  up_disableallints(TTYS6_DEV.priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */

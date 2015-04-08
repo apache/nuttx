@@ -710,7 +710,7 @@ static inline void sam_serialout(struct sam_dev_s *priv, int offset, uint32_t va
 
 static inline void sam_restoreusartint(struct sam_dev_s *priv, uint32_t imr)
 {
-  /* Restore the previous interrupt state */
+  /* Restore the previous interrupt state (assuming all interrupts disabled) */
 
   sam_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }

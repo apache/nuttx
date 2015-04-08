@@ -650,7 +650,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 
 static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
-  /* Restore the previous interrupt state */
+  /* Restore the previous interrupt state (assuming all interrupts disabled) */
 
   up_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }
