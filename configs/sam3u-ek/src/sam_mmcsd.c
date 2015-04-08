@@ -48,7 +48,7 @@
 #ifdef CONFIG_SAM34_HSMCI
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* This needs to be extended.  The card detect GPIO must be configured as an interrupt.

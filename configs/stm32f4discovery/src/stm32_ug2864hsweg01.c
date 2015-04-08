@@ -52,7 +52,7 @@
 #ifdef CONFIG_LCD_UG2864HSWEG01
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* The pin configurations here require that SPI1 is selected */

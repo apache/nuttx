@@ -53,7 +53,7 @@
 #include "pic32mx-starterkit.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Assume that we have MMC/SD, USB host (and USB device) */

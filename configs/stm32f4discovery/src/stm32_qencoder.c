@@ -51,7 +51,7 @@
 #include "stm32f4discovery.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration *******************************************************************/
 /* Check if we have a timer configured for quadrature encoder -- assume YES. */

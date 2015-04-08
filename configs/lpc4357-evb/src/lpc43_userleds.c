@@ -54,7 +54,7 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* LED definitions **********************************************************/
 /* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by

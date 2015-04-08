@@ -57,7 +57,7 @@
 #if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* CONFIG_DEBUG_SPI enables debug output from this file (needs CONFIG_DEBUG too) */

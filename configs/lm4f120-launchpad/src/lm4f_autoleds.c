@@ -52,7 +52,7 @@
 #include "lmf4120-launchpad.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED
  * which will vary in color.  But, from the standpoint of the firmware, this

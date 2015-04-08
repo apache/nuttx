@@ -58,7 +58,7 @@
 #include "olimex-stm32-h405.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)

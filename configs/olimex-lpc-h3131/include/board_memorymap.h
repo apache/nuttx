@@ -47,7 +47,7 @@
 #include <nuttx/config.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* If the LPC31xx ROM page table is selected, then the board-logic is required

@@ -52,7 +52,7 @@
 #include "sama5d3-xplained.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 /* PWM.  There are no dedicated PWM output pins available to the user for PWM

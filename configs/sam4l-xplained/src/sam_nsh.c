@@ -47,7 +47,7 @@
 #include "sam4l-xplained.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE

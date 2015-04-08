@@ -52,7 +52,7 @@
 #include "stm32ldiscovery.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration *******************************************************************/
 /* Check if we have a timer configured for quadrature encoder -- assume YES. */

@@ -46,7 +46,7 @@
 #include "tm4c1294-launchpad.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_DK_TM4C129X_TIMER

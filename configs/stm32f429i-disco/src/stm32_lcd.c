@@ -56,7 +56,7 @@
 #include "stm32_dma2d.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_LCDDEVICE
 # define ILI9341_LCD_DEVICE CONFIG_STM32F429I_DISCO_ILI9341_LCDDEVICE
