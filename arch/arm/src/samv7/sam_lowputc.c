@@ -226,8 +226,6 @@ void up_lowputc(char ch)
           /* Send the character */
 
           putreg32((uint32_t)ch, SAM_CONSOLE_BASE + SAM_UART_THR_OFFSET);
-          irqrestore(flags);
-          return;
         }
 
       irqrestore(flags);

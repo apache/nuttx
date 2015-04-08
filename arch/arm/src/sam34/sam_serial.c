@@ -652,7 +652,7 @@ static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
   /* Restore the previous interrupt state */
 
-  up_serialout(priv, SAM_UART_IMR_OFFSET, imr);
+  up_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }
 
 /****************************************************************************
