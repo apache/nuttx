@@ -52,7 +52,7 @@
 #include "a1x_pio.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 /* Select UART parameters for the selected console */

@@ -46,7 +46,7 @@
 #include "atmega_internal.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 #if defined(CONFIG_WDTO_15MS)

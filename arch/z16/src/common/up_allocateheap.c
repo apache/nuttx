@@ -51,7 +51,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Use ZDS-II linker settings to get the unused external RAM and use this

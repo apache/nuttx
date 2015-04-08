@@ -56,7 +56,7 @@
 #include "lpc43_uart.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 /* Select UART parameters for the selected console */

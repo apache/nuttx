@@ -45,7 +45,7 @@
 #include <arch/irq.h>
 
 /************************************************************************************
- * Pre-procesor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enhanced Interupt Controller (EIC) register offsets ******************************/

@@ -62,7 +62,7 @@
 #ifdef CONFIG_AVR_SPI
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

@@ -56,7 +56,7 @@
 #include "mmu.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a

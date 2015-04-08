@@ -55,7 +55,7 @@
 #include "lpc43_irq.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Get a 32-bit version of the default priority */

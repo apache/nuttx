@@ -54,7 +54,7 @@
 #include "at32uc3_pinmux.h"
 
 /******************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ******************************************************************************/
 
 /* Select USART parameters for the selected console */

@@ -54,7 +54,7 @@
 #include "stm32_uart.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 /* Select USART parameters for the selected console */

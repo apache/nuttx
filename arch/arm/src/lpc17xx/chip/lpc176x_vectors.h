@@ -38,7 +38,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 /* This file is included by lpc17_vectors.S.  It provides the macro VECTOR that
  * supplies each LPC17xx vector in terms of a (lower-case) ISR label and an

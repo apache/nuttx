@@ -54,7 +54,7 @@
 #include "stm32.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The desired timer interrupt frequency is provided by the definition

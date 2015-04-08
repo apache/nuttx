@@ -57,7 +57,7 @@
 #include "sam_periphclks.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* All SAM's have SRAM.  In addition, they may have external SRAM or SDRAM */
 

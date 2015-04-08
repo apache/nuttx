@@ -77,7 +77,7 @@
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* When SPI DMA is enabled, small DMA transfers will still be performed by

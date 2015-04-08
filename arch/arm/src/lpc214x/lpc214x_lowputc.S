@@ -47,7 +47,7 @@
 #include "lpc214x_uart.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)

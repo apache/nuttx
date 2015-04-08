@@ -48,7 +48,7 @@
 #include <arch/board/board.h> /* For clock settings */
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Derive baud divisor setting from clock settings (see board.h) */
 //--F_in = 57 600 000 Hz U0DLM=0, U0DLL=25, DIVADDVAL=3, MULVAL=12, baudrate=115200, err = 0.000000 %

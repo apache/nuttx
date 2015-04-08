@@ -51,7 +51,7 @@
 #include "str71x_internal.h"
 
 /********************************************************************************
- * Pre-procesor Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* Select set of peripherals to be enabled */

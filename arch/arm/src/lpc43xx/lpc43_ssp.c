@@ -62,7 +62,7 @@
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The following enable debug output from this file (needs CONFIG_DEBUG too).

@@ -50,7 +50,7 @@
 #include "up_arch.h"
 
 /*****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  *****************************************************************************/
 
 /* This file holds the NuttX start logic that runs when the LPC2148

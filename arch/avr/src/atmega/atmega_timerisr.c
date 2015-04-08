@@ -52,7 +52,7 @@
 #include "atmega_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The CPU frequency is given by BOARD_CPU_CLOCK (defined in board.h).  The

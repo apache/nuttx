@@ -59,7 +59,7 @@
 #include "lpc43_usbram.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Get customizations for each supported chip.
  *

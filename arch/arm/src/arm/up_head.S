@@ -158,7 +158,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* RX_NSECTIONS determines the number of 1Mb sections to map for the

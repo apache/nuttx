@@ -48,7 +48,7 @@
 #include <arch/avr/avr.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The ATmegaXXXc has 64 interrupt vectors including vector 0, the reset

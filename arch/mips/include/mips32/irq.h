@@ -48,7 +48,7 @@
 #include <arch/types.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* The global pointer (GP) does not need to be saved in the "normal," flat

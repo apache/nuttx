@@ -53,7 +53,7 @@
 #include "lpc214x_vic.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The timers count at the rate of PCLK which is determined by PLL_M and

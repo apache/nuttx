@@ -54,7 +54,7 @@
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Clocking *****************************************************************/
 /* The minimum frequency of the WWDG clock is:

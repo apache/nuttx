@@ -48,7 +48,7 @@
 #include <arch/avr/avr.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The AT90USB has 38 interrupt vectors including vector 0, the reset

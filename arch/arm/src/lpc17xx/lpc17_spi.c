@@ -61,7 +61,7 @@
 #ifdef CONFIG_LPC17_SPI
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* This driver does not support the SPI exchange method. */

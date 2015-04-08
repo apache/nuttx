@@ -56,7 +56,7 @@
 #include "stm32_waste.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.

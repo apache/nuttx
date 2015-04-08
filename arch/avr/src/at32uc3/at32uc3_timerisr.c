@@ -52,7 +52,7 @@
 #include "at32uc3_rtc.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The desired timer interrupt frequency is normally provided by the

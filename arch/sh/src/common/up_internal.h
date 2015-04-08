@@ -48,7 +48,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Bring-up debug configurations.  These are here (vs defconfig)

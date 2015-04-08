@@ -55,7 +55,7 @@
 #include "m9s12_crg.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The desired timer interrupt frequency is provided by the definition

@@ -53,7 +53,7 @@
 #include "chip/kl_uart.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 /* Select UART parameters for the selected console */
 

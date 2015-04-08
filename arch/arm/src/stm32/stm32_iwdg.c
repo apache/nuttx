@@ -56,7 +56,7 @@
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Clocking *****************************************************************/
 /* The minimum frequency of the IWDG clock is:

@@ -47,7 +47,7 @@
 #include <arch/board/board.h>
 
 /************************************************************************************
- * Pre-procesor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Calculate the values of PCLK1 and PCLK2 from settings in board.h.

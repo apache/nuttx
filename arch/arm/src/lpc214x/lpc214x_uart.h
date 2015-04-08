@@ -43,7 +43,7 @@
 #include <arch/board/board.h> /* For clock settings */
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* PINSEL0 bit definitions for UART0/1 */

@@ -1190,7 +1190,7 @@ int up_putc(int ch)
 #else /* USE_SERIALDRIVER */
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #  if defined(CONFIG_UART1_SERIAL_CONSOLE)

@@ -45,7 +45,7 @@
 #include "m9s12_internal.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 #ifdef CONFIG_HCS12_NONBANKED
