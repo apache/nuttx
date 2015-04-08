@@ -1094,6 +1094,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         struct termios  *termiosp = (struct termios*)arg;
         struct up_dev_s *priv     = (struct up_dev_s *)dev->priv;
         uint32_t baud;
+        uint32_t imr;
         uint8_t parity;
         uint8_t nbits;
         bool stop2;
@@ -1178,7 +1179,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
+            up_disableallints(priv, &imr);
             ret = up_setup(dev);
+
+            /* Restore the interrupt state */
+
+            up_restoreusartint(priv, imr);
           }
       }
       break;
