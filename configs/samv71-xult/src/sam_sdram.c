@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 
@@ -300,7 +301,8 @@ void sam_sdram_config(void)
    * For IS42S16100E, 2048 refresh cycle every 32ms, every 15.625 usec
    */
 
-  putreg32(1562, SAM_SDRAMC_TR);
+  regval = (32 * (BOARD_MCK_FREQUENCY / 1000)) / 2048 ;
+  putreg32(regval, SAM_SDRAMC_TR);
 
   regval  = getreg32(SAM_SDRAMC_CFR1);
   regval |= SDRAMC_CFR1_UNAL;
