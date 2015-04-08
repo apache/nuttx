@@ -50,7 +50,7 @@
 #include <nuttx/binfmt/elf.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #undef ELF_DUMP_READDATA       /* Define to dump all file data read */

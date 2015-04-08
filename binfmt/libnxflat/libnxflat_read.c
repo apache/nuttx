@@ -51,7 +51,7 @@
 #include <nuttx/binfmt/nxflat.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #undef NXFLAT_DUMP_READDATA    /* Define to dump all file data read */
