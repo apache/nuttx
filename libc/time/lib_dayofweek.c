@@ -1,8 +1,9 @@
 /****************************************************************************
- * include/nuttx/time.h
+ * libc/time/lib_dayofweek.c
  *
- *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 - 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,72 +34,49 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_TIME_H
-#define __INCLUDE_NUTTX_TIME_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdbool.h>
-#include <time.h>
+
+#include <nuttx/time.h>
+
+#if defined(CONFIG_TIME_EXTENDED)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If Gregorian time is not supported, then neither is Julian */
-
-#ifndef CONFIG_GREGORIAN_TIME
-#  undef CONFIG_JULIAN_TIME
-#else
-#  define JD_OF_EPOCH           2440588    /* Julian Date of noon, J1970 */
-
-#  ifdef CONFIG_JULIAN_TIME
-#    define GREG_DUTC           -141427    /* Default is October 15, 1582 */
-#    define GREG_YEAR            1582
-#    define GREG_MONTH           10
-#    define GREG_DAY             15
-#  endif /* CONFIG_JULIAN_TIME */
-#endif /* !CONFIG_GREGORIAN_TIME */
-
 /****************************************************************************
- * Public Data
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Function Prototypes
  ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
- * Function:  clock_isleapyear
- *
- * Description:
- *    Return true if the specified year is a leap year
- *
+ * Public Constant Data
  ****************************************************************************/
-
-int clock_isleapyear(int year);
 
 /****************************************************************************
- * Function:  clock_daysbeforemonth
- *
- * Description:
- *    Get the number of days that occurred before the beginning of the month.
- *
+ * Public Variables
  ****************************************************************************/
 
-int clock_daysbeforemonth(int month, bool leapyear);
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Function:  clock_dayoftheweek
@@ -112,30 +90,17 @@ int clock_daysbeforemonth(int month, bool leapyear);
  *   year  - the year including the 1900
  *
  * Returned value:
- *   Zero based day of the week 0-6, 0 = Sunday, 1 = Monday... 6 = Saturday
+  * Zero based day of the week 0-6, 0 = Sunday, 1 = Monday... 6 = Saturday
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIME_EXTENDED)
-int clock_dayoftheweek(int mday, int month, int year);
-#endif
-
-/****************************************************************************
- * Function:  clock_calendar2utc
- *
- * Description:
- *    Calendar/UTC conversion based on algorithms from p. 604
- *    of Seidelman, P. K. 1992.  Explanatory Supplement to
- *    the Astronomical Almanac.  University Science Books,
- *    Mill Valley.
- *
- ****************************************************************************/
-
-time_t clock_calendar2utc(int year, int month, int day);
-
-#undef EXTERN
-#ifdef __cplusplus
+int clock_dayoftheweek(int mday, int month, int year)
+{
+  if (month <= 2) {
+      year--;
+      month += 12;
+  }
+  month -= 2;
+  return (mday + year + year/4 - year/100 + year/400 + ( 31 * month) / 12) % 7;
 }
-#endif
-
-#endif /* __INCLUDE_NUTTX_TIME_H */
+#endif /* CONFIG_TIME_EXTENDED */

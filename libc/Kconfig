@@ -285,6 +285,16 @@ config LIBC_TZDIR
 
 endif
 
+config TIME_EXTENDED
+	bool "Add day of week, year support"
+	default "n"
+	---help---
+		Selecting TIME_EXTENDED adds tm_wday, tm_yday and tm_isdst
+		to the tm struct. This allows integration with 3rd party libraries
+		that expect the tm struct to contain these members.
+
+		Note: tm_isdst is always 0
+
 config LIB_SENDFILE_BUFSIZE
 	int "sendfile() buffer size"
 	default 512
