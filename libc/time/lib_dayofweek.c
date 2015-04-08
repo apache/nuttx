@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/time/lib_dayofweek.c
  *
- *   Copyright (C) 2009, 2011 - 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -70,6 +70,7 @@
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -90,16 +91,18 @@
  *   year  - the year including the 1900
  *
  * Returned value:
-  * Zero based day of the week 0-6, 0 = Sunday, 1 = Monday... 6 = Saturday
+ *   Zero based day of the week 0-6, 0 = Sunday, 1 = Monday... 6 = Saturday
  *
  ****************************************************************************/
 
 int clock_dayoftheweek(int mday, int month, int year)
 {
-  if (month <= 2) {
+  if (month <= 2)
+    {
       year--;
       month += 12;
-  }
+    }
+
   month -= 2;
   return (mday + year + year/4 - year/100 + year/400 + ( 31 * month) / 12) % 7;
 }
