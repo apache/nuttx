@@ -10110,19 +10110,15 @@
 	  relative to providing the last 3 members of the tm struct and support
 	  for filling them in and even using the wday in the STM32 RTC. From
 	  David Sidrane.
-
-# Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
-# On branch master
-# Your branch is ahead of 'origin/master' by 1 commit.
-#
-# Changes to be committed:
-#   (use "git reset HEAD <file>..." to unstage)
-#
-#       modified:   nuttx/arch/arm/src/stm32/stm32_rtcc.c
-#       modified:   nuttx/include/nuttx/time.h
-#       modified:  
-#       modified:   nuttx/libc/Kconfig
-#       modified:   nuttx/libc/time/Make.defs
-#       new file:   nuttx/libc/time/lib_dayofweek.c
-#       modified:   nuttx/libc/time/lib_gmtimer.c
+	* arch/arm/src/sam34/sam_serial.c and samv7/sam_serial.c:  A side-effect
+	  of changing serial settings via TERMIOS (such as tcsetattr) is that
+	  serial interrupts were being left disabled.  This is not a problem if
+	  the serial configuration is changed when there are no open references
+	  to the serial device.  In that case, serial interrupts are disabled and
+	  will not be enabled enabled until the serial device is first opened.
+	  But it is fatal if the serial device is already opened and if there is
+	  a task waiting to receive data.  In that case, the side-effect of
+	  disabling interrupts is fatal:  That task is then left hanging with
+	  interrupts disabled (2015-04-08)
+	* arch/arm/src/sama5/sam_serial.c:  Backport support for flowcontrol and
+	  termios from SAM3/4 -- UNVERIFIED. (2015-04-08).
