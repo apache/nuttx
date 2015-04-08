@@ -282,38 +282,45 @@ config SAMA5_UART0
 	default y
 	depends on SAMA5_HAVE_UART0
 	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_UART1
 	bool "UART 1"
 	default n
 	depends on SAMA5_HAVE_UART1
 	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART0
 	bool "USART 0"
 	default n
 	select ARCH_HAVE_USART0
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART1
 	bool "USART 1"
 	default n
 	select ARCH_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART2
 	bool "USART 2"
 	default n
 	select ARCH_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART3
 	bool "USART 3"
 	default n
 	select ARCH_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_USART4
 	bool "USART 4"
 	default n
 	depends on SAMA5_HAVE_USART4
 	select ARCH_HAVE_USART4
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_TWI0
 	bool "Two-Wire Interface 0 (TWI0)"

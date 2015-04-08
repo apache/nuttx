@@ -404,7 +404,7 @@ struct up_dev_s
   uint8_t  bits;      /* Number of bits (7 or 8) */
   bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  bool     flowc;               /* input flow control (RTS) enabled */
+  bool     flowc;     /* input flow control (RTS) enabled */
 #endif
 };
 
@@ -521,7 +521,7 @@ static struct up_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
-;
+};
 
 static uart_dev_t g_uart1port =
 {
@@ -1239,16 +1239,17 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
             priv->flowc     = flowc;
 #endif
-            /* effect the changes immediately - note that we do not
+            /* Effect the changes immediately - note that we do not
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            up_disableallints(priv, &imr);
+            imr = up_serialin(priv, SAM_UART_IMR_OFFSET);
+            up_disableallints(priv);
             ret = up_setup(dev);
 
             /* Restore the interrupt state */
 
-            up_restoreusartint(priv, imr);
+            up_serialout(priv, SAM_UART_IER_OFFSET, imr);
           }
       }
       break;
