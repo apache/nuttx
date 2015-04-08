@@ -10105,3 +10105,24 @@
 	  nxtk_drawlinewindow.c: Implement line caps by drawing a file circle at
 	  the each endpoint of a line with a radius equal to half of the width
 	  of the line (2015-04-05).
+	* include/time.h, nuttx/time.h, libc/time/lib_dayofweek.c and
+	  lib_gmtimer.c: Implements CONFIG_TIME_EXTENDED as we discussed
+	  relative to providing the last 3 members of the tm struct and support
+	  for filling them in and even using the wday in the STM32 RTC. From
+	  David Sidrane.
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is ahead of 'origin/master' by 1 commit.
+#
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#       modified:   nuttx/arch/arm/src/stm32/stm32_rtcc.c
+#       modified:   nuttx/include/nuttx/time.h
+#       modified:  
+#       modified:   nuttx/libc/Kconfig
+#       modified:   nuttx/libc/time/Make.defs
+#       new file:   nuttx/libc/time/lib_dayofweek.c
+#       modified:   nuttx/libc/time/lib_gmtimer.c
