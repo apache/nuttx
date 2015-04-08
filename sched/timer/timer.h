@@ -49,7 +49,7 @@
 #include <nuttx/wdog.h>
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 #define PT_FLAGS_PREALLOCATED 0x01 /* Timer comes from a pool of preallocated timers */

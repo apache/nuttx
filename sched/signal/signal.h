@@ -49,7 +49,7 @@
 #include <nuttx/kmalloc.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The following definition determines the number of signal structures to

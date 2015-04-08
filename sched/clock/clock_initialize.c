@@ -56,7 +56,7 @@
 #include "clock/clock.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Standard time definitions (in units of seconds) */
 
