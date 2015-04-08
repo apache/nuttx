@@ -48,7 +48,7 @@
 #include "samd20-xplained.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Some configuration checks */
 

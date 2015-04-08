@@ -50,7 +50,7 @@
 #include <errno.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Size of the circular buffer used for interrupt I/O */

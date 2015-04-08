@@ -63,7 +63,7 @@
 #ifdef USE_SERIALDRIVER
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 #define TRSDOS 0 /* TRSDOS 1.3 */
 #define LDOS 1 /* LDOS 5.3.1 */

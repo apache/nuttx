@@ -121,7 +121,7 @@
 #ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* The pin configurations here require that SPI1 is selected */

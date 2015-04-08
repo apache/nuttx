@@ -52,7 +52,7 @@
 #ifdef CONFIG_USBHOST_HIDMOUSE
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Both CONFIG_DEBUG_INPUT and CONFIG_DEBUG_USB could apply to this file.
  * We assume here that CONFIG_DEBUG_INPUT might be enabled separately, but

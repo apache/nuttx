@@ -53,7 +53,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /*  There are three user-controllable LEDs on board the Arduino Due board:
  *

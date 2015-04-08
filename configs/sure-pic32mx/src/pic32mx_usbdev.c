@@ -53,7 +53,7 @@
 #if defined(CONFIG_PIC32MX_USBDEV)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* The Sure DB_DP11215 PIC32 Storage Demo Board has a CP2102 PHY that is shared
  * between the USB and the UART-to-USB logic.  That PHY must be programmed during

@@ -45,7 +45,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Memory map.  Board-specific extensions to the basic ez80f91 memory map

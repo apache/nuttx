@@ -55,7 +55,7 @@
 #if defined(CONFIG_LPC17_EMC) && defined(CONFIG_LPC17_EXTDRAM)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* The core clock is LPC17_EMCCLK which may be either LPC17_CCLK* (undivided), or
  * LPC17_CCLK / 2 as determined by settings in the board.h header file.

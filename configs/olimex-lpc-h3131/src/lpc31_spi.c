@@ -56,7 +56,7 @@
        * in arch/arm/src/lpc31xx */
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */
