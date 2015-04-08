@@ -60,7 +60,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_HCS12_NINTERFACES determines the number of physical interfaces

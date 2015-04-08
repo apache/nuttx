@@ -65,7 +65,7 @@
 #if defined(CONFIG_M16C_UART0) || defined(CONFIG_M16C_UART1) || defined(CONFIG_M16C_UART2)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration **********************************************************/
@@ -235,7 +235,7 @@ elif defined(CONFIG_M16C_UART1)
 #  undef TTYS1_DEV                       /* No tty2 */
 #endif
 
-/* Definitions for the enable field of the device structure */
+/* Pre-processor Definitions for the enable field of the device structure */
 
 #define M16C_RXENABLED     0x01
 #define M16C_TXENABLED     0x02

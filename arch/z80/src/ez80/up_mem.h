@@ -44,7 +44,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* For the ZiLOG ZDS-II toolchain(s), the heap will be set using linker-

@@ -57,7 +57,7 @@
 #include "sam_periphclks.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* All SAM's have SRAM0.  The SAM3U family also have SRAM1 and possibly
  * NFCSRAM.  NFCSRAM may not be used, however, if NAND support is enabled.

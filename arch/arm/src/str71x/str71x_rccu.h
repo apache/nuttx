@@ -45,7 +45,7 @@
 #include "str71x_map.h"
 
 /************************************************************************************
- * Pre-procesor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Reset and Clock Control Unit (RCCU) register offsets *****************************/

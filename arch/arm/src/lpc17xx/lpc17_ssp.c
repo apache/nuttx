@@ -62,7 +62,7 @@
     defined(CONFIG_LPC17_SSP2)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* This driver does not support the SPI exchange method. */

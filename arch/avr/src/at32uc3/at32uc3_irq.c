@@ -57,7 +57,7 @@
 #include "at32uc3_intc.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* These symbols are exported from up_exceptions.S:

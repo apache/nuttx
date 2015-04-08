@@ -53,7 +53,7 @@
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_SAMA5_WDT)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* The Watchdog Timer uses the Slow Clock divided by 128 to establish the

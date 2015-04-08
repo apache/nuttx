@@ -44,7 +44,7 @@
 #include "chip.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
@@ -137,7 +137,7 @@
 
 /* Timer Toggle Overflow Register Bit-Field Definitions */
 
-#define TIM_TTOV(n)                   (1 << (n)) /* Toggle On Overflow Bits
+#define TIM_TTOV(n)                   (1 << (n)) /* Toggle On Overflow Bits */
 
 /* Timer Control Register1 Bit-Field Definitions */
 

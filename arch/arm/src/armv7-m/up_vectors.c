@@ -41,7 +41,7 @@
 #include "chip.h"
 
 /************************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #define IDLE_STACK      ((unsigned)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)

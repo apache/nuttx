@@ -66,7 +66,7 @@
 #ifdef CONFIG_LPC43_SPIFI
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* SPIFI Configuration ******************************************************/
 /* This logic supports some special options that can be used to create an

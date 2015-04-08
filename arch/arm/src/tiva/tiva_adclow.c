@@ -179,7 +179,7 @@ struct tiva_adc_sse_s
 };
 
 /****************************************************************************
- * Private Function Definitions
+ * Private Function Prototypes
  ****************************************************************************/
 
 static void tiva_adc_interrupt(struct tiva_adc_sse_s *sse);

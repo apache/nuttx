@@ -57,7 +57,7 @@
 #ifdef CONFIG_ARMV7A_L2CC_PL310
 
 /***************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ***************************************************************************/
 /* Configuration ***********************************************************/
 /* Number of ways depends on ARM configuration */

@@ -55,7 +55,7 @@
 #include "lpc17_serial.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 /* Select UART parameters for the selected console */

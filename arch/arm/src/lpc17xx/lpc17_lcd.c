@@ -53,7 +53,7 @@
 #include "lpc17_lcd.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define LPC17_LCD_CLK_PER_LINE \

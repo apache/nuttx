@@ -51,7 +51,7 @@
 #include "at32uc3_gpio.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 /* How many GPIO ports are supported?  There are 32-pins per port and we

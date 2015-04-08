@@ -62,7 +62,7 @@
 extern uint32_t get_freq(void);
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* System clock frequency value from ZDS target settings */
@@ -791,7 +791,7 @@ int up_putc(int ch)
 #else /* USE_SERIALDRIVER */
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE

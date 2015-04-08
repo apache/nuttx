@@ -53,7 +53,7 @@
 #if defined(USE_LOWSERIALINIT) && defined(HAVE_SCC)
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Select UART parameters for the selected console */

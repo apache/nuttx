@@ -52,7 +52,7 @@
 #include "chip/a1x_timer.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Timer 0 will run at the rate of OSC24M with no division */
 

@@ -49,7 +49,7 @@
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARMV7M_MPU)
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef MAX

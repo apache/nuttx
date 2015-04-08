@@ -82,7 +82,7 @@
 #if STM32_NETHERNET > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* See configs/stm3240g-eval/README.txt for an explanation of the configuration

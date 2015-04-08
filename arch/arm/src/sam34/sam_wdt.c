@@ -56,7 +56,7 @@
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_SAM34_WDT)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Clocking *****************************************************************/
 /* The minimum frequency of the WWDG clock is:

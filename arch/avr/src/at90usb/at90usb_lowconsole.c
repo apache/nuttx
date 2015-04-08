@@ -53,7 +53,7 @@
 #include "at90usb_internal.h"
 
 /******************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ******************************************************************************/
 
 /* Baud rate settings for normal and double speed modes  */

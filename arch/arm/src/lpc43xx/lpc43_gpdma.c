@@ -58,7 +58,7 @@
 #ifdef CONFIG_LPC43_GPDMA
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */

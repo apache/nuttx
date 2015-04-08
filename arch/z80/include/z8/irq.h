@@ -50,7 +50,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* This is similar configuration information that is contained in ez8.h.

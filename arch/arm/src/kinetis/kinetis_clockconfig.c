@@ -52,7 +52,7 @@
 #include "kinetis_pinmux.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_RAMFUNCS

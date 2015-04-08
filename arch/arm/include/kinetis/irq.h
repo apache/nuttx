@@ -48,7 +48,7 @@
 #include <nuttx/irq.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* IRQ numbers **********************************************************************/
 /* The IRQ numbers corresponds directly to vector numbers and hence map directly to

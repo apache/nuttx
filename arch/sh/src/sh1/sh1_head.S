@@ -46,7 +46,7 @@
 #include "up_arch.h"
 
 /*****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  *****************************************************************************/
 
 /* This file holds the NuttX start logic that runs when the SH-1/US7032EVB1

@@ -58,7 +58,7 @@
 #include "stm32_mpuinit.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Internal SRAM is available in all members of the STM32 family. The
  * following definitions must be provided to specify the size and

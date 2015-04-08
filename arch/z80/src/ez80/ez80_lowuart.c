@@ -52,7 +52,7 @@
 #ifdef USE_LOWSERIALINIT
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Is there any serial support?  This might be the case if the board does

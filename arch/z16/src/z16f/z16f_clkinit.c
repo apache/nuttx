@@ -42,7 +42,7 @@
 #include "chip/chip.h"
 
 /***************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ***************************************************************************/
 
 /* System clock source value from ZDS target settings */
