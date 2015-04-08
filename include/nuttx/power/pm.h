@@ -75,7 +75,7 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_IDLE_CUSTOM. Some architectures support this definition.  This,

@@ -50,7 +50,7 @@
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_MXT)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Maximum number of threads than can be waiting for POLL events */

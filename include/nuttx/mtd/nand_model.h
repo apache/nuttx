@@ -58,7 +58,7 @@
 #include <stdbool.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Number of NAND FLASH models inside the model list */

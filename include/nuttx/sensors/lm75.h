@@ -44,7 +44,7 @@
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************
  * CONFIG_I2C - Enables support for I2C drivers

@@ -47,7 +47,7 @@
 #include <semaphore.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* If the MCU has a small (16-bit) address capability, then we will use

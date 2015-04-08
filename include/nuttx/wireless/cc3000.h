@@ -53,7 +53,7 @@
 #include <nuttx/wireless/wireless.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define DEV_FORMAT   "/dev/wireless%d" /* The device Name*/

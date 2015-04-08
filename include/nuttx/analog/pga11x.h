@@ -51,7 +51,7 @@
 #if defined(CONFIG_ADC) && defined(CONFIG_ADC_PGA11X)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Prerequisites:

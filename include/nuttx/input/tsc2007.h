@@ -56,7 +56,7 @@
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_TSC2007)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Maximum number of threads than can be waiting for POLL events */

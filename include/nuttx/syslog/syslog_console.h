@@ -46,7 +46,7 @@
 #ifdef CONFIG_SYSLOG_CONSOLE
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_SYSLOG_CONSOLE - Use the syslog logging output as a system console.

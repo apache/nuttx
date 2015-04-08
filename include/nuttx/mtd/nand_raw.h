@@ -56,7 +56,7 @@
 #include <nuttx/mtd/nand_model.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Nand flash commands */
 

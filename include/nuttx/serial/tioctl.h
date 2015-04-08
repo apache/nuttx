@@ -46,7 +46,7 @@
 #include <stdint.h>
 
 /********************************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ********************************************************************************************/
 
 /* Get and Set Terminal Attributes (see termios.h) */

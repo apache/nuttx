@@ -49,7 +49,7 @@
 #ifdef CONFIG_GRAN
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_GRAN - Enable granule allocator support

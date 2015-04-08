@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* A packet identifier (PID) immediately follows the SYNC field of every USB packet.
  * A PID consists of a four-bit packet type field followed by a four-bit check field

@@ -47,7 +47,7 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Macros to hide implementation */

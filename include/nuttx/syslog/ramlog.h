@@ -59,7 +59,7 @@
 #ifdef CONFIG_RAMLOG
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_RAMLOG - Enables the RAM logging feature

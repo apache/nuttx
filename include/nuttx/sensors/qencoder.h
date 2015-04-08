@@ -46,7 +46,7 @@
 #ifdef CONFIG_QENCODER
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************
  * CONFIG_QENCODER - Enables support for the quadrature encoder upper half

@@ -51,7 +51,7 @@
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* SPI Frequency.  Default:  100KHz */

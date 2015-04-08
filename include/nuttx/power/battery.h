@@ -51,7 +51,7 @@
 #ifdef CONFIG_BATTERY
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_BATTERY - Upper half battery driver support

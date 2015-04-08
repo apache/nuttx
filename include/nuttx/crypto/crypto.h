@@ -44,7 +44,7 @@
 #include <debug.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #if defined(CONFIG_CRYPTO_AES)

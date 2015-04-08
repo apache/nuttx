@@ -56,7 +56,7 @@
 #include <nuttx/mtd/nand_raw.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* These are the possible errors when trying to verify a block of data
  * encoded using a Hamming code:

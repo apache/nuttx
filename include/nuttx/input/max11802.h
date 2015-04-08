@@ -53,7 +53,7 @@
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_MAX11802)
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* SPI Frequency.  Default:  100KHz */

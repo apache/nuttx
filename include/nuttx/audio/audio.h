@@ -63,7 +63,7 @@
 #ifdef CONFIG_AUDIO
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_AUDIO - Enables Audio driver support

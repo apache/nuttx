@@ -47,7 +47,7 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define SMART_DEBUG_CMD_SET_DEBUG_LEVEL   1
