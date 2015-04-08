@@ -49,7 +49,7 @@
 #include <nuttx/input/kbd_codec.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define NDX_ESC        0

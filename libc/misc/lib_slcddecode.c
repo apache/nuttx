@@ -50,7 +50,7 @@
 #include <nuttx/lcd/slcd_codec.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose
