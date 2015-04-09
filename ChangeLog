@@ -10127,5 +10127,5 @@
 	  actually re-enable UART interrupts (2015-04-08).
 	* sigaddset() and sigdelset(): Need to set errno if a bad signal number
 	  is received (2015-04-09).
-	* sighold(), sigrelse(), sigignore(), and sigpause():  New signal
-	  handling functions (2015-04-09).
+	* sighold(), sigrelse(), sigignore(), sigset() and sigpause():  New
+	  signal handling functions (2015-04-09).
