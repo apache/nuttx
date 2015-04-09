@@ -33,6 +33,9 @@ rmdir          NXrmdir
 seekdir        NXseekdir
 select         NXselect
 send           NXsend
+sighold        NXsighold
+sigprocmask    NXsigprocmask
+sigrelse       NXsigrelse
 sendto         NXsendto
 sleep          NXsleep
 socket         NXsocket

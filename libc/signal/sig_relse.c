@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-int sighold(int signo)
+int sigrelse(int signo)
 {
   sigset_t set;
   int ret;
