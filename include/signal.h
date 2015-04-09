@@ -165,11 +165,17 @@
 #define SIGEV_NONE      0 /* No notification desired */
 #define SIGEV_SIGNAL    1 /* Notify via signal */
 
-/* Special values of sigaction (all treated like NULL) */
+/* Special values of of sa_handler used by sigaction and sigset.  There are all
+ * treated like NULL for now.
+ *
+ * REVISIT:  Need to distinguish the value of SIG_HOLD.  It is need in the
+ * implementation of sigset().
+ */
 
 #define SIG_ERR         ((CODE void*)-1)
 #define SIG_DFL         ((CODE void*)0)
 #define SIG_IGN         ((CODE void*)0)
+#define SIG_HOLD        ((CODE void*)0)
 
 /********************************************************************************
  * Global Type Declarations
@@ -262,6 +268,7 @@ int sigdelset(FAR sigset_t *set, int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigaction(int sig, FAR const struct sigaction *act,
               FAR struct sigaction *oact);
+void (*sigset(int signo, void (*disp)(int)))(int);
 int sigignore(int signo);
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 int sigpause(int signo);

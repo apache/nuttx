@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: November 29, 2014</p>
+      <p>Last Updated: April 9, 2015</p>
     </td>
   </tr>
 </table>
@@ -4487,14 +4487,19 @@ interface of the same name.
   <li><a href="#sigdelset">2.7.4 sigdelset</a></li>
   <li><a href="#sigismember">2.7.5 sigismember</a></li>
   <li><a href="#sigaction">2.7.6 sigaction</a></li>
-  <li><a href="#sigprocmask">2.7.7 sigprocmask</a></li>
-  <li><a href="#sigpending">2.7.8 sigpending</a></li>
-  <li><a href="#sigsuspend">2.7.9 sigsuspend</a></li>
-  <li><a href="#sigwaitinfo">2.7.10 sigwaitinfo</a></li>
-  <li><a href="#sigtimedwait">2.7.11 sigtimedwait</a></li>
-  <li><a href="#sigqueue">2.7.12 sigqueue</a></li>
-  <li><a href="#kill">2.7.13 kill</a></li>
-  <li><a href="#pause">2.7.14 pause</a></li>
+  <li><a href="#sigignore">2.7.7 sigignore</a></li>
+  <li><a href="#sigset">2.7.8 sigset</a></li>
+  <li><a href="#sigprocmask">2.7.9 sigprocmask</a></li>
+  <li><a href="#sighold">2.7.10 sighold</a></li>
+  <li><a href="#sigrelse">2.7.11 sigrelse</a></li>
+  <li><a href="#sigpending">2.7.12 sigpending</a></li>
+  <li><a href="#sigsuspend">2.7.13 sigsuspend</a></li>
+  <li><a href="#sigpause">2.7.14 sigpause</a></li>
+  <li><a href="#sigwaitinfo">2.7.15 sigwaitinfo</a></li>
+  <li><a href="#sigtimedwait">2.7.16 sigtimedwait</a></li>
+  <li><a href="#sigqueue">2.7.17 sigqueue</a></li>
+  <li><a href="#kill">2.7.18 kill</a></li>
+  <li><a href="#pause">2.7.19 pause</a></li>
 </ul>
 
 <H3><a name="sigemptyset">2.7.1 sigemptyset</a></H3>
@@ -4729,7 +4734,65 @@ Differences from the POSIX implementation include:
   </li>
 </ul>
 
-<H3><a name="sigprocmask">2.7.7 sigprocmask</a></H3>
+<H3><a name="sigignore">2.7.7 sigignore</a></H3>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;signal.h&gt;
+    int sigignore(int signo);
+</pre>
+
+<p>
+<b>Description:</b> The sigignore() function will set the disposition of <code>signo</code> to <code>SIG_IGN</code>.
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>signo</code>.  The signal number to act on
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>Zero is returned upon successful completion, otherwise -1 (<code>ERROR</code>) is returned with the <code<>errno</code> set appropriately.  The <code>errno</code> value of <code>EINVAL</code>, for example, would indicate that <code>signo</code> argument is not a valid signal number.
+</ul>
+
+<H3><a name="sigset">2.7.8 sigset</a></H3>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;signal.h&gt;
+    void (*sigset(int signo, void (*disp)(int)))(int);
+</pre>
+
+<p>
+<b>Description:</b>
+  The sigset() function will modify signal dispositions.
+  The <code>signo</code> argument specifies the signal.
+  The <code>disp</code> argument specifies the signal's disposition, which may be <code>SIG_DFL</code>, <code>SIG_IGN</code>, or the address of a signal handler.
+  If <code>disp</code> is the address of a signal handler, the system will add <code>signo</code> to the calling process' signal mask before executing the signal handler; when the signal handler returns, the system will restore the calling process' signal mask to its state prior to the delivery of the signal.
+  <code>signo</code> will be removed from the calling process' signal mask.
+</p>
+<p>
+  NOTE:  The value <code>SIG_HOLD</code> for <code>disp</code> is not currently supported.
+</p>
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>signo</code>.  The signal number to operate on
+<li><code>disp</code>.  The new disposition of the signal
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>
+Upon successful completion, <code>sigset()</code> will the previous disposition of the signal.
+Otherwise, <code>SIG_ERR</code> will be returned and <code>errno</code> set to indicate the error.
+</ul>
+
+<H3><a name="sigprocmask">2.7.9 sigprocmask</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4779,7 +4842,55 @@ pointed to by the <code>set</code> input parameter.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigpending">2.7.8 sigpending</a></H3>
+<H3><a name="sighold">2.7.10 sighold</a></H3>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;signal.h&gt;
+    int sighold(int signo);
+</pre>
+
+<p>
+<b>Description:</b> The sighold() function will add <code>signo</code> to the calling process' signal mask
+</p>
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>signo</code>.  Identifies the signal to be blocked.
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>Zero is returned upon successful completion, otherwise -1 (<code>ERROR</code>) is returned with the <code<>errno</code> set appropriately.  The <code>errno</code> value of <code>EINVAL</code>, for example, would indicate that <code>signo</code> argument is not a valid signal number.
+</ul>
+
+<H3><a name="sigrelse">2.7.11 sigrelse</a></H3>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;signal.h&gt;
+    int sigrelse(int signo);
+</pre>
+
+<p>
+<b>Description:</b> The sighold() function will remove <code>signo</code> from the calling process' signal mask
+</p>
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>signo</code>.  Identifies the signal to be unblocked.
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>Zero is returned upon successful completion, otherwise -1 (<code>ERROR</code>) is returned with the <code<>errno</code> set appropriately.  The <code>errno</code> value of <code>EINVAL</code>, for example, would indicate that <code>signo</code> argument is not a valid signal number.
+</ul>
+
+<H3><a name="sigpending">2.7.12 sigpending</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4817,7 +4928,7 @@ is delivered more than once.&quot;
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigsuspend">2.7.9 sigsuspend</a></H3>
+<H3><a name="sigsuspend">2.7.13 sigsuspend</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4865,7 +4976,30 @@ function or to terminate the task.&quot;  Only delivery of the signal
 is required in the present implementation (even if the signal is ignored).
 </ul>
 
-<H3><a name="sigwaitinfo">2.7.10 sigwaitinfo</a></H3>
+<H3><a name="sigpause">2.7.14 sigpause</a></H3>
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;signal.h&gt;
+    int sigpause(int signo);
+</pre>
+
+<p>
+<b>Description:</b> The <code>sigpause()</code>) function will remove <code>signo</code>) from the calling process' signal mask and suspend the calling process until a signal is received.
+The <code>sigpause()</code>) function will restore the process' signal mask to its original state before returning.
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>set</code>.  Identifies the signal to be unblocked while waiting.
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li><code>sigpause</code> always returns -1 (<code>ERROR</code>).  On a successful wait for a signal, the <code>errno</code> will be set to <code>EINTR</code>.
+</ul>
+
+<H3><a name="sigwaitinfo">2.7.15 sigwaitinfo</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4894,10 +5028,9 @@ with a NULL timeout parameter. (see below).
 <p>
 <b>Assumptions/Limitations:</b>
 <p>
-<b>  POSIX  Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+<b>  POSIX  Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="sigtimedwait">2.7.11 sigtimedwait</a></H3>
+<H3><a name="sigtimedwait">2.7.16 sigtimedwait</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4963,7 +5096,7 @@ that the unblocked signal be caught; the task will be resumed even if
 the unblocked signal is ignored.
 </ul>
 
-<H3><a name="sigqueue">2.7.12 sigqueue</a></H3>
+<H3><a name="sigqueue">2.7.17 sigqueue</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5020,7 +5153,7 @@ There is no null signal in the present implementation; a zero signal will
 be sent.
 </ul>
 
-<H3><a name="kill">2.7.13 kill</a></H3>
+<H3><a name="kill">2.7.18 kill</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5076,7 +5209,7 @@ be sent.
   <li>Sending of signals to 'process groups' is not supported in NuttX.</li>
 </ul>
 
-<H3><a name="pause">2.7.14 pause</a></H3>
+<H3><a name="pause">2.7.19 pause</a></H3>
 
 <p>
 <b>Function Prototype:</b>
