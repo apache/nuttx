@@ -42,8 +42,8 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = kl_boardinitialize.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += kl_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += kl_appinit.c
 endif
 
 ifeq ($(CONFIG_KL_TSI),y)
