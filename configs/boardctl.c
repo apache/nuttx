@@ -136,7 +136,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_ADCTEST_SETUP:
         {
-          ret = board_adc_setup(();
+          ret = board_adc_setup();
         }
         break;
 #endif
