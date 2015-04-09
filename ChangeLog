@@ -10125,4 +10125,7 @@
 	* arch/arm/src/sam34/sam_serial.c and samv7/sam_serial.c: The IMR
 	  register is read-only.  This means that sam_restoreints() did not
 	  actually re-enable UART interrupts (2015-04-08).
-
+	* sigaddset() and sigdelset(): Need to set errno if a bad signal number
+	  is received (2015-04-09).
+	* sighold(), sigrelse(), sigignore(), and sigpause():  New signal
+	  handling functions (2015-04-09).
