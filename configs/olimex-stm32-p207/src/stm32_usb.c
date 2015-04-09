@@ -45,9 +45,11 @@
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
+
 #include "stm32.h"
 #include "stm32_otgfs.h"
 #include "olimex-stm32-p207.h"
@@ -106,6 +108,7 @@ static int usbhost_waiter(int argc, char *argv[])
 
       ret = CONN_WAIT(g_usbconn, &connected);
       DEBUGASSERT(ret == OK);
+      UNUSED(ret);
 
       connected = !connected;
       uvdbg("%s\n", connected ? "connected" : "disconnected");
