@@ -42,8 +42,8 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = kl_boardinitialize.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += kl_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += kl_appinit.c
 endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
@@ -84,10 +84,6 @@ endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
 CSRCS += kl_watchdog.c
-endif
-
-ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += kl_nsh.c
 endif
 
 ifeq ($(CONFIG_SENSORS_ADXL345),y)
