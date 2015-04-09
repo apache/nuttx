@@ -112,7 +112,7 @@
 #    undef PIC32MZ_HAVE_MMCSD
 #  endif
 
- /* Use the minor number selected in the NSH configuratino */
+ /* Use the minor number selected in the NSH configuration */
 
 #  ifdef CONFIG_NSH_MMCSDMINOR
 #    define PIC32MZ_MMCSDMINOR CONFIG_NSH_MMCSDMINOR

@@ -307,7 +307,7 @@ uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size)
 
   ret = mpu_subregion_ms(size + offset, l2size);
 
-  /* Then OR in the mask need to handle disabled subretinos at the beginning
+  /* Then OR in the mask need to handle disabled subregions at the beginning
    * of the region.
    */
 

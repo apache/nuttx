@@ -96,7 +96,7 @@ void (*sigset(int signo, void (*disp)(int)))(int)
 
   if (disp != SIG_DFL /* && disp != SIG_IGN */)
     {
-      /* Add the signal to the set of signals to be ignored with the signal
+      /* Add the signal to the set of signals to be ignored when the signal
        * handler executes.
        */
 

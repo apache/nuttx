@@ -362,7 +362,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
  net_unlock(save);
 
   /* IPv6 Stateless Autoconfiguration
-   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfiguratinoandRenumbering.htm
+   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
    *
    * The following is a summary of the steps a device takes when using
    * stateless auto-configuration:
