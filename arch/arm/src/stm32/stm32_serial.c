@@ -2045,7 +2045,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         priv->baud = cfgetispeed(termiosp);
 
-        /* effect the changes immediately - note that we do not implement
+        /* Effect the changes immediately - note that we do not implement
          * TCSADRAIN / TCSAFLUSH
          */
 
