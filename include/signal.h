@@ -165,17 +165,22 @@
 #define SIGEV_NONE      0 /* No notification desired */
 #define SIGEV_SIGNAL    1 /* Notify via signal */
 
-/* Special values of of sa_handler used by sigaction and sigset.  There are all
- * treated like NULL for now.
+/* Special values of of sa_handler used by sigaction and sigset.  They are all
+ * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
+ * in NuttX, the default action for all signals is to ignore them.
  *
- * REVISIT:  Need to distinguish the value of SIG_HOLD.  It is need in the
- * implementation of sigset().
+ * REVISIT:  Need to distinguish the value of SIG_HOLD.  It is needed in the
+ * implementation of sigset() but would need to be recognized in all signal
+ * functions that deal with signal disposition.
  */
 
 #define SIG_ERR         ((CODE void*)-1)
 #define SIG_DFL         ((CODE void*)0)
 #define SIG_IGN         ((CODE void*)0)
-#define SIG_HOLD        ((CODE void*)0)
+
+#if 0 /* Not yet supported */
+#  define SIG_HOLD      ((CODE void*)0)
+#endif
 
 /********************************************************************************
  * Global Type Declarations
