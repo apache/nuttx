@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/signal/sig_emptyset.c
+ * libc/signal/sig_hold.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,25 +44,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigemptyset
+ * Name: sighold
  *
  * Description:
- *   This function initializes the signal set specified by set such that all
- *   signals are excluded.
- *
- * Parameters:
- *   set - Signal set to initialize
- *
- * Return Value:
- *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
- *
- * Assumptions:
+ *   The sighold() function will add 'signo' to the calling process' signal
+ *   mask.
  *
  ****************************************************************************/
 
-int sigemptyset(FAR sigset_t *set)
+int sighold(int signo)
 {
-  *set = NULL_SIGNAL_SET;
-  return OK;
-}
+  sigset_t set;
+  int ret;
 
+  /* Create a set of signals with only the signal to be blocked */
+
+  (void)sigemptyset(&set);
+  ret = sigaddset(&set, signo);
+  if (ret == OK)
+    {
+      /* Block the signal */
+
+      ret = sigprocmask(SIG_BLOCK, &set, NULL);
+    }
+
+  return ret;
+}

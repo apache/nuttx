@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/signal.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -262,8 +262,12 @@ int sigdelset(FAR sigset_t *set, int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigaction(int sig, FAR const struct sigaction *act,
               FAR struct sigaction *oact);
+int sigignore(int signo);
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+int sigpause(int signo);
+int sigrelse(int signo);
 int sigpending(FAR sigset_t *set);
+int sighold(int signo);
 int sigsuspend(FAR const sigset_t *sigmask);
 int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,

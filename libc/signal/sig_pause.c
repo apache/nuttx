@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/signal/sig_emptyset.c
+ * libc/signal/sig_ignore.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,32 +37,48 @@
  * Included Files
  ****************************************************************************/
 
+#include <unistd.h>
 #include <signal.h>
+#include <sched.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigemptyset
+ * Name: sigpause
  *
  * Description:
- *   This function initializes the signal set specified by set such that all
- *   signals are excluded.
- *
- * Parameters:
- *   set - Signal set to initialize
- *
- * Return Value:
- *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
- *
- * Assumptions:
+ *   The sigpause() will remove sig from the calling process' signal mask
+ *   and suspend the calling process until a signal is received. The
+ *   sigpause() function will restore the process' signal mask to its
+ *   original state before returning.
  *
  ****************************************************************************/
 
-int sigemptyset(FAR sigset_t *set)
+int sigpause(int signo)
 {
-  *set = NULL_SIGNAL_SET;
-  return OK;
-}
+  sigset_t set;
+  int ret;
 
+  /* Get the current set of blocked signals */
+
+  sched_lock();
+  ret = sigprocmask(SIG_SETMASK, NULL, &set);
+  if (ret == OK)
+    {
+      /* Remove the 'signo' from the set of blocked signals */
+
+      ret = sigdelset(&set, signo);
+    }
+
+  /* Let sigsuspend do the rest of the job */
+
+  if (ret == OK)
+    {
+      ret = sigsuspend(&set);
+    }
+
+  sched_unlock();
+  return ret;
+}

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/signal/sig_emptyset.c
+ * libc/signal/sig_ignore.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,25 +44,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigemptyset
+ * Name: sigignore
  *
  * Description:
- *   This function initializes the signal set specified by set such that all
- *   signals are excluded.
- *
- * Parameters:
- *   set - Signal set to initialize
- *
- * Return Value:
- *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
- *
- * Assumptions:
+ *   The sigignore() function will set the disposition of 'signo' to SIG_IGN.
  *
  ****************************************************************************/
 
-int sigemptyset(FAR sigset_t *set)
+int sigignore(int signo)
 {
-  *set = NULL_SIGNAL_SET;
-  return OK;
-}
+  struct sigaction act;
+  int ret;
 
+  /* Ignore the signal */
+
+  act.sa_handler = SIG_IGN;
+  act.sa_flags   = 0;
+
+  ret = sigemptyset(&act.sa_mask);
+  if (ret == OK)
+    {
+      ret = sigaction(signo, &act, NULL);
+    }
+
+  return ret;
+}
