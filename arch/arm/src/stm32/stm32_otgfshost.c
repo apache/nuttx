@@ -991,7 +991,7 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
 
   flags = irqsave();
 
-  /* Loop, testing for an end of transfer conditino.  The channel 'result'
+  /* Loop, testing for an end of transfer condition.  The channel 'result'
    * was set to EBUSY and 'waiter' was set to true before the transfer; 'waiter'
    * will be set to false and 'result' will be set appropriately when the
    * tranfer is completed.
