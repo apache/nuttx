@@ -10129,3 +10129,15 @@
 	  is received (2015-04-09).
 	* sighold(), sigrelse(), sigignore(), sigset() and sigpause():  New
 	  signal handling functions (2015-04-09).
+	* Fixes to asinh(), atanh(), and sinh():  The 'basic' expansions all
+	  exhibited bad cancellation errors near zero (<= 1E-10). This can be
+	  easily seen e.g. with x = 1E-30, the results are all zero though they
+	  should be extremely close to x. The cutoff values (1E-5, 1E-9) are
+	  chosen so that the next term in the Taylor series is negligible (for
+	  double). Functions could maybe be optimized to use only first term (x)
+	  and a smaller cutoff, just bigger than where the cancellation occurs
+	  (2015-04-09).
+	* syscall/syscall.csv: Last changes to message queue prototypes did not
+	  make it into call gate logic (2015-04-09).
+	* syscall/syscall_stublookup.c: Fix some errors that crept in recently
+	  (2015-04-09).
