@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/zp214xpa/src/up_ug2864ambag01.c
+ * config/zp214xpa/src/lpc2148_ug2864ambag01.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
