@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/zp214xpa/src/up_spi1.c
+ * config/zp214xpa/src/lpc2148_spi1.c
  *
  *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

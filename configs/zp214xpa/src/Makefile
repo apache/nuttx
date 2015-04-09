@@ -53,6 +53,10 @@ ifeq ($(CONFIG_LCD_UG2864AMBAG01),y)
 CSRCS += lpc2148_ug2864ambag01.c lpc2148_spi1.c
 endif
 
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += lpc2148_appinit.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
