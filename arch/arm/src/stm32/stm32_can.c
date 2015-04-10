@@ -500,8 +500,8 @@ static void can_dumpfiltregs(struct stm32_can_s *priv, FAR const char *msg)
   for (i = 0; i < CAN_NFILTERS; i++)
     {
       lldbg(" F%dR1: %08x F%dR2: %08x\n",
-            i, getreg32(priv->base + STM32_CAN_FR_OFFSET(i,1)),
-            i, getreg32(priv->base + STM32_CAN_FR_OFFSET(i,2)));
+            i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i,1)),
+            i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i,2)));
     }
 }
 #endif
@@ -1554,8 +1554,8 @@ static int can_filterinit(struct stm32_can_s *priv)
    * composed of two 32-bit registers, CAN_FiR:
    */
 
-  can_putfreg(priv,  STM32_CAN_FR_OFFSET(priv->filter, 1), 0);
-  can_putfreg(priv,  STM32_CAN_FR_OFFSET(priv->filter, 2), 0);
+  can_putfreg(priv,  STM32_CAN_FIR_OFFSET(priv->filter, 1), 0);
+  can_putfreg(priv,  STM32_CAN_FIR_OFFSET(priv->filter, 2), 0);
 
  /* Set Id/Mask mode for the filter */
 
