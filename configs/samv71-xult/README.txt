@@ -127,6 +127,12 @@ The BASIC nsh configuration is fully function (as desribed below under
      correctly but there is no available technical documentation or sample
      code to debug with.
 
+  7. The full port for audio support is code complete:  WM8904 driver,
+     SSC/I2C driver, and CS2100-CP driver.  But this code is untested.  The
+     WM8904 interface was taken directly from the SAMA5D4-EK and may well
+     need modification due to differences with the physical WM8904
+     interface.
+
 Serial Console
 ==============
 
