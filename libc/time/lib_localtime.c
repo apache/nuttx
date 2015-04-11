@@ -67,7 +67,7 @@
 #ifdef CONFIG_LIBC_TZDIR
 #  define TZDIR CONFIG_LIBC_TZDIR
 #else
-#  define TZDIR "/usr/local/etc/zoneinfo"
+#  define TZDIR "/etc/zoneinfo"
 #endif
 
 /* Time definitions *********************************************************/
