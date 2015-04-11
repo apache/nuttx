@@ -10141,4 +10141,6 @@
 	  make it into call gate logic (2015-04-09).
 	* syscall/syscall_stublookup.c: Fix some errors that crept in recently
 	  (2015-04-09).
+	* libc/time/lib_localtime.c: Inconsistent configuration name:
+	  CONFIG_LIBC_TZDIR vs CONFIG_LIBC_TZ_TZDIR.  Former wins (2015-04-11).
 
