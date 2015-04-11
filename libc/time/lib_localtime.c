@@ -64,8 +64,8 @@
 /* Configuration ************************************************************/
 /* Time zone object file directory */
 
-#ifdef CONFIG_LIBC_TZ_TZDIR
-#  define TZDIR CONFIG_LIBC_TZ_TZDIR
+#ifdef CONFIG_LIBC_TZDIR
+#  define TZDIR CONFIG_LIBC_TZDIR
 #else
 #  define TZDIR "/usr/local/etc/zoneinfo"
 #endif
