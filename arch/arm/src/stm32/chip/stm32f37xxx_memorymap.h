@@ -63,6 +63,15 @@
 #define STM32_OPTION_BASE    0x1ffff800     /* 0x1fffc000-0x1fffc007: Option bytes */
                                             /* 0x1fffc008-0x1fffffff: Reserved */
 
+/* System Memory Addresses **********************************************************/
+
+#define STM32_SYSMEM_UID     0x1ffff7ac     /* The 96-bit unique device identifier */
+#define STM32_SYSMEM_FSIZE   0x1ffff7cc     /* This bitfield indicates the size of
+                                             * the device Flash memory expressed in
+                                             * Kbytes.  Example: 0x040 corresponds
+                                             * to 64 Kbytes
+                                             */
+
 /* Peripheral Base Addresses ********************************************************/
 
 #define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x40009fff: APB1 */
@@ -146,4 +155,3 @@
 #define STM32_DEBUGMCU_BASE 0xe0042000
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F37XXX_MEMORYMAP_H */
-

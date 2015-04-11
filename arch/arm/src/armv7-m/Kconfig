@@ -107,7 +107,7 @@ config ARMV7M_OABI_TOOLCHAIN
 		arm-nuttx-elf- vs. arm-nuttx-eabi-
 
 config ARMV7M_STACKCHECK
-	bool "Stack for stack overflow on each function call"
+	bool "Check for stack overflow on each function call"
 	default n
 	depends on ARCH_CHIP_STM32
 	---help---

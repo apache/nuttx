@@ -72,6 +72,15 @@
 #define STM32_OPTION_BASE    0x1fffc000     /* 0x1fffc000-0x1fffc007: Option bytes */
                                             /* 0x1fffc008-0x1fffffff: Reserved */
 
+/* System Memory Addresses **********************************************************/
+
+#define STM32_SYSMEM_UID     0x1fff7a10     /* The 96-bit unique device identifier */
+#define STM32_SYSMEM_FSIZE   0x1fff7a22     /* This bitfield indicates the size of
+                                             * the device Flash memory expressed in
+                                             * Kbytes. Example: 0x0400 corresponds
+                                             * to 1024 Kbytes.
+                                             */
+
 /* SRAM Base Addresses **************************************************************/
 
                                             /* 0x20000000-0x2001bfff: 112Kb aliased by bit-banding */
