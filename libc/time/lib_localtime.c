@@ -2158,6 +2158,7 @@ static time_t time2sub(struct tm *const tmp,
       li = y + (1 < yourtm.tm_mon);
       yourtm.tm_mday += year_lengths[isleap(li)];
     }
+
   while (yourtm.tm_mday > DAYSPERLYEAR)
     {
       li = y + (1 < yourtm.tm_mon);
@@ -2167,6 +2168,7 @@ static time_t time2sub(struct tm *const tmp,
           return -1;
         }
     }
+
   for (;;)
     {
       i = mon_lengths[isleap(y)][yourtm.tm_mon];
