@@ -1650,6 +1650,13 @@ config STM32_I2C
 config STM32_CAN
 	bool
 
+config STM32_NOEXT_VECTORS
+	bool "Disable the ARMv7-M EXT vectors"
+	default n
+	---help---
+		Sometimes you may not need any Vector support beyond SysTick
+		and wish to save memory. This applies only to ARMv7-M architectures.
+
 menu "Alternate Pin Mapping"
 
 choice

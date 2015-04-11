@@ -51,6 +51,15 @@
 #define STM32_REGION_MASK    0xf0000000
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
 
+/* System Memory Addresses **********************************************************/
+
+#define STM32_SYSMEM_UID     0x1ffff7e8     /* The 96-bit unique device identifier */
+#define STM32_SYSMEM_FSIZE   0x1ffff7e0     /* This bitfield indicates the size of
+                                             * the device Flash memory expressed
+                                             * in Kbytes. Example: 0x0080 = 128
+                                             * Kbytes
+                                             */
+
 /* Register Base Address ************************************************************/
 
 /* APB1 bus */
