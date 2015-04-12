@@ -164,6 +164,7 @@ config ARCH_CHIP_SAM34
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
+	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures
 
@@ -174,6 +175,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
+	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
 
@@ -183,6 +185,7 @@ config ARCH_CHIP_STM32
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
+	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
 
