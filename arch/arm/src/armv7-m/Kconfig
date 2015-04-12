@@ -106,10 +106,14 @@ config ARMV7M_OABI_TOOLCHAIN
 		Most of the older buildroot toolchains are OABI and are named
 		arm-nuttx-elf- vs. arm-nuttx-eabi-
 
+config ARMV7M_HAVE_STACKCHECK
+	bool
+	default n
+
 config ARMV7M_STACKCHECK
 	bool "Check for stack overflow on each function call"
 	default n
-	depends on ARCH_CHIP_STM32
+	depends on ARMV7M_HAVE_STACKCHECK
 	---help---
 		This check uses R10 to check for a stack overflow within each function
 		call. This has performances and code size impacts, but it will be able to
