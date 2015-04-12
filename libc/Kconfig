@@ -265,9 +265,18 @@ config ARCH_LOWPUTC
 config LIBC_LOCALTIME
 	bool "localtime API call support"
 	default "n"
-	depends on !DISABLE_ENVIRON
+	depends on !DISABLE_ENVIRON && EXPERIMENTAL
 	---help---
 		localtime API call support
+
+		Logic currently depends on file system support with, at a minimum, these
+		files in the zoneinfo directory:  GMT and posixrules.
+
+		There is also an issue with mktime being called very early in
+		initialization by the OS before there are any file systems available.
+
+		And finally, the times presented by the NSH date command are wrong with
+		this logic is enabled.
 
 if LIBC_LOCALTIME
 
