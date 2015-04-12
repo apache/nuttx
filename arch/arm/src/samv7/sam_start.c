@@ -111,6 +111,12 @@ static void go_os_start(void *pv, unsigned int nbytes)
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+/* we need to get r10 set before we can allow instrumentation calls */
+
+void __start(void) __attribute__ ((no_instrument_function));
+#endif
+
 /****************************************************************************
  * Name: sam_fpuconfig
  *
@@ -306,6 +312,12 @@ void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
+
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  /* Set the stack limit before we attempt to call any functions */
+
+  __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+#endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
