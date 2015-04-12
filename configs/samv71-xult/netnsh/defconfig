@@ -137,6 +137,8 @@ CONFIG_ARMV7M_HAVE_DTCM=y
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL is not set
 CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
 # CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE is not set
+CONFIG_ARMV7M_HAVE_STACKCHECK=y
+# CONFIG_ARMV7M_STACKCHECK is not set
 # CONFIG_ARMV7M_ITMSYSLOG is not set
 CONFIG_SDIO_DMA=y
 # CONFIG_SDIO_WIDTH_D1_ONLY is not set
@@ -350,6 +352,12 @@ CONFIG_NSH_MMCSDSLOTNO=0
 #
 # Board-Specific Options
 #
+# CONFIG_SAMV71XULT_MXTXPLND is not set
+CONFIG_LIB_BOARDCTL=y
+# CONFIG_BOARDCTL_TSCTEST is not set
+# CONFIG_BOARDCTL_ADCTEST is not set
+# CONFIG_BOARDCTL_GRAPHICS is not set
+# CONFIG_BOARDCTL_IOCTL is not set
 
 #
 # RTOS Features
@@ -486,9 +494,14 @@ CONFIG_SPI_EXCHANGE=y
 # CONFIG_SPI_CALLBACK is not set
 # CONFIG_SPI_BITBANG is not set
 # CONFIG_I2S is not set
+
+#
+# Timer Driver Support
+#
 # CONFIG_TIMER is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
+# CONFIG_TIMERS_CS2100CP is not set
 # CONFIG_ANALOG is not set
 # CONFIG_AUDIO_DEVICES is not set
 # CONFIG_VIDEO_DEVICES is not set
@@ -858,6 +871,7 @@ CONFIG_LIBC_TMPDIR="/tmp"
 CONFIG_LIBC_MAX_TMPFILE=32
 CONFIG_ARCH_LOWPUTC=y
 # CONFIG_LIBC_LOCALTIME is not set
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
@@ -1028,6 +1042,7 @@ CONFIG_NSH_BUILTIN_APPS=y
 # CONFIG_NSH_DISABLE_CD is not set
 # CONFIG_NSH_DISABLE_CP is not set
 # CONFIG_NSH_DISABLE_CMP is not set
+CONFIG_NSH_DISABLE_DATE=y
 # CONFIG_NSH_DISABLE_DD is not set
 # CONFIG_NSH_DISABLE_DF is not set
 # CONFIG_NSH_DISABLE_DELROUTE is not set
@@ -1087,7 +1102,6 @@ CONFIG_NSH_FILEIOSIZE=512
 #
 CONFIG_NSH_CONSOLE=y
 CONFIG_NSH_ARCHINIT=y
-CONFIG_LIB_BOARDCTL=y
 
 #
 # Networking Configuration
@@ -1132,40 +1146,12 @@ CONFIG_NSH_IOBUFFER_SIZE=512
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
 # CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# CU Minimal Terminal
-#
 # CONFIG_SYSTEM_CUTERM is not set
-
-#
-# FLASH Program Installation
-#
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
 # CONFIG_SYSTEM_FLASH_ERASEALL is not set
-
-#
-# Intel HEX to binary conversion
-#
 # CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
 CONFIG_SYSTEM_I2CTOOL=y
 CONFIG_I2CTOOL_MINBUS=0
 CONFIG_I2CTOOL_MAXBUS=0
@@ -1173,90 +1159,14 @@ CONFIG_I2CTOOL_MINADDR=0x03
 CONFIG_I2CTOOL_MAXADDR=0x77
 CONFIG_I2CTOOL_MAXREGADDR=0xff
 CONFIG_I2CTOOL_DEFFREQ=400000
-
-#
-# INI File Parser
-#
 # CONFIG_SYSTEM_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
 CONFIG_SYSTEM_READLINE=y
 CONFIG_READLINE_ECHO=y
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
 # CONFIG_SYSTEM_POWEROFF is not set
-
-#
-# RAMTRON
-#
 # CONFIG_SYSTEM_RAMTRON is not set
-
-#
-# SD Card
-#
 # CONFIG_SYSTEM_SDCARD is not set
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
 # CONFIG_SYSTEM_SYSINFO is not set
-
-#
-# Temperature
-#
-
-#
-# VI Work-Alike Editor
-#
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set
