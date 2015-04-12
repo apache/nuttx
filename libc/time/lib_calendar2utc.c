@@ -193,17 +193,27 @@ time_t clock_calendar2utc(int year, int month, int day)
 
 time_t clock_calendar2utc(int year, int month, int day)
 {
-  struct tm t;
+  time_t days;
 
-  /* mktime can (kind of) do this */
+  /* Years since epoch in units of days (ignoring leap years). */
 
-  t.tm_year = year;
-  t.tm_mon  = month;
-  t.tm_mday = day;
-  t.tm_hour = 0;
-  t.tm_min  = 0;
-  t.tm_sec  = 0;
-  return mktime(&t);
+  days = (year - 1970) * 365;
+
+  /* Add in the extra days for the leap years prior to the current year. */
+
+  days += (year - 1969) >> 2;
+
+  /* Add in the days up to the beginning of this month. */
+
+  days += (time_t)clock_daysbeforemonth(month, clock_isleapyear(year));
+
+  /* Add in the days since the beginning of this month (days are 1-based). */
+
+  days += day - 1;
+
+  /* Then convert the seconds and add in hours, minutes, and seconds */
+
+  return days;
 }
 #endif /* CONFIG_GREGORIAN_TIME */
 

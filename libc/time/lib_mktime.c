@@ -77,14 +77,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  mktime
+ * Name:  mktime
  *
  * Description:
- *  Time conversion (based on the POSIX API)
+ *   Time conversion (based on the POSIX API)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GREGORIAN_TIME
 time_t mktime(FAR struct tm *tp)
 {
   time_t ret;
@@ -94,48 +93,15 @@ time_t mktime(FAR struct tm *tp)
    * month, and date
    */
 
-  jdn = clock_calendar2utc(tp->tm_year+1900, tp->tm_mon+1, tp->tm_mday);
+  jdn = clock_calendar2utc(tp->tm_year + 1900, tp->tm_mon, tp->tm_mday);
   sdbg("jdn=%d tm_year=%d tm_mon=%d tm_mday=%d\n",
        (int)jdn, tp->tm_year, tp->tm_mon, tp->tm_mday);
 
   /* Return the seconds into the julian day. */
 
-  ret = ((jdn*24 + tp->tm_hour)*60 + tp->tm_min)*60 + tp->tm_sec;
+  ret = ((jdn * 24 + tp->tm_hour) * 60 + tp->tm_min) * 60 + tp->tm_sec;
   sdbg("ret=%d tm_hour=%d tm_min=%d tm_sec=%d\n",
        (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
 
   return ret;
 }
-#else
-
-/* Simple version that only works for dates within a (relatively) small range
- * from the epoch.  It does not handle earlier days or longer days where leap
- * seconds, etc. apply.
- */
-
-time_t mktime(FAR struct tm *tp)
-{
-  unsigned int days;
-
-  /* Years since epoch in units of days (ignoring leap years). */
-
-  days = (tp->tm_year - 70) * 365;
-
-  /* Add in the extra days for the leap years prior to the current year. */
-
-  days += (tp->tm_year - 69) >> 2;
-
-  /* Add in the days up to the beginning of this month. */
-
-  days += (time_t)clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
-
-  /* Add in the days since the beginning of this month (days are 1-based). */
-
-  days += tp->tm_mday - 1;
-
-  /* Then convert the seconds and add in hours, minutes, and seconds */
-
-  return ((days * 24 + tp->tm_hour) * 60 + tp->tm_min) * 60 + tp->tm_sec;
-}
-#endif /* CONFIG_GREGORIAN_TIME */
-
