@@ -10143,4 +10143,12 @@
 	  (2015-04-09).
 	* libc/time/lib_localtime.c: Inconsistent configuration name:
 	  CONFIG_LIBC_TZDIR vs CONFIG_LIBC_TZ_TZDIR.  Former wins (2015-04-11).
+	* libc/time/lib_calendar2utc.c and lib_mktime.c: Fix an error in time
+	  initialization when there is not RTC and the time is initialized from
+	  a fixed configured value. The call to clock_calendar2utc() was
+	  returning the time in units of seconds.  The initialization logic,
+	  however, was expecting to get time in units of days.  This problem
+	  has been there forever but obiously has not significant impact to
+	  behavior in systems where time is not visible (2015-04-12).
+
 
