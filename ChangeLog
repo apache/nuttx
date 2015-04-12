@@ -10150,5 +10150,7 @@
 	  however, was expecting to get time in units of days.  This problem
 	  has been there forever but obiously has not significant impact to
 	  behavior in systems where time is not visible (2015-04-12).
+	* fs/fat/fs_fat32utils.c:  Fix misthink when CONFIG_ENDIAN_BIG=y.  From
+	  Lwazi Dube (2015-04-12).
 
 
