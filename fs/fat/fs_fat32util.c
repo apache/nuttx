@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32util.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -90,7 +90,8 @@
 /****************************************************************************
  * Name: fat_checkfsinfo
  *
- * Desciption: Read the FAT32 FSINFO sector
+ * Description:
+ *   Read the FAT32 FSINFO sector
  *
  ****************************************************************************/
 
@@ -118,7 +119,8 @@ static int fat_checkfsinfo(struct fat_mountpt_s *fs)
 /****************************************************************************
  * Name: fat_checkbootrecord
  *
- * Desciption: Read a sector and verify that it is a a FAT boot record.
+ * Description:
+ *   Read a sector and verify that it is a a FAT boot record.
  *
  ****************************************************************************/
 
@@ -263,8 +265,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
       return -EINVAL;
     }
 
-  /* We have what appears to be a valid FAT filesystem! Save a few more things
-   * from the boot record that we will need later.
+  /* We have what appears to be a valid FAT filesystem! Save a few more
+   * things from the boot record that we will need later.
    */
 
   fs->fs_fatbase     += fs->fs_fatresvdseccount;
@@ -294,15 +296,9 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
 uint16_t fat_getuint16(uint8_t *ptr)
 {
-#ifdef CONFIG_ENDIAN_BIG
-  /* The bytes always have to be swapped if the target is big-endian */
-
-  return ((uint16_t)ptr[0] << 8) | ptr[1];
-#else
   /* Byte-by-byte transfer is still necessary if the address is un-aligned */
 
   return ((uint16_t)ptr[1] << 8) | ptr[0];
-#endif
 }
 
 /****************************************************************************
@@ -311,15 +307,9 @@ uint16_t fat_getuint16(uint8_t *ptr)
 
 uint32_t fat_getuint32(uint8_t *ptr)
 {
-#ifdef CONFIG_ENDIAN_BIG
-  /* The bytes always have to be swapped if the target is big-endian */
-
-  return ((uint32_t)fat_getuint16(&ptr[0]) << 16) | fat_getuint16(&ptr[2]);
-#else
   /* Byte-by-byte transfer is still necessary if the address is un-aligned */
 
   return ((uint32_t)fat_getuint16(&ptr[2]) << 16) | fat_getuint16(&ptr[0]);
-#endif
 }
 
 /****************************************************************************
@@ -329,11 +319,13 @@ uint32_t fat_getuint32(uint8_t *ptr)
 void fat_putuint16(uint8_t *ptr, uint16_t value16)
 {
   uint8_t *val = (uint8_t*)&value16;
+
 #ifdef CONFIG_ENDIAN_BIG
   /* The bytes always have to be swapped if the target is big-endian */
 
   ptr[0] = val[1];
   ptr[1] = val[0];
+
 #else
   /* Byte-by-byte transfer is still necessary if the address is un-aligned */
 
@@ -355,6 +347,7 @@ void fat_putuint32(uint8_t *ptr, uint32_t value32)
 
   fat_putuint16(&ptr[0], val[1]);
   fat_putuint16(&ptr[2], val[0]);
+
 #else
   /* Byte-by-byte transfer is still necessary if the address is un-aligned */
 
@@ -393,8 +386,9 @@ void fat_semgive(struct fat_mountpt_s *fs)
 /****************************************************************************
  * Name: fat_systime2fattime
  *
- * Desciption: Get the system time convert to a time and and date suitble
- * for writing into the FAT FS.
+ * Description:
+ *   Get the system time convert to a time and and date suitable for
+ *   writing into the FAT FS.
  *
  *    TIME in LS 16-bits:
  *      Bits 0:4   = 2 second count (0-29 representing 0-58 seconds)
@@ -449,13 +443,15 @@ uint32_t fat_systime2fattime(void)
         }
     }
 #endif
+
   return 0;
 }
 
 /****************************************************************************
  * Name: fat_fattime2systime
  *
- * Desciption: Convert FAT data and time to a system time_t
+ * Description:
+ *   Convert FAT data and time to a system time_t
  *
  *    16-bit FAT time:
  *      Bits 0:4   = 2 second count (0-29 representing 0-58 seconds)
@@ -500,9 +496,10 @@ time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 /****************************************************************************
  * Name: fat_mount
  *
- * Desciption: This function is called only when the mountpoint is first
- *   established.  It initializes the mountpoint structure and verifies
- *   that a valid FAT32 filesystem is provided by the block driver.
+ * Description:
+ *   This function is called only when the mountpoint is first established.
+ *   It initializes the mountpoint structure and verifies that a valid FAT32
+ *   filesystem is provided by the block driver.
  *
  *   The caller should hold the mountpoint semaphore
  *
@@ -684,7 +681,8 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 /****************************************************************************
  * Name: fat_checkmount
  *
- * Desciption: Check if the mountpoint is still valid.
+ * Description:
+ *   Check if the mountpoint is still valid.
  *
  *   The caller should hold the mountpoint semaphore
  *
@@ -727,7 +725,8 @@ int fat_checkmount(struct fat_mountpt_s *fs)
 /****************************************************************************
  * Name: fat_hwread
  *
- * Desciption: Read the specified sector into the sector buffer
+ * Description:
+ *   Read the specified sector into the sector buffer
  *
  ****************************************************************************/
 
@@ -752,13 +751,15 @@ int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  off_t sector,
             }
         }
     }
+
   return ret;
 }
 
 /****************************************************************************
  * Name: fat_hwwrite
  *
- * Desciption: Write the sector buffer to the specified sector
+ * Description:
+ *   Write the sector buffer to the specified sector
  *
  ****************************************************************************/
 
@@ -784,13 +785,15 @@ int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, off_t sector,
             }
         }
     }
+
   return ret;
 }
 
 /****************************************************************************
  * Name: fat_cluster2sector
  *
- * Desciption: Convert a cluster number to a start sector number
+ * Description:
+ *   Convert a cluster number to a start sector number
  *
  ****************************************************************************/
 
@@ -807,7 +810,8 @@ off_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster )
 /****************************************************************************
  * Name: fat_getcluster
  *
- * Desciption: Get the next cluster start from the FAT.
+ * Description:
+ *   Get the next cluster start from the FAT.
  *
  * Return:  <0: error, 0:cluster unassigned, >=0: start sector of cluster
  *
@@ -941,18 +945,20 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 /****************************************************************************
  * Name: fat_putcluster
  *
- * Desciption: Write a new cluster into the FAT
+ * Description:
+ *   Write a new cluster into the FAT
  *
  ****************************************************************************/
 
-int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextcluster)
+int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
+                   off_t nextcluster)
 {
   /* Verify that the cluster number is within range.  Zero erases the cluster. */
 
   if (clusterno == 0 || (clusterno >= 2 && clusterno < fs->fs_nclusters))
     {
       /* Okay.. Write the next cluster into the FAT.  The way we will do
-       * this depends on the type of FAT filesystm we are dealing with.
+       * this depends on the type of FAT filesystem we are dealing with.
        */
 
       switch (fs->fs_type)
@@ -1085,7 +1091,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
           break;
 
           default:
-              return -EINVAL;
+            return -EINVAL;
         }
 
       /* Mark the modified sector as "dirty" and return success */
@@ -1100,7 +1106,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
 /****************************************************************************
  * Name: fat_removechain
  *
- * Desciption: Remove an entire chain of clusters, starting with 'cluster'
+ * Description:
+ *   Remove an entire chain of clusters, starting with 'cluster'
  *
  ****************************************************************************/
 
@@ -1149,10 +1156,12 @@ int fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster)
 /****************************************************************************
  * Name: fat_extendchain
  *
- * Desciption: Add a new cluster to the chain following cluster (if cluster
- *   is non-NULL).  if cluster is zero, then a new chain is created.
+ * Description:
+ *   Add a new cluster to the chain following cluster (if cluster is non-
+ *   NULL).  if cluster is zero, then a new chain is created.
  *
- * Return: <0:error, 0: no free cluster, >=2: new cluster number
+ * Return:
+ *   <0:error, 0: no free cluster, >=2: new cluster number
  *
  ****************************************************************************/
 
@@ -1175,6 +1184,7 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
       if (startcluster == 0 || startcluster >= fs->fs_nclusters)
         {
           /* But it is bad.. we have to start at the beginning */
+
           startcluster = 1;
         }
     }
@@ -1309,9 +1319,10 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
 /****************************************************************************
  * Name: fat_nextdirentry
  *
- * Desciption: Read the next directory entry from the sector in cache,
- *   reading the next sector(s) in the cluster as necessary.  This function
- *   must return -ENOSPC if it fails because there are no further entries
+ * Description:
+ *   Read the next directory entry from the sector in cache, reading the
+ *   next sector(s) in the cluster as necessary.  This function must
+ *   return -ENOSPC if it fails because there are no further entries
  *   available in the directory.
  *
  ****************************************************************************/
@@ -1348,8 +1359,8 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 
           if (ndx >= fs->fs_rootentcnt)
             {
-              /* When we index past this count, we have examined all of the entries in
-               * the root directory.
+              /* When we index past this count, we have examined all of the
+               * entries in the root directory.
                */
 
               return -ENOSPC;
@@ -1403,11 +1414,13 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 /****************************************************************************
  * Name: fat_dirtruncate
  *
- * Desciption: Truncate an existing file to zero length
+ * Description:
+ *   Truncate an existing file to zero length
  *
- * Assumptions:  The caller holds mountpoint semaphore, fs_buffer holds
- *   the directory entry, the directory entry sector (fd_sector) is
- *   currently in the sector cache.
+ * Assumptions:
+ *   The caller holds mountpoint semaphore, fs_buffer holds the directory
+ *   entry, the directory entry sector (fd_sector) is currently in the
+ *   sector cache.
  *
  ****************************************************************************/
 
@@ -1452,11 +1465,11 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
   savesector = fs->fs_currentsector;
   ret = fat_removechain(fs, startcluster);
   if (ret < 0)
-  {
-    return ret;
-  }
+    {
+      return ret;
+    }
 
-  /* Setup FSINFO to resuse this cluster next */
+  /* Setup FSINFO to reuse this cluster next */
 
   fs->fs_fsinextfree = startcluster - 1;
 
@@ -1468,7 +1481,8 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 /****************************************************************************
  * Name: fat_fscacheflush
  *
- * Desciption: Flush any dirty sector if fs_buffer as necessary
+ * Description:
+ *   Flush any dirty sector if fs_buffer as necessary
  *
  ****************************************************************************/
 
@@ -1513,14 +1527,16 @@ int fat_fscacheflush(struct fat_mountpt_s *fs)
 
       fs->fs_dirty = false;
     }
+
   return OK;
 }
 
 /****************************************************************************
  * Name: fat_fscacheread
  *
- * Desciption: Read the specified sector into the sector cache, flushing any
- *   existing dirty sectors as necessary.
+ * Description:
+ *   Read the specified sector into the sector cache, flushing any existing
+ *   dirty sectors as necessary.
  *
  ****************************************************************************/
 
@@ -1558,13 +1574,14 @@ int fat_fscacheread(struct fat_mountpt_s *fs, off_t sector)
         fs->fs_currentsector = sector;
     }
 
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
  * Name: fat_ffcacheflush
  *
- * Desciption: Flush any dirty sectors as necessary
+ * Description:
+ *   Flush any dirty sectors as necessary
  *
  ****************************************************************************/
 
@@ -1598,8 +1615,9 @@ int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff)
 /****************************************************************************
  * Name: fat_ffcacheread
  *
- * Desciption: Read the specified sector into the sector cache, flushing any
- *   existing dirty sectors as necessary.
+ * Description:
+ *   Read the specified sector into the sector cache, flushing any existing
+ *   dirty sectors as necessary.
  *
  ****************************************************************************/
 
@@ -1644,7 +1662,8 @@ int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t secto
 /****************************************************************************
  * Name: fat_ffcacheread
  *
- * Desciption: Invalidate the current file buffer contents
+ * Description:
+ *   Invalidate the current file buffer contents
  *
  ****************************************************************************/
 
@@ -1676,8 +1695,9 @@ int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff)
 /****************************************************************************
  * Name: fat_updatefsinfo
  *
- * Desciption: Flush evertyhing buffered for the mountpoint and update
- *   the FSINFO sector, if appropriate
+ * Description:
+ *   Flush everything buffered for the mountpoint and update the FSINFO
+ *   sector, if appropriate
  *
  ****************************************************************************/
 
@@ -1725,7 +1745,8 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
 /****************************************************************************
  * Name: fat_nfreeclusters
  *
- * Desciption: Get the number of free clusters
+ * Description:
+ *   Get the number of free clusters
  *
  ****************************************************************************/
 
@@ -1830,7 +1851,7 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 /****************************************************************************
  * Name: fat_nfreeclusters
  *
- * Desciption:
+ * Description:
  *   Given the file position, set the correct current sector to access.
  *
  ****************************************************************************/
