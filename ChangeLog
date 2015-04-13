@@ -10152,5 +10152,10 @@
 	  behavior in systems where time is not visible (2015-04-12).
 	* fs/fat/fs_fat32utils.c:  Fix misthink when CONFIG_ENDIAN_BIG=y.  From
 	  Lwazi Dube (2015-04-12).
-
-
+	* include/nuttx/net/netdev.h, net/devif/ipv6_input.c,
+	  icmpv6/icmpv6_rsolicit.c and net/icmpv6/icmpv6_solicit.c: Use common
+	  macro(s) for calculating link layer header length.  From Brennan
+	  Ashton (2015-04-13).
+	* apps/netutils/pppd/Kconfig, pppd.c, and ntpv3.h (removed):  Remove
+	  ntpclient header file in and NTP client references from the pppd
+	  dir.  From Brennan Ashton (2015-04-13).
