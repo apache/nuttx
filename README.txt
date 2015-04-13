@@ -1160,8 +1160,6 @@ nuttx
  |   |   `- README.txt
  |   |- freedom-kl26z/
  |   |   `- README.txt
- |   |- galileo/
- |   |   `- README.txt
  |   |- hymini-stm32v/
  |   |   `- README.txt
  |   |- kwikstik-k40/

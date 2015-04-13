@@ -10159,3 +10159,7 @@
 	* apps/netutils/pppd/Kconfig, pppd.c, and ntpv3.h (removed):  Remove
 	  ntpclient header file in and NTP client references from the pppd
 	  dir.  From Brennan Ashton (2015-04-13).
+	* configs/galileo: Remove all references to the Galileo board.  That
+	  port is not going to happen (I don't even have the hardware anymore)
+	  (2015-04-13).
+
