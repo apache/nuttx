@@ -274,13 +274,6 @@ config LIBC_LOCALTIME
 		timezone file is required for any another time zone and the environment
 		variable TZ must be set to the name of that file.
 
-		There is an issue with mktime being called very early in initialization
-		by the OS before there are any file systems available.
-
-		And finally, the times presented by the NSH date command are wrong when
-		this logic is enabled.  I assume that this is due to some inconsistency
-		between the NuttX timing logic and the localtime timing logic.
-
 if LIBC_LOCALTIME
 
 config LIBC_TZ_MAX_TIMES

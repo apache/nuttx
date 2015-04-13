@@ -296,7 +296,10 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
 uint16_t fat_getuint16(uint8_t *ptr)
 {
-  /* Byte-by-byte transfer is still necessary if the address is un-aligned */
+  /* NOTE that (1) this operation is independent of endian-ness and that (2)
+   * byte-by-byte transfer is necessary in any case because the address may be
+   * unaligned.
+   */
 
   return ((uint16_t)ptr[1] << 8) | ptr[0];
 }
@@ -307,7 +310,10 @@ uint16_t fat_getuint16(uint8_t *ptr)
 
 uint32_t fat_getuint32(uint8_t *ptr)
 {
-  /* Byte-by-byte transfer is still necessary if the address is un-aligned */
+  /* NOTE that (1) this operation is independent of endian-ness and that (2)
+   * byte-by-byte transfer is necessary in any case because the address may be
+   * unaligned.
+   */
 
   return ((uint32_t)fat_getuint16(&ptr[2]) << 16) | fat_getuint16(&ptr[0]);
 }
@@ -321,13 +327,17 @@ void fat_putuint16(uint8_t *ptr, uint16_t value16)
   uint8_t *val = (uint8_t*)&value16;
 
 #ifdef CONFIG_ENDIAN_BIG
-  /* The bytes always have to be swapped if the target is big-endian */
+  /* If the target is big-endian then the bytes always have to be swapped so
+   * that the representation is litle endian in the file system.
+   */
 
   ptr[0] = val[1];
   ptr[1] = val[0];
 
 #else
-  /* Byte-by-byte transfer is still necessary if the address is un-aligned */
+  /* Byte-by-byte transfer is still necessary because the address may be
+   * un-aligned.
+   */
 
   ptr[0] = val[0];
   ptr[1] = val[1];
@@ -343,13 +353,17 @@ void fat_putuint32(uint8_t *ptr, uint32_t value32)
   uint16_t *val = (uint16_t*)&value32;
 
 #ifdef CONFIG_ENDIAN_BIG
-  /* The bytes always have to be swapped if the target is big-endian */
+  /* If the target is big-endian then the bytes always have to be swapped so
+   * that the representation is litle endian in the file system.
+   */
 
   fat_putuint16(&ptr[0], val[1]);
   fat_putuint16(&ptr[2], val[0]);
 
 #else
-  /* Byte-by-byte transfer is still necessary if the address is un-aligned */
+  /* Byte-by-byte transfer is still necessary because the address may be
+   * un-aligned.
+   */
 
   fat_putuint16(&ptr[0], val[0]);
   fat_putuint16(&ptr[2], val[1]);
