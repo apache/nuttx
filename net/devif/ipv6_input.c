@@ -178,13 +178,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * headers.
    */
 
-#if defined(CONFIG_NET_MULTILINK)
-  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + dev->d_llhdrlen;
-#elif defined(CONFIG_NET_ETHERNET)
-  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + ETH_HDRLEN;
-#else /* if defined(CONFIG_NET_SLIP) */
-  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN;
-#endif
+  pktlen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN + netdev_ip +
+            netdev_ipv6_hdrlen(dev);
 
   if (pktlen <= dev->d_len)
     {

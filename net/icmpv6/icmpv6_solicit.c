@@ -210,15 +210,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   /* Add the size of the layer layer header to the total size of the
    * outgoing packet.
    */
-
-#if defined(CONFIG_NET_MULTILINK)
-  dev->d_len += dev->d_llhdrlen;
-#elif defined(CONFIG_NET_ETHERNET)
-  dev->d_len += ETH_HDRLEN;
-#else /* if defined(CONFIG_NET_SLIP) */
-  /* SLIP has no link layer header */
-#endif
-
+  dev->d_len += netdev_ipv6_hdrlen(dev);
   nllvdbg("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
 

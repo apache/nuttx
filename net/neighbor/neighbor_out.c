@@ -245,14 +245,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
    * outgoing packet.
    */
 
-#if defined(CONFIG_NET_MULTILINK)
-  dev->d_len += dev->d_llhdrlen;
-#elif defined(CONFIG_NET_ETHERNET)
-  dev->d_len += ETH_HDRLEN;
-#else /* if defined(CONFIG_NET_SLIP) */
-  /* SLIP has no link layer header */
-#endif
-
+  dev_d_len += netdev_ipv6_hdrlen(dev);
   nllvdbg("Outgoing IPv6 Packet length: %d (%d)\n",
           dev->d_len, (ip->len[0] << 8) | ip->len[1]);
 }

@@ -274,6 +274,8 @@ config LIBC_LOCALTIME
 		timezone file is required for any another time zone and the environment
 		variable TZ must be set to the name of that file.
 
+		See https://www.iana.org/time-zones
+
 if LIBC_LOCALTIME
 
 config LIBC_TZ_MAX_TIMES

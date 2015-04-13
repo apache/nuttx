@@ -481,4 +481,47 @@ uint16_t ipv4_chksum(FAR struct net_driver_s *dev);
 #ifdef CONFIG_NET_IPv6
 uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
 #endif
+
+/****************************************************************************
+ * Function: netdev_ipv4_hdrlen
+ *
+ * Description:
+ *    Provide header length for interface based on device
+ *
+ * Input Parameters:
+ *   dev Device structure pointer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_MULTILINK)
+#  define netdev_ipv4_hdrlen(dev) (dev->d_llhdrlen)
+#elif defined(CONFIG_NET_ETHERNET)
+#  define netdev_ipv4_hdrlen(dev) ETH_HDRLEN
+#else /* if defined(CONFIG_NET_SLIP) */
+#  define netdev_ipv4_hdrlen(dev) 0
+#endif
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Function: netdev_ipv6_hdrlen
+ *
+ * Description:
+ *    Provide header lenght for interface based on device
+ *
+ * Input Parameters:
+ *   dev Device structure pointer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_MULTILINK)
+#  define netdev_ipv6_hdrlen(dev) dev->d_llhdrlen
+#elif defined(CONFIG_NET_ETHERNET)
+#  define netdev_ipv6_hdrlen(dev) ETH_HDRLEN
+#else /* if defined(CONFIG_NET_SLIP) */
+#  define netdev_ipv6_hdrlen(dev) 0
+#endif
+#endif /* CONFIG_NET_IPv6 */
+
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */
