@@ -91,7 +91,7 @@
  *
  *    NOTE: CONFIG_SCHED_ATEXIT must be defined to enable this function
  *
- *    Limitiations in the current implementation:
+ *    Limitations in the current implementation:
  *
  *      1. Only a single atexit function can be registered unless
  *         CONFIG_SCHED_ATEXIT_MAX defines a larger number.
@@ -100,7 +100,7 @@
  *      3. If both SCHED_ONEXIT and SCHED_ATEXIT are selected, then atexit()
  *         is built on top of the on_exit() implementation.  In that case,
  *         CONFIG_SCHED_ONEXIT_MAX determines the size of the combined
- *         number of atexit(0) and on_exit calls and SCHED_ATEXIT_MAX is
+ *         number of atexit() and on_exit() calls and SCHED_ATEXIT_MAX is
  *         not used.
  *
  * Input Parameters:
@@ -115,7 +115,7 @@ int atexit(void (*func)(void))
 {
 #if defined(CONFIG_SCHED_ONEXIT)
   /* atexit is equivalent to on_exit() with no argument (Assuming that the ABI
-   * can handle a callback function that recieves more parameters than it expects).
+   * can handle a callback function that receives more parameters than it expects).
    */
 
   return on_exit((onexitfunc_t)func, NULL);
@@ -135,12 +135,11 @@ int atexit(void (*func)(void))
       sched_lock();
 
       /* Search for the first available slot.  atexit() functions are registered
-       * from lower to higher arry indices; they must be called in the reverse
+       * from lower to higher array indices; they must be called in the reverse
        * order of registration when task exists, i.e., from higher to lower
        * indices.
        */
 
-      available = -1;
       for (index = 0; index < CONFIG_SCHED_ATEXIT_MAX; index++)
         {
           if (!group->tg_atexitfunc[index])
