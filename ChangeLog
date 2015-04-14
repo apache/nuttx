@@ -660,7 +660,7 @@
 	* examples/dchpd: Added a tiny DHCP server example
 	* net/uip: Correct UDP bind behavior.  It should select a valid port number
 	  if it receives a port number of zero.
-	* netutils/dhcpd:  Corrrect for ZDS compiler.  Fix issue with re-use of a
+	* netutils/dhcpd:  correct for ZDS compiler.  Fix issue with re-use of a
 	  port number. Fixed a number of broadcast-related problems.
 	* eZ80Acclaim!: Add a tiny webserver configuration
 	* eZ80Acclaim!: Fixed an important bug in the EMAC Tx timeout logic. It was
@@ -9187,7 +9187,7 @@
 	  untested (2014-12-10).
 	* configs/tm4c123g-launchpad/src/tm4c_at24.c, tm4c_bringup.c, and other
 	  files:  Add initialization logic for an external AT24 EEPROM.  This
-	  is intended only to suppport testing of the Tiva I2C driver
+	  is intended only to support testing of the Tiva I2C driver
 	  (2014-12-10).
 	* libnx/Makefile, libnx/nxfonts/nxfonts_x11-misc-fixed-*.h, Make.defs,
 	  Makefile.sources, nxfonts_bitmaps.c, graphics/Kconfig, and
@@ -9752,7 +9752,7 @@
 	* configs/freedom-kl26z: Add board support for the Freedom KL26Z board.
 	  From Derek B. Noonburg (2015-02-11).
 
-7.9 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.9 2015-04-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/tiva:  Add support for the TM4C1294.  Contributed by
 	  Frank Sautter (2015-02-11).
@@ -9828,7 +9828,7 @@
 	* arch/arm/src/tiva/:  Updated files to allow for ADC triggering by the
 	  timer. I’ve cleaned up some parts of the ADC code, too, and fleshed
 	  out the PWM triggering ioctl.  From Calvin Maguranis (2015-02-17).
-	* configs/tm4c123g-launchpad: Add ADC suppport.  From Calvin Maguranis
+	* configs/tm4c123g-launchpad: Add ADC support.  From Calvin Maguranis
 	  (2015-02-17).
 	* fs/fat/fs_mkfatfs.c:  Use DMA memory for mkfatfs when needed. This makes
 	  mkfatfs use fat_dma_alloc() when CONFIG_FAT_DMAMEMORY is set. This is
@@ -9842,7 +9842,7 @@
 	  value of nanoseconds in struct tm.  From Juha Niskanen (2015-02-20).
 	* tm4c123g-launchpad: Add board button interrupt logic.  From Calvin
 	  Maguranis (2015-02-20).
-	* "Tiva: Move GPIIO prototypes out of arch/arm/include/tiva/irq.h to
+	* "Tiva: Move GPIO prototypes out of arch/arm/include/tiva/irq.h to
 	  arch/arm/tiva/tiva_gpio.h where they belong (2015-02-20).
 	* arch/arm/src/tiva: Tiva GPIO clean-up by Calvin Maguranis (2015-02-20).
 	* arch/arm/src/stm32/stm32_pwr.c, stm32_pwr.h, and stm32_rtcc.c: Changes
@@ -9857,7 +9857,7 @@
 	  context to one of the files. From David Sidrane (2015-02-21).
 	* configs/pic32mx-starterkit:  Rename from pic32-starterkit to make
 	  room on the namespace for a pic3mz-starterkit.  Update src/ directory
-	  file naming to match currnet standard.  Refresh configurations.  Move
+	  file naming to match current standard.  Refresh configurations.  Move
 	  linker scripts to a new scripts/directory.  Make sure that it builds
 	  using the Pinquino toolchain (2015-02-21).
 	* arch/mips/src/mips32/Toolchain.mk: Current Pinguino toolchain uses
@@ -9878,7 +9878,7 @@
 	  problems when trying to open the can bus from two different tasks.
 	  SourceForge Patch #46 from Anonymous (2015-02-23).
 	* Tiva TM4c1294: Updates from Frank Sautter (2015-02-24).
-	* fs/aio: Corrrect some backward tests in aio_read() and aio_write():
+	* fs/aio: correct some backward tests in aio_read() and aio_write():
 	  Socket descriptors have higher numbers than file descriptors.  In
 	  aio_contain(),  Copy u.ptr (void *) when initializing aioc and not
 	  the case specific u.aioc_filep.  From Michal Ulianko (2015-02-24).
@@ -9983,7 +9983,7 @@
 	* drivers/mmcsd/mmcsd_spi.c: Debugging and manuals (this one
 	  https://www.sdcard.org/downloads/pls/simplified_specs/part1_410.pdf
 	  and this one https://www.sdcard.org/downloads/pls/simplified_specs/part1_410.pdf)
-	  shows that ACMD23 must be preceeded with CMD55 command as any other
+	  shows that ACMD23 must be preceded with CMD55 command as any other
 	  ACMD commands. Also, after the block reading wait loop must be
 	  inserted before writing the next block of data to the sd card.  From
 	  Dmitry Nikolaev via Jussi Kivilinna (2015-03-13).
@@ -10148,7 +10148,7 @@
 	  a fixed configured value. The call to clock_calendar2utc() was
 	  returning the time in units of seconds.  The initialization logic,
 	  however, was expecting to get time in units of days.  This problem
-	  has been there forever but obiously has not significant impact to
+	  has been there forever but obviously has not significant impact to
 	  behavior in systems where time is not visible (2015-04-12).
 	* fs/fat/fs_fat32utils.c:  Fix misthink when CONFIG_ENDIAN_BIG=y.  From
 	  Lwazi Dube (2015-04-12).
@@ -10166,3 +10166,5 @@
 	  by Juha Niskanen (2015-04-14).
 	* atexit(): Fix reference to undefined variable in certain
 	  configurations.  From Juha Niskanen (2015-04-14).
+
+7.10 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
