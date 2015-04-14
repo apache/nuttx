@@ -1628,61 +1628,6 @@ static void tzsetwall(void)
   settzname();
 }
 
-void tzset(void)
-{
-  FAR const char *name;
-
-  name = getenv("TZ");
-  if (name == NULL)
-    {
-      tzsetwall();
-      return;
-    }
-
-  if (lcl_is_set > 0 && strcmp(lcl_TZname, name) == 0)
-    {
-      return;
-    }
-
-  lcl_is_set = strlen(name) < sizeof lcl_TZname;
-  if (lcl_is_set)
-    {
-      (void)strcpy(lcl_TZname, name);
-    }
-
-  if (lclptr == NULL)
-    {
-      lclptr = malloc(sizeof *lclptr);
-      if (lclptr == NULL)
-        {
-          settzname(); /* all we can do */
-          return;
-        }
-    }
-
-  if (*name == '\0')
-    {
-      /* User wants it fast rather than right */
-
-      lclptr->leapcnt = 0; /* so, we're off a little */
-      lclptr->timecnt = 0;
-      lclptr->typecnt = 0;
-      lclptr->ttis[0].tt_isdst = 0;
-      lclptr->ttis[0].tt_gmtoff = 0;
-      lclptr->ttis[0].tt_abbrind = 0;
-      (void)strcpy(lclptr->chars, GMT);
-    }
-  else if (tzload(name, lclptr, TRUE) != 0)
-    {
-      if (name[0] == ':' || tzparse(name, lclptr, FALSE) != 0)
-        {
-          (void)gmtload(lclptr);
-        }
-    }
-
-  settzname();
-}
-
 /* The easy way to behave "as if no library function calls" localtime
  * is to not call it, so we drop its guts into "localsub", which can be
  * freely called. (And no, the PANS doesn't require the above behavior,
@@ -2499,6 +2444,61 @@ static time_t time1(FAR struct tm *const tmp,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void tzset(void)
+{
+  FAR const char *name;
+
+  name = getenv("TZ");
+  if (name == NULL)
+    {
+      tzsetwall();
+      return;
+    }
+
+  if (lcl_is_set > 0 && strcmp(lcl_TZname, name) == 0)
+    {
+      return;
+    }
+
+  lcl_is_set = strlen(name) < sizeof lcl_TZname;
+  if (lcl_is_set)
+    {
+      (void)strcpy(lcl_TZname, name);
+    }
+
+  if (lclptr == NULL)
+    {
+      lclptr = malloc(sizeof *lclptr);
+      if (lclptr == NULL)
+        {
+          settzname(); /* all we can do */
+          return;
+        }
+    }
+
+  if (*name == '\0')
+    {
+      /* User wants it fast rather than right */
+
+      lclptr->leapcnt = 0; /* so, we're off a little */
+      lclptr->timecnt = 0;
+      lclptr->typecnt = 0;
+      lclptr->ttis[0].tt_isdst = 0;
+      lclptr->ttis[0].tt_gmtoff = 0;
+      lclptr->ttis[0].tt_abbrind = 0;
+      (void)strcpy(lclptr->chars, GMT);
+    }
+  else if (tzload(name, lclptr, TRUE) != 0)
+    {
+      if (name[0] == ':' || tzparse(name, lclptr, FALSE) != 0)
+        {
+          (void)gmtload(lclptr);
+        }
+    }
+
+  settzname();
+}
 
 FAR struct tm *localtime(FAR const time_t * const timep)
 {
