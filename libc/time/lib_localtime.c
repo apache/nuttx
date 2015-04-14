@@ -298,27 +298,21 @@ struct rule_s
 
 /* The minimum and maximum finite time values.  */
 
-static time_t const time_t_min =
+static time_t const g_min_timet =
   (TYPE_SIGNED(time_t)
    ? (time_t) -1 << (CHAR_BIT * sizeof (time_t) - 1)
    : 0);
 
-static time_t const time_t_max =
+static time_t const g_max_timet =
   (TYPE_SIGNED(time_t)
    ? - (~ 0 < 0) - ((time_t) -1 << (CHAR_BIT * sizeof (time_t) - 1))
    : -1);
 
-static const char wildabbr[] = WILDABBR;
+static const char g_wildabbr[] = WILDABBR;
 
-static char lcl_TZname[MY_TZNAME_MAX + 1];
-static int lcl_is_set;
-static int gmt_is_set;
-
-char *tzname[2] =
-{
-  (FAR char*)wildabbr,
-  (FAR char*)wildabbr
-};
+static char g_lcl_tzname[MY_TZNAME_MAX + 1];
+static int g_lcl_isset;
+static int g_gmt_isset;
 
 /* Section 4.12.3 of X3.159-1989 requires that
  *    Except for the strftime function, these functions [asctime,
@@ -327,15 +321,29 @@ char *tzname[2] =
  * Thanks to Paul Eggert for noting this.
  */
 
-static struct tm tm;
+static struct tm g_tm;
 
-static const int mon_lengths[2][MONSPERYEAR] = {
+static const int g_mon_lengths[2][MONSPERYEAR] =
+{
   {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
   {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
-static const int year_lengths[2] = {
+static const int g_year_lengths[2] =
+{
   DAYSPERNYEAR, DAYSPERLYEAR
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Setup by tzset() */
+
+FAR char *tzname[2] =
+{
+  (FAR char *)g_wildabbr,
+  (FAR char *)g_wildabbr
 };
 
 /****************************************************************************
@@ -429,7 +437,7 @@ static void settzname(void)
   FAR struct state_s *const sp = lclptr;
   int i;
 
-  tzname[0] = tzname[1] = (FAR char*)wildabbr;
+  tzname[0] = tzname[1] = (FAR char*)g_wildabbr;
   if (sp == NULL)
     {
       tzname[0] = tzname[1] = (FAR char*)GMT;
@@ -630,10 +638,10 @@ static int tzload(FAR const char *name,
         {
           int_fast64_t at = stored == 4 ? detzcode(p) : detzcode64(p);
           sp->types[i] = ((TYPE_SIGNED(time_t)
-                           ? time_t_min <= at : 0 <= at) && at <= time_t_max);
+                           ? g_min_timet <= at : 0 <= at) && at <= g_max_timet);
           if (sp->types[i])
             {
-              if (i && !timecnt && at != time_t_min)
+              if (i && !timecnt && at != g_min_timet)
                 {
                   /* Keep the earlier record, but tweak
                    * it so that it starts with the
@@ -641,7 +649,7 @@ static int tzload(FAR const char *name,
                    */
 
                   sp->types[i - 1] = 1;
-                  sp->ats[timecnt++] = time_t_min;
+                  sp->ats[timecnt++] = g_min_timet;
                 }
 
               sp->ats[timecnt++] = at;
@@ -1219,7 +1227,7 @@ static int_fast32_t transtime(const int year,
 
       for (i = 1; i < rulep->r_week; ++i)
         {
-          if (d + DAYSPERWEEK >= mon_lengths[leapyear][rulep->r_mon - 1])
+          if (d + DAYSPERWEEK >= g_mon_lengths[leapyear][rulep->r_mon - 1])
             {
               break;
             }
@@ -1232,7 +1240,7 @@ static int_fast32_t transtime(const int year,
       value = d * SECSPERDAY;
       for (i = 0; i < rulep->r_mon - 1; ++i)
         {
-          value += mon_lengths[leapyear][i] * SECSPERDAY;
+          value += g_mon_lengths[leapyear][i] * SECSPERDAY;
         }
       break;
     }
@@ -1402,7 +1410,7 @@ static int tzparse(FAR const char *name, FAR struct state_s *const sp,
               int_fast32_t
                 starttime = transtime(year, &start, stdoffset),
                 endtime = transtime(year, &end, dstoffset);
-              int_fast32_t yearsecs = (year_lengths[isleap(year)] * SECSPERDAY);
+              int_fast32_t yearsecs = (g_year_lengths[isleap(year)] * SECSPERDAY);
               int reversed = endtime < starttime;
               if (reversed)
                 {
@@ -1603,12 +1611,12 @@ static void gmtload(FAR struct state_s *const sp)
 
 static void tzsetwall(void)
 {
-  if (lcl_is_set < 0)
+  if (g_lcl_isset < 0)
     {
       return;
     }
 
-  lcl_is_set = -1;
+  g_lcl_isset = -1;
 
   if (lclptr == NULL)
     {
@@ -1755,11 +1763,11 @@ static struct tm *localsub(FAR const time_t * const timep,
 static struct tm *gmtsub(FAR const time_t * const timep, const int_fast32_t offset,
                          struct tm *const tmp)
 {
-  if (!gmt_is_set)
+  if (!g_gmt_isset)
     {
       gmtptr = malloc(sizeof *gmtptr);
-      gmt_is_set = gmtptr != NULL;
-      if (gmt_is_set)
+      g_gmt_isset = gmtptr != NULL;
+      if (g_gmt_isset)
         {
           gmtload(gmtptr);
         }
@@ -1826,7 +1834,7 @@ static struct tm *timesub(FAR const time_t * const timep,
   y = EPOCH_YEAR;
   tdays = *timep / SECSPERDAY;
   rem = *timep - tdays * SECSPERDAY;
-  while (tdays < 0 || tdays >= year_lengths[isleap(y)])
+  while (tdays < 0 || tdays >= g_year_lengths[isleap(y)])
     {
       int newy;
       time_t tdelta;
@@ -1885,12 +1893,12 @@ static struct tm *timesub(FAR const time_t * const timep,
     {
       if (increment_overflow(&y, -1))
         return NULL;
-      idays += year_lengths[isleap(y)];
+      idays += g_year_lengths[isleap(y)];
     }
 
-  while (idays >= year_lengths[isleap(y)])
+  while (idays >= g_year_lengths[isleap(y)])
     {
-      idays -= year_lengths[isleap(y)];
+      idays -= g_year_lengths[isleap(y)];
       if (increment_overflow(&y, 1))
         {
           return NULL;
@@ -1926,7 +1934,7 @@ static struct tm *timesub(FAR const time_t * const timep,
    */
 
   tmp->tm_sec = (int)(rem % SECSPERMIN) + hit;
-  ip = mon_lengths[isleap(y)];
+  ip = g_mon_lengths[isleap(y)];
   for (tmp->tm_mon = 0; idays >= ip[tmp->tm_mon]; ++(tmp->tm_mon))
     {
       idays -= ip[tmp->tm_mon];
@@ -1983,13 +1991,13 @@ static int increment_overflow32(FAR int_fast32_t * const lp, int const m)
 static int increment_overflow_time(time_t * tp, int_fast32_t j)
 {
   /* This is like
-   * 'if (! (time_t_min <= *tp + j && *tp + j <= time_t_max)) ...',
+   * 'if (! (g_min_timet <= *tp + j && *tp + j <= g_max_timet)) ...',
    * except that it does the right thing even if *tp + j would overflow.
    */
 
   if (!(j < 0
-        ? (TYPE_SIGNED(time_t) ? time_t_min - j <= *tp : -1 - j < *tp)
-        : *tp <= time_t_max - j))
+        ? (TYPE_SIGNED(time_t) ? g_min_timet - j <= *tp : -1 - j < *tp)
+        : *tp <= g_max_timet - j))
     {
       return TRUE;
     }
@@ -2101,13 +2109,13 @@ static time_t time2sub(struct tm *const tmp,
         }
 
       li = y + (1 < yourtm.tm_mon);
-      yourtm.tm_mday += year_lengths[isleap(li)];
+      yourtm.tm_mday += g_year_lengths[isleap(li)];
     }
 
   while (yourtm.tm_mday > DAYSPERLYEAR)
     {
       li = y + (1 < yourtm.tm_mon);
-      yourtm.tm_mday -= year_lengths[isleap(li)];
+      yourtm.tm_mday -= g_year_lengths[isleap(li)];
       if (increment_overflow32(&y, 1))
         {
           return -1;
@@ -2116,7 +2124,7 @@ static time_t time2sub(struct tm *const tmp,
 
   for (;;)
     {
-      i = mon_lengths[isleap(y)][yourtm.tm_mon];
+      i = g_mon_lengths[isleap(y)][yourtm.tm_mon];
       if (yourtm.tm_mday <= i)
         {
           break;
@@ -2220,7 +2228,7 @@ static time_t time2sub(struct tm *const tmp,
         {
           if (t == lo)
             {
-              if (t == time_t_max)
+              if (t == g_max_timet)
                 {
                   return -1;
                 }
@@ -2230,7 +2238,7 @@ static time_t time2sub(struct tm *const tmp,
             }
           else if (t == hi)
             {
-              if (t == time_t_min)
+              if (t == g_min_timet)
                 {
                   return -1;
                 }
@@ -2456,15 +2464,15 @@ void tzset(void)
       return;
     }
 
-  if (lcl_is_set > 0 && strcmp(lcl_TZname, name) == 0)
+  if (g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
     {
       return;
     }
 
-  lcl_is_set = strlen(name) < sizeof lcl_TZname;
-  if (lcl_is_set)
+  g_lcl_isset = strlen(name) < sizeof g_lcl_tzname;
+  if (g_lcl_isset)
     {
-      (void)strcpy(lcl_TZname, name);
+      (void)strcpy(g_lcl_tzname, name);
     }
 
   if (lclptr == NULL)
@@ -2503,7 +2511,7 @@ void tzset(void)
 FAR struct tm *localtime(FAR const time_t * const timep)
 {
   tzset();
-  return localsub(timep, 0L, &tm);
+  return localsub(timep, 0L, &g_tm);
 }
 
 /* Re-entrant version of localtime */
@@ -2515,7 +2523,7 @@ FAR struct tm *localtime_r(FAR const time_t * const timep, struct tm *tmp)
 
 FAR struct tm *gmtime(FAR const time_t * const timep)
 {
-  return gmtsub(timep, 0L, &tm);
+  return gmtsub(timep, 0L, &g_tm);
 }
 
 /* Re-entrant version of gmtime */

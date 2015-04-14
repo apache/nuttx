@@ -265,14 +265,15 @@ config ARCH_LOWPUTC
 config LIBC_LOCALTIME
 	bool "localtime API call support"
 	default "n"
-	depends on !DISABLE_ENVIRON && EXPERIMENTAL
+	depends on !DISABLE_ENVIRON
 	---help---
 		localtime API call support
 
 		Logic currently depends on file system support with, at a minimum, these
 		files in the zoneinfo directory:  GMT and posixrules.  An additional
-		timezone file is required for any another time zone and the environment
-		variable TZ must be set to the name of that file.
+		timezone file is required for any additional, local time zone(s) and the
+		environment variable TZ must be set to the name of that timezone file
+		when tzset() is called.
 
 		See https://www.iana.org/time-zones
 
