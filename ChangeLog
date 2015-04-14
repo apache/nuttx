@@ -10162,4 +10162,7 @@
 	* configs/galileo: Remove all references to the Galileo board.  That
 	  port is not going to happen (I don't even have the hardware anymore)
 	  (2015-04-13).
-
+	* drivers/input/max11802.c:  Fix possible unmatched IRQ restore.  Noted
+	  by Juha Niskanen (2015-04-14).
+	* atexit(): Fix reference to undefined variable in certain
+	  configurations.  From Juha Niskanen (2015-04-14).
