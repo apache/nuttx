@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/max11802.c
  *
- *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Petteri Aimonen <jpa@nx.mail.kapsi.fi>
  *
@@ -73,7 +73,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is a value for the threshold that guantees a big difference on the
+/* This is a value for the threshold that guarantees a big difference on the
  * first pendown (but can't overflow).
  */
 
@@ -98,7 +98,8 @@ static void max11802_lock(FAR struct spi_dev_s *spi);
 static void max11802_unlock(FAR struct spi_dev_s *spi);
 #endif
 
-static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv, uint8_t cmd, int *tags);
+static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
+                                 uint8_t cmd, int *tags);
 
 /* Interrupts and data sampling */
 
@@ -114,10 +115,13 @@ static int max11802_interrupt(int irq, FAR void *context);
 
 static int max11802_open(FAR struct file *filep);
 static int max11802_close(FAR struct file *filep);
-static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer, size_t len);
-static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
+                             size_t len);
+static int max11802_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int max11802_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
+static int max11802_poll(FAR struct file *filep, struct pollfd *fds,
+                         bool setup);
 #endif
 
 /****************************************************************************
@@ -136,6 +140,9 @@ static const struct file_operations max11802_fops =
   max11802_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , max11802_poll   /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0               /* unlink */
 #endif
 };
 
@@ -243,8 +250,8 @@ static void max11802_unlock(FAR struct spi_dev_s *spi)
 #ifdef CONFIG_SPI_OWNBUS
 static inline void max11802_configspi(FAR struct spi_dev_s *spi)
 {
-  /* Configure SPI for the MAX11802.  But only if we own the SPI bus.  Otherwise, don't
-   * bother because it might change.
+  /* Configure SPI for the MAX11802.  But only if we own the SPI bus.
+   * Otherwise, don't bother because it might change.
    */
 
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
@@ -257,7 +264,8 @@ static inline void max11802_configspi(FAR struct spi_dev_s *spi)
  * Name: max11802_sendcmd
  ****************************************************************************/
 
-static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv, uint8_t cmd, int *tags)
+static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
+                                 uint8_t cmd, int *tags)
 {
   uint8_t  buffer[2];
   uint16_t result;
@@ -306,10 +314,10 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
       sem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for MAX11802 data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for MAX11802 data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting
+   * threads because we do not know that they are going to do.  If they
+   * all try to read the data, then some make end up blocking after all.
    */
 
 #ifndef CONFIG_DISABLE_POLL
@@ -436,9 +444,9 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
 
   ivdbg("Sampled\n");
 
-   /* Re-acquire the semaphore that manages mutually exclusive access to
-   * the device structure.  We may have to wait here.  But we have our sample.
-   * Interrupts and pre-emption will be re-enabled while we wait.
+  /* Re-acquire the semaphore that manages mutually exclusive access to
+   * the device structure.  We may have to wait here.  But we have our
+   * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
   ret = sem_wait(&priv->devsem);
@@ -550,6 +558,7 @@ static void max11802_worker(FAR void *arg)
   max11802_lock(priv->spi);
 
   /* Start coordinate measurement */
+
   (void)max11802_sendcmd(priv, MAX11802_CMD_MEASUREXY, &tags);
 
   /* Get exclusive access to the driver data structure */
@@ -558,7 +567,7 @@ static void max11802_worker(FAR void *arg)
     {
       ret = sem_wait(&priv->devsem);
 
-      /* This should only fail if the wait was canceled by an signal
+      /* This should only fail if the wait was cancelled by an signal
        * (and the worker thread will receive a lot of signals).
        */
 
@@ -573,9 +582,13 @@ static void max11802_worker(FAR void *arg)
   /* Handle the change from pen down to pen up */
 
   if (pendown)
-    ivdbg("\nPD\n");
+    {
+      ivdbg("\nPD\n");
+    }
   else
-    ivdbg("\nPU\n");
+    {
+      ivdbg("\nPU\n");
+    }
 
   if (!pendown)
     {
@@ -584,8 +597,9 @@ static void max11802_worker(FAR void *arg)
       priv->threshx = INVALID_THRESHOLD;
       priv->threshy = INVALID_THRESHOLD;
 
-      /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen up
-       * and already reported; CONTACT_UP == pen up, but not reported)
+      /* Ignore the interrupt if the pen was already up (CONTACT_NONE ==
+       * pen up and already reported; CONTACT_UP == pen up, but not
+       * reported).
        */
 
       ivdbg("\nPC%d\n", priv->sample.contact);
@@ -606,26 +620,28 @@ static void max11802_worker(FAR void *arg)
     }
 
   /* It is a pen down event.  If the last loss-of-contact event has not been
-   * processed yet, then we have to ignore the pen down event (or else it will
-   * look like a drag event)
+   * processed yet, then we have to ignore the pen down event (or else it
+   * will look like a drag event)
    */
 
   else if (priv->sample.contact == CONTACT_UP)
     {
       /* If we have not yet processed the last pen up event, then we
-       * cannot handle this pen down event. We will have to discard it.  That
-       * should be okay because we will set the timer to to sample again
-       * later.
+       * cannot handle this pen down event. We will have to discard it.
+       * That should be okay because we will set the timer to to sample
+       * again later.
        */
 
        ivdbg("Previous pen up event still in buffer\n");
        max11802_notify(priv);
-       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1, (uint32_t)priv);
+       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+                (uint32_t)priv);
        goto ignored;
     }
   else
     {
       /* Wait for data ready
+       *
        * Note: MAX11802 signals the readiness of the results using
        * the lowest 4 bits of the result. However these are the
        * last bits to be read out of the device. It appears that
@@ -638,32 +654,39 @@ static void max11802_worker(FAR void *arg)
        */
 
       int readycount = 0;
-      do {
-#ifdef CONFIG_MAX11802_SWAPXY
-        x = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags);
-        y = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags2);
-#else
-        x = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags);
-        y = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags2);
-#endif
-        if (tags != 0xF && tags2 != 0xF)
+      do
         {
-          readycount++;
+#ifdef CONFIG_MAX11802_SWAPXY
+          x = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags);
+          y = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags2);
+#else
+          x = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags);
+          y = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags2);
+#endif
+          if (tags != 0xF && tags2 != 0xF)
+            {
+              readycount++;
+            }
         }
-      } while (readycount < 2);
+      while (readycount < 2);
 
       /* Continue to sample the position while the pen is down */
-      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1, (uint32_t)priv);
+
+      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+               (uint32_t)priv);
 
       /* Check if data is valid */
-      if ((tags & 0x03) != 0)
-      {
-        ivdbg("Touch ended before measurement\n");
-        goto ignored;
-      }
 
-      /* Perform a thresholding operation so that the results will be more stable.
-       * If the difference from the last sample is small, then ignore the event.
+      if ((tags & 0x03) != 0)
+        {
+          ivdbg("Touch ended before measurement\n");
+          goto ignored;
+        }
+
+      /* Perform a thresholding operation so that the results will be more
+       * stable.  If the difference from the last sample is small, then
+       * ignore the event.
+       *
        * REVISIT:  Should a large change in pressure also generate a event?
        */
 
@@ -871,7 +894,8 @@ static int max11802_close(FAR struct file *filep)
  * Name: max11802_read
  ****************************************************************************/
 
-static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
+                             size_t len)
 {
   FAR struct inode          *inode;
   FAR struct max11802_dev_s *priv;
@@ -905,7 +929,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer, size_t le
   ret = sem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
+      /* This should only happen if the wait was cancelled by an signal */
 
       idbg("sem_wait: %d\n", errno);
       DEBUGASSERT(errno == EINTR);
@@ -1150,10 +1174,6 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: max11802_register
  *
  * Description:
@@ -1260,12 +1280,14 @@ int max11802_register(FAR struct spi_dev_s *spi,
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
 
   /* Test that the device access was successful. */
+
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_RD);
   ret = SPI_SEND(priv->spi, 0);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
 
   /* Unlock the bus */
+
   max11802_unlock(spi);
 
   if (ret != MAX11802_MODE)
@@ -1292,6 +1314,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
    */
 
 #ifdef CONFIG_MAX11802_MULTIPLE
+  flags          = irqsave();
   priv->flink    = g_max11802list;
   g_max11802list = priv;
   irqrestore(flags);
