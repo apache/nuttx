@@ -1418,7 +1418,9 @@ apps
  |   |  `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
- |   `- zmodem
+ |   |- zmodem
+ |   |  `- README.txt
+ |   `- zoneinfo
  |      `- README.txt
  `- README.txt
 
