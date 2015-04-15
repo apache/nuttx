@@ -275,7 +275,9 @@ config LIBC_LOCALTIME
 		environment variable TZ must be set to the name of that timezone file
 		when tzset() is called.
 
-		See https://www.iana.org/time-zones
+		See https://www.iana.org/time-zones .  See also apps/system/zoneinfo
+		which provides a framework for incorporating the TZ database into a
+		NuttX build.
 
 if LIBC_LOCALTIME
 
@@ -286,10 +288,10 @@ config LIBC_TZ_MAX_TIMES
 		Timezone files with more than this number of times will not be usedi
 		(tmecnt).
 
-		Warning: Some files in IANA TZ database include many more times than
-		this.  The current posixrules file, for example, has timecnt = 236.
-		The value of TX_MAX_ITMES in the tzfile.h header file on my Linux
-		system is 370.  You may want to reduce this value for a smaller
+		Warning: Some files in IANA TZ database include many times.  The current
+		posixrules file, for example, has timecnt = 236.  The value of
+		TX_MAX_ITMES in the tzfile.h header file on my Linux system is 370, the
+		default used here.  You may want to reduce this value for a smaller
 		footprint.
 
 config LIBC_TZ_MAX_TYPES
