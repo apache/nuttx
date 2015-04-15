@@ -10168,3 +10168,10 @@
 	  configurations.  From Juha Niskanen (2015-04-14).
 
 7.10 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* configs/sim/src/sim.h, sim_zoneinfo.c, Makefile, and sim_boot.c: Add
+	  logic to test localtime and TZ database.  See apps/system/README.txt
+	  for info (2015-04-15).
+	* libc/Kconfig: Fix defaults for timezone limits.  They need to be much
+	  larger (2015-04-15).
+
