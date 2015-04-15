@@ -45,6 +45,9 @@ CSRCS =
 
 ifeq ($(CONFIG_BOARD_INITIALIZE),y)
   CSRCS += sim_boot.c
+ifeq ($(CONFIG_SYSTEM_ZONEINFO_ROMFS),y)
+  CSRCS += sim_zoneinfo.c
+endif
 endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
@@ -52,6 +55,7 @@ ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += sim_touchscreen.c
 endif
 endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
