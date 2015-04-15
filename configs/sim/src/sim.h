@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/sim/src/sim_boot.c
+ * config/sim/src/sim.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,75 +33,64 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_SIM_SRC_SIM_H
+#define __CONFIGS_SIM_SRC_SIM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <nuttx/board.h>
-
-#include "up_internal.h"
-#include "sim.h"
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-int trv_mount_world(int minor, FAR const char *mountpoint);
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_initialize
+ * Name: sim_zoneinfo
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   Mount the TZ database.  The apps/system/zoneinfo directory contains
+ *   logic to create a version of the TZ/Olson database.
+ *   This database is required if localtime() support is selected via
+ *   CONFIG_LIBC_LOCALTIME.  This logic in that directory does the following:
+ *
+ *   - It downloads the current TZ database from the IANA website
+ *   - It downloads the current timezone tools from the same location
+ *   - It builds the tools and constructs the binary TZ database
+ *   - It will then, optionally, build a ROMFS filesystem image containing
+ *     the data base.
+ *
+ *   The ROMFS filesystem image can that be mounted during the boot-up sequence
+ *   so that it is available for the localtime logic.  There are two steps to
+ *   doing this:
+ *
+ *   - First, a ROM disk device must be created.  This is done by calling
+ *     the function romdisk_register() as described in
+ *     nuttx/include/nuttx/fs/ramdisk.h.  This is an OS level operation
+ *     and must be done in the board-level logic before your appliction
+ *     starts.
+ *
+ *     romdisk_register() will create a block driver at /dev/ramN where N
+ *     is the device minor number that was provdied to romdisk_regsiter.
+ *
+ *   - The second step is to mount the file system.  This step can be
+ *     performed either in your board configuration logic or by your
+ *     application using the mount() interface described in
+ *     nuttx/include/sys/mount.h.
+ *
+ *     These steps, however, must be done very early in initialization,
+ *     before there is any need for time-related services.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
 #ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
-  /* Mount the TZ database */
-
-  (void)sim_zoneinfo(3);
+int sim_zoneinfo(int minor);
 #endif
 
-#ifdef CONFIG_AJOYSTICK
-  /* Initialize the simulated analog joystick input device */
 
-  sim_ajoy_initialize();
-#endif
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-  /* Special initialization for the Traveler game simulation */
-
-  (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
-#endif
-
-}
-#endif /* CONFIG_BOARD_INITIALIZE */
-
+#endif /* __CONFIGS_SIM_SRC_SIM_H */
