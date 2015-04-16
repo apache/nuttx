@@ -1596,6 +1596,10 @@ config BOARDCTL_ADCTEST
 	bool "Enable ADC test interfaces"
 	default n
 
+config BOARDCTL_PWMTEST
+	bool "Enable PWM test interfaces"
+	default n
+
 config BOARDCTL_GRAPHICS
 	bool "Enable custom graphics initialization interfaces"
 	default n
