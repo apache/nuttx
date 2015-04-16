@@ -168,7 +168,6 @@
 #define DMA2D_xGCOLR_RED_MASK       (0xFF << DMA2D_xGCOLR_RED_SHIFT)
 #define DMA2D_xGCOLR_RED(n)         ((uint32_t)(n) << DMA2D_xGCOLR_RED_SHIFT)
 
-
 /* DMA2D Foreground CLUT Memory Address Register */
 
 /* DMA2D Background CLUT Memory Address Register */
