@@ -15,8 +15,8 @@ MEMORY
 /* E86 stacked flash 32mbit flash, 4mbit sram, DBB internal 256kb SRAM */
     /* 0x800000-0x87ffff */ /* bump up because we have 32mbit instead of 16mbit */
     /* compal-loaded binary: our text, initialized data */
-    LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00040000
-    TRAM (rw) : ORIGIN = 0x00840000, LENGTH = 0x00020000
+    LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
+    TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00040000
     /* compal-loaded binary: our unitialized data, stacks, heap */
     IRAM (rw) : ORIGIN = 0x00860000, LENGTH = 0x00020000
 
