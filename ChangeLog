@@ -10237,3 +10237,5 @@
 	  From Marco Krahl (2015-04-16).
 	* Add support for the new DMA2D features to the STM32F429i-Disco LTDC
 	  configuration.  From Marco Krahl (2015-04-16).
+	* stdlib.h:  MAX_RAND should be RAND_MAX (2015-04-16).
+
