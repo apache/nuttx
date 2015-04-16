@@ -2121,18 +2121,8 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
           int lid = priv->lid;
 
           kmm_free(priv->pinfo.fbmem);
-#ifdef HAVE_CCM_HEAP
-          if (((uint32_t)priv & 0xF0000000) == 0x10000000)
-            {
-              ccm_free(priv);
-            }
-          else
-            {
-              kmm_free(priv);
-            }
-#else
-          kmm_free(priv);
-#endif
+          stm32_dma2d_lfree(priv);
+
           g_layers[lid] = NULL;
           ret = OK;
         }
