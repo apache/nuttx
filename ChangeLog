@@ -10178,4 +10178,62 @@
 	  drivers (2015-04-15).
 	* configs/boardctl.c and Kconfig:  Add missing causing that caused
 	  failures of PWM test (2015-04-15).
+	* arch/arm/src/stm32: Defines a second interface for the dma2d controller.
+	  Controlling both LTDC and DMA2D was unpractical from the programmers
+	  view because both controllers are to different. LTDC only controls the
+	  display visibility but the DMA2D controller changes the content of the
+	  frame buffer (buffer of the layer).
 
+	  The main features are:
+
+	  1. DMA2D interface
+	     Supports the nuttx pixel formats:
+	     - FB_FMT_RGB8
+	     - FB_FMT_RGB24
+	     - FB_FMT_RGB16_565
+	     Dynamic layer allocation during runtime for the supported formats
+	     - The number of allocatable layer can be configured.
+	     Supported dma2d operation:
+	     - blit (Copy content from source to destination layer) also works
+	       with selectable area.
+	     - blend (Blend two layer and copy the result to a destination layer
+	       which canbe a third layer or one of the source layer) also works
+	       awith selectablerea.
+	     - fillarea (Fill a defined area of the whole layer with a specific
+	       color)
+
+	  As a result of that the dma2d controller can't transfer data from the
+	  core coupled memory, CCM is disabled but usable by the ccm allocator.
+	  Currently the ccm allocator is used for allocating the layer structure
+	  only. For the dma memory (layers frame buffer) memory is allocated from
+	  heap 2 and 3.
+
+	  2. LTDC interface
+	     I have changed the api for the currently non implemented operations:
+	     - blit (Copy content from a dma2d layer to an ltdc layer) also works with
+	       selectable area.
+	     - blend (Blend two dma2d layer and copy the result to a destination ltdc
+	       layer) also  works with selectable area.
+
+	       Note! ltdc layer is a layer referenced by the ltdc interface. dma2d layer
+	       is a layer referenced by the dma2d interface.
+
+	       One of the most important questions for me was, How can i flexible use an
+	       ltdc layer with the dma2d interface, e.g. as source layer for dma2d
+	       operations?
+	       Get the layer id of the related dma2d layer by a special flag when using
+	       getlid() function of the ltdc interface and use the layer id to reference
+	       the specific dma2d layer by the dma2d interface.
+
+	       The ltdc coupled dma2d layers are predefined and can't be dynamically
+	       allocated of freed. They use the same frame buffer memory and the same
+	       color lookup table.
+
+	     Changes:
+	     - layer internal format of the clut table
+	     - interrupt handling for register reload (vertical vblank) instead using
+	       waiting loop
+	     - small fixes and refactoring
+	  From Marco Krahl (2015-04-16).
+	* Add support for the new DMA2D features to the STM32F429i-Disco LTDC
+	  configuration.  From Marco Krahl (2015-04-16).
