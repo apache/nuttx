@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <debug.h>
+#include <errno.h>
 
 #include "up_arch.h"
 #include "calypso_spi.h"
@@ -66,8 +67,12 @@ struct calypso_spidev_s
 };
 
 /* STUBS! */
+
 #ifndef CONFIG_SPI_OWNBUS
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock);
+static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+{
+  return -ENOSYS;
+}
 #endif
 
 static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
