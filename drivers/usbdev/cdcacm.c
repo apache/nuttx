@@ -203,6 +203,11 @@ static int     cdcuart_attach(FAR struct uart_dev_s *dev);
 static void    cdcuart_detach(FAR struct uart_dev_s *dev);
 static int     cdcuart_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
 static void    cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool    cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
+                 unsigned int nbuffered, bool upper);
+#endif
+
 static void    cdcuart_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
 
@@ -213,16 +218,16 @@ static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
 
 static const struct usbdevclass_driverops_s g_driverops =
 {
-  cdcacm_bind,          /* bind */
-  cdcacm_unbind,        /* unbind */
-  cdcacm_setup,         /* setup */
-  cdcacm_disconnect,    /* disconnect */
+  cdcacm_bind,           /* bind */
+  cdcacm_unbind,         /* unbind */
+  cdcacm_setup,          /* setup */
+  cdcacm_disconnect,     /* disconnect */
 #ifdef CONFIG_SERIAL_REMOVABLE
-  cdcacm_suspend,       /* suspend */
-  cdcacm_resume,        /* resume */
+  cdcacm_suspend,        /* suspend */
+  cdcacm_resume,         /* resume */
 #else
-  NULL,                 /* suspend */
-  NULL,                 /* resume */
+  NULL,                  /* suspend */
+  NULL,                  /* resume */
 #endif
 };
 
@@ -230,21 +235,21 @@ static const struct usbdevclass_driverops_s g_driverops =
 
 static const struct uart_ops_s g_uartops =
 {
-  cdcuart_setup,        /* setup */
-  cdcuart_shutdown,     /* shutdown */
-  cdcuart_attach,       /* attach */
-  cdcuart_detach,       /* detach */
-  cdcuart_ioctl,        /* ioctl */
-  NULL,                 /* receive */
-  cdcuart_rxint,        /* rxinit */
-  NULL,                 /* rxavailable */
+  cdcuart_setup,         /* setup */
+  cdcuart_shutdown,      /* shutdown */
+  cdcuart_attach,        /* attach */
+  cdcuart_detach,        /* detach */
+  cdcuart_ioctl,         /* ioctl */
+  NULL,                  /* receive */
+  cdcuart_rxint,         /* rxinit */
+  NULL,                  /* rxavailable */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  NULL,                 /* rxflowcontrol */
+  cdcuart_rxflowcontrol, /* rxflowcontrol */
 #endif
-  NULL,                 /* send */
-  cdcuart_txint,        /* txinit */
-  NULL,                 /* txready */
-  cdcuart_txempty       /* txempty */
+  NULL,                  /* send */
+  cdcuart_txint,         /* txinit */
+  NULL,                  /* txready */
+  cdcuart_txempty        /* txempty */
 };
 
 /****************************************************************************
@@ -2116,6 +2121,38 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
     }
   irqrestore(flags);
 }
+
+/****************************************************************************
+ * Name: cdcuart_rxflowcontrol
+ *
+ * Description:
+ *   Called when Rx buffer is full (or exceeds configured watermark levels
+ *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data
+ *
+ * Input parameters:
+ *   dev       - UART device instance
+ *   nbuffered - the number of characters currently buffered
+ *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
+ *               not defined the value will be 0 for an empty buffer or the
+ *               defined buffer size for a full buffer)
+ *   upper     - true indicates the upper watermark was crossed where
+ *               false indicates the lower watermark has been crossed
+ *
+ * Returned Value:
+ *   true if RX flow control activated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
+                                  unsigned int nbuffered, bool upper)
+{
+#warning Missing logic
+  return false;
+}
+#endif
 
 /****************************************************************************
  * Name: cdcuart_txint
