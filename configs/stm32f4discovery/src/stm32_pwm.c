@@ -117,7 +117,7 @@ int board_pwm_setup(void)
       pwm = stm32_pwminitialize(STM32F4DISCOVERY_PWMTIMER);
       if (!pwm)
         {
-          dbg("Failed to get the STM32 PWM lower half\n");
+          adbg("Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
         }
 
