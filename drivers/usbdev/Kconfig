@@ -280,6 +280,14 @@ config CDCACM_CONSOLE
 		Register the USB device as /dev/console so that is will be used
 		as the console device.
 
+config CDCACM_IFLOWCONTROL
+	bool "CDC/ACM RTS flow control"
+	default n
+	depends on EXPERIMENTAL
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable CDC/ACM RTS flow control
+
 config CDCACM_COMPOSITE
 	bool "CDC/ACM composite support"
 	default n
@@ -438,6 +446,7 @@ config CDCACM_VENDORSTR
 config CDCACM_PRODUCTSTR
 	string "Product string"
 	default "CDC/ACM Serial"
+
 endif
 
 config USBMSC

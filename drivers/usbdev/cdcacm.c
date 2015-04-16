@@ -2149,7 +2149,13 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
 static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
                                   unsigned int nbuffered, bool upper)
 {
-#warning Missing logic
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+  /* Allocate a request */
+  /* Format the SerialControlLineState messages */
+  /* Submit the request on the Interrupt IN endpoint */
+#  warning Missing logic
+#endif
+
   return false;
 }
 #endif
