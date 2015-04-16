@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_ltdc.c
  *
- *   Copyright (C) 2013-2014 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013-2015 Ken Pettit. All rights reserved.
  *   Authors: Ken Pettit <pettitd@gmail.com>
  *            Marco Krahl <ocram.lhark@gmail.com>
  *
@@ -48,10 +48,12 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/kmalloc.h>
 
 #include <arch/chip/ltdc.h>
+#include <arch/chip/dma2d.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -131,13 +133,6 @@
 #define STM32_LTDC_GCR_DBW           LTDC_GCR_GBW(BOARD_LTDC_GCR_DBW)
 #define STM32_LTDC_GCR_DGW           LTDC_GCR_DGW(BOARD_LTDC_GCR_DGW)
 #define STN32_LTDC_GCR_DRW           LTDC_GCR_DBW(BOARD_LTDC_GCR_DRW)
-
-/* IER register */
-
-#define STM32_LTDC_IER_LIE           LTDC_IER_LIE
-#define STM32_LTDC_IER_FUIE          !LTDC_IER_FUIE
-#define STM32_LTDC_IER_TERRIE        !LTDC_IER_TERRIE
-#define STM32_LTDC_IER_RRIE          LTDC_IER_RRIE
 
 /* LIPCR register */
 
@@ -304,7 +299,8 @@
 
 #define STM32_LTDC_BUFFER_SIZE  CONFIG_STM32_LTDC_FB_SIZE
 #define STM32_LTDC_BUFFER_FREE  (STM32_LTDC_BUFFER_SIZE - STM32_TOTAL_FBSIZE)
-#define STM32_LTDC_BUFFER_START (CONFIG_STM32_LTDC_FB_BASE + STM32_LTDC_BUFFER_FREE/2)
+#define STM32_LTDC_BUFFER_START (CONFIG_STM32_LTDC_FB_BASE + \
+                                STM32_LTDC_BUFFER_FREE/2)
 
 #if STM32_LTDC_BUFFER_FREE < 0
 #  error "STM32_LTDC_BUFFER_SIZE not large enough for frame buffers"
@@ -386,23 +382,49 @@
 #define STM32_LTDC_BF1_RESET        6
 #define STM32_LTDC_BF2_RESET        7
 
-/*
- * Waits upon vertical sync
- * Note! Position is reserved in current SRCR register but not used
- */
+/* Check pixel format support by DMA2D driver */
 
-#define LTDC_SRCR_WAIT              4
+#ifdef CONFIG_STM32_DMA2D
+# if defined(CONFIG_STM32_LTDC_L1_L8) || \
+        defined(CONFIG_STM32_LTDC_L2_L8)
+#  if !defined(CONFIG_STM32_DMA2D_L8)
+#   error "DMA2D must support FB_FMT_RGB8 pixel format"
+#  endif
+# endif
+# if defined(CONFIG_STM32_LTDC_L1_RGB565) || \
+        defined(CONFIG_STM32_LTDC_L2_RGB565)
+#  if !defined(CONFIG_STM32_DMA2D_RGB565)
+#   error "DMA2D must support FB_FMT_RGB16_565 pixel format"
+#  endif
+# endif
+# if defined(CONFIG_STM32_LTDC_L1_RGB888) || \
+        defined(CONFIG_STM32_LTDC_L2_RGB888)
+#  if !defined(CONFIG_STM32_DMA2D_RGB888)
+#   error "DMA2D must support FB_FMT_RGB24 pixel format"
+#  endif
+# endif
+#endif
 
 /* Calculate the size of the layers clut table */
 
 #ifdef CONFIG_FB_CMAP
-#define STM32_LTDC_CLUT_ENTRIES     256
+# if defined(CONFIG_STM32_DMA2D) && !defined(CONFIG_STM32_DMA2D_L8)
+#  error "DMA2D must also support L8 CLUT pixel format if supported by LTDC"
+# endif
 # ifdef STM32_LTDC_L1CMAP
-#  define STM32_LAYER_CLUT_SIZE     1 * 3 * STM32_LTDC_CLUT_ENTRIES
+#  ifdef CONFIG_FB_TRANSPARENCY
+#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * sizeof(uint32_t)
+#  else
+#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * 3 * sizeof(uint8_t)
+#  endif
 # endif
 # ifdef STM32_LTDC_L2CMAP
 #  undef  STM32_LAYER_CLUT_SIZE
-#  define STM32_LAYER_CLUT_SIZE     2 * 3 * STM32_LTDC_CLUT_ENTRIES
+#  ifdef CONFIG_FB_TRANSPARENCY
+#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * sizeof(uint32_t) * 2
+#  else
+#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * 3 * sizeof(uint8_t) * 2
+#  endif
 # endif
 #endif
 
@@ -423,12 +445,21 @@
 #define LTDC_L2CLUT_GREENOFFSET     1024
 #define LTDC_L2CLUT_BLUEOFFSET      1280
 
-/* Layer rgb clut register position */
+/* Layer argb clut register position */
 
 #define LTDC_CLUT_ADD(n)            ((uint32_t)(n) << 24)
+#define LTDC_CLUT_ALPHA(n)          LTDC_CLUT_ADD(n)
 #define LTDC_CLUT_RED(n)            ((uint32_t)(n) << 16)
 #define LTDC_CLUT_GREEN(n)          ((uint32_t)(n) << 8)
 #define LTDC_CLUT_BLUE(n)           ((uint32_t)(n) << 0)
+#define LTDC_CLUT_RGB888_MASK       0xffffff
+
+/* Layer argb cmap conversion */
+
+#define LTDC_CMAP_ALPHA(n)          ((uint32_t)(n) >> 24)
+#define LTDC_CMAP_RED(n)            ((uint32_t)(n) >> 16)
+#define LTDC_CMAP_GREEN(n)          ((uint32_t)(n) >> 8)
+#define LTDC_CMAP_BLUE(n)           ((uint32_t)(n) >> 0)
 
 /****************************************************************************
  * Private Types
@@ -463,6 +494,9 @@ struct stm32_layer_s
   /* Operation */
 
   uint8_t operation;        /* Operation flags */
+#ifdef CONFIG_STM32_DMA2D
+  FAR struct dma2d_layer_s *dma2d; /* dma2d interface */
+#endif
 };
 
 /* This structure provides the state of each LTDC layer */
@@ -488,14 +522,20 @@ struct stm32_ltdcdev_s
 #ifdef STM32_LAYER_CLUT_SIZE
 enum stm32_clut_e
 {
-  LTDC_L1CLUT_RED   = LTDC_L1CLUT_REDOFFSET,
-  LTDC_L1CLUT_GREEN = LTDC_L1CLUT_GREENOFFSET,
-  LTDC_L1CLUT_BLUE  = LTDC_L1CLUT_BLUEOFFSET,
-  LTDC_L2CLUT_RED   = LTDC_L2CLUT_REDOFFSET,
-  LTDC_L2CLUT_GREEN = LTDC_L2CLUT_GREENOFFSET,
-  LTDC_L2CLUT_BLUE  = LTDC_L2CLUT_BLUEOFFSET
+  LTDC_L1CLUT_OFFSET = 0,
+  LTDC_L2CLUT_OFFSET = STM32_LTDC_NCLUT * sizeof(uint32_t)
 };
 #endif
+
+/* Interrupt handling */
+
+struct stm32_interrupt_s
+{
+  bool  wait;       /* Informs that the task is waiting for the irq */
+  bool  handled;    /* Informs that an irq was handled */
+  int   irq;        /* irq number */
+  sem_t *sem;       /* Semaphore for waiting for irq */
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -509,15 +549,16 @@ static void stm32_ltdc_periphconfig(void);
 static void stm32_ltdc_bgcolor(uint32_t rgb);
 static void stm32_ltdc_dither(bool enable, uint8_t red,
                               uint8_t green, uint8_t blue);
-static void stm32_ltdc_interrupt(uint32_t mask, uint32_t value);
-static void stm32_ltdc_reload(uint8_t value);
+static int stm32_ltdcirq(int irq, void *context);
+static int stm32_ltdc_waitforirq(void);
+static int stm32_ltdc_reload(uint8_t value, bool waitvblank);
 
 /* Layer and layer register operation */
 
 static inline void stm32_ltdc_lsetopac(FAR struct stm32_layer_s *layer);
 static inline void stm32_ltdc_lunsetopac(FAR struct stm32_layer_s *layer);
 static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer);
-static inline bool stm32_ltdc_lvalidate(FAR struct stm32_layer_s *layer);
+static inline bool stm32_ltdc_lvalidate(FAR const struct stm32_layer_s *layer);
 #ifdef CONFIG_STM32_LTDC_INTERFACE
 static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
                                     fb_coord_t xpos, fb_coord_t ypos,
@@ -536,10 +577,10 @@ static void stm32_ltdc_lblendmode(FAR struct stm32_layer_s *layer,
                                   uint8_t bf1, uint8_t bf2);
 
 #ifdef STM32_LAYER_CLUT_SIZE
-static void stm32_ltdc_cmapcpy(FAR struct fb_cmap_s *dest,
-                               FAR const struct fb_cmap_s *src);
-static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer);
-static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s* layer, bool enable);
+static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer,
+                             FAR const struct fb_cmap_s *cmap);
+static void stm32_ltdc_lclutenable(FAR struct stm32_layer_s* layer,
+                                    bool enable);
 #endif
 static void stm32_ltdc_linit(int lid);
 static void stm32_ltdc_lenable(FAR struct stm32_layer_s *layer);
@@ -598,15 +639,18 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode);
 
 #ifdef CONFIG_STM32_DMA2D
 static int stm32_blit(FAR struct ltdc_layer_s *dest,
-                      FAR struct ltdc_layer_s *fore,
-                      fb_coord_t forexpos, fb_coord_t foreypos,
-                      FAR struct ltdc_layer_s *back,
-                      FAR const struct ltdc_area_s *backarea);
+                      fb_coord_t destxpos, fb_coord_t destypos,
+                      FAR const struct dma2d_layer_s *src,
+                      FAR const struct ltdc_area_s *srcarea);
 static int stm32_blend(FAR struct ltdc_layer_s *dest,
-                       FAR struct ltdc_layer_s *fore,
-                       fb_coord_t forexpos, fb_coord_t foreypos,
-                       FAR struct ltdc_layer_s *back,
-                       FAR const struct ltdc_area_s *backarea);
+                        fb_coord_t destxpos, fb_coord_t destypos,
+                        FAR const struct dma2d_layer_s *fore,
+                        fb_coord_t forexpos, fb_coord_t foreypos,
+                        FAR const struct dma2d_layer_s *back,
+                        FAR const struct ltdc_area_s *backarea);
+static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
+                            FAR const struct ltdc_area_s *area,
+                            uint32_t color);
 #endif
 #endif /* CONFIG_STM32_LTDC_INTERFACE */
 
@@ -652,6 +696,20 @@ static const struct fb_vtable_s g_vtable =
 
 static sem_t g_lock;
 
+/* The semaphore for interrupt handling */
+
+static sem_t g_semirq;
+
+/* This structure provides irq handling */
+
+static struct stm32_interrupt_s g_interrupt =
+{
+  .wait    = false,
+  .handled = true,
+  .irq     = STM32_IRQ_LTDCINT,
+  .sem     = &g_semirq
+};
+
 /* The layer active state */
 
 static uint8_t g_lactive;
@@ -659,31 +717,7 @@ static uint8_t g_lactive;
 #ifdef STM32_LAYER_CLUT_SIZE
 /* The layers clut table entries */
 
-static uint8_t g_clut[STM32_LAYER_CLUT_SIZE];
-
-/* The layer 1 cmap */
-
-#ifdef STM32_LTDC_L1CMAP
-static struct fb_cmap_s g_cmap_l1 =
-{
-  .len     = STM32_LTDC_CLUT_ENTRIES,
-  .red     = &g_clut[LTDC_L1CLUT_RED],
-  .green   = &g_clut[LTDC_L1CLUT_GREEN],
-  .blue    = &g_clut[LTDC_L1CLUT_BLUE]
-};
-#endif
-
-/* The layer 2 cmap */
-
-#ifdef STM32_LTDC_L2CMAP
-static struct fb_cmap_s g_cmap_l2 =
-{
-  .len     = STM32_LTDC_CLUT_ENTRIES,
-  .red     = &g_clut[LTDC_L2CLUT_RED],
-  .green   = &g_clut[LTDC_L2CLUT_GREEN],
-  .blue    = &g_clut[LTDC_L2CLUT_BLUE]
-};
-#endif
+static uint32_t g_clut[STM32_LAYER_CLUT_SIZE];
 #endif
 
 /* The initialized state of the overall LTDC layers */
@@ -710,7 +744,7 @@ static struct stm32_ltdcdev_s g_ltdc =
               .nplanes  = 1
             }
 #ifdef STM32_LTDC_L1CMAP
-         ,.cmap = &g_cmap_l1
+         ,.clut         = &g_clut[LTDC_L1CLUT_OFFSET]
 #endif
         }
     }
@@ -735,7 +769,7 @@ static struct stm32_ltdcdev_s g_ltdc =
               .nplanes  = 1
             }
 #ifdef STM32_LTDC_L2CMAP
-         ,.cmap = &g_cmap_l2
+         ,.clut         = &g_clut[LTDC_L2CLUT_OFFSET]
 #endif
         }
     }
@@ -875,6 +909,10 @@ static const uintptr_t stm32_clutwr_layer_t[LTDC_NLAYERS] =
 # endif
 };
 #endif
+
+/* The initialized state of the driver */
+
+static bool g_initialized;
 
 /****************************************************************************
  * Public Data
@@ -1037,34 +1075,15 @@ static void stm32_ltdc_dither(bool enable,
 }
 
 /****************************************************************************
- * Name: stm32_ltdc_interrupt
+ * Name: stm32_ltdc_linepos
  *
  * Description:
- *   Configures specific interrupt
- *
- * Parameter:
- *   mask  - Interrupt mask
- *   value - Interrupt value
+ *   Configures line position register
  *
  ****************************************************************************/
 
-static void stm32_ltdc_interrupt(uint32_t mask, uint32_t value)
+static void stm32_ltdc_linepos(void)
 {
-  uint32_t regval;
-
-  /* Get interrupts */
-
-  regval = getreg32(STM32_LTDC_IER);
-  regvdbg("get LTDC_IER=%08x\n", regval);
-  regval &= ~mask;
-
-  /* Set interrupt */
-
-  regval |= value;
-  regvdbg("set LTDC_IER=%08x\n", regval);
-  putreg32(regval, STM32_LTDC_IER);
-  regvdbg("configured LTDC_IER=%08x\n", getreg32(STM32_LTDC_IER));
-
   /* Configure LTDC_LIPCR */
 
   regvdbg("set LTDC_LIPCR=%08x\n", STM32_LTDC_LIPCR_LIPOS);
@@ -1073,38 +1092,179 @@ static void stm32_ltdc_interrupt(uint32_t mask, uint32_t value)
 }
 
 /****************************************************************************
- * Name: stm32_ltdc_reload
+ * Name: stm32_ltdc_irqctrl
  *
  * Description:
- *   Reload the layer shadow register and make layer changes visible
+ *   Control  interrupts generated by the ltdc controller
  *
  * Parameter:
- *   value - Reload flag (e.g. upon vertical blank or immediately)
+ *   setirqs  - set interrupt mask
+ *   clrirqs  - clear interrupt mask
  *
  ****************************************************************************/
 
-static void stm32_ltdc_reload(uint8_t value)
+static void stm32_ltdc_irqctrl(uint32_t setirqs, uint32_t clrirqs)
 {
-  /* Check if last reload is finished */
+  uint32_t regval;
 
-  while ((getreg32(STM32_LTDC_SRCR) & (LTDC_SRCR_VBR|LTDC_SRCR_IMR)) != 0)
+  regval = getreg32(STM32_LTDC_IER);
+  regval &= ~clrirqs;
+  regval |= setirqs;
+  regvdbg("set LTDC_IER=%08x\n", regval);
+  putreg32(regval, STM32_LTDC_IER);
+  regvdbg("configured LTDC_IER=%08x\n", getreg32(STM32_LTDC_IER));
+}
+
+/****************************************************************************
+ * Name: stm32_ltdcirq
+ *
+ * Description:
+ *   LTDC interrupt handler
+ *
+ ****************************************************************************/
+
+static int stm32_ltdcirq(int irq, void *context)
+{
+  FAR struct stm32_interrupt_s *priv = &g_interrupt;
+
+  uint32_t regval = getreg32(STM32_LTDC_ISR);
+
+  regvdbg("irq = %d, regval = %08x\n", irq, regval);
+
+  if (regval & LTDC_ISR_RRIF)
     {
-    }
+      /* Register reload interrupt */
 
-  /* Reload shadow register */
+      /* Clear the interrupt status register */
 
-  regvdbg("set LTDC_SRCR=%08x\n", value & ~LTDC_SRCR_WAIT);
-  putreg32(value & ~LTDC_SRCR_WAIT, STM32_LTDC_SRCR);
-  regvdbg("configured LTDC_SRCR=%08x\n", getreg32(STM32_LTDC_SRCR));
+      putreg32(LTDC_ICR_CRRIF, STM32_LTDC_ICR);
 
-  /* Wait until registers reloaded */
+      /* Update the handled flag */
 
-  if (value & LTDC_SRCR_WAIT)
-    {
-      while ((getreg32(STM32_LTDC_SRCR) & (value & ~LTDC_SRCR_WAIT)) != 0)
+      priv->handled = true;
+
+      /* Unlock the semaphore if locked */
+
+      if (priv->wait)
         {
+          int ret = sem_post(priv->sem);
+
+          if (ret != OK)
+            {
+              dbg("sem_post() failed\n");
+              return ret;
+            }
         }
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_ltdc_waitforirq
+ *
+ * Description:
+ *   Helper waits until the ltdc irq occurs. In the current design That means
+ *   that a register reload was been completed.
+ *   Note! The caller must use this function within irqsave state.
+ *
+ * Return:
+ *   OK - On success otherwise ERROR
+ *
+ ****************************************************************************/
+
+static int stm32_ltdc_waitforirq(void)
+{
+  int ret = OK;
+  FAR struct stm32_interrupt_s *priv = &g_interrupt;
+
+  irqstate_t flags;
+
+  flags = irqsave();
+
+  /* Only waits if last enabled interrupt is currently not handled */
+
+  if (!priv->handled)
+    {
+      /* Inform the irq handler the task is able to wait for the irq */
+
+      priv->wait = true;
+
+      ret = sem_wait(priv->sem);
+
+      /* irq or an error occurs, reset the wait flag */
+
+      priv->wait = false;
+
+      if (ret != OK)
+        {
+          dbg("sem_wait() failed\n");
+        }
+    }
+
+  irqrestore(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_ltdc_reload
+ *
+ * Description:
+ *   Reload the layer shadow register and make layer changes visible.
+ *   Note! The caller must ensure that a previous register reloading has been
+ *   completed.
+ *
+ * Parameter:
+ *   value      - Reload flag (e.g. upon vertical blank or immediately)
+ *   waitvblank - Wait until register reload is finished
+ *
+ ****************************************************************************/
+
+static int stm32_ltdc_reload(uint8_t value, bool waitvblank)
+{
+  int ret = OK;
+  FAR struct stm32_interrupt_s *priv = &g_interrupt;
+
+  if (value == LTDC_SRCR_VBR)
+    {
+      irqstate_t flags;
+
+      /* Prepare shadow register reload for later detection by the task.
+       * At this point the last register reload must be completed. This is done
+       * in stm32_update before the next operation is triggered and manipulates
+       * the shadow register. This handling is only neccessary in the case of
+       * the application causes shadow register reload.
+       */
+
+      flags = irqsave();
+
+      ASSERT(priv->handled == true);
+
+      /* Reset the handled flag */
+
+      priv->handled = false;
+      irqrestore(flags);
+    }
+
+  /* Reloads the shadow register.
+   * Note! This will not trigger an register reload interrupt if
+   * immediately reload is set.
+   */
+
+  regvdbg("set LTDC_SRCR=%08x\n", value);
+  putreg32(value, STM32_LTDC_SRCR);
+  regvdbg("configured LTDC_SRCR=%08x\n", getreg32(STM32_LTDC_SRCR));
+
+  if (waitvblank & (value == LTDC_SRCR_VBR))
+    {
+      /* Wait upon vertical blanking period */
+
+      ret = stm32_ltdc_waitforirq();
+    }
+
+  /* Otherwise check if reload is completed before the next operation */
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1122,6 +1282,26 @@ static void stm32_global_configure(void)
   /* Initialize the LTDC semaphore that enforces mutually exclusive access */
 
   sem_init(&g_lock, 0, 1);
+
+  /* Initialize the semaphore for interrupt handling */
+
+  sem_init(g_interrupt.sem, 0, 0);
+
+  /* Attach LTDC interrupt vector */
+
+  (void)irq_attach(g_interrupt.irq, stm32_ltdcirq);
+
+  /* Enable the IRQ at the NVIC */
+
+  up_enable_irq(g_interrupt.irq);
+
+  /* Enable register reload interrupt only */
+
+  stm32_ltdc_irqctrl(LTDC_IER_RRIE,LTDC_IER_TERRIE|LTDC_IER_FUIE|LTDC_IER_LIE);
+
+  /* Configure line interrupt */
+
+  stm32_ltdc_linepos();
 
   /* Set the default active layer */
 
@@ -1152,22 +1332,6 @@ static void stm32_global_configure(void)
   /* Configure background color of the controller */
 
   stm32_ltdc_bgcolor(STM32_LTDC_BACKCOLOR);
-
-  /* Enable line interrupt */
-
-  stm32_ltdc_interrupt(STM32_LTDC_IER_LIE, 1);
-
-  /* Disable fifo underrun interrupt */
-
-  stm32_ltdc_interrupt(STM32_LTDC_IER_FUIE, 0);
-
-  /* Disable transfer error interrupt */
-
-  stm32_ltdc_interrupt(STM32_LTDC_IER_TERRIE, 0);
-
-  /* Enable register reload interrupt */
-
-  stm32_ltdc_interrupt(STM32_LTDC_IER_RRIE, 1);
 }
 
 /****************************************************************************
@@ -1305,7 +1469,7 @@ static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer)
  *
  ****************************************************************************/
 
-static inline bool stm32_ltdc_lvalidate(FAR struct stm32_layer_s *layer)
+static inline bool stm32_ltdc_lvalidate(FAR const struct stm32_layer_s *layer)
 {
 #ifdef CONFIG_STM32_LTDC_L2
   return layer == &LAYER_L1 || layer == &LAYER_L2;
@@ -1531,7 +1695,7 @@ static inline void stm32_ltdc_lframebuffer(FAR struct stm32_layer_s *layer)
             pinfo->stride * priv->ypos;
 
   regvdbg("set LTDC_L%dCFBAR=%08x\n", priv->lid + 1, pinfo->fbmem + offset);
-  putreg32(pinfo->fbmem + offset, stm32_cfbar_layer_t[priv->lid]);
+  putreg32((uint32_t)pinfo->fbmem + offset, stm32_cfbar_layer_t[priv->lid]);
 
   /* Configure LxCFBLR register */
 
@@ -1684,34 +1848,56 @@ static void stm32_ltdc_lcolorkey(FAR struct stm32_layer_s *layer)
  ****************************************************************************/
 
 #ifdef STM32_LAYER_CLUT_SIZE
-static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer)
+static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer,
+                             FAR const struct fb_cmap_s *cmap)
 {
-  int n;
-  uint32_t regval;
-  FAR struct fb_cmap_s *cmap = layer->state.cmap;
+  int            n;
+  uint32_t  regval;
+  uint32_t   *clut;
   irqstate_t flags;
 
   /* Disable clut during register update */
 
   stm32_ltdc_lclutenable(layer, false);
 
+  /* Set the clut memory address */
+
+  clut = layer->state.clut;
+
   /* Reload shadow control register.
    * This never changed any layer setting as long the layer register not up to
    * date. This is what stm32_update does.
    */
 
-  stm32_ltdc_reload(LTDC_SRCR_IMR);
+  stm32_ltdc_reload(LTDC_SRCR_IMR, false);
 
   flags = irqsave();
 
   /* Update the clut registers */
 
-  for (n = cmap->first; n < cmap->len - cmap->first; n++)
+  for (n = cmap->first; n < cmap->len && n < STM32_LTDC_NCLUT; n++)
     {
-      regval = (uint32_t)LTDC_CLUT_ADD(n) |
-               (uint32_t)LTDC_CLUT_RED(cmap->red[n]) |
-               (uint32_t)LTDC_CLUT_GREEN(cmap->green[n]) |
-               (uint32_t)LTDC_CLUT_BLUE(cmap->blue[n]);
+      /* Update the layer clut entry */
+#ifndef CONFIG_FB_TRANSPARENCY
+       uint8_t  *clut888 = (uint8_t*)clut;
+       uint16_t offset   = 3 * n;
+
+       clut888[offset]     = cmap->blue[n];
+       clut888[offset + 1] = cmap->green[n];
+       clut888[offset + 2] = cmap->red[n];
+
+       regval = (uint32_t)LTDC_CLUT_BLUE(clut888[offset]) |
+                (uint32_t)LTDC_CLUT_GREEN(clut888[offset + 1]) |
+                (uint32_t)LTDC_CLUT_RED(clut888[offset + 2]) |
+                (uint32_t)LTDC_CLUT_ADD(n);
+#else
+      clut[n] = (uint32_t)LTDC_CLUT_ALPHA(cmap->transp[n]) |
+                (uint32_t)LTDC_CLUT_RED(cmap->red[n]) |
+                (uint32_t)LTDC_CLUT_GREEN(cmap->green[n]) |
+                (uint32_t)LTDC_CLUT_BLUE(cmap->blue[n]);
+      regval  = (uint32_t)LTDC_CLUT_ADD(n) | (clut[n] & LTDC_CLUT_RGB888_MASK);
+#endif
+
 
       regvdbg("set LTDC_L%dCLUTWR = %08x, cmap->first = %d, cmap->len = %d\n",
              layer->state.lid + 1, regval, cmap->first, cmap->len);
@@ -1726,7 +1912,7 @@ static void stm32_ltdc_lclut(FAR struct stm32_layer_s *layer)
 
   /* Reload shadow control register */
 
-  stm32_ltdc_reload(LTDC_SRCR_IMR);
+  stm32_ltdc_reload(LTDC_SRCR_IMR, false);
 }
 #endif
 
@@ -1885,6 +2071,7 @@ static void stm32_ltdc_lclear(FAR struct stm32_layer_s *layer,
  *   - layer colorkey
  *   - layer alpha
  *   - layer blendmode
+ *   - layer dma2d interface binding
  *
  * Parameter
  *   layer - Reference to the layer control structure
@@ -1923,14 +2110,12 @@ static void stm32_ltdc_linit(int lid)
  #ifdef CONFIG_STM32_DMA2D
   ltdc->blit         = stm32_blit;
   ltdc->blend        = stm32_blend;
+  ltdc->fillarea     = stm32_fillarea;
  #endif
 #endif
 
   /* Initialize the layer state */
 
-#ifdef STM32_LAYER_CLUT_SIZE
-  state->cmap->first = 0;
-#endif
   state->area.xpos   = 0;
   state->area.ypos   = 0;
   state->area.xres   = STM32_LTDC_WIDTH;
@@ -1970,44 +2155,14 @@ static void stm32_ltdc_linit(int lid)
       stm32_ltdc_lclutenable(layer, false);
     }
 #endif
-}
 
-/****************************************************************************
- * Name: stm32_ltdc_cmapcpy
- *
- * Description:
- *   Copies a color table
- *   Note! Caller must check if first position is out of range
- *
- * Parameter:
- *   dest - color cmap to copy to
- *   src  - color map to copy from
- *
- * Return:
- *   On success - OK
- *   On error   - -EINVAL
- *
- ****************************************************************************/
+#ifdef CONFIG_STM32_DMA2D
+  /* Bind the dma2d interface */
 
-#ifdef STM32_LAYER_CLUT_SIZE
-static void stm32_ltdc_cmapcpy(FAR struct fb_cmap_s *dest,
-                                FAR const struct fb_cmap_s *src)
-{
-  int   n;
-
-  for (n = src->first; n < src->len && n < STM32_LTDC_CLUT_ENTRIES; n++)
-    {
-      regvdbg("n = %d, red = %02x, green = %02x, blue = %02x\n",
-              n, src->red[n], src->green[n], src->blue[n]);
-      dest->red[n]   = src->red[n];
-      dest->green[n] = src->green[n];
-      dest->blue[n]  = src->blue[n];
-    }
-
-  dest->first = src->first;
-  dest->len   = src->len;
-}
+  layer->dma2d = stm32_dma2dinitltdc(state);
+  DEBUGASSERT(layer->dma2d);
 #endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -2121,8 +2276,8 @@ static int stm32_getcmap(struct fb_vtable_s *vtable,
  *   cmap   - the color table
  *
  * Return:
- * On success - OK
- * On error   - -EINVAL
+ *   On success - OK
+ *   On error   - -EINVAL
  *
  ****************************************************************************/
 
@@ -2159,7 +2314,7 @@ static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
   gvdbg("layer=%p vinfo=%p\n", layer, vinfo);
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
-  if (priv == &LAYER_L1 || priv == &LAYER_L2)
+  if (stm32_ltdc_lvalidate(priv))
     {
       memcpy(vinfo, &priv->state.vinfo, sizeof(struct fb_videoinfo_s));
 
@@ -2239,20 +2394,17 @@ static int stm32_setclut(struct ltdc_layer_s *layer,
                     priv->state.vinfo.fmt);
           ret = -EINVAL;
         }
-      else if (cmap->first > STM32_LTDC_CLUT_ENTRIES)
+      else if (cmap->first >= STM32_LTDC_NCLUT)
         {
-          gdbg("Error: CLUT offset is out of range: %d\n", cmap->first);
+          gdbg("Error: only %d color table entries supported\n",
+                    STM32_LTDC_NCLUT);
           ret = -EINVAL;
         }
       else
         {
-          /* Copy to the layer cmap */
+          /* Update layer clut and clut register */
 
-          stm32_ltdc_cmapcpy(priv->state.cmap, cmap);
-
-          /* Update layer clut register */
-
-          stm32_ltdc_lclut(priv);
+          stm32_ltdc_lclut(priv, cmap);
 
           ret = OK;
         }
@@ -2293,28 +2445,65 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
   if (priv == &LAYER_L1 || priv == &LAYER_L2)
     {
       sem_wait(priv->state.lock);
+#ifdef CONFIG_STM32_DMA2D
+      /*
+       * Note! We share the same color lookup table with the dma2d driver and
+       * the getclut implementation works in the same way.
+       * To prevent redundant code we simply call the getclut function of the
+       * dma2d interface.
+       */
 
+      ret = priv->dma2d->getclut(priv->dma2d, cmap);
+#else
       if (priv->state.vinfo.fmt != FB_FMT_RGB8)
         {
           gdbg("Error: CLUT is not supported for the pixel format: %d\n",
                     priv->state.vinfo.fmt);
           ret = -EINVAL;
         }
-      else if (cmap->len < priv->state.cmap->len)
+      else if (cmap->first >= STM32_LTDC_NCLUT)
         {
-          gdbg("Error: cmap must accept %d color table entries: %d\n",
-                    priv->state.cmap->len);
+          gdbg("Error: only %d color table entries supported\n",
+                    STM32_LTDC_NCLUT);
           ret = -EINVAL;
         }
       else
         {
-          /* Copy from the layer cmap */
+          /* Copy from the layer clut */
 
-          stm32_ltdc_cmapcpy(cmap, priv->state.cmap);
+          uint32_t *clut;
+          int      n;
+
+          clut = priv->state.clut;
+
+          for (n = cmap->first; n < cmap->len && n < STM32_LTDC_NCLUT; n++)
+            {
+# ifndef CONFIG_FB_TRANSPARENCY
+              uint8_t  *clut888 = (uint8_t*)clut;
+              uint16_t offset   = 3 * n;
+
+              cmap->blue[n]   = clut888[offset];
+              cmap->green[n]  = clut888[offset + 1];
+              cmap->red[n]    = clut888[offset + 2];
+
+              regvdbg("n=%d, red=%02x, green=%02x, blue=%02x\n", n,
+                      clut888[offset], clut888[offset + 1],
+                      clut888[offset + 2]);
+# else
+              cmap->transp[n] = (uint8_t)LTDC_CMAP_ALPHA(clut[n]);
+              cmap->red[n]    = (uint8_t)LTDC_CMAP_RED(clut[n]);
+              cmap->green[n]  = (uint8_t)LTDC_CMAP_GREEN(clut[n]);
+              cmap->blue[n]   = (uint8_t)LTDC_CMAP_BLUE(clut[n]);
+
+              regvdbg("n=%d, alpha=%02x, red=%02x, green=%02x, blue=%02x\n", n,
+                      DMA2D_CMAP_ALPHA(clut[n]), DMA2D_CMAP_RED(clut[n]),
+                      DMA2D_CMAP_GREEN(clut[n]), DMA2D_CMAP_BLUE(clut[n]));
+# endif
+            }
 
           ret = OK;
         }
-
+#endif
       sem_post(priv->state.lock);
 
       return ret;
@@ -2381,6 +2570,11 @@ static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid, uint32_t flag)
           case LTDC_LAYER_TOP:
           case LTDC_LAYER_BOTTOM:
             *lid = LTDC_LAYER_L1;
+            break;
+#endif
+#ifdef CONFIG_STM32_DMA2D
+          case LTDC_LAYER_DMA2D:
+            ret = priv->dma2d->getlid(priv->dma2d, lid);
             break;
 #endif
           default:
@@ -2620,7 +2814,7 @@ static int stm32_getalpha(FAR struct ltdc_layer_s *layer, uint8_t *alpha)
  *
  * Description:
  *   Configure blend mode of the layer.
- *   Default mode during initialzing: LTDC_BLEND_NONE
+ *   Default mode during initializing: LTDC_BLEND_NONE
  *   Blendmode is active after next update.
  *
  * Parameter:
@@ -2658,6 +2852,7 @@ static int stm32_getalpha(FAR struct ltdc_layer_s *layer, uint8_t *alpha)
 static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  uint32_t   blendmode = mode;
   gvdbg("layer = %p, mode = %08x\n", layer, mode);
 
   if (stm32_ltdc_lvalidate(priv))
@@ -2666,33 +2861,56 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
       sem_wait(priv->state.lock);
 
-      /* Disable alpha blending by default */
-
-      priv->bf1         = LTDC_BF1_CONST_ALPHA;
-      priv->bf2         = LTDC_BF2_CONST_ALPHA;
-      stm32_ltdc_lsetopac(priv);
-
       /* Disable colorkeying by default */
 
       priv->operation &=~ LTDC_LAYER_ENABLECOLORKEY;
 
-      if (mode & LTDC_BLEND_ALPHA)
+      if (blendmode & (LTDC_BLEND_ALPHA|LTDC_BLEND_PIXELALPHA|
+                        LTDC_BLEND_ALPHAINV|LTDC_BLEND_PIXELALPHAINV))
         {
-          /* Initialize blend factor */
-
-          if (mode & LTDC_BLEND_SRCPIXELALPHA)
-            {
-              priv->bf1 = LTDC_BF1_PIXEL_ALPHA;
-            }
-          else if (mode & LTDC_BLEND_DESTPIXELALPHA)
-            {
-              priv->bf2 = LTDC_BF2_PIXEL_ALPHA;
-            }
-
-          /* Enable blending, restore the alpha value */
+          /* Enable any alpha blending */
 
           stm32_ltdc_lunsetopac(priv);
-          mode &= ~LTDC_BLEND_ALPHA;
+        }
+      else
+        {
+          /* Disable any alpha blending */
+
+          stm32_ltdc_lsetopac(priv);
+        }
+
+      if (blendmode & LTDC_BLEND_ALPHA || blendmode == LTDC_BLEND_NONE)
+        {
+          /* alpha blending introduce LTDC_BLEND_ALPHAINV */
+
+          priv->bf1         = LTDC_BF1_CONST_ALPHA;
+          priv->bf2         = LTDC_BF2_CONST_ALPHA;
+          blendmode        &= ~LTDC_BLEND_ALPHA;
+        }
+
+      if (blendmode & LTDC_BLEND_PIXELALPHA)
+        {
+          /* pixel alpha blending introduce LTDC_BLEND_PIXELALPHAINV */
+
+          priv->bf1         = LTDC_BF1_PIXEL_ALPHA;
+          priv->bf2         = LTDC_BF2_PIXEL_ALPHA;
+          blendmode        &= ~LTDC_BLEND_PIXELALPHA;
+        }
+
+      if (blendmode & LTDC_BLEND_ALPHAINV)
+        {
+          /* alpha blending of source input */
+
+          priv->bf2         = LTDC_BF2_CONST_ALPHA;
+          blendmode        &= ~LTDC_BLEND_ALPHAINV;
+        }
+
+      if (blendmode & LTDC_BLEND_PIXELALPHAINV)
+        {
+          /* pixel alpha blending of source input */
+
+          priv->bf2         = LTDC_BF2_PIXEL_ALPHA;
+          blendmode        &= ~LTDC_BLEND_PIXELALPHAINV;
         }
 
       if (mode & LTDC_BLEND_COLORKEY)
@@ -2700,12 +2918,11 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
           /* Enable colorkeying */
 
           priv->operation |= LTDC_LAYER_ENABLECOLORKEY;
-          mode            &= ~LTDC_BLEND_COLORKEY;
+          blendmode       &= ~LTDC_BLEND_COLORKEY;
         }
-
-      if (mode & ~(LTDC_BLEND_SRCPIXELALPHA|LTDC_BLEND_DESTPIXELALPHA))
+      if (blendmode)
         {
-          gdbg("Unknown blendmode %02x\n", mode);
+          gdbg("Unknown blendmode %02x\n", blendmode);
           ret = -EINVAL;
         }
 
@@ -2718,7 +2935,6 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
         }
 
       sem_post(priv->state.lock);
-
       return ret;
     }
 
@@ -2875,8 +3091,9 @@ static int stm32_getarea(FAR struct ltdc_layer_s *layer,
  *   mode    - operation mode
  *
  * Return:
- *    OK     - On success
- *   -EINVAL - If one of the parameter invalid
+ *    OK        - On success
+ *   -EINVAL    - If one of the parameter invalid
+ *   -ECANCELED - Operation cancelled, something goes wrong
  *
  * Procedure information:
  *   LTDC_UPDATE_SIM:
@@ -2916,6 +3133,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
     {
       /* Reload immediately by default */
 
+      bool    waitvblank = false;
       uint8_t reload = LTDC_SRCR_IMR;
 
       sem_wait(priv->state.lock);
@@ -2927,7 +3145,15 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
       if (mode & LTDC_SYNC_WAIT)
         {
-          reload |= LTDC_SRCR_WAIT;
+          waitvblank = true;
+        }
+
+      /* Ensures that last register reload operation has been completed */
+
+      if (stm32_ltdc_waitforirq() != OK)
+        {
+          gdbg("Returning ECANCELED\n");
+          return -ECANCELED;
         }
 
       /* Update the given layer */
@@ -2965,7 +3191,8 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
           /* Set blendfactor for current active layer to there reset value */
 
-          stm32_ltdc_lblendmode(active, STM32_LTDC_BF1_RESET, STM32_LTDC_BF2_RESET);
+          stm32_ltdc_lblendmode(active, STM32_LTDC_BF1_RESET,
+                                        STM32_LTDC_BF2_RESET);
 
           /* Set blendfactor for current inactive layer */
 
@@ -3000,7 +3227,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
       /* Make the changes visible */
 
-      stm32_ltdc_reload(reload);
+      stm32_ltdc_reload(reload, waitvblank);
 
       sem_post(priv->state.lock);
 
@@ -3011,53 +3238,48 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
   return -EINVAL;
 }
 
-
 #ifdef CONFIG_STM32_DMA2D
 /****************************************************************************
- * Name: blit
+ * Name: stm32_blit
  *
  * Description:
- *   Copy selected area from a background layer to selected position of the
- *   foreground layer. Copies the result to the destination layer.
+ *   Copy selected area from a source layer to selected position of the
+ *   destination layer.
  *
  * Parameter:
  *   dest     - Reference to the destination layer
- *   fore     - Reference to the foreground layer
- *   forexpos - Selected x target position of the destination layer
- *   foreypos - Selected y target position of the destination layer
- *   back     - Reference to the background layer
- *   backarea - Reference to the selected area of the background layer
+ *   destxpos - Selected x position of the destination layer
+ *   destypos - Selected y position of the destination layer
+ *   src      - Reference to the source layer
+ *   srcarea  - Reference to the selected area of the source layer
  *
  * Return:
- *    OK     - On success
- *   -EINVAL - If one of the parameter invalid or if the size of the selected
- *             source area outside the visible area of the destination layer.
- *             (The visible area usually represents the display size)
+ *    OK      - On success
+ *   -EINVAL  - If one of the parameter invalid or if the size of the selected
+ *              source area outside the visible area of the destination layer.
+ *              (The visible area usually represents the display size)
  *
  ****************************************************************************/
 
 static int stm32_blit(FAR struct ltdc_layer_s *dest,
-                      FAR struct ltdc_layer_s *fore,
-                      fb_coord_t forexpos, fb_coord_t foreypos,
-                      FAR struct ltdc_layer_s *back,
-                      FAR const struct ltdc_area_s *backarea)
+                      fb_coord_t destxpos, fb_coord_t destypos,
+                      FAR const struct dma2d_layer_s *src,
+                      FAR const struct ltdc_area_s *srcarea)
 {
-  FAR struct stm32_layer_s *destlayer = (FAR struct stm32_layer_s *)dest;
-  FAR struct stm32_layer_s *forelayer = (FAR struct stm32_layer_s *)fore;
-  FAR struct stm32_layer_s *backlayer = (FAR struct stm32_layer_s *)back;
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)dest;
 
-  gvdbg("dest = %p, fore = %p, forexpos = %d, foreypos = %d, back = %p, \
-            backarea = %p\n", dest, fore, forexpos, foreypos, back, backarea);
+  gvdbg("dest = %p, destxpos = %d, destypos = %d, src = %p, srcarea = %p\n",
+        dest, destxpos, destypos, src, srcarea);
 
-  if (stm32_ltdc_lvalidate(destlayer) &&
-      stm32_ltdc_lvalidate(forelayer) &&
-      stm32_ltdc_lvalidate(backlayer))
+  if (stm32_ltdc_lvalidate(priv))
     {
-      return stm32_dma2dblit(&destlayer->state,
-                              &forelayer->state,
-                              forexpos, foreypos,
-                              &backlayer->state,
-                              backarea);
+      int   ret;
+
+      sem_wait(priv->state.lock);
+      priv->dma2d->blit(priv->dma2d, destxpos, destypos, src, srcarea);
+      sem_post(priv->state.lock);
+
+      return ret;
     }
 
   gdbg("Returning EINVAL\n");
@@ -3065,53 +3287,96 @@ static int stm32_blit(FAR struct ltdc_layer_s *dest,
 }
 
 /****************************************************************************
- *
- * Name: blend
+ * Name: stm32_blend
  *
  * Description:
- *   Blends the selected area from a background layer with selected position of
- *   the foreground layer. Blends the result with the destination layer.
- *   Note! This is the same as the blit operation but with blending depending on
- *   the blendmode settings of the layer.
+ *   Blends the selected area from a foreground layer with selected position
+ *   of the background layer. Copy the result to the destination layer. Note!
+ *   The content of the foreground and background layer is not changed.
  *
  * Parameter:
  *   dest     - Reference to the destination layer
+ *   destxpos - Selected x position of the destination layer
+ *   destypos - Selected y position of the destination layer
  *   fore     - Reference to the foreground layer
- *   forexpos - Selected x target position of the destination layer
- *   foreypos - Selected y target position of the destination layer
+ *   forexpos - Selected x position of the foreground layer
+ *   foreypos - Selected y position of the foreground layer
  *   back     - Reference to the background layer
  *   backarea - Reference to the selected area of the background layer
  *
  * Return:
- *    OK     - On success
- *   -EINVAL - If one of the parameter invalid or if the size of the selected
- *             source area outside the visible area of the destination layer.
- *             (The visible area usually represents the display size)
+ *    OK      - On success
+ *   -EINVAL  - If one of the parameter invalid or if the size of the selected
+ *              source area outside the visible area of the destination layer.
+ *              (The visible area usually represents the display size)
  *
  ****************************************************************************/
 
 static int stm32_blend(FAR struct ltdc_layer_s *dest,
-                        FAR struct ltdc_layer_s *fore,
+                        fb_coord_t destxpos, fb_coord_t destypos,
+                        FAR const struct dma2d_layer_s *fore,
                         fb_coord_t forexpos, fb_coord_t foreypos,
-                        FAR struct ltdc_layer_s *back,
+                        FAR const struct dma2d_layer_s *back,
                         FAR const struct ltdc_area_s *backarea)
 {
-  FAR struct stm32_layer_s *destlayer = (FAR struct stm32_layer_s *)dest;
-  FAR struct stm32_layer_s *forelayer = (FAR struct stm32_layer_s *)fore;
-  FAR struct stm32_layer_s *backlayer = (FAR struct stm32_layer_s *)back;
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)dest;
 
-  gvdbg("dest = %p, fore = %p, forexpos = %d, foreypos = %d, back = %p, \
-            backarea = %p\n", dest, fore, forexpos, foreypos, back, backarea);
+  gvdbg("dest=%p, destxpos=%d, destypos=%d, "
+        "fore=%p, forexpos=%d foreypos=%d, "
+        "back=%p, backarea=%p\n",
+        dest, destxpos, destypos, fore, forexpos, foreypos, back, backarea);
 
-  if (stm32_ltdc_lvalidate(destlayer) &&
-      stm32_ltdc_lvalidate(forelayer) &&
-      stm32_ltdc_lvalidate(backlayer))
+  if (stm32_ltdc_lvalidate(priv))
     {
-      return stm32_dma2dblend(&destlayer->state,
-                              &forelayer->state,
-                              forexpos, foreypos,
-                              &backlayer->state,
-                              backarea);
+      int   ret;
+
+      sem_wait(priv->state.lock);
+      priv->dma2d->blend(priv->dma2d, destxpos, destypos,
+                        fore, forexpos, foreypos, back, backarea);
+      sem_post(priv->state.lock);
+
+      return ret;
+    }
+
+  gdbg("Returning EINVAL\n");
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: fillarea
+ *
+ * Description:
+ *   Fill the selected area of the whole layer with a specific color.
+ *
+ * Parameter:
+ *   layer    - Reference to the layer structure
+ *   area     - Reference to the valid area structure select the area
+ *   color    - Color to fill the selected area. Color must be formatted
+ *              according to the layer pixel format.
+ *
+ * Return:
+ *    OK      - On success
+ *   -EINVAL  - If one of the parameter invalid or if the size of the selected
+ *              area outside the visible area of the layer.
+ *
+ ****************************************************************************/
+
+static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
+                            FAR const struct ltdc_area_s *area,
+                            uint32_t color)
+{
+  FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
+  gvdbg("layer = %p, area = %p, color = %08x\n", layer, area, color);
+
+  if (stm32_ltdc_lvalidate(priv))
+    {
+      int   ret;
+
+      sem_wait(priv->state.lock);
+      priv->dma2d->fillarea(priv->dma2d, area, color);
+      sem_post(priv->state.lock);
+
+      return ret;
     }
 
   gdbg("Returning EINVAL\n");
@@ -3163,7 +3428,16 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
 
 int stm32_ltdcinitialize(void)
 {
-  gvdbg("Initialize LTDC driver\n");
+#ifdef CONFIG_STM32_DMA2D
+  int   ret;
+#endif
+
+  dbg("Initialize LTDC driver\n");
+
+  if (g_initialized == true)
+    {
+      return OK;
+    }
 
   /* Disable the LCD */
 
@@ -3180,6 +3454,17 @@ int stm32_ltdcinitialize(void)
 
   gvdbg("Configure global register\n");
   stm32_global_configure();
+
+#ifdef CONFIG_STM32_DMA2D
+  /* Initialize the dma2d controller */
+
+  ret = up_dma2dinitialize();
+
+  if (ret != OK)
+    {
+      return ret;
+    }
+#endif
 
   /* Initialize ltdc layer */
 
@@ -3205,13 +3490,16 @@ int stm32_ltdcinitialize(void)
   /* Reload shadow register */
 
   gvdbg("Reload shadow register\n");
-  stm32_ltdc_reload(LTDC_SRCR_IMR);
+  stm32_ltdc_reload(LTDC_SRCR_IMR, false);
 
   /* Turn the LCD on */
 
   gvdbg("Enabling the display\n");
   stm32_lcd_enable(true);
 
+  /* Set initialized state */
+
+  g_initialized = true;
   return OK;
 }
 
@@ -3233,6 +3521,7 @@ int stm32_ltdcinitialize(void)
 struct fb_vtable_s *stm32_ltdcgetvplane(int vplane)
 {
   gvdbg("vplane: %d\n", vplane);
+
   if (vplane == 0)
     {
       return (struct fb_vtable_s *)&g_vtable;
@@ -3252,9 +3541,21 @@ struct fb_vtable_s *stm32_ltdcgetvplane(int vplane)
 
 void stm32_ltdcuninitialize(void)
 {
+  /* Disable all ltdc interrupts */
+
+  stm32_ltdc_irqctrl(0, LTDC_IER_RRIE|LTDC_IER_TERRIE|
+                        LTDC_IER_FUIE|LTDC_IER_LIE);
+
+  up_disable_irq(g_interrupt.irq);
+  irq_detach(g_interrupt.irq);
+
   /* Disable the LCD controller */
 
   stm32_lcd_enable(false);
+
+  /* Set initialized state */
+
+  g_initialized = false;
 }
 
 /****************************************************************************

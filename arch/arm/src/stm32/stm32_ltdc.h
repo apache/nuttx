@@ -81,7 +81,7 @@ struct stm32_ltdc_s
 
   uint32_t color;               /* Layer color definition */
 #ifdef CONFIG_FB_CMAP
-  struct fb_cmap_s *cmap;       /* Reference to the valid color lookup table */
+  uint32_t *clut;               /* 32-bit aligned clut color table */
 #endif
 
   /* Blending */

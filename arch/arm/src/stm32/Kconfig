@@ -3944,7 +3944,13 @@ config FB_CMAP
 	bool "Enable color map support"
 	default y
 	---help---
-		Enabling color map suport is neccessary for ltdc L8 format.
+		Enabling color map support is neccessary for ltdc L8 format.
+
+config FB_TRANSPARENCY
+	bool "Enable transparency color map support"
+	default y
+	---help---
+		Enabling transparency color map support is neccessary for ltdc L8 format.
 
 endif
 endmenu
@@ -3964,14 +3970,17 @@ config STM32_DMA2D_NLAYERS
 menu "Supported pixel format"
 
 config STM32_DMA2D_L8
+	depends on FB_CMAP
 	bool "8 bpp L8 (8-bit CLUT)"
 	default y
 
 config STM32_DMA2D_AL44
+	depends on FB_CMAP
 	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
 	default n
 
 config STM32_DMA2D_AL88
+	depends on FB_CMAP
 	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
 	default n
 
