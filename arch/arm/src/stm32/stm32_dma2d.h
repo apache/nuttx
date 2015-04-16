@@ -1,7 +1,7 @@
 /******************************************************************************
  * arch/arm/src/stm32/stm32_dma2d.h
  *
- *   Copyright (C) 2014 Marco Krahl. All rights reserved.
+ *   Copyright (C) 2014-2015 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 #include <nuttx/video/fb.h>
 #include <arch/chip/ltdc.h>
-#include "stm32_ltdc.h"
 
 #ifdef CONFIG_STM32_DMA2D
 /******************************************************************************
@@ -62,86 +61,30 @@
  * Public Functions
  ******************************************************************************/
 
+# ifdef CONFIG_STM32_LTDC_INTERFACE
 /******************************************************************************
- * Name: stm32_dma2dblit
+ * Name: stm32_dma2dinitltdc
  *
  * Description:
- *   Copy selected area from a background layer to selected position of the
- *   foreground layer. Copies the result to the destination layer.
+ *   Get a reference to the dma2d layer coupled with the ltdc layer.
+ *   It not intends to use this function by user space applications.
+ *   It resolves the following requirements:
+ *   1. Share the color lookup table
+ *   2. Share the planeinfo information
+ *   3. Share the videoinfo information
  *
  * Parameter:
- *   dest     - Valid reference to the destination layer
- *   fore     - Valid reference to the foreground layer
- *   forexpos - Valid selected x target position of the destination layer
- *   foreypos - Valid selected y target position of the destination layer
- *   back     - Valid reference to the background layer
- *   backarea - Valid reference to the selected area of the background layer
+ *   layer  - a valid reference to the low level ltdc layer structure
  *
  * Return:
- *    OK     - On success
- *   -EINVAL - On error
+ *   On success - A valid dma2d layer reference
+ *   On error   - NULL and errno is set to
+ *                -EINVAL if one of the parameter is invalid
  *
  ******************************************************************************/
 
-int stm32_dma2dblit(FAR struct stm32_ltdc_s *dest,
-                    FAR struct stm32_ltdc_s *fore,
-                    fb_coord_t forexpos, fb_coord_t foreypos,
-                    FAR struct stm32_ltdc_s *back,
-                    FAR const struct ltdc_area_s *backarea);
-
-/******************************************************************************
- *
- * Name: stm32_dma2dblend
- *
- * Description:
- *   Blends the selected area from a background layer with selected position of
- *   the foreground layer. Blends the result with the destination layer.
- *   Note! This is the same as the blit operation but with blending depending on
- *   the blendmode settings of the layer.
- *
- * Parameter:
- *   dest     - Valid reference to the destination layer
- *   fore     - Valid reference to the foreground layer
- *   forexpos - Valid selected x target position of the destination layer
- *   foreypos - Valid selected y target position of the destination layer
- *   back     - Valid reference to the background layer
- *   backarea - Valid reference to the selected area of the background layer
- *
- * Return:
- *    OK     - On success
- *   -EINVAL - On error
- *
- ******************************************************************************/
-
-int stm32_dma2dblend(FAR struct stm32_ltdc_s *dest,
-                      FAR struct stm32_ltdc_s *fore,
-                      fb_coord_t forexpos, fb_coord_t foreypos,
-                      FAR struct stm32_ltdc_s *back,
-                      FAR const struct ltdc_area_s *backarea);
-
-/******************************************************************************
- * Name: up_dma2dinitialize
- *
- * Description:
- *   Initialize the dma2d controller
- *
- * Return:
- *   OK - On success
- *   An error if initializing failed.
- *
- ******************************************************************************/
-
-int up_dma2dinitialize(void);
-
-/******************************************************************************
- * Name: up_dma2duninitialize
- *
- * Description:
- *   Uninitialize the dma2d controller
- *
- ******************************************************************************/
-
-void up_dma2duninitialize(void);
+FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
+# endif /* CONFIG_STM32_LTDC_INTERFACE */
 
 #endif /* CONFIG_STM32_DMA2D */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_DMA2D_H */

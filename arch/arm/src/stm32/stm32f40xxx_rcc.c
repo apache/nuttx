@@ -209,6 +209,12 @@ static inline void rcc_enableahb1(void)
 
 #endif  /* CONFIG_STM32_OTGHS */
 
+#ifdef CONFIG_STM32_DMA2D
+  /* DMA2D clock */
+
+  regval |= RCC_AHB1ENR_DMA2DEN;
+#endif
+
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
 

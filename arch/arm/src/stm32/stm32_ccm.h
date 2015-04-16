@@ -82,7 +82,7 @@
  */
 
 #define ccm_initialize() \
-  mm_initialize(&g_ccm_heap, (uintptr_t)CCM_START, CCM_END-CCM_START)
+  mm_initialize(&g_ccm_heap, (FAR void *)CCM_START, CCM_END-CCM_START)
 
 /* The ccm_addregion interface could be used if, for example, you want to
  * add some other memory region to the CCM heap.  I don't really know why

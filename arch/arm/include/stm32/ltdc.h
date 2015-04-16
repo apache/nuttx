@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/include/stm32/ltdc.h
  *
- *   Copyright (C) 2014 Marco Krahl. All rights reserved.
+ *   Copyright (C) 2014-2015 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,15 +53,18 @@
  * Public Types
  ******************************************************************************/
 
+struct dma2d_layer_s; /* see arch/chip/dma2d.h */
+
 /* Blend mode definitions */
 
 enum ltdc_blend_e
 {
   LTDC_BLEND_NONE           = 0,   /* Disable all blend operation */
   LTDC_BLEND_ALPHA          = 0x1, /* Enable alpha blending */
-  LTDC_BLEND_COLORKEY       = 0x2, /* Enable colorkey */
-  LTDC_BLEND_SRCPIXELALPHA  = 0x4, /* Use pixel alpha of source */
-  LTDC_BLEND_DESTPIXELALPHA = 0x8  /* Use pixel alpha of destination */
+  LTDC_BLEND_PIXELALPHA     = 0x2, /* Enable alpha blending from pixel color */
+  LTDC_BLEND_COLORKEY       = 0x4, /* Enable colorkey */
+  LTDC_BLEND_ALPHAINV       = 0x8, /* Inverse alpha blending of source */
+  LTDC_BLEND_PIXELALPHAINV  = 0x10 /* Invers pixel alpha blending of source */
 };
 
 /* layer control definitions */
@@ -73,6 +76,9 @@ enum ltdc_layer_e
   LTDC_LAYER_BOTTOM         = 0x2, /* the initialized bottom layer */
   LTDC_LAYER_ACTIVE         = 0x4, /* The current visible flip layer */
   LTDC_LAYER_INACTIVE       = 0x8  /* The current invisible flip layer */
+#ifdef CONFIG_STM32_DMA2D
+ ,LTDC_LAYER_DMA2D          = 0x10  /* The dma2d interface layer id */
+#endif
 };
 
 /* Update operation flag */
@@ -447,8 +453,9 @@ struct ltdc_layer_s
    *   mode    - operation mode (see LTDC_UPDATE_*)
    *
    * Return:
-   *    OK     - On success
-   *   -EINVAL - If one of the parameter invalid
+   *    OK        - On success
+   *   -EINVAL    - If one of the parameter invalid
+   *   -ECANCELED - Operation cancelled, something goes wrong
    *
    * Procedure information:
    *   LTDC_UPDATE_SIM:
@@ -480,59 +487,81 @@ struct ltdc_layer_s
    * Name: blit
    *
    * Description:
-   *   Copy selected area from a background layer to selected position of the
-   *   foreground layer. Copies the result to the destination layer.
+   *   Copy selected area from a source layer to selected position of the
+   *   destination layer.
    *
    * Parameter:
    *   dest     - Reference to the destination layer
-   *   fore     - Reference to the foreground layer
-   *   forexpos - Selected x target position of the destination layer
-   *   foreypos - Selected y target position of the destination layer
-   *   back     - Reference to the background layer
-   *   backarea - Reference to the selected area of the background layer
+   *   destxpos - Selected x position of the destination layer
+   *   destypos - Selected y position of the destination layer
+   *   src      - Reference to the source layer
+   *   srcarea  - Reference to the selected area of the source layer
    *
    * Return:
-   *    OK     - On success
-   *   -EINVAL - If one of the parameter invalid or if the size of the selected
-   *             source area outside the visible area of the destination layer.
-   *             (The visible area usually represents the display size)
+   *    OK      - On success
+   *   -EINVAL  - If one of the parameter invalid or if the size of the selected
+   *              source area outside the visible area of the destination layer.
+   *              (The visible area usually represents the display size)
    *
    */
    int (*blit)(FAR struct ltdc_layer_s *dest,
-                FAR struct ltdc_layer_s *fore,
-                fb_coord_t forexpos, fb_coord_t foreypos,
-                FAR struct ltdc_layer_s *back,
-                FAR const struct ltdc_area_s *backarea);
+                fb_coord_t destxpos, fb_coord_t destypos,
+                FAR const struct dma2d_layer_s *src,
+                FAR const struct ltdc_area_s *srcarea);
   /*
    *
    * Name: blend
    *
    * Description:
-   *   Blend the selected area from a background layer with selected position of
-   *   the foreground layer. Blends the result with the destination layer.
-   *   Note! This is the same as the blit operation but with blending depending
-   *   on the blendmode settings of the layer.
+   *   Blends the selected area from a foreground layer with selected position
+   *   of the background layer. Copy the result to the destination layer. Note!
+   *   The content of the foreground and background layer is not changed.
    *
    * Parameter:
    *   dest     - Reference to the destination layer
+   *   destxpos - Selected x position of the destination layer
+   *   destypos - Selected y position of the destination layer
    *   fore     - Reference to the foreground layer
-   *   forexpos - Selected x target position of the destination layer
-   *   foreypos - Selected y target position of the destination layer
+   *   forexpos - Selected x position of the foreground layer
+   *   foreypos - Selected y position of the foreground layer
    *   back     - Reference to the background layer
    *   backarea - Reference to the selected area of the background layer
    *
    * Return:
-   *    OK     - On success
-   *   -EINVAL - If one of the parameter invalid or if the size of the selected
-   *             source area outside the visible area of the destination layer.
-   *             (The visible area usually represents the display size)
+   *    OK      - On success
+   *   -EINVAL  - If one of the parameter invalid or if the size of the selected
+   *              source area outside the visible area of the destination layer.
+   *              (The visible area usually represents the display size)
    *
    */
    int (*blend)(FAR struct ltdc_layer_s *dest,
-                FAR struct ltdc_layer_s *fore,
+                fb_coord_t destxpos, fb_coord_t destypos,
+                FAR const struct dma2d_layer_s *fore,
                 fb_coord_t forexpos, fb_coord_t foreypos,
-                FAR struct ltdc_layer_s *back,
-                FAR const struct ltdc_area_s *backarea)
+                FAR const struct dma2d_layer_s *back,
+                FAR const struct ltdc_area_s *backarea);
+
+  /*
+   * Name: fillarea
+   *
+   * Description:
+   *   Fill the selected area of the whole layer with a specific color.
+   *
+   * Parameter:
+   *   layer    - Reference to the layer structure
+   *   area     - Reference to the valid area structure select the area
+   *   color    - Color to fill the selected area. Color must be formatted
+   *              according to the layer pixel format.
+   *
+   * Return:
+   *    OK      - On success
+   *   -EINVAL  - If one of the parameter invalid or if the size of the selected
+   *              area outside the visible area of the layer.
+   *
+   */
+   int (*fillarea)(FAR struct ltdc_layer_s *layer,
+                    FAR const struct ltdc_area_s *area,
+                    uint32_t color);
 #endif
 };
 
