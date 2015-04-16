@@ -10174,4 +10174,8 @@
 	  for info (2015-04-15).
 	* libc/Kconfig: Fix defaults for timezone limits.  They need to be much
 	  larger (2015-04-15).
+	* Watchdog files:  Fix repeated typo wachog.h in several watchdog
+	  drivers (2015-04-15).
+	* configs/boardctl.c and Kconfig:  Add missing causing that caused
+	  failures of PWM test (2015-04-15).
 
