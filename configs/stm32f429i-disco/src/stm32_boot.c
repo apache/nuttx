@@ -46,6 +46,7 @@
 
 #include "up_arch.h"
 #include "stm32f429i-disco.h"
+#include "stm32_ccm.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -64,46 +65,53 @@
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
 void stm32_boardinitialize(void)
 {
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3) || defined(CONFIG_STM32_SPI4) || \
+    defined(CONFIG_STM32_SPI5)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3) ||\
-	defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)
   if (stm32_spiinitialize)
     {
       stm32_spiinitialize();
     }
 #endif
 
+#ifdef CONFIG_STM32_OTGHS
   /* Initialize USB if the 1) OTG HS controller is in the configuration and 2)
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
+   * into the build. Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also
    * selected.
    */
 
-#ifdef CONFIG_STM32_OTGHS
   if (stm32_usbinitialize)
     {
       stm32_usbinitialize();
     }
 #endif
 
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   board_led_initialize();
 #endif
 
 #ifdef CONFIG_STM32_FSMC
   stm32_enablefsmc();
+#endif
+
+#ifdef HAVE_CCM_HEAP
+  /* Initialize ccm allocator */
+
+  ccm_initialize();
 #endif
 }
 
@@ -124,15 +132,17 @@ void stm32_boardinitialize(void)
 void board_initialize(void)
 {
 #ifdef CONFIG_STM32_LTDC
+  /* Initialize the framebuffer driver */
+
   up_fbinitialize();
 #endif
 
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   (void)board_app_initialize();
 #endif
 }
