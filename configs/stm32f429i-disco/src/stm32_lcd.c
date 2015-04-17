@@ -92,6 +92,7 @@
  * RCM:         2 (DE Mode)
  * ByPass_Mode: 1 (Memory)
  */
+
 #define STM32_ILI9341_IFMODE_PARAM    ((!ILI9341_INTERFACE_CONTROL_EPL) | \
                                       ILI9341_INTERFACE_CONTROL_DPL | \
                                       (!ILI9341_INTERFACE_CONTROL_HSPL) | \
@@ -497,15 +498,16 @@ int board_lcd_initialize(void)
            */
 
           g_lcd = ili9341_initialize(dev, ILI9341_LCD_DEVICE);
-
           if (g_lcd)
             {
               return OK;
             }
         }
+
+      return -errno;
     }
 
-  return -errno;
+  return OK;
 }
 #endif /* CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE */
 

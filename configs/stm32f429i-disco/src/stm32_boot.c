@@ -109,7 +109,7 @@ void stm32_boardinitialize(void)
 #endif
 
 #ifdef HAVE_CCM_HEAP
-  /* Initialize ccm allocator */
+  /* Initialize CCM allocator */
 
   ccm_initialize();
 #endif
@@ -131,10 +131,16 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
-#ifdef CONFIG_STM32_LTDC
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
   /* Initialize the framebuffer driver */
 
   up_fbinitialize();
+#endif
+
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE
+  /* Initialize the SPI-based LCD early */
+
+  board_lcd_initialize();
 #endif
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
@@ -147,4 +153,3 @@ void board_initialize(void)
 #endif
 }
 #endif
-
