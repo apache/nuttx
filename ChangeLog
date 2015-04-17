@@ -10238,4 +10238,8 @@
 	* Add support for the new DMA2D features to the STM32F429i-Disco LTDC
 	  configuration.  From Marco Krahl (2015-04-16).
 	* stdlib.h:  MAX_RAND should be RAND_MAX (2015-04-16).
-
+	* STM32F429i Disco: (1) Fix a bad return value if the LCD driver is already
+	  initialized. (2) The LCD driver initialization is now performed during the
+	  early boot sequence.  (3) Increased the size of the message queue from 32
+	  to 64 in the lcd configuration.  From Marco, ocram.lhark@yahoo.com
+	  (2015-04-17).
