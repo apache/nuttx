@@ -141,28 +141,33 @@ config STM32F429I_DISCO_ILI9341
 		Driver. This sub driver supports only communication with the display driver
 		connected via 4-wire serial (spi) mcu interface.
 
-config STM32F429I_DISCO_ILI9341_SPIFREQUENCY
-	int "SPI frequency"
-	default 12000000
-	depends on STM32F429I_DISCO_ILI9341
-	---help---
-		Define the bus freqency of the spi device.
+if STM32F429I_DISCO_ILI9341
 
-config STM32F429I_DISCO_ILI9341_SPIBITS16
-	bool "Enable 16 bit pixel read/write"
-	default n
-	depends on STM32F429I_DISCO_ILI9341
-	---help---
-		This enables faster 16-bit spi mode for transmitting or receiving pixel data
-		to or from the display gram. But uses default 8-bit spi mode for all other
-		display operations.
+choice
+	prompt "LCD Interface Type"
+	default STM32F429I_DISCO_ILI9341_NONE if !LCD_ILI9341 && !STM32_LTDC
+	default STM32F429I_DISCO_ILI9341_LCDIFACE if LCD_ILI9341 && !STM32_LTDC
+	default STM32F429I_DISCO_ILI9341_FBIFACE if STM32_LTDC
+
+config STM32F429I_DISCO_ILI9341_NONE
+	bool "No LCD interface"
 
 config STM32F429I_DISCO_ILI9341_LCDIFACE
-	bool "Enable support for nuttx lcd interface"
-	default n
-	depends on STM32F429I_DISCO_ILI9341 && LCD_ILI9341
+	bool "Enable support for nuttx LCD interface"
+	depends on LCD_ILI9341
 	---help---
 		Enable lcd driver support for the nuttx lcd interface.
+
+config STM32F429I_DISCO_ILI9341_FBIFACE
+	bool "Enable support for nuttx framebuffer interface"
+	depends on STM32_LTDC
+	---help---
+		Enable lcd driver support for the nuttx framebuffer interface to displaying
+		data via ltdc controller of the stm32f429i mcu.
+
+endchoice # LCD Interface Type
+
+if STM32F429I_DISCO_ILI9341_LCDIFACE
 
 config STM32F429I_DISCO_ILI9341_LCDDEVICE
 	int "LCD interface"
@@ -171,16 +176,24 @@ config STM32F429I_DISCO_ILI9341_LCDDEVICE
 	depends on STM32F429I_DISCO_ILI9341_LCDIFACE
 	---help---
 		Define the lcd interface which should be used. This must be
-		corresponding to the configured ili9341 lcd device in the driver
+		corresponding to the configured ili9341 LCD device in the driver
 		section.
 
-config STM32F429I_DISCO_ILI9341_FBIFACE
-	bool "Enable support for nuttx frambuffer interface"
-	default n
-	depends on STM32F429I_DISCO_ILI9341 && STM32_LTDC
+config STM32F429I_DISCO_ILI9341_SPIFREQUENCY
+	int "SPI frequency"
+	default 12000000
 	---help---
-		Enable lcd driver support for the nuttx framebuffer interface to displaying
-		data via ltdc controller of the stm32f429i mcu.
+		Define the bus frequency of the SPI device.
+
+config STM32F429I_DISCO_ILI9341_SPIBITS16
+	bool "Enable 16 bit pixel read/write"
+	default n
+	---help---
+		This enables faster 16-bit SPI mode for transmitting or receiving pixel data
+		to or from the display gram. But uses default 8-bit SPI mode for all other
+		display operations.
+
+endif # STM32F429I_DISCO_ILI9341_LCDIFACE
 
 if STM32F429I_DISCO_ILI9341_FBIFACE
 
@@ -211,5 +224,7 @@ config STM32F429I_DISCO_ILI9341_FBIFACE_RORTRAIT
 		Define for "reverse portrait" orientation support.
 
 endchoice
-endif
-endif
+
+endif # STM32F429I_DISCO_ILI9341_FBIFACE
+endif # STM32F429I_DISCO_ILI9341
+endif # ARCH_BOARD_STM32F429I_DISCO
