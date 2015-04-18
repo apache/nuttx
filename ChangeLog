@@ -10248,4 +10248,8 @@
 	  return (2015-04-19).
 	* include/nuttx/usb/hub.h: Add USB hub header file from Kaushal Parikh
 	  (2015-04-18).
-
+	* drivers/usbhost/usbhost_hub.c: Bring in USB hub-related files from
+	  https://github.com/kaushalparikh/nuttx.  This is the work of Kaushal
+	  Parikh.  This initial commit is incomplete.  This is quite a bit more
+	  hub logic that needs to come in before the port is complete
+	  (2015-04-18).
