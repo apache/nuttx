@@ -30,6 +30,13 @@ config USBHOST_ISOC_DISABLE
 		On some architectures, selecting this setting will reduce driver size
 		by disabling isochronous endpoint support
 
+config USBHOST_HUB
+	bool "USB Hub Support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Select this option to build in support for USB hubs.
+
 config USBHOST_MSC
 	bool "Mass Storage Class Support"
 	default n
