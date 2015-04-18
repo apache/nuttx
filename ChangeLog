@@ -10246,4 +10246,6 @@
 	* STM23 RTC: Fix an error introduced into stm32_pwr_enablebkp().  That
 	  function must preserve the previous state of backup domain access on
 	  return (2015-04-19).
+	* include/nuttx/usb/hub.h: Add USB hub header file from Kaushal Parikh
+	  (2015-04-18).
 
