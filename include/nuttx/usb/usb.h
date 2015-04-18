@@ -247,6 +247,18 @@
 #define USBOTG_FEATURE_A_HNP_SUPPORT            4  /* A device supports HNP */
 #define USBOTG_FEATURE_A_ALT_HNP_SUPPORT        5  /* Another port on the A device supports HNP */
 
+/* Device speeds */
+
+#define USB_SPEED_UNKNOWN                       0 /* Transfer rate not yet set */
+#define USB_SPEED_LOW                           1 /* USB 1.1 */
+#define USB_SPEED_FULL                          2 /* USB 1.1 */
+#define USB_SPEED_HIGH                          3 /* USB 2.0 */
+#define USB_SPEED_VARIABLE                      4 /* Wireless USB 2.5 */
+
+/* Maximum number of devices per controller */
+
+#define USB_MAX_DEVICES                         (127)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

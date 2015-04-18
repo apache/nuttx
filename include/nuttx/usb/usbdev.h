@@ -181,14 +181,6 @@
 #define CLASS_RESUME(drvr,dev)  \
   do { if ((drvr)->ops->resume) (drvr)->ops->resume(drvr,dev); } while (0)
 
-/* Device speeds */
-
-#define USB_SPEED_UNKNOWN         0 /* Transfer rate not yet set */
-#define USB_SPEED_LOW             1 /* USB 1.1 */
-#define USB_SPEED_FULL            2 /* USB 1.1 */
-#define USB_SPEED_HIGH            3 /* USB 2.0 */
-#define USB_SPEED_VARIABLE        4 /* Wireless USB 2.5 */
-
 /* Maximum size of a request buffer */
 
 #define USBDEV_MAXREQUEUST        UINT16_MAX
