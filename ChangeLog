@@ -10243,3 +10243,7 @@
 	  early boot sequence.  (3) Increased the size of the message queue from 32
 	  to 64 in the lcd configuration.  From Marco, ocram.lhark@yahoo.com
 	  (2015-04-17).
+	* STM23 RTC: Fix an error introduced into stm32_pwr_enablebkp().  That
+	  function must preserve the previous state of backup domain access on
+	  return (2015-04-19).
+
