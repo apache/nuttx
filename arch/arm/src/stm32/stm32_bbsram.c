@@ -246,9 +246,9 @@ static void stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
  *
  ****************************************************************************/
 
-static inline void  stm32_bbsram_unlock(void)
+static inline void stm32_bbsram_unlock(void)
 {
-  stm32_pwr_enablebkp(true);
+  (void)stm32_pwr_enablebkp(true);
 }
 
 /****************************************************************************
@@ -268,7 +268,7 @@ static inline void  stm32_bbsram_unlock(void)
 
 static inline void  stm32_bbsram_lock(void)
 {
-  stm32_pwr_enablebkp(false);
+  (void)stm32_pwr_enablebkp(false);
 }
 
 /****************************************************************************

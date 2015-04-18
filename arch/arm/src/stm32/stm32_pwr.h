@@ -76,12 +76,12 @@ extern "C"
  * Input Parameters:
  *   writable - sets the write protections
  *
- * Returned Values:
- *   None
+ * Returned Value:
+ *   True: The backup domain was previously writable.
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebkp(bool writable);
+bool stm32_pwr_enablebkp(bool writable);
 
 /************************************************************************************
  * Name: stm32_pwr_enablebreg
