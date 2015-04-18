@@ -129,6 +129,7 @@ CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL is not set
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW is not set
 # CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE is not set
+CONFIG_ARMV7M_HAVE_STACKCHECK=y
 # CONFIG_ARMV7M_STACKCHECK is not set
 # CONFIG_ARMV7M_ITMSYSLOG is not set
 # CONFIG_NET_MULTICAST is not set
@@ -334,6 +335,7 @@ CONFIG_STM32_USART2=y
 # CONFIG_STM32_IWDG is not set
 # CONFIG_STM32_WWDG is not set
 CONFIG_STM32_SPI=y
+# CONFIG_STM32_NOEXT_VECTORS is not set
 
 #
 # Alternate Pin Mapping
@@ -363,6 +365,7 @@ CONFIG_STM32_USART=y
 #
 # CONFIG_STM32_SPI_INTERRUPTS is not set
 # CONFIG_STM32_SPI_DMA is not set
+CONFIG_STM32_HAVE_RTC_COUNTER=y
 # CONFIG_STM32_HAVE_RTC_SUBSECONDS is not set
 CONFIG_RTC_LSECLOCK=y
 # CONFIG_RTC_LSICLOCK is not set
@@ -486,6 +489,7 @@ CONFIG_NSH_MMCSDSPIPORTNO=1
 CONFIG_LIB_BOARDCTL=y
 # CONFIG_BOARDCTL_TSCTEST is not set
 # CONFIG_BOARDCTL_ADCTEST is not set
+# CONFIG_BOARDCTL_PWMTEST is not set
 # CONFIG_BOARDCTL_GRAPHICS is not set
 # CONFIG_BOARDCTL_IOCTL is not set
 
@@ -716,6 +720,7 @@ CONFIG_ARCH_HAVE_USART2=y
 CONFIG_USART2_ISUART=y
 CONFIG_MCU_SERIAL=y
 CONFIG_STANDARD_SERIAL=y
+CONFIG_SERIAL_NPOLLWAITERS=2
 # CONFIG_SERIAL_IFLOWCONTROL is not set
 # CONFIG_SERIAL_OFLOWCONTROL is not set
 CONFIG_ARCH_HAVE_SERIAL_TERMIOS=y
@@ -960,6 +965,7 @@ CONFIG_LIBC_TMPDIR="/tmp"
 CONFIG_LIBC_MAX_TMPFILE=32
 CONFIG_ARCH_LOWPUTC=y
 # CONFIG_LIBC_LOCALTIME is not set
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
@@ -1027,10 +1033,10 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_NXTEXT is not set
 # CONFIG_EXAMPLES_OSTEST is not set
 # CONFIG_EXAMPLES_PIPE is not set
+# CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
 # CONFIG_EXAMPLES_QENCODER is not set
 # CONFIG_EXAMPLES_RGMP is not set
-# CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set
@@ -1049,6 +1055,7 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_USBSERIAL is not set
 # CONFIG_EXAMPLES_USBTERM is not set
 # CONFIG_EXAMPLES_WATCHDOG is not set
+# CONFIG_EXAMPLES_XMLRPC is not set
 
 #
 # Graphics Support
@@ -1074,6 +1081,7 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_NETUTILS_CODECS is not set
 # CONFIG_NETUTILS_DHCPD is not set
 # CONFIG_NETUTILS_FTPC is not set
+# CONFIG_NETUTILS_FTPD is not set
 # CONFIG_NETUTILS_JSON is not set
 CONFIG_NETUTILS_DNSCLIENT=y
 CONFIG_NETUTILS_DNSCLIENT_IPv4=y
@@ -1231,123 +1239,19 @@ CONFIG_NSH_IOBUFFER_SIZE=512
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
 # CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# CU Minimal Terminal
-#
 # CONFIG_SYSTEM_CUTERM is not set
-
-#
-# FLASH Program Installation
-#
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
-
-#
-# Intel HEX to binary conversion
-#
 # CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
-
-#
-# INI File Parser
-#
 # CONFIG_SYSTEM_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
 CONFIG_SYSTEM_READLINE=y
 CONFIG_READLINE_ECHO=y
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
 # CONFIG_SYSTEM_POWEROFF is not set
-
-#
-# RAMTRON
-#
 # CONFIG_SYSTEM_RAMTRON is not set
-
-#
-# SD Card
-#
 # CONFIG_SYSTEM_SDCARD is not set
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
 # CONFIG_SYSTEM_SYSINFO is not set
-
-#
-# Temperature
-#
-
-#
-# VI Work-Alike Editor
-#
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set

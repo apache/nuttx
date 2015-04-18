@@ -88,28 +88,43 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  * Input Parameters:
  *   protect - sets the write protections
  *
- * Returned Values:
- *   None
+ * Returned Value:
+ *   True: The backup domain was previously writable.
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebkp(bool writable)
+bool stm32_pwr_enablebkp(bool writable)
 {
   uint16_t regval;
+  bool waswritable;
 
-  /* Enable or disable the ability to write*/
+  /* Get the current state of the STM32 PWR control register */
 
-  regval  = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
-  regval &= ~PWR_CR_DBP;
-  regval |= writable ? PWR_CR_DBP : 0;
-  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+  regval      = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  waswritable = ((regval & PWR_CR_DBP) != 0);
 
-  if (writable)
+  /* Enable or disable the ability to write */
+
+  if (waswritable && !writable)
     {
+      /* Disable backup domain access */
+
+      regval &= ~PWR_CR_DBP;
+      stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+    }
+  else if (!waswritable && writable)
+    {
+      /* Enable backup domain access */
+
+      regval |= PWR_CR_DBP;
+      stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+
       /* Enable does not happen right away */
 
       up_udelay(4);
     }
+
+  return waswritable;
 }
 
 /************************************************************************************

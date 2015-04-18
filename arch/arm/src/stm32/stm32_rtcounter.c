@@ -370,7 +370,7 @@ int up_rtcinitialize(void)
    * registers and backup SRAM).
    */
 
-  stm32_pwr_enablebkp(true);
+  (void)stm32_pwr_enablebkp(true);
 
   /* Set access to the peripheral, enable the backup domain (BKP) and the lower
    * power external 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the
@@ -421,7 +421,7 @@ int up_rtcinitialize(void)
    * registers and backup SRAM).
    */
 
-  stm32_pwr_enablebkp(false);
+  (void)stm32_pwr_enablebkp(false);
 
   return OK;
 }
