@@ -630,18 +630,13 @@ typedef FAR void *usbhost_ep_t;
 struct usbhost_class_s
 {
 #ifdef CONFIG_USBHOST_HUB
-  /* Host driver */
+  /* Common host driver */
 
-  struct usbhost_driver_s *drvr;
-
-  /* USB device address & speed */
-
-  uint8_t addr;
-  uint8_t speed;
+  FAR struct usbhost_driver_s *drvr;
 
   /* Parent class */
 
-  struct usbhost_class_s *parent;
+  FAR struct usbhost_class_s *parent;
 
   /* Control endpoint, ep0 */
 
@@ -651,13 +646,18 @@ struct usbhost_class_s
 
   FAR struct usb_hubtt_s *tt;
 
-  /* Transaction translator port */
-
-  uint8_t ttport;
-
   /* Class specific private data */
 
   FAR void *priv;
+
+  /* USB device address & speed */
+
+  uint8_t addr;
+  uint8_t speed;
+
+  /* Transaction translator port */
+
+  uint8_t ttport;
 #endif
 
   /* Provides the configuration descriptor to the class.  The configuration

@@ -600,11 +600,13 @@ int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass,
 
   sem_init(&xfer.done, 0, 0);
 
+#ifdef CONFIG_USBHOST_HUB
   if (ROOTHUB(devclass))
     {
       ret = DRVR_RHCTRL(devclass->drvr, &xfer, ctrlreq);
     }
   else
+#endif
     {
       if ((ctrlreq->type & USB_REQ_DIR_IN) != 0)
         {
