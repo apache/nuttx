@@ -117,7 +117,7 @@
  *
  * Input Parameters:
  *   devclass - The USB host class entry previously obtained from a call to create().
- *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
+ *   configdesc - A pointer to a uint8_t buffer container the configuration descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
  *
  * Returned Values:
@@ -178,8 +178,8 @@
  *
  * Returned Values:
  *   And index [0..(n-1)} corresponding to the root hub port number {1..n} is
- *   returned when a device in connected or disconnectd. This function will not
- *   return until either (1) a device is connected or disconntect to/from any
+ *   returned when a device in connected or disconnected. This function will not
+ *   return until either (1) a device is connected or disconnect to/from any
  *   root hub port or until (2) some failure occurs.  On a failure, a negated
  *   errno value is returned indicating the nature of the failure
  *
@@ -289,7 +289,7 @@
  *      the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
  *   ep - A memory location provided by the caller in which to receive the
- *      allocated endpoint desciptor.
+ *      allocated endpoint descriptor.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -311,7 +311,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ep - The endpint to be freed.
+ *   ep - The endpoint to be freed.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
