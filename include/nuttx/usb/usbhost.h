@@ -98,13 +98,13 @@
  *
  * Description:
  *   This macro will call the connect() method of struct usbhost_class_s.  This
- *   method is a callback into the usbclass implementation.  It is used to provide the
- *   device's configuration descriptor to the usbclass so that the usbclass may initialize
+ *   method is a callback into the devclass implementation.  It is used to provide the
+ *   device's configuration descriptor to the devclass so that the devclass may initialize
  *   properly
  *
  * Input Parameters:
- *   usbclass - The USB host class entry previously obtained from a call to create().
- *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
+ *   devclass - The USB host class entry previously obtained from a call to create().
+ *   configdesc - A pointer to a uint8_t buffer container the configuration descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
@@ -126,8 +126,8 @@
  *
  ************************************************************************************/
 
-#define CLASS_CONNECT(usbclass,configdesc,desclen,funcaddr) \
-  ((usbclass)->connect(usbclass,configdesc,desclen, funcaddr))
+#define CLASS_CONNECT(devclass,configdesc,desclen,funcaddr) \
+  ((devclass)->connect(devclass,configdesc,desclen, funcaddr))
 
 /************************************************************************************
  * Name: CLASS_DISCONNECTED
@@ -138,7 +138,7 @@
  *   class that the USB device has been disconnected.
  *
  * Input Parameters:
- *   usbclass - The USB host class entry previously obtained from a call to create().
+ *   devclass - The USB host class entry previously obtained from a call to create().
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -149,7 +149,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_DISCONNECTED(usbclass) ((usbclass)->disconnected(usbclass))
+#define CLASS_DISCONNECTED(devclass) ((devclass)->disconnected(devclass))
 
 /*******************************************************************************
  * Name: CONN_WAIT
@@ -167,8 +167,8 @@
  *
  * Returned Values:
  *   And index [0..(n-1)} corresponding to the root hub port number {1..n} is
- *   returned when a device in connected or disconnectd. This function will not
- *   return until either (1) a device is connected or disconntect to/from any
+ *   returned when a device in connected or disconnected. This function will not
+ *   return until either (1) a device is connected or disconnect to/from any
  *   root hub port or until (2) some failure occurs.  On a failure, a negated
  *   errno value is returned indicating the nature of the failure
  *
@@ -276,7 +276,7 @@
  *      the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
  *   ep - A memory location provided by the caller in which to receive the
- *      allocated endpoint desciptor.
+ *      allocated endpoint descriptor.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -298,7 +298,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ep - The endpint to be freed.
+ *   ep - The endpoint to be freed.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -584,13 +584,13 @@ struct usbhost_class_s
    * initialize properly (such as endpoint selections).
    */
 
-  int (*connect)(FAR struct usbhost_class_s *usbclass,
+  int (*connect)(FAR struct usbhost_class_s *devclass,
                  FAR const uint8_t *configdesc,
                  int desclen, uint8_t funcaddr);
 
   /* This method informs the class that the USB device has been disconnected. */
 
-  int (*disconnected)(FAR struct usbhost_class_s *usbclass);
+  int (*disconnected)(FAR struct usbhost_class_s *devclass);
 };
 
 /* This structure describes one endpoint.  It is used as an input to the
@@ -616,7 +616,7 @@ struct usbhost_devinfo_s
 };
 
 /* This type represents one endpoint configured by the epalloc() method.
- * The actual form is know only internally to the USB host controller
+ * The actual form is known only internally to the USB host controller
  * (for example, for an OHCI driver, this would probably be a pointer
  * to an endpoint descriptor).
  */
@@ -766,7 +766,7 @@ extern "C"
  *   the device.
  *
  * Input Parameters:
- *   usbclass - An write-able instance of struct usbhost_registry_s that will be
+ *   devclass - An write-able instance of struct usbhost_registry_s that will be
  *     maintained in a registry.
  *
  * Returned Values:
@@ -775,7 +775,7 @@ extern "C"
  *
  ************************************************************************************/
 
-int usbhost_registerclass(struct usbhost_registry_s *usbclass);
+int usbhost_registerclass(struct usbhost_registry_s *devclass);
 
 /************************************************************************************
  * Name: usbhost_findclass
@@ -903,7 +903,7 @@ int usbhost_wlaninit(void);
  *      the class create() method.
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
- *   usbclass - If the class driver for the device is successful located
+ *   devclass - If the class driver for the device is successful located
  *      and bound to the driver, the allocated class instance is returned into
  *      this caller-provided memory location.
  *
@@ -919,7 +919,7 @@ int usbhost_wlaninit(void);
  *******************************************************************************/
 
 int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
-                      FAR struct usbhost_class_s **usbclass);
+                      FAR struct usbhost_class_s **devclass);
 
 #undef EXTERN
 #if defined(__cplusplus)
