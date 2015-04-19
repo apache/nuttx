@@ -10253,6 +10253,7 @@
 	  Parikh.  This initial commit is incomplete.  This is quite a bit more
 	  hub logic that needs to come in before the port is complete
 	  (2015-04-18).
+	* arch/arm/src/stm32/stm32_rtcounter.c: Now need to enable backup
+	  domain write access when setting the time.  From Darcy Gong (2015-04-19).
 	* include/nuttx/usb/usbhost.h:  Bring in more logic from
-          https://github.com/kaushalparikh/nuttx (2015-04-19).
-
+	  https://github.com/kaushalparikh/nuttx (2015-04-19).

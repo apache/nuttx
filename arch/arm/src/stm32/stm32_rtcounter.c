@@ -589,25 +589,37 @@ int up_rtc_settime(FAR const struct timespec *tp)
 {
   struct rtc_regvals_s regvals;
   irqstate_t flags;
+  uint16_t cntl;
 
   /* Break out the time values */
 
   stm32_rtc_breakout(tp, &regvals);
+
+  /* Enable write access to the backup domain */
+
+  (void)stm32_pwr_enablebkp(true);
 
   /* Then write the broken out values to the RTC counter and BKP overflow register
    * (hi-res mode only)
    */
 
   flags = irqsave();
-  stm32_rtc_beginwr();
-  putreg16(regvals.cnth, STM32_RTC_CNTH);
-  putreg16(regvals.cntl, STM32_RTC_CNTL);
-  stm32_rtc_endwr();
+  do
+    {
+      stm32_rtc_beginwr();
+      putreg16(regvals.cnth, STM32_RTC_CNTH);
+      putreg16(regvals.cntl, STM32_RTC_CNTL);
+      cntl = getreg16(STM32_RTC_CNTL);
+      stm32_rtc_endwr();
+    }
+  while (cntl != regvals.cntl);
 
 #ifdef CONFIG_RTC_HIRES
   putreg16(regvals.ovf, RTC_TIMEMSB_REG);
 #endif
   irqrestore(flags);
+
+  (void)stm32_pwr_enablebkp(false);
   return OK;
 }
 
