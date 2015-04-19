@@ -356,7 +356,7 @@ static inline FAR struct usbhost_class_s *
  *   Free a class instance previously allocated by usbhost_allocclass().
  *
  * Input Parameters:
- *   class - A reference to the class instance to be freed.
+ *   devclass - A reference to the class instance to be freed.
  *
  * Returned Values:
  *   None

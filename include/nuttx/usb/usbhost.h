@@ -1027,48 +1027,6 @@ int usbhost_mouse_init(void);
 
 int usbhost_wlaninit(void);
 
-#ifdef CONFIG_USBHOST_HUB
-/****************************************************************************
- * Name: usbhost_ctrlxfer
- *
- * Description:
- *   Free transfer buffer memory.
- *
- * Input Parameters:
- *   priv - A reference to the class instance.
- *
- * Returned Values:
- *   On success, zero (OK) is returned.  On failure, an negated errno value
- *   is returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass, uint8_t type,
-                     uint8_t req, uint16_t value, uint16_t index,
-                     uint16_t len, FAR uint8_t *buffer);
-#endif
-
-#ifdef CONFIG_USBHOST_HUB
-/****************************************************************************
- * Name: usbhost_intxfer
- *
- * Description:
- *   Free transfer buffer memory.
- *
- * Input Parameters:
- *   priv - A reference to the class instance.
- *
- * Returned Values:
- *   On success, zero (OK) is returned.  On failure, an negated errno value
- *   is returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
-                    FAR struct usbhost_transfer_s *xfer,
-                    void (*callback)(FAR struct usbhost_transfer_s *));
-#endif
-
 /*******************************************************************************
  * Name: usbhost_enumerate
  *
@@ -1099,6 +1057,50 @@ int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
  *******************************************************************************/
 
 int usbhost_enumerate(FAR struct usbhost_class_s *devclass);
+
+/****************************************************************************
+ * Name: usbhost_ctrlxfer
+ *
+ * Description:
+ *   Free transfer buffer memory.
+ *
+ * Input Parameters:
+ *   devclass - A reference to the class instance.
+ *   type, req, value, index, len - Describes the control transfer
+ *   buffer - Data accompanying the control transfer
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass, uint8_t type,
+                     uint8_t req, uint16_t value, uint16_t index,
+                     uint16_t len, FAR uint8_t *buffer);
+
+#ifdef CONFIG_USBHOST_HUB
+/****************************************************************************
+ * Name: usbhost_intxfer
+ *
+ * Description:
+ *   Free transfer buffer memory.
+ *
+ * Input Parameters:
+ *   devclass - A reference to the class instance.
+ *   xfer - Describes the transfer to be performed
+ *   callback - The transfer complete callback
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
+                    FAR struct usbhost_transfer_s *xfer,
+                    void (*callback)(FAR struct usbhost_transfer_s *));
+#endif
 
 #ifdef CONFIG_USBHOST_HUB
 /*******************************************************************************

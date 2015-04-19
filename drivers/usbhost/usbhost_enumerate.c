@@ -1,7 +1,7 @@
 /*******************************************************************************
  * drivers/usbhost/usbhost_enumerate.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/hub.h>
 
 /*******************************************************************************
  * Pre-processor Definitions
@@ -66,14 +67,15 @@
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static void usbhost_putle16(uint8_t *dest, uint16_t val);
 
+static void usbhost_callback(FAR struct usbhost_transfer_s *xfer);
+
 static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
-                                  struct usbhost_id_s *id);
+                                  FAR struct usbhost_id_s *id);
 static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
-                                     struct usbhost_id_s *id);
-static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
+                                     FAR struct usbhost_id_s *id);
+static inline int usbhost_classbind(FAR struct usbhost_class_s *devclass,
                                     const uint8_t *configdesc, int desclen,
-                                    struct usbhost_id_s *id, uint8_t funcaddr,
-                                    FAR struct usbhost_class_s **usbclass);
+                                    FAR struct usbhost_id_s *id);
 
 /*******************************************************************************
  * Private Data
@@ -112,6 +114,19 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
 {
   dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
   dest[1] = val >> 8;
+}
+
+/****************************************************************************
+ * Name: usbhost_callback
+ *
+ * Description:
+ *
+ *
+ *******************************************************************************/
+
+static void usbhost_callback(FAR struct usbhost_transfer_s *xfer)
+{
+  sem_post(&xfer->done);
 }
 
 /*******************************************************************************
@@ -221,33 +236,32 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
  *
  *******************************************************************************/
 
-static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
+static inline int usbhost_classbind(FAR struct usbhost_class_s *devclass,
                                     const uint8_t *configdesc, int desclen,
-                                    struct usbhost_id_s *id, uint8_t funcaddr,
-                                    FAR struct usbhost_class_s **usbclass)
+                                    FAR struct usbhost_id_s *id)
 {
-  FAR struct usbhost_class_s *devclass;
-  const struct usbhost_registry_s *reg;
+  FAR const struct usbhost_registry_s *reg;
   int ret = -EINVAL;
 
   /* Is there is a class implementation registered to support this device. */
 
   reg = usbhost_findclass(id);
   uvdbg("usbhost_findclass: %p\n", reg);
-  if (reg)
+
+  if (reg != NULL)
     {
       /* Yes.. there is a class for this device.  Get an instance of
        * its interface.
        */
 
-      ret = -ENOMEM;
-      devclass = CLASS_CREATE(reg, drvr, id);
-      uvdbg("CLASS_CREATE: %p\n", devclass);
-      if (devclass)
+      ret = CLASS_CREATE(reg, devclass, id);
+      uvdbg("CLASS_CREATE: %p\n", devclass->priv);
+
+      if (devclass->priv != NULL)
         {
           /* Then bind the newly instantiated class instance */
 
-          ret = CLASS_CONNECT(devclass, configdesc, desclen, funcaddr);
+          ret = CLASS_CONNECT(devclass, configdesc, desclen);
           if (ret != OK)
             {
               /* On failures, call the class disconnect method which
@@ -256,10 +270,6 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
 
               udbg("CLASS_CONNECT failed: %d\n", ret);
               CLASS_DISCONNECTED(devclass);
-            }
-          else
-            {
-              *usbclass = devclass;
             }
         }
     }
@@ -286,57 +296,42 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
- *   usbclass - If the class driver for the device is successful located
- *      and bound to the driver, the allocated class instance is returned into
- *      this caller-provided memory location.
+ *   devclass - USB class information common across all classes. Whoever calls
+ *     enumerate should fill address, speed, driver and parent class
+ *     pointer. Enumeration will fill the control endpoint ep0,
+ *     transaction translator (if applicable) and private data
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
-int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
-                      FAR struct usbhost_class_s **usbclass)
+int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
 {
-  struct usb_ctrlreq_s *ctrlreq;
   struct usbhost_devinfo_s devinfo;
   struct usbhost_id_s id;
   size_t maxlen;
   unsigned int cfglen;
   uint8_t maxpacketsize;
   uint8_t descsize;
-  uint8_t *buffer;
+  FAR uint8_t *buffer;
   int  ret;
 
-  DEBUGASSERT(drvr && usbclass);
+  DEBUGASSERT(devclass != NULL && devclass->drvr != NULL);
 
-  /* Allocate descriptor buffers for use in this function.  We will need two:
-   * One for the request and one for the data buffer.
-   */
+  /* Allocate descriptor buffer for use in this function. */
 
-  ret = DRVR_ALLOC(drvr, (FAR uint8_t **)&ctrlreq, &maxlen);
-  if (ret != OK)
-    {
-      udbg("DRVR_ALLOC failed: %d\n", ret);
-      return ret;
-    }
-
-  ret = DRVR_ALLOC(drvr, &buffer, &maxlen);
-  if (ret != OK)
-    {
-      udbg("DRVR_ALLOC failed: %d\n", ret);
-      goto errout;
-    }
+   ret = DRVR_ALLOC(devclass->drvr, &buffer, &maxlen);
+   if (ret != OK)
+     {
+       udbg("DRVR_ALLOC failed: %d\n", ret);
+       goto errout;
+     }
 
   /* Get information about the connected device */
 
@@ -381,16 +376,14 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Read first bytes of the device descriptor */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
-  usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, descsize);
-
-  ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
+  ret = usbhost_ctrlxfer(devclass,
+                         (USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE),
+                         USB_REQ_GETDESCRIPTOR, (USB_DESC_TYPE_DEVICE << 8),
+                         0, descsizedescsize, buffer);
   if (ret != OK)
     {
-      udbg("ERROR: GETDESCRIPTOR/DEVICE, DRVR_CTRLIN returned %d\n", ret);
+      udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
+           descsize, ret);
       goto errout;
     }
 
@@ -403,21 +396,38 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
 
+  /* Set the USB device address */
+
+  ret = usbhost_ctrlxfer(devclass,
+                         (USB_REQ_DIR_OUT | USB_REQ_RECIPIENT_DEVICE),
+                         USB_REQ_SETADDRESS, devclass->addr,
+                         0, 0, NULL);
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to set address: %d\n");
+      goto errout;
+    }
+
+  usleep(2*1000);
+
+   /* And reconfigure EP0 */
+
+  DRVR_EP0CONFIGURE(devclass->drvr, devclass->ep0, devclass->addr
+                    maxpacketsize);
+
   /* Now read the full device descriptor (if we have not already done so) */
 
   if (descsize < USB_SIZEOF_DEVDESC)
     {
-      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
-      ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
-      usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
-      usbhost_putle16(ctrlreq->index, 0);
-      usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
-
-      ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
+      ret = usbhost_ctrlxfer(devclass,
+                             (USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE),
+                             USB_REQ_GETDESCRIPTOR,
+                             (USB_DESC_TYPE_DEVICE << 8),
+                             0, USB_SIZEOF_DEVDESC, buffer);
       if (ret != OK)
         {
-          udbg("ERROR: GETDESCRIPTOR/DEVICE, DRVR_CTRLIN returned %d\n",
-               ret);
+          udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
+               USB_SIZEOF_DEVDESC, ret);
           goto errout;
         }
     }
@@ -430,42 +440,19 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   (void)usbhost_devdesc((struct usb_devdesc_s *)buffer, &id);
 
-  /* Set the USB device address to the value in the 'funcaddr' input */
-
-  ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_SETADDRESS;
-  usbhost_putle16(ctrlreq->value, (uint16_t)funcaddr);
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, 0);
-
-  ret = DRVR_CTRLOUT(drvr, ctrlreq, NULL);
-  if (ret != OK)
-    {
-      udbg("ERROR: SETADDRESS DRVR_CTRLOUT returned %d\n", ret);
-      goto errout;
-    }
-
-  usleep(2*1000);
-
-  /* Modify control pipe with the provided USB device address */
-
-  DRVR_EP0CONFIGURE(drvr, funcaddr, maxpacketsize);
-
  /* Get the configuration descriptor (only), index == 0.  Should not be
   * hard-coded! More logic is needed in order to handle devices with
   * multiple configurations.
   */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
-  usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, USB_SIZEOF_CFGDESC);
-
-  ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
+  ret = usbhost_ctrlxfer(devclass,
+                         (USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE),
+                         USB_REQ_GETDESCRIPTOR, (USB_DESC_TYPE_CONFIG << 8),
+                         0, USB_SIZEOF_CFGDESC, buffer);
   if (ret != OK)
    {
-      udbg("ERROR: GETDESCRIPTOR/CONFIG, DRVR_CTRLIN returned %d\n", ret);
+      udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
+           USB_SIZEOF_CFGDESC, ret);
       goto errout;
     }
 
@@ -478,41 +465,28 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
    * hard-coded!)
    */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
-  usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, cfglen);
-
-  ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
+  ret = usbhost_ctrlxfer(devclass,
+                         (USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE),
+                         USB_REQ_GETDESCRIPTOR, (USB_DESC_TYPE_CONFIG << 8),
+                         0, cfglen, buffer);
   if (ret != OK)
     {
-      udbg("ERROR: GETDESCRIPTOR/CONFIG, DRVR_CTRLIN returned %d\n", ret);
+      udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
+           cfglen, ret);
       goto errout;
     }
 
   /* Select device configuration 1 (Should not be hard-coded!) */
 
-  ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_SETCONFIGURATION;
-  usbhost_putle16(ctrlreq->value, 1);
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, 0);
-
-  ret = DRVR_CTRLOUT(drvr, ctrlreq, NULL);
+  ret = usbhost_ctrlxfer(devclass,
+                         (USB_REQ_DIR_OUT | USB_REQ_RECIPIENT_DEVICE),
+                         USB_REQ_SETCONFIGURATION, 1,
+                         0, 0, NULL);
   if (ret != OK)
     {
-      udbg("ERROR: SETCONFIGURATION, DRVR_CTRLOUT returned %d\n", ret);
+      udbg("ERROR: Failed to set configuration: %d\n", ret);
       goto errout;
     }
-
-  /* Free the descriptor buffer that we were using for the request buffer.
-   * It is not needed further here but it may be needed by the class driver
-   * during its connection operations.
-   */
-
-  DRVR_FREE(drvr, (uint8_t*)ctrlreq);
-  ctrlreq = NULL;
 
   /* Was the class identification information provided in the device descriptor?
    * Or do we need to find it in the interface descriptor(s)?
@@ -528,7 +502,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
       ret = usbhost_configdesc(buffer, cfglen, &id);
       if (ret != OK)
         {
-          udbg("ERROR: usbhost_configdesc returned %d\n", ret);
+          udbg("ERROR: Failed to read class identification: %d\n", ret);
           goto errout;
         }
     }
@@ -542,22 +516,135 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
    * will begin configuring the device.
    */
 
-  ret = usbhost_classbind(drvr, buffer, cfglen, &id, funcaddr, usbclass);
+  ret = usbhost_classbind(devclass, buffer, cfglen, &id);
   if (ret != OK)
     {
-      udbg("ERROR: usbhost_classbind returned %d\n", ret);
+      udbg("ERROR: Failed to bind class: %d\n", ret);
     }
 
 errout:
-  if (buffer)
+  if (buffer != NULL)
     {
-      DRVR_FREE(drvr, buffer);
-    }
-
-  if (ctrlreq)
-    {
-      DRVR_FREE(drvr, (uint8_t*)ctrlreq);
+      DRVR_FREE(devclass->drvr, buffer);
     }
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: usbhost_ctrlxfer
+ *
+ * Description:
+ *   Free transfer buffer memory.
+ *
+ * Input Parameters:
+ *   devclass - A reference to the class instance.
+ *   type, req, value, index, len - Describes the control transfer
+ *   buffer - Data accompanying the control transfer
+ *
+ * Returned Values:
+ *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass,
+                     uint8_t type, uint8_t req, uint16_t value,
+                     uint16_t index, uint16_t len,
+                     FAR uint8_t *buffer)
+{
+  struct usbhost_transfer_s xfer;
+  struct usb_ctrlreq_s cmd;
+  struct timespec timeout;
+  int ret;
+
+  cmd.type = type;
+  cmd.req  = req;
+  usbhost_putle16(cmd.value, value);
+  usbhost_putle16(cmd.index, index);
+  usbhost_putle16(cmd.len, len);
+
+  xfer.buffer   = buffer;
+  xfer.buflen   = len;
+  xfer.len      = len;
+  xfer.status   = -EIO;
+  xfer.devclass = devclass;
+  xfer.ep       = devclass->ep0;
+  xfer.callback = usbhost_callback;
+
+  sem_init(&xfer.done, 0, 0);
+
+  if (ROOTHUB(devclass))
+    {
+      ret = DRVR_RHCTRL(devclass->drvr, &xfer, &cmd);
+    }
+  else
+    {
+      if (type & USB_REQ_DIR_IN)
+        {
+          ret = DRVR_CTRLIN(devclass->drvr, &xfer, &cmd);
+        }
+      else
+        {
+          ret = DRVR_CTRLOUT(devclass->drvr, &xfer, &cmd);
+        }
+    }
+
+  if (ret != OK)
+    {
+      goto out;
+    }
+
+  timeout.tv_sec  = 5;
+  timeout.tv_nsec = 1000*1000;
+
+  ret = sem_timedwait(&xfer.done, &timeout);
+  if (ret == OK)
+    {
+      ret = xfer.status;
+    }
+
+out:
+  sem_destroy(&xfer.done);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: usbhost_intxfer
+ *
+ * Description:
+ *   Free transfer buffer memory.
+ *
+ * Input Parameters:
+ *   devclass - A reference to the class instance.
+ *   xfer - Describes the transfer to be performed
+ *   callback - The transfer complete callback
+ *
+ * Returned Values:
+ *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST_HUB
+int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
+                    FAR struct usbhost_transfer_s *xfer,
+                    void (*callback)(FAR struct usbhost_transfer_s *))
+{
+  int ret;
+
+  xfer->callback = callback;
+
+  if (ROOTHUB(devclass))
+    {
+      ret = DRVR_RHSTATUS(devclass->drvr, xfer);
+    }
+  else
+    {
+      ret = DRVR_TRANSFER(devclass->drvr, xfer);
+    }
+
+  return ret;
+}
+#endif
