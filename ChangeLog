@@ -10253,3 +10253,6 @@
 	  Parikh.  This initial commit is incomplete.  This is quite a bit more
 	  hub logic that needs to come in before the port is complete
 	  (2015-04-18).
+	* include/nuttx/usb/usbhost.h:  Bring in more logic from
+          https://github.com/kaushalparikh/nuttx (2015-04-19).
+
