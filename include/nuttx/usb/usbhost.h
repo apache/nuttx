@@ -1066,7 +1066,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass);
  *
  * Input Parameters:
  *   devclass - A reference to the class instance.
- *   type, req, value, index, len - Describes the control transfer
+ *   ctrlreq - Describes the control request transfer
  *   buffer - Data accompanying the control transfer
  *
  * Returned Values:
@@ -1075,32 +1075,9 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass);
  *
  ****************************************************************************/
 
-int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass, uint8_t type,
-                     uint8_t req, uint16_t value, uint16_t index,
-                     uint16_t len, FAR uint8_t *buffer);
-
-#ifdef CONFIG_USBHOST_HUB
-/****************************************************************************
- * Name: usbhost_intxfer
- *
- * Description:
- *   Free transfer buffer memory.
- *
- * Input Parameters:
- *   devclass - A reference to the class instance.
- *   xfer - Describes the transfer to be performed
- *   callback - The transfer complete callback
- *
- * Returned Values:
- *   On success, zero (OK) is returned.  On failure, an negated errno value
- *   is returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
-                    FAR struct usbhost_transfer_s *xfer,
-                    void (*callback)(FAR struct usbhost_transfer_s *));
-#endif
+int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass,
+                     FAR struct usb_ctrlreq_s *ctrlreq,
+                     FAR uint8_t *buffer);
 
 #ifdef CONFIG_USBHOST_HUB
 /*******************************************************************************
@@ -1120,6 +1097,26 @@ int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
  *******************************************************************************/
 
 int usbhost_rh_connect(FAR struct usbhost_driver_s *drvr);
+#endif
+
+/*******************************************************************************
+ * Name: usbhost_rh_disconnect
+ *
+ * Description:
+ *   Disconnects USB host root hub
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call
+ *      to the class create() method.
+ *
+ * Returned Value:
+ *
+ * Assumptions:
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_HUB
+int usbhost_rh_disconnect(FAR struct usbhost_driver_s *drvr);
 #endif
 
 #undef EXTERN

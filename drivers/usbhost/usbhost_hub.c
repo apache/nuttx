@@ -734,6 +734,43 @@ static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
 }
 
 /****************************************************************************
+ * Name: usbhost_intxfer
+ *
+ * Description:
+ *   Free transfer buffer memory.
+ *
+ * Input Parameters:
+ *   devclass - A reference to the class instance.
+ *   xfer - Describes the transfer to be performed
+ *   callback - The transfer complete callback
+ *
+ * Returned Values:
+ *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+static int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
+                           FAR struct usbhost_transfer_s *xfer,
+                           void (*callback)(FAR struct usbhost_transfer_s *))
+{
+  int ret;
+
+  xfer->callback = callback;
+
+  if (ROOTHUB(devclass))
+    {
+      ret = DRVR_RHSTATUS(devclass->drvr, xfer);
+    }
+  else
+    {
+      ret = DRVR_TRANSFER(devclass->drvr, xfer);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: usbhost_hubevent
  *
  * Description:
