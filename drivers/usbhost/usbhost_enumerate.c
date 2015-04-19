@@ -335,7 +335,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
 
   /* Get information about the connected device */
 
-  ret = DRVR_GETDEVINFO(drvr, &devinfo);
+  ret = DRVR_GETDEVINFO(devclass->drvr, &devinfo);
   if (ret != OK)
     {
       udbg("DRVR_GETDEVINFO failed: %d\n", ret);
@@ -370,16 +370,16 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
       descsize      = 8;
     }
 
-  /* Set the initial maximum packet size */
+  /* Configure EP0 with the initial maximum packet size */
 
-  DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
+  DRVR_EP0CONFIGURE(devclass->drvr, devclass->ep0, 0, maxpacketsize);
 
   /* Read first bytes of the device descriptor */
 
   ret = usbhost_ctrlxfer(devclass,
                          (USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE),
                          USB_REQ_GETDESCRIPTOR, (USB_DESC_TYPE_DEVICE << 8),
-                         0, descsizedescsize, buffer);
+                         0, descsize, buffer);
   if (ret != OK)
     {
       udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
@@ -392,9 +392,9 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   maxpacketsize = ((struct usb_devdesc_s *)buffer)->mxpacketsize;
   uvdbg("maxpacksetsize: %d\n", maxpacketsize);
 
-  /* And reconfigure EP0 */
+  /* And reconfigure EP0 with the correct maximum packet size */
 
-  DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
+  DRVR_EP0CONFIGURE(devclass->drvr, devclass->ep0, 0, maxpacketsize);
 
   /* Set the USB device address */
 
@@ -410,9 +410,9 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
 
   usleep(2*1000);
 
-   /* And reconfigure EP0 */
+   /* And reconfigure EP0 with the correct address */
 
-  DRVR_EP0CONFIGURE(devclass->drvr, devclass->ep0, devclass->addr
+  DRVR_EP0CONFIGURE(devclass->drvr, devclass->ep0, devclass->addr,
                     maxpacketsize);
 
   /* Now read the full device descriptor (if we have not already done so) */

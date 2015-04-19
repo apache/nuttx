@@ -557,7 +557,7 @@
  *
  ************************************************************************************/
 
-#ifdef CONFIG_UBHOST_HUB
+#ifdef CONFIG_USBHOST_HUB
 #  define DRVR_RHCTRL(drvr,xfer,cmd) ((drvr)->rhctrl(drvr,xfer,cmd))
 #  define DRVR_RHSTATUS(drvr,xfer) ((drvr)->rhstatus(drvr,xfer))
 #endif
@@ -614,13 +614,22 @@ struct usbhost_registry_s
   FAR const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
 };
 
+
+/* This type represents one endpoint configured by the epalloc() method.
+ * The actual form is known only internally to the USB host controller
+ * (for example, for an OHCI driver, this would probably be a pointer
+ * to an endpoint descriptor).
+ */
+
+typedef FAR void *usbhost_ep_t;
+
 /* struct usbhost_class_s provides access from the USB host driver to the USB host
  * class implementation.
  */
 
 struct usbhost_class_s
 {
-#ifdef CONFIG_UBHOST_HUB
+#ifdef CONFIG_USBHOST_HUB
   /* Host driver */
 
   struct usbhost_driver_s *drvr;
@@ -672,7 +681,7 @@ struct usbhost_class_s
 
 struct usbhost_epdesc_s
 {
-#ifdef CONFIG_UBHOST_HUB
+#ifdef CONFIG_USBHOST_HUB
   FAR struct usbhost_class_s *devclass; /* Class */
 #endif
   uint8_t addr;                         /* Endpoint address */
@@ -689,15 +698,6 @@ struct usbhost_devinfo_s
 {
   uint8_t speed:2;       /* Device speed: 0=low, 1=full, 2=high */
 };
-
-/* This type represents one endpoint configured by the epalloc() method.
- * The actual form is known only internally to the USB host controller
- * (for example, for an OHCI driver, this would probably be a pointer
- * to an endpoint descriptor).
- */
-
-typedef FAR void *usbhost_ep_t;
-
 /* Generic transfer structure */
 
 struct usbhost_transfer_s
@@ -758,7 +758,7 @@ struct usbhost_connection_s
 
 struct usbhost_driver_s
 {
-#ifdef CONFIG_UBHOST_HUB
+#ifdef CONFIG_USBHOST_HUB
   /* Root hub */
 
   FAR struct usbhost_class_s *roothub;
@@ -852,7 +852,7 @@ struct usbhost_driver_s
 
   void (*disconnect)(FAR struct usbhost_driver_s *drvr);
 
-#ifdef CONFIG_UBHOST_HUB
+#ifdef CONFIG_USBHOST_HUB
   /* Called by hub class to control root hub. */
 
   int (*rhctrl)(FAR struct usbhost_driver_s *drvr,
