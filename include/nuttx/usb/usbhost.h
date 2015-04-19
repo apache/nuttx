@@ -74,12 +74,12 @@
  * Name: CLASS_CREATE
  *
  * Description:
- *   This macro will call the create() method of struct usbhost_registry_s.  The create()
- *   method is a callback into the class implementation.  It is used to (1) create
- *   a new instance of the USB host class state and to (2) bind a USB host driver
- *   "session" to the class instance.  Use of this create() method will support
- *   environments where there may be multiple USB ports and multiple USB devices
- *   simultaneously connected.
+ *   This macro will call the create() method of struct usbhost_registry_s. The
+ *   create() method is a callback into the class implementation.  It is used to
+ *   (1) create a new instance of the USB host class state and to (2) bind a USB
+ *   host driver "session" to the class instance.  Use of this create() method
+ *   will support environments where there may be multiple USB ports and multiple
+ *   USB devices simultaneously connected.
  *
  * Input Parameters:
  *   reg - The USB host class registry entry previously obtained from a call to
