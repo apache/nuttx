@@ -594,6 +594,10 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   stm32_rtc_breakout(tp, &regvals);
 
+  /* Enable write access to the backup domain */
+
+  (void)stm32_pwr_enablebkp(true);
+
   /* Then write the broken out values to the RTC counter and BKP overflow register
    * (hi-res mode only)
    */
@@ -608,6 +612,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
   putreg16(regvals.ovf, RTC_TIMEMSB_REG);
 #endif
   irqrestore(flags);
+
+  (void)stm32_pwr_enablebkp(false);
   return OK;
 }
 
