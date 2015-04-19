@@ -10248,4 +10248,5 @@
 	  return (2015-04-19).
 	* include/nuttx/usb/hub.h: Add USB hub header file from Kaushal Parikh
 	  (2015-04-18).
-
+	* arch/arm/src/stm32/stm32_rtcounter.c: Now need to enable backup
+	  domain write access when setting the time.  From Darcy Gong (2015-04-19).
