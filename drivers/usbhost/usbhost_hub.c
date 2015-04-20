@@ -102,6 +102,7 @@ struct usbhost_hubdev_s
   sem_t                     exclsem;      /* Used to maintain mutual exclusive access */
 
   struct usb_hubtt_s        tt;           /* Transaction translator */
+  struct work_s             work;         /* Used for deferred callback work */
   usbhost_ep_t              intin;        /* Interrupt IN endpoint */
 
   struct usbhost_class_s    *childclass[USBHUB_MAX_PORTS];
@@ -139,7 +140,7 @@ static void usbhost_hubevent(FAR void *arg);
 
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static void usbhost_putle16(uint8_t *dest, uint16_t val);
-static void usbhost_callback(FAR struct usbhost_transfer_s *xfer);
+static void usbhost_callback(FAR void *arg, int result);
 
 /* struct usbhost_registry_s methods */
  
@@ -1001,10 +1002,12 @@ static void usbhost_hubevent(FAR void *arg)
       udbg("WARNING: Hub status changed, not handled\n");
     }
 
-  xfer->status = -EIO;
+  /* Get the number hub event */
 
-  ret = DRVR_ASYNCH(hubclass->drvr, &priv->ctrlreq, sizeof(struct usb_ctrlreq_s)
-                    usbhost_callback, hubclass);
+  ret = DRVR_ASYNCH(hubclass->drvr, priv->intin,
+                    (FAR uint8_t *)priv->ctrlreq,
+                    sizeof(struct usb_ctrlreq_s), usbhost_callback,
+                    hubclass);
   if (ret != OK)
     {
       udbg("ERROR: Failed to queue interrupt endpoint: %d\n", ret);
@@ -1066,7 +1069,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *
  ****************************************************************************/
 
-static void usbhost_callback(FAR void *arg)
+static void usbhost_callback(FAR void *arg, int result)
 {
   FAR struct usbhost_class_s *hubclass;
   FAR struct usbhost_hubdev_s *priv;
@@ -1077,12 +1080,13 @@ static void usbhost_callback(FAR void *arg)
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
   priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
-  if (xfer->status != OK)
+  if (result != OK)
     {
       priv->buffer[0] = 0;
     }
 
-  (void)work_queue(HPWORK, &xfer->work, (worker_t)usbhost_hubevent, hubclass, 0);
+  (void)work_queue(HPWORK, &priv->work, (worker_t)usbhost_hubevent,
+                   hubclass, 0);
 }
 
 /****************************************************************************
@@ -1256,7 +1260,8 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
 
       /* INT request to periodically check port status */
 
-      ret = DRVR_ASYNCH(hubclass->drvr, &priv->ctrlreq,
+      ret = DRVR_ASYNCH(hubclass->drvr, priv->intin,
+                        (FAR uint8_t *)&priv->ctrlreq,
                         sizeof(struct usb_ctrlreq_s), usbhost_callback,
                         hubclass);
     }

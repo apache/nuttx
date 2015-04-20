@@ -30,10 +30,19 @@ config USBHOST_ISOC_DISABLE
 		On some architectures, selecting this setting will reduce driver size
 		by disabling isochronous endpoint support
 
+config USBHOST_ASYNCH
+	bool "Asynchronous transfer support"
+	default n
+	---help---
+		Select if the host controller driver needs to support asynchronous
+		I/O transfer.  This may be required, for example, to receive
+		infrequent, asynchronous input from an interrupt pipe.
+
 config USBHOST_HUB
 	bool "USB Hub Support"
 	default n
 	depends on EXPERIMENTAL
+	select USBHOST_ASYNCH
 	---help---
 		Select this option to build in support for USB hubs.
 

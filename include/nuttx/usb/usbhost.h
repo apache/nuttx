@@ -686,7 +686,7 @@ struct usbhost_connection_s
 
 /* Callback type used with asynchronous transfers */
 
-typedef void (*usbhost_asynch_t)(FAR void *arg);
+typedef CODE void (*usbhost_asynch_t)(FAR void *arg, int result);
 
 /* struct usbhost_driver_s provides access to the USB host driver from the
  * USB host class implementation.
