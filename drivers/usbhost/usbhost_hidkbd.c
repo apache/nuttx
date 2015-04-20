@@ -321,8 +321,9 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *usbhost_create(FAR struct usbhost_hub_s *hub,
-                                              FAR const struct usbhost_id_s *id);
+static struct usbhost_class_s *
+  usbhost_create(FAR struct usbhost_hub_s *hub, uint8_t port,
+                 FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
@@ -1775,6 +1776,7 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
  *
  * Input Parameters:
  *   hub - The hub that manages the new class instance.
+ *   port - The hub port index
  *   id - In the case where the device supports multiple base classes,
  *     subclasses, or protocols, this specifies which to configure for.
  *
@@ -1788,7 +1790,7 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hub_s *hub,
+  usbhost_create(FAR struct usbhost_hub_s *hub, uint8_t port,
                  FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
@@ -1809,6 +1811,7 @@ static FAR struct usbhost_class_s *
          /* Initialize class method function pointers */
 
           priv->usbclass.hub          = hub;
+          priv->usbclass.port         = port;
           priv->usbclass.connect      = usbhost_connect;
           priv->usbclass.disconnected = usbhost_disconnected;
 

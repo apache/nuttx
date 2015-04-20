@@ -71,7 +71,7 @@ static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
                                   FAR struct usbhost_id_s *id);
 static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
                                      FAR struct usbhost_id_s *id);
-static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub,
+static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub, uint8_t port,
                                     const uint8_t *configdesc, int desclen,
                                     struct usbhost_id_s *id,
                                     FAR struct usbhost_class_s **devclass);
@@ -222,7 +222,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
  *
  *******************************************************************************/
 
-static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub,
+static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub, uint8_t port,
                                     const uint8_t *configdesc, int desclen,
                                     struct usbhost_id_s *id,
                                     FAR struct usbhost_class_s **usbclass)
@@ -242,7 +242,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub,
        */
 
       ret = -ENOMEM;
-      devclass = CLASS_CREATE(reg, hub, id);
+      devclass = CLASS_CREATE(reg, hub, port, id);
       uvdbg("CLASS_CREATE: %p\n", devclass);
       if (devclass != NULL)
         {
@@ -288,6 +288,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub,
  *
  * Input Parameters:
  *   hub - The hub that manages the new class.
+ *   port - The hub port index
  *   devclass - If the class driver for the device is successful located
  *      and bound to the hub, the allocated class instance is returned into
  *      this caller-provided memory location.
@@ -303,7 +304,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hub_s *hub,
  *
  *******************************************************************************/
 
-int usbhost_enumerate(FAR struct usbhost_hub_s *hub,
+int usbhost_enumerate(FAR struct usbhost_hub_s *hub, uint8_t port,
                       FAR struct usbhost_class_s **devclass)
 {
   FAR struct usb_ctrlreq_s *ctrlreq = NULL;
@@ -535,7 +536,7 @@ int usbhost_enumerate(FAR struct usbhost_hub_s *hub,
    * will begin configuring the device.
    */
 
-  ret = usbhost_classbind(hub, buffer, cfglen, &id, devclass);
+  ret = usbhost_classbind(hub, port, buffer, cfglen, &id, devclass);
   if (ret != OK)
     {
       udbg("ERROR: usbhost_classbind returned %d\n", ret);

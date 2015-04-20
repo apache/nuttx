@@ -156,7 +156,7 @@ static void usbhost_callback(FAR void *arg, int result);
 /* struct usbhost_registry_s methods */
 
 static FAR struct usbhost_class_s *usbhost_create(
-             FAR struct usbhost_hub_s *drvr,
+             FAR struct usbhost_hub_s *hub, uint8_t port,
              FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
@@ -290,26 +290,20 @@ static inline FAR struct usbhost_hub_s *
       struct usbhost_epdesc_s epdesc;
       int ret;
 
-      child->drvr     = drvr;
-      child->parent   = parent;
-      child->tt       = NULL;
-      child->funcaddr = usbhost_allocaddr();
-      child->speed    = speed;
-      child->rhport   = 0;
+      child->drvr         = drvr;
+      child->parent       = parent;
+      child->tt           = NULL;
+      child->funcaddr     = usbhost_allocaddr();
+      child->speed        = speed;
 
-      if (!ROOTHUB(parent))
+      if (parent->tt != NULL)
         {
-          if (parent->tt != NULL)
-            {
-              child->tt     = parent->tt;
-              child->rhport = parent->rhport;
-            }
-          else if ((child->speed != USB_SPEED_HIGH) &&
-                   (parent->speed == USB_SPEED_HIGH))
-            {
-              child->tt     = &priv->tt;
-              child->rhport = port;
-            }
+          child->tt       = parent->tt;
+        }
+      else if ((child->speed != USB_SPEED_HIGH) &&
+               (parent->speed == USB_SPEED_HIGH))
+        {
+          child->tt       = &priv->tt;
         }
 
       epdesc.hub          = child;
@@ -1029,7 +1023,8 @@ static void usbhost_hubevent(FAR void *arg)
                       udbg("ERROR: Failed to allocated class\n");
                       uvdbg("enumerate port %d speed %d\n", port, speed);
 
-                      ret = usbhost_enumerate(newhub, &priv->childclass[port]);
+                      ret = usbhost_enumerate(newhub, port,
+                                              &priv->childclass[port]);
                       if (ret != OK)
                         {
                           udbg("ERROR: Failed to enumerate port %d: %d\n",
@@ -1163,6 +1158,7 @@ static void usbhost_callback(FAR void *arg, int result)
  *
  * Input Parameters:
  *   hub - The hub that manages the new class instance.
+ *   port - The hub port index
  *   id - In the case where the device supports multiple base classes,
  *     subclasses, or protocols, this specifies which to configure for.
  *
@@ -1176,7 +1172,7 @@ static void usbhost_callback(FAR void *arg, int result)
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hub_s *hub,
+  usbhost_create(FAR struct usbhost_hub_s *hub, uint8_t port,
                  FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_hubclass_s *alloc;
@@ -1198,6 +1194,7 @@ static FAR struct usbhost_class_s *
 
   hubclass               = &alloc->hubclass;
   hubclass->hub          = hub;
+  hubclass->port         = port;
   hubclass->connect      = usbhost_connect;
   hubclass->disconnected = usbhost_disconnected;
 
@@ -1225,7 +1222,7 @@ static FAR struct usbhost_class_s *
 
   /* The initial reference count is 1... One reference is held by the driver */
 
-  priv->crefs            = 1;
+  priv->crefs = 1;
 
   /* Initialize semaphores (this works okay in the interrupt context) */
 

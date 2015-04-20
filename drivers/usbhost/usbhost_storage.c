@@ -227,8 +227,9 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *usbhost_create(FAR struct usbhost_hub_s *hub,
-                                              FAR const struct usbhost_id_s *id);
+static struct usbhost_class_s *
+  usbhost_create(FAR struct usbhost_hub_s *hub, uint8_t port,
+                 FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
@@ -1633,6 +1634,7 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
  *
  * Input Parameters:
  *   hub - The hub that manages the new class instance.
+ *   port - The hub port index
  *   id - In the case where the device supports multiple base classes,
  *     subclasses, or protocols, this specifies which to configure for.
  *
@@ -1646,7 +1648,7 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-usbhost_create(FAR struct usbhost_hub_s *hub,
+usbhost_create(FAR struct usbhost_hub_s *hub, uint8_t port,
                FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
@@ -1667,6 +1669,7 @@ usbhost_create(FAR struct usbhost_hub_s *hub,
          /* Initialize class method function pointers */
 
           priv->usbclass.hub          = hub;
+          priv->usbclass.port         = port;
           priv->usbclass.connect      = usbhost_connect;
           priv->usbclass.disconnected = usbhost_disconnected;
 

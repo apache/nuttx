@@ -82,6 +82,7 @@
  *   reg - The USB host class registry entry previously obtained from a call to
  *     usbhost_findclass().
  *   hub - The hub that manages the new class instance.
+ *   port - The hub port index
  *   id - In the case where the device supports multiple base classes, subclasses, or
  *     protocols, this specifies which to configure for.
  *
@@ -99,7 +100,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_CREATE(reg,hub,id) ((reg)->create(hub,id))
+#define CLASS_CREATE(reg,hub,port,id) ((reg)->create(hub,port,id))
 
 /************************************************************************************
  * Name: CLASS_CONNECT
@@ -584,6 +585,7 @@ struct usbhost_registry_s
    */
 
   FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_hub_s *hub,
+                                            uint8_t port,
                                             FAR const struct usbhost_id_s *id);
 
   /* This information uniquely identifies the USB host class implementation that
@@ -618,7 +620,6 @@ struct usbhost_hub_s
 #endif
   uint8_t funcaddr;                   /* Device function address */
   uint8_t speed;                      /* Device speed */
-  uint8_t rhport;                     /* Root hub port index */
 };
 
 /* struct usbhost_class_s provides access from the USB host driver to the USB host
@@ -627,9 +628,10 @@ struct usbhost_hub_s
 
 struct usbhost_class_s
 {
-  /* The hub used by this class instance */
-
-  FAR struct usbhost_hub_s *hub;
+  FAR struct usbhost_hub_s *hub;      /* The hub used by this class instance */
+#ifdef CONFIG_USBHOST_HUB
+  uint8_t port;                       /* Hub port index */
+#endif
 
   /* Provides the configuration descriptor to the class.  The configuration
    * descriptor contains critical information needed by the class in order to
@@ -991,6 +993,7 @@ int usbhost_wlaninit(void);
  *
  * Input Parameters:
  *   hub - The hub that manages the new class.
+ *   port - The hub port index
  *   devclass - If the class driver for the device is successful located
  *      and bound to the hub, the allocated class instance is returned into
  *      this caller-provided memory location.
@@ -1006,7 +1009,7 @@ int usbhost_wlaninit(void);
  *
  *******************************************************************************/
 
-int usbhost_enumerate(FAR struct usbhost_hub_s *hub,
+int usbhost_enumerate(FAR struct usbhost_hub_s *hub, uint8_t port,
                       FAR struct usbhost_class_s **devclass);
 
 #undef EXTERN
