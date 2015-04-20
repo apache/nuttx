@@ -448,6 +448,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   ep0 - The control endpoint to send/receive the control request.
  *   req - Describes the request to be sent.  This request must lie in memory
  *      created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
@@ -466,8 +467,8 @@
  *
  ************************************************************************************/
 
-#define DRVR_CTRLIN(drvr,req,buffer)  ((drvr)->ctrlin(drvr,req,buffer))
-#define DRVR_CTRLOUT(drvr,req,buffer) ((drvr)->ctrlout(drvr,req,buffer))
+#define DRVR_CTRLIN(drvr,ep0,req,buffer)  ((drvr)->ctrlin(drvr,ep0,req,buffer))
+#define DRVR_CTRLOUT(drvr,ep0,req,buffer) ((drvr)->ctrlout(drvr,ep0,req,buffer))
 
 /************************************************************************************
  * Name: DRVR_TRANSFER and DRVR_ASYNCH
@@ -761,10 +762,10 @@ struct usbhost_driver_s
    * control transfer has completed.
    */
 
-  int (*ctrlin)(FAR struct usbhost_driver_s *drvr,
+  int (*ctrlin)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                 FAR const struct usb_ctrlreq_s *req,
                 FAR uint8_t *buffer);
-  int (*ctrlout)(FAR struct usbhost_driver_s *drvr,
+  int (*ctrlout)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                  FAR const struct usb_ctrlreq_s *req,
                  FAR const uint8_t *buffer);
 

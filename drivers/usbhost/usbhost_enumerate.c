@@ -377,7 +377,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, descsize);
 
-  ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
+  ret = DRVR_CTRLIN(devclass->drvr, devclass->ep0, ctrlreq, buffer);
   if (ret != OK)
     {
       udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
@@ -402,7 +402,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, 0);
 
-  ret = DRVR_CTRLOUT(devclass->drvr, ctrlreq, NULL);
+  ret = DRVR_CTRLOUT(devclass->drvr, devclass->ep0, ctrlreq, NULL);
   if (ret != OK)
     {
       udbg("ERROR: Failed to set address: %d\n");
@@ -426,7 +426,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
       usbhost_putle16(ctrlreq->index, 0);
       usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
 
-      ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
+      ret = DRVR_CTRLIN(devclass->drvr, devclass->ep0, ctrlreq, buffer);
       if (ret != OK)
         {
           udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
@@ -454,7 +454,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, USB_SIZEOF_CFGDESC);
 
-  ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
+  ret = DRVR_CTRLIN(devclass->drvr, devclass->ep0, ctrlreq, buffer);
   if (ret != OK)
    {
       udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
@@ -477,7 +477,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, cfglen);
 
-  ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
+  ret = DRVR_CTRLIN(devclass->drvr, devclass->ep0, ctrlreq, buffer);
   if (ret != OK)
     {
       udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
@@ -493,7 +493,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, 0);
 
-  ret = DRVR_CTRLOUT(devclass->drvr, ctrlreq, NULL);
+  ret = DRVR_CTRLOUT(devclass->drvr, devclass->ep0, ctrlreq, NULL);
   if (ret != OK)
     {
       udbg("ERROR: Failed to set configuration: %d\n", ret);
