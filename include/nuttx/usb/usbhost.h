@@ -61,29 +61,27 @@
  * Name: ROOTHUB
  *
  * Description:
- *   Check for root hub
+ *   Check if a hub instance is the root hub.
  *
  ************************************************************************************/
 
-#define ROOTHUB(devclass)  ((devclass)->parent == NULL)
+#define ROOTHUB(hub) ((hub)->parent == NULL)
 
 /************************************************************************************
  * Name: CLASS_CREATE
  *
  * Description:
- *   This macro will call the create() method of struct usbhost_registry_s. The
- *   create() method is a callback into the class implementation.  It is used to
- *   (1) create a new instance of the USB host class state and to (2) bind a USB
- *   host driver "session" to the class instance.  Use of this create() method
- *   will support environments where there may be multiple USB ports and multiple
- *   USB devices simultaneously connected.
+ *   This macro will call the create() method of struct usbhost_registry_s.  The create()
+ *   method is a callback into the class implementation.  It is used to (1) create
+ *   a new instance of the USB host class state and to (2) bind a USB host driver
+ *   "session" to the class instance.  Use of this create() method will support
+ *   environments where there may be multiple USB ports and multiple USB devices
+ *   simultaneously connected.
  *
  * Input Parameters:
  *   reg - The USB host class registry entry previously obtained from a call to
  *     usbhost_findclass().
- *   devclass - An instance of struct usbhost_driver_s that the class
- *     implementation will "bind" to its state structure and will subsequently
- *     use to communicate with the USB host driver.
+ *   hub - The hub that manages the new class instance.
  *   id - In the case where the device supports multiple base classes, subclasses, or
  *     protocols, this specifies which to configure for.
  *
@@ -91,7 +89,7 @@
  *   On success, this function will return a non-NULL instance of struct
  *   usbhost_class_s that can be used by the USB host driver to communicate with the
  *   USB host class.  NULL is returned on failure; this function will fail only if
- *   the devclass input parameter is NULL or if there are insufficient resources to
+ *   the drvr input parameter is NULL or if there are insufficient resources to
  *   create another USB host class instance.
  *
  * Assumptions:
@@ -101,7 +99,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_CREATE(reg, devclass, id) ((reg)->create(devclass, id))
+#define CLASS_CREATE(reg,hub,id) ((reg)->create(hub,id))
 
 /************************************************************************************
  * Name: CLASS_CONNECT
@@ -567,7 +565,7 @@ struct usbhost_id_s
  * connected to the USB port.
  */
 
-struct usbhost_driver_s; /* Forward reference to the driver state structure */
+struct usbhost_hub_s;    /* Forward reference to the hub state structure */
 struct usbhost_class_s;  /* Forward reference to the class state structure */
 struct usbhost_registry_s
 {
@@ -576,7 +574,7 @@ struct usbhost_registry_s
    * provide those instances in write-able memory (RAM).
    */
 
-  struct usbhost_registry_s *flink;
+  struct usbhost_registry_s     *flink;
 
   /* This is a callback into the class implementation.  It is used to (1) create
    * a new instance of the USB host class state and to (2) bind a USB host driver
@@ -585,14 +583,14 @@ struct usbhost_registry_s
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
 
-  int (*create)(FAR struct usbhost_class_s *devclass,
-                FAR const struct usbhost_id_s *id);
+  FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_hub_s *hub,
+                                            FAR const struct usbhost_id_s *id);
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.
    */
 
-  uint8_t nids;                        /* Number of IDs in the id[] array */
+  uint8_t                       nids;  /* Number of IDs in the id[] array */
   FAR const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
 };
 
@@ -605,22 +603,34 @@ struct usbhost_registry_s
 
 typedef FAR void *usbhost_ep_t;
 
+/* Every class connects to the host controller driver (HCD) via a hub.  That
+ * may be an external hub or the internal, root hub.  The root hub is managed
+ * by the HCD.  This structure provides for the linkages in that event that
+ * an external hub.
+ */
+
+struct usbhost_hub_s
+{
+  FAR struct usbhost_driver_s *drvr;  /* Common host driver */
+  usbhost_ep_t ep0;                   /* Control endpoint, ep0 */
+#ifdef CONFIG_USBHOST_HUB
+  FAR struct usbhost_hub_s *parent;   /* Parent hub */
+  FAR struct usb_hubtt_s *tt;         /* Transaction translator hub */
+#endif
+  uint8_t funcaddr;                   /* Device function address */
+  uint8_t speed;                      /* Device speed */
+  uint8_t rhport;                     /* Root hub port index */
+};
+
 /* struct usbhost_class_s provides access from the USB host driver to the USB host
  * class implementation.
  */
 
 struct usbhost_class_s
 {
-#ifdef CONFIG_USBHOST_HUB
-  FAR struct usbhost_driver_s *drvr;  /* Common host driver */
-  FAR struct usbhost_class_s *parent; /* Parent class */
-  usbhost_ep_t ep0;                   /* Control endpoint, ep0 */
-  FAR struct usb_hubtt_s *tt;         /* Transaction translator hub */
-  FAR void *priv;                     /* Class specific private data */
-  uint8_t addr;                       /* Device function address */
-  uint8_t speed;                      /* Device speed */
-  uint8_t rhport;                     /* Root hub port index */
-#endif
+  /* The hub used by this class instance */
+
+  FAR struct usbhost_hub_s *hub;
 
   /* Provides the configuration descriptor to the class.  The configuration
    * descriptor contains critical information needed by the class in order to
@@ -644,14 +654,14 @@ struct usbhost_class_s
 struct usbhost_epdesc_s
 {
 #ifdef CONFIG_USBHOST_HUB
-  FAR struct usbhost_class_s *devclass; /* Class */
+  FAR struct usbhost_hub_s *hub; /* Hub that manages the endpoint */
 #endif
-  uint8_t addr;                         /* Endpoint address */
-  bool in;                              /* Direction: true->IN */
-  uint8_t funcaddr;                     /* USB address of function containing endpoint */
-  uint8_t xfrtype;                      /* Transfer type.  See USB_EP_ATTR_XFER_* in usb.h */
-  uint8_t interval;                     /* Polling interval */
-  uint16_t mxpacketsize;                /* Max packetsize */
+  uint8_t addr;                  /* Endpoint address */
+  bool in;                       /* Direction: true->IN */
+  uint8_t funcaddr;              /* USB address of function containing endpoint */
+  uint8_t xfrtype;               /* Transfer type.  See USB_EP_ATTR_XFER_* in usb.h */
+  uint8_t interval;              /* Polling interval */
+  uint16_t mxpacketsize;         /* Max packetsize */
 };
 
 /* This structure provides information about the connected device */
@@ -967,6 +977,10 @@ int usbhost_wlaninit(void);
  * Name: usbhost_enumerate
  *
  * Description:
+ *   This is a share-able implementation of most of the logic required by the
+ *   driver enumerate() method.  This logic within this method should be common
+ *   to all USB host drivers.
+ *
  *   Enumerate the connected device.  As part of this enumeration process,
  *   the driver will (1) get the device's configuration descriptor, (2)
  *   extract the class ID info from the configuration descriptor, (3) call
@@ -977,62 +991,24 @@ int usbhost_wlaninit(void);
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   devclass - USB class information common across all classes. Whoever calls
- *     enumerate should fill address, speed, driver and parent class
- *     pointer. Enumeration will fill the control endpoint ep0,
- *     transaction translator (if applicable) and private data
+ *   hub - The hub that manages the new class.
+ *   devclass - If the class driver for the device is successful located
+ *      and bound to the hub, the allocated class instance is returned into
+ *      this caller-provided memory location.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
  * Assumptions:
+ *   - Only a single class bound to a single device is supported.
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
-int usbhost_enumerate(FAR struct usbhost_class_s *devclass);
-
-#ifdef CONFIG_USBHOST_HUB
-/*******************************************************************************
- * Name: usbhost_rh_connect
- *
- * Description:
- *   Registers USB host root hub
- *
- * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *
- * Returned Value:
- *
- * Assumptions:
- *
- *******************************************************************************/
-
-int usbhost_rh_connect(FAR struct usbhost_driver_s *drvr);
-#endif
-
-/*******************************************************************************
- * Name: usbhost_rh_disconnect
- *
- * Description:
- *   Disconnects USB host root hub
- *
- * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *      to the class create() method.
- *
- * Returned Value:
- *
- * Assumptions:
- *
- *******************************************************************************/
-
-#ifdef CONFIG_USBHOST_HUB
-int usbhost_rh_disconnect(FAR struct usbhost_driver_s *drvr);
-#endif
+int usbhost_enumerate(FAR struct usbhost_hub_s *hub,
+                      FAR struct usbhost_class_s **devclass);
 
 #undef EXTERN
 #if defined(__cplusplus)

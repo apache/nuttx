@@ -120,9 +120,9 @@ struct usbhost_state_s
 
   struct usbhost_class_s  usbclass;
 
-  /* This is an instance of the USB host driver bound to this class instance */
+  /* This is an instance of the USB hub bound to this class instance */
 
-  struct usbhost_driver_s *drvr;
+  struct usbhost_hub_s   *hub;
 
   /* The remainder of the fields are provide to the mass storage class */
 
@@ -228,7 +228,7 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
+static struct usbhost_class_s *usbhost_create(FAR struct usbhost_hub_s *hub,
                                               FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
@@ -679,6 +679,7 @@ usbhost_writecbw(size_t startsector, uint16_t blocksize,
 static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
 {
   FAR struct usb_ctrlreq_s *req = (FAR struct usb_ctrlreq_s *)priv->tbuffer;
+  FAR struct usbhost_hub_s *hub;
   DEBUGASSERT(priv && priv->tbuffer);
   int ret;
 
@@ -688,12 +689,16 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
    */
 
   uvdbg("Request maximum logical unit number\n");
+
   memset(req, 0, sizeof(struct usb_ctrlreq_s));
   req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
   req->req     = USBMSC_REQ_GETMAXLUN;
   usbhost_putle16(req->len, 1);
 
-  ret = DRVR_CTRLIN(priv->drvr, req, priv->tbuffer);
+  DEBUGASSERT(priv->hub);
+  hub = priv->hub;
+
+  ret = DRVR_CTRLIN(hub->drvr, hub->ep0, req, priv->tbuffer);
   if (ret != OK)
     {
       /* Devices that do not support multiple LUNs may stall this command.
@@ -723,13 +728,13 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
   /* Construct and send the CBW */
 
   usbhost_testunitreadycbw(cbw);
-  result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+  result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                         (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
   if (result == OK)
     {
       /* Receive the CSW */
 
-      result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+      result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                              priv->tbuffer, USBMSC_CSW_SIZEOF);
       if (result == OK)
         {
@@ -757,19 +762,19 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
   /* Construct and send the CBW */
 
   usbhost_requestsensecbw(cbw);
-  result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+  result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                         (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
   if (result == OK)
     {
       /* Receive the sense data response */
 
-      result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+      result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                              priv->tbuffer, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
       if (result == OK)
         {
           /* Receive the CSW */
 
-          result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+          result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                                  priv->tbuffer, USBMSC_CSW_SIZEOF);
           if (result == OK)
             {
@@ -799,13 +804,13 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
   /* Construct and send the CBW */
 
   usbhost_readcapacitycbw(cbw);
-  result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+  result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                         (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
   if (result == OK)
     {
       /* Receive the read capacity CBW IN response */
 
-      result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+      result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                              priv->tbuffer, SCSIRESP_READCAPACITY10_SIZEOF);
       if (result == OK)
         {
@@ -817,7 +822,7 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
 
           /* Receive the CSW */
 
-          result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+          result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                                  priv->tbuffer, USBMSC_CSW_SIZEOF);
           if (result == OK)
             {
@@ -846,13 +851,13 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
   /* Construct and send the CBW */
 
   usbhost_inquirycbw(cbw);
-  result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+  result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                          (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
   if (result == OK)
     {
       /* Receive the CBW IN response */
 
-      result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+      result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                              priv->tbuffer, SCSIRESP_INQUIRY_SIZEOF);
       if (result == OK)
         {
@@ -865,7 +870,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
 
           /* Receive the CSW */
 
-          result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+          result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                                  priv->tbuffer, USBMSC_CSW_SIZEOF);
           if (result == OK)
             {
@@ -914,12 +919,12 @@ static void usbhost_destroy(FAR void *arg)
 
   if (priv->bulkout)
     {
-      DRVR_EPFREE(priv->drvr, priv->bulkout);
+      DRVR_EPFREE(priv->hub->drvr, priv->bulkout);
     }
 
   if (priv->bulkin)
     {
-      DRVR_EPFREE(priv->drvr, priv->bulkin);
+      DRVR_EPFREE(priv->hub->drvr, priv->bulkin);
     }
 
   /* Free any transfer buffers */
@@ -932,7 +937,7 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Disconnect the USB host device */
 
-  DRVR_DISCONNECT(priv->drvr);
+  DRVR_DISCONNECT(priv->hub->drvr);
 
   /* And free the class instance.  Hmmm.. this may execute on the worker
    * thread and the work structure is part of what is getting freed.  That
@@ -1149,18 +1154,18 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* We are good... Allocate the endpoints */
 
-  ret = DRVR_EPALLOC(priv->drvr, &boutdesc, &priv->bulkout);
+  ret = DRVR_EPALLOC(priv->hub->drvr, &boutdesc, &priv->bulkout);
   if (ret != OK)
     {
       udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
       return ret;
     }
 
-  ret = DRVR_EPALLOC(priv->drvr, &bindesc, &priv->bulkin);
+  ret = DRVR_EPALLOC(priv->hub->drvr, &bindesc, &priv->bulkin);
   if (ret != OK)
     {
       udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
-      (void)DRVR_EPFREE(priv->drvr, priv->bulkout);
+      (void)DRVR_EPFREE(priv->hub->drvr, priv->bulkout);
       return ret;
     }
 
@@ -1552,7 +1557,7 @@ static void usbhost_putbe32(uint8_t *dest, uint32_t val)
 static inline int usbhost_talloc(FAR struct usbhost_state_s *priv)
 {
   DEBUGASSERT(priv && priv->tbuffer == NULL);
-  return DRVR_ALLOC(priv->drvr, &priv->tbuffer, &priv->tbuflen);
+  return DRVR_ALLOC(priv->hub->drvr, &priv->tbuffer, &priv->tbuflen);
 }
 
 /****************************************************************************
@@ -1577,8 +1582,8 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
 
   if (priv->tbuffer)
     {
-      DEBUGASSERT(priv->drvr);
-      result         = DRVR_FREE(priv->drvr, priv->tbuffer);
+      DEBUGASSERT(priv->hub->drvr);
+      result         = DRVR_FREE(priv->hub->drvr, priv->tbuffer);
       priv->tbuffer = NULL;
       priv->tbuflen = 0;
     }
@@ -1631,9 +1636,7 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
  *   USB ports and multiple USB devices simultaneously connected.
  *
  * Input Parameters:
- *   drvr - An instance of struct usbhost_driver_s that the class
- *     implementation will "bind" to its state structure and will
- *     subsequently use to communicate with the USB host driver.
+ *   hub - The hub that manages the new class instance.
  *   id - In the case where the device supports multiple base classes,
  *     subclasses, or protocols, this specifies which to configure for.
  *
@@ -1641,13 +1644,13 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
  *   On success, this function will return a non-NULL instance of struct
  *   usbhost_class_s that can be used by the USB host driver to communicate
  *   with the USB host class.  NULL is returned on failure; this function
- *   will fail only if the drvr input parameter is NULL or if there are
+ *   will fail only if the hub input parameter is NULL or if there are
  *   insufficient resources to create another USB host class instance.
  *
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-usbhost_create(FAR struct usbhost_driver_s *drvr,
+usbhost_create(FAR struct usbhost_hub_s *hub,
                FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
@@ -1667,6 +1670,7 @@ usbhost_create(FAR struct usbhost_driver_s *drvr,
         {
          /* Initialize class method function pointers */
 
+          priv->usbclass.hub          = hub;
           priv->usbclass.connect      = usbhost_connect;
           priv->usbclass.disconnected = usbhost_disconnected;
 
@@ -1677,10 +1681,6 @@ usbhost_create(FAR struct usbhost_driver_s *drvr,
           /* Initialize semphores (this works okay in the interrupt context) */
 
           sem_init(&priv->exclsem, 0, 1);
-
-          /* Bind the driver to the storage class instance */
-
-          priv->drvr = drvr;
 
           /* NOTE: We do not yet know the geometry of the USB mass storage device */
 
@@ -2003,19 +2003,19 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
               /* Construct and send the CBW */
 
               usbhost_readcbw(startsector, priv->blocksize, nsectors, cbw);
-              result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+              result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                                      (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
               if (result == OK)
                 {
                   /* Receive the user data */
 
-                  result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+                  result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                                          buffer, priv->blocksize * nsectors);
                   if (result == OK)
                     {
                       /* Receive the CSW */
 
-                      result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+                      result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                                              priv->tbuffer, USBMSC_CSW_SIZEOF);
                       if (result == OK)
                         {
@@ -2096,19 +2096,19 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
           /* Construct and send the CBW */
 
           usbhost_writecbw(startsector, priv->blocksize, nsectors, cbw);
-          result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+          result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                                  (uint8_t*)cbw, USBMSC_CBW_SIZEOF);
           if (result == OK)
             {
               /* Send the user data */
 
-              result = DRVR_TRANSFER(priv->drvr, priv->bulkout,
+              result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkout,
                                      (uint8_t*)buffer, priv->blocksize * nsectors);
               if (result == OK)
                 {
                   /* Receive the CSW */
 
-                  result = DRVR_TRANSFER(priv->drvr, priv->bulkin,
+                  result = DRVR_TRANSFER(priv->hub->drvr, priv->bulkin,
                                          priv->tbuffer, USBMSC_CSW_SIZEOF);
                   if (result == OK)
                     {
