@@ -572,7 +572,7 @@ struct usbhost_class_s;  /* Forward reference to the class state structure */
 struct usbhost_registry_s
 {
   /* This field is used to implement a singly-link registry structure.  Because of
-   * the presence of this link, provides of structy usbhost_registry_s instances must
+   * the presence of this link, provides of struct usbhost_registry_s instances must
    * provide those instances in write-able memory (RAM).
    */
 
