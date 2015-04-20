@@ -40,10 +40,14 @@ ifeq ($(CONFIG_USBHOST),y)
 # Include built-in USB host driver logic
 
 CSRCS += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
-CSRCS += usbhost_enumerate.c usbhost_storage.c usbhost_devaddr.c
+CSRCS += usbhost_enumerate.c usbhost_devaddr.c
 
 ifeq ($(CONFIG_USBHOST_HUB),y)
 CSRCS += usbhost_hub.c
+endif
+
+ifeq ($(CONFIG_USBHOST_MSC),y)
+CSRCS += usbhost_storage.c
 endif
 
 ifeq ($(CONFIG_USBHOST_HIDKBD),y)

@@ -52,9 +52,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
-
-#include <nuttx/wqueue.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -451,7 +448,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   xfr - Describes the request to be sent.  This request must lie in memory
+ *   req - Describes the request to be sent.  This request must lie in memory
  *      created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
@@ -469,8 +466,8 @@
  *
  ************************************************************************************/
 
-#define DRVR_CTRLIN(drvr,xfer,cmd)  ((drvr)->ctrlin(drvr,xfer,cmd))
-#define DRVR_CTRLOUT(drvr,xfer,cmd) ((drvr)->ctrlout(drvr,xfer,cmd))
+#define DRVR_CTRLIN(drvr,req,buffer)  ((drvr)->ctrlin(drvr,req,buffer))
+#define DRVR_CTRLOUT(drvr,req,buffer) ((drvr)->ctrlout(drvr,req,buffer))
 
 /************************************************************************************
  * Name: DRVR_TRANSFER
@@ -535,7 +532,7 @@
 #define DRVR_DISCONNECT(drvr) ((drvr)->disconnect(drvr))
 
 /************************************************************************************
- * Name: DRVR_RHCTRL and DRVR_RHSTATUS
+ * Name: DRVR_RHSTATUS
  *
  * Description:
  *   Called by hub class to control root hub.
@@ -558,7 +555,6 @@
  ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
-#  define DRVR_RHCTRL(drvr,xfer,cmd) ((drvr)->rhctrl(drvr,xfer,cmd))
 #  define DRVR_RHSTATUS(drvr,xfer) ((drvr)->rhstatus(drvr,xfer))
 #endif
 
@@ -630,34 +626,14 @@ typedef FAR void *usbhost_ep_t;
 struct usbhost_class_s
 {
 #ifdef CONFIG_USBHOST_HUB
-  /* Common host driver */
-
-  FAR struct usbhost_driver_s *drvr;
-
-  /* Parent class */
-
-  FAR struct usbhost_class_s *parent;
-
-  /* Control endpoint, ep0 */
-
-  usbhost_ep_t ep0;
-
-  /* Transaction translator hub */
-
-  FAR struct usb_hubtt_s *tt;
-
-  /* Class specific private data */
-
-  FAR void *priv;
-
-  /* USB device address & speed */
-
-  uint8_t addr;
-  uint8_t speed;
-
-  /* Transaction translator port */
-
-  uint8_t ttport;
+  FAR struct usbhost_driver_s *drvr;  /* Common host driver */
+  FAR struct usbhost_class_s *parent; /* Parent class */
+  usbhost_ep_t ep0;                   /* Control endpoint, ep0 */
+  FAR struct usb_hubtt_s *tt;         /* Transaction translator hub */
+  FAR void *priv;                     /* Class specific private data */
+  uint8_t addr;                       /* Device function address */
+  uint8_t speed;                      /* Device speed */
+  uint8_t rhport;                     /* Root hub port index */
 #endif
 
   /* Provides the configuration descriptor to the class.  The configuration
@@ -698,34 +674,18 @@ struct usbhost_devinfo_s
 {
   uint8_t speed:2;       /* Device speed: 0=low, 1=full, 2=high */
 };
+
 /* Generic transfer structure */
 
 struct usbhost_transfer_s
 {
-  FAR uint8_t *buffer;
   size_t buflen;
   size_t len;
   int status;
 
-  /* Semaphore of synchronized transfers */
-
-  sem_t done;
-
   /* Device class */
 
   FAR struct usbhost_class_s *devclass;
-
-  /* Opaque endpoint pointer; can be xHCI specific */
-
-  usbhost_ep_t ep;
-
-  /* Workqueue for callback */
-
-  struct work_s  work;
-
-  /* Transfer complete callback */
-
-  void (*callback)(FAR struct usbhost_transfer_s *);
 };
 
 /* struct usbhost_connection_s provides as interface between platform-specific
@@ -826,11 +786,11 @@ struct usbhost_driver_s
    */
 
   int (*ctrlin)(FAR struct usbhost_driver_s *drvr,
-                FAR struct usbhost_transfer_s *xfer,
-                FAR const struct usb_ctrlreq_s *cmd);
+                FAR const struct usb_ctrlreq_s *req,
+                FAR uint8_t *buffer);
   int (*ctrlout)(FAR struct usbhost_driver_s *drvr,
-                 FAR struct usbhost_transfer_s *xfer,
-                 FAR const struct usb_ctrlreq_s *cmd);
+                 FAR const struct usb_ctrlreq_s *req,
+                 FAR const uint8_t *buffer);
 
   /* Process a request to handle a transfer descriptor.  This method will
    * enqueue the transfer request and wait for it to complete.  Only one transfer may
@@ -855,9 +815,6 @@ struct usbhost_driver_s
 #ifdef CONFIG_USBHOST_HUB
   /* Called by hub class to control root hub. */
 
-  int (*rhctrl)(FAR struct usbhost_driver_s *drvr,
-                 FAR struct usbhost_transfer_s *xfer,
-                 FAR const struct usb_ctrlreq_s *cmd);
   int (*rhstatus)(FAR struct usbhost_driver_s *drvr,
                   FAR struct usbhost_transfer_s *xfer);
 #endif
@@ -1057,27 +1014,6 @@ int usbhost_wlaninit(void);
  *******************************************************************************/
 
 int usbhost_enumerate(FAR struct usbhost_class_s *devclass);
-
-/****************************************************************************
- * Name: usbhost_ctrlxfer
- *
- * Description:
- *   Free transfer buffer memory.
- *
- * Input Parameters:
- *   devclass - A reference to the class instance.
- *   ctrlreq - Describes the control request transfer
- *   buffer - Data accompanying the control transfer
- *
- * Returned Values:
- *   On success, zero (OK) is returned.  On failure, an negated errno value
- *   is returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass,
-                     FAR struct usb_ctrlreq_s *ctrlreq,
-                     FAR uint8_t *buffer);
 
 #ifdef CONFIG_USBHOST_HUB
 /*******************************************************************************

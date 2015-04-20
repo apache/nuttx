@@ -67,8 +67,6 @@
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static void usbhost_putle16(uint8_t *dest, uint16_t val);
 
-static void usbhost_callback(FAR struct usbhost_transfer_s *xfer);
-
 static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
                                   FAR struct usbhost_id_s *id);
 static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
@@ -116,19 +114,6 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
   dest[1] = val >> 8;
 }
 
-/****************************************************************************
- * Name: usbhost_callback
- *
- * Description:
- *
- *
- *******************************************************************************/
-
-static void usbhost_callback(FAR struct usbhost_transfer_s *xfer)
-{
-  sem_post(&xfer->done);
-}
-
 /*******************************************************************************
  * Name: usbhost_devdesc
  *
@@ -173,8 +158,8 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
 static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
                                      struct usbhost_id_s *id)
 {
-  struct usb_cfgdesc_s *cfgdesc;
-  struct usb_ifdesc_s *ifdesc;
+  FAR struct usb_cfgdesc_s *cfgdesc;
+  FAR struct usb_ifdesc_s *ifdesc;
   int remaining;
 
   DEBUGASSERT(configdesc != NULL && cfglen >= USB_SIZEOF_CFGDESC);
@@ -392,7 +377,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, descsize);
 
-  ret = usbhost_ctrlxfer(devclass, ctrlreq, buffer);
+  ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
   if (ret != OK)
     {
       udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
@@ -417,7 +402,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, 0);
 
-  ret = usbhost_ctrlxfer(devclass, ctrlreq, NULL);
+  ret = DRVR_CTRLOUT(devclass->drvr, ctrlreq, NULL);
   if (ret != OK)
     {
       udbg("ERROR: Failed to set address: %d\n");
@@ -441,7 +426,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
       usbhost_putle16(ctrlreq->index, 0);
       usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
 
-      ret = usbhost_ctrlxfer(devclass, ctrlreq, buffer);
+      ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
       if (ret != OK)
         {
           udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
@@ -469,7 +454,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, USB_SIZEOF_CFGDESC);
 
-  ret = usbhost_ctrlxfer(devclass, ctrlreq, buffer);
+  ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
   if (ret != OK)
    {
       udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
@@ -492,7 +477,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, cfglen);
 
-  ret = usbhost_ctrlxfer(devclass, ctrlreq, buffer);
+  ret = DRVR_CTRLIN(devclass->drvr, ctrlreq, buffer);
   if (ret != OK)
     {
       udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
@@ -508,7 +493,7 @@ int usbhost_enumerate(FAR struct usbhost_class_s *devclass)
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, 0);
 
-  ret = usbhost_ctrlxfer(devclass, ctrlreq, NULL);
+  ret = DRVR_CTRLOUT(devclass->drvr, ctrlreq, NULL);
   if (ret != OK)
     {
       udbg("ERROR: Failed to set configuration: %d\n", ret);
@@ -559,81 +544,6 @@ errout:
     {
       DRVR_FREE(devclass->drvr, (FAR uint8_t *)ctrlreq);
     }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: usbhost_ctrlxfer
- *
- * Description:
- *   Free transfer buffer memory.
- *
- * Input Parameters:
- *   devclass - A reference to the class instance.
- *   ctrlreq - Describes the control request transfer
- *   buffer - Data accompanying the control transfer
- *
- * Returned Values:
- *   On sucess, zero (OK) is returned.  On failure, an negated errno value
- *   is returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int usbhost_ctrlxfer(FAR struct usbhost_class_s *devclass,
-                     FAR struct usb_ctrlreq_s *ctrlreq,
-                     FAR uint8_t *buffer)
-{
-  struct usbhost_transfer_s xfer;
-  struct timespec timeout;
-  uint16_t len;
-  int ret;
-
-  len           = usbhost_getle16(ctrlreq->len);
-  xfer.buffer   = buffer;
-  xfer.buflen   = len;
-  xfer.len      = len;
-  xfer.status   = -EIO;
-  xfer.devclass = devclass;
-  xfer.ep       = devclass->ep0;
-  xfer.callback = usbhost_callback;
-
-  sem_init(&xfer.done, 0, 0);
-
-#ifdef CONFIG_USBHOST_HUB
-  if (ROOTHUB(devclass))
-    {
-      ret = DRVR_RHCTRL(devclass->drvr, &xfer, ctrlreq);
-    }
-  else
-#endif
-    {
-      if ((ctrlreq->type & USB_REQ_DIR_IN) != 0)
-        {
-          ret = DRVR_CTRLIN(devclass->drvr, &xfer, ctrlreq);
-        }
-      else
-        {
-          ret = DRVR_CTRLOUT(devclass->drvr, &xfer, ctrlreq);
-        }
-    }
-
-  if (ret != OK)
-    {
-      goto out;
-    }
-
-  timeout.tv_sec  = 5;
-  timeout.tv_nsec = 1000*1000;
-
-  ret = sem_timedwait(&xfer.done, &timeout);
-  if (ret == OK)
-    {
-      ret = xfer.status;
-    }
-
-out:
-  sem_destroy(&xfer.done);
 
   return ret;
 }
