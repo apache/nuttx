@@ -158,8 +158,8 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
 static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
                                      struct usbhost_id_s *id)
 {
-  struct usb_cfgdesc_s *cfgdesc;
-  struct usb_ifdesc_s *ifdesc;
+  FAR struct usb_cfgdesc_s *cfgdesc;
+  FAR struct usb_ifdesc_s *ifdesc;
   int remaining;
 
   DEBUGASSERT(configdesc != NULL && cfglen >= USB_SIZEOF_CFGDESC);
@@ -227,14 +227,14 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
                                     FAR struct usbhost_class_s **usbclass)
 {
   FAR struct usbhost_class_s *devclass;
-  const struct usbhost_registry_s *reg;
+  FAR const struct usbhost_registry_s *reg;
   int ret = -EINVAL;
 
   /* Is there is a class implementation registered to support this device. */
 
   reg = usbhost_findclass(id);
   uvdbg("usbhost_findclass: %p\n", reg);
-  if (reg)
+  if (reg != NULL)
     {
       /* Yes.. there is a class for this device.  Get an instance of
        * its interface.
@@ -308,14 +308,14 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
 int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                       FAR struct usbhost_class_s **usbclass)
 {
-  struct usb_ctrlreq_s *ctrlreq;
+  FAR struct usb_ctrlreq_s *ctrlreq = NULL;
   struct usbhost_devinfo_s devinfo;
   struct usbhost_id_s id;
   size_t maxlen;
   unsigned int cfglen;
   uint8_t maxpacketsize;
   uint8_t descsize;
-  uint8_t *buffer;
+  FAR uint8_t *buffer = NULL;
   int  ret;
 
   DEBUGASSERT(drvr && usbclass);
@@ -381,7 +381,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Read first bytes of the device descriptor */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
   usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
   usbhost_putle16(ctrlreq->index, 0);
@@ -407,7 +407,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   if (descsize < USB_SIZEOF_DEVDESC)
     {
-      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+      ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE;
       ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
       usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
       usbhost_putle16(ctrlreq->index, 0);
@@ -432,7 +432,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Set the USB device address to the value in the 'funcaddr' input */
 
-  ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->type = USB_REQ_DIR_OUT | USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_SETADDRESS;
   usbhost_putle16(ctrlreq->value, (uint16_t)funcaddr);
   usbhost_putle16(ctrlreq->index, 0);
@@ -456,7 +456,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   * multiple configurations.
   */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
   usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
   usbhost_putle16(ctrlreq->index, 0);
@@ -478,7 +478,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
    * hard-coded!)
    */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
   usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
   usbhost_putle16(ctrlreq->index, 0);
@@ -493,7 +493,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Select device configuration 1 (Should not be hard-coded!) */
 
-  ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->type = USB_REQ_DIR_OUT | USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_SETCONFIGURATION;
   usbhost_putle16(ctrlreq->value, 1);
   usbhost_putle16(ctrlreq->index, 0);
