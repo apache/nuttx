@@ -474,7 +474,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
  *      perform the transfer.
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
@@ -495,7 +495,7 @@
  *
  ************************************************************************************/
 
-#define DRVR_TRANSFER(drvr,ed,buffer,buflen) ((drvr)->transfer(drvr,ed,buffer,buflen))
+#define DRVR_TRANSFER(drvr,ep,buffer,buflen) ((drvr)->transfer(drvr,ep,buffer,buflen))
 
 /************************************************************************************
  * Name: DRVR_DISCONNECT
@@ -549,7 +549,7 @@ struct usbhost_class_s;  /* Forward reference to the class state structure */
 struct usbhost_registry_s
 {
   /* This field is used to implement a singly-link registry structure.  Because of
-   * the presence of this link, provides of structy usbhost_registry_s instances must
+   * the presence of this link, provides of struct usbhost_registry_s instances must
    * provide those instances in write-able memory (RAM).
    */
 

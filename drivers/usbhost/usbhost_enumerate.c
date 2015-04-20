@@ -243,7 +243,7 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
       ret = -ENOMEM;
       devclass = CLASS_CREATE(reg, drvr, id);
       uvdbg("CLASS_CREATE: %p\n", devclass);
-      if (devclass)
+      if (devclass != NULL)
         {
           /* Then bind the newly instantiated class instance */
 
