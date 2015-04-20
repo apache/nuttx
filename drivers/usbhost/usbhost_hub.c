@@ -34,13 +34,6 @@
  *
  ****************************************************************************/
 
- /* TODO:
-  *   - For EHCI controller, enable use of companion controllers
-  *     or transaction translator with root hub. Current assumption
-  *     is that device connected on EHCI root hub is a high-speed
-  *     device.
-  */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -91,7 +84,7 @@
  * hub class.
  */
 
-struct usbhost_hub_s
+struct usbhost_hubdev_s
 {
   FAR struct usb_ctrlreq_s *ctrlreq;      /* Allocated control request */
   FAR uint8_t              *buffer;       /* Allocated buffer */
@@ -140,7 +133,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
 static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass);
 static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass,
              bool on);
-static void usbhost_hubevent(FAR struct usbhost_transfer_s *xfer);
+static void usbhost_hubevent(FAR void *arg);
 
 /* (Little Endian) Data helpers */
 
@@ -259,11 +252,11 @@ static inline FAR struct usbhost_class_s *
                      FAR struct usbhost_class_s *hubclass,
                      uint8_t speed, uint8_t port)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   FAR struct usbhost_class_s *devclass;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   /* We are not executing from an interrupt handler so we can just call
    * kmm_malloc() to get memory for the class instance.
@@ -377,12 +370,12 @@ static inline void usbhost_freeclass(FAR struct usbhost_class_s *devclass)
 static void usbhost_destroy(FAR void *arg)
 {
   FAR struct usbhost_class_s *hubclass = (FAR struct usbhost_class_s *)arg;
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   int i;
 
   DEBUGASSERT(hubclass != NULL);
   
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
   if (priv != NULL)
     {
       uvdbg("crefs: %d\n", priv->crefs);
@@ -441,7 +434,7 @@ static void usbhost_destroy(FAR void *arg)
 static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
                                   FAR const uint8_t *configdesc, int desclen)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   FAR struct usb_cfgdesc_s *cfgdesc;
   FAR struct usb_desc_s *desc;
   FAR struct usbhost_epdesc_s intindesc;
@@ -450,7 +443,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
   int ret;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   DEBUGASSERT(configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
@@ -619,14 +612,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
 
 static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   FAR struct usb_ctrlreq_s *ctrlreq;
   struct usb_hubdesc_s hubdesc;
   uint16_t hubchar;  
   int ret;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   /* Get the hub descriptor */
 
@@ -683,11 +676,11 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
 
 static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   FAR struct usb_ctrlreq_s *ctrlreq;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   if (on || ROOTHUB(hubclass))
     {
@@ -729,43 +722,6 @@ static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
 }
 
 /****************************************************************************
- * Name: usbhost_intxfer
- *
- * Description:
- *   Set-up to receive a callback when an interrupt packet is received.
- *
- * Input Parameters:
- *   devclass - A reference to the class instance.
- *   xfer - Describes the transfer to be performed
- *   callback - The transfer complete callback
- *
- * Returned Values:
- *   On sucess, zero (OK) is returned.  On failure, an negated errno value
- *   is returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-static int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
-                           FAR struct usbhost_transfer_s *xfer,
-                           void (*callback)(FAR struct usbhost_transfer_s *))
-{
-  int ret;
-
-  xfer->callback = callback;
-
-  if (ROOTHUB(devclass))
-    {
-      ret = DRVR_RHSTATUS(devclass->drvr, xfer);
-    }
-  else
-    {
-      ret = DRVR_TRANSFER(devclass->drvr, xfer);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: usbhost_hubevent
  *
  * Description:
@@ -783,10 +739,10 @@ static int usbhost_intxfer(FAR struct usbhost_class_s *devclass,
  *
  ****************************************************************************/
 
-static void usbhost_hubevent(FAR struct usbhost_transfer_s *xfer)
+static void usbhost_hubevent(FAR void *arg)
 {
   FAR struct usbhost_class_s *hubclass;
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   FAR struct usb_ctrlreq_s *ctrlreq;
   struct usb_portstatus_s portstatus;
   uint16_t status;
@@ -797,11 +753,11 @@ static void usbhost_hubevent(FAR struct usbhost_transfer_s *xfer)
   int port;
   int ret;
 
-  DEBUGASSERT(xfer != NULL && xfer->devclass != NULL);
-  hubclass = (FAR struct usbhost_class_s *)xfer->devclass;
+  DEBUGASSERT(arg != NULL);
+  hubclass = (FAR struct usbhost_class_s *)arg;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   ctrlreq = priv->ctrlreq;
   DEBUGASSERT(ctrlreq);
@@ -1047,7 +1003,8 @@ static void usbhost_hubevent(FAR struct usbhost_transfer_s *xfer)
 
   xfer->status = -EIO;
 
-  ret = usbhost_intxfer(hubclass, xfer, usbhost_callback);
+  ret = DRVR_ASYNCH(hubclass->drvr, &priv->ctrlreq, sizeof(struct usb_ctrlreq_s)
+                    usbhost_callback, hubclass);
   if (ret != OK)
     {
       udbg("ERROR: Failed to queue interrupt endpoint: %d\n", ret);
@@ -1109,23 +1066,23 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *
  ****************************************************************************/
 
-static void usbhost_callback(FAR struct usbhost_transfer_s *xfer)
+static void usbhost_callback(FAR void *arg)
 {
   FAR struct usbhost_class_s *hubclass;
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
 
-  DEBUGASSERT(xfer != NULL && xfer->devclass != NULL);
-  hubclass = (FAR struct usbhost_class_s *)xfer->devclass;
+  DEBUGASSERT(arg != NULL);
+  hubclass = (FAR struct usbhost_class_s *)arg;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   if (xfer->status != OK)
     {
       priv->buffer[0] = 0;
     }
 
-  (void)work_queue(HPWORK, &xfer->work, (worker_t)usbhost_hubevent, xfer, 0);
+  (void)work_queue(HPWORK, &xfer->work, (worker_t)usbhost_hubevent, hubclass, 0);
 }
 
 /****************************************************************************
@@ -1162,14 +1119,14 @@ static void usbhost_callback(FAR struct usbhost_transfer_s *xfer)
 static int usbhost_create(FAR struct usbhost_class_s *hubclass,
                           FAR const struct usbhost_id_s *id)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   size_t maxlen;
   int child;
   int ret;
 
   /* Allocate a USB host class instance */
 
-  priv = kmm_zalloc(sizeof(struct usbhost_hub_s));
+  priv = kmm_zalloc(sizeof(struct usbhost_hubdev_s));
   if (priv == NULL)
     {
       return -ENOMEM;
@@ -1263,11 +1220,11 @@ errout_with_hub:
 static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
                            FAR const uint8_t *configdesc, int desclen)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   int ret;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   DEBUGASSERT(configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
@@ -1299,7 +1256,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
 
       /* INT request to periodically check port status */
 
-      ret = usbhost_intxfer(hubclass, &priv->ctrlreq, usbhost_callback);
+      ret = DRVR_ASYNCH(hubclass->drvr, &priv->ctrlreq,
+                        sizeof(struct usb_ctrlreq_s), usbhost_callback,
+                        hubclass);
     }
  
   return ret;
@@ -1329,11 +1288,11 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
 
 static int usbhost_disconnected(struct usbhost_class_s *hubclass)
 {
-  FAR struct usbhost_hub_s *priv;
+  FAR struct usbhost_hubdev_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(hubclass != NULL && hubclass->priv != NULL);
-  priv = (FAR struct usbhost_hub_s *)hubclass->priv;
+  priv = (FAR struct usbhost_hubdev_s *)hubclass->priv;
 
   /* Set an indication to any users of the device that the device is no
    * longer available.
@@ -1430,7 +1389,7 @@ int usbhost_rh_connect(FAR struct usbhost_driver_s *drvr)
         {
           drvr->roothub = hubclass;
           uvdbg("Total class memory %d+%d\n",
-                sizeof(struct usbhost_class_s), sizeof(struct usbhost_hub_s));
+                sizeof(struct usbhost_class_s), sizeof(struct usbhost_hubdev_s));
         }
     }
 

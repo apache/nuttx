@@ -470,7 +470,7 @@
 #define DRVR_CTRLOUT(drvr,req,buffer) ((drvr)->ctrlout(drvr,req,buffer))
 
 /************************************************************************************
- * Name: DRVR_TRANSFER
+ * Name: DRVR_TRANSFER and DRVR_ASYNCH
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -478,17 +478,23 @@
  *   be queued; Neither this method nor the ctrlin or ctrlout methods can be called
  *   again until this function returns.
  *
- *   This is a blocking method; this functions will not return until the
+ * - 'transfer' is a blocking method; this method will not return until the
  *   transfer has completed.
+ * - 'asynch' will return immediately.  When the transfer completes, the
+ *    semaphore will be posted.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
  *      perform the transfer.
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
+ *   callback - This function will be called when the transfer completes ('asynch'
+ *     only).
+ *   arg - The arbitrary parameter that will be passed to the callback function
+ *     when the transfer completes ('asynch' only).
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -505,7 +511,13 @@
  *
  ************************************************************************************/
 
-#define DRVR_TRANSFER(drvr,xfer) ((drvr)->transfer(drvr,xfer))
+#define DRVR_TRANSFER(drvr,ep,buffer,buflen) \
+  ((drvr)->transfer(drvr,ep,buffer,buflen))
+
+#ifdef CONFIG_USBHOST_ASYNCH
+#define DRVR_ASYNCH(drvr,ep,buffer,buflen,callback,arg) \
+  ((drvr)->asynch(drvr,ep,buffer,buflen,callback,arg))
+#endif
 
 /************************************************************************************
  * Name: DRVR_DISCONNECT
@@ -530,33 +542,6 @@
  ************************************************************************************/
 
 #define DRVR_DISCONNECT(drvr) ((drvr)->disconnect(drvr))
-
-/************************************************************************************
- * Name: DRVR_RHSTATUS
- *
- * Description:
- *   Called by hub class to control root hub.
- *
- * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   xfer - Describes the request to be sent.  This request must lie in memory
- *      created by DRVR_ALLOC.
- *   cmd - A buffer used for sending the request and for returning any
- *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC.
- *
- * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
- *
- * Assumptions:
- *
- ************************************************************************************/
-
-#ifdef CONFIG_USBHOST_HUB
-#  define DRVR_RHSTATUS(drvr,xfer) ((drvr)->rhstatus(drvr,xfer))
-#endif
 
 /************************************************************************************
  * Public Types
@@ -675,19 +660,6 @@ struct usbhost_devinfo_s
   uint8_t speed:2;       /* Device speed: 0=low, 1=full, 2=high */
 };
 
-/* Generic transfer structure */
-
-struct usbhost_transfer_s
-{
-  size_t buflen;
-  size_t len;
-  int status;
-
-  /* Device class */
-
-  FAR struct usbhost_class_s *devclass;
-};
-
 /* struct usbhost_connection_s provides as interface between platform-specific
  * connection monitoring and the USB host driver connection and enumeration
  * logic.
@@ -711,6 +683,10 @@ struct usbhost_connection_s
 
   int (*enumerate)(FAR struct usbhost_connection_s *conn, int rhpndx);
 };
+
+/* Callback type used with asynchronous transfers */
+
+typedef void (*usbhost_asynch_t)(FAR void *arg);
 
 /* struct usbhost_driver_s provides access to the USB host driver from the
  * USB host class implementation.
@@ -779,9 +755,9 @@ struct usbhost_driver_s
   /* Process a IN or OUT request on the control endpoint.  These methods
    * will enqueue the request and wait for it to complete.  Only one transfer may
    * be queued; Neither these methods nor the transfer() method can be called again
-   * until the control transfer functions returns.
+   * until the control transfer methods returns.
    *
-   * These are blocking methods; these functions will not return until the
+   * These are blocking methods; these methods will not return until the
    * control transfer has completed.
    */
 
@@ -797,12 +773,21 @@ struct usbhost_driver_s
    * be queued; Neither this method nor the ctrlin or ctrlout methods can be called
    * again until this function returns.
    *
-   * This is a blocking method; this functions will not return until the
-   * transfer has completed.
+   * - 'transfer' is a blocking method; this method will not return until the
+   *   transfer has completed.
+   * - 'asynch' will return immediately.  When the transfer completes, the
+   *    the callback will be invoked with the provided transfer.  This method
+   *    is useful for receiving interrupt transfers which may come
+   *    infrequently.
    */
 
-  int (*transfer)(FAR struct usbhost_driver_s *drvr,
-                  FAR struct usbhost_transfer_s *xfer);
+  int (*transfer)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                  FAR uint8_t *buffer, size_t buflen);
+#ifdef CONFIG_USBHOST_ASYNCH
+  int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                  FAR uint8_t *buffer, size_t buflen,
+                  usbhost_asynch_t callback, FAR void *arg);
+#endif
 
   /* Called by the class when an error occurs and driver has been disconnected.
    * The USB host driver should discard the handle to the class instance (it is
@@ -811,13 +796,6 @@ struct usbhost_driver_s
    */
 
   void (*disconnect)(FAR struct usbhost_driver_s *drvr);
-
-#ifdef CONFIG_USBHOST_HUB
-  /* Called by hub class to control root hub. */
-
-  int (*rhstatus)(FAR struct usbhost_driver_s *drvr,
-                  FAR struct usbhost_transfer_s *xfer);
-#endif
 };
 
 /************************************************************************************
