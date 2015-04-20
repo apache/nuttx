@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_storage.c
  *
- *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -205,8 +205,7 @@ static void usbhost_destroy(FAR void *arg);
 /* Helpers for usbhost_connect() */
 
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
-                                  FAR const uint8_t *configdesc, int desclen,
-                                  uint8_t funcaddr);
+                                  FAR const uint8_t *configdesc, int desclen);
 static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv);
 
 /* (Little Endian) Data helpers */
@@ -234,8 +233,7 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_hub_s *hub,
 /* struct usbhost_class_s methods */
 
 static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
-                           FAR const uint8_t *configdesc, int desclen,
-                           uint8_t funcaddr);
+                           FAR const uint8_t *configdesc, int desclen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /* struct block_operations methods */
@@ -962,8 +960,6 @@ static void usbhost_destroy(FAR void *arg)
  *   configdesc - A pointer to a uint8_t buffer container the configuration
  *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
- *   funcaddr - The USB address of the function containing the endpoint that
- *     EP0 controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -975,9 +971,9 @@ static void usbhost_destroy(FAR void *arg)
  ****************************************************************************/
 
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
-                                  FAR const uint8_t *configdesc, int desclen,
-                                  uint8_t funcaddr)
+                                  FAR const uint8_t *configdesc, int desclen)
 {
+  FAR struct usbhost_hub_s *hub;
   FAR struct usb_cfgdesc_s *cfgdesc;
   FAR struct usb_desc_s *desc;
   FAR struct usbhost_epdesc_s bindesc;
@@ -986,9 +982,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   uint8_t found = 0;
   int ret;
 
-  DEBUGASSERT(priv != NULL &&
-              configdesc != NULL &&
-              desclen >= sizeof(struct usb_cfgdesc_s));
+  DEBUGASSERT(priv != NULL && priv->usbclass.hub &&
+              configdesc != NULL && desclen >= sizeof(struct usb_cfgdesc_s));
+  hub = priv->usbclass.hub;
 
   /* Keep the compiler from complaining about uninitialized variables */
 
@@ -1080,7 +1076,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                     boutdesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     boutdesc.in           = false;
-                    boutdesc.funcaddr     = funcaddr;
+                    boutdesc.funcaddr     = hub->funcaddr;
                     boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     boutdesc.interval     = epdesc->interval;
                     boutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
@@ -1107,7 +1103,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                     bindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     bindesc.in           = 1;
-                    bindesc.funcaddr     = funcaddr;
+                    bindesc.funcaddr     = hub->funcaddr;
                     bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     bindesc.interval     = epdesc->interval;
                     bindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
@@ -1717,8 +1713,6 @@ usbhost_create(FAR struct usbhost_hub_s *hub,
  *   configdesc - A pointer to a uint8_t buffer container the configuration
  *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
- *   funcaddr - The USB address of the function containing the endpoint that
- *     EP0 controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -1736,8 +1730,7 @@ usbhost_create(FAR struct usbhost_hub_s *hub,
  ****************************************************************************/
 
 static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
-                           FAR const uint8_t *configdesc, int desclen,
-                           uint8_t funcaddr)
+                           FAR const uint8_t *configdesc, int desclen)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   int ret;
@@ -1748,7 +1741,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 
   /* Parse the configuration descriptor to get the bulk I/O endpoints */
 
-  ret = usbhost_cfgdesc(priv, configdesc, desclen, funcaddr);
+  ret = usbhost_cfgdesc(priv, configdesc, desclen);
   if (ret != OK)
     {
       udbg("usbhost_cfgdesc() failed: %d\n", ret);

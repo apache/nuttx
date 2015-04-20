@@ -594,7 +594,6 @@ struct usbhost_registry_s
   FAR const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
 };
 
-
 /* This type represents one endpoint configured by the epalloc() method.
  * The actual form is known only internally to the USB host controller
  * (for example, for an OHCI driver, this would probably be a pointer
