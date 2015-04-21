@@ -41,9 +41,9 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/usb/usbhost.h>
@@ -125,6 +125,16 @@ int board_tsc_setup(int minor)
 
   if (!initialized)
     {
+#ifdef CONFIG_USBHOST_HUB
+      /* Initialize USB hub support */
+
+      ret = usbhost_hub_initialize();
+      if (ret < 0)
+        {
+          idbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+        }
+#endif
+
       /* Initialize and register the USB HID mouse device class */
 
       ret = usbhost_mouse_init();
