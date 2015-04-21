@@ -2,7 +2,7 @@
  * include/nuttx/usb/usbhost_devaddr.h
  * Manage USB device addresses
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * NOTE:  This interface was inspired by the Linux gadget interface by
@@ -49,6 +49,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <semaphore.h>
+
 /*******************************************************************************
  * Pre-processor Definitions
  *******************************************************************************/
@@ -61,22 +64,11 @@
  * Public Types
  *******************************************************************************/
 
-struct usbhost_devhash_s
-{
-  FAR struct usbhost_devhash_s *flink;
-  FAR void *payload;
-  uint8_t   devaddr;
-};
-
 struct usbhost_devaddr_s
 {
   uint8_t   next;           /* Next device address */
-  sem_t     exclsem;        /* Enforces mutulaly exlusive access */
+  sem_t     exclsem;        /* Enforces mutually exclusive access */
   uint32_t  alloctab[4];    /* Bit allocation table */
-
-  /* Hash table */
-
-  FAR struct usbhost_devhash_s *hashtab[USBHOST_DEVADDR_HASHSIZE];
 };
 
 /*******************************************************************************
@@ -96,51 +88,61 @@ extern "C"
  * Public Functions
  *******************************************************************************/
 
+struct usbhost_hubport_s;     /* Forward reference */
+struct usbhost_roothubport_s; /* Forward reference */
+
 /*******************************************************************************
  * Name: usbhost_devaddr_initialize
  *
  * Description:
  *   Initialize the caller provided struct usbhost_devaddr_s instance in
- *   preparation for the management of device addresses on behalf of an HCD.
+ *   preparation for the management of device addresses on behalf of an root
+ *   hub port.
+ *
+ * Input Parameters:
+ *   rhport - A reference to a roothubport structure.
+ *
+ * Returned Value:
+ *   None
  *
  *******************************************************************************/
 
-void usbhost_devaddr_initialize(FAR struct usbhost_devaddr_s *hcd);
+void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport);
 
 /*******************************************************************************
  * Name: usbhost_devaddr_create
  *
  * Description:
- *   Create a new unique device address for this HCD.  Bind the void* arg to the
- *   the device address and return the newly allocated device address.
+ *   Create a new unique device address for this hub port.
+ *
+ * Input Parameters:
+ *   hport - A reference to a hub port structure to which a device has been
+ *     newly connected and so is in need of a function address.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value is returned on failure.
  *
  *******************************************************************************/
 
-int usbhost_devaddr_create(FAR struct usbhost_devaddr_s *hcd,
-                           FAR void *associate);
-
-/*******************************************************************************
- * Name: usbhost_devaddr_find
- *
- * Description:
- *   Given a device address, find the void* value that was bound to the device
- *   address by usbhost_devaddr_create() when the device address was allocated.
- *
- *******************************************************************************/
-
-FAR void *usbhost_devaddr_find(FAR struct usbhost_devaddr_s *hcd,
-                               uint8_t devaddr);
+int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport);
 
 /*******************************************************************************
  * Name: usbhost_devaddr_destroy
  *
  * Description:
- *   Release a device address previously allocated by usbhost_devaddr_destroy()
- *   and destroy the association with the void* data.
+ *   Release a device address previously assigned to a hub port by
+ *   usbhost_devaddr_create().
+ *
+ * Input Parameters:
+ *   hport - A reference to a hub port structure from which a device has been
+ *     disconnected and so no longer needs the function address.
+ *
+ * Returned Value:
+ *   None
  *
  *******************************************************************************/
 
-void usbhost_devaddr_destroy(FAR struct usbhost_devaddr_s *hcd, uint8_t devaddr);
+void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport);
 
 #undef EXTERN
 #if defined(__cplusplus)

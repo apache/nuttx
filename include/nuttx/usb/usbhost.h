@@ -53,6 +53,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <nuttx/usb/usbhost_devaddr.h>
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -606,6 +608,8 @@ typedef FAR void *usbhost_ep_t;
  * root hub is managed by the HCD.  This structure describes that state of
  * that port and provides the linkage to the parent hub in that event that
  * the port is on an external hub.
+ *
+ * The root hub port can be distinguish because it has parent == NULL.
  */
 
 struct usbhost_hubport_s
@@ -618,6 +622,21 @@ struct usbhost_hubport_s
   uint8_t port;                         /* Hub port index */
   uint8_t funcaddr;                     /* Device function address */
   uint8_t speed;                        /* Device speed */
+};
+
+/* The root hub port differs in that it includes a data set that is used to
+ * manage the generation of unique device function addresses on all
+ * downstream ports.
+ */
+
+struct usbhost_roothubport_s
+{
+  /* This structure must appear first so that this structure is cast-
+   * compatible with usbhost_hubport_s.
+   */
+
+  struct usbhost_hubport_s hport;       /* Common hub port definitions */
+  struct usbhost_devaddr_s devgen;      /* Address generation data */
 };
 
 /* struct usbhost_class_s provides access from the USB host driver to the
@@ -695,16 +714,6 @@ typedef CODE void (*usbhost_asynch_t)(FAR void *arg, int result);
 
 struct usbhost_driver_s
 {
-#ifdef CONFIG_USBHOST_HUB
-  /* Root hub */
-
-  FAR struct usbhost_class_s *roothub;
-
-  /* Controller speed, i.e. High/Full/Low */
-
-  uint8_t speed;
-#endif
-
   /* Configure endpoint 0.  This method is normally used internally by the
    * enumerate() method but is made available at the interface to support
    * an external implementation of the enumeration logic.

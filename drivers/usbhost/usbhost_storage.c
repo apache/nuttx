@@ -57,6 +57,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/storage.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 
 /* Don't compile if prerequisites are not met */
 
@@ -1809,9 +1810,11 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
+  FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
+  hport = priv->usbclass.hport;
 
   /* Set an indication to any users of the mass storage device that the device
    * is no longer available.
@@ -1851,6 +1854,10 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
     }
 
   irqrestore(flags);
+
+  /* Free the function address assigned to this device */
+
+  usbhost_devaddr_destroy(hport);
   return OK;
 }
 

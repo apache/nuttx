@@ -2,7 +2,7 @@
  * drivers/usbhost/usbhost_devaddr.c
  * Manage USB device addresses
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
 
 /*******************************************************************************
@@ -64,11 +65,11 @@
  *
  *******************************************************************************/
 
-static void usbhost_takesem(FAR struct usbhost_devaddr_s *hcd)
+static void usbhost_takesem(FAR struct usbhost_devaddr_s *devgen)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&hcd->exclsem) != 0)
+  while (sem_wait(&devgen->exclsem) != 0)
     {
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
@@ -78,39 +79,22 @@ static void usbhost_takesem(FAR struct usbhost_devaddr_s *hcd)
     }
 }
 
-#define usbhost_givesem(hcd) sem_post(&hcd->exclsem)
-
-/*******************************************************************************
- * Name: usbhost_devaddr_hash
- *
- * Description:
- *   Create a hash value from a device address.
- *
- *******************************************************************************/
-
-static inline uint8_t usbhost_devaddr_hash(uint8_t devaddr)
-{
-  uint8_t ret = devaddr;
-
-  ret ^= (devaddr >> 2);
-  ret ^= (devaddr >> 3);
-  return ret & USBHOST_DEVADDR_HASHMASK;
-}
+#define usbhost_givesem(devgen) sem_post(&devgen->exclsem)
 
 /*******************************************************************************
  * Name: usbhost_devaddr_allocate
  *
  * Description:
- *   Allocate a new unique device address for this HCD.
+ *   Allocate a new unique device address.
  *
  * Assumptions:
  *   Caller hold the exclsem
  *
  *******************************************************************************/
 
-static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *hcd)
+static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
 {
-  uint8_t startaddr = hcd->next;
+  uint8_t startaddr = devgen->next;
   uint8_t devaddr;
   int index;
   int bitno;
@@ -121,25 +105,25 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *hcd)
     {
       /* Try the next device address */
 
-      devaddr = hcd->next;
-      if (hcd->next >= 0x7f)
+      devaddr = devgen->next;
+      if (devgen->next >= 0x7f)
         {
-          hcd->next = 1;
+          devgen->next = 1;
         }
       else
         {
-          hcd->next++;
+          devgen->next++;
         }
 
       /* Is this address already allocated? */
 
       index = devaddr >> 5;
       bitno = devaddr & 0x1f;
-      if ((hcd->alloctab[index] & (1 << bitno)) == 0)
+      if ((devgen->alloctab[index] & (1 << bitno)) == 0)
         {
           /* No... allocate it now */
 
-          hcd->alloctab[index] |= (1 << bitno);
+          devgen->alloctab[index] |= (1 << bitno);
           return (int)devaddr;
         }
 
@@ -157,6 +141,74 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *hcd)
 }
 
 /*******************************************************************************
+ * Name: usbhost_devaddr_free
+ *
+ * Description:
+ *   De-allocate a device address.
+ *
+ * Assumptions:
+ *   Caller hold the exclsem
+ *
+ *******************************************************************************/
+
+static void usbhost_devaddr_free(FAR struct usbhost_devaddr_s *devgen,
+                                 uint8_t devaddr)
+{
+  int index;
+  int bitno;
+
+  /* Free the address by clearing the associated bit in the alloctab[]; */
+
+  index = devaddr >> 5;
+  bitno = devaddr & 0x1f;
+
+  DEBUGASSERT((devgen->alloctab[index] |= (1 << bitno)) != 0);
+  devgen->alloctab[index] &= ~(1 << bitno);
+}
+
+/*******************************************************************************
+ * Name: usbhost_roothubport
+ *
+ * Description:
+ *   Find and return a reference the root hub port.
+ *
+ *******************************************************************************/
+
+static inline FAR struct usbhost_roothubport_s *
+usbhost_roothubport(FAR struct usbhost_hubport_s *hport)
+{
+  while (hport->parent != NULL)
+    {
+      hport = hport->parent;
+    }
+
+  return (FAR struct usbhost_roothubport_s *)hport;
+}
+
+/*******************************************************************************
+ * Name: usbhost_devaddr_gen
+ *
+ * Description:
+ *   Find root hub port and return a reference to the device function address
+ *   data set.
+ *
+ *******************************************************************************/
+
+static FAR struct usbhost_devaddr_s *
+usbhost_devaddr_gen(FAR struct usbhost_hubport_s *hport)
+{
+  FAR struct usbhost_roothubport_s *rhport;
+
+  rhport = usbhost_roothubport(hport);
+  if (rhport != NULL)
+    {
+      return &rhport->devgen;
+    }
+
+  return NULL;
+}
+
+/*******************************************************************************
  * Public Functions
  *******************************************************************************/
 
@@ -165,169 +217,113 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *hcd)
  *
  * Description:
  *   Initialize the caller provided struct usbhost_devaddr_s instance in
- *   preparation for the management of device addresses on behalf of an HCD.
+ *   preparation for the management of device addresses on behalf of an root
+ *   hub port.
+ *
+ * Input Parameters:
+ *   rhport - A reference to a roothubport structure.
+ *
+ * Returned Value:
+ *   None
  *
  *******************************************************************************/
 
-void usbhost_devaddr_initialize(FAR struct usbhost_devaddr_s *hcd)
+void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport)
 {
-  DEBUGASSERT(hcd);
+  FAR struct usbhost_devaddr_s *devgen;
 
-  memset(hcd, 0, sizeof(struct usbhost_devaddr_s));
-  sem_init(&hcd->exclsem, 0, 1);
-  hcd->next = 1;
+  DEBUGASSERT(rhport);
+  devgen = &rhport->devgen;
+
+  memset(devgen, 0, sizeof(struct usbhost_devaddr_s));
+  sem_init(&devgen->exclsem, 0, 1);
+  devgen->next = 1;
 }
 
 /*******************************************************************************
  * Name: usbhost_devaddr_create
  *
  * Description:
- *   Create a new unique device address for this HCD.  Bind the void* arg to the
- *   the device address and return the newly allocated device address.
+ *   Create a new unique device address for this hub port.
+ *
+ * Input Parameters:
+ *   hport - A reference to a hub port structure to which a device has been
+ *     newly connected and so is in need of a function address.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value is returned on failure.
  *
  *******************************************************************************/
 
-int usbhost_devaddr_create(FAR struct usbhost_devaddr_s *hcd,
-                           FAR void *associate)
+int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport)
 {
-  FAR struct usbhost_devhash_s *hentry;
-  uint8_t hvalue;
+  FAR struct usbhost_devaddr_s *devgen;
   int devaddr;
 
-  /* Allocate a hash table entry */
+  /* Get the address generation data from the root hub port */
 
-  hentry = (FAR struct usbhost_devhash_s *)kmm_malloc(sizeof(struct usbhost_devhash_s));
-  if (!hentry)
-    {
-      udbg("ERROR: Failed to allocate a hash table entry\n");
-      return -ENOMEM;
-    }
+  DEBUGASSERT(hport);
+  devgen = usbhost_devaddr_gen(hport);
+  DEBUGASSERT(devgen);
 
-  /* Get exclusive access to the HCD device address data */
+  /* Get exclusive access to the root hub port device address data */
 
-  usbhost_takesem(hcd);
+  usbhost_takesem(devgen);
 
   /* Allocate a device address */
 
-  devaddr = usbhost_devaddr_allocate(hcd);
+  devaddr = usbhost_devaddr_allocate(devgen);
+  usbhost_givesem(devgen);
+
   if (devaddr < 0)
     {
       udbg("ERROR: Failed to allocate a device address\n");
-      free(hentry);
-    }
-  else
-    {
-      /* Initialize the hash table entry */
-
-      hentry->devaddr = devaddr;
-      hentry->payload = associate;
-
-      /* Add the new device address to the hash table */
-
-      hvalue = usbhost_devaddr_hash(devaddr);
-      hentry->flink = hcd->hashtab[hvalue];
-      hcd->hashtab[hvalue] = hentry;
-
-      /* Try to re-use the lowest numbered device addresses */
-
-      if (hcd->next > devaddr)
-        {
-          hcd->next = devaddr;
-        }
+      return devaddr;
     }
 
-  usbhost_givesem(hcd);
-  return devaddr;
-}
+  /* Set the function address in the hub port structure */
 
-/*******************************************************************************
- * Name: usbhost_devaddr_find
- *
- * Description:
- *   Given a device address, find the void* value that was bound to the device
- *   address by usbhost_devaddr_create() when the device address was allocated.
- *
- *******************************************************************************/
-
-FAR void *usbhost_devaddr_find(FAR struct usbhost_devaddr_s *hcd,
-                               uint8_t devaddr)
-{
-  FAR struct usbhost_devhash_s *hentry;
-  uint8_t hvalue;
-
-  /* Get exclusive access to the HCD device address data */
-
-  hvalue = usbhost_devaddr_hash(devaddr);
-  usbhost_takesem(hcd);
-
-  /* Check each entry in the hash table */
-
-  for (hentry = hcd->hashtab[hvalue]; hentry; hentry = hentry->flink)
-    {
-      /* Is this the address we are looking for? */
-
-      if (hentry->devaddr == devaddr)
-        {
-          /* Yes.. return the payload from the hash table entry */
-
-          usbhost_givesem(hcd);
-          return hentry->payload;
-        }
-    }
-
-  /* Didn't find the device address */
-
-  usbhost_givesem(hcd);
-  return NULL;
+  hport->funcaddr = devaddr;
+  return OK;
 }
 
 /*******************************************************************************
  * Name: usbhost_devaddr_destroy
  *
  * Description:
- *   Release a device address previously allocated by usbhost_devaddr_destroy()
- *   and destroy the association with the void* data.
+ *   Release a device address previously assigned to a hub port by
+ *   usbhost_devaddr_create().
+ *
+ * Input Parameters:
+ *   hport - A reference to a hub port structure from which a device has been
+ *     disconnected and so no longer needs the function address.
+ *
+ * Returned Value:
+ *   None
  *
  *******************************************************************************/
 
-void usbhost_devaddr_destroy(FAR struct usbhost_devaddr_s *hcd, uint8_t devaddr)
+void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport)
 {
-  FAR struct usbhost_devhash_s *hentry;
-  FAR struct usbhost_devhash_s *prev;
-  uint8_t hvalue;
+  FAR struct usbhost_devaddr_s *devgen;
 
-  /* Get exclusive access to the HCD device address data */
+  /* Ignore bad device address */
 
-  hvalue = usbhost_devaddr_hash(devaddr);
-  usbhost_takesem(hcd);
-
-  /* Search the hast table for the matching entry */
-
-  for (hentry = hcd->hashtab[hvalue], prev = NULL;
-       hentry;
-       prev = hentry, hentry = hentry->flink)
+  if (hport->funcaddr > 0 && hport->funcaddr < 0x7f)
     {
-      /* Is this the address we are looking for? */
+      /* Get the address generation data from the root hub port */
 
-      if (hentry->devaddr == devaddr)
-        {
-          /* Yes.. remove the entry from the hash list */
+      DEBUGASSERT(hport);
+      devgen = usbhost_devaddr_gen(hport);
+      DEBUGASSERT(devgen);
 
-          if (prev)
-            {
-              prev->flink = hentry->flink;
-            }
-          else
-            {
-              hcd->hashtab[hvalue] = hentry->flink;
-            }
+      /* Get exclusive access to the root hub port device address data */
 
-          /* And release the entry */
+      usbhost_takesem(devgen);
 
-          kmm_free(hentry);
-          break;
-        }
+      /* Free the device address */
+
+      usbhost_devaddr_free(devgen, hport->funcaddr);
+      usbhost_givesem(devgen);
     }
-
-  usbhost_givesem(hcd);
 }

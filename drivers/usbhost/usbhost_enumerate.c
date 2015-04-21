@@ -51,6 +51,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/hub.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 
 /*******************************************************************************
  * Pre-processor Definitions
@@ -313,7 +314,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   uint8_t maxpacketsize;
   uint8_t descsize;
   FAR uint8_t *buffer = NULL;
-  int  ret;
+  int ret;
 
   DEBUGASSERT(hport != NULL && hport->drvr != NULL);
 
@@ -520,6 +521,15 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   usleep(100*1000);
 
+  /* Assign a function address to the device connected to this port */
+
+  ret = usbhost_devaddr_create(hport);
+  if (ret < 0)
+    {
+      udbg("ERROR: Failed to allocate device address: %d\n", ret);
+      goto errout;
+    }
+
   /* Parse the configuration descriptor and bind to the class instance for the
    * device.  This needs to be the last thing done because the class driver
    * will begin configuring the device.
@@ -529,6 +539,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   if (ret != OK)
     {
       udbg("ERROR: usbhost_classbind returned %d\n", ret);
+      usbhost_devaddr_destroy(hport);
     }
 
 errout:

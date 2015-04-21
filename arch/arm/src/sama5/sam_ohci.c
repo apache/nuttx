@@ -54,6 +54,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 #include <nuttx/usb/usbhost_trace.h>
 
 #include <arch/irq.h>
@@ -189,6 +190,11 @@
 
 #define TD_DELAY(n)           (uint32_t)((n) << GTD_STATUS_DI_SHIFT)
 
+/* Port numbers */
+
+#define RHPNDX(rh)            ((rh)->hport.hport.port)
+#define RHPORT(rh)            (RHPNDX(rh)+1)
+
 /*******************************************************************************
  * Private Types
  *******************************************************************************/
@@ -228,7 +234,7 @@ struct sam_rhport_s
 
   /* This is the hub port description understood by class drivers */
 
-  struct usbhost_hubport_s hport;
+  struct usbhost_roothubport_s hport;
 
   /* The bound device class driver */
 
@@ -1643,7 +1649,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
   ret = sam_wdhwait(rhport, edctrl);
   if (ret != OK)
     {
-      usbhost_trace1(OHCI_TRACE1_DEVDISCONN, rhport->hport.port + 1);
+      usbhost_trace1(OHCI_TRACE1_DEVDISCONN, RHPORT(rhport));
       return ret;
     }
 
@@ -1707,7 +1713,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
         }
       else
         {
-          usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, rhport->hport.port + 1,
+          usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, RHPORT(rhport),
                          edctrl->tdstatus);
           ret = -EIO;
         }
@@ -1797,14 +1803,14 @@ static void sam_rhsc_bottomhalf(void)
 
                   if ((rhportst & OHCI_RHPORTST_LSDA) != 0)
                     {
-                      rhport->hport.speed = USB_SPEED_LOW;
+                      rhport->hport.hport.speed = USB_SPEED_LOW;
                     }
                   else
                     {
-                      rhport->hport.speed = USB_SPEED_FULL;
+                      rhport->hport.hport.speed = USB_SPEED_FULL;
                     }
 
-                  usbhost_vtrace1(OHCI_VTRACE1_SPEED, rhport->hport.speed);
+                  usbhost_vtrace1(OHCI_VTRACE1_SPEED, rhport->hport.hport.speed);
                 }
 
               /* Check if we are now disconnected */
@@ -1817,7 +1823,7 @@ static void sam_rhsc_bottomhalf(void)
                                   rhpndx + 1, g_ohci.rhswait);
 
                   rhport->connected   = false;
-                  rhport->hport.speed = USB_SPEED_FULL;
+                  rhport->hport.hport.speed = USB_SPEED_FULL;
 
                   /* Are we bound to a class instance? */
 
@@ -2170,7 +2176,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* No, return an error */
 
-      usbhost_vtrace1(OHCI_VTRACE1_ENUMDISCONN, rhport->hport.port + 1);
+      usbhost_vtrace1(OHCI_VTRACE1_ENUMDISCONN, RHPORT(rhport));
       return -ENODEV;
     }
 
@@ -2181,7 +2187,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       ret = sam_ep0enqueue(rhport);
       if (ret < 0)
         {
-          usbhost_trace2(OHCI_TRACE2_EP0ENQUEUE_FAILED, rhport->hport.port + 1,
+          usbhost_trace2(OHCI_TRACE2_EP0ENQUEUE_FAILED, RHPORT(rhport),
                          -ret);
           return ret;
         }
@@ -2216,7 +2222,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    */
 
   usbhost_vtrace2(OHCI_VTRACE2_CLASSENUM, rhpndx+1, rhpndx+1);
-  ret = usbhost_enumerate(&g_ohci.rhport[rhpndx].hport, &rhport->class);
+  ret = usbhost_enumerate(&g_ohci.rhport[rhpndx].hport.hport, &rhport->class);
   if (ret < 0)
     {
       usbhost_trace2(OHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
@@ -2271,7 +2277,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   edctrl->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
                     (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
-  if (rhport->hport.speed == USB_SPEED_LOW)
+  if (rhport->hport.hport.speed == USB_SPEED_LOW)
    {
      edctrl->hw.ctrl |= ED_CONTROL_S;
    }
@@ -2287,7 +2293,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   sam_givesem(&g_ohci.exclsem);
 
   usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIGURE,
-                  rhport->hport.port + 1, (uint16_t)edctrl->hw.ctrl);
+                  RHPORT(rhport), (uint16_t)edctrl->hw.ctrl);
   return OK;
 }
 
@@ -2394,7 +2400,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Check for a low-speed device */
 
-  if (rhport->hport.speed == USB_SPEED_LOW)
+  if (rhport->hport.hport.speed == USB_SPEED_LOW)
     {
       ed->hw.ctrl |= ED_CONTROL_S;
     }
@@ -2766,10 +2772,10 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   DEBUGASSERT(rhport != NULL && eplist != NULL && req != NULL);
 
 #ifdef CONFIG_USBHOST_TRACE
-  usbhost_vtrace2(OHCI_VTRACE2_CTRLIN, rhport->hport.port + 1, req->req);
+  usbhost_vtrace2(OHCI_VTRACE2_CTRLIN, RHPORT(rhport), req->req);
 #else
   uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
-        rhport->hport.port + 1, req->type, req->req, req->value[1],
+        RHPORT(rhport), req->type, req->req, req->value[1],
         req->value[0], req->index[1], req->index[0], req->len[1],
         req->len[0]);
 #endif
@@ -2815,10 +2821,10 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   DEBUGASSERT(rhport != NULL && eplist != NULL && req != NULL);
 
 #ifdef CONFIG_USBHOST_TRACE
-  usbhost_vtrace2(OHCI_VTRACE2_CTRLOUT, rhport->hport.port + 1, req->req);
+  usbhost_vtrace2(OHCI_VTRACE2_CTRLOUT, RHPORT(rhport), req->req);
 #else
   uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
-        rhport->hport.port + 1, req->type, req->req, req->value[1],
+        RHPORT(rhport), req->type, req->req, req->value[1],
         req->value[0], req->index[1], req->index[0], req->len[1],
         req->len[0]);
 #endif
@@ -2929,7 +2935,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ret = sam_wdhwait(rhport, ed);
   if (ret != OK)
     {
-      usbhost_trace1(OHCI_TRACE1_DEVDISCONN, rhport->hport.port + 1);
+      usbhost_trace1(OHCI_TRACE1_DEVDISCONN, RHPORT(rhport));
       goto errout;
     }
 
@@ -3012,7 +3018,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         }
       else
         {
-          usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, rhport->hport.port + 1,
+          usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, RHPORT(rhport),
                          ed->tdstatus);
           ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
@@ -3095,6 +3101,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
 
 FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 {
+  FAR struct usbhost_hubport_s *hport;
   uintptr_t physaddr;
   uint32_t regval;
   uint8_t *buffer;
@@ -3218,6 +3225,8 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
     {
       struct sam_rhport_s *rhport = &g_ohci.rhport[i];
 
+      /* Initialize the device operations */
+
       rhport->drvr.ep0configure   = sam_ep0configure;
       rhport->drvr.epalloc        = sam_epalloc;
       rhport->drvr.epfree         = sam_epfree;
@@ -3230,13 +3239,20 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
       rhport->drvr.transfer       = sam_transfer;
       rhport->drvr.disconnect     = sam_disconnect;
 
-      rhport->hport.drvr          = &rhport->drvr;
+      /* Initialize the public port representation */
+
+      hport                       = &rhport->hport.hport;
+      hport->drvr                 = &rhport->drvr;
 #ifdef CONFIG_USBHOST_HUB
-      rhport->hport.parent        = NULL;
+      hport->parent               = NULL;
 #endif
-      rhport->hport.ep0           = &rhport->ep0;
-      rhport->hport.port          = i;
-      rhport->hport.speed         = USB_SPEED_FULL;
+      hport->ep0                  = &rhport->ep0;
+      hport->port                 = i;
+      hport->speed                = USB_SPEED_FULL;
+
+      /* Initialize function address generation logic */
+
+      usbhost_devaddr_initialize(&rhport->hport);
     }
 
   /* Wait 50MS then perform hardware reset */

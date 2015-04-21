@@ -58,6 +58,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/hid.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
 #  include <nuttx/input/touchscreen.h>
@@ -2015,9 +2016,11 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
+  FAR struct usbhost_hubport_s *hport;
   int i;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
+  hport = priv->usbclass.hport;
 
   /* Set an indication to any users of the mouse device that the device
    * is no longer available.
@@ -2065,6 +2068,9 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
       (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
     }
 
+  /* Free the function address assigned to this device */
+
+  usbhost_devaddr_destroy(hport);
   return OK;
 }
 

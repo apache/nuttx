@@ -57,6 +57,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/hub.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 
 #ifdef CONFIG_USBHOST_HUB
 
@@ -125,8 +126,6 @@ struct usbhost_hubclass_s
 
 /* Memory allocation services */
 
-static inline uint8_t usbhost_allocaddr(void);
-static inline void usbhost_freeaddr(uint8_t addr);
 static inline FAR struct usbhost_hubport_s *usbhost_allochub(
              FAR struct usbhost_driver_s *drvr,
              FAR struct usbhost_class_s *hubclass, uint8_t speed,
@@ -192,54 +191,9 @@ static struct usbhost_registry_s g_hub =
   &g_id                   /* id[]     */
 };
 
-/* Each bit indicates if corresponding bit number
- * is allocated as usb address
- */
-
-static uint32_t g_addrmap[4];
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: usbhost_allocaddr
- *
- * Description:
- *   This is just a wrapper to handle the annoying behavior of semaphore
- *   waits that return due to the receipt of a signal.
- *
- ****************************************************************************/
-
-static inline uint8_t usbhost_allocaddr(void)
-{
-  uint8_t addr;
-
-  for (addr = 0; addr < 128; addr++)
-    {
-      if (!(g_addrmap[addr/32] & (0x1 << (addr % 32))))
-        {
-          break;
-        }
-    }
-
-  return (addr + 1);
-}
-
-/****************************************************************************
- * Name: usbhost_freecaddr
- *
- * Description:
- *   This is just a wrapper to handle the annoying behavior of semaphore
- *   waits that return due to the receipt of a signal.
- *
- ****************************************************************************/
-
-static inline void usbhost_freeaddr(uint8_t addr)
-{
-  addr--;
-  g_addrmap[addr/32] &= (~(0x1 << (addr % 32)));
-}
 
 /****************************************************************************
  * Name: usbhost_allochub
@@ -288,7 +242,7 @@ static inline FAR struct usbhost_hubport_s *
 
       child->drvr         = drvr;
       child->parent       = parent;
-      child->funcaddr     = usbhost_allocaddr();
+      child->funcaddr     = 0;
       child->speed        = speed;
 
       epdesc.hport        = child;
@@ -334,7 +288,8 @@ static inline void usbhost_freehub(FAR struct usbhost_hubport_s *hport)
           hport->ep0 = NULL;
         }
 
-      usbhost_freeaddr(hport->funcaddr);
+      usbhost_devaddr_destroy(hport);
+      hport->funcaddr = 0;
 
       /* Free the hport instance */
 

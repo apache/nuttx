@@ -347,10 +347,14 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
 static void usbhost_destroy(FAR void *arg)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
-  FAR struct usbhost_hport_s *hport
+  FAR struct usbhost_hubport_s *hport;
+  FAR struct usbhost_driver_s *drvr;
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
   hport = priv->usbclass.hport;
+
+  DEBUGASSERT(hport->drvr);
+  drvr = hport->drvr;
 
   uvdbg("crefs: %d\n", priv->crefs);
 
@@ -364,11 +368,15 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Free any transfer buffers */
 
+  /* Free the function address assigned to this device */
+
+  usbhost_devaddr_destroy(hport);
+
   /* Destroy the semaphores */
 
   /* Disconnect the USB host device */
 
-  DRVR_DISCONNECT(hport->drvr);
+  DRVR_DISCONNECT(drvr);
 
   /* And free the class instance.  Hmmm.. this may execute on the worker
    * thread and the work structure is part of what is getting freed.  That
