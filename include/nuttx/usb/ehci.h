@@ -50,11 +50,14 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 /* General definitions **********************************************************************/
-/* Endpoint speed values as used in endpoint characteristics field */
+/* Endpoint speed values as used in endpoint characteristics field.  NOTE:  These values
+ * are assumed to equal to the SPEED definitions in usb.h (minus 1).
+ */
 
 #define EHCI_FULL_SPEED               (0) /* Full-Speed (12Mbs) */
 #define EHCI_LOW_SPEED                (1) /* Low-Speed (1.5Mbs) */
 #define EHCI_HIGH_SPEED               (2) /* High-Speed (480 Mb/s) */
+#define EHCI_SPEED(s)                 ((s)-1)
 
 #define EHCI_DIR_IN                   (1) /* Direction IN: Peripheral to host */
 #define EHCI_DIR_OUT                  (0) /* Direction OUT: Host to peripheral */

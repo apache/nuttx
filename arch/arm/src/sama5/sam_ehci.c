@@ -224,9 +224,11 @@ struct sam_rhport_s
   /* Root hub port status */
 
   volatile bool connected;     /* Connected to device */
-  volatile bool lowspeed;      /* Low speed device attached */
-  uint8_t rhpndx;              /* Root hub port index */
   struct sam_epinfo_s ep0;     /* EP0 endpoint info */
+
+  /* This is the hub port description understood by class drivers */
+
+  struct usbhost_hubport_s hport;
 
   /* The bound device class driver */
 
@@ -366,10 +368,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
          FAR const bool *connected);
 static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
-static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
-         uint16_t maxpacketsize);
-static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
-         FAR struct usbhost_devinfo_s *devinfo);
+static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+         uint8_t funcaddr, uint16_t maxpacketsize);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
          const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
@@ -379,10 +379,12 @@ static int sam_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 static int sam_ioalloc(FAR struct usbhost_driver_s *drvr,
          FAR uint8_t **buffer, size_t buflen);
 static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
-static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
-         FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
-static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
-         FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
+static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                      FAR const struct usb_ctrlreq_s *req,
+                      FAR uint8_t *buffer);
+static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                       FAR const struct usb_ctrlreq_s *req,
+                       FAR const uint8_t *buffer);
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
          FAR uint8_t *buffer, size_t buflen);
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
@@ -1423,6 +1425,7 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
                                       struct sam_epinfo_s *epinfo)
 {
   struct sam_qh_s *qh;
+  uint32_t rhpndx;
   uint32_t regval;
 
   /* Allocate a new queue head structure */
@@ -1452,9 +1455,9 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
    * RL       NAK count reloaded              8
    */
 
-  regval = ((uint32_t)epinfo->devaddr   << QH_EPCHAR_DEVADDR_SHIFT) |
-           ((uint32_t)epinfo->epno      << QH_EPCHAR_ENDPT_SHIFT) |
-           ((uint32_t)epinfo->speed     << QH_EPCHAR_EPS_SHIFT) |
+  regval = ((uint32_t)epinfo->devaddr << QH_EPCHAR_DEVADDR_SHIFT) |
+           ((uint32_t)epinfo->epno << QH_EPCHAR_ENDPT_SHIFT) |
+           ((uint32_t)EHCI_SPEED(epinfo->speed) << QH_EPCHAR_EPS_SHIFT) |
            QH_EPCHAR_DTC |
            ((uint32_t)epinfo->maxpacket << QH_EPCHAR_MAXPKT_SHIFT) |
            ((uint32_t)8 << QH_EPCHAR_RL_SHIFT);
@@ -1465,7 +1468,7 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
    * Otherwise it should always set this bit to a zero."
    */
 
-  if (epinfo->speed   != EHCI_HIGH_SPEED &&
+  if (epinfo->speed   != USB_SPEED_HIGH &&
       epinfo->xfrtype == USB_EP_ATTR_XFER_CONTROL)
     {
       regval |= QH_EPCHAR_C;
@@ -1489,9 +1492,10 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
    * and HUB device address to be included here.
    */
 
-  regval = ((uint32_t)0                    << QH_EPCAPS_HUBADDR_SHIFT) |
-           ((uint32_t)(rhport->rhpndx + 1) << QH_EPCAPS_PORT_SHIFT) |
-           ((uint32_t)1                    << QH_EPCAPS_MULT_SHIFT);
+  rhpndx = rhport->hport.port;
+  regval = ((uint32_t)0            << QH_EPCAPS_HUBADDR_SHIFT) |
+           ((uint32_t)(rhpndx + 1) << QH_EPCAPS_PORT_SHIFT) |
+           ((uint32_t)1            << QH_EPCAPS_MULT_SHIFT);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   if (epinfo->xfrtype == USB_EP_ATTR_XFER_INT)
@@ -1835,7 +1839,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   usbhost_vtrace2(EHCI_VTRACE2_ASYNCXFR, epinfo->epno, buflen);
 #else
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
-        rhport->rhpndx+1, epinfo->epno, buffer, buflen, req);
+        rhport->hport.port+1, epinfo->epno, buffer, buflen, req);
 #endif
 
   DEBUGASSERT(rhport && epinfo);
@@ -2194,7 +2198,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
   usbhost_vtrace2(EHCI_VTRACE2_INTRXFR, epinfo->epno, buflen);
 #else
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d\n",
-        rhport->rhpndx+1, epinfo->epno, buffer, buflen);
+        rhport->hport.port+1, epinfo->epno, buffer, buflen);
 #endif
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
@@ -2669,7 +2673,6 @@ static inline void sam_portsc_bottomhalf(void)
                                   rhpndx+1, g_ehci.pscwait);
 
                   rhport->connected = false;
-                  rhport->lowspeed  = false;
 
                   /* Are we bound to a class instance? */
 
@@ -3141,7 +3144,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
        *    repeat."
        */
 
-      rhport->ep0.speed = EHCI_LOW_SPEED;
+      rhport->ep0.speed = USB_SPEED_LOW;
       regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
 
@@ -3164,7 +3167,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* Assume full-speed for now */
 
-      rhport->ep0.speed = EHCI_FULL_SPEED;
+      rhport->ep0.speed = USB_SPEED_FULL;
     }
 
   /* Put the root hub port in reset.
@@ -3189,7 +3192,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    *   write a zero to the Port Enable bit."
    */
 
-  regaddr = &HCOR->portsc[rhport->rhpndx];
+  regaddr = &HCOR->portsc[rhport->hport.port];
   regval  = sam_getreg(regaddr);
   regval &= ~EHCI_PORTSC_PE;
   regval |= EHCI_PORTSC_RESET;
@@ -3243,7 +3246,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* High speed device */
 
-      rhport->ep0.speed = EHCI_HIGH_SPEED;
+      rhport->ep0.speed = USB_SPEED_HIGH;
     }
   else
     {
@@ -3291,7 +3294,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    */
 
   usbhost_vtrace2(EHCI_VTRACE2_CLASSENUM, rhpndx+1, rhpndx+1);
-  ret = usbhost_enumerate(&g_ehci.rhport[rhpndx].drvr, rhpndx+1, &rhport->class);
+  ret = usbhost_enumerate(&g_ehci.rhport[rhpndx].hport, &rhport->class);
   if (ret < 0)
     {
       usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
@@ -3326,17 +3329,12 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
  *
  ************************************************************************************/
 
-static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
-                            uint16_t maxpacketsize)
+static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                            uint8_t funcaddr, uint16_t maxpacketsize)
 {
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
-  struct sam_epinfo_s *epinfo;
+  struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep0;
 
-  DEBUGASSERT(rhport &&
-              funcaddr >= 0 && funcaddr <= SAM_EHCI_NRHPORT &&
-              maxpacketsize < 2048);
-
-  epinfo = &rhport->ep0;
+  DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);
 
   /* We must have exclusive access to the EHCI data structures. */
 
@@ -3348,66 +3346,6 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   epinfo->maxpacket = maxpacketsize;
 
   sam_givesem(&g_ehci.exclsem);
-  return OK;
-}
-
-/************************************************************************************
- * Name: sam_getdevinfo
- *
- * Description:
- *   Get information about the connected device.
- *
- * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   devinfo - A pointer to memory provided by the caller in which to return the
- *      device information.
- *
- * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
- *
- * Assumptions:
- *   This function will *not* be called from an interrupt handler.
- *
- ************************************************************************************/
-
-static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
-                          FAR struct usbhost_devinfo_s *devinfo)
-{
-#if 0
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
-  struct sam_epinfo_s *epinfo;
-
-  DEBUGASSERT(drvr && devinfo);
-  epinfo = &rhport->ep0;
-
-  /* As implemented now, this driver supports only HIGH speed.  All
-   * low or full speed devices are handed off to the OHCI driver.
-   */
-
-  switch (epinfo->speed)
-    {
-    case EHCI_LOW_SPEED:
-      devinfo->speed = DEVINFO_SPEED_LOW;
-      break;
-
-    case EHCI_FULL_SPEED:
-      devinfo->speed = DEVINFO_SPEED_FULL;
-      break;
-
-    default:
-    case EHCI_HIGH_SPEED:
-      devinfo->speed = DEVINFO_SPEED_HIGH;
-      break;
-    }
-
-#else
-  DEBUGASSERT(drvr && devinfo);
-
-  devinfo->speed = DEVINFO_SPEED_HIGH;
-
-#endif
   return OK;
 }
 
@@ -3436,14 +3374,15 @@ static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
                        const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo;
+  struct usbhost_hubport_s *hport;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
    */
 
-  DEBUGASSERT(drvr && epdesc && ep);
+  DEBUGASSERT(drvr != 0 && epdesc != NULL && epdesc->hport != NULL && ep != NULL);
+  hport = epdesc->hport;
 
   /* Terse output only if we are tracing */
 
@@ -3472,13 +3411,13 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   epinfo->epno      = epdesc->addr;
   epinfo->dirin     = epdesc->in;
-  epinfo->devaddr   = epdesc->funcaddr;
+  epinfo->devaddr   = hport->funcaddr;
 #ifndef CONFIG_USBHOST_INT_DISABLE
   epinfo->interval  = epdesc->interval;
 #endif
   epinfo->maxpacket = epdesc->mxpacketsize;
   epinfo->xfrtype   = epdesc->xfrtype;
-  epinfo->speed     = rhport->ep0.speed;
+  epinfo->speed     = hport->speed;
   sem_init(&epinfo->iocsem, 0, 0);
 
   /* Success.. return an opaque reference to the endpoint information structure
@@ -3683,10 +3622,11 @@ static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Name: sam_ctrlin and sam_ctrlout
  *
  * Description:
+ * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and wait for it to complete.  Only one transfer may
- *   be queued; Neither these methods nor the transfer() method can be called
- *   again until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one transfer may be
+ *   queued; Neither these methods nor the transfer() method can be called again
+ *   until the control transfer functions returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
@@ -3694,12 +3634,12 @@ static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   ep0 - The control endpoint to send/receive the control request.
  *   req - Describes the request to be sent.  This request must lie in memory
  *      created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using
- *     DRVR_ALLOC
+ *     in the request description. buffer must have been allocated using DRVR_ALLOC.
  *
  *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
  *   memory.
@@ -3709,31 +3649,31 @@ static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
-static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
+static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                       FAR const struct usb_ctrlreq_s *req,
                       FAR uint8_t *buffer)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
+  struct sam_epinfo_s *ep0info = (struct sam_epinfo_s *)ep0;
   uint16_t len;
   ssize_t nbytes;
 
-  DEBUGASSERT(rhport && req);
+  DEBUGASSERT(rhport != NULL && epinfo != NULL && req != NULL);
 
   len = sam_read16(req->len);
 
   /* Terse output only if we are tracing */
 
 #ifdef CONFIG_USBHOST_TRACE
-  usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, rhport->rhpndx + 1, req->req);
+  usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, rhport->hport.port + 1, req->req);
 #else
   uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
-        rhport->rhpndx + 1, req->type, req->req, req->value[1], req->value[0],
+        rhport->hport.port + 1, req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], len);
 #endif
 
@@ -3743,12 +3683,12 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
 
   /* Now perform the transfer */
 
-  nbytes = sam_async_transfer(rhport, &rhport->ep0, req, buffer, len);
+  nbytes = sam_async_transfer(rhport, ep0info, req, buffer, len);
   sam_givesem(&g_ehci.exclsem);
   return nbytes >=0 ? OK : (int)nbytes;
 }
 
-static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
+static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                        FAR const struct usb_ctrlreq_s *req,
                        FAR const uint8_t *buffer)
 {
@@ -3756,7 +3696,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
    * differences in the function signatures.
    */
 
-  return sam_ctrlin(drvr, req, (uint8_t *)buffer);
+  return sam_ctrlin(drvr, ep0, req, (uint8_t *)buffer);
 }
 
 /*******************************************************************************
@@ -4123,12 +4063,10 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   for (i = 0; i < SAM_EHCI_NRHPORT; i++)
     {
       struct sam_rhport_s *rhport = &g_ehci.rhport[i];
-      rhport->rhpndx              = i;
 
       /* Initialize the device operations */
 
       rhport->drvr.ep0configure   = sam_ep0configure;
-      rhport->drvr.getdevinfo     = sam_getdevinfo;
       rhport->drvr.epalloc        = sam_epalloc;
       rhport->drvr.epfree         = sam_epfree;
       rhport->drvr.alloc          = sam_alloc;
@@ -4143,9 +4081,19 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       /* Initialize EP0 */
 
       rhport->ep0.xfrtype         = USB_EP_ATTR_XFER_CONTROL;
-      rhport->ep0.speed           = EHCI_FULL_SPEED;
+      rhport->ep0.speed           = USB_SPEED_FULL;
       rhport->ep0.maxpacket       = 8;
       sem_init(&rhport->ep0.iocsem, 0, 0);
+
+      /* Initialize the public port representation */
+
+      rhport->hport.drvr          = &rhport->drvr;
+#ifdef CONFIG_USBHOST_HUB
+      rhport->hport.parent        = NULL;
+#endif
+      rhport->hport.ep0           = &rhport->ep0;
+      rhport->hport.port          = i;
+      rhport->hport.speed         = USB_SPEED_FULL;
     }
 
 #ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
