@@ -81,7 +81,7 @@
  * Input Parameters:
  *   reg - The USB host class registry entry previously obtained from a call to
  *     usbhost_findclass().
- *   hub - The hub that manages the new class instance.
+ *   hport - The hub hat manages the new class instance.
  *   id - In the case where the device supports multiple base classes, subclasses, or
  *     protocols, this specifies which to configure for.
  *
@@ -99,7 +99,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_CREATE(reg,hub,id) ((reg)->create(hub,id))
+#define CLASS_CREATE(reg,hport,id) ((reg)->create(hport,id))
 
 /************************************************************************************
  * Name: CLASS_CONNECT
@@ -1001,3 +1001,4 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hub,
 #endif
 
 #endif /* __INCLUDE_NUTTX_USB_USBHOST_H */
+
