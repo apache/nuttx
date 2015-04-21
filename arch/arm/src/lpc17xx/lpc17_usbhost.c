@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
- *   Copyright (C) 2010-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Authors: Rafael Noronha <rafael@pdsolucoes.com.br>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -54,6 +54,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 
 #include <arch/irq.h>
 
@@ -152,6 +153,10 @@ struct lpc17_usbhost_s
    */
 
   struct usbhost_driver_s drvr;
+
+  /* This is the hub port description understood by class drivers */
+
+  struct usbhost_roothubport_s hport;
 
   /* The bound device class driver */
 
@@ -271,13 +276,13 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
 #endif
 
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
-                                 FAR const struct usbhost_epdesc_s *epdesc,
+                                 const struct usbhost_epdesc_s *epdesc,
                                  struct lpc17_ed_s *ed);
 static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed);
 
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
-                                  FAR const struct usbhost_epdesc_s *epdesc,
+                                  const struct usbhost_epdesc_s *epdesc,
                                   struct lpc17_ed_s *ed);
 static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
@@ -288,41 +293,40 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
                            struct lpc17_ed_s *ed, uint32_t dirpid,
                            uint32_t toggle, volatile uint8_t *buffer,
                            size_t buflen);
-static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
-                        uint8_t *buffer, size_t buflen);
+static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
+                        uint32_t dirpid, uint8_t *buffer, size_t buflen);
 
 /* Interrupt handling **********************************************************/
 
-static int lpc17_usbinterrupt(int irq, FAR void *context);
+static int lpc17_usbinterrupt(int irq, void *context);
 
 /* USB host controller operations **********************************************/
 
-static int lpc17_wait(FAR struct usbhost_connection_s *conn,
-                      FAR const bool *connected);
-static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
+static int lpc17_wait(struct usbhost_connection_s *conn,
+                      const bool *connected);
+static int lpc17_enumerate(struct usbhost_connection_s *conn, int rhpndx);
 
-static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
+static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep0, uint8_t funcaddr,
                               uint16_t maxpacketsize);
-static int lpc17_getdevinfo(FAR struct usbhost_driver_s *drvr,
-                            FAR struct usbhost_devinfo_s *devinfo);
-static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
-static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
-static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
-                       FAR uint8_t **buffer, FAR size_t *maxlen);
-static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
-static int lpc17_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen);
-static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
-static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
-                        FAR const struct usb_ctrlreq_s *req,
-                        FAR uint8_t *buffer);
-static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
-                         FAR const struct usb_ctrlreq_s *req,
-                         FAR const uint8_t *buffer);
-static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                          FAR uint8_t *buffer, size_t buflen);
-static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
+static int lpc17_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int lpc17_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen);
+static int lpc17_free(struct usbhost_driver_s *drvr, uint8_t *buffer);
+static int lpc17_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen);
+static int lpc17_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer);
+static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                        const struct usb_ctrlreq_s *req,
+                        uint8_t *buffer);
+static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer);
+static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                          uint8_t *buffer, size_t buflen);
+static void lpc17_disconnect(struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
 
@@ -337,25 +341,7 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv);
  * instance.
  */
 
-static struct lpc17_usbhost_s g_usbhost =
-{
-  .drvr             =
-    {
-      .ep0configure = lpc17_ep0configure,
-      .getdevinfo   = lpc17_getdevinfo,
-      .epalloc      = lpc17_epalloc,
-      .epfree       = lpc17_epfree,
-      .alloc        = lpc17_alloc,
-      .free         = lpc17_free,
-      .ioalloc      = lpc17_ioalloc,
-      .iofree       = lpc17_iofree,
-      .ctrlin       = lpc17_ctrlin,
-      .ctrlout      = lpc17_ctrlout,
-      .transfer     = lpc17_transfer,
-      .disconnect   = lpc17_disconnect,
-    },
-  .class            = NULL,
-};
+static struct lpc17_usbhost_s g_usbhost;
 
 /* This is the connection/enumeration interface */
 
@@ -893,7 +879,7 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
  *******************************************************************************/
 
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
-                                 FAR const struct usbhost_epdesc_s *epdesc,
+                                 const struct usbhost_epdesc_s *epdesc,
                                  struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -1129,7 +1115,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
  *******************************************************************************/
 
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
-                                  FAR const struct usbhost_epdesc_s *epdesc,
+                                  const struct usbhost_epdesc_s *epdesc,
                                   struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
@@ -1249,8 +1235,8 @@ static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
  *
  *******************************************************************************/
 
-static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
-                        uint8_t *buffer, size_t buflen)
+static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
+                        uint32_t dirpid, uint8_t *buffer, size_t buflen)
 {
   uint32_t toggle;
   uint32_t regval;
@@ -1260,7 +1246,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
    * transfer.
    */
 
-  ret = lpc17_wdhwait(priv, EDCTRL);
+  ret = lpc17_wdhwait(priv, ed);
   if (ret != OK)
     {
       udbg("ERROR: Device disconnected\n");
@@ -1280,8 +1266,8 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
   /* Then enqueue the transfer */
 
-  EDCTRL->tdstatus = TD_CC_NOERROR;
-  ret = lpc17_enqueuetd(priv, EDCTRL, dirpid, toggle, buffer, buflen);
+  ed->tdstatus = TD_CC_NOERROR;
+  ret = lpc17_enqueuetd(priv, ed, dirpid, toggle, buffer, buflen);
   if (ret == OK)
     {
       /* Set ControlListFilled.  This bit is used to indicate whether there are
@@ -1294,24 +1280,24 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
       /* Wait for the Writeback Done Head interrupt */
 
-      lpc17_takesem(&EDCTRL->wdhsem);
+      lpc17_takesem(&ed->wdhsem);
 
       /* Check the TD completion status bits */
 
-      if (EDCTRL->tdstatus == TD_CC_NOERROR)
+      if (ed->tdstatus == TD_CC_NOERROR)
         {
           ret = OK;
         }
       else
         {
-          uvdbg("Bad TD completion status: %d\n", EDCTRL->tdstatus);
-          ret = EDCTRL->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
+          uvdbg("Bad TD completion status: %d\n", ed->tdstatus);
+          ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
 
   /* Make sure that there is no outstanding request on this endpoint */
 
-  EDCTRL->wdhwait = false;
+  ed->wdhwait = false;
   return ret;
 }
 
@@ -1323,7 +1309,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
  *
  *******************************************************************************/
 
-static int lpc17_usbinterrupt(int irq, FAR void *context)
+static int lpc17_usbinterrupt(int irq, void *context)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
   uint32_t intst;
@@ -1549,8 +1535,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *
  *******************************************************************************/
 
-static int lpc17_wait(FAR struct usbhost_connection_s *conn,
-                      FAR const bool *connected)
+static int lpc17_wait(struct usbhost_connection_s *conn,
+                      const bool *connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
   irqstate_t flags;
@@ -1601,7 +1587,7 @@ static int lpc17_wait(FAR struct usbhost_connection_s *conn,
  *
  *******************************************************************************/
 
-static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
+static int lpc17_enumerate(struct usbhost_connection_s *conn, int rphndx)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
   DEBUGASSERT(priv && rphndx == 0);
@@ -1640,7 +1626,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
    */
 
   uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(&g_usbhost.drvr, 1, &priv->class);
+  return usbhost_enumerate(&g_usbhost.hport.hport, &priv->class);
 }
 
 /************************************************************************************
@@ -1654,9 +1640,10 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   ep0 - The (opaque) EP0 endpoint instance
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
- *   maxpacketsize - The maximum number of bytes that can be sent to or
+ *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
  * Returned Values:
@@ -1668,12 +1655,15 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
  *
  ************************************************************************************/
 
-static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
+static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep0, uint8_t funcaddr,
                               uint16_t maxpacketsize)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct lpc17_ed_s      *ed;
 
-  DEBUGASSERT(drvr && funcaddr < 128 && maxpacketsize < 2048);
+  DEBUGASSERT(drvr != NULL && ep0 != NULL && funcaddr < 128 && maxpacketsize < 2048);
+  ed = (struct lpc17_ed_s *)ep0;
 
   /* We must have exclusive access to EP0 and the control list */
 
@@ -1681,51 +1671,20 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
 
   /* Set the EP0 ED control word */
 
-  EDCTRL->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
-                    (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+  ed->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
+                (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
   if (priv->lowspeed)
    {
-     EDCTRL->hw.ctrl |= ED_CONTROL_S;
+     ed->hw.ctrl |= ED_CONTROL_S;
    }
 
   /* Set the transfer type to control */
 
-  EDCTRL->xfrtype = USB_EP_ATTR_XFER_CONTROL;
+  ed->xfrtype = USB_EP_ATTR_XFER_CONTROL;
   lpc17_givesem(&priv->exclsem);
 
-  uvdbg("EP0 CTRL:%08x\n", EDCTRL->hw.ctrl);
-  return OK;
-}
-
-/************************************************************************************
- * Name: lpc17_getdevinfo
- *
- * Description:
- *   Get information about the connected device.
- *
- * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   devinfo - A pointer to memory provided by the caller in which to return the
- *      device information.
- *
- * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
- *
- * Assumptions:
- *   This function will *not* be called from an interrupt handler.
- *
- ************************************************************************************/
-
-static int lpc17_getdevinfo(FAR struct usbhost_driver_s *drvr,
-                            FAR struct usbhost_devinfo_s *devinfo)
-{
-  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-
-  DEBUGASSERT(drvr && devinfo);
-  devinfo->speed = priv->lowspeed ? DEVINFO_SPEED_LOW : DEVINFO_SPEED_FULL;
+  uvdbg("EP0 CTRL:%08x\n", ed->hw.ctrl);
   return OK;
 }
 
@@ -1751,12 +1710,13 @@ static int lpc17_getdevinfo(FAR struct usbhost_driver_s *drvr,
  *
  ************************************************************************************/
 
-static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
+static int lpc17_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct lpc17_ed_s      *ed;
-  int                     ret  = -ENOMEM;
+  struct usbhost_hubport_s *hport;
+  struct lpc17_ed_s *ed;
+  int ret  = -ENOMEM;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
@@ -1782,7 +1742,9 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
       /* Configure the endpoint descriptor. */
 
       memset((void*)ed, 0, sizeof(struct lpc17_ed_s));
-      ed->hw.ctrl = (uint32_t)(epdesc->funcaddr)     << ED_CONTROL_FA_SHIFT |
+
+      hport = epdesc->hport;
+      ed->hw.ctrl = (uint32_t)(hport->funcaddr)      << ED_CONTROL_FA_SHIFT |
                     (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
                     (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
@@ -1893,7 +1855,7 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
  *
  ************************************************************************************/
 
-static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s      *ed   = (struct lpc17_ed_s *)ep;
@@ -1974,8 +1936,8 @@ static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *
  *******************************************************************************/
 
-static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
-                       FAR uint8_t **buffer, FAR size_t *maxlen)
+static int lpc17_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   DEBUGASSERT(priv && buffer && maxlen);
@@ -2019,7 +1981,7 @@ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int lpc17_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   DEBUGASSERT(buffer);
@@ -2059,15 +2021,15 @@ static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ************************************************************************************/
 
-static int lpc17_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen)
+static int lpc17_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen)
 {
   DEBUGASSERT(drvr && buffer);
 
 #if LPC17_IOBUFFERS > 0
   if (buflen <= CONFIG_USBHOST_IOBUFSIZE)
     {
-      FAR uint8_t *alloc = lpc17_allocio();
+      uint8_t *alloc = lpc17_allocio();
       if (alloc)
         {
           *buffer = alloc;
@@ -2103,7 +2065,7 @@ static int lpc17_ioalloc(FAR struct usbhost_driver_s *drvr,
  *
  ************************************************************************************/
 
-static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int lpc17_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
@@ -2119,6 +2081,7 @@ static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Name: lpc17_ctrlin and lpc17_ctrlout
  *
  * Description:
+ * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
  *   will enqueue the request and wait for it to complete.  Only one transfer may be
  *   queued; Neither these methods nor the transfer() method can be called again
@@ -2130,11 +2093,12 @@ static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   ep0 - The control endpoint to send/receive the control request.
  *   req - Describes the request to be sent.  This request must lie in memory
  *      created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC
+ *     in the request description. buffer must have been allocated using DRVR_ALLOC.
  *
  *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
  *   memory.
@@ -2144,21 +2108,22 @@ static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
-static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
-                        FAR const struct usb_ctrlreq_s *req,
-                        FAR uint8_t *buffer)
+static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                        const struct usb_ctrlreq_s *req,
+                        uint8_t *buffer)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep0;
   uint16_t len;
   int  ret;
 
-  DEBUGASSERT(drvr && req);
+  DEBUGASSERT(priv != NULL && ed != NULL && req!= NULL);
+
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
@@ -2168,17 +2133,17 @@ static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
   lpc17_takesem(&priv->exclsem);
 
   len = lpc17_getle16(req->len);
-  ret = lpc17_ctrltd(priv, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
         {
-          ret = lpc17_ctrltd(priv, GTD_STATUS_DP_IN, buffer, len);
+          ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_IN, buffer, len);
         }
 
       if (ret == OK)
         {
-          ret = lpc17_ctrltd(priv, GTD_STATUS_DP_OUT, NULL, 0);
+          ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_OUT, NULL, 0);
         }
     }
 
@@ -2186,15 +2151,17 @@ static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
   return ret;
 }
 
-static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
-                         FAR const struct usb_ctrlreq_s *req,
-                         FAR const uint8_t *buffer)
+static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep0;
   uint16_t len;
   int  ret;
 
-  DEBUGASSERT(drvr && req);
+  DEBUGASSERT(priv != NULL && ed != NULL && req!= NULL);
+
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
@@ -2204,17 +2171,17 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
   lpc17_takesem(&priv->exclsem);
 
   len = lpc17_getle16(req->len);
-  ret = lpc17_ctrltd(priv, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
         {
-          ret = lpc17_ctrltd(priv, GTD_STATUS_DP_OUT, (uint8_t*)buffer, len);
+          ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_OUT, (uint8_t*)buffer, len);
         }
 
       if (ret == OK)
         {
-          ret = lpc17_ctrltd(priv, GTD_STATUS_DP_IN, NULL, 0);
+          ret = lpc17_ctrltd(priv, ed, GTD_STATUS_DP_IN, NULL, 0);
         }
     }
 
@@ -2260,8 +2227,8 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                          FAR uint8_t *buffer, size_t buflen)
+static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                          uint8_t *buffer, size_t buflen)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
@@ -2436,7 +2403,7 @@ errout:
  *
  *******************************************************************************/
 
-static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
+static void lpc17_disconnect(struct usbhost_driver_s *drvr)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   DEBUGASSERT(priv);
@@ -2468,7 +2435,7 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
 
   /* Set up some default values */
 
-  (void)lpc17_ep0configure(&priv->drvr, 1, 8);
+  (void)lpc17_ep0configure(&priv->drvr, (usbhost_ep_t)EDCTRL, 1, 8);
 
   /* Initialize the common tail TD. */
 
@@ -2527,9 +2494,11 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
  *
  *******************************************************************************/
 
-FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
+struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
+  struct usbhost_driver_s *drvr;
+  struct usbhost_hubport_s *hport;
   uint32_t regval;
   uint8_t *buffer;
   irqstate_t flags;
@@ -2544,6 +2513,36 @@ FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   DEBUGASSERT(sizeof(struct lpc17_gtd_s) <= LPC17_TD_SIZE);
 
   /* Initialize the state data structure */
+  /* Initialize the device operations */
+
+  drvr                 = &priv->drvr;
+  drvr->ep0configure   = lpc17_ep0configure;
+  drvr->epalloc        = lpc17_epalloc;
+  drvr->epfree         = lpc17_epfree;
+  drvr->alloc          = lpc17_alloc;
+  drvr->free           = lpc17_free;
+  drvr->ioalloc        = lpc17_ioalloc;
+  drvr->iofree         = lpc17_iofree;
+  drvr->ctrlin         = lpc17_ctrlin;
+  drvr->ctrlout        = lpc17_ctrlout;
+  drvr->transfer       = lpc17_transfer;
+  drvr->disconnect     = lpc17_disconnect;
+
+  /* Initialize the public port representation */
+
+  hport                       = &priv->hport.hport;
+  hport->drvr                 = drvr;
+#ifdef CONFIG_USBHOST_HUB
+  hport->parent               = NULL;
+#endif
+  hport->ep0                  = EDCTRL;
+  hport->speed                = USB_SPEED_FULL;
+
+  /* Initialize function address generation logic */
+
+  usbhost_devaddr_initialize(&priv->hport);
+
+  /* Initialize semaphores */
 
   sem_init(&priv->rhssem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
@@ -2710,7 +2709,7 @@ FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   lpc17_putreg((uint32_t)HCCA, LPC17_USBHOST_HCCA);
 
-  /* Set up EP0 */
+  /* Set up the root hub port EP0 */
 
   lpc17_ep0init(priv);
 
