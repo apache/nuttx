@@ -35,52 +35,52 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		=
-CSRCS		= lpc17_boot.c lpc17_leds.c lpc17_ssp.c
+ASRCS =
+CSRCS = lpc17_boot.c lpc17_leds.c lpc17_ssp.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= lpc17_nsh.c
+CSRCS += lpc17_nsh.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS		+= lpc17_usbmsc.c
+CSRCS += lpc17_usbmsc.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
-CSRCS		+= lpc17_lcd.c
+CSRCS += lpc17_lcd.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+= lpc17_buttons.c
+CSRCS += lpc17_buttons.c
 endif
 
 ifeq ($(CONFIG_CAN),y)
-CSRCS		+= lpc17_can.c
+CSRCS += lpc17_can.c
 endif
 
 ifeq ($(CONFIG_USBHOST_HIDKBD),y)
-CSRCS		+= lpc17_hidkbd.c
+CSRCS += lpc17_hidkbd.c
 endif
 
 ifeq ($(CONFIG_USBHOST_HIDMOUSE),y)
-CSRCS           += lpc17_hidmouse.c
+CSRCS += lpc17_hidmouse.c
 endif
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)
