@@ -224,7 +224,6 @@ struct sam_rhport_s
   /* Root hub port status */
 
   volatile bool connected;     /* Connected to device */
-  volatile bool lowspeed;      /* Low speed device attached */
   uint8_t rhpndx;              /* Root hub port index */
   struct sam_epinfo_s ep0;     /* EP0 endpoint info */
 
@@ -2669,7 +2668,6 @@ static inline void sam_portsc_bottomhalf(void)
                                   rhpndx+1, g_ehci.pscwait);
 
                   rhport->connected = false;
-                  rhport->lowspeed  = false;
 
                   /* Are we bound to a class instance? */
 
