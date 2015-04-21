@@ -3390,7 +3390,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
   usbhost_vtrace2(EHCI_VTRACE2_EPALLOC, epdesc->addr, epdesc->xfrtype);
 #else
   uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
-        epdesc->addr, epdesc->in ? "IN" : "OUT", epdesc->funcaddr,
+        epdesc->addr, epdesc->in ? "IN" : "OUT", hport->funcaddr,
         epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 #endif
 
@@ -3663,7 +3663,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   uint16_t len;
   ssize_t nbytes;
 
-  DEBUGASSERT(rhport != NULL && epinfo != NULL && req != NULL);
+  DEBUGASSERT(rhport != NULL && ep0info != NULL && req != NULL);
 
   len = sam_read16(req->len);
 
