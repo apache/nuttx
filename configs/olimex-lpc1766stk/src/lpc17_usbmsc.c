@@ -135,4 +135,5 @@ int usbmsc_archinitialize(void)
 
 errout:
   lpc17_gpiowrite(LPC1766STK_MMC_PWR, true);
-  return ret;}
+  return ret;
+}

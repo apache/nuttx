@@ -1341,7 +1341,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbhost_hubinit
+ * Name: usbhost_hub_initialize
  *
  * Description:
  *   Initialize the USB hub class.  This function should be called
@@ -1357,7 +1357,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
  *
  ****************************************************************************/
 
-int usbhost_hubinit(void)
+int usbhost_hub_initialize(void)
 {
   /* Advertise our availability to support (certain) mass storage devices */
 

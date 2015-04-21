@@ -865,8 +865,8 @@ int usbhost_registerclass(struct usbhost_registry_s *devclass);
 const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id);
 
 #ifdef CONFIG_USBHOST_HUB
-/****************************************************************************
- * Name: usbhost_hubinit
+ /****************************************************************************
+ * Name: usbhost_hub_initialize
  *
  * Description:
  *   Initialize the USB hub class.  This function should be called
@@ -882,7 +882,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
  *
  ****************************************************************************/
 
-int usbhost_hubinit(void);
+int usbhost_hub_initialize(void);
 #endif
 
 #ifdef CONFIG_USBHOST_MSC
