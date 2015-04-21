@@ -410,6 +410,11 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                        FAR const uint8_t *buffer);
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen);
+#ifdef CONFIG_USBHOST_ASYNCH
+static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                      FAR uint8_t *buffer, size_t buflen,
+                      usbhost_asynch_t callback, FAR void *arg);
+#endif
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
 
 /*******************************************************************************
@@ -2855,7 +2860,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 }
 
 /*******************************************************************************
- * Name: sam_transfer
+ * Name: sam_transfer and sam_asynch
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -3031,6 +3036,16 @@ errout:
   sam_givesem(&g_ohci.exclsem);
   return ret;
 }
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                      FAR uint8_t *buffer, size_t buflen,
+                      usbhost_asynch_t callback, FAR void *arg)
+{
+# error Not implemented
+  return -ENOSYS;
+}
+#endif
 
 /*******************************************************************************
  * Name: sam_disconnect
@@ -3237,6 +3252,9 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
       rhport->drvr.ctrlin         = sam_ctrlin;
       rhport->drvr.ctrlout        = sam_ctrlout;
       rhport->drvr.transfer       = sam_transfer;
+#ifdef CONFIG_USBHOST_ASYNCH
+      rhport->drvr.asynch         = sam_asynch;
+#endif
       rhport->drvr.disconnect     = sam_disconnect;
 
       /* Initialize the public port representation */

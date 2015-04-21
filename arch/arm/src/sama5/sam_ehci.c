@@ -393,6 +393,11 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                        FAR const uint8_t *buffer);
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
          FAR uint8_t *buffer, size_t buflen);
+#ifdef CONFIG_USBHOST_ASYNCH
+static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                      FAR uint8_t *buffer, size_t buflen,
+                      usbhost_asynch_t callback, FAR void *arg);
+#endif
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
@@ -3706,7 +3711,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 }
 
 /*******************************************************************************
- * Name: sam_transfer
+ * Name: sam_transfer and sam_asynch
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -3716,6 +3721,13 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
  *
+ * - 'transfer' is a blocking method; this method will not return until the
+ *   transfer has completed.
+ * - 'asynch' will return immediately.  When the transfer completes, the
+ *   the callback will be invoked with the provided transfer.  This method
+ *   is useful for receiving interrupt transfers which may come
+ *   infrequently.
+ *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
@@ -3724,6 +3736,10 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
+ *   callback - This function will be called when the transfer completes ('asynch'
+ *     only).
+ *   arg - The arbitrary parameter that will be passed to the callback function
+ *     when the transfer completes ('asynch' only).
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -3783,6 +3799,16 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   sam_givesem(&g_ehci.exclsem);
   return nbytes >=0 ? OK : (int)nbytes;
 }
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                      FAR uint8_t *buffer, size_t buflen,
+                      usbhost_asynch_t callback, FAR void *arg)
+{
+# error Not implemented
+  return -ENOSYS;
+}
+#endif
 
 /*******************************************************************************
  * Name: sam_disconnect
@@ -4083,6 +4109,9 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->drvr.ctrlin         = sam_ctrlin;
       rhport->drvr.ctrlout        = sam_ctrlout;
       rhport->drvr.transfer       = sam_transfer;
+#ifdef CONFIG_USBHOST_ASYNCH
+      rhport->drvr.asynch         = sam_asynch;
+#endif
       rhport->drvr.disconnect     = sam_disconnect;
 
       /* Initialize EP0 */
