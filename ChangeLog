@@ -10250,3 +10250,6 @@
 	  (2015-04-18).
 	* arch/arm/src/stm32/stm32_rtcounter.c: Now need to enable backup
 	  domain write access when setting the time.  From Darcy Gong (2015-04-19).
+	* include/time.h:  Add prototypes for localtime() and localtimer_r()
+	  (2015-04-21).
+
