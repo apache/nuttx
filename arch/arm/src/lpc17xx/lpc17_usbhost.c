@@ -326,6 +326,12 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          const uint8_t *buffer);
 static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           uint8_t *buffer, size_t buflen);
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        FAR uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, FAR void *arg);
+#endif
+
 static void lpc17_disconnect(struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
@@ -2190,7 +2196,7 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 }
 
 /*******************************************************************************
- * Name: lpc17_transfer
+ * Name: lpc17_transfer and lcp17_async
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -2201,6 +2207,13 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
  *
+ * - 'transfer' is a blocking method; this method will not return until the
+ *   transfer has completed.
+ * - 'asynch' will return immediately.  When the transfer completes, the
+ *   the callback will be invoked with the provided transfer.  This method
+ *   is useful for receiving interrupt transfers which may come
+ *   infrequently.
+ *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
@@ -2209,6 +2222,10 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
+ *   callback - This function will be called when the transfer completes ('asynch'
+ *     only).
+ *   arg - The arbitrary parameter that will be passed to the callback function
+ *     when the transfer completes ('asynch' only).
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -2380,6 +2397,16 @@ errout:
   return ret;
 }
 
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        FAR uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, FAR void *arg)
+{
+# error Not implemented
+  return -ENOSYS;
+}
+#endif
+
 /*******************************************************************************
  * Name: lpc17_disconnect
  *
@@ -2526,6 +2553,9 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   drvr->ctrlin         = lpc17_ctrlin;
   drvr->ctrlout        = lpc17_ctrlout;
   drvr->transfer       = lpc17_transfer;
+#ifdef CONFIG_USBHOST_ASYNCH
+  drvr->asynch         = lpc17_asynch;
+#endif
   drvr->disconnect     = lpc17_disconnect;
 
   /* Initialize the public port representation */

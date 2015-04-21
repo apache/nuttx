@@ -476,7 +476,7 @@
  * - 'transfer' is a blocking method; this method will not return until the
  *   transfer has completed.
  * - 'asynch' will return immediately.  When the transfer completes, the
- *    semaphore will be posted.
+ *   semaphore will be posted.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
