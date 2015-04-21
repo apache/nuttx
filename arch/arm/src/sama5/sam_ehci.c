@@ -53,6 +53,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ehci.h>
+#include <nuttx/usb/usbhost_devaddr.h>
 #include <nuttx/usb/usbhost_trace.h>
 
 #include "up_arch.h"
@@ -146,6 +147,11 @@
 
 #define FRAME_LIST_SIZE 1024
 
+/* Port numbers */
+
+#define RHPNDX(rh)            ((rh)->hport.hport.port)
+#define RHPORT(rh)            (RHPNDX(rh)+1)
+
 /*******************************************************************************
  * Private Types
  *******************************************************************************/
@@ -228,7 +234,7 @@ struct sam_rhport_s
 
   /* This is the hub port description understood by class drivers */
 
-  struct usbhost_hubport_s hport;
+  struct usbhost_roothubport_s hport;
 
   /* The bound device class driver */
 
@@ -1492,7 +1498,7 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
    * and HUB device address to be included here.
    */
 
-  rhpndx = rhport->hport.port;
+  rhpndx = RHPNDX(rhport);
   regval = ((uint32_t)0            << QH_EPCAPS_HUBADDR_SHIFT) |
            ((uint32_t)(rhpndx + 1) << QH_EPCAPS_PORT_SHIFT) |
            ((uint32_t)1            << QH_EPCAPS_MULT_SHIFT);
@@ -1839,7 +1845,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   usbhost_vtrace2(EHCI_VTRACE2_ASYNCXFR, epinfo->epno, buflen);
 #else
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
-        rhport->hport.port+1, epinfo->epno, buffer, buflen, req);
+        RHPORT(rhport), epinfo->epno, buffer, buflen, req);
 #endif
 
   DEBUGASSERT(rhport && epinfo);
@@ -2198,7 +2204,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
   usbhost_vtrace2(EHCI_VTRACE2_INTRXFR, epinfo->epno, buflen);
 #else
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d\n",
-        rhport->hport.port+1, epinfo->epno, buffer, buflen);
+        RHPORT(rhport), epinfo->epno, buffer, buflen);
 #endif
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
@@ -3192,7 +3198,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    *   write a zero to the Port Enable bit."
    */
 
-  regaddr = &HCOR->portsc[rhport->hport.port];
+  regaddr = &HCOR->portsc[RHPNDX(rhport)];
   regval  = sam_getreg(regaddr);
   regval &= ~EHCI_PORTSC_PE;
   regval |= EHCI_PORTSC_RESET;
@@ -3294,7 +3300,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    */
 
   usbhost_vtrace2(EHCI_VTRACE2_CLASSENUM, rhpndx+1, rhpndx+1);
-  ret = usbhost_enumerate(&g_ehci.rhport[rhpndx].hport, &rhport->class);
+  ret = usbhost_enumerate(&g_ehci.rhport[rhpndx].hport.hport, &rhport->class);
   if (ret < 0)
     {
       usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
@@ -3670,10 +3676,10 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   /* Terse output only if we are tracing */
 
 #ifdef CONFIG_USBHOST_TRACE
-  usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, rhport->hport.port + 1, req->req);
+  usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, RHPORT(rhport), req->req);
 #else
   uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
-        rhport->hport.port + 1, req->type, req->req, req->value[1], req->value[0],
+        RHPORT(rhport), req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], len);
 #endif
 
@@ -3959,6 +3965,7 @@ static int sam_reset(void)
 
 FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 {
+  FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
   uint32_t regval;
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
@@ -4087,13 +4094,18 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
       /* Initialize the public port representation */
 
-      rhport->hport.drvr          = &rhport->drvr;
+      hport                       = &rhport->hport.hport;
+      hport->drvr                 = &rhport->drvr;
 #ifdef CONFIG_USBHOST_HUB
-      rhport->hport.parent        = NULL;
+      hport->parent               = NULL;
 #endif
-      rhport->hport.ep0           = &rhport->ep0;
-      rhport->hport.port          = i;
-      rhport->hport.speed         = USB_SPEED_FULL;
+      hport->ep0                  = &rhport->ep0;
+      hport->port                 = i;
+      hport->speed                = USB_SPEED_FULL;
+
+      /* Initialize function address generation logic */
+
+      usbhost_devaddr_initialize(&rhport->hport);
     }
 
 #ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
