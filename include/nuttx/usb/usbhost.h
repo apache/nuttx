@@ -82,7 +82,6 @@
  *   reg - The USB host class registry entry previously obtained from a call to
  *     usbhost_findclass().
  *   hub - The hub that manages the new class instance.
- *   port - The hub port index
  *   id - In the case where the device supports multiple base classes, subclasses, or
  *     protocols, this specifies which to configure for.
  *
@@ -100,7 +99,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_CREATE(reg,hub,port,id) ((reg)->create(hub,port,id))
+#define CLASS_CREATE(reg,hub,id) ((reg)->create(hub,id))
 
 /************************************************************************************
  * Name: CLASS_CONNECT
@@ -267,12 +266,6 @@
  ************************************************************************************/
 
 #define DRVR_GETDEVINFO(drvr,devinfo) ((drvr)->getdevinfo(drvr,devinfo))
-
-/* struct usbhost_devinfo_s speed settings */
-
-#define DEVINFO_SPEED_LOW  0
-#define DEVINFO_SPEED_FULL 1
-#define DEVINFO_SPEED_HIGH 2
 
 /************************************************************************************
  * Name: DRVR_EPALLOC
@@ -566,7 +559,7 @@ struct usbhost_id_s
  * connected to the USB port.
  */
 
-struct usbhost_hub_s;    /* Forward reference to the hub state structure */
+struct usbhost_hubport_s;    /* Forward reference to the hub state structure */
 struct usbhost_class_s;  /* Forward reference to the class state structure */
 struct usbhost_registry_s
 {
@@ -575,7 +568,7 @@ struct usbhost_registry_s
    * provide those instances in write-able memory (RAM).
    */
 
-  struct usbhost_registry_s     *flink;
+  struct usbhost_registry_s *flink;
 
   /* This is a callback into the class implementation.  It is used to (1) create
    * a new instance of the USB host class state and to (2) bind a USB host driver
@@ -584,15 +577,14 @@ struct usbhost_registry_s
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
 
-  FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_hub_s *hub,
-                                            uint8_t port,
-                                            FAR const struct usbhost_id_s *id);
+  FAR struct usbhost_class_s *(*create)(FAR struct usbhost_hubport_s *hub,
+                                        FAR const struct usbhost_id_s *id);
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.
    */
 
-  uint8_t                       nids;  /* Number of IDs in the id[] array */
+  uint8_t nids;                        /* Number of IDs in the id[] array */
   FAR const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
 };
 
@@ -604,34 +596,41 @@ struct usbhost_registry_s
 
 typedef FAR void *usbhost_ep_t;
 
-/* Every class connects to the host controller driver (HCD) via a hub.  That
- * may be an external hub or the internal, root hub.  The root hub is managed
- * by the HCD.  This structure provides for the linkages in that event that
- * an external hub.
+/* In the hierarchy of things, there is the host control driver (HCD),
+ * represented by struct usbhost_driver_s.  Connected to the HCD are one
+ * or more hubs.  At a minimum, the root hub is always present. Each hub
+ * has from 1 to 4 ports.
+
+/* Every class connects to the host controller driver (HCD) via a port on a
+ * hub.  That hub may be an external hub or the internal, root hub.  The
+ * root hub is managed by the HCD.  This structure describes that state of
+ * that port and provides the linkage to the parent hub in that event that
+ * the port is on an external hub.
  */
 
-struct usbhost_hub_s
+struct usbhost_hubport_s
 {
-  FAR struct usbhost_driver_s *drvr;  /* Common host driver */
-  usbhost_ep_t ep0;                   /* Control endpoint, ep0 */
+  FAR struct usbhost_driver_s *drvr;    /* Common host driver */
 #ifdef CONFIG_USBHOST_HUB
-  FAR struct usbhost_hub_s *parent;   /* Parent hub */
-  FAR struct usb_hubtt_s *tt;         /* Transaction translator hub */
+  FAR struct usbhost_hubport_s *parent; /* Parent hub (NULL=root hub) */
 #endif
-  uint8_t funcaddr;                   /* Device function address */
-  uint8_t speed;                      /* Device speed */
+  usbhost_ep_t ep0;                     /* Control endpoint, ep0 */
+  uint8_t port;                         /* Hub port index */
+  uint8_t funcaddr;                     /* Device function address */
+  uint8_t speed;                        /* Device speed */
 };
 
-/* struct usbhost_class_s provides access from the USB host driver to the USB host
- * class implementation.
+/* struct usbhost_class_s provides access from the USB host driver to the
+ * USB host class implementation.
  */
 
 struct usbhost_class_s
 {
-  FAR struct usbhost_hub_s *hub;      /* The hub used by this class instance */
-#ifdef CONFIG_USBHOST_HUB
-  uint8_t port;                       /* Hub port index */
-#endif
+ /* Class instances are associated with devices connected on one port on a
+  * hub and are represented by this structure.
+  */
+
+  FAR struct usbhost_hubport_s *hport;  /* The port used by this class instance */
 
   /* Provides the configuration descriptor to the class.  The configuration
    * descriptor contains critical information needed by the class in order to
@@ -654,22 +653,12 @@ struct usbhost_class_s
 
 struct usbhost_epdesc_s
 {
-#ifdef CONFIG_USBHOST_HUB
-  FAR struct usbhost_hub_s *hub; /* Hub that manages the endpoint */
-#endif
+  FAR struct usbhost_hubport_s *hport; /* Hub port that supports the endpoint */
   uint8_t addr;                  /* Endpoint address */
   bool in;                       /* Direction: true->IN */
-  uint8_t funcaddr;              /* USB address of function containing endpoint */
   uint8_t xfrtype;               /* Transfer type.  See USB_EP_ATTR_XFER_* in usb.h */
   uint8_t interval;              /* Polling interval */
   uint16_t mxpacketsize;         /* Max packetsize */
-};
-
-/* This structure provides information about the connected device */
-
-struct usbhost_devinfo_s
-{
-  uint8_t speed:2;       /* Device speed: 0=low, 1=full, 2=high */
 };
 
 /* struct usbhost_connection_s provides as interface between platform-specific
@@ -723,11 +712,6 @@ struct usbhost_driver_s
 
   int (*ep0configure)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                       uint8_t funcaddr, uint16_t maxpacketsize);
-
-  /* Get information about the connected device */
-
-  int (*getdevinfo)(FAR struct usbhost_driver_s *drvr,
-                   FAR struct usbhost_devinfo_s *devinfo);
 
   /* Allocate and configure an endpoint. */
 
@@ -993,7 +977,6 @@ int usbhost_wlaninit(void);
  *
  * Input Parameters:
  *   hub - The hub that manages the new class.
- *   port - The hub port index
  *   devclass - If the class driver for the device is successful located
  *      and bound to the hub, the allocated class instance is returned into
  *      this caller-provided memory location.
@@ -1009,7 +992,7 @@ int usbhost_wlaninit(void);
  *
  *******************************************************************************/
 
-int usbhost_enumerate(FAR struct usbhost_hub_s *hub, uint8_t port,
+int usbhost_enumerate(FAR struct usbhost_hubport_s *hub,
                       FAR struct usbhost_class_s **devclass);
 
 #undef EXTERN
