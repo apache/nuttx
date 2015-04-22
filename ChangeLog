@@ -10252,4 +10252,6 @@
 	  domain write access when setting the time.  From Darcy Gong (2015-04-19).
 	* include/time.h:  Add prototypes for localtime() and localtimer_r()
 	  (2015-04-21).
+	* include/assert.h: Wrap definitions of assertion macros in do while.
+	  Suggested by orbitalfox (2015-04-22).
 
