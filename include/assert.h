@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/assert.h
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,10 +58,24 @@
 #ifdef CONFIG_HAVE_FILENAME
 
 #  define ASSERT(f) \
-     { if (!(f)) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
+     do \
+       { \
+         if (!(f)) \
+           { \
+             up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
+           } \
+       } \
+     while (0)
 
 #  define VERIFY(f) \
-     { if ((f) < 0) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
+     do \
+       { \
+         if ((f) < 0) \
+           { \
+             up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
+           } \
+       } \
+     while (0)
 
 #  define PANIC() \
      up_assert((const uint8_t *)__FILE__, (int)__LINE__)
@@ -69,10 +83,24 @@
 #  ifdef CONFIG_DEBUG
 
 #    define DEBUGASSERT(f) \
-       { if (!(f)) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
+       do \
+         { \
+           if (!(f)) \
+             { \
+               up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
+             } \
+         } \
+       while (0)
 
 #    define DEBUGVERIFY(f) \
-       { if ((f) < 0) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
+       do \
+         { \
+           if ((f) < 0) \
+             { \
+               up_assert((const uint8_t *)__FILE__, (int)__LINE__); \
+             } \
+         } \
+       while (0)
 
 #    define DEBUGPANIC() \
        up_assert((const uint8_t *)__FILE__, (int)__LINE__)
