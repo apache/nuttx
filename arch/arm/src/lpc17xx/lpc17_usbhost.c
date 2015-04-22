@@ -156,24 +156,29 @@ struct lpc17_usbhost_s
 
   /* This is the hub port description understood by class drivers */
 
-  struct usbhost_roothubport_s hport;
-
-  /* The bound device class driver */
-
-  struct usbhost_class_s *class;
+  struct usbhost_roothubport_s rhport;
 
   /* Driver status */
 
+  volatile bool    change;      /* Connection change */
   volatile bool    connected;   /* Connected to device */
   volatile bool    lowspeed;    /* Low speed device attached. */
-  volatile bool    rhswait;     /* TRUE: Thread is waiting for Root Hub Status change */
+  volatile bool    pscwait;     /* TRUE: Thread is waiting for a port status change */
+
 #ifndef CONFIG_USBHOST_INT_DISABLE
   uint8_t          ininterval;  /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
   uint8_t          outinterval; /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
 #endif
+
   sem_t            exclsem;     /* Support mutually exclusive access */
-  sem_t            rhssem;      /* Semaphore to wait Writeback Done Head event */
-};
+  sem_t            pscsem;      /* Semaphore to wait Writeback Done Head event */
+
+#ifdef CONFIG_USBHOST_HUB
+  /* Used to pass external hub port events */
+
+  volatile struct usbhost_hubport_s *hport;
+#endif
+ };
 
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes in
@@ -303,8 +308,11 @@ static int lpc17_usbinterrupt(int irq, void *context);
 /* USB host controller operations **********************************************/
 
 static int lpc17_wait(struct usbhost_connection_s *conn,
-                      const bool *connected);
-static int lpc17_enumerate(struct usbhost_connection_s *conn, int rhpndx);
+                      struct usbhost_hubport_s **hport);
+static int lpc17_rh_enumerate(struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport);
+static int lpc17_enumerate(struct usbhost_connection_s *conn,
+                           struct usbhost_hubport_s *hport);
 
 static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0, uint8_t funcaddr,
@@ -331,7 +339,11 @@ static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen,
                         usbhost_asynch_t callback, FAR void *arg);
 #endif
-
+#ifdef CONFIG_USBHOST_HUB
+static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
+                         FAR struct usbhost_hubport_s *hport,
+                         bool connected);
+#endif
 static void lpc17_disconnect(struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
@@ -902,7 +914,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
   regval &= ~OHCI_CTRL_PLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
-  /* Get the quanitized interval value associated with this ED and save it
+  /* Get the quantized interval value associated with this ED and save it
    * in the ED.
    */
 
@@ -1366,13 +1378,14 @@ static int lpc17_usbinterrupt(int irq, void *context)
 
                           ullvdbg("Connected\n");
                           priv->connected = true;
+                          priv->change    = true;
 
                           /* Notify any waiters */
 
-                          if (priv->rhswait)
+                          if (priv->pscwait)
                             {
-                              lpc17_givesem(&priv->rhssem);
-                              priv->rhswait = false;
+                              lpc17_givesem(&priv->pscsem);
+                              priv->pscwait = false;
                             }
                         }
                       else
@@ -1396,24 +1409,25 @@ static int lpc17_usbinterrupt(int irq, void *context)
 
                       ullvdbg("Disconnected\n");
                       priv->connected = false;
+                      priv->change    = true;
                       priv->lowspeed  = false;
 
                       /* Are we bound to a class instance? */
 
-                      if (priv->class)
+                      if (priv->rhport.hport.devclass)
                         {
                           /* Yes.. Disconnect the class */
 
-                          CLASS_DISCONNECTED(priv->class);
-                          priv->class = NULL;
+                          CLASS_DISCONNECTED(priv->rhport.hport.devclass);
+                          priv->rhport.hport.devclass = NULL;
                         }
 
                       /* Notify any waiters for the Root Hub Status change event */
 
-                      if (priv->rhswait)
+                      if (priv->pscwait)
                         {
-                          lpc17_givesem(&priv->rhssem);
-                          priv->rhswait = false;
+                          lpc17_givesem(&priv->pscsem);
+                          priv->pscwait = false;
                         }
                     }
                   else
@@ -1521,19 +1535,20 @@ static int lpc17_usbinterrupt(int irq, void *context)
  * Name: lpc17_wait
  *
  * Description:
- *   Wait for a device to be connected or disconneced.
+ *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
  *   conn - The USB host connection instance obtained as a parameter from the call to
  *      the USB driver initialization logic.
- *   connected - A pointer to a boolean value:  TRUE: Wait for device to be
- *      connected; FALSE: wait for device to be disconnected
+ *   hport - The location to return the hub port descriptor that detected the
+ *      connection related event.
  *
  * Returned Values:
- *   Zero (OK) is returned when a device in connected. This function will not
- *   return until either (1) a device is connected or (2) some failure occurs.
- *   On a failure, a negated errno value is returned indicating the nature of
- *   the failure
+ *   Zero (OK) is returned on success when a device in connected or
+ *   disconnected. This function will not return until either (1) a device is
+ *   connected or disconnect to/from any hub port or until (2) some failure
+ *   occurs.  On a failure, a negated errno value is returned indicating the
+ *   nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -1542,26 +1557,60 @@ static int lpc17_usbinterrupt(int irq, void *context)
  *******************************************************************************/
 
 static int lpc17_wait(struct usbhost_connection_s *conn,
-                      const bool *connected)
+                      struct usbhost_hubport_s **hport)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
+  struct usbhost_hubport_s *connport;
   irqstate_t flags;
 
-  /* Are we already connected? */
-
   flags = irqsave();
-  while (priv->connected == *connected)
+  for (;;)
     {
-      /* No... wait for the connection/disconnection */
+      /* Is there a change in the connection state of the single root hub
+       * port?
+       */
 
-      priv->rhswait = true;
-      lpc17_takesem(&priv->rhssem);
+      if (priv->change)
+        {
+          connport = &priv->rhport.hport;
+
+          /* Yes. Remember the new state */
+
+          connport->connected = priv->connected;
+          priv->change = false;
+
+          /* And return the root hub port */
+
+          *hport = connport;
+          irqrestore(flags);
+
+          udbg("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
+          return OK;
+        }
+
+#ifdef CONFIG_USBHOST_HUB
+      /* Is a device connected to an external hub? */
+
+      if (priv->hport)
+        {
+          /* Yes.. return the external hub port */
+
+          connport = (struct usbhost_hubport_s *)priv->hport;
+          priv->hport = NULL;
+
+          *hport = connport;
+          irqrestore(flags);
+
+          udbg("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          return OK;
+        }
+#endif
+
+      /* Wait for the next connection event */
+
+      priv->pscwait = true;
+      lpc17_takesem(&priv->pscsem);
     }
-
-  irqrestore(flags);
-
-  udbg("Connected:%s\n", priv->connected ? "YES" : "NO");
-  return OK;
 }
 
 /*******************************************************************************
@@ -1573,30 +1622,30 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
  *   extract the class ID info from the configuration descriptor, (3) call
  *   usbhost_findclass() to find the class that supports this device, (4)
  *   call the create() method on the struct usbhost_registry_s interface
- *   to get a class instance, and finally (5) call the configdesc() method
+ *   to get a class instance, and finally (5) call the connect() method
  *   of the struct usbhost_class_s interface.  After that, the class is in
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
- *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
+ *   conn - The USB host connection instance obtained as a parameter from
+ *      the call to the USB driver initialization logic.
+ *   hport - The descriptor of the hub port that has the newly connected
+ *      device.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
- *   - Called from a single thread so no mutual exclusion is required.
- *   - Never called from an interrupt handler.
+ *   This function will *not* be called from an interrupt handler.
  *
  *******************************************************************************/
 
-static int lpc17_enumerate(struct usbhost_connection_s *conn, int rphndx)
+static int lpc17_rh_enumerate(struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
-  DEBUGASSERT(priv && rphndx == 0);
+  DEBUGASSERT(conn != NULL && hport != NULL &&& hport->port == 0);
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
@@ -1626,13 +1675,42 @@ static int lpc17_enumerate(struct usbhost_connection_s *conn, int rphndx)
 
   lpc17_putreg(OHCI_RHPORTST_PRSC, LPC17_USBHOST_RHPORTST1);
   (void)usleep(200*1000);
+  return OK;
+}
 
-  /* Let the common usbhost_enumerate do all of the real work.  Note that the
-   * FunctionAddress (USB address) is hardcoded to one.
+static int lpc17_enumerate(FAR struct usbhost_connection_s *conn,
+                           FAR struct usbhost_hubport_s *hport)
+{
+  int ret;
+
+  DEBUGASSERT(hport);
+
+  /* If this is a connection on the root hub, then we need to go to
+   * little more effort to get the device speed.  If it is a connection
+   * on an external hub, then we already have that information.
    */
 
+#ifdef CONFIG_USBHOST_HUB
+  if (ROOTHUB(hport))
+#endif
+    {
+      ret = lpc17_rh_enumerate(conn, hport);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  /* Then let the common usbhost_enumerate do the real enumeration. */
+
   uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(&g_usbhost.hport.hport, &priv->class);
+  ret = usbhost_enumerate(hport, &hport->devclass);
+  if (ret < 0)
+    {
+      udbg("ERROR: Enumeration failed: %d\n", ret);
+    }
+
+  return ret;
 }
 
 /************************************************************************************
@@ -2407,6 +2485,56 @@ static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 }
 #endif
 
+/************************************************************************************
+ * Name: lpc17_connect
+ *
+ * Description:
+ *   New connections may be detected by an attached hub.  This method is the
+ *   mechanism that is used by the hub class to introduce a new connection
+ *   and port description to the system.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   hport - The descriptor of the hub port that detected the connection
+ *      related event
+ *   connected - True: device connected; false: device disconnected
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_HUB
+static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
+                         FAR struct usbhost_hubport_s *hport,
+                         bool connected)
+{
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  DEBUGASSERT(priv != NULL && hport != NULL);
+  irqstate_t flags;
+
+  /* Set the connected/disconnected flag */
+
+  hport->connected = connected;
+  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+
+  /* Report the connection event */
+
+  flags = irqsave();
+  priv->hport = hport;
+  if (priv->pscwait)
+    {
+      priv->pscwait = false;
+      lpc17_givesem(&priv->pscsem);
+    }
+
+  irqrestore(flags);
+  return OK;
+}
+#endif
+
 /*******************************************************************************
  * Name: lpc17_disconnect
  *
@@ -2435,7 +2563,7 @@ static void lpc17_disconnect(struct usbhost_driver_s *drvr)
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   DEBUGASSERT(priv);
 
-  priv->class = NULL;
+  priv->rhport.hport.devclass = NULL;
 }
 
 /*******************************************************************************
@@ -2556,11 +2684,14 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 #ifdef CONFIG_USBHOST_ASYNCH
   drvr->asynch         = lpc17_asynch;
 #endif
+#ifdef CONFIG_USBHOST_HUB
+  drvr->connect        = lpc17_connect;
+#endif
   drvr->disconnect     = lpc17_disconnect;
 
   /* Initialize the public port representation */
 
-  hport                       = &priv->hport.hport;
+  hport                       = &priv->rhport.hport;
   hport->drvr                 = drvr;
 #ifdef CONFIG_USBHOST_HUB
   hport->parent               = NULL;
@@ -2570,11 +2701,11 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   /* Initialize function address generation logic */
 
-  usbhost_devaddr_initialize(&priv->hport);
+  usbhost_devaddr_initialize(&priv->rhport);
 
   /* Initialize semaphores */
 
-  sem_init(&priv->rhssem,  0, 0);
+  sem_init(&priv->pscsem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE

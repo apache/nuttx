@@ -106,8 +106,9 @@ struct usbhost_hubpriv_s
   struct work_s             work;         /* Used for deferred callback work */
   usbhost_ep_t              intin;        /* Interrupt IN endpoint */
 
-  struct usbhost_class_s    *childclass[USBHUB_MAX_PORTS];
-                                          /* Pointer to child devices */
+  /* Hub port descriptors */
+
+  struct usbhost_hubport_s  hport[USBHUB_MAX_PORTS];
 };
 
 /* This represents the hub class structure.  It must be cast compatible
@@ -126,12 +127,7 @@ struct usbhost_hubclass_s
 
 /* Memory allocation services */
 
-static inline FAR struct usbhost_hubport_s *usbhost_allochub(
-             FAR struct usbhost_driver_s *drvr,
-             FAR struct usbhost_class_s *hubclass, uint8_t speed,
-             uint8_t port);
-static inline void usbhost_freehub(FAR struct usbhost_hubport_s *hport);
-static inline void usbhost_freeclass(FAR struct usbhost_class_s *devclass);
+static inline void usbhost_class_free(FAR struct usbhost_class_s *devclass);
 
 /* Worker thread actions */
 
@@ -196,9 +192,44 @@ static struct usbhost_registry_s g_hub =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbhost_allochub
+ * Name: usbhost_hport_free
  *
  * Description:
+ *   Free a hub resource previously allocated by usbhost_hport_initialize().
+ *
+ * Input Parameters:
+ *   hport - A reference to the hub port instance to be freed.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void usbhost_hport_free(FAR struct usbhost_hubport_s *hport)
+{
+  uvdbg("Freeing: %p\n", hport);
+
+  /* Free endpoints */
+
+  if (hport->ep0 != NULL)
+    {
+      DRVR_EPFREE(hport->drvr, hport->ep0);
+      hport->ep0 = NULL;
+    }
+
+  /* Free the function address */
+
+  usbhost_devaddr_destroy(hport);
+  hport->funcaddr = 0;
+
+  DEBUGASSERT(hport->devclass == NULL);
+}
+
+/****************************************************************************
+ * Name: usbhost_hport_initialize
+ *
+ * Description:
+ *   Initialize and configure an
  *   This is really part of the logic that implements the create() method
  *   of struct usbhost_registry_s.  This function allocates memory for one
  *   new class instance.
@@ -214,92 +245,39 @@ static struct usbhost_registry_s g_hub =
  *
  ****************************************************************************/
 
-static inline FAR struct usbhost_hubport_s *
-  usbhost_allochub(FAR struct usbhost_driver_s *drvr,
-                     FAR struct usbhost_class_s *hubclass,
-                     uint8_t speed, uint8_t port)
+static int usbhost_hport_initialize(FAR struct usbhost_driver_s *drvr,
+                                    FAR struct usbhost_class_s *hubclass,
+                                    uint8_t port,
+                                    FAR struct usbhost_hubport_s *child)
 {
-  FAR struct usbhost_hubport_s *child;
-  FAR struct usbhost_hubport_s *parent;
+  FAR struct usbhost_hubport_s *parent = hubclass->hport;
+  struct usbhost_epdesc_s epdesc;
+  int ret;
 
-  DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
-  parent = hubclass->hport;
+  child->drvr         = drvr;
+  child->parent       = parent;
+  child->funcaddr     = 0;
+  child->speed        = USB_SPEED_FULL;
 
-  /* We are not executing from an interrupt handler so we can just call
-   * kmm_malloc() to get memory for the class instance.
-   */
+  epdesc.hport        = child;
+  epdesc.addr         = 0;
+  epdesc.in           = 0;
+  epdesc.xfrtype      = USB_EP_ATTR_XFER_CONTROL;
+  epdesc.interval     = 0;
+  epdesc.mxpacketsize = 8;
 
-  DEBUGASSERT(!up_interrupt_context());
-  child = (FAR struct usbhost_hubport_s *)
-    kmm_malloc(sizeof(struct usbhost_hubport_s));
-
-  uvdbg("Allocated: %p\n", child);
-
-  if (child != NULL)
+  ret = DRVR_EPALLOC(drvr, &epdesc, &child->ep0);
+  if (ret != OK)
     {
-      struct usbhost_epdesc_s epdesc;
-      int ret;
-
-      child->drvr         = drvr;
-      child->parent       = parent;
-      child->funcaddr     = 0;
-      child->speed        = speed;
-
-      epdesc.hport        = child;
-      epdesc.addr         = 0;
-      epdesc.in           = 0;
-      epdesc.xfrtype      = USB_EP_ATTR_XFER_CONTROL;
-      epdesc.interval     = 0;
-      epdesc.mxpacketsize = 8;
-
-      ret = DRVR_EPALLOC(drvr, &epdesc, &child->ep0);
-      if (ret != OK)
-        {
-          udbg("ERROR: Failed to allocate ep0: %d\n", ret);
-          usbhost_freehub(child);
-          child = NULL;
-        }
+      udbg("ERROR: Failed to allocate ep0: %d\n", ret);
+      usbhost_hport_free(child);
     }
 
-  return child;
+  return ret;
 }
 
 /****************************************************************************
- * Name: usbhost_freehub
- *
- * Description:
- *   Free a hub instance previously allocated by usbhost_allochub().
- *
- * Input Parameters:
- *   hport - A reference to the hub port instance to be freed.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-static inline void usbhost_freehub(FAR struct usbhost_hubport_s *hport)
-{
-  if (hport && !ROOTHUB(hport))
-    {
-      if (hport->ep0 != NULL)
-        {
-          DRVR_EPFREE(hport->drvr, hport->ep0);
-          hport->ep0 = NULL;
-        }
-
-      usbhost_devaddr_destroy(hport);
-      hport->funcaddr = 0;
-
-      /* Free the hport instance */
-
-      uvdbg("Freeing: %p\n", hport);
-      kmm_free(hport);
-    }
-}
-
-/****************************************************************************
- * Name: usbhost_freeclass
+ * Name: usbhost_class_free
  *
  * Description:
  *   Free a class instance previously allocated by usbhost_create().
@@ -312,18 +290,25 @@ static inline void usbhost_freehub(FAR struct usbhost_hubport_s *hport)
  *
  ****************************************************************************/
 
-static inline void usbhost_freeclass(FAR struct usbhost_class_s *devclass)
+static inline void usbhost_class_free(FAR struct usbhost_class_s *devclass)
 {
+  FAR struct usbhost_hubport_s *hport;
   DEBUGASSERT(devclass != NULL);
 
-  /* Free the bound hub */
+  uvdbg("Freeing: %p\n", devclass);
+  DEBUGASSERT(devclass != NULL && devclass->hport != NULL);
+  hport = devclass->hport;
 
-  usbhost_freehub(devclass->hport);
+  /* Detach the class from the hub port */
+
+  usbhost_devaddr_destroy(hport);
+  hport->funcaddr = 0;
 
   /* Free the class instance */
 
-  uvdbg("Freeing: %p\n", devclass);
+  DEBUGASSERT(hport->devclass == devclass);
   kmm_free(devclass);
+  hport->devclass = NULL;
 }
 
 /****************************************************************************
@@ -347,37 +332,46 @@ static void usbhost_destroy(FAR void *arg)
   FAR struct usbhost_class_s *hubclass = (FAR struct usbhost_class_s *)arg;
   FAR struct usbhost_hubpriv_s *priv;
   FAR struct usbhost_hubport_s *hport;
-  int i;
-
-  DEBUGASSERT(hubclass != NULL);
-  priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
+  int port;
 
   uvdbg("crefs: %d\n", priv->crefs);
 
+  DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
+  priv  = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
+  hport = hubclass->hport;
+
+  /* Destroy the interrupt IN endpoint */
+
   if (priv->intin)
     {
-      DEBUGASSERT(hubclass->hport);
-      hport = hubclass->hport;
       DRVR_EPFREE(hport->drvr, priv->intin);
+      priv->intin = NULL;
+    }
+
+  /* Release per-per resource */
+
+  for (port = 0; port < USBHUB_MAX_PORTS; port++)
+    {
+      /* Free any devices classes connect on this hub port */
+
+      hport = &priv->hport[port];
+      if (hport->devclass != NULL)
+        {
+          CLASS_DISCONNECTED(hport->devclass);
+        }
+
+      /* Free any resource use by the hub port */
+
+      usbhost_hport_free(hport);
     }
 
   /* Destroy the semaphores */
 
   sem_destroy(&priv->exclsem);
 
-  /* Destroy allocated child classes */
+  /* Free the hub class structure */
 
-  for (i = 0; i < USBHUB_MAX_PORTS; i++)
-    {
-      if (priv->childclass[i] != NULL)
-        {
-          CLASS_DISCONNECTED(priv->childclass[i]);
-        }
-    }
-
-  /* Free the allocated class structure */
-
-  usbhost_freeclass(hubclass);
+  usbhost_class_free(hubclass);
 }
 
 /****************************************************************************
@@ -735,7 +729,6 @@ static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
 static void usbhost_hubevent(FAR void *arg)
 {
   FAR struct usbhost_class_s *hubclass;
-  FAR struct usbhost_hubport_s *newhub;
   FAR struct usbhost_hubport_s *hport;
   FAR struct usbhost_hubpriv_s *priv;
   FAR struct usb_ctrlreq_s *ctrlreq;
@@ -930,7 +923,7 @@ static void usbhost_hubevent(FAR void *arg)
               if (!(status & USBHUB_PORT_STAT_RESET) &&
                    (status & USBHUB_PORT_STAT_ENABLE))
                 {
-                  uint8_t speed;
+                  FAR struct usbhost_hubport_s *connport;
 
                   if (change & USBHUB_PORT_STAT_CRESET)
                     {
@@ -943,34 +936,26 @@ static void usbhost_hubevent(FAR void *arg)
                       (void)DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
                     }
 
+                  connport = &hubclass->hport[port];
                   if (status & USBHUB_PORT_STAT_HIGH_SPEED)
                     {
-                      speed = USB_SPEED_HIGH;
+                      connport->speed = USB_SPEED_HIGH;
                     }
                   else if (status & USBHUB_PORT_STAT_LOW_SPEED)
                     {
-                      speed = USB_SPEED_LOW;
+                      connport->speed = USB_SPEED_LOW;
                     }
                   else
                     {
-                      speed = USB_SPEED_FULL;
+                      connport->speed = USB_SPEED_FULL;
                     }
 
-                  /* Allocate new hub class and enumerate */
+                  /* Inform waiters that a new device has been connected */
 
-                  newhub = usbhost_allochub(hport->drvr, hubclass, speed, port);
-                  if (newhub)
+                  ret = DRVR_CONNECT(connport->drvr, connport, true);
+                  if (ret < 0)
                     {
-                      udbg("ERROR: Failed to allocated class\n");
-                      uvdbg("enumerate port %d speed %d\n", port, speed);
-
-                      ret = usbhost_enumerate(newhub, &priv->childclass[port]);
-                      if (ret != OK)
-                        {
-                          udbg("ERROR: Failed to enumerate port %d: %d\n",
-                               port, ret);
-                          usbhost_freehub(hport);
-                        }
+                      udbg("ERROR: DRVR_CONNECT failed: %d\n", ret);
                     }
                 }
               else
@@ -1118,7 +1103,7 @@ static FAR struct usbhost_class_s *
   FAR struct usbhost_class_s *hubclass;
   FAR struct usbhost_hubpriv_s *priv;
   size_t maxlen;
-  int child;
+  int port;
   int ret;
 
   /* Allocate a USB host class instance */
@@ -1166,14 +1151,29 @@ static FAR struct usbhost_class_s *
 
   sem_init(&priv->exclsem, 0, 1);
 
-  /* Initialize child class pointers */
+  /* Initialize per-port data */
 
-  for (child = 0; child < USBHUB_MAX_PORTS; child++)
+  for (port = 0; port < USBHUB_MAX_PORTS; port++)
     {
-      priv->childclass[child] = NULL;
+      /* Initialize the hub port descriptor */
+
+      ret = usbhost_hport_initialize(hport->drvr, hubclass, port,
+                                     &hubclass->hport[port]);
+      if (ret < 0)
+        {
+          goto errout_with_hports;
+        }
     }
 
   return hubclass;
+
+errout_with_hports:
+  for (port = 0; port < USBHUB_MAX_PORTS; port++)
+    {
+      /* Free resource used by hub port descriptor */
+
+      usbhost_hport_free(hport);
+    }
 
 errout_with_ctrlreq:
   kmm_free(priv->ctrlreq);

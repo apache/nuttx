@@ -235,10 +235,6 @@ struct sam_rhport_s
   /* This is the hub port description understood by class drivers */
 
   struct usbhost_roothubport_s hport;
-
-  /* The bound device class driver */
-
-  struct usbhost_class_s *class;
 };
 
 /* This structure retains the overall state of the USB host controller */
@@ -246,6 +242,7 @@ struct sam_rhport_s
 struct sam_ehci_s
 {
   volatile bool pscwait;       /* TRUE: Thread is waiting for port status change event */
+
   sem_t exclsem;               /* Support mutually exclusive access */
   sem_t pscsem;                /* Semaphore to wait for port status change events */
 
@@ -254,7 +251,13 @@ struct sam_ehci_s
   struct sam_list_s *qtdfree;  /* List of free Queue Element Transfer Descriptor (qTD) */
   struct work_s work;          /* Supports interrupt bottom half */
 
-  /* Root hub ports */
+#ifdef CONFIG_USBHOST_HUB
+  /* Used to pass external hub port events */
+
+  volatile struct usbhost_hubport_s *hport;
+#endif
+
+   /* Root hub ports */
 
   struct sam_rhport_s rhport[SAM_EHCI_NRHPORT];
 };
@@ -371,8 +374,11 @@ static int sam_ehci_tophalf(int irq, FAR void *context);
 /* USB Host Controller Operations **********************************************/
 
 static int sam_wait(FAR struct usbhost_connection_s *conn,
-         FAR const bool *connected);
-static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
+         FAR struct usbhost_hubport_s **hport);
+static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
+         FAR struct usbhost_hubport_s *hport);
+static int sam_enumerate(FAR struct usbhost_connection_s *conn,
+         FAR struct usbhost_hubport_s *hport);
 
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
          uint8_t funcaddr, uint16_t maxpacketsize);
@@ -397,6 +403,11 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                       FAR uint8_t *buffer, size_t buflen,
                       usbhost_asynch_t callback, FAR void *arg);
+#endif
+#ifdef CONFIG_USBHOST_HUB
+static int sam_connect(FAR struct usbhost_driver_s *drvr,
+                       FAR struct usbhost_hubport_s *hport,
+                       bool connected);
 #endif
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
 
@@ -2687,12 +2698,12 @@ static inline void sam_portsc_bottomhalf(void)
 
                   /* Are we bound to a class instance? */
 
-                  if (rhport->class)
+                  if (rhport->hport.devclass)
                     {
                       /* Yes.. Disconnect the class */
 
-                      CLASS_DISCONNECTED(rhport->class);
-                      rhport->class = NULL;
+                      CLASS_DISCONNECTED(rhport->hport.devclass);
+                      rhport->hport.devclass = NULL;
                     }
 
                   /* Notify any waiters for the Root Hub Status change
@@ -2986,23 +2997,20 @@ static int sam_uhphs_interrupt(int irq, FAR void *context)
  * Name: sam_wait
  *
  * Description:
- *   Wait for a device to be connected or disconnected to/from a root hub port.
+ *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
  *   conn - The USB host connection instance obtained as a parameter from the call to
  *      the USB driver initialization logic.
- *   connected - A pointer to an array of 3 boolean values corresponding to
- *      root hubs 1, 2, and 3.  For each boolean value: TRUE: Wait for a device
- *      to be connected on the root hub; FALSE: wait for device to be
- *      disconnected from the root hub.
+ *   hport - The location to return the hub port descriptor that detected the
+ *      connection related event.
  *
  * Returned Values:
- *   And index [0, 1, or 2} corresponding to the root hub port number {1, 2,
- *   or 3} is returned when a device is connected or disconnected. This
- *   function will not return until either (1) a device is connected or
- *   disconnected to/from any root hub port or until (2) some failure occurs.
- *   On a failure, a negated errno value is returned indicating the nature of
- *   the failure
+ *   Zero (OK) is returned on success when a device in connected or
+ *   disconnected. This function will not return until either (1) a device is
+ *   connected or disconnect to/from any hub port or until (2) some failure
+ *   occurs.  On a failure, a negated errno value is returned indicating the
+ *   nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3011,7 +3019,7 @@ static int sam_uhphs_interrupt(int irq, FAR void *context)
  *******************************************************************************/
 
 static int sam_wait(FAR struct usbhost_connection_s *conn,
-                    FAR const bool *connected)
+                    FAR struct usbhost_hubport_s **hport)
 {
   irqstate_t flags;
   int rhpndx;
@@ -3029,18 +3037,42 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
         {
           /* Has the connection state changed on the RH port? */
 
-          if (g_ehci.rhport[rhpndx].connected != connected[rhpndx])
+          if (g_ehci.rhport[rhpndx].hport.connected != connected[rhpndx])
             {
-              /* Yes.. Return the RH port number to inform the caller which
+              /* Yes.. Return the RH port to inform the caller which
                * port has the connection change.
                */
 
+              *hport = &g_ehci.rhport[rhpndx].hport;
               irqrestore(flags);
+
               usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
-                              rhpndx + 1, g_ehci.rhport[rhpndx].connected);
-              return rhpndx;
+                              rhpndx + 1,
+                              g_ehci.rhport[rhpndx].hport.connected);
+              return OK;
             }
         }
+
+#ifdef CONFIG_USBHOST_HUB
+      /* Is a device connected to an external hub? */
+
+      if (g_ehci.hport)
+        {
+          FAR volatile struct usbhost_hubport_s *connport;
+
+          /* Yes.. return the external hub port */
+
+          connport = g_ehci.hport;
+          g_ehci.hport = NULL;
+
+          *hport = connport;
+          irqrestore(flags);
+
+          usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
+                          connport->port + 1, connport->connected);
+          return OK;
+        }
+#endif
 
       /* No changes on any port. Wait for a connection/disconnection event
        * and check again
@@ -3060,32 +3092,36 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
  *   extract the class ID info from the configuration descriptor, (3) call
  *   usbhost_findclass() to find the class that supports this device, (4)
  *   call the create() method on the struct usbhost_registry_s interface
- *   to get a class instance, and finally (5) call the configdesc() method
+ *   to get a class instance, and finally (5) call the connect() method
  *   of the struct usbhost_class_s interface.  After that, the class is in
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
- *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
+ *   conn - The USB host connection instance obtained as a parameter from
+ *      the call to the USB driver initialization logic.
+ *   hport - The descriptor of the hub port that has the newly connected
+ *      device.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
- *   - Called from a single thread so no mutual exclusion is required.
- *   - Never called from an interrupt handler.
+ *   This function will *not* be called from an interrupt handler.
  *
  *******************************************************************************/
 
-static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
+static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
+                            FAR struct usbhost_hubport_s *hport)
 {
   struct sam_rhport_s *rhport;
   volatile uint32_t *regaddr;
   uint32_t regval;
+  int rhpndx;
   int ret;
+
+  DEBUGASSERT(conn != NULL && hport != NULL);
+  rhpndx = hport->port;
 
   DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_EHCI_NRHPORT);
   rhport = &g_ehci.rhport[rhpndx];
@@ -3296,16 +3332,35 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       return -EPERM;
     }
 
-  /* Let the common usbhost_enumerate do all of the real work.  Note that the
-   * FunctionAddress (USB address) is set to the root hub port number + 1
-   * for now.
-   *
-   * REVISIT:  Hub support will require better device address assignment.
-   * See include/nuttx/usb/usbhost_devaddr.h.
+  return OK;
+}
+
+static int sam_enumerate(FAR struct usbhost_connection_s *conn,
+                         FAR struct usbhost_hubport_s *hport)
+{
+  int ret;
+
+  /* If this is a connection on the root hub, then we need to go to
+   * little more effort to get the device speed.  If it is a connection
+   * on an external hub, then we already have that information.
    */
 
-  usbhost_vtrace2(EHCI_VTRACE2_CLASSENUM, rhpndx+1, rhpndx+1);
-  ret = usbhost_enumerate(&g_ehci.rhport[rhpndx].hport.hport, &rhport->class);
+  DEBUGASSERT(hport);
+#ifdef CONFIG_USBHOST_HUB
+  if (ROOTHUB(hport))
+#endif
+    {
+      ret = sam_rh_enumerate(conn, hport);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  /* Then let the common usbhost_enumerate do the real enumeration. */
+
+  usbhost_vtrace1(EHCI_VTRACE2_CLASSENUM, hport->port);
+  ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
       usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
@@ -3810,6 +3865,56 @@ static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 }
 #endif
 
+/************************************************************************************
+ * Name: sam_connect
+ *
+ * Description:
+ *   New connections may be detected by an attached hub.  This method is the
+ *   mechanism that is used by the hub class to introduce a new connection
+ *   and port description to the system.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   hport - The descriptor of the hub port that detected the connection
+ *      related event
+ *   connected - True: device connected; false: device disconnected
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_HUB
+static int sam_connect(FAR struct usbhost_driver_s *drvr,
+                       FAR struct usbhost_hubport_s *hport,
+                       bool connected)
+{
+  irqstate_t flags;
+
+  /* Set the connected/disconnected flag */
+
+  hport->connected = connected;
+  ullvdbg("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+
+  /* Report the connection event */
+
+  flags = irqsave();
+  DEBUGASSERT(g_ehci.hport == NULL); /* REVISIT */
+
+  g_ehci.hport = hport;
+  if (g_ehci.pscwait)
+    {
+      g_ehci.pscwait = false;
+      sam_givesem(&g_ehci.pscsem);
+    }
+
+  irqrestore(flags);
+  return OK;
+}
+#endif
+
 /*******************************************************************************
  * Name: sam_disconnect
  *
@@ -3841,7 +3946,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
   /* Unbind the class */
   /* REVISIT:  Is there more that needs to be done? */
 
-  rhport->class = NULL;
+  rhport->hport.devclass = NULL;
 }
 
 /*******************************************************************************
@@ -4111,6 +4216,9 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->drvr.transfer       = sam_transfer;
 #ifdef CONFIG_USBHOST_ASYNCH
       rhport->drvr.asynch         = sam_asynch;
+#endif
+#ifdef CONFIG_USBHOST_HUB
+      rhport->drvr.connect        = sam_connect;
 #endif
       rhport->drvr.disconnect     = sam_disconnect;
 

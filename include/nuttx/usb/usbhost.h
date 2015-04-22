@@ -163,22 +163,20 @@
  * Name: CONN_WAIT
  *
  * Description:
- *   Wait for a device to be connected or disconnected to/from a root hub port.
+ *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
  *   conn - The USB host connection instance obtained as a parameter from the call to
  *      the USB driver initialization logic.
- *   connected - A pointer to an array of n boolean values corresponding to
- *      root hubs 1 through n.  For each boolean value: TRUE: Wait for a device
- *      to be connected on the root hub; FALSE: wait for device to be
- *      disconnected from the root hub.
+ *   hport - The location to return the hub port descriptor that detected the
+ *      connection related event.
  *
  * Returned Values:
- *   And index [0..(n-1)} corresponding to the root hub port number {1..n} is
- *   returned when a device in connected or disconnected. This function will not
- *   return until either (1) a device is connected or disconnect to/from any
- *   root hub port or until (2) some failure occurs.  On a failure, a negated
- *   errno value is returned indicating the nature of the failure
+ *   Zero (OK) is returned on success when a device in connected or
+ *   disconnected. This function will not return until either (1) a device is
+ *   connected or disconnect to/from any hub port or until (2) some failure
+ *   occurs.  On a failure, a negated errno value is returned indicating the
+ *   nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -186,7 +184,7 @@
  *
  *******************************************************************************/
 
-#define CONN_WAIT(conn, connected) ((conn)->wait(conn,connected))
+#define CONN_WAIT(conn,hport) ((conn)->wait(conn,hport))
 
 /************************************************************************************
  * Name: CONN_ENUMERATE
@@ -202,9 +200,10 @@
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
- *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
+ *   conn - The USB host connection instance obtained as a parameter from
+ *      the call to the USB driver initialization logic.
+ *   hport - The descriptor of the hub port that has the newly connected
+ *      device.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -510,8 +509,34 @@
   ((drvr)->transfer(drvr,ep,buffer,buflen))
 
 #ifdef CONFIG_USBHOST_ASYNCH
-#define DRVR_ASYNCH(drvr,ep,buffer,buflen,callback,arg) \
-  ((drvr)->asynch(drvr,ep,buffer,buflen,callback,arg))
+#  define DRVR_ASYNCH(drvr,ep,buffer,buflen,callback,arg) \
+     ((drvr)->asynch(drvr,ep,buffer,buflen,callback,arg))
+#endif
+
+/************************************************************************************
+ * Name: DRVR_CONNECT
+ *
+ * Description:
+ *   New connections may be detected by an attached hub.  This method is the
+ *   mechanism that is used by the hub class to introduce a new connection
+ *   and port description to the system.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   hport - The descriptor of the hub port that detected the connection
+ *      related event
+ *   connected - True: device connected; false: device disconnected
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_HUB
+#  define DRVR_CONNECT(drvr,hport,connected) \
+     ((drvr)->connect(drvr,hport,connected))
 #endif
 
 /************************************************************************************
@@ -618,7 +643,9 @@ struct usbhost_hubport_s
 #ifdef CONFIG_USBHOST_HUB
   FAR struct usbhost_hubport_s *parent; /* Parent hub (NULL=root hub) */
 #endif
+  FAR struct usbhost_class_s *devclass; /* The bound device class driver */
   usbhost_ep_t ep0;                     /* Control endpoint, ep0 */
+  bool connected;                       /* True: device connected; false: disconnected */
   uint8_t port;                         /* Hub port index */
   uint8_t funcaddr;                     /* Device function address */
   uint8_t speed;                        /* Device speed */
@@ -689,9 +716,10 @@ struct usbhost_connection_s
 {
   /* Wait for a device to connect or disconnect. */
 
-  int (*wait)(FAR struct usbhost_connection_s *conn, FAR const bool *connected);
+  int (*wait)(FAR struct usbhost_connection_s *conn,
+              FAR struct usbhost_hubport_s **hport);
 
-  /* Enumerate the device connected on a root hub port.  As part of this
+  /* Enumerate the device connected on a hub port.  As part of this
    * enumeration process, the driver will (1) get the device's configuration
    * descriptor, (2) extract the class ID info from the configuration
    * descriptor, (3) call usbhost_findclass() to find the class that supports
@@ -701,7 +729,8 @@ struct usbhost_connection_s
    * in charge of the sequence of operations.
    */
 
-  int (*enumerate)(FAR struct usbhost_connection_s *conn, int rhpndx);
+  int (*enumerate)(FAR struct usbhost_connection_s *conn,
+                   FAR struct usbhost_hubport_s *hport);
 };
 
 /* Callback type used with asynchronous transfers */
@@ -792,6 +821,17 @@ struct usbhost_driver_s
   int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                   FAR uint8_t *buffer, size_t buflen,
                   usbhost_asynch_t callback, FAR void *arg);
+#endif
+
+#ifdef CONFIG_USBHOST_HUB
+  /* New connections may be detected by an attached hub.  This method is the
+   * mechanism that is used by the hub class to introduce a new connection
+   * and port description to the system.
+   */
+
+  int (*connect)(FAR struct usbhost_driver_s *drvr,
+                 FAR struct usbhost_hubport_s *hport,
+                 bool connected);
 #endif
 
   /* Called by the class when an error occurs and driver has been disconnected.
@@ -1010,4 +1050,3 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hub,
 #endif
 
 #endif /* __INCLUDE_NUTTX_USB_USBHOST_H */
-
