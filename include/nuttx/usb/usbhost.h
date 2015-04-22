@@ -468,9 +468,9 @@
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and rwait for it to complete.  Only one transfer may
- *   be queued; Neither this method nor the ctrlin or ctrlout methods can be called
- *   again until this function returns.
+ *   enqueue the transfer request.  Only one transfer may be queued; Neither this
+ *   method nor the ctrlin or ctrlout methods can be called again until this
+ *   function returns.
  *
  * - 'transfer' is a blocking method; this method will not return until the
  *   transfer has completed.

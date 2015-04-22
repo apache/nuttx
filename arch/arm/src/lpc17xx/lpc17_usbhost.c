@@ -84,6 +84,10 @@
 #  warning "No IO buffers allocated"
 #endif
 
+#ifndef CONFIG_LPC17_USBHOST_NASYNCH
+#  define CONFIG_LPC17_USBHOST_NASYNCH 8
+#endif
+
 /* OHCI Setup ******************************************************************/
 /* Frame Interval / Periodic Start */
 
@@ -180,6 +184,21 @@ struct lpc17_usbhost_s
 #endif
  };
 
+#ifdef CONFIG_USBHOST_ASYNCH
+/* This structure describes one asynchronous transfer */
+
+struct lpc17_asynch_s
+{
+  uint16_t buflen;            /* Buffer length */
+  uint8_t *user;              /* User buffer */
+#if LPC17_IOBUFFERS > 0
+  uint8_t *alloc;             /* Allocated buffer */
+#endif
+  usbhost_asynch_t callback;  /* Transfer complete callback */
+  void *arg;                  /* Argument that accompanies the callback */
+};
+#endif
+
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes in
  * lpc17_ohciram.h.  This extra 16-bytes is used by the OHCI host driver in
@@ -194,12 +213,17 @@ struct lpc17_ed_s
 
   /* Software specific fields */
 
-  uint8_t          xfrtype;   /* Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
-  uint8_t          interval;  /* Periodic EP polling interval: 2, 4, 6, 16, or 32 */
-  volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
-  volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
-  sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
-                              /* Unused bytes follow, depending on the size of sem_t */
+  uint8_t          xfrtype;   /* 0: Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
+  uint8_t          interval;  /* 1: Periodic EP polling interval: 2, 4, 6, 16, or 32 */
+  volatile uint8_t tdstatus;  /* 2: TD control status bits from last Writeback Done Head event */
+  volatile bool    wdhwait;   /* 3: TRUE: Thread is waiting for WDH interrupt */
+  sem_t            wdhsem;    /* 4: Semaphore used to wait for Writeback Done Head event */
+                              /* Unused bytes may follow, depending on the size of sem_t */
+#ifdef CONFIG_USBHOST_ASYNCH
+  /* Pointer to structure that manages asynchronous transfers on this pipe */
+
+  struct lpc17_asynch_s *asynch;
+#endif
 };
 
 /* The OCHI expects the size of an transfer descriptor to be 16 bytes.
@@ -267,6 +291,10 @@ static void lpc17_tbfree(uint8_t *buffer);
 static uint8_t *lpc17_allocio(void);
 static void lpc17_freeio(uint8_t *buffer);
 #endif
+#ifdef CONFIG_USBHOST_ASYNCH
+static struct lpc17_asynch_s *lpc17_allocasynch(void);
+static void lpc17_freeasynch(struct lpc17_asynch_s *asynch);
+#endif
 
 /* ED list helper functions ****************************************************/
 
@@ -332,9 +360,22 @@ static int lpc17_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          const struct usb_ctrlreq_s *req,
                          const uint8_t *buffer);
+static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
+                                 struct lpc17_ed_s *ed, uint8_t *buffer,
+                                 size_t buflen);
+#if LPC17_IOBUFFERS > 0
+static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
+                           struct lpc17_ed_s *ed, uint8_t *userbuffer,
+                           size_t buflen, uint8_t **alloc);
+static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
+                           struct lpc17_ed_s *ed, uint8_t *userbuffer,
+                           size_t buflen, uint8_t *alloc);
+#endif
 static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
+static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
+                                    struct lpc17_ed_s *ed);
 static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen,
                         usbhost_asynch_t callback, FAR void *arg);
@@ -376,6 +417,13 @@ static struct lpc17_list_s *g_tdfree; /* List of unused TDs */
 static struct lpc17_list_s *g_tbfree; /* List of unused transfer buffers */
 #if LPC17_IOBUFFERS > 0
 static struct lpc17_list_s *g_iofree; /* List of unused I/O buffers */
+#endif
+
+#ifdef CONFIG_USBHOST_ASYNCH
+/* Pool and freelist of asynchronous transfer structures */
+
+static struct lpc17_list_s *g_asynchfree;
+static struct lpc17_list_s g_asynchbuffers[CONFIG_LPC17_USBHOST_NASYNCH];
 #endif
 
 /*******************************************************************************
@@ -695,11 +743,19 @@ static void lpc17_tbfree(uint8_t *buffer)
 #if LPC17_IOBUFFERS > 0
 static uint8_t *lpc17_allocio(void)
 {
-  uint8_t *ret = (uint8_t *)g_iofree;
+  uint8_t *ret;
+  irqstate_t flags;
+
+  /* lpc17_freeio() may be called from the interrupt level */
+
+  flags = irqsave();
+  ret = (uint8_t *)g_iofree;
   if (ret)
     {
       g_iofree = ((struct lpc17_list_s*)ret)->flink;
     }
+
+  irqrestore(flags);
   return ret;
 }
 #endif
@@ -715,9 +771,72 @@ static uint8_t *lpc17_allocio(void)
 #if LPC17_IOBUFFERS > 0
 static void lpc17_freeio(uint8_t *buffer)
 {
-  struct lpc17_list_s *iofree = (struct lpc17_list_s *)buffer;
-  iofree->flink               = g_iofree;
-  g_iofree                    = iofree;
+  struct lpc17_list_s *iofree;
+  irqstate_t flags;
+
+  /* Could be called from the interrupt level */
+
+  flags         = irqsave();
+  iofree        = (struct lpc17_list_s *)buffer;
+  iofree->flink = g_iofree;
+  g_iofree      = iofree;
+  irqrestore(flags);
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_allocasynch
+ *
+ * Description:
+ *   Allocate an asynchronous data structure from the free list
+ *
+ * Assumptions:
+ *   - Never called from an interrupt handler.
+ *   - Protection from re-entrance must be assured by the caller
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static struct lpc17_asynch_s *lpc17_allocasynch(void)
+{
+  struct lpc17_asynch_s *ret;
+  irqstate_t flags;
+
+  /* lpc17_freeasynch() may be called from the interrupt level */
+
+  flags = irqsave();
+  ret = (struct lpc17_asynch_s *)g_asynchfree;
+  if (ret)
+    {
+      g_asynchfree = ((struct lpc17_list_s*)ret)->flink;
+    }
+
+  irqrestore(flags);
+  return ret;
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_freeio
+ *
+ * Description:
+ *   Return an TD buffer to the free list
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static void lpc17_freeasynch(struct lpc17_asynch_s *asynch)
+{
+  struct lpc17_list_s *node;
+  irqstate_t flags;
+
+  /* Could be called from the interrupt level */
+
+  flags        = irqsave();
+  node         = (struct lpc17_list_s *)asynch;
+  node->flink  = g_asynchfree;
+  g_asynchfree = node;
+  irqrestore(flags);
 }
 #endif
 
@@ -1502,10 +1621,22 @@ static int lpc17_usbinterrupt(int irq, void *context)
               next = (struct lpc17_gtd_s *)td->hw.nexttd;
               lpc17_tdfree(td);
 
-              /* And wake up the thread waiting for the WDH event */
+#ifdef CONFIG_USBHOST_ASYNCH
+              /* Perform any pending callbacks for the case of asynchronous
+               * transfers.
+               */
 
+              if (ed->asynch)
+                {
+                  DEBUGASSERT(ed->wdhwait == false);
+                  lpc17_asynch_completion(priv, ed);
+                }
+              else
+#endif
               if (ed->wdhwait)
                 {
+                  /* Wake up the thread waiting for the WDH event */
+
                   lpc17_givesem(&ed->wdhsem);
                   ed->wdhwait = false;
                 }
@@ -2274,68 +2405,39 @@ static int lpc17_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 }
 
 /*******************************************************************************
- * Name: lpc17_transfer and lcp17_async
+ * Name: lpc17_transfer_common
  *
  * Description:
- *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and return immediately.  Only one transfer may be
- *   queued; Neither this method nor the ctrlin or ctrlout methods can be called
- *   again until this function returns.
- *
- *   This is a blocking method; this functions will not return until the
- *   transfer has completed.
- *
- * - 'transfer' is a blocking method; this method will not return until the
- *   transfer has completed.
- * - 'asynch' will return immediately.  When the transfer completes, the
- *   the callback will be invoked with the provided transfer.  This method
- *   is useful for receiving interrupt transfers which may come
- *   infrequently.
+ *   Initiate a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *   priv - Internal driver state structure.
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
  *      perform the transfer.
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
- *   callback - This function will be called when the transfer completes ('asynch'
- *     only).
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes ('asynch' only).
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure:
+ *   returned indicating the nature of the failure.
  *
- *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
- *              it may be appropriate to restart the entire transaction).
- *     EPERM  - If the endpoint stalls
- *     EIO    - On a TX or data toggle error
- *     EPIPE  - Overrun errors
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
-static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                          uint8_t *buffer, size_t buflen)
+static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
+                                 struct lpc17_ed_s *ed, uint8_t *buffer,
+                                 size_t buflen)
 {
-  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
   uint32_t dirpid;
   uint32_t regval;
-#if LPC17_IOBUFFERS > 0
-  uint8_t *origbuf = NULL;
-#endif
   bool in;
   int ret;
-
-  DEBUGASSERT(priv && ed && buffer && buflen > 0);
 
   in = (ed->hw.ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
   uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
@@ -2345,72 +2447,15 @@ static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT,
         buflen);
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
-   */
-
-  lpc17_takesem(&priv->exclsem);
-
-  /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
-
-#if LPC17_IOBUFFERS > 0
-  if ((uintptr_t)buffer < LPC17_SRAM_BANK0 ||
-      (uintptr_t)buffer >= (LPC17_SRAM_BANK0 + LPC17_BANK0_SIZE + LPC17_BANK1_SIZE))
-    {
-      /* Will the transfer fit in an IO buffer? */
-
-      if (buflen > CONFIG_USBHOST_IOBUFSIZE)
-        {
-          uvdbg("buflen (%d) > IO buffer size (%d)\n",
-                 buflen, CONFIG_USBHOST_IOBUFSIZE);
-          ret = -ENOMEM;
-          goto errout;
-        }
-
-      /* Allocate an IO buffer in AHB SRAM */
-
-      origbuf = buffer;
-      buffer  = lpc17_allocio();
-      if (!buffer)
-        {
-          uvdbg("IO buffer allocation failed\n");
-          ret = -ENOMEM;
-          goto errout;
-        }
-
-      /* If this is an OUT transaction, copy the user data into the AHB
-       * SRAM IO buffer.  Sad... so inefficient.  But without exposing
-       * the AHB SRAM to the final, end-user client I don't know of any
-       * way around this copy.
-       */
-
-      if (!in)
-        {
-          memcpy(buffer, origbuf, buflen);
-        }
-    }
-#endif
-
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
-   */
-
-  ret = lpc17_wdhwait(priv, ed);
-  if (ret != OK)
-    {
-      udbg("ERROR: Device disconnected\n");
-      goto errout;
-    }
-
   /* Get the direction of the endpoint */
 
   if (in)
     {
-      dirpid    = GTD_STATUS_DP_IN;
+      dirpid = GTD_STATUS_DP_IN;
     }
   else
     {
-      dirpid    = GTD_STATUS_DP_OUT;
+      dirpid = GTD_STATUS_DP_OUT;
     }
 
   /* Then enqueue the transfer */
@@ -2426,33 +2471,118 @@ static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       regval  = lpc17_getreg(LPC17_USBHOST_CMDST);
       regval |= OHCI_CMDST_BLF;
       lpc17_putreg(regval, LPC17_USBHOST_CMDST);
-
-      /* Wait for the Writeback Done Head interrupt */
-
-      lpc17_takesem(&ed->wdhsem);
-
-      /* Check the TD completion status bits */
-
-      if (ed->tdstatus == TD_CC_NOERROR)
-        {
-          ret = OK;
-        }
-      else
-        {
-          uvdbg("Bad TD completion status: %d\n", ed->tdstatus);
-          ret = -EIO;
-        }
     }
 
-errout:
-  /* Make sure that there is no outstanding request on this endpoint */
+  return ret;
+}
 
-  ed->wdhwait = false;
-
-  /* Free any temporary IO buffers */
+/*******************************************************************************
+ * Name: lpc17_dma_alloc
+ *
+ * Description:
+ *   Allocate DMA memory to perform a transfer, copying user data as necessary
+ *
+ * Input Parameters:
+ *   priv - Internal driver state structure.
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   userbuffer - The user buffer containing the data to be sent (OUT endpoint)
+ *      or received (IN endpoint).
+ *   buflen - The length of the data to be sent or received.
+ *   alloc - The location to return the allocated DMA buffer.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
-  if (buffer && origbuf)
+static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
+                           struct lpc17_ed_s *ed, uint8_t *userbuffer,
+                           size_t buflen, uint8_t **alloc)
+{
+  uint8_t *newbuffer;
+
+  if ((uintptr_t)userbuffer < LPC17_SRAM_BANK0 ||
+      (uintptr_t)userbuffer >= (LPC17_SRAM_BANK0 + LPC17_BANK0_SIZE + LPC17_BANK1_SIZE))
+    {
+      /* Will the transfer fit in an IO buffer? */
+
+      if (buflen > CONFIG_USBHOST_IOBUFSIZE)
+        {
+          uvdbg("buflen (%d) > IO buffer size (%d)\n",
+                 buflen, CONFIG_USBHOST_IOBUFSIZE);
+          return -ENOMEM;
+        }
+
+      /* Allocate an IO buffer in AHB SRAM */
+
+      newbuffer = lpc17_allocio();
+      if (!newbuffer)
+        {
+          uvdbg("IO buffer allocation failed\n");
+          return -ENOMEM;
+        }
+
+      /* If this is an OUT transaction, copy the user data into the AHB
+       * SRAM IO buffer.  Sad... so inefficient.  But without exposing
+       * the AHB SRAM to the final, end-user client I don't know of any
+       * way around this copy.
+       */
+
+      if ((ed->hw.ctrl & ED_CONTROL_D_MASK) != ED_CONTROL_D_IN)
+        {
+          memcpy(newbuffer, userbuffer, buflen);
+        }
+
+      /* Return the allocated buffer */
+
+      *alloc = newbuffer;
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: lpc17_dma_free
+ *
+ * Description:
+ *   Free allocated DMA memory.
+ *
+ * Input Parameters:
+ *   priv - Internal driver state structure.
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   userbuffer - The user buffer containing the data to be sent (OUT endpoint)
+ *      or received (IN endpoint).
+ *   buflen - The length of the data to be sent or received.
+ *   alloc - The allocated DMA buffer to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+static void lpc17_dma_free(struct lpc17_usbhost_s *priv,
+                           struct lpc17_ed_s *ed, uint8_t *userbuffer,
+                           size_t buflen, uint8_t *newbuffer)
+{
+  irqstate_t flags;
+
+  /* Could be called from the interrupt level */
+
+  flags = irqsave();
+  if (userbuffer && newbuffer)
     {
       /* If this is an IN transaction, get the user data from the AHB
        * SRAM IO buffer.  Sad... so inefficient.  But without exposing
@@ -2460,28 +2590,358 @@ errout:
        * way around this copy.
        */
 
-      if (in && ret == OK)
+      if ((ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
         {
-          memcpy(origbuf, buffer, buflen);
+          memcpy(userbuffer, newbuffer, buflen);
         }
 
       /* Then free the temporary I/O buffer */
 
-      lpc17_freeio(buffer);
+      lpc17_freeio(newbuffer);
+    }
+
+  irqrestore(flags);
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_transfer
+ *
+ * Description:
+ *   Process a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request, blocking until the transfer completes. Only
+ *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   ctrlout methods can be called again until this function returns.
+ *
+ *   This is a blocking method; this functions will not return until the
+ *   transfer has completed.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buflen - The length of the data to be sent or received.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure:
+ *
+ *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
+ *              it may be appropriate to restart the entire transaction).
+ *     EPERM  - If the endpoint stalls
+ *     EIO    - On a TX or data toggle error
+ *     EPIPE  - Overrun errors
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                          uint8_t *buffer, size_t buflen)
+{
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
+#if LPC17_IOBUFFERS > 0
+  uint8_t *alloc = NULL;
+  uint8_t *userbuffer = NULL;
+#endif
+  int ret;
+
+  DEBUGASSERT(priv && ed && buffer && buflen > 0);
+#ifdef CONFIG_USBHOST_ASYNCH
+  DEBUGASSERT(ed->wdhwait == false && ed->asynch == NULL);
+#else
+  DEBUGASSERT(ed->wdhwait == false);
+#endif
+
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
+   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+   */
+
+  lpc17_takesem(&priv->exclsem);
+
+#if LPC17_IOBUFFERS > 0
+  /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
+
+  ret = lpc17_dma_alloc(priv, ed, buffer, buflen, &alloc);
+  if (ret < 0)
+    {
+      udbg("ERROR: lpc17_dma_alloc failed: %d\n", ret);
+      goto errout_with_sem;
+    }
+
+  /* If a buffer was allocated, then use it instead of the callers buffer */
+
+  if (alloc)
+    {
+      userbuffer = buffer;
+      buffer  = alloc;
     }
 #endif
 
+  /* Set the request for the Writeback Done Head event well BEFORE enabling the
+   * transfer.
+   */
+
+  ret = lpc17_wdhwait(priv, ed);
+  if (ret != OK)
+    {
+      udbg("ERROR: Device disconnected\n");
+      goto errout_with_buffers;
+    }
+
+#ifdef CONFIG_USBHOST_ASYNCH
+  ed->asynch = NULL;
+#endif
+
+  /* Set up the transfer */
+
+  ret = lpc17_transfer_common(priv, ed, buffer, buflen);
+  if (ret < 0)
+    {
+      udbg("ERROR: lpc17_transfer_common failed: %d\n", ret);
+      goto errout_with_wdhwait;
+    }
+
+  /* Wait for the Writeback Done Head interrupt */
+
+  lpc17_takesem(&ed->wdhsem);
+
+  /* Check the TD completion status bits */
+
+  if (ed->tdstatus == TD_CC_NOERROR)
+    {
+      ret = OK;
+    }
+  else
+    {
+      udbg("ERROR: Bad TD completion status: %d\n", ed->tdstatus);
+      ret = -EIO;
+     }
+
+errout_with_wdhwait:
+  /* Make sure that there is no outstanding request on this endpoint */
+
+  ed->wdhwait = false;
+
+errout_with_buffers:
+#if LPC17_IOBUFFERS > 0
+  /* Free any temporary IO buffers */
+
+  lpc17_dma_free(priv, ed, userbuffer, buflen, alloc);
+#endif
+
+errout_with_sem:
   lpc17_givesem(&priv->exclsem);
   return ret;
 }
 
+/*******************************************************************************
+ * Name: lpc17_asynch_completion
+ *
+ * Description:
+ *   This function is called at the interrupt level when an asynchronous
+ *   transfer completes.  It performs the pending callback.
+ *
+ * Input Parameters:
+ *   priv - Internal driver state structure.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which the
+ *      transfer was performed.
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   - Called from the interrupt level
+ *
+ *******************************************************************************/
+
 #ifdef CONFIG_USBHOST_ASYNCH
-static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg)
+static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
+                                    struct lpc17_ed_s *ed)
 {
-# error Not implemented
-  return -ENOSYS;
+  struct lpc17_asynch_s *asynch;
+  usbhost_asynch_t callback;
+  void *arg;
+  int result;
+
+  DEBUGASSERT(ed != NULL && ed->wdhwait == false && ed->asynch != NULL);
+  asynch = ed->asynch;
+
+  DEBUGASSERT(asynch->callback != NULL && asynch->user != NULL && asynch->buflen > 0);
+
+  /* Check the TD completion status bits */
+
+  if (ed->tdstatus == TD_CC_NOERROR)
+    {
+      result = OK;
+    }
+  else
+    {
+      udbg("ERROR: Bad TD completion status: %d\n", ed->tdstatus);
+      result = -EIO;
+     }
+
+#if LPC17_IOBUFFERS > 0
+  /* Free any temporary IO buffers */
+
+  lpc17_dma_free(priv, ed, asynch->user, asynch->buflen, asynch->alloc);
+#endif
+
+  /* Extract the callback information before freeing the buffer */
+
+  callback = asynch->callback;
+  arg = asynch->arg;
+
+  /* Clear any pending transfer indicators */
+
+  ed->wdhwait = false;
+  ed->asynch  = NULL;
+
+  /* Make sure that there is no outstanding request on this endpoint */
+
+#ifdef CONFIG_DEBUG
+  memset(asynch, 0, sizeof(struct lpc17_asynch_s));
+#endif
+  lpc17_freeasynch(asynch);
+
+  /* Then perform the callback */
+
+  callback(arg, result);
+}
+#endif
+
+/*******************************************************************************
+ * Name: lcp17_async
+ *
+ * Description:
+ *   Process a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  When the transfer
+ *   completes, the the callback will be invoked with the provided transfer.
+ *   This method is useful for receiving interrupt transfers which may come
+ *   infrequently.
+ *
+ *   Only one transfer may be queued; Neither this method nor the ctrlin or
+ *   ctrlout methods can be called again until the transfer completes.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buflen - The length of the data to be sent or received.
+ *   callback - This function will be called when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback function
+ *     when the transfer completes.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, void *arg)
+{
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
+  struct lpc17_asynch_s *asynch;
+  int ret;
+
+  DEBUGASSERT(priv && ed && buffer && buflen > 0 && callback);
+  DEBUGASSERT(ed->wdhwait == false && ed->asynch == NULL);
+
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
+   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+   */
+
+  lpc17_takesem(&priv->exclsem);
+
+  /* Allocate a structure to retain the information needed when the asynchronous
+   * transfer completes.
+   */
+
+  asynch = lpc17_allocasynch();
+  if (asynch == NULL)
+    {
+      udbg("ERROR: lpc17_allocasynch failed\n");
+      ret = -ENOMEM;
+      goto errout_with_sem;
+    }
+
+  /* Initialize the asynch structure */
+
+  asynch->buflen   = buflen;
+  asynch->user     = buffer;
+  asynch->callback = callback;
+  asynch->arg      = arg;
+
+#if LPC17_IOBUFFERS > 0
+  /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
+
+  ret = lpc17_dma_alloc(priv, ed, buffer, buflen, &asynch->alloc);
+  if (ret < 0)
+    {
+      udbg("ERROR: lpc17_dma_alloc failed: %d\n", ret);
+      goto errout_with_sem;
+    }
+
+  /* If a buffer was allocated, then use it instead of the callers buffer */
+
+  if (asynch->alloc)
+    {
+      buffer  = asynch->alloc;
+    }
+#endif
+
+  /* Set the callback information BEFORE enabling the transfer. */
+
+  ed->wdhwait = false;
+  ed->asynch  = asynch;
+
+  /* Set up the transfer */
+
+  ret = lpc17_transfer_common(priv, ed, buffer, buflen);
+  if (ret < 0)
+    {
+      udbg("ERROR: lpc17_transfer_common failed: %d\n", ret);
+      goto errout_with_asynch;
+    }
+
+  /* And return now.  The callback will be invoked when the transfer
+   * completes.
+   */
+
+  lpc17_givesem(&priv->exclsem);
+  return OK;
+
+errout_with_asynch:
+#if LPC17_IOBUFFERS > 0
+  /* Free any temporary IO buffers */
+
+  lpc17_dma_free(priv, ed, buffer, buflen, asynch->alloc);
+#endif
+
+  /* Free the asynchronous structure */
+
+  lpc17_freeasynch(asynch);
+
+errout_with_sem:
+  lpc17_givesem(&priv->exclsem);
+  return ret;
 }
 #endif
 
@@ -2654,6 +3114,9 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   struct lpc17_usbhost_s *priv = &g_usbhost;
   struct usbhost_driver_s *drvr;
   struct usbhost_hubport_s *hport;
+#ifdef CONFIG_USBHOST_ASYNCH
+  struct lpc17_asynch_s *asynch;
+#endif
   uint32_t regval;
   uint8_t *buffer;
   irqstate_t flags;
@@ -2833,6 +3296,19 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
       lpc17_freeio(buffer);
       buffer += CONFIG_USBHOST_IOBUFSIZE;
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_ASYNCH
+  /* Initialize asynchronous transfer structures */
+
+  for (i = 0, asynch = (struct lpc17_asynch_s *)g_asynchbuffers;
+       i < CONFIG_LPC17_USBHOST_NASYNCH;
+       i++, asynch++)
+    {
+      /* Put the asynch structure in a free list */
+
+      lpc17_freeasynch(asynch);
     }
 #endif
 
