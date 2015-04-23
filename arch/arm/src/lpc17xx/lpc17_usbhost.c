@@ -1776,7 +1776,7 @@ static int lpc17_rh_enumerate(struct usbhost_connection_s *conn,
                               struct usbhost_hubport_s *hport)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
-  DEBUGASSERT(conn != NULL && hport != NULL &&& hport->port == 0);
+  DEBUGASSERT(conn != NULL && hport != NULL && hport->port == 0);
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
