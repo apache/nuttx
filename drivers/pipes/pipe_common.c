@@ -488,10 +488,10 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
    *
    * On the other hand, it would be very valuable to be able to feed the pipe
    * from an interrupt handler!  TODO:  Consider disabling interrupts instead
-   * of taking semaphores so that pipes can be written from interupt handlers
+   * of taking semaphores so that pipes can be written from interrupt handlers
    */
 
-  DEBUGASSERT(up_interrupt_context() == false)
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Make sure that we have exclusive access to the device structure */
 
