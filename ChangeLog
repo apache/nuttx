@@ -10254,4 +10254,7 @@
 	  (2015-04-21).
 	* include/assert.h: Wrap definitions of assertion macros in do while.
 	  Suggested by orbitalfox (2015-04-22).
+	* sched/semaphore/sem_wait.c:  Missing comma on debug statement caused
+	  compile error with DEBUG on.  Why hasn't that been noted before?
+	  (2015-04-23).
 
