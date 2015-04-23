@@ -10261,3 +10261,5 @@
 	  https://github.com/kaushalparikh/nuttx (2015-04-19).
 	* include/time.h:  Add prototypes for localtime() and localtimer_r()
 	  (2015-04-21).
+	* include/assert.h: Wrap definitions of assertion macros in do while.
+	  Suggested by orbitalfox (2015-04-22).
