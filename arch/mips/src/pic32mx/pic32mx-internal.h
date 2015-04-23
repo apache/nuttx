@@ -244,7 +244,7 @@ void pic32mx_boardinitialize(void);
  * Name: pic32mx_decodeirq
  *
  * Description:
- *   Called from assembly language logic when an interrrupt exception occurs.  This
+ *   Called from assembly language logic when an interrupt exception occurs.  This
  *   function decodes and dispatches the interrupt.
  *
  ************************************************************************************/

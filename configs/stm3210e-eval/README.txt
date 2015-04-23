@@ -340,7 +340,7 @@ events as follows:
   * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
     and these LEDs will give you some indication of where the failure was
  ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
-    is because of timer interupts that result in the LED being illuminated
+    is because of timer interrupts that result in the LED being illuminated
     on a small proportion of the time.
 *** LED2 may also flicker normally if signals are processed.
 
@@ -1048,7 +1048,7 @@ Where <subdir> is one of the following:
         CONFIG_PM_BUTTONS=y
 
        CONFIG_PM_BUTTONS enables button support for PM testing.  Buttons can
-       drive EXTI interrupts and EXTI interrrupts can be used to wakeup for
+       drive EXTI interrupts and EXTI interrupts can be used to wakeup for
        certain reduced power modes (STOP mode).  The use of the buttons here
        is for PM testing purposes only; buttons would normally be part the
        application code and CONFIG_PM_BUTTONS would not be defined.

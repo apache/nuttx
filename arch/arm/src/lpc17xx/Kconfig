@@ -967,7 +967,7 @@ config USBHOST_BULK_DISABLE
 		Disable support for bulk endpoints.
 
 config USBHOST_INT_DISABLE
-	bool "Disable interupt EPs"
+	bool "Disable interrupt EPs"
 	default n
 	---help---
 		Disable support for interrupt endpoints.

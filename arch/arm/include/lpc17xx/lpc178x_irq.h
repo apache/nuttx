@@ -167,7 +167,7 @@
  */
 
 #ifdef CONFIG_GPIO_IRQ
-#  define LPC17_VALID_GPIOINT0  (0xfffffffful) /* GPIO port 0 interrrupt set */
+#  define LPC17_VALID_GPIOINT0  (0xfffffffful) /* GPIO port 0 interrupt set */
 #  define LPC17_VALID_GPIOINT2  (0xfffffffful) /* GPIO port 2 interrupt set */
 
    /* Set 1: 16 interrupts p0.0-p0.15 */

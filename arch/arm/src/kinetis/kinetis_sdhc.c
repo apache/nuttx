@@ -1952,7 +1952,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
   kinetis_dataconfig(priv, true, nbytes, 1, SDHC_DVS_DATATIMEOUT);
 
-  /* Enable TX interrrupts */
+  /* Enable TX interrupts */
 
   kinetis_configxfrints(priv, SDHC_SNDDONE_INTS);
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
@@ -2662,7 +2662,7 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
 
-  /* Enable TX interrrupts */
+  /* Enable TX interrupts */
 
   kinetis_configxfrints(priv, SDHC_DMADONE_INTS);
   return OK;

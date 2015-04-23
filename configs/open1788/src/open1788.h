@@ -103,7 +103,7 @@
 #define GPIO_JOY_D       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN19)
 #define GPIO_JOY_CTR     (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN14)
 
-/* IRQ numbers for the buttons that do support interrrupts */
+/* IRQ numbers for the buttons that do support interrupts */
 
 #define GPIO_USER2_IRQ   LPC17_IRQ_P2p22
 #define GPIO_USER3_IRQ   LPC17_IRQ_P0p10

@@ -70,7 +70,7 @@ static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
   LPC1766STK_UP,   LPC1766STK_DOWN, LPC1766STK_LEFT,   LPC1766STK_RIGHT
 };
 
-/* This array defines all of the interupt handlers current attached to
+/* This array defines all of the interrupt handlers current attached to
  * button events.
  */
 

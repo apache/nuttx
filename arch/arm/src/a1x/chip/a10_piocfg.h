@@ -191,7 +191,7 @@
 #define PIO_ETXEN       (PIO_PERIPH2 | PIO_PORT_PIOA | PIO_PIN13)
 #define PIO_ETXERR      (PIO_PERIPH2 | PIO_PORT_PIOA | PIO_PIN16)
 
-/* External PIO interrrupts */
+/* External PIO interrupts */
 
 #define PIO_EINT0       (PIO_EINT | PIO_PORT_PIOH | PIO_PIN0)
 #define PIO_EINT1       (PIO_EINT | PIO_PORT_PIOH | PIO_PIN1)

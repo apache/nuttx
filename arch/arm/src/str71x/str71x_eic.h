@@ -156,7 +156,7 @@
 #define STR71X_EICFIR_FIE          (0x00000001) /* Bit 0: FIQ channel 1/0 enable */
 #define STR71X_EICFIR_FIP          (0x00000002) /* Bit 1: channel 1/0 FIQ pending */
 
-/* Source interrrupt register definitions */
+/* Source interrupt register definitions */
 
 #define STR71X_EICSIR_SIPLMASK     (0x0000000f) /* Bits 0-3: Source interrupt priority level */
 #define STR71X_EICSIR_SIVMASK      (0xffff0000) /* Bits 16-31: Source interrupt vector */
