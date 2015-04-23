@@ -1906,7 +1906,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
   dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize);
 
-  /* Enable TX interrrupts */
+  /* Enable TX interrupts */
 
   stm32_configxfrints(priv, SDIO_SEND_MASK);
   stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
@@ -2711,7 +2711,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   stm32_dmastart(priv->dma, stm32_dmacallback, priv, false);
   stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
 
-  /* Enable TX interrrupts */
+  /* Enable TX interrupts */
 
   stm32_configxfrints(priv, SDIO_DMASEND_MASK);
 

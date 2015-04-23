@@ -2668,7 +2668,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
               stm32_epout(priv, epno);
             }
 
-          /* Endpoint disabled interrupt (ignored because this interrrupt is
+          /* Endpoint disabled interrupt (ignored because this interrupt is
            * used in polled mode by the endpoint disable logic).
            */
 #if 1

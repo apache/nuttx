@@ -117,7 +117,7 @@ void lpc43_softreset(void)
 
   up_mdelay(20);
 
-  /* Clear all pending interupts */
+  /* Clear all pending interrupts */
 
   putreg32(0xffffffff, NVIC_IRQ0_31_CLRPEND);
   putreg32(0xffffffff, NVIC_IRQ32_63_CLRPEND);

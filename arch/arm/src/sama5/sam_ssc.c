@@ -1478,7 +1478,7 @@ static void ssc_rx_worker(void *arg)
   while (sq_peek(&priv->rx.done) != NULL)
     {
       /* Remove the buffer container from the rx.done queue.  NOTE that
-       * interupts must be enabled to do this because the rx.done queue is
+       * interrupts must be enabled to do this because the rx.done queue is
        * also modified from the interrupt level.
        */
 
@@ -1890,7 +1890,7 @@ static void ssc_tx_worker(void *arg)
   while (sq_peek(&priv->tx.done) != NULL)
     {
       /* Remove the buffer container from the tx.done queue.  NOTE that
-       * interupts must be enabled to do this because the tx.done queue is
+       * interrupts must be enabled to do this because the tx.done queue is
        * also modified from the interrupt level.
        */
 

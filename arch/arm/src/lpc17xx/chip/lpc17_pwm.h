@@ -118,16 +118,16 @@
 
 /* Interrupt Register */
 
-#define PWM_IR_MR0                (1 << 0)  /* Bit 0:  PWM match channel 0 interrrupt */
-#define PWM_IR_MR1                (1 << 1)  /* Bit 1:  PWM match channel 1 interrrupt */
-#define PWM_IR_MR2                (1 << 2)  /* Bit 2:  PWM match channel 2 interrrupt */
-#define PWM_IR_MR3                (1 << 3)  /* Bit 3:  PWM match channel 3 interrrupt */
-#define PWM_IR_CAP0               (1 << 4)  /* Bit 4:  Capture input 0 interrrupt */
-#define PWM_IR_CAP1               (1 << 5)  /* Bit 5:  Capture input 1 interrrupt */
+#define PWM_IR_MR0                (1 << 0)  /* Bit 0:  PWM match channel 0 interrupt */
+#define PWM_IR_MR1                (1 << 1)  /* Bit 1:  PWM match channel 1 interrupt */
+#define PWM_IR_MR2                (1 << 2)  /* Bit 2:  PWM match channel 2 interrupt */
+#define PWM_IR_MR3                (1 << 3)  /* Bit 3:  PWM match channel 3 interrupt */
+#define PWM_IR_CAP0               (1 << 4)  /* Bit 4:  Capture input 0 interrupt */
+#define PWM_IR_CAP1               (1 << 5)  /* Bit 5:  Capture input 1 interrupt */
                                             /* Bits 6-7: Reserved */
-#define PWM_IR_MR4                (1 << 8)  /* Bit 8:  PWM match channel 4 interrrupt */
-#define PWM_IR_MR5                (1 << 9)  /* Bit 9:  PWM match channel 5 interrrupt */
-#define PWM_IR_MR6                (1 << 10) /* Bit 10: PWM match channel 6 interrrupt */
+#define PWM_IR_MR4                (1 << 8)  /* Bit 8:  PWM match channel 4 interrupt */
+#define PWM_IR_MR5                (1 << 9)  /* Bit 9:  PWM match channel 5 interrupt */
+#define PWM_IR_MR6                (1 << 10) /* Bit 10: PWM match channel 6 interrupt */
                                             /* Bits 11-31: Reserved */
 /* Timer Control Register */
 
