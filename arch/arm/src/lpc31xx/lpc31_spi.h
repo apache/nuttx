@@ -235,7 +235,7 @@
 #define SPI_INT_TX                       (1 << 3)  /* Bit 3:  Transmit threshold level interrupt bit */
 #define SPI_INT_RX                       (1 << 2)  /* Bit 3:  Receive threshold level interrupt bit */
 #define SPI_INT_TO                       (1 << 1)  /* Bit 1:  Receive timeout interrupt bit */
-#define SPI_INT_OV                       (1 << 0)  /* Bit 0:  Receive overrtun interrrupt bit */
+#define SPI_INT_OV                       (1 << 0)  /* Bit 0:  Receive overrtun interrupt bit */
 
 /************************************************************************************************
  * Public Types

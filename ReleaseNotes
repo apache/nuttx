@@ -2950,7 +2950,7 @@ Bugfixes (see the change log for details) :
     * General:  sleep() and usleep() return values, sig_timedwait() errno setting
       on timeout.
     * Drivers: STMPE811 touchscreen driver, USB PLC2303, USB CDC/ACM
-    * STM32: Several USB device controller driver fixes, F4 interrrupt priorities
+    * STM32: Several USB device controller driver fixes, F4 interrupt priorities
       (contributed by Mike Smith).
     * Graphics: Keyboard input, fill trapezoid bug
 

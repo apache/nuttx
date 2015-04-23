@@ -416,7 +416,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
   if ((cfgset & GPIO_PERIPH_EVENTS) != 0)
     {
-      /* Rising only.. disable interrrupts on the falling edge */
+      /* Rising only.. disable interrupts on the falling edge */
 
       putreg32(pin, base + SAM_GPIO_EVERS_OFFSET);
     }

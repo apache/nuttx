@@ -1804,7 +1804,7 @@ static int lpc17_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
   dblocksize = lpc17_log2(nbytes) << SDCARD_DCTRL_DBLOCKSIZE_SHIFT;
   lpc17_dataconfig(SDCARD_DTIMER_DATATIMEOUT, nbytes, dblocksize);
 
-  /* Enable TX interrrupts */
+  /* Enable TX interrupts */
 
   lpc17_configxfrints(priv, SDCARD_SEND_MASK);
   lpc17_sample(priv, SAMPLENDX_AFTER_SETUP);
@@ -2558,7 +2558,7 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
           lpc17_dmastart(priv->dma, lpc17_dmacallback, priv);
           lpc17_sample(priv, SAMPLENDX_AFTER_SETUP);
 
-          /* Enable TX interrrupts */
+          /* Enable TX interrupts */
 
           lpc17_configxfrints(priv, SDCARD_DMASEND_MASK);
         }

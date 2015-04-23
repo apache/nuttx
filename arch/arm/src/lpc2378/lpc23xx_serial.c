@@ -483,7 +483,7 @@ static int up_setup(struct uart_dev_s *dev)
                (FCR_FIFO_TRIG8 | FCR_TX_FIFO_RESET |
                 FCR_RX_FIFO_RESET | FCR_FIFO_ENABLE));
 
-  /* The NuttX serial driver waits for the first THRE interrrupt before sending
+  /* The NuttX serial driver waits for the first THRE interrupt before sending
    * serial data... However, it appears that the LPC2378 hardware too does not
    * generate that interrupt until a transition from not-empty to empty.  So,
    * the current kludge here is to send one NULL at startup to kick things off.

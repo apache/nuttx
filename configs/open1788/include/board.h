@@ -250,7 +250,7 @@
 #define LED_HEAPALLOCATE           1  /*  ON   OFF  OFF  OFF                        */
 #define LED_IRQSENABLED            2  /*  OFF   ON  OFF  OFF                        */
 #define LED_STACKCREATED           3  /*  ON    ON  OFF  OFF                        */
-#define LED_INIRQ                  4  /*  LED3 glows, on while in interupt          */
+#define LED_INIRQ                  4  /*  LED3 glows, on while in interrupt          */
 #define LED_SIGNAL                 4  /*  LED3 glows, on while in signal handler    */
 #define LED_ASSERTION              4  /*  LED3 glows, on while in assertion         */
 #define LED_PANIC                  4  /*  LED3 Flashes at 2Hz                       */
