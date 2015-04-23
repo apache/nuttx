@@ -192,10 +192,10 @@ static struct usbhost_registry_s g_hub =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbhost_hport_free
+ * Name: usbhost_hport_deactivate
  *
  * Description:
- *   Free a hub resource previously allocated by usbhost_hport_initialize().
+ *   Free a hub resource previously allocated by usbhost_hport_activate().
  *
  * Input Parameters:
  *   hport - A reference to the hub port instance to be freed.
@@ -205,72 +205,65 @@ static struct usbhost_registry_s g_hub =
  *
  ****************************************************************************/
 
-static inline void usbhost_hport_free(FAR struct usbhost_hubport_s *hport)
+static inline void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
 {
-  uvdbg("Freeing: %p\n", hport);
+  uvdbg("Deactivating: %d\n", hport->port);
 
-  /* Free endpoints */
+  /* Don't deactivate root hub ports! */
 
-  if (hport->ep0 != NULL)
+  if (!ROOTHUB(hport))
     {
-      DRVR_EPFREE(hport->drvr, hport->ep0);
-      hport->ep0 = NULL;
+      /* Free the control endpoint */
+
+      if (hport->ep0 != NULL)
+        {
+          DRVR_EPFREE(hport->drvr, hport->ep0);
+          hport->ep0 = NULL;
+        }
+
+      /* Free the function address if one has been assigned */
+
+      usbhost_devaddr_destroy(hport);
+      hport->funcaddr = 0;
+
+      DEBUGASSERT(hport->devclass == NULL);
     }
-
-  /* Free the function address */
-
-  usbhost_devaddr_destroy(hport);
-  hport->funcaddr = 0;
-
-  DEBUGASSERT(hport->devclass == NULL);
 }
 
 /****************************************************************************
- * Name: usbhost_hport_initialize
+ * Name: usbhost_hport_activate
  *
  * Description:
- *   Initialize and configure an
- *   This is really part of the logic that implements the create() method
- *   of struct usbhost_registry_s.  This function allocates memory for one
- *   new class instance.
+ *   Activate a hub port by assigning it a control endpoint.  This actions
+ *   only occur when a device is connected to the hub endpoint.
  *
  * Input Parameters:
- *   None
+ *   hport - The hub port to be activated.
  *
  * Returned Values:
- *   On success, this function will return a non-NULL instance of struct
- *   usbhost_class_s.  NULL is returned on failure; this function will
- *   will fail only if there are insufficient resources to create another
- *   USB host class instance.
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
  *
  ****************************************************************************/
 
-static int usbhost_hport_initialize(FAR struct usbhost_driver_s *drvr,
-                                    FAR struct usbhost_class_s *hubclass,
-                                    uint8_t port,
-                                    FAR struct usbhost_hubport_s *child)
+static int usbhost_hport_activate(FAR struct usbhost_hubport_s *hport)
 {
-  FAR struct usbhost_hubport_s *parent = hubclass->hport;
   struct usbhost_epdesc_s epdesc;
   int ret;
 
-  child->drvr         = drvr;
-  child->parent       = parent;
-  child->funcaddr     = 0;
-  child->speed        = USB_SPEED_FULL;
+  uvdbg("Activating port %d\n", hport->port);
 
-  epdesc.hport        = child;
+  epdesc.hport        = hport;
   epdesc.addr         = 0;
-  epdesc.in           = 0;
+  epdesc.in           = false;
   epdesc.xfrtype      = USB_EP_ATTR_XFER_CONTROL;
   epdesc.interval     = 0;
-  epdesc.mxpacketsize = 8;
+  epdesc.mxpacketsize = (hport->speed == USB_SPEED_HIGH) ? 64 : 8;
 
-  ret = DRVR_EPALLOC(drvr, &epdesc, &child->ep0);
-  if (ret != OK)
+  ret = DRVR_EPALLOC(hport->drvr, &epdesc, &hport->ep0);
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate ep0: %d\n", ret);
-      usbhost_hport_free(child);
     }
 
   return ret;
@@ -334,11 +327,11 @@ static void usbhost_destroy(FAR void *arg)
   FAR struct usbhost_hubport_s *hport;
   int port;
 
-  uvdbg("crefs: %d\n", priv->crefs);
-
   DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
   priv  = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
   hport = hubclass->hport;
+
+  uvdbg("crefs: %d\n", priv->crefs);
 
   /* Destroy the interrupt IN endpoint */
 
@@ -362,7 +355,7 @@ static void usbhost_destroy(FAR void *arg)
 
       /* Free any resource use by the hub port */
 
-      usbhost_hport_free(hport);
+      usbhost_hport_deactivate(hport);
     }
 
   /* Destroy the semaphores */
@@ -936,7 +929,7 @@ static void usbhost_hubevent(FAR void *arg)
                       (void)DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
                     }
 
-                  connport = &hubclass->hport[port];
+                  connport = &priv->hport[port];
                   if (status & USBHUB_PORT_STAT_HIGH_SPEED)
                     {
                       connport->speed = USB_SPEED_HIGH;
@@ -950,12 +943,23 @@ static void usbhost_hubevent(FAR void *arg)
                       connport->speed = USB_SPEED_FULL;
                     }
 
-                  /* Inform waiters that a new device has been connected */
+                  /* Activate the hub port by assigning it a control endpoint. */
 
-                  ret = DRVR_CONNECT(connport->drvr, connport, true);
+                  ret = usbhost_hport_activate(connport);
                   if (ret < 0)
                     {
-                      udbg("ERROR: DRVR_CONNECT failed: %d\n", ret);
+                      udbg("ERROR: usbhost_hport_activate failed: %d\n", ret);
+                    }
+                  else
+                    {
+                      /* Inform waiters that a new device has been connected */
+
+                      ret = DRVR_CONNECT(connport->drvr, connport, true);
+                      if (ret < 0)
+                        {
+                          udbg("ERROR: DRVR_CONNECT failed: %d\n", ret);
+                          usbhost_hport_deactivate(connport);
+                        }
                     }
                 }
               else
@@ -1155,25 +1159,20 @@ static FAR struct usbhost_class_s *
 
   for (port = 0; port < USBHUB_MAX_PORTS; port++)
     {
+      FAR struct usbhost_hubport_s *child;
+
       /* Initialize the hub port descriptor */
 
-      ret = usbhost_hport_initialize(hport->drvr, hubclass, port,
-                                     &hubclass->hport[port]);
-      if (ret < 0)
-        {
-          goto errout_with_hports;
-        }
+      child               = &priv->hport[port];
+      memset(child, 0, sizeof(struct usbhost_hubport_s));
+
+      child->drvr         = hport->drvr;
+      child->parent       = hport;
+      child->port         = port;
+      child->speed        = USB_SPEED_FULL;
     }
 
   return hubclass;
-
-errout_with_hports:
-  for (port = 0; port < USBHUB_MAX_PORTS; port++)
-    {
-      /* Free resource used by hub port descriptor */
-
-      usbhost_hport_free(hport);
-    }
 
 errout_with_ctrlreq:
   kmm_free(priv->ctrlreq);
@@ -1201,8 +1200,6 @@ errout_with_hub:
  *   configdesc - A pointer to a uint8_t buffer container the configuration
  *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
- *   funcaddr - The USB address of the function containing the endpoint that
- *     EP0 controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is

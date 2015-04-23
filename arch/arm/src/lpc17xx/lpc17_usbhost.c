@@ -3154,13 +3154,13 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   /* Initialize the public port representation */
 
-  hport                       = &priv->rhport.hport;
-  hport->drvr                 = drvr;
+  hport                = &priv->rhport.hport;
+  hport->drvr          = drvr;
 #ifdef CONFIG_USBHOST_HUB
-  hport->parent               = NULL;
+  hport->parent        = NULL;
 #endif
-  hport->ep0                  = EDCTRL;
-  hport->speed                = USB_SPEED_FULL;
+  hport->ep0           = EDCTRL;
+  hport->speed         = USB_SPEED_FULL;
 
   /* Initialize function address generation logic */
 
