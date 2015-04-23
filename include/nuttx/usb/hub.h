@@ -86,21 +86,22 @@
 
 /* Hub characteristics */
 
-#define USBHUB_CHAR_LPSM_SHIFT         (0)
-#define USBHUB_CHAR_LPSM_MASK          (0x3 << USBHUB_CHAR_LPSM_SHIFT)
-
-#define USBHUB_CHAR_COMPOUND           (1 << 2)
-#define USBHUB_CHAR_OCPM_SHIFT         (3)
-#define USBHUB_CHAR_OCPM_MASK          (0x3 << USBHUB_CHAR_OCPM_SHIFT)
-
-#define USBHUB_CHAR_TTTT_SHIFT         (5)
-#define USBHUB_CHAR_TTTT_MASK          (0x3 << USBHUB_CHAR_TTTT_SHIFT)
-#  define USBHUB_CHAR_TTTT_8_BITS      (0x0 << USBHUB_CHAR_TTTT_SHIFT)
-#  define USBHUB_CHAR_TTTT_16_BITS     (0x1 << USBHUB_CHAR_TTTT_SHIFT)
-#  define USBHUB_CHAR_TTTT_24_BITS     (0x2 << USBHUB_CHAR_TTTT_SHIFT)
-#  define USBHUB_CHAR_TTTT_32_BITS     (0x3 << USBHUB_CHAR_TTTT_SHIFT)
-
-#define USBHUB_CHAR_PORTIND            (1 << 7)
+#define USBHUB_CHAR_LPSM_SHIFT         (0)       /* Bits 0-1: Logical Power Switching Mode */
+#define USBHUB_CHAR_LPSM_MASK          (3 << USBHUB_CHAR_LPSM_SHIFT)
+#  define USBHUB_CHAR_LPSM_GANGED      (0 << USBHUB_CHAR_LPSM_SHIFT)
+#  define USBHUB_CHAR_LPSM_INDIVIDUAL  (1 << USBHUB_CHAR_LPSM_SHIFT)
+#define USBHUB_CHAR_COMPOUND           (1 << 2)  /* Bit 2: Compound device */
+#define USBHUB_CHAR_OCPM_SHIFT         (3)       /* Bits 3-4: Over-current Protection Mode */
+#define USBHUB_CHAR_OCPM_MASK          (3 << USBHUB_CHAR_OCPM_SHIFT)
+#  define USBHUB_CHAR_OCPM_GLOBAL      (0 << USBHUB_CHAR_OCPM_SHIFT)
+#  define USBHUB_CHAR_OCPM_INDIVIDUAL  (1 << USBHUB_CHAR_OCPM_SHIFT)
+#define USBHUB_CHAR_TTTT_SHIFT         (5)       /* Bits 5-6: TT Think Time */
+#define USBHUB_CHAR_TTTT_MASK          (3 << USBHUB_CHAR_TTTT_SHIFT)
+#  define USBHUB_CHAR_TTTT_8_BITS      (0 << USBHUB_CHAR_TTTT_SHIFT)
+#  define USBHUB_CHAR_TTTT_16_BITS     (1 << USBHUB_CHAR_TTTT_SHIFT)
+#  define USBHUB_CHAR_TTTT_24_BITS     (2 << USBHUB_CHAR_TTTT_SHIFT)
+#  define USBHUB_CHAR_TTTT_32_BITS     (3 << USBHUB_CHAR_TTTT_SHIFT)
+#define USBHUB_CHAR_PORTIND            (1 << 7)  /* Bit 7: Port Indicators Supported */
 
 /* Hub status */
 

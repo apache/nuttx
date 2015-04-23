@@ -136,7 +136,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
 static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass);
 static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass,
              bool on);
-static void usbhost_hubevent(FAR void *arg);
+static void usbhost_hub_event(FAR void *arg);
+static void usbhost_disconnect_event(FAR void *arg);
 
 /* (Little Endian) Data helpers */
 
@@ -703,7 +704,7 @@ static int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
 }
 
 /****************************************************************************
- * Name: usbhost_hubevent
+ * Name: usbhost_hub_event
  *
  * Description:
  *   Handle a hub event.
@@ -720,7 +721,7 @@ static int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
  *
  ****************************************************************************/
 
-static void usbhost_hubevent(FAR void *arg)
+static void usbhost_hub_event(FAR void *arg)
 {
   FAR struct usbhost_class_s *hubclass;
   FAR struct usbhost_hubport_s *hport;
@@ -999,6 +1000,72 @@ static void usbhost_hubevent(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: usbhost_disconnect_event
+ *
+ * Description:
+ *   This function performs the disconnect() actions on the worker thread.
+ *   This work was scheduled when by the usbhost_disconnected() method after
+ *   the HCD informs use that the device has been disconnected.
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to
+ *     create().
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   Probably called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static void usbhost_disconnect_event(FAR void *arg)
+{
+  FAR struct usbhost_class_s *hubclass = (FAR struct usbhost_class_s *)arg;
+  FAR struct usbhost_hubpriv_s *priv;
+  FAR struct usbhost_hubport_s *hport;
+  irqstate_t flags;
+
+  DEBUGASSERT(hubclass != NULL);
+  priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
+
+  /* Set an indication to any users of the device that the device is no
+   * longer available.
+   */
+
+  flags              = irqsave();
+  priv->disconnected = true;
+
+  /* Now check the number of references on the class instance.  If it is one,
+   * then we can free the class instance now.  Otherwise, we will have to
+   * wait until the holders of the references free them by closing the
+   * block driver.
+   */
+
+  ullvdbg("crefs: %d\n", priv->crefs);
+  if (priv->crefs == 1)
+    {
+      DEBUGASSERT(hubclass->hport);
+      hport = hubclass->hport;
+
+      /* Free buffer for status change (INT) endpoint */
+
+      DRVR_IOFREE(hport->drvr, priv->buffer);
+
+      /* Disable power to all downstream ports */
+
+      (void)usbhost_hubpwr(hubclass, false);
+
+      /* Destroy the class instance */
+
+      usbhost_destroy(hubclass);
+    }
+
+  irqrestore(flags);
+}
+
+/****************************************************************************
  * Name: usbhost_getle16
  *
  * Description:
@@ -1051,6 +1118,9 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  * Returned Values:
  *   None
  *
+ * Assumptions:
+ *   Probably called from an interrupt handler.
+ *
  ****************************************************************************/
 
 static void usbhost_callback(FAR void *arg, int result)
@@ -1064,11 +1134,20 @@ static void usbhost_callback(FAR void *arg, int result)
 
   if (result != OK)
     {
+      ulldbg("ERROR: Transfer failed: %d\n", result);
       priv->buffer[0] = 0;
     }
 
-  (void)work_queue(HPWORK, &priv->work, (worker_t)usbhost_hubevent,
-                   hubclass, 0);
+  /* The work structure should always be available since hub communications
+   * are serialized.  However, there is a remote chance that this may
+   * collide with a hub disconnection event.
+   */
+
+  if (work_available(&priv->work))
+    {
+      (void)work_queue(HPWORK, &priv->work, (worker_t)usbhost_hub_event,
+                       hubclass, 0);
+    }
 }
 
 /****************************************************************************
@@ -1259,7 +1338,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
       DEBUGASSERT(hubclass->hport);
       hport = hubclass->hport;
 
-      ret = DRVR_ASYNCH(hport->drvr, priv->intin, (FAR uint8_t *)&priv->ctrlreq,
+      ret = DRVR_ASYNCH(hport->drvr, priv->intin, (FAR uint8_t *)priv->ctrlreq,
                         sizeof(struct usb_ctrlreq_s), usbhost_callback,
                         hubclass);
     }
@@ -1285,53 +1364,30 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
  *   is returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function cannot be called from an interrupt handler.
+ *   Probably called from an interrupt handler.
  *
  ****************************************************************************/
 
 static int usbhost_disconnected(struct usbhost_class_s *hubclass)
 {
   FAR struct usbhost_hubpriv_s *priv;
-  FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
+  int ret;
+
+  /* Execute the disconnect action from the worker thread. */
 
   DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
 
-  /* Set an indication to any users of the device that the device is no
-   * longer available.
+  /* NOTE: There may be pending HUB work associated with hub interrupt
+   * pipe events.  That work may be overwritten and lost by this action.
    */
 
-  flags              = irqsave();
-  priv->disconnected = true;
-
-  /* Now check the number of references on the class instance.  If it is one,
-   * then we can free the class instance now.  Otherwise, we will have to
-   * wait until the holders of the references free them by closing the
-   * block driver.
-   */
-
-  ullvdbg("crefs: %d\n", priv->crefs);
-  if (priv->crefs == 1)
-    {
-      DEBUGASSERT(hubclass->hport);
-      hport = hubclass->hport;
-
-      /* Free buffer for status change (INT) endpoint */
-
-      DRVR_IOFREE(hport->drvr, priv->buffer);
-
-      /* Disable power to all downstream ports */
-
-      (void)usbhost_hubpwr(hubclass, false);
-
-      /* Destroy the class instance */
-
-      usbhost_destroy(hubclass);
-    }
-
+  flags = irqsave();
+  ret = work_queue(HPWORK, &priv->work, (worker_t)usbhost_disconnect_event,
+                   hubclass, 0);
   irqrestore(flags);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
