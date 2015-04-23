@@ -557,6 +557,8 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
   uint16_t hubchar;
   int ret;
 
+  uvdbg("Read hub descriptor\n");
+
   DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
 
@@ -592,6 +594,21 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
   priv->pwrondelay  = (2 * hubdesc.pwrondelay);
   priv->ctrlcurrent = hubdesc.ctrlcurrent;
 
+  uvdbg("Hub Descriptor:\n");
+  uvdbg("  bDescLength:         %d\n", hubdesc.len);
+  uvdbg("  bDescriptorType:     0x%02x\n", hubdesc.type);
+  uvdbg("  bNbrPorts:           %d\n", hubdesc.nports);
+  uvdbg("  wHubCharacteristics: 0x%04x\n", usbhost_getle16(hubdesc.characteristics));
+  uvdbg("    lpsm:              %d\n", priv->lpsm);
+  uvdbg("    compounddev:       %s\n", priv->compounddev ? "TRUE" : "FALSE");
+  uvdbg("    ocmode:            %d\n", priv->ocmode);
+  uvdbg("    indicator:         %s\n", priv->indicator ? "TRUE" : "FALSE");
+  uvdbg("  bPwrOn2PwrGood:      %d\n", hubdesc.pwrondelay);
+  uvdbg("    pwrondelay:        %d\n", priv->pwrondelay);
+  uvdbg("  bHubContrCurrent:    %d\n", hubdesc.ctrlcurrent);
+  uvdbg("  DeviceRemovable:     %d\n", hubdesc.devattached);
+  uvdbg("  PortPwrCtrlMask:     %d\n", hubdesc.pwrctrlmask);
+
   return OK;
 }
 
@@ -599,13 +616,29 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
  * Name: usbhost_hubpwr
  *
  * Description:
- *   This function implements the connect() method of struct
- *   usbhost_class_s.  This method is a callback into the class
- *   implementation.  It is used to provide the device's configuration
- *   descriptor to the class so that the class may initialize properly
+ *   Self-powered hubs may have power switches that control delivery of
+ *   power downstream facing ports but it is not required. Bus-powered hubs
+ *   are required to have power switches. A hub with power switches can
+ *   switch power to all ports as a group/gang, to each port individually, or
+ *   have an arbitrary number of gangs of one or more ports.
+ *
+ *   A hub indicates whether or not it supports power switching by the
+ *   setting of the Logical Power Switching Mode field in wHubCharacteristics.
+ *   If a hub supports per-port power switching, then the power to a port is
+ *   turned on when a SetPortFeature(PORT_POWER) request is received for the
+ *   port. Port power is turned off when the port is in the Powered-off or
+ *   Not Configured states. If a hub supports ganged power switching, then
+ *   the power to all ports in a gang is turned on when any port in a gang
+ *   receives a SetPortFeature(PORT_POWER) request. The power to a gang is
+ *   not turned off unless all ports in a gang are in the Powered-off or Not
+ *   Configured states. Note, the power to a port is not turned on by a
+ *   SetPortFeature(PORT_POWER) if both C_HUB_LOCAL_POWER and Local Power
+ *   Status (in wHubStatus) are set to 1B at the time when the request is
+ *   executed and the PORT_POWER feature would be turned on.
  *
  * Input Parameters:
  *   hubclass - The USB host class instance.
+ *   on - True: enable power; false: Disablel power
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -616,11 +649,14 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
  *
  ****************************************************************************/
 
-static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
+static int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
 {
   FAR struct usbhost_hubpriv_s *priv;
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_ctrlreq_s *ctrlreq;
+  uint16_t req;
+  int port;
+  int ret;
 
   DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
@@ -628,12 +664,10 @@ static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
   DEBUGASSERT(hubclass->hport);
   hport  = hubclass->hport;
 
-  if (on || ROOTHUB(hport))
-    {
-      uint16_t req;
-      int port;
-      int ret;
+  /* Don't bother trying to control the power of a root hub port */
 
+  if (!ROOTHUB(hport))
+    {
       if (on)
         {
           req = USB_REQ_SETFEATURE;
@@ -643,7 +677,7 @@ static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
           req = USB_REQ_CLEARFEATURE;
         }
 
-     /* Set port power  */
+     /* Enable/disable power to all downstream ports */
 
      ctrlreq = priv->ctrlreq;
      DEBUGASSERT(ctrlreq);
@@ -1212,7 +1246,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
           return ret;
         }
 
-      /* Power on hub (i.e. power on all hub ports) */
+      /* Enable power to all downstream ports */
 
       ret = usbhost_hubpwr(hubclass, true);
       if (ret != OK)
@@ -1220,7 +1254,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
           return ret;
         }
 
-      /* INT request to periodically check port status */
+      /* Enable monitoring of port status change events */
 
       DEBUGASSERT(hubclass->hport);
       hport = hubclass->hport;
@@ -1287,7 +1321,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
 
       DRVR_IOFREE(hport->drvr, priv->buffer);
 
-      /* Power off (for root hub only) */
+      /* Disable power to all downstream ports */
 
       (void)usbhost_hubpwr(hubclass, false);
 
