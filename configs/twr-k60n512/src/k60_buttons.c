@@ -162,7 +162,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   oldhandler = knetis_pinirqattach(pinset, irqhandler);
 
-  /* Then make sure that interupts are enabled on the pin */
+  /* Then make sure that interrupts are enabled on the pin */
 
   kinetis_pindmaenable(pinset);
   return oldhandler;

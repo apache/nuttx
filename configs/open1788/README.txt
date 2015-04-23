@@ -36,7 +36,7 @@ LEDs
     LED_HEAPALLOCATE           ON   OFF  OFF  OFF
     LED_IRQSENABLED            OFF   ON  OFF  OFF
     LED_STACKCREATED           ON    ON  OFF  OFF
-    LED_INIRQ                  LED3 glows, on while in interupt
+    LED_INIRQ                  LED3 glows, on while in interrupt
     LED_SIGNAL                 LED3 glows, on while in signal handler
     LED_ASSERTION              LED3 glows, on while in assertion
     LED_PANIC                  LED3 Flashes at 2Hz

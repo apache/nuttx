@@ -89,7 +89,7 @@ static const lpc17_pinset_t g_buttoncfg[BOARD_NUM_BUTTONS] =
   GPIO_JOY_B, GPIO_JOY_C, GPIO_JOY_D, GPIO_JOY_CTR
 };
 
-/* This array defines all of the interupt handlers current attached to
+/* This array defines all of the interrupt handlers current attached to
  * button events.
  */
 
