@@ -125,10 +125,6 @@ struct usbhost_hubclass_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Memory allocation services */
-
-static inline void usbhost_class_free(FAR struct usbhost_class_s *devclass);
-
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
@@ -205,7 +201,7 @@ static struct usbhost_registry_s g_hub =
  *
  ****************************************************************************/
 
-static inline void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
+static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
 {
   uvdbg("Deactivating: %d\n", hport->port);
 
@@ -270,41 +266,6 @@ static int usbhost_hport_activate(FAR struct usbhost_hubport_s *hport)
 }
 
 /****************************************************************************
- * Name: usbhost_class_free
- *
- * Description:
- *   Free a class instance previously allocated by usbhost_create().
- *
- * Input Parameters:
- *   devclass - A reference to the class instance to be freed.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-static inline void usbhost_class_free(FAR struct usbhost_class_s *devclass)
-{
-  FAR struct usbhost_hubport_s *hport;
-  DEBUGASSERT(devclass != NULL);
-
-  uvdbg("Freeing: %p\n", devclass);
-  DEBUGASSERT(devclass != NULL && devclass->hport != NULL);
-  hport = devclass->hport;
-
-  /* Detach the class from the hub port */
-
-  usbhost_devaddr_destroy(hport);
-  hport->funcaddr = 0;
-
-  /* Free the class instance */
-
-  DEBUGASSERT(hport->devclass == devclass);
-  kmm_free(devclass);
-  hport->devclass = NULL;
-}
-
-/****************************************************************************
  * Name: usbhost_destroy
  *
  * Description:
@@ -325,6 +286,7 @@ static void usbhost_destroy(FAR void *arg)
   FAR struct usbhost_class_s *hubclass = (FAR struct usbhost_class_s *)arg;
   FAR struct usbhost_hubpriv_s *priv;
   FAR struct usbhost_hubport_s *hport;
+  FAR struct usbhost_hubport_s *child;
   int port;
 
   DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
@@ -347,24 +309,29 @@ static void usbhost_destroy(FAR void *arg)
     {
       /* Free any devices classes connect on this hub port */
 
-      hport = &priv->hport[port];
-      if (hport->devclass != NULL)
+      child = &priv->hport[port];
+      if (child->devclass != NULL)
         {
-          CLASS_DISCONNECTED(hport->devclass);
+          CLASS_DISCONNECTED(child->devclass);
         }
 
-      /* Free any resource use by the hub port */
+      /* Free any resources used by the hub port */
 
-      usbhost_hport_deactivate(hport);
+      usbhost_hport_deactivate(child);
     }
 
   /* Destroy the semaphores */
 
   sem_destroy(&priv->exclsem);
 
-  /* Free the hub class structure */
+  /* Deactivate the parent hub port (unless it is the root hub port) */
 
-  usbhost_class_free(hubclass);
+  usbhost_hport_deactivate(hport);
+
+  /* Free the class instance */
+
+  kmm_free(hubclass);
+  hport->devclass = NULL;
 }
 
 /****************************************************************************
