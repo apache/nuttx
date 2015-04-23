@@ -2077,7 +2077,7 @@ static int ez80_emacinitialize(void)
 
   /* Software reset */
 
-  outp(EZ80_EMAC_ISTAT, 0xff); /* Clear any pending interupts */
+  outp(EZ80_EMAC_ISTAT, 0xff); /* Clear any pending interrupts */
   regval  = inp(EZ80_EMAC_RST);
   regval |= EMAC_RST_SRST;
   outp(EZ80_EMAC_RST, regval);

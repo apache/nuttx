@@ -108,7 +108,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* CONFIG_I2C_POLLED may be set so that I2C interrrupts will not be used.  Instead,
+/* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.  Instead,
  * CPU-intensive polling will be used.
  */
 

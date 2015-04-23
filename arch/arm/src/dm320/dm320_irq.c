@@ -204,7 +204,7 @@ void up_enable_irq(int irq)
  * Name: up_ack_irq
  *
  * Description:
- *   Acknowledge the interupt
+ *   Acknowledge the interrupt
  *
  ************************************************************************/
 

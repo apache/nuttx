@@ -88,7 +88,7 @@
 #define CLK_PWRCON_OSC10K_EN       (1 << 3)  /* Bit 3:  Internal 10KHz low speed oscillator enable */
 #define CLK_PWRCON_PD_WU_DLY       (1 << 4)  /* Bit 4:  Enable the wake-up delay counter */
 #define CLK_PWRCON_PD_WU_INT_EN    (1 << 5)  /* Bit 5:  Power down mode wake-up interrupt status */
-#define CLK_PWRCON_PD_WU_STS       (1 << 6)  /* Bit 6:  Power down mode wake-up interupt status */
+#define CLK_PWRCON_PD_WU_STS       (1 << 6)  /* Bit 6:  Power down mode wake-up interrupt status */
 #define CLK_PWRCON_PWR_DOWN_EN     (1 << 7)  /* Bit 7:  System power down enable bit */
 #define CLK_PWRCON_PD_WAIT_CPU     (1 << 8)  /* Bit 8:  Power down entry condition */
 

@@ -857,7 +857,7 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
   uint32_t eptype;
   unsigned int avail;
 
-  /* Save the reason for the halt.  We need this in the channel halt interrrupt
+  /* Save the reason for the halt.  We need this in the channel halt interrupt
    * handling logic to know what to do next.
    */
 
@@ -1806,7 +1806,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
 
   if ((pending & USB_HC_INT_FRMOVRUN) != 0)
     {
-      /* Halt the channel -- the CHH interrrupt is expected next */
+      /* Halt the channel -- the CHH interrupt is expected next */
 
       efm32_chan_halt(priv, chidx, CHREASON_FRMOR);
 
@@ -1827,7 +1827,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
 
       if (chan->eptype == EFM32_USB_EPTYPE_CTRL || chan->eptype == EFM32_USB_EPTYPE_BULK)
         {
-          /* Halt the channel -- the CHH interrrupt is expected next */
+          /* Halt the channel -- the CHH interrupt is expected next */
 
           efm32_chan_halt(priv, chidx, CHREASON_XFRC);
 
@@ -2050,7 +2050,7 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
       priv->chan[chidx].buflen  -= priv->chan[chidx].inflight;
       priv->chan[chidx].inflight = 0;
 
-      /* Halt the channel -- the CHH interrrupt is expected next */
+      /* Halt the channel -- the CHH interrupt is expected next */
 
       efm32_chan_halt(priv, chidx, CHREASON_XFRC);
 
@@ -2078,7 +2078,7 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
 
   else if ((pending & USB_HC_INT_NAK) != 0)
     {
-      /* Halt the channel  -- the CHH interrrupt is expected next */
+      /* Halt the channel  -- the CHH interrupt is expected next */
 
       efm32_chan_halt(priv, chidx, CHREASON_NAK);
 

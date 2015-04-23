@@ -328,7 +328,7 @@ void lpc31_lowsetup(void)
             UART_FCR_RXFIFORST|UART_FCR_FIFOENABLE),
            LPC31_UART_FCR);
 
-  /* The NuttX serial driver waits for the first THRE interrrupt before
+  /* The NuttX serial driver waits for the first THRE interrupt before
    * sending serial data... However, it appears that the lpc313x hardware
    * does not generate that interrupt until a transition from not-empty
    * to empty.  So, the current kludge here is to send one NULL at

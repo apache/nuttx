@@ -296,7 +296,7 @@ avr32_common:
 
 	mov		r11, sp
 
-	/* Switch to the interrrupt stack if so configured.  Move the current   */
+	/* Switch to the interrupt stack if so configured.  Move the current   */
 	/* stack pointer into a preserved register (r7) and set the interrupt   */
 	/* stack pointer.                                                       */
 

@@ -500,7 +500,7 @@ static int up_interrupt(int irq, void *context)
            /* Clear the pending error interrupt */
 
            up_clrpend_irq(priv->irqe);
-           lldbg("ERROR: interrrupt STA: %08x\n",
+           lldbg("ERROR: interrupt STA: %08x\n",
                  up_serialin(priv, PIC32MX_UART_STA_OFFSET));
            handled = true;
         }
