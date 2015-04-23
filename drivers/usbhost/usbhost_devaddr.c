@@ -251,7 +251,8 @@ void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport)
  *     newly connected and so is in need of a function address.
  *
  * Returned Value:
- *   Zero on success; a negated errno value is returned on failure.
+ *   On success, a new device function address in the the range 0x01 to 0x7f
+ *   is returned.  On failure, a negated errno value is returned.
  *
  *******************************************************************************/
 
@@ -278,38 +279,34 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport)
   if (devaddr < 0)
     {
       udbg("ERROR: Failed to allocate a device address\n");
-      return devaddr;
     }
 
-  /* Set the function address in the hub port structure */
-
-  hport->funcaddr = devaddr;
-  return OK;
+  return devaddr;
 }
 
 /*******************************************************************************
  * Name: usbhost_devaddr_destroy
  *
  * Description:
- *   Release a device address previously assigned to a hub port by
- *   usbhost_devaddr_create().
+ *   Release a device address previously assigned by usbhost_devaddr_create().
  *
  * Input Parameters:
  *   hport - A reference to a hub port structure from which a device has been
  *     disconnected and so no longer needs the function address.
+ *   devaddr - The address to be released.
  *
  * Returned Value:
  *   None
  *
  *******************************************************************************/
 
-void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport)
+void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport, uint8_t devaddr)
 {
   FAR struct usbhost_devaddr_s *devgen;
 
   /* Ignore bad device address */
 
-  if (hport->funcaddr > 0 && hport->funcaddr < 0x7f)
+  if (devaddr > 0 && devaddr < 0x7f)
     {
       /* Get the address generation data from the root hub port */
 
@@ -323,7 +320,7 @@ void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport)
 
       /* Free the device address */
 
-      usbhost_devaddr_free(devgen, hport->funcaddr);
+      usbhost_devaddr_free(devgen, devaddr);
       usbhost_givesem(devgen);
     }
 }

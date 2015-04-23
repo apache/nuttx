@@ -1991,7 +1991,8 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
   /* Free the function address assigned to this device */
 
-  usbhost_devaddr_destroy(hport);
+  usbhost_devaddr_destroy(hport, hport->funcaddr);
+  hport->funcaddr = 0;
   return OK;
 }
 

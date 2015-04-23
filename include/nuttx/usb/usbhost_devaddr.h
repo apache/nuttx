@@ -120,7 +120,8 @@ void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport);
  *     newly connected and so is in need of a function address.
  *
  * Returned Value:
- *   Zero on success; a negated errno value is returned on failure.
+ *   On success, a new device function address in the the range 0x01 to 0x7f
+ *   is returned.  On failure, a negated errno value is returned.
  *
  *******************************************************************************/
 
@@ -130,19 +131,20 @@ int usbhost_devaddr_create(FAR struct usbhost_hubport_s *hport);
  * Name: usbhost_devaddr_destroy
  *
  * Description:
- *   Release a device address previously assigned to a hub port by
- *   usbhost_devaddr_create().
+ *   Release a device address previously assigned by usbhost_devaddr_create().
  *
  * Input Parameters:
  *   hport - A reference to a hub port structure from which a device has been
  *     disconnected and so no longer needs the function address.
+ *   devaddr - The address to be released.
  *
  * Returned Value:
  *   None
  *
  *******************************************************************************/
 
-void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport);
+void usbhost_devaddr_destroy(FAR struct usbhost_hubport_s *hport,
+                             uint8_t devaddr);
 
 #undef EXTERN
 #if defined(__cplusplus)

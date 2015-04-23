@@ -49,10 +49,9 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/scsi.h>
+#include <nuttx/clock.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -69,6 +68,24 @@
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#endif
+
+/* Perform polling actions on the low priority work queue, if configured */
+
+#ifndef CONFIG_SCHED_LPWORK
+#  define POLL_WORK         LPWORK
+#else
+#  define POLL_WORK         HPWORK
+#endif
+
+#define POLL_DELAY          MSEC2TICK(400)
+
+/* Perform event processing on the high priority work queue, if configured */
+
+#ifndef CONFIG_SCHED_HPWORK
+#  define EVENT_WORK        HPWORK
+#else
+#  define EVENT_WORK        LPWORK
 #endif
 
 /* Used in usbhost_cfgdesc() */
@@ -98,10 +115,7 @@ struct usbhost_hubpriv_s
   volatile bool             disconnected; /* TRUE: Device has been disconnected */
   bool                      compounddev;  /* Hub is part of compound device */
   bool                      indicator;    /* Port indicator */
-
   uint16_t                  pwrondelay;   /* Power on wait time in ms */
-  int16_t                   crefs;        /* Reference count on the driver instance */
-
   sem_t                     exclsem;      /* Used to maintain mutual exclusive access */
   struct work_s             work;         /* Used for deferred callback work */
   usbhost_ep_t              intin;        /* Interrupt IN endpoint */
@@ -134,8 +148,9 @@ static void usbhost_destroy(FAR void *arg);
 static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
              FAR const uint8_t *configdesc, int desclen);
 static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass);
-static inline int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass,
-             bool on);
+static inline int usbhost_hubpwr(FAR struct usbhost_hubpriv_s *priv,
+                                 FAR struct usbhost_hubport_s *hport,
+                                 bool on);
 static void usbhost_hub_event(FAR void *arg);
 static void usbhost_disconnect_event(FAR void *arg);
 
@@ -220,7 +235,7 @@ static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
 
       /* Free the function address if one has been assigned */
 
-      usbhost_devaddr_destroy(hport);
+      usbhost_devaddr_destroy(hport, hport->funcaddr);
       hport->funcaddr = 0;
 
       DEBUGASSERT(hport->devclass == NULL);
@@ -294,7 +309,7 @@ static void usbhost_destroy(FAR void *arg)
   priv  = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
   hport = hubclass->hport;
 
-  uvdbg("crefs: %d\n", priv->crefs);
+  uvdbg("Destroying hub on port  %d\n", hport->port);
 
   /* Destroy the interrupt IN endpoint */
 
@@ -638,8 +653,9 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
  *   executed and the PORT_POWER feature would be turned on.
  *
  * Input Parameters:
- *   hubclass - The USB host class instance.
- *   on - True: enable power; false: Disablel power
+ *   priv - The USB hub private data
+ *   hport - The port on the parent hub where the this hub is connected.
+ *   on - True: enable power; false: Disable power
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -650,53 +666,45 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
  *
  ****************************************************************************/
 
-static int usbhost_hubpwr(FAR struct usbhost_class_s *hubclass, bool on)
+static int usbhost_hubpwr(FAR struct usbhost_hubpriv_s *priv,
+                          FAR struct usbhost_hubport_s *hport,
+                          bool on)
 {
-  FAR struct usbhost_hubpriv_s *priv;
-  FAR struct usbhost_hubport_s *hport;
   FAR struct usb_ctrlreq_s *ctrlreq;
   uint16_t req;
   int port;
   int ret;
 
-  DEBUGASSERT(hubclass != NULL);
-  priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
+  /* Are we enabling or disabling power? */
 
-  DEBUGASSERT(hubclass->hport);
-  hport  = hubclass->hport;
-
-  /* Don't bother trying to control the power of a root hub port */
-
-  if (!ROOTHUB(hport))
+  if (on)
     {
-      if (on)
-        {
-          req = USB_REQ_SETFEATURE;
-        }
-      else
-        {
-          req = USB_REQ_CLEARFEATURE;
-        }
+      req = USB_REQ_SETFEATURE;
+    }
+  else
+    {
+      req = USB_REQ_CLEARFEATURE;
+    }
 
-     /* Enable/disable power to all downstream ports */
+  /* Enable/disable power to all downstream ports */
 
-     ctrlreq = priv->ctrlreq;
-     DEBUGASSERT(ctrlreq);
+  ctrlreq = priv->ctrlreq;
+  DEBUGASSERT(ctrlreq);
 
-      for (port = 1; port <= priv->nports; port++)
-        {
-          ctrlreq->type = USBHUB_REQ_TYPE_PORT;
-          ctrlreq->req  = req;
-          usbhost_putle16(ctrlreq->value, (USBHUB_PORT_FEAT_POWER << 8));
-          usbhost_putle16(ctrlreq->index, port);
-          usbhost_putle16(ctrlreq->len, 0);
+   for (port = 1; port <= priv->nports; port++)
+     {
+       ctrlreq->type = USBHUB_REQ_TYPE_PORT;
+       ctrlreq->req  = req;
+       usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_POWER);
+       usbhost_putle16(ctrlreq->index, port);
+       usbhost_putle16(ctrlreq->len, 0);
 
-          ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
-          if (ret != OK)
-            {
-              udbg("ERROR: Failed to power %d port %d: %d\n", on, port, ret);
-              return ret;
-            }
+       ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
+       if (ret != OK)
+         {
+           udbg("ERROR: Failed to power %s port %d: %d\n",
+                on ? "UP" : "DOWN", port, ret);
+           return ret;
         }
     }
 
@@ -1030,38 +1038,27 @@ static void usbhost_disconnect_event(FAR void *arg)
   DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
 
+  DEBUGASSERT(hubclass->hport);
+  hport = hubclass->hport;
+
   /* Set an indication to any users of the device that the device is no
    * longer available.
    */
 
-  flags              = irqsave();
+  flags = irqsave();
   priv->disconnected = true;
 
-  /* Now check the number of references on the class instance.  If it is one,
-   * then we can free the class instance now.  Otherwise, we will have to
-   * wait until the holders of the references free them by closing the
-   * block driver.
-   */
+  /* Free buffer for status change (INT) endpoint */
 
-  ullvdbg("crefs: %d\n", priv->crefs);
-  if (priv->crefs == 1)
-    {
-      DEBUGASSERT(hubclass->hport);
-      hport = hubclass->hport;
+  DRVR_IOFREE(hport->drvr, priv->buffer);
 
-      /* Free buffer for status change (INT) endpoint */
+  /* Disable power to all downstream ports */
 
-      DRVR_IOFREE(hport->drvr, priv->buffer);
+  (void)usbhost_hubpwr(priv, hport, false);
 
-      /* Disable power to all downstream ports */
+  /* Destroy the class instance */
 
-      (void)usbhost_hubpwr(hubclass, false);
-
-      /* Destroy the class instance */
-
-      usbhost_destroy(hubclass);
-    }
-
+  usbhost_destroy(hubclass);
   irqrestore(flags);
 }
 
@@ -1127,15 +1124,36 @@ static void usbhost_callback(FAR void *arg, int result)
 {
   FAR struct usbhost_class_s *hubclass;
   FAR struct usbhost_hubpriv_s *priv;
+  uint32_t delay = 0;
+  int qid = EVENT_WORK;
 
   DEBUGASSERT(arg != NULL);
   hubclass = (FAR struct usbhost_class_s *)arg;
   priv     = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
 
+  /* Check for a failure */
+
   if (result != OK)
     {
       ulldbg("ERROR: Transfer failed: %d\n", result);
+
+      /* Indicate there there is nothing to do.  So when the work is
+       * performed, nothing will happen other than we will set to receive
+       * the next event.
+       */
+
       priv->buffer[0] = 0;
+
+      /* We don't know the nature of the failure, but we need to do all that
+       * we can do to avoid a CPU hog error loop.
+       *
+       * Use the low-priority work queue and delay polling for the next
+       * event.  We want to use as little CPU bandwidth as possible in this
+       * case.
+       */
+
+      qid   = POLL_WORK;
+      delay = POLL_DELAY;
     }
 
   /* The work structure should always be available since hub communications
@@ -1145,8 +1163,8 @@ static void usbhost_callback(FAR void *arg, int result)
 
   if (work_available(&priv->work))
     {
-      (void)work_queue(HPWORK, &priv->work, (worker_t)usbhost_hub_event,
-                       hubclass, 0);
+      (void)work_queue(qid, &priv->work, (worker_t)usbhost_hub_event,
+                       hubclass, delay);
     }
 }
 
@@ -1227,10 +1245,6 @@ static FAR struct usbhost_class_s *
       goto errout_with_ctrlreq;
     }
 
-  /* The initial reference count is 1... One reference is held by the driver */
-
-  priv->crefs = 1;
-
   /* Initialize semaphores (this works okay in the interrupt context) */
 
   sem_init(&priv->exclsem, 0, 1);
@@ -1306,6 +1320,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
   DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
 
+  DEBUGASSERT(hubclass->hport);
+  hport = hubclass->hport;
+
   DEBUGASSERT(configdesc != NULL && desclen >= sizeof(struct usb_cfgdesc_s));
 
   /* Parse the configuration descriptor to get the endpoints */
@@ -1327,16 +1344,13 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
 
       /* Enable power to all downstream ports */
 
-      ret = usbhost_hubpwr(hubclass, true);
+      ret = usbhost_hubpwr(priv, hport, true);
       if (ret != OK)
         {
           return ret;
         }
 
       /* Enable monitoring of port status change events */
-
-      DEBUGASSERT(hubclass->hport);
-      hport = hubclass->hport;
 
       ret = DRVR_ASYNCH(hport->drvr, priv->intin, (FAR uint8_t *)priv->ctrlreq,
                         sizeof(struct usb_ctrlreq_s), usbhost_callback,
@@ -1384,8 +1398,8 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
    */
 
   flags = irqsave();
-  ret = work_queue(HPWORK, &priv->work, (worker_t)usbhost_disconnect_event,
-                   hubclass, 0);
+  ret = work_queue(EVENT_WORK, &priv->work,
+                   (worker_t)usbhost_disconnect_event, hubclass, 0);
   irqrestore(flags);
   return ret;
 }

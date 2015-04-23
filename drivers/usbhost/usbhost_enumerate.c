@@ -250,7 +250,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
           /* Then bind the newly instantiated class instance */
 
           ret = CLASS_CONNECT(devclass, configdesc, desclen);
-          if (ret != OK)
+          if (ret < 0)
             {
               /* On failures, call the class disconnect method which
                * should then free the allocated devclass instance.
@@ -313,6 +313,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   unsigned int cfglen;
   uint8_t maxpacketsize;
   uint8_t descsize;
+  uint8_t funcaddr = 0;
   FAR uint8_t *buffer = NULL;
   int ret;
 
@@ -323,14 +324,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
    */
 
   ret = DRVR_ALLOC(hport->drvr, (FAR uint8_t **)&ctrlreq, &maxlen);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("DRVR_ALLOC failed: %d\n", ret);
       return ret;
     }
 
   ret = DRVR_ALLOC(hport->drvr, &buffer, &maxlen);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("DRVR_ALLOC failed: %d\n", ret);
       goto errout;
@@ -377,7 +378,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   usbhost_putle16(ctrlreq->len, descsize);
 
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
            descsize, ret);
@@ -393,27 +394,6 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, 0, maxpacketsize);
 
-  /* Set the USB device address */
-
-  ctrlreq->type = USB_REQ_DIR_OUT | USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_SETADDRESS;
-  usbhost_putle16(ctrlreq->value, ((uint16_t)hport->funcaddr << 8));
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, 0);
-
-  ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
-  if (ret != OK)
-    {
-      udbg("ERROR: Failed to set address: %d\n");
-      goto errout;
-    }
-
-  usleep(2*1000);
-
-   /* And reconfigure EP0 with the correct address */
-
-  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, hport->funcaddr, maxpacketsize);
-
   /* Now read the full device descriptor (if we have not already done so) */
 
   if (descsize < USB_SIZEOF_DEVDESC)
@@ -425,7 +405,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
       usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
 
       ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
-      if (ret != OK)
+      if (ret < 0)
         {
           udbg("ERROR: Failed to get device descriptor, length=%d: %d\n",
                USB_SIZEOF_DEVDESC, ret);
@@ -441,10 +421,45 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   (void)usbhost_devdesc((struct usb_devdesc_s *)buffer, &id);
 
- /* Get the configuration descriptor (only), index == 0.  Should not be
-  * hard-coded! More logic is needed in order to handle devices with
-  * multiple configurations.
-  */
+  /* Assign a function address to the device connected to this port */
+
+  funcaddr = usbhost_devaddr_create(hport);
+  if (funcaddr < 0)
+    {
+      udbg("ERROR: usbhost_devaddr_create failed: %d\n", ret);
+      goto errout;
+    }
+
+  /* Set the USB device address */
+
+  ctrlreq->type = USB_REQ_DIR_OUT | USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_SETADDRESS;
+  usbhost_putle16(ctrlreq->value, (uint16_t)funcaddr);
+  usbhost_putle16(ctrlreq->index, 0);
+  usbhost_putle16(ctrlreq->len, 0);
+
+  ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
+  if (ret < 0)
+    {
+      udbg("ERROR: Failed to set address: %d\n");
+      goto errout;
+    }
+
+  usleep(2*1000);
+
+  /* Assign the function address to the port */
+
+  DEBUGASSERT(hport->funcaddr == 0 && funcaddr != 0);
+  hport->funcaddr = funcaddr;
+
+  /* And reconfigure EP0 with the correct address */
+
+  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, hport->funcaddr, maxpacketsize);
+
+  /* Get the configuration descriptor (only), index == 0.  Should not be
+   * hard-coded! More logic is needed in order to handle devices with
+   * multiple configurations.
+   */
 
   ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
@@ -453,7 +468,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   usbhost_putle16(ctrlreq->len, USB_SIZEOF_CFGDESC);
 
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
-  if (ret != OK)
+  if (ret < 0)
    {
       udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
            USB_SIZEOF_CFGDESC, ret);
@@ -476,7 +491,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   usbhost_putle16(ctrlreq->len, cfglen);
 
   ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to get configuration descriptor, length=%d: %d\n",
            cfglen, ret);
@@ -492,7 +507,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   usbhost_putle16(ctrlreq->len, 0);
 
   ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to set configuration: %d\n", ret);
       goto errout;
@@ -510,9 +525,9 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
        */
 
       ret = usbhost_configdesc(buffer, cfglen, &id);
-      if (ret != OK)
+      if (ret < 0)
         {
-          udbg("ERROR: Failed to read class identification: %d\n", ret);
+          udbg("ERROR: usbhost_configdesc failed: %d\n", ret);
           goto errout;
         }
     }
@@ -521,28 +536,28 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   usleep(100*1000);
 
-  /* Assign a function address to the device connected to this port */
-
-  ret = usbhost_devaddr_create(hport);
-  if (ret < 0)
-    {
-      udbg("ERROR: Failed to allocate device address: %d\n", ret);
-      goto errout;
-    }
-
   /* Parse the configuration descriptor and bind to the class instance for the
    * device.  This needs to be the last thing done because the class driver
    * will begin configuring the device.
    */
 
   ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
-  if (ret != OK)
+  if (ret < 0)
     {
-      udbg("ERROR: usbhost_classbind returned %d\n", ret);
-      usbhost_devaddr_destroy(hport);
+      udbg("ERROR: usbhost_classbind failed %d\n", ret);
     }
 
 errout:
+  if (ret < 0)
+    {
+      /* Release the device function address on any failure */
+
+      usbhost_devaddr_destroy(hport, funcaddr);
+      hport->funcaddr = 0;
+    }
+
+  /* Release temporary buffers in any event */
+
   if (buffer != NULL)
     {
       DRVR_FREE(hport->drvr, buffer);
