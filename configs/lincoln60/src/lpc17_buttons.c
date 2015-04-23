@@ -69,7 +69,7 @@ static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
   LINCOLN60_BUT1
 };
 
-/* This array defines all of the interupt handlers current attached to
+/* This array defines all of the interrupt handlers current attached to
  * button events.
  */
 

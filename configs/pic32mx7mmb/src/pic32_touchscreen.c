@@ -312,7 +312,7 @@ static void tc_adc_sample(int pin)
 
   putreg32(ADC_CON3_ADCS(6) | ADC_CON3_SAMC(0), PIC32MX_ADC_CON3);
 
-  /* No interrrupts, no scan, internal voltage reference */
+  /* No interrupts, no scan, internal voltage reference */
 
   putreg32(ADC_CON2_VCFG_AVDDAVSS, PIC32MX_ADC_CON2);
 

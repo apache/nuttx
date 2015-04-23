@@ -86,7 +86,7 @@
  *
  * Thus if LED L is statically on, NuttX has successfully booted and is,
  * apparently, running normmally.  If LED RX is glowing, then NuttX is
- * handling interupts (and also signals and assertions).  If TX is flashing
+ * handling interrupts (and also signals and assertions).  If TX is flashing
  * at approximately 2Hz, then a fatal error has been detected and the system
  */
 
