@@ -514,6 +514,28 @@
 #endif
 
 /************************************************************************************
+ * Name: DRVR_CANCEL
+ *
+ * Description:
+ *   Cancel a pending asynchronous transfer on an endpoint.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
+ *      asynchronous transfer should be transferred.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+#  define DRVR_CANCEL(drvr,ep) ((drvr)->cancel(drvr,ep))
+#endif
+
+/************************************************************************************
  * Name: DRVR_CONNECT
  *
  * Description:
@@ -821,6 +843,12 @@ struct usbhost_driver_s
   int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                   FAR uint8_t *buffer, size_t buflen,
                   usbhost_asynch_t callback, FAR void *arg);
+#endif
+
+#ifdef CONFIG_USBHOST_ASYNCH
+  /* Cancel any pending asynchronous transfer on an endpoint */
+
+  int (*cancel)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
 
 #ifdef CONFIG_USBHOST_HUB

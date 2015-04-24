@@ -379,6 +379,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
 static int lpc17_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen,
                         usbhost_asynch_t callback, FAR void *arg);
+static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
 #ifdef CONFIG_USBHOST_HUB
 static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
@@ -682,8 +683,8 @@ static void lpc17_tdfree(struct lpc17_gtd_s *td)
 
  if (tdfree != NULL && td != TDTAIL)
     {
-      tdfree->flink           = g_tdfree;
-      g_tdfree                = tdfree;
+      tdfree->flink = g_tdfree;
+      g_tdfree      = tdfree;
     }
 }
 
@@ -2943,7 +2944,74 @@ errout_with_sem:
   lpc17_givesem(&priv->exclsem);
   return ret;
 }
-#endif
+#endif /* CONFIG_USBHOST_ASYNCH */
+
+/************************************************************************************
+ * Name: DRVR_CANCEL
+ *
+ * Description:
+ *   Cancel a pending asynchronous transfer on an endpoint.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
+ *      asynchronous transfer should be transferred.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+{
+  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
+  struct lpc17_gtd_s *td;
+  struct lpc17_gtd_s *next;
+  struct lpc17_asynch_s *asynch;
+  irqstate_t flags;
+  int ret;
+
+  /* These first steps must be atomic as possible */
+
+  flags  = irqsave();
+
+  /* It might be possible for no transfer to be in progress (asynch == NULL),
+   * but it would be an usage error to use the interface to try to cancel a
+   * synchronous transfer (wdhwait == true).
+   */
+
+  DEBUGASSERT(ed != NULL && ed->wdhwait == false);
+  asynch = ed->asynch;
+  if (asynch)
+    {
+      /* We really need some kind of atomic test and set to do this right */
+
+      td              = (struct lpc17_gtd_s *)ed->hw.headp;
+      ed->hw.headp    = LPC17_TDTAIL_ADDR;
+      ed->asynch      = NULL;
+
+      /* Free all transfer descriptors that were connected to the ED */
+
+      DEBUGASSERT(td != (struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR);
+      while (td != (struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR)
+        {
+          next = (struct lpc17_gtd_s *)td->hw.nexttd;
+          lpc17_tdfree(td);
+          td = next;
+        }
+
+      memset(asynch, 0, sizeof(struct lpc17_asynch_s));
+      lpc17_freeasynch(asynch);
+    }
+
+  ret = ed->wdhwait ? -EINVAL : OK;
+  irqrestore(flags);
+  return ret;
+}
+#endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
  * Name: lpc17_connect
@@ -3146,6 +3214,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   drvr->transfer       = lpc17_transfer;
 #ifdef CONFIG_USBHOST_ASYNCH
   drvr->asynch         = lpc17_asynch;
+  drvr->cancel         = lpc17_cancel;
 #endif
 #ifdef CONFIG_USBHOST_HUB
   drvr->connect        = lpc17_connect;
@@ -3269,7 +3338,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   buffer = (uint8_t *)LPC17_TDFREE_BASE;
   for (i = 0; i < CONFIG_USBHOST_NTDS; i++)
     {
-      /* Put the ED in a free list */
+      /* Put the TD in a free list */
 
       lpc17_tdfree((struct lpc17_gtd_s *)buffer);
       buffer += LPC17_TD_SIZE;
