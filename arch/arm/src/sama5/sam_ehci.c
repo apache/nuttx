@@ -403,6 +403,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                       FAR uint8_t *buffer, size_t buflen,
                       usbhost_asynch_t callback, FAR void *arg);
+static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(FAR struct usbhost_driver_s *drvr,
@@ -3766,22 +3767,16 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 }
 
 /*******************************************************************************
- * Name: sam_transfer and sam_asynch
+ * Name: sam_transfer
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and return immediately.  Only one transfer may be
- *   queued;.
+ *   enqueue the transfer request, blocking until the transfer completes. Only
+ *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   ctrlout methods can be called again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
- *
- * - 'transfer' is a blocking method; this method will not return until the
- *   transfer has completed.
- * - 'asynch' will return immediately.  When the transfer completes, the
- *   the callback will be invoked with the provided transfer.  This method
- *   is useful for receiving interrupt transfers which may come
- *   infrequently.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -3791,10 +3786,6 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
- *   callback - This function will be called when the transfer completes ('asynch'
- *     only).
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes ('asynch' only).
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -3807,7 +3798,6 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *     EPIPE  - Overrun errors
  *
  * Assumptions:
- *   - Only a single class bound to a single device is supported.
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
@@ -3855,6 +3845,41 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   return nbytes >=0 ? OK : (int)nbytes;
 }
 
+/*******************************************************************************
+ * Name: lcp17_asynch
+ *
+ * Description:
+ *   Process a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  When the transfer
+ *   completes, the the callback will be invoked with the provided transfer.
+ *   This method is useful for receiving interrupt transfers which may come
+ *   infrequently.
+ *
+ *   Only one transfer may be queued; Neither this method nor the ctrlin or
+ *   ctrlout methods can be called again until the transfer completes.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buflen - The length of the data to be sent or received.
+ *   callback - This function will be called when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback function
+ *     when the transfer completes.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
 #ifdef CONFIG_USBHOST_ASYNCH
 static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                       FAR uint8_t *buffer, size_t buflen,
@@ -3863,7 +3888,33 @@ static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 # error Not implemented
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_USBHOST_ASYNCH */
+
+/************************************************************************************
+ * Name: sam_cancel
+ *
+ * Description:
+ *   Cancel a pending asynchronous transfer on an endpoint.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
+ *      asynchronous transfer should be transferred.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+{
+# error Not implemented
+  return -ENOSYS;
+}
+#endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
  * Name: sam_connect
@@ -4216,6 +4267,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->drvr.transfer       = sam_transfer;
 #ifdef CONFIG_USBHOST_ASYNCH
       rhport->drvr.asynch         = sam_asynch;
+      rhport->drvr.cancel         = sam_cancel;
 #endif
 #ifdef CONFIG_USBHOST_HUB
       rhport->drvr.connect        = sam_connect;
