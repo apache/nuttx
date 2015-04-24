@@ -2439,13 +2439,13 @@ static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
   bool in;
   int ret;
 
-  in = (ed->hw.ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
-  uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
+  in = (ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
+  uvdbg("EP%u %s toggle:%u maxpacket:%u buflen:%lu\n",
         (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
         in ? "IN" : "OUT",
         (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
         (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT,
-        buflen);
+        (unsigned long)buflen);
 
   /* Get the direction of the endpoint */
 
