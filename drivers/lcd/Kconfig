@@ -95,9 +95,9 @@ config P14201_FRAMEBUFFER
 		buffer is 128 * 96 / 2 = 6Kb.  If this is defined, then the driver
 		will be fully functional. If not, then it will have the following
 		limitations:
-		
+
 		Reading graphics memory cannot be supported, and
-		
+
 		All pixel writes must be aligned to byte boundaries.
 		The latter limitation effectively reduces the 128x96 disply to 64x96.
 
@@ -717,6 +717,60 @@ config LCD_ILI9341_IFACE1_RGB565
 
 endchoice
 endif
+
+config LCD_RA8875
+	bool "RA8875 LCD Display Controller"
+	default n
+	---help---
+		LCD controller driver for RA8875 by RAiO Technologies Inc.
+
+if LCD_RA8875
+
+choice
+	prompt "MCU Interface width"
+	default LCD_RA8875_8BIT
+	---help---
+		Bit-width of MCU interface (8 or 16)
+
+config LCD_RA8875_8BIT
+	bool "8 bit"
+
+config LCD_RA8875_16BIT
+	bool "16 bit"
+
+endchoice # MCU Interface width
+
+choice
+	prompt "Colors"
+	default LCD_RA8875_65K
+	---help---
+		Number of colors/color depth
+
+config LCD_RA8875_256
+	bool "256 / 8 bit"
+
+config LCD_RA8875_65K
+	bool "65k / 16 bit"
+
+endchoice # Colors
+
+config LCD_RA8875_EXTENDED
+	bool "Extended drawing interfaces"
+	default n
+	depends on BUILD_FLAT
+	---help---
+		Build in some non-standard, custom drawing interfaces for the RA8875
+		including the following: ra8875_drawrectangle(), ra8875_drawline(),
+		ra8875_drawtriangle(), and ra8875_drawcircle().  NOTE that these
+		will not be accessible by applications in protected or kernel build
+		configurations.
+
+		NOTE: The non-standard ra8875_clear(), ra8875_drawrectangle(),
+		ra8875_drawline() interfaces are always built and available for use
+		because within the OS because these are used internally by the
+		driver anyway.
+
+endif # LCD_RA8875
 
 comment "Alphanumeric/Segment LCD Devices"
 
