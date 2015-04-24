@@ -116,7 +116,8 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
     There are some more different models, they are basically controlled
     by similar logics, thus this driver can be extended.  Example usage:
 
-      configs/maple
+  ra8875.c.  RAiO Technologies RA8875 LCD controller.  Contributed by
+    Marten Svanfeldt.
 
   OLEDs:
   -----
