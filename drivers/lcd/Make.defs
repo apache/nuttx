@@ -87,6 +87,10 @@ ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += ili9341.c
 endif
 
+ifeq ($(CONFIG_LCD_RA8875),y)
+  CSRCS += ra8875.c
+endif
+
 # Include LCD driver build support
 
 DEPPATH += --dep-path lcd
