@@ -824,14 +824,14 @@ static void usbhost_hub_event(FAR void *arg)
 
               ctrlreq->type = USBHUB_REQ_TYPE_PORT;
               ctrlreq->req  = USB_REQ_SETFEATURE;
-              usbhost_putle16(ctrlreq->value, (USBHUB_PORT_FEAT_RESET << 8));
+              usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_RESET);
               usbhost_putle16(ctrlreq->index, port);
               usbhost_putle16(ctrlreq->len, 0);
 
               ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
               if (ret < 0)
                 {
-                  udbg("ERROR: ailed to reset port %d: %d\n", port, ret);
+                  udbg("ERROR: Failed to reset port %d: %d\n", port, ret);
                   continue;
                 }
 
@@ -985,6 +985,17 @@ static void usbhost_disconnect_event(FAR void *arg)
   flags = irqsave();
   priv->disconnected = true;
 
+  /* Cancel any pending transfers on the interrupt IN pipe */
+
+  DRVR_CANCEL(hport->drvr, priv->intin);
+
+  /* Cancel any pending port status change events */
+
+  work_cancel(EVENT_WORK, &priv->work);
+#if EVENT_WORK != POLL_WORK
+  work_cancel(POLL_WORK, &priv->work);
+#endif
+
   /* Disable power to all downstream ports */
 
   (void)usbhost_hubpwr(priv, hport, false);
@@ -996,10 +1007,6 @@ static void usbhost_disconnect_event(FAR void *arg)
   /* Free buffer for status change (INT) endpoint */
 
   DRVR_IOFREE(hport->drvr, priv->buffer);
-
-  /* Destroy EP0 */
-
-  DRVR_EPFREE(hport->drvr, priv->intin);
 
   /* Destroy the interrupt IN endpoint */
 
