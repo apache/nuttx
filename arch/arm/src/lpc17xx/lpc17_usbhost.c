@@ -298,6 +298,11 @@ static void lpc17_freeasynch(struct lpc17_asynch_s *asynch);
 
 /* ED list helper functions ****************************************************/
 
+static inline int lpc17_addctrled(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed);
+static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed);
+
 static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
 static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
@@ -842,6 +847,97 @@ static void lpc17_freeasynch(struct lpc17_asynch_s *asynch)
 #endif
 
 /*******************************************************************************
+ * Name: lpc17_addctrled
+ *
+ * Description:
+ *   Helper function to add an ED to the control list.
+ *
+ *******************************************************************************/
+
+static inline int lpc17_addctrled(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed)
+{
+  uint32_t regval;
+
+  /* Add the new bulk ED to the head of the bulk list */
+
+  ed->hw.nexted = lpc17_getreg(LPC17_USBHOST_CTRLHEADED);
+  lpc17_putreg((uint32_t)ed, LPC17_USBHOST_CTRLHEADED);
+
+  /* ControlListEnable.  This bit is set to enable the processing of the
+   * Control list.  Note: once enabled, it remains enabled and we may even
+   * complete list processing before we get the bit set.  We really
+   * should never modify the control list while CLE is set.
+   */
+
+  regval = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval |= OHCI_CTRL_CLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: lpc17_remctrled
+ *
+ * Description:
+ *   Helper function remove an ED from the control list.
+ *
+ *******************************************************************************/
+
+static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed)
+{
+  struct lpc17_ed_s *curr;
+  struct lpc17_ed_s *prev;
+  uint32_t           regval;
+
+  /* Find the ED in the control list.  NOTE: We really should never be mucking
+   * with the control list while CLE is set.
+   */
+
+  for (curr = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_CTRLHEADED),
+       prev = NULL;
+       curr && curr != ed;
+       prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
+
+  /* Hmmm.. It would be a bug if we do not find the ED in the control list. */
+
+  DEBUGASSERT(curr != NULL);
+
+  /* Remove the ED from the control list */
+
+  if (curr != NULL)
+    {
+      /* Is this ED the first on in the control list? */
+
+      if (prev == NULL)
+        {
+          /* Yes... set the head of the control list to skip over this ED */
+
+          lpc17_putreg(ed->hw.nexted, LPC17_USBHOST_CTRLHEADED);
+
+          /* If the control list is now empty, then disable it.
+           * This should never happen!
+           */
+
+          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+          regval &= ~OHCI_CTRL_CLE;
+          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+        }
+      else
+        {
+          /* No.. set the forward link of the previous ED in the list
+           * skip over this ED.
+           */
+
+          prev->hw.nexted = ed->hw.nexted;
+        }
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
  * Name: lpc17_addbulked
  *
  * Description:
@@ -1260,7 +1356,6 @@ static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
 #  warning "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
-
 }
 
 /*******************************************************************************
@@ -2011,6 +2106,10 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
 
       switch (ed->xfrtype)
         {
+        case USB_EP_ATTR_XFER_CONTROL:
+          ret = lpc17_addctrled(priv, ed);
+          break;
+
         case USB_EP_ATTR_XFER_BULK:
           ret = lpc17_addbulked(priv, ed);
           break;
@@ -2023,7 +2122,6 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
           ret = lpc17_addisoced(priv, epdesc, ed);
           break;
 
-        case USB_EP_ATTR_XFER_CONTROL:
         default:
           ret = -EINVAL;
           break;
@@ -2091,6 +2189,10 @@ static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   switch (ed->xfrtype)
     {
+    case USB_EP_ATTR_XFER_CONTROL:
+      ret = lpc17_remctrled(priv, ed);
+      break;
+
     case USB_EP_ATTR_XFER_BULK:
       ret = lpc17_rembulked(priv, ed);
       break;
@@ -2103,7 +2205,6 @@ static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       ret = lpc17_remisoced(priv, ed);
       break;
 
-    case USB_EP_ATTR_XFER_CONTROL:
     default:
       ret = -EINVAL;
       break;
@@ -2818,7 +2919,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
 #endif
 
 /*******************************************************************************
- * Name: lcp17_async
+ * Name: lcp17_asynch
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -2947,7 +3048,7 @@ errout_with_sem:
 #endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
- * Name: DRVR_CANCEL
+ * Name: lpc17_cancel
  *
  * Description:
  *   Cancel a pending asynchronous transfer on an endpoint.
@@ -3114,12 +3215,13 @@ static void lpc17_disconnect(struct usbhost_driver_s *drvr)
 
 static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
 {
-  uint32_t regval;
-
   /* Set up some default values */
 
   (void)lpc17_ep0configure(&priv->drvr, (usbhost_ep_t)EDCTRL, 1, 8);
 
+  /* Initialize the common tail TD.*/
+
+  memset(TDTAIL, 0, sizeof(struct lpc17_gtd_s));
   /* Initialize the common tail TD. */
 
   memset(TDTAIL, 0, sizeof(struct lpc17_gtd_s));
@@ -3128,24 +3230,16 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
   /* Link the common tail TD to the ED's TD list */
 
   memset(EDCTRL, 0, sizeof(struct lpc17_ed_s));
-  EDCTRL->hw.headp        = (uint32_t)TDTAIL;
-  EDCTRL->hw.tailp        = (uint32_t)TDTAIL;
+  EDCTRL->hw.headp = (uint32_t)TDTAIL;
+  EDCTRL->hw.tailp = (uint32_t)TDTAIL;
 
-  /* Set the head of the control list to the EP0 EDCTRL (this would have to
-   * change if we want more than on control EP queued at a time).
-   */
+  /* Set the head of the control list to the NULL (for now). */
 
-  lpc17_putreg(LPC17_EDCTRL_ADDR, LPC17_USBHOST_CTRLHEADED);
+  lpc17_putreg(0, LPC17_USBHOST_CTRLHEADED);
 
-  /* ControlListEnable.  This bit is set to enable the processing of the
-   * Control list.  Note: once enabled, it remains enabled and we may even
-   * complete list processing before we get the bit set.  We really
-   * should never modify the control list while CLE is set.
-   */
+  /* Then add EP0 to the empty Control List */
 
-  regval = lpc17_getreg(LPC17_USBHOST_CTRL);
-  regval |= OHCI_CTRL_CLE;
-  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+  lpc17_addctrled(priv, EDCTRL);
 }
 
 /*******************************************************************************
