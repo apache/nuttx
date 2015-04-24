@@ -10257,4 +10257,6 @@
 	* sched/semaphore/sem_wait.c:  Missing comma on debug statement caused
 	  compile error with DEBUG on.  Why hasn't that been noted before?
 	  (2015-04-23).
+	* drivers/lcd and include/nuttx/drivers: RA8875 LCD driver contributed
+	  by Marten Svanfeldt (2015-04-24).
 
