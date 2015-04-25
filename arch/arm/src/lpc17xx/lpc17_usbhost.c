@@ -1979,6 +1979,7 @@ static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s      *ed;
+  uint32_t hwctrl;
 
   DEBUGASSERT(drvr != NULL && ep0 != NULL && funcaddr < 128 && maxpacketsize < 2048);
   ed = (struct lpc17_ed_s *)ep0;
@@ -1987,19 +1988,14 @@ static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
 
   lpc17_takesem(&priv->exclsem);
 
-  /* Set the EP0 ED control word */
+  /* Set the EP0 ED control word (preserving only speed) */
 
-  ed->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
+  hwctrl      = ed->hw.ctrl & ED_CONTROL_S;
+  hwctrl     |= (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
+                (uint32_t)ED_CONTROL_D_TD1 |
                 (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+  ed->hw.ctrl = hwctrl;
 
-  if (priv->rhport.hport.speed == USB_SPEED_LOW)
-   {
-     ed->hw.ctrl |= ED_CONTROL_S;
-   }
-
-  /* Set the transfer type to control */
-
-  ed->xfrtype = USB_EP_ATTR_XFER_CONTROL;
   lpc17_givesem(&priv->exclsem);
 
   uvdbg("EP0 CTRL:%08x\n", ed->hw.ctrl);
@@ -2085,7 +2081,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
 
       /* Check for a low-speed device */
 
-      if (priv->rhport.hport.speed == USB_SPEED_LOW)
+      if (hport->speed == USB_SPEED_LOW)
         {
           ed->hw.ctrl |= ED_CONTROL_S;
         }
@@ -3228,13 +3224,6 @@ static void lpc17_disconnect(struct usbhost_driver_s *drvr)
 
 static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
 {
-  /* Set up some default values */
-
-  (void)lpc17_ep0configure(&priv->drvr, (usbhost_ep_t)EDCTRL, 1, 8);
-
-  /* Initialize the common tail TD.*/
-
-  memset(TDTAIL, 0, sizeof(struct lpc17_gtd_s));
   /* Initialize the common tail TD. */
 
   memset(TDTAIL, 0, sizeof(struct lpc17_gtd_s));
@@ -3245,6 +3234,7 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
   memset(EDCTRL, 0, sizeof(struct lpc17_ed_s));
   EDCTRL->hw.headp = (uint32_t)TDTAIL;
   EDCTRL->hw.tailp = (uint32_t)TDTAIL;
+  EDCTRL->xfrtype  = USB_EP_ATTR_XFER_CONTROL;
 
   /* Set the head of the control list to the NULL (for now). */
 
