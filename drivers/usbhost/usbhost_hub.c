@@ -799,16 +799,16 @@ static void usbhost_hub_event(FAR void *arg)
                   connection = status & USBHUB_PORT_STAT_CONNECTION;
                 }
 
-                if ((change & USBHUB_PORT_STAT_CCONNECTION) != 0)
-                  {
-                    ctrlreq->type = USBHUB_REQ_TYPE_PORT;
-                    ctrlreq->req  = USBHUB_REQ_CLEARFEATURE;
-                    usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_CCONNECTION);
-                    usbhost_putle16(ctrlreq->index, port);
-                    usbhost_putle16(ctrlreq->len, 0);
+              if ((change & USBHUB_PORT_STAT_CCONNECTION) != 0)
+                {
+                  ctrlreq->type = USBHUB_REQ_TYPE_PORT;
+                  ctrlreq->req  = USBHUB_REQ_CLEARFEATURE;
+                  usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_CCONNECTION);
+                  usbhost_putle16(ctrlreq->index, port);
+                  usbhost_putle16(ctrlreq->len, 0);
 
-                    (void)DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
-                  }
+                  (void)DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
+                }
 
               debouncetime += 25;
               up_mdelay(25);
