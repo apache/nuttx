@@ -662,6 +662,7 @@ static void usbhost_hub_event(FAR void *arg)
 {
   FAR struct usbhost_class_s *hubclass;
   FAR struct usbhost_hubport_s *hport;
+  FAR struct usbhost_hubport_s *connport;
   FAR struct usbhost_hubpriv_s *priv;
   FAR struct usb_ctrlreq_s *ctrlreq;
   struct usb_portstatus_s portstatus;
@@ -739,7 +740,7 @@ static void usbhost_hub_event(FAR void *arg)
               ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
               if (ret < 0)
                 {
-                  udbg("ERROR: Failed to clear port %d change mask %x: %d\n",
+                  udbg("ERROR: Failed to clear port %d change mask %04x: %d\n",
                        port, mask, ret);
                 }
 
@@ -760,7 +761,7 @@ static void usbhost_hub_event(FAR void *arg)
           uint16_t debouncestable = 0;
           uint16_t connection = 0xffff;
 
-          uvdbg("Port %d status %x change %x\n", port, status, change);
+          uvdbg("Port %d status %04x change %04x\n", port, status, change);
 
           /* Debounce */
 
@@ -822,7 +823,9 @@ static void usbhost_hub_event(FAR void *arg)
 
           if ((status & USBHUB_PORT_STAT_CONNECTION) != 0)
             {
-              /* Connect */
+              /* Device connected to a port on the hub */
+
+              uvdbg("Connection on port %d\n", port);
 
               ctrlreq->type = USBHUB_REQ_TYPE_PORT;
               ctrlreq->req  = USBHUB_REQ_SETFEATURE;
@@ -862,8 +865,6 @@ static void usbhost_hub_event(FAR void *arg)
               if ((status & USBHUB_PORT_STAT_RESET)  == 0 &&
                   (status & USBHUB_PORT_STAT_ENABLE) != 0)
                 {
-                  FAR struct usbhost_hubport_s *connport;
-
                   if ((change & USBHUB_PORT_STAT_CRESET) != 0)
                     {
                       ctrlreq->type = USBHUB_REQ_TYPE_PORT;
@@ -916,12 +917,29 @@ static void usbhost_hub_event(FAR void *arg)
             }
           else
             {
-              /* Disconnect */
+              /* Device disconnected from a port on the hub.  Release port
+               * resources.
+               */
+
+              uvdbg("Disconnection on port %d\n", port);
+
+              /* Free any devices classes connect on this hub port */
+
+              connport = &priv->hport[port];
+              if (connport->devclass != NULL)
+                {
+                  CLASS_DISCONNECTED(connport->devclass);
+                  connport->devclass = NULL;
+                }
+
+              /* Free any resources used by the hub port */
+
+              usbhost_hport_deactivate(connport);
             }
         }
       else if (change)
         {
-          udbg("WARNING: status %x change %x not handled\n", status, change);
+          udbg("WARNING: status %04x change %04x not handled\n", status, change);
         }
     }
 
@@ -1024,6 +1042,7 @@ static void usbhost_disconnect_event(FAR void *arg)
       if (child->devclass != NULL)
         {
           CLASS_DISCONNECTED(child->devclass);
+          child->devclass = NULL;
         }
 
       /* Free any resources used by the hub port */
