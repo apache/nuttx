@@ -3105,7 +3105,7 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
     {
       /* We really need some kind of atomic test and set to do this right */
 
-      td              = (struct lpc17_gtd_s *)ed->hw.headp;
+      td              = (struct lpc17_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
       ed->hw.headp    = LPC17_TDTAIL_ADDR;
       ed->asynch      = NULL;
 
