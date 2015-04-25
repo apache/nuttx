@@ -2239,7 +2239,7 @@ static int usbhost_close(FAR struct file *filep)
         {
           /* Yes.. In either case, then the driver is no longer open */
 
-          priv->open    = false;
+          priv->open = false;
 
           /* Check if the USB keyboard device is still connected. */
 
@@ -2254,6 +2254,11 @@ static int usbhost_close(FAR struct file *filep)
                */
 
               usbhost_destroy(priv);
+
+              /* Skip giving the semaphore... it is no longer valid */
+
+              irqrestore(flags);
+              return OK;
             }
           else /* if (priv->crefs == 1) */
             {
@@ -2262,12 +2267,12 @@ static int usbhost_close(FAR struct file *filep)
                * signal that we use does not matter in this case.
                */
 
-              (void)kill(priv->pollpid, SIGUSR1);
-              usbhost_givesem(&priv->exclsem);
+              (void)kill(priv->pollpid, SIGALRM);
             }
         }
     }
 
+  usbhost_givesem(&priv->exclsem);
   irqrestore(flags);
   return OK;
 }
