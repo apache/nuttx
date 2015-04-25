@@ -888,18 +888,19 @@ static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
 {
   struct lpc17_ed_s *curr;
   struct lpc17_ed_s *prev;
-  uint32_t           regval;
+  struct lpc17_ed_s *head;
+  uint32_t regval;
 
   /* Find the ED in the control list.  NOTE: We really should never be mucking
    * with the control list while CLE is set.
    */
 
-  for (curr = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_CTRLHEADED),
-       prev = NULL;
+  head = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_CTRLHEADED);
+  for (prev = NULL, curr = head;
        curr && curr != ed;
        prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
 
-  /* Hmmm.. It would be a bug if we do not find the ED in the control list. */
+  /* It would be a bug if we do not find the ED in the control list. */
 
   DEBUGASSERT(curr != NULL);
 
@@ -913,15 +914,19 @@ static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
         {
           /* Yes... set the head of the control list to skip over this ED */
 
-          lpc17_putreg(ed->hw.nexted, LPC17_USBHOST_CTRLHEADED);
+          head = (struct lpc17_ed_s *)ed->hw.nexted;
+          lpc17_putreg((uint32_t)head, LPC17_USBHOST_CTRLHEADED);
 
           /* If the control list is now empty, then disable it.
            * This should never happen!
            */
 
-          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-          regval &= ~OHCI_CTRL_CLE;
-          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+          if (head == NULL)
+            {
+              regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+              regval &= ~OHCI_CTRL_CLE;
+              lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+            }
         }
       else
         {
@@ -989,14 +994,15 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
 #ifndef CONFIG_USBHOST_BULK_DISABLE
   struct lpc17_ed_s *curr;
   struct lpc17_ed_s *prev;
-  uint32_t           regval;
+  struct lpc17_ed_s *head;
+  uint32_t regval;
 
   /* Find the ED in the bulk list.  NOTE: We really should never be mucking
    * with the bulk list while BLE is set.
    */
 
-  for (curr = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED),
-       prev = NULL;
+  head = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED)
+  for (prev = NULL, curr = head;
        curr && curr != ed;
        prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
 
@@ -1014,13 +1020,17 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
         {
           /* Yes... set the head of the bulk list to skip over this ED */
 
-          lpc17_putreg(ed->hw.nexted, LPC17_USBHOST_BULKHEADED);
+          head = (struct lpc17_ed_s *)ed->hw.nexted;
+          lpc17_putreg((uint32_t)head, LPC17_USBHOST_BULKHEADED);
 
           /* If the bulk list is now empty, then disable it */
 
-          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-          regval &= ~OHCI_CTRL_BLE;
-          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+          if (head == NULL);
+            {
+              regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+              regval &= ~OHCI_CTRL_BLE;
+              lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+            }
         }
       else
         {
@@ -1297,6 +1307,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
 
           prev->hw.nexted = ed->hw.nexted;
         }
+
         uvdbg("ed: %08x head: %08x next: %08x\n",
               ed, head, head ? head->hw.nexted : 0);
 
@@ -1310,6 +1321,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
               interval = curr->interval;
             }
         }
+
       uvdbg("min interval: %d offset: %d\n", interval, offset);
 
       /* Save the new minimum interval */
