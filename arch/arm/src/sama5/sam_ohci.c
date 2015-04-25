@@ -1479,6 +1479,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   (void)sam_ep0configure(&rhport->drvr, &rhport->ep0, 0, 8);
   edctrl->hw.ctrl  |= ED_CONTROL_K;
   edctrl->eplist    = &rhport->ep0;
+  edctrl->xfrtype   = USB_EP_ATTR_XFER_CONTROL;
 
   /* Link the common tail TD to the ED's TD list */
 
@@ -2361,6 +2362,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *ep0list = (struct sam_eplist_s *)ep0;
   struct sam_ed_s *edctrl;
+  uint32_t hwctrl;
 
   DEBUGASSERT(rhport && maxpacketsize < 2048);
 
@@ -2370,19 +2372,13 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   sam_takesem(&g_ohci.exclsem);
 
-  /* Set the EP0 ED control word */
+  /* Set the EP0 ED control word (preserving only speed) */
 
-  edctrl->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
-                    (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
-
-  if (rhport->hport.hport.speed == USB_SPEED_LOW)
-   {
-     edctrl->hw.ctrl |= ED_CONTROL_S;
-   }
-
-  /* Set the transfer type to control */
-
-  edctrl->xfrtype = USB_EP_ATTR_XFER_CONTROL;
+  hwctrl      = ed->hw.ctrl & ED_CONTROL_S;
+  hwctrl     |= (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
+                (uint32_t)ED_CONTROL_D_TD1 |
+                (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+  ed->hw.ctrl = hwctrl;
 
   /* Flush the modified control ED to RAM */
 
@@ -2504,7 +2500,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Check for a low-speed device */
 
-  if (rhport->hport.hport.speed == USB_SPEED_LOW)
+  if (hport->speed == USB_SPEED_LOW)
     {
       ed->hw.ctrl |= ED_CONTROL_S;
     }
