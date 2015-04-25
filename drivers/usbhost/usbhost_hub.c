@@ -219,7 +219,8 @@ static struct usbhost_registry_s g_hub =
 
 static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
 {
-  uvdbg("Deactivating: %d\n", hport->port);
+  uvdbg("Deactivating: %s port %d\n",
+        ROOTHUB(hport) ? "Root" : "Hub", hport->port);
 
   /* Don't free the control pipe of root hub ports! */
 
