@@ -931,6 +931,12 @@ static inline int lpc17_remctrled(struct lpc17_usbhost_s *priv,
 
           prev->hw.nexted = ed->hw.nexted;
         }
+
+      /* Just in case the hardware happens to be processing this ed now...
+       * it should go back to the control list head.
+       */
+
+      ed->hw.nexted = 0;
     }
 
   return OK;
