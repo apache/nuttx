@@ -54,10 +54,15 @@
 
 /* Hub class requests */
 
-#define USBHUB_REQ_CLEARTTBUFFER       (0x8)
-#define USBHUB_REQ_RESETTT             (0x9)
-#define USBHUB_REQ_GETTTSTATE          (0xa)
-#define USBHUB_REQ_STOPTT              (0xb)
+#define USBHUB_REQ_GETSTATUS           USB_REQ_GETSTATUS
+#define USBHUB_REQ_CLEARFEATURE        USB_REQ_CLEARFEATURE
+#define USBHUB_REQ_SETFEATURE          USB_REQ_SETFEATURE
+#define USBHUB_REQ_GETDESCRIPTOR       USB_REQ_GETDESCRIPTOR
+#define USBHUB_REQ_SETDESCRIPTOR       USB_REQ_SETDESCRIPTOR
+#define USBHUB_REQ_CLEARTTBUFFER       (0x08)
+#define USBHUB_REQ_RESETTT             (0x09)
+#define USBHUB_REQ_GETTTSTATE          (0x0a)
+#define USBHUB_REQ_STOPTT              (0x0b)
 
 /* Hub class features */
 

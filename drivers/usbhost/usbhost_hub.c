@@ -516,7 +516,7 @@ static inline int usbhost_hubdesc(FAR struct usbhost_class_s *hubclass)
   DEBUGASSERT(ctrlreq);
 
   ctrlreq->type = USB_REQ_DIR_IN | USBHUB_REQ_TYPE_HUB;
-  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+  ctrlreq->req  = USBHUB_REQ_GETDESCRIPTOR;
   usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_HUB << 8));
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, USB_SIZEOF_HUBDESC);
@@ -608,11 +608,11 @@ static int usbhost_hubpwr(FAR struct usbhost_hubpriv_s *priv,
 
   if (on)
     {
-      req = USB_REQ_SETFEATURE;
+      req = USBHUB_REQ_SETFEATURE;
     }
   else
     {
-      req = USB_REQ_CLEARFEATURE;
+      req = USBHUB_REQ_CLEARFEATURE;
     }
 
   /* Enable/disable power to all downstream ports */
@@ -706,7 +706,7 @@ static void usbhost_hub_event(FAR void *arg)
       /* Read hub port status */
 
       ctrlreq->type = USB_REQ_DIR_IN | USBHUB_REQ_TYPE_PORT;
-      ctrlreq->req  = USB_REQ_GETSTATUS;
+      ctrlreq->req  = USBHUB_REQ_GETSTATUS;
       usbhost_putle16(ctrlreq->value, 0);
       usbhost_putle16(ctrlreq->index, port);
       usbhost_putle16(ctrlreq->len, USB_SIZEOF_PORTSTS);
@@ -731,7 +731,7 @@ static void usbhost_hub_event(FAR void *arg)
           if (change & mask)
             {
               ctrlreq->type = USBHUB_REQ_TYPE_PORT;
-              ctrlreq->req  = USB_REQ_CLEARFEATURE;
+              ctrlreq->req  = USBHUB_REQ_CLEARFEATURE;
               usbhost_putle16(ctrlreq->value, feat);
               usbhost_putle16(ctrlreq->index, port);
               usbhost_putle16(ctrlreq->len, 0);
@@ -767,7 +767,7 @@ static void usbhost_hub_event(FAR void *arg)
           while (debouncetime < 1500)
             {
               ctrlreq->type = USB_REQ_DIR_IN | USBHUB_REQ_TYPE_PORT;
-              ctrlreq->req  = USB_REQ_GETSTATUS;
+              ctrlreq->req  = USBHUB_REQ_GETSTATUS;
               usbhost_putle16(ctrlreq->value, 0);
               usbhost_putle16(ctrlreq->index, port);
               usbhost_putle16(ctrlreq->len, USB_SIZEOF_PORTSTS);
@@ -776,6 +776,7 @@ static void usbhost_hub_event(FAR void *arg)
                                 (FAR uint8_t *)&portstatus);
               if (ret < 0)
                 {
+                  udbg("ERROR: Failed to get port %d status: %d\n", port, ret);
                   break;
                 }
 
@@ -788,6 +789,7 @@ static void usbhost_hub_event(FAR void *arg)
                   debouncestable += 25;
                   if (debouncestable >= 100)
                     {
+                      uvdbg("Port %d debouncestable=%d\n", port, debouncestable);
                       break;
                     }
                 }
@@ -800,7 +802,7 @@ static void usbhost_hub_event(FAR void *arg)
                 if ((change & USBHUB_PORT_STAT_CCONNECTION) != 0)
                   {
                     ctrlreq->type = USBHUB_REQ_TYPE_PORT;
-                    ctrlreq->req  = USB_REQ_CLEARFEATURE;
+                    ctrlreq->req  = USBHUB_REQ_CLEARFEATURE;
                     usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_CCONNECTION);
                     usbhost_putle16(ctrlreq->index, port);
                     usbhost_putle16(ctrlreq->len, 0);
@@ -823,7 +825,7 @@ static void usbhost_hub_event(FAR void *arg)
               /* Connect */
 
               ctrlreq->type = USBHUB_REQ_TYPE_PORT;
-              ctrlreq->req  = USB_REQ_SETFEATURE;
+              ctrlreq->req  = USBHUB_REQ_SETFEATURE;
               usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_RESET);
               usbhost_putle16(ctrlreq->index, port);
               usbhost_putle16(ctrlreq->len, 0);
@@ -838,7 +840,7 @@ static void usbhost_hub_event(FAR void *arg)
               up_mdelay(100);
 
               ctrlreq->type = USB_REQ_DIR_IN | USBHUB_REQ_TYPE_PORT;
-              ctrlreq->req  = USB_REQ_GETSTATUS;
+              ctrlreq->req  = USBHUB_REQ_GETSTATUS;
               usbhost_putle16(ctrlreq->value, 0);
               usbhost_putle16(ctrlreq->index, port);
               usbhost_putle16(ctrlreq->len, USB_SIZEOF_PORTSTS);
@@ -847,14 +849,14 @@ static void usbhost_hub_event(FAR void *arg)
                                 (FAR uint8_t *)&portstatus);
               if (ret < 0)
                 {
-                  udbg("ERROR: Failed to reset port %d: %d\n", port, ret);
+                  udbg("ERROR: Failed to get port %d status: %d\n", port, ret);
                   continue;
                 }
 
               status = usbhost_getle16(portstatus.status);
               change = usbhost_getle16(portstatus.change);
 
-              uvdbg("port %d status %x change %x after reset\n",
+              uvdbg("port %d status %04x change %04x after reset\n",
                     port, status, change);
 
               if ((status & USBHUB_PORT_STAT_RESET)  == 0 &&
@@ -865,7 +867,7 @@ static void usbhost_hub_event(FAR void *arg)
                   if ((change & USBHUB_PORT_STAT_CRESET) != 0)
                     {
                       ctrlreq->type = USBHUB_REQ_TYPE_PORT;
-                      ctrlreq->req  = USB_REQ_CLEARFEATURE;
+                      ctrlreq->req  = USBHUB_REQ_CLEARFEATURE;
                       usbhost_putle16(ctrlreq->value, USBHUB_PORT_FEAT_CRESET);
                       usbhost_putle16(ctrlreq->index, port);
                       usbhost_putle16(ctrlreq->len, 0);
