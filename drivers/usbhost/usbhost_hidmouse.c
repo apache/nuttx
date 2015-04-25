@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wqueue.h>
 
@@ -1058,9 +1059,10 @@ static int usbhost_mouse_poll(int argc, char *argv[])
    * the start-up logic, and wait a bit to make sure that all of the class
    * creation logic has a chance to run to completion.
    *
-   * NOTE: that the reference count is incremented here.  Therefore, we know
-   * that the driver data structure will remain stable while this thread is
-   * running.
+   * NOTE: that the reference count is *not* incremented here.  When the driver
+   * structure was created, it was created with a reference count of one.  This
+   * thread is responsible for that count.  The count will be decrement when
+   * this thread exits.
    */
 
   priv = g_priv;
@@ -1068,7 +1070,6 @@ static int usbhost_mouse_poll(int argc, char *argv[])
   hport = priv->usbclass.hport;
 
   priv->polling = true;
-  priv->crefs++;
   usbhost_givesem(&g_syncsem);
   sleep(1);
 
@@ -1674,7 +1675,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uvdbg("Start poll task\n");
 
-  /* The inputs to a task started by task_create() are very awkward for this
+  /* The inputs to a task started by kernel_thread() are very awkward for this
    * purpose.  They are really designed for command line tasks (argc/argv). So
    * the following is kludge pass binary data when the mouse poll task
    * is started.
@@ -1686,9 +1687,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   usbhost_takesem(&g_exclsem);
   g_priv = priv;
 
-  priv->pollpid = task_create("mouse", CONFIG_HIDMOUSE_DEFPRIO,
-                              CONFIG_HIDMOUSE_STACKSIZE,
-                              (main_t)usbhost_mouse_poll, (FAR char * const *)NULL);
+  priv->pollpid = kernel_thread("mouse", CONFIG_HIDMOUSE_DEFPRIO,
+                                CONFIG_HIDMOUSE_STACKSIZE,
+                                (main_t)usbhost_mouse_poll, (FAR char * const *)NULL);
   if (priv->pollpid == ERROR)
     {
       /* Failed to started the poll thread... probably due to memory resources */
@@ -1921,7 +1922,7 @@ static FAR struct usbhost_class_s *
           priv->usbclass.disconnected = usbhost_disconnected;
 
           /* The initial reference count is 1... One reference is held by
-           * the driver.
+           * the driver's usbhost_mouse_poll() task.
            */
 
           priv->crefs = 1;
@@ -1930,9 +1931,6 @@ static FAR struct usbhost_class_s *
 
           sem_init(&priv->exclsem, 0, 1);
           sem_init(&priv->waitsem, 0, 0);
-
-          /* Bind the driver to the storage class instance */
-
 
           /* Return the instance of the USB mouse class driver */
 
