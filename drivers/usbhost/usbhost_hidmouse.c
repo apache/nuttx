@@ -45,6 +45,7 @@
 #include <string.h>
 #include <poll.h>
 #include <semaphore.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -82,7 +83,7 @@
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
-/* Signals must not be disabled as they are needed by usleep.  Need to have
+/* Signals must not be disabled as they are needed for kill.  Need to have
  * CONFIG_DISABLE_SIGNALS=n
  */
 
@@ -1041,6 +1042,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
   FAR struct usbhid_mousereport_s *rpt;
+  irqstate_t flags;
 #ifndef CONFIG_HIDMOUSE_TSCIF
   uint8_t buttons;
 #endif
@@ -1083,11 +1085,11 @@ static int usbhost_mouse_poll(int argc, char *argv[])
       ret = DRVR_TRANSFER(hport->drvr, priv->epin,
                           priv->tbuffer, priv->tbuflen);
 
-      /* Check for errors -- Bail if an excessive number of errors
-       * are encountered.
+      /* Check for errors -- Bail if an excessive number of consecutive
+       * errors are encountered.
        */
 
-      if (ret != OK)
+      if (ret < 0)
         {
           /* If DRVR_TRANSFER() returns EAGAIN, that simply means that
            * the devices was not ready and has NAK'ed the transfer.  That
@@ -1106,80 +1108,88 @@ static int usbhost_mouse_poll(int argc, char *argv[])
             }
         }
 
-      /* The report was received correctly.  But ignore the mouse data if no
-       * task has opened the driver.
-       */
+      /* The report was received correctly. */
 
-      else if (priv->open)
+      else
         {
-          /* Get exclusive access to the mouse state data */
+          /* Success, reset the error counter */
 
-          usbhost_takesem(&priv->exclsem);
+          nerrors = 0;
 
-          /* Get the HID mouse report */
+          /* Ignore the mouse data if no task has opened the driver. */
 
-          rpt = (FAR struct usbhid_mousereport_s *)priv->tbuffer;
+          if (priv->open)
+            {
+              /* Get exclusive access to the mouse state data */
 
-          /* Get the updated mouse position */
+              usbhost_takesem(&priv->exclsem);
 
-          usbhost_position(priv, rpt);
+              /* Get the HID mouse report */
+
+              rpt = (FAR struct usbhid_mousereport_s *)priv->tbuffer;
+
+              /* Get the updated mouse position */
+
+              usbhost_position(priv, rpt);
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
-          /* Execute the touchscreen state machine */
+              /* Execute the touchscreen state machine */
 
-          if (usbhost_touchscreen(priv, rpt))
+              if (usbhost_touchscreen(priv, rpt))
 #else
-          /* Check if any buttons have changed.  If so, then report the
-           * new mouse data.
-           *
-           * If not, then perform a thresholding operation so that the
-           * results will be more stable.  If the difference from the
-           * last sample is small, then ignore the event.
-           */
-
-          buttons = rpt->buttons & USBHID_MOUSEIN_BUTTON_MASK;
-          if (buttons != priv->buttons || usbhost_threshold(priv))
-#endif
-            {
-              /* We get here when either there is a meaning button change
-               * and/or a significant movement of the mouse.  We are going
-               * to report the mouse event.
+              /* Check if any buttons have changed.  If so, then report the
+               * new mouse data.
                *
-               * Snap to the new x/y position for subsequent thresholding
+               * If not, then perform a thresholding operation so that the
+               * results will be more stable.  If the difference from the
+               * last sample is small, then ignore the event.
                */
 
-              priv->xlast = priv->xaccum;
-              priv->ylast = priv->yaccum;
-#ifdef CONFIG_MOUSE_WHEEL
-              priv->wlast = priv->waccum;
+              buttons = rpt->buttons & USBHID_MOUSEIN_BUTTON_MASK;
+              if (buttons != priv->buttons || usbhost_threshold(priv))
 #endif
-              /* Update the sample X/Y positions */
+                {
+                  /* We get here when either there is a meaning button
+                   * change and/or a significant movement of the mouse.  We
+                   * are going to report the mouse event.
+                   *
+                   * Snap to the new x/y position for subsequent
+                   * thresholding
+                   */
 
-              priv->sample.x = b16toi(priv->xaccum);
-              priv->sample.y = b16toi(priv->yaccum);
+                  priv->xlast = priv->xaccum;
+                  priv->ylast = priv->yaccum;
 #ifdef CONFIG_MOUSE_WHEEL
-              priv->sample.wheel = b16toi(priv->waccum);
+                  priv->wlast = priv->waccum;
+#endif
+                  /* Update the sample X/Y positions */
+
+                  priv->sample.x = b16toi(priv->xaccum);
+                  priv->sample.y = b16toi(priv->yaccum);
+#ifdef CONFIG_MOUSE_WHEEL
+                  priv->sample.wheel = b16toi(priv->waccum);
 #endif
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
-              /* The X/Y positional data is now valid */
+                  /* The X/Y positional data is now valid */
 
-              priv->sample.valid = true;
+                  priv->sample.valid = true;
 
-              /* Indicate the availability of new sample data for this ID */
+                  /* Indicate the availability of new sample data for this ID */
 
-              priv->sample.id = priv->id;
+                  priv->sample.id = priv->id;
 #else
-              /* Report and remember the new button state */
+                  /* Report and remember the new button state */
 
-              priv->sample.buttons = buttons;
-              priv->buttons = buttons;
+                  priv->sample.buttons = buttons;
+                  priv->buttons = buttons;
 #endif
-              priv->valid = true;
+                  priv->valid = true;
 
-              /* Notify any waiters that new HIDMOUSE data is available */
+                  /* Notify any waiters that new HIDMOUSE data is available */
 
-              usbhost_notify(priv);
+                  usbhost_notify(priv);
+                }
             }
         }
 
@@ -1211,26 +1221,49 @@ static int usbhost_mouse_poll(int argc, char *argv[])
   usbhost_takesem(&priv->exclsem);
 
   /* Indicate that we are no longer running and decrement the reference
-   * count help by this thread.  If there are no other users of the class,
+   * count held by this thread.  If there are no other users of the class,
    * we can destroy it now.  Otherwise, we have to wait until the all
    * of the file descriptors are closed.
    */
 
   udbg("Mouse removed, polling halted\n");
+
+  flags = irqsave();
   priv->polling = false;
-  if (--priv->crefs < 2)
+
+  /* Decrement the reference count held by this thread. */
+
+  DEBUGASSERT(priv->crefs > 0);
+  priv->crefs--;
+
+  /* There are two possibilities:
+   * 1) The reference count is greater than zero.  This means that there
+   *    are still open references to the mouse driver.  In this case
+   *    we need to wait until usbhost_close() is called and all of the
+   *    open driver references are decremented.  Then usbhost_destroy() can
+   *    be called from usbhost_close().
+   * 2) The reference count is now zero.  This means that there are no
+   *    further open references and we can call usbhost_destroy() now.
+   */
+
+  if (priv->crefs < 1)
     {
-      /* Destroy the instance (while we hold the semaphore!) */
+      /* Unregister the driver and destroy the instance (while we hold
+       * the semaphore!)
+       */
 
       usbhost_destroy(priv);
     }
   else
     {
-      /* No, we will destroy the driver instance when it is finally closed */
+      /* No, we will destroy the driver instance when it is final open
+       * reference is closed
+       */
 
       usbhost_givesem(&priv->exclsem);
     }
 
+  irqrestore(flags);
   return 0;
 }
 
@@ -1582,7 +1615,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   /* We are good... Allocate the interrupt IN endpoint. */
 
   ret = DRVR_EPALLOC(hport->drvr, &epindesc, &priv->epin);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate interrupt IN endpoint\n");
       return ret;
@@ -1619,7 +1652,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   /* Set aside a transfer buffer for exclusive use by the mouse class driver */
 
   ret = usbhost_tdalloc(priv);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate transfer buffer\n");
       return ret;
@@ -1963,7 +1996,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   /* Parse the configuration descriptor to get the endpoints */
 
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("usbhost_cfgdesc() failed: %d\n", ret);
     }
@@ -1972,7 +2005,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       /* Now configure the device and register the NuttX driver */
 
       ret = usbhost_devinit(priv);
-      if (ret != OK)
+      if (ret < 0)
         {
           udbg("usbhost_devinit() failed: %d\n", ret);
         }
@@ -2164,8 +2197,9 @@ static int usbhost_open(FAR struct file *filep)
 
 static int usbhost_close(FAR struct file *filep)
 {
-  FAR struct inode           *inode;
+  FAR struct inode *inode;
   FAR struct usbhost_state_s *priv;
+  irqstate_t flags;
 
   uvdbg("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
@@ -2174,48 +2208,67 @@ static int usbhost_close(FAR struct file *filep)
 
   /* Decrement the reference count on the driver */
 
-  DEBUGASSERT(priv->crefs > 1);
+  DEBUGASSERT(priv->crefs >= 1);
   usbhost_takesem(&priv->exclsem);
-  priv->crefs--;
 
-  /* Is this the last reference (other than the one held by the USB host
-   * controller driver)
+  /* We need to disable interrupts momentarily to assure that there are no
+   * asynchronous poll or disconnect events.
    */
 
-  if (priv->crefs <= 1)
+  flags = irqsave();
+  priv->crefs--;
+
+  /* Check if the USB mouse device is still connected.  If the device is
+   * no longer connected, then unregister the driver and free the driver
+   * class instance.
+   */
+
+  if (priv->disconnected)
     {
-      irqstate_t flags;
-
-      /* Yes.. then the driver is no longer open */
-
-      priv->open = false;
-
-      /* We need to disable interrupts momentarily to assure that there are
-       * no asynchronous disconnect events.
+      /* If the reference count is one or less then there are two
+       * possibilities:
+       *
+       * 1) It might be zero meaning that the polling thread has already
+       *    exited and decremented its count.
+       * 2) If might be one meaning either that (a) the polling thread is still
+       *    running and still holds a count, or (b) the polling thread has exited,
+       *    but there is still an outstanding open reference.
        */
 
-      flags = irqsave();
-
-      /* Check if the USB mouse device is still connected.  If the device is
-       * no longer connected, then unregister the driver and free the driver
-       * class instance.
-       */
-
-      if (priv->disconnected)
+     if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
         {
-          /* Destroy the class instance (we can't use priv after this; we can't
-           * 'give' the semaphore)
-           */
+          /* Yes.. In either case, then the driver is no longer open */
 
-          usbhost_destroy(priv);
-          irqrestore(flags);
-          return OK;
+          priv->open    = false;
+
+          /* Check if the USB keyboard device is still connected. */
+
+          if (priv->crefs == 0)
+            {
+              /* The polling thread is no longer running */
+
+              DEBUGASSERT(!priv->polling);
+
+              /* If the device is no longer connected, unregister the driver
+               * and free the driver class instance.
+               */
+
+              usbhost_destroy(priv);
+            }
+          else /* if (priv->crefs == 1) */
+            {
+              /* The polling thread is still running.  Signal it so that it
+               * will wake up and call usbhost_destroy().  The particular
+               * signal that we use does not matter in this case.
+               */
+
+              (void)kill(priv->pollpid, SIGUSR1);
+              usbhost_givesem(&priv->exclsem);
+            }
         }
-
-      irqrestore(flags);
     }
 
-  usbhost_givesem(&priv->exclsem);
+  irqrestore(flags);
   return OK;
 }
 

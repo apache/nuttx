@@ -47,6 +47,7 @@
 #include <string.h>
 #include <poll.h>
 #include <semaphore.h>
+#include <signal.h>
 #include <time.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -1002,6 +1003,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_ctrlreq_s *ctrlreq;
+  irqstate_t flags;
 #ifndef CONFIG_HIDKBD_NODEBOUNCE
   uint8_t lastkey[6] = {0, 0, 0, 0, 0, 0};
 #endif
@@ -1009,6 +1011,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
   unsigned int npolls = 0;
 #endif
   unsigned int nerrors = 0;
+  useconds_t delay;
   bool empty = true;
   bool newstate;
   int ret;
@@ -1069,11 +1072,11 @@ static int usbhost_kbdpoll(int argc, char *argv[])
       ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, priv->tbuffer);
       usbhost_givesem(&priv->exclsem);
 
-      /* Check for errors -- Bail if an excessive number of errors
-       * are encountered.
+      /* Check for errors -- Bail if an excessive number of consecutive
+       * errors are encountered.
        */
 
-      if (ret != OK)
+      if (ret < 0)
         {
           nerrors++;
           udbg("ERROR: GETREPORT/INPUT, DRVR_CTRLIN returned: %d/%d\n",
@@ -1095,6 +1098,10 @@ static int usbhost_kbdpoll(int argc, char *argv[])
           struct usbhid_kbdreport_s *rpt = (struct usbhid_kbdreport_s *)priv->tbuffer;
           uint8_t                    keycode;
           int                        i;
+
+          /* Success, reset the error counter */
+
+          nerrors = 0;
 
           /* Add the newly received keystrokes to our internal buffer */
 
@@ -1223,9 +1230,22 @@ static int usbhost_kbdpoll(int argc, char *argv[])
       /* Wait for the required amount (or until a signal is received).  We
        * will wake up when either the delay elapses or we are signalled that
        * the device has been disconnected.
+       *
+       * If we are getting errors, then sleep longer.  In the event that
+       * the keyboard is connected via a hub, there may be a significant
+       * amount of time after the keyboard is removed before we are stopped.
        */
 
-      usleep(CONFIG_HIDKBD_POLLUSEC);
+      if (nerrors > 1)
+        {
+          delay = nerrors * CONFIG_HIDKBD_POLLUSEC;
+        }
+      else
+        {
+          delay = CONFIG_HIDKBD_POLLUSEC;
+        }
+
+      usleep(delay);
     }
 
   /* We get here when the driver is removed.. or when too many errors have
@@ -1239,26 +1259,49 @@ static int usbhost_kbdpoll(int argc, char *argv[])
   usbhost_takesem(&priv->exclsem);
 
   /* Indicate that we are no longer running and decrement the reference
-   * count help by this thread.  If there are no other users of the class,
+   * count held by this thread.  If there are no other users of the class,
    * we can destroy it now.  Otherwise, we have to wait until the all
    * of the file descriptors are closed.
    */
 
   udbg("Keyboard removed, polling halted\n");
+
+  flags = irqsave();
   priv->polling = false;
-  if (--priv->crefs < 2)
+
+  /* Decrement the reference count held by this thread. */
+
+  DEBUGASSERT(priv->crefs > 0);
+  priv->crefs--;
+
+  /* There are two possibilities:
+   * 1) The reference count is greater than zero.  This means that there
+   *    are still open references to the keyboard driver.  In this case
+   *    we need to wait until usbhost_close() is called and all of the
+   *    open driver references are decremented.  Then usbhost_destroy() can
+   *    be called from usbhost_close().
+   * 2) The reference count is now zero.  This means that there are no
+   *    further open references and we can call usbhost_destroy() now.
+   */
+
+  if (priv->crefs < 1)
     {
-      /* Destroy the instance (while we hold the semaphore!) */
+      /* Unregister the driver and destroy the instance (while we hold
+       * the semaphore!)
+       */
 
       usbhost_destroy(priv);
     }
   else
     {
-      /* No, we will destroy the driver instance when it is finally closed */
+      /* No, we will destroy the driver instance when it is final open
+       * reference is closed
+       */
 
       usbhost_givesem(&priv->exclsem);
     }
 
+  irqrestore(flags);
   return 0;
 }
 
@@ -1489,7 +1532,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
    */
 
   ret = DRVR_EPALLOC(hport->drvr, &epindesc, &priv->epin);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate interrupt IN endpoint\n");
       return ret;
@@ -1503,7 +1546,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   if ((found & USBHOST_EPOUTFOUND) != 0)
     {
       ret = DRVR_EPALLOC(hport->drvr, &epoutdesc, &priv->epout);
-      if (ret != OK)
+      if (ret < 0)
         {
           udbg("ERROR: Failed to allocate interrupt OUT endpoint\n");
           (void)DRVR_EPFREE(hport->drvr, priv->epin);
@@ -1542,7 +1585,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   /* Set aside a transfer buffer for exclusive use by the keyboard class driver */
 
   ret = usbhost_tdalloc(priv);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate transfer buffer\n");
       return ret;
@@ -1884,7 +1927,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   /* Parse the configuration descriptor to get the endpoints */
 
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("usbhost_cfgdesc() failed: %d\n", ret);
     }
@@ -1893,7 +1936,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       /* Now configure the device and register the NuttX driver */
 
       ret = usbhost_devinit(priv);
-      if (ret != OK)
+      if (ret < 0)
         {
           udbg("usbhost_devinit() failed: %d\n", ret);
         }
@@ -2063,8 +2106,9 @@ static int usbhost_open(FAR struct file *filep)
 
 static int usbhost_close(FAR struct file *filep)
 {
-  FAR struct inode           *inode;
+  FAR struct inode *inode;
   FAR struct usbhost_state_s *priv;
+  irqstate_t flags;
 
   uvdbg("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
@@ -2073,50 +2117,69 @@ static int usbhost_close(FAR struct file *filep)
 
   /* Decrement the reference count on the driver */
 
-  DEBUGASSERT(priv->crefs > 1);
+  DEBUGASSERT(priv->crefs >= 1);
   usbhost_takesem(&priv->exclsem);
-  priv->crefs--;
 
-  /* Is this the last reference (other than the one held by the USB host
-   * controller driver)
+  /* We need to disable interrupts momentarily to assure that there are no
+   * asynchronous poll or disconnect events.
    */
 
-  if (priv->crefs <= 1)
+  flags = irqsave();
+  priv->crefs--;
+
+  /* Check if the USB mouse device is still connected.  If the device is
+   * no longer connected, then unregister the driver and free the driver
+   * class instance.
+   */
+
+  if (priv->disconnected)
     {
-      irqstate_t flags;
-
-      /* Yes.. then the driver is no longer open */
-
-      priv->open    = false;
-      priv->headndx = 0;
-      priv->tailndx = 0;
-
-      /* We need to disable interrupts momentarily to assure that there are
-       * no asynchronous disconnect events.
+      /* If the reference count is one or less then there are two
+       * possibilities:
+       *
+       * 1) It might be zero meaning that the polling thread has already
+       *    exited and decremented its count.
+       * 2) If might be one meaning either that (a) the polling thread is still
+       *    running and still holds a count, or (b) the polling thread has exited,
+       *    but there is still an outstanding open reference.
        */
 
-      flags = irqsave();
-
-      /* Check if the USB keyboard device is still connected.  If the device is
-       * no longer connected, then unregister the driver and free the driver
-       * class instance.
-       */
-
-      if (priv->disconnected)
+     if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
         {
-          /* Destroy the class instance (we can't use priv after this; we can't
-           * 'give' the semaphore)
-           */
+          /* Yes.. In either case, then the driver is no longer open */
 
-          usbhost_destroy(priv);
-          irqrestore(flags);
-          return OK;
+          priv->open    = false;
+          priv->headndx = 0;
+          priv->tailndx = 0;
+
+          /* Check if the USB keyboard device is still connected. */
+
+          if (priv->crefs == 0)
+            {
+              /* The polling thread is no longer running */
+
+              DEBUGASSERT(!priv->polling);
+
+              /* If the device is no longer connected, unregister the driver
+               * and free the driver class instance.
+               */
+
+              usbhost_destroy(priv);
+            }
+          else /* if (priv->crefs == 1) */
+            {
+              /* The polling thread is still running.  Signal it so that it
+               * will wake up and call usbhost_destroy().  The particular
+               * signal that we use does not matter in this case.
+               */
+
+              (void)kill(priv->pollpid, SIGUSR1);
+              usbhost_givesem(&priv->exclsem);
+            }
         }
-
-      irqrestore(flags);
     }
 
-  usbhost_givesem(&priv->exclsem);
+  irqrestore(flags);
   return OK;
 }
 
