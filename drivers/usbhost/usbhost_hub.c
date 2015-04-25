@@ -221,25 +221,26 @@ static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
 {
   uvdbg("Deactivating: %d\n", hport->port);
 
-  /* Don't deactivate root hub ports! */
+  /* Don't free the control pipe of root hub ports! */
 
-  if (!ROOTHUB(hport))
+  if (!ROOTHUB(hport) && hport->ep0 != NULL)
     {
       /* Free the control endpoint */
 
-      if (hport->ep0 != NULL)
-        {
-          DRVR_EPFREE(hport->drvr, hport->ep0);
-          hport->ep0 = NULL;
-        }
-
-      /* Free the function address if one has been assigned */
-
-      usbhost_devaddr_destroy(hport, hport->funcaddr);
-      hport->funcaddr = 0;
-
-      DEBUGASSERT(hport->devclass == NULL);
+      DRVR_EPFREE(hport->drvr, hport->ep0);
+      hport->ep0 = NULL;
     }
+
+  /* Free the function address if one has been assigned */
+
+  usbhost_devaddr_destroy(hport, hport->funcaddr);
+  hport->funcaddr = 0;
+
+  /* If this is a downstream hub port, then there should be no class driver
+   * associated wit it.
+   */
+
+  DEBUGASSERT(ROOTHUB(hport) || hport->devclass == NULL);
 }
 
 /****************************************************************************
@@ -1398,13 +1399,19 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
 static int usbhost_disconnected(struct usbhost_class_s *hubclass)
 {
   FAR struct usbhost_hubpriv_s *priv;
+  FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
   int ret;
 
   /* Execute the disconnect action from the worker thread. */
 
-  DEBUGASSERT(hubclass != NULL);
+  DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
+  hport = hubclass->hport;
+
+  /* Cancel any pending transfers on the interrupt IN pipe */
+
+  DRVR_CANCEL(hport->drvr, priv->intin);
 
   /* NOTE: There may be pending HUB work associated with hub interrupt
    * pipe events.  That work may be overwritten and lost by this action.
