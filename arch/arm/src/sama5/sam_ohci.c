@@ -355,6 +355,9 @@ static void sam_tbfree(uint8_t *buffer);
 
 /* ED list helper functions ****************************************************/
 
+static inline int sam_addctrled(struct sam_ed_s *ed);
+static inline int sam_remctrled(struct sam_ed_s *ed);
+
 static inline int sam_addbulked(struct sam_ed_s *ed);
 static inline int sam_rembulked(struct sam_ed_s *ed);
 
@@ -832,6 +835,34 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
 #else
   return -ENOSYS;
 #endif
+}
+
+/*******************************************************************************
+ * Name: sam_addctrled
+ *
+ * Description:
+ *   Helper function to add an ED to the control list.
+ *
+ *******************************************************************************/
+
+static inline int sam_addctrled(struct sam_ed_s *ed)
+{
+#error Not Implemented
+  return -ENOSYS;
+}
+
+/*******************************************************************************
+ * Name: sam_remctrled
+ *
+ * Description:
+ *   Helper function remove an ED from the control list.
+ *
+ *******************************************************************************/
+
+static inline int sam_remctrled(struct sam_ed_s *ed)
+{
+#error Not Implemented
+  return -ENOSYS;
 }
 
 /*******************************************************************************
@@ -2454,9 +2485,15 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
                 (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
                 (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
-  /* Get the direction of the endpoint */
+  /* Get the direction of the endpoint.  For control endpoints, the
+   * direction is in the TD.
+   */
 
-  if (epdesc->in)
+  if (epdesc->xfrtype == USB_EP_ATTR_XFER_CONTROL)
+    {
+      ed->hw.ctrl |= ED_CONTROL_D_TD1;
+    }
+  else if (epdesc->in)
     {
       ed->hw.ctrl |= ED_CONTROL_D_IN;
     }
@@ -2510,6 +2547,10 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   switch (ed->xfrtype)
     {
+    case USB_EP_ATTR_XFER_CONTROL:
+      ret = sam_addctrled(ed);
+      break;
+
     case USB_EP_ATTR_XFER_BULK:
       ret = sam_addbulked(ed);
       break;
@@ -2522,7 +2563,6 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
       ret = sam_addisoced(epdesc, ed);
       break;
 
-    case USB_EP_ATTR_XFER_CONTROL:
     default:
       ret = -EINVAL;
       break;
@@ -2601,6 +2641,10 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   switch (ed->xfrtype)
     {
+    case USB_EP_ATTR_XFER_CONTROL:
+      ret = sam_remctrled(eplist->ed);
+      break;
+
     case USB_EP_ATTR_XFER_BULK:
       ret = sam_rembulked(eplist->ed);
       break;
@@ -2613,7 +2657,6 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       ret = sam_remisoced(eplist->ed);
       break;
 
-    case USB_EP_ATTR_XFER_CONTROL:
     default:
       ret = -EINVAL;
       break;

@@ -166,7 +166,6 @@ struct lpc17_usbhost_s
 
   volatile bool    change;      /* Connection change */
   volatile bool    connected;   /* Connected to device */
-  volatile bool    lowspeed;    /* Low speed device attached. */
   volatile bool    pscwait;     /* TRUE: Thread is waiting for a port status change */
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -1612,8 +1611,16 @@ static int lpc17_usbinterrupt(int irq, void *context)
                        * when CCS == 1.
                        */
 
-                      priv->lowspeed = (rhportst1 & OHCI_RHPORTST_LSDA) != 0;
-                      ullvdbg("Speed:%s\n", priv->lowspeed ? "LOW" : "FULL");
+                      if ((rhportst1 & OHCI_RHPORTST_LSDA) != 0)
+                        {
+                          priv->rhport.hport.speed = USB_SPEED_LOW;
+                        }
+                      else
+                        {
+                          priv->rhport.hport.speed = USB_SPEED_FULL;
+                        }
+
+                      ullvdbg("Speed:%d\n", priv->rhport.hport.speed);
                     }
 
                   /* Check if we are now disconnected */
@@ -1623,9 +1630,9 @@ static int lpc17_usbinterrupt(int irq, void *context)
                       /* Yes.. disconnect the device */
 
                       ullvdbg("Disconnected\n");
-                      priv->connected = false;
-                      priv->change    = true;
-                      priv->lowspeed  = false;
+                      priv->connected          = false;
+                      priv->change             = true;
+                      priv->rhport.hport.speed = USB_SPEED_FULL;
 
                       /* Are we bound to a class instance? */
 
@@ -1985,7 +1992,7 @@ static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
   ed->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
                 (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
-  if (priv->lowspeed)
+  if (priv->rhport.hport.speed == USB_SPEED_LOW)
    {
      ed->hw.ctrl |= ED_CONTROL_S;
    }
@@ -2078,7 +2085,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
 
       /* Check for a low-speed device */
 
-      if (priv->lowspeed)
+      if (priv->rhport.hport.speed == USB_SPEED_LOW)
         {
           ed->hw.ctrl |= ED_CONTROL_S;
         }
