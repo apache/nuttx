@@ -2059,9 +2059,15 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
                     (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
                     (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
-      /* Get the direction of the endpoint */
+      /* Get the direction of the endpoint.  For control endpoints, the
+       * direction is in the TD.
+       */
 
-      if (epdesc->in)
+      if (epdesc->xfrtype == USB_EP_ATTR_XFER_CONTROL)
+        {
+          ed->hw.ctrl |= ED_CONTROL_D_TD1;
+        }
+      else if (epdesc->in)
         {
           ed->hw.ctrl |= ED_CONTROL_D_IN;
         }
