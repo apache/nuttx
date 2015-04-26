@@ -95,7 +95,7 @@
 #define FB_FMT_RGBA16      18          /* BPP=16 Raw RGB with alpha */
 #define FB_FMT_RGBA32      19          /* BPP=32 Raw RGB with alpha */
 
-/* Raw RGB with a transparency field. Layout is as for stanadard RGB at 16 and
+/* Raw RGB with a transparency field. Layout is as for standard RGB at 16 and
  * 32 bits per pixel but the msb in each pixel indicates whether the pixel is
  * transparent or not.
  */
@@ -109,16 +109,20 @@
 
 #define FB_FMT_AYUV        22          /* BPP=32  Combined YUV and alpha */
 #define FB_FMT_CLJR        23          /* BPP=8   4 pixels packed into a uint32_t.
-                                        * YUV 4:1:1 with l< 8 bits per YUV sample */
-#define FB_FMT_CYUV        24          /* BPP=16  UYVY except that height is reversed */
+                                        *         YUV 4:1:1 with l< 8 bits
+                                        *         per YUV sample */
+#define FB_FMT_CYUV        24          /* BPP=16  UYVY except that height is
+                                        *         reversed */
 #define FB_FMT_IRAW        25          /* BPP=?   Intel uncompressed YUV */
 #define FB_FMT_IUYV        26          /* BPP=16  Interlaced UYVY (line order
-                                        * 0,2,4,.., 1,3,5...) */
+                                        *         0,2,4,.., 1,3,5...) */
 #define FB_FMT_IY41        27          /* BPP=12  Interlaced Y41P (line order
-                                        * 0,2,4,.., 1,3,5...) */
+                                        *         0,2,4,.., 1,3,5...) */
 #define FB_FMT_IYU2        28          /* BPP=24 */
-#define FB_FMT_HDYC        29          /* BPP=16  UYVY except uses the BT709 color space  */
-#define FB_FMT_UYVP        30          /* BPP=24? YCbCr 4:2:2, 10-bits per component in U0Y0V0Y1 order */
+#define FB_FMT_HDYC        29          /* BPP=16  UYVY except uses the BT709
+                                        *         color space  */
+#define FB_FMT_UYVP        30          /* BPP=24? YCbCr 4:2:2, 10-bits per
+                                        *         component in U0Y0V0Y1 order */
 #define FB_FMT_UYVY        31          /* BPP=16  YUV 4:2:2 */
 #define FB_FMT_UYNV        FB_FMT_UYVY /* BPP=16  */
 #define FB_FMT_Y422        FB_FMT_UYVY /* BPP=16  */
@@ -141,20 +145,32 @@
 
 /* Packed Planar YUV Formats ************************************************/
 
-#define FB_FMT_YVU9        44          /* BPP=9  8-bit Y followed by 8-bit 4x4 VU */
+#define FB_FMT_YVU9        44          /* BPP=9   8-bit Y followed by 8-bit
+                                        *         4x4 VU */
 #define FB_FMT_YUV9        45          /* BPP=9? */
-#define FB_FMT_IF09        46          /* BPP=9.5 YVU9 + 4x4 plane of delta relative to tframe. */
-#define FB_FMT_YV16        47          /* BPP=16  8-bit Y followed by 8-bit 2x1 VU */
-#define FB_FMT_YV12        48          /* BPP=12  8-bit Y followed by 8-bit 2x2 VU */
-#define FB_FMT_I420        49          /* BPP=12  8-bit Y followed by 8-bit 2x2 UV */
+#define FB_FMT_IF09        46          /* BPP=9.5 YVU9 + 4x4 plane of delta
+                                        *         relative to tframe. */
+#define FB_FMT_YV16        47          /* BPP=16  8-bit Y followed by 8-bit
+                                        *         2x1 VU */
+#define FB_FMT_YV12        48          /* BPP=12  8-bit Y followed by 8-bit
+                                        *         2x2 VU */
+#define FB_FMT_I420        49          /* BPP=12  8-bit Y followed by 8-bit
+                                        *         2x2 UV */
 #define FB_FMT_IYUV        FB_FMT_I420 /* BPP=12 */
-#define FB_FMT_NV12        50          /* BPP=12  8-bit Y followed by an interleaved 2x2 UV */
+#define FB_FMT_NV12        50          /* BPP=12  8-bit Y followed by an
+                                        *         interleaved 2x2 UV */
 #define FB_FMT_NV21        51          /* BPP=12  NV12 with UV reversed */
-#define FB_FMT_IMC1        52          /* BPP=12  YV12 except UV planes ame stride as Y */
-#define FB_FMT_IMC2        53          /* BPP=12  IMC1 except UV lines interleaved at half stride boundaries */
-#define FB_FMT_IMC3        54          /* BPP=12  As IMC1 except that UV swapped */
-#define FB_FMT_IMC4        55          /* BPP=12  As IMC2  except that UV swapped */
-#define FB_FMT_CLPL        56          /* BPP=12  YV12 but including a level of indirection. */
+#define FB_FMT_IMC1        52          /* BPP=12  YV12 except UV planes same
+                                        *         stride as Y */
+#define FB_FMT_IMC2        53          /* BPP=12  IMC1 except UV lines
+                                        *         interleaved at half stride
+                                        *         boundaries */
+#define FB_FMT_IMC3        54          /* BPP=12  As IMC1 except that UV
+                                        *         swapped */
+#define FB_FMT_IMC4        55          /* BPP=12  As IMC2  except that UV
+                                        *         swapped */
+#define FB_FMT_CLPL        56          /* BPP=12  YV12 but including a level
+                                        *         of indirection. */
 #define FB_FMT_Y41B        57          /* BPP=12?  4:1:1 planar. */
 #define FB_FMT_Y42B        58          /* BPP=16?  YUV 4:2:2 planar. */
 #define FB_FMT_CXY1        59          /* BPP=12 */
@@ -237,7 +253,7 @@ struct fb_cmap_s
 struct fb_cursorimage_s
 {
  fb_coord_t     width;     /* Width of the cursor image in pixels */
- fb_coord_t     height     /* Height of the curor image in pixels */
+ fb_coord_t     height     /* Height of the cursor image in pixels */
  const uint8_t *image;     /* Pointer to image data */
 };
 #endif
@@ -295,24 +311,35 @@ struct fb_setcursor_s
 
 struct fb_vtable_s
 {
-  /* Get information about the video controller configuration and the configuration
-   * of each color plane.
+  /* Get information about the video controller configuration and the
+   * configuration of each color plane.
    */
 
-  int (*getvideoinfo)(FAR struct fb_vtable_s *vtable, FAR struct fb_videoinfo_s *vinfo);
-  int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno, FAR struct fb_planeinfo_s *pinfo);
+  int (*getvideoinfo)(FAR struct fb_vtable_s *vtable,
+                      FAR struct fb_videoinfo_s *vinfo);
+  int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno,
+                      FAR struct fb_planeinfo_s *pinfo);
 
-  /* The following are provided only if the video hardware supports RGB color mapping */
+  /* The following are provided only if the video hardware supports RGB
+   * color mapping
+   */
 
 #ifdef CONFIG_FB_CMAP
-  int (*getcmap)(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
-  int (*putcmap)(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap);
+  int (*getcmap)(FAR struct fb_vtable_s *vtable,
+                 FAR struct fb_cmap_s *cmap);
+  int (*putcmap)(FAR struct fb_vtable_s *vtable,
+                 FAR const struct fb_cmap_s *cmap);
 #endif
-  /* The following are provided only if the video hardware supports a hardware cursor */
+
+  /* The following are provided only if the video hardware supports a
+   * hardware cursor.
+   */
 
 #ifdef CONFIG_FB_HWCURSOR
-  int (*getcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_cursorattrib_s *attrib);
-  int (*setcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *settings);
+  int (*getcursor)(FAR struct fb_vtable_s *vtable,
+                   FAR struct fb_cursorattrib_s *attrib);
+  int (*setcursor)(FAR struct fb_vtable_s *vtable,
+                   FAR struct fb_setcursor_s *settings);
 #endif
 };
 
@@ -343,7 +370,7 @@ extern "C"
  *   up_fbgetvplane    - Return a a reference to the framebuffer object for
  *                       the specified video plane.  Most OSDs support
  *                       multiple planes of video.
- *   up_fbuninitialize - Unitialize the framebuffer support
+ *   up_fbuninitialize - Uninitialize the framebuffer support
  *
  ***************************************************************************/
 
