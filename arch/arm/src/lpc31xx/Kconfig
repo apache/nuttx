@@ -60,6 +60,7 @@ config LPC31_SPI
 config LPC31_USBOTG
 	bool "USB OTG"
 	default n
+	select USBHOST_HAVE_ASYNCH
 
 config LPC31_MCI
 	bool "MCI"

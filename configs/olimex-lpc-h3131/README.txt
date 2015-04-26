@@ -648,7 +648,7 @@ Configurations
        RAMTest: Pattern test: 30000000 33554432 33333333 cccccccc
        RAMTest: Address-in-address test: 30000000 33554432
 
-    4. This configuration has been used to test USB host functionaly.  USB
+    4. This configuration has been used to test USB host functionality.  USB
        host is *not* enabled by default.  If you will to enable USB host
        support in the NSH configuration, please modify the NuttX
        configuration as follows:
@@ -657,7 +657,7 @@ Configurations
 
           Drivers -> USB Host Driver Support
             CONFIG_USBHOST=y              : General USB host support
-            CONFIG_USBHOST_INT_DISABLE=y  : Not needed (unless you use the keyboard)
+            CONFIG_USBHOST_INT_DISABLE=n  : Interrupt EPs need with hub, HID keyboard, and HID mouse
             CONFIG_USBHOST_ISOC_DISABLE=y : Not needed (or supported)
 
           System Type -> Peripherals
@@ -667,11 +667,24 @@ Configurations
             CONFIG_LPC31_EHCI_BUFSIZE=128
             CONFIG_LPC31_EHCI_PREALLOCATE=y
 
-          Library Routines
+          RTOS Features -> Work Queue Support
             CONFIG_SCHED_WORKQUEUE=y      : Work queue support is needed
             CONFIG_SCHED_HPWORKSTACKSIZE=1536
 
-       b. USB Mass Storage Class.  With this class enabled, you can support
+       b. Hub Support.
+
+          Drivers -> USB Host Driver Support
+            CONFIG_USBHOST_INT_DISABLE=n  : Interrupt endpoint support needed
+            CONFIG_USBHOST_HUB=y          : Enable the hub class
+            CONFIG_USBHOST_ASYNCH=y       : Asynchonous I/O supported needed for hubs
+
+          System Type -> USB host configuration
+            To be provided
+
+          Logic nesting becomes deeper with a hub and it may also be
+          necessary to increase some stack sizes.
+
+       c. USB Mass Storage Class.  With this class enabled, you can support
           connection of USB FLASH storage drives.  Support for the USB
           mass storage class is enabled like this:
 
@@ -718,7 +731,7 @@ Configurations
 
             nsh> umount /mnt/flash
 
-       c. HID Keyboard support.  The following support will enable support
+       d. HID Keyboard support.  The following support will enable support
           for certain keyboard devices (only the so-called "boot" keyboard
           class is supported):
 

@@ -257,7 +257,7 @@ struct sam_ehci_s
   volatile struct usbhost_hubport_s *hport;
 #endif
 
-   /* Root hub ports */
+  /* Root hub ports */
 
   struct sam_rhport_s rhport[SAM_EHCI_NRHPORT];
 };
@@ -392,23 +392,20 @@ static int sam_ioalloc(FAR struct usbhost_driver_s *drvr,
          FAR uint8_t **buffer, size_t buflen);
 static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                      FAR const struct usb_ctrlreq_s *req,
-                      FAR uint8_t *buffer);
+         FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
 static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                       FAR const struct usb_ctrlreq_s *req,
-                       FAR const uint8_t *buffer);
+         FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
          FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                      FAR uint8_t *buffer, size_t buflen,
-                      usbhost_asynch_t callback, FAR void *arg);
+         FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
+         FAR void *arg);
 static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(FAR struct usbhost_driver_s *drvr,
-                       FAR struct usbhost_hubport_s *hport,
-                       bool connected);
+         FAR struct usbhost_hubport_s *hport, bool connected);
 #endif
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
 
@@ -2638,6 +2635,7 @@ static inline void sam_ioc_bottomhalf(void)
 static inline void sam_portsc_bottomhalf(void)
 {
   struct sam_rhport_s *rhport;
+  struct usbhost_hubport_s *hport;
   uint32_t portsc;
   int rhpndx;
 
@@ -2699,12 +2697,13 @@ static inline void sam_portsc_bottomhalf(void)
 
                   /* Are we bound to a class instance? */
 
-                  if (rhport->hport.devclass)
+                  hport = &rhport->hport.hport;
+                  if (hport->devclass)
                     {
                       /* Yes.. Disconnect the class */
 
-                      CLASS_DISCONNECTED(rhport->hport.devclass);
-                      rhport->hport.devclass = NULL;
+                      CLASS_DISCONNECTED(hport->devclass);
+                      hport->devclass = NULL;
                     }
 
                   /* Notify any waiters for the Root Hub Status change
@@ -3036,20 +3035,25 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       for (rhpndx = 0; rhpndx < SAM_EHCI_NRHPORT; rhpndx++)
         {
+          struct lpc31_rhport_s *rhport;
+          struct usbhost_hubport_s *connport;
+
           /* Has the connection state changed on the RH port? */
 
-          if (g_ehci.rhport[rhpndx].hport.connected != connected[rhpndx])
+          rhport   = &g_ehci.rhport[rhpndx];
+          connport = &rhport->hport.hport;
+          if (rhport->connected != connport->connected)
             {
               /* Yes.. Return the RH port to inform the caller which
                * port has the connection change.
                */
 
-              *hport = &g_ehci.rhport[rhpndx].hport;
+              connport->connected = rhport->connected;
+              *hport = connport;
               irqrestore(flags);
 
               usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
-                              rhpndx + 1,
-                              g_ehci.rhport[rhpndx].hport.connected);
+                              rhpndx + 1, rhport->conected);
               return OK;
             }
         }
@@ -3059,14 +3063,14 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       if (g_ehci.hport)
         {
-          FAR volatile struct usbhost_hubport_s *connport;
+          volatile struct usbhost_hubport_s *connport;
 
           /* Yes.. return the external hub port */
 
           connport = g_ehci.hport;
           g_ehci.hport = NULL;
 
-          *hport = connport;
+          *hport = (struct usbhost_hubport_s *)connport;
           irqrestore(flags);
 
           usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
@@ -3119,7 +3123,6 @@ static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
   volatile uint32_t *regaddr;
   uint32_t regval;
   int rhpndx;
-  int ret;
 
   DEBUGASSERT(conn != NULL && hport != NULL);
   rhpndx = hport->port;
@@ -3690,7 +3693,6 @@ static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Name: sam_ctrlin and sam_ctrlout
  *
  * Description:
- * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
  *   will enqueue the request and wait for it to complete.  Only one transfer may be
  *   queued; Neither these methods nor the transfer() method can be called again
@@ -3847,7 +3849,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 }
 
 /*******************************************************************************
- * Name: lcp17_asynch
+ * Name: lpc17_asynch
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -3998,7 +4000,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
   /* Unbind the class */
   /* REVISIT:  Is there more that needs to be done? */
 
-  rhport->hport.devclass = NULL;
+  rhport->hport.hport.devclass = NULL;
 }
 
 /*******************************************************************************
@@ -4010,7 +4012,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
  * Description:
  *   Set the HCRESET bit in the USBCMD register to reset the EHCI hardware.
  *
- *   Table 2-9. USBCMD – USB Command Register Bit Definitions
+ *   Table 2-9. USBCMD - USB Command Register Bit Definitions
  *
  *    "Host Controller Reset (HCRESET) ... This control bit is used by software
  *     to reset the host controller. The effects of this on Root Hub registers
@@ -4042,7 +4044,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
  *   on failure.
  *
  * Assumptions:
- * - Called during the initializaation of the EHCI.
+ * - Called during the initialization of the EHCI.
  *
  *******************************************************************************/
 

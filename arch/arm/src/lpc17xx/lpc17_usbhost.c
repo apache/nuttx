@@ -2951,7 +2951,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
 #endif
 
 /*******************************************************************************
- * Name: lcp17_asynch
+ * Name: lpc17_asynch
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
