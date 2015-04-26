@@ -977,6 +977,9 @@ Configuration Sub-Directories
                      crash seems seems to be due to a corrupt addess in the callback from
                      the new asynchronous I/O.  Should not be too hard to fix.
 
+                     Also, the code does not enumerat the hub if it is connected at the
+                     time of power up.
+
   hidmouse:
     This configuration directory supports a variant of an NSH configution.
     It is set up to perform the touchscreen test at apps/examples/touchscreen
