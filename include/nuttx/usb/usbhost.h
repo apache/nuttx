@@ -67,7 +67,11 @@
  *
  ************************************************************************************/
 
-#define ROOTHUB(hub) ((hub)->parent == NULL)
+#ifdef CONFIG_USBHOST_HUB
+#  define ROOTHUB(hub) ((hub)->parent == NULL)
+#else
+#  define ROOTHUB(hub) true
+#endif
 
 /************************************************************************************
  * Name: CLASS_CREATE
@@ -230,6 +234,7 @@
  *   ep0 - The (opaque) EP0 endpoint instance
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
+ *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
@@ -242,8 +247,8 @@
  *
  ************************************************************************************/
 
-#define DRVR_EP0CONFIGURE(drvr,ep0,funcaddr,mps) \
-  ((drvr)->ep0configure(drvr,ep0,funcaddr,mps))
+#define DRVR_EP0CONFIGURE(drvr,ep0,funcaddr,speed,mps) \
+  ((drvr)->ep0configure(drvr,ep0,funcaddr,speed,mps))
 
 /************************************************************************************
  * Name: DRVR_GETDEVINFO
@@ -771,7 +776,7 @@ struct usbhost_driver_s
    */
 
   int (*ep0configure)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                      uint8_t funcaddr, uint16_t maxpacketsize);
+                      uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize);
 
   /* Allocate and configure an endpoint. */
 

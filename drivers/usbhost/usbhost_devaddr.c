@@ -177,10 +177,21 @@ static void usbhost_devaddr_free(FAR struct usbhost_devaddr_s *devgen,
 static inline FAR struct usbhost_roothubport_s *
 usbhost_roothubport(FAR struct usbhost_hubport_s *hport)
 {
+#ifdef CONFIG_USBHOST_HUB
+  /* If this is a root hub port then the parent port pointer will be NULL.
+   * Otherwise, we need to traverse the parent pointer list until we find the
+   * root hub port.
+   */
+
   while (hport->parent != NULL)
     {
+      /* This is not a root hub port.  It is a port on a hub.  Try the port of
+       * the parent hub that supports this port.
+       */
+
       hport = hport->parent;
     }
+#endif
 
   return (FAR struct usbhost_roothubport_s *)hport;
 }

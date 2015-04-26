@@ -367,7 +367,8 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   /* Configure EP0 with the initial maximum packet size */
 
-  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, 0, maxpacketsize);
+  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, 0, hport->speed,
+                    maxpacketsize);
 
   /* Read first bytes of the device descriptor */
 
@@ -392,7 +393,8 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   /* And reconfigure EP0 with the correct maximum packet size */
 
-  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, 0, maxpacketsize);
+  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, 0, hport->speed,
+                    maxpacketsize);
 
   /* Now read the full device descriptor (if we have not already done so) */
 
@@ -454,7 +456,8 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   /* And reconfigure EP0 with the correct address */
 
-  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, hport->funcaddr, maxpacketsize);
+  DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, hport->funcaddr,
+                    hport->speed, maxpacketsize);
 
   /* Get the configuration descriptor (only), index == 0.  Should not be
    * hard-coded! More logic is needed in order to handle devices with
