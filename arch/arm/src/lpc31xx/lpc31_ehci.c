@@ -3204,6 +3204,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
                * port has the connection change.
                */
 
+              connport->connected = rhport->connected;
               *hport = connport;
               irqrestore(flags);
 
