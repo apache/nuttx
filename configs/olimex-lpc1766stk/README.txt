@@ -952,6 +952,31 @@ Configuration Sub-Directories
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
+    2. I used this configuration to test the USB hub class.  I did this
+       testing with the following changes to the configuration:
+
+       CONFIG_USBHOST_HUB=y                    : Enable the hub class
+       CONFIG_USBHOST_ASYNCH=y                 : Asynchonous I/O supported needed for hubs
+
+       CONFIG_LPC17_USBHOST_NASYNCH=8          : Allow up to 8 asynchronous requests
+       CONFIG_USBHOST_NEDS=3                   : Increase number of endpoint descriptors from 2
+       CONFIG_USBHOST_NTDS=4                   : Increase number of transfer descriptors from 3
+       CONFIG_USBHOST_TDBUFFERS=4              : Increase number of transfer buffers from 3
+       CONFIG_USBHOST_IOBUFSIZE=256            : Decrease the size of I/O buffers from 512
+
+       I also increased some stack sizes:
+
+       CONFIG_EXAMPLES_HIDKBD_STACKSIZE=2048   : Was 1024
+       CONFIG_HIDKBD_STACKSIZE=2048            : Was 1024
+       CONFIG_SCHED_HPWORKSTACKSIZE=2048       : Was 1024
+
+       STATUS:
+         2015-04-26: The hub basically works.  I do get crashes in the LPC16 USB host driver
+                     when removing the keyboard from the hub.  It looks like that crash
+                     occurs consistently the 4th time that the keyboard is removed.  The
+                     crash seems seems to be due to a corrupt addess in the callback from
+                     the new asynchronous I/O.  Should not be too hard to fix.
+
   hidmouse:
     This configuration directory supports a variant of an NSH configution.
     It is set up to perform the touchscreen test at apps/examples/touchscreen
