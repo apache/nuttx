@@ -347,7 +347,7 @@ static int lpc17_enumerate(struct usbhost_connection_s *conn,
                            struct usbhost_hubport_s *hport);
 
 static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep0, uint8_t funcaddr,
+                              usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
                               uint16_t maxpacketsize);
 static int lpc17_epalloc(struct usbhost_driver_s *drvr,
                          const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
@@ -1979,6 +1979,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn,
  *   ep0 - The (opaque) EP0 endpoint instance
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
+ *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
@@ -1991,9 +1992,8 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn,
  *
  ************************************************************************************/
 
-static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep0, uint8_t funcaddr,
-                              uint16_t maxpacketsize)
+static int lpc17_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                              uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s      *ed;
@@ -2006,12 +2006,17 @@ static int lpc17_ep0configure(struct usbhost_driver_s *drvr,
 
   lpc17_takesem(&priv->exclsem);
 
-  /* Set the EP0 ED control word (preserving only speed) */
+  /* Set the EP0 ED control word */
 
-  hwctrl      = ed->hw.ctrl & ED_CONTROL_S;
-  hwctrl     |= (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
-                (uint32_t)ED_CONTROL_D_TD1 |
-                (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+  hwctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
+           (uint32_t)ED_CONTROL_D_TD1 |
+           (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+
+  if (speed == USB_SPEED_LOW)
+    {
+      hwctrl |= ED_CONTROL_S;
+    }
+
   ed->hw.ctrl = hwctrl;
 
   lpc17_givesem(&priv->exclsem);

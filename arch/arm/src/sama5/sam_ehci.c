@@ -381,7 +381,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
          FAR struct usbhost_hubport_s *hport);
 
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         uint8_t funcaddr, uint16_t maxpacketsize);
+         uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
          const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
@@ -3384,6 +3384,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls.  A funcaddr of zero will be received if no address is yet assigned
  *     to the device.
+ *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   maxpacketsize - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
@@ -3397,7 +3398,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
  ************************************************************************************/
 
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                            uint8_t funcaddr, uint16_t maxpacketsize)
+                            uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
 {
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep0;
 

@@ -400,8 +400,9 @@ static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
 static int sam_enumerate(FAR struct usbhost_connection_s *conn,
                          FAR struct usbhost_hubport_s *hport);
 
-static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                            uint8_t funcaddr, uint16_t maxpacketsize);
+static int sam_ep0configure(FAR struct usbhost_driver_s *drvr,
+                            usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
+                            uint16_t maxpacketsize);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
                        const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
@@ -1476,7 +1477,9 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
    */
 
   memset(edctrl, 0, sizeof(struct sam_ed_s));
-  (void)sam_ep0configure(&rhport->drvr, &rhport->ep0, 0, 8);
+  (void)sam_ep0configure(&rhport->drvr, &rhport->ep0, 0,
+                         rhport->hport.speed, 8);
+
   edctrl->hw.ctrl  |= ED_CONTROL_K;
   edctrl->eplist    = &rhport->ep0;
   edctrl->xfrtype   = USB_EP_ATTR_XFER_CONTROL;
@@ -2344,6 +2347,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
  *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls.  A funcaddr of zero will be received if no address is yet assigned
  *     to the device.
+ *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   maxpacketsize - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
@@ -2356,8 +2360,8 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
  *
  ************************************************************************************/
 
-static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                            uint8_t funcaddr, uint16_t maxpacketsize)
+static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                              uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *ep0list = (struct sam_eplist_s *)ep0;
@@ -2374,10 +2378,15 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* Set the EP0 ED control word (preserving only speed) */
 
-  hwctrl      = ed->hw.ctrl & ED_CONTROL_S;
-  hwctrl     |= (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
-                (uint32_t)ED_CONTROL_D_TD1 |
-                (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+  hwctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
+           (uint32_t)ED_CONTROL_D_TD1 |
+           (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+
+  if (speed == USB_SPEED_LOW)
+    {
+      hwctrl |= ED_CONTROL_S;
+    }
+
   ed->hw.ctrl = hwctrl;
 
   /* Flush the modified control ED to RAM */
