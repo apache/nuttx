@@ -656,11 +656,12 @@ static void usbhost_destroy(FAR void *arg)
 
   DRVR_DISCONNECT(hport->drvr);
 
-  /* And free the class instance.  Hmmm.. this may execute on the worker
-   * thread and the work structure is part of what is getting freed.  That
-   * should be okay because once the work contained is removed from the
-   * queue, it should not longer be accessed by the worker thread.
-   */
+  /* Free the function address assigned to this device */
+
+  usbhost_devaddr_destroy(hport, hport->funcaddr);
+  hport->funcaddr = 0;
+
+  /* And free the class instance. */
 
   usbhost_freeclass(priv);
 }
@@ -2047,11 +2048,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
-  FAR struct usbhost_hubport_s *hport;
   int i;
 
-  DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
-  hport = priv->usbclass.hport;
+  DEBUGASSERT(priv != NULL);
 
   /* Set an indication to any users of the mouse device that the device
    * is no longer available.
@@ -2099,10 +2098,6 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
       (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
     }
 
-  /* Free the function address assigned to this device */
-
-  usbhost_devaddr_destroy(hport, hport->funcaddr);
-  hport->funcaddr = 0;
   return OK;
 }
 
