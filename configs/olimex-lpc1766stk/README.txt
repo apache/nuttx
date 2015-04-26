@@ -977,7 +977,7 @@ Configuration Sub-Directories
                      crash seems seems to be due to a corrupt addess in the callback from
                      the new asynchronous I/O.  Should not be too hard to fix.
 
-                     Also, the code does not enumerat the hub if it is connected at the
+                     Also, the code does not enumerate the hub if it is connected at the
                      time of power up.
 
   hidmouse:
