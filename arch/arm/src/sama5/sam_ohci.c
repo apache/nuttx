@@ -1731,10 +1731,10 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
       sam_putreg(regval, SAM_USBHOST_CMDST);
 
       /* Release the OHCI semaphore while we wait.  Other threads need the
-       * opportunity to access the EHCI resources while we wait.
+       * opportunity to access the OHCI resources while we wait.
        *
        * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
-       * We need to lock all of the port-resources (not EHCI common) until
+       * We need to lock all of the port-resources (not OHCI common) until
        * the transfer is complete.  But we can't use the common OHCI exclsem
        * or we will deadlock while waiting (because the working thread that
        * wakes this thread up needs the exclsem).
@@ -2034,7 +2034,7 @@ static void sam_ohci_bottomhalf(void *arg)
 {
   uint32_t pending = (uint32_t)arg;
 
-  /* We need to have exclusive access to the EHCI data structures.  Waiting here
+  /* We need to have exclusive access to the OHCI data structures.  Waiting here
    * is not a good thing to do on the worker thread, but there is no real option
    * (other than to reschedule and delay).
    */
@@ -3083,10 +3083,10 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         }
 
       /* Release the OHCI semaphore while we wait.  Other threads need the
-       * opportunity to access the EHCI resources while we wait.
+       * opportunity to access the OHCI resources while we wait.
        *
        * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
-       * We need to lock all of the port-resources (not EHCI common) until
+       * We need to lock all of the port-resources (not OHCI common) until
        * the transfer is complete.  But we can't use the common OHCI exclsem
        * or we will deadlock while waiting (because the working thread that
        * wakes this thread up needs the exclsem).

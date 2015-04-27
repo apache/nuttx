@@ -664,7 +664,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  * Name: sam_printreg
  *
  * Description:
- *   Print the contents of a SAMA5 EHCI register
+ *   Print the contents of a SAMA5 UDPHS register
  *
  *******************************************************************************/
 
@@ -680,7 +680,7 @@ static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a SAMA5
- *   EHCI register
+ *   UDPHS register
  *
  *******************************************************************************/
 
@@ -4285,7 +4285,7 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
   int epno;
 
 #ifdef CONFIG_SAMA5_UDPHS_SCATTERGATHER
-#ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
+#ifndef CONFIG_SAMA5_UDPHS_PREALLOCATE
   int i;
 
   /* Allocate a pool of free DMA transfer descriptors */
@@ -4318,7 +4318,7 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
       sam_td_free(&g_dtdpool[i]);
     }
 
-#endif /* CONFIG_SAMA5_EHCI_PREALLOCATE */
+#endif /* CONFIG_SAMA5_UDPHS_PREALLOCATE */
 #endif /* CONFIG_SAMA5_UDPHS_SCATTERGATHER */
 
   /* Initialize the device state structure.  NOTE: many fields
