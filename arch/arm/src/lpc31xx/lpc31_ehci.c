@@ -341,6 +341,7 @@ enum usbhost_trace1codes_e
   EHCI_VTRACE1_TOPHALF,             /* EHCI Interrupt top half */
   EHCI_VTRACE1_AAINTR,              /* EHCI Async Advance Interrupt */
 
+  EHCI_VTRACE1_CLASSENUM,           /* EHCI RHPort CLASS enumeration */
   EHCI_VTRACE1_USBINTR,             /* EHCI USB Interrupt (USBINT) Interrupt */
   EHCI_VTRACE1_ENUM_DISCONN,        /* EHCI Enumeration not connected */
   EHCI_VTRACE1_INITIALIZING,        /* EHCI Initializing EHCI Stack */
@@ -363,7 +364,6 @@ enum usbhost_trace1codes_e
   EHCI_VTRACE2_PORTSC_DISCONND,     /* EHCI RHport disconnected */
   EHCI_VTRACE2_MONWAKEUP,           /* EHCI RHPort connected wakeup */
 
-  EHCI_VTRACE2_CLASSENUM,           /* EHCI RHPort CLASS enumeration */
   EHCI_VTRACE2_EPALLOC,             /* EHCI EPALLOC */
   EHCI_VTRACE2_CTRLINOUT,           /* EHCI CTRLIN/OUT */
   EHCI_VTRACE2_HCIVERSION,          /* EHCI HCIVERSION */
@@ -653,6 +653,7 @@ static const struct lpc31_ehci_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(EHCI_VTRACE1_TOPHALF,            TR_FMT1, "EHCI Interrupt: %06x\n"),
   TRENTRY(EHCI_VTRACE1_AAINTR,             TR_FMT1, "EHCI Async Advance Interrupt\n"),
 
+  TRENTRY(EHCI_VTRACE1_CLASSENUM,          TR_FMT1, "EHCI Hub Port%d: Enumerate the device\n"),
   TRENTRY(EHCI_VTRACE1_USBINTR,            TR_FMT1, "EHCI USB Interrupt (USBINT) Interrupt: %06x\n"),
   TRENTRY(EHCI_VTRACE1_ENUM_DISCONN,       TR_FMT1, "EHCI Enumeration not connected\n"),
   TRENTRY(EHCI_VTRACE1_INITIALIZING,       TR_FMT1, "EHCI Initializing EHCI Stack\n"),
@@ -676,7 +677,6 @@ static const struct lpc31_ehci_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(EHCI_VTRACE2_PORTSC_DISCONND,    TR_FMT2, "EHCI RHport%d disconnected, pscwait: %d\n"),
   TRENTRY(EHCI_VTRACE2_MONWAKEUP,          TR_FMT2, "EHCI RHPort%d connected: %d\n"),
 
-  TRENTRY(EHCI_VTRACE2_CLASSENUM,          TR_FMT2, "EHCI RHPort%d: Enumerate the device, devaddr=%02x\n"),
   TRENTRY(EHCI_VTRACE2_EPALLOC,            TR_FMT2, "EHCI EPALLOC: EP%d TYPE=%d\n"),
   TRENTRY(EHCI_VTRACE2_CTRLINOUT,          TR_FMT2, "EHCI CTRLIN/OUT: RHPort%d req: %02x\n"),
   TRENTRY(EHCI_VTRACE2_HCIVERSION,         TR_FMT2, "EHCI HCIVERSION %x.%02x\n"),
@@ -3699,7 +3699,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
        *    repeat."
        */
 
-      DEBUGASSERT(rhport->ep0.speed == EHCI_FULL_SPEED);
+      DEBUGASSERT(rhport->ep0.speed == USB_SPEED_FULL);
 
 #if 0 /* The LPC31xx does not support a companion host controller */
       regval |= EHCI_PORTSC_OWNER;
@@ -3747,7 +3747,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
-  usbhost_vtrace1(EHCI_VTRACE2_CLASSENUM, hport->port);
+  usbhost_vtrace1(EHCI_VTRACE1_CLASSENUM, hport->port);
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
