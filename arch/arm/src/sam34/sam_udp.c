@@ -598,7 +598,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  * Name: sam_printreg
  *
  * Description:
- *   Print the contents of a SAM34 EHCI register
+ *   Print the contents of a SAM34 UDP registers
  *
  *******************************************************************************/
 
@@ -614,7 +614,7 @@ static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a SAM34
- *   EHCI register
+ *   UDP registers
  *
  *******************************************************************************/
 
