@@ -676,7 +676,7 @@ Configurations
           Drivers -> USB Host Driver Support
             CONFIG_USBHOST_INT_DISABLE=n  : Interrupt endpoint support needed
             CONFIG_USBHOST_HUB=y          : Enable the hub class
-            CONFIG_USBHOST_ASYNCH=y       : Asynchonous I/O supported needed for hubs
+            CONFIG_USBHOST_ASYNCH=y       : Asynchronous I/O supported needed for hubs
 
           System Type -> USB host configuration
             To be provided
