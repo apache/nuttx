@@ -352,13 +352,14 @@ static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
 static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
          void *buffer, int buflen, uint32_t tokenbits);
 static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits);
-static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
+static int sam_async_setup(struct sam_rhport_s *rhport,
          struct sam_epinfo_s *epinfo, const struct usb_ctrlreq_s *req,
          uint8_t *buffer, size_t buflen);
 #ifndef CONFIG_USBHOST_INT_DISABLE
-static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
+static int sam_intr_setup(struct sam_rhport_s *rhport,
          struct sam_epinfo_s *epinfo, uint8_t *buffer, size_t buflen);
 #endif
+static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo);
 
 /* Interrupt Handling **********************************************************/
 
@@ -1814,7 +1815,7 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
 }
 
 /*******************************************************************************
- * Name: sam_async_transfer
+ * Name: sam_async_setup
  *
  * Description:
  *   Process a IN or OUT request on any asynchronous endpoint (bulk or control).
@@ -1825,23 +1826,18 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
  *   This is a blocking function; it will not return until the control transfer
  *   has completed.
  *
- * Assumption:  The caller holds the EHCI exclsem.  The caller must be aware
- *   that the EHCI exclsem will released while waiting for the transfer to
- *   complete, but will be re-aquired when before returning.  The state of
- *   EHCI resources could be very different upon return.
+ * Assumption:  The caller holds the EHCI exclsem.
  *
  * Returned value:
- *   On success, this function returns the number of bytes actually transferred.
- *   For control transfers, this size includes the size of the control request
- *   plus the size of the data (which could be short); For bulk transfers, this
- *   will be the number of data bytes transfers (which could be short).
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
  *
  *******************************************************************************/
 
-static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
-                                  struct sam_epinfo_s *epinfo,
-                                  const struct usb_ctrlreq_s *req,
-                                  uint8_t *buffer, size_t buflen)
+static int sam_async_setup(struct sam_rhport_s *rhport,
+                           struct sam_epinfo_s *epinfo,
+                           const struct usb_ctrlreq_s *req,
+                           uint8_t *buffer, size_t buflen)
 {
   struct sam_qh_s *qh;
   struct sam_qtd_s *qtd;
@@ -1870,23 +1866,13 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   DEBUGASSERT(req || (buffer && buflen > 0));
 
-  /* Set the request for the IOC event well BEFORE enabling the transfer. */
-
-  ret = sam_ioc_setup(rhport, epinfo);
-  if (ret != OK)
-    {
-      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
-      return ret;
-    }
-
   /* Create and initialize a Queue Head (QH) structure for this transfer */
 
   qh = sam_qh_create(rhport, epinfo);
   if (qh == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QHCREATE_FAILED, 0);
-      ret = -ENOMEM;
-      goto errout_with_iocwait;
+      return -ENOMEM;
     }
 
   /* Initialize the QH link and get the next data toggle (not used for SETUP
@@ -2083,72 +2069,17 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   regval |= EHCI_USBCMD_ASEN;
   sam_putreg(regval, &HCOR->usbcmd);
-
-  /* Release the EHCI semaphore while we wait.  Other threads need the
-   * opportunity to access the EHCI resources while we wait.
-   *
-   * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
-   * We need to lock all of the port-resources (not EHCI common) until
-   * the transfer is complete.  But we can't use the common EHCI exclsem
-   * or we will deadlock while waiting (because the working thread that
-   * wakes this thread up needs the exclsem).
-   */
-#warning REVISIT
-  sam_givesem(&g_ehci.exclsem);
-
-  /* Wait for the IOC completion event */
-
-  ret = sam_ioc_wait(epinfo);
-
-  /* Re-aquire the EHCI semaphore.  The caller expects to be holding
-   * this upon return.
-   */
-
-  sam_takesem(&g_ehci.exclsem);
-
-#if 0 /* Does not seem to be needed */
-  /* Was there a data buffer?  Was this an OUT transfer? */
-
-  if (buffer != NULL && buflen > 0 && !dirin)
-    {
-      /* We have received data from the host -- unless there was an error.
-       * in any event, we will invalidate the data buffer so that we will
-       * reload any new data freshly DMAed into the user buffer.
-       *
-       * NOTE: This might be un-necessary.  We cleaned and invalidated the
-       * D-Cache prior to starting the DMA so the D-Cache should still be
-       * invalid in this memory region.
-       */
-
-      arch_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
-    }
-#endif
-
-  /* Did sam_ioc_wait() report an error? */
-
-  if (ret < 0)
-    {
-      usbhost_trace1(EHCI_TRACE1_TRANSFER_FAILED, -ret);
-      goto errout_with_iocwait;
-    }
-
-  /* Transfer completed successfully.  Return the number of bytes
-   * transferred.
-   */
-
-  return epinfo->xfrd;
+  return OK;
 
   /* Clean-up after an error */
 
 errout_with_qh:
   sam_qh_discard(qh);
-errout_with_iocwait:
-  epinfo->iocwait = false;
-  return (ssize_t)ret;
+  return ret;
 }
 
 /*******************************************************************************
- * Name: sam_intr_transfer
+ * Name: sam_intr_setup
  *
  * Description:
  *   Process a IN or OUT request on any interrupt endpoint by inserting a qTD
@@ -2187,23 +2118,18 @@ errout_with_iocwait:
  *     frame list), followed by shorter poll rates, with queue heads with a
  *     poll rate of one, on the very end."
  *
- * Assumption:  The caller holds the EHCI exclsem.  The caller must be aware
- *   that the EHCI exclsem will released while waiting for the transfer to
- *   complete, but will be re-aquired when before returning.  The state of
- *   EHCI resources could be very different upon return.
+ * Assumption:  The caller holds the EHCI exclsem.
  *
  * Returned value:
- *   On success, this function returns the number of bytes actually transferred.
- *   For control transfers, this size includes the size of the control request
- *   plus the size of the data (which could be short); For bulk transfers, this
- *   will be the number of data bytes transfers (which could be short).
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
  *
  *******************************************************************************/
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
-static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
-                                 struct sam_epinfo_s *epinfo,
-                                 uint8_t *buffer, size_t buflen)
+static int sam_intr_setup(struct sam_rhport_s *rhport,
+                          struct sam_epinfo_s *epinfo,
+                          uint8_t *buffer, size_t buflen)
 {
   struct sam_qh_s *qh;
   struct sam_qtd_s *qtd;
@@ -2223,27 +2149,17 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
 
-  /* Set the request for the IOC event well BEFORE enabling the transfer. */
-
-  ret = sam_ioc_setup(rhport, epinfo);
-  if (ret != OK)
-    {
-      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
-      return ret;
-    }
-
   /* Create and initialize a Queue Head (QH) structure for this transfer */
 
   qh = sam_qh_create(rhport, epinfo);
   if (qh == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QHCREATE_FAILED, 0);
-      ret = -ENOMEM;
-      goto errout_with_iocwait;
+      return -ENOMEM;
     }
 
-  /* Extra TOKEN bits include the data toggle, the data PID, and and indication to interrupt at the end of this
-   * transfer.
+  /* Extra TOKEN bits include the data toggle, the data PID, and an
+   * indication to interrupt at the end of this transfer.
    */
 
   tokenbits = (uint32_t)epinfo->toggle << QTD_TOKEN_TOGGLE_SHIFT;
@@ -2289,6 +2205,38 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
 
   regval |= EHCI_USBCMD_PSEN;
   sam_putreg(regval, &HCOR->usbcmd);
+  return OK;
+
+  /* Clean-up after an error */
+
+errout_with_qh:
+  sam_qh_discard(qh);
+  return ret;
+}
+#endif /* CONFIG_USBHOST_INT_DISABLE */
+
+/*******************************************************************************
+ * Name: sam_transfer_wait
+ *
+ * Description:
+ *   Wait for an IN or OUT transfer to complete.
+ *
+ * Assumption:  The caller holds the EHCI exclsem.  The caller must be aware
+ *   that the EHCI exclsem will released while waiting for the transfer to
+ *   complete, but will be re-acquired when before returning.  The state of
+ *   EHCI resources could be very different upon return.
+ *
+ * Returned value:
+ *   On success, this function returns the number of bytes actually transferred.
+ *   For control transfers, this size includes the size of the control request
+ *   plus the size of the data (which could be short); For bulk transfers, this
+ *   will be the number of data bytes transfers (which could be short).
+ *
+ *******************************************************************************/
+
+static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo)
+{
+  int ret;
 
   /* Release the EHCI semaphore while we wait.  Other threads need the
    * opportunity to access the EHCI resources while we wait.
@@ -2306,33 +2254,49 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
 
   ret = sam_ioc_wait(epinfo);
 
-  /* Re-aquire the EHCI semaphore.  The caller expects to be holding
+  /* Wait for the IOC completion event */
+
+  ret = sam_ioc_wait(epinfo);
+
+  /* Re-acquire the EHCI semaphore.  The caller expects to be holding
    * this upon return.
    */
 
   sam_takesem(&g_ehci.exclsem);
+
+#if 0 /* Does not seem to be needed */
+  /* Was there a data buffer?  Was this an OUT transfer? */
+
+  if (buffer != NULL && buflen > 0 && !dirin)
+    {
+      /* We have received data from the host -- unless there was an error.
+       * in any event, we will invalidate the data buffer so that we will
+       * reload any new data freshly DMAed into the user buffer.
+       *
+       * NOTE: This might be un-necessary.  We cleaned and invalidated the
+       * D-Cache prior to starting the DMA so the D-Cache should still be
+       * invalid in this memory region.
+       */
+
+      cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+    }
+#endif
 
   /* Did sam_ioc_wait() report an error? */
 
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_TRANSFER_FAILED, -ret);
-      goto errout_with_iocwait;
+      epinfo->iocwait = false;
+      return (ssize_t)ret;
     }
 
-  /* Transfer completed successfully.  Return the number of bytes transferred */
+  /* Transfer completed successfully.  Return the number of bytes
+   * transferred.
+   */
 
   return epinfo->xfrd;
-
-  /* Clean-up after an error */
-
-errout_with_qh:
-  sam_qh_discard(qh);
-errout_with_iocwait:
-  epinfo->iocwait = false;
-  return (ssize_t)ret;
 }
-#endif
 
 /*******************************************************************************
  * EHCI Interrupt Handling
@@ -3035,7 +2999,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       for (rhpndx = 0; rhpndx < SAM_EHCI_NRHPORT; rhpndx++)
         {
-          struct lpc31_rhport_s *rhport;
+          struct sam_rhport_s *rhport;
           struct usbhost_hubport_s *connport;
 
           /* Has the connection state changed on the RH port? */
@@ -3732,6 +3696,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   struct sam_epinfo_s *ep0info = (struct sam_epinfo_s *)ep0;
   uint16_t len;
   ssize_t nbytes;
+  int ret;
 
   DEBUGASSERT(rhport != NULL && ep0info != NULL && req != NULL);
 
@@ -3751,11 +3716,35 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   sam_takesem(&g_ehci.exclsem);
 
-  /* Now perform the transfer */
+  /* Set the request for the IOC event well BEFORE initiating the transfer. */
 
-  nbytes = sam_async_transfer(rhport, ep0info, req, buffer, len);
+  ret = sam_ioc_setup(rhport, ep0info);
+  if (ret != OK)
+    {
+      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
+      goto errout_with_sem;
+    }
+
+  /* Now initiate the transfer */
+
+  ret = sam_async_setup(rhport, ep0info, req, buffer, len);
+  if (ret < 0)
+    {
+      udbg("ERROR: sam_async_setup failed: %d\n", ret);
+      goto errout_with_iocwait;
+    }
+
+  /* And wait for the transfer to complete */
+
+  nbytes = sam_transfer_wait(ep0info);
   sam_givesem(&g_ehci.exclsem);
-  return nbytes >=0 ? OK : (int)nbytes;
+  return nbytes >= 0 ? OK : (int)nbytes;
+
+errout_with_iocwait:
+  ep0info->iocwait = false;
+errout_with_sem:
+  sam_givesem(&g_ehci.exclsem);
+  return ret;
 }
 
 static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
@@ -3812,6 +3801,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep;
   ssize_t nbytes;
+  int ret;
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
 
@@ -3819,17 +3809,26 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   sam_takesem(&g_ehci.exclsem);
 
-  /* Perform the transfer */
+  /* Set the request for the IOC event well BEFORE initiating the transfer. */
+
+  ret = sam_ioc_setup(rhport, epinfo);
+  if (ret != OK)
+    {
+      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
+      goto errout_with_sem;
+    }
+
+  /* Initiate the transfer */
 
   switch (epinfo->xfrtype)
     {
       case USB_EP_ATTR_XFER_BULK:
-        nbytes = sam_async_transfer(rhport, epinfo, NULL, buffer, buflen);
+        ret = sam_async_setup(rhport, epinfo, NULL, buffer, buflen);
         break;
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
       case USB_EP_ATTR_XFER_INT:
-        nbytes = sam_intr_transfer(rhport, epinfo, buffer, buflen);
+        ret = sam_intr_setup(rhport, epinfo, buffer, buflen);
         break;
 #endif
 
@@ -3840,12 +3839,28 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       case USB_EP_ATTR_XFER_CONTROL:
       default:
         usbhost_trace1(EHCI_TRACE1_BADXFRTYPE, epinfo->xfrtype);
-        nbytes = -ENOSYS;
+        ret = -ENOSYS;
         break;
     }
 
+  /* Check for errors in the setup of the transfer */
+
+  if (ret < 0)
+    {
+      goto errout_with_iocwait;
+    }
+
+  /* Then wait for the transfer to complete */
+
+  nbytes = sam_transfer_wait(epinfo);
   sam_givesem(&g_ehci.exclsem);
-  return nbytes >=0 ? OK : (int)nbytes;
+  return nbytes >= 0 ? OK : (int)nbytes;
+
+errout_with_iocwait:
+  epinfo->iocwait = false;
+errout_with_sem:
+  sam_givesem(&g_ehci.exclsem);
+  return ret;
 }
 
 /*******************************************************************************
