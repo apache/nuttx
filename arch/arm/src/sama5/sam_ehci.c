@@ -214,6 +214,10 @@ struct sam_epinfo_s
   int result;                  /* The result of the transfer */
   uint32_t xfrd;               /* On completion, will hold the number of bytes transferred */
   sem_t iocsem;                /* Semaphore used to wait for transfer completion */
+#ifdef CONFIG_USBHOST_ASYNCH
+  usbhost_asynch_t callback;     /* Transfer complete callback */
+  void *arg;                     /* Argument that accompanies the callback */
+#endif
 };
 
 /* This structure retains the state of one root hub port */
@@ -360,6 +364,12 @@ static int sam_intr_setup(struct sam_rhport_s *rhport,
          struct sam_epinfo_s *epinfo, uint8_t *buffer, size_t buflen);
 #endif
 static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo);
+#ifdef CONFIG_USBHOST_ASYNCH
+static inline int sam_asynch_setup(struct sam_rhport_s *rhport,
+         struct sam_epinfo_s *epinfo, usbhost_asynch_t callback,
+         FAR void *arg);
+static void sam_asynch_completion(struct sam_epinfo_s *epinfo);
+#endif
 
 /* Interrupt Handling **********************************************************/
 
@@ -1348,22 +1358,29 @@ static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinf
   int ret = -ENODEV;
 
   DEBUGASSERT(rhport && epinfo && !epinfo->iocwait);
+#ifdef CONFIG_USBHOST_ASYNCH
+  DEBUGASSERT(epinfo->callback == NULL);
+#endif
 
   /* Is the device still connected? */
 
   flags = irqsave();
   if (rhport->connected)
     {
-      /* Then set wdhwait to indicate that we expect to be informed when
+      /* Then set iocwait to indicate that we expect to be informed when
        * either (1) the device is disconnected, or (2) the transfer
        * completed.
        */
 
-      epinfo->iocwait = true;   /* We want to be awakened by IOC interrupt */
-      epinfo->status  = 0;      /* No status yet */
-      epinfo->xfrd    = 0;      /* Nothing transferred yet */
-      epinfo->result  = -EBUSY; /* Transfer in progress */
-      ret             = OK;     /* We are good to go */
+      epinfo->iocwait  = true;   /* We want to be awakened by IOC interrupt */
+      epinfo->status   = 0;      /* No status yet */
+      epinfo->xfrd     = 0;      /* Nothing transferred yet */
+      epinfo->result   = -EBUSY; /* Transfer in progress */
+#ifdef CONFIG_USBHOST_ASYNCH
+      epinfo->callback = NULL;   /* No asynchronous callback */
+      epinfo->arg      = NULL;
+#endif
+      ret              = OK;     /* We are good to go */
     }
 
   irqrestore(flags);
@@ -2299,6 +2316,106 @@ static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo)
 }
 
 /*******************************************************************************
+ * Name: sam_asynch_setup
+ *
+ * Description:
+ *   Setup to receive an asynchronous notification when a transfer completes.
+ *
+ * Input Parameters:
+ *   epinfo - The IN or OUT endpoint descriptor for the device endpoint on
+ *      which the transfer will be performed.
+ *   callback - The function to be called when the completes
+ *   arg - An arbitrary argument that will be provided with the callback.
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   - Called from the interrupt level
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static inline int sam_asynch_setup(struct sam_rhport_s *rhport,
+                                   struct sam_epinfo_s *epinfo,
+                                   usbhost_asynch_t callback, FAR void *arg)
+{
+  irqstate_t flags;
+  int ret = -ENODEV;
+
+  DEBUGASSERT(rhport && epinfo && !epinfo->iocwait &&
+              epinfo->callback == NULL);
+
+  /* Is the device still connected? */
+
+  flags = irqsave();
+  if (rhport->connected)
+    {
+      /* Then save callback information to used when either (1) the
+       * device is disconnected, or (2) the transfer completes.
+       */
+
+      epinfo->iocwait  = false;    /* No synchronous wakeup */
+      epinfo->status   = 0;        /* No status yet */
+      epinfo->xfrd     = 0;        /* Nothing transferred yet */
+      epinfo->result   = -EBUSY;   /* Transfer in progress */
+      epinfo->callback = callback; /* Asynchronous callback */
+      epinfo->arg      = arg;      /* Argument that accompanies the callback */
+      ret              = OK;       /* We are good to go */
+    }
+
+  irqrestore(flags);
+  return ret;
+}
+#endif
+
+/*******************************************************************************
+ * Name: sam_asynch_completion
+ *
+ * Description:
+ *   This function is called at the interrupt level when an asynchronous
+ *   transfer completes.  It performs the pending callback.
+ *
+ * Input Parameters:
+ *   epinfo - The IN or OUT endpoint descriptor for the device endpoint on
+ *      which the transfer was performed.
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   - Called from the interrupt level
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static void sam_asynch_completion(struct sam_epinfo_s *epinfo)
+{
+  usbhost_asynch_t callback;
+  void *arg;
+  int result;
+
+  DEBUGASSERT(epinfo != NULL && epinfo->iocwait == false &&
+              epinfo->callback != NULL);
+
+  /* Extract and reset the callback info */
+
+  callback         = epinfo->callback;
+  arg              = epinfo->arg;
+  result           = epinfo->result;
+
+  epinfo->callback = NULL;
+  epinfo->arg      = NULL;
+  epinfo->result   = OK;
+  epinfo->iocwait  = false;
+
+  /* Then perform the callback */
+
+  callback(arg, result);
+}
+#endif
+
+/*******************************************************************************
  * EHCI Interrupt Handling
  *******************************************************************************/
 
@@ -2481,6 +2598,17 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
           sam_givesem(&epinfo->iocsem);
           epinfo->iocwait = 0;
         }
+
+#ifdef CONFIG_USBHOST_ASYNCH
+      /* No.. Is there a pending asynchronous transfer? */
+
+      else if (epinfo->callback != NULL)
+        {
+          /* Yes.. perform the callback */
+
+          sam_asynch_completion(epinfo);
+        }
+#endif
 
       /* Then release this QH by returning it to the free list */
 
@@ -3864,7 +3992,7 @@ errout_with_sem:
 }
 
 /*******************************************************************************
- * Name: lpc17_asynch
+ * Name: sam_asynch
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
@@ -3903,8 +4031,68 @@ static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                       FAR uint8_t *buffer, size_t buflen,
                       usbhost_asynch_t callback, FAR void *arg)
 {
-# error Not implemented
-  return -ENOSYS;
+  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
+  struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep;
+  int ret;
+
+  DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
+
+  /* We must have exclusive access to the EHCI hardware and data structures. */
+
+  sam_takesem(&g_ehci.exclsem);
+
+  /* Set the request for the callback well BEFORE initiating the transfer. */
+
+  ret = sam_asynch_setup(rhport, epinfo, callback, arg);
+  if (ret != OK)
+    {
+      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
+      goto errout_with_sem;
+    }
+
+  /* Initiate the transfer */
+
+  switch (epinfo->xfrtype)
+    {
+      case USB_EP_ATTR_XFER_BULK:
+        ret = sam_async_setup(rhport, epinfo, NULL, buffer, buflen);
+        break;
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+      case USB_EP_ATTR_XFER_INT:
+        ret = sam_intr_setup(rhport, epinfo, buffer, buflen);
+        break;
+#endif
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+      case USB_EP_ATTR_XFER_ISOC:
+# warning "Isochronous endpoint support not emplemented"
+#endif
+      case USB_EP_ATTR_XFER_CONTROL:
+      default:
+        usbhost_trace1(EHCI_TRACE1_BADXFRTYPE, epinfo->xfrtype);
+        ret = -ENOSYS;
+        break;
+    }
+
+  /* Check for errors in the setup of the transfer */
+
+  if (ret < 0)
+    {
+      goto errout_with_callback;
+    }
+
+  /* The transfer is in progress */
+
+  sam_givesem(&g_ehci.exclsem);
+  return OK;
+
+errout_with_callback:
+  epinfo->callback = NULL;
+  epinfo->arg      = NULL;
+errout_with_sem:
+  sam_givesem(&g_ehci.exclsem);
+  return ret;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
