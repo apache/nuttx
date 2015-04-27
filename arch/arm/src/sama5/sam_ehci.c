@@ -2276,10 +2276,6 @@ static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo)
 
   ret = sam_ioc_wait(epinfo);
 
-  /* Wait for the IOC completion event */
-
-  ret = sam_ioc_wait(epinfo);
-
   /* Re-acquire the EHCI semaphore.  The caller expects to be holding
    * this upon return.
    */
@@ -3574,7 +3570,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
-  usbhost_vtrace1(EHCI_VTRACE2_CLASSENUM, hport->port);
+  usbhost_vtrace1(EHCI_VTRACE1_CLASSENUM, hport->port);
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {

@@ -341,7 +341,7 @@ enum usbhost_trace1codes_e
   EHCI_VTRACE1_TOPHALF,             /* EHCI Interrupt top half */
   EHCI_VTRACE1_AAINTR,              /* EHCI Async Advance Interrupt */
 
-  EHCI_VTRACE1_CLASSENUM,           /* EHCI RHPort CLASS enumeration */
+  EHCI_VTRACE1_CLASSENUM,           /* EHCI Hub port CLASS enumeration */
   EHCI_VTRACE1_USBINTR,             /* EHCI USB Interrupt (USBINT) Interrupt */
   EHCI_VTRACE1_ENUM_DISCONN,        /* EHCI Enumeration not connected */
   EHCI_VTRACE1_INITIALIZING,        /* EHCI Initializing EHCI Stack */
@@ -653,7 +653,7 @@ static const struct lpc31_ehci_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(EHCI_VTRACE1_TOPHALF,            TR_FMT1, "EHCI Interrupt: %06x\n"),
   TRENTRY(EHCI_VTRACE1_AAINTR,             TR_FMT1, "EHCI Async Advance Interrupt\n"),
 
-  TRENTRY(EHCI_VTRACE1_CLASSENUM,          TR_FMT1, "EHCI Hub Port%d: Enumerate the device\n"),
+  TRENTRY(EHCI_VTRACE1_CLASSENUM,          TR_FMT1, "EHCI Hub port %d: Enumerate the device\n"),
   TRENTRY(EHCI_VTRACE1_USBINTR,            TR_FMT1, "EHCI USB Interrupt (USBINT) Interrupt: %06x\n"),
   TRENTRY(EHCI_VTRACE1_ENUM_DISCONN,       TR_FMT1, "EHCI Enumeration not connected\n"),
   TRENTRY(EHCI_VTRACE1_INITIALIZING,       TR_FMT1, "EHCI Initializing EHCI Stack\n"),
@@ -666,7 +666,7 @@ static const struct lpc31_ehci_trace_s g_trace2[TRACE2_NSTRINGS] =
 {
   TRENTRY(EHCI_TRACE2_EPSTALLED,           TR_FMT2, "EHCI EP%d Stalled: TOKEN=%04x\n"),
   TRENTRY(EHCI_TRACE2_EPIOERROR,           TR_FMT2, "EHCI ERROR: EP%d TOKEN=%04x\n"),
-  TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_FMT2, "EHCI RHport%d usbhost_enumerate() failed: %d\n"),
+  TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_FMT2, "EHCI Hub port %d usbhost_enumerate() failed: %d\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
   TRENTRY(EHCI_VTRACE2_ASYNCXFR,           TR_FMT2, "EHCI Async transfer EP%d buflen=%d\n"),
@@ -2452,10 +2452,6 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
    */
 #warning REVISIT
   lpc31_givesem(&g_ehci.exclsem);
-
-  /* Wait for the IOC completion event */
-
-  ret = lpc31_ioc_wait(epinfo);
 
   /* Wait for the IOC completion event */
 
