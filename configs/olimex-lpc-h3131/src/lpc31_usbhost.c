@@ -105,7 +105,8 @@ static int ehci_waiter(int argc, char *argv[])
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_ehciconn, &hport));
-      printf("ehci_waiter: %s\n", hport->connected ? "connected" : "disconnected");
+      syslog(LOG_INFO, "ehci_waiter: %s\n",
+             hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 

@@ -498,6 +498,10 @@ static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo);
 
 static int lpc31_qtd_ioccheck(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg);
 static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg);
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc31_qtd_cancel(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg);
+static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg);
+#endif
 static inline void lpc31_ioc_bottomhalf(void);
 static inline void lpc31_portsc_bottomhalf(void);
 static inline void lpc31_syserr_bottomhalf(void);
@@ -2381,6 +2385,7 @@ static int lpc31_intr_setup(struct lpc31_rhport_s *rhport,
   if (qtd == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QTDDATA_FAILED, 0);
+      ret = -ENOMEM;
       goto errout_with_qh;
     }
 
@@ -2409,7 +2414,7 @@ static int lpc31_intr_setup(struct lpc31_rhport_s *rhport,
 
 errout_with_qh:
   lpc31_qh_discard(qh);
-  return (ssize_t)ret;
+  return ret;
 }
 #endif /* CONFIG_USBHOST_INT_DISABLE */
 
@@ -2805,6 +2810,120 @@ static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 
   return OK;
 }
+
+/*******************************************************************************
+ * Name: lpc31_qtd_cancel
+ *
+ * Description:
+ *   This function is a lpc31_qtd_foreach() callback function.  It removes each
+ *   qTD attached to a QH.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc31_qtd_cancel(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
+{
+  DEBUGASSERT(qtd != NULL && bp != NULL);
+
+  /* Make sure we reload the QH from memory */
+
+  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
+                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  lpc31_qtd_print(qtd);
+
+  /* Remove the qTD from the list
+   *
+   * NOTE that we don't check if the qTD is active nor do we check if there
+   * are any errors reported in the qTD.  If the transfer halted due to
+   * an error, then qTDs in the list after the error qTD will still appear
+   * to be active.
+   *
+   * REVISIT: There is a race condition here that needs to be resolved.
+   */
+
+  **bp = qtd->hw.nqp;
+
+  /* Release this QH by returning it to the free list */
+
+  lpc31_qtd_free(qtd);
+  return OK;
+}
+#endif /* CONFIG_USBHOST_ASYNCH */
+
+/*******************************************************************************
+ * Name: lpc31_qh_cancel
+ *
+ * Description:
+ *   This function is a lpc31_qh_foreach() callback function.  It cancels one
+ *   QH in the asynchronous queue.  It will remove all attached qTD structures
+ *   and remove all of the structures that are no longer active.  Then QH
+ *   itself will also be removed.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_USBHOST_ASYNCH
+static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
+{
+  struct lpc31_epinfo_s *epinfo = (struct lpc31_epinfo_s *)arg;
+  uint32_t regval;
+  int ret;
+
+  DEBUGASSERT(qh != NULL && bp != NULL && epinfo != NULL);
+
+  /* Make sure we reload the QH from memory */
+
+  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  lpc31_qh_print(qh);
+
+  /* Check if this is the QH that we are looking for */
+
+  if (qh->epinfo == epinfo)
+    {
+      /* No... keep looking */
+
+      return OK;
+    }
+
+  /* Disable both the asynchronous and period schedules */
+
+  regval = lpc31_getreg(&HCOR->usbcmd);
+  lpc31_putreg(regval & ~(EHCI_USBCMD_ASEN | EHCI_USBCMD_PSEN),
+               &HCOR->usbcmd);
+
+  /* Remove the QH from the list
+   *
+   * NOTE that we don't check if the qTD is active nor do we check if there
+   * are any errors reported in the qTD.  If the transfer halted due to
+   * an error, then qTDs in the list after the error qTD will still appear
+   * to be active.
+   *
+   * REVISIT: There is a race condition here that needs to be resolved.
+   */
+
+  **bp = qh->hw.hlp;
+  cp15_flush_idcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+
+  /* Re-enable the schedules (if they were enabled before. */
+
+  lpc31_putreg(regval, &HCOR->usbcmd);
+
+  /* Remove all active, attached qTD structures from the removed QH */
+
+  ret = lpc31_qtd_foreach(qh, lpc31_qtd_cancel, NULL);
+  if (ret < 0)
+    {
+      usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
+    }
+
+  /* Then release this QH by returning it to the free list.  Return 1
+   * to stop the traverse without an error.
+   */
+
+  lpc31_qh_free(qh);
+  return 1;
+}
+#endif /* CONFIG_USBHOST_ASYNCH */
 
 /*******************************************************************************
  * Name: lpc31_ioc_bottomhalf
@@ -4291,8 +4410,85 @@ errout_with_sem:
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-# error Not implemented
-  return -ENOSYS;
+  struct lpc31_epinfo_s *epinfo = (struct lpc31_epinfo_s *)ep;
+  struct lpc31_qh_s *qh;
+  uint32_t *bp;
+  irqstate_t flags;
+  int ret;
+
+  DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
+
+  /* We must have exclusive access to the EHCI hardware and data structures.  This
+   * will prevent servicing any transfer completion events while we perform the
+   * the cancellation, but will not prevent DMA-related race conditions.
+   */
+
+  lpc31_takesem(&g_ehci.exclsem);
+
+  /* If there is no asynchronous transfer in progress, then bail now */
+
+  flags = irqsave();
+  if (epinfo->callback == NULL)
+    {
+      ret = -EINVAL;
+      irqrestore(flags);
+      goto errout_with_sem;
+    }
+
+  /* This will prevent any callbacks from occurring while are performing
+   * the cancellation.  The transfer may still be in progress, however, so
+   * this does not eliminate other DMA-related race conditions.
+   */
+
+  epinfo->callback = NULL;
+  epinfo->arg      = NULL;
+  irqrestore(flags);
+
+  /* Handle the cancellation according to the type of the transfer */
+
+  switch (epinfo->xfrtype)
+    {
+      case USB_EP_ATTR_XFER_CONTROL:
+      case USB_EP_ATTR_XFER_BULK:
+        qh = &g_asynchead;
+        break;
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+      case USB_EP_ATTR_XFER_INT:
+        qh = &g_intrhead;
+        break;
+#endif
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+      case USB_EP_ATTR_XFER_ISOC:
+# warning "Isochronous endpoint support not emplemented"
+#endif
+      default:
+        usbhost_trace1(EHCI_TRACE1_BADXFRTYPE, epinfo->xfrtype);
+        ret = -ENOSYS;
+        goto errout_with_sem;
+    }
+
+  /* Find and remove the QH.  There are four possibilities:
+   *
+   * 1)  The transfer has already completed and the QH is no longer in the list.  In
+   *     this case, lpc31_hq_foreach will return zero
+   * 2a) The transfer is not active and still pending.  It was removed from the list
+   *     and lpc31_hq_foreach will return one.
+   * 2b) The is active but not yet complete.  This is currently handled the same as
+   *     2a).  REVISIT: This needs to be fixed.
+   * 3)  Some bad happened and lpc31_hq_foreach returned an error code < 0.
+   */
+
+  ret = lpc31_qh_foreach(qh, &bp, lpc31_qh_cancel, epinfo);
+  if (ret < 0)
+    {
+      usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
+    }
+
+errout_with_sem:
+  lpc31_givesem(&g_ehci.exclsem);
+  return ret;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
