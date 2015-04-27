@@ -960,7 +960,6 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
     {
       FAR struct sockaddr_in *infrom  =
         (FAR struct sockaddr_in *)pstate->rf_from;
-      FAR socklen_t *fromlen = pstate->rf_fromlen;
 
       if (infrom)
         {
@@ -977,6 +976,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
 
           if (conn->domain == PF_INET6)
             {
+              FAR socklen_t *fromlen = pstate->rf_fromlen;
               in_addr_t ipv4addr;
 
               /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
