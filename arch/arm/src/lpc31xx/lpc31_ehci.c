@@ -3420,7 +3420,7 @@ static int lpc31_wait(FAR struct usbhost_connection_s *conn,
               irqrestore(flags);
 
               usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
-                              rhpndx + 1, rhport->conected);
+                              rhpndx + 1, rhport->connected);
               return OK;
             }
         }
@@ -3716,8 +3716,8 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
 
   else
     {
-      DEBUGASSERT(rhport->ep0.speed == EHCI_LOW_SPEED);
-      DEBUGASSERT((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_LS)
+      DEBUGASSERT(rhport->ep0.speed == USB_SPEED_LOW);
+      DEBUGASSERT((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_LS);
     }
 
   return OK;
@@ -3751,7 +3751,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn,
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
-      usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
+      usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, hport->port + 1, -ret);
     }
 
   return ret;
@@ -4416,7 +4416,7 @@ static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
+  DEBUGASSERT(epinfo);
 
   /* We must have exclusive access to the EHCI hardware and data structures.  This
    * will prevent servicing any transfer completion events while we perform the
