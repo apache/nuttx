@@ -345,6 +345,7 @@ static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg);
 #  define sam_qh_dump(qh, bp, arg)   OK
 #endif
 
+static inline uint8_t sam_ehci_speed(uint8_t usbspeed);
 static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinfo);
 static int sam_ioc_wait(struct sam_epinfo_s *epinfo);
 static void sam_qh_enqueue(struct sam_qh_s *qhead, struct sam_qh_s *qh);
@@ -441,6 +442,13 @@ static struct sam_ehci_s g_ehci;
 /* This is the connection/enumeration interface */
 
 static struct usbhost_connection_s g_ehciconn;
+
+/* Maps USB chapter 9 speed to EHCI speed */
+
+static const uint8_t g_ehci_speed[4] =
+{
+  0, EHCI_LOW_SPEED, EHCI_FULL_SPEED, EHCI_HIGH_SPEED
+};
 
 /* The head of the asynchronous queue */
 
@@ -1344,6 +1352,21 @@ static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 #endif
 
 /*******************************************************************************
+ * Name: sam_ehci_speed
+ *
+ * Description:
+ *  Map a speed enumeration value per Chapter 9 of the USB specification to the
+ *  speed enumeration required in the EHCI queue head.
+ *
+ *******************************************************************************/
+
+static inline uint8_t sam_ehci_speed(uint8_t usbspeed)
+{
+  DEBUGASSERT(usbspeed >= USB_SPEED_LOW && usbspeed <= USB_SPEED_HIGH);
+  return g_ehci_speed[usbspeed];
+}
+
+/*******************************************************************************
  * Name: sam_ioc_setup
  *
  * Description:
@@ -1469,6 +1492,8 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
   struct sam_qh_s *qh;
   uint32_t rhpndx;
   uint32_t regval;
+  uint8_t hubaddr;
+  uint8_t hubport;
 
   /* Allocate a new queue head structure */
 
@@ -1499,7 +1524,7 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
 
   regval = ((uint32_t)epinfo->devaddr << QH_EPCHAR_DEVADDR_SHIFT) |
            ((uint32_t)epinfo->epno << QH_EPCHAR_ENDPT_SHIFT) |
-           ((uint32_t)EHCI_SPEED(epinfo->speed) << QH_EPCHAR_EPS_SHIFT) |
+           ((uint32_t)sam_ehci_speed(epinfo->speed) << QH_EPCHAR_EPS_SHIFT) |
            QH_EPCHAR_DTC |
            ((uint32_t)epinfo->maxpacket << QH_EPCHAR_MAXPKT_SHIFT) |
            ((uint32_t)8 << QH_EPCHAR_RL_SHIFT);
@@ -1529,15 +1554,34 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
    * HUBADDR  Hub Address                     Always 0 for now
    * PORT     Port number                     RH port index + 1
    * MULT     High band width multiplier      1
-   *
-   * REVISIT:  Future HUB support will require the HUB port number
-   * and HUB device address to be included here.
    */
 
   rhpndx = RHPNDX(rhport);
-  regval = ((uint32_t)0            << QH_EPCAPS_HUBADDR_SHIFT) |
-           ((uint32_t)(rhpndx + 1) << QH_EPCAPS_PORT_SHIFT) |
-           ((uint32_t)1            << QH_EPCAPS_MULT_SHIFT);
+
+#ifdef CONFIG_USBHOST_HUB
+  /* REVISIT:  Future HUB support will require the HUB port number
+   * and HUB device address to be included here:
+   *
+   * - The HUB device address is the USB device address of the USB 2.0 Hub
+   *   below which a full- or low-speed device is attached.
+   * - The HUB port number is the port number on the above USB 2.0 Hub
+   *
+   * These fields are used in the split-transaction protocol.  The kludge
+   * below should work for hubs connected directly to a root hub port,
+   * but would not work for devices connected to downstream hubs.
+   */
+
+#warning Missing logic
+  hubaddr = rhport->ep0.devaddr;
+  hubport = rhpndx + 1;
+#else
+  hubaddr = rhport->ep0.devaddr;
+  hubport = rhpndx + 1;
+#endif
+
+  regval  = ((uint32_t)hubaddr << QH_EPCAPS_HUBADDR_SHIFT) |
+            ((uint32_t)hubport << QH_EPCAPS_PORT_SHIFT) |
+            ((uint32_t)1       << QH_EPCAPS_MULT_SHIFT);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   if (epinfo->xfrtype == USB_EP_ATTR_XFER_INT)
@@ -3402,7 +3446,7 @@ static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
        *    repeat."
        */
 
-      rhport->ep0.speed = USB_SPEED_LOW;
+      hport->speed = USB_SPEED_LOW;
       regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
 
@@ -3425,7 +3469,7 @@ static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* Assume full-speed for now */
 
-      rhport->ep0.speed = USB_SPEED_FULL;
+      hport->speed = USB_SPEED_FULL;
     }
 
   /* Put the root hub port in reset.
@@ -3504,7 +3548,7 @@ static int sam_rh_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* High speed device */
 
-      rhport->ep0.speed = USB_SPEED_HIGH;
+      hport->speed = USB_SPEED_HIGH;
     }
   else
     {
@@ -3621,6 +3665,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   /* Remember the new device address and max packet size */
 
   epinfo->devaddr   = funcaddr;
+  epinfo->speed     = speed;
   epinfo->maxpacket = maxpacketsize;
 
   sam_givesem(&g_ehci.exclsem);
