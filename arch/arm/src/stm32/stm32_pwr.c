@@ -167,7 +167,7 @@ void stm32_pwr_enablebreg(bool regon)
  * Name: stm32_pwr_setvos
  *
  * Description:
- *   Set voltage scaling for EneryLite devices.
+ *   Set voltage scaling for EnergyLite devices.
  *
  * Input Parameters:
  *   vos - Properly aligned voltage scaling select bits for the PWR_CR register.
@@ -204,6 +204,71 @@ void stm32_pwr_setvos(uint16_t vos)
 
   while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
 }
-#endif
+
+/************************************************************************************
+ * Name: stm32_pwr_setpvd
+ *
+ * Description:
+ *   Sets power voltage detector
+ *
+ * Input Parameters:
+ *   pls - PVD level
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   At present, this function is called only from initialization logic.  If used
+ *   for any other purpose that protection to assure that its operation is atomic
+ *   will be required.
+ *
+ ************************************************************************************/
+
+void stm32_pwr_setpvd(uint16_t pls)
+{
+  uint16_t regval;
+
+  /* Set PLS */
+
+  regval = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval &= ~PWR_CR_PLS_MASK;
+  regval |= (pls & PWR_CR_PLS_MASK);
+
+  /* Write value to register */
+
+  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_enablepvd
+ *
+ * Description:
+ *   Enable the Programmable Voltage Detector
+ *
+ ************************************************************************************/
+
+void stm32_pwr_enablepvd(void)
+{
+  /* Enable PVD by setting the PVDE bit in PWR_CR register. */
+
+  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_PVDE);
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_disablepvd
+ *
+ * Description:
+ *   Disable the Programmable Voltage Detector
+ *
+ ************************************************************************************/
+
+void stm32_pwr_disablepvd(void)
+{
+  /* Disable PVD by clearing the PVDE bit in PWR_CR register. */
+
+  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, PWR_CR_PVDE, 0);
+}
+
+#endif /* CONFIG_STM32_ENERGYLITE */
 
 #endif /* CONFIG_STM32_PWR */
