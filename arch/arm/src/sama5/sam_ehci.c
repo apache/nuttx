@@ -2814,13 +2814,18 @@ static inline void sam_ioc_bottomhalf(void)
   arch_invalidate_dcache((uintptr_t)&g_asynchead.hw,
                          (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
-  /* Set the back pointer to the forward qTD pointer of the asynchronous
+  /* Set the back pointer to the forward QH pointer of the asynchronous
    * queue head.
    */
 
   bp = (uint32_t *)&g_asynchead.hw.hlp;
   qh = (struct sam_qh_s *)sam_virtramaddr(sam_swap32(*bp) & QH_HLP_MASK);
-  if (qh)
+
+  /* If the asynchronous queue is empty, then the forward point in the
+   * asynchronous queue head will point back to the the queue head.
+   */
+
+  if (qh && qh != &g_asynchead)
     {
       /* Then traverse and operate on every QH and qTD in the asynchronous
        * queue
@@ -4317,12 +4322,46 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
     {
       case USB_EP_ATTR_XFER_CONTROL:
       case USB_EP_ATTR_XFER_BULK:
-        qh = &g_asynchead;
+        {
+          /* Get the horizontal pointer from the head of the asynchronous
+           * queue.
+           */
+
+          bp = (uint32_t *)&g_asynchead.hw.hlp;
+          qh = (struct sam_qh_s *)sam_virtramaddr(sam_swap32(*bp) & QH_HLP_MASK);
+
+          /* If the asynchronous queue is empty, then the forward point in
+           * the asynchronous queue head will point back to the the queue
+           * head.
+           */
+
+          if (qh && qh != &g_asynchead)
+            {
+              /* Claim that we successfully cancelled the transfer */
+
+              return OK;
+            }
+        }
         break;
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
       case USB_EP_ATTR_XFER_INT:
-        qh = &g_intrhead;
+        {
+          /* Get the horizontal pointer from the head of the interrupt
+           * queue.
+           */
+
+          bp = (uint32_t *)&g_intrhead.hw.hlp;
+          qh = (struct sam_qh_s *)sam_virtramaddr(sam_swap32(*bp) & QH_HLP_MASK);
+          if (qh)
+            {
+              /* if the queue is empty, then just claim that we successfully
+               * cancelled the transfer.
+               */
+
+              return OK;
+            }
+        }
         break;
 #endif
 
