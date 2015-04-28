@@ -73,7 +73,7 @@
 #    define PWR_CR_1p9V        (0 << PWR_CR_PLS_SHIFT) /* 000: 1.9 V */
 #    define PWR_CR_2p1V        (1 << PWR_CR_PLS_SHIFT) /* 001: 2.1 V */
 #    define PWR_CR_2p3V        (2 << PWR_CR_PLS_SHIFT) /* 010: 2.3 V */
-#    define PWR_CR_2pvV        (3 << PWR_CR_PLS_SHIFT) /* 011: 2.5 V */
+#    define PWR_CR_2p5V        (3 << PWR_CR_PLS_SHIFT) /* 011: 2.5 V */
 #    define PWR_CR_2p7V        (4 << PWR_CR_PLS_SHIFT) /* 100: 2.7 V */
 #    define PWR_CR_2p9V        (5 << PWR_CR_PLS_SHIFT) /* 101: 2.9 V */
 #    define PWR_CR_3p1V        (6 << PWR_CR_PLS_SHIFT) /* 110: 3.1 V */

@@ -112,7 +112,7 @@ void stm32_pwr_enablebreg(bool regon);
  * Name: stm32_pwr_setvos
  *
  * Description:
- *   Set voltage scaling for EneryLite devices.
+ *   Set voltage scaling for EnergyLite devices.
  *
  * Input Parameters:
  *   vos - Properly aligned voltage scaling select bits for the PWR_CR register.
@@ -129,7 +129,47 @@ void stm32_pwr_enablebreg(bool regon);
 
 #ifdef CONFIG_STM32_ENERGYLITE
 void stm32_pwr_setvos(uint16_t vos);
-#endif
+
+/************************************************************************************
+ * Name: stm32_pwr_setpvd
+ *
+ * Description:
+ *   Sets power voltage detector for EnergyLite devices.
+ *
+ * Input Parameters:
+ *   pls - PVD level
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   At present, this function is called only from initialization logic.
+ *
+ ************************************************************************************/
+
+void stm32_pwr_setpvd(uint16_t pls);
+
+/************************************************************************************
+ * Name: stm32_pwr_enablepvd
+ *
+ * Description:
+ *   Enable the Programmable Voltage Detector
+ *
+ ************************************************************************************/
+
+void stm32_pwr_enablepvd(void);
+
+/************************************************************************************
+ * Name: stm32_pwr_disablepvd
+ *
+ * Description:
+ *   Disable the Programmable Voltage Detector
+ *
+ ************************************************************************************/
+
+void stm32_pwr_disablepvd(void);
+
+#endif /* CONFIG_STM32_ENERGYLITE */
 
 #undef EXTERN
 #if defined(__cplusplus)
