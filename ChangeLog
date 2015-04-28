@@ -10259,4 +10259,9 @@
 	  (2015-04-23).
 	* drivers/lcd and include/nuttx/drivers: RA8875 LCD driver contributed
 	  by Marten Svanfeldt (2015-04-24).
-
+	* arch/arm/src/stm32/chip/stm32_pwr.c and .h: Adds support for STM32's
+	  Programmable Voltage Detector (PVD) feature. Register access is behind
+	  CONFIG_STM32_ENERGYLITE as the feature has not been verified for
+	  F1/F2/F4 etc. manuals. Tested on STM32L1. PVD interrupt looks generic,
+	  at least #defines it needs are in headers for every chip variant.  By
+	  Dmitry Nikolaev, submitted by Juha Niskanen (2015-04-28).
