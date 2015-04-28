@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/usb/usbhost.h>
 
 #include "lpc17_usbhost.h"
@@ -66,6 +68,18 @@
 
 struct usbhost_connection_s *arch_usbhost_initialize(void)
 {
+#ifdef CONFIG_USBHOST_HUB
+  int ret;
+
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
   return lpc17_usbhost_initialize(0);
 }
 #endif /* CONFIG_LPC17_USBHOST && CONFIG_USBHOST && CONFIG_EXAMPLES_HIDKBD */
