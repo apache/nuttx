@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sam_usb.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -309,10 +309,20 @@ int sam_usbhost_initialize(void)
   int ret;
 
   /* First, register all of the class drivers needed to support the drivers
-   * that we care about
-   *
-   * Register theUSB host Mass Storage Class:
+   * that we care about/
    */
+
+#ifdef CONFIG_USBHOST_HUB
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
+  /* Register the USB host Mass Storage Class */
 
   ret = usbhost_storageinit();
   if (ret != OK)

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-stm32-p207/src/stm32_usb.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -174,6 +174,18 @@ int stm32_usbhost_initialize(void)
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:
    */
+
+#ifdef CONFIG_USBHOST_HUB
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
+  /* Initialize Mass Storage Class support */
 
   uvdbg("Register class drivers\n");
   ret = usbhost_storageinit();
