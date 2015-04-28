@@ -112,35 +112,23 @@ static int usbhost_waiter(struct usbhost_connection_s *dev, const char *hcistr)
 static int usbhost_waiter(struct usbhost_connection_s *dev)
 #endif
 {
-  bool connected[SAM_OHCI_NRHPORT] = {false, false, false};
-  int rhpndx;
-  int ret;
+  struct usbhost_hubport_s *hport;
 
-  uvdbg("%s Waiter Running\n", hcistr);
+  uvdbg("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
-      rhpndx = CONN_WAIT(dev, connected);
-      DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_OHCI_NRHPORT);
-
-      connected[rhpndx] = !connected[rhpndx];
-
-      uvdbg("%s RHport%d %s\n",
-            hcistr, rhpndx + 1, connected[rhpndx] ? "connected" : "disconnected");
+      DEBUGVERIFY(CONN_WAIT(dev, &hport));
+      uvdbg("%s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
-      if (connected[rhpndx])
+      if (hport->connected)
         {
           /* Yes.. enumerate the newly connected device */
 
-          ret = CONN_ENUMERATE(dev, rhpndx);
-          if (ret < 0)
-            {
-              uvdbg("%s RHport%d CONN_ENUMERATE failed: %d\n", hcistr, rhpndx+1, ret);
-              connected[rhpndx] = false;
-            }
+          (void)CONN_ENUMERATE(dev, hport);
         }
     }
 
