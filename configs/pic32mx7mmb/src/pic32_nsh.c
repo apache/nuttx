@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
@@ -172,28 +173,23 @@ static struct usbhost_connection_s *g_usbconn;
 #ifdef NSH_HAVEUSBHOST
 static int nsh_waiter(int argc, char *argv[])
 {
-  bool connected = false;
-  int ret;
+  struct usbhost_hubport_s *hport;
 
   syslog(LOG_INFO, "nsh_waiter: Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
-      ret = CONN_WAIT(g_usbconn, &connected);
-      DEBUGASSERT(ret == OK);
-
-      connected = !connected;
-      syslog(LOG_INFO, "nsh_waiter: %s\n",
-             connected ? "connected" : "disconnected");
+      DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
+      syslog(LOG_INFO, "nsh_waiter: %s\n", hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
-      if (connected)
+      if (hport->connected)
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)CONN_ENUMERATE(g_usbconn, 0);
+          (void)CONN_ENUMERATE(g_usbconn, hport);
         }
     }
 
