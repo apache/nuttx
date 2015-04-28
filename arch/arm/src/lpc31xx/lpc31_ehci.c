@@ -465,6 +465,7 @@ static int lpc31_qh_dump(struct lpc31_qh_s *qh, uint32_t **bp, void *arg);
 #  define lpc31_qh_dump(qh, bp, arg)   OK
 #endif
 
+static inline uint8_t lpc31_ehci_speed(uint8_t usbspeed);
 static int lpc31_ioc_setup(struct lpc31_rhport_s *rhport,
          struct lpc31_epinfo_s *epinfo);
 static int lpc31_ioc_wait(struct lpc31_epinfo_s *epinfo);
@@ -564,6 +565,13 @@ static struct lpc31_ehci_s g_ehci;
 /* This is the connection/enumeration interface */
 
 static struct usbhost_connection_s g_ehciconn;
+
+/* Maps USB chapter 9 speed to EHCI speed */
+
+static const uint8_t g_ehci_speed[4] =
+{
+  0, EHCI_LOW_SPEED, EHCI_FULL_SPEED, EHCI_HIGH_SPEED
+};
 
 /* The head of the asynchronous queue */
 
@@ -1529,6 +1537,21 @@ static int lpc31_qh_dump(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 #endif
 
 /*******************************************************************************
+ * Name: lpc31_ehci_speed
+ *
+ * Description:
+ *  Map a speed enumeration value per Chapter 9 of the USB specification to the
+ *  speed enumeration required in the EHCI queue head.
+ *
+ *******************************************************************************/
+
+static inline uint8_t lpc31_ehci_speed(uint8_t usbspeed)
+{
+  DEBUGASSERT(usbspeed >= USB_SPEED_LOW && usbspeed <= USB_SPEED_HIGH);
+  return g_ehci_speed[usbspeed];
+}
+
+/*******************************************************************************
  * Name: lpc31_ioc_setup
  *
  * Description:
@@ -1649,11 +1672,13 @@ static void lpc31_qh_enqueue(struct lpc31_qh_s *qhead, struct lpc31_qh_s *qh)
  *******************************************************************************/
 
 static struct lpc31_qh_s *lpc31_qh_create(struct lpc31_rhport_s *rhport,
-                                      struct lpc31_epinfo_s *epinfo)
+                                          struct lpc31_epinfo_s *epinfo)
 {
   struct lpc31_qh_s *qh;
   uint32_t rhpndx;
   uint32_t regval;
+  uint8_t hubaddr;
+  uint8_t hubport;
 
   /* Allocate a new queue head structure */
 
@@ -1684,7 +1709,7 @@ static struct lpc31_qh_s *lpc31_qh_create(struct lpc31_rhport_s *rhport,
 
   regval = ((uint32_t)epinfo->devaddr << QH_EPCHAR_DEVADDR_SHIFT) |
            ((uint32_t)epinfo->epno << QH_EPCHAR_ENDPT_SHIFT) |
-           ((uint32_t)EHCI_SPEED(epinfo->speed) << QH_EPCHAR_EPS_SHIFT) |
+           ((uint32_t)lpc31_ehci_speed(epinfo->speed) << QH_EPCHAR_EPS_SHIFT) |
            QH_EPCHAR_DTC |
            ((uint32_t)epinfo->maxpacket << QH_EPCHAR_MAXPKT_SHIFT) |
            ((uint32_t)8 << QH_EPCHAR_RL_SHIFT);
@@ -1714,15 +1739,34 @@ static struct lpc31_qh_s *lpc31_qh_create(struct lpc31_rhport_s *rhport,
    * HUBADDR  Hub Address                     Always 0 for now
    * PORT     Port number                     RH port index + 1
    * MULT     High band width multiplier      1
-   *
-   * REVISIT:  Future HUB support will require the HUB port number
-   * and HUB device address to be included here.
    */
 
-  rhpndx = RHPNDX(rhport);
-  regval = ((uint32_t)0            << QH_EPCAPS_HUBADDR_SHIFT) |
-           ((uint32_t)(rhpndx + 1) << QH_EPCAPS_PORT_SHIFT) |
-           ((uint32_t)1            << QH_EPCAPS_MULT_SHIFT);
+  rhpndx  = RHPNDX(rhport);
+
+#ifdef CONFIG_USBHOST_HUB
+  /* REVISIT:  Future HUB support will require the HUB port number
+   * and HUB device address to be included here:
+   *
+   * - The HUB device address is the USB device address of the USB 2.0 Hub
+   *   below which a full- or low-speed device is attached.
+   * - The HUB port number is the port number on the above USB 2.0 Hub
+   *
+   * These fields are used in the split-transaction protocol.  The kludge
+   * below should work for hubs connected directly to a root hub port,
+   * but would not work for devices connected to downstream hubs.
+   */
+
+#warning Missing logic
+  hubaddr = rhport->ep0.devaddr;
+  hubport = rhpndx + 1;
+#else
+  hubaddr = rhport->ep0.devaddr;
+  hubport = rhpndx + 1;
+#endif
+
+  regval  = ((uint32_t)hubaddr << QH_EPCAPS_HUBADDR_SHIFT) |
+            ((uint32_t)hubport << QH_EPCAPS_PORT_SHIFT) |
+            ((uint32_t)1       << QH_EPCAPS_MULT_SHIFT);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   if (epinfo->xfrtype == USB_EP_ATTR_XFER_INT)
@@ -3562,7 +3606,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
        *    repeat."
        */
 
-      rhport->ep0.speed = USB_SPEED_LOW;
+      hport->speed = USB_SPEED_LOW;
 
 #if 0 /* The LPC31xx does not support a companion host controller */
       regval |= EHCI_PORTSC_OWNER;
@@ -3578,7 +3622,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* Assume full-speed for now */
 
-      rhport->ep0.speed = USB_SPEED_FULL;
+      hport->speed = USB_SPEED_FULL;
     }
 
   /* Put the root hub port in reset.
@@ -3675,7 +3719,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* High speed device */
 
-      rhport->ep0.speed = USB_SPEED_HIGH;
+      hport->speed = USB_SPEED_HIGH;
     }
   else if ((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_FS)
     {
@@ -3695,7 +3739,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
        *    repeat."
        */
 
-      DEBUGASSERT(rhport->ep0.speed == USB_SPEED_FULL);
+      DEBUGASSERT(hport->speed == USB_SPEED_FULL);
 
 #if 0 /* The LPC31xx does not support a companion host controller */
       regval |= EHCI_PORTSC_OWNER;
@@ -3712,7 +3756,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
 
   else
     {
-      DEBUGASSERT(rhport->ep0.speed == USB_SPEED_LOW);
+      DEBUGASSERT(hport->speed == USB_SPEED_LOW);
       DEBUGASSERT((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_LS);
     }
 
@@ -3794,6 +3838,7 @@ static int lpc31_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
   /* Remember the new device address and max packet size */
 
   epinfo->devaddr   = funcaddr;
+  epinfo->speed     = speed;
   epinfo->maxpacket = maxpacketsize;
 
   lpc31_givesem(&g_ehci.exclsem);
