@@ -65,28 +65,28 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+/* It is necessary to perform work on the low-priority work queue (vs. the
+ * high priority work queue) because:
+ *
+ * 1. Deferred work requires some delays and waiting, and
+ * 2. There may be dependencies between the waiting and driver interrupt
+ *    related work.  Since that interrupt related work will performed on the
+ *    high priority work queue, there would be the likelihood of deadlocks
+ *    if you wait for events on the high priority work thread that can only
+ *    occur if the high priority work thread is available to post those events.
+ */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#elif !defined(CONFIG_SCHED_LPWORK)
+#  error Low-priority work queue support is required (CONFIG_SCHED_LPWORK)
 #endif
 
-/* Perform polling actions on the low priority work queue, if configured */
-
-#ifndef CONFIG_SCHED_LPWORK
-#  define POLL_WORK         LPWORK
-#else
-#  define POLL_WORK         HPWORK
-#endif
+/* Perform polling actions with a delay on the low priority work queue, if
+ * configured
+ */
 
 #define POLL_DELAY          MSEC2TICK(400)
-
-/* Perform event processing on the high priority work queue, if configured */
-
-#ifndef CONFIG_SCHED_HPWORK
-#  define EVENT_WORK        HPWORK
-#else
-#  define EVENT_WORK        LPWORK
-#endif
 
 /* Used in usbhost_cfgdesc() */
 
@@ -1013,10 +1013,7 @@ static void usbhost_disconnect_event(FAR void *arg)
 
   /* Cancel any pending port status change events */
 
-  work_cancel(EVENT_WORK, &priv->work);
-#if EVENT_WORK != POLL_WORK
-  work_cancel(POLL_WORK, &priv->work);
-#endif
+  work_cancel(LPWORK, &priv->work);
 
   /* Disable power to all downstream ports */
 
@@ -1130,7 +1127,6 @@ static void usbhost_callback(FAR void *arg, int result)
   FAR struct usbhost_class_s *hubclass;
   FAR struct usbhost_hubpriv_s *priv;
   uint32_t delay = 0;
-  int qid = EVENT_WORK;
 
   DEBUGASSERT(arg != NULL);
   hubclass = (FAR struct usbhost_class_s *)arg;
@@ -1157,7 +1153,6 @@ static void usbhost_callback(FAR void *arg, int result)
        * case.
        */
 
-      qid   = POLL_WORK;
       delay = POLL_DELAY;
     }
 
@@ -1168,7 +1163,7 @@ static void usbhost_callback(FAR void *arg, int result)
 
   if (work_available(&priv->work))
     {
-      (void)work_queue(qid, &priv->work, (worker_t)usbhost_hub_event,
+      (void)work_queue(LPWORK, &priv->work, (worker_t)usbhost_hub_event,
                        hubclass, delay);
     }
 }
@@ -1419,7 +1414,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
    */
 
   flags = irqsave();
-  ret = work_queue(EVENT_WORK, &priv->work,
+  ret = work_queue(LPWORK, &priv->work,
                    (worker_t)usbhost_disconnect_event, hubclass, 0);
   irqrestore(flags);
   return ret;
