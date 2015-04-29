@@ -73,8 +73,10 @@
 /* Configuration ***************************************************************/
 /* Pre-requisites */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#elif !defined(CONFIG_SCHED_HPWORK)
+#  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
 #endif
 
 /* Configurable number of Queue Head (QH) structures.  The default is one per
@@ -2570,7 +2572,7 @@ static inline int lpc31_asynch_setup(struct lpc31_rhport_s *rhport,
   int ret = -ENODEV;
 
   DEBUGASSERT(rhport && epinfo && !epinfo->iocwait &&
-              epinfo->callback == NULL);
+              callback != NULL && epinfo->callback == NULL);
 
   /* Is the device still connected? */
 
