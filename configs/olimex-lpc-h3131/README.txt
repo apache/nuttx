@@ -668,8 +668,9 @@ Configurations
             CONFIG_LPC31_EHCI_PREALLOCATE=y
 
           RTOS Features -> Work Queue Support
-            CONFIG_SCHED_WORKQUEUE=y      : Work queue support is needed
-            CONFIG_SCHED_HPWORKSTACKSIZE=1536
+            CONFIG_SCHED_WORKQUEUE=y      : High priority queue support is needed
+            CONFIG_SCHED_HPWORK=y
+            CONFIG_SCHED_HPWORKSTACKSIZE=1536 (1024 seems to work okay too)
 
        b. Hub Support.
 
@@ -678,11 +679,26 @@ Configurations
             CONFIG_USBHOST_HUB=y          : Enable the hub class
             CONFIG_USBHOST_ASYNCH=y       : Asynchronous I/O supported needed for hubs
 
-          System Type -> USB host configuration
-            To be provided
+          RTOS Features -> Work Queue Support
+            CONFIG_SCHED_LPWORK=y         : Low priority queue support is needed
+            CONFIG_SCHED_LPNTHREADS=1
+            CONFIG_SCHED_LPWORKSTACKSIZE=1024
 
-          Logic nesting becomes deeper with a hub and it may also be
-          necessary to increase some stack sizes.
+          NOTES:
+
+          1. It is necessary to perform work on the low-priority work queue
+             (vs. the high priority work queue) because:
+
+             a. Deferred work requires some delays and waiting, and
+             b. There are dependencies between the waiting and driver
+                interrupt related work.  Since that interrupt related work
+                will performed on the high priority work queue, there would
+                be the likelihood of deadlocks if you wait for events on the
+                high priority work thread that can only occur if the high
+                priority work thread is available to post those events.
+
+          2. Logic nesting becomes deeper with a hub and it may also be
+             necessary to increase some stack sizes.
 
        c. USB Mass Storage Class.  With this class enabled, you can support
           connection of USB FLASH storage drives.  Support for the USB

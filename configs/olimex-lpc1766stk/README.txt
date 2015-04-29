@@ -955,20 +955,36 @@ Configuration Sub-Directories
     2. I used this configuration to test the USB hub class.  I did this
        testing with the following changes to the configuration:
 
-       CONFIG_USBHOST_HUB=y                    : Enable the hub class
-       CONFIG_USBHOST_ASYNCH=y                 : Asynchonous I/O supported needed for hubs
+       Drivers -> USB Host Driver Support
+         CONFIG_USBHOST_HUB=y                  : Enable the hub class
+         CONFIG_USBHOST_ASYNCH=y               : Asynchonous I/O supported needed for hubs
 
-       CONFIG_LPC17_USBHOST_NASYNCH=8          : Allow up to 8 asynchronous requests
-       CONFIG_USBHOST_NEDS=3                   : Increase number of endpoint descriptors from 2
-       CONFIG_USBHOST_NTDS=4                   : Increase number of transfer descriptors from 3
-       CONFIG_USBHOST_TDBUFFERS=4              : Increase number of transfer buffers from 3
-       CONFIG_USBHOST_IOBUFSIZE=256            : Decrease the size of I/O buffers from 512
+       System Type -> USB host configuration
+         CONFIG_LPC17_USBHOST_NASYNCH=8        : Allow up to 8 asynchronous requests
+         CONFIG_USBHOST_NEDS=3                 : Increase number of endpoint descriptors from 2
+         CONFIG_USBHOST_NTDS=4                 : Increase number of transfer descriptors from 3
+         CONFIG_USBHOST_TDBUFFERS=4            : Increase number of transfer buffers from 3
+         CONFIG_USBHOST_IOBUFSIZE=256          : Decrease the size of I/O buffers from 512
 
-       I also increased some stack sizes:
+       RTOS Features -> Work Queue Support
+         CONFIG_SCHED_LPWORK=y         : Low priority queue support is needed
+         CONFIG_SCHED_LPNTHREADS=1
+         CONFIG_SCHED_LPWORKSTACKSIZE=1024
 
-       CONFIG_EXAMPLES_HIDKBD_STACKSIZE=2048   : Was 1024
-       CONFIG_HIDKBD_STACKSIZE=2048            : Was 1024
-       CONFIG_SCHED_HPWORKSTACKSIZE=2048       : Was 1024
+       NOTES:
+
+       1. It is necessary to perform work on the low-priority work queue
+          (vs. the high priority work queue) because deferred hub-related
+          work requires some delays and waiting that is not appropriate on
+          the high priority work queue.
+
+       2. I also increased some stack sizes.  These values are not tuned.
+          When I ran into stack size issues, I just increased the size of
+          all threads that had smaller stacks.
+
+          CONFIG_EXAMPLES_HIDKBD_STACKSIZE=2048   : Was 1024
+          CONFIG_HIDKBD_STACKSIZE=2048            : Was 1024
+          CONFIG_SCHED_HPWORKSTACKSIZE=2048       : Was 1024 (1024 is probably ok)
 
        STATUS:
          2015-04-26: The hub basically works.  I do get crashes in the LPC16 USB host driver
