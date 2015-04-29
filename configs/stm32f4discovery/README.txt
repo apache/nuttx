@@ -1605,10 +1605,11 @@ Where <subdir> is one of the following:
 
        CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
        CONFIG_USBHOST=y         : Enable USB host support
+       CONFIG_USBHOST_MSC=y     : Enable the mass storage class
        CONFIG_STM32_OTGFS=y     : Enable the STM32 USB OTG FS block
        CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF FS support
-       CONFIG_SCHED_WORKQUEUE=y : Worker thread support is required for the mass
-                                  storage class driver.
+       CONFIG_SCHED_WORKQUEUE=y : High priority worker thread support is required
+       CONFIG_SCHED_HPWORK=y    :   for the mass storage class driver.
        CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
                                   is needed for NSH
        CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
