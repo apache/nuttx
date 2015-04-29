@@ -192,7 +192,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
 
 void net_lostconnection(FAR struct socket *psock, uint16_t flags)
 {
-  DEBUGASSERT(psock)
+  DEBUGASSERT(psock);
 
   /* These loss-of-connection events may be reported:
    *
