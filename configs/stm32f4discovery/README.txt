@@ -1696,7 +1696,7 @@ Where <subdir> is one of the following:
          To be determined
 
        Board Selection ->
-         CONFIG_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
+         CONFIG_STM32F4DISCO_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
 
        RTOS Features -> Work Queue Support
          CONFIG_SCHED_LPWORK=y     : Low priority queue support is needed
@@ -1715,7 +1715,7 @@ Where <subdir> is one of the following:
 
        STATUS:
        2015-04-30
-          Just beginning to test.
+          Appears to be fully functional.
 
   nxlines:
   ------

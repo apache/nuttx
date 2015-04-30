@@ -69,12 +69,12 @@
 #  undef HAVE_USB
 #endif
 
-#ifndef CONFIG_USBHOST_DEFPRIO
-#  define CONFIG_USBHOST_DEFPRIO 50
+#ifndef CONFIG_STM32F4DISCO_USBHOST_PRIO
+#  define CONFIG_STM32F4DISCO_USBHOST_PRIO 100
 #endif
 
-#ifndef CONFIG_USBHOST_STACKSIZE
-#  define CONFIG_USBHOST_STACKSIZE 1024
+#ifndef CONFIG_STM32F4DISCO_USBHOST_STACKSIZE
+#  define CONFIG_STM32F4DISCO_USBHOST_STACKSIZE 1024
 #endif
 
 /************************************************************************************
@@ -227,8 +227,8 @@ int stm32_usbhost_initialize(void)
 
       uvdbg("Start usbhost_waiter\n");
 
-      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        CONFIG_USBHOST_STACKSIZE,
+      pid = task_create("usbhost", CONFIG_STM32F4DISCO_USBHOST_PRIO,
+                        CONFIG_STM32F4DISCO_USBHOST_STACKSIZE,
                         (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
