@@ -199,6 +199,7 @@ struct efm32_chan_s
   sem_t             waitsem;   /* Channel wait semaphore */
   volatile uint8_t  result;    /* The result of the transfer */
   volatile uint8_t  chreason;  /* Channel halt reason. See enum efm32_chreason_e */
+  uint8_t           chidx;     /* Channel index */
   uint8_t           epno;      /* Device endpoint number (0-127) */
   uint8_t           eptype;    /* See EFM32_USB_EPTYPE_* definitions */
   uint8_t           funcaddr;  /* Device function address */
@@ -1031,7 +1032,7 @@ static int efm32_chan_waitsetup(FAR struct efm32_usbhost_s *priv,
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int efm32_chan_asynchsetup(FAR struct efm32_usbhost_s *priv,
-                                  FAR struct efm32_chan_s *chan.
+                                  FAR struct efm32_chan_s *chan,
                                   usbhost_asynch_t callback, FAR void *arg)
 {
   irqstate_t flags = irqsave();
@@ -1159,7 +1160,7 @@ static void efm32_chan_wakeup(FAR struct efm32_usbhost_s *priv,
         {
           /* Handle continuation of IN/OUT pipes */
 
-          if (priv->in)
+          if (chan->in)
             {
               efm32_in_next(priv, chan);
             }
@@ -1911,7 +1912,7 @@ static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
        * endpoint type
        */
 
-      ret = efm32_in_setup(priv, chidx);
+      ret = efm32_in_setup(priv, chan->chidx);
       if (ret >= 0)
         {
           return;
@@ -2182,7 +2183,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
        * endpoint type
        */
 
-      ret = efm32_out_setup(priv, chidx);
+      ret = efm32_out_setup(priv, chan->chidx);
       if (ret >= 0)
         {
           return;
@@ -4962,6 +4963,7 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
   for (i = 0; i < EFM32_MAX_TX_FIFOS; i++)
     {
       FAR struct efm32_chan_s *chan = &priv->chan[i];
+      chan->chidx = i;
       sem_init(&chan->waitsem,  0, 0);
     }
 }

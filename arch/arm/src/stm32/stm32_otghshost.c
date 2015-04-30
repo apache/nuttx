@@ -206,6 +206,7 @@ struct stm32_chan_s
   sem_t             waitsem;   /* Channel wait semaphore */
   volatile uint8_t  result;    /* The result of the transfer */
   volatile uint8_t  chreason;  /* Channel halt reason. See enum stm32_chreason_e */
+  uint8_t           chidx;     /* Channel index */
   uint8_t           epno;      /* Device endpoint number (0-127) */
   uint8_t           eptype;    /* See OTGHS_EPTYPE_* definitions */
   uint8_t           funcaddr;  /* Device function address */
@@ -1036,7 +1037,7 @@ static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
-                                  FAR struct stm32_chan_s *chan.
+                                  FAR struct stm32_chan_s *chan,
                                   usbhost_asynch_t callback, FAR void *arg)
 {
   irqstate_t flags = irqsave();
@@ -1164,7 +1165,7 @@ static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
         {
           /* Handle continuation of IN/OUT pipes */
 
-          if (priv->in)
+          if (chan->in)
             {
               stm32_in_next(priv, chan);
             }
@@ -1916,7 +1917,7 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
        * endpoint type
        */
 
-      ret = stm32_in_setup(priv, chidx);
+      ret = stm32_in_setup(priv, chan->chidx);
       if (ret >= 0)
         {
           return;
@@ -2187,7 +2188,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
        * endpoint type
        */
 
-      ret = stm32_out_setup(priv, chidx);
+      ret = stm32_out_setup(priv, chan->chidx);
       if (ret >= 0)
         {
           return;
@@ -5007,6 +5008,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
   for (i = 0; i < STM32_MAX_TX_FIFOS; i++)
     {
       FAR struct stm32_chan_s *chan = &priv->chan[i];
+      chan->chidx = i;
       sem_init(&chan->waitsem,  0, 0);
     }
 }

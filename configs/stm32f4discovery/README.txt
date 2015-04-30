@@ -1490,7 +1490,17 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This example supports the PWM test (apps/examples/pwm) but this must
+    3. To use this configuration with the STM32F4DIS-BB baseboard you
+       should:
+
+       - Select the STM32F4DIS-BB baseboard in the board configuration
+         menu
+       - Disable UART2 and select USART6 in the STM32 peripheral selection
+         menu
+       - Select USART6 as the serial console at 115200 8N1 in the
+         Drivers menus
+
+    4. This example supports the PWM test (apps/examples/pwm) but this must
        be manually enabled by selecting:
 
        CONFIG_PWM=y              : Enable the generic PWM infrastructure
@@ -1673,6 +1683,36 @@ Where <subdir> is one of the following:
        before removing it:
 
        nsh> umount /mnt/stuff
+
+   11. I used this configuration to test the USB hub class.  I did this
+       testing with the following changes to the configuration (in addition
+       to those listed above for base USB host/mass storage class support):
+
+       Drivers -> USB Host Driver Support
+         CONFIG_USBHOST_HUB=y     : Enable the hub class
+         CONFIG_USBHOST_ASYNCH=y  : Asynchonous I/O supported needed for hubs
+
+       System Type -> USB host configuration
+         To be determined
+
+       RTOS Features -> Work Queue Support
+         CONFIG_SCHED_LPWORK=y     : Low priority queue support is needed
+         CONFIG_SCHED_LPNTHREADS=1
+         CONFIG_SCHED_LPWORKSTACKSIZE=1024
+
+       NOTES:
+
+       1. It is necessary to perform work on the low-priority work queue
+          (vs. the high priority work queue) because deferred hub-related
+          work requires some delays and waiting that is not appropriate on
+          the high priority work queue.
+
+       2. Stack usage make increase when USB hub support is enabled because
+          the nesting depth of certain USB host class logic can increase.
+
+       STATUS:
+       2015-04-30
+          Just beginning to test.
 
   nxlines:
   ------
