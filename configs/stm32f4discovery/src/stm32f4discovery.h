@@ -68,6 +68,7 @@
 #define HAVE_USBMONITOR 1
 #define HAVE_SDIO       1
 #define HAVE_RTC_DRIVER 1
+#define HAVE_ELF        1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
@@ -139,6 +140,13 @@
 #if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
 #  undef HAVE_RTC_DRIVER
 #endif
+
+/* ELF */
+
+#if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
+#  undef HAVE_ELF
+#endif
+
 
 /* STM32F4 Discovery GPIOs **************************************************/
 /* LEDs */
