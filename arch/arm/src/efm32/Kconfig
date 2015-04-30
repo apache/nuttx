@@ -193,6 +193,7 @@ config EFM32_OTGFS
 	bool "USB Full-Speed OTG"
 	default n
 	depends on EFM32_HAVE_OTGFS && EXPERIMENTAL
+	select USBHOST_HAVE_ASYNCH if USBHOST
 
 config EFM32_TIMER0
 	bool "TIMER0"

@@ -1393,11 +1393,13 @@ config STM32_OTGFS
 	bool "OTG FS"
 	default n
 	depends on STM32_HAVE_OTGFS
+	select USBHOST_HAVE_ASYNCH if USBHOST
 
 config STM32_OTGHS
 	bool "OTG HS"
 	default n
 	depends on STM32_STM32F207 || STM32_STM32F40XX || STM32_STM32F429
+	select USBHOST_HAVE_ASYNCH if USBHOST
 
 config STM32_PWR
 	bool "PWR"
