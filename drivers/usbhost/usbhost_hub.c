@@ -668,6 +668,7 @@ static void usbhost_hub_event(FAR void *arg)
   FAR struct usbhost_hubpriv_s *priv;
   FAR struct usb_ctrlreq_s *ctrlreq;
   struct usb_portstatus_s portstatus;
+  irqstate_t flags;
   uint16_t status;
   uint16_t change;
   uint16_t mask;
@@ -679,6 +680,16 @@ static void usbhost_hub_event(FAR void *arg)
   DEBUGASSERT(arg != NULL);
   hubclass = (FAR struct usbhost_class_s *)arg;
   priv     = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
+
+  /* Has the hub been disconnected? */
+
+  if (priv->disconnected)
+    {
+      uvdbg("Disconnected\n");
+      return;
+    }
+
+  /* No.. then set up to process the hub event */
 
   DEBUGASSERT(priv->ctrlreq);
   ctrlreq = priv->ctrlreq;
@@ -954,14 +965,27 @@ static void usbhost_hub_event(FAR void *arg)
       udbg("WARNING: Hub status changed, not handled\n");
     }
 
-  /* Wait for the next hub event */
+  /* The preceding sequence of events may take a significant amount of
+   * time and it is possible that the hub may have been removed while this
+   * logic operated.  In any event, we will get here after several failures.
+   * But we do not want to schedule another hub event if the hub has been
+   * removed.
+   */
 
-  ret = DRVR_ASYNCH(hport->drvr, priv->intin, (FAR uint8_t *)priv->buffer,
-                    INTIN_BUFSIZE, usbhost_callback, hubclass);
-  if (ret < 0)
+  flags = irqsave();
+  if (!priv->disconnected)
     {
-      udbg("ERROR: Failed to queue interrupt endpoint: %d\n", ret);
+      /* Wait for the next hub event */
+
+      ret = DRVR_ASYNCH(hport->drvr, priv->intin, (FAR uint8_t *)priv->buffer,
+                        INTIN_BUFSIZE, usbhost_callback, hubclass);
+      if (ret < 0)
+        {
+          udbg("ERROR: Failed to queue interrupt endpoint: %d\n", ret);
+        }
     }
+
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -994,6 +1018,8 @@ static void usbhost_disconnect_event(FAR void *arg)
   irqstate_t flags;
   int port;
 
+  uvdbg("Disconnecting\n");
+
   DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
   priv  = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
   hport = hubclass->hport;
@@ -1005,7 +1031,6 @@ static void usbhost_disconnect_event(FAR void *arg)
    */
 
   flags = irqsave();
-  priv->disconnected = true;
 
   /* Cancel any pending transfers on the interrupt IN pipe */
 
@@ -1132,7 +1157,13 @@ static void usbhost_callback(FAR void *arg, int result)
   hubclass = (FAR struct usbhost_class_s *)arg;
   priv     = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
 
-  /* Check for a failure */
+  /* Check for a failure.  On higher end host controllers, the asynchronous
+   * transfer will pend until data is available (OHCI and EHCI).  On lower
+   * end host controllers (like STM32 and EFM32), the transfer will fail
+   * immediately when the device NAKs the first attempted interrupt IN
+   * transfer (with result == EGAIN).  In that case (or in the case of
+   * other errors), we must fall back to polling.
+   */
 
   if (result != OK)
     {
@@ -1161,7 +1192,7 @@ static void usbhost_callback(FAR void *arg, int result)
    * collide with a hub disconnection event.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->work) && !priv->disconnected)
     {
       (void)work_queue(LPWORK, &priv->work, (worker_t)usbhost_hub_event,
                        hubclass, delay);
@@ -1395,25 +1426,31 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
 static int usbhost_disconnected(struct usbhost_class_s *hubclass)
 {
   FAR struct usbhost_hubpriv_s *priv;
-  FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
   int ret;
 
+  uvdbg("Disconnected\n");
+
   /* Execute the disconnect action from the worker thread. */
 
-  DEBUGASSERT(hubclass != NULL && hubclass->hport != NULL);
+  DEBUGASSERT(hubclass != NULL);
   priv = &((FAR struct usbhost_hubclass_s *)hubclass)->hubpriv;
-  hport = hubclass->hport;
 
-  /* Cancel any pending transfers on the interrupt IN pipe */
-
-  DRVR_CANCEL(hport->drvr, priv->intin);
-
-  /* NOTE: There may be pending HUB work associated with hub interrupt
-   * pipe events.  That work may be overwritten and lost by this action.
+  /* Mark the driver disconnected.  This will cause the callback to ignore
+   * any subsequent completions of asynchronous transfers.
    */
 
   flags = irqsave();
+  priv->disconnected = true;
+
+  /* Cancel any pending work. There may be pending HUB work associated with
+   * hub interrupt pipe events.  That work may be lost by this action.
+   */
+
+  (void)work_cancel(LPWORK, &priv->work);
+
+  /* Schedule the disconnection work */
+
   ret = work_queue(LPWORK, &priv->work,
                    (worker_t)usbhost_disconnect_event, hubclass, 0);
   irqrestore(flags);

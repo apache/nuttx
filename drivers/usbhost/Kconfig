@@ -51,6 +51,32 @@ config USBHOST_HUB
 	---help---
 		Select this option to build in support for USB hubs.
 
+if USBHOST_HUB
+
+config USBHOST_HUB_POLLMSEC
+	int "USB Hub Polling Interval (MSec)"
+	default 400
+	---help---
+		On higher end host controllers (OHCI and EHCI), the asynchronous,
+		interrupt IN transfers will pend until data is available from the
+		hub.  On lower end host controllers (like STM32 and EFM32), the
+		transfer will fail immediately when the device NAKs the first
+		attempted interrupt IN transfer (with result == EGAIN) and the hub
+		class driver will fall back to polling the hub.
+
+		For the case of the higher end controllers, this polling interval
+		is not critical since it would really only be used in the event of
+		failures to communicate with the hub.
+
+		But for the lower end host controllers, the asynchronous transfers
+		are ineffective and this polling interval becomes a critical
+		parameter that must be tuned to tradeoff CPU usage with
+		responsiveness to hub-related events (It would, I suppose, be more
+		efficient to use synchronous transfers with these lower end host
+		controllers).
+
+endif # USBHOST_HUB
+
 config USBHOST_MSC
 	bool "Mass Storage Class Support"
 	default n
