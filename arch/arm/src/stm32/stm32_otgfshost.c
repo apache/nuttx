@@ -439,9 +439,6 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer);
-static int stm32_transfer_common(FAR struct stm32_usbhost_s *priv,
-                                 FAR struct stm32_ed_s *ed,FAR  uint8_t *buffer,
-                                 size_t buflen);
 static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -1302,7 +1299,7 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
   /* Return a pointer to the control pipe container as the pipe "handle" */
 
   *ep = (usbhost_ep_t)ctrlep;
-  ret = OK;
+  return OK;
 }
 
 /************************************************************************************
@@ -1333,7 +1330,6 @@ static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
   struct usbhost_hubport_s *hport;
   FAR struct stm32_chan_s *chan;
   int chidx;
-  int ret;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
@@ -1761,7 +1757,6 @@ static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
 static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx)
 {
   FAR struct stm32_chan_s *chan;
-  int ret = OK;
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -2005,7 +2000,6 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
 static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx)
 {
   FAR struct stm32_chan_s *chan;
-  int ret;
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -3826,7 +3820,7 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
   regval = stm32_getreg(STM32_OTGFS_HPRT);
   if ((regval & OTGFS_HPRT_PSPD_MASK) == OTGFS_HPRT_PSPD_LS)
     {
-      priv->rhport.hport.speed = USB_SPEED_LOW.
+      priv->rhport.hport.speed = USB_SPEED_LOW;
     }
   else
     {
@@ -3935,7 +3929,7 @@ static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
 
   /* Configure the EP0 OUT channel */
 
-  chan            = priv->&riv->chan[ep0info->outndx];
+  chan            = &priv->chan[ep0info->outndx];
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
   chan->maxpacket = maxpacketsize;
@@ -3944,7 +3938,7 @@ static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
 
   /* Configure the EP0 IN channel */
 
-  chan            = priv->&riv->chan[ep0info->inndx];
+  chan            = &priv->chan[ep0info->inndx];
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
   chan->maxpacket = maxpacketsize;
@@ -4036,7 +4030,6 @@ static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
 static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  FAR struct stm32_ctrlinfo_s *ctrlep;
 
   DEBUGASSERT(priv);
 
@@ -4058,7 +4051,7 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
     {
       /* Halt both control channel and mark the channels available */
 
-      FAR struct stm32_ctrlinfo_s *ctrlep = ( FAR struct stm32_ctrlinfo_s *)ep;
+      FAR struct stm32_ctrlinfo_s *ctrlep = (FAR struct stm32_ctrlinfo_s *)ep;
       stm32_chan_free(priv, ctrlep->inndx);
       stm32_chan_free(priv, ctrlep->outndx);
 
@@ -4276,14 +4269,15 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
                         FAR uint8_t *buffer)
 {
-  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
+  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
   uint32_t start;
   uint32_t elapsed;
   int retries;
   int ret;
 
-  DEBUGASSERT(drvr && req);
+  DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(OTGFS_VTRACE2_CTRLIN, req->type, req->req);
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
@@ -4303,7 +4297,7 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
     {
       /* Send the SETUP request */
 
-      ret = stm32_ctrl_sendsetup(priv, ep0, req);
+      ret = stm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
        {
           usbhost_trace1(OTGFS_TRACE1_SENDSETUP, -ret);
@@ -4319,7 +4313,7 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (buflen > 0)
             {
-              ret = stm32_ctrl_recvdata(priv, ep0, buffer, buflen);
+              ret = stm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
               if (ret < 0)
                 {
                   usbhost_trace1(OTGFS_TRACE1_RECVDATA, -ret);
@@ -4330,8 +4324,8 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (ret == OK)
             {
-              priv->chan[ep0->outndx].outdata1 ^= true;
-              ret = stm32_ctrl_senddata(priv, ep0, NULL, 0);
+              priv->chan[ep0info->outndx].outdata1 ^= true;
+              ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
               if (ret == OK)
                 {
                   /* All success transactions exit here */
@@ -4360,14 +4354,15 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer)
 {
-  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
+  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
   uint32_t start;
   uint32_t elapsed;
   int retries;
   int ret;
 
-  DEBUGASSERT(drvr && req);
+  DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(OTGFS_VTRACE2_CTRLOUT, req->type, req->req);
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
@@ -4387,9 +4382,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
     {
       /* Send the SETUP request */
 
-      /* Send the SETUP request */
-
-      ret = stm32_ctrl_sendsetup(priv, ep0, req);
+      ret = stm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
         {
           usbhost_trace1(OTGFS_TRACE1_SENDSETUP, -ret);
@@ -4407,8 +4400,8 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
             {
               /* Start DATA out transfer (only one DATA packet) */
 
-              priv->chan[ep0->outndx].outdata1 = true;
-              ret = stm32_ctrl_senddata(priv, ep0, NULL, 0);
+              priv->chan[ep0info->outndx].outdata1 = true;
+              ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
               if (ret < 0)
                 {
                   usbhost_trace1(OTGFS_TRACE1_SENDDATA, -ret);
@@ -4419,7 +4412,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (ret == OK)
             {
-              ret = stm32_ctrl_recvdata(priv, ep0, NULL, 0);
+              ret = stm32_ctrl_recvdata(priv, ep0info, NULL, 0);
               if (ret == OK)
                 {
                   /* All success transactins exit here */

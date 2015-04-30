@@ -350,9 +350,9 @@ static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx);
 static int efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
                              FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
-                          FAR struct stm32_chan_s *chan);
-static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
+static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
+                          FAR struct efm32_chan_s *chan);
+static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
                            FAR uint8_t *buffer, size_t buflen,
                            usbhost_asynch_t callback, FAR void *arg);
 #endif
@@ -360,9 +360,9 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx);
 static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
                               FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
-                           FAR struct stm32_chan_s *chan);
-static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
+static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
+                           FAR struct efm32_chan_s *chan);
+static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
                             FAR uint8_t *buffer, size_t buflen,
                             usbhost_asynch_t callback, FAR void *arg);
 #endif
@@ -432,9 +432,6 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer);
-static int efm32_transfer_common(FAR struct efm32_usbhost_s *priv,
-                                 FAR struct efm32_ed_s *ed,FAR  uint8_t *buffer,
-                                 size_t buflen);
 static int efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -1164,11 +1161,11 @@ static void efm32_chan_wakeup(FAR struct efm32_usbhost_s *priv,
 
           if (priv->in)
             {
-              stm32_in_next(priv, chan);
+              efm32_in_next(priv, chan);
             }
           else
             {
-              stm32_out_next(priv, chan);
+              efm32_out_next(priv, chan);
             }
         }
 #endif
@@ -1297,7 +1294,7 @@ static int efm32_ctrlep_alloc(FAR struct efm32_usbhost_s *priv,
   /* Return a pointer to the control pipe container as the pipe "handle" */
 
   *ep = (usbhost_ep_t)ctrlep;
-  ret = OK;
+  return OK;
 }
 
 /************************************************************************************
@@ -1328,7 +1325,6 @@ static int efm32_xfrep_alloc(FAR struct efm32_usbhost_s *priv,
   struct usbhost_hubport_s *hport;
   FAR struct efm32_chan_s *chan;
   int chidx;
-  int ret;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
@@ -1756,7 +1752,6 @@ static int efm32_ctrl_recvdata(FAR struct efm32_usbhost_s *priv,
 static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx)
 {
   FAR struct efm32_chan_s *chan;
-  int ret = OK;
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -1888,7 +1883,7 @@ static int efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 }
 
 /*******************************************************************************
- * Name: stm32_in_next
+ * Name: efm32_in_next
  *
  * Description:
  *   Initiate the next of a sequence of asynchronous transfers.
@@ -1899,8 +1894,8 @@ static int efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
  *******************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
-                          FAR struct stm32_chan_s *chan)
+static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
+                          FAR struct efm32_chan_s *chan)
 {
   usbhost_asynch_t callback;
   FAR void *arg;
@@ -1916,13 +1911,13 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
        * endpoint type
        */
 
-      ret = stm32_in_setup(priv, chidx);
+      ret = efm32_in_setup(priv, chidx);
       if (ret >= 0)
         {
           return;
         }
 
-      udbg("ERROR: stm32_in_setup failed: %d\n", ret);
+      udbg("ERROR: efm32_in_setup failed: %d\n", ret);
       result = ret;
     }
 
@@ -1944,7 +1939,7 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
 #endif
 
 /*******************************************************************************
- * Name: stm32_in_asynch
+ * Name: efm32_in_asynch
  *
  * Description:
  *   Initiate the first of a sequence of asynchronous transfers.
@@ -1955,11 +1950,11 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
  *******************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
+static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
                            FAR uint8_t *buffer, size_t buflen,
                            usbhost_asynch_t callback, FAR void *arg)
 {
-  FAR struct stm32_chan_s *chan;
+  FAR struct efm32_chan_s *chan;
   int ret;
 
   /* Set up for the transfer data and callback BEFORE starting the first transfer */
@@ -1968,19 +1963,19 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   chan->buffer = buffer;
   chan->buflen = buflen;
 
-  ret = stm32_chan_asynchsetup(priv, chan, callback, arg);
+  ret = efm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_chan_asynchsetup failed: %d\n", ret);
+      udbg("ERROR: efm32_chan_asynchsetup failed: %d\n", ret);
       return ret;
     }
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
-  ret = stm32_in_setup(priv, chidx);
+  ret = efm32_in_setup(priv, chidx);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_in_setup failed: %d\n", ret);
+      udbg("ERROR: efm32_in_setup failed: %d\n", ret);
     }
 
   /* And return with the transfer pending */
@@ -2000,7 +1995,6 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
 static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
 {
   FAR struct efm32_chan_s *chan;
-  int ret;
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -2160,7 +2154,7 @@ static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 }
 
 /*******************************************************************************
- * Name: stm32_out_next
+ * Name: efm32_out_next
  *
  * Description:
  *   Initiate the next of a sequence of asynchronous transfers.
@@ -2171,8 +2165,8 @@ static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
  *******************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
-                           FAR struct stm32_chan_s *chan)
+static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
+                           FAR struct efm32_chan_s *chan)
 {
   usbhost_asynch_t callback;
   FAR void *arg;
@@ -2188,13 +2182,13 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
        * endpoint type
        */
 
-      ret = stm32_out_setup(priv, chidx);
+      ret = efm32_out_setup(priv, chidx);
       if (ret >= 0)
         {
           return;
         }
 
-      udbg("ERROR: stm32_out_setup failed: %d\n", ret);
+      udbg("ERROR: efm32_out_setup failed: %d\n", ret);
       result = ret;
     }
 
@@ -2216,7 +2210,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
 #endif
 
 /*******************************************************************************
- * Name: stm32_out_asynch
+ * Name: efm32_out_asynch
  *
  * Description:
  *   Initiate the first of a sequence of asynchronous transfers.
@@ -2227,11 +2221,11 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
  *******************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
+static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
                             FAR uint8_t *buffer, size_t buflen,
                             usbhost_asynch_t callback, FAR void *arg)
 {
-  FAR struct stm32_chan_s *chan;
+  FAR struct efm32_chan_s *chan;
   int ret;
 
   /* Set up for the transfer data and callback BEFORE starting the first transfer */
@@ -2240,19 +2234,19 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   chan->buffer = buffer;
   chan->buflen = buflen;
 
-  ret = stm32_chan_asynchsetup(priv, chan, callback, arg);
+  ret = efm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_chan_asynchsetup failed: %d\n", ret);
+      udbg("ERROR: efm32_chan_asynchsetup failed: %d\n", ret);
       return ret;
     }
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
-  ret = stm32_out_setup(priv, chidx);
+  ret = efm32_out_setup(priv, chidx);
   if (ret < 0)
     {
-      udbg("ERROR: stm32_out_setup failed: %d\n", ret);
+      udbg("ERROR: efm32_out_setup failed: %d\n", ret);
     }
 
   /* And return with the transfer pending */
@@ -3774,7 +3768,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
   regval = efm32_getreg(EFM32_USB_HPRT);
   if ((regval & _USB_HPRT_PRTSPD_MASK) == USB_HPRT_PRTSPD_LS)
     {
-      priv->rhport.hport.speed = USB_SPEED_LOW.
+      priv->rhport.hport.speed = USB_SPEED_LOW;
     }
   else
     {
@@ -3883,7 +3877,7 @@ static int efm32_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
 
   /* Configure the EP0 OUT channel */
 
-  chan            = priv->&riv->chan[ep0info->outndx];
+  chan            = &priv->chan[ep0info->outndx];
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
   chan->maxpacket = maxpacketsize;
@@ -3892,7 +3886,7 @@ static int efm32_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
 
   /* Configure the EP0 IN channel */
 
-  chan            = priv->&riv->chan[ep0info->inndx];
+  chan            = &priv->chan[ep0info->inndx];
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
   chan->maxpacket = maxpacketsize;
@@ -3988,7 +3982,6 @@ static int efm32_epalloc(FAR struct usbhost_driver_s *drvr,
 static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   FAR struct efm32_usbhost_s *priv = (FAR struct efm32_usbhost_s *)drvr;
-  FAR struct efm32_ctrlinfo_s *ctrlep;
 
   DEBUGASSERT(priv);
 
@@ -4010,7 +4003,7 @@ static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
     {
       /* Halt both control channel and mark the channels available */
 
-      FAR struct efm32_ctrlinfo_s *ctrlep = ( FAR struct efm32_ctrlinfo_s *)ep;
+      FAR struct efm32_ctrlinfo_s *ctrlep = (FAR struct efm32_ctrlinfo_s *)ep;
       efm32_chan_free(priv, ctrlep->inndx);
       efm32_chan_free(priv, ctrlep->outndx);
 
@@ -4228,14 +4221,15 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
                         FAR uint8_t *buffer)
 {
-  struct efm32_usbhost_s *priv = (struct efm32_usbhost_s *)drvr;
+  FAR struct efm32_usbhost_s *priv = (FAR struct efm32_usbhost_s *)drvr;
+  FAR struct efm32_ctrlinfo_s *ep0info = (FAR struct efm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
   uint32_t start;
   uint32_t elapsed;
   int retries;
   int ret;
 
-  DEBUGASSERT(drvr && req);
+  DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(OTGFS_VTRACE2_CTRLIN, req->type, req->req);
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
@@ -4255,7 +4249,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
     {
       /* Send the SETUP request */
 
-      ret = efm32_ctrl_sendsetup(priv, ep0, req);
+      ret = efm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
        {
           usbhost_trace1(USB_TRACE1_SENDSETUP, -ret);
@@ -4271,7 +4265,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (buflen > 0)
             {
-              ret = efm32_ctrl_recvdata(priv, ep0, buffer, buflen);
+              ret = efm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
               if (ret < 0)
                 {
                   usbhost_trace1(USB_TRACE1_RECVDATA, -ret);
@@ -4282,8 +4276,8 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (ret == OK)
             {
-              priv->chan[ep0->outndx].outdata1 ^= true;
-              ret = efm32_ctrl_senddata(priv, ep0, NULL, 0);
+              priv->chan[ep0info->outndx].outdata1 ^= true;
+              ret = efm32_ctrl_senddata(priv, ep0info, NULL, 0);
               if (ret == OK)
                 {
                   /* All success transactions exit here */
@@ -4312,14 +4306,15 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer)
 {
-  struct efm32_usbhost_s *priv = (struct efm32_usbhost_s *)drvr;
+  FAR struct efm32_usbhost_s *priv = (FAR struct efm32_usbhost_s *)drvr;
+  FAR struct efm32_ctrlinfo_s *ep0info = (FAR struct efm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
   uint32_t start;
   uint32_t elapsed;
   int retries;
   int ret;
 
-  DEBUGASSERT(drvr && req);
+  DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
   usbhost_vtrace2(OTGFS_VTRACE2_CTRLOUT, req->type, req->req);
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
@@ -4339,9 +4334,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
     {
       /* Send the SETUP request */
 
-      /* Send the SETUP request */
-
-      ret = efm32_ctrl_sendsetup(priv, ep0, req);
+      ret = efm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
         {
           usbhost_trace1(USB_TRACE1_SENDSETUP, -ret);
@@ -4359,8 +4352,8 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
             {
               /* Start DATA out transfer (only one DATA packet) */
 
-              priv->chan[ep0->outndx].outdata1 = true;
-              ret = efm32_ctrl_senddata(priv, ep0, NULL, 0);
+              priv->chan[ep0info->outndx].outdata1 = true;
+              ret = efm32_ctrl_senddata(priv, ep0info, NULL, 0);
               if (ret < 0)
                 {
                   usbhost_trace1(USB_TRACE1_SENDDATA, -ret);
@@ -4371,7 +4364,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (ret == OK)
             {
-              ret = efm32_ctrl_recvdata(priv, ep0, NULL, 0);
+              ret = efm32_ctrl_recvdata(priv, ep0info, NULL, 0);
               if (ret == OK)
                 {
                   /* All success transactins exit here */
