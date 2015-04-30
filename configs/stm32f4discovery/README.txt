@@ -1695,6 +1695,9 @@ Where <subdir> is one of the following:
        System Type -> USB host configuration
          To be determined
 
+       Board Selection ->
+         CONFIG_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
+
        RTOS Features -> Work Queue Support
          CONFIG_SCHED_LPWORK=y     : Low priority queue support is needed
          CONFIG_SCHED_LPNTHREADS=1

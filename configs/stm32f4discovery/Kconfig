@@ -12,6 +12,11 @@ config STM32F4DISBB
 		Select if you are using the STM32F4DIS-BB base board with the
 		STM32F4Discovery.
 
+config USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1024
+	depends on USBHOST
+
 config PM_BUTTONS
 	bool "PM button support"
 	default n
