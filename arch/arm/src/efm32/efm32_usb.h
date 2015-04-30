@@ -58,6 +58,83 @@
 #endif
 
 /************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+#if defined(HAVE_USBHOST_TRACE) && defined(CONFIG_EFM32_OTGFS)
+enum usbhost_trace1codes_e
+{
+  __TRACE1_BASEVALUE = 0,              /* This will force the first value to be 1 */
+
+  USBHOST_TRACE1_DEVDISCONN,           /* OTGFS ERROR: Host Port Device disconnected */
+  USBHOST_TRACE1_IRQATTACH,            /* OTGFS ERROR: Failed to attach IRQ */
+  USBHOST_TRACE1_TRNSFRFAILED,         /* OTGFS ERROR: Host Port Transfer Failed */
+  USBHOST_TRACE1_SENDSETUP,            /* OTGFS ERROR: sendsetup() failed with: */
+  USBHOST_TRACE1_SENDDATA,             /* OTGFS ERROR: senddata() failed with: */
+  USBHOST_TRACE1_RECVDATA,             /* OTGFS ERROR: recvdata() failed with: */
+
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
+  USBHOST_VTRACE1_CONNECTED,           /* OTGFS Host Port connected */
+  USBHOST_VTRACE1_DISCONNECTED,        /* OTGFS Host Port disconnected */
+  USBHOST_VTRACE1_GINT,                /* OTGFS Handling Interrupt. Entry Point */
+  USBHOST_VTRACE1_GINT_SOF,            /* OTGFS Handle the start of frame interrupt */
+  USBHOST_VTRACE1_GINT_RXFLVL,         /* OTGFS Handle the RxFIFO non-empty interrupt */
+  USBHOST_VTRACE1_GINT_NPTXFE,         /* OTGFS Handle the non-periodic TxFIFO empty interrupt */
+  USBHOST_VTRACE1_GINT_PTXFE,          /* OTGFS Handle the periodic TxFIFO empty interrupt */
+  USBHOST_VTRACE1_GINT_HC,             /* OTGFS Handle the host channels interrupt */
+  USBHOST_VTRACE1_GINT_HPRT,           /* OTGFS Handle the host port interrupt */
+  USBHOST_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGFS  HPRT: Port Over-Current Change*/
+  USBHOST_VTRACE1_GINT_HPRT_PCDET,     /* OTGFS  HPRT: Port Connect Detect */
+  USBHOST_VTRACE1_GINT_HPRT_PENCHNG,   /* OTGFS  HPRT: Port Enable Changed */
+  USBHOST_VTRACE1_GINT_HPRT_LSDEV,     /* OTGFS  HPRT: Low Speed Device Connected */
+  USBHOST_VTRACE1_GINT_HPRT_FSDEV,     /* OTGFS  HPRT: Full Speed Device Connected */
+  USBHOST_VTRACE1_GINT_HPRT_LSFSSW,    /* OTGFS  HPRT: Host Switch: LS -> FS */
+  USBHOST_VTRACE1_GINT_HPRT_FSLSSW,    /* OTGFS  HPRT: Host Switch: FS -> LS */
+  USBHOST_VTRACE1_GINT_DISC,           /* OTGFS Handle the disconnect detected interrupt */
+  USBHOST_VTRACE1_GINT_IPXFR,          /* OTGFS Handle the incomplete periodic transfer */
+#endif
+
+  __TRACE1_NSTRINGS,                   /* Separates the format 1 from the format 2 strings */
+
+  USBHOST_TRACE2_CLIP,                 /* OTGFS CLIP: chidx:  buflen: */
+
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
+  USBHOST_VTRACE2_CHANWAKEUP_IN,       /* OTGFS IN Channel wake up with result */
+  USBHOST_VTRACE2_CHANWAKEUP_OUT,      /* OTGFS OUT Channel wake up with result */
+  USBHOST_VTRACE2_CTRLIN,              /* OTGFS CTRLIN */
+  USBHOST_VTRACE2_CTRLOUT,             /* OTGFS CTRLOUT */
+  USBHOST_VTRACE2_INTRIN,              /* OTGFS INTRIN */
+  USBHOST_VTRACE2_INTROUT,             /* OTGFS INTROUT */
+  USBHOST_VTRACE2_BULKIN,              /* OTGFS BULKIN */
+  USBHOST_VTRACE2_BULKOUT,             /* OTGFS BULKOUT */
+  USBHOST_VTRACE2_ISOCIN,              /* OTGFS ISOCIN */
+  USBHOST_VTRACE2_ISOCOUT,             /* OTGFS ISOCOUT */
+  USBHOST_VTRACE2_STARTTRANSFER,       /* OTGFS EP buflen */
+  USBHOST_VTRACE2_CHANCONF_CTRL_IN,
+  USBHOST_VTRACE2_CHANCONF_CTRL_OUT,
+  USBHOST_VTRACE2_CHANCONF_INTR_IN,
+  USBHOST_VTRACE2_CHANCONF_INTR_OUT,
+  USBHOST_VTRACE2_CHANCONF_BULK_IN,
+  USBHOST_VTRACE2_CHANCONF_BULK_OUT,
+  USBHOST_VTRACE2_CHANCONF_ISOC_IN,
+  USBHOST_VTRACE2_CHANCONF_ISOC_OUT,
+  USBHOST_VTRACE2_CHANHALT,            /* Channel halted. chidx: , reason:  */
+#endif
+
+  __TRACE2_NSTRINGS                    /* Total number of enumeration values */
+};
+
+#  define TRACE1_FIRST     ((int)__TRACE1_BASEVALUE + 1)
+#  define TRACE1_INDEX(id) ((int)(id) - TRACE1_FIRST)
+#  define TRACE1_NSTRINGS  TRACE1_INDEX(__TRACE1_NSTRINGS)
+
+#  define TRACE2_FIRST     ((int)__TRACE1_NSTRINGS + 1)
+#  define TRACE2_INDEX(id) ((int)(id) - TRACE2_FIRST)
+#  define TRACE2_NSTRINGS  TRACE2_INDEX(__TRACE2_NSTRINGS)
+
+#endif /* HAVE_USBHOST_TRACE && CONFIG_EFM32_OTGFS */
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 

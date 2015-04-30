@@ -51,6 +51,10 @@
 
 #if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_USBHOST)
 
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
 #ifdef HAVE_USBHOST_TRACE
 enum usbhost_trace1codes_e
 {
