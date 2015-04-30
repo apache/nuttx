@@ -2016,7 +2016,7 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Set up the OUT data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_ISOCOUT, chidx, buflen);
+        usbhost_vtrace2(OTGFS_VTRACE2_ISOCOUT, chidx, chan->buflen);
         chan->pid = EFM32_USB_PID_DATA0;
       }
       break;
@@ -2025,7 +2025,7 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Setup the OUT data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_BULKOUT, chidx, buflen);
+        usbhost_vtrace2(OTGFS_VTRACE2_BULKOUT, chidx, chan->buflen);
         chan->pid = chan->outdata1 ? EFM32_USB_PID_DATA1 : EFM32_USB_PID_DATA0;
       }
       break;
@@ -2034,7 +2034,7 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Setup the OUT data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_INTROUT, chidx, buflen);
+        usbhost_vtrace2(OTGFS_VTRACE2_INTROUT, chidx, chan->buflen);
         chan->pid = chan->outdata1 ? EFM32_USB_PID_DATA1 : EFM32_USB_PID_DATA0;
 
         /* Toggle the OUT data PID for the next transfer */
@@ -3869,7 +3869,7 @@ static int efm32_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
   FAR struct efm32_ctrlinfo_s *ep0info = (FAR struct efm32_ctrlinfo_s *)ep0;
   FAR struct efm32_chan_s *chan;
 
-  DEBUGASSERT(drvr != NULL && ep0info != NULL && && funcaddr < 128 &&
+  DEBUGASSERT(drvr != NULL && ep0info != NULL && funcaddr < 128 &&
               maxpacketsize <= 64);
 
   /* We must have exclusive access to the USB host hardware and state structures */
