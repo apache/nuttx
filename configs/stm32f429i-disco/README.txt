@@ -15,20 +15,17 @@ memory and 256kbytes. The board features:
   - USB OTG FS with micro-AB connector, and
   - Easy access to most MCU pins.
 
-NOTE:  The STM32F429I-DISCO port is in early stages and has only limited
-       support at this point.  I have basic NSH command support with
-       full 8MByte SDRAM + the internal 256K.  Unsupported are the LCD
-       and USB interfaces.
+NOTE:  Includes basic NSH command support with full 8MByte SDRAM + the
+       internal 256K.  Unsupported are the LCD and USB interfaces.
 
        The board pin configuration to support on-board SDRAM and LCD
        prevents use of the OTG FS module which is normally used for USB
        NSH sessions.  Instead, the board routes the OTG HS pins to the
-       USB OTG connector.  Until the port has been updated to use the
-       OTG HS module of the MCU, USB functions are not available.
+       USB OTG connector.
 
        The NSH configuration / testing that has been done so far was
        performed by connecting an external RS-232 line driver to pins
-       PA9 and PA10 and configuring UART1 as the NSH console.
+       PA9 (TX) and PA10 (RX) and configuring UART1 as the NSH console.
 
 Refer to the http://www.st.com website for further information about this
 board (search keyword: 429i-disco)
@@ -745,15 +742,31 @@ Where <subdir> is one of the following:
        a USB host on the STM32F429I-DISCO, including support for a mass storage
        class driver:
 
-       CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
-       CONFIG_USBHOST=y         : Enable USB host support
-       CONFIG_STM32_OTGFS=y     : Enable the STM32 USB OTG FS block
-       CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF FS support
-       CONFIG_SCHED_WORKQUEUE=y : Worker thread support is required for the mass
-                                  storage class driver.
-       CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
-                                  is needed for NSH
-       CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
+       Device Drivers ->
+         CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
+         CONFIG_USBHOST=y         : Enable USB host support
+         CONFIG_USBHOST_ISOC_DISABLE=y
+
+       Device Drivers -> USB Host Driver Support
+         CONFIG_USBHOST_MSC=y     : Enable the mass storage class
+
+       System Type -> STM32 Peripheral Support
+         CONFIG_STM32_OTGHS=y     : Enable the STM32 USB OTG FH block (FS mode)
+         CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF HS support
+
+       RTOS Features -> Work Queue Support
+         CONFIG_SCHED_WORKQUEUE=y : High priority worker thread support is required
+         CONFIG_SCHED_HPWORK=y    :   for the mass storage class driver.
+
+       File Systems ->
+         CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
+
+       Board Selection ->
+         CONFIG_LIB_BOARDCTL=y    : Needed for CONFIG_NSH_ARCHINIT
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
+                                  : is needed for NSH
 
        With those changes, you can use NSH with a FLASH pen driver as shown
        belong.  Here NSH is started with nothing in the USB host slot:
@@ -799,6 +812,36 @@ Where <subdir> is one of the following:
        before removing it:
 
        nsh> umount /mnt/stuff
+
+   11. I used this configuration to test the USB hub class.  I did this
+       testing with the following changes to the configuration (in addition
+       to those listed above for base USB host/mass storage class support):
+
+       Drivers -> USB Host Driver Support
+         CONFIG_USBHOST_HUB=y     : Enable the hub class
+         CONFIG_USBHOST_ASYNCH=y  : Asynchonous I/O supported needed for hubs
+
+       Board Selection ->
+         CONFIG_STM32F429IDISCO_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
+
+       RTOS Features -> Work Queue Support
+         CONFIG_SCHED_LPWORK=y     : Low priority queue support is needed
+         CONFIG_SCHED_LPNTHREADS=1
+         CONFIG_SCHED_LPWORKSTACKSIZE=1024
+
+       NOTES:
+
+       1. It is necessary to perform work on the low-priority work queue
+          (vs. the high priority work queue) because deferred hub-related
+          work requires some delays and waiting that is not appropriate on
+          the high priority work queue.
+
+       2. Stack usage make increase when USB hub support is enabled because
+          the nesting depth of certain USB host class logic can increase.
+
+       STATUS:
+       2015-04-30
+          Appears to be fully functional.
 
   extflash:
   ---------
