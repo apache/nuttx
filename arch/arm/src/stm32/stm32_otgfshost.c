@@ -192,7 +192,8 @@ enum stm32_chreason_e
   CHREASON_STALL,        /* Endpoint stalled */
   CHREASON_TXERR,        /* Transfer error received */
   CHREASON_DTERR,        /* Data toggle error received */
-  CHREASON_FRMOR         /* Frame overrun */
+  CHREASON_FRMOR,        /* Frame overrun */
+  CHREASON_CANCELLED     /* Transfer cancelled */
 };
 
 /* This structure retains the state of one host channel.  NOTE: Since there
@@ -4594,9 +4595,29 @@ static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-# error Missing logic
-  return -ENOSYS;
- }
+  FAR struct stm32_usbhost_s *priv  = (FAR struct stm32_usbhost_s *)drvr;
+  unsigned int chidx = (unsigned int)ep;
+  irqstate_t flags;
+
+  uvdbg("chidx: %u: %d\n",  chidx);
+  DEBUGASSERT(priv && chidx < STM32_MAX_TX_FIFOS);
+
+  /* We must have exclusive access to the USB host hardware and state structures.
+   * And when we have that, we need to disable interrupts to avoid race conditions
+   * with the asynchronous completion of the transfer being cancelled.
+   */
+
+  stm32_takesem(&priv->exclsem);
+  flags = irqsave();
+
+  /* Halt the channel */
+
+  stm32_chan_halt(priv, chidx, CHREASON_CANCELLED);
+
+  irqrestore(flags);
+  stm32_givesem(&priv->exclsem);
+  return OK;
+}
 #endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
