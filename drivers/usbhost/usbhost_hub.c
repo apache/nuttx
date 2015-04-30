@@ -1161,13 +1161,23 @@ static void usbhost_callback(FAR void *arg, int result)
    * transfer will pend until data is available (OHCI and EHCI).  On lower
    * end host controllers (like STM32 and EFM32), the transfer will fail
    * immediately when the device NAKs the first attempted interrupt IN
-   * transfer (with result == EGAIN).  In that case (or in the case of
+   * transfer (with result == EAGAIN).  In that case (or in the case of
    * other errors), we must fall back to polling.
    */
 
   if (result != OK)
     {
-      ulldbg("ERROR: Transfer failed: %d\n", result);
+      /* This debug output is good to know, but really a nuisance for
+       * those configurations where we have to fall back to polling.
+       * FIX:  Don't output the message is the result is EAGAIN.
+       */
+
+#if defined(CONFIG_DEBUG_USB) && !defined(CONFIG_DEBUG_VERBOSE)
+      if (result != EAGAIN)
+#endif
+        {
+          ulldbg("ERROR: Transfer failed: %d\n", result);
+        }
 
       /* Indicate there there is nothing to do.  So when the work is
        * performed, nothing will happen other than we will set to receive

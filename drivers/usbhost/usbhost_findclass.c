@@ -160,7 +160,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
   uvdbg("Looking for class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
         id->base, id->subclass, id->proto, id->vid, id->pid);
 
-  /* g_classregistry is a singly-linkedlist of class ID information added by
+  /* g_classregistry is a singly-linked list of class ID information added by
    * calls to usbhost_registerclass().  Since this list is accessed from USB
    * host controller interrupt handling logic, accesses to this list must be
    * protected by disabling interrupts.
