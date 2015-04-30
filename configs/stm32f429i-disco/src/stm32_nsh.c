@@ -304,19 +304,6 @@ int board_app_initialize(void)
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
-
-#ifdef CONFIG_USBHOST_MSC
-  /* Initialize the USB storage class */
-
-  ret = usbhost_storageinit();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host storage: %d\n", ret);
-      return ret;
-    }
-
-#endif
-
 #endif
 
 #ifdef HAVE_USBMONITOR

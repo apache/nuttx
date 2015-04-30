@@ -84,6 +84,16 @@ config STM32F429I_DISCO_RAMMTD_SIZE
 	---help---
 		Sets the size of static RAM allocation for the SMART RAM device
 
+config STM32F429IDISCO_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1024
+	depends on USBHOST
+
+config STM32F429IDISCO_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
 config PM_BUTTONS
 	bool "PM Button support"
 	default n
