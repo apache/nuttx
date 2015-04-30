@@ -43,7 +43,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-
 #include "stm32_usbhost.h"
 
 #ifdef HAVE_USBHOST_TRACE

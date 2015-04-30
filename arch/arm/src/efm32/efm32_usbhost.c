@@ -157,6 +157,13 @@
 #  define  MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+/* Tracing *********************************************************************/
+
+#define TR_FMT1 false
+#define TR_FMT2 true
+
+#define TRENTRY(id,fmt1,string) {string}
+
 /*******************************************************************************
  * Private Types
  *******************************************************************************/
@@ -269,6 +276,19 @@ struct efm32_usbhost_s
 
   struct efm32_chan_s chan[EFM32_MAX_TX_FIFOS];
 };
+
+#ifdef HAVE_USBHOST_TRACE
+/* Format of one trace entry */
+
+struct stm32_usbhost_trace_s
+{
+#if 0
+  uint16_t id;
+  bool fmt2;
+#endif
+  FAR const char *string;
+};
+#endif
 
 /*******************************************************************************
  * Private Function Prototypes
@@ -478,6 +498,69 @@ static struct usbhost_connection_s g_usbconn =
   .wait             = efm32_wait,
   .enumerate        = efm32_enumerate,
 };
+
+#ifdef HAVE_USBHOST_TRACE
+/* Trace strings */
+
+static const struct stm32_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
+{
+  TRENTRY(USBHOST_TRACE1_DEVDISCONN,         TR_FMT1, "OTGFS ERROR: Host Port %d. Device disconnected\n"),
+  TRENTRY(USBHOST_TRACE1_IRQATTACH,          TR_FMT1, "OTGFS ERROR: Failed to attach IRQ\n"),
+  TRENTRY(USBHOST_TRACE1_TRNSFRFAILED,       TR_FMT1, "OTGFS  ERROR: Transfer Failed. ret=%d\n"),
+  TRENTRY(USBHOST_TRACE1_SENDSETUP,          TR_FMT1, "OTGFS  ERROR: ctrl_sendsetup() failed with: %d\n"),
+  TRENTRY(USBHOST_TRACE1_SENDDATA,           TR_FMT1, "OTGFS  ERROR: ctrl_senddata() failed with: %d\n"),
+  TRENTRY(USBHOST_TRACE1_RECVDATA,           TR_FMT1, "OTGFS  ERROR: ctrl_recvdata() failed with: %d\n"),
+
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
+  TRENTRY(USBHOST_VTRACE1_CONNECTED,         TR_FMT1, "OTGFS Host Port %d connected.\n"),
+  TRENTRY(USBHOST_VTRACE1_DISCONNECTED,      TR_FMT1, "OTGFS Host Port %d disconnected.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT,              TR_FMT1, "OTGFS Handling Interrupt. Entry Point.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_SOF,          TR_FMT1, "OTGFS Handle the start of frame interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_RXFLVL,       TR_FMT1, "OTGFS Handle the RxFIFO non-empty interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_NPTXFE,       TR_FMT1, "OTGFS Handle the non-periodic TxFIFO empty interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_PTXFE,        TR_FMT1, "OTGFS Handle the periodic TxFIFO empty interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HC,           TR_FMT1, "OTGFS Handle the host channels interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT,         TR_FMT1, "OTGFS Handle the host port interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_POCCHNG, TR_FMT1, "OTGFS  HPRT: Port Over-Current Change.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_PCDET,   TR_FMT1, "OTGFS  HPRT: Port Connect Detect.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_PENCHNG, TR_FMT1, "OTGFS  HPRT: Port Enable Changed.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_LSDEV,   TR_FMT1, "OTGFS  HPRT: Low Speed Device Connected.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_FSDEV,   TR_FMT1, "OTGFS  HPRT: Full Speed Device Connected.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_LSFSSW,  TR_FMT1, "OTGFS  HPRT: Host Switch: LS -> FS.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_HPRT_FSLSSW,  TR_FMT1, "OTGFS  HPRT: Host Switch: FS -> LS.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_DISC,         TR_FMT1, "OTGFS Handle the disconnect detected interrupt.\n"),
+  TRENTRY(USBHOST_VTRACE1_GINT_IPXFR,        TR_FMT1, "OTGFS Handle the incomplete periodic transfer.\n"),
+#endif
+};
+
+static const struct stm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
+{
+  TRENTRY(USBHOST_TRACE2_CLIP,               TR_FMT2, "OTGFS CLIP: chidx: %d buflen: %d\n"),
+
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
+  TRENTRY(USBHOST_VTRACE2_CHANWAKEUP_IN,     TR_FMT2, "OTGFS  EP%d(IN)  wake up with result: %d\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANWAKEUP_OUT,    TR_FMT2, "OTGFS  EP%d(OUT) wake up with result: %d\n"),
+  TRENTRY(USBHOST_VTRACE2_CTRLIN,            TR_FMT2, "OTGFS CTRL_IN  type: %02x req: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_CTRLOUT,           TR_FMT2, "OTGFS CTRL_OUT type: %02x req: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_INTRIN,            TR_FMT2, "OTGFS INTR_IN  chidx: %02x len: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_INTROUT,           TR_FMT2, "OTGFS INTR_OUT chidx: %02x len: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_BULKIN,            TR_FMT2, "OTGFS BULK_IN  chidx: %02x len: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_BULKOUT,           TR_FMT2, "OTGFS BULK_OUT chidx: %02x len: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_ISOCIN,            TR_FMT2, "OTGFS ISOC_IN  chidx: %02x len: %04d\n"),
+  TRENTRY(USBHOST_VTRACE2_ISOCOUT,           TR_FMT2, "OTGFS ISOC_OUT chidx: %02x req: %02x\n"),
+  TRENTRY(USBHOST_VTRACE2_STARTTRANSFER,     TR_FMT2, "OTGFS  Transfer chidx: %d buflen: %d\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_CTRL_IN,  TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,IN ,CTRL)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_CTRL_OUT, TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,OUT,CTRL)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_INTR_IN,  TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,IN ,INTR)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_INTR_OUT, TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,OUT,INTR)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_BULK_IN,  TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,IN ,BULK)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_BULK_OUT, TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,OUT,BULK)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_ISOC_IN,  TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,IN ,ISOC)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANCONF_ISOC_OUT, TR_FMT2, "OTGFS Channel configured. chidx: %d: (EP%d,OUT,ISOC)\n"),
+  TRENTRY(USBHOST_VTRACE2_CHANHALT,          TR_FMT2, "OTGFS Channel halted. chidx: %d, reason: %d\n"),
+#endif
+};
+#endif /* HAVE_USBHOST_TRACE */
 
 /*******************************************************************************
  * Public Data
@@ -767,13 +850,13 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 
         if (chan->eptype == EFM32_USB_EPTYPE_CTRL)
           {
-            intrace  = OTGFS_VTRACE2_CHANCONF_CTRL_IN;
-            outtrace = OTGFS_VTRACE2_CHANCONF_CTRL_OUT;
+            intrace  = USBHOST_VTRACE2_CHANCONF_CTRL_IN;
+            outtrace = USBHOST_VTRACE2_CHANCONF_CTRL_OUT;
           }
         else
           {
-            intrace  = OTGFS_VTRACE2_CHANCONF_BULK_IN;
-            outtrace = OTGFS_VTRACE2_CHANCONF_BULK_OUT;
+            intrace  = USBHOST_VTRACE2_CHANCONF_BULK_IN;
+            outtrace = USBHOST_VTRACE2_CHANCONF_BULK_OUT;
           }
 #endif
 
@@ -809,14 +892,14 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 
         if (chan->in)
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_INTR_IN, chidx,
+            usbhost_vtrace2(USBHOST_VTRACE2_CHANCONF_INTR_IN, chidx,
                             chan->epno);
             regval |= USB_HC_INTMSK_BBLERRMSK;
           }
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
         else
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_INTR_OUT, chidx,
+            usbhost_vtrace2(USBHOST_VTRACE2_CHANCONF_INTR_OUT, chidx,
                             chan->epno);
           }
 #endif
@@ -834,14 +917,14 @@ static void efm32_chan_configure(FAR struct efm32_usbhost_s *priv, int chidx)
 
         if (chan->in)
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_ISOC_IN, chidx,
+            usbhost_vtrace2(USBHOST_VTRACE2_CHANCONF_ISOC_IN, chidx,
                             chan->epno);
             regval |= (USB_HC_INTMSK_XACTERRMSK | USB_HC_INTMSK_BBLERRMSK);
           }
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
         else
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_ISOC_OUT, chidx,
+            usbhost_vtrace2(USBHOST_VTRACE2_CHANCONF_ISOC_OUT, chidx,
                             chan->epno);
           }
 #endif
@@ -913,7 +996,7 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
    * handling logic to know what to do next.
    */
 
-  usbhost_vtrace2(OTGFS_VTRACE2_CHANHALT, chidx, chreason);
+  usbhost_vtrace2(USBHOST_VTRACE2_CHANHALT, chidx, chreason);
 
   priv->chan[chidx].chreason = (uint8_t)chreason;
 
@@ -1144,8 +1227,8 @@ static void efm32_chan_wakeup(FAR struct efm32_usbhost_s *priv,
 #endif
           /* Wake'em up! */
 
-          usbhost_vtrace2(chan->in ? OTGFS_VTRACE2_CHANWAKEUP_IN :
-                                     OTGFS_VTRACE2_CHANWAKEUP_OUT,
+          usbhost_vtrace2(chan->in ? USBHOST_VTRACE2_CHANWAKEUP_IN :
+                                     USBHOST_VTRACE2_CHANWAKEUP_OUT,
                           chan->epno, chan->result);
 
           efm32_givesem(&chan->waitsem);
@@ -1392,7 +1475,7 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
 
   chan           = &priv->chan[chidx];
 
-  usbhost_vtrace2(OTGFS_VTRACE2_STARTTRANSFER, chidx, chan->buflen);
+  usbhost_vtrace2(USBHOST_VTRACE2_STARTTRANSFER, chidx, chan->buflen);
 
   chan->result   = EBUSY;
   chan->inflight = 0;
@@ -1422,7 +1505,7 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
         {
           npackets = EFM32_MAX_PKTCOUNT;
           chan->buflen = EFM32_MAX_PKTCOUNT * maxpacket;
-          usbhost_trace2(USB_TRACE2_CLIP, chidx, chan->buflen);
+          usbhost_trace2(USBHOST_TRACE2_CLIP, chidx, chan->buflen);
         }
     }
   else
@@ -1611,7 +1694,7 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
       ret = efm32_chan_waitsetup(priv, chan);
       if (ret != OK)
         {
-          usbhost_trace1(USB_TRACE1_DEVDISCONN, 0);
+          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
           return ret;
         }
 
@@ -1634,7 +1717,7 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
 
           if (ret < 0)
             {
-              usbhost_trace1(USB_TRACE1_TRNSFRFAILED, ret);
+              usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED, ret);
             }
 
           /* Return the result in any event */
@@ -1690,7 +1773,7 @@ static int efm32_ctrl_senddata(FAR struct efm32_usbhost_s *priv,
   ret = efm32_chan_waitsetup(priv, chan);
   if (ret != OK)
     {
-      usbhost_trace1(USB_TRACE1_DEVDISCONN, 0);
+      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
       return ret;
     }
 
@@ -1730,7 +1813,7 @@ static int efm32_ctrl_recvdata(FAR struct efm32_usbhost_s *priv,
   ret = efm32_chan_waitsetup(priv, chan);
   if (ret != OK)
     {
-      usbhost_trace1(USB_TRACE1_DEVDISCONN, 0);
+      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
       return ret;
     }
 
@@ -1774,7 +1857,7 @@ static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Set up the IN data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_ISOCIN, chidx, chan->buflen);
+        usbhost_vtrace2(USBHOST_VTRACE2_ISOCIN, chidx, chan->buflen);
         chan->pid = EFM32_USB_PID_DATA0;
       }
       break;
@@ -1783,7 +1866,7 @@ static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Setup the IN data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_BULKIN, chidx, chan->buflen);
+        usbhost_vtrace2(USBHOST_VTRACE2_BULKIN, chidx, chan->buflen);
         chan->pid = chan->indata1 ? EFM32_USB_PID_DATA1 : EFM32_USB_PID_DATA0;
       }
       break;
@@ -1792,7 +1875,7 @@ static int efm32_in_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Setup the IN data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_INTRIN, chidx, chan->buflen);
+        usbhost_vtrace2(USBHOST_VTRACE2_INTRIN, chidx, chan->buflen);
         chan->pid = chan->indata1 ? EFM32_USB_PID_DATA1 : EFM32_USB_PID_DATA0;
       }
       break;
@@ -1836,7 +1919,7 @@ static int efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
       ret = efm32_chan_waitsetup(priv, chan);
       if (ret != OK)
         {
-          usbhost_trace1(OTGFS_TRACE1_DEVDISCONN, 0);
+          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN, 0);
           return ret;
         }
 
@@ -1860,7 +1943,7 @@ static int efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 
       if (ret != OK)
         {
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED,ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2017,7 +2100,7 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Set up the OUT data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_ISOCOUT, chidx, chan->buflen);
+        usbhost_vtrace2(USBHOST_VTRACE2_ISOCOUT, chidx, chan->buflen);
         chan->pid = EFM32_USB_PID_DATA0;
       }
       break;
@@ -2026,7 +2109,7 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Setup the OUT data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_BULKOUT, chidx, chan->buflen);
+        usbhost_vtrace2(USBHOST_VTRACE2_BULKOUT, chidx, chan->buflen);
         chan->pid = chan->outdata1 ? EFM32_USB_PID_DATA1 : EFM32_USB_PID_DATA0;
       }
       break;
@@ -2035,7 +2118,7 @@ static int efm32_out_setup(FAR struct efm32_usbhost_s *priv, int chidx)
       {
         /* Setup the OUT data PID */
 
-        usbhost_vtrace2(OTGFS_VTRACE2_INTROUT, chidx, chan->buflen);
+        usbhost_vtrace2(USBHOST_VTRACE2_INTROUT, chidx, chan->buflen);
         chan->pid = chan->outdata1 ? EFM32_USB_PID_DATA1 : EFM32_USB_PID_DATA0;
 
         /* Toggle the OUT data PID for the next transfer */
@@ -2091,7 +2174,7 @@ static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
       ret = efm32_chan_waitsetup(priv, chan);
       if (ret != OK)
         {
-          usbhost_trace1(OTGFS_TRACE1_DEVDISCONN,0);
+          usbhost_trace1(USBHOST_TRACE1_DEVDISCONN,0);
           return ret;
         }
 
@@ -2112,7 +2195,7 @@ static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
 
       if (ret != OK)
         {
-          usbhost_trace1(OTGFS_TRACE1_TRNSFRFAILED,ret);
+          usbhost_trace1(USBHOST_TRACE1_TRNSFRFAILED,ret);
 
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
@@ -2135,7 +2218,7 @@ static int efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
            * data in the FIFO when the NAK occurs?  Does it discard it?
            */
 
-          efm32_flush_txfifos(OTGFS_GRSTCTL_TXFNUM_HALL);
+          efm32_flush_txfifos(USB_GRSTCTL_TXFNUM_FALL);
 
           /* Get the device a little time to catch up.  Then retry the transfer
            * using the same buffer pointer and length.
@@ -2782,7 +2865,7 @@ static void efm32_gint_connected(FAR struct efm32_usbhost_s *priv)
     {
       /* Yes.. then now we are connected */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_CONNECTED,0);
+      usbhost_vtrace1(USBHOST_VTRACE1_CONNECTED,0);
       priv->connected = true;
       priv->change    = true;
       DEBUGASSERT(priv->smstate == SMSTATE_DETACHED);
@@ -2814,7 +2897,7 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
     {
       /* Yes.. then we no longer connected */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_DISCONNECTED,0);
+      usbhost_vtrace1(USBHOST_VTRACE1_DISCONNECTED,0);
 
       /* Are we bound to a class driver? */
 
@@ -3206,7 +3289,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
   uint32_t newhprt;
   uint32_t hcfg;
 
-  usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT, 0);
+  usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT, 0);
 
   /* Read the port status and control register (HPRT) */
 
@@ -3226,7 +3309,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
     {
       /* Set up to clear the POCCHNG status in the new HPRT contents. */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_POCCHNG, 0);
+      usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_POCCHNG, 0);
       newhprt |= USB_HPRT_PRTOVRCURRCHNG;
     }
 
@@ -3240,7 +3323,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
        * process the new connection event.
        */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PCDET, 0);
+      usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_PCDET, 0);
       newhprt |= USB_HPRT_PRTCONNDET;
       efm32_portreset(priv);
       efm32_gint_connected(priv);
@@ -3252,7 +3335,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
     {
       /* Set up to clear the PENCHNG status in the new HPRT contents. */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PENCHNG, 0);
+      usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_PENCHNG, 0);
       newhprt |= USB_HPRT_PRTENCHNG;
 
       /* Was the port enabled? */
@@ -3275,7 +3358,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
             {
               /* Set the Host Frame Interval Register for the 6KHz speed */
 
-              usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_LSDEV, 0);
+              usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_LSDEV, 0);
               efm32_putreg(EFM32_USB_HFIR, 6000);
 
               /* Are we switching from FS to LS? */
@@ -3283,7 +3366,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
               if ((hcfg & _USB_HCFG_FSLSPCLKSEL_MASK) != USB_HCFG_FSLSPCLKSEL_DIV8)
                 {
 
-                  usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSLSSW, 0);
+                  usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_FSLSSW, 0);
                   /* Yes... configure for LS */
 
                   hcfg &= ~_USB_HCFG_FSLSPCLKSEL_MASK;
@@ -3298,7 +3381,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
           else /* if ((hprt & _USB_HPRT_PRTSPD_MASK) == USB_HPRT_PSPD_FS) */
             {
 
-              usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSDEV, 0);
+              usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_FSDEV, 0);
               efm32_putreg(EFM32_USB_HFIR, 48000);
 
               /* Are we switching from LS to FS? */
@@ -3306,7 +3389,7 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
               if ((hcfg & _USB_HCFG_FSLSPCLKSEL_MASK) != USB_HCFG_FSLSPCLKSEL_DIV1)
                 {
 
-                  usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_LSFSSW, 0);
+                  usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_LSFSSW, 0);
                   /* Yes... configure for FS */
 
                   hcfg &= ~_USB_HCFG_FSLSPCLKSEL_MASK;
@@ -3422,7 +3505,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 #ifdef CONFIG_EFM32_OTGFS_SOFINTR
       if ((pending & USB_GINTSTS_SOF) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_SOF, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_SOF, 0);
           efm32_gint_sofisr(priv);
         }
 #endif
@@ -3431,7 +3514,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & USB_GINTSTS_RXFLVL) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_RXFLVL, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_RXFLVL, 0);
           efm32_gint_rxflvlisr(priv);
         }
 
@@ -3439,7 +3522,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & USB_GINTSTS_NPTXFEMP) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_NPTXFE, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_NPTXFE, 0);
           efm32_gint_nptxfeisr(priv);
         }
 
@@ -3447,7 +3530,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & USB_GINTSTS_PTXFEMP) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_PTXFE, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_PTXFE, 0);
           efm32_gint_ptxfeisr(priv);
         }
 
@@ -3455,7 +3538,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & USB_GINTSTS_HCHINT) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_HC, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_HC, 0);
           efm32_gint_hcisr(priv);
         }
 
@@ -3470,7 +3553,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & USB_GINTSTS_DISCONNINT) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_DISC, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_DISC, 0);
           efm32_gint_discisr(priv);
         }
 
@@ -3478,7 +3561,7 @@ static int efm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & USB_GINTSTS_INCOMPLP) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_IPXFR, 0);
+          usbhost_vtrace1(USBHOST_VTRACE1_GINT_IPXFR, 0);
           efm32_gint_ipxfrisr(priv);
         }
     }
@@ -3683,27 +3766,62 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
  *******************************************************************************/
 
 static int efm32_wait(FAR struct usbhost_connection_s *conn,
-                      FAR const bool *connected)
+                      FAR struct usbhost_hubport_s **hport)
 {
   FAR struct efm32_usbhost_s *priv = &g_usbhost;
+  struct usbhost_hubport_s *connport;
   irqstate_t flags;
 
-  /* Are we already connected? */
+  /* Loop until a change in connection state is detected */
 
   flags = irqsave();
-  while (priv->connected == *connected)
+  for (;;)
     {
-      /* No... wait for the connection/disconnection */
+      /* Is there a change in the connection state of the single root hub
+       * port?
+       */
+
+      if (priv->change)
+        {
+          connport = &priv->rhport.hport;
+
+          /* Yes. Remember the new state */
+
+          connport->connected = priv->connected;
+          priv->change = false;
+
+          /* And return the root hub port */
+
+          *hport = connport;
+          irqrestore(flags);
+
+          uvdbg("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
+          return OK;
+        }
+
+#ifdef CONFIG_USBHOST_HUB
+      /* Is a device connected to an external hub? */
+
+      if (priv->hport)
+        {
+          /* Yes.. return the external hub port */
+
+          connport = (struct usbhost_hubport_s *)priv->hport;
+          priv->hport = NULL;
+
+          *hport = connport;
+          irqrestore(flags);
+
+          uvdbg("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          return OK;
+        }
+#endif
+
+      /* Wait for the next connection event */
 
       priv->pscwait = true;
       efm32_takesem(&priv->pscsem);
     }
-
-  priv->change = false;
-  irqrestore(flags);
-
-  uvdbg("Connected:%s\n", priv->connected ? "YES" : "NO");
-  return OK;
 }
 
 /*******************************************************************************
@@ -3751,7 +3869,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
     {
       /* No, return an error */
 
-      usbhost_trace1(USB_TRACE1_DEVDISCONN,0);
+      usbhost_trace1(USBHOST_TRACE1_DEVDISCONN,0);
       return -ENODEV;
     }
 
@@ -3925,10 +4043,7 @@ static int efm32_epalloc(FAR struct usbhost_driver_s *drvr,
                          FAR const struct usbhost_epdesc_s *epdesc,
                          FAR usbhost_ep_t *ep)
 {
-static int efm32_epalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR const struct usbhost_epdesc_s *epdesc,
-                         FAR usbhost_ep_t *ep)
-{
+
   FAR struct efm32_usbhost_s *priv = (FAR struct efm32_usbhost_s *)drvr;
   int ret;
 
@@ -4232,7 +4347,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   int ret;
 
   DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
-  usbhost_vtrace2(OTGFS_VTRACE2_CTRLIN, req->type, req->req);
+  usbhost_vtrace2(USBHOST_VTRACE2_CTRLIN, req->type, req->req);
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
@@ -4254,7 +4369,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       ret = efm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
        {
-          usbhost_trace1(USB_TRACE1_SENDSETUP, -ret);
+          usbhost_trace1(USBHOST_TRACE1_SENDSETUP, -ret);
           continue;
         }
 
@@ -4270,7 +4385,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
               ret = efm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
               if (ret < 0)
                 {
-                  usbhost_trace1(USB_TRACE1_RECVDATA, -ret);
+                  usbhost_trace1(USBHOST_TRACE1_RECVDATA, -ret);
                 }
             }
 
@@ -4288,7 +4403,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                   return OK;
                 }
 
-              usbhost_trace1(USB_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
+              usbhost_trace1(USBHOST_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
             }
 
           /* Get the elapsed time (in frames) */
@@ -4317,7 +4432,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   int ret;
 
   DEBUGASSERT(priv != NULL && ep0info != NULL && req != NULL);
-  usbhost_vtrace2(OTGFS_VTRACE2_CTRLOUT, req->type, req->req);
+  usbhost_vtrace2(USBHOST_VTRACE2_CTRLOUT, req->type, req->req);
   uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
@@ -4339,7 +4454,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       ret = efm32_ctrl_sendsetup(priv, ep0info, req);
       if (ret < 0)
         {
-          usbhost_trace1(USB_TRACE1_SENDSETUP, -ret);
+          usbhost_trace1(USBHOST_TRACE1_SENDSETUP, -ret);
           continue;
         }
 
@@ -4358,7 +4473,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
               ret = efm32_ctrl_senddata(priv, ep0info, NULL, 0);
               if (ret < 0)
                 {
-                  usbhost_trace1(USB_TRACE1_SENDDATA, -ret);
+                  usbhost_trace1(USBHOST_TRACE1_SENDDATA, -ret);
                 }
             }
 
@@ -4375,7 +4490,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                   return OK;
                 }
 
-              usbhost_trace1(USB_TRACE1_RECVDATA, ret < 0 ? -ret : ret);
+              usbhost_trace1(USBHOST_TRACE1_RECVDATA, ret < 0 ? -ret : ret);
             }
 
           /* Get the elapsed time (in frames) */
@@ -4973,7 +5088,6 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
   priv->smstate   = SMSTATE_DETACHED;
   priv->connected = false;
   priv->change    = false;
-  priv->lowspeed  = false;
 
   /* Put all of the channels back in their initial, allocated state */
 
@@ -5174,7 +5288,7 @@ FAR struct usbhost_connection_s *efm32_usbhost_initialize(int controller)
 
   if (irq_attach(EFM32_IRQ_USB, efm32_gint_isr) != 0)
     {
-      usbhost_trace1(USB_TRACE1_IRQATTACH, 0);
+      usbhost_trace1(USBHOST_TRACE1_IRQATTACH, 0);
       return NULL;
     }
 
