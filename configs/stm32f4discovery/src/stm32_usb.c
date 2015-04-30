@@ -166,8 +166,8 @@ void stm32_usbinitialize(void)
 int stm32_usbhost_initialize(void)
 {
   int pid;
-#if defined(CONFIG_USBHOST_MSC) || defined(CONFIG_USBHOST_HIDKBD) || \
-    defined(CONFIG_USBHOST_HIDMOUSE)
+#if defined(CONFIG_USBHOST_HUB)    || defined(CONFIG_USBHOST_MSC) || \
+    defined(CONFIG_USBHOST_HIDKBD) || defined(CONFIG_USBHOST_HIDMOUSE)
   int ret;
 #endif
 
@@ -177,7 +177,19 @@ int stm32_usbhost_initialize(void)
 
   uvdbg("Register class drivers\n");
 
+#ifdef CONFIG_USBHOST_HUB
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_USBHOST_MSC
+  /* Initialize the mass storage class */
+
   ret = usbhost_storageinit();
   if (ret != OK)
     {
@@ -186,6 +198,8 @@ int stm32_usbhost_initialize(void)
 #endif
 
 #ifdef CONFIG_USBHOST_HIDKBD
+  /* Initialize the HID keyboard class */
+
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
@@ -194,6 +208,8 @@ int stm32_usbhost_initialize(void)
 #endif
 
 #ifdef CONFIG_USBHOST_HIDMOUSE
+  /* Initialize the HID mouse class */
+
   ret = usbhost_mouse_init();
   if (ret != OK)
     {
