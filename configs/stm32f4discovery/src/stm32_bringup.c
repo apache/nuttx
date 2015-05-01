@@ -154,5 +154,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_ELF
+  /* Initialize the ELF binary loader */
+
+  ret = elf_initialize();
+  if (ret < 0)
+    {
+      sdbg("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
