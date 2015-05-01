@@ -448,7 +448,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
       return;
     }
 
-  /* Then enable or disable VBUS power */
+  /* Then enable or disable VBUS power (active low for SP2526A-2) */
 
   if (enable)
     {
