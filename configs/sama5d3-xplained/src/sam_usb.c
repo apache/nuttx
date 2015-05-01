@@ -312,6 +312,7 @@ int sam_usbhost_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST_MSC
   /* Register theUSB host Mass Storage Class */
 
   ret = usbhost_storageinit();
@@ -319,7 +320,9 @@ int sam_usbhost_initialize(void)
     {
       udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
+#endif
 
+#ifdef CONFIG_USBHOST_HIDKBD
   /* Register the USB host HID keyboard class driver */
 
   ret = usbhost_kbdinit();
@@ -327,6 +330,7 @@ int sam_usbhost_initialize(void)
     {
       udbg("ERROR: Failed to register the KBD class\n");
     }
+#endif
 
   /* Then get an instance of the USB host interface. */
 
