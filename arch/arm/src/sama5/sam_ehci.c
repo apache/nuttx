@@ -3663,6 +3663,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 {
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep0;
 
+  usbhost_vtrace2(EHCI_VTRACE2_EP0CONFIG, speed, funcaddr);
   DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);
 
   /* We must have exclusive access to the EHCI data structures. */
