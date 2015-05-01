@@ -172,7 +172,7 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(OHCI_VTRACE2_CONNECTED,          TR_OHCI, TR_FMT2, "OHCI RHPort%d connected, rhswait: %d\n"),
   TRENTRY(OHCI_VTRACE2_DISCONNECTED,       TR_OHCI, TR_FMT2, "OHCI RHPort%d disconnected, rhswait: %d\n"),
   TRENTRY(OHCI_VTRACE2_WAKEUP,             TR_OHCI, TR_FMT2, "OHCI RHPort%d connected: %d\n"),
-  TRENTRY(OHCI_VTRACE2_EP0CONFIGURE,       TR_OHCI, TR_FMT2, "OHCI RHPort%d EP0 CTRL: %04x\n"),
+  TRENTRY(OHCI_VTRACE2_EP0CTRLED,          TR_OHCI, TR_FMT2, "OHCI RHPort%d EP0 CTRL: %04x\n"),
   TRENTRY(OHCI_VTRACE2_EPALLOC,            TR_OHCI, TR_FMT2, "OHCI EP%d CTRL: %04x\n"),
   TRENTRY(OHCI_VTRACE2_CTRLIN,             TR_OHCI, TR_FMT2, "OHCI CTRLIN RHPort%d req: %02x\n"),
   TRENTRY(OHCI_VTRACE2_CTRLOUT,            TR_OHCI, TR_FMT2, "OHCI CTRLOUT RHPort%d req: %02x\n"),
