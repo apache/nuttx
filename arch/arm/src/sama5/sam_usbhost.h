@@ -157,7 +157,7 @@ enum usbhost_trace1codes_e
   OHCI_VTRACE2_CONNECTED,           /* OHCI RHPort connected */
   OHCI_VTRACE2_DISCONNECTED,        /* OHCI RHPort disconnected */
   OHCI_VTRACE2_WAKEUP,              /* OHCI RHPort connected */
-  OHCI_VTRACE2_EP0CONFIGURE,        /* OHCI RHPort EP0 CTRL */
+  OHCI_VTRACE2_EP0CTRLED,           /* OHCI RHPort EP0 CTRL */
   OHCI_VTRACE2_EPALLOC,             /* OHCI EP CTRL */
   OHCI_VTRACE2_CTRLIN,              /* OHCI CTRLIN */
   OHCI_VTRACE2_CTRLOUT,             /* OHCI CTRLOUT */

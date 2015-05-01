@@ -2466,8 +2466,7 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                     (uintptr_t)edctrl + sizeof(struct ohci_ed_s));
   sam_givesem(&g_ohci.exclsem);
 
-  usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIGURE,
-                  RHPORT(rhport), (uint16_t)edctrl->hw.ctrl);
+  usbhost_vtrace2(OHCI_VTRACE2_EP0CTRLED, RHPORT(rhport), (uint16_t)edctrl->hw.ctrl);
   UNUSED(rhport);
   return OK;
 }
