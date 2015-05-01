@@ -10265,3 +10265,7 @@
 	  F1/F2/F4 etc. manuals. Tested on STM32L1. PVD interrupt looks generic,
 	  at least #defines it needs are in headers for every chip variant.  By
 	  Dmitry Nikolaev, submitted by Juha Niskanen (2015-04-28).
+	* arch/arm/src/stm32/chip/stm32_exti.h, stm32f30xxx_memorymap.h, and
+	  stm32f37xxx_memorymap.h:  Added missing EXTI definitions for the STM32
+	  F3; Correct an error the port D base address in the STM32 F30x and F37x
+	  memory maps.  From Greg Meiste (2015-05-01).
