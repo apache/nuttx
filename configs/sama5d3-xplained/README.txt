@@ -1495,6 +1495,13 @@ file1: CONFIG_USBHOST_ISOC_DISABLE=y
     2. Stack usage make increase when USB hub support is enabled because
        the nesting depth of certain USB host class logic can increase.
 
+    STATUS:
+    2015-05-01:
+      This USB host function does not work on the SAMA5D3-Xplained board.
+      Those same drivers work on the other SAMA5Dx boards and so I believe
+      that there is some issue with either clocking to USB or to powering
+      of the USB host ports.
+
   Mass Storage Device Usage
   -------------------------
 

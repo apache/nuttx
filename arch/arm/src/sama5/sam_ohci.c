@@ -430,7 +430,7 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(FAR struct usbhost_driver_s *drvr,
-                       FAR struct usbhsot_hubport_s *hport,
+                       FAR struct usbhost_hubport_s *hport,
                        bool connected);
 #endif
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
@@ -2257,8 +2257,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
           *hport = connport;
           irqrestore(flags);
 
-          usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
-                          connport->port + 1, connport->connected);
+          usbhost_vtrace2(OHCI_VTRACE2_HUBWAKEUP,
+                          HPORT(connport), connport->connected);
           return OK;
         }
 #endif
@@ -3312,7 +3312,7 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(FAR struct usbhost_driver_s *drvr,
-                       FAR struct usbhsot_hubport_s *hport,
+                       FAR struct usbhost_hubport_s *hport,
                        bool connected)
 {
   irqstate_t flags;

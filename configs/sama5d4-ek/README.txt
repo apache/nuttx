@@ -2046,6 +2046,10 @@ USB High-Speed Host
     2. Stack usage make increase when USB hub support is enabled because
        the nesting depth of certain USB host class logic can increase.
 
+    STATUS:
+      2015-05-01:
+        Verified that normal, non-hub OHCI still works.
+
   Mass Storage Device Usage
   -------------------------
 
@@ -4220,7 +4224,7 @@ Configurations
        the console device.
 
     2. This configuration was verified using the SAMA5D4-MB, Rev C. board.
-       There may be some differences in released SAMA5D4-EK board.  Also,
+       There may be some differences in the released SAMA5D4-EK board.  Also,
        this configuration assumes that you have the TM7000 LCD/Touchscreen
        attached.  If you do not, you should disable the LCD and touchscreen
        drivers as described above under "TM7000 LCD/Touchscreen" and also
