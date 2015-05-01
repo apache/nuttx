@@ -178,6 +178,9 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(OHCI_VTRACE2_CTRLOUT,            TR_OHCI, TR_FMT2, "OHCI CTRLOUT RHPort%d req: %02x\n"),
   TRENTRY(OHCI_VTRACE2_TRANSFER,           TR_OHCI, TR_FMT2, "OHCI EP%d buflen: %d\n"),
   TRENTRY(OHCI_VTRACE2_INITCONNECTED,      TR_OHCI, TR_FMT2, "OHCI RHPort%d Device connected: %d\n"),
+#ifdef CONFIG_USBHOST_HUB
+  TRENTRY(OHCI_VTRACE2_HUBWAKEUP,          TR_OHCI, TR_FMT2, "OHCI Hub Port%d connected: %d\n"),
+#endif
 #endif
 #endif
 
