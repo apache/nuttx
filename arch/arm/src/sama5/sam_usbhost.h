@@ -91,6 +91,7 @@ enum usbhost_trace1codes_e
   OHCI_VTRACE1_ALREADYDISCONN,      /* OHCI Already disconnected */
   OHCI_VTRACE1_RHSC,                /* OHCI Root Hub Status Change */
   OHCI_VTRACE1_WDHINTR,             /* OHCI Writeback Done Head interrupt */
+  OHCI_VTRACE1_CLASSENUM,           /* OHCI Enumerate the device */
   OHCI_VTRACE1_ENUMDISCONN,         /* OHCI RHport Not connected */
   OHCI_VTRACE1_INITIALIZING,        /* OHCI Initializing Stack */
   OHCI_VTRACE1_INITIALIZED,         /* OHCI Initialized */
@@ -155,7 +156,6 @@ enum usbhost_trace1codes_e
   OHCI_VTRACE2_CONNECTED,           /* OHCI RHPort connected */
   OHCI_VTRACE2_DISCONNECTED,        /* OHCI RHPort disconnected */
   OHCI_VTRACE2_WAKEUP,              /* OHCI RHPort connected */
-  OHCI_VTRACE2_CLASSENUM,           /* OHCI Enumerate the device */
   OHCI_VTRACE2_EP0CONFIGURE,        /* OHCI RHPort EP0 CTRL */
   OHCI_VTRACE2_EPALLOC,             /* OHCI EP CTRL */
   OHCI_VTRACE2_CTRLIN,              /* OHCI CTRLIN */
