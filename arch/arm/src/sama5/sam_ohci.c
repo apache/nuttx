@@ -355,7 +355,7 @@ static void sam_tbfree(uint8_t *buffer);
 
 /* ED list helper functions ****************************************************/
 
-static inline int sam_addctrled(struct sam_ed_s *ed);
+static int sam_addctrled(struct sam_ed_s *ed);
 static inline int sam_remctrled(struct sam_ed_s *ed);
 
 static inline int sam_addbulked(struct sam_ed_s *ed);
@@ -796,6 +796,122 @@ static void sam_tbfree(uint8_t *buffer)
 }
 
 /*******************************************************************************
+ * Name: sam_addctrled
+ *
+ * Description:
+ *   Helper function to add an ED to the control list.
+ *
+ *******************************************************************************/
+
+static int sam_addctrled(struct sam_ed_s *ed)
+{
+  irqstate_t flags;
+  uint32_t regval;
+  uintptr_t physed;
+
+  /* Disable control list processing while we modify the list */
+
+  flags   = irqsave();
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_CLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  /* Add the new control ED to the head of the control list */
+
+  ed->hw.nexted = sam_getreg(SAM_USBHOST_CTRLHEADED);
+  arch_clean_dcache((uintptr_t)ed, (uintptr_t)ed + sizeof(struct ohci_ed_s));
+
+  physed = sam_physramaddr((uintptr_t)ed);
+  sam_putreg((uint32_t)physed, SAM_USBHOST_CTRLHEADED);
+
+  /* Re-enable control list processing. */
+
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval |= OHCI_CTRL_CLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  irqrestore(flags);
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_remctrled
+ *
+ * Description:
+ *   Helper function remove an ED from the control list.
+ *
+ *******************************************************************************/
+
+static inline int sam_remctrled(struct sam_ed_s *ed)
+{
+  struct sam_ed_s *curr;
+  struct sam_ed_s *prev;
+  irqstate_t flags;
+  uintptr_t physed;
+  uint32_t regval;
+
+  /* Disable control list processing while we modify the list */
+
+  flags = irqsave();
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_CLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  /* Find the ED in the control list.  NOTE: We really should never be mucking
+   * with the control list while BLE is set.
+   */
+
+  physed = sam_getreg(SAM_USBHOST_CTRLHEADED);
+  for (curr = (struct sam_ed_s *)sam_virtramaddr(physed), prev = NULL;
+       curr && curr != ed;
+       prev = curr, curr = (struct sam_ed_s *)curr->hw.nexted);
+
+  /* Hmmm.. It would be a bug if we do not find the ED in the control list. */
+
+  DEBUGASSERT(curr != NULL);
+
+  /* Remove the ED from the control list */
+
+  if (curr != NULL)
+    {
+      /* Is this ED the first on in the control list? */
+
+      if (prev == NULL)
+        {
+          /* Yes... set the head of the control list to skip over this ED */
+
+          sam_putreg(ed->hw.nexted, SAM_USBHOST_CTRLHEADED);
+        }
+      else
+        {
+          /* No.. set the forward link of the previous ED in the list
+           * skip over this ED.
+           */
+
+          prev->hw.nexted = ed->hw.nexted;
+          arch_clean_dcache((uintptr_t)prev,
+                            (uintptr_t)prev + sizeof(struct sam_ed_s));
+        }
+    }
+
+  /* Re-enable control list processing if the control list is still non-empty
+   * after removing the ED node.
+   */
+
+  if (sam_getreg(SAM_USBHOST_CTRLHEADED) != 0)
+    {
+      /* If the control list is now empty, then disable it */
+
+      regval  = sam_getreg(SAM_USBHOST_CTRL);
+      regval |= OHCI_CTRL_CLE;
+      sam_putreg(regval, SAM_USBHOST_CTRL);
+    }
+
+  irqrestore(flags);
+  return OK;
+}
+
+/*******************************************************************************
  * Name: sam_addbulked
  *
  * Description:
@@ -836,34 +952,6 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
 #else
   return -ENOSYS;
 #endif
-}
-
-/*******************************************************************************
- * Name: sam_addctrled
- *
- * Description:
- *   Helper function to add an ED to the control list.
- *
- *******************************************************************************/
-
-static inline int sam_addctrled(struct sam_ed_s *ed)
-{
-#error Not Implemented
-  return -ENOSYS;
-}
-
-/*******************************************************************************
- * Name: sam_remctrled
- *
- * Description:
- *   Helper function remove an ED from the control list.
- *
- *******************************************************************************/
-
-static inline int sam_remctrled(struct sam_ed_s *ed)
-{
-#error Not Implemented
-  return -ENOSYS;
 }
 
 /*******************************************************************************
@@ -1432,7 +1520,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   struct sam_gtd_s *tdtail;
   irqstate_t flags;
   uintptr_t physaddr;
-  uint32_t regval;
+  int ret;
 
   DEBUGASSERT(rhport && !rhport->ep0init && rhport->ep0.ed == NULL &&
               rhport->ep0.tail == NULL);
@@ -1458,14 +1546,6 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   rhport->ep0.ed   = edctrl;
   rhport->ep0.tail = tdtail;
 
-  /* ControlListEnable.  This bit is cleared to disable the processing of the
-   * Control list.  We should never modify the control list while CLE is set.
-   */
-
-  regval  = sam_getreg(SAM_USBHOST_CTRL);
-  regval &= ~OHCI_CTRL_CLE;
-  sam_putreg(regval, SAM_USBHOST_CTRL);
-
   /* Initialize the common tail TD for this port */
 
   memset(tdtail, 0, sizeof(struct sam_gtd_s));
@@ -1478,7 +1558,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
 
   memset(edctrl, 0, sizeof(struct sam_ed_s));
   (void)sam_ep0configure(&rhport->drvr, &rhport->ep0, 0,
-                         rhport->hport.speed, 8);
+                         rhport->hport.hport.speed, 8);
 
   edctrl->hw.ctrl  |= ED_CONTROL_K;
   edctrl->eplist    = &rhport->ep0;
@@ -1490,18 +1570,6 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   edctrl->hw.headp  = (uint32_t)physaddr;
   edctrl->hw.tailp  = (uint32_t)physaddr;
 
-  /* The new ED will be the first ED in the list.  Set the nexted
-   * pointer of the ED old head of the list
-   */
-
-  physaddr          = sam_getreg(SAM_USBHOST_CTRLHEADED);
-  edctrl->hw.nexted = physaddr;
-
-  /* Set the control list head to the new ED */
-
-  physaddr          = (uintptr_t)sam_physramaddr((uintptr_t)edctrl);
-  sam_putreg(physaddr, SAM_USBHOST_CTRLHEADED);
-
   /* Flush the affected control ED and tail TD to RAM */
 
   arch_clean_dcache((uintptr_t)edctrl,
@@ -1509,16 +1577,11 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   arch_clean_dcache((uintptr_t)tdtail,
                     (uintptr_t)tdtail + sizeof(struct ohci_gtd_s));
 
-  /* ControlListEnable.  This bit is set to (re-)enable the processing of the
-   * Control list.  Note: once enabled, it remains enabled and we may even
-   * complete list processing before we get the bit set.
-   */
+  /* Add the ED to the control list */
 
-  regval = sam_getreg(SAM_USBHOST_CTRL);
-  regval |= OHCI_CTRL_CLE;
-  sam_putreg(regval, SAM_USBHOST_CTRL);
+  ret = sam_addctrled(edctrl);
   irqrestore(flags);
-  return OK;
+  return ret;
 }
 
 /*******************************************************************************
@@ -1879,12 +1942,12 @@ static void sam_rhsc_bottomhalf(void)
 
                   /* Are we bound to a class instance? */
 
-                  if (rhport->hport.devclass)
+                  if (rhport->hport.hport.devclass)
                     {
                       /* Yes.. Disconnect the class */
 
-                      CLASS_DISCONNECTED(rhport->hport.devclass);
-                      rhport->hport.devclass = NULL;
+                      CLASS_DISCONNECTED(rhport->hport.hport.devclass);
+                      rhport->hport.hport.devclass = NULL;
                     }
 
                   /* Notify any waiters for the Root Hub Status change
@@ -2141,13 +2204,16 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       for (rhpndx = 0; rhpndx < SAM_OHCI_NRHPORT; rhpndx++)
         {
+          struct sam_rhport_s *rhport = &g_ohci.rhport[rhpndx];
+          struct usbhost_hubport_s *connport;
+
 #if 0 /* #ifdef CONFIG_SAMA5_EHCI */
           /* If a device is no longer connected, return the port to the EHCI
            * controller.  Zero is the reset value for all ports; one makes
            * the corresponding port available to OHCI.
            */
 
-          if (!g_ohci.rhport[rhpndx].connected)
+          if (!rhport->connected)
             {
               uint32_t regval  = getreg32(SAM_SFR_OHCIICR);
               regval &= ~SFR_OHCIICR_RES(rhpndx);
@@ -2157,7 +2223,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
           /* Has the connection state changed on the RH port? */
 
-          if (g_ohci.rhport[rhpndx].connected != connected[rhpndx])
+          connport = &rhport->hport.hport;
+          if (rhport->connected != connport->connected)
             {
               /* Yes.. Return the RH port number to inform the caller which
                * port has the connection change.
@@ -2167,7 +2234,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
               usbhost_vtrace2(OHCI_VTRACE2_WAKEUP,
                               rhpndx + 1, g_ohci.rhport[rhpndx].connected);
 
-              *hport = &g_ohci.rphort[rhpndx].hport;
+              connport->connected  = rhport->connected;
+              *hport = connport;
               return OK;
             }
         }
@@ -2387,7 +2455,7 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       hwctrl |= ED_CONTROL_S;
     }
 
-  ed->hw.ctrl = hwctrl;
+  edctrl->hw.ctrl = hwctrl;
 
   /* Flush the modified control ED to RAM */
 
@@ -2396,7 +2464,8 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   sam_givesem(&g_ohci.exclsem);
 
   usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIGURE,
-                  RHPORT(rhport), (uint16_t)edctrl->hw.ctrl);
+                  RHPORT(rhport->hport.port), (uint16_t)edctrl->hw.ctrl);
+  UNUSED(rhport);
   return OK;
 }
 
@@ -2439,6 +2508,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(rhport != NULL && epdesc != NULL && epdesc->hport != NULL);
   DEBUGASSERT(ep != NULL && rhport->connected);
+  UNUSED(rhport);
 
   hport = epdesc->hport;
 
@@ -3302,7 +3372,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
 
   /* Unbind the class */
 
-  rhport->hport.devclass = NULL;
+  rhport->hport.hport.devclass = NULL;
 }
 
 /*******************************************************************************
