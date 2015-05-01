@@ -192,6 +192,8 @@
 
 /* Port numbers */
 
+#define HPNDX(hp)             ((hp)->port)
+#define HPORT(hp)             (HPNDX(hp)+1)
 #define RHPNDX(rh)            ((rh)->hport.hport.port)
 #define RHPORT(rh)            (RHPNDX(rh)+1)
 
@@ -2391,11 +2393,11 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
-  usbhost_vtrace1(OHCI_VTRACE1_CLASSENUM, hport->port);
+  usbhost_vtrace1(OHCI_VTRACE1_CLASSENUM, HPORT(hport));
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
-      usbhost_trace2(OHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
+      usbhost_trace2(OHCI_TRACE2_CLASSENUM_FAILED, HPORT(hport), -ret);
     }
 
   return ret;
@@ -2464,7 +2466,7 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   sam_givesem(&g_ohci.exclsem);
 
   usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIGURE,
-                  RHPORT(rhport->hport.port), (uint16_t)edctrl->hw.ctrl);
+                  RHPORT(rhport), (uint16_t)edctrl->hw.ctrl);
   UNUSED(rhport);
   return OK;
 }

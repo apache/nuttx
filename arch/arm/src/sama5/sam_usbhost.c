@@ -100,7 +100,7 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(OHCI_VTRACE1_CSC,                TR_OHCI, TR_FMT1, "OHCI Connect Status Change, RHSTATUS: %06x\n"),
   TRENTRY(OHCI_VTRACE1_DRWE,               TR_OHCI, TR_FMT1, "OHCI DRWE: Remote wake-up, RHSTATUS: %06x\n"),
   TRENTRY(OHCI_VTRACE1_ALREADYCONN,        TR_OHCI, TR_FMT1, "OHCI Already connected, RHPORTST: %06x\n"),
-  TRENTRY(OHCI_VTRACE1_SPEED,              TR_OHCI, TR_FMT1, "OHCI Low speed: %d\n"),
+  TRENTRY(OHCI_VTRACE1_SPEED,              TR_OHCI, TR_FMT1, "OHCI Port speed: %d\n"),
   TRENTRY(OHCI_VTRACE1_ALREADYDISCONN,     TR_OHCI, TR_FMT1, "OHCI Already disconnected, RHPORTST: %06x\n"),
   TRENTRY(OHCI_VTRACE1_RHSC,               TR_OHCI, TR_FMT1, "OHCI Root Hub Status Change. Pending: %06x\n"),
   TRENTRY(OHCI_VTRACE1_WDHINTR,            TR_OHCI, TR_FMT1, "OHCI Writeback Done Head interrupt. Pending: %06x\n"),
