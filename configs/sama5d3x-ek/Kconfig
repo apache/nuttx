@@ -178,6 +178,17 @@ config SAMA5D3xEK_AT24_NXFFS
 
 endchoice # AT24 serial EPPROM configuration
 
+config SAMA5D3xEK_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D3xEK_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
 config SAMA5D3xEK_TSD_DEVMINOR
 	int "Touchscreen device minor"
 	default 0

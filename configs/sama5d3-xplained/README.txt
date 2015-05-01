@@ -738,7 +738,7 @@ Serial Console
    5  PE14 (available)
    6  GND
 
-  By default the DBUG is used as the NuttX serial console in all
+  By default the DBUG port is used as the NuttX serial console in all
   configurations (unless otherwise noted).  The DBGU is available at
   logic levels at pins RXD and TXD of the DEBUG connector (J23).  GND
   is available at J23 and +3.3V is available from J14
@@ -1397,11 +1397,13 @@ USB High-Speed Host
       CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
       CONFIG_USBHOST_HIDKBD=y              : Enable the HID keyboard class driver
 
-    Library Routines
-      CONFIG_SCHED_WORKQUEUE=y             : Worker thread support is required
+    RTOS Features -> Work Queue Support
+      CONFIG_SCHED_WORKQUEUE=y             : High priority worker thread support is required
+      CONFIG_SCHED_HPWORK=y                :
 
     Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+      CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
+file1: CONFIG_USBHOST_ISOC_DISABLE=y
 
   NOTE:  When OHCI is selected, the SAMA5 will operate at 384MHz instead of
   396MHz.  This is so that the PLL generates a frequency which is a multiple
@@ -1422,7 +1424,7 @@ USB High-Speed Host
     System Type -> USB High Speed Host driver options
       CONFIG_SAMA5_EHCI=y                  : High-speed EHCI support
       CONFIG_SAMA5_OHCI=y                  : Low/full-speed OHCI support
-                                               : Defaults for values probably OK for both
+                                           : Defaults for values probably OK for both
     Device Drivers
       CONFIG_USBHOST=y                     : Enable USB host support
       CONFIG_USBHOST_INT_DISABLE=y         : Interrupt endpoints not needed
@@ -1433,11 +1435,45 @@ USB High-Speed Host
       CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
       CONFIG_USBHOST_HIDKBD=y              : Enable the HID keyboard class driver
 
-    Library Routines
-      CONFIG_SCHED_WORKQUEUE=y             : Worker thread support is required
+    RTOS Features -> Work Queue Support
+      CONFIG_SCHED_WORKQUEUE=y             : High priority worker thread support is required
+      CONFIG_SCHED_HPWORK=y                :
 
     Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+      CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
+
+  USB Hub Support
+  ----------------
+
+  USB hub support can be included by adding the following changes to the configuration (in addition to those listed above):
+
+    Drivers -> USB Host Driver Support
+      CONFIG_USBHOST_HUB=y                 : Enable the hub class
+      CONFIG_USBHOST_ASYNCH=y              : Asynchonous I/O supported needed for hubs
+
+    System Type -> USB High Speed Host driver options
+      CONFIG_SAMA5_OHCI_NEDS=12            : You will probably want more pipes
+      CONFIG_SAMA5_OHCI_NTDS=18
+      CONFIG_SAMA5_OHCI_TDBUFFERS=12
+      CONFIG_SAMA5_OHCI_TDBUFSIZE=128
+
+    Board Selection ->
+      CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
+
+    RTOS Features -> Work Queue Support
+      CONFIG_SCHED_LPWORK=y                 : Low priority queue support is needed
+      CONFIG_SCHED_LPNTHREADS=1
+      CONFIG_SCHED_LPWORKSTACKSIZE=1024
+
+    NOTES:
+
+    1. It is necessary to perform work on the low-priority work queue
+       (vs. the high priority work queue) because deferred hub-related
+       work requires some delays and waiting that is not appropriate on
+       the high priority work queue.
+
+    2. Stack usage make increase when USB hub support is enabled because
+       the nesting depth of certain USB host class logic can increase.
 
   Mass Storage Device Usage
   -------------------------
