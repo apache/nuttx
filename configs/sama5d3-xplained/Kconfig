@@ -111,6 +111,17 @@ config SAMA5D3XPLAINED_AT25_NXFFS
 
 endchoice # AT25 serial FLASH configuration
 
+config SAMA5D3XPLAINED_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D3XPLAINED_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
 config SAMA5D3XPLAINED_CHANNEL
 	int "PWM channel number"
 	default 0 if SAMA5_PWM_CHAN0

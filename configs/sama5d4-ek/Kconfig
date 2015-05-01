@@ -321,6 +321,17 @@ config SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT
 
 endif # SAMA5D4EK_ROMFS_MOUNT
 
+config SAMA5D4EK_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D4EK_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
 if INPUT_MXT
 
 config SAMA5D4EK_MXT_I2CFREQUENCY

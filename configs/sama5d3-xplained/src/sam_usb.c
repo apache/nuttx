@@ -63,12 +63,12 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifndef CONFIG_USBHOST_DEFPRIO
-#  define CONFIG_USBHOST_DEFPRIO 50
+#ifndef CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO
+#  define CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO 50
 #endif
 
-#ifndef CONFIG_USBHOST_STACKSIZE
-#  define CONFIG_USBHOST_STACKSIZE 1024
+#ifndef CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE
+#  define CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE 1024
 #endif
 
 #ifdef HAVE_USBDEV
@@ -257,7 +257,9 @@ void weak_function sam_usbinitialize(void)
 #ifdef CONFIG_SAMA5_UHPHS_RHPORT1
   /* Configure Port A to support the USB OHCI/EHCI function */
 
+#ifdef PIO_USBA_VBUS_ENABLE /* SAMA5D3-Xplained has no port A VBUS enable */
   sam_configpio(PIO_USBA_VBUS_ENABLE); /* VBUS enable, initially OFF */
+#endif
 #endif
 
 #ifdef CONFIG_SAMA5_UHPHS_RHPORT2
@@ -298,9 +300,19 @@ int sam_usbhost_initialize(void)
 
   /* First, register all of the class drivers needed to support the drivers
    * that we care about
-   *
-   * Register theUSB host Mass Storage Class:
    */
+
+#ifdef CONFIG_USBHOST_HUB
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      udbg("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
+  /* Register theUSB host Mass Storage Class */
 
   ret = usbhost_storageinit();
   if (ret != OK)
@@ -330,7 +342,8 @@ int sam_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = task_create("OHCI Monitor", CONFIG_USBHOST_DEFPRIO,  CONFIG_USBHOST_STACKSIZE,
+  pid = task_create("OHCI Monitor", CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO,
+                    CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE,
                     (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
@@ -351,7 +364,8 @@ int sam_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = task_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO,  CONFIG_USBHOST_STACKSIZE,
+  pid = task_create("EHCI Monitor", CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO,
+                    CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE,
                     (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
@@ -393,8 +407,14 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
   switch (rhport)
     {
     case SAM_RHPORT1:
-#ifndef CONFIG_SAMA5_UHPHS_RHPORT1
+#if !defined(CONFIG_SAMA5_UHPHS_RHPORT1)
       udbg("ERROR: RHPort1 is not available in this configuration\n");
+      return;
+
+#elif !defined(PIO_USBA_VBUS_ENABLE)
+      /* SAMA5D3-Xplained has no port A VBUS enable */
+
+      udbg("ERROR: RHPort1 has no VBUS enable\n");
       return;
 #else
       pinset = PIO_USBA_VBUS_ENABLE;
