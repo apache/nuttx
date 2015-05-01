@@ -222,7 +222,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       ret = up_relocate(&rel, psym, addr);
       if (ret < 0)
         {
-          bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", ret);
+          bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
           return ret;
         }
     }
