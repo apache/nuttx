@@ -165,6 +165,7 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(OHCI_TRACE2_CLASSENUM_FAILED,    TR_OHCI, TR_FMT2, "OHCI Hub port %d usbhost_enumerate() failed: %d\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
+  TRENTRY(OHCI_VTRACE2_EP0CONFIG,          TR_OHCI, TR_FMT2, "OHCI EP0 configure speed=%d funcaddr=%d\n"),
   TRENTRY(OHCI_VTRACE2_INTERVAL,           TR_OHCI, TR_FMT2, "OHCI interval: %d->%d\n"),
   TRENTRY(OHCI_VTRACE2_MININTERVAL,        TR_OHCI, TR_FMT2, "OHCI MIN interval: %d offset: %d\n"),
   TRENTRY(OHCI_VTRACE2_RHPORTST,           TR_OHCI, TR_FMT2, "OHCI RHPORTST%d: %04x\n"),
@@ -186,6 +187,7 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_EHCI, TR_FMT2, "EHCI Hub port %d usbhost_enumerate() failed: %d\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
+  TRENTRY(EHCI_VTRACE2_EP0CONFIG,          TR_EHCI, TR_FMT2, "EHCI EP0 configure speed=%d funcaddr=%d\n"),
   TRENTRY(EHCI_VTRACE2_ASYNCXFR,           TR_EHCI, TR_FMT2, "EHCI Async transfer EP%d buflen=%d\n"),
   TRENTRY(EHCI_VTRACE2_INTRXFR,            TR_EHCI, TR_FMT2, "EHCI Intr Transfer EP%d buflen=%d\n"),
   TRENTRY(EHCI_VTRACE2_IOCCHECK,           TR_EHCI, TR_FMT2, "EHCI IOC EP%d TOKEN=%04x\n"),

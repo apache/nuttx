@@ -2438,6 +2438,7 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   struct sam_ed_s *edctrl;
   uint32_t hwctrl;
 
+  usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIG, speed, funcaddr);
   DEBUGASSERT(rhport && maxpacketsize < 2048);
 
   edctrl = ep0list->ed;

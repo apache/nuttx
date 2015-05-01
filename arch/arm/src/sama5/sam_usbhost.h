@@ -150,6 +150,7 @@ enum usbhost_trace1codes_e
   OHCI_TRACE2_CLASSENUM_FAILED,     /* OHCI usbhost_enumerate() failed */
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
+  OHCI_VTRACE2_EP0CONFIG,           /* OHCI EP0 configuration */
   OHCI_VTRACE2_INTERVAL,            /* OHCI interval */
   OHCI_VTRACE2_MININTERVAL,         /* OHCI MIN interval/offset */
   OHCI_VTRACE2_RHPORTST,            /* OHCI RHPORTST */
@@ -171,6 +172,7 @@ enum usbhost_trace1codes_e
   EHCI_TRACE2_CLASSENUM_FAILED,     /* EHCI usbhost_enumerate() failed */
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
+  EHCI_VTRACE2_EP0CONFIG,           /* EHCI EP0 configuration */
   EHCI_VTRACE2_ASYNCXFR,            /* EHCI Async transfer */
   EHCI_VTRACE2_INTRXFR,             /* EHCI Interrupt Transfer */
   EHCI_VTRACE2_IOCCHECK,            /* EHCI IOC */
