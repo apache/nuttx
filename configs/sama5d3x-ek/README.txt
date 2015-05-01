@@ -458,6 +458,9 @@ Creating and Using NORBOOT
 Running NuttX from SDRAM
 ========================
 
+  Executing from SDRAM
+  --------------------
+
   NuttX may be executed from SDRAM.  But this case means that the NuttX
   binary must reside on some other media (typically NAND FLASH, Serial
   FLASH, or, perhaps even a TFTP server).  In these cases, an intermediate
@@ -476,6 +479,26 @@ Running NuttX from SDRAM
   but are instead function calls:  The MCK clock frequency is not known in
   advance but instead has to be calculated from the bootloader PLL configuration.
   See the TODO list at the end of this file for further information.
+
+  Using JTAG
+  ----------
+
+  This description assumes that you have a JTAG debugger such as Segger
+  J-Link connected to the SAMA5D3-Xplained.
+
+  1. Start the GDB server
+  2. Start GDB
+  3. Use the 'target remote localhost:xxxx' command to attach to the GDG
+     server
+  4. Do 'mon reset' then 'mon go' to start the internal boot loader (maybe
+     U-Boot).
+  5. Let the boot loader run until it completes SDRAM initialization, then
+     do 'mon halt'.
+  6. Now you have SDRAM initialized and you use 'load nuttx' to load the
+     ELF file into SDRAM.
+  7. Use 'file nuttx' to load symbols
+  8. Set the PC to the NuttX entry point 'mon pc 0x20008040' and start
+     nuttx using 'mon go'.
 
 NuttX Configuration
 -------------------
