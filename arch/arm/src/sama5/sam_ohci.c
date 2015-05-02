@@ -388,7 +388,7 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplis
                          struct sam_ed_s *ed, uint32_t dirpid, uint32_t toggle,
                          volatile uint8_t *buffer, size_t buflen);
 static int  sam_ep0enqueue(struct sam_rhport_s *rhport);
-static void sam_ep0dequeue(struct sam_rhport_s *rhport);
+static void sam_ep0dequeue(struct sam_eplist_s *ep0);
 static int  sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int  sam_wdhasynch(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
@@ -448,7 +448,8 @@ static int sam_connect(struct usbhost_driver_s *drvr,
                        struct usbhost_hubport_s *hport,
                        bool connected);
 #endif
-static void sam_disconnect(struct usbhost_driver_s *drvr);
+static void sam_disconnect(struct usbhost_driver_s *drvr,
+                           struct usbhost_hubport_s *hport);
 
 /*******************************************************************************
  * Private Data
@@ -1520,8 +1521,8 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplis
  * Name: sam_ep0enqueue
  *
  * Description:
- *   Initialize ED for EP0, add it to the control ED list, and enable control
- *   transfers.
+ *   Initialize ED for a root hub EP0, add it to the control ED list, and
+ *   enable control transfers.
  *
  * Input Parameters:
  *   rhpndx - Root hub port index.
@@ -1609,14 +1610,15 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
  *   list processing.
  *
  * Input Parameters:
- *   rhpndx - Root hub port index.
+ *   ep0 - The control endpoint to be released.  May be the control endpoint for
+ *         an attached hub.
  *
  * Returned Values:
  *   None
  *
  *******************************************************************************/
 
-static void sam_ep0dequeue(struct sam_rhport_s *rhport)
+static void sam_ep0dequeue(struct sam_eplist_s *ep0)
 {
   struct sam_ed_s *edctrl;
   struct sam_ed_s *curred;
@@ -1627,8 +1629,7 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
   uintptr_t physcurr;
   uint32_t regval;
 
-  DEBUGASSERT(rhport && rhport->ep0init && rhport->ep0.ed != NULL &&
-              rhport->ep0.tail != NULL);
+  DEBUGASSERT(ep0->ed != NULL && ep0->tail != NULL);
 
   /* ControlListEnable.  This bit is cleared to disable the processing of the
    * Control list.  We should never modify the control list while CLE is set.
@@ -1643,7 +1644,7 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
    * precedessor).
    */
 
-  edctrl   = rhport->ep0.ed;
+  edctrl   = ep0->ed;
   physcurr = sam_getreg(SAM_USBHOST_CTRLHEADED);
 
   for (curred = (struct sam_ed_s *)sam_virtramaddr(physcurr),
@@ -1692,7 +1693,7 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
 
   /* Release any TDs that may still be attached to the ED. */
 
-  tdtail   = rhport->ep0.tail;
+  tdtail   = ep0->tail;
   physcurr = edctrl->hw.headp;
 
   for (currtd = (struct sam_gtd_s *)sam_virtramaddr(physcurr);
@@ -1708,8 +1709,8 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
   sam_tdfree(tdtail);
   sam_edfree(edctrl);
 
-  rhport->ep0.ed   = NULL;
-  rhport->ep0.tail = NULL;
+  ep0->ed   = NULL;
+  ep0->tail = NULL;
 }
 
 /*******************************************************************************
@@ -2408,7 +2409,7 @@ static int sam_rh_enumerate(struct usbhost_connection_s *conn,
       return -ENODEV;
     }
 
-  /* Add EP0 to the control list */
+  /* Add root hub EP0 to the control list */
 
   if (!rhport->ep0init)
     {
@@ -3659,6 +3660,8 @@ static int sam_connect(struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be a port
+ *      on a hub.
  *
  * Returned Values:
  *   None
@@ -3669,19 +3672,29 @@ static int sam_connect(struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static void sam_disconnect(struct usbhost_driver_s *drvr)
+static void sam_disconnect(struct usbhost_driver_s *drvr,
+                           struct usbhost_hubport_s *hport)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
-  DEBUGASSERT(rhport);
+  struct sam_eplist_s *ep0;
+
+  DEBUGASSERT(rhport != NULL && hport != NULL && hport->ep0);
+  ep0 = (struct sam_eplist_s *)hport->ep0;
 
   /* Remove the disconnected port from the control list */
 
-  sam_ep0dequeue(rhport);
-  rhport->ep0init = false;
+  sam_ep0dequeue(ep0);
 
-  /* Unbind the class */
+  /* Did we just dequeue EP0 from a hoot hub port? */
 
-  rhport->hport.hport.devclass = NULL;
+  if (ROOTHUB(hport))
+    {
+      rhport->ep0init = false;
+    }
+
+  /* Unbind the class from the port */
+
+  hport->devclass = NULL;
 }
 
 /*******************************************************************************

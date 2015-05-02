@@ -390,7 +390,8 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
                          FAR struct usbhost_hubport_s *hport,
                          bool connected);
 #endif
-static void lpc17_disconnect(struct usbhost_driver_s *drvr);
+static void lpc17_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport);
 
 /* Initialization **************************************************************/
 
@@ -3213,6 +3214,8 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be a port
+ *      on a hub.
  *
  * Returned Values:
  *   None
@@ -3223,12 +3226,13 @@ static int lpc17_connect(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static void lpc17_disconnect(struct usbhost_driver_s *drvr)
+static void lpc17_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv != NULL && hport != NULL);
 
-  priv->rhport.hport.devclass = NULL;
+  hport->devclass = NULL;
 }
 
 /*******************************************************************************

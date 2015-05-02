@@ -549,7 +549,8 @@ static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
          FAR struct usbhost_hubport_s *hport, bool connected);
 #endif
-static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr);
+static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_hubport_s *hport);
 
 /* Initialization **************************************************************/
 
@@ -4638,6 +4639,8 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be a port
+ *      on a hub.
  *
  * Returned Values:
  *   None
@@ -4648,15 +4651,16 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr)
+static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_hubport_s *hport)
 {
   struct lpc31_rhport_s *rhport = (struct lpc31_rhport_s *)drvr;
-  DEBUGASSERT(rhport);
+  DEBUGASSERT(rhport != NULL && hport != NULL);
 
   /* Unbind the class */
   /* REVISIT:  Is there more that needs to be done? */
 
-  rhport->hport.hport.devclass = NULL;
+  hport->devclass = NULL;
 }
 
 /*******************************************************************************
