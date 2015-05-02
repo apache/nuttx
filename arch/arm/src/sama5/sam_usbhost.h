@@ -136,6 +136,7 @@ enum usbhost_trace1codes_e
   EHCI_VTRACE1_TOPHALF,             /* EHCI Interrupt top half */
   EHCI_VTRACE1_AAINTR,              /* EHCI Async Advance Interrupt */
   EHCI_VTRACE1_USBINTR,             /* EHCI USB Interrupt (USBINT) Interrupt */
+  EHCI_VTRACE1_CLASSENUM,           /* EHCI Enumerate the device */
   EHCI_VTRACE1_ENUM_DISCONN,        /* EHCI Enumeration not connected */
   EHCI_VTRACE1_INITIALIZING,        /* EHCI Initializing EHCI Stack */
   EHCI_VTRACE1_HCCPARAMS,           /* EHCI HCCPARAMS */
@@ -186,7 +187,6 @@ enum usbhost_trace1codes_e
   EHCI_VTRACE2_PORTSC_CONNECTED,    /* EHCI RHPort connected */
   EHCI_VTRACE2_PORTSC_DISCONND,     /* EHCI RHport disconnected */
   EHCI_VTRACE2_MONWAKEUP,           /* EHCI RHPort connected wakeup */
-  EHCI_VTRACE2_CLASSENUM,           /* EHCI RHPort CLASS enumeration */
   EHCI_VTRACE2_EPALLOC,             /* EHCI EPALLOC */
   EHCI_VTRACE2_CTRLINOUT,           /* EHCI CTRLIN/OUT */
   EHCI_VTRACE2_HCIVERSION,          /* EHCI HCIVERSION */
