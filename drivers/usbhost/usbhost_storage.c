@@ -952,7 +952,7 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Disconnect the USB host device */
 
-  DRVR_DISCONNECT(hport->drvr);
+  DRVR_DISCONNECT(hport->drvr, hport);
 
   /* Free the function address assigned to this device */
 

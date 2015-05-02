@@ -579,6 +579,8 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be a port
+ *      on a hub.
  *
  * Returned Values:
  *   None
@@ -588,7 +590,7 @@
  *
  ************************************************************************************/
 
-#define DRVR_DISCONNECT(drvr) ((drvr)->disconnect(drvr))
+#define DRVR_DISCONNECT(drvr, hport) ((drvr)->disconnect(drvr, hport))
 
 /************************************************************************************
  * Public Types
@@ -873,7 +875,8 @@ struct usbhost_driver_s
    * (until a new instance is received from the create() method).
    */
 
-  void (*disconnect)(FAR struct usbhost_driver_s *drvr);
+  void (*disconnect)(FAR struct usbhost_driver_s *drvr,
+                     FAR struct usbhost_hubport_s *hport);
 };
 
 /************************************************************************************

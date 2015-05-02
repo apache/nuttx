@@ -467,7 +467,8 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
                          FAR struct usbhost_hubport_s *hport,
                          bool connected);
 #endif
-static void efm32_disconnect(FAR struct usbhost_driver_s *drvr);
+static void efm32_disconnect(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_hubport_s *hport);
 
 /* Initialization **************************************************************/
 
@@ -4761,12 +4762,13 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static void efm32_disconnect(FAR struct usbhost_driver_s *drvr)
+static void efm32_disconnect(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_hubport_s *hport)
 {
   FAR struct efm32_usbhost_s *priv = (FAR struct efm32_usbhost_s *)drvr;
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv != NULL && hport != NULL);
 
-  priv->rhport.hport.devclass = NULL;
+  hport->devclass = NULL;
 }
 
 /*******************************************************************************

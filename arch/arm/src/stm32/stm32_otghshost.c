@@ -454,7 +454,8 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
                          FAR struct usbhost_hubport_s *hport,
                          bool connected);
 #endif
-static void stm32_disconnect(FAR struct usbhost_driver_s *drvr);
+static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_hubport_s *hport);
 
 /* Initialization **************************************************************/
 
@@ -4684,6 +4685,8 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be a port
+ *      on a hub.
  *
  * Returned Values:
  *   None
@@ -4694,12 +4697,13 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static void stm32_disconnect(FAR struct usbhost_driver_s *drvr)
+static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_hubport_s *hport)
 {
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv != NULL && hport != NULL);
 
-  priv->rhport.hport.devclass = NULL;
+  hport->devclass = NULL;
 }
 
 /*******************************************************************************

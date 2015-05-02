@@ -184,7 +184,7 @@ static int ehci_waiter(int argc, char *argv[])
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup USB-related
+ *   Called from sam_usbinitialize very early in initialization to setup USB-related
  *   GPIO pins for the SAMA5D4-EK board.
  *
  * USB Ports

@@ -1074,13 +1074,17 @@ static void usbhost_disconnect_event(FAR void *arg)
       usbhost_hport_deactivate(child);
     }
 
+  /* Deactivate the parent hub port (unless it is the root hub port) */
+
+  usbhost_hport_deactivate(hport);
+
   /* Destroy the semaphores */
 
   sem_destroy(&priv->exclsem);
 
-  /* Deactivate the parent hub port (unless it is the root hub port) */
+  /* Disconnect the USB host device */
 
-  usbhost_hport_deactivate(hport);
+  DRVR_DISCONNECT(hport->drvr, hport);
 
   /* Free the class instance */
 
