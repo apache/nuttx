@@ -93,6 +93,9 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(OHCI_TRACE1_EDALLOC_FAILED,      TR_OHCI, TR_FMT1, "OHCI ERROR: Failed to allocate ED\n"),
   TRENTRY(OHCI_TRACE1_TDALLOC_FAILED,      TR_OHCI, TR_FMT1, "OHCI ERROR: Failed to allocate TD\n"),
   TRENTRY(OHCI_TRACE1_IRQATTACH,           TR_OHCI, TR_FMT1, "OHCI ERROR: Failed to attach IRQ%d\n"),
+#ifdef CONFIG_USBHOST_ASYNCH
+  TRENTRY(OHCI_TRACE1_BADTDSTATUS,         TR_OHCI, TR_FMT1, "OHCI ERROR: Bad asynch TD completion status: %d\n"),
+#endif
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
   TRENTRY(OHCI_VTRACE1_PHYSED,             TR_OHCI, TR_FMT1, "OHCI physed: %06x\n"),
