@@ -10284,3 +10284,8 @@
 	* arch/arm/src/stm32/stm32_otgfsdev.c and stm32_otghsdev.c: Add
 	  protection in the event that out-of-bound enpoint numbers are
 	  received.  From David Sidrane (2015-05-02).
+	* USB host:  Merged in the USB hub support that has been happening on
+	  a separate branch up until this point.  The interfaces are complete
+	  and most platforms have been verified (still a little to be done
+	  however). (2015-05-02)
+
