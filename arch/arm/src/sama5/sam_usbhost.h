@@ -80,6 +80,9 @@ enum usbhost_trace1codes_e
   OHCI_TRACE1_EDALLOC_FAILED,       /* OHCI ERROR: Failed to allocate ED */
   OHCI_TRACE1_TDALLOC_FAILED,       /* OHCI ERROR: Failed to allocate TD */
   OHCI_TRACE1_IRQATTACH,            /* OHCI ERROR: Failed to attach IRQ */
+#ifdef CONFIG_USBHOST_ASYNCH
+  OHCI_TRACE1_BADTDSTATUS,          /* OHCI ERROR: Bad asynch TD completion status */
+#endif
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
   OHCI_VTRACE1_PHYSED,              /* OHCI physed */

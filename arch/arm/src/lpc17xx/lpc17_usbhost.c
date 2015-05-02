@@ -1464,6 +1464,9 @@ static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
        */
 
       ed->wdhwait = true;
+#ifdef CONFIG_USBHOST_ASYNCH
+      ed->asynch  = NULL;
+#endif
       ret         = OK;
     }
 
@@ -2602,9 +2605,12 @@ static int lpc17_transfer_common(struct lpc17_usbhost_s *priv,
        * TDs on the Bulk list.
        */
 
-      regval  = lpc17_getreg(LPC17_USBHOST_CMDST);
-      regval |= OHCI_CMDST_BLF;
-      lpc17_putreg(regval, LPC17_USBHOST_CMDST);
+      if (ed->xfrtype == USB_EP_ATTR_XFER_BULK)
+        {
+          regval  = lpc17_getreg(LPC17_USBHOST_CMDST);
+          regval |= OHCI_CMDST_BLF;
+          lpc17_putreg(regval, LPC17_USBHOST_CMDST);
+        }
     }
 
   return ret;
@@ -2828,10 +2834,6 @@ static int lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       udbg("ERROR: Device disconnected\n");
       goto errout_with_buffers;
     }
-
-#ifdef CONFIG_USBHOST_ASYNCH
-  ed->asynch = NULL;
-#endif
 
   /* Set up the transfer */
 
@@ -3139,6 +3141,8 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       memset(asynch, 0, sizeof(struct lpc17_asynch_s));
       lpc17_freeasynch(asynch);
     }
+
+  /* Determine the return value */
 
   ret = ed->wdhwait ? -EINVAL : OK;
   irqrestore(flags);
