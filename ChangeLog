@@ -10269,3 +10269,6 @@
 	  stm32f37xxx_memorymap.h:  Added missing EXTI definitions for the STM32
 	  F3; Correct an error the port D base address in the STM32 F30x and F37x
 	  memory maps.  From Greg Meiste (2015-05-01).
+	* arch/arm/src/lpc17xx/lpc176x_gpio.c:  Reorder steps when an output
+	  GPIO is configured in order to avoid transient bad values from being
+	  output.  From Hal Glenn (2015-05-02).
