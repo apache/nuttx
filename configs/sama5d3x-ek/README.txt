@@ -1667,6 +1667,9 @@ USB High-Speed Host
     2. Stack usage make increase when USB hub support is enabled because
        the nesting depth of certain USB host class logic can increase.
 
+    STATUS:
+      Hub support has not been verified on this board.
+
   Mass Storage Device Usage
   -------------------------
 
