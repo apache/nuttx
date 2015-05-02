@@ -2781,7 +2781,8 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   struct sam_ed_s *ed;
   int ret;
 
-  DEBUGASSERT(rhport && eplist && eplist->ed && eplist->tail);
+  DEBUGASSERT(rhport != NULL && eplist != NULL &&
+              eplist->ed != NULL && eplist->tail != NULL);
 
   /* There should not be any pending, real TDs linked to this ED */
 
@@ -3694,6 +3695,7 @@ static void sam_disconnect(struct usbhost_driver_s *drvr,
 
   /* Unbind the class from the port */
 
+  hport->ep0      = NULL;
   hport->devclass = NULL;
 }
 
