@@ -135,6 +135,42 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 #endif
 
 /****************************************************************************
+ * Name: up_taskdump
+ ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  /* Dump interesting properties of this task */
+
+#ifdef CONFIG_PRINT_TASKNAME
+  lldbg("%s: PID=%d Stack Used=%lu of %lu\n",
+        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+        (unsigned long)tcb->adj_stack_size);
+#else
+  lldbg("PID: %d Stack Used=%lu of %lu\n",
+        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+        (unsigned long)tcb->adj_stack_size);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: up_showtasks
+ ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+static inline void up_showtasks(void)
+{
+  /* Dump interesting properties of each task in the crash environment */
+
+  sched_foreach(up_taskdump, NULL);
+}
+#else
+#  define up_showtasks()
+#endif
+
+/****************************************************************************
  * Name: up_registerdump
  ****************************************************************************/
 
@@ -305,6 +341,10 @@ static void up_dumpstate(void)
   /* Then dump the registers (if available) */
 
   up_registerdump();
+
+  /* Dump the state of all tasks (if available) */
+
+  up_showtasks();
 
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
