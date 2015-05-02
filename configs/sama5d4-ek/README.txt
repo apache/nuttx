@@ -2023,10 +2023,14 @@ USB High-Speed Host
       CONFIG_USBHOST_ASYNCH=y              : Asynchonous I/O supported needed for hubs
 
     System Type -> USB High Speed Host driver options
-      CONFIG_SAMA5_OHCI_NEDS=12            : You will probably want more pipes
-      CONFIG_SAMA5_OHCI_NTDS=18
+      CONFIG_SAMA5_OHCI_NEDS=12            : You will probably want more OHCI pipes
+      CONFIG_SAMA5_OHCI_NTDS=18            : You will probably want more OHCI pipes
       CONFIG_SAMA5_OHCI_TDBUFFERS=12
       CONFIG_SAMA5_OHCI_TDBUFSIZE=128
+
+      CONFIG_SAMA5_EHCI_NQHS=12            : You will probably want more OHCI pipes
+      CONFIG_SAMA5_EHCI_NQTDS=16           : You will probably want more OHCI pipes
+      CONFIG_SAMA5_EHCI_BUFSIZE=128
 
     Board Selection ->
       CONFIG_SAMA5D4EK_USBHOST_STACKSIZE=2048 (bigger than it needs to be)
