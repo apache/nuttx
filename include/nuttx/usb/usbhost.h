@@ -469,18 +469,16 @@
 #define DRVR_CTRLOUT(drvr,ep0,req,buffer) ((drvr)->ctrlout(drvr,ep0,req,buffer))
 
 /************************************************************************************
- * Name: DRVR_TRANSFER and DRVR_ASYNCH
+ * Name: DRVR_TRANSFER
  *
  * Description:
- *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request.  Only one transfer may be queued; Neither this
- *   method nor the ctrlin or ctrlout methods can be called again until this
- *   function returns.
+ * Process a request to handle a transfer descriptor.  This method will
+ * enqueue the transfer request and wait for it to complete.  Only one
+ * transfer may be queued; Neither this method nor the ctrlin nor ctrlout
+ * methods can be called) again until this function returns.
  *
- * - 'transfer' is a blocking method; this method will not return until the
- *   transfer has completed.
- * - 'asynch' will return immediately.  When the transfer completes, the
- *   semaphore will be posted.
+ * This is a blocking method; this method will not return until the
+ * transfer has completed.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -490,10 +488,6 @@
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
- *   callback - This function will be called when the transfer completes ('asynch'
- *     only).
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes ('asynch' only).
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -512,6 +506,41 @@
 
 #define DRVR_TRANSFER(drvr,ep,buffer,buflen) \
   ((drvr)->transfer(drvr,ep,buffer,buflen))
+
+/************************************************************************************
+ * Name: DRVR_ASYNCH
+ *
+ * Description:
+ *   Process a request to handle a transfer asynchronously.  This method
+ *   will enqueue the transfer request and return immediately.  Only one
+ *   transfer may be queued on a given endpoint/
+ *
+ *   When the transfer completes, the the callback will be invoked with the
+ *   provided argument.
+ *
+ *   This method is useful for receiving interrupt transfers which may come
+ *   infrequently.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buflen - The length of the data to be sent or received.
+ *   callback - This function will be called when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback function
+ *     when the transfer completes.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 #  define DRVR_ASYNCH(drvr,ep,buffer,buflen,callback,arg) \
@@ -832,24 +861,32 @@ struct usbhost_driver_s
                  FAR const uint8_t *buffer);
 
   /* Process a request to handle a transfer descriptor.  This method will
-   * enqueue the transfer request and wait for it to complete.  Only one transfer may
-   * be queued; Neither this method nor the ctrlin or ctrlout methods can be called
-   * again until this function returns.
+   * enqueue the transfer request and wait for it to complete.  Only one
+   * transfer may be queued; Neither this method nor the ctrlin nor ctrlout
+   * methods can be called) again until this function returns.
    *
-   * - 'transfer' is a blocking method; this method will not return until the
-   *   transfer has completed.
-   * - 'asynch' will return immediately.  When the transfer completes, the
-   *    the callback will be invoked with the provided transfer.  This method
-   *    is useful for receiving interrupt transfers which may come
-   *    infrequently.
+   * This is a blocking method; this method will not return until the
+   * transfer has completed.
    */
 
   int (*transfer)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                   FAR uint8_t *buffer, size_t buflen);
+
+  /* Process a request to handle a transfer asynchronously.  This method
+   * will enqueue the transfer request and return immediately.  Only one
+   * transfer may be queued on a given endpoint/
+   *
+   * When the transfer completes, the the callback will be invoked with the
+   * provided argument.
+   *
+   * This method is useful for receiving interrupt transfers which may come
+   * infrequently.
+   */
+
 #ifdef CONFIG_USBHOST_ASYNCH
   int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                  FAR uint8_t *buffer, size_t buflen,
-                  usbhost_asynch_t callback, FAR void *arg);
+                FAR uint8_t *buffer, size_t buflen,
+                usbhost_asynch_t callback, FAR void *arg);
 #endif
 
 #ifdef CONFIG_USBHOST_ASYNCH
