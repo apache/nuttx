@@ -2764,7 +2764,7 @@ static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
    */
 
   **bp = qh->hw.hlp;
-  cp15_flush_idcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+  cp15_flush_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
   /* Re-enable the schedules (if they were enabled before. */
 
