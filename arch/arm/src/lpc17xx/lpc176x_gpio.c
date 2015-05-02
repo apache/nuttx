@@ -479,13 +479,6 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
 
   (void)lpc17_configinput(DEFAULT_INPUT, port, pin);
 
-  /* Now, reconfigure the pin as an output */
-
-  fiobase = g_fiobase[port];
-  regval  = getreg32(fiobase + LPC17_FIO_DIR_OFFSET);
-  regval |= (1 << pin);
-  putreg32(regval, fiobase + LPC17_FIO_DIR_OFFSET);
-
   /* Check for open drain output */
 
   if ((cfgset & GPIO_OPEN_DRAIN) != 0)
@@ -504,6 +497,14 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
   /* Set the initial value of the output */
 
   lpc17_gpiowrite(cfgset, ((cfgset & GPIO_VALUE) != GPIO_VALUE_ZERO));
+
+  /* Now, reconfigure the pin as an output */
+
+  fiobase = g_fiobase[port];
+  regval  = getreg32(fiobase + LPC17_FIO_DIR_OFFSET);
+  regval |= (1 << pin);
+  putreg32(regval, fiobase + LPC17_FIO_DIR_OFFSET);
+
 
   return OK;
 }
