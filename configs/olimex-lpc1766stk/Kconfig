@@ -4,4 +4,16 @@
 #
 
 if ARCH_BOARD_LPC1766STK
+
+config LPC1766STK_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config LPC1766STK_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
 endif
