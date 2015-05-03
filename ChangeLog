@@ -10288,4 +10288,13 @@
 	  a separate branch up until this point.  The interfaces are complete
 	  and most platforms have been verified (still a little to be done
 	  however). (2015-05-02)
-
+	* arch/arm/src/lpc31xx/lpc31_ehci.c, chip.h, sama5/sam_ehci.c, and
+	  chip.h:  Fix cache related problem in LPC31 and SAMA5Dx EHCI drivers.
+	  All buffers are now aligned with the cache line size in both starting
+	  address and in length.  This cause major problems in unlucky builds
+	  where the USB host buffers where unaligned and abbutting other data.
+	  The cache flush and invalidate operations could be subverted by
+	  accesses to adjacent data or could have unexpected side effects.  This
+	  bug has been in the ECHI drivers forever, but was only revealed due to
+	  unlucky memory allocations during the integration of the hub feature
+	  (2015-05-03).
