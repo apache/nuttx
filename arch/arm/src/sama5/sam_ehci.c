@@ -1816,7 +1816,7 @@ static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
 
   qtd->hw.token = sam_swap32(regval);
 
-  /* Add the buffer information to the bufffer pointer list */
+  /* Add the buffer information to the buffer pointer list */
 
   ret = sam_qtd_addbpl(qtd, buffer, buflen);
   if (ret < 0)
@@ -2343,7 +2343,7 @@ static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo)
        * invalid in this memory region.
        */
 
-      cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      arch_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
     }
 #endif
 
@@ -2689,7 +2689,7 @@ static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
+  arch_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   sam_qtd_print(qtd);
 
@@ -2734,7 +2734,7 @@ static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+  arch_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   sam_qh_print(qh);
 
@@ -4144,6 +4144,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   if (ret < 0)
     {
+      udbg("ERROR: Tranfer setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 

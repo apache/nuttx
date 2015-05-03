@@ -1700,7 +1700,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
 
           priv->crefs = 1;
 
-          /* Initialize semphores (this works okay in the interrupt context) */
+          /* Initialize semaphores (this works okay in the interrupt context) */
 
           sem_init(&priv->exclsem, 0, 1);
 
@@ -1718,6 +1718,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
     {
       usbhost_freeclass(priv);
     }
+
   return NULL;
 }
 
