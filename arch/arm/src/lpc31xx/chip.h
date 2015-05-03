@@ -70,6 +70,11 @@
 #  undef  HAVE_AESENGINE                 /* No AES engine */
 #endif
 
+/* Cache line sizes (in bytes)for the SAVA5Dx */
+
+#define ARM_DCACHE_LINESIZE 32           /* 32 bytes (8 words) */
+#define ARM_ICACHE_LINESIZE 32           /* 32 bytes (8 words) */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
