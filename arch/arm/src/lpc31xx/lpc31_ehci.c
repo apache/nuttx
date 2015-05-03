@@ -60,6 +60,7 @@
 #include "up_arch.h"
 #include "cache.h"
 
+#include "chip.h"
 #include "lpc31_internal.h"
 #include "lpc31_cgudrvr.h"
 #include "lpc31_syscreg.h"
@@ -96,11 +97,18 @@
 #  define CONFIG_LPC31_EHCI_NQTDS (LPC31_EHCI_NRHPORT + 3)
 #endif
 
+/* Buffers must be aligned to the cache line size */
+
+#define DCACHE_LINEMASK (ARM_DCACHE_LINESIZE -1)
+
 /* Configurable size of a request/descriptor buffers */
 
 #ifndef CONFIG_LPC31_EHCI_BUFSIZE
 #  define CONFIG_LPC31_EHCI_BUFSIZE 128
 #endif
+
+#define LPC31_EHCI_BUFSIZE \
+  ((CONFIG_LPC31_EHCI_BUFSIZE + DCACHE_LINEMASK) & ~DCACHE_LINEMASK)
 
 /* Debug options */
 
@@ -4005,12 +4013,15 @@ static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
   int ret = -ENOMEM;
   DEBUGASSERT(drvr && buffer && maxlen);
 
-  /* There is no special requirements for transfer/descriptor buffers. */
+  /* The only special requirements for transfer/descriptor buffers are that (1)
+   * they be aligned to a cache line boundary and (2) they are a multiple of the
+   * cache line size in length.
+   */
 
-  *buffer = (FAR uint8_t *)kmm_malloc(CONFIG_LPC31_EHCI_BUFSIZE);
+  *buffer = (FAR uint8_t *)kmm_memalign(LPC31_EHCI_BUFSIZE, ARM_DCACHE_LINESIZE);
   if (*buffer)
     {
-      *maxlen = CONFIG_LPC31_EHCI_BUFSIZE;
+      *maxlen = LPC31_EHCI_BUFSIZE;
       ret = OK;
     }
 
@@ -4082,11 +4093,14 @@ static int lpc31_ioalloc(FAR struct usbhost_driver_s *drvr, FAR uint8_t **buffer
 {
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
-  /* The only special requirements for I/O buffers are they might need to be user
-   * accessible (depending on how the class driver implements its buffering).
+  /* The only special requirements for I/O buffers are that (1) they be aligned to a
+   * cache line boundary, (2) they are a multiple of the cache line size in length,
+   * and (3) they might need to be user accessible (depending on how the class driver
+   * implements its buffering).
    */
 
-  *buffer = (FAR uint8_t *)kumm_malloc(buflen);
+  buflen  = (buflen + DCACHE_LINEMASK) & ~DCACHE_LINEMASK;
+  *buffer = (FAR uint8_t *)kumm_memalign(buflen, ARM_DCACHE_LINESIZE);
   return *buffer ? OK : -ENOMEM;
 }
 

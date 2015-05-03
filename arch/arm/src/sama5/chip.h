@@ -55,5 +55,9 @@
 
 #define L2CC_VBASE SAM_L2CC_VSECTION
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_H */
+/* Cache line sizes (in bytes)for the SAVA5Dx */
 
+#define ARMV7A_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
+#define ARMV7A_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
+
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_H */
