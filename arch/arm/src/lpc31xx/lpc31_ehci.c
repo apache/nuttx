@@ -3808,7 +3808,15 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn,
   ret = usbhost_enumerate(hport, &hport->devclass);
   if (ret < 0)
     {
+      /* Failed to enumerate */
+
       usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, hport->port + 1, -ret);
+
+      /* If this is a root hub port, then marking the hub port not connected will
+       * cause sam_wait() to return and we will try the connection again.
+       */
+
+      hport->connected = false;
     }
 
   return ret;
@@ -4018,7 +4026,7 @@ static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
    * cache line size in length.
    */
 
-  *buffer = (FAR uint8_t *)kmm_memalign(LPC31_EHCI_BUFSIZE, ARM_DCACHE_LINESIZE);
+  *buffer = (FAR uint8_t *)kmm_memalign(ARM_DCACHE_LINESIZE, LPC31_EHCI_BUFSIZE);
   if (*buffer)
     {
       *maxlen = LPC31_EHCI_BUFSIZE;
@@ -4100,7 +4108,7 @@ static int lpc31_ioalloc(FAR struct usbhost_driver_s *drvr, FAR uint8_t **buffer
    */
 
   buflen  = (buflen + DCACHE_LINEMASK) & ~DCACHE_LINEMASK;
-  *buffer = (FAR uint8_t *)kumm_memalign(buflen, ARM_DCACHE_LINESIZE);
+  *buffer = (FAR uint8_t *)kumm_memalign(ARM_DCACHE_LINESIZE, buflen);
   return *buffer ? OK : -ENOMEM;
 }
 
