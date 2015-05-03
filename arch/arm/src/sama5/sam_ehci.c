@@ -4144,7 +4144,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   if (ret < 0)
     {
-      udbg("ERROR: Tranfer setup failed: %d\n", ret);
+      udbg("ERROR: Transfer setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 
