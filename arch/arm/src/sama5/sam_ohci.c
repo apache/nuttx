@@ -103,6 +103,16 @@
 #  error Insufficent number of transfer descriptors (CONFIG_SAMA5_OHCI_NTDS < 2)
 #endif
 
+/* Minimum alignment for DMA access is 16 bytes, but it is safer to align to the
+ * cache line size.
+ */
+
+#if ARMV7A_DCACHE_LINESIZE > 16
+#  define SAMA5_DMA_ALIGN ARMV7A_DCACHE_LINESIZE
+#else
+#  define SAMA5_DMA_ALIGN 16
+#endif
+
 /* Configurable number of request/descriptor buffers (TDBUFFER) */
 
 #ifndef CONFIG_SAMA5_OHCI_TDBUFFERS
@@ -487,11 +497,11 @@ static struct ohci_hcca_s g_hcca
  */
 
 static struct sam_ed_s    g_edalloc[SAMA5_OHCI_NEDS]
-                          __attribute__ ((aligned (16)));
+                          __attribute__ ((aligned (SAMA5_DMA_ALIGN)));
 static struct sam_gtd_s   g_tdalloc[SAMA5_OHCI_NTDS]
-                          __attribute__ ((aligned (16)));
+                          __attribute__ ((aligned (SAMA5_DMA_ALIGN)));
 static uint8_t            g_bufalloc[SAM_BUFALLOC]
-                          __attribute__ ((aligned (16)));
+                          __attribute__ ((aligned (SAMA5_DMA_ALIGN)));
 
 /*******************************************************************************
  * Public Data
