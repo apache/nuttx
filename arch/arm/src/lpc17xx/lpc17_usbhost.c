@@ -429,7 +429,7 @@ static struct lpc17_list_s *g_iofree; /* List of unused I/O buffers */
 /* Pool and freelist of asynchronous transfer structures */
 
 static struct lpc17_list_s *g_asynchfree;
-static struct lpc17_list_s g_asynchbuffers[CONFIG_LPC17_USBHOST_NASYNCH];
+static struct lpc17_asynch_s g_asynchbuffers[CONFIG_LPC17_USBHOST_NASYNCH];
 #endif
 
 /*******************************************************************************
@@ -3499,7 +3499,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 #ifdef CONFIG_USBHOST_ASYNCH
   /* Initialize asynchronous transfer structures */
 
-  for (i = 0, asynch = (struct lpc17_asynch_s *)g_asynchbuffers;
+  for (i = 0, asynch = g_asynchbuffers;
        i < CONFIG_LPC17_USBHOST_NASYNCH;
        i++, asynch++)
     {
