@@ -982,9 +982,10 @@ Configuration Sub-Directories
           When I ran into stack size issues, I just increased the size of
           all threads that had smaller stacks.
 
-          CONFIG_EXAMPLES_HIDKBD_STACKSIZE=2048   : Was 1024
-          CONFIG_HIDKBD_STACKSIZE=2048            : Was 1024
-          CONFIG_SCHED_HPWORKSTACKSIZE=2048       : Was 1024 (1024 is probably ok)
+          CONFIG_EXAMPLES_HIDKBD_STACKSIZE=2048    : Was 1024
+          CONFIG_HIDKBD_STACKSIZE=2048             : Was 1024
+          CONFIG_SCHED_HPWORKSTACKSIZE=2048        : Was 1024 (1024 is probably ok)
+          CONFIG_LPC1766STK_USBHOST_STACKSIZE=1536 | Was 1024
 
        STATUS:
          2015-04-26: The hub basically works.  I do get crashes in the LPC16 USB host driver
