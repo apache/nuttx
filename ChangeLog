@@ -10298,3 +10298,10 @@
 	  bug has been in the ECHI drivers forever, but was only revealed due to
 	  unlucky memory allocations during the integration of the hub feature
 	  (2015-05-03).
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c:  Correct some initialization of
+	  data structures.  When hub support is enabled, it would overwrite the
+	  end of an array and clobber some OS data structures (2015-05-03).
+	* configs/olimex-lpc1766stk:  Make stacks usage configurable for USB
+	  host waiter. It needs to be a lot deeper when hub support is enabled
+	  (2015-05-03).
+
