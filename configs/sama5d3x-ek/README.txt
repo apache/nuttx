@@ -1668,7 +1668,7 @@ USB High-Speed Host
        the nesting depth of certain USB host class logic can increase.
 
     STATUS:
-      Hub support has not been verified on this board.
+      Hub support has not been verified on this board yet.
 
   Mass Storage Device Usage
   -------------------------

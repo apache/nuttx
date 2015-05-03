@@ -146,7 +146,11 @@
 #    define CONFIG_USBHOST_DEFPRIO 50
 #  endif
 #  ifndef CONFIG_USBHOST_STACKSIZE
-#    define CONFIG_USBHOST_STACKSIZE 1024
+#    ifdef CONFIG_USBHOST_HUB
+#      define CONFIG_USBHOST_STACKSIZE 1536
+#    else
+#      define CONFIG_USBHOST_STACKSIZE 1024
+#    endif
 #  endif
 #endif
 
