@@ -10304,4 +10304,5 @@
 	* configs/olimex-lpc1766stk:  Make stacks usage configurable for USB
 	  host waiter. It needs to be a lot deeper when hub support is enabled
 	  (2015-05-03).
-
+	* fs/vfs/fs_poll.c: Fix resource leak and memory corruption on poll
+	  failure.  From Jussi Kivilinna (2015-05-04).
