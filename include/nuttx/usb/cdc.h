@@ -857,6 +857,22 @@ struct cdc_linestatus_s
   uint32_t call[1];  /* dwCallStateN, Defines current state of call N on the line */
 };
 
+/* Messages are formatted as a standardized 8-byte header, followed by a variable-length
+ * data field. The header identifies the kind of notification, and the interface associated
+ * with the notification; it also indicates the length of the variable length portion of
+ * the message
+ */
+
+struct cdc_notification_s
+{
+  uint8_t type;                /* bmRequestType */
+  uint8_t notification;        /* bNotification */
+  uint8_t value[2];            /* wValue */
+  uint8_t index[2];            /* wIndex - interface */
+  uint8_t len[2];              /* wLength - length of variable data */
+  uint8_t data[1];             /* Variable length data begins here */
+};
+
 /* Table 60: Unit Parameter Structure */
 
 struct cdc_unitparm_s
