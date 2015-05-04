@@ -89,7 +89,7 @@ SECTIONS
       _sctors = . ;
       *(.ctors)       /* Old ABI:  Unallocated */
       *(.init_array)  /* New ABI:  Allocated */
-      _edtors = . ;
+      _ectors = . ;
     }
 
   .dtors :
