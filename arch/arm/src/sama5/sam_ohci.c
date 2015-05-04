@@ -3547,7 +3547,6 @@ errout:
 #ifdef CONFIG_USBHOST_ASYNCH
 static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;
   struct sam_ed_s *ed;
   struct sam_gtd_s *td;
@@ -3555,7 +3554,7 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   uintptr_t paddr;
   irqstate_t flags;
 
-  DEBUGASSERT(rhport && eplist && eplist->ed && eplist->tail);
+  DEBUGASSERT(eplist && eplist->ed && eplist->tail);
   ed = eplist->ed;
 
   /* These first steps must be atomic as possible */
