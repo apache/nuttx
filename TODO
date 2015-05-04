@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 6, 2015)
+NuttX TODO List (Last updated May 3, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,7 +16,7 @@ nuttx/
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
-  (4)  USB (drivers/usbdev, drivers/usbhost)
+  (3)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
@@ -1089,11 +1089,6 @@ o USB (drivers/usbdev, drivers/usbhost)
   Priority:    High for class drivers that need EP0 data.  For example, the
                CDC/ACM serial driver might need the line coding data (that
                data is not used currently, but it might be).
-
-  Title:       USB HUB SUPPORT
-  Description: Add support for USB hubs
-  Status:      Open
-  Priority:    Low/Unknown.  This is a feature enhancement.
 
 o Libraries (libc/)
   ^^^^^^^^^^^^^^^^^
