@@ -162,6 +162,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 {
   unsigned int i;
+  unsigned int j;
   int ret;
 
   /* Process each descriptor in the list */
@@ -190,6 +191,17 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
           ret = poll_fdsetup(fds[i].fd, &fds[i], true);
           if (ret < 0)
             {
+              /* Setup failed for fds[i]. We now need to teardown previously
+               * setup fds[0 .. (i - 1)] to release allocated resources and
+               * to prevent memory corruption by access to freed/released 'fds'
+               * and 'sem'.
+               */
+
+              for (j = 0; j < i; j++)
+                {
+                  (void)poll_fdsetup(fds[j].fd, &fds[j], false);
+                }
+
               return ret;
             }
         }
