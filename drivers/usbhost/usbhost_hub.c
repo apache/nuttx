@@ -82,11 +82,19 @@
 #  error Low-priority work queue support is required (CONFIG_SCHED_LPWORK)
 #endif
 
+#ifndef CONFIG_USBHOST_ASYNCH
+#  error Asynchronous transfer support is required (CONFIG_USBHOST_ASYNCH)
+#endif
+
+#ifdef CONFIG_USBHOST_HUB_POLLMSEC
+#  define CONFIG_USBHOST_HUB_POLLMSEC 400
+#endif
+
 /* Perform polling actions with a delay on the low priority work queue, if
  * configured
  */
 
-#define POLL_DELAY          MSEC2TICK(400)
+#define POLL_DELAY          MSEC2TICK(CONFIG_USBHOST_HUB_POLLMSEC)
 
 /* Used in usbhost_cfgdesc() */
 
@@ -1140,8 +1148,8 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *   Handle end of transfer callback.
  *
  * Input Parameters:
- *   dest - A pointer to the first byte to save the little endian value.
- *   val - The 16-bit value to be saved.
+ *   arg - The argument provided with the asynchronous I/O was setup
+ *   result - The result of the transfer
  *
  * Returned Values:
  *   None
