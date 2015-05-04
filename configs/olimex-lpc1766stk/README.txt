@@ -990,7 +990,9 @@ Configuration Sub-Directories
        STATUS:
          2015-05-03: The hub basically works.  The only problem that I see is
                      that the code does not enumerate the hub if it is
-                     connected at the time of power up.
+                     connected at the time of reset up.  It does not a power-up
+                     reset, but not with the reset button.  This sounds like
+                     a hardwares reset issue on the board to me.
 
   hidmouse:
     This configuration directory supports a variant of an NSH configution.
