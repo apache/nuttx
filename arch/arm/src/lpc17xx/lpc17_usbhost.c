@@ -194,8 +194,8 @@ struct lpc17_xfrinfo_s
   
 #ifdef CONFIG_USBHOST_ASYNCH
 #if LPC17_IOBUFFERS > 0
-  /* Remember buffer related information for when the asynchronous transfer
-   * completes.
+  /* Remember the allocated DMA buffer address so that it can be freed when
+   * the transfer completes.
    */
 
   uint16_t buflen;            /* Buffer length */
@@ -1499,12 +1499,11 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
   uint32_t regval;
   int ret;
 
-  xfrinfo = ed->xfrinfo;
-  DEBUGASSERT(xfrinfo);
-
-  /* Allocate a structure to retain the information needed when the asynchronous
-   * transfer completes.
+  /* Allocate a structure to retain the information needed when the transfer
+   * completes.
    */
+
+  DEBUGASSERT(ed->xfrinfo == NULL);
 
   xfrinfo = lpc17_alloc_xfrinfo();
   if (xfrinfo == NULL)
@@ -1684,8 +1683,14 @@ static int lpc17_usbinterrupt(int irq, void *context)
                       /* Yes.. disconnect the device */
 
                       ullvdbg("Disconnected\n");
-                      priv->connected          = false;
-                      priv->change             = true;
+                      priv->connected = false;
+                      priv->change    = true;
+
+                      /* Set the port speed to the default (FULL).  We cannot
+                       * yet free the function address.  That has to be done
+                       * by the class when responds to the disconnection.
+                       */
+
                       priv->rhport.hport.speed = USB_SPEED_FULL;
 
                       /* Are we bound to a class instance? */
@@ -1774,13 +1779,24 @@ static int lpc17_usbinterrupt(int irq, void *context)
                 }
 #endif
 
-              /* Determine the size of the transfer by subtracting the
-               * current buffer pointer (CBP) from the initial buffer
-               * pointer (on packet receipt only).
+              /* Determine the number of bytes actually transfer by
+               * subtracting the buffer start address from the CBP.  But be
+               * careful, the CBP may be zero.
                */
 
-              tmp = (uintptr_t)td->hw.cbp - (uintptr_t)xfrinfo->buffer;
-              DEBUGASSERT(tmp < UINT16_MAX);
+              tmp = (uintptr_t)td->hw.cbp;
+              if (tmp != 0)
+                {
+                  DEBUGASSERT(tmp >= (uintptr_t)xfrinfo->buffer);
+
+                  /* Determine the size of the transfer by subtracting the
+                   * current buffer pointer (CBP) from the initial buffer
+                   * pointer (on packet receipt only).
+                   */
+
+                  tmp -= (uintptr_t)xfrinfo->buffer;
+                  DEBUGASSERT(tmp < UINT16_MAX);
+                }
 
               xfrinfo->xfrd = (uint16_t)tmp;
 
@@ -1796,6 +1812,7 @@ static int lpc17_usbinterrupt(int irq, void *context)
                   lpc17_givesem(&ed->wdhsem);
                   xfrinfo->wdhwait = false;
                 }
+
 #ifdef CONFIG_USBHOST_ASYNCH
               /* Perform any pending callbacks for the case of asynchronous
                * transfers.
@@ -1871,19 +1888,26 @@ static int lpc17_wait(struct usbhost_connection_s *conn,
       if (priv->change)
         {
           connport = &priv->rhport.hport;
-
-          /* Yes. Remember the new state */
-
-          connport->connected = priv->connected;
           priv->change = false;
 
-          /* And return the root hub port */
+          /* Yes.. check for false alarms */
 
-          *hport = connport;
-          irqrestore(flags);
+          if (priv->connected != connport->connected)
+            {
+              /* Not a false alarm.. Remember the new state */
 
-          udbg("RHport Connected: %s\n", connport->connected ? "YES" : "NO");
-          return OK;
+              connport->connected = priv->connected;
+
+              /* And return the root hub port */
+
+              *hport = connport;
+              irqrestore(flags);
+
+              udbg("RHport Connected: %s\n",
+                   connport->connected ? "YES" : "NO");
+
+              return OK;
+            }
         }
 
 #ifdef CONFIG_USBHOST_HUB
@@ -2842,7 +2866,6 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   int ret;
 
   DEBUGASSERT(priv && ed && buffer && buflen > 0);
-  DEBUGASSERT(ed->xfrinfo == NULL);
 
   /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
    * pool, the bulk and interrupt lists, and the HCCA interrupt table.
@@ -2850,9 +2873,11 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   lpc17_takesem(&priv->exclsem);
 
-  /* Allocate a structure to retain the information needed when the asynchronous
-   * transfer completes.
+  /* Allocate a structure to retain the information needed when the transfer
+   * completes.
    */
+
+  DEBUGASSERT(ed->xfrinfo == NULL);
 
   xfrinfo = lpc17_alloc_xfrinfo();
   if (xfrinfo == NULL)
@@ -3091,6 +3116,8 @@ static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   /* Allocate a structure to retain the information needed when the asynchronous
    * transfer completes.
    */
+
+  DEBUGASSERT(ed->xfrinfo == NULL);
 
   xfrinfo = lpc17_alloc_xfrinfo();
   if (xfrinfo == NULL)
@@ -3443,6 +3470,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 #endif
   hport->ep0           = EDCTRL;
   hport->speed         = USB_SPEED_FULL;
+  hport->funcaddr      = 0;
 
   /* Initialize function address generation logic */
 
