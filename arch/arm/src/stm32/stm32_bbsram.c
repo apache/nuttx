@@ -266,7 +266,7 @@ static inline void stm32_bbsram_unlock(void)
  *
  ****************************************************************************/
 
-static inline void  stm32_bbsram_lock(void)
+static inline void stm32_bbsram_lock(void)
 {
   (void)stm32_pwr_enablebkp(false);
 }
