@@ -74,7 +74,7 @@ extern "C"
  *   and backup SRAM).
  *
  * Input Parameters:
- *   writable - sets the write protections
+ *   writable - True: enable ability to write to backup domain registers
  *
  * Returned Value:
  *   True: The backup domain was previously writable.

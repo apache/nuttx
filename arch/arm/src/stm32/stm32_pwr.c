@@ -86,7 +86,7 @@ static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint1
  *   and backup SRAM).
  *
  * Input Parameters:
- *   protect - sets the write protections
+ *   writable - True: enable ability to write to backup domain registers
  *
  * Returned Value:
  *   True: The backup domain was previously writable.
