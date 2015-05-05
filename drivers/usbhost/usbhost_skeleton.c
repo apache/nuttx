@@ -585,14 +585,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   /* We are good... Allocate the endpoints */
 
   ret = DRVR_EPALLOC(hport->drvr, &boutdesc, &priv->epout);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
       return ret;
     }
 
   ret = DRVR_EPALLOC(hport->drvr, &bindesc, &priv->epin);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
       (void)DRVR_EPFREE(hport->drvr, priv->epout);
@@ -639,7 +639,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   /* Register the driver */
 
-  if (ret == OK)
+  if (ret >= 0)
     {
       char devname[DEV_NAMELEN];
 
@@ -653,7 +653,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
    * driver has been registerd.
    */
 
-  if (ret == OK)
+  if (ret >= 0)
     {
       usbhost_takesem(&priv->exclsem);
       DEBUGASSERT(priv->crefs >= 2);
@@ -952,7 +952,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   /* Parse the configuration descriptor to get the endpoints */
 
   ret = usbhost_cfgdesc(priv, configdesc, desclen);
-  if (ret != OK)
+  if (ret < 0)
     {
       udbg("usbhost_cfgdesc() failed: %d\n", ret);
     }
@@ -961,7 +961,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       /* Now configure the device and register the NuttX driver */
 
       ret = usbhost_devinit(priv);
-      if (ret != OK)
+      if (ret < 0)
         {
           udbg("usbhost_devinit() failed: %d\n", ret);
         }
