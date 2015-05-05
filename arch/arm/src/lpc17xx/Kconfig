@@ -961,16 +961,14 @@ config USBHOST_IOBUFSIZE
 		Size of one end-user I/O buffer.  This can be zero if the application
 		can guarantee that all end-user I/O buffers reside in AHB SRAM.
 
-config LPC17_USBHOST_NASYNCH
-	int "Number asynch transfers"
+config LPC17_USBHOST_NPREALLOC
+	int "Max concurrent transfers"
 	default 8 if USBHOST_HUB
 	default 4 if !USBHOST_HUB
-	depends on USBHOST_ASYNCH
 	---help---
 		This number represents a number of pre-allocated structures to support
-		asynchronous IN data transfers.  This number effective determines that
-		number of concurrent asynchronous IN endpoint transfer that can be
-		supported.
+		concurrent data transfers.  This number limits that number of concurrent
+		asynchronous IN endpoint transfer that can be supported.
 
 config USBHOST_BULK_DISABLE
 	bool "Disable bulk EPs"

@@ -545,7 +545,7 @@ static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
          FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
 static int lpc31_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
          FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
-static int lpc31_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+static ssize_t lpc31_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
          FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc31_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -2630,6 +2630,7 @@ static inline int lpc31_asynch_setup(struct lpc31_rhport_s *rhport,
 static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo)
 {
   usbhost_asynch_t callback;
+  ssize_t nbytes;
   void *arg;
   int result;
 
@@ -2641,15 +2642,23 @@ static void lpc31_asynch_completion(struct lpc31_epinfo_s *epinfo)
   callback         = epinfo->callback;
   arg              = epinfo->arg;
   result           = epinfo->result;
+  nbytes           = epinfo->xfrd;
 
   epinfo->callback = NULL;
   epinfo->arg      = NULL;
   epinfo->result   = OK;
   epinfo->iocwait  = false;
 
-  /* Then perform the callback */
+  /* Then perform the callback.  Provide the number of bytes successfully
+   * transferred or the negated errno value in the event of a failure.
+   */
 
-  callback(arg, result);
+  if (result < 0)
+    {
+      nbytes = (ssize_t)result;
+    }
+
+  callback(arg, nbytes);
 }
 #endif
 
@@ -4273,8 +4282,9 @@ static int lpc31_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure:
+ *   On success, a non-negative value is returned that indicates the number
+ *   of bytes successfully transferred.  On a failure, a negated errno value is
+ *   returned that indicates the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -4288,8 +4298,8 @@ static int lpc31_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  *******************************************************************************/
 
-static int lpc31_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen)
+static ssize_t lpc31_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                              FAR uint8_t *buffer, size_t buflen)
 {
   struct lpc31_rhport_s *rhport = (struct lpc31_rhport_s *)drvr;
   struct lpc31_epinfo_s *epinfo = (struct lpc31_epinfo_s *)ep;
@@ -4347,13 +4357,13 @@ static int lpc31_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   nbytes = lpc31_transfer_wait(epinfo);
   lpc31_givesem(&g_ehci.exclsem);
-  return nbytes >= 0 ? OK : (int)nbytes;
+  return nbytes;
 
 errout_with_iocwait:
   epinfo->iocwait = false;
 errout_with_sem:
   lpc31_givesem(&g_ehci.exclsem);
-  return ret;
+  return (ssize_t)ret;
 }
 
 /*******************************************************************************
@@ -4676,12 +4686,7 @@ static int lpc31_connect(FAR struct usbhost_driver_s *drvr,
 static void lpc31_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
 {
-  struct lpc31_rhport_s *rhport = (struct lpc31_rhport_s *)drvr;
-  DEBUGASSERT(rhport != NULL && hport != NULL);
-
-  /* Unbind the class */
-  /* REVISIT:  Is there more that needs to be done? */
-
+  DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
 }
 
