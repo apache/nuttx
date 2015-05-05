@@ -219,14 +219,15 @@
 
 struct sam_eplist_s
 {
-  volatile bool    wdhwait;    /* TRUE: Thread is waiting for WDH interrupt */
-  sem_t            wdhsem;     /* Semaphore used to wait for Writeback Done Head event */
+  volatile bool     wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
+  sem_t             wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
 #ifdef CONFIG_USBHOST_ASYNCH
-  usbhost_asynch_t callback;   /* Transfer complete callback */
-  void            *arg;        /* Argument that accompanies the callback */
-  uint8_t         *buffer;     /* Buffer being transferred */
-  uint16_t         buflen;     /* Length of the buffer */
+  usbhost_asynch_t  callback;  /* Transfer complete callback */
+  void             *arg;       /* Argument that accompanies the callback */
+  uint16_t          buflen;    /* Length of the buffer */
 #endif
+  uint8_t          *buffer;    /* Buffer being transferred */
+  uint16_t          xfrd;      /* Number of bytes completed in the last transfer */
   struct sam_ed_s  *ed;        /* Endpoint descriptor (ED) */
   struct sam_gtd_s *tail;      /* Tail transfer descriptor (TD) */
 };
@@ -444,8 +445,8 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 static int sam_transfer_common(struct sam_rhport_s *rhport,
                                struct sam_eplist_s *eplist,
                                uint8_t *buffer, size_t buflen);
-static int sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        uint8_t *buffer, size_t buflen);
+static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                            uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static void sam_asynch_completion(struct sam_eplist_s *eplist);
 static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -2077,6 +2078,8 @@ static void sam_wdh_bottomhalf(void)
   struct sam_gtd_s *td;
   struct sam_gtd_s *next;
   struct sam_ed_s *ed;
+  uintptr_t paddr;
+  uintptr_t tmp;
 
   /* The host controller just wrote the one finished TDs into the HCCA
    * done head.  This may include multiple packets that were transferred
@@ -2146,6 +2149,16 @@ static void sam_wdh_bottomhalf(void)
           usbhost_trace2(OHCI_TRACE2_WHDTDSTATUS, ed->tdstatus, ed->xfrtype);
         }
 #endif
+
+      /* Determine the size of the transfer by subtracting the current buffer
+       * pointer (CBP) from the initial buffer pointer (on packet receipt only).
+       */
+
+      paddr = sam_physramaddr((uintptr_t)eplist->buffer);
+      tmp   = (uintptr_t)td->hw.cbp - paddr;
+      DEBUGASSERT(tmp < UINT16_MAX);
+
+      eplist->xfrd = (uint16_t)tmp;
 
       /* Return the TD to the free list */
 
@@ -3253,12 +3266,13 @@ static int sam_transfer_common(struct sam_rhport_s *rhport,
  *
  *******************************************************************************/
 
-static int sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        uint8_t *buffer, size_t buflen)
+static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                            uint8_t *buffer, size_t buflen)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;
   struct sam_ed_s *ed;
+  ssize_t nbytes;
   bool in;
   int ret;
 
@@ -3339,21 +3353,24 @@ static int sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                                  (uintptr_t)buffer + buflen);
         }
 
-      ret = OK;
+      nbytes = eplist->xfrd;
+      DEBUGASSERT(nbytes >=0 && nbytes <= buflen);
+
+      sam_givesem(&g_ohci.exclsem);
+      return nbytes;
     }
-  else
-    {
-      usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, RHPORT(rhport),
-                     ed->tdstatus);
-      ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
-    }
+
+  /* A transfer error occurred */
+
+  usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, RHPORT(rhport), ed->tdstatus);
+  ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
 
 errout:
   /* Make sure that there is no outstanding request on this endpoint */
 
   eplist->wdhwait = false;
   sam_givesem(&g_ohci.exclsem);
-  return ret;
+  return (ssize_t)ret;
 }
 
 /*******************************************************************************
@@ -3382,7 +3399,7 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist)
   struct sam_ed_s *ed;
   usbhost_asynch_t callback;
   void *arg;
-  int result;
+  ssize_t nbytes;
 
   DEBUGASSERT(eplist->ed && eplist->tail && eplist->callback != NULL && 
               eplist->buffer != NULL && eplist->buflen > 0);
@@ -3407,12 +3424,13 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist)
           arch_invalidate_dcache(buffaddr, buffaddr + eplist->buflen);
         }
 
-      result = OK;
+      nbytes = eplist->xfrd;
+      DEBUGASSERT(nbytes >= 0 && nbytes <= eplist->buflen);
     }
   else
     {
       usbhost_trace1(OHCI_TRACE1_BADTDSTATUS, ed->tdstatus);
-      result = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
+      nbytes = (ed->tdstatus == TD_CC_STALL) ? -EPERM : -EIO;
     }
 
   /* Extract the callback information before freeing the buffer */
@@ -3430,7 +3448,7 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist)
 
   /* Then perform the callback */
 
-  callback(arg, result);
+  callback(arg, nbytes);
 }
 #endif
 

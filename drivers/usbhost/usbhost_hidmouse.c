@@ -1052,6 +1052,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
   unsigned int npolls = 0;
 #endif
   unsigned int nerrors = 0;
+  ssize_t nbytes;
   int ret;
 
   uvdbg("Started\n");
@@ -1084,14 +1085,14 @@ static int usbhost_mouse_poll(int argc, char *argv[])
        * sends data.
        */
 
-      ret = DRVR_TRANSFER(hport->drvr, priv->epin,
-                          priv->tbuffer, priv->tbuflen);
+      nbytes = DRVR_TRANSFER(hport->drvr, priv->epin,
+                             priv->tbuffer, priv->tbuflen);
 
       /* Check for errors -- Bail if an excessive number of consecutive
        * errors are encountered.
        */
 
-      if (ret < 0)
+      if (nbytes < 0)
         {
           /* If DRVR_TRANSFER() returns EAGAIN, that simply means that
            * the devices was not ready and has NAK'ed the transfer.  That
@@ -1100,11 +1101,12 @@ static int usbhost_mouse_poll(int argc, char *argv[])
            */
 
           udbg("ERROR: DRVR_TRANSFER returned: %d/%d\n", ret, nerrors);
-          if (ret != -EAGAIN)
+          if (nbytes != -EAGAIN)
             {
               if (++nerrors > 200)
                 {
                   udbg("Too many errors... aborting: %d\n", nerrors);
+                  ret = (int)nbytes;
                   break;
                 }
             }

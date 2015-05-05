@@ -490,8 +490,9 @@
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure:
+ *   On success, a non-negative value is returned that indicates the number
+ *   of bytes successfully transferred.  On a failure, a negated errno value is
+ *   returned that indicates the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -791,9 +792,13 @@ struct usbhost_connection_s
                    FAR struct usbhost_hubport_s *hport);
 };
 
-/* Callback type used with asynchronous transfers */
+/* Callback type used with asynchronous transfers.  The result of the
+ * transfer is provided by the 'result' parameters.  If >= 0, then 'result'
+ * is the number of bytes transfers. If < 0 then the transfer failed and
+ * result is a negated errno value that indicates the nature of the failure.
+ */
 
-typedef CODE void (*usbhost_asynch_t)(FAR void *arg, int result);
+typedef CODE void (*usbhost_asynch_t)(FAR void *arg, ssize_t result);
 
 /* struct usbhost_driver_s provides access to the USB host driver from the
  * USB host class implementation.
@@ -869,8 +874,8 @@ struct usbhost_driver_s
    * transfer has completed.
    */
 
-  int (*transfer)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                  FAR uint8_t *buffer, size_t buflen);
+  ssize_t (*transfer)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                      FAR uint8_t *buffer, size_t buflen);
 
   /* Process a request to handle a transfer asynchronously.  This method
    * will enqueue the transfer request and return immediately.  Only one

@@ -220,7 +220,8 @@ struct stm32_chan_s
   bool              in;        /* True: IN endpoint */
   volatile bool     waiter;    /* True: Thread is waiting for a channel event */
   uint16_t          maxpacket; /* Max packet size */
-  volatile uint16_t buflen;    /* Buffer length (remaining) */
+  uint16_t          buflen;    /* Buffer length (at start of transfer) */
+  volatile uint16_t xfrd;      /* Bytes transferred (at end of transfer) */
   volatile uint16_t inflight;  /* Number of Tx bytes "in-flight" */
   FAR uint8_t      *buffer;    /* Transfer buffer pointer */
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -356,8 +357,8 @@ static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
                                FAR struct stm32_ctrlinfo_s *ep0,
                                FAR uint8_t *buffer, unsigned int buflen);
 static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx);
-static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
-                             FAR uint8_t *buffer, size_t buflen);
+static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
+                                 FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
                           FAR struct stm32_chan_s *chan);
@@ -366,8 +367,8 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
                            usbhost_asynch_t callback, FAR void *arg);
 #endif
 static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx);
-static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
-                              FAR uint8_t *buffer, size_t buflen);
+static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
+                                  FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
                            FAR struct stm32_chan_s *chan);
@@ -441,8 +442,8 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer);
-static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                          FAR uint8_t *buffer, size_t buflen);
+static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                              FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen,
@@ -1104,7 +1105,7 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
 
       ret = sem_wait(&chan->waitsem);
 
-      /* sem_wait should succeeed.  But it is possible that we could be
+      /* sem_wait should succeed.  But it is possible that we could be
        * awakened by a signal too.
        */
 
@@ -1402,6 +1403,7 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
 
   chan->result   = EBUSY;
   chan->inflight = 0;
+  chan->xfrd     = 0;
   priv->chidx    = chidx;
 
   /* Compute the expected number of packets associated to the transfer.
@@ -1611,11 +1613,12 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
       chan->pid    = OTGHS_PID_SETUP;
       chan->buffer = (FAR uint8_t *)req;
       chan->buflen = USB_SIZEOF_CTRLREQ;
+      chan->xfrd   = 0;
 
       /* Set up for the wait BEFORE starting the transfer */
 
       ret = stm32_chan_waitsetup(priv, chan);
-      if (ret != OK)
+      if (ret < 0)
         {
           usbhost_trace1(OTGHS_TRACE1_DEVDISCONN, 0);
           return ret;
@@ -1677,6 +1680,7 @@ static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
 
   chan->buffer = buffer;
   chan->buflen = buflen;
+  chan->xfrd   = 0;
 
   /* Set the DATA PID */
 
@@ -1694,7 +1698,7 @@ static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
   /* Set up for the wait BEFORE starting the transfer */
 
   ret = stm32_chan_waitsetup(priv, chan);
-  if (ret != OK)
+  if (ret < 0)
     {
       usbhost_trace1(OTGHS_TRACE1_DEVDISCONN, 0);
       return ret;
@@ -1730,11 +1734,12 @@ static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
   chan->pid    = OTGHS_PID_DATA1;
   chan->buffer = buffer;
   chan->buflen = buflen;
+  chan->xfrd   = 0;
 
   /* Set up for the wait BEFORE starting the transfer */
 
   ret = stm32_chan_waitsetup(priv, chan);
-  if (ret != OK)
+  if (ret < 0)
     {
       usbhost_trace1(OTGHS_TRACE1_DEVDISCONN, 0);
       return ret;
@@ -1818,13 +1823,13 @@ static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  *******************************************************************************/
 
-static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
-                             FAR uint8_t *buffer, size_t buflen)
+static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
+                                 FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
   uint32_t start;
   uint32_t elapsed;
-  int ret = OK;
+  int ret;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
    * or a fatal error occurs (any error other than a simple NAK)
@@ -1833,17 +1838,18 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
   chan->buflen = buflen;
+  chan->xfrd   = 0;
 
   start = clock_systimer();
-  while (chan->buflen > 0)
+  while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
 
       ret = stm32_chan_waitsetup(priv, chan);
-      if (ret != OK)
+      if (ret < 0)
         {
           usbhost_trace1(OTGHS_TRACE1_DEVDISCONN, 0);
-          return ret;
+          return (ssize_t)ret;
         }
 
       /* Set up for the transfer based on the direction and the endpoint type */
@@ -1852,7 +1858,7 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       if (ret < 0)
         {
           udbg("ERROR: stm32_in_setup failed: %d\n", ret);
-          return ret;
+          return (ssize_t)ret;
         }
 
       /* Wait for the transfer to complete and get the result */
@@ -1864,7 +1870,7 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
        * cause use to return
        */
 
-      if (ret != OK)
+      if (ret < 0)
         {
           usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED,ret);
 
@@ -1878,16 +1884,17 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           elapsed = clock_systimer() - start;
           if (ret != -EAGAIN ||                       /* Not a NAK condition OR */
               elapsed >= STM32_DATANAK_DELAY ||       /* Timeout has elapsed OR */
-              chan->buflen != buflen)                 /* Data has been partially transferred */
+               chan->xfrd > 0)                        /* Data has been partially transferred */
             {
               /* Break out and return the error */
 
-              break;
+              udbg("ERROR: stm32_chan_wait failed: %d\n", ret);
+              return (ssize_t)ret;
             }
         }
     }
 
-  return ret;
+  return (ssize_t)chan->xfrd;
 }
 
 /*******************************************************************************
@@ -1907,13 +1914,14 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
 {
   usbhost_asynch_t callback;
   FAR void *arg;
+  ssize_t nbytes;
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK?*/
+  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
 
-  result = chan->result;
-  if (chan->buflen > 0 && result == OK)
+  result = -(int)chan->result;
+  if (chan->xfrd < chan->buflen && result == OK)
     {
       /* Yes.. Set up for the next transfer based on the direction and the
        * endpoint type
@@ -1937,12 +1945,20 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
 
   callback       = chan->callback;
   arg            = chan->arg;
+  nbytes         = chan->xfrd;
+
   chan->callback = NULL;
   chan->arg      = NULL;
+  chan->xfrd     = 0;
 
   /* Then perform the callback */
 
-  callback(arg, chan->result);
+  if (result < 0)
+    {
+      nbytes = (ssize_t)result;
+    }
+
+  callback(arg, nbytes);
 }
 #endif
 
@@ -1970,6 +1986,7 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
   chan->buflen = buflen;
+  chan->xfrd   = 0;
 
   ret = stm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
@@ -2065,14 +2082,15 @@ static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  *******************************************************************************/
 
-static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
-                              FAR uint8_t *buffer, size_t buflen)
+static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
+                                  FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
   uint32_t start;
   uint32_t elapsed;
   size_t xfrlen;
-  int ret = OK;
+  ssize_t xfrd;
+  int ret;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
    * or a fatal error occurs (any error other than a simple NAK)
@@ -2080,6 +2098,7 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
   chan  = &priv->chan[chidx];
   start = clock_systimer();
+  xfrd  = 0;
 
   while (buflen > 0)
     {
@@ -2091,14 +2110,15 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       xfrlen       = MIN(chan->maxpacket, buflen);
       chan->buffer = buffer;
       chan->buflen = xfrlen;
+      chan->xfrd   = 0;
 
       /* Set up for the wait BEFORE starting the transfer */
 
       ret = stm32_chan_waitsetup(priv, chan);
-      if (ret != OK)
+      if (ret < 0)
         {
           usbhost_trace1(OTGHS_TRACE1_DEVDISCONN,0);
-          return ret;
+          return (ssize_t)ret;
         }
 
       /* Set up for the transfer based on the direction and the endpoint type */
@@ -2107,7 +2127,7 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
       if (ret < 0)
         {
           udbg("ERROR: stm32_out_setup failed: %d\n", ret);
-          return ret;
+          return (ssize_t)ret;
         }
 
      /* Wait for the transfer to complete and get the result */
@@ -2116,7 +2136,7 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
       /* Handle transfer failures */
 
-      if (ret != OK)
+      if (ret < 0)
         {
           usbhost_trace1(OTGHS_TRACE1_TRNSFRFAILED,ret);
 
@@ -2128,13 +2148,14 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
            */
 
           elapsed = clock_systimer() - start;
-          if (ret != -EAGAIN ||                       /* Not a NAK condition OR */
-              elapsed >= STM32_DATANAK_DELAY ||       /* Timeout has elapsed OR */
-              chan->buflen != xfrlen)                 /* Data has been partially transferred */
+          if (ret != -EAGAIN ||                     /* Not a NAK condition OR */
+              elapsed >= STM32_DATANAK_DELAY ||     /* Timeout has elapsed OR */
+              chan->xfrd != xfrlen)                 /* Data has been partially transferred */
             {
               /* Break out and return the error */
 
-              break;
+              udbg("ERROR: stm32_chan_wait failed: %d\n", ret);
+              return (ssize_t)ret;
             }
 
           /* Is this flush really necessary? What does the hardware do with the
@@ -2155,10 +2176,11 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
           buffer += xfrlen;
           buflen -= xfrlen;
+          xfrd   += chan->xfrd;
         }
     }
 
-  return ret;
+  return xfrd;
 }
 
 /*******************************************************************************
@@ -2178,13 +2200,14 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
 {
   usbhost_asynch_t callback;
   FAR void *arg;
+  ssize_t nbytes;
   int result;
   int ret;
 
   /* Is the full transfer complete? Did the last chunk transfer complete OK?*/
 
-  result = chan->result;
-  if (chan->buflen > 0 && result == OK)
+  result = -(int)chan->result;
+  if (chan->xfrd < chan->buflen && result == OK)
     {
       /* Yes.. Set up for the next transfer based on the direction and the
        * endpoint type
@@ -2208,12 +2231,20 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
 
   callback       = chan->callback;
   arg            = chan->arg;
+  nbytes         = chan->xfrd;
+
   chan->callback = NULL;
   chan->arg      = NULL;
+  chan->xfrd     = 0;
 
   /* Then perform the callback */
 
-  callback(arg, chan->result);
+  if (result < 0)
+    {
+      nbytes = (ssize_t)result;
+    }
+
+  callback(arg, nbytes);
 }
 #endif
 
@@ -2241,6 +2272,7 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
   chan->buflen = buflen;
+  chan->xfrd   = 0;
 
   ret = stm32_chan_asynchsetup(priv, chan, callback, arg);
   if (ret < 0)
@@ -2631,7 +2663,7 @@ static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
        */
 
       priv->chan[chidx].buffer  += priv->chan[chidx].inflight;
-      priv->chan[chidx].buflen  -= priv->chan[chidx].inflight;
+      priv->chan[chidx].xfrd    += priv->chan[chidx].inflight;
       priv->chan[chidx].inflight = 0;
 
       /* Halt the channel -- the CHH interrupt is expected next */
@@ -2957,7 +2989,7 @@ static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
             /* Manage multiple packet transfers */
 
             priv->chan[chidx].buffer += bcnt;
-            priv->chan[chidx].buflen -= bcnt;
+            priv->chan[chidx].xfrd   += bcnt;
 
             /* Check if more packets are expected */
 
@@ -3015,15 +3047,15 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
    */
 
   chan->buffer  += chan->inflight;
-  chan->buflen  -= chan->inflight;
+  chan->xfrd    += chan->inflight;
   chan->inflight = 0;
 
-  /* If we have now transfered the entire buffer, then this transfer is
+  /* If we have now transferred the entire buffer, then this transfer is
    * complete (this case really should never happen because we disable
    * the NPTXFE interrupt on the final packet).
    */
 
-  if (chan->buflen <= 0)
+  if (chan->xfrd >= chan->buflen)
     {
       /* Disable further Tx FIFO empty interrupts and bail. */
 
@@ -3039,16 +3071,15 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   avail = ((regval & OTGHS_HNPTXSTS_NPTXFSAV_MASK) >> OTGHS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
 
+  /* Get the size to put in the Tx FIFO now */
+
+  wrsize = chan->buflen - chan->xfrd;
+
   /* Get minimal size packet that can be sent.  Something is seriously
    * configured wrong if one packet will not fit into the empty Tx FIFO.
    */
 
-  DEBUGASSERT(chan->buflen > 0 &&
-              avail >= MIN(chan->buflen, chan->maxpacket));
-
-  /* Get the size to put in the Tx FIFO now */
-
-  wrsize = chan->buflen;
+  DEBUGASSERT(wrsize > 0 && avail >= MIN(wrsize, chan->maxpacket));
   if (wrsize > avail)
     {
       /* Clip the write size to the number of full, max sized packets
@@ -3070,8 +3101,8 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, wrsize);
+  ullvdbg("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %dwrsize: %d\n",
+           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -3104,7 +3135,7 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
    */
 
   chan->buffer  += chan->inflight;
-  chan->buflen  -= chan->inflight;
+  chan->xfrd    += chan->inflight;
   chan->inflight = 0;
 
   /* If we have now transfered the entire buffer, then this transfer is
@@ -3112,7 +3143,7 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
    * the PTXFE interrupt on the final packet).
    */
 
-  if (chan->buflen <= 0)
+  if (chan->xfrd >= chan->buflen)
     {
       /* Disable further Tx FIFO empty interrupts and bail. */
 
@@ -3128,16 +3159,15 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   avail = ((regval & OTGHS_HPTXSTS_PTXFSAVL_MASK) >> OTGHS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
 
+  /* Get the size to put in the Tx FIFO now */
+
+  wrsize = chan->buflen - chan->xfrd;
+
   /* Get minimal size packet that can be sent.  Something is seriously
    * configured wrong if one packet will not fit into the empty Tx FIFO.
    */
 
-  DEBUGASSERT(chan->buflen > 0 &&
-              avail >= MIN(chan->buflen, chan->maxpacket));
-
-  /* Get the size to put in the Tx FIFO now */
-
-  wrsize = chan->buflen;
+  DEBUGASSERT(wrsize > 0 && avail >= MIN(wrsize, chan->maxpacket));
   if (wrsize > avail)
     {
       /* Clip the write size to the number of full, max sized packets
@@ -3159,8 +3189,8 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  ullvdbg("HPTXSTS: %08x chidx: %d avail: %d buflen: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, wrsize);
+  ullvdbg("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -4462,8 +4492,9 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure:
+ *   On success, a non-negative value is returned that indicates the number
+ *   of bytes successfully transferred.  On a failure, a negated errno value is
+ *   returned that indicates the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -4477,12 +4508,12 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  *******************************************************************************/
 
-static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                          FAR uint8_t *buffer, size_t buflen)
+static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                              FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_usbhost_s *priv  = (FAR struct stm32_usbhost_s *)drvr;
   unsigned int chidx = (unsigned int)ep;
-  int ret;
+  ssize_t nbytes;
 
   uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
@@ -4496,15 +4527,15 @@ static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   if (priv->chan[chidx].in)
     {
-      ret = stm32_in_transfer(priv, chidx, buffer, buflen);
+      nbytes = stm32_in_transfer(priv, chidx, buffer, buflen);
     }
   else
     {
-      ret = stm32_out_transfer(priv, chidx, buffer, buflen);
+      nbytes = stm32_out_transfer(priv, chidx, buffer, buflen);
     }
 
   stm32_givesem(&priv->exclsem);
-  return ret;
+  return nbytes;
 }
 
 /*******************************************************************************
@@ -4700,9 +4731,7 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
 static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  DEBUGASSERT(priv != NULL && hport != NULL);
-
+  DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
 }
 

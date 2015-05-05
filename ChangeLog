@@ -10306,3 +10306,7 @@
 	  (2015-05-03).
 	* fs/vfs/fs_poll.c: Fix resource leak and memory corruption on poll
 	  failure.  From Jussi Kivilinna (2015-05-04).
+	* All USB host drivers in arch/ and all USB class drivers in drivers/usbhost:
+	  Modify the transfer() and asynch() methods so that the actual size of
+	  the transfer is returned.  Unverified on initial commit (2015-05-05).
+
