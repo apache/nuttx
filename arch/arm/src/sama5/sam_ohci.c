@@ -2019,7 +2019,13 @@ static void sam_rhsc_bottomhalf(void)
                   usbhost_vtrace2(OHCI_VTRACE2_DISCONNECTED,
                                   rhpndx + 1, g_ohci.pscwait);
 
-                  rhport->connected   = false;
+                  rhport->connected = false;
+
+                   /* Set the port speed to the default (FULL).  We cannot
+                    * yet free the function address.  That has to be done
+                    * by the class when responds to the disconnection.
+                    */
+
                   rhport->hport.hport.speed = USB_SPEED_FULL;
 
                   /* Are we bound to a class instance? */
@@ -2150,13 +2156,25 @@ static void sam_wdh_bottomhalf(void)
         }
 #endif
 
-      /* Determine the size of the transfer by subtracting the current buffer
-       * pointer (CBP) from the initial buffer pointer (on packet receipt only).
+      /* Determine the number of bytes actually transfer by* subtracting the
+       * buffer start address from the CBP.  But be careful, the CBP may be
+       * zero.
        */
 
-      paddr = sam_physramaddr((uintptr_t)eplist->buffer);
-      tmp   = (uintptr_t)td->hw.cbp - paddr;
-      DEBUGASSERT(tmp < UINT16_MAX);
+      tmp = (uintptr_t)td->hw.cbp;
+      if (tmp != 0)
+        {
+          paddr = sam_physramaddr((uintptr_t)eplist->buffer);
+          DEBUGASSERT(tmp >= paddr);
+
+          /* Determine the size of the transfer by subtracting the current
+           * buffer pointer (CBP) from the initial buffer pointer (on packet
+           * receipt only).
+           */
+
+          tmp -= paddr;
+          DEBUGASSERT(tmp < UINT16_MAX);
+        }
 
       eplist->xfrd = (uint16_t)tmp;
 
@@ -3278,6 +3296,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(rhport && eplist && eplist->ed && eplist->tail &&
               buffer && buflen > 0);
+
   ed = eplist->ed;
   in = (ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
 
@@ -3912,6 +3931,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
       hport->ep0                  = &rhport->ep0;
       hport->port                 = i;
       hport->speed                = USB_SPEED_FULL;
+      hport->funcaddr             = 0;
 
       /* Initialize function address generation logic */
 
