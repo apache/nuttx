@@ -164,6 +164,13 @@ static void usbhost_devaddr_free(FAR struct usbhost_devaddr_s *devgen,
 
   DEBUGASSERT((devgen->alloctab[index] |= (1 << bitno)) != 0);
   devgen->alloctab[index] &= ~(1 << bitno);
+
+  /* Reset the next pointer if the one just released has a lower value */
+
+  if (devaddr < devgen->next)
+    {
+      devgen->next = devaddr;
+    }
 }
 
 /*******************************************************************************
