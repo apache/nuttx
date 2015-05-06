@@ -191,10 +191,20 @@ int lpc31_usbhost_initialize(void)
 #ifdef CONFIG_USBHOST_MSC
   /* Register theUSB host Mass Storage Class */
 
-  ret = usbhost_storageinit();
+  ret = usbhost_msc_initialize();
   if (ret != OK)
     {
       udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_CDCACM
+  /* Register the CDC/ACM serial class */
+
+  ret = usbhost_cdcacm_initialize();
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to register the CDC/ACM serial class\n");
     }
 #endif
 
