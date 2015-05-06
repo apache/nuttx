@@ -207,7 +207,6 @@ static void    cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool    cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
                  unsigned int nbuffered, bool upper);
 #endif
-
 static void    cdcuart_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
 

@@ -85,6 +85,103 @@ config USBHOST_MSC
 		Enable support for the keyboard class driver.  This also depends on
 		NFILE_DESCRIPTORS > 0 && SCHED_WORKQUEUE=y
 
+config USBHOST_CDCACM
+	bool "CDC/ACM support"
+	default n
+	depends on USBHOST_HAVE_ASYNCH && !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE
+	select USBHOST_ASYNCH
+	---help---
+		Select this option to build in host support for CDC/ACM serial
+		devices.
+
+if USBHOST_CDCACM
+
+config USBHOST_CDCACM_NTDELAY
+	int "CDC/ACM notification polling interval (MSec)"
+	default 400
+	---help---
+		On higher end host controllers (OHCI and EHCI), the asynchronous,
+		interrupt IN transfers will pend until data is available from the
+		hub.  On lower end host controllers (like STM32 and EFM32), the
+		transfer will fail immediately when the device NAKs the first
+		attempted interrupt IN transfer (with result == EGAIN) and the hub
+		class driver will fall back to polling the hub.
+
+		For the case of the higher end controllers, this polling interval
+		is not critical since it would really only be used in the event of
+		failures to communicate with the hub.
+
+		But for the lower end host controllers, the asynchronous transfers
+		are ineffective and this polling interval becomes a critical
+		parameter that must be tuned to tradeoff CPU usage with
+		responsiveness to hub-related events (It would, I suppose, be more
+		efficient to use synchronous transfers with these lower end host
+		controllers).
+
+config USBHOST_CDCACM_RXDELAY
+	int "RX poll delay (MSec)
+	default 200
+	---help---
+		When the CDC/ACM device is inactive, the host must poll it at this
+		rate in order to discover if it has serial data to send to us.
+
+config USBHOST_CDCACM_TXDELAY
+	int "TX poll delay (MSec)
+	default 200
+	---help---
+		When the appellation is inactive, the host must poll it at this
+		rate in order to discover if it has serial data to send to to the
+		device.
+
+config USBHOST_CDCACM_NPREALLOC
+	int "Preallocated state"
+	default 0
+	---help---
+		If this setting is zero, the CDC/ACM class driver will allocate
+		memory as needed for CDC/ACM device state.  If this value is non-
+		zero, then it provides a number of preallocated CDC/ACM state
+		structures.  This increases the static size of the code image, but
+		eliminates all, direct, run-time allocations by the driver.
+
+config USBHOST_CDCACM_BAUD
+	int "Initialize CDC/ACM BAUD"
+	default 115200
+
+config USBHOST_CDCACM_PARITY
+	int "Initialize CDC/ACM parity"
+	default 0
+	range 0 2
+	---help---
+		Initialize CDC/ACM parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config USBHOST_CDCACM_BITS
+	int "Initialize CDC/ACM number of bits"
+	default 8
+	---help---
+		Initialize CDC/ACM number of bits.  Default: 8
+
+config USBHOST_CDCACM_2STOP
+	int "Initialize CDC/ACM two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config USBHOST_CDCACM_RXBUFSIZE
+	int "Serial RX buffer size"
+	default 128
+	---help---
+		This is the size of the serial buffer that will be used to hold
+		received data.
+
+config USBHOST_CDCACM_TXBUFSIZE
+	int "Serial TX buffer size"
+	default 128
+	---help---
+		This is the size of the serial buffer that will be used to hold
+		data waiting for tranmission.
+
+endif # USBHOST_CDCACM
+
 config USBHOST_HIDKBD
 	bool "HID Keyboard Class Support"
 	default n
