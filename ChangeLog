@@ -10309,4 +10309,5 @@
 	* All USB host drivers in arch/ and all USB class drivers in drivers/usbhost:
 	  Modify the transfer() and asynch() methods so that the actual size of
 	  the transfer is returned.  Unverified on initial commit (2015-05-05).
-
+	* drivers/usbhost/usbhost_cdcacm.c: Add initial implementation of a host-
+	  side CDC/ACM driver.  Completely untested on initial commit (2015-05-06).
