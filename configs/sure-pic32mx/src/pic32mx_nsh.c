@@ -278,11 +278,25 @@ static int nsh_usbhostinitialize(void)
 
   syslog(LOG_INFO, "Register class drivers\n");
 
-  ret = usbhost_storageinit();
+#ifdef CONFIG_USBHOST_MSC
+  /* Register the USB mass storage class class */
+
+  ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class\n");
+      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_USBHOST_CDCACM
+  /* Register the CDC/ACM serial class */
+
+  ret = usbhost_cdcacm_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+    }
+#endif
 
   /* Then get an instance of the USB host interface */
 

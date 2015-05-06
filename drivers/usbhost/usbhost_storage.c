@@ -2268,7 +2268,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbhost_storageinit
+ * Name: usbhost_msc_initialize
  *
  * Description:
  *   Initialize the USB host storage class.  This function should be called
@@ -2284,7 +2284,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int usbhost_storageinit(void)
+int usbhost_msc_initialize(void)
 {
   /* If we have been configured to use pre-allocated storage class instances,
    * then place all of the pre-allocated USB host storage class instances

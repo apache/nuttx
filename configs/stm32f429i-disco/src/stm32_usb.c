@@ -184,13 +184,25 @@ int stm32_usbhost_initialize(void)
     }
 #endif
 
-  /* Register the USB host Mass Storage Class */
+#ifdef CONFIG_USBHOST_MSC
+  /* Register the USB mass storage class class */
 
-  ret = usbhost_storageinit();
+  ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      udbg("Failed to register the mass storage class\n");
+      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_USBHOST_CDCACM
+  /* Register the CDC/ACM serial class */
+
+  ret = usbhost_cdcacm_initialize();
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+    }
+#endif
 
   /* Then get an instance of the USB host interface */
 

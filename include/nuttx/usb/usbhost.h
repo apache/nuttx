@@ -1005,7 +1005,7 @@ int usbhost_hub_initialize(void);
 
 #ifdef CONFIG_USBHOST_MSC
 /****************************************************************************
- * Name: usbhost_storageinit
+ * Name: usbhost_msc_initialize
  *
  * Description:
  *   Initialize the USB host storage class.  This function should be called
@@ -1021,7 +1021,28 @@ int usbhost_hub_initialize(void);
  *
  ****************************************************************************/
 
-int usbhost_storageinit(void);
+int usbhost_msc_initialize(void);
+#endif
+
+#ifdef CONFIG_USBHOST_CDCACM
+/****************************************************************************
+ * Name: usbhost_cdcacm_initialize
+ *
+ * Description:
+ *   Initialize the USB host CDC/ACM class.  This function should be called
+ *   be platform-specific code in order to initialize and register support
+ *   for the USB host CDC/ACM class.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+int usbhost_cdcacm_initialize(void);
 #endif
 
 #ifdef CONFIG_USBHOST_HIDKBD
