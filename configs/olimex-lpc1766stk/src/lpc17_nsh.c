@@ -273,7 +273,7 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", eret);
+      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 

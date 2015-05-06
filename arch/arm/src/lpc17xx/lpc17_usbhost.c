@@ -1003,7 +1003,7 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
    * with the bulk list while BLE is set.
    */
 
-  head = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED)
+  head = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED);
   for (prev = NULL, curr = head;
        curr && curr != ed;
        prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
@@ -1570,7 +1570,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
         }
       else
         {
-          uvdbg("Bad TD completion status: %d\n", ed->tdstatus);
+          uvdbg("Bad TD completion status: %d\n", xfrinfo->tdstatus);
           ret = xfrinfo->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
