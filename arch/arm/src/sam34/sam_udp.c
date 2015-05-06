@@ -230,7 +230,7 @@ enum sam_epstate_e
   UDP_EPSTATE_STALLED,      /* Endpoint is stalled */
   UDP_EPSTATE_IDLE,         /* Endpoint is idle (i.e. ready for transmission) */
   UDP_EPSTATE_SENDING,      /* Endpoint is sending data */
-  UDP_EPSTATE_RXSTOPPED,    /* OUT dndpoint is stopped waiting for a read request */
+  UDP_EPSTATE_RXSTOPPED,    /* OUT endpoint is stopped waiting for a read request */
                             /* --- Endpoint 0 Only --- */
   UDP_EPSTATE_EP0DATAOUT,   /* Endpoint 0 is receiving SETUP OUT data */
   UDP_EPSTATE_EP0STATUSIN,  /* Endpoint 0 is sending SETUP status */
@@ -1116,7 +1116,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   epno = USB_EPNO(privep->ep.eplog);
   do
     {
-      /* Peek at the next read request in the requeust queue */
+      /* Peek at the next read request in the request queue */
 
       privreq = sam_rqpeek(&privep->reqq);
       if (!privreq)
@@ -1416,7 +1416,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_NOSTDREQ), priv->ctrl.type);
 
-      /* Let the class implementation handle all non-standar requests */
+      /* Let the class implementation handle all non-standard requests */
 
       sam_ep0_dispatch(priv);
       return;
@@ -1702,7 +1702,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
             index.w == 0 && len.w == 0)
           {
              /* The request seems valid... let the class implementation handle it.
-              * If the class implementation accespts it new configuration, it will
+              * If the class implementation accepts it new configuration, it will
               * call sam_ep_configure() to configure the endpoints.
               */
 
@@ -2120,7 +2120,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
            * data transfer.  This bit must be cleared before CSR:RXSETUP is
            * cleared at the end of the SETUP stage.
            *
-           * NOTE: Clearing this bit seems to be un-necessary.  I think it must
+           * NOTE: Clearing this bit seems to be unnecessary.  I think it must
            * be cleared when RXSETUP is set.
            */
 
@@ -2486,7 +2486,7 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
 
   sam_putreg(UDP_INT_EP(epno), SAM_UDP_IDR);
 
-  /* Cancel any queued requests.  Since they are canceled with status
+  /* Cancel any queued requests.  Since they are cancelled with status
    * -ESHUTDOWN, then will not be requeued until the configuration is reset.
    * NOTE:  This should not be necessary... the CLASS_DISCONNECT above
    * should result in the class implementation calling sam_ep_disable
@@ -2698,7 +2698,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
  * Name: sam_ep_unreserve
  *
  * Description:
- *   The endpoint is no long in-used.  It will be un-reserved and can be
+ *   The endpoint is no long in-used.  It will be unreserved and can be
  *   re-used if needed.
  *
  ****************************************************************************/
@@ -3575,7 +3575,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
     {
       struct sam_ep_s *privep = &priv->eplist[epno];
 
-      /* Cancel any queued requests.  Since they are canceled
+      /* Cancel any queued requests.  Since they are cancelled
        * with status -ESHUTDOWN, then will not be requeued
        * until the configuration is reset.  NOTE:  This should
        * not be necessary... the CLASS_DISCONNECT above should
