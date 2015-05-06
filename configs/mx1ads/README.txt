@@ -31,6 +31,22 @@ Toolchain
   8. Edit setenv.h so that the PATH variable includes the path to the
      newly built binaries.
 
+Issues
+^^^^^^
+
+  Title:       PORT IS INCOMPLETE
+  Description: The basic port of the i.MX1 architecture was never finished.  The port
+               is incomplete (as of this writing, is still lacks a timer, interrupt
+               decoding, USB, network) and untested.
+  Status:      Open
+  Priority:    Medium (high if you need i.MX1/L support)
+
+  Title:       SPI METHODS ARE NOT THREAD SAFE
+  Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
+  Status:      Open
+  Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
+
+
 ARM/i.MX1-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
