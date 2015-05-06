@@ -31,6 +31,15 @@ Toolchain
   8. Edit setenv.h so that the PATH variable includes the path to the
      newly built binaries.
 
+Issues
+^^^^^^
+
+  Title:       UART RECONFIGURATION
+  Description: UART re-configuration is untested and conditionally compiled out.
+  Status:      Open
+  Priority:    Medium.  ttyS1 is not configured, but not used; ttyS0 is configured
+               by the bootloader
+
 ARM/C5471-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

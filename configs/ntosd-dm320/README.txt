@@ -13,6 +13,7 @@ CONTENTS
   - ARM/DM320-specific Configuration Options
   - Configurations
   - Configuration Options
+  - Issues
 
 Dev vs. Production Neuros OSD v1.0 boards
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -395,3 +396,34 @@ Neuros OSD Configuration Options
  CONFIG_ARCH_NTOSD_DEVBOARD - Selects the old NTOSD development board.
    The default is the production OSD board which differs in
    several ways.
+
+Issues
+^^^^^^
+
+  Title:       DEBUG ISSUES
+  Description: config/ntos-dm320: It seems that when a lot of debug statements
+               are added, the system no longer boots.  This is suspected to be
+               a stack problem: Making the stack bigger or removing arrays on
+               the stack seems to fix the problem (might also be the
+               bootloader overwriting memory)
+  Status:      Open
+  Priority:    Medium
+
+  Title:       USB DEVICE DRIVER UNTESTED
+  Description: A USB device controller driver was added but has never been tested.
+  Status:      Open
+  Priority:    Medium
+
+  Title:       FRAMEBUFFER DRIVER UNTESTED
+  Description: A framebuffer "driver" was added, however, it remains untested.
+  Status:      Open
+  Priority:    Medium
+
+  Title:       VIDEO ENCODER DRIVER
+  Description: In order to use the framebuffer "driver" additional video encoder
+               logic is required to setup composite video output or to interface
+               with an LCD.
+  Status:      Open
+  Priority:    Medium (high if you need to use the framebuffer driver)
+
+
