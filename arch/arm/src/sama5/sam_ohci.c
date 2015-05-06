@@ -2087,9 +2087,9 @@ static void sam_wdh_bottomhalf(void)
   uintptr_t paddr;
   uintptr_t tmp;
 
-  /* The host controller just wrote the one finished TDs into the HCCA
-   * done head.  This may include multiple packets that were transferred
-   * in the preceding frame.
+  /* The host controller just wrote the finished TDs into the HCCA done head.
+   * This may include multiple packets that were transferred in the preceding
+   * frame.
    *
    * Remove the TD from the Writeback Done Head in the HCCA and return
    * it to the free list.  Note that this is safe because the hardware
@@ -2107,11 +2107,10 @@ static void sam_wdh_bottomhalf(void)
                          (uintptr_t)&g_hcca + sizeof(struct ohci_hcca_s));
 #endif
 
-  /* Now read the done head */
+  /* Now read the done head. */
 
   td = (struct sam_gtd_s *)sam_virtramaddr(g_hcca.donehead);
   g_hcca.donehead = 0;
-  DEBUGASSERT(td);
 
   /* Process each TD in the write done list */
 
