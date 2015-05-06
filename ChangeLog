@@ -10311,3 +10311,7 @@
 	  the transfer is returned.  Unverified on initial commit (2015-05-05).
 	* drivers/usbhost/usbhost_cdcacm.c: Add initial implementation of a host-
 	  side CDC/ACM driver.  Completely untested on initial commit (2015-05-06).
+	* configs/, drivers/usbhost/usbhost_storage.c, and included/nuttx/usb/usbhost.h:
+	  Rename usbhost_storageinit() to usbhost_msc_initialize().  Add calls
+	  to usbhost_cdcacm_initialize() if CONFIG_USBHOST_CDCACM is selected
+	 (2015-05-06).
