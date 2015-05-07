@@ -74,6 +74,15 @@
 
 void kl_boardinitialize(void)
 {
+#if defined(CONFIG_KL_UART0)
+  /* Remap UART0 to the standard pins. */
+
+  kl_configgpio(PIN_PORTA | PIN2);
+  kl_configgpio(PIN_PORTA | PIN1);
+  kl_configgpio(PIN_UART0_RX_3);
+  kl_configgpio(PIN_UART0_TX_3);
+#endif
+
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * kl_spiinitialize() has been brought into the link.
    */
