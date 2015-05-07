@@ -101,7 +101,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure representst the state of one PWM timer */
+/* This structure represents the state of one PWM timer */
 
 struct kl_pwmtimer_s
 {
@@ -255,6 +255,8 @@ static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset, uint32_t value)
 #if defined(CONFIG_DEBUG_PWM) && defined(CONFIG_DEBUG_VERBOSE)
 static void pwm_dumpregs(struct kl_pwmtimer_s *priv, FAR const char *msg)
 {
+  int nchannels = (priv->tpmid == 0) ? 6 : 2;
+
   pwmvdbg("%s:\n", msg);
   pwmvdbg("  TPM%d_SC:     %04x   TPM%d_CNT:  %04x     TPM%d_MOD:  %04x\n",
           priv->tpmid,
@@ -278,26 +280,42 @@ static void pwm_dumpregs(struct kl_pwmtimer_s *priv, FAR const char *msg)
           pwm_getreg(priv, TPM_C1SC_OFFSET),
           priv->tpmid,
           pwm_getreg(priv, TPM_C1V_OFFSET));
-  pwmvdbg("   TPM%d_C2SC:  %04x   TPM%d_C2V:  %04x\n",
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C2SC_OFFSET),
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C2V_OFFSET));
-  pwmvdbg("   TPM%d_C3SC:  %04x   TPM%d_C3V:  %04x\n",
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C3SC_OFFSET),
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C3V_OFFSET));
-  pwmvdbg("   TPM%d_C4SC:  %04x   TPM%d_C4V:  %04x\n",
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C4SC_OFFSET),
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C4V_OFFSET));
-  pwmvdbg("   TPM%d_C5SC:  %04x   TPM%d_C5V:  %04x\n",
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C5SC_OFFSET),
-          priv->tpmid,
-          pwm_getreg(priv, TPM_C5V_OFFSET));
+
+  if (nchannels >= 3)
+    {
+      pwmvdbg("   TPM%d_C2SC:  %04x   TPM%d_C2V:  %04x\n",
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C2SC_OFFSET),
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C2V_OFFSET));
+    }
+
+  if (nchannels >= 4)
+    {
+      pwmvdbg("   TPM%d_C3SC:  %04x   TPM%d_C3V:  %04x\n",
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C3SC_OFFSET),
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C3V_OFFSET));
+    }
+
+  if (nchannels >= 5)
+    {
+      pwmvdbg("   TPM%d_C4SC:  %04x   TPM%d_C4V:  %04x\n",
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C4SC_OFFSET),
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C4V_OFFSET));
+    }
+
+  if (nchannels >= 6)
+    {
+      pwmvdbg("   TPM%d_C5SC:  %04x   TPM%d_C5V:  %04x\n",
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C5SC_OFFSET),
+              priv->tpmid,
+              pwm_getreg(priv, TPM_C5V_OFFSET));
+    }
 }
 #endif
 
@@ -328,7 +346,7 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
   uint32_t cv;
   uint8_t i;
 
-  uint8_t presc_values[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+  static const uint8_t presc_values[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 
   /* Register contents */
 
@@ -406,7 +424,7 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
 
   pwmvdbg("TPM%d PCLK: %d frequency: %d TPMCLK: %d prescaler: %d modulo: %d c0v: %d\n",
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
-          presc_values[prescaler], modulo, c0v);
+          presc_values[prescaler], modulo, cv);
 
   /* Disable TPM and reset CNT before writing MOD and PS */
 
