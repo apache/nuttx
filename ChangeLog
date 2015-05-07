@@ -10323,3 +10323,12 @@
 	  LED, PWM, and UART0 have been tested. The SPI pins are mapped
 	  correctly but have not yet been tested.  From Michael Hope as
 	  SourceForge patch 51 (2015-05-07).
+	* arch/arm/src/kl/kl_pwm.c: fix PWM debugging. TPM1 and TPM2 have two
+	  channels instead of six and will hard fault if you try to read the
+	  missing channels.  From Michael Hope (2015-05-07).
+	* arch/arm/src/kl/kl_lowputc.c: enable the clocks to UART1 and UART2.
+	  The previous version would cause a hard fault on startup due to the
+	  modules not being clocked.  Also drop the GPIO configuration as it's
+	  done during kl_start().  From Michael Hope (2015-05-07).
+	* teensy-lc: remap UART0 to the standard pins. From Michael Hope
+	  (2015-05-07).
