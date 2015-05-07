@@ -96,6 +96,19 @@ config USBHOST_CDCACM
 
 if USBHOST_CDCACM
 
+config USBHOST_CDCACM_BULKONLY
+	bool "Bulk only protocol"
+	default n
+	---help---
+		Support only the CDC/ACM data interface (bulk in + bulk out).  This
+		works with devices that have no  additional control interface and
+		even if the device provides the control interface, it will not be
+		used.
+
+		By default, both the CDC/ACM compliant protocol and the bulk only
+		protocol are supported.  This option is then most useful for testing
+		purposes.
+
 config USBHOST_CDCACM_NTDELAY
 	int "CDC/ACM notification polling interval (MSec)"
 	default 400

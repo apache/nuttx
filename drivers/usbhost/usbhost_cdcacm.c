@@ -163,24 +163,30 @@
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT            "/dev/ttyACM%d"
-#define DEV_NAMELEN           16
+#define DEV_FORMAT             "/dev/ttyACM%d"
+#define DEV_NAMELEN            16
 
-#define MAX_NOTIFICATION      32
+#define MAX_NOTIFICATION       32
 
 /* Used in usbhost_connect() */
 
-#define USBHOST_DATAIF_FOUND  0x01      /* Data interface found */
-#define USBHOST_BULKIN_FOUND  0x02      /* Bulk IN interface found */
-#define USBHOST_BULKOUT_FOUND 0x04      /* Bulk OUT interface found */
-#define USBHOST_CTRLIF_FOUND  0x08      /* Control interface found */
-#define USBHOST_INTIN_FOUND   0x10      /* Interrupt IN interface found */
+#define USBHOST_DATAIF_FOUND   0x01      /* Data interface found */
+#define USBHOST_BULKIN_FOUND   0x02      /* Bulk IN interface found */
+#define USBHOST_BULKOUT_FOUND  0x04      /* Bulk OUT interface found */
 
-#define USBHOST_MINFOUND      0x07      /* Minimum things needed */
-#define USBHOST_HAVE_CTRLIF   0x18      /* Needed for control interface */
-#define USBHOST_ALLFOUND      0x1f      /* All configuration things */
+#ifdef CONFIG_USBHOST_CDCACM_BULKONLY
+#  define USBHOST_MINFOUND     0x07      /* Minimum things needed */
+#  define USBHOST_ALLFOUND     0x07      /* All configuration things */
+#else
+#  define USBHOST_CTRLIF_FOUND 0x08      /* Control interface found */
+#  define USBHOST_INTIN_FOUND  0x10      /* Interrupt IN interface found */
 
-#define USBHOST_MAX_CREFS     INT16_MAX /* Max cref count before signed overflow */
+#  define USBHOST_MINFOUND     0x07      /* Minimum things needed */
+#  define USBHOST_HAVE_CTRLIF  0x18      /* Needed for control interface */
+#  define USBHOST_ALLFOUND     0x1f      /* All configuration things */
+#endif
+
+#define USBHOST_MAX_CREFS      INT16_MAX /* Max cref count before signed overflow */
 
 /****************************************************************************
  * Private Types
@@ -223,7 +229,9 @@ struct usbhost_cdcacm_s
 #endif
   uint8_t        minor;          /* Minor number identifying the /dev/ttyACM[n] device */
   uint8_t        dataif;         /* Data interface number */
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   uint8_t        ctrlif;         /* Control interface number */
+#endif
   uint8_t        nbits;          /* Number of bits (for line encoding) */
   uint8_t        parity;         /* Parity (for line encoding) */
   uint16_t       pktsize;        /* Allocated size of transfer buffers */
@@ -243,7 +251,9 @@ struct usbhost_cdcacm_s
   uint32_t       baud;           /* Current baud for line coding */
   usbhost_ep_t   bulkin;         /* Bulk IN endpoint */
   usbhost_ep_t   bulkout;        /* Bulk OUT endpoint */
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   usbhost_ep_t   intin;          /* Interrupt IN endpoint (optional) */
+#endif
 
   /* This is the serial data buffer */
 
@@ -281,9 +291,11 @@ static inline void usbhost_mkdevname(FAR struct usbhost_cdcacm_s *priv,
 
 /* CDC/ACM request helpers */
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
 static int  usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv);
 static void usbhost_notification_work(FAR void *arg);
 static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes);
+#endif
 
 /* UART buffer data transfer */
 
@@ -304,7 +316,9 @@ static int  usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static inline uint16_t usbhost_getbe16(const uint8_t *val);
 static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
 static void usbhost_putle32(uint8_t *dest, uint32_t val);
+#endif
 
 /* Transfer descriptor memory management */
 
@@ -610,6 +624,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_cdcacm_s *priv,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
 static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
 {
   FAR struct usbhost_hubport_s *hport;
@@ -648,6 +663,7 @@ static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: usbhost_notification_work
@@ -666,6 +682,7 @@ static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
 static void usbhost_notification_work(FAR void *arg)
 {
   FAR struct usbhost_cdcacm_s *priv;
@@ -735,6 +752,7 @@ static void usbhost_notification_work(FAR void *arg)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: usbhost_notification_callback
@@ -755,6 +773,7 @@ static void usbhost_notification_work(FAR void *arg)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
 static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)arg;
@@ -775,7 +794,7 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
        * polling.
        */
 
-      DEBUGASSERT(nbytes >= -INT16_MIN && nbytes <= INT16_MAX);
+      DEBUGASSERT(nbytes >= INT16_MIN && nbytes <= INT16_MAX);
       priv->nbytes = (int16_t)nbytes;
 
       if (nbytes < 0)
@@ -815,6 +834,7 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
         }
     }
 }
+#endif
 
 /************************************************************************************
  * UART buffer data transfer
@@ -972,10 +992,10 @@ static void usbhost_rxdata_work(FAR void *arg)
   int rxndx;
   int ret;
 
-  priv = (FAR struct usbhost_cdcacm_s *)arg;
+  priv    = (FAR struct usbhost_cdcacm_s *)arg;
   DEBUGASSERT(priv);
 
-  hport = priv->usbclass.hport;
+  hport   = priv->usbclass.hport;
   DEBUGASSERT(hport);
 
   uartdev = &priv->uartdev;
@@ -1050,7 +1070,13 @@ static void usbhost_rxdata_work(FAR void *arg)
               break;
             }
 
-          DEBUGASSERT(nread > 0 && nread <=  priv->pktsize);
+          /* Save the number of bytes read.  This might be zero if
+           * a Zero Length Packet (ZLP) is received.  The ZLP is
+           * part of the bulk transfer protocol, but otherwise of
+           * no interest to us.
+           */
+
+          DEBUGASSERT(nread <=  priv->pktsize);
           priv->nrxbytes = (uint16_t)nread;
           rxndx          = 0;
 
@@ -1072,12 +1098,27 @@ static void usbhost_rxdata_work(FAR void *arg)
       rxbuf->head = nexthead;
       priv->rxndx = rxndx;
  
-      /* Update the indices for the next pass through the loop */
+      /* Update the head point for for the next pass through the loop
+       * handling. If nexthead incremented to rxbuf->tail, then the
+       * RX buffer will and we will exit the loop at the top.
+       */
  
-      rxndx++;
       if (++nexthead >= rxbuf->size)
         {
            nexthead = 0;
+        }
+
+
+      /* Increment the index in the USB IN packet buffer.  If the
+       * index becomes equal to the number of bytes in the buffer, then
+       * we have consumed all of the RX data.  In that case set the
+       * number of bytes in the buffer to zero.  This will force re-
+       * reading on the next time through the loop.
+       */
+
+      if (++rxndx >= priv->nrxbytes)
+        {
+          priv->nrxbytes = 0;
         }
     }
 
@@ -1166,10 +1207,12 @@ static void usbhost_destroy(FAR void *arg)
       DRVR_EPFREE(hport->drvr, priv->bulkin);
     }
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   if (priv->intin)
     {
       DRVR_EPFREE(hport->drvr, priv->intin);
     }
+#endif
 
   /* Free any transfer buffers */
 
@@ -1299,6 +1342,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                 found        |= USBHOST_DATAIF_FOUND;
                 currif        = USBHOST_DATAIF_FOUND;
               }
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
             else if (ifdesc->classid == USB_CLASS_CDC &&
                      (found & USBHOST_CTRLIF_FOUND) == 0)
               {
@@ -1309,6 +1353,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                 priv->ctrlif  = ifdesc->ifno;
                 currif        = USBHOST_CTRLIF_FOUND;
               }
+#endif
             else
               {
                 /* Its something else */
@@ -1397,6 +1442,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                   }
               }
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
             /* Check for an interrupt IN endpoint. */
 
             else if (currif == USBHOST_CTRLIF_FOUND &&
@@ -1438,6 +1484,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                           boutdesc.addr, boutdesc.mxpacketsize);
                   }
               }
+#endif
           }
           break;
 
@@ -1493,6 +1540,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
       return ret;
     }
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   /* The control interface with interrupt IN endpoint is optional */
 
   if ((found & USBHOST_HAVE_CTRLIF) == USBHOST_HAVE_CTRLIF)
@@ -1504,6 +1552,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
           priv->intin = NULL;
         }
     }
+#endif
 
   uvdbg("Endpoints allocated\n");
   return OK;
@@ -1583,6 +1632,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
 static void usbhost_putle32(uint8_t *dest, uint32_t val)
 {
   /* Little endian means LS halfword first in byte stream */
@@ -1590,6 +1640,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
   usbhost_putle16(dest, (uint16_t)(val & 0xffff));
   usbhost_putle16(dest+2, (uint16_t)(val >> 16));
 }
+#endif
 
 /****************************************************************************
  * Name: usbhost_alloc_buffers
@@ -1638,6 +1689,7 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
       goto errout;
     }
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   /* Allocate (optional) buffer for receiving line status data. */
 
   if (priv->intin)
@@ -1650,6 +1702,7 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
           goto errout;
         }
     }
+#endif
 
   /* Set the size of Bulk IN and OUT buffers to the max packet size */
 
@@ -1915,6 +1968,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       goto errout;
     }
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   /* Send the initial line encoding */
 
   ret = usbhost_linecoding_send(priv);
@@ -1922,11 +1976,14 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
     {
       udbg("usbhost_linecoding_send() failed: %d\n", ret);
     }
+#endif
 
   /* Register the lower half serial instance with the upper half serial
    * driver */
 
   usbhost_mkdevname(priv, devname);
+  uvdbg("Register device: %s\n", devname);
+
   ret = uart_register(devname, &priv->uartdev);
   if (ret < 0)
     {
@@ -1934,12 +1991,14 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       goto errout;
     }
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
   /* Do we have an interrupt IN endpoint? */
 
   if (priv->intin)
     {
       /* Begin monitoring of port status change events */
 
+      uvdbg("Start notification monitoring\n");
       ret = DRVR_ASYNCH(hport->drvr, priv->intin,
                         (FAR uint8_t *)priv->notification,
                         MAX_NOTIFICATION, usbhost_notification_callback,
@@ -1949,6 +2008,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
           udbg("ERROR: DRVR_ASYNCH failed: %d\n", ret);
         }
     }
+#endif
 
 errout:
   /* Decrement the reference count.  We incremented the reference count
@@ -2354,11 +2414,13 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               }
 #endif
 
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
             /* Effect the changes immediately - note that we do not implement
              * TCSADRAIN / TCSAFLUSH
              */
 
             ret = usbhost_linecoding_send(priv);
+#endif
           }
           break;
 #endif /* CONFIG_SERIAL_TERMIOS */
