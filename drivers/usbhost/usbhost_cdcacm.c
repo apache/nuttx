@@ -163,21 +163,24 @@
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT          "/dev/ttyACM%d"
-#define DEV_NAMELEN         16
+#define DEV_FORMAT            "/dev/ttyACM%d"
+#define DEV_NAMELEN           16
 
-#define MAX_NOTIFICATION    32
+#define MAX_NOTIFICATION      32
 
 /* Used in usbhost_connect() */
 
-#define USBHOST_IFFOUND     0x01       /* Interface found */
-#define USBHOST_BINFOUND    0x02       /* Bulk IN interface found */
-#define USBHOST_BOUTFOUND   0x04       /* Bulk OUT interface found */
-#define USBHOST_IINFOUND    0x08       /* Interrupt IN interface found */
-#define USBHOST_MINFOUND    0x07       /* Minimum things needed */
-#define USBHOST_ALLFOUND    0x0f       /* All configuration things */
+#define USBHOST_DATAIF_FOUND  0x01      /* Data interface found */
+#define USBHOST_BULKIN_FOUND  0x02      /* Bulk IN interface found */
+#define USBHOST_BULKOUT_FOUND 0x04      /* Bulk OUT interface found */
+#define USBHOST_CTRLIF_FOUND  0x08      /* Control interface found */
+#define USBHOST_INTIN_FOUND   0x10      /* Interrupt IN interface found */
 
-#define USBHOST_MAX_CREFS   INT16_MAX  /* Max cref count before signed overflow */
+#define USBHOST_MINFOUND      0x07      /* Minimum things needed */
+#define USBHOST_HAVE_CTRLIF   0x18      /* Needed for control interface */
+#define USBHOST_ALLFOUND      0x1f      /* All configuration things */
+
+#define USBHOST_MAX_CREFS     INT16_MAX /* Max cref count before signed overflow */
 
 /****************************************************************************
  * Private Types
@@ -219,7 +222,8 @@ struct usbhost_cdcacm_s
   bool           oflow;          /* True: Output flow control (CTS) enabled */
 #endif
   uint8_t        minor;          /* Minor number identifying the /dev/ttyACM[n] device */
-  uint8_t        ifno;           /* Interface number */
+  uint8_t        dataif;         /* Data interface number */
+  uint8_t        ctrlif;         /* Control interface number */
   uint8_t        nbits;          /* Number of bits (for line encoding) */
   uint8_t        parity;         /* Parity (for line encoding) */
   uint16_t       pktsize;        /* Allocated size of transfer buffers */
@@ -465,7 +469,7 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
     }
 
   irqrestore(flags);
-  ullvdbg("Allocated: %p\n", entry);;
+  uvdbg("Allocated: %p\n", entry);;
   return (FAR struct usbhost_cdcacm_s *)entry;
 }
 #else
@@ -505,7 +509,7 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
   irqstate_t flags;
   DEBUGASSERT(entry != NULL);
 
-  ullvdbg("Freeing: %p\n", entry);
+  uvdbg("Freeing: %p\n", entry);
 
   /* Just put the pre-allocated class structure back on the freelist */
 
@@ -631,7 +635,7 @@ static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
   ctrlreq->req     = ACM_SET_LINE_CODING;
 
   usbhost_putle16(ctrlreq->value, 0);
-  usbhost_putle16(ctrlreq->index, priv->ifno);
+  usbhost_putle16(ctrlreq->index, priv->dataif);
   usbhost_putle16(ctrlreq->len,   SIZEOF_CDC_LINECODING);
 
   /* And send the request */
@@ -702,7 +706,7 @@ static void usbhost_notification_work(FAR void *arg)
                                        USB_REQ_RECIPIENT_INTERFACE)) &&
               (inmsg->notification == ACM_SERIAL_STATE) &&
               (value               == 0) &&
-              (index               == priv->ifno) &&
+              (index               == priv->dataif) &&
               (len                 == 2))
             {
               uint16_t state = usbhost_getle16(inmsg->data);
@@ -785,7 +789,7 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
           if (nbytes != -EAGAIN)
 #endif
             {
-              ulldbg("ERROR: Transfer failed: %d\n", nbytes);
+              udbg("ERROR: Transfer failed: %d\n", nbytes);
             }
 
           /* We don't know the nature of the failure, but we need to do all
@@ -1223,7 +1227,8 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
   FAR struct usbhost_epdesc_s boutdesc;
   FAR struct usbhost_epdesc_s iindesc;
   int remaining;
-  uint8_t found = 0;
+  uint8_t found  = 0;
+  uint8_t currif = 0;
   int ret;
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport &&
@@ -1264,21 +1269,52 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
       desc = (FAR struct usb_desc_s *)configdesc;
       switch (desc->type)
         {
-        /* Interface descriptor. We really should get the number of endpoints
-         * from this descriptor too.
+        /* Interface descriptor. The CDC/ACM device may include two
+         * interfaces:
+         *
+         * 1) A data interface which consists of two endpoints (bulk in +
+         *    bulk out) and
+         * 2) A control interface which consists of one interrupt in
+         *    endpoint.
          */
 
         case USB_DESC_TYPE_INTERFACE:
           {
             FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
 
-            uvdbg("Interface descriptor\n");
+            uvdbg("Interface descriptor: class: %d subclass: %d proto: %d\n",
+                  ifdesc->classid, ifdesc->subclass, ifdesc->protocol);
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Save the interface number and mark ONLY the interface found */
+            /* Check for the CDC/ACM data interface */
 
-            priv->ifno = ifdesc->ifno;
-            found      = USBHOST_IFFOUND;
+            if (ifdesc->classid == USB_CLASS_CDC_DATA &&
+                (found & USBHOST_DATAIF_FOUND) == 0)
+              {
+                /* Save the data interface number and mark that the data
+                 * interface found has been found.
+                 */
+
+                priv->dataif  = ifdesc->ifno;
+                found        |= USBHOST_DATAIF_FOUND;
+                currif        = USBHOST_DATAIF_FOUND;
+              }
+            else if (ifdesc->classid == USB_CLASS_CDC &&
+                     (found & USBHOST_CTRLIF_FOUND) == 0)
+              {
+                /* Otherwise, tentatively assume that this is the control
+                 * interface.
+                 */
+
+                priv->ctrlif  = ifdesc->ifno;
+                currif        = USBHOST_CTRLIF_FOUND;
+              }
+            else
+              {
+                /* Its something else */
+
+                currif        = 0;
+              }
           }
           break;
 
@@ -1290,22 +1326,25 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
 
-            uvdbg("Endpoint descriptor\n");
+            uvdbg("Endpoint descriptor: currif: %02x attr: %02x\n",
+                  currif, epdesc->attr);
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for a bulk endpoint. */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_BULK)
+            if (currif == USBHOST_DATAIF_FOUND &&
+                (epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_BULK)
               {
-                /* Yes.. it is a bulk endpoint.  IN or OUT? */
+                /* Yes.. Did we find the data interface? */
 
+                /* Yes.. it is a bulk endpoint.  IN or OUT? */
                 if (USB_ISEPOUT(epdesc->addr))
                   {
                     /* It is an OUT bulk endpoint.  There should be only one
                      * bulk OUT endpoint.
                      */
 
-                    if ((found & USBHOST_BOUTFOUND) != 0)
+                    if ((found & USBHOST_BULKOUT_FOUND) != 0)
                       {
                         /* Oops.. more than one endpoint.  We don't know
                          * what to do with this.
@@ -1314,7 +1353,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                         return -EINVAL;
                       }
 
-                    found |= USBHOST_BOUTFOUND;
+                    found |= USBHOST_BULKOUT_FOUND;
 
                     /* Save the bulk OUT endpoint information */
 
@@ -1334,7 +1373,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                      * bulk IN endpoint.
                      */
 
-                    if ((found & USBHOST_BINFOUND) != 0)
+                    if ((found & USBHOST_BULKIN_FOUND) != 0)
                       {
                         /* Oops.. more than one endpoint.  We don't know
                          * what to do with this.
@@ -1343,7 +1382,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                         return -EINVAL;
                       }
 
-                    found |= USBHOST_BINFOUND;
+                    found |= USBHOST_BULKIN_FOUND;
 
                     /* Save the bulk IN endpoint information */
 
@@ -1360,7 +1399,8 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
             /* Check for an interrupt IN endpoint. */
 
-            else if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_INT)
+            else if (currif == USBHOST_CTRLIF_FOUND &&
+                     (epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_INT)
               {
                 /* Yes.. it is a interrupt endpoint.  IN or OUT? */
 
@@ -1370,7 +1410,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                      * interrupt IN endpoint.
                      */
 
-                    if ((found & USBHOST_IINFOUND) != 0)
+                    if ((found & USBHOST_INTIN_FOUND) != 0)
                       {
                         /* Oops.. more than one.  We don't know what to do
                          * with this.
@@ -1379,7 +1419,11 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                         return -EINVAL;
                       }
 
-                    found |= USBHOST_BOUTFOUND;
+                    /* Let's pick this interface as the one and only control
+                     * interface.
+                     */
+
+                    found |= (USBHOST_CTRLIF_FOUND | USBHOST_INTIN_FOUND);
 
                     /* Save the bulk OUT endpoint information */
 
@@ -1418,17 +1462,17 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
       remaining  -= desc->len;
     }
 
-  /* Sanity checking... did we find all of things that we need? NOTE: that
+  /* Sanity checking... did we find all of things that we needed for the
+   * basic CDC/ACM data itnerface? NOTE: that the Control interface with
    * the Interrupt IN endpoint is optional.
    */
 
   if ((found & USBHOST_MINFOUND) != USBHOST_MINFOUND)
     {
-      ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s INTIN:%s\n",
-             (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
-             (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
-             (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO",
-             (found & USBHOST_IINFOUND) != 0 ? "YES" : "NO");
+      udbg("ERROR: Found DATA IF:%s BULK IN:%s BULK OUT:%s\n",
+           (found & USBHOST_DATAIF_FOUND)  != 0  ? "YES" : "NO",
+           (found & USBHOST_BULKIN_FOUND)  != 0 ? "YES" : "NO",
+           (found & USBHOST_BULKOUT_FOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
     }
 
@@ -1449,9 +1493,9 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
       return ret;
     }
 
-  /* The interrupt IN endpoint is optional */
+  /* The control interface with interrupt IN endpoint is optional */
 
-  if ((found & USBHOST_IINFOUND) != 0)
+  if ((found & USBHOST_HAVE_CTRLIF) == USBHOST_HAVE_CTRLIF)
     {
       ret = DRVR_EPALLOC(hport->drvr, &iindesc, &priv->intin);
       if (ret < 0)
@@ -1461,7 +1505,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
         }
     }
 
-  ullvdbg("Endpoints allocated\n");
+  uvdbg("Endpoints allocated\n");
   return OK;
 }
 
@@ -1589,7 +1633,8 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
                      sizeof( struct cdc_linecoding_s));
   if (ret < 0)
     {
-      udbg("ERROR: DRVR_IOALLOC of line coding failed: %d\n", ret);
+      udbg("ERROR: DRVR_IOALLOC of line coding failed: %d (%d bytes)\n",
+           ret, sizeof( struct cdc_linecoding_s));
       goto errout;
     }
 
@@ -1600,7 +1645,8 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
       ret = DRVR_IOALLOC(hport->drvr, &priv->notification, MAX_NOTIFICATION);
       if (ret < 0)
         {
-          udbg("ERROR: DRVR_IOALLOC of line status failed: %d\n", ret);
+          udbg("ERROR: DRVR_IOALLOC of line status failed: %d (%d bytes)\n",
+               ret, MAX_NOTIFICATION);
           goto errout;
         }
     }
@@ -1614,7 +1660,8 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
   ret = DRVR_IOALLOC(hport->drvr, &priv->inbuf, priv->pktsize);
   if (ret < 0)
     {
-      udbg("ERROR: DRVR_IOALLOC of Bulk IN buffer failed: %d\n", ret);
+      udbg("ERROR: DRVR_IOALLOC of Bulk IN buffer failed: %d (%d bytes)\n",
+           ret, priv->pktsize);
       goto errout;
     }
   
@@ -1623,7 +1670,8 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
   ret = DRVR_IOALLOC(hport->drvr, &priv->outbuf, priv->pktsize);
   if (ret < 0)
     {
-      udbg("ERROR: DRVR_IOALLOC of Bulk OUT buffer failed: %d\n", ret);
+      udbg("ERROR: DRVR_IOALLOC of Bulk OUT buffer failed: %d (%d bytes)\n",
+           ret, priv->pktsize);
       goto errout;
     }
 
@@ -1965,7 +2013,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * serial driver.
    */
 
-  ullvdbg("crefs: %d\n", priv->crefs);
+  uvdbg("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
       /* Destroy the class instance.  If we are executing from an interrupt

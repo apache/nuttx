@@ -2455,6 +2455,7 @@ static int lpc17_ioalloc(struct usbhost_driver_s *drvr,
           return OK;
         }
     }
+
   return -ENOMEM;
 #else
   return -ENOSYS;
