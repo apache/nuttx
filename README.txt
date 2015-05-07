@@ -1295,6 +1295,8 @@ nuttx
  |   |   `- README.txt
  |   |- teensy/
  |   |   `- README.txt
+ |   |- teensy-lc/
+ |   |   `- README.txt
  |   |- tm4c123g-launchpad/
  |   |   `- README.txt
  |   |- tm4c1294-launchpad/
