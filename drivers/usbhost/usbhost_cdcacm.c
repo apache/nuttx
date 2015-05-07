@@ -1108,17 +1108,23 @@ static void usbhost_rxdata_work(FAR void *arg)
            nexthead = 0;
         }
 
-
       /* Increment the index in the USB IN packet buffer.  If the
        * index becomes equal to the number of bytes in the buffer, then
-       * we have consumed all of the RX data.  In that case set the
-       * number of bytes in the buffer to zero.  This will force re-
-       * reading on the next time through the loop.
+       * we have consumed all of the RX data.
        */
 
       if (++rxndx >= priv->nrxbytes)
         {
+          /* In that case set the number of bytes in the buffer to zero.
+           * This will force re-reading on the next time through the loop.
+           */
+
           priv->nrxbytes = 0;
+
+          /* Inform any waiters there there is new incoming data available. */
+
+          uart_datareceived(uartdev);
+          nxfrd = 0;
         }
     }
 
