@@ -10315,3 +10315,11 @@
 	  Rename usbhost_storageinit() to usbhost_msc_initialize().  Add calls
 	  to usbhost_cdcacm_initialize() if CONFIG_USBHOST_CDCACM is selected
 	 (2015-05-06).
+	* arch/arm/include/kl and src/kl: Add support for the KL25Z64.  The
+	  KL25Z64 is a lower memory variant of the KL25Z128 and is used on the
+	  Teensy LC.  From Michael as SourceForge patch 50 (2015-05-07)
+	* configs/teensy-lc and related board support files: Add board support
+	  for the Teensy LC board.  Support is based off the Freedom KL25Z board.
+	  LED, PWM, and UART0 have been tested. The SPI pins are mapped
+	  correctly but have not yet been tested.  From Michael Hope as
+	  SourceForge patch 51 (2015-05-07).
