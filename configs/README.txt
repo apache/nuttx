@@ -603,6 +603,11 @@ configs/teensy
   developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
   on an Atmel AT90USB1286 MCU.
 
+configs/teensy-lc
+  This is the port of nuttx for the Teensy LC board.  The Teensy LC
+  is a DIP style breakout board for the MKL25Z64 and comes with a USB
+  based bootloader.
+
 configs/tm4c123g-launchpad
   This is the port of NuttX to the Tiva® TM4C123G LaunchPad.  The
   Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
