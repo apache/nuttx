@@ -79,7 +79,7 @@
  * K40P144M100SF2RM
  */
 
-#if defined(CONFIG_ARCH_CHIP_MKL25Z128)
+#if defined(CONFIG_ARCH_CHIP_MKL25Z128) || defined(CONFIG_ARCH_CHIP_MKL25Z64)
 
 #  define KL_IRQ_DMACH0        (16)  /* Vector 16: DMA channel 0 transfer complete */
 #  define KL_IRQ_DMACH1        (17)  /* Vector 17: DMA channel 1 transfer complete */

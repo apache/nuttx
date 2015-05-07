@@ -10,6 +10,10 @@ choice
 	default ARCH_CHIP_MKL25Z128
 	depends on ARCH_CHIP_KL
 
+config ARCH_CHIP_MKL25Z64
+	bool "MKL25Z64"
+	select ARCH_FAMILY_KL2X
+
 config ARCH_CHIP_MKL25Z128
 	bool "MKL25Z128"
 	select ARCH_FAMILY_KL2X
@@ -309,8 +313,8 @@ config KL_TPM1_PWM
 config KL_TPM1_CHANNEL
 	int "TPM1 PWM Output Channel"
 	default 0
-	range 0 1 if ARCH_CHIP_MKL25Z128 || ARCH_CHIP_MKL26Z128
-	range 0 5 if !ARCH_CHIP_MKL25Z128 && !ARCH_CHIP_MKL26Z128
+	range 0 1 if ARCH_CHIP_MKL25Z64 || ARCH_CHIP_MKL25Z128 || ARCH_CHIP_MKL26Z128
+	range 0 5 if !ARCH_CHIP_MKL25Z64 && !ARCH_CHIP_MKL25Z128 && !ARCH_CHIP_MKL26Z128
 	depends on KL_TPM1_PWM
 	---help---
 		If TIM1 is enabled for PWM usage, you also need specifies the timer output
@@ -331,8 +335,8 @@ config KL_TPM2_PWM
 config KL_TPM2_CHANNEL
 	int "TPM2 PWM Output Channel"
 	default 0
-	range 0 1 if ARCH_CHIP_MKL25Z128 || ARCH_CHIP_MKL26Z128
-	range 0 5 if !ARCH_CHIP_MKL25Z128 && !ARCH_CHIP_MKL26Z128
+	range 0 1 if ARCH_CHIP_MKL25Z64 || ARCH_CHIP_MKL25Z128 || ARCH_CHIP_MKL26Z128
+	range 0 5 if !ARCH_CHIP_MKL25Z64 && !ARCH_CHIP_MKL25Z128 && !ARCH_CHIP_MKL26Z128
 	depends on KL_TPM2_PWM
 	---help---
 		If TIM2 is enabled for PWM usage, you also need specifies the timer output
