@@ -1428,7 +1428,7 @@ static inline void sam_smc_initialize(void)
 static inline int sam_lcd_initialize(void)
 {
   FAR struct sam_dev_s *priv = &g_lcddev;
-  uint8_t buffer[4];
+  uint8_t buffer[4] = {0, 0, 0, 0};
   uint16_t id;
   uint16_t param;
   int ret;
