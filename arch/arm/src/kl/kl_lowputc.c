@@ -163,12 +163,16 @@ void kl_lowsetup(void)
    putreg32(regval, KL_SIM_SOPT2);
 #endif
 
-   regval = getreg32(KL_SIM_SCGC5);
-   regval |= SIM_SCGC5_PORTA;
-   putreg32(regval, KL_SIM_SCGC5);
-
    regval = getreg32(KL_SIM_SCGC4);
+#ifdef CONFIG_KL_UART0
    regval |= SIM_SCGC4_UART0;
+#endif
+#ifdef CONFIG_KL_UART1
+   regval |= SIM_SCGC4_UART1;
+#endif
+#ifdef CONFIG_KL_UART2
+   regval |= SIM_SCGC4_UART2;
+#endif
    putreg32(regval, KL_SIM_SCGC4);
 
    regval = getreg32(KL_SIM_SOPT2);
