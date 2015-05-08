@@ -144,7 +144,7 @@
 #define STM32_IRQ_COMP456     (STM32_IRQ_INTERRUPTS+65) /* 65: COMP4 & COMP5 & COMP6 interrupts, or */
 #define STM32_IRQ_EXTI3012    (STM32_IRQ_INTERRUPTS+65) /* 65: EXTI Lines 30, 31 and 32 interrupts */
 #define STM32_IRQ_COMP7       (STM32_IRQ_INTERRUPTS+66) /* 66: COMP7 interrupt, or */
-#define STM32_IRQ_EXTI35      (STM32_IRQ_INTERRUPTS+66) /* 66: EXTI Line 33 interrupt */
+#define STM32_IRQ_EXTI33      (STM32_IRQ_INTERRUPTS+66) /* 66: EXTI Line 33 interrupt */
 #define STM32_IRQ_RESERVED67  (STM32_IRQ_INTERRUPTS+67) /* 67: Reserved */
 #define STM32_IRQ_RESERVED68  (STM32_IRQ_INTERRUPTS+68) /* 68: Reserved */
 #define STM32_IRQ_RESERVED69  (STM32_IRQ_INTERRUPTS+69) /* 69: Reserved */
