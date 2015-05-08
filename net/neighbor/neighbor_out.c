@@ -113,7 +113,7 @@ static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
  *   beginning of the packet and the function returns.
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,
- *   the packet in the d_buf[] is replaced by an ICMPv6 Neighbor Solict
+ *   the packet in the d_buf[] is replaced by an ICMPv6 Neighbor Solicit
  *   request packet for the IPv6 address. The IPv6 packet is dropped and 
  *   it is assumed that the higher level protocols (e.g., TCP) eventually
  *   will retransmit the dropped packet.
@@ -245,7 +245,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
    * outgoing packet.
    */
 
-  dev_d_len += netdev_ipv6_hdrlen(dev);
+  dev->d_len += netdev_ipv6_hdrlen(dev);
   nllvdbg("Outgoing IPv6 Packet length: %d (%d)\n",
           dev->d_len, (ip->len[0] << 8) | ip->len[1]);
 }
