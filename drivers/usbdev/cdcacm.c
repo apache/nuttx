@@ -1467,7 +1467,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
               {
                 /* Save the new line coding in the private data structure.  NOTE:
                  * that this is conditional now because not all device controller
-                 * drivers supported provisioni of EP0 OUT data with the setup
+                 * drivers supported provision of EP0 OUT data with the setup
                  * command.
                  */
 
@@ -1475,6 +1475,8 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                   {
                     memcpy(&priv->linecoding, dataout, SIZEOF_CDC_LINECODING);
                   }
+
+                /* Respond with a zero length packet */
 
                 ret = 0;
 
@@ -1504,7 +1506,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                 index == CDCACM_NOTIFID)
               {
                 /* Save the control line state in the private data structure. Only bits
-                 * 0 and 1 have meaning.
+                 * 0 and 1 have meaning.  Respond with a zero length packet.
                  */
 
                 priv->ctrlline = value & 3;
@@ -1534,7 +1536,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                 index == CDCACM_NOTIFID)
               {
                 /* If there is a registered callback to handle the SendBreak request,
-                 * then callout now.
+                 * then callout now.  Respond with a zero length packet.
                  */
 
                 ret = 0;
@@ -1588,6 +1590,8 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
           cdcacm_ep0incomplete(dev->ep0, ctrlreq);
         }
     }
+
+  /* Returning a negative value will cause a STALL */
 
   return ret;
 }

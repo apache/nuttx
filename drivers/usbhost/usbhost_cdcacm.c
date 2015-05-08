@@ -650,7 +650,7 @@ static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
   ctrlreq->req     = ACM_SET_LINE_CODING;
 
   usbhost_putle16(ctrlreq->value, 0);
-  usbhost_putle16(ctrlreq->index, priv->dataif);
+  usbhost_putle16(ctrlreq->index, priv->ctrlif);
   usbhost_putle16(ctrlreq->len,   SIZEOF_CDC_LINECODING);
 
   /* And send the request */
@@ -723,7 +723,7 @@ static void usbhost_notification_work(FAR void *arg)
                                        USB_REQ_RECIPIENT_INTERFACE)) &&
               (inmsg->notification == ACM_SERIAL_STATE) &&
               (value               == 0) &&
-              (index               == priv->dataif) &&
+              (index               == priv->ctrlif) &&
               (len                 == 2))
             {
               uint16_t state = usbhost_getle16(inmsg->data);
@@ -2062,9 +2062,16 @@ errout:
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)usbclass;
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+  FAR struct usbhost_hubport_s *hport;
+#endif
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+  DEBUGASSERT(priv->usbclass.hport != NULL);
+  hport = priv->usbclass.hport;
+#endif
 
   /* Set an indication to any users of the CDC/ACM device that the device
    * is no longer available.
@@ -2072,6 +2079,19 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
   flags              = irqsave();
   priv->disconnected = true;
+
+#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+  /* Cancel any pending asynchronous I/O */
+
+  if (priv->intin)
+    {
+      int ret = DRVR_CANCEL(hport->drvr, priv->intin);
+      if (ret < 0)
+        {
+         udbg("WARNING: DRVR_CANCEL failed: %d\n", ret);
+        }
+    }
+#endif
 
   /* Now check the number of references on the class instance.  If it is one,
    * then we can free the class instance now.  Otherwise, we will have to
