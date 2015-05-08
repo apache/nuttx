@@ -114,7 +114,6 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
 
   /* Loop until we get the entire section name into memory */
 
-  buffer    = loadinfo->iobuffer;
   bytesread = 0;
 
   for (; ; )
@@ -136,7 +135,7 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = elf_read(loadinfo, buffer, readlen, offset);
+      ret = elf_read(loadinfo, buffer, readlen, offset + bytesread);
       if (ret < 0)
         {
           berr("Failed to read section name\n");
