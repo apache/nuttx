@@ -55,9 +55,10 @@
 
 #include "up_arch.h"
 
-/* Only for the STM32F10xx family for now */
+/* Only for the STM32F[1|3|4]0xx family for now */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined (CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined (CONFIG_STM32_STM32F40XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -66,7 +67,7 @@
 #define FLASH_KEY1      0x45670123
 #define FLASH_KEY2      0xCDEF89AB
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #define FLASH_CR_PAGE_ERASE              FLASH_CR_PER
 #define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPRT_ERR
 #elif defined(CONFIG_STM32_STM32F40XX)
@@ -103,7 +104,7 @@ void stm32_flash_lock(void)
  * Public Functions
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_STM32F10XX
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
 size_t up_progmem_pagesize(size_t page)
 {
@@ -135,7 +136,7 @@ size_t up_progmem_getaddress(size_t page)
   return page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE;
 }
 
-#endif /* def CONFIG_STM32_STM32F10XX */
+#endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) */
 
 #ifdef CONFIG_STM32_STM32F40XX
 
@@ -226,9 +227,9 @@ bool up_progmem_isuniform(void)
 
 ssize_t up_progmem_erasepage(size_t page)
 {
-#ifdef CONFIG_STM32_STM32F10XX
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
   size_t page_address;
-#endif /* def CONFIG_STM32_STM32F10XX */
+#endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) */
 
   if (page >= STM32_FLASH_NPAGES)
     {
@@ -246,10 +247,12 @@ ssize_t up_progmem_erasepage(size_t page)
 
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
 
-#if defined(CONFIG_STM32_STM32F10XX)
-  /* must be valid - page index checked above */
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+  /* Must be valid - page index checked above */
+
   page_address = up_progmem_getaddress(page);
   putreg32(page_address, STM32_FLASH_AR);
+
 #elif defined(CONFIG_STM32_STM32F40XX)
   modifyreg32(STM32_FLASH_CR, FLASH_CR_SNB_MASK, FLASH_CR_SNB(page));
 #endif
@@ -363,4 +366,5 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   return written;
 }
 
-#endif /* defined(CONFIG_STM32_STM32F10XX) || defined (CONFIG_STM32_STM32F40XX) */
+#endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+          defined (CONFIG_STM32_STM32F40XX) */
