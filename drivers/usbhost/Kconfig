@@ -132,14 +132,14 @@ config USBHOST_CDCACM_NTDELAY
 		controllers).
 
 config USBHOST_CDCACM_RXDELAY
-	int "RX poll delay (MSec)
+	int "RX poll delay (MSec)"
 	default 200
 	---help---
 		When the CDC/ACM device is inactive, the host must poll it at this
 		rate in order to discover if it has serial data to send to us.
 
 config USBHOST_CDCACM_TXDELAY
-	int "TX poll delay (MSec)
+	int "TX poll delay (MSec)"
 	default 200
 	---help---
 		When the appellation is inactive, the host must poll it at this
