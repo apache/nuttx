@@ -3220,15 +3220,15 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   irqstate_t flags;
   int ret = OK;
 
+  DEBUGASSERT(ed != NULL);
+
   /* These first steps must be atomic as possible */
 
-  flags  = irqsave();
+  flags = irqsave();
 
-  /* It might be possible for no transfer to be in progress */
+  /* It is possible there there is no transfer to be in progress */
 
-  DEBUGASSERT(ed != NULL && ed->xfrinfo != NULL);
   xfrinfo = ed->xfrinfo;
-
   if (xfrinfo)
     {
       /* It would be an usage error to use the interface to try to cancel a
