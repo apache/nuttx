@@ -537,12 +537,12 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
 {
   DEBUGASSERT(usbclass != NULL);
 
-  /* Free the class instance (calling sched_kmm_free() in case we are executing
+  /* Free the class instance (calling sched_kfree() in case we are executing
    * from an interrupt handler.
    */
 
   uvdbg("Freeing: %p\n", usbclass);;
-  kmm_free(usbclass);
+  sched_kfree(usbclass);
 }
 #endif
 

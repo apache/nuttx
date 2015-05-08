@@ -548,7 +548,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
   /* Free the class instance. */
 
   uvdbg("Freeing: %p\n", usbclass);;
-  kmm_free(usbclass);
+  sched_kfree(usbclass);
 }
 
 /****************************************************************************
