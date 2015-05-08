@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 #ifdef CONFIG_SPI_CALLBACK
 #include <nuttx/irq.h>
@@ -167,6 +168,8 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
       up_disable_irq(irq);
       (void)irq_detach(irq);
     }
+
+  irqrestore(flags);
 }
 #endif
 
