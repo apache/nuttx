@@ -10332,3 +10332,5 @@
 	  done during kl_start().  From Michael Hope (2015-05-07).
 	* teensy-lc: remap UART0 to the standard pins. From Michael Hope
 	  (2015-05-07).
+	* arch/arm/src/stm32 and include/stm32: Added support for STM32F302K8
+	  and STM32F302K6.  From Ben Dyer via PX4/David Sidrane (2015-05-08).
