@@ -121,13 +121,22 @@
 
 /* EXTI lines > 15 are associated with internal devices: */
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX)
 #  define EXTI_PVD_LINE          (1 << 16) /* EXTI line 16 is connected to the PVD output */
 #  define EXTI_RTC_ALARM         (1 << 17) /* EXTI line 17 is connected to the RTC Alarm event */
 #  define EXTI_USB_WAKEUP        (1 << 18) /* EXTI line 18 is connected to the USB Wakeup event */
 #  ifdef CONFIG_STM32_CONNECTIVITYLINE
 #    define EXTI_ETH_WAKEUP      (1 << 19) /* EXTI line 19 is connected to the Ethernet Wakeup event */
 #  endif
+#elif defined(CONFIG_STM32_STM32L15XX)
+#  define EXTI_PVD_LINE          (1 << 16) /* EXTI line 16 is connected to the PVD output */
+#  define EXTI_RTC_ALARM         (1 << 17) /* EXTI line 17 is connected to the RTC Alarm event */
+#  define EXTI_USB_WAKEUP        (1 << 18) /* EXTI line 18 is connected to the USB Device FS Wakeup event */
+#  define EXTI_RTC_TAMPER        (1 << 19) /* EXTI line 19 is connected to the RTC Tamper and TimeStamp events */
+#  define EXTI_RTC_WAKEUP        (1 << 20) /* EXTI line 20 is connected to the RTC Wakeup event */
+#  define EXTI_RTC_CMP1          (1 << 21) /* EXTI line 21 is connected to the Comparator 1 wakeup event */
+#  define EXTI_RTC_CMP2          (1 << 22) /* EXTI line 22 is connected to the Comparator 2 wakeup event */
+#  define EXTI_RTC_ACQUIRE       (1 << 23) /* EXTI line 23 is connected to the channel acquisition interrupt */
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define EXTI_PVD_LINE          (1 << 16) /* EXTI line 16 is connected to the PVD output */
 #  define EXTI_RTC_ALARM         (1 << 17) /* EXTI line 17 is connected to the RTC Alarm event */
