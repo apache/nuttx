@@ -1,7 +1,10 @@
 compal_e86
 ==========
 
-This directory contains the board support for compal e86 phones.
+This directory contains the board support for compal e86 phones. This port
+is tested on the following phone:
+
+* motorola c139 (compal e86) with flash configuration
 
 This port is based on patches contributed by Denis Carikli for both the
 compal e99 and e88. At the time of initial check-in, the following phones
@@ -36,8 +39,24 @@ the host system. Sercomm is the transport used by osmocom-bb that runs on top
 of serial.  See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed
 the usage of nuttx with sercomm.
 
-Loading NuttX
-=============
+Running NuttX From Flash
+========================
+
+Flash layout:
+
+0x00000 - 0x02000 - original compal loader
+0x02000 - 0x10000 - simple binary to jump to 0x10000 (jumper.e86loader.bin)
+0x10000 - ???     - NuttX binary (nuttx.bin)
+
+Using osmocon/osmoload, retrieve the compal loader, flash it and the
+jumper.e86loader.bin as well as nuttx.bin.
+
+The jumper app is a modified version of the menu app in osmocom-bb, branch
+jolly/menu. The app disabled irqs (setup by compal loader?) and jumps to
+0x10000. This app is submitted as a patch to osmocom-bb mailing list.
+
+Loading NuttX (highram)
+=======================
 
 The osmocom-bb wiki describes how to load NuttX.  See
 http://bb.osmocom.org/trac/wiki/nuttx-bb for detailed information.

@@ -42,8 +42,9 @@ CONFIG_RAW_BINARY=y
 # Debug Options
 #
 # CONFIG_DEBUG is not set
-CONFIG_ARCH_HAVE_STACKCHECK=y
 # CONFIG_ARCH_HAVE_HEAPCHECK is not set
+CONFIG_ARCH_HAVE_STACKCHECK=y
+# CONFIG_STACK_COLORATION is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 CONFIG_ARCH_HAVE_CUSTOMOPT=y
 # CONFIG_DEBUG_NOOPT is not set
@@ -87,6 +88,7 @@ CONFIG_ARCH_CHIP_CALYPSO=y
 # CONFIG_ARCH_CHIP_SAMA5 is not set
 # CONFIG_ARCH_CHIP_SAMD is not set
 # CONFIG_ARCH_CHIP_SAM34 is not set
+# CONFIG_ARCH_CHIP_SAMV7 is not set
 # CONFIG_ARCH_CHIP_STM32 is not set
 # CONFIG_ARCH_CHIP_STR71X is not set
 CONFIG_ARCH_ARM7TDMI=y
@@ -95,11 +97,13 @@ CONFIG_ARCH_ARM7TDMI=y
 # CONFIG_ARCH_CORTEXM0 is not set
 # CONFIG_ARCH_CORTEXM3 is not set
 # CONFIG_ARCH_CORTEXM4 is not set
+# CONFIG_ARCH_CORTEXM7 is not set
 # CONFIG_ARCH_CORTEXA5 is not set
 # CONFIG_ARCH_CORTEXA8 is not set
 CONFIG_ARCH_FAMILY="arm"
 CONFIG_ARCH_CHIP="calypso"
 # CONFIG_ARCH_HAVE_FPU is not set
+# CONFIG_ARCH_HAVE_DPFPU is not set
 CONFIG_ARCH_HAVE_LOWVECTORS=y
 # CONFIG_ARCH_LOWVECTORS is not set
 
@@ -210,6 +214,7 @@ CONFIG_NSH_MMCSDMINOR=0
 #
 # Board-Specific Options
 #
+# CONFIG_LIB_BOARDCTL is not set
 
 #
 # RTOS Features
@@ -328,11 +333,16 @@ CONFIG_SPI=y
 # CONFIG_SPI_OWNBUS is not set
 CONFIG_SPI_EXCHANGE=y
 # CONFIG_SPI_CMDDATA is not set
+# CONFIG_SPI_CALLBACK is not set
 # CONFIG_SPI_BITBANG is not set
 # CONFIG_I2S is not set
+
+#
+# Timer Driver Support
+#
+# CONFIG_TIMER is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
-# CONFIG_TIMER is not set
 # CONFIG_ANALOG is not set
 # CONFIG_AUDIO_DEVICES is not set
 # CONFIG_VIDEO_DEVICES is not set
@@ -346,7 +356,7 @@ CONFIG_SPI_EXCHANGE=y
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
 # CONFIG_SENSORS is not set
-CONFIG_SERCOMM_CONSOLE=y
+# CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
@@ -395,6 +405,7 @@ CONFIG_OTHER_SERIAL_CONSOLE=y
 # System Logging
 #
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_CONSOLE is not set
 
 #
 # Networking Support
@@ -493,6 +504,7 @@ CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
 # CONFIG_LIBC_PERROR_STDOUT is not set
 CONFIG_ARCH_LOWPUTC=y
 # CONFIG_LIBC_LOCALTIME is not set
+# CONFIG_TIME_EXTENDED is not set
 CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_ROMGETC is not set
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
@@ -551,10 +563,10 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_NXTEXT is not set
 # CONFIG_EXAMPLES_OSTEST is not set
 # CONFIG_EXAMPLES_PIPE is not set
+# CONFIG_EXAMPLES_PPPD is not set
 # CONFIG_EXAMPLES_POSIXSPAWN is not set
 # CONFIG_EXAMPLES_QENCODER is not set
 # CONFIG_EXAMPLES_RGMP is not set
-# CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERIALBLASTER is not set
 # CONFIG_EXAMPLES_SERIALRX is not set
@@ -567,7 +579,6 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
-# CONFIG_EXAMPLES_UDP is not set
 # CONFIG_EXAMPLES_WEBSERVER is not set
 # CONFIG_EXAMPLES_USBSERIAL is not set
 # CONFIG_EXAMPLES_USBTERM is not set
@@ -584,6 +595,7 @@ CONFIG_EXAMPLES_NSH=y
 #
 # CONFIG_INTERPRETERS_FICL is not set
 # CONFIG_INTERPRETERS_PCODE is not set
+# CONFIG_INTERPRETERS_MICROPYTHON is not set
 
 #
 # Network Utilities
@@ -593,15 +605,11 @@ CONFIG_EXAMPLES_NSH=y
 # Networking Utilities
 #
 # CONFIG_NETUTILS_CODECS is not set
-# CONFIG_NETUTILS_DHCPD is not set
 # CONFIG_NETUTILS_FTPC is not set
-# CONFIG_NETUTILS_FTPD is not set
 # CONFIG_NETUTILS_JSON is not set
 # CONFIG_NETUTILS_SMTP is not set
-# CONFIG_NETUTILS_TFTPC is not set
 # CONFIG_NETUTILS_THTTPD is not set
-# CONFIG_NETUTILS_NETLIB is not set
-# CONFIG_NETUTILS_WEBCLIENT is not set
+# CONFIG_NETUTILS_PPPD is not set
 
 #
 # FreeModBus
@@ -635,6 +643,7 @@ CONFIG_NSH_BUILTIN_APPS=y
 # CONFIG_NSH_DISABLE_CD is not set
 # CONFIG_NSH_DISABLE_CP is not set
 # CONFIG_NSH_DISABLE_CMP is not set
+CONFIG_NSH_DISABLE_DATE=y
 # CONFIG_NSH_DISABLE_DD is not set
 # CONFIG_NSH_DISABLE_DF is not set
 # CONFIG_NSH_DISABLE_DELROUTE is not set
@@ -655,6 +664,7 @@ CONFIG_NSH_BUILTIN_APPS=y
 # CONFIG_NSH_DISABLE_MKRD is not set
 # CONFIG_NSH_DISABLE_MH is not set
 # CONFIG_NSH_DISABLE_MOUNT is not set
+# CONFIG_NSH_DISABLE_MV is not set
 # CONFIG_NSH_DISABLE_MW is not set
 # CONFIG_NSH_DISABLE_PS is not set
 # CONFIG_NSH_DISABLE_PUT is not set
@@ -705,119 +715,19 @@ CONFIG_NSH_CONSOLE=y
 #
 # System Libraries and NSH Add-Ons
 #
-
-#
-# Custom Free Memory Command
-#
 # CONFIG_SYSTEM_FREE is not set
-
-#
-# EMACS-like Command Line Editor
-#
 # CONFIG_SYSTEM_CLE is not set
-
-#
-# CU Minimal Terminal
-#
 # CONFIG_SYSTEM_CUTERM is not set
-
-#
-# FLASH Program Installation
-#
 # CONFIG_SYSTEM_INSTALL is not set
-
-#
-# FLASH Erase-all Command
-#
-
-#
-# Intel HEX to binary conversion
-#
 # CONFIG_SYSTEM_HEX2BIN is not set
-
-#
-# I2C tool
-#
-
-#
-# INI File Parser
-#
 # CONFIG_SYSTEM_INIFILE is not set
-
-#
-# NxPlayer media player library / command Line
-#
-
-#
-# RAM test
-#
 # CONFIG_SYSTEM_RAMTEST is not set
-
-#
-# readline()
-#
 CONFIG_SYSTEM_READLINE=y
 CONFIG_READLINE_ECHO=y
-
-#
-# P-Code Support
-#
-
-#
-# PHY Tool
-#
-
-#
-# Power Off
-#
 CONFIG_SYSTEM_POWEROFF=y
-
-#
-# RAMTRON
-#
 # CONFIG_SYSTEM_RAMTRON is not set
-
-#
-# SD Card
-#
 # CONFIG_SYSTEM_SDCARD is not set
-
-#
-# Sudoku
-#
 # CONFIG_SYSTEM_SUDOKU is not set
-
-#
-# Sysinfo
-#
 # CONFIG_SYSTEM_SYSINFO is not set
-
-#
-# VI Work-Alike Editor
-#
 # CONFIG_SYSTEM_VI is not set
-
-#
-# Stack Monitor
-#
-
-#
-# USB CDC/ACM Device Commands
-#
-
-#
-# USB Composite Device Commands
-#
-
-#
-# USB Mass Storage Device Commands
-#
-
-#
-# USB Monitor
-#
-
-#
-# Zmodem Commands
-#
 # CONFIG_SYSTEM_ZMODEM is not set
