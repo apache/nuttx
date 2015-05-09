@@ -37,7 +37,11 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/arm/Toolchain.defs
 
-LDSCRIPT = highram.ld
+ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
+  LDSCRIPT = flash.ld
+else
+  LDSCRIPT = highram.ld
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
