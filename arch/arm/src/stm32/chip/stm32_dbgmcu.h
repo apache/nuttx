@@ -52,7 +52,8 @@
 
 #define STM32_DBGMCU_IDCODE       0xe0042000  /* MCU identifier */
 #define STM32_DBGMCU_CR           0xe0042004  /* MCU debug */
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_DBGMCU_APB1_FZ    0xe0042008  /* Debug MCU APB1 freeze register */
 #  define STM32_DBGMCU_APB2_FZ    0xe004200c  /* Debug MCU APB2 freeze register */
 #endif
