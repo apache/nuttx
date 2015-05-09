@@ -10334,3 +10334,5 @@
 	  (2015-05-07).
 	* arch/arm/src/stm32 and include/stm32: Added support for STM32F302K8
 	  and STM32F302K6.  From Ben Dyer via PX4/David Sidrane (2015-05-08).
+	* configs/compal_e86: Calypso Compal-E86: Updates for execution out of
+	  FLASH on the C139 phone.  From Craig Comstock (2015-05-08).
