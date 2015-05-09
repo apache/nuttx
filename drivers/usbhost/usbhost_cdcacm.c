@@ -1386,9 +1386,8 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
             if (currif == USBHOST_DATAIF_FOUND &&
                 (epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_BULK)
               {
-                /* Yes.. Did we find the data interface? */
-
                 /* Yes.. it is a bulk endpoint.  IN or OUT? */
+
                 if (USB_ISEPOUT(epdesc->addr))
                   {
                     /* It is an OUT bulk endpoint.  There should be only one

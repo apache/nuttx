@@ -10338,3 +10338,5 @@
 	  FLASH on the C139 phone.  From Craig Comstock (2015-05-08).
 	* STM32 F3:  Add DBGMCU register definitions for the F3 family.  From
 	  Greg Meiste (2015-05-09).
+	* arch/arm/src/stm32/chip/stm32_exti.h: Add EXTI line definitions for
+	  the STM32L family (2015-05-09).
