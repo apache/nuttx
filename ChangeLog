@@ -10336,3 +10336,5 @@
 	  and STM32F302K6.  From Ben Dyer via PX4/David Sidrane (2015-05-08).
 	* configs/compal_e86: Calypso Compal-E86: Updates for execution out of
 	  FLASH on the C139 phone.  From Craig Comstock (2015-05-08).
+	* STM32 F3:  Add DBGMCU register definitions for the F3 family.  From
+	  Greg Meiste (2015-05-09).
