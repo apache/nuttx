@@ -745,7 +745,7 @@ static void usbhost_notification_work(FAR void *arg)
       ret = DRVR_ASYNCH(hport->drvr, priv->intin,
                         (FAR uint8_t *)priv->notification,
                         MAX_NOTIFICATION, usbhost_notification_callback,
-                        &priv->usbclass);
+                        priv);
       if (ret < 0)
         {
           udbg("ERROR: DRVR_ASYNCH failed: %d\n", ret);
@@ -2008,7 +2008,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       ret = DRVR_ASYNCH(hport->drvr, priv->intin,
                         (FAR uint8_t *)priv->notification,
                         MAX_NOTIFICATION, usbhost_notification_callback,
-                        &priv->usbclass);
+                        priv);
       if (ret < 0)
         {
           udbg("ERROR: DRVR_ASYNCH failed: %d\n", ret);
@@ -2088,7 +2088,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
       int ret = DRVR_CANCEL(hport->drvr, priv->intin);
       if (ret < 0)
         {
-         udbg("WARNING: DRVR_CANCEL failed: %d\n", ret);
+         udbg("ERROR: DRVR_CANCEL failed: %d\n", ret);
         }
     }
 #endif
