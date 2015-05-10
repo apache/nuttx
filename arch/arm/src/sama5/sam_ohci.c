@@ -224,9 +224,9 @@ struct sam_eplist_s
 #ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t  callback;  /* Transfer complete callback */
   void             *arg;       /* Argument that accompanies the callback */
-  uint16_t          buflen;    /* Length of the buffer */
 #endif
   uint8_t          *buffer;    /* Buffer being transferred */
+  uint16_t          buflen;    /* Length of the buffer */
   uint16_t          xfrd;      /* Number of bytes completed in the last transfer */
   struct sam_ed_s  *ed;        /* Endpoint descriptor (ED) */
   struct sam_gtd_s *tail;      /* Tail transfer descriptor (TD) */
@@ -400,7 +400,8 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplis
                          volatile uint8_t *buffer, size_t buflen);
 static int  sam_ep0enqueue(struct sam_rhport_s *rhport);
 static void sam_ep0dequeue(struct sam_eplist_s *ep0);
-static int  sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed);
+static int  sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
+                        uint8_t *buffer, uint16_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int  sam_wdhasynch(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
                           usbhost_asynch_t callback, void *arg,
@@ -1735,7 +1736,8 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
  *
  *******************************************************************************/
 
-static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed)
+static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
+                       uint8_t *buffer, uint16_t buflen)
 {
   struct sam_eplist_s *eplist;
   irqstate_t flags = irqsave();
@@ -1759,9 +1761,9 @@ static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed)
 #ifdef CONFIG_USBHOST_ASYNCH
       eplist->callback = NULL;
       eplist->arg      = NULL;
-      eplist->buffer   = NULL;
-      eplist->buflen   = 0;
 #endif
+      eplist->buffer   = buffer;
+      eplist->buflen   = buflen;
       ret              = OK;
     }
 
@@ -1843,7 +1845,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
    */
 
   edctrl = eplist->ed;
-  ret = sam_wdhwait(rhport, edctrl);
+  ret = sam_wdhwait(rhport, edctrl, buffer, buflen);
   if (ret != OK)
     {
       usbhost_trace1(OHCI_TRACE1_DEVDISCONN, RHPORT(rhport));
@@ -2156,12 +2158,18 @@ static void sam_wdh_bottomhalf(void)
 #endif
 
       /* Determine the number of bytes actually transfer by* subtracting the
-       * buffer start address from the CBP.  But be careful, the CBP may be
-       * zero.
+       * buffer start address from the CBP.    A value of zero means that all
+       * bytes were transferred.
        */
 
       tmp = (uintptr_t)td->hw.cbp;
-      if (tmp != 0)
+      if (tmp == 0)
+        {
+          /* Set the (fake) CBP to the end of the buffer + 1 */
+
+          tmp = xfrinfo->buflen;
+        }
+      else
         {
           paddr = sam_physramaddr((uintptr_t)eplist->buffer);
           DEBUGASSERT(tmp >= paddr);
@@ -3309,7 +3317,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
    * transfer.
    */
 
-  ret = sam_wdhwait(rhport, ed);
+  ret = sam_wdhwait(rhport, ed, buffer, buflen);
   if (ret != OK)
     {
       usbhost_trace1(OHCI_TRACE1_DEVDISCONN, RHPORT(rhport));

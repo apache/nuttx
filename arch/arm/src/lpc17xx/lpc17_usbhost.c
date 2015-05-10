@@ -190,6 +190,7 @@ struct lpc17_xfrinfo_s
   volatile bool wdhwait;      /* Thread is waiting for WDH interrupt */
   volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   uint8_t *buffer;            /* Transfer buffer start */
+  uint16_t buflen;            /* Buffer length */
   uint16_t xfrd;              /* Number of bytes transferred */
   
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -198,7 +199,6 @@ struct lpc17_xfrinfo_s
    * the transfer completes.
    */
 
-  uint16_t buflen;            /* Buffer length */
   uint8_t *alloc;             /* Allocated buffer */
 #endif
 
@@ -1516,9 +1516,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
 
   memset(xfrinfo, 0, sizeof(struct lpc17_xfrinfo_s));
   xfrinfo->buffer = buffer;
-#if defined(CONFIG_USBHOST_ASYNCH) && LPC17_IOBUFFERS > 0
   xfrinfo->buflen = buflen;
-#endif
 
   ed->xfrinfo = xfrinfo;
 
@@ -1780,12 +1778,18 @@ static int lpc17_usbinterrupt(int irq, void *context)
 #endif
 
               /* Determine the number of bytes actually transfer by
-               * subtracting the buffer start address from the CBP.  But be
-               * careful, the CBP may be zero.
+               * subtracting the buffer start address from the CBP.  A value
+               * of zero means that all bytes were transferred.
                */
 
               tmp = (uintptr_t)td->hw.cbp;
-              if (tmp != 0)
+              if (tmp == 0)
+                {
+                  /* Set the (fake) CBP to the end of the buffer + 1 */
+
+                  tmp = xfrinfo->buflen;
+                }
+              else
                 {
                   DEBUGASSERT(tmp >= (uintptr_t)xfrinfo->buffer);
 
@@ -2892,9 +2896,7 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   memset(xfrinfo, 0, sizeof(struct lpc17_xfrinfo_s));
   xfrinfo->buffer = buffer;
-#if defined(CONFIG_USBHOST_ASYNCH) && LPC17_IOBUFFERS > 0
   xfrinfo->buflen = buflen;
-#endif
 
   ed->xfrinfo = xfrinfo;
 
@@ -3017,11 +3019,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
   xfrinfo = ed->xfrinfo;
 
   DEBUGASSERT(xfrinfo->wdhwait == false &&  xfrinfo->callback != NULL &&
-              xfrinfo->buffer != NULL);
-
-#if LPC17_IOBUFFERS > 0
-  DEBUGASSERT(xfrinfo->buflen > 0);
-#endif
+              xfrinfo->buffer != NULL && xfrinfo->buflen > 0);
 
   /* Check the TD completion status bits */
 
@@ -3132,9 +3130,7 @@ static int lpc17_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   memset(xfrinfo, 0, sizeof(struct lpc17_xfrinfo_s));
   xfrinfo->buffer   = buffer;
-#if LPC17_IOBUFFERS > 0
   xfrinfo->buflen   = buflen;
-#endif
   xfrinfo->callback = callback;
   xfrinfo->arg      = arg;
 
