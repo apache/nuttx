@@ -1135,11 +1135,20 @@ o USB (drivers/usbdev, drivers/usbhost)
                 removed.  If I skip the 'cat /dev/ttyACM0', then the
                 crash does not occur when the cable is removed.
 
+                UPDATE: A similar crash occurs on the SAMA5Dx OCHI driver.
+                Both the LPC17 and the SAMA5Dx are OHCI drivers.
+
                Most of these problems are unique to the Olimex LPC1766STK
                DCD; some are probably design problems in the CDC/ACM host
                driver.  The bottom line is that the host CDC/ACM driver is
-               immature and you should probably not use it unless you want
-               to invest some effort.
+               still immature and you could experience issues in some
+               configurations if you use it.
+
+               That all being said, I know of know no issues with the current
+               CDC/ACM driver if the interrupt IN endpoint is not used, i.e.,
+               in "reduced" mode.  The only loss of functionality is output
+               flow control.
+
   Status:      Open
   Priority:    Medium-Low unless you really need host CDC/ACM support.
 

@@ -154,6 +154,7 @@ endchoice # CDC/ACM Protocol
 config USBHOST_CDCACM_NTDELAY
 	int "CDC/ACM notification polling interval (MSec)"
 	default 400
+	depends on USBHOST_CDCACM_COMPLIANT
 	---help---
 		On higher end host controllers (OHCI and EHCI), the asynchronous,
 		interrupt IN transfers will pend until data is available from the
