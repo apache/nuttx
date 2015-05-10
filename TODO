@@ -1106,26 +1106,36 @@ o USB (drivers/usbdev, drivers/usbhost)
 
               - The driver works fine when configured for reduced or bulk-
                 only protocol.
+
               - Testing has not been performed with the interrupt IN channel
                 enabled (ie., I have not enabled FLOW control nor do I have
                 a test case that used the interrupt IN channel).  I can see
                 that the polling for interrupt IN data is occurring
                 initially.
+
               - I test for incoming data by doing 'nsh> cat /dev/ttyACM0' on
                 the Olimex LPC1766STK host.  The bulk data reception still
                 works okay whether or not the interupt IN channel is enabled.
                 If the interrupt IN channel is enabled, then polling of that
                 channel appears to stop when the bulk in channel becomes
                 active.
+
+              - I see some missing data in the received stream.
+
               - The RX reception logic uses the low priority work queue.
                 However, that logic never returns and so blocks other use of
                 the work queue thread.  This is probably okay but means that
                 the RX reception logic probably should be moved to its own
                 dedicated thread.
+
               - When the cable connecting the STM3110E-EVAL device is
                 removed, the software on the Olimex LPC1766STK crashes.  The
                 crash is due to corruption of the OHCI bDoneHead pointer.
-                This might be an related to the use of 'cat /dev/ttyACM0'?
+
+                This is related to the use of 'cat /dev/ttyACM0' which is
+                trying to read from CDC/ACM while the device is being
+                removed.  If I skip the 'cat /dev/ttyACM0', then the
+                crash does not occur when the cable is removed.
 
                Most of these problems are unique to the Olimex LPC1766STK
                DCD; some are probably design problems in the CDC/ACM host
