@@ -1104,8 +1104,8 @@ o USB (drivers/usbdev, drivers/usbhost)
                are several unresolved issues that prevent the host driver
                from being usable:
 
-              - The driver works fine when configured for BULK-ONLY
-                operation.
+              - The driver works fine when configured for reduced or bulk-
+                only protocol.
               - Testing has not been performed with the interrupt IN channel
                 enabled (ie., I have not enabled FLOW control nor do I have
                 a test case that used the interrupt IN channel).  I can see
@@ -1125,8 +1125,13 @@ o USB (drivers/usbdev, drivers/usbhost)
               - When the cable connecting the STM3110E-EVAL device is
                 removed, the software on the Olimex LPC1766STK crashes.  The
                 crash is due to corruption of the OHCI bDoneHead pointer.
+                This might be an related to the use of 'cat /dev/ttyACM0'?
 
-               Most of these problems are unique to the Olimex LPC1766STK DCD; some are probably design problems in the CDC/ACM host driver.  The bottom line is that the host CDC/ACM driver is immature and you should probably not use it unless you want to invest some effort.
+               Most of these problems are unique to the Olimex LPC1766STK
+               DCD; some are probably design problems in the CDC/ACM host
+               driver.  The bottom line is that the host CDC/ACM driver is
+               immature and you should probably not use it unless you want
+               to invest some effort.
   Status:      Open
   Priority:    Medium-Low unless you really need host CDC/ACM support.
 

@@ -96,18 +96,60 @@ config USBHOST_CDCACM
 
 if USBHOST_CDCACM
 
+choice
+	prompt "CDC/ACM Protocol"
+	default USBHOST_CDCACM_COMPLIANT if SERIAL_OFLOWCONTROL && !USBHOST_INT_DISABLE
+	default USBHOST_CDCACM_REDUCED  if !SERIAL_OFLOWCONTROL || USBHOST_INT_DISABLE
+
+config USBHOST_CDCACM_COMPLIANT
+	bool "CDC/ACM compliant"
+	depends on SERIAL_OFLOWCONTROL && !USBHOST_INT_DISABLE
+	---help---
+		The device needs to implement the Abstract Control Model (ACM)
+		subclass defined in the USB Communication Device Class (CDC)
+		specification. This protocol requires two USB interfaces, a data
+		interface which consists of two endpoints (bulk in + bulk out) and a
+		control interface which consists of one interrupt in endpoint.
+		Furthermore, on EP0 the device must implement the class-specific
+		requests defined by the CDC specification. Because this USB protocol
+		is compliant to the CDC/ACM standard on some other operating systems
+		(e.g. Linux, MacOS) the device can work with in-box drivers.
+
+config USBHOST_CDCACM_REDUCED
+	bool "CDC/ACM reduced"
+	---help---
+		This mode uses the CDC data interface (bulk in + bulk out endpoint)
+		only. No control interface (interrupt in endpoint) is required. The
+		device needs to implement the CDC class-specific requests, so that
+		is still possible to support baud rate settings and serial control/
+		status lines. This mode is useful if the number of available
+		endpoints is limited by hardware restrictions.
+
+		If the the CDC/ACM compliant protocol is selected, then the reduced
+		protocol is supported for devices that provide not interrupt IN
+		endpoint.  This option is then most useful for testing purposes or
+		if there are insufficient resources to support the compliant
+		protocol.   The interrupt IN control interface will not be used even
+		if it is available in this case.
+
 config USBHOST_CDCACM_BULKONLY
 	bool "Bulk only protocol"
 	default n
 	---help---
-		Support only the CDC/ACM data interface (bulk in + bulk out).  This
-		works with devices that have no  additional control interface and
-		even if the device provides the control interface, it will not be
-		used.
+		The device implements only the data interface (bulk in + bulk out
+		endpoint). The device does not provide an additional control
+		interface and does not need to implement any class-specific requests
+		on EP0. Because bulk transfer mode provides flow control, there is
+		no need to support serial control/status lines. The advantage of
+		the bulk-only protocol is that the implementation efforts on the
+		device side are reduced to a minimum.
 
-		By default, both the CDC/ACM compliant protocol and the bulk only
+		By default, both the CDC/ACM compliant protocol and the reduced
 		protocol are supported.  This option is then most useful for testing
-		purposes.
+		purposes.  The interrupt IN control interface will not be used even
+		if it is available; nor will EP0 class requestes.
+
+endchoice # CDC/ACM Protocol
 
 config USBHOST_CDCACM_NTDELAY
 	int "CDC/ACM notification polling interval (MSec)"

@@ -99,7 +99,6 @@
 #  warning Asynchronous transfer support is required (CONFIG_USBHOST_ASYNCH)
 #endif
 
-
 #ifdef CONFIG_USBHOST_CDCACM_NTDELAY
 #  define USBHOST_CDCACM_NTDELAY MSEC2TICK(CONFIG_USBHOST_CDCACM_NTDELAY)
 #else
@@ -116,6 +115,23 @@
 #  define USBHOST_CDCACM_TXDELAY MSEC2TICK(CONFIG_USBHOST_CDCACM_TXDELAY)
 #else
 #  define USBHOST_CDCACM_TXDELAY MSEC2TICK(200)
+#endif
+
+/* Supported protocol */
+
+#define HAVE_CLASS_REQUESTS 1
+#define HAVE_INTIN_ENDPOINT 1
+#define HAVE_CTRL_INTERFACE 1
+
+#if defined(CONFIG_USBHOST_CDCACM_REDUCED)
+#  undef CONFIG_USBHOST_CDCACM_BULKONLY
+#  undef CONFIG_USBHOST_CDCACM_COMPLIANT
+#  undef HAVE_INTIN_ENDPOINT
+#elif defined(CONFIG_USBHOST_CDCACM_BULKONLY)
+#  undef CONFIG_USBHOST_CDCACM_COMPLIANT
+#  undef HAVE_CLASS_REQUESTS
+#  undef HAVE_INTIN_ENDPOINT
+#  undef HAVE_CTRL_INTERFACE
 #endif
 
 /* If the create() method is called by the USB host device driver from an
@@ -174,9 +190,15 @@
 #define USBHOST_BULKIN_FOUND   0x02      /* Bulk IN interface found */
 #define USBHOST_BULKOUT_FOUND  0x04      /* Bulk OUT interface found */
 
-#ifdef CONFIG_USBHOST_CDCACM_BULKONLY
+#if defined(CONFIG_USBHOST_CDCACM_BULKONLY)
 #  define USBHOST_MINFOUND     0x07      /* Minimum things needed */
 #  define USBHOST_ALLFOUND     0x07      /* All configuration things */
+#elif defined(CONFIG_USBHOST_CDCACM_REDUCED)
+#  define USBHOST_CTRLIF_FOUND 0x08      /* Control interface found */
+
+#  define USBHOST_MINFOUND     0x07      /* Minimum things needed */
+#  define USBHOST_HAVE_CTRLIF  0x08      /* Needed for control interface */
+#  define USBHOST_ALLFOUND     0x0f      /* All configuration things */
 #else
 #  define USBHOST_CTRLIF_FOUND 0x08      /* Control interface found */
 #  define USBHOST_INTIN_FOUND  0x10      /* Interrupt IN interface found */
@@ -229,7 +251,7 @@ struct usbhost_cdcacm_s
 #endif
   uint8_t        minor;          /* Minor number identifying the /dev/ttyACM[n] device */
   uint8_t        dataif;         /* Data interface number */
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
   uint8_t        ctrlif;         /* Control interface number */
 #endif
   uint8_t        nbits;          /* Number of bits (for line encoding) */
@@ -251,7 +273,7 @@ struct usbhost_cdcacm_s
   uint32_t       baud;           /* Current baud for line coding */
   usbhost_ep_t   bulkin;         /* Bulk IN endpoint */
   usbhost_ep_t   bulkout;        /* Bulk OUT endpoint */
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   usbhost_ep_t   intin;          /* Interrupt IN endpoint (optional) */
 #endif
 
@@ -291,10 +313,12 @@ static inline void usbhost_mkdevname(FAR struct usbhost_cdcacm_s *priv,
 
 /* CDC/ACM request helpers */
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
 static int  usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv);
+#ifdef HAVE_INTIN_ENDPOINT
 static void usbhost_notification_work(FAR void *arg);
 static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes);
+#endif
 #endif
 
 /* UART buffer data transfer */
@@ -316,7 +340,7 @@ static int  usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static inline uint16_t usbhost_getbe16(const uint8_t *val);
 static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
 static void usbhost_putle32(uint8_t *dest, uint32_t val);
 #endif
 
@@ -624,7 +648,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_cdcacm_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
 static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
 {
   FAR struct usbhost_hubport_s *hport;
@@ -682,7 +706,7 @@ static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
 static void usbhost_notification_work(FAR void *arg)
 {
   FAR struct usbhost_cdcacm_s *priv;
@@ -773,7 +797,7 @@ static void usbhost_notification_work(FAR void *arg)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
 static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)arg;
@@ -1137,9 +1161,9 @@ static void usbhost_rxdata_work(FAR void *arg)
    */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->rxena && priv->rts)
+  if (priv->rxena && priv->rts && work_available(&priv->rxwork))
 #else
-  if (priv->rxena)
+  if (priv->rxena && work_available(&priv->rxwork))
 #endif
     {
       /* Schedule RX data reception work flow to occur after a delay.
@@ -1148,7 +1172,6 @@ static void usbhost_rxdata_work(FAR void *arg)
        * work when the upper layer demands more data.
        */
 
-      DEBUGASSERT(work_available(&priv->rxwork));
       ret = work_queue(LPWORK, &priv->rxwork, usbhost_rxdata_work, priv,
                        USBHOST_CDCACM_RXDELAY);
       DEBUGASSERT(ret >= 0);
@@ -1213,7 +1236,7 @@ static void usbhost_destroy(FAR void *arg)
       DRVR_EPFREE(hport->drvr, priv->bulkin);
     }
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   if (priv->intin)
     {
       DRVR_EPFREE(hport->drvr, priv->intin);
@@ -1348,7 +1371,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                 found        |= USBHOST_DATAIF_FOUND;
                 currif        = USBHOST_DATAIF_FOUND;
               }
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
             else if (ifdesc->classid == USB_CLASS_CDC &&
                      (found & USBHOST_CTRLIF_FOUND) == 0)
               {
@@ -1447,7 +1470,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                   }
               }
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
             /* Check for an interrupt IN endpoint. */
 
             else if (currif == USBHOST_CTRLIF_FOUND &&
@@ -1457,6 +1480,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
                 if (USB_ISEPIN(epdesc->addr))
                   {
+#ifdef HAVE_INTIN_ENDPOINT
                     /* It is an IN interrupt endpoint.  There should be only one
                      * interrupt IN endpoint.
                      */
@@ -1487,6 +1511,9 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
                     uvdbg("Interrupt IN EP addr:%d mxpacketsize:%d\n",
                           boutdesc.addr, boutdesc.mxpacketsize);
+#else
+                    found |= USBHOST_CTRLIF_FOUND;
+#endif
                   }
               }
 #endif
@@ -1545,7 +1572,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
       return ret;
     }
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   /* The control interface with interrupt IN endpoint is optional */
 
   if ((found & USBHOST_HAVE_CTRLIF) == USBHOST_HAVE_CTRLIF)
@@ -1637,7 +1664,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
 static void usbhost_putle32(uint8_t *dest, uint32_t val)
 {
   /* Little endian means LS halfword first in byte stream */
@@ -1694,7 +1721,7 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
       goto errout;
     }
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   /* Allocate (optional) buffer for receiving line status data. */
 
   if (priv->intin)
@@ -1973,7 +2000,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       goto errout;
     }
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
   /* Send the initial line encoding */
 
   ret = usbhost_linecoding_send(priv);
@@ -1996,7 +2023,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
       goto errout;
     }
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   /* Do we have an interrupt IN endpoint? */
 
   if (priv->intin)
@@ -2061,13 +2088,13 @@ errout:
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)usbclass;
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   FAR struct usbhost_hubport_s *hport;
 #endif
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   DEBUGASSERT(priv->usbclass.hport != NULL);
   hport = priv->usbclass.hport;
 #endif
@@ -2079,7 +2106,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
   flags              = irqsave();
   priv->disconnected = true;
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_INTIN_ENDPOINT
   /* Cancel any pending asynchronous I/O */
 
   if (priv->intin)
@@ -2439,7 +2466,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               }
 #endif
 
-#ifndef CONFIG_USBHOST_CDCACM_BULKONLY
+#ifdef HAVE_CTRL_INTERFACE
             /* Effect the changes immediately - note that we do not implement
              * TCSADRAIN / TCSAFLUSH
              */
@@ -2500,10 +2527,9 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
        */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->rts)
+      if (priv->rts && work_available(&priv->rxwork))
 #endif
         {
-          DEBUGASSERT(work_available(&priv->rxwork));
           ret = work_queue(LPWORK, &priv->rxwork,
                            usbhost_rxdata_work, priv, 0);
           DEBUGASSERT(ret >= 0);
@@ -2613,9 +2639,8 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * disabled.
        */
 
-      if (priv->rxena)
+      if (priv->rxena && work_available(&priv->rxwork))
         {
-          DEBUGASSERT(work_available(&priv->rxwork));
           ret = work_queue(LPWORK, &priv->rxwork,
                            usbhost_rxdata_work, priv, 0);
           DEBUGASSERT(ret >= 0);

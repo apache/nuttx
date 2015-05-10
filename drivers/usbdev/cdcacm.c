@@ -693,6 +693,7 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
       goto errout;
     }
+
   priv->epintin->priv = priv;
 
   /* Configure the IN bulk endpoint */
