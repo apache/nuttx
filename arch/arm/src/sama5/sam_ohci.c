@@ -2167,7 +2167,7 @@ static void sam_wdh_bottomhalf(void)
         {
           /* Set the (fake) CBP to the end of the buffer + 1 */
 
-          tmp = xfrinfo->buflen;
+          tmp = eplist->buflen;
         }
       else
         {
