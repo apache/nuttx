@@ -1126,17 +1126,6 @@ o USB (drivers/usbdev, drivers/usbhost)
                 the RX reception logic probably should be moved to its own
                 dedicated thread.
 
-              - When the cable connecting the STM3110E-EVAL device is
-                removed, the software on the Olimex LPC1766STK crashes.  The
-                crash is due to corruption of the OHCI bDoneHead pointer.
-
-                This is related to the use of 'cat /dev/ttyACM0' which is
-                trying to read from CDC/ACM while the device is being
-                removed.  If I skip the 'cat /dev/ttyACM0', then the
-                crash does not occur when the cable is removed.
-
-                UPDATE: A similar crash occurs on the SAMA5Dx OCHI driver.
-                Both the LPC17 and the SAMA5Dx are OHCI drivers.
 
                Most of these problems are unique to the Olimex LPC1766STK
                DCD; some are probably design problems in the CDC/ACM host
