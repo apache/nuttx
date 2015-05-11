@@ -427,8 +427,8 @@ static ssize_t sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
          FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
          FAR void *arg);
-static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
+static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(FAR struct usbhost_driver_s *drvr,
          FAR struct usbhost_hubport_s *hport, bool connected);
@@ -4302,8 +4302,8 @@ errout_with_sem:
  * Name: sam_cancel
  *
  * Description:
- *   Cancel a pending asynchronous transfer on an endpoint.  Cancelled synchronous
- *   or asynchronous transfer will complete normally with the error -ESHUTDOWN.
+ *   Cancel a pending transfer on an endpoint.  Cancelled synchronous or
+ *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -4317,13 +4317,14 @@ errout_with_sem:
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST_ASYNCH
 static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep;
   struct sam_qh_s *qh;
+#ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t callback;
   void *arg;
+#endif
   uint32_t *bp;
   irqstate_t flags;
   bool iocwait;
@@ -4345,12 +4346,16 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    */
 
   flags = irqsave();
+#ifdef CONFIG_USBHOST_ASYNCH
   callback         = epinfo->callback;
   arg              = epinfo->arg;
+#endif
   iocwait          = epinfo->iocwait;
 
+#ifdef CONFIG_USBHOST_ASYNCH
   epinfo->callback = NULL;
   epinfo->arg      = NULL;
+#endif
   epinfo->iocwait  = false;
   irqrestore(flags);
 
@@ -4440,10 +4445,13 @@ exit_terminate:
     {
       /* Yes... wake it up */
 
+#ifdef CONFIG_USBHOST_ASYNCH
       DEBUGASSERT(callback == NULL);
+#endif
       sam_givesem(&epinfo->iocsem);
     }
 
+#ifdef CONFIG_USBHOST_ASYNCH
   /* No.. Is there a pending asynchronous transfer? */
 
   else if (callback != NULL)
@@ -4452,12 +4460,12 @@ exit_terminate:
 
       callback(arg, -ESHUTDOWN);
     }
+#endif
 
 errout_with_sem:
   sam_givesem(&g_ehci.exclsem);
   return ret;
 }
-#endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
  * Name: sam_connect
@@ -4808,8 +4816,8 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->drvr.transfer       = sam_transfer;
 #ifdef CONFIG_USBHOST_ASYNCH
       rhport->drvr.asynch         = sam_asynch;
-      rhport->drvr.cancel         = sam_cancel;
 #endif
+      rhport->drvr.cancel         = sam_cancel;
 #ifdef CONFIG_USBHOST_HUB
       rhport->drvr.connect        = sam_connect;
 #endif

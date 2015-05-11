@@ -552,8 +552,8 @@
  * Name: DRVR_CANCEL
  *
  * Description:
- *   Cancel a pending asynchronous transfer on an endpoint.  Cancelled synchronous
- *   or asynchronous transfer will complete normally with the error -ESHUTDOWN.
+ *   Cancel a pending transfer on an endpoint.  Cancelled synchronous or
+ *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -567,9 +567,7 @@
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST_ASYNCH
-#  define DRVR_CANCEL(drvr,ep) ((drvr)->cancel(drvr,ep))
-#endif
+#define DRVR_CANCEL(drvr,ep) ((drvr)->cancel(drvr,ep))
 
 /************************************************************************************
  * Name: DRVR_CONNECT
@@ -895,11 +893,9 @@ struct usbhost_driver_s
                 usbhost_asynch_t callback, FAR void *arg);
 #endif
 
-#ifdef CONFIG_USBHOST_ASYNCH
-  /* Cancel any pending asynchronous transfer on an endpoint */
+  /* Cancel any pending syncrhonous or asynchronous transfer on an endpoint */
 
   int (*cancel)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
-#endif
 
 #ifdef CONFIG_USBHOST_HUB
   /* New connections may be detected by an attached hub.  This method is the

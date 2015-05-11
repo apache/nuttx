@@ -448,8 +448,8 @@ static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
 static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen,
                         usbhost_asynch_t callback, FAR void *arg);
-static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
+static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int stm32_connect(FAR struct usbhost_driver_s *drvr,
                          FAR struct usbhost_hubport_s *hport,
@@ -4610,8 +4610,8 @@ static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  * Name: stm32_cancel
  *
  * Description:
- *   Cancel a pending asynchronous transfer on an endpoint.  Cancelled synchronous
- *   or asynchronous transfer will complete normally with the error -ESHUTDOWN.
+ *   Cancel a pending transfer on an endpoint.  Cancelled synchronous or
+ *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -4625,7 +4625,6 @@ static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST_ASYNCH
 static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   FAR struct stm32_usbhost_s *priv  = (FAR struct stm32_usbhost_s *)drvr;
@@ -4655,9 +4654,11 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   if (chan->waiter)
     {
+#ifdef CONFIG_USBHOST_ASYNCH
       /* Yes.. there should not also be a callback scheduled */
 
       DEBUGASSERT(chan->callback == NULL);
+#endif
 
       /* Wake'em up! */
 
@@ -4665,6 +4666,7 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       chan->waiter = false;
     }
 
+#ifdef CONFIG_USBHOST_ASYNCH
   /* No.. is an asynchronous callback expected when the transfer
    * completes?
    */
@@ -4687,6 +4689,7 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
       callback(arg, -ESHUTDOWN);
     }
+#endif
 
   irqrestore(flags);
   stm32_givesem(&priv->exclsem);
@@ -5063,8 +5066,8 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
   drvr->transfer       = stm32_transfer;
 #ifdef CONFIG_USBHOST_ASYNCH
   drvr->asynch         = stm32_asynch;
-  drvr->cancel         = stm32_cancel;
 #endif
+  drvr->cancel         = stm32_cancel;
 #ifdef CONFIG_USBHOST_HUB
   drvr->connect        = stm32_connect;
 #endif
