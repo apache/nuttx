@@ -453,8 +453,8 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist);
 static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                       uint8_t *buffer, size_t buflen,
                       usbhost_asynch_t callback, void *arg);
-static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #endif
+static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(struct usbhost_driver_s *drvr,
                        struct usbhost_hubport_s *hport,
@@ -3605,8 +3605,8 @@ errout:
  * Name: sam_cancel
  *
  * Description:
- *   Cancel a pending asynchronous transfer on an endpoint.  Cancelled synchronous
- *   or asynchronous transfer will complete normally with the error -ESHUTDOWN.
+ *   Cancel a pending transfer on an endpoint.  Cancelled synchronous or
+ *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -3620,7 +3620,6 @@ errout:
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST_ASYNCH
 static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;
@@ -3641,7 +3640,11 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * and wdhwait == false)
    */
 
+#ifdef CONFIG_USBHOST_ASYNCH
   if (eplist->callback || eplist->wdhwait)
+#else
+  if (eplist->wdhwait)
+#endif
     {
       /* We really need some kind of atomic test and set to do this right */
 
@@ -3670,35 +3673,40 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
       if (eplist->wdhwait)
         {
+#ifdef CONFIG_USBHOST_ASYNCH
           /* Yes.. there should not also be a callback scheduled */
 
           DEBUGASSERT(eplist->callback == NULL);
+#endif
 
           /* Wake up the waiting thread */
 
           sam_givesem(&eplist->wdhsem);
           eplist->wdhwait = false;
         }
+#ifdef CONFIG_USBHOST_ASYNCH
       else
         {
           /* Otherwise, perform the callback */
 
           sam_asynch_completion(eplist);
         }
+#endif
     }
 
   /* Reset any pending activity indications */
 
   eplist->wdhwait  = false;
+#ifdef CONFIG_USBHOST_ASYNCH
   eplist->callback = NULL;
   eplist->arg      = NULL;
+#endif
   eplist->buffer   = NULL;
   eplist->buflen   = 0;
 
   irqrestore(flags);
   return OK;
 }
-#endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
  * Name: sam_connect
@@ -3970,8 +3978,8 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
       rhport->drvr.transfer       = sam_transfer;
 #ifdef CONFIG_USBHOST_ASYNCH
       rhport->drvr.asynch         = sam_asynch;
-      rhport->drvr.cancel         = sam_cancel;
 #endif
+      rhport->drvr.cancel         = sam_cancel;
 #ifdef CONFIG_USBHOST_HUB
       rhport->drvr.connect        = sam_connect;
 #endif
