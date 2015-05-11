@@ -164,7 +164,7 @@ struct tcp_conn_s
   sq_queue_t unacked_q;   /* Write buffering for un-ACKed segments */
   uint16_t   expired;     /* Number segments retransmitted but not yet ACKed,
                            * it can only be updated at TCP_ESTABLISHED state */
-  uint16_t   sent;        /* The number of bytes sent (ACKed and un-ACKed) */
+  uint32_t   sent;        /* The number of bytes sent (ACKed and un-ACKed) */
   uint32_t   isn;         /* Initial sequence number */
 #endif
 
