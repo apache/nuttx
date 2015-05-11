@@ -3669,6 +3669,12 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
       if (eplist->wdhwait)
         {
+          /* Yes.. there should not also be a callback scheduled */
+
+          DEBUGASSERT(eplist->callback == NULL);
+
+          /* Wake up the waiting thread */
+
           sam_givesem(&eplist->wdhsem);
           eplist->wdhwait = false;
         }
