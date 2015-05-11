@@ -4359,6 +4359,18 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   epinfo->iocwait  = false;
   irqrestore(flags);
 
+  /* Bail if there is no transfer in progress for this endpoint */
+
+#ifdef CONFIG_USBHOST_ASYNCH
+  if (callback == NULL && !iocwait)
+#else
+  if (!iocwait)
+#endif
+    {
+      ret = OK;
+      goto errout_with_sem;
+    }
+
   /* Handle the cancellation according to the type of the transfer */
 
   switch (epinfo->xfrtype)
@@ -4441,25 +4453,28 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
 exit_terminate:
   epinfo->result = -ESHUTDOWN;
+#ifdef CONFIG_USBHOST_ASYNCH
   if (iocwait)
     {
       /* Yes... wake it up */
 
-#ifdef CONFIG_USBHOST_ASYNCH
       DEBUGASSERT(callback == NULL);
-#endif
       sam_givesem(&epinfo->iocsem);
     }
 
-#ifdef CONFIG_USBHOST_ASYNCH
   /* No.. Is there a pending asynchronous transfer? */
 
-  else if (callback != NULL)
+  else /* if (callback != NULL) */
     {
       /* Yes.. perform the callback */
 
       callback(arg, -ESHUTDOWN);
     }
+
+#else
+  /* Wake up the waiting thread */
+
+  sam_givesem(&epinfo->iocsem);
 #endif
 
 errout_with_sem:
