@@ -10340,3 +10340,7 @@
 	  Greg Meiste (2015-05-09).
 	* arch/arm/src/stm32/chip/stm32_exti.h: Add EXTI line definitions for
 	  the STM32L family (2015-05-09).
+	* net/tcp/tcp.h:  Correct failures in long Telnet sessions by increasing
+	  the size of the number of bytes sent from uint16_t to uint32_t.  This
+	  avoids an integer overflow that causes a Telnet sessions to be closed
+	  unexpectedly.  From Rony XLN (2015-05-12).
