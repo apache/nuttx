@@ -1877,14 +1877,14 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
            * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case becasue the then the transfer
+           * We can detect this latter case because the then the transfer
            * buffer pointer and buffer size will be unaltered.
            */
 
           elapsed = clock_systimer() - start;
-          if (ret != -EAGAIN ||                       /* Not a NAK condition OR */
-              elapsed >= STM32_DATANAK_DELAY ||       /* Timeout has elapsed OR */
-              chan->xfrd > 0)                         /* Data has been partially transferred */
+          if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
+              elapsed >= STM32_DATANAK_DELAY ||  /* Timeout has elapsed OR */
+              chan->xfrd > 0)                    /* Data has been partially transferred */
             {
               /* Break out and return the error */
 
@@ -2143,14 +2143,14 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
            * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case becasue the then the transfer
+           * We can detect this latter case because the then the transfer
            * buffer pointer and buffer size will be unaltered.
            */
 
           elapsed = clock_systimer() - start;
-          if (ret != -EAGAIN ||                     /* Not a NAK condition OR */
-              elapsed >= STM32_DATANAK_DELAY ||     /* Timeout has elapsed OR */
-              chan->xfrd != xfrlen)                 /* Data has been partially transferred */
+          if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
+              elapsed >= STM32_DATANAK_DELAY ||  /* Timeout has elapsed OR */
+              chan->xfrd > 0)                    /* Data has been partially transferred */
             {
               /* Break out and return the error */
 
