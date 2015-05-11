@@ -906,13 +906,13 @@ static void usbhost_txdata_work(FAR void *arg)
       return;
     }
 
-  /* Loop until The UART TX buffer is empty */
+  /* Loop until The UART TX buffer is empty (or we become disconnected) */
 
   txtail = txbuf->tail;
   nxfrd  = 0;
   txndx  = 0;
 
-  while (txtail != txbuf->head)
+  while (txtail != txbuf->head && !priv->disconnected)
     {
       /* Copy data from the UART TX buffer until either 1) the UART TX
        * buffer has been emptie, or 2) the Bulk OUT buffer is full.
@@ -1163,7 +1163,7 @@ static void usbhost_rxdata_work(FAR void *arg)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->rxena && priv->rts && work_available(&priv->rxwork))
 #else
-  if (priv->rxena && work_available(&priv->rxwork))
+  if (priv->rxena && work_available(&priv->rxwork) && !priv->disconnected)
 #endif
     {
       /* Schedule RX data reception work flow to occur after a delay.
@@ -2088,16 +2088,12 @@ errout:
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)usbclass;
-#ifdef HAVE_INTIN_ENDPOINT
   FAR struct usbhost_hubport_s *hport;
-#endif
   irqstate_t flags;
+  int ret;
 
-  DEBUGASSERT(priv != NULL);
-#ifdef HAVE_INTIN_ENDPOINT
-  DEBUGASSERT(priv->usbclass.hport != NULL);
+  DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
   hport = priv->usbclass.hport;
-#endif
 
   /* Set an indication to any users of the CDC/ACM device that the device
    * is no longer available.
@@ -2105,6 +2101,20 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
   flags              = irqsave();
   priv->disconnected = true;
+
+  /* Cancel any ongoing Bulk transfers */
+
+  ret = DRVR_CANCEL(hport->drvr, priv->bulkin);
+  if (ret < 0)
+    {
+     udbg("ERROR: Bulk IN DRVR_CANCEL failed: %d\n", ret);
+    }
+
+  ret = DRVR_CANCEL(hport->drvr, priv->bulkout);
+  if (ret < 0)
+    {
+     udbg("ERROR: Bulk OUT DRVR_CANCEL failed: %d\n", ret);
+    }
 
 #ifdef HAVE_INTIN_ENDPOINT
   /* Cancel any pending asynchronous I/O */
@@ -2114,7 +2124,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
       int ret = DRVR_CANCEL(hport->drvr, priv->intin);
       if (ret < 0)
         {
-         udbg("ERROR: DRVR_CANCEL failed: %d\n", ret);
+         udbg("ERROR: Interrupt IN DRVR_CANCEL failed: %d\n", ret);
         }
     }
 #endif
@@ -2142,7 +2152,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
           DEBUGASSERT(work_available(&priv->ntwork));
           (void)work_queue(HPWORK, &priv->ntwork, usbhost_destroy, priv, 0);
-       }
+        }
       else
         {
           /* Do the work now */
