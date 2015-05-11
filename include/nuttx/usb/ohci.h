@@ -344,6 +344,8 @@
 #define TD_CC_BUFFERUNDERRUN       0x0d
 #define TD_CC_NOTACCESSED          0x0f
 
+#define TD_CC_USER                 0x10      /* For use by OHCI drivers */
+
 /* Host Controller Communications Area Format (4.4.1) ***********************/
 
 /* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */

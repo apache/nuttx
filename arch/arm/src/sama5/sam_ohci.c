@@ -1914,7 +1914,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
         {
           usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, RHPORT(rhport),
                          edctrl->tdstatus);
-          ret = -EIO;
+          ret = edctrl->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
 
@@ -3389,7 +3389,20 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   /* A transfer error occurred */
 
   usbhost_trace2(OHCI_TRACE2_BADTDSTATUS, RHPORT(rhport), ed->tdstatus);
-  ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
+  switch (ed->tdstatus)
+    {
+    case TD_CC_STALL:
+      ret = -EPERM;
+      break;
+
+    case TD_CC_USER:
+      ret = -ESHUTDOWN;
+      break;
+
+    default:
+      ret = -EIO;
+      break;
+    }
 
 errout:
   /* Make sure that there is no outstanding request on this endpoint */
@@ -3455,8 +3468,26 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist)
     }
   else
     {
+      /* Map the bad completion status to something that a class driver
+       * might understand.
+       */
+
       usbhost_trace1(OHCI_TRACE1_BADTDSTATUS, ed->tdstatus);
-      nbytes = (ed->tdstatus == TD_CC_STALL) ? -EPERM : -EIO;
+
+      switch (ed->tdstatus)
+        {
+        case TD_CC_STALL:
+          nbytes = -EPERM;
+          break;
+
+        case TD_CC_USER:
+          nbytes = -ESHUTDOWN;
+          break;
+
+        default:
+          nbytes = -EIO;
+          break;
+        }
     }
 
   /* Extract the callback information before freeing the buffer */
@@ -3605,18 +3636,11 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   flags  = irqsave();
 
-  /* It might be possible for no transfer to be in progress (callback == NULL),
-   * but it would be an usage error to use the interface to try to cancel a
-   * synchronous transfer (wdhwait == true).
+  /* It might be possible for no transfer to be in progress (callback == NULL
+   * and wdhwait == false)
    */
 
-  DEBUGASSERT(eplist->wdhwait == false);
-  if (eplist->wdhwait)
-    {
-      return -EINVAL;
-    }
-
-  if (eplist->callback)
+  if (eplist->callback || eplist->wdhwait)
     {
       /* We really need some kind of atomic test and set to do this right */
 
@@ -3635,6 +3659,24 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
           next  = (struct sam_gtd_s *)sam_virtramaddr(paddr);
           sam_tdfree(td);
           td    = next;
+        }
+
+      ed->tdstatus = TD_CC_USER;
+
+      /* If there is a thread waiting for the transfer to complete, then
+       * wake up the thread.
+       */
+
+      if (eplist->wdhwait)
+        {
+          sam_givesem(&eplist->wdhsem);
+          eplist->wdhwait = false;
+        }
+      else
+        {
+          /* Otherwise, perform the callback */
+
+          sam_asynch_completion(eplist);
         }
     }
 

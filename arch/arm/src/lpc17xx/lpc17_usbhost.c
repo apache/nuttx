@@ -1568,7 +1568,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed,
         }
       else
         {
-          uvdbg("Bad TD completion status: %d\n", xfrinfo->tdstatus);
+          udbg("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
           ret = xfrinfo->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
@@ -2957,10 +2957,26 @@ static ssize_t lpc17_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
     }
   else
     {
-      /* Return an I/O error */
+      /* Map the bad completion status to something that a class driver
+       * might understand.
+       */
 
       udbg("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
-      nbytes = -EIO;
+
+      switch (xfrinfo->tdstatus)
+        {
+        case TD_CC_STALL:
+          nbytes = -EPERM;
+          break;
+
+        case TD_CC_USER:
+          nbytes = -ESHUTDOWN;
+          break;
+
+        default:
+          nbytes = -EIO;
+          break;
+        }
      }
 
 errout_with_wdhwait:
@@ -3031,10 +3047,26 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
     }
   else
     {
-      /* Provide an I/O error indication */
+      /* Map the bad completion status to something that a class driver
+       * might understand.
+       */
 
       udbg("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
-      nbytes = -EIO;
+
+      switch (xfrinfo->tdstatus)
+        {
+        case TD_CC_STALL:
+          nbytes = -EPERM;
+          break;
+
+        case TD_CC_USER:
+          nbytes = -ESHUTDOWN;
+          break;
+
+        default:
+          nbytes = -EIO;
+          break;
+        }
      }
 
 #if LPC17_IOBUFFERS > 0
@@ -3209,14 +3241,14 @@ errout_with_sem:
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
   struct lpc17_gtd_s *td;
   struct lpc17_gtd_s *next;
   struct lpc17_xfrinfo_s *xfrinfo;
   irqstate_t flags;
-  int ret = OK;
 
-  DEBUGASSERT(ed != NULL);
+  DEBUGASSERT(priv != NULL && ed != NULL);
 
   /* These first steps must be atomic as possible */
 
@@ -3227,40 +3259,66 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   xfrinfo = ed->xfrinfo;
   if (xfrinfo)
     {
-      /* It would be an usage error to use the interface to try to cancel a
-       * synchronous transfer (wdhwait == true).
+      /* It might be possible for no transfer to be in progress (callback == NULL
+       * and wdhwait == false)
        */
 
-      DEBUGASSERT(xfrinfo->wdhwait == false);
-
-      /* We really need some kind of atomic test and set to do this right */
-
-      td           = (struct lpc17_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
-      ed->hw.headp = LPC17_TDTAIL_ADDR;
-      ed->xfrinfo  = NULL;
-
-      /* Free all transfer descriptors that were connected to the ED */
-
-      DEBUGASSERT(td != (struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR);
-      while (td != (struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR)
+      if (xfrinfo->callback || xfrinfo->wdhwait)
         {
-          next = (struct lpc17_gtd_s *)td->hw.nexttd;
-          lpc17_tdfree(td);
-          td = next;
+          /* We really need some kind of atomic test and set to do this right */
+
+          td           = (struct lpc17_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
+          ed->hw.headp = LPC17_TDTAIL_ADDR;
+          ed->xfrinfo  = NULL;
+
+          /* Free all transfer descriptors that were connected to the ED */
+
+          DEBUGASSERT(td != (struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR);
+          while (td != (struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR)
+            {
+              next = (struct lpc17_gtd_s *)td->hw.nexttd;
+              lpc17_tdfree(td);
+              td = next;
+            }
+
+          xfrinfo->tdstatus = TD_CC_USER;
+
+          /* If there is a thread waiting for the transfer to complete, then
+           * wake up the thread.
+           */
+
+          if (xfrinfo->wdhwait)
+            {
+              /* Wake up the waiting thread */
+
+              lpc17_givesem(&ed->wdhsem);
+              xfrinfo->wdhwait = false;
+
+               /* And free the transfer structure */
+
+              lpc17_free_xfrinfo(xfrinfo);
+              ed->xfrinfo = NULL;
+            }
+          else
+            {
+              /* Otherwise, perform the callback and free the transfer structure */
+
+              lpc17_asynch_completion(priv, ed);
+            }
         }
+      else
+        {
+           /* Just free the transfer structure */
 
-      ret = xfrinfo->wdhwait ? -EINVAL : OK;
-
-      /* Free the transfer structure */
-
-      lpc17_free_xfrinfo(xfrinfo);
-      ed->xfrinfo = NULL;
+          lpc17_free_xfrinfo(xfrinfo);
+          ed->xfrinfo = NULL;
+        }
     }
 
   /* Determine the return value */
 
   irqrestore(flags);
-  return ret;
+  return OK;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
