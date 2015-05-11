@@ -552,7 +552,8 @@
  * Name: DRVR_CANCEL
  *
  * Description:
- *   Cancel a pending asynchronous transfer on an endpoint.
+ *   Cancel a pending asynchronous transfer on an endpoint.  Cancelled synchronous
+ *   or asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to

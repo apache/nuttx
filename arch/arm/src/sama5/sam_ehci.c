@@ -4302,7 +4302,8 @@ errout_with_sem:
  * Name: sam_cancel
  *
  * Description:
- *   Cancel a pending asynchronous transfer on an endpoint.
+ *   Cancel a pending asynchronous transfer on an endpoint.  Cancelled synchronous
+ *   or asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -4321,8 +4322,11 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep;
   struct sam_qh_s *qh;
+  usbhost_asynch_t callback;
+  void *arg;
   uint32_t *bp;
   irqstate_t flags;
+  bool iocwait;
   int ret;
 
   DEBUGASSERT(epinfo);
@@ -4334,23 +4338,20 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   sam_takesem(&g_ehci.exclsem);
 
-  /* If there is no asynchronous transfer in progress, then bail now */
+  /* Sample and reset all transfer termination information.  This will prevent any
+   * callbacks from occurring while are performing the cancellation.  The transfer
+   * may still be in progress, however, so this does not eliminate other DMA-
+   * related race conditions.
+   */
 
   flags = irqsave();
-  if (epinfo->callback == NULL)
-    {
-      ret = -EINVAL;
-      irqrestore(flags);
-      goto errout_with_sem;
-    }
-
-  /* This will prevent any callbacks from occurring while are performing
-   * the cancellation.  The transfer may still be in progress, however, so
-   * this does not eliminate other DMA-related race conditions.
-   */
+  callback         = epinfo->callback;
+  arg              = epinfo->arg;
+  iocwait          = epinfo->iocwait;
 
   epinfo->callback = NULL;
   epinfo->arg      = NULL;
+  epinfo->iocwait  = false;
   irqrestore(flags);
 
   /* Handle the cancellation according to the type of the transfer */
@@ -4376,7 +4377,8 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
             {
               /* Claim that we successfully cancelled the transfer */
 
-              return OK;
+              ret = OK;
+              goto exit_terminate;
             }
         }
         break;
@@ -4396,7 +4398,8 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
                * cancelled the transfer.
                */
 
-              return OK;
+              ret = OK;
+              goto exit_terminate;
             }
         }
         break;
@@ -4427,6 +4430,27 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
+    }
+
+  /* Was there a pending synchronous transfer? */
+
+exit_terminate:
+  epinfo->result = -ESHUTDOWN;
+  if (iocwait)
+    {
+      /* Yes... wake it up */
+
+      DEBUGASSERT(callback == NULL);
+      sam_givesem(&epinfo->iocsem);
+    }
+
+  /* No.. Is there a pending asynchronous transfer? */
+
+  else if (callback != NULL)
+    {
+      /* Yes.. perform the callback */
+
+      callback(arg, -ESHUTDOWN);
     }
 
 errout_with_sem:
