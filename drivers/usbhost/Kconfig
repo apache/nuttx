@@ -90,6 +90,7 @@ config USBHOST_CDCACM
 	default n
 	depends on USBHOST_HAVE_ASYNCH && !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE
 	select USBHOST_ASYNCH
+	select SERIAL_REMOVABLE
 	---help---
 		Select this option to build in host support for CDC/ACM serial
 		devices.

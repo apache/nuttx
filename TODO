@@ -1126,7 +1126,6 @@ o USB (drivers/usbdev, drivers/usbhost)
                 the RX reception logic probably should be moved to its own
                 dedicated thread.
 
-
                Most of these problems are unique to the Olimex LPC1766STK
                DCD; some are probably design problems in the CDC/ACM host
                driver.  The bottom line is that the host CDC/ACM driver is

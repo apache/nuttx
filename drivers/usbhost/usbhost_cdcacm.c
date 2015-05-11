@@ -99,6 +99,10 @@
 #  warning Asynchronous transfer support is required (CONFIG_USBHOST_ASYNCH)
 #endif
 
+#ifndef CONFIG_SERIAL_REMOVABLE
+#  warning Removable serial device support is required (CONFIG_SERIAL_REMOVABLE)
+#endif
+
 #ifdef CONFIG_USBHOST_CDCACM_NTDELAY
 #  define USBHOST_CDCACM_NTDELAY MSEC2TICK(CONFIG_USBHOST_CDCACM_NTDELAY)
 #else
@@ -2101,6 +2105,12 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
   flags              = irqsave();
   priv->disconnected = true;
+
+  /* Let the upper half driver know that serial device is no longer
+   * connected.
+   */
+
+  uart_connected(&priv->uartdev, false);
 
   /* Cancel any ongoing Bulk transfers */
 
