@@ -4628,11 +4628,14 @@ static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   FAR struct stm32_usbhost_s *priv  = (FAR struct stm32_usbhost_s *)drvr;
+  FAR struct stm32_chan_s *chan;
   unsigned int chidx = (unsigned int)ep;
   irqstate_t flags;
 
   uvdbg("chidx: %u: %d\n",  chidx);
+
   DEBUGASSERT(priv && chidx < STM32_MAX_TX_FIFOS);
+  chan = &priv->chan[chidx];
 
   /* We must have exclusive access to the USB host hardware and state structures.
    * And when we have that, we need to disable interrupts to avoid race conditions
@@ -4645,6 +4648,44 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   /* Halt the channel */
 
   stm32_chan_halt(priv, chidx, CHREASON_CANCELLED);
+  chan->result = -ESHUTDOWN;
+
+  /* Is there a thread waiting for this transfer to complete? */
+
+  if (chan->waiter)
+    {
+      /* Yes.. there should not also be a callback scheduled */
+
+      DEBUGASSERT(chan->callback == NULL);
+
+      /* Wake'em up! */
+
+      stm32_givesem(&chan->waitsem);
+      chan->waiter = false;
+    }
+
+  /* No.. is an asynchronous callback expected when the transfer
+   * completes?
+   */
+
+  else if (chan->callback)
+    {
+      usbhost_asynch_t callback;
+      FAR void *arg;
+
+      /* Extract the callback information */
+
+      callback       = chan->callback;
+      arg            = chan->arg;
+
+      chan->callback = NULL;
+      chan->arg      = NULL;
+      chan->xfrd     = 0;
+
+      /* Then perform the callback */
+
+      callback(arg, -ESHUTDOWN);
+    }
 
   irqrestore(flags);
   stm32_givesem(&priv->exclsem);

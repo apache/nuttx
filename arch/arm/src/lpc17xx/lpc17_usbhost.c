@@ -3289,6 +3289,10 @@ static int lpc17_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
           if (xfrinfo->wdhwait)
             {
+              /* Yes.. there should not also be a callback scheduled */
+
+              DEBUGASSERT(xfrinfo->callback == NULL);
+
               /* Wake up the waiting thread */
 
               lpc17_givesem(&ed->wdhsem);
