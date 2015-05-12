@@ -60,7 +60,7 @@ See the Atmel website for further information about this board:
 tatus/Open Issues
 =================
 
-I would characterize the general port as very mature and reliable.  However,
+I would characterize the general port as very mature and stable.  However,
 there are a number of issues, caveats, and unfinished drivers as detailed in
 the following paragraphs.
 
