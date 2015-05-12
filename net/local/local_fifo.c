@@ -80,8 +80,17 @@
 static inline void local_cs_name(FAR struct local_conn_s *conn,
                                  FAR char *path)
 {
-  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_CS_SUFFIX,
-                 conn->lc_path);
+  if (conn->lc_instance_id < 0)
+    {
+      (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_CS_SUFFIX,
+                     conn->lc_path);
+    }
+  else
+    {
+      (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_CS_SUFFIX "%x",
+                     conn->lc_path, conn->lc_instance_id);
+    }
+
   path[LOCAL_FULLPATH_LEN-1] = '\0';
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */
@@ -98,8 +107,17 @@ static inline void local_cs_name(FAR struct local_conn_s *conn,
 static inline void local_sc_name(FAR struct local_conn_s *conn,
                                  FAR char *path)
 {
-  (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_SC_SUFFIX,
-                 conn->lc_path);
+  if (conn->lc_instance_id < 0)
+    {
+      (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_SC_SUFFIX,
+                     conn->lc_path);
+    }
+  else
+    {
+      (void)snprintf(path, LOCAL_FULLPATH_LEN-1, "%s" LOCAL_SC_SUFFIX "%x",
+                     conn->lc_path, conn->lc_instance_id);
+    }
+
   path[LOCAL_FULLPATH_LEN-1] = '\0';
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */

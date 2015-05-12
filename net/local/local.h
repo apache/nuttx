@@ -143,6 +143,8 @@ struct local_conn_s
   int16_t lc_infd;             /* File descriptor of read-only FIFO (peers) */
   int16_t lc_outfd;            /* File descriptor of write-only FIFO (peers) */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
+  int32_t lc_instance_id;      /* Connection instance ID for stream
+                                * server<->client connection pair */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* SOCK_STREAM fields common to both client and server */

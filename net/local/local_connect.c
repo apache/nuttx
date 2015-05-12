@@ -60,6 +60,26 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: local_generate_instance_id
+ ****************************************************************************/
+
+static int32_t local_generate_instance_id(void)
+{
+  static int32_t g_next_instance_id = 0;
+  int32_t id;
+
+  /* Called from local_connect with net_lock held. */
+
+  id = g_next_instance_id++;
+  if (g_next_instance_id < 0)
+    {
+      g_next_instance_id = 0;
+    }
+
+  return id;
+}
+
+/****************************************************************************
  * Name: _local_semtake() and _local_semgive()
  *
  * Description:
@@ -286,6 +306,7 @@ int psock_local_connect(FAR struct socket *psock,
                 client->lc_proto = conn->lc_proto;
                 strncpy(client->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
                 client->lc_path[UNIX_PATH_MAX-1] = '\0';
+                client->lc_instance_id = local_generate_instance_id();
 
                 /* The client is now bound to an address */
 

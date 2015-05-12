@@ -170,6 +170,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
               strncpy(conn->lc_path, client->lc_path, UNIX_PATH_MAX-1);
               conn->lc_path[UNIX_PATH_MAX-1] = '\0';
+              conn->lc_instance_id = client->lc_instance_id;
 
               /* Open the server-side write-only FIFO.  This should not
                * block.
