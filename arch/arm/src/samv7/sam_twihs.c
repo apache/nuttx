@@ -597,21 +597,53 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       if (priv->xfrd >= msg->length)
         {
-          /* The transfer is complete.  Disable the RXRDY interrupt and
-           * enable the TXCOMP interrupt
+          struct i2c_msg_s *next = msg++;
+
+          /* Is there another message to after this one?  Does it require a
+           * restart?
            */
 
-          twi_putrel(priv, SAM_TWIHS_IDR_OFFSET, TWIHS_INT_RXRDY);
-          twi_putrel(priv, SAM_TWIHS_IER_OFFSET, TWIHS_INT_TXCOMP);
+          if (priv->msgc <= 1 || (next->flags & I2C_M_NORESTART) == 0)
+            {
+              /* The transfer is complete.  Disable the RXRDY interrupt and
+               * enable the TXCOMP interrupt
+               */
+
+              twi_putrel(priv, SAM_TWIHS_IDR_OFFSET, TWIHS_INT_RXRDY);
+              twi_putrel(priv, SAM_TWIHS_IER_OFFSET, TWIHS_INT_TXCOMP);
+            }
+          else
+            {
+              /* No.. just switch to the next message and continue receiving.
+               * On the next RXRDY, we will continue with the first byt of the
+               * next message.
+               */
+
+              DEBUGASSERT((next->flags & I2C_M_READ) != 0);
+              priv->msg = next;
+              priv->msgc--;
+              priv->xfrd = 0;
+            }
         }
 
       /* Not yet complete, but will the next be the last byte? */
 
       else if (priv->xfrd == (msg->length - 1))
         {
-          /* Yes, set the stop signal */
+          struct i2c_msg_s *next = msg++;
 
-          twi_putrel(priv, SAM_TWIHS_CR_OFFSET, TWIHS_CR_STOP);
+          /* Is there another message to after this one?  Does it require a
+           * restart?
+           */
+
+          if (priv->msgc <= 1 || (next->flags & I2C_M_NORESTART) == 0)
+            {
+              /* This is the last message OR a restart is required before
+               * the next mesage.  Send the stop signal.
+               */
+
+              twi_putrel(priv, SAM_TWIHS_CR_OFFSET, TWIHS_CR_STOP);
+            }
         }
     }
 
@@ -623,18 +655,38 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       if (priv->xfrd >= msg->length)
         {
-          /* The transfer is complete.  Disable the TXRDY interrupt and
-           * enable the TXCOMP interrupt
+          struct i2c_msg_s *next = msg++;
+
+          /* Is there another message to after this one?  Does it require a
+           * restart?
            */
 
-          twi_putrel(priv, SAM_TWIHS_IDR_OFFSET, TWIHS_INT_TXRDY);
-          twi_putrel(priv, SAM_TWIHS_IER_OFFSET, TWIHS_INT_TXCOMP);
+          if (priv->msgc <= 1 || (next->flags & I2C_M_NORESTART) == 0)
+            {
+              /* The transfer is complete.  Disable the TXRDY interrupt and
+               * enable the TXCOMP interrupt
+               */
 
-          /* Send the STOP condition */
+              twi_putrel(priv, SAM_TWIHS_IDR_OFFSET, TWIHS_INT_TXRDY);
+              twi_putrel(priv, SAM_TWIHS_IER_OFFSET, TWIHS_INT_TXCOMP);
 
-          regval  = twi_getrel(priv, SAM_TWIHS_CR_OFFSET);
-          regval |= TWIHS_CR_STOP;
-          twi_putrel(priv, SAM_TWIHS_CR_OFFSET, regval);
+              /* Send the STOP condition */
+
+              regval  = twi_getrel(priv, SAM_TWIHS_CR_OFFSET);
+              regval |= TWIHS_CR_STOP;
+              twi_putrel(priv, SAM_TWIHS_CR_OFFSET, regval);
+            }
+          else
+            {
+              /* No.. just switch to the next message and continue sending.  */
+
+              DEBUGASSERT((next->flags & I2C_M_READ) == 0);
+              priv->msg = next;
+              priv->msgc--;
+
+              twi_putrel(priv, SAM_TWIHS_THR_OFFSET, next->buffer[0]);
+              priv->xfrd = 1;
+            }
         }
 
       /* No, there are more bytes remaining to be sent */
@@ -646,7 +698,9 @@ static int twi_interrupt(struct twi_dev_s *priv)
         }
     }
 
-  /* Transfer complete */
+  /* Transfer complete,  Occurs on message only if the STOP bit was set on
+   * the previously sent byte.
+   */
 
   else if ((pending & TWIHS_INT_TXCOMP) != 0)
     {
