@@ -81,7 +81,7 @@
 #define TPM0_C4V            (KL_TPM0_BASE + TPM_C4V_OFFSET)  /* TPM0 Channel 4 Value */
 #define TPM0_C5SC           (KL_TPM0_BASE + TPM_C5SC_OFFSET) /* TPM0 Channel 5 Status and Control */
 #define TPM0_C5V            (KL_TPM0_BASE + TPM_C5V_OFFSET)  /* TPM0 Channel 5 Value */
-#define TPM0_STATUS         (KL_TPM0_BASE + TPM_C5V_OFFSET)  /* TPM0 Capture and Compare Status */
+#define TPM0_STATUS         (KL_TPM0_BASE + TPM_STATUS_OFFSET)  /* TPM0 Capture and Compare Status */
 #define TPM0_CONF           (KL_TPM0_BASE + TPM_CONF_OFFSET) /* TPM0 Configuration */
 
 #define TPM1_SC             (KL_TPM1_BASE + TPM_SC_OFFSET)   /* TPM1 Status and Control */
@@ -99,7 +99,7 @@
 #define TPM1_C4V            (KL_TPM1_BASE + TPM_C4V_OFFSET)  /* TPM1 Channel 4 Value */
 #define TPM1_C5SC           (KL_TPM1_BASE + TPM_C5SC_OFFSET) /* TPM1 Channel 5 Status and Control */
 #define TPM1_C5V            (KL_TPM1_BASE + TPM_C5V_OFFSET)  /* TPM1 Channel 5 Value */
-#define TPM1_STATUS         (KL_TPM1_BASE + TPM_C5V_OFFSET)  /* TPM1 Capture and Compare Status */
+#define TPM1_STATUS         (KL_TPM1_BASE + TPM_STATUS_OFFSET)  /* TPM1 Capture and Compare Status */
 #define TPM1_CONF           (KL_TPM1_BASE + TPM_CONF_OFFSET) /* TPM1 Configuration */
 
 #define TPM2_SC             (KL_TPM2_BASE + TPM_SC_OFFSET)   /* TPM2 Status and Control */
@@ -117,7 +117,7 @@
 #define TPM2_C4V            (KL_TPM2_BASE + TPM_C4V_OFFSET)  /* TPM2 Channel 4 Value */
 #define TPM2_C5SC           (KL_TPM2_BASE + TPM_C5SC_OFFSET) /* TPM2 Channel 5 Status and Control */
 #define TPM2_C5V            (KL_TPM2_BASE + TPM_C5V_OFFSET)  /* TPM2 Channel 5 Value */
-#define TPM2_STATUS         (KL_TPM2_BASE + TPM_C5V_OFFSET)  /* TPM2 Capture and Compare Status */
+#define TPM2_STATUS         (KL_TPM2_BASE + TPM_STATUS_OFFSET)  /* TPM2 Capture and Compare Status */
 #define TPM2_CONF           (KL_TPM2_BASE + TPM_CONF_OFFSET) /* TPM2 Configuration */
 
 #define TPM_SC_PS_SHIFT     0 /* Bits 0-2: Prescale Factor Selection */
