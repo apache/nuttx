@@ -8089,7 +8089,6 @@ FAR FILE *fdopen(int fd, FAR const char *type);
 int    dprintf(int fd, FAR const char *fmt, ...);
 int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 
-int    statfs(FAR const char *path, FAR struct statfs *buf);
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 
@@ -8102,8 +8101,8 @@ int fstat(int fd, FAR struct stat *buf);
 
 #include &lt;sys/statfs.h&gt;
 
-int statfs(const char *path, struct statfs *buf);
-int fstatfs(int fd, struct statfs *buf);
+int statfs(FAR const char *path, FAR struct statfs *buf);
+int fstatfs(int fd, FAR struct statfs *buf);
 </pre></ul>
 
 <h3><a name="standardlib">2.10.6 Standard Library</a></h3>
