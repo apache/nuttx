@@ -10344,3 +10344,10 @@
 	  the size of the number of bytes sent from uint16_t to uint32_t.  This
 	  avoids an integer overflow that causes a Telnet sessions to be closed
 	  unexpectedly.  From Rony XLN (2015-05-12).
+	* include/stdio.h, sys/statfs.h, cxx/cstdio, and syscall/syscall.csv:
+	  Remove duplicate prototype of statfs from stdio.h.  Belongs in
+	  sys/statfs.h only.  Note by Michael Hope (2015-05-12).
+	* arch/arm/include/kl/chip.h: Fix typo in header file. From Michael
+	  Hope (2015-05-12).
+	* arch/arm/src/kl/chip/kl_tpm.h: Fix offset to the TPM status register.
+	  From Michael Hope (2015-05-12).
