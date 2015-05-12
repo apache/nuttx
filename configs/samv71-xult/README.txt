@@ -11,7 +11,7 @@ Contents
 ========
 
   - Board Features
-  - Open Issues
+  - Status/Open Issues
   - Serial Console
   - SD card
   - Automounter
@@ -57,11 +57,17 @@ See the Atmel website for further information about this board:
 
   - http://www.atmel.com/tools/atsamv71-xult.aspx
 
-Open Issues
-===========
+tatus/Open Issues
+=================
 
-The BASIC nsh configuration is fully function (as desribed below under
-"Configurations").  There are still open issues that need to be resolved:
+I would characterize the general port as very mature and reliable.  However,
+there are a number of issues, caveats, and unfinished drivers as detailed in
+the following paragraphs.
+
+The BASIC nsh configuration is fully function (as described below under
+"Configurations").  There is also a graphics configuratino (mxtxplnd) and
+a configuration for network testing (netnsh).  There are still open issues
+that need to be resolved:
 
   1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
      transfers only because I have not yet had a chance to verify this.  The
@@ -126,6 +132,11 @@ The BASIC nsh configuration is fully function (as desribed below under
      assume that the different maXTouch part is not being configured
      correctly but there is no available technical documentation or sample
      code to debug with.
+
+     Current thinking is the the maXTouch chips that I have have not yet
+     been configured.  In the Linux world, you would do this configuration
+     with the mxt-app program.  But this is a bigger problem for us in the
+     embedded world.
 
   7. The full port for audio support is code complete:  WM8904 driver,
      SSC/I2C driver, and CS2100-CP driver.  But this code is untested.  The
