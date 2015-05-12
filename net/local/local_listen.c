@@ -85,7 +85,6 @@ dq_queue_t g_local_listeners;
 int local_listen(FAR struct local_conn_s *server, int backlog)
 {
   net_lock_t state;
-  int ret;
 
   /* Some sanity checks */
 
@@ -127,23 +126,6 @@ int local_listen(FAR struct local_conn_s *server, int backlog)
 
       server->lc_state = LOCAL_STATE_LISTENING;
     }
-
-  /* Loop until a connection is requested or we receive a signal */
-
-  while (dq_empty(&server->u.server.lc_waiters))
-    {
-      /* No.. wait for a connection or a signal */
-
-      ret = sem_wait(&server->lc_waitsem);
-      if (ret < 0)
-        {
-          int errval = errno;
-          DEBUGASSERT(errval == EINTR);
-          return -errval;
-        }
-    }
-
-  /* There is a client waiting for the connection */
 
   return OK;
 }

@@ -109,6 +109,7 @@ struct pipe_dev_s
   pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
   uint8_t    d_refs;        /* References counts on pipe (limited to 255) */
   uint8_t    d_nwriters;    /* Number of reference counts for write access */
+  uint8_t    d_nreaders;    /* Number of reference counts for read access */
   uint8_t    d_pipeno;      /* Pipe minor number */
   uint8_t    d_flags;       /* See PIPE_FLAG_* definitions */
   uint8_t   *d_buffer;      /* Buffer allocated when device opened */

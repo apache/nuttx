@@ -94,6 +94,9 @@ FAR struct local_conn_s *local_alloc(void)
       conn->lc_outfd = -1;
 #ifdef CONFIG_NET_LOCAL_STREAM
       sem_init(&conn->lc_waitsem, 0, 0);
+#ifdef HAVE_LOCAL_POLL
+      memset(conn->lc_accept_fds, 0, sizeof(conn->lc_accept_fds));
+#endif
 #endif
     }
 
@@ -118,6 +121,7 @@ void local_free(FAR struct local_conn_s *conn)
   if (conn->lc_infd >= 0)
     {
       close(conn->lc_infd);
+      conn->lc_infd = -1;
     }
 
   /* Make sure that the write-only FIFO is closed */
@@ -125,6 +129,7 @@ void local_free(FAR struct local_conn_s *conn)
   if (conn->lc_outfd >= 0)
     {
       close(conn->lc_outfd);
+      conn->lc_outfd = -1;
     }
 
 #ifdef CONFIG_NET_LOCAL_STREAM

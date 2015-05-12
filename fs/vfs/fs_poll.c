@@ -102,10 +102,6 @@ static int poll_semtake(FAR sem_t *sem)
 #if CONFIG_NFILE_DESCRIPTORS > 0
 static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 {
-  FAR struct file *filep;
-  FAR struct inode *inode;
-  int ret = -ENOSYS;
-
   /* Check for a valid file descriptor */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
@@ -124,29 +120,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
         }
     }
 
-  /* Get the file pointer corresponding to this file descriptor */
-
-  filep = fs_getfilep(fd);
-  if (!filep)
-    {
-      /* The errno value has already been set */
-
-      return ERROR;
-    }
-
-  /* Is a driver registered? Does it support the poll method?
-   * If not, return -ENOSYS
-   */
-
-  inode = filep->f_inode;
-  if (inode && inode->u.i_ops && inode->u.i_ops->poll)
-    {
-      /* Yes, then setup the poll */
-
-      ret = (int)inode->u.i_ops->poll(filep, fds, setup);
-    }
-
-  return ret;
+  return file_poll(fd, fds, setup);
 }
 #endif
 
@@ -264,6 +238,57 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: file_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on file descriptors
+ *   to this function.
+ *
+ * Input Parameters:
+ *   fd    - The file descriptor of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_poll(int fd, FAR struct pollfd *fds, bool setup)
+{
+  FAR struct file *filep;
+  FAR struct inode *inode;
+  int ret = -ENOSYS;
+
+  /* Get the file pointer corresponding to this file descriptor */
+
+  filep = fs_getfilep(fd);
+  if (!filep)
+    {
+      /* The errno value has already been set */
+
+      return -get_errno();
+    }
+
+  /* Is a driver registered? Does it support the poll method?
+   * If not, return -ENOSYS
+   */
+
+  inode = filep->f_inode;
+  if (inode && inode->u.i_ops && inode->u.i_ops->poll)
+    {
+      /* Yes, then setup the poll */
+
+      ret = (int)inode->u.i_ops->poll(filep, fds, setup);
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: poll

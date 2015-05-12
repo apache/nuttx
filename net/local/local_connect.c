@@ -160,6 +160,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
 
   dq_addlast(&client->lc_node, &server->u.server.lc_waiters);
   client->lc_state = LOCAL_STATE_ACCEPT;
+  local_accept_pollnotify(server, POLLIN);
   _local_semgive(&server->lc_waitsem);
   net_unlock(state);
 
@@ -197,6 +198,7 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
 
 errout_with_outfd:
   (void)close(client->lc_outfd);
+  client->lc_outfd = -1;
 
 errout_with_fifos:
   (void)local_release_fifos(client);

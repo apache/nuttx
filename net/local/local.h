@@ -49,15 +49,19 @@
 #include <semaphore.h>
 #include <queue.h>
 #include <stdint.h>
+#include <poll.h>
 
 #ifdef CONFIG_NET_LOCAL
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Not yet any support for poll/select operations on Unix domain sockets */
 
 #undef HAVE_LOCAL_POLL
+#ifndef CONFIG_DISABLE_POLL
+#  define HAVE_LOCAL_POLL 1
+#  define LOCAL_ACCEPT_NPOLLWAITERS 2
+#endif
 
 /* Packet format in FIFO:
  *
@@ -144,6 +148,14 @@ struct local_conn_s
   /* SOCK_STREAM fields common to both client and server */
 
   sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
+
+#ifdef HAVE_LOCAL_POLL
+  /* The following is a list if poll structures of threads waiting for
+   * socket accept events.
+   */
+
+  struct pollfd *lc_accept_fds[LOCAL_ACCEPT_NPOLLWAITERS];
+#endif
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
    * peers.
@@ -617,6 +629,58 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock);
 #ifdef CONFIG_NET_LOCAL_DGRAM
 int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
                       bool nonblock);
+#endif
+
+
+/****************************************************************************
+ * Name: local_accept_pollnotify
+ ****************************************************************************/
+
+#ifdef HAVE_LOCAL_POLL
+void local_accept_pollnotify(FAR struct local_conn_s *conn,
+                             pollevent_t eventset);
+#else
+#define local_accept_pollnotify(conn, eventset) ((void)(conn))
+#endif
+
+/****************************************************************************
+ * Function: local_pollsetup
+ *
+ * Description:
+ *   Setup to monitor events on one Unix domain socket
+ *
+ * Input Parameters:
+ *   psock - The Unix domain socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LOCAL_POLL
+int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+#endif
+
+/****************************************************************************
+ * Function: local_pollteardown
+ *
+ * Description:
+ *   Teardown monitoring of events on a Unix domain socket
+ *
+ * Input Parameters:
+ *   psock - The Unix domain socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_LOCAL_POLL
+int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
 #undef EXTERN

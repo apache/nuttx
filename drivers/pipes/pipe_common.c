@@ -120,12 +120,25 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev, pollevent_t events
 {
   int i;
 
+  if (eventset & POLLERR)
+    {
+      eventset &= ~(POLLOUT | POLLIN);
+    }
+
   for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = dev->d_fds[i];
       if (fds)
         {
-          fds->revents |= (fds->events & eventset);
+          fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
+
+          if ((fds->revents & (POLLOUT | POLLHUP)) == (POLLOUT | POLLHUP))
+            {
+              /* POLLOUT and POLLHUP are mutually exclusive. */
+
+              fds->revents &= ~POLLOUT;
+            }
+
           if (fds->revents != 0)
             {
               fvdbg("Report events: %02x\n", fds->revents);
@@ -222,7 +235,7 @@ int pipecommon_open(FAR struct file *filep)
 
   dev->d_refs++;
 
-  /* If opened for writing, increment the count of writers on on the pipe instance */
+  /* If opened for writing, increment the count of writers on the pipe instance */
 
   if ((filep->f_oflags & O_WROK) != 0)
     {
@@ -239,6 +252,13 @@ int pipecommon_open(FAR struct file *filep)
               sem_post(&dev->d_rdsem);
             }
         }
+    }
+
+  /* If opened for reading, increment the count of reader on on the pipe instance */
+
+  if ((filep->f_oflags & O_RDOK) != 0)
+    {
+      dev->d_nreaders++;
     }
 
   /* If opened for read-only, then wait for either (1) at least one writer
@@ -326,6 +346,27 @@ int pipecommon_close(FAR struct file *filep)
                 {
                   sem_post(&dev->d_rdsem);
                 }
+
+              /* Inform poll readers that other end closed. */
+
+              pipecommon_pollnotify(dev, POLLHUP);
+            }
+        }
+
+      /* If opened for reading, decrement the count of readers on the pipe
+       * instance.
+       */
+
+      if ((filep->f_oflags & O_RDOK) != 0)
+        {
+          if (--dev->d_nreaders <= 0)
+            {
+              if (PIPE_IS_POLICY_0(dev->d_flags))
+                {
+                  /* Inform poll writers that other end closed. */
+
+                  pipecommon_pollnotify(dev, POLLERR);
+                }
             }
         }
     }
@@ -349,6 +390,7 @@ int pipecommon_close(FAR struct file *filep)
       dev->d_rdndx    = 0;
       dev->d_refs     = 0;
       dev->d_nwriters = 0;
+      dev->d_nreaders = 0;
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
       /* If, in addition, we have been unlinked, then also need to free the
@@ -423,7 +465,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       ret = sem_wait(&dev->d_rdsem);
       sched_unlock();
 
-      if (ret < 0  || sem_wait(&dev->d_bfsem) < 0)
+      if (ret < 0 || sem_wait(&dev->d_bfsem) < 0)
         {
           return ERROR;
         }
@@ -641,7 +683,8 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
           nbytes = (CONFIG_DEV_PIPE_SIZE-1) + dev->d_wrndx - dev->d_rdndx;
         }
 
-      /* Notify the POLLOUT event if the pipe is not full */
+      /* Notify the POLLOUT event if the pipe is not full, but only if
+       * there is readers. */
 
       eventset = 0;
       if (nbytes < (CONFIG_DEV_PIPE_SIZE-1))
@@ -654,6 +697,22 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (nbytes > 0)
         {
           eventset |= POLLIN;
+        }
+
+      /* Notify the POLLHUP event if the pipe is empty and no writers */
+
+      if (nbytes == 0 && dev->d_nwriters <= 0)
+        {
+          eventset |= POLLHUP;
+        }
+
+      /* Change POLLOUT to POLLERR, if no readers and policy 0. */
+
+      if ((eventset | POLLOUT) &&
+          PIPE_IS_POLICY_0(dev->d_flags) &&
+          dev->d_nreaders <= 0)
+        {
+          eventset |= POLLERR;
         }
 
       if (eventset)
