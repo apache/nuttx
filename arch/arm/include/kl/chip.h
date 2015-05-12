@@ -79,7 +79,7 @@
 #  define KL_NDAC12          1          /* Two 12-bit DAC */
 #  define KL_NVREF           1          /* Voltage reference */
 #  define KL_NTIMERS6        1          /* One 6 channel timer */
-#  undef  KL_NTIMERS2        2          /* Two 2 channel timers */
+#  define KL_NTIMERS2        2          /* Two 2 channel timers */
 #  undef  KL_NRNG                       /* No random number generator */
 #  define KL_NRTC            1          /* Real time clock */
 #  undef  KL_NMMCAU                     /* No hardware encryption */
