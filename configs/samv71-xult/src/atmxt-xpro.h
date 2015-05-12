@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -345,11 +347,27 @@
  * Public Types
  ************************************************************************************/
 
+struct atmxt_config_s
+{
+  uint16_t addr;
+  uint8_t id;
+  uint8_t nbytes;
+  FAR const uint8_t *bytes;
+};
+
 /************************************************************************************
  * Public data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+#ifdef HAVE_MAXTOUCH
+/* List of configuration settings.  Terminated with an entry with nbytes == 0 and
+ * bytes == NULL;
+ */
+
+extern const struct atmxt_config_s g_atmxt_config[];
+#endif
 
 /************************************************************************************
  * Public Functions
