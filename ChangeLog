@@ -10351,3 +10351,13 @@
 	  Hope (2015-05-12).
 	* arch/arm/src/kl/chip/kl_tpm.h: Fix offset to the TPM status register.
 	  From Michael Hope (2015-05-12).
+	* net/local/local_connect.c: Correct some network lock logic:  Two
+	  error conditions where the network was not being unlocked and one
+	  where it was getting unlocked twice.  From Jussi Kivilinna (2015-05-12).
+	* net/local/, fs/vfs/fs_poll.c, drivers/pipes/pipe_common.c/.h,
+	  include/nuttx/fs/fs.h: Add poll support for Unix stream sockets.  From
+	  Jussi Kivilinna (2015-05-12).
+	* net/local/: Local stream sockets had problem of double releasing pipes
+	  (both server and client attempt release), which causes wrong pipe pair
+	  being closed in multi-client case. Solve by adding per connection
+	  instance ID to pipe names.  From  Jussi Kivilinna (2015-05-12).
