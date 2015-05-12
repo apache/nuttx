@@ -135,6 +135,8 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
     {
       ndbg("ERROR: Failed to create FIFOs for %s: %d\n",
            client->lc_path, ret);
+
+      net_unlock(state);
       return ret;
     }
 
@@ -147,6 +149,8 @@ int inline local_stream_connect(FAR struct local_conn_s *client,
     {
       ndbg("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
+
+      net_unlock(state);
       goto errout_with_fifos;
     }
 
@@ -293,8 +297,11 @@ int psock_local_connect(FAR struct socket *psock,
                                                _SS_ISNONBLOCK(psock->s_flags),
                                                state);
                   }
+                else
+                  {
+                    net_unlock(state);
+                  }
 
-                net_unlock(state);
                 return ret;
               }
           }
