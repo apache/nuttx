@@ -10361,3 +10361,7 @@
 	  (both server and client attempt release), which causes wrong pipe pair
 	  being closed in multi-client case. Solve by adding per connection
 	  instance ID to pipe names.  From  Jussi Kivilinna (2015-05-12).
+	* drivers/usbdev/ all class drivers:  There needs to be a check to make
+	  sure that the size of a returned string does not exceed the size of
+	  the allocated request buffer.  Strings such as vendor names or product
+	  names will be truncated to fit in the request buffer (2015-05-12).
