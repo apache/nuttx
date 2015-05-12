@@ -180,7 +180,6 @@ int    vdprintf(int fd, FAR const char *fmt, va_list ap);
 
 /* Operations on paths */
 
-int    statfs(FAR const char *path, FAR struct statfs *buf);
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 

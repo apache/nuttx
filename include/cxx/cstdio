@@ -103,7 +103,6 @@ namespace std
 
   // Operations on paths
 
-  using ::statfs;
   using ::tmpnam;
   using ::tempnam;
 }

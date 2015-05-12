@@ -137,8 +137,8 @@ extern "C"
  * form of the struct statfs.
  */
 
-int statfs(const char *path, struct statfs *buf);
-int fstatfs(int fd, struct statfs *buf);
+int statfs(FAR const char *path, FAR struct statfs *buf);
+int fstatfs(int fd, FAR struct statfs *buf);
 
 #undef EXTERN
 #if defined(__cplusplus)
