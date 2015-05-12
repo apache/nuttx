@@ -126,6 +126,9 @@ static struct sama5d4ek_tscinfo_s g_mxtinfo =
   {
     .address   = MXT_I2C_ADDRESS,
     .frequency = CONFIG_SAMV71XULT_MXT_I2CFREQUENCY,
+#ifdef CONFIG_SAMV71XULT_MXT_SWAPXY
+    .swapxy    = true;
+#endif
 
     .attach    = mxt_attach,
     .enable    = mxt_enable,
