@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/pl2303.c
  *
- *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
@@ -194,6 +194,7 @@
 /* Buffer big enough for any of our descriptors */
 
 #define PL2303_MXDESCLEN           (64)
+#defien PL2303_MAXSTRLEN           (PL2303_MXDESCLEN-2)
 
 /* Vender specific control requests *******************************************/
 
@@ -871,6 +872,11 @@ static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
     */
 
    len = strlen(str);
+   if (len > (PL2303_MAXSTRLEN / 2))
+     {
+       len = (PL2303_MAXSTRLEN / 2);
+     }
+
    for (i = 0, ndata = 0; i < len; i++, ndata += 2)
      {
        strdesc->data[ndata]   = str[i];

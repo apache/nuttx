@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc_desc.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -287,6 +287,11 @@ int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
     */
 
    len = strlen(str);
+   if (len > (USBMSC_MAXSTRLEN / 2))
+     {
+       len = (USBMSC_MAXSTRLEN / 2);
+     }
+
    for (i = 0, ndata = 0; i < len; i++, ndata += 2)
      {
        strdesc->data[ndata]   = str[i];

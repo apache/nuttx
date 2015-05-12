@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.h
  *
- *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -269,6 +269,7 @@
 /* Big enough to hold our biggest descriptor */
 
 #define USBMSC_MXDESCLEN              (64)
+#defien USBMSC_MAXSTRLEN              (USBMSC_MXDESCLEN-2)
 
 /* String language */
 
