@@ -118,27 +118,7 @@ that need to be resolved:
      sheet, but I have not found the key to
      solving this.
 
-  6. Partial support for the maXTouch Xplained Pro LCD is in place.  The
-     ILI9488-based LCD is working well with a SMC DMA-based interface.  Very
-     nice performance.
-
-     However, the maXTouch touchscreen driver is not working.  I tried re-
-     using the maXTouch driver that was used with the SAMA5D4-EK TM7000
-     LCD, but the maXTouch Xplained Pro has a different maXTouch part
-     (ATMXT112S).  No data sheet is available for this part.
-
-     The existing maXTouch driver claims that all operations on the ATMXT112S
-     are success, but there are no interrupts signalling touch event.  I
-     assume that the different maXTouch part is not being configured
-     correctly but there is no available technical documentation or sample
-     code to debug with.
-
-     Current thinking is the the maXTouch chips that I have have not yet
-     been configured.  In the Linux world, you would do this configuration
-     with the mxt-app program.  But this is a bigger problem for us in the
-     embedded world.
-
-  7. The full port for audio support is code complete:  WM8904 driver,
+  6. The full port for audio support is code complete:  WM8904 driver,
      SSC/I2C driver, and CS2100-CP driver.  But this code is untested.  The
      WM8904 interface was taken directly from the SAMA5D4-EK and may well
      need modification due to differences with the physical WM8904
@@ -776,6 +756,31 @@ maXTouch Xplained Pro
 Testing has also been performed using the maXTouch Xplained Pro LCD
 (ATMXT-XPRO).
 
+  **************************************************************************
+  *  WARNING:                                                              *
+  *   The maXTouch chip was not configured on all of the maXTouch Xplained *
+  *   Pro boards that I have used (which is two).  The maXTouch is         *
+  *   completely non-functional with no configuration in its NV memory!    *
+  *                                                                        *
+  *   My understanding is that this configuration can be set on Linux      *
+  *   using the mxp-app program which is available on GitHub.  There is an *
+  *   (awkward) way to do this with NuttX too. In order to set the         *
+  *   maXTouch configuration with Nuttx you need to do these things:       *
+  *                                                                        *
+  *   - Copy the function atmxt_config() from the file                     *
+  *     configs/samv71-xult/src/atmxt_config.c into the file               *
+  *     drivers/input/mxt.c                                                *
+  *   - Add a call to atmxt_config() in drivers/input/mxt.c in the         *
+  *     function mxt_register() just before the touchscreen device is      *
+  *     registered (i.e, the call to register_driver()).                   *
+  *   - Run the code one time.  Your maXTouch is configured and should     *
+  *     now work.                                                          *
+  *   - Don't forget to remove atmxt_config() from drivers/input/mxt.c and *
+  *     restore driver as it was.                                          *
+  *                                                                        *
+  **************************************************************************
+
+
 maXTouch Xplained Pro Standard Extension Header
 -----------------------------------------------
 The LCD could be connected either via EXT1 or EXT2 using the 2x10 20-pin
@@ -1178,16 +1183,8 @@ Configuration sub-directories
       2015-04-05:  Partial support for the maXTouch Xplained Pro LCD is in
         place.  The ILI9488-based LCD is working well with a SMC DMA-based
         interface.  Very nice performance.
-
-        However, the maXTouch touchscreen driver is not working.  I tried
-        re-using the maXTouch driver that was used with the SAMA5D4-EK
-        TM7000 LCD, but the maXTouch Xplained Pro has a different maXTouch
-        part.  The driver claims that all operations are success, but
-        there are no interrupts signalling touch event.  I assume that the
-        different maXTouch part is not being configured correctly but there
-        is no available technical documentation or sample code to debug
-        with.
-
+      2015-05-12:  After some difficulties, the maXTouch touchscreen
+        controller is now fully functional as well.
 
   netnsh:
 
