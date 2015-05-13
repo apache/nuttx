@@ -291,9 +291,9 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
 
 int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 {
-  struct nxfe_state_s     fe;
+  struct nxfe_state_s    fe;
   FAR struct nxsvrmsg_s *msg;
-  uint8_t                buffer[NX_MXSVRMSGLEN];
+  char                   buffer[NX_MXSVRMSGLEN];
   int                    nbytes;
   int                    ret;
 

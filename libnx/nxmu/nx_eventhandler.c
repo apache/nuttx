@@ -138,7 +138,7 @@ int nx_eventhandler(NXHANDLE handle)
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
   struct nxsvrmsg_s      *msg;
   struct nxbe_window_s   *wnd;
-  uint8_t                 buffer[NX_MXCLIMSGLEN];
+  char                    buffer[NX_MXCLIMSGLEN];
   int                     nbytes;
 
   /* Get the next message from our incoming message queue */
