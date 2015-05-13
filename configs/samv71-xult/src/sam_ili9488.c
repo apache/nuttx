@@ -1711,7 +1711,7 @@ void sam_lcdclear(uint16_t color)
 
   for (row = 0; row < SAM_YRES; row++)
     {
-      ret = sam_putrun(row, col, (FAR const uint8_t *)g_runbuffer, SAM_XRES);
+      ret = sam_putrun(row, 0, (FAR const uint8_t *)g_runbuffer, SAM_XRES);
       if (ret < 0)
         {
           lcddbg("ERROR: sam_putrun failed on row %d: %d\n", row, ret);
