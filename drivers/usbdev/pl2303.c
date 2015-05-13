@@ -194,7 +194,7 @@
 /* Buffer big enough for any of our descriptors */
 
 #define PL2303_MXDESCLEN           (64)
-#defien PL2303_MAXSTRLEN           (PL2303_MXDESCLEN-2)
+#define PL2303_MAXSTRLEN           (PL2303_MXDESCLEN-2)
 
 /* Vender specific control requests *******************************************/
 

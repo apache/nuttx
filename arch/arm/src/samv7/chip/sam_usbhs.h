@@ -753,7 +753,7 @@
 /* General Status Register */
 
 #define USBHS_SR_RDERRI                    (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt (host mode) */
-#defien USBHS_SR_VBUSRQ                    (1 << 9)          /* Bit 9:  VBus Request (host mode) */
+#define USBHS_SR_VBUSRQ                    (1 << 9)          /* Bit 9:  VBus Request (host mode) */
 #define USBHS_SR_SPEED_SHIFT               (12)              /* Bits 12-13: Speed Status (device mode) */
 #define USBHS_SR_SPEED_MASK                (3 << USBHS_SR_SPEED_SHIFT)
 #  define USBHS_SR_SPEED_FULL              (0 << USBHS_SR_SPEED_SHIFT) /* Full-Speed mode */

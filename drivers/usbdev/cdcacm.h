@@ -119,7 +119,7 @@
  */
 
 #define CDCACM_MXDESCLEN           (64)
-#defien CDCACM_MAXSTRLEN           (CDCACM_MXDESCLEN-2)
+#define CDCACM_MAXSTRLEN           (CDCACM_MXDESCLEN-2)
 
 /* Device descriptor values */
 

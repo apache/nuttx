@@ -269,7 +269,7 @@
 /* Big enough to hold our biggest descriptor */
 
 #define USBMSC_MXDESCLEN              (64)
-#defien USBMSC_MAXSTRLEN              (USBMSC_MXDESCLEN-2)
+#define USBMSC_MAXSTRLEN              (USBMSC_MXDESCLEN-2)
 
 /* String language */
 
