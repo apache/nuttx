@@ -1593,10 +1593,11 @@ Configuration sub-directories
 
     STATUS:
     2015-05-13:
-      - The demo functions and produces displays.  I have two maXTouch
-        Xplained Pro displays.  One works perfectly, the other has some
-        issues which I suspect are due to the ribbon cable connector
-        with fits too snugly on one side.
+      - The demo functions and produces displays but is not yet very stable.
+
+      - I have two maXTouch  Xplained Pro displays.  One works well, the
+        other has some issues which I suspect are due to the ribbon cable
+        connector with fits too snugly on one side.
 
         Here are the symptoms of the LCD that does not work.  I attribute
         these problems with problems in the parallel interface due to a
