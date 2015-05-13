@@ -10376,3 +10376,9 @@
 	  to avoid compilation errors.  From Max Neklyudov (2015-05-13).
 	* /net/route/netdev_router.c: Fix bug in IPv6 router from Max Neklyudov
 	  (2015-05-13).
+	* sched/pthread/pthread_kill.c: Re-implemened pthread_kill().  It was
+	  just a simple wrapper around kill() but since the correct dispatching
+	  of singles for multi-threaded task groups has been implemented,
+	  calling kill() does not do what pthread_kill() is supposed to do.  The
+	  corrected implementation of pthread_kill() will direct the signal
+	  specifically to the specific pthread and no other (2015-05-13).
