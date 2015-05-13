@@ -65,9 +65,11 @@ there are a number of issues, caveats, and unfinished drivers as detailed in
 the following paragraphs.
 
 The BASIC nsh configuration is fully function (as described below under
-"Configurations").  There is also a graphics configuratino (mxtxplnd) and
-a configuration for network testing (netnsh).  There are still open issues
-that need to be resolved:
+"Configurations").  There is also a graphics configuration (mxtxplnd), a
+a configuration for network testing (netnsh), and a graphics demo (nxwm).
+There are still open issues that need to be resolved.  General problems are
+listed below.  But see the STATUS section associated with each configuration
+for additional issues specific to a particular configuration.
 
   1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
      transfers only because I have not yet had a chance to verify this.  The
@@ -1574,3 +1576,17 @@ Configuration sub-directories
 
        $ cd ~/nuttx-git/nuttx
        $ make
+
+    STATUS:
+    2015-05-13:
+      The demo functions and produces displays, but there is something wrong
+      with the LCD configuration:
+      - The color is wrong; to reddish.  This suggests some issue with color
+        format or pixel width
+      - Images are positioned correctly on the display, but all half the
+        horizontal width that they should be, again suggesting some problem
+        with the pixel with.
+      - Some images are simply truncated to half the correct size (such as
+        the touch circles in the calibration screen).
+      - Other images are horizontally compressed (such as the initial NX
+        logo on the background).
