@@ -271,7 +271,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
        * of the device.
        */
 
-      net_ipv6addr_copy(router, dev->d_draddr);
+      net_ipv6addr_copy(router, dev->d_ipv6draddr);
     }
 }
 #endif
