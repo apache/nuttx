@@ -501,4 +501,3 @@ int sig_dispatch(pid_t pid, FAR siginfo_t *info)
 
 #endif
 }
-

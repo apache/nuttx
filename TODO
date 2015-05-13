@@ -11,7 +11,7 @@ nuttx/
 
  (11)  Task/Scheduler (sched/)
   (1)  Memory Management (mm/)
-  (4)  Signals (sched/signal, arch/)
+  (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (4)  C++ Support
@@ -306,16 +306,6 @@ o Signals (sched/signal, arch/)
                to map bits appropriately.
   Status:      Open
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
-
-  Title:       PTHREAD_KILL
-  Description: Currently pthread_kill() is a simple wrapper around kill().  This is
-               not correct.  kill() will deliver signals to a task group with
-               incompatible rules.
-
-              "The pthread_kill() function shall request that a signal be delivered
-               to the specified thread." Reference http://pubs.opengroup.org/onlinepubs/009695399/functions/pthread_kill.html
-  Status:      Open
-  Priority:    Medium-Low unless you need this functionality.
 
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^

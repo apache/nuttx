@@ -136,5 +136,3 @@ errout:
   set_errno(-ret);
   return ERROR;
 }
-
-
