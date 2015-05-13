@@ -31,7 +31,7 @@ endchoice # MaXTouch Xplained connection
 if INPUT_MXT
 
 config SAMV71XULT_MXT_SWAPXY
-	default "Swap X/Y coordinates"
+	bool "Swap X/Y coordinates"
 	default n
 	---help---
 		If you are working in a landscape orientation, it should be
