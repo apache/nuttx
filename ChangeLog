@@ -10370,4 +10370,9 @@
 	* maXTouch Xplained Pro:  The above TWIHS fix was the last barrier to
 	  getting the touchscreen workingoin the maXTouch Xplained Pro LCD
 	  (2015-05-12).
-
+	* net/route/ and net/netdev/netdev_ioctl.c: Complete implementation of
+	  the IPv6 routing logic.  From Max Neklyudov (2015-05-13).
+	* net/udp/: Add inclusion of assert.h in networking files where needed
+	  to avoid compilation errors.  From Max Neklyudov (2015-05-13).
+	* /net/route/netdev_router.c: Fix bug in IPv6 router from Max Neklyudov
+	  (2015-05-13).
