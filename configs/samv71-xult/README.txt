@@ -1511,82 +1511,113 @@ Configuration sub-directories
     UnitTest.  It provides an interactive windowing experience with the
     maXTouch Xplained Pro LCD.
 
-    The NxWM window manager is a tiny window manager tailored for use
-    with smaller LCDs.  It supports a task, a start window, and
-    multiple application windows with toolbars.  However, to make the best
-    use of the visible LCD space, only one application window is visible at
-    at time.
+    NOTES:
 
-    The NxWM window manager can be found here:
+    1. The NxWM window manager is a tiny window manager tailored for use
+       with smaller LCDs.  It supports a task, a start window, and
+       multiple application windows with toolbars.  However, to make the
+       best use of the visible LCD space, only one application window is
+       visible at at time.
 
-      nuttx-git/NxWidgets/nxwm
+       The NxWM window manager can be found here:
 
-    The NxWM unit test can be found at:
+         nuttx-git/NxWidgets/nxwm
 
-      nuttx-git/NxWidgets/UnitTests/nxwm
+       The NxWM unit test can be found at:
 
-    Documentation for installing the NxWM unit test can be found here:
+         nuttx-git/NxWidgets/UnitTests/nxwm
 
-      nuttx-git/NxWidgets/UnitTests/README.txt
+       Documentation for installing the NxWM unit test can be found here:
 
-    Here is the quick summary of the build steps.  These steps assume that
-    you have the entire NuttX GIT in some directory ~/nuttx-git.  You may
-    have these components installed elsewhere.  In that case, you will need
-    to adjust all of the paths in the following accordingly:
+         nuttx-git/NxWidgets/UnitTests/README.txt
 
-    1. Install the nxwm configuration
+    2. Here is the quick summary of the build steps.  These steps assume
+       that you have the entire NuttX GIT in some directory ~/nuttx-git.
+       You may have these components installed elsewhere.  In that case, you
+       will need to adjust all of the paths in the following accordingly:
 
-       $ cd ~/nuttx-git/nuttx/tools
-       $ ./configure.sh samv71-xult/nxwm
+       a. Install the nxwm configuration
 
-    2. Make the build context (only)
+          $ cd ~/nuttx-git/nuttx/tools
+          $ ./configure.sh samv71-xult/nxwm
 
-       $ cd ..
-       $ . ./setenv.sh
-       $ make context
-       ...
+       b. Make the build context (only)
 
-       NOTE: the use of the setenv.sh file is optional.  All that it will
-       do is to adjust your PATH variable so that the build system can find
-       your tools.  If you use it, you will most likely need to modify the
-       script so that it has the correct path to your tool binaries
-       directory.
+          $ cd ..
+          $ . ./setenv.sh
+          $ make context
+          ...
 
-    3. Install the nxwm unit test
+          NOTE: the use of the setenv.sh file is optional.  All that it will
+          do is to adjust your PATH variable so that the build system can find
+          your tools.  If you use it, you will most likely need to modify the
+          script so that it has the correct path to your tool binaries
+          directory.
 
-       $ cd ~/nuttx-git/NxWidgets
-       $ tools/install.sh ~/nuttx-git/apps nxwm
-       Creating symbolic link
-        - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-git/apps/external
+       c. Install the nxwm unit test
 
-    4. Build the NxWidgets library
+          $ cd ~/nuttx-git/NxWidgets
+          $ tools/install.sh ~/nuttx-git/apps nxwm
+          Creating symbolic link
+           - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
+           - At ~/nuttx-git/apps/external
 
-       $ cd ~/nuttx-git/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-git/nuttx
-       ...
+       d. Build the NxWidgets library
 
-    5. Build the NxWM library
+          $ cd ~/nuttx-git/NxWidgets/libnxwidgets
+          $ make TOPDIR=~/nuttx-git/nuttx
+          ...
 
-       $ cd ~/nuttx-git/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-git/nuttx
-       ...
+       e. Build the NxWM library
 
-    6. Built NuttX with the installed unit test as the application
+          $ cd ~/nuttx-git/NxWidgets/nxwm
+          $ make TOPDIR=~/nuttx-git/nuttx
+          ...
 
-       $ cd ~/nuttx-git/nuttx
-       $ make
+       f. Built NuttX with the installed unit test as the application
+
+          $ cd ~/nuttx-git/nuttx
+          $ make
+
+    3. Reading from the LCD is not currently functional.  The following
+       settings are in the configuration that tell the system that this
+       is a read-only LCD:
+
+         CONFIG_LCD_NOGETRUN=y
+         CONFIG_NX_WRITEONLY=y
+
+    4. Small Icons are selected and can be very difficult to touch.  You
+       might want to enable larger icons with:
+
+         CONFIG_NXWM_LARGE_ICONS=y
 
     STATUS:
     2015-05-13:
-      The demo functions and produces displays, but there is something wrong
-      with the LCD configuration:
-      - The color is wrong; to reddish.  This suggests some issue with color
-        format or pixel width
-      - Images are positioned correctly on the display, but all half the
-        horizontal width that they should be, again suggesting some problem
-        with the pixel with.
-      - Some images are simply truncated to half the correct size (such as
-        the touch circles in the calibration screen).
-      - Other images are horizontally compressed (such as the initial NX
-        logo on the background).
+      - The demo functions and produces displays.  I have two maXTouch
+        Xplained Pro displays.  One works perfectly, the other has some
+        issues which I suspect are due to the ribbon cable connector
+        with fits too snugly on one side.
+
+        Here are the symptoms of the LCD that does not work.  I attribute
+        these problems with problems in the parallel interface due to a
+        bad connection:
+
+        - The color is wrong; to reddish.  This suggests some issue with color
+          format or pixel width
+        - Images are positioned correctly on the display, but all half the
+          horizontal width that they should be, again suggesting some problem
+          with the pixel with.
+        - Some images are simply truncated to half the correct size (such as
+          the touch circles in the calibration screen).
+        - Other images are horizontally compressed (such as the initial NX
+          logo on the background).
+
+      - As mentioned above, reading fromthe LCD is not currently functional.
+        There are some special settings work work around this but the
+        bottom line is that transparent operations cannot yet be supported.
+
+      - I am seeing some small artifacts with the font used in the HEX
+        calculator display.
+
+      - Line spacing in the NxTerm window is too much.  This is probably
+        a font-related issue too.
