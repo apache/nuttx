@@ -43,9 +43,6 @@
 
 #include <nuttx/arch.h>
 
-#include <arch/sama5/chip.h>
-#include "chip.h"
-
 #if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
 
 /************************************************************************************
