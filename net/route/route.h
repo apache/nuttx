@@ -64,6 +64,7 @@
  ****************************************************************************/
 /* This structure describes one entry in the routing table */
 
+#ifdef CONFIG_NET_IPv4
 struct net_route_s
 {
   FAR struct net_route_s *flink; /* Supports a singly linked list */
@@ -75,6 +76,21 @@ struct net_route_s
 /* Type of the call out function pointer provided to net_foreachroute() */
 
 typedef int (*route_handler_t)(FAR struct net_route_s *route, FAR void *arg);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+struct net_route_ipv6_s
+{
+  FAR struct net_route_ipv6_s *flink; /* Supports a singly linked list */
+  net_ipv6addr_t target;              /* The destination network */
+  net_ipv6addr_t netmask;             /* The network address mask */
+  net_ipv6addr_t router;              /* Route packets via this router */
+};
+
+/* Type of the call out function pointer provided to net_foreachroute() */
+
+typedef int (*route_handler_ipv6_t)(FAR struct net_route_ipv6_s *route, FAR void *arg);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -89,8 +105,13 @@ extern "C"
 #endif
 
 /* This is the routing table */
-
+#ifdef CONFIG_NET_IPv4
 EXTERN sq_queue_t g_routes;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+EXTERN sq_queue_t g_routes_ipv6;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -127,7 +148,13 @@ void net_initroute(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 FAR struct net_route_s *net_allocroute(void);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+FAR struct net_route_ipv6_s *net_allocroute_ipv6(void);
+#endif
 
 /****************************************************************************
  * Function: net_allocroute
@@ -143,7 +170,13 @@ FAR struct net_route_s *net_allocroute(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 void net_freeroute(FAR struct net_route_s *route);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
+#endif
 
 /****************************************************************************
  * Function: net_addroute
@@ -162,8 +195,15 @@ void net_freeroute(FAR struct net_route_s *route);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int net_addroute(in_addr_t target, in_addr_t netmask,
                  in_addr_t router);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
+                 net_ipv6addr_t router);
+#endif
 
 /****************************************************************************
  * Function: net_delroute
@@ -178,7 +218,13 @@ int net_addroute(in_addr_t target, in_addr_t netmask,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int net_delroute(in_addr_t target, in_addr_t netmask);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask);
+#endif
 
 /****************************************************************************
  * Function: net_ipv4_router
@@ -290,7 +336,13 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int net_foreachroute(route_handler_t handler, FAR void *arg);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

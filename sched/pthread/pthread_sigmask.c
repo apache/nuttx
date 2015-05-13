@@ -103,5 +103,6 @@ int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
     {
       ret = EINVAL;
     }
+
   return ret;
 }

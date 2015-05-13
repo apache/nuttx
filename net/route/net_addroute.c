@@ -78,6 +78,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 {
   FAR struct net_route_s *route;
@@ -108,5 +109,39 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
   net_unlock(save);
   return OK;
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
+{
+  FAR struct net_route_ipv6_s *route;
+  net_lock_t save;
+
+  /* Allocate a route entry */
+
+  route = net_allocroute_ipv6();
+  if (!route)
+    {
+      ndbg("ERROR:  Failed to allocate a route\n");
+      return -ENOMEM;
+    }
+
+  /* Format the new route table entry */
+
+  net_ipv6addr_copy(route->target, target);
+  net_ipv6addr_copy(route->netmask, netmask);
+  net_ipv6addr_copy(route->router, router);
+
+  /* Get exclusive address to the networking data structures */
+
+  save = net_lock();
+
+  /* Then add the new entry to the table */
+
+  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
+  net_unlock(save);
+  return OK;
+}
+#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */

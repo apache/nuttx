@@ -56,7 +56,13 @@
 
 /* This is the routing table */
 
+#ifdef CONFIG_NET_IPv4
 sq_queue_t g_routes;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+sq_queue_t g_routes_ipv6;
+#endif
 
 /****************************************************************************
  * Private Data
@@ -64,11 +70,23 @@ sq_queue_t g_routes;
 
 /* This is a list of free routing table entries */
 
+#ifdef CONFIG_NET_IPv4
 static sq_queue_t g_freeroutes;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+static sq_queue_t g_freeroutes_ipv6;
+#endif
 
 /* This is an array of pre-allocated network routes */
 
+#ifdef CONFIG_NET_IPv4
 static struct net_route_s g_preallocroutes[CONFIG_NET_MAXROUTES];
+#endif
+
+#ifdef CONFIG_NET_IPv6
+static struct net_route_ipv6_s g_preallocroutes_ipv6[CONFIG_NET_MAXROUTES];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -97,6 +115,7 @@ void net_initroute(void)
 
   /* Initialize the routing table and the free list */
 
+#ifdef CONFIG_NET_IPv4
   sq_init(&g_routes);
   sq_init(&g_freeroutes);
 
@@ -107,6 +126,20 @@ void net_initroute(void)
       sq_addlast((FAR sq_entry_t *)&g_preallocroutes[i],
                  (FAR sq_queue_t *)&g_freeroutes);
     }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  sq_init(&g_routes_ipv6);
+  sq_init(&g_freeroutes_ipv6);
+
+  /* All all of the pre-allocated routing table entries to a free list */
+
+  for (i = 0; i < CONFIG_NET_MAXROUTES; i++)
+    {
+      sq_addlast((FAR sq_entry_t *)&g_preallocroutes_ipv6[i],
+                 (FAR sq_queue_t *)&g_freeroutes_ipv6);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -124,6 +157,7 @@ void net_initroute(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 FAR struct net_route_s *net_allocroute(void)
 {
   FAR struct net_route_s *route;
@@ -141,6 +175,27 @@ FAR struct net_route_s *net_allocroute(void)
   net_unlock(save);
   return route;
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
+{
+  FAR struct net_route_ipv6_s *route;
+  net_lock_t save;
+
+  /* Get exclusive address to the networking data structures */
+
+  save = net_lock();
+
+  /* Then add the new entry to the table */
+
+  route = (FAR struct net_route_ipv6_s *)
+    sq_remfirst((FAR sq_queue_t *)&g_freeroutes_ipv6);
+
+  net_unlock(save);
+  return route;
+}
+#endif
 
 /****************************************************************************
  * Function: net_allocroute
@@ -156,6 +211,7 @@ FAR struct net_route_s *net_allocroute(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 void net_freeroute(FAR struct net_route_s *route)
 {
   net_lock_t save;
@@ -171,5 +227,24 @@ void net_freeroute(FAR struct net_route_s *route)
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_freeroutes);
   net_unlock(save);
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route)
+{
+  net_lock_t save;
+
+  DEBUGASSERT(route);
+
+  /* Get exclusive address to the networking data structures */
+
+  save = net_lock();
+
+  /* Then add the new entry to the table */
+
+  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_freeroutes_ipv6);
+  net_unlock(save);
+}
+#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */

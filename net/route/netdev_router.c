@@ -64,6 +64,15 @@ struct route_ipv4_devmatch_s
 };
 #endif
 
+#ifdef CONFIG_NET_IPv6
+struct route_ipv6_devmatch_s
+{
+  FAR struct net_driver_s *dev; /* The route must use this device */
+  net_ipv6addr_t target;        /* Target IPv4 address on an external network to match */
+  net_ipv6addr_t router;        /* IPv6 address of the router on one of our networks*/
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -125,11 +134,8 @@ static int net_ipv4_devmatch(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static int net_ipv6_devmatch(FAR struct net_route_s *route, FAR void *arg)
+static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route, FAR void *arg)
 {
-#if 1
-#  warning Missing logic
-#else
   FAR struct route_ipv6_devmatch_s *match = (FAR struct route_ipv6_devmatch_s *)arg;
   FAR struct net_driver_s *dev = match->dev;
 
@@ -141,14 +147,13 @@ static int net_ipv6_devmatch(FAR struct net_route_s *route, FAR void *arg)
    */
 
   if (net_ipv6addr_maskcmp(route->target, match->target, route->netmask) &&
-      net_ipv6addr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
+      net_ipv6addr_maskcmp(route->router, dev->d_ipv6addr, dev->d_ipv6netmask))
     {
       /* They match.. Copy the router address */
 
       net_ipv6addr_copy(match->router, route->router);
       return 1;
     }
-#endif
 
   return 0;
 }
@@ -253,7 +258,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
    * address using this device.
    */
 
-  ret = net_foreachroute(net_ipv6_devmatch, &match);
+  ret = net_foreachroute_ipv6(net_ipv6_devmatch, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */

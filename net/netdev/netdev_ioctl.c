@@ -143,30 +143,27 @@ static int ioctl_addipv4route(FAR struct rtentry *rtentry)
 #if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
 static int ioctl_addipv6route(FAR struct rtentry *rtentry)
 {
-  FAR struct sockaddr_in6 *addr;
-  net_ipv6addr_t target;
-  net_ipv6addr_t netmask;
+  FAR struct sockaddr_in6 *target;
+  FAR struct sockaddr_in6 *netmask;
   net_ipv6addr_t router;
 
-  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-  target  = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
-
-  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
-  netmask = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+  target    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
+  netmask    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
 
   /* The router is an optional argument */
 
   if (rtentry->rt_router)
     {
-      addr   = (FAR struct sockaddr_in6 *)rtentry->rt_router;
-      router = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+      FAR struct sockaddr_in6 *addr;
+      addr = (FAR struct sockaddr_in6 *)rtentry->rt_router;
+      net_ipv6addr_copy(router, addr->sin6_addr.s6_addr16);
     }
   else
     {
-      router = NULL;
+      net_ipv6addr_copy(router, in6addr_any.s6_addr16);
     }
 
-  return net_addroute(target, netmask, router);
+  return net_addroute_ipv6(target->sin6_addr.s6_addr16, netmask->sin6_addr.s6_addr16, router);
 }
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv6 */
 
@@ -212,17 +209,13 @@ static int ioctl_delipv4route(FAR struct rtentry *rtentry)
 #if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
 static int ioctl_delipv6route(FAR struct rtentry *rtentry)
 {
-  FAR struct sockaddr_in6 *addr;
-  net_ipv6addr_t target;
-  net_ipv6addr_t netmask;
+  FAR struct sockaddr_in6 *target;
+  FAR struct sockaddr_in6 *netmask;
 
-  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-  target  = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
+  target    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
+  netmask    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
 
-  addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
-  netmask = (net_ipv6addr_t)addr->sin6_addr.u6_addr16;
-
-  return net_delroute(target, netmask);
+  return net_delroute_ipv6(target->sin6_addr.s6_addr16, netmask->sin6_addr.s6_addr16);
 }
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv6 */
 

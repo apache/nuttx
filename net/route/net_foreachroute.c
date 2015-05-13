@@ -71,6 +71,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int net_foreachroute(route_handler_t handler, FAR void *arg)
 {
   FAR struct net_route_s *route;
@@ -99,5 +100,37 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
   net_unlock(save);
   return ret;
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
+{
+  FAR struct net_route_ipv6_s *route;
+  FAR struct net_route_ipv6_s *next;
+  net_lock_t save;
+  int ret = 0;
+
+  /* Prevent concurrent access to the routing table */
+
+  save = net_lock();
+
+  /* Visit each entry in the routing table */
+
+  for (route = (FAR struct net_route_s *)g_routes_ipv6.head; route; route = next)
+    {
+      /* Get the next entry in the to visit.  We do this BEFORE calling the
+       * handler because the hanlder may delete this entry.
+       */
+
+      next = route->flink;
+      ret = handler(route, arg);
+    }
+
+  /* Unlock uIP */
+
+  net_unlock(save);
+  return ret;
+}
+#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */
