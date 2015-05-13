@@ -46,6 +46,7 @@
 
 #include <string.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <arpa/inet.h>
 

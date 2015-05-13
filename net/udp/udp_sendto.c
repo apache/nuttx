@@ -45,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
