@@ -620,7 +620,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
   nllvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
-      DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+      DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
 
       /* Look up the destination MAC address and add it to the Ethernet
        * header.
@@ -936,7 +936,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
    * at this point.
    */
 
-  DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+  DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
 
   /* Then poll uIP for new XMIT data */
 
