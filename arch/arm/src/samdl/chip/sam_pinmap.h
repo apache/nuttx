@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/samdl/chip/sam_pinmap.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,9 @@
 
 #if defined(SAMD20)
 #  include "chip/samd20_pinmap.h"
+#elif defined(SAML21)
+#  include "chip/saml21_pinmap.h"
+#else
 #else
 #  error Unrecognized SAMD/L architecture
 #endif

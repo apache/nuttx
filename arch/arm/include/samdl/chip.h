@@ -253,6 +253,13 @@
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
 
+#else
+
+#  undef  SAMD20                                  /* Not SAMD20 family */
+#  undef  SAMD20E
+#  undef  SAMD20G
+#  undef  SAMD20J
+
 #endif
 
 /* SAMD20 Peripherals */
@@ -261,47 +268,357 @@
 #  define SAMDL_NEVENTS             8             /* 8 event channels */
 #  define SAMDL_NTC                 6             /* 6 Timer/counters */
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
+#  define SAMDL_NTCC                0             /* No TC control channels */
+#  define SAMDL_NTCCOUT             0             /* No TCC output channels */
+#  define SAMDL_NDMA                0             /* No DMA channels */
+#  define SAMDL_NUSBIF              0             /* No USB interface */
+#  define SAMDL_NAES                0             /* No AES engine */
+#  define SAMDL_NCCL                0             /* No Counfigurable Custom Logic */
+#  define SAMDL_NTRNG               0             /* No True random number generator */
 #  define SAMDL_NSERCOM             4             /* 4 SERCOM */
 #  define SAMDL_NADC                10            /* 10 ADC channels */
 #  define SAMDL_NCMP                2             /* 2 Comparators */
 #  define SAMDL_NDAC                1             /* 1 DAC channel */
+#  define SAMCL_NOPAMP              0             /* No OpAmps */
 #  define SAMDL_RTC                 1             /* Have RTC */
 #  define SAMDL_NALARMS             1             /* 1 RTC alarm */
 #  define SAMDL_NRTCMP              1             /* RTC compare: 1 32-bit/2 16-bit */
 #  define SAMDL_NEXTINT             16            /* 16 External interrupts */
 #  define SAMDL_NPTCX               10            /* PTC X */
 #  define SAMDL_NPTCY               6             /* PTC Y */
-#  define SAMDL_WDT                               /* Have watchdog timer */
+#  define SAMDL_WDT                 1             /* Have watchdog timer */
 #elif defined(SAMD20G)
 #  define SAMDL_NEVENTS             8             /* 8 event channels */
 #  define SAMDL_NTC                 6             /* 6 Timer/counters */
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
+#  define SAMDL_NTCC                0             /* No TC control channels */
+#  define SAMDL_NTCCOUT             0             /* No TCC output channels */
+#  define SAMDL_NDMA                0             /* No DMA channels */
+#  define SAMDL_NUSBIF              0             /* No USB interface */
+#  define SAMDL_NAES                0             /* No AES engine */
+#  define SAMDL_NCCL                0             /* No Counfigurable Custom Logic */
+#  define SAMDL_NTRNG               0             /* No True random number generator */
 #  define SAMDL_NSERCOM             6             /* 6 SERCOM */
 #  define SAMDL_NADC                15            /* 14 ADC channels */
 #  define SAMDL_NCMP                2             /* 2 Comparators */
 #  define SAMDL_NDAC                1             /* 1 DAC channel */
+#  define SAMCL_NOPAMP              0             /* No OpAmps */
 #  define SAMDL_RTC                 1             /* Have RTC */
 #  define SAMDL_NALARMS             1             /* 1 RTC alarm */
 #  define SAMDL_NRTCMP              1             /* RTC compare: 1 32-bit/2 16-bit */
 #  define SAMDL_NEXTINT             16            /* 16 External interrupts */
 #  define SAMDL_NPTCX               12            /* PTC X */
 #  define SAMDL_NPTCY               10            /* PTC Y */
-#  define SAMDL_WDT                                /* Have watchdog timer */
+#  define SAMDL_WDT                 1             /* Have watchdog timer */
 #elif defined(SAMD20J)
 #  define SAMDL_NEVENTS             8             /* 8 event channels */
 #  define SAMDL_NTC                 8             /* 8 Timer/counters */
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
+#  define SAMDL_NTCC                0             /* No TC control channels */
+#  define SAMDL_NTCCOUT             0             /* No TCC output channels */
+#  define SAMDL_NDMA                0             /* No DMA channels */
+#  define SAMDL_NUSBIF              0             /* No USB interface */
+#  define SAMDL_NAES                0             /* No AES engine */
+#  define SAMDL_NCCL                0             /* No Counfigurable Custom Logic */
+#  define SAMDL_NTRNG               0             /* No True random number generator */
 #  define SAMDL_NSERCOM             6             /* 6 SERCOM */
 #  define SAMDL_NADC                20            /* 20 ADC channels */
 #  define SAMDL_NCMP                2             /* 2 Comparators */
 #  define SAMDL_NDAC                1             /* 1 DAC channel */
+#  define SAMCL_NOPAMP              0             /* No OpAmps */
 #  define SAMDL_RTC                 1             /* Have RTC */
 #  define SAMDL_NALARMS             1             /* 1 RTC alarm */
 #  define SAMDL_NRTCMP              1             /* RTC compare: 1 32-bit/2 16-bit */
 #  define SAMDL_NEXTINT             16            /* 16 External interrupts */
 #  define SAMDL_NPTCX               16            /* PTC X */
 #  define SAMDL_NPTCY               16            /* PTC Y */
-#  define SAMDL_WDT                                /* Have watchdog timer */
+#  define SAMDL_WDT                 1             /* Have watchdog timer */
+#endif
+
+/* SAML21 Family ********************************************************************/
+/* FEATURE             SAM D21J          SAM D21G           SAM D21E
+ * ------------------- ------------------ ------------------ --------
+ * No. of pins         64                 48                 32
+ * Flash               256/128/64KB       256/128/64KB       256/128/64/32KB
+ * Flash RWW           8/4/2KB            8/4/2KB            8/4/2/1KB
+ * SRAM                32/16/8KB          32/16/8KB          32/16/8/4KB
+ * Max. Freq.          48MHz              48MHz              48MHz
+ * Event channels      12                 12                 12
+ * Timer/counters      5                  3                  3
+ * TC output channels  2                  2                  2
+ * T/C Control         3                  3                  3
+ * TCC output channels 2                  2                  2
+ * TCC waveform output 8/4/2              8/4/2              6/4/2
+ * DMA channels        16                 16                 16
+ * USB interface       1                  1                  1
+ * AES engine          1                  1                  1
+ * CCLs                4                  4                  4
+ * TRNG                1                  1                  1
+ * SERCOM              6                  6                  4
+ * ADC channels        20                 14                 10
+ * Comparators         2                  2                  2
+ * DAC channels        2                  2                  2
+ * OPAMP               3                  3                  3
+ * RTC                 Yes                Yes                Yes
+ * RTC alarms          1                  1                  1
+ * RTC compare         1 32-bit/2 16-bit  1 32-bit/2 16-bit  1 32-bit/2 16-bit
+ * External interrupts 16                 16                 16
+ * PTC X an Y          12x16              8x12               6x10
+ *                     16x12              12x8               10x6
+ * Packages            QFN/TQFP           QFN/TQFP           QFN/TQFP
+ * Oscillators         XOSC32, XOSC, OSC32K, OSCULP32K, OSC16M, DFLL48M, and FDPLL96M
+ * SW Debug interface  Yes                Yes                Yes
+ * Watchdog timer      Yes                Yes                Yes
+ */
+
+#if defined(CONFIG_ARCH_CHIP_SAML21E15)
+
+#  define SAML21                    1             /* SAML21 family */
+#  define SAML21E                   1             /* SAML21E */
+#  undef  SAML21G
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
+#  define SAMDL_FLASHRWW_SIZE       (1*1024)      /*  1KB */
+#  define SAMDL_SRAM0_SIZE          (4*1024)      /*  4KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      2             /* 2 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21E16)
+
+#  define SAML21                    1             /* SAML21 family */
+#  define SAML21E                   1             /* SAML21E */
+#  undef  SAML21G
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
+#  define SAMDL_FLASHRWW_SIZE       (2*1024)      /*  2KB */
+#  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      2             /* 2 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21E17)
+
+#  define SAML21                    1             /* SAML21 family */
+#  define SAML21E                   1             /* SAML21E */
+#  undef  SAML21G
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
+#  define SAMDL_FLASHRWW_SIZE       (4*1024)      /*   4KB */
+#  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      4             /* 4 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21E18)
+
+#  define SAML21                    1             /* SAML21 family */
+#  define SAML21E                   1             /* SAML21E */
+#  undef  SAML21G
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
+#  define SAMDL_FLASHRWW_SIZE       (8*1024)      /*   8KB */
+#  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      6             /* 6 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21G16)
+
+#  define SAML21                    1             /* SAML21 family */
+#  undef  SAML21E
+#  define SAML21G                   1             /* SAML21G */
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
+#  define SAMDL_FLASHRWW_SIZE       (2*1024)      /*  2KB */
+#  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      2             /* 2 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21G17)
+
+#  define SAML21                    1             /* SAML21 family */
+#  undef  SAML21E
+#  define SAML21G                   1             /* SAML21G */
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (128*1024)     /* 128KB */
+#  define SAMDL_FLASHRWW_SIZE       (4*1024)       /*   4KB */
+#  define SAMDL_SRAM0_SIZE          (16*1024)      /*  16KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      4              /* 4 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21G18)
+
+#  define SAML21                    1             /* SAML21 family */
+#  undef  SAML21E
+#  define SAML21G                   1             /* SAML21G */
+#  undef  SAML21J
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (256*1024)     /* 256KB */
+#  define SAMDL_FLASHRWW_SIZE       (8*1024)       /*   8KB */
+#  define SAMDL_SRAM0_SIZE          (32*1024)      /*  32KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      8              /* 8 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21J16)
+
+#  define SAML21                    1             /* SAML21 family */
+#  undef  SAML21E
+#  undef  SAML21G
+#  define SAML21J                                 /* SAML21J */
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
+#  define SAMDL_FLASHRWW_SIZE       (2*1024)      /*  2KB */
+#  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      2             /* 2 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21J17)
+
+#  define SAML21                    1             /* SAML21 family */
+#  undef  SAML21E
+#  undef  SAML21G
+#  define SAML21J                                 /* SAML21J */
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
+#  define SAMDL_FLASHRWW_SIZE       (4*1024)      /*   4KB */
+#  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      4             /* 4 TCC wavefor outputs */
+
+#elif defined(CONFIG_ARCH_CHIP_SAML21J18)
+
+#  define SAML21                    1             /* SAML21 family */
+#  undef  SAML21E
+#  undef  SAML21G
+#  define SAML21J                                 /* SAML21J */
+
+/* Internal memory */
+
+#  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
+#  define SAMDL_FLASHRWW_SIZE       (8*1024)      /*   8KB */
+#  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+
+/* TCC waveform outputs */
+
+#  define SAMDL_TCC_NWAVEFORMS      8             /* 8 TCC wavefor outputs */
+
+#else
+
+#  undef  SAML21                                  /* Not SAML21 family */
+#  undef  SAML21E
+#  undef  SAML21G
+#  undef  SAML21J
+
+#endif
+
+#if defined(SAML21E)
+#  define SAMDL_NEVENTS             12            /* 12 event channels */
+#  define SAMDL_NTC                 3             /* 3 Timer/counters */
+#  define SAMDL_NTCOUT              2             /* 2 TC output channels */
+#  define SAMDL_NTCC                3             /* 3 TC control channels */
+#  define SAMDL_NTCCOUT             2             /* 2 TCC output channels */
+#  define SAMDL_NDMA                16            /* 16 DMA channels */
+#  define SAMDL_NUSBIF              1             /* 1 USB interface */
+#  define SAMDL_NAES                1             /* 1 AES engine */
+#  define SAMDL_NCCL                4             /* 4 Counfigurable Custom Logic */
+#  define SAMDL_NTRNG               1             /* 1 True random number generator */
+#  define SAMDL_NSERCOM             4             /* 4 SERCOM */
+#  define SAMDL_NADC                10            /* 10 ADC channels */
+#  define SAMDL_NCMP                2             /* 2 Comparators */
+#  define SAMDL_NDAC                2             /* 2 DAC channels */
+#  define SAMCL_NOPAMP              3             /* 3 OpAmps */
+#  define SAMDL_RTC                 1             /* Have RTC */
+#  define SAMDL_NALARMS             1             /* 1 RTC alarm */
+#  define SAMDL_NRTCMP              1             /* RTC compare: 1 32-bit/2 16-bit */
+#  define SAMDL_NEXTINT             16            /* 16 External interrupts */
+#  define SAMDL_NPTCX               10            /* PTC X 6 or 10 */
+#  define SAMDL_NPTCY               10            /* PTC Y 6 or 10*/
+#  define SAMDL_WDT                 1             /* Have watchdog timer */
+#elif defined(SAML21G)
+#  define SAMDL_NEVENTS             12            /* 12 event channels */
+#  define SAMDL_NTC                 3             /* 3 Timer/counters */
+#  define SAMDL_NTCOUT              2             /* 2 TC output channels */
+#  define SAMDL_NTCC                3             /* 3 TC control channels */
+#  define SAMDL_NTCCOUT             2             /* 2 TCC output channels */
+#  define SAMDL_NDMA                16            /* 16 DMA channels */
+#  define SAMDL_NUSBIF              1             /* 1 USB interface */
+#  define SAMDL_NAES                1             /* 1 AES engine */
+#  define SAMDL_NCCL                4             /* 4 Counfigurable Custom Logic */
+#  define SAMDL_NTRNG               1             /* 1 True random number generator */
+#  define SAMDL_NSERCOM             6             /* 6 SERCOM */
+#  define SAMDL_NADC                14            /* 14 ADC channels */
+#  define SAMDL_NCMP                2             /* 2 Comparators */
+#  define SAMDL_NDAC                2             /* 2 DAC channels */
+#  define SAMCL_NOPAMP              3             /* 3 OpAmps */
+#  define SAMDL_RTC                 1             /* Have RTC */
+#  define SAMDL_NALARMS             1             /* 1 RTC alarm */
+#  define SAMDL_NRTCMP              1             /* RTC compare: 1 32-bit/2 16-bit */
+#  define SAMDL_NEXTINT             16            /* 16 External interrupts */
+#  define SAMDL_NPTCX               12            /* PTC X 8 or 12 */
+#  define SAMDL_NPTCY               12            /* PTC Y 8 or 12*/
+#  define SAMDL_WDT                 1             /* Have watchdog timer */
+#elif defined(SAML21J)
+#  define SAMDL_NEVENTS             12            /* 12 event channels */
+#  define SAMDL_NTC                 5             /* 5 Timer/counters */
+#  define SAMDL_NTCOUT              2             /* 2 TC output channels */
+#  define SAMDL_NTCC                3             /* 3 TC control channels */
+#  define SAMDL_NTCCOUT             2             /* 2 TCC output channels */
+#  define SAMDL_NDMA                16            /* 16 DMA channels */
+#  define SAMDL_NUSBIF              1             /* 1 USB interface */
+#  define SAMDL_NAES                1             /* 1 AES engine */
+#  define SAMDL_NCCL                4             /* 4 Counfigurable Custom Logic */
+#  define SAMDL_NTRNG               1             /* 1 True random number generator */
+#  define SAMDL_NSERCOM             6             /* 6 SERCOM */
+#  define SAMDL_NADC                20            /* 20 ADC channels */
+#  define SAMDL_NCMP                2             /* 2 Comparators */
+#  define SAMDL_NDAC                2             /* 2 DAC channels */
+#  define SAMCL_NOPAMP              3             /* 3 OpAmps */
+#  define SAMDL_RTC                 1             /* Have RTC */
+#  define SAMDL_NALARMS             1             /* 1 RTC alarm */
+#  define SAMDL_NRTCMP              1             /* RTC compare: 1 32-bit/2 16-bit */
+#  define SAMDL_NEXTINT             16            /* 16 External interrupts */
+#  define SAMDL_NPTCX               16            /* PTC X 12 or 16 */
+#  define SAMDL_NPTCY               16            /* PTC Y 12 or 16*/
+#  define SAMDL_WDT                 1             /* Have watchdog timer */
 #endif
 
 /* NVIC priority levels *************************************************************/
