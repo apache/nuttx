@@ -888,9 +888,9 @@ static void usbhost_txdata_work(FAR void *arg)
   FAR struct uart_dev_s *uartdev;
   FAR struct uart_buffer_s *txbuf;
   ssize_t nwritten;
-  int nxfrd;
   int txndx;
   int txtail;
+  int ret;
 
   priv = (FAR struct usbhost_cdcacm_s *)arg;
   DEBUGASSERT(priv);
@@ -913,13 +913,12 @@ static void usbhost_txdata_work(FAR void *arg)
   /* Loop until The UART TX buffer is empty (or we become disconnected) */
 
   txtail = txbuf->tail;
-  nxfrd  = 0;
   txndx  = 0;
 
-  while (txtail != txbuf->head && !priv->disconnected)
+  while (txtail != txbuf->head && priv->txena && !priv->disconnected)
     {
       /* Copy data from the UART TX buffer until either 1) the UART TX
-       * buffer has been emptie, or 2) the Bulk OUT buffer is full.
+       * buffer has been emptied, or 2) the Bulk OUT buffer is full.
        */
 
       txndx = 0;
@@ -931,13 +930,22 @@ static void usbhost_txdata_work(FAR void *arg)
 
           /* Increment counters and indices */
 
-          nxfrd++;
           txndx++;
           if (++txtail > txbuf->size)
             {
              txtail = 0;
             }
         }
+
+      /* Save the updated tail pointer so that it cannot be sent again */
+
+      txbuf->tail = txtail;
+
+      /* Bytes were removed from the TX buffer.  Inform any waiters that
+       * there is space available in the TX buffer.
+       */
+
+      uart_datasent(uartdev);
 
       /* Send the filled TX buffer to the CDC/ACM device */
 
@@ -946,29 +954,26 @@ static void usbhost_txdata_work(FAR void *arg)
       if (nwritten < 0)
         {
           /* The most likely reason for a failure is that CDC/ACM device
-           * NAK'ed our packet
+           * NAK'ed our packet OR that the device has been disconnected.
            *
-           * Just break out of the loop, rescheduling the work.
+           * Just break out of the loop, rescheduling the work (unless
+           * the device is disconnected).
            */
 
           udbg("ERROR: DRVR_TRANSFER for packet failed: %d\n", (int)nwritten);
           break;
         }
-
-      /* Save the updated tail pointer so that it cannot be send again */
-
-      txbuf->tail = txtail;
     }
 
-  /* We get here because either 1) the UART TX buffer is empty and there is
-   * nothing more to send, or 2) the CDC/ACM device was not ready to accept
-   * our data.
+  /* We get here because: 1) the UART TX buffer is empty and there is
+   * nothing more to send, 2) the CDC/ACM device was not ready to accept our
+   * data, or the device is no longer available.
    *
    * If the last packet sent was and even multiple of the packet size, then
    * we need to send a zero length packet (ZLP).
    */
 
-  if (nxfrd > 0 && txndx == priv->pktsize)
+  if (txndx == priv->pktsize && !priv->disconnected)
     {
       /* Send the ZLP to the CDC/ACM device */
 
@@ -984,13 +989,19 @@ static void usbhost_txdata_work(FAR void *arg)
         }
     }
 
-  /* If any bytes were removed from the buffer, inform any waiters there there is
-   * space available.
+  /* Check again if TX reception is enabled and that the device is still
+   * connected.  These states could have changed since we started the
+   * transfer.
    */
 
-  if (nxfrd)
+  if (priv->txena && !priv->disconnected)
     {
-      uart_datasent(uartdev);
+      /* Schedule TX data work to occur after a delay. */
+
+      ret = work_queue(LPWORK, &priv->txwork, usbhost_txdata_work, priv,
+                       USBHOST_CDCACM_TXDELAY);
+      DEBUGASSERT(ret >= 0);
+      UNUSED(ret);
     }
 }
 
@@ -1029,21 +1040,6 @@ static void usbhost_rxdata_work(FAR void *arg)
   uartdev = &priv->uartdev;
   rxbuf   = &uartdev->recv;
 
-  /* Do nothing if RX reception is disabled or if RX flow control is in
-   * effect.
-   */
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (!priv->rxena || !priv->rts)
-#else
-  if (!priv->rxena)
-#endif
-    {
-      /* Terminate the work now *without* rescheduling */
-
-      return;
-    }
-
   /* Get the index in the RX packet buffer where we will take the first
    * byte of data.
    */
@@ -1066,9 +1062,14 @@ static void usbhost_rxdata_work(FAR void *arg)
    *
    * 1. The UART RX buffer is full
    * 2. There is no more data available from the CDC/ACM device
+   * 3. RX rec
    */
 
-  for (;;)
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  while (priv->rxena && priv->rts && !priv->disconnected)
+#else
+  while (priv->rxena && !priv->disconnected)
+#endif
     {
       /* Stop now if there is no room for another character in the RX buffer. */
 
@@ -1089,12 +1090,15 @@ static void usbhost_rxdata_work(FAR void *arg)
                                 priv->inbuf, priv->pktsize);
           if (nread < 0)
             {
-              /* The most likely reason for a failure is that the
-               * has no data available now and NAK'ed the IN token.
+              /* The most likely reason for a failure is that the has no
+               * data available now and NAK'ed the IN token OR that the
+               * transfer was cancelled because the device was disconnected.
                *
-               * Just break out of the loop, rescheduling the work.
+               * Just break out of the loop, rescheduling the work (if the
+               * device was not disconnected.
                */
 
+              udbg("ERROR: DRVR_TRANSFER for packet failed: %d\n", (int)nread);
               break;
             }
 
@@ -1104,7 +1108,7 @@ static void usbhost_rxdata_work(FAR void *arg)
            * no interest to us.
            */
 
-          DEBUGASSERT(nread <=  priv->pktsize);
+          DEBUGASSERT(nread <= priv->pktsize);
           priv->nrxbytes = (uint16_t)nread;
           rxndx          = 0;
 
@@ -1148,6 +1152,7 @@ static void usbhost_rxdata_work(FAR void *arg)
            */
 
           priv->nrxbytes = 0;
+          priv->rxndx    = 0;
 
           /* Inform any waiters there there is new incoming data available. */
 
@@ -1156,24 +1161,25 @@ static void usbhost_rxdata_work(FAR void *arg)
         }
     }
 
-  /* We break out to here if either:  1) the UART RX buffer is full or,
-   * 2) the CDC/ACM device is not ready to provide us with more serial
-   * data.
+  /* We break out to here:  1) the UART RX buffer is full, 2) the CDC/ACM
+   * device is not ready to provide us with more serial data, or 3) the
+   * device has been disconnected.
    *
-   * Check again if RX reception is enabled.  This state could have
-   * changed since we started the transfer.
+   * Check if the device is still available:  RX enabled, no RX flow
+   * control in effect, and that the device is not disconnected. These
+   * states could have changed since we started the transfer.
    */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->rxena && priv->rts && work_available(&priv->rxwork))
+  if (priv->rxena && priv->rts && work_available(&priv->rxwork) && !priv->disconnected)
 #else
   if (priv->rxena && work_available(&priv->rxwork) && !priv->disconnected)
 #endif
     {
-      /* Schedule RX data reception work flow to occur after a delay.
-       * This will effect our responsive in certain cased.  The delayed
-       * work, however, will be cancelled and replaced with immediate
-       * work when the upper layer demands more data.
+      /* Schedule RX data reception work to occur after a delay.  This will
+       * affect our responsive in certain cases.  The delayed work, however,
+       * will be cancelled and replaced with immediate work when the upper
+       * layer demands more data.
        */
 
       ret = work_queue(LPWORK, &priv->rxwork, usbhost_rxdata_work, priv,
@@ -1964,7 +1970,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)usbclass;
+#ifdef HAVE_INTIN_ENDPOINT
   FAR struct usbhost_hubport_s *hport;
+#endif
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -1972,8 +1980,10 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
 
+#ifdef HAVE_INTIN_ENDPOINT
   hport = priv->usbclass.hport;
   DEBUGASSERT(hport);
+#endif
 
   /* Get exclusive access to the device structure */
 
@@ -2542,12 +2552,16 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
 
   if (enable && !priv->rxena)
     {
-      /* Restart RX data reception work flow unless RX flow control is in
-       * effect.
+      /* Cancel any pending, delayed RX data reception work */
+
+      (void)work_cancel(LPWORK, &priv->rxwork);
+
+      /* Restart immediate RX data reception work (unless RX flow control
+       * is in* effect.
        */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->rts && work_available(&priv->rxwork))
+      if (priv->rts))
 #endif
         {
           ret = work_queue(LPWORK, &priv->rxwork,
@@ -2692,9 +2706,12 @@ static void usbhost_txint(FAR struct uart_dev_s *uartdev, bool enable)
 
   if (enable && !priv->txena)
     {
-      /* Restart TX data transmission work flow */
+      /* Cancel any pending, delayed TX data transmission work */
 
-      DEBUGASSERT(work_available(&priv->txwork));
+      (void)work_cancel(LPWORK, &priv->txwork);
+
+      /* Restart immediate TX data transmission work */
+
       ret = work_queue(LPWORK, &priv->txwork,
                        usbhost_txdata_work, priv, 0);
       DEBUGASSERT(ret >= 0);

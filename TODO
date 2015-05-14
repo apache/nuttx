@@ -1126,6 +1126,16 @@ o USB (drivers/usbdev, drivers/usbhost)
                 the RX reception logic probably should be moved to its own
                 dedicated thread.
 
+              - I get crashes when I run with the STM32 OTGHS host driver.
+                Apparently the host driver is trashing memory on receipt
+                of data.
+
+              - The SAMA5D EHCI and the LPC31 EHCI drivers both take semaphores
+                in the cancel method.  The current CDC/ACM class driver calls
+                the cancel() method from an interrupt handler.  This will
+                cause a crash.  Those EHCI drivers should be redesigned to
+                permit cancellation from the interrupt level.
+
                Most of these problems are unique to the Olimex LPC1766STK
                DCD; some are probably design problems in the CDC/ACM host
                driver.  The bottom line is that the host CDC/ACM driver is
