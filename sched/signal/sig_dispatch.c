@@ -445,7 +445,6 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 int sig_dispatch(pid_t pid, FAR siginfo_t *info)
 {
 #ifdef HAVE_GROUP_MEMBERS
-
   FAR struct tcb_s *stcb;
   FAR struct task_group_s *group;
 
@@ -486,7 +485,6 @@ int sig_dispatch(pid_t pid, FAR siginfo_t *info)
     }
 
 #else
-
   FAR struct tcb_s *stcb;
 
   /* Get the TCB associated with the pid */

@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
+
 #include "signal/signal.h"
 
 /************************************************************************
@@ -82,6 +84,14 @@
 
 int pthread_kill(pthread_t thread, int signo)
 {
+#ifdef HAVE_GROUP_MEMBERS
+  /* If group members are support then pthread_kill() differs from kill().
+   * kill(), in this case, must following the POSIX rules for delivery of
+   * signals in the group environment.  Otherwise, kill(), like
+   * pthread_kill() will just deliver the signal to the thread ID it is
+   * requested to use.
+   */
+
 #ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 #endif
@@ -138,4 +148,21 @@ errout_with_lock:
   sched_unlock();
 errout:
   return -ret;
+
+#else
+  /* If group members are not supported then pthread_kill is basically the
+   * same as kill().
+   */
+
+  int ret;
+
+  set_errno(EINVAL);
+  ret = kill((pid_t)thread, signo);
+  if (ret != OK)
+    {
+       ret = get_errno();
+    }
+
+  return ret;
+#endif
 }
