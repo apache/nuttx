@@ -4763,7 +4763,6 @@ static int efm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   efm32_givesem(&priv->exclsem);
   return OK;
 }
-#endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
  * Name: efm32_connect
