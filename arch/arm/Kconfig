@@ -159,6 +159,13 @@ config ARCH_CHIP_SAMD
 	---help---
 		Atmel SAMD (ARM Cortex-M0+)
 
+config ARCH_CHIP_SAML
+	bool "Atmel SAML"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_CMNVECTOR
+	---help---
+		Atmel SAML (ARM Cortex-M0+)
+
 config ARCH_CHIP_SAM34
 	bool "Atmel SAM3/SAM4"
 	select ARCH_HAVE_CMNVECTOR
@@ -281,7 +288,7 @@ config ARCH_CHIP
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
-	default "samd"		if ARCH_CHIP_SAMD
+	default "samd"		if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
@@ -474,8 +481,8 @@ endif
 if ARCH_CHIP_SAMA5
 source arch/arm/src/sama5/Kconfig
 endif
-if ARCH_CHIP_SAMD
-source arch/arm/src/samd/Kconfig
+if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
+source arch/arm/src/samdl/Kconfig
 endif
 if ARCH_CHIP_SAM34
 source arch/arm/src/sam34/Kconfig
