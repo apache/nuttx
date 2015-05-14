@@ -53,7 +53,7 @@
 /* Some configuration checks */
 
 #ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
-#  ifndef SAMD_HAVE_SPI0
+#  ifndef SAMDL_HAVE_SPI0
 #    error I/O1 module on EXT1 requires SERCOM SPI0
 #    undef CONFIG_SAMD20_XPLAINED_IOMODULE
 #  endif
@@ -61,7 +61,7 @@
 #endif
 
 #ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
-#  ifndef SAMD_HAVE_SPI1
+#  ifndef SAMDL_HAVE_SPI1
 #    error I/O1 module on EXT2 requires SERCOM SPI1
 #    undef CONFIG_SAMD20_XPLAINED_IOMODULE
 #  endif
@@ -72,12 +72,12 @@
 /* Support for the SD card slot on the I/O1 module */
 /* Verify NSH PORT and SLOT settings */
 
-#  define SAMD_MMCSDSLOTNO    0 /* There is only one slot */
+#  define SAMDL_MMCSDSLOTNO    0 /* There is only one slot */
 
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMD_MMCSDSLOTNO
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMDL_MMCSDSLOTNO
 #    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
 #    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO SAMD_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO SAMDL_MMCSDSLOTNO
 #  endif
 
 #  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SPI_PORTNO
@@ -107,7 +107,7 @@
 
 int board_app_initialize(void)
 {
-#if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
+#if defined(SAMDL_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
   {

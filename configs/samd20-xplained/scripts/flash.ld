@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/samd30-xplained/scripts/flash.ld
+ * configs/samd20-xplained/scripts/flash.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -51,7 +51,7 @@
 
 #include "samd20-xplained.h"
 
-#ifdef SAMD_HAVE_SPI
+#ifdef SAMDL_HAVE_SPI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -129,7 +129,7 @@ void weak_function sam_spiinitialize(void)
  *   o sam_spi[n]status and sam_spi[n]cmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAMD logic.
+ *     up_spiinitialize()) are provided by common SAMD/L logic.
  *
  *   Where [n] is the SERCOM number for the SPI module.
  *
@@ -179,7 +179,7 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef SAMD_HAVE_SPI0
+#ifdef SAMDL_HAVE_SPI0
 void sam_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                     bool selected)
 {
@@ -207,7 +207,7 @@ void sam_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI1
+#ifdef SAMDL_HAVE_SPI1
 void sam_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                     bool selected)
 {
@@ -235,28 +235,28 @@ void sam_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI2
+#ifdef SAMDL_HAVE_SPI2
 void sam_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                     bool selected)
 {
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI3
+#ifdef SAMDL_HAVE_SPI3
 void sam_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                     bool selected)
 {
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI4
+#ifdef SAMDL_HAVE_SPI4
 void sam_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                     bool selected)
 {
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI5
+#ifdef SAMDL_HAVE_SPI5
 void sam_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                     bool selected)
 {
@@ -278,7 +278,7 @@ void sam_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
  *
  ****************************************************************************/
 
-#ifdef SAMD_HAVE_SPI0
+#ifdef SAMDL_HAVE_SPI0
 uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   uint8_t ret = 0;
@@ -301,7 +301,7 @@ uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI1
+#ifdef SAMDL_HAVE_SPI1
 uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   uint8_t ret = 0;
@@ -324,28 +324,28 @@ uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI2
+#ifdef SAMDL_HAVE_SPI2
 uint8_t sam_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI3
+#ifdef SAMDL_HAVE_SPI3
 uint8_t sam_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI4
+#ifdef SAMDL_HAVE_SPI4
 uint8_t sam_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI5
+#ifdef SAMDL_HAVE_SPI5
 uint8_t sam_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   uint8_t ret = 0;
@@ -378,7 +378,7 @@ uint8_t sam_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef SAMD_HAVE_SPI0
+#ifdef SAMDL_HAVE_SPI0
 int sam_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
 #ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1
@@ -399,7 +399,7 @@ int sam_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI1
+#ifdef SAMDL_HAVE_SPI1
 int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
 #ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2
@@ -420,28 +420,28 @@ int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI2
+#ifdef SAMDL_HAVE_SPI2
 int sam_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI3
+#ifdef SAMDL_HAVE_SPI3
 int sam_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI4
+#ifdef SAMDL_HAVE_SPI4
 int sam_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef SAMD_HAVE_SPI5
+#ifdef SAMDL_HAVE_SPI5
 int sam_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
@@ -449,4 +449,4 @@ int sam_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #endif
 
 #endif /* CONFIG_SPI_CMDDATA */
-#endif /* SAMD_HAVE_SPI */
+#endif /* SAMDL_HAVE_SPI */
