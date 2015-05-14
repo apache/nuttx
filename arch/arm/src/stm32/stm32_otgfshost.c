@@ -2482,7 +2482,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
 
       if (chan->chreason == CHREASON_XFRC)
         {
-          /* Set the request done reult */
+          /* Set the request done result */
 
           chan->result = OK;
         }
@@ -2551,7 +2551,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
       /* For a BULK transfer, the hardware is capable of retrying
        * automatically on a NAK.  However, this is not always
        * what we need to do.  So we always halt the transfer and
-       * return control to high level logic in the even of a NAK.
+       * return control to high level logic in the event of a NAK.
        */
 
 #if 1
@@ -2564,7 +2564,9 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
           stm32_chan_halt(priv, chidx, CHREASON_NAK);
         }
 
-      /* Re-activate CTRL and BULK channels */
+      /* Re-activate CTRL and BULK channels.
+       * REVISIT: This can cause a lot of interrupts!
+       */
 
       else if (chan->eptype == OTGFS_EPTYPE_CTRL ||
                chan->eptype == OTGFS_EPTYPE_BULK)
@@ -3455,7 +3457,7 @@ static int stm32_gint_isr(int irq, FAR void *context)
       pending  = stm32_getreg(STM32_OTGFS_GINTSTS);
       pending &= stm32_getreg(STM32_OTGFS_GINTMSK);
 
-      /* Return from the interrupt when there are no furhter pending
+      /* Return from the interrupt when there are no further pending
        * interrupts.
        */
 
@@ -3465,7 +3467,6 @@ static int stm32_gint_isr(int irq, FAR void *context)
         }
 
       /* Otherwise, process each pending, unmasked GINT interrupts */
-
 
       /* Handle the start of frame interrupt */
 
@@ -4637,12 +4638,10 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   DEBUGASSERT(priv && chidx < STM32_MAX_TX_FIFOS);
   chan = &priv->chan[chidx];
 
-  /* We must have exclusive access to the USB host hardware and state structures.
-   * And when we have that, we need to disable interrupts to avoid race conditions
-   * with the asynchronous completion of the transfer being cancelled.
+  /* We need to disable interrupts to avoid race conditions with the asynchronous
+   * completion of the transfer being cancelled.
    */
 
-  stm32_takesem(&priv->exclsem);
   flags = irqsave();
 
   /* Halt the channel */
@@ -4692,7 +4691,6 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 #endif
 
   irqrestore(flags);
-  stm32_givesem(&priv->exclsem);
   return OK;
 }
 
