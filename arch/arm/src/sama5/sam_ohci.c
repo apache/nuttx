@@ -3654,6 +3654,9 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       paddr        = sam_physramaddr((uintptr_t)eplist->tail);
       ed->hw.headp = paddr;
 
+      arch_clean_dcache((uintptr_t)ed,
+                        (uintptr_t)ed + sizeof(struct ohci_ed_s));
+
       /* Free all transfer descriptors that were connected to the ED */
 
       DEBUGASSERT(td != (struct sam_gtd_s *)eplist->tail);
