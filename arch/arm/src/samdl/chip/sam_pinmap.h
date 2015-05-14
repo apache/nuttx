@@ -48,7 +48,6 @@
 #elif defined(SAML21)
 #  include "chip/saml21_pinmap.h"
 #else
-#else
 #  error Unrecognized SAMD/L architecture
 #endif
 
