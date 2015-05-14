@@ -10382,3 +10382,10 @@
 	  calling kill() does not do what pthread_kill() is supposed to do.  The
 	  corrected implementation of pthread_kill() will direct the signal
 	  specifically to the specific pthread and no other (2015-05-13).
+	* arch/arm/include/samdl, arch/arm/src/samdl, configs/samd20-xplained:
+	  Rename the samd/ directories and configuratino varialbes to samdl to
+	  all the same directory structure to support the SAML21 (2015-05-14).
+	* arch/arm/include/samdl and arch/arm/src/samdl: And chip definitions,
+	  configuration framework, and placeholder memory map and pin
+	  configuration files for SAML21 support.  Still incomplete on initial
+	  commit (2015-05-14).
