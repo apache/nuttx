@@ -193,7 +193,7 @@
 #define PORT_GCLK_IO7_1      (PORT_FUNCH | PORTA | PORT_PIN23)
 #define PORT_GCLK_IO7_2      (PORT_FUNCH | PORTB | PORT_PIN13)
 
-/* No maskable interrupt */
+/* Non maskable interrupt */
 
 #define PORT_NMI             (PORT_FUNCA | PORTA | PORT_PIN8)
 

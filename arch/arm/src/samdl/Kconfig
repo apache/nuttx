@@ -131,11 +131,94 @@ config ARCH_CHIP_SAMD20J18
 	---help---
 		Flash 256KB SRAM 32KB
 
+config ARCH_CHIP_SAML21E15
+	bool "SAML21E15"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21E
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAML21E16
+	bool "SAML21E16"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21E
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAML21E17
+	bool "SAML21E17"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21E
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAML21E18
+	bool "SAML21E18"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21E
+	---help---
+		Flash 256KB SRAM 32KB
+
+config ARCH_CHIP_SAML21G16
+	bool "SAML21G16"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21G
+	---help---
+		Flash 64KB SRAM 4KB
+
+config ARCH_CHIP_SAML21G17
+	bool "SAML21G17"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21G
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAML21G18
+	bool "SAML21G18"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21G
+	---help---
+		Flash 256KB SRAM 32KB
+
+config ARCH_CHIP_SAML21J16
+	bool "SAML21J16"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21J
+	---help---
+		Flash 64KB SRAM 4KB
+
+config ARCH_CHIP_SAML21J17
+	bool "SAML21J17"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21J
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAML21J18
+	bool "SAML21J18"
+	depends on ARCH_CHIP_SAML
+	select ARCH_FAMILY_SAML21
+	select ARCH_FAMILY_SAML21J
+	---help---
+		Flash 256KB SRAM 32KB
+
 endchoice
 
 config ARCH_FAMILY_SAMD20
 	bool
 	default n
+	select SAMDL_HAVE_TC2
+	select SAMDL_HAVE_TC3
+	select SAMDL_HAVE_TC5
 
 config ARCH_FAMILY_SAMD20E
 	bool
@@ -155,11 +238,46 @@ config ARCH_FAMILY_SAMD20J
 	select SAMDL_HAVE_TC6
 	select SAMDL_HAVE_TC7
 
+config ARCH_FAMILY_SAML21
+	bool
+	default n
+
+config ARCH_FAMILY_SAML21E
+	bool
+	default n
+
+config ARCH_FAMILY_SAML21G
+	bool
+	default n
+	select SAMDL_HAVE_SERCOM4
+	select SAMDL_HAVE_SERCOM5
+
+config ARCH_FAMILY_SAML21J
+	bool
+	default n
+	select SAMDL_HAVE_SERCOM4
+	select SAMDL_HAVE_SERCOM5
+	select SAMDL_HAVE_TC2
+	select SAMDL_HAVE_TC3
+	select SAMDL_HAVE_TC5
+
 config SAMDL_HAVE_SERCOM4
 	bool
 	default n
 
 config SAMDL_HAVE_SERCOM5
+	bool
+	default n
+
+config SAMDL_HAVE_TC5
+	bool
+	default n
+
+config SAMDL_HAVE_TC2
+	bool
+	default n
+
+config SAMDL_HAVE_TC3
 	bool
 	default n
 
@@ -226,10 +344,12 @@ config SAMDL_TC1
 config SAMDL_TC2
 	bool "Timer/Counter 2"
 	default n
+	depends on SAMDL_HAVE_TC2
 
 config SAMDL_TC3
 	bool "Timer/Counter 3"
 	default n
+	depends on SAMDL_HAVE_TC3
 
 config SAMDL_TC4
 	bool "Timer/Counter 4"
@@ -238,6 +358,7 @@ config SAMDL_TC4
 config SAMDL_TC5
 	bool "Timer/Counter 5"
 	default n
+	depends on SAMDL_HAVE_TC5
 
 config SAMDL_TC6
 	bool "Timer/Counter 6"
