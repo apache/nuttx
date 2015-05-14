@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samd20-xplained/src/sam_nsh.c
+ * arch/arm/src/samdl/sam_serial.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,93 +33,35 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_SERIAL_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_SERIAL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-
-#include <nuttx/board.h>
-
 #include "sam_config.h"
-#include "samd20-xplained.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Some configuration checks */
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
-#  ifndef SAMDL_HAVE_SPI0
-#    error I/O1 module on EXT1 requires SERCOM SPI0
-#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
-#  endif
-#  define SPI_PORTNO 0
-#endif
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
-#  ifndef SAMDL_HAVE_SPI1
-#    error I/O1 module on EXT2 requires SERCOM SPI1
-#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
-#  endif
-#  define SPI_PORTNO 1
-#endif
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
-/* Support for the SD card slot on the I/O1 module */
-/* Verify NSH PORT and SLOT settings */
-
-#  define SAMDL_MMCSDSLOTNO    0 /* There is only one slot */
-
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMDL_MMCSDSLOTNO
-#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO SAMDL_MMCSDSLOTNO
-#  endif
-
-#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SPI_PORTNO
-#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SPI_PORTNO
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO SPI_PORTNO
-#  endif
-
-/* Default MMC/SD minor number */
-
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
-#endif
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
- ****************************************************************************/
-
-int board_app_initialize(void)
-{
-#if defined(SAMDL_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
-  /* Initialize the SPI-based MMC/SD slot */
-
-  {
-    int ret = sam_sdinitialize(SPI_PORTNO, CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
-#endif
-
-  return OK;
-}
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_SERIAL_H */

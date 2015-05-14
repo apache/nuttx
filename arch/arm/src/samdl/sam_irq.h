@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/samd20-xplained/src/sam_cxxinitialize.c
+ * arch/arm/src/samdl/sam_irq.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,71 +33,29 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_IRQ_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_IRQ_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/arch.h>
-
-#if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Debug ****************************************************************************/
-/* Non-standard debug that may be enabled just for testing the static constructors */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_CXX
-#endif
-
-#ifdef CONFIG_DEBUG_CXX
-#  define cxxdbg              dbg
-#  define cxxlldbg            lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define cxxvdbg           vdbg
-#    define cxxllvdbg         llvdbg
-#  else
-#    define cxxvdbg(x...)
-#    define cxxllvdbg(x...)
-#  endif
-#else
-#  define cxxdbg(x...)
-#  define cxxlldbg(x...)
-#  define cxxvdbg(x...)
-#  define cxxllvdbg(x...)
-#endif
 
 /************************************************************************************
- * Private Types
+ * Public Types
  ************************************************************************************/
-/* This type defines one entry in initialization array */
-
-typedef void (*initializer_t)(void);
 
 /************************************************************************************
- * External references
+ * Public Data
  ************************************************************************************/
-/* _sinit and _einit are symbols exported by the linker script that mark the
- * beginning and the end of the C++ initialization section.
- */
-
-extern initializer_t _sinit;
-extern initializer_t _einit;
-
-/* _stext and _etext are symbols exported by the linker script that mark the
- * beginning and the end of text.
- */
-
-extern uint32_t _stext;
-extern uint32_t _etext;
 
 /************************************************************************************
- * Private Functions
+ * Inline Functions
  ************************************************************************************/
 
 /************************************************************************************
@@ -105,46 +63,17 @@ extern uint32_t _etext;
  ************************************************************************************/
 
 /****************************************************************************
- * Name: up_cxxinitialize
+ * Name: sam_dumpnvic
  *
  * Description:
- *   If C++ and C++ static constructors are supported, then this function
- *   must be provided by board-specific logic in order to perform
- *   initialization of the static C++ class instances.
+ *   Dump some interesting NVIC registers
  *
- *   This function should then be called in the application-specific
- *   user_start logic in order to perform the C++ initialization.  NOTE
- *   that no component of the core NuttX RTOS logic is involved; This
- *   function defintion only provides the 'contract' between application
- *   specific C++ code and platform-specific toolchain support
- *
- ***************************************************************************/
+ ****************************************************************************/
 
-void up_cxxinitialize(void)
-{
-  initializer_t *initp;
+#ifdef CONFIG_DEBUG_IRQ
+void sam_dumpnvic(const char *msg, int irq);
+#else
+#  define sam_dumpnvic(msg, irq)
+#endif
 
-  cxxdbg("_sinit: %p _einit: %p _stext: %p _etext: %p\n",
-         &_sinit, &_einit, &_stext, &_etext);
-
-  /* Visit each entry in the initialzation table */
-
-  for (initp = &_sinit; initp != &_einit; initp++)
-    {
-      initializer_t initializer = *initp;
-      cxxdbg("initp: %p initializer: %p\n", initp, initializer);
-
-      /* Make sure that the address is non-NULL and lies in the text region
-       * defined by the linker script.  Some toolchains may put NULL values
-       * or counts in the initialization table
-       */
-
-      if ((void*)initializer > (void*)&_stext && (void*)initializer < (void*)&_etext)
-        {
-          cxxdbg("Calling %p\n", initializer);
-          initializer();
-        }
-    }
-}
-
-#endif /* CONFIG_HAVE_CXX && CONFIG_HAVE_CXXINITIALIZE */
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_IRQ_H */

@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/samd20-xplained/src/sam_boot.c
+ * arch/arm/src/samdl/sam_clockconfig.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,61 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_CLOCKCONFIG_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/board.h>
-
-#include "sam_config.h"
-#include "samd20-xplained.h"
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Private Functions
+ * Public Types
  ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_boardinitialize
+ * Name: sam_clockconfig
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to establish the clock settings based on the values in board.h.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ************************************************************************************/
 
-void sam_boardinitialize(void)
-{
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam_spiinitialize() has been brought into the link.
-   */
+void sam_clockconfig(void);
 
-#ifdef SAMDL_HAVE_SPI
-  if (sam_spiinitialize)
-    {
-      sam_spiinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_CLOCKCONFIG_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samd20-xplained/src/sam_nsh.c
+ * arch/arm/src/samdl/sam_irqprio.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,87 +39,101 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
+#include <sys/types.h>
+#include <assert.h>
+#include <arch/irq.h>
 
-#include <nuttx/board.h>
+#include "nvic.h"
+#include "up_arch.h"
 
-#include "sam_config.h"
-#include "samd20-xplained.h"
+#include "sam_irq.h"
+
+#ifdef CONFIG_ARCH_IRQPRIO
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Some configuration checks */
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
-#  ifndef SAMDL_HAVE_SPI0
-#    error I/O1 module on EXT1 requires SERCOM SPI0
-#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
-#  endif
-#  define SPI_PORTNO 0
-#endif
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
-#  ifndef SAMDL_HAVE_SPI1
-#    error I/O1 module on EXT2 requires SERCOM SPI1
-#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
-#  endif
-#  define SPI_PORTNO 1
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
-/* Support for the SD card slot on the I/O1 module */
-/* Verify NSH PORT and SLOT settings */
-
-#  define SAMDL_MMCSDSLOTNO    0 /* There is only one slot */
-
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMDL_MMCSDSLOTNO
-#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO SAMDL_MMCSDSLOTNO
-#  endif
-
-#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SPI_PORTNO
-#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SPI_PORTNO
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO SPI_PORTNO
-#  endif
-
-/* Default MMC/SD minor number */
-
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: up_prioritize_irq
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Set the priority of an IRQ.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
  *
  ****************************************************************************/
 
-int board_app_initialize(void)
+int up_prioritize_irq(int irq, int priority)
 {
-#if defined(SAMDL_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
-  /* Initialize the SPI-based MMC/SD slot */
+  uint32_t regaddr;
+  uint32_t regval;
+  int shift;
 
-  {
-    int ret = sam_sdinitialize(SPI_PORTNO, CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
-#endif
+  DEBUGASSERT(irq == SAM_IRQ_SVCALL ||
+              irq == SAM_IRQ_PENDSV ||
+              irq == SAM_IRQ_SYSTICK ||
+             (irq >= SAM_IRQ_INTERRUPT && irq < NR_IRQS));
+  DEBUGASSERT(priority >= NVIC_SYSH_PRIORITY_MAX &&
+              priority <= NVIC_SYSH_PRIORITY_MIN);
 
+  /* Check for external interrupt */
+
+  if (irq >= SAM_IRQ_INTERRUPT && irq < SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS)
+    {
+      /* ARMV6M_NVIC_IPR() maps register IPR0-IPR7 with four settings per
+       * register.
+       */
+
+      regaddr = ARMV6M_NVIC_IPR(irq >> 2);
+      shift   = (irq & 3) << 3;
+    }
+
+  /* Handle processor exceptions.  Only SVCall, PendSV, and SysTick can be
+   * reprioritized.  And we will not permit modification of SVCall through
+   * this function.
+   */
+
+  else if (irq == SAM_IRQ_PENDSV)
+    {
+      regaddr = ARMV6M_SYSCON_SHPR2;
+      shift   = SYSCON_SHPR3_PRI_14_SHIFT;
+    }
+  else if (irq == SAM_IRQ_SYSTICK)
+    {
+      regaddr = ARMV6M_SYSCON_SHPR2;
+      shift   = SYSCON_SHPR3_PRI_15_SHIFT;
+    }
+  else
+    {
+      return ERROR;
+    }
+
+  /* Set the priority */
+
+  regval  = getreg32(regaddr);
+  regval &= ~((uint32_t)0xff << shift);
+  regval |= ((uint32_t)priority << shift);
+  putreg32(regval, regaddr);
+
+  sam_dumpnvic("prioritize", irq);
   return OK;
 }
+#endif

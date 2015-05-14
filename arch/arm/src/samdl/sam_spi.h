@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/samd20-xplained/src/sam_spi.c
+ * arch/arm/src/samdl/sam_spi.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,89 +33,52 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_SPI_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_SPI_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
-#include <errno.h>
-
-#include <nuttx/spi/spi.h>
 
 #include "sam_config.h"
-#include "sam_port.h"
-#include "sam_spi.h"
-
-#include "samd20-xplained.h"
 
 #ifdef SAMDL_HAVE_SPI
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#if defined(CONFIG_SAMD20_XPLAINED_IOMODULE) && \
-    defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE) && defined(CONFIG_SPI_OWNBUS)
-#  error CONFIG_SPI_OWNBUS must not defined if using both I/O1 and OLED1 modules
-#endif
-
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
-
-#undef SPI_DEBUG   /* Define to enable debug */
-#undef SPI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SPI_DEBUG
-#  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  undef SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
 
 /****************************************************************************
- * Private Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Inline Functions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: sam_spiinitialize
- *
- * Description:
- *   Called to configure SPI chip select PORT pins for the SAMD20 Xplained
- *   Pro board.
- *
+ * Public Data
  ****************************************************************************/
 
-void weak_function sam_spiinitialize(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  /* The I/O module containing the SD connector may or may not be installed.  And, if
-   * it is installed, it may be in connector EXT1 or EXT2.
-   */
-
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
-  /* TODO: enable interrupt on card detect */
-
-   sam_configport(PORT_SD_CD);     /* Card detect input */
-   sam_configport(PORT_SD_CS);     /* Chip select output */
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
-   sam_configport(PORT_OLED_DATA); /* Command/data */
-   sam_configport(PORT_OLED_CS);   /* Card detect input */
-#endif
-}
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name:  sam_spi[n]select, sam_spi[n]status, and sam_spi[n]cmddata
@@ -153,6 +116,9 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
+struct spi_dev_s;
+enum spi_dev_e;
+
 /****************************************************************************
  * Name: sam_spi[n]select
  *
@@ -181,86 +147,32 @@ void weak_function sam_spiinitialize(void)
 
 #ifdef SAMDL_HAVE_SPI0
 void sam_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                    bool selected)
-{
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
-  /* Select/de-select the SD card */
-
-  if (devid == SPIDEV_MMCSD)
-    {
-      /* Active low */
-
-      sam_portwrite(PORT_SD_CS, !selected);
-    }
-#endif
-
-#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1
-  /* Select/de-select the OLED */
-
-  if (devid == SPIDEV_DISPLAY)
-    {
-      /* Active low */
-
-      sam_portwrite(PORT_OLED_CS, !selected);
-    }
-#endif
-}
+                    bool selected);
 #endif
 
 #ifdef SAMDL_HAVE_SPI1
 void sam_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                    bool selected)
-{
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
-  /* Select/de-select the SD card */
-
-  if (devid == SPIDEV_MMCSD)
-    {
-      /* Active low */
-
-      sam_portwrite(PORT_SD_CS, !selected);
-    }
-#endif
-
-#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2
-  /* Select/de-select the OLED */
-
-  if (devid == SPIDEV_DISPLAY)
-    {
-      /* Active low */
-
-      sam_portwrite(PORT_OLED_CS, !selected);
-    }
-#endif
-}
+                    bool selected);
 #endif
 
 #ifdef SAMDL_HAVE_SPI2
 void sam_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                    bool selected)
-{
-}
+                    bool selected);
 #endif
 
 #ifdef SAMDL_HAVE_SPI3
 void sam_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                    bool selected)
-{
-}
+                    bool selected);
 #endif
 
 #ifdef SAMDL_HAVE_SPI4
 void sam_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                    bool selected)
-{
-}
+                    bool selected);
 #endif
 
 #ifdef SAMDL_HAVE_SPI5
 void sam_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                    bool selected)
-{
-}
+                    bool selected);
 #endif
 
 /****************************************************************************
@@ -279,78 +191,27 @@ void sam_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
  ****************************************************************************/
 
 #ifdef SAMDL_HAVE_SPI0
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  uint8_t ret = 0;
-
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
-  /* Check if an SD card is present in the microSD slot */
-
-  if (devid == SPIDEV_MMCSD)
-    {
-      /* Active low */
-
-      if (!sam_portread(PORT_SD_CD))
-        {
-          ret |= SPI_STATUS_PRESENT;
-        }
-    }
-#endif
-
-  return ret;
-}
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #ifdef SAMDL_HAVE_SPI1
-uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  uint8_t ret = 0;
-
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
-  /* Check if an SD card is present in the microSD slot */
-
-  if (devid == SPIDEV_MMCSD)
-    {
-      /* Active low */
-
-      if (!sam_portread(PORT_SD_CD))
-        {
-          ret |= SPI_STATUS_PRESENT;
-        }
-    }
-#endif
-
-  return ret;
-}
+uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #ifdef SAMDL_HAVE_SPI2
-uint8_t sam_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return 0;
-}
+uint8_t sam_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #ifdef SAMDL_HAVE_SPI3
-uint8_t sam_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return 0;
-}
+uint8_t sam_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #ifdef SAMDL_HAVE_SPI4
-uint8_t sam_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return 0;
-}
+uint8_t sam_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #ifdef SAMDL_HAVE_SPI5
-uint8_t sam_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  uint8_t ret = 0;
-  return ret;
-}
+uint8_t sam_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 /****************************************************************************
@@ -379,74 +240,35 @@ uint8_t sam_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef SAMDL_HAVE_SPI0
-int sam_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1
-  if (devid == SPIDEV_DISPLAY)
-    {
-      /* This is the Data/Command control pad which determines whether the
-       * data bits are data or a command.
-       *
-       * High: the inputs are treated as display data.
-       * Low:  the inputs are transferred to the command registers.
-       */
-
-      (void)sam_portwrite(PORT_OLED_DATA, !cmd);
-    }
-#endif
-
-  return OK;
-}
+int sam_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef SAMDL_HAVE_SPI1
-int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2
-  if (devid == SPIDEV_DISPLAY)
-    {
-      /* This is the Data/Command control pad which determines whether the
-       * data bits are data or a command.
-       *
-       * High: the inputs are treated as display data.
-       * Low:  the inputs are transferred to the command registers.
-       */
-
-      (void)sam_portwrite(PORT_OLED_DATA, !cmd);
-    }
-#endif
-
-  return OK;
-}
+int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef SAMDL_HAVE_SPI2
-int sam_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-  return OK;
-}
+int sam_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef SAMDL_HAVE_SPI3
-int sam_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-  return OK;
-}
+int sam_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef SAMDL_HAVE_SPI4
-int sam_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-  return OK;
-}
+int sam_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #ifdef SAMDL_HAVE_SPI5
-int sam_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-  return OK;
+int sam_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
 
-#endif /* CONFIG_SPI_CMDDATA */
+#endif /* __ASSEMBLY__ */
 #endif /* SAMDL_HAVE_SPI */
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_SPI_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samd20-xplained/src/sam_nsh.c
+ * arch/arm/src/samdl/sam_userspace.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,87 +39,75 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include <nuttx/board.h>
+#include <nuttx/userspace.h>
 
-#include "sam_config.h"
-#include "samd20-xplained.h"
+#include "sam_userspace.h"
+
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Some configuration checks */
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
-#  ifndef SAMDL_HAVE_SPI0
-#    error I/O1 module on EXT1 requires SERCOM SPI0
-#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
-#  endif
-#  define SPI_PORTNO 0
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
-#  ifndef SAMDL_HAVE_SPI1
-#    error I/O1 module on EXT2 requires SERCOM SPI1
-#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
-#  endif
-#  define SPI_PORTNO 1
-#endif
-
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
-/* Support for the SD card slot on the I/O1 module */
-/* Verify NSH PORT and SLOT settings */
-
-#  define SAMDL_MMCSDSLOTNO    0 /* There is only one slot */
-
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMDL_MMCSDSLOTNO
-#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO SAMDL_MMCSDSLOTNO
-#  endif
-
-#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SPI_PORTNO
-#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SPI_PORTNO
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO SPI_PORTNO
-#  endif
-
-/* Default MMC/SD minor number */
-
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: sam_userspace
  *
  * Description:
- *   Perform architecture specific initialization
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
  ****************************************************************************/
 
-int board_app_initialize(void)
+void sam_userspace(void)
 {
-#if defined(SAMDL_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
-  /* Initialize the SPI-based MMC/SD slot */
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
 
-  {
-    int ret = sam_sdinitialize(SPI_PORTNO, CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
-#endif
+  /* Clear all of user-space .bss */
 
-  return OK;
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+
+  dest = (uint8_t*)USERSPACE->us_bssstart;
+  end  = (uint8_t*)USERSPACE->us_bssend;
+
+  while (dest != end)
+    {
+      *dest++ = 0;
+    }
+
+  /* Initialize all of user-space .data */
+
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t*)USERSPACE->us_datasource;
+  dest = (uint8_t*)USERSPACE->us_datastart;
+  end  = (uint8_t*)USERSPACE->us_dataend;
+
+  while (dest != end)
+    {
+      *dest++ = *src++;
+    }
 }
+
+#endif /* CONFIG_BUILD_PROTECTED */

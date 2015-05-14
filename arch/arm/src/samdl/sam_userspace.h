@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/samd20-xplained/src/sam_boot.c
+ * arch/arm/src/samdl/sam_userspace.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,44 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_USERSPACE_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_USERSPACE_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/board.h>
-
-#include "sam_config.h"
-#include "samd20-xplained.h"
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Private Functions
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
  ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: sam_boardinitialize
+/****************************************************************************
+ * Name: sam_userspace
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void sam_boardinitialize(void)
-{
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam_spiinitialize() has been brought into the link.
-   */
-
-#ifdef SAMDL_HAVE_SPI
-  if (sam_spiinitialize)
-    {
-      sam_spiinitialize();
-    }
+#ifdef CONFIG_BUILD_PROTECTED
+void sam_userspace(void);
 #endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
-}
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_USERSPACE_H */

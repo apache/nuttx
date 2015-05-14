@@ -1,5 +1,5 @@
 ############################################################################
-# configs/samd20-xplained/src/Makefile
+# arch/arm/src/samdl/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,86 +33,57 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+HEAD_ASRC =
 
-CFLAGS += -I$(TOPDIR)/sched
+CMN_ASRCS  = up_exception.S up_saveusercontext.S up_fullcontextrestore.S
+CMN_ASRCS += up_switchcontext.S vfork.S
 
-ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
+CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
+CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
+CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
+CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
+CMN_CSRCS += up_systemreset.c up_unblocktask.c up_usestack.c up_doirq.c
+CMN_CSRCS += up_hardfault.c up_svcall.c up_vectors.c up_vfork.c
 
-CSRCS = sam_boot.c
-
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
-ifeq ($(CONFIG_SAMDL_SERCOM0),y)
-CSRCS += sam_spi.c
-endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += sam_autoleds.c
-else
-CSRCS += sam_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += sam_buttons.c
-endif
-
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
-endif
-
-ifeq ($(CONFIG_SAMD20_XPLAINED_IOMODULE),y)
-CSRCS += sam_mmcsd.c
-endif
-
-ifeq ($(CONFIG_SAMD20_XPLAINED_OLED1MODULE),y)
-ifeq ($(CONFIG_LCD_UG2832HSWEG04),y)
-CSRCS += sam_ug2832hsweg04.c
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += up_task_start.c up_pthread_start.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
 endif
 endif
 
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
-else
-  CFLAGS += -I$(ARCH_SRCDIR)/chip
-  CFLAGS += -I$(ARCH_SRCDIR)/common
-  CFLAGS += -I$(ARCH_SRCDIR)/armv7-m
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
 endif
 
-all: libboard$(LIBEXT)
+ifeq ($(CONFIG_ELF),y)
+CMN_CSRCS += up_elf.c
+endif
 
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
+ifeq ($(CONFIG_DEBUG),y)
+CMN_CSRCS += up_dumpnvic.c
+endif
 
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
+CHIP_ASRCS  =
+CHIP_CSRCS  = sam_clockconfig.c sam_idle.c sam_irq.c sam_lowputc.c
+CHIP_CSRCS += sam_port.c sam_sercom.c sam_serial.c sam_start.c
+CHIP_CSRCS += sam_usart.c
 
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += sam_timerisr.c
+endif
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += sam_userspace.c
+endif
 
-depend: .depend
+ifeq ($(CONFIG_ARCH_IRQPRIO),y)
+CHIP_CSRCS += sam_irqprio.c
+endif
 
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+ifeq ($(CONFIG_SAMDL_HAVE_SPI),y)
+CHIP_CSRCS += sam_spi.c
+endif
