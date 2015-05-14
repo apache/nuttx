@@ -288,7 +288,7 @@ config ARCH_CHIP
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
-	default "samd"		if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
+	default "samdl"		if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
