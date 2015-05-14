@@ -4695,7 +4695,6 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   stm32_givesem(&priv->exclsem);
   return OK;
 }
-#endif /* CONFIG_USBHOST_ASYNCH */
 
 /************************************************************************************
  * Name: stm32_connect
