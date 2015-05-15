@@ -1050,7 +1050,7 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
    * after removing the ED node.
    */
 
-  sam_getreg(0, SAM_USBHOST_BULKED);
+  sam_putreg(0, SAM_USBHOST_BULKED);
   if (sam_getreg(SAM_USBHOST_BULKHEADED) != 0)
     {
       /* If the bulk list is now empty, then disable it */
@@ -2137,55 +2137,66 @@ static void sam_wdh_bottomhalf(void)
       eplist = ed->eplist;
       DEBUGASSERT(eplist != NULL);
 
-      /* Also invalidate the control ED so that it two will be re-read from
-       * memory.
+      /* Do nothing if there is no transfer in progress.  This situation may
+       * occur after cancellation of a transfer.
        */
 
-      arch_invalidate_dcache((uintptr_t)ed,
-                             (uintptr_t)ed + sizeof( struct ohci_ed_s));
-
-      /* Save the condition code from the (single) TD status/control
-       * word.
-       */
-
-      ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
-
-#ifdef HAVE_USBHOST_TRACE
-      if (ed->tdstatus != TD_CC_NOERROR)
-        {
-          /* The transfer failed for some reason... dump some diagnostic info. */
-
-          usbhost_trace2(OHCI_TRACE2_WHDTDSTATUS, ed->tdstatus, ed->xfrtype);
-        }
+#ifdef CONFIG_USBHOST_ASYNCH
+      if (eplist->wdhwait || eplist->callback)
+#else
+      if (eplist->wdhwait)
 #endif
-
-      /* Determine the number of bytes actually transfer by* subtracting the
-       * buffer start address from the CBP.    A value of zero means that all
-       * bytes were transferred.
-       */
-
-      tmp = (uintptr_t)td->hw.cbp;
-      if (tmp == 0)
         {
-          /* Set the (fake) CBP to the end of the buffer + 1 */
-
-          tmp = eplist->buflen;
-        }
-      else
-        {
-          paddr = sam_physramaddr((uintptr_t)eplist->buffer);
-          DEBUGASSERT(tmp >= paddr);
-
-          /* Determine the size of the transfer by subtracting the current
-           * buffer pointer (CBP) from the initial buffer pointer (on packet
-           * receipt only).
+          /* Invalidate the control ED so that it two will be re-read from
+           * memory.
            */
 
-          tmp -= paddr;
-          DEBUGASSERT(tmp < UINT16_MAX);
-        }
+          arch_invalidate_dcache((uintptr_t)ed,
+                                 (uintptr_t)ed + sizeof( struct ohci_ed_s));
 
-      eplist->xfrd = (uint16_t)tmp;
+          /* Save the condition code from the (single) TD status/control
+           * word.
+           */
+
+          ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
+
+#ifdef HAVE_USBHOST_TRACE
+          if (ed->tdstatus != TD_CC_NOERROR)
+            {
+              /* The transfer failed for some reason... dump some diagnostic info. */
+
+              usbhost_trace2(OHCI_TRACE2_WHDTDSTATUS, ed->tdstatus, ed->xfrtype);
+            }
+#endif
+
+          /* Determine the number of bytes actually transfer by* subtracting
+           * the buffer start address from the CBP.    A value of zero means
+           * that all bytes were transferred.
+           */
+
+          tmp = (uintptr_t)td->hw.cbp;
+          if (tmp == 0)
+            {
+              /* Set the (fake) CBP to the end of the buffer + 1 */
+
+              tmp = eplist->buflen;
+            }
+          else
+            {
+              paddr = sam_physramaddr((uintptr_t)eplist->buffer);
+              DEBUGASSERT(tmp >= paddr);
+
+              /* Determine the size of the transfer by subtracting the
+               * current buffer pointer (CBP) from the initial buffer
+               * pointer (on packet receipt only).
+               */
+
+              tmp -= paddr;
+              DEBUGASSERT(tmp < UINT16_MAX);
+            }
+
+          eplist->xfrd = (uint16_t)tmp;
+        }
 
       /* Return the TD to the free list */
 
@@ -3628,8 +3639,9 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   struct sam_ed_s *ed;
   struct sam_gtd_s *td;
   struct sam_gtd_s *next;
-  uintptr_t paddr;
   irqstate_t flags;
+  uintptr_t paddr;
+  uint32_t ctrl;
 
   DEBUGASSERT(eplist && eplist->ed && eplist->tail);
   ed = eplist->ed;
