@@ -856,6 +856,8 @@ static int sam_addctrled(struct sam_ed_s *ed)
 
   /* Re-enable control list processing. */
 
+  sam_putreg(0, SAM_USBHOST_CTRLED);
+
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval |= OHCI_CTRL_CLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -887,9 +889,7 @@ static inline int sam_remctrled(struct sam_ed_s *ed)
   regval &= ~OHCI_CTRL_CLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
-  /* Find the ED in the control list.  NOTE: We really should never be mucking
-   * with the control list while BLE is set.
-   */
+  /* Find the ED in the control list. */
 
   physed = sam_getreg(SAM_USBHOST_CTRLHEADED);
   for (curr = (struct sam_ed_s *)sam_virtramaddr(physed), prev = NULL;
@@ -928,6 +928,7 @@ static inline int sam_remctrled(struct sam_ed_s *ed)
    * after removing the ED node.
    */
 
+  sam_putreg(0, SAM_USBHOST_CTRLED);
   if (sam_getreg(SAM_USBHOST_CTRLHEADED) != 0)
     {
       /* If the control list is now empty, then disable it */
@@ -973,6 +974,8 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
 
   /* Re-enable bulk list processing. */
 
+  sam_putreg(0, SAM_USBHOST_BULKED);
+
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval |= OHCI_CTRL_BLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -1008,9 +1011,7 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
   regval &= ~OHCI_CTRL_BLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
-  /* Find the ED in the bulk list.  NOTE: We really should never be mucking
-   * with the bulk list while BLE is set.
-   */
+  /* Find the ED in the bulk list. */
 
   physed = sam_getreg(SAM_USBHOST_BULKHEADED);
   for (curr = (struct sam_ed_s *)sam_virtramaddr(physed), prev = NULL;
@@ -1049,6 +1050,7 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
    * after removing the ED node.
    */
 
+  sam_getreg(0, SAM_USBHOST_BULKED);
   if (sam_getreg(SAM_USBHOST_BULKHEADED) != 0)
     {
       /* If the bulk list is now empty, then disable it */
@@ -3646,20 +3648,52 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   if (eplist->wdhwait)
 #endif
     {
-      /* We really need some kind of atomic test and set to do this right */
+      /* Control endpoints should not come through this path and
+       * isochronous endpoints are not yet implemented.  So we only have
+       * to distinguish bulk and interrupt endpoints.
+       */
 
-      paddr        = ed->hw.headp & ED_HEADP_ADDR_MASK;
-      td           = (struct sam_gtd_s *)sam_virtramaddr(paddr);
+      if (ed->xfrtype == USB_EP_ATTR_XFER_BULK)
+        {
+          /* Disable bulk list processing while we modify the list */
 
-      paddr        = sam_physramaddr((uintptr_t)eplist->tail);
-      ed->hw.headp = paddr;
+          ctrl  = sam_getreg(SAM_USBHOST_CTRL);
+          sam_putreg(ctrl & ~OHCI_CTRL_BLE, SAM_USBHOST_CTRL);
 
-      arch_clean_dcache((uintptr_t)ed,
-                        (uintptr_t)ed + sizeof(struct ohci_ed_s));
+          /* Remove the TDs attached to the ED, keeping the ED in the list */
 
-      /* Free all transfer descriptors that were connected to the ED */
+          paddr        = ed->hw.headp & ED_HEADP_ADDR_MASK;
+          td           = (struct sam_gtd_s *)sam_virtramaddr(paddr);
 
-      DEBUGASSERT(td != (struct sam_gtd_s *)eplist->tail);
+          paddr        = sam_physramaddr((uintptr_t)eplist->tail);
+          ed->hw.headp = paddr;
+
+          arch_clean_dcache((uintptr_t)ed,
+                            (uintptr_t)ed + sizeof(struct ohci_ed_s));
+
+          /* Re-enable bulk list processing, if it was enabled before */
+
+          sam_putreg(0, SAM_USBHOST_BULKED);
+          sam_putreg(ctrl, SAM_USBHOST_CTRL);
+        }
+      else
+        {
+          /* Remove the TDs attached to the ED, keeping the Ed in the list */
+
+          paddr        = ed->hw.headp & ED_HEADP_ADDR_MASK;
+          td           = (struct sam_gtd_s *)sam_virtramaddr(paddr);
+
+          paddr        = sam_physramaddr((uintptr_t)eplist->tail);
+          ed->hw.headp = paddr;
+
+          arch_clean_dcache((uintptr_t)ed,
+                            (uintptr_t)ed + sizeof(struct ohci_ed_s));
+        }
+
+      /* Free all transfer descriptors that were connected to the ED.  In some
+       * race conditions with the hardware, this might be none.
+       */
+
       while (td != (struct sam_gtd_s *)eplist->tail)
         {
           paddr = (uintptr_t)td->hw.nexttd;
