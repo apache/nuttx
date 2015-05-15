@@ -399,7 +399,7 @@ static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
   /* Don't permit reads beyond the end of the memory region */
 
-#ifdef MTDIOC_EXTENDED
+#ifdef CONFIG_AT24XX_EXTENDED
   if (priv->extended)
     {
       memsize = CONFIG_AT24XX_EXTSIZE;
@@ -420,7 +420,7 @@ static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
   /* Get the I2C address, converting it to the extended I2C if needed */
 
   addr = priv->addr;
-#ifdef MTDIOC_EXTENDED
+#ifdef CONFIG_AT24XX_EXTENDED
   if (priv->extended)
     {
       addr |= 0x08;
