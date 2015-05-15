@@ -75,7 +75,7 @@
 #define SAM_PAC0_BASE    0x40000000 /* Peripheral Access Controller 0 */
 #define SAM_PM_BASE      0x40000400 /* Power Manager */
 #define SAM_SYSCTRL_BASE 0x40000800 /* System Controller */
-#define SAM_GCLK_BASE    0x40000C00 /* Generic Clock Controller */
+#define SAM_GCLK_BASE    0x40000c00 /* Generic Clock Controller */
 #define SAM_WDT_BASE     0x40001000 /* Watchdog Timer */
 #define SAM_RTC_BASE     0x40001400 /* Real-Time Counter */
 #define SAM_EIC_BASE     0x40001800 /* External Interrupt Controller */
@@ -108,7 +108,7 @@
 #define SAM_ADC_BASE     0x42004000 /* Analog-to-Digital Converter */
 #define SAM_AC_BASE      0x42004400 /* Analog Comparator*/
 #define SAM_DAC_BASE     0x42004800 /* Digital-to-Analog Converter */
-#define SAM_PTC_BASE     0x42004C00 /* Peripheral Touch Controller */
+#define SAM_PTC_BASE     0x42004c00 /* Peripheral Touch Controller */
 
 /********************************************************************************************
  * Public Types
