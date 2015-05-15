@@ -2113,7 +2113,7 @@ static void sam_wdh_bottomhalf(void)
 
   /* Now read the done head. */
 
-  td = (struct sam_gtd_s *)sam_virtramaddr(g_hcca.donehead);
+  td = (struct sam_gtd_s *)sam_virtramaddr(g_hcca.donehead & HCCA_DONEHEAD_MASK);
   g_hcca.donehead = 0;
 
   /* Process each TD in the write done list */
