@@ -367,10 +367,16 @@
 /* HccaDoneHead: When the HC reaches the end of a frame and its deferred
  * interrupt register is 0, it writes the current value of its HcDoneHead to
  * this location and generates an interrupt.
+ *
+ * The LSB of HCCADoneHead may be set to 1 to indicate that an unmasked
+ * HcInterruptStatus was set when HccaDoneHead was written.
  */
 
 #define HCCA_DONEHEAD_OFFSET       (0x84)
 #define HCCA_DONEHEAD_BSIZE        (4)
+
+#define HCCA_DONEHEAD_MASK         0xfffffffe
+#define HCCA_DONEHEAD_INTSTA       (1 << 0)
 
 /* 0x88: 116 bytes reserved */
 

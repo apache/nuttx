@@ -1786,87 +1786,107 @@ static int lpc17_usbinterrupt(int irq, void *context)
            * cleared in the interrupt status register.
            */
 
-          td = (struct lpc17_gtd_s *)HCCA->donehead;
+          td = (struct lpc17_gtd_s *)(HCCA->donehead & HCCA_DONEHEAD_MASK);
           HCCA->donehead = 0;
 
           /* Process each TD in the write done list */
 
           for (; td; td = next)
             {
+              /* REVISIT: I have encountered bad TDs in the done list linked
+               * after at least one good TD.  This is some consequence of how
+               * transfers are being cancelled.  But for now, I have only
+               * this work-around.
+               */
+
+              if ((uintptr_t)td < LPC17_TDFREE_BASE ||
+                  (uintptr_t)td >= (LPC17_TDFREE_BASE + LPC17_TD_SIZE*CONFIG_USBHOST_NTDS))
+                {
+                  break;
+                }
+
               /* Get the ED in which this TD was enqueued */
 
               ed      = td->ed;
-              DEBUGASSERT(ed != NULL && ed->xfrinfo != NULL);
+              DEBUGASSERT(ed != NULL);
+
+              /* If there is a transfer in progress, then the xfrinfo pointer will be
+               * non-NULL.  But it appears that a NULL pointer may be received with a
+               * spurious interrupt such as may occur after a transfer is cancelled.
+               */
+
               xfrinfo = ed->xfrinfo;
-
-              /* Save the condition code from the (single) TD status/control
-               * word.
-               */
-
-              xfrinfo->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
-
-#ifdef CONFIG_DEBUG_USB
-              if (xfrinfo->tdstatus != TD_CC_NOERROR)
+              if (xfrinfo)
                 {
-                  /* The transfer failed for some reason... dump some diagnostic info. */
-
-                  ulldbg("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
-                         ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
-                         lpc17_getreg(LPC17_USBHOST_RHPORTST1));
-                }
-#endif
-
-              /* Determine the number of bytes actually transfer by
-               * subtracting the buffer start address from the CBP.  A value
-               * of zero means that all bytes were transferred.
-               */
-
-              tmp = (uintptr_t)td->hw.cbp;
-              if (tmp == 0)
-                {
-                  /* Set the (fake) CBP to the end of the buffer + 1 */
-
-                  tmp = xfrinfo->buflen;
-                }
-              else
-                {
-                  DEBUGASSERT(tmp >= (uintptr_t)xfrinfo->buffer);
-
-                  /* Determine the size of the transfer by subtracting the
-                   * current buffer pointer (CBP) from the initial buffer
-                   * pointer (on packet receipt only).
+                  /* Save the condition code from the (single) TD status/control
+                   * word.
                    */
 
-                  tmp -= (uintptr_t)xfrinfo->buffer;
-                  DEBUGASSERT(tmp < UINT16_MAX);
-                }
+                  xfrinfo->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
 
-              xfrinfo->xfrd = (uint16_t)tmp;
+#ifdef CONFIG_DEBUG_USB
+                  if (xfrinfo->tdstatus != TD_CC_NOERROR)
+                    {
+                      /* The transfer failed for some reason... dump some diagnostic info. */
 
-              /* Return the TD to the free list */
+                      ulldbg("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                             ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
+                             lpc17_getreg(LPC17_USBHOST_RHPORTST1));
+                    }
+#endif
 
-              next = (struct lpc17_gtd_s *)td->hw.nexttd;
-              lpc17_tdfree(td);
+                  /* Determine the number of bytes actually transfer by
+                   * subtracting the buffer start address from the CBP.  A
+                   * value of zero means that all bytes were transferred.
+                   */
 
-              if (xfrinfo->wdhwait)
-                {
-                  /* Wake up the thread waiting for the WDH event */
+                  tmp = (uintptr_t)td->hw.cbp;
+                  if (tmp == 0)
+                    {
+                      /* Set the (fake) CBP to the end of the buffer + 1 */
 
-                  lpc17_givesem(&ed->wdhsem);
-                  xfrinfo->wdhwait = false;
-                }
+                      tmp = xfrinfo->buflen;
+                    }
+                  else
+                    {
+                      DEBUGASSERT(tmp >= (uintptr_t)xfrinfo->buffer);
+
+                      /* Determine the size of the transfer by subtracting
+                       * the current buffer pointer (CBP) from the initial
+                       * buffer pointer (on packet receipt only).
+                       */
+
+                      tmp -= (uintptr_t)xfrinfo->buffer;
+                      DEBUGASSERT(tmp < UINT16_MAX);
+                    }
+
+                  xfrinfo->xfrd = (uint16_t)tmp;
+
+                  /* Return the TD to the free list */
+
+                  next = (struct lpc17_gtd_s *)td->hw.nexttd;
+                  lpc17_tdfree(td);
+
+                  if (xfrinfo->wdhwait)
+                    {
+                      /* Wake up the thread waiting for the WDH event */
+
+                      lpc17_givesem(&ed->wdhsem);
+                      xfrinfo->wdhwait = false;
+                    }
 
 #ifdef CONFIG_USBHOST_ASYNCH
-              /* Perform any pending callbacks for the case of asynchronous
-               * transfers.
-               */
+                  /* Perform any pending callbacks for the case of
+                   * asynchronous transfers.
+                   */
 
-              else if (xfrinfo->callback)
-                {
-                  DEBUGASSERT(xfrinfo->wdhwait == false);
-                  lpc17_asynch_completion(priv, ed);
-                }
+                  else if (xfrinfo->callback)
+                    {
+                      DEBUGASSERT(xfrinfo->wdhwait == false);
+                      lpc17_asynch_completion(priv, ed);
+                    }
 #endif
+                }
             }
         }
 
