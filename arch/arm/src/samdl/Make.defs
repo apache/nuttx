@@ -68,9 +68,16 @@ CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = sam_clockconfig.c sam_idle.c sam_irq.c sam_lowputc.c
-CHIP_CSRCS += sam_port.c sam_sercom.c sam_serial.c sam_start.c
-CHIP_CSRCS += sam_usart.c
+CHIP_CSRCS  = sam_idle.c sam_irq.c sam_lowputc.c sam_port.c sam_sercom.c
+CHIP_CSRCS += sam_serial.c sam_start.c sam_usart.c
+
+ifneq ($(CONFIG_ARCH_FAMILY_SAMD20),y)
+CHIP_CSRCS += samd_clockconfig.c
+else
+ifneq ($(CONFIG_ARCH_FAMILY_SAML21),y)
+CHIP_CSRCS += saml_clockconfig.c
+endif
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sam_timerisr.c

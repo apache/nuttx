@@ -62,7 +62,7 @@
 #define SAM_MCLK_CPUDIV_OFFSET     0x0004  /* CPU clock division */
 #define SAM_MCLK_LPDIV_OFFSET      0x0005  /* Low-power clock division */
 #define SAM_MCLK_BUPDIV_OFFSET     0x0006  /* Backup clock division */
-                                              /* 0x0007-0x000f: Reserved */
+                                           /* 0x0007-0x000f: Reserved */
 #define SAM_MCLK_AHBMASK_OFFSET    0x0010  /* AHB mask */
 #define SAM_MCLK_APBAMASK_OFFSET   0x0010  /* APBA mask */
 #define SAM_MCLK_APBBMASK_OFFSET   0x0010  /* APBB mask */
