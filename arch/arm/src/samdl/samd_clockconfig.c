@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samdl/sam_clockconfig.c
+ * arch/arm/src/samdl/samd_clockconfig.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
