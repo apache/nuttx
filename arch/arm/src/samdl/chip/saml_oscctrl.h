@@ -6,7 +6,7 @@
  *
  * References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
- *   Datasheet", Ateml-42385C-SAML21_Datasheet_Preliminary-03/20/15
+ *   Datasheet", Atmel-42385C-SAML21_Datasheet_Preliminary-03/20/15
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
