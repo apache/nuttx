@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_spi.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -64,11 +64,11 @@
 #include "chip.h"
 #include "chip/sam_port.h"
 #include "chip/sam_pinmap.h"
-#include "chip/sam_gclk.h"
 #include "chip/sam_spi.h"
 
 #include <arch/board/board.h>
 
+#include "sam_gclk.h"
 #include "sam_port.h"
 #include "sam_sercom.h"
 #include "sam_spi.h"

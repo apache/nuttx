@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_gclk.h
+ * arch/arm/src/samdl/chip/samd_gclk.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_GCLK_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_GCLK_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_GCLK_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_GCLK_H
 
 /********************************************************************************************
  * Included Files
@@ -47,6 +47,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -185,4 +187,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_GCLK_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_GCLK_H */

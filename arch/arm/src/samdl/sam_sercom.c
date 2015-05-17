@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_lowputc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -51,9 +51,9 @@
 #include "sam_config.h"
 
 #include "chip/sam_pm.h"
-#include "chip/sam_gclk.h"
 #include "chip/sam_sercom.h"
 
+#include "sam_gclk.h"
 #include "sam_sercom.h"
 
 /****************************************************************************
@@ -92,12 +92,12 @@
 void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 {
   uint16_t regval;
-  uint8_t glckcore;
+  uint8_t gclkcore;
 
   /* Set up the SERCOMn_GCLK_ID_CORE clock */
 
-  glckcore = (uint8_t)SERCOM_GCLK_ID_CORE(sercom);
-  regval   = ((uint16_t)glckcore << GCLK_CLKCTRL_ID_SHIFT);
+  gclkcore = (uint8_t)SERCOM_GCLK_ID_CORE(sercom);
+  regval   = ((uint16_t)gclkcore << GCLK_CLKCTRL_ID_SHIFT);
 
   /* Select and disable the SERCOMn_GCLK_ID_CORE generic clock */
 
