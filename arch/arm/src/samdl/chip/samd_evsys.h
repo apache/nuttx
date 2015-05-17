@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_evsys.h
+ * arch/arm/src/samdl/chip/samd_evsys.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_EVSYS_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_EVSYS_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_EVSYS_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_EVSYS_H
 
 /********************************************************************************************
  * Included Files
@@ -47,7 +47,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_sercom.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -209,12 +210,10 @@
 
 #define EVSYS_INT_OVR_SHIFT          (0)       /* Bits 0-7: Overrun channel n interrupt */
 #define EVSYS_INT_OVR_MASK           (0xff << EVSYS_INT_OVR_SHIFT)
-#  define EVSYS_INT_OVR(n)           (1 << (n)
-#  define EVSYS_INT_OVR0             (1 << 0)  /* Bit 0: Overrun channel 0 interrupt */
+#  define EVSYS_INT_OVR(n)           (1 << (n))
 #define EVSYS_INT_EVD_SHIFT          (8)       /* Bits 8-15: Event detected channel n interrupt */
 #define EVSYS_INT_EVD_MASK           (0xff << EVSYS_INT_EVD_SHIFT)
 #  define EVSYS_INT_EVD(n)           (1 << ((n)+8))
-#  define EVSYS_INT_EVD0             (1 << 8)  /* Bit 8: Event detected channel 0 interrupt */
 
 /********************************************************************************************
  * Public Types
@@ -228,4 +227,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_EVSYS_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_EVSYS_H */
