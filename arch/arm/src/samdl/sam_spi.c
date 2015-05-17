@@ -64,7 +64,6 @@
 #include "chip.h"
 #include "chip/sam_port.h"
 #include "chip/sam_pinmap.h"
-#include "chip/sam_spi.h"
 
 #include <arch/board/board.h>
 
