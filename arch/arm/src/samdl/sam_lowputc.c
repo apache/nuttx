@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_lowputc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -59,10 +59,10 @@
 #include <arch/board/board.h>
 
 #include "chip/sam_pm.h"
-#include "chip/sam_gclk.h"
 #include "chip/sam_usart.h"
 
 #include "sam_usart.h"
+#include "sam_gclk.h"
 #include "sam_lowputc.h"
 
 /****************************************************************************
