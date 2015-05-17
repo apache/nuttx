@@ -1,12 +1,12 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_wdt.h
+ * arch/arm/src/samdl/chip/saml_wdt.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
- *   Datasheet", 42129J–SAM–12/2013
+ *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
+ *   Datasheet", Atmel-42385C-SAML21_Datasheet_Preliminary-03/20/15
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_WDT_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_WDT_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAML_WDT_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAML_WDT_H
 
 /********************************************************************************************
  * Included Files
@@ -49,39 +49,41 @@
 #include "chip.h"
 #include "chip/sam_sercom.h"
 
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
 /* WDT register offsets *********************************************************************/
 
-#define SAM_WDT_CTRL_OFFSET        0x0000  /* Control register */
+#define SAM_WDT_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_WDT_CONFIG_OFFSET      0x0001  /* Configuration register */
 #define SAM_WDT_EWCTRL_OFFSET      0x0002  /* Early warning interrupt control register */
 #define SAM_WDT_INTENCLR_OFFSET    0x0004  /* Interrupt enable clear register */
 #define SAM_WDT_INTENSET_OFFSET    0x0005  /* Interrupt enable set register */
 #define SAM_WDT_INTFLAG_OFFSET     0x0006  /* Interrupt flag and status clear register */
-#define SAM_WDT_STATUS_OFFSET      0x0007  /* Status register */
-#define SAM_WDT_CLEAR_OFFSET       0x0008  /* Clear register */
+#define SAM_WDT_SYNCBUSY_OFFSET    0x0008  /* Synchronization busy register */
+#define SAM_WDT_CLEAR_OFFSET       0x000c  /* Clear register */
 
 /* WDT register addresses *******************************************************************/
 
-#define SAM_WDT_CTRL               (SAM_WDT_BASE+SAM_WDT_CTRL_OFFSET)
+#define SAM_WDT_CTRLA              (SAM_WDT_BASE+SAM_WDT_CTRLA_OFFSET)
 #define SAM_WDT_CONFIG             (SAM_WDT_BASE+SAM_WDT_CONFIG_OFFSET)
 #define SAM_WDT_EWCTRL             (SAM_WDT_BASE+SAM_WDT_EWCTRL_OFFSET)
 #define SAM_WDT_INTENCLR           (SAM_WDT_BASE+SAM_WDT_INTENCLR_OFFSET)
 #define SAM_WDT_INTENSET           (SAM_WDT_BASE+SAM_WDT_INTENSET_OFFSET)
 #define SAM_WDT_INTFLAG            (SAM_WDT_BASE+SAM_WDT_INTFLAG_OFFSET)
-#define SAM_WDT_STATUS             (SAM_WDT_BASE+SAM_WDT_STATUS_OFFSET)
+#define SAM_WDT_SYNCBUSY           (SAM_WDT_BASE+SAM_WDT_SYNCBUSY_OFFSET)
 #define SAM_WDT_CLEAR              (SAM_WDT_BASE+SAM_WDT_CLEAR_OFFSET)
 
 /* WDT register bit definitions *************************************************************/
 
 /* Control register */
 
-#define WDT_CTRL_ENABLE            (1 << 1)  /* Bit 1:  Enable */
-#define WDT_CTRL_WEN               (1 << 2)  /* Bit 2:  Watchdog Timer Window Mode Enable */
-#define WDT_CTRL_ALWAYSON          (1 << 7)  /* Bit 7:  Always-On
- */
+#define WDT_CTRLA_ENABLE            (1 << 1)  /* Bit 1:  Enable */
+#define WDT_CTRLA_WEN               (1 << 2)  /* Bit 2:  Watchdog Timer Window Mode Enable */
+#define WDT_CTRLA_ALWAYSON          (1 << 7)  /* Bit 7:  Always-On */
+
 /* Configuration register */
 
 #define WDT_CONFIG_PER_SHIFT       (0)       /* Bits 0–3: Time-Out Period */
@@ -135,9 +137,12 @@
 #define WDT_INT_EW                 (1 << 0)  /* Bit 0:  Early warning interrupt */
 #define WDT_INT_All                (0x01)
 
-/* Status register */
+/* Synchronization busy register */
 
-#define WDT_STATUS_SYNCBUSY        (1 << 7)  /* Bit 7:  Synchronization Busy */
+#define WDT_SYNCBUSY_ENABLE        (1 << 1)  /* Bit 1:  Enable syncrhonization busy */
+#define WDT_SYNCBUSY_WEN           (1 << 2)  /* Bit 2:  Window enable synchronization busy */
+#define WDT_SYNCBUSY_ALWAYSON      (1 << 3)  /* Bit 3:  Always-on synchronization busy */
+#define WDT_SYNCBUSY_CLEAR         (1 << 4)  /* Bit 4:  Clear syncrhonization busy */
 
 /* Clear register */
 
@@ -157,4 +162,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_WDT_H */
+#endif /* CONFIG_ARCH_FAMILY_SAML21 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAML_WDT_H */
