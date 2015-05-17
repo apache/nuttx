@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_RSTC_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_RSTC_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAML_RSTC_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAML_RSTC_H
 
 /********************************************************************************************
  * Included Files
@@ -47,7 +47,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_sercom.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAML21
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -140,4 +141,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_RSTC_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAML_RSTC_H */
