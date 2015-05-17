@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samdl/chip/sam_memorymap.h
+ * arch/arm/src/samdl/sam_pinmap.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,22 +33,21 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_PINMAP_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_PINMAP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/samdl/chip.h>
 
-#if defined(SAMD20)
-#  include "chip/samd20_memorymap.h"
-#elif defined(SAML21)
-#  include "chip/saml21_memorymap.h"
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd20_pinmap.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml21_pinmap.h"
 #else
 #  error Unrecognized SAMD/L architecture
 #endif
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_PINMAP_H */
