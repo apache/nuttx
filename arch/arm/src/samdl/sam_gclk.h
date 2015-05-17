@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/samdl/sam_sercom.h
+ * arch/arm/src/samdl/sam_gclk.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_SAM_SERCOM_H
-#define __ARCH_ARM_SRC_SAMDL_SAM_SERCOM_H
+#ifndef __ARCH_ARM_SRC_SAMDL_SAM_GCLK_H
+#define __ARCH_ARM_SRC_SAMDL_SAM_GCLK_H
 
 /****************************************************************************
  * Included Files
@@ -42,13 +42,13 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-
-#include "chip/sam_sercom.h"
-
-#include "up_arch.h"
 #include "sam_config.h"
-#include "sam_pm.h"
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd_gclk.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml_gclk.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,10 +59,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Inline Functions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -77,70 +81,5 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sercom_enable
- *
- * Description:
- *   Enable clocking to a SERCOM module in PM
- *
- * Assumptions/Limitation:
- *   This operation is global and non-atomic.  The caller should disable
- *   interrupts prior to calling this function.
- *
- ****************************************************************************/
-
-static inline void sercom_enable(int sercom)
-{
-  uint32_t regval;
-
-  /* Enable clocking to the SERCOM module in PM */
-
-  regval  = getreg32(SAM_PM_APBCMASK);
-  regval |= PM_APBCMASK_SERCOM(sercom);
-  putreg32(regval, SAM_PM_APBCMASK);
-}
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-/****************************************************************************
- * Name: sercom_coreclk_configure
- *
- * Description:
- *   Configure the SERCOM core source clock.
- *
- *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
- *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
- *   clock the SERCOM while operating as a master, while the slow clock
- *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
- *   modules must share the same slow GCLK channel ID.
- *
- *   The baud-rate generator runs off the GCLK_SERCOMx_CORE clock (or,
- *   optionally, external clock).
- *
- ****************************************************************************/
-
-void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock);
-
-/****************************************************************************
- * Name: sercom_slowclk_configure
- *
- * Description:
- *   Configure the SERCOM slow source clock.
- *
- *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
- *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
- *   clock the SERCOM while operating as a master, while the slow clock
- *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
- *   modules must share the same slow GCLK channel ID.
- *
- ****************************************************************************/
-
-void sercom_slowclk_configure(int gclkgen);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMDL_SAM_SERCOM_H */
+#endif /* __ARCH_ARM_SRC_SAMDL_SAM_GCLK_H */

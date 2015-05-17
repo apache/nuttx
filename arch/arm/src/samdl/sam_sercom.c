@@ -50,9 +50,7 @@
 
 #include "sam_config.h"
 
-#include "chip/sam_pm.h"
-#include "chip/sam_sercom.h"
-
+#include "sam_pm.h"
 #include "sam_gclk.h"
 #include "sam_sercom.h"
 
