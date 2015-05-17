@@ -68,6 +68,7 @@
 
 #define SAM_PM_BASE          0x40000000 /* Power Management */
 #define SAM_MCLK_BASE        0x40000400 /* Main Clock */
+#define SAM_RSTC_BASE        0x40000800 /* Reset controller */
 #define SAM_OSCCTRL_BASE     0x40000c00 /* Oscillators Controller */
 #define SAM_OSC32KCTRL_BASE  0x40001000 /* 32KHz Oscillators Controller */
 #define SAM_SUPC_BASE        0x40001400 /* Supply Controller */
@@ -82,7 +83,7 @@
 #define SAM_USB_BASE         0x41000000 /* Universal Serial Bus */
 #define SAM_DSU_BASE         0x41002000 /* Device Service Unit */
 #define SAM_NVMCTRL_BASE     0x41004000 /* Non-Volatile Memory Controller */
-#define SAM_MTD_BASE         0x41006000 /* ??? */
+#define SAM_MTB_BASE         0x41006000 /* Micro trace buffer */
 
 /* AHB-APB Bridge C */
 
@@ -104,6 +105,7 @@
 
 /* AHB-APB Bridge D */
 
+#define SAM_EVSYS_BASE       0x43000000 /* Event system */
 #define SAM_SERCOM5_BASE     0x43000400 /* Serial Communication Interface 5 */
 #define SAM_TC4_BASE         0x43000800 /* Timer/Counter 4 */
 #define SAM_ADC_BASE         0x43000c00 /* Analog-to-Digital Converter */
