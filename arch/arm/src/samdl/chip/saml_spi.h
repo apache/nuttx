@@ -58,15 +58,15 @@
 
 #define SAM_SPI_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_SPI_CTRLB_OFFSET       0x0004  /* Control B register */
-#define SAM_SPI_BAUD_OFFSET        0x000a  /* Baud register */
-#define SAM_SPI_INTENCLR_OFFSET    0x000c  /* Interrupt enable clear register */
-#define SAM_SPI_INTENSET_OFFSET    0x000d  /* Interrupt enable set register */
-#define SAM_SPI_INTFLAG_OFFSET     0x000e  /* Interrupt flag and status clear register */
-#define SAM_SPI_STATUS_OFFSET      0x0010  /* Status register */
-#define SAM_SPI_SYNCBUSY_OFFSET    0x0010  /* Synchronization busy register */
-#define SAM_SPI_ADDR_OFFSET        0x0014  /* Address register */
-#define SAM_SPI_DATA_OFFSET        0x0018  /* Data register */
-#define SAM_SPI_DBGCTRL_OFFSET     0x0008  /* Debug control register */
+#define SAM_SPI_BAUD_OFFSET        0x000c  /* Baud register */
+#define SAM_SPI_INTENCLR_OFFSET    0x0014  /* Interrupt enable clear register */
+#define SAM_SPI_INTENSET_OFFSET    0x0016  /* Interrupt enable set register */
+#define SAM_SPI_INTFLAG_OFFSET     0x0018  /* Interrupt flag and status clear register */
+#define SAM_SPI_STATUS_OFFSET      0x001a  /* Status register */
+#define SAM_SPI_SYNCBUSY_OFFSET    0x001c  /* Synchronization busy register */
+#define SAM_SPI_ADDR_OFFSET        0x0024  /* Address register */
+#define SAM_SPI_DATA_OFFSET        0x0028  /* Data register */
+#define SAM_SPI_DBGCTRL_OFFSET     0x0030  /* Debug control register */
 
 /* SPI register addresses *******************************************************************/
 
