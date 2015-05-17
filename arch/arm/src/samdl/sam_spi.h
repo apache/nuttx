@@ -47,6 +47,12 @@
 
 #include "sam_config.h"
 
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd_spi.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml_spi.h"
+#endif
+
 #ifdef SAMDL_HAVE_SPI
 
 /****************************************************************************
