@@ -42,8 +42,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "chip/sam_pinmap.h"
-
+#include "sam_pinmap.h"
 #include "sam_gclk.h"
 #include "sam_usart.h"
 

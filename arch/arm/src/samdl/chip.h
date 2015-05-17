@@ -54,7 +54,13 @@
  * this file for the proper setup.
  */
 
-#include "chip/sam_memorymap.h"
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd20_memorymap.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml21_memorymap.h"
+#else
+#  error Unrecognized SAMD/L architecture
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
