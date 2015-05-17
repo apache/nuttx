@@ -81,5 +81,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_SAMDL_SAM_I2C_MASTER_H */
