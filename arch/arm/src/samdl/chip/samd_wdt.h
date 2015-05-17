@@ -47,7 +47,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_sercom.h"
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD20
 
