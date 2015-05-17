@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_usart.h
+ * arch/arm/src/samdl/chip/samd_usart.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_USART_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_USART_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_USART_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_USART_H
 
 /********************************************************************************************
  * Included Files
@@ -48,6 +48,8 @@
 
 #include "chip.h"
 #include "chip/sam_sercom.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -220,4 +222,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_USART_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_USART_H */

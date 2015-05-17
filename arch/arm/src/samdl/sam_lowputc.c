@@ -56,8 +56,6 @@
 
 #include "sam_config.h"
 
-#include "chip/sam_usart.h"
-
 #include "sam_gclk.h"
 #include "sam_pm.h"
 #include "sam_usart.h"
