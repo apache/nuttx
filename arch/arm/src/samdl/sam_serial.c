@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_serial.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,6 @@
 
 #include "chip.h"
 #include "sam_config.h"
-#include "chip/sam_usart.h"
 #include "sam_usart.h"
 #include "sam_lowputc.h"
 #include "sam_serial.h"

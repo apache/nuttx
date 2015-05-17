@@ -47,6 +47,12 @@
 
 #include <arch/chip/chip.h>
 
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd_usart.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml_usart.h"
+#endif
+
 #include "sam_config.h"
 #include "sam_port.h"
 
