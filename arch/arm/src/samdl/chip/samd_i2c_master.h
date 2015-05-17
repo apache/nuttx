@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_i2c_master.h
+ * arch/arm/src/samdl/chip/samd_i2c_master.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_I2C_MASTER_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_I2C_MASTER_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_I2C_MASTER_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_I2C_MASTER_H
 
 /********************************************************************************************
  * Included Files
@@ -48,6 +48,8 @@
 
 #include "chip.h"
 #include "chip/sam_sercom.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -172,7 +174,7 @@
 #  define I2C_CTRLB_CMD_ACKSTOP    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by STOP */
 #define I2C_CTRLB_ACKACT           (1 << 18) /* Bit 18: Acknowledge Action */
 #  define I2C_CTRLB_ACK            (0)              /* Send ACK */
-#  define I2C_CTRLB_NCK            I2C_CTRLB_ACKACT /* Send NACK */
+#  define I2C_CTRLB_NACK           I2C_CTRLB_ACKACT /* Send NACK */
 
 /* Debug control register */
 
@@ -199,7 +201,7 @@
 /* Status register */
 
 #define I2C_STATUS_BUSERR          (1 << 0)  /* Bit 0:  Bus Error */
-#define I2C_STATUS_FARBLOST        (1 << 1)  /* Bit 1:  Arbitration Lost */
+#define I2C_STATUS_ARBLOST         (1 << 1)  /* Bit 1:  Arbitration Lost */
 #define I2C_STATUS_RXNACK          (1 << 2)  /* Bit 2:  Received Not Acknowledge */
 #define I2C_STATUS_BUSSTATE_SHIFT  (4)       /* Bits 4-5:  Bus State */
 #define I2C_STATUS_BUSSTATE_MASK   (3 << I2C_STATUS_BUSSTATE_SHIFT)
@@ -231,4 +233,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_I2C_MASTER_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_I2C_MASTER_H */
