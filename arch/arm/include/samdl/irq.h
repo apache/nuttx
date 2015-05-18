@@ -75,10 +75,12 @@
 
 /* Chip-Specific External interrupts */
 
-#if defined(SAMD20)
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
 #  include <arch/samdl/samd20_irq.h>
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include <arch/samdl/saml21_irq.h>
 #else
-#  error "Unrecognized/unsupported SAMD/L chip"
+#  error Unrecognized SAMD/L architecture
 #endif
 
 /****************************************************************************************
