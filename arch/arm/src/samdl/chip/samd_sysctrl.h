@@ -53,7 +53,7 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-/* SYSCTRL register offsets ****************************************************************/
+/* SYSCTRL register offsets *****************************************************************/
 
 #define SAM_SYSCTRL_INTENCLR_OFFSET   0x0000  /* Interrupt enable clear */
 #define SAM_SYSCTRL_INTENSET_OFFSET   0x0004  /* Interrupt enable set */
@@ -71,7 +71,7 @@
 #define SAM_SYSCTRL_BOD33_OFFSET      0x0034  /* 3.3V brown-out detector control */
 #define SAM_SYSCTRL_VREF_OFFSET       0x0040  /* Voltage references system control */
 
-/* SYSCTRL register addresses **************************************************************/
+/* SYSCTRL register addresses ***************************************************************/
 
 #define SAM_SYSCTRL_INTENCLR          (SAM_SYSCTRL_BASE+SAM_SYSCTRL_INTENCLR_OFFSET)
 #define SAM_SYSCTRL_INTENSET          (SAM_SYSCTRL_BASE+SAM_SYSCTRL_INTENSET_OFFSET)
@@ -89,7 +89,7 @@
 #define SAM_SYSCTRL_BOD33             (SAM_SYSCTRL_BASE+SAM_SYSCTRL_BOD33_OFFSET)
 #define SAM_SYSCTRL_VREF              (SAM_SYSCTRL_BASE+SAM_SYSCTRL_VREF_OFFSET)
 
-/* SYSCTRL register bit definitions ********************************************************/
+/* SYSCTRL register bit definitions *********************************************************/
 
 /* Interrupt enable clear, Interrupt enable set, Interrupt flag status and clear, and
  * Power and clocks status registers.
