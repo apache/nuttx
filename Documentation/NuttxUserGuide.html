@@ -9731,37 +9731,6 @@ notify a task when a message is available on a queue.
     };
 </pre>
 
-<H3>3.4.9 Watchdog Data Types</H3>
-
-<p>
-  When a watchdog expires, the callback function with this
-  type is called:
-</p>
-<pre>
-    typedef void (*wdentry_t)(int argc, ...);
-</pre>
-<p>
-  Where argc is the number of uint32_t type arguments that follow.
-</p>
-<p>
-  The arguments are passed as <code>wdparm_t</code> values.  For systems where the <code>sizeof(pointer) &lt; sizeof(uint32_t)</code>, the following union defines the alignment of the pointer within the <code>uint32_t</code>.  For example, the SDCC MCS51 general pointer is 24-bits, but <code>uint32_t</code> is 32-bits (of course).
-</p>
-   We always have <code>sizeof(pointer) <= sizeof(uintptr_t)</code> by definitions.
-</p>
-<ul><pre>
-union wdparm_u
-{
-  FAR void     *pvarg; /* The size one generic point */
-  uint32_t      dwarg; /* Big enough for a 32-bit value in any case */
-  uintptr_t     uiarg; /* sizeof(uintptr_t) >= sizeof(pointer) */
-};
-
-#if UINTPTR_MAX >= UINT32_MAX
-typedef uintptr_t wdparm_t;
-#else
-typedef uint32_t  wdpartm_t;
-#endif
-</pre></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">

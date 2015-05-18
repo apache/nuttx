@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 1, 2015</p>
+      <p>Last Updated: May 18, 2015</p>
     </td>
   </tr>
 </table>
@@ -2725,6 +2725,8 @@ int up_timer_start(FAR const struct timespec *ts);
   <li><a href="#wdstart">4.3.5.3 wd_start</a></li>
   <li><a href="#wdcancel">4.3.5.4 wd_cancel</a></li>
   <li><a href="#wdgettime">4.3.5.5 wd_gettime</a></li>
+  <li><a href="#wdcallback">4.3.5.6 Watchdog Timer Callback</a></li>
+
 </ul>
 
 <h4><a name="wdcreate">4.3.5.1 wd_create/wd_static</a></h4>
@@ -2926,6 +2928,36 @@ VxWorks provides the following comparable interface:
   The time in system ticks remaining until the watchdog time expires.  Zero
   means either that wdog is not valid or that the wdog has already expired.
 </p>
+
+<h4><a name="wdcallback">4.3.5.6 Watchdog Timer Callback</a></h4>
+<p>
+  When a watchdog expires, the callback function with this type is called:
+</p>
+<pre>
+    typedef void (*wdentry_t)(int argc, ...);
+</pre>
+<p>
+  Where <code>argc</code> is the number of <code>wdparm_t</code> type arguments that follow.
+</p>
+<p>
+  The arguments are passed as scalar <code>wdparm_t</code> values.  For systems where the <code>sizeof(pointer) &lt; sizeof(uint32_t)</code>, the following union defines the alignment of the pointer within the <code>uint32_t</code>.  For example, the SDCC MCS51 general pointer is 24-bits, but <code>uint32_t</code> is 32-bits (of course).
+</p>
+   We always have <code>sizeof(pointer) <= sizeof(uintptr_t)</code> by definition.
+</p>
+<ul><pre>
+union wdparm_u
+{
+  FAR void     *pvarg; /* The size one generic point */
+  uint32_t      dwarg; /* Big enough for a 32-bit value in any case */
+  uintptr_t     uiarg; /* sizeof(uintptr_t) >= sizeof(pointer) */
+};
+
+#if UINTPTR_MAX >= UINT32_MAX
+typedef uintptr_t wdparm_t;
+#else
+typedef uint32_t  wdparm_t;
+#endif
+</pre></ul>
 
 <h2><a name="workqueues">4.4 Work Queues</a></h2>
 <p><b>Work Queues</b>.
