@@ -62,10 +62,10 @@
 
 /* NVM Software Calibration Area */
 
-#defien SAM_NVMCALIB_AREA0               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 0-31 */
-#defien SAM_NVMCALIB_AREA1               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 32-63 */
-#defien SAM_NVMCALIB_AREA2               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 64-95 */
-#defien SAM_NVMCALIB_AREA3               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 96-127 */
+#define SAM_NVMCALIB_AREA0               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 0-31 */
+#define SAM_NVMCALIB_AREA1               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 32-63 */
+#define SAM_NVMCALIB_AREA2               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 64-95 */
+#define SAM_NVMCALIB_AREA3               (SAM_NVMCALIB_AREA + 0x0000) /* Bits 96-127 */
 
 /* Fuse bit-field definitions **************************************************************/
 /* NVM user row bits 0-31 */

@@ -59,12 +59,13 @@ fi
 export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 #export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
-# These are the Cygwin paths to the locations where I installed the Atollic
-# toolchain under windows.  You will also have to edit this if you install
-# the Atollic toolchain in any other location.  /usr/bin is added before
-# the Atollic bin path because there is are binaries named gcc.exe and g++.exe
-# at those locations as well.
-#export TOOLCHAIN_BIN="/usr/bin:/cygdrive/c/Program Files (x86)/Atollic/TrueSTUDIO for ARM Pro 2.3.0/ARMTools/bin"
+# This is the location where I installed the ARM "GNU Tools for ARM Embedded Processors"
+# You can this free toolchain here https://launchpad.net/gcc-arm-embedded
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2014q4/bin"
+
+# This is the path to the location where I installed the devkitARM toolchain
+# You can get this free toolchain from http://devkitpro.org/ or http://sourceforge.net/projects/devkitpro/
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/devkitARM/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
