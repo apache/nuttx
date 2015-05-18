@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/wdog.h
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,28 +101,32 @@
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
-/* The arguments are passed as uint32_t values.  For systems where the
- * sizeof(pointer) < sizeof(uint32_t), the following union defines the
+/* The arguments are passed as scalar wdparm_t values.  For systems where
+ * the sizeof(pointer) < sizeof(uint32_t), the following union defines the
  * alignment of the pointer within the uint32_t.  For example, the SDCC
  * MCS51 general pointer is 24-bits, but uint32_t is 32-bits (of course).
  *
- * For systems where sizeof(pointer) > sizeof(uint32_t), we will have to do
- * some redesign.
+ * We always have sizeof(pointer) <= sizeof(uintptr_t) by definitions.
  */
 
 union wdparm_u
 {
-  FAR void     *pvarg;
-  FAR uint32_t *dwarg;
+  FAR void     *pvarg; /* The size one generic point */
+  uint32_t      dwarg; /* Big enough for a 32-bit value in any case */
+  uintptr_t     uiarg; /* sizeof(uintptr_t) >= sizeof(pointer) */
 };
 
-typedef union wdparm_u wdparm_t;
+#if UINTPTR_MAX >= UINT32_MAX
+typedef uintptr_t wdparm_t;
+#else
+typedef uint32_t  wdparm_t;
+#endif
 
 /* This is the form of the function that is called when the
  * watchdog function expires.  Up to four parameters may be passed.
  */
 
-typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, ...);
+typedef CODE void (*wdentry_t)(int argc, wdparm_t arg1, ...);
 
 /* This is the internal representation of the watchdog timer structure.  The
  * WDOG_ID is a pointer to a watchdog structure.
@@ -138,7 +142,7 @@ struct wdog_s
   int                lag;        /* Timer associated with the delay */
   uint8_t            flags;      /* See WDOGF_* definitions above */
   uint8_t            argc;       /* The number of parameters to pass */
-  uint32_t           parm[CONFIG_MAX_WDOGPARMS];
+  wdparm_t           parm[CONFIG_MAX_WDOGPARMS];
 };
 
 /* Watchdog 'handle' */

@@ -71,18 +71,18 @@
 
 typedef void (*wdentry0_t)(int argc);
 #if CONFIG_MAX_WDOGPARMS > 0
-typedef void (*wdentry1_t)(int argc, uint32_t arg1);
+typedef void (*wdentry1_t)(int argc, wdparm_t arg1);
 #endif
 #if CONFIG_MAX_WDOGPARMS > 1
-typedef void (*wdentry2_t)(int argc, uint32_t arg1, uint32_t arg2);
+typedef void (*wdentry2_t)(int argc, wdparm_t arg1, wdparm_t arg2);
 #endif
 #if CONFIG_MAX_WDOGPARMS > 2
-typedef void (*wdentry3_t)(int argc, uint32_t arg1, uint32_t arg2,
-                           uint32_t arg3);
+typedef void (*wdentry3_t)(int argc, wdparm_t arg1, wdparm_t arg2,
+                           wdparm_t arg3);
 #endif
 #if CONFIG_MAX_WDOGPARMS > 3
-typedef void (*wdentry4_t)(int argc, uint32_t arg1, uint32_t arg2,
-                           uint32_t arg3, uint32_t arg4);
+typedef void (*wdentry4_t)(int argc, wdparm_t arg1, wdparm_t arg2,
+                           wdparm_t arg3, wdparm_t arg4);
 #endif
 
 /****************************************************************************
@@ -264,7 +264,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   va_start(ap, argc);
   for (i = 0; i < argc; i++)
     {
-      wdog->parm[i] = va_arg(ap, uint32_t);
+      wdog->parm[i] = va_arg(ap, wdparm_t);
     }
 #ifdef CONFIG_DEBUG
   for (; i < CONFIG_MAX_WDOGPARMS; i++)

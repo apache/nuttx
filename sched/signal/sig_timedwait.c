@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_timedwait.c
  *
- *   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-static void sig_timeout(int argc, uint32_t itcb)
+static void sig_timeout(int argc, wdparm_t itcb)
 {
   /* On many small machines, pointers are encoded and cannot be simply cast
    * from uint32_t to struct tcb_s*.  The following union works around this
@@ -101,7 +101,7 @@ static void sig_timeout(int argc, uint32_t itcb)
   union
     {
       FAR struct tcb_s *wtcb;
-      uint32_t itcb;
+      wdparm_t itcb;
     } u;
 
   u.itcb = itcb;
@@ -269,13 +269,13 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                * see wdog.h.
                */
 
-              wdparm_t wdparm;
+              union wdparm_u wdparm;
               wdparm.pvarg = (FAR void *)rtcb;
 
               /* Start the watchdog */
 
               wd_start(rtcb->waitdog, waitticks, (wdentry_t)sig_timeout, 1,
-                       wdparm.dwarg);
+                       wdparm.pvarg);
 
               /* Now wait for either the signal or the watchdog */
 

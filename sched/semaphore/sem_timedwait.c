@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_timedwait.c
  *
- *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@
  *
  ****************************************************************************/
 
-static void sem_timeout(int argc, uint32_t pid)
+static void sem_timeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
   irqstate_t flags;
