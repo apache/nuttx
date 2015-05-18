@@ -106,7 +106,7 @@
  * alignment of the pointer within the uint32_t.  For example, the SDCC
  * MCS51 general pointer is 24-bits, but uint32_t is 32-bits (of course).
  *
- * We always have sizeof(pointer) <= sizeof(uintptr_t) by definitions.
+ * We always have sizeof(pointer) <= sizeof(uintptr_t) by definition.
  */
 
 union wdparm_u
