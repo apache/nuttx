@@ -44,11 +44,17 @@
 
 #include <stdbool.h>
 
-#include "chip/sam_sercom.h"
-
 #include "up_arch.h"
 #include "sam_config.h"
 #include "sam_pm.h"
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd_sercom.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml_sercom.h"
+#else
+#  error Unrecognized SAMD/L architecture
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions

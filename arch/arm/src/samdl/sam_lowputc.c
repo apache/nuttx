@@ -58,6 +58,7 @@
 
 #include "sam_gclk.h"
 #include "sam_pm.h"
+#include "sam_sercom.h"
 #include "sam_usart.h"
 #include "sam_lowputc.h"
 
