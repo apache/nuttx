@@ -58,7 +58,7 @@
 #include "chip/samd_sysctrl.h"
 #include "chip/samd_gclk.h"
 #include "chip/samd_nvmctrl.h"
-#include "chip/sam_fuses.h"
+#include "sam_fuses.h"
 
 #include <arch/board/board.h>
 

@@ -55,6 +55,7 @@
 
 #define SAM_FLASH_BASE       0x00000000 /* Embedded FLASH memory space (<= 256KB) */
 #define SAM_FLASHRWW_BASE    0x00400000 /* Embedded FLASH RWW memory space (<= 8KB) */
+#define SAM_NVM_BASE         0x00800000 /* Readable NVM content */
 #define SAM_SRAM_BASE        0x20000000 /* Embedded SRAM memory space (<= 32KB) */
 #define SAM_LPSRAM_BASE      0x30000000 /* Embedded low-power SRAM memory space (<= 8KB) */
 #define SAM_AHBA_BASE        0x40000000 /* AHB-APB Bridge A (64KB) */
@@ -63,6 +64,13 @@
 #define SAM_AHBD_BASE        0x43000000 /* AHB-APB Bridge D (64KB) */
 #define SAM_AHBE_BASE        0x44000000 /* AHB-APB Bridge D (64KB) */
 #define SAM_IOBUS_BASE       0x60000000 /* IOBUS (O.5KB) */
+#define SAM_SYSTEM_BASE      0x60000200 /* System */
+
+/* Non-volatile memory */
+
+#define SAM_NVMUSER_ROW      0x00804000 /* NVM user row */
+#define SAM_NVMCALIB_AREA    0x00806020 /* NVM software calibration area */
+#define SAM_NVM_SERIALNO     0x0080a00c /* Serial number */
 
 /* AHB-APB Bridge A */
 

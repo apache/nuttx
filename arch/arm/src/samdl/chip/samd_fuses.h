@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_fuses.h
+ * arch/arm/src/samdl/chip/samd_fuses.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -42,8 +42,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_NVMCTRL_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_NVMCTRL_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_FUSES_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_FUSES_H
 
 /********************************************************************************************
  * Included Files
@@ -52,6 +52,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -255,4 +257,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_NVMCTRL_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_FUSES_H */
