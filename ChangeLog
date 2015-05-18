@@ -10389,3 +10389,7 @@
 	  configuration framework, and placeholder memory map and pin
 	  configuration files for SAML21 support.  Still incomplete on initial
 	  commit (2015-05-14).
+	* include/nuttx/wdog.h, sched/mqueue/mq_timed*.c, semaphore/sem_timed*.c,
+	  signal/sig_timed*.c, timer/timer_settime.c, and wdog/wd_start.c:
+	  Update the type passed to watchdog timer handlers.  Using uint32_t is
+	  a problem for 64-bit machines (2015-05-18).
