@@ -135,7 +135,6 @@ config USBHOST_CDCACM_REDUCED
 
 config USBHOST_CDCACM_BULKONLY
 	bool "Bulk only protocol"
-	default n
 	---help---
 		The device implements only the data interface (bulk in + bulk out
 		endpoint). The device does not provide an additional control

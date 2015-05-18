@@ -687,6 +687,17 @@ config ARCH_BOARD_SAMD20_XPLAINED
 		This board features the ATSAMD20J18A MCU (Cortex-M0+ with 256KB of FLASH
 		and 32KB of SRAM).
 
+config ARCH_BOARD_SAML21_XPLAINED
+	bool "Atmel SAML21-Xplained Pro development board"
+	depends on ARCH_CHIP_SAML21J18
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAML21-Xplained Pro development board.
+		This board features the ATSAML21J18A MCU (Cortex-M0+ with 256KB of FLASH
+		and 32KB of SRAM).
+
 config ARCH_BOARD_SAM3UEK
 	bool "Atmel SAM3U-EK development board"
 	depends on ARCH_CHIP_ATSAM3U4E
@@ -1194,6 +1205,7 @@ config ARCH_BOARD
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
 	default "samd20-xplained"          if ARCH_BOARD_SAMD20_XPLAINED
+	default "saml21-xplained"          if ARCH_BOARD_SAML21_XPLAINED
 	default "sam3u-ek"                 if ARCH_BOARD_SAM3UEK
 	default "sam4e-ek"                 if ARCH_BOARD_SAM4EEK
 	default "sam4l-xplained"           if ARCH_BOARD_SAM4L_XPLAINED
@@ -1485,6 +1497,9 @@ source "configs/sama5d4-ek/Kconfig"
 endif
 if ARCH_BOARD_SAMD20_XPLAINED
 source "configs/samd20-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAML21_XPLAINED
+source "configs/saml21-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAM3UEK
 source "configs/sam3u-ek/Kconfig"

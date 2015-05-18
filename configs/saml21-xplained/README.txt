@@ -2,10 +2,10 @@ README
 ^^^^^^
 
 This README discusses issues unique to NuttX configurations for the
-Atmel SAMD20 Xplained Pro development board.  This board features the
-ATSAMD20J18A MCU.
+Atmel SAML21 Xplained Pro development board.  This board features the
+ATSAML21J18A MCU.
 
-The SAMD20 Xplained Pro Starter Kit may be bundled with three modules:
+The SAML21 Xplained Pro Starter Kit may be bundled with three modules:
 
 1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, USART
             loopback, TWI AT30TSE758 Temperature sensor.
@@ -24,12 +24,12 @@ Contents
   - LEDs
   - Serial Consoles
   - Atmel Studio 6.1
-  - SAMD20 Xplained Pro-specific Configuration Options
+  - SAML21 Xplained Pro-specific Configuration Options
   - Configurations
 
 Modules
 ^^^^^^^
-  The SAMD20 Xplained Pro Starter Kit is bundled with four modules:
+  The SAML21 Xplained Pro Starter Kit is bundled with four modules:
 
   I/O1
   ----
@@ -42,7 +42,7 @@ Modules
     - USART loopback
     - TWI AT30TSE758 Temperature sensor with EEPROM
 
-    SPI is available on two of the SAMD20 Xplained connectors, EXT1 and EXT2.
+    SPI is available on two of the SAML21 Xplained connectors, EXT1 and EXT2.
     They mate with the I/O1 connector as indicated in this table.
 
     I/O1 CONNECTOR
@@ -142,10 +142,10 @@ Modules
 
     Configuration Options:
     ----------------------
-      CONFIG_SAMD20_XPLAINED_IOMODULE=y      : Informs the system that the
+      CONFIG_SAML21_XPLAINED_IOMODULE=y      : Informs the system that the
                                               I/O1 module is installed
-      CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1=y : The module is installed in EXT1
-      CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2=y : The mdoule is installed in EXT2
+      CONFIG_SAML21_XPLAINED_IOMODULE_EXT1=y : The module is installed in EXT1
+      CONFIG_SAML21_XPLAINED_IOMODULE_EXT2=y : The mdoule is installed in EXT2
 
     See the set-up in the discussion of the nsh configuration below for other
     required configuration options.
@@ -216,10 +216,10 @@ Modules
 
     Configuration Options:
     ----------------------
-      CONFIG_SAMD20_XPLAINED_OLED1MODULE=y      : Informs the system that the
+      CONFIG_SAML21_XPLAINED_OLED1MODULE=y      : Informs the system that the
                                                  I/O1 module is installed
-      CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1=y : The module is installed in EXT1
-      CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2=y : The mdoule is installed in EXT2
+      CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT1=y : The module is installed in EXT1
+      CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT2=y : The mdoule is installed in EXT2
 
     See the set-up in the discussion of the nsh configuration below for other
     required configuration options.
@@ -339,7 +339,7 @@ NuttX EABI "buildroot" Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh samd20-xplained/<sub-dir>
+     ./configure.sh saml21-xplained/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -403,7 +403,7 @@ Serial Consoles
      20   VCC  VCC  VCC  N/A
 
   There are options available in the NuttX configuration to select which
-  connector SERCOM4 is on:  SAMD20_XPLAINED_USART4_EXTn, where n=1, 2, or 3.
+  connector SERCOM4 is on:  SAML21_XPLAINED_USART4_EXTn, where n=1, 2, or 3.
 
   If you have a TTL to RS-232 converter then this is the most convenient
   serial console to use (because you don't lose the console device each time
@@ -413,8 +413,8 @@ Serial Consoles
   Virtual COM Port
   ----------------
 
-  The SAMD20 Xplained Pro contains an Embedded Debugger (EDBG) that can be
-  used to program and debug the ATSAMD20J18A using Serial Wire Debug (SWD).
+  The SAML21 Xplained Pro contains an Embedded Debugger (EDBG) that can be
+  used to program and debug the ATSAML21J18A using Serial Wire Debug (SWD).
   The Embedded debugger also include a Virtual COM port interface over
   SERCOM3.  Virtual COM port connections:
 
@@ -435,14 +435,14 @@ Atmel Studio 6.1
 
   2) File menu: File -> Open -> Open object file for debugging
      - Select nuttx.elf object file
-     - Select AT91SAMD20J18
+     - Select AT91SAML21J18
      - Select files for symbols as desired
      - Select debugger
 
   3) Debug menu: Debug -> Start debugging and break
      - This will reload the nuttx.elf file into FLASH
 
-SAMD20 Xplained Pro-specific Configuration Options
+SAML21 Xplained Pro-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -465,18 +465,18 @@ SAMD20 Xplained Pro-specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_SAMD
-       CONFIG_ARCH_CHIP_SAMD20
-       CONFIG_ARCH_CHIP_ATSAMD20J18
+       CONFIG_ARCH_CHIP_SAML
+       CONFIG_ARCH_CHIP_SAML21
+       CONFIG_ARCH_CHIP_ATSAML21J18
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=samd20-xplained (for the SAMD20 Xplained Pro development board)
+       CONFIG_ARCH_BOARD=saml21-xplained (for the SAML21 Xplained Pro development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_SAMD20_XPLAINED=y
+       CONFIG_ARCH_BOARD_SAML21_XPLAINED=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -546,7 +546,7 @@ SAMD20 Xplained Pro-specific Configuration Options
     CONFIG_SAMDL_SERCOM4_ISI2C, CONFIG_SAMDL_SERCOM4_ISSPI, or CONFIG_SAMDL_SERCOM4_ISUSART
     CONFIG_SAMDL_SERCOM5_ISI2C, CONFIG_SAMDL_SERCOM5_ISSPI, or CONFIG_SAMDL_SERCOM5_ISUSART
 
-  SAMD20 specific device driver settings
+  SAML21 specific device driver settings
 
     CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,..5) for the
       console and ttys0 (default is the USART4).
@@ -562,11 +562,11 @@ SAMD20 Xplained Pro-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-  Each SAMD20 Xplained Pro configuration is maintained in a sub-directory and
+  Each SAML21 Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
     cd tools
-    ./configure.sh samd20-xplained/<subdir>
+    ./configure.sh saml21-xplained/<subdir>
     cd -
     . ./setenv.sh
 
@@ -633,9 +633,9 @@ Configurations
          CONFIG_USART4_TXBUFSIZE=256
 
        Board Selection -> USART4 Connection
-         CONFIG_SAMD20_XPLAINED_USART4_EXT1=n : Pick on if USART4 used
-         CONFIG_SAMD20_XPLAINED_USART4_EXT2=n
-         CONFIG_SAMD20_XPLAINED_USART4_EXT3=y
+         CONFIG_SAML21_XPLAINED_USART4_EXT1=n : Pick on if USART4 used
+         CONFIG_SAML21_XPLAINED_USART4_EXT2=n
+         CONFIG_SAML21_XPLAINED_USART4_EXT3=y
 
   3. Unless otherwise stated, the configurations are setup for
      Cygwin under Windows:
@@ -695,7 +695,7 @@ Configuration sub-directories
        an 'unsigned long int'.  If this error occurs, then you may need to
        toggle the value of CONFIG_CXX_NEWLONG.
 
-    4. If the I/O1 module is connected to the SAMD20 Xplained Pro, then
+    4. If the I/O1 module is connected to the SAML21 Xplained Pro, then
        support for the SD card slot can be enabled by making the following
        changes to the configuration.  These changes assume that the I/O1
        modules is connected in EXT1.  Most of the modifications necessary
@@ -738,9 +738,9 @@ Configuration sub-directories
          CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
          CONFIG_NSH_MMCSDSPIPORTNO=0       : Use port=0 -> SERCOM0 if the I/O1 is in EXT1
 
-       Board Selection -> SAMD20 Xplained Pro Modules
-         CONFIG_SAMD20_XPLAINED_IOMODULE=y      : I/O1 module is connected
-         CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1=y : I/O1 modules is in EXT1
+       Board Selection -> SAML21 Xplained Pro Modules
+         CONFIG_SAML21_XPLAINED_IOMODULE=y      : I/O1 module is connected
+         CONFIG_SAML21_XPLAINED_IOMODULE_EXT1=y : I/O1 modules is in EXT1
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
@@ -766,7 +766,7 @@ Configuration sub-directories
          This is a test
          nsh>
 
-    5. If the OLED1 module is connected to the SAMD20 Xplained Pro, then
+    5. If the OLED1 module is connected to the SAML21 Xplained Pro, then
        support for the OLED display can be enabled by making the following
        changes to the configuration.  These changes assume that the I/O1
        modules is connected in EXT1.  Most of the modifications necessary
@@ -795,9 +795,9 @@ Configuration sub-directories
          CONFIG_LCD_SSD1306_SPIMODE=0       : SPI Mode 0
          CONFIG_LCD_SSD1306_SPIMODE=3500000 : Pick an SPI frequency
 
-       Board Selection -> SAMD20 Xplained Pro Modules
-         CONFIG_SAMD20_XPLAINED_OLED1MODULE=y      : OLED1 module is connected
-         CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2=y : OLED1 modules is in EXT2
+       Board Selection -> SAML21 Xplained Pro Modules
+         CONFIG_SAML21_XPLAINED_OLED1MODULE=y      : OLED1 module is connected
+         CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT2=y : OLED1 modules is in EXT2
 
        The NX graphics subsystem also needs to be configured:
 

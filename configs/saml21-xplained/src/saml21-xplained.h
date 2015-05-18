@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/samd20-xplained/src/samd20-xplained.h
+ * configs/saml21-xplained/src/saml21-xplained.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_SAMD20_XPLAINED_SRC_SAMD20_XPLAINED_H
-#define __CONFIGS_SAMD20_XPLAINED_SRC_SAMD20_XPLAINED_H
+#ifndef __CONFIGS_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H
+#define __CONFIGS_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H
 
 /************************************************************************************
  * Included Files
@@ -54,9 +54,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* LEDs: There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
+/* LEDs: There are three LEDs on board the SAML21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labelled STATIS near the SAMD20 USB
+ * one user controllable LED, a yellow LED labelled STATIS near the SAML21 USB
  * connector.
  *
  * This LED is controlled by PA14 and the LED can be activated by driving PA14
@@ -86,8 +86,8 @@
 
 /* Mechanical buttons:
  *
- * The SAMD20 Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAMD20 reset line and the other is a generic user
+ * The SAML21 Xplained Pro contains two mechanical buttons. One button is the
+ * RESET button connected to the SAML21 reset line and the other is a generic user
  * configurable button. When a button is pressed it will drive the I/O line to GND.
  *
  *   PA15 SW0
@@ -113,16 +113,16 @@
  *   --- ------------------ ---------------------- -------------------------------
  */
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
+#ifdef CONFIG_SAML21_XPLAINED_IOMODULE
 
 #  ifndef SAMDL_HAVE_SPI0
 #    error SAMDL_HAVE_SPI0 is required to use the I/O1 module
 #  endif
 
-#  if defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1)
+#  if defined(CONFIG_SAML21_XPLAINED_IOMODULE_EXT1)
 
-#    if defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE) && \
-        defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1)
+#    if defined(CONFIG_SAML21_XPLAINED_OLED1MODULE) && \
+        defined(CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT1)
 #      error I/O1 and OLED1 modules cannot both reside in EXT1
 #    endif
 
@@ -132,10 +132,10 @@
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                         PORTA | PORT_PIN5)
 
-#  elif defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2)
+#  elif defined(CONFIG_SAML21_XPLAINED_IOMODULE_EXT2)
 
-#    if defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE) && \
-        defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2)
+#    if defined(CONFIG_SAML21_XPLAINED_OLED1MODULE) && \
+        defined(CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT2)
 #      error I/O1 and OLED1 modules cannot both reside in EXT2
 #    endif
 
@@ -165,7 +165,7 @@
  *            SPI SS              SPI SS
  */
 
-#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
+#ifdef CONFIG_SAML21_XPLAINED_OLED1MODULE
 
 #  ifndef SAMDL_HAVE_SPI0
 #    error SAMDL_HAVE_SPI0 is required to use the OLED1 module
@@ -183,10 +183,10 @@
 #    error CONFIG_LCD_UG2832HSWEG04 is required to use the OLED1 module
 #  endif
 
-#  if defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1)
+#  if defined(CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT1)
 
-#    if defined(CONFIG_SAMD20_XPLAINED_IOMODULE) && \
-        defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1)
+#    if defined(CONFIG_SAML21_XPLAINED_IOMODULE) && \
+        defined(CONFIG_SAML21_XPLAINED_IOMODULE_EXT1)
 #      error OLED1 and I/O1 modules cannot both reside in EXT1
 #    endif
 
@@ -197,10 +197,10 @@
 #    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                             PORTA | PORT_PIN5)
 
-#  elif defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2)
+#  elif defined(CONFIG_SAML21_XPLAINED_OLED1MODULE_EXT2)
 
-#    if defined(CONFIG_SAMD20_XPLAINED_IOMODULE) && \
-        defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2)
+#    if defined(CONFIG_SAML21_XPLAINED_IOMODULE) && \
+        defined(CONFIG_SAML21_XPLAINED_IOMODULE_EXT2)
 #      error OLED1 and I/O1 modules cannot both reside in EXT2
 #    endif
 
@@ -249,16 +249,15 @@ void weak_function sam_spiinitialize(void);
  * Name: sam_sdinitialize
  *
  * Description:
- *   Initialize the SPI-based SD card.  Requires CONFIG_SAMD20_XPLAINED_IOMODULE=y,
+ *   Initialize the SPI-based SD card.  Requires CONFIG_SAML21_XPLAINED_IOMODULE=y,
  *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and the appropriate SERCOM SPI
  *   port enabled.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
+#ifdef CONFIG_SAML21_XPLAINED_IOMODULE
 int sam_sdinitialize(int port, int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_SAMD20_XPLAINED_SRC_SAMD20_XPLAINED_H */
-
+#endif /* __CONFIGS_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H */

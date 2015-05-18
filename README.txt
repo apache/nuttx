@@ -1251,6 +1251,8 @@ nuttx
  |   |   `- README.txt
  |   |- samd20-xplained/
  |   |   `- README.txt
+ |   |- saml21-xplained/
+ |   |   `- README.txt
  |   |- sam3u-ek/
  |   |   `- README.txt
  |   |- sam4e-ek/
