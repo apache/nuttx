@@ -48,6 +48,8 @@
 #  include "chip/samd_gclk.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
 #  include "chip/saml_gclk.h"
+#else
+#  error Unrecognized SAMD/L architecture
 #endif
 
 /****************************************************************************
