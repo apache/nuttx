@@ -460,8 +460,16 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
     }
 
   /* Then copy data into the RX buffer until either: (1) all of the data has been
-   * copied, or (2) the RX buffer is full.  NOTE:  If the RX buffer becomes full,
-   * then we have overrun the serial driver and data will be lost.
+   * copied, or (2) the RX buffer is full.
+   *
+   * NOTE:  If the RX buffer becomes full, then we have overrun the serial driver
+   * and data will be lost.  This is the correct behavior for a proper emulation
+   * of a serial link.  It should not NAK, it should drop data like a physical
+   * serial port.
+   *
+   * If you don't like that behavior.  DO NOT change it here.  Instead, you should
+   * finish the implementation of RX flow control which is the only proper way
+   * to throttle a serial device.
    */
 
   while (nexthead != recv->tail && nbytes < reqlen)
