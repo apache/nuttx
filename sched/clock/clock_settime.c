@@ -111,16 +111,16 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
       flags = irqsave();
 
-      /* Save the new base time. */
-
-      g_basetime.tv_sec  = tp->tv_sec;
-      g_basetime.tv_nsec = tp->tv_nsec;
-
       /* Get the elapsed time since power up (in milliseconds).  This is a
        * bias value that we need to use to correct the base time.
        */
 
       (void)clock_systimespec(&bias);
+
+      /* Save the new base time. */
+
+      g_basetime.tv_sec  = tp->tv_sec;
+      g_basetime.tv_nsec = tp->tv_nsec;
 
       /* Subtract that bias from the basetime so that when the system
        * timer is again added to the base time, the result is the current
