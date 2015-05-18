@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_sercom.h
+ * arch/arm/src/samdl/chip/samd_sercom.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_SERCOM_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_SERCOM_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_SERCOM_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_SERCOM_H
 
 /********************************************************************************************
  * Included Files
@@ -81,4 +81,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_SERCOM_H */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_SERCOM_H */
