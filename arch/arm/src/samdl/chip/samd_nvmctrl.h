@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samdl/chip/sam_nvmctrl.h
+ * arch/arm/src/samdl/chip/samd_nvmctrl.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAM_NVMCTRL_H
-#define __ARCH_ARM_SRC_SAMDL_CHIP_SAM_NVMCTRL_H
+#ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_NVMCTRL_H
+#define __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_NVMCTRL_H
 
 /********************************************************************************************
  * Included Files
@@ -47,6 +47,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -111,7 +113,7 @@
 #define NVMCTRL_CTRLB_READMODE_MASK  (3 << NVMCTRL_CTRLB_READMODE_SHIFT)
 #  define NVMCTRL_CTRLB_READMODE_NO_MISS_PENALTY (0 << NVMCTRL_CTRLB_READMODE_SHIFT) /* No extra wait states on miss */
 #  define NVMCTRL_CTRLB_READMODE_LOW_POWER       (1 << NVMCTRL_CTRLB_READMODE_SHIFT) /* Insert wait/reduce power */
-#  define NVMCTRL_CTRLB_READMODE_DETERMINISTIC       (2 << NVMCTRL_CTRLB_READMODE_SHIFT) /* Same wait on all access */
+#  define NVMCTRL_CTRLB_READMODE_DETERMINISTIC   (2 << NVMCTRL_CTRLB_READMODE_SHIFT) /* Same wait on all access */
 #define NVMCTRL_CTRLB_CACHEDIS       (1 << 18)  /* Bit 18: Cache Disable */
 
 /* NVM parameter register */
@@ -166,4 +168,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_NVMCTRL_H */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_NVMCTRL_H */
