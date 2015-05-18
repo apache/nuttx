@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_port.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,14 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "chip/sam_port.h"
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  include "chip/samd_port.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  include "chip/saml_port.h"
+#else
+#  error Unrecognized SAMD/L architecture
+#endif
 
 /****************************************************************************
  * Pre-processor Declarations

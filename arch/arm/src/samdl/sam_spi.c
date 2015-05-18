@@ -62,15 +62,13 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/sam_port.h"
-
-#include <arch/board/board.h>
-
 #include "sam_pinmap.h"
 #include "sam_gclk.h"
 #include "sam_port.h"
 #include "sam_sercom.h"
 #include "sam_spi.h"
+
+#include <arch/board/board.h>
 
 #ifdef SAMDL_HAVE_SPI
 

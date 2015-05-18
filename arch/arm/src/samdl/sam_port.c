@@ -56,7 +56,6 @@
 
 #include "chip.h"
 #include "sam_port.h"
-#include "chip/sam_port.h"
 
 /****************************************************************************
  * Pre-processor Definitions
