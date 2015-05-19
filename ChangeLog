@@ -10396,4 +10396,5 @@
 	* configs/saml21-xplained:  Add a board build configuration for the
 	  SAML21 Xplained Pro.  Initial commit is just the SAMD20 Xplained Pro
 	  board support with naming changed.  Does not yet build (2015-05-18).
-
+	* libc/net/lib_inetntoa.c: Correct errors in printing IP address when
+	  type char is signed.  From Max Neklyudov (2015-05-19).
