@@ -56,14 +56,20 @@
 /* Clocking *************************************************************************/
 /* Overview
  *
- * OSC16M             Output = 16MHz
- *  `- GCLK1          Input  = 16MHz Prescaler    = 1 output         = 16MHz
- *      `- DFLL       Input  = 8MHz  Multiplier   = 3 output         = 48MHz
- *          `- GCLK0  Input  = 48MHz Prescaler    = 1 output         = 48MHz
- *              `- PM Input  = 48Mhz CPU divider  = 1 CPU frequency  = 48MHz
- *                                   APBA divider = 1 APBA frequency = 48MHz
- *                                   APBB divider = 1 APBB frequency = 48MHz
- *                                   APBC divider = 1 APBC frequency = 48MHz
+ * Since there is not high speed crystal, we will run from the OSC16M clock source.
+ * We will use its default, POR frequency of 4MHz to avoid an additional clock
+ * switch.
+ *
+ * OSC16M             Output = 4MHz
+ *  `- GCLK1          Input  = 4MHz Prescaler     = 1  output         = 4MHz
+ *      `- DFLL       Input  = 4MHz  Multiplier   = 12 output         = 48MHz
+ *          `- GCLK0  Input  = 48MHz Prescaler    = 1  output         = 48MHz
+ *              `- PM Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
+ *                                   APBA divider = 1  APBA frequency = 48MHz
+ *                                   APBB divider = 1  APBB frequency = 48MHz
+ *                                   APBC divider = 1  APBC frequency = 48MHz
+ *                                   APBD divider = 1  APBD frequency = 48MHz
+ *                                   APBE divider = 1  APBE frequency = 48MHz
  *
  * The SAML21 Xplained Pro has one on-board crystal:
  *
@@ -104,6 +110,7 @@
  *   BOARD_XOSC32K_EN32KHZ      - Boolean (defined / not defined)
  *   BOARD_XOSC32K_ONDEMAND     - Boolean (defined / not defined)
  *   BOARD_XOSC32K_RUNINSTANDBY - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_WRITELOCK    - Boolean (defined / not defined)
  */
 
 #undef  BOARD_XOSC32K_ENABLE
@@ -115,6 +122,7 @@
 #define BOARD_XOSC32K_EN32KHZ        1
 #define BOARD_XOSC32K_ONDEMAND       1
 #undef  BOARD_XOSC32K_RUNINSTANDBY
+#undef  BOARD_XOSC32K_WRITELOCK
 
 /* OSC32 Configuration -- not used
  *
@@ -125,6 +133,7 @@
  *   BOARD_OSC32K_EN32KHZ       - Boolean (defined / not defined)
  *   BOARD_OSC32K_ONDEMAND      - Boolean (defined / not defined)
  *   BOARD_OSC32K_RUNINSTANDBY  - Boolean (defined / not defined)
+ *   BOARD_OSC32K_WRITELOCK     - Boolean (defined / not defined)
  */
 
 #undef  BOARD_OSC32K_ENABLE
@@ -134,15 +143,16 @@
 #define BOARD_OSC32K_EN32KHZ         1
 #define BOARD_OSC32K_ONDEMAND        1
 #undef  BOARD_OSC32K_RUNINSTANDBY
+#undef  BOARD_OSC32K_WRITELOCK
 
 /* OSC16M Configuration -- always enabled
  *
- *   BOARD_OSC16M_PRESCALER     - See SYSCTRL_OSC16M_PRESC_DIV* definitions
+ *   BOARD_OSC16M_FSEL          - See OSCCTRL_OSC16MCTRL_FSEL_* definitions
  *   BOARD_OSC16M_ONDEMAND      - Boolean (defined / not defined)
  *   BOARD_OSC16M_RUNINSTANDBY  - Boolean (defined / not defined)
  */
 
-#define BOARD_OSC16M_PRESCALER       SYSCTRL_OSC16M_PRESC_DIV1
+#define BOARD_OSC16M_FSEL            OSCCTRL_OSC16MCTRL_FSEL_4MHZ
 #define BOARD_OSC16M_ONDEMAND        1
 #undef  BOARD_OSC16M_RUNINSTANDBY
 
@@ -200,7 +210,7 @@
 /* DFLL closed loop mode configuration */
 
 #define BOARD_DFLL_SRCGCLKGEN         GCLK_CLKCTRL_GEN1
-#define BOARD_DFLL_MULTIPLIER         3
+#define BOARD_DFLL_MULTIPLIER         12
 #define BOARD_DFLL_QUICKLOCK          1
 #define BOARD_DFLL_TRACKAFTERFINELOCK 1
 #define BOARD_DFLL_KEEPLOCKONWAKEUP   1
