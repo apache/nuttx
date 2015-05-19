@@ -59,7 +59,7 @@
  * one user controllable LED, a yellow LED labelled STATIS near the SAML21 USB
  * connector.
  *
- * This LED is controlled by PA14 and the LED can be activated by driving PA14
+ * This LED is controlled by PB10 and the LED can be activated by driving PB10
  * to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
@@ -82,7 +82,7 @@
  */
 
 #define PORT_STATUS_LED (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                         PORTA | PORT_PIN14)
+                         PORTB | PORT_PIN10)
 
 /* Mechanical buttons:
  *
@@ -90,11 +90,11 @@
  * RESET button connected to the SAML21 reset line and the other is a generic user
  * configurable button. When a button is pressed it will drive the I/O line to GND.
  *
- *   PA15 SW0
+ *   PA02 SW0
  */
 
-#define PORT_SW0      (PORT_INTERRUPT | PORT_PULL_UP | PORTA | PORT_PIN15)
-#define IRQ_SW0       SAM_IRQ_PA15
+#define PORT_SW0      (PORT_INTERRUPT | PORT_PULL_UP | PORTA | PORT_PIN2)
+#define IRQ_SW0       SAM_IRQ_PA2
 
 /* I/O1
  *
@@ -105,11 +105,10 @@
  *   --- ------------------ ---------------------- -------------------------------
  *   PIN EXT1               EXT2                   Description
  *   --- ------------------ ---------------------- -------------------------------
- *   15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]  Active low chip select OUTPUT,
- *           SPI SS                 SPI SS          pulled high on board.
- *   --- ------------------ ---------------------- -------------------------------
- *   10 PB05 PORT           10 PB15 PORT            Active low card detect INPUT,
- *                                                  must use internal pull-up.
+ *   15 PA05 SERCOM0 PAD[1] 15 PA17 GPIO]          Active low chip select OUTPUT,
+ *                             SPI SS               pulled high on board.
+ *   10 PA02 GPIO           10 PB15 GPIO           Active low card detect INPUT,
+ *                                                 must use internal pull-up.
  *   --- ------------------ ---------------------- -------------------------------
  */
 
@@ -127,7 +126,7 @@
 #    endif
 
 #    define PORT_SD_CD (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
-                        PORTB | PORT_PIN5)
+                        PORTA | PORT_PIN2)
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                         PORTA | PORT_PIN5)
@@ -157,12 +156,14 @@
  * is installed on the EXT1 or EXT2 connector:
  *
  *
+ *   --- ------------------- -------------------- -------------------------------------
  *   PIN EXT1                EXT2                 Description
  *   --- ------------------- -------------------- -------------------------------------
- *   5   PB06 PORT           PA20 PORT            DATA_CMD_SEL
- *   10  PB05 PORT           PB15 PORT            DISPLAY_RESET. Active low.
+ *   5   PB06 PA02           PA20 PA02            DATA_CMD_SEL
+ *   10  PA02 PA02           PB15 PA02            DISPLAY_RESET. Active low.
  *   15  PA05 SERCOM0 PAD[1] PA17 SERCOM1 PAD[1]  DISPLAY_SS.  Active low.
  *            SPI SS              SPI SS
+ *   --- ------------------- -------------------- -------------------------------------
  */
 
 #ifdef CONFIG_SAML21_XPLAINED_OLED1MODULE
@@ -193,7 +194,7 @@
 #    define PORT_OLED_DATA (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
                             PORTB | PORT_PIN6)
 #    define PORT_OLED_RST  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
-                            PORTB | PORT_PIN5)
+                            PORTA | PORT_PIN2)
 #    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                             PORTA | PORT_PIN5)
 

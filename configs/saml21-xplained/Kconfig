@@ -52,31 +52,4 @@ endchoice
 endif
 endmenu
 
-if USART4_SERIAL_CONSOLE
-choice
-	prompt "USART 4 Connection"
-	default SAML21_XPLAINED_USART4_EXT3
-
-config SAML21_XPLAINED_USART4_EXT1
-	bool "EXT1"
-	depends on !SAML21_XPLAINED_OLED1MODULE_EXT1 && !SAML21_XPLAINED_IOMODULE_EXT1
-	---help---
-		Select this option if the serial console is on SERCOM4 connected via
-		EXT1.  The RX will be on PB9 and TX signal will be on PB8.
-
-config SAML21_XPLAINED_USART4_EXT2
-	bool "EXT2"
-	depends on !SAML21_XPLAINED_OLED1MODULE_EXT2 && !SAML21_XPLAINED_IOMODULE_EXT2
-	---help---
-		Select this option if the serial console is on SERCOM4 connected via
-		EXT2.  The RX will be on PB13 and TX signal will be on PB12.
-
-config SAML21_XPLAINED_USART4_EXT3
-	bool "EXT3"
-	---help---
-		Select this option if the serial console is on SERCOM4 connect via
-		EXT3.  The RX will be on PB11 and TX signal will be on PB10.
-
-endchoice
-endif
-endif
+endif # ARCH_BOARD_SAML21_XPLAINED

@@ -1,5 +1,5 @@
 README
-^^^^^^
+======
 
 This README discusses issues unique to NuttX configurations for the
 Atmel SAML21 Xplained Pro development board.  This board features the
@@ -14,21 +14,22 @@ The SAML21 Xplained Pro Starter Kit may be bundled with three modules:
             logic).
 
 Contents
-^^^^^^^^
+========
 
   - Modules
   - Development Environment
   - GNU Toolchain Options
   - IDEs
   - NuttX EABI "buildroot" Toolchain
-  - LEDs
+  - LEDs and Buttons
   - Serial Consoles
   - Atmel Studio 6.1
   - SAML21 Xplained Pro-specific Configuration Options
   - Configurations
 
 Modules
-^^^^^^^
+=======
+
   The SAML21 Xplained Pro Starter Kit is bundled with four modules:
 
   I/O1
@@ -54,21 +55,21 @@ Modules
     ----------------- ---------------------- ---------------------- ------------------------------------
     2  GND            2       GND            2  GND
     ----------------- ---------------------- ---------------------- ------------------------------------
-    3  LIGHTSENSOR    3  PB00 AIN[8]         3  PA10 AIN[18]
+    3  LIGHTSENSOR    3  PB05 AIN[13]        3  PA10 AIN[18]
     ----------------- ---------------------- ---------------------- ------------------------------------
-    4  LP_OUT         4  PB01 AIN[9]         4  PA11 AIN[19]
+    4  LP_OUT         4  PA03 AIN[1]         4  PA11 AIN[19]
     ----------------- ---------------------- ---------------------- ------------------------------------
     5  GPIO1          5  PB06 GPIO           5  PA20 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
     6  GPIO2          6  PB07 GPIO           6  PA21 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
-    7  LED            7  PB02 TC6/WO[0]      7  PA22 TC4/WO[0]
+    7  LED            7  PA12 TCC2/WO[0]     7  PB12 TC4/WO[0]
     ----------------- ---------------------- ---------------------- ------------------------------------
-    8  LP_IN          8  PB03 TC6/WO[1]      8  PA23 TC4/WO[1]
+    8  LP_IN          8  PA13 TCC2/WO[1]     8  PB13 TC4/WO[1]
     ----------------- ---------------------- ---------------------- ------------------------------------
     9  TEMP_ALERT     9  PB04 EXTINT[4]      9  PB14 EXTINT[14]
     ----------------- ---------------------- ---------------------- ------------------------------------
-    10 microSD_DETECT 10 PB05 GPIO           10 PB15 GPIO
+    10 microSD_DETECT 10 PA02 GPIO           10 PB15 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
     11 TWI SDA        11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0] EXT1, EXT2, EXT3 and EDBG
                               I²C SDA                I²C SDA
@@ -76,24 +77,24 @@ Modules
     12 TWI SCL        12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
                               I²C SCL                I²C SCL
     ----------------- ---------------------- ---------------------- ------------------------------------
-    13 USART RX       13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
+    13 USART RX       13 PB09 SERCOM4 PAD[1] 13 PA19 SERCOM1 PAD[3] The SERCOM4 module is shared between
                               USART RX               USART RX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
-    14 USART TX       14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
+    14 USART TX       14 PB08 SERCOM4 PAD[0] 14 PA18 SERCOM1 PAD[2] The SERCOM4 module is shared between
                               USART TX               USART TX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
-    15 microSD_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
-                              SPI SS                 SPI SS
+    15 microSD_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 GPIO
+                              SPI SS
     ----------------- ---------------------- ---------------------- ------------------------------------
-    16 SPI_MOSI       16 PA06 SERCOM0 PAD[2] 16 PA18 SERCOM1 PAD[2]
+    16 SPI_MOSI       16 PA06 SERCOM0 PAD[2] 16 PB22 SERCOM5 PAD[2]
                               SPI MOSI               SPI MOSI
     ----------------- ---------------------- ---------------------- ------------------------------------
-    17 SPI_MISO       17 PA04 SERCOM0 PAD[0] 17 PA16 SERCOM1 PAD[0]
+    17 SPI_MISO       17 PA04 SERCOM0 PAD[0] 17 PB16 SERCOM5 PAD[0]
                               SPI MISO               SPI MISO
     ----------------- ---------------------- ---------------------- ------------------------------------
-    18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PA19 SERCOM1 PAD[3]
+    18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PB23 SERCOM5 PAD[3]
                               SPI SCK                SPI SCK
     ----------------- ---------------------- ---------------------- ------------------------------------
     19 GND            19      GND               GND
@@ -133,10 +134,10 @@ Modules
     --- ------------------ ---------------------- -------------------------------------
     PIN EXT1               EXT2                   Description
     --- ------------------ ---------------------- -------------------------------------
-    15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]  Active low chip select OUTPUT, pulled
-            SPI SS                 SPI SS          high on board.
+    15 PA05 SERCOM0 PAD[1] 15 PA17 GPIO            Active low chip select OUTPUT, pulled
+            SPI SS                                 high on board.
     --- ------------------ ---------------------- -------------------------------------
-    10 PB05 GPIO           10 PB15 GPIO            Active low card detect INPUT, must
+    10 PA02 GPIO           10 PB15 GPIO            Active low card detect INPUT, must
                                                    use internal pull-up.
     --- ------------------ ---------------------- -------------------------------------
 
@@ -167,21 +168,21 @@ Modules
     ----------------- ---------------------- ---------------------- ------------------------------------
     2  GND            2       GND            2  GND
     ----------------- ---------------------- ---------------------- ------------------------------------
-    3  BUTTON2        3  PB00 AIN[8]         3  PA10 AIN[18]
+    3  BUTTON2        3  PB05 AIN[13]        3  PA10 AIN[18]
     ----------------- ---------------------- ---------------------- ------------------------------------
-    4  BUTTON3        4  PB01 AIN[9]         4  PA11 AIN[19]
+    4  BUTTON3        4  PA03 AIN[1]         4  PA11 AIN[19]
     ----------------- ---------------------- ---------------------- ------------------------------------
     5  DATA_CMD_SEL   5  PB06 GPIO           5  PA20 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
     6  LED3           6  PB07 GPIO           6  PA21 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
-    7  LED1           7  PB02 TC6/WO[0]      7  PA22 TC4/WO[0]
+    7  LED1           7  PA12 TCC2/WO[0]     7  PB12 TC4/WO[0]
     ----------------- ---------------------- ---------------------- ------------------------------------
-    8  LED2           8  PB03 TC6/WO[1]      8  PA23 TC4/WO[1]
+    8  LED2           8  PA13 TCC2/WO[1]     8  PB13 TC4/WO[1]
     ----------------- ---------------------- ---------------------- ------------------------------------
     9  BUTTON1        9  PB04 EXTINT[4]      9  PB14 EXTINT[14]
     ----------------- ---------------------- ---------------------- ------------------------------------
-    10 DISPLAY_RESET  10 PB05 GPIO           10 PB15 GPIO
+    10 DISPLAY_RESET  10 PA02 GPIO           10 PB15 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
     11 N/C            11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0] EXT1, EXT2, EXT3 and EDBG
                               I²C SDA                I²C SDA
@@ -189,24 +190,24 @@ Modules
     12 N/C            12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
                               I²C SCL                I²C SCL
     ----------------- ---------------------- ---------------------- ------------------------------------
-    13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
+    13 N/C            13 PB09 SERCOM4 PAD[1] 13 PA19 SERCOM1 PAD[3] The SERCOM4 module is shared between
                               USART RX               USART RX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
-    14 N/C            14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
+    14 N/C            14 PB08 SERCOM4 PAD[0] 14 PA18 SERCOM1 PAD[2] The SERCOM4 module is shared between
                               USART TX               USART TX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
-    15 DISPLAY_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
-                              SPI SS                 SPI SS
+    15 DISPLAY_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 GPIO
+                              SPI SS
     ----------------- ---------------------- ---------------------- ------------------------------------
-    16 SPI_MOSI       16 PA06 SERCOM0 PAD[2] 16 PA18 SERCOM1 PAD[2]
+    16 SPI_MOSI       16 PA06 SERCOM0 PAD[2] 16 PB22 SERCOM5 PAD[2]
                               SPI MOSI               SPI MOSI
     ----------------- ---------------------- ---------------------- ------------------------------------
-    17 N/C            17 PA04 SERCOM0 PAD[0] 17 PA16 SERCOM1 PAD[0]
+    17 N/C            17 PA04 SERCOM0 PAD[0] 17 PB16 SERCOM5 PAD[0]
                               SPI MISO               SPI MISO
     ----------------- ---------------------- ---------------------- ------------------------------------
-    18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PA19 SERCOM1 PAD[3]
+    18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PB23 SERCOM5 PAD[3]
                               SPI SCK                SPI SCK
     ----------------- ---------------------- ---------------------- ------------------------------------
     19 GND            19      GND               GND
@@ -230,7 +231,7 @@ Modules
   There is no built-in support for the PROTO1 module.
 
 Development Environment
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
@@ -238,8 +239,7 @@ Development Environment
   environment.
 
 GNU Toolchain Options
-^^^^^^^^^^^^^^^^^^^^^
-
+=====================
 
   The NuttX make system can be configured to support the various different
   toolchain options.  All testing has been conducted using the NuttX buildroot
@@ -294,7 +294,7 @@ GNU Toolchain Options
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
 
 IDEs
-^^^^
+====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
@@ -326,7 +326,7 @@ IDEs
   startup object needed by an IDE.
 
 NuttX EABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the Cortex-M0 GCC toolchain (if
@@ -362,11 +362,14 @@ NuttX EABI "buildroot" Toolchain
   details PLUS some special instructions that you will need to follow if you are
   building a Cortex-M0 toolchain for Cygwin under Windows.
 
-LEDs
-^^^^
-  There is one yellow LED available on the SAM D20 Xplained Pro board that
+LEDs and Buttons
+================
+
+  LED
+  ---
+  There is one yellow LED available on the SAML21 Xplained Pro board that
   can be turned on and off. The LED can be activated by driving the connected
-  PA14 I/O line to GND.
+  PB10 I/O line to GND.
 
   When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
   control the LED as follows:
@@ -386,22 +389,64 @@ LEDs
   apparently, running normally.  If LED is flashing at approximately
   2Hz, then a fatal error has been detected and the system has halted.
 
-Serial Consoles
-^^^^^^^^^^^^^^^
-
-  SERCOM4
+  Button
   ------
+  SAM L21 Xplained Pro contains one mechanical button on PA02 that can be
+  controlled by software. When a button is pressed it will drive the I/O
+  line to GND. Note: There is no pull-up resistor connected to the generic
+  user button. Remember to enable the internal pull-up in the SAM L21 to
+  use the button.
 
-  SERCOM4 is available on connectors EXT1, EXT2, and EXT3, but using
-  different PORT pins:
+  QTouch Button
+  -------------
+  To be provided
+
+Serial Consoles
+===============
+
+  SERCOM0
+  -------
+  SERCOM0 is dedicated for use with SPI at the EXT1 connector
+
+  SERCOM1
+  -------
+  SERCOM1 is available as a USART on EXT2 and EXT3
 
     PIN   EXT1 EXT2 EXT3 GPIO Function
     ----  ---- ---- ---- ------------------
-     13   PB09 PB13 PB11 SERCOM4 / USART RX
-     14   PB08 PB12 PB12 SERCOM4 / USART TX
+     13   ---  PA19 PA19 SERCOM1 / USART RX
+     14   ---  PA18 PA18 SERCOM1 / USART TX
      19   GND  GND  GND  N/A
      20   VCC  VCC  VCC  N/A
 
+  SERCOM2
+  -------
+  SERCOM0 is dedicated for use with I2C at the EXT1, EXT2, and EXT3
+  connectors.
+
+  SERCOM3
+  -------
+  SERCOM3 is not available on any EXT connector but is dedicated for
+  use with Virtual COM (see below).
+
+  SERCOM4
+  -------
+  SERCOM1 is available as a USART on EXT1
+
+    PIN   EXT1 EXT2 EXT3 GPIO Function
+    ----  ---- ---- ---- ------------------
+     13   PB09 ---  ---  SERCOM4 / USART RX
+     14   PB08 ---  ---  SERCOM4 / USART TX
+     19   GND  GND  GND  N/A
+     20   VCC  VCC  VCC  N/A
+
+  SERCOM5
+  -------
+
+  SERCOM5 is dedicated for use with SPI at the EXT2 and EXT3 connectors
+
+  Configuration
+  -------------
   There are options available in the NuttX configuration to select which
   connector SERCOM4 is on:  SAML21_XPLAINED_USART4_EXTn, where n=1, 2, or 3.
 
@@ -418,11 +463,14 @@ Serial Consoles
   The Embedded debugger also include a Virtual COM port interface over
   SERCOM3.  Virtual COM port connections:
 
-    PA24 SERCOM3 / USART TXD
-    PA25 SERCOM3 / USART RXD
+    PA22 SERCOM3 / USART TXD
+    PA23 SERCOM3 / USART RXD
 
 Atmel Studio 6.1
-^^^^^^^^^^^^^^^^
+================
+
+  NOTE: These instructions are old. The SAML21 requires Atmel Studio 6.2. 
+  They may still prove useful to you, however.
 
   Loading Code into FLASH:
   -----------------------
@@ -443,7 +491,7 @@ Atmel Studio 6.1
      - This will reload the nuttx.elf file into FLASH
 
 SAML21 Xplained Pro-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==================================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -472,7 +520,7 @@ SAML21 Xplained Pro-specific Configuration Options
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=saml21-xplained (for the SAML21 Xplained Pro development board)
+       CONFIG_ARCH_BOARD="saml21-xplained" (for the SAML21 Xplained Pro development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
@@ -560,7 +608,7 @@ SAML21 Xplained Pro-specific Configuration Options
     CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
   Each SAML21 Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
@@ -603,39 +651,31 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output of on SERCOM4 which is available on EXT1, EXT2, or EXT3 (see
-     the section "Serial Consoles" above).  The virtual COM port could
-     be used, instead, by reconfiguring to use SERCOM3 instead of
-     SERCOM4:
+     output of on SERCOM4 which is available on EXT1 (see the section
+     "Serial Consoles" above).  The SERCOM1 on EXT2 or EXT3 or the
+     virtual COM port on SERCOME could be used, instead, by
+     reconfiguring to use SERCOM1 or SERCOM3 instead of SERCOM4:
+
 
        System Type -> SAMD/L Peripheral Support
-         CONFIG_SAMDL_SERCOM3=y           : Enable one or both
+         CONFIG_SAMDL_SERCOM1=y           : Enable one or both
+         CONFIG_SAMDL_SERCOM3=y
          CONFIG_SAMDL_SERCOM4=n
 
        Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_USART4_SERIAL_CONSOLE=y  : Select only one for the console
+         CONFIG_USART1_SERIAL_CONSOLE=y  : Select only one for the console
+         CONFIG_USART3_SERIAL_CONSOLE=y  : Select only one for the console
          CONFIG_USART4_SERIAL_CONSOLE=n
 
-       Device Drivers -> Serial Driver Support -> SERCOM3 Configuration
-         CONFIG_USART3_2STOP=0
-         CONFIG_USART3_BAUD=115200
-         CONFIG_USART3_BITS=8
-         CONFIG_USART3_PARITY=0
-         CONFIG_USART3_RXBUFSIZE=256
-         CONFIG_USART3_TXBUFSIZE=256
+       Device Drivers -> Serial Driver Support -> SERCOMn Configuration
+       where n=1 or 3:
 
-       Device Drivers -> Serial Driver Support -> SERCOM4 Configuration
-         CONFIG_USART4_2STOP=0
-         CONFIG_USART4_BAUD=115200
-         CONFIG_USART4_BITS=8
-         CONFIG_USART4_PARITY=0
-         CONFIG_USART4_RXBUFSIZE=256
-         CONFIG_USART4_TXBUFSIZE=256
-
-       Board Selection -> USART4 Connection
-         CONFIG_SAML21_XPLAINED_USART4_EXT1=n : Pick on if USART4 used
-         CONFIG_SAML21_XPLAINED_USART4_EXT2=n
-         CONFIG_SAML21_XPLAINED_USART4_EXT3=y
+         CONFIG_USARTn_2STOP=0
+         CONFIG_USARTn_BAUD=115200
+         CONFIG_USARTn_BITS=8
+         CONFIG_USARTn_PARITY=0
+         CONFIG_USARTn_RXBUFSIZE=256
+         CONFIG_USARTn_TXBUFSIZE=256
 
   3. Unless otherwise stated, the configurations are setup for
      Cygwin under Windows:
@@ -740,14 +780,14 @@ Configuration sub-directories
 
        Board Selection -> SAML21 Xplained Pro Modules
          CONFIG_SAML21_XPLAINED_IOMODULE=y      : I/O1 module is connected
-         CONFIG_SAML21_XPLAINED_IOMODULE_EXT1=y : I/O1 modules is in EXT1
+         CONFIG_SAML21_XPLAINED_IOMODULE_EXT2=y : I/O1 modules is in EXT2
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
 
        NOTE: If you enable the I/O1 this configuration with SERCOM4 as the
        console and with the I/O1 module in EXT1, you *must* remove USART
-       jumper.  Otherwise, you have lookpack on SERCOM4 and NSH will *not*
+       jumper.  Otherwise, you have lookback on SERCOM4 and NSH will *not*
        behave very well (since its outgoing prompts also appear as incoming
        commands).
 
@@ -804,7 +844,7 @@ Configuration sub-directories
          CONFIG_NX=y                        : Enable graphics support
          CONFIG_NX_LCDDRIVER=y              : Using an LCD driver
          CONFIG_NX_NPLANES=1                : With a single color plane
-         CONFIG_NX_WRITEONLY=n              : You can read from the LCD (see below**)
+         CONFIG_NX_WRITEONLY=n              : You can read from the LCD (see below*)
          CONFIG_NX_DISABLE_2BPP=y           : Disable all resolutions except 1BPP
          CONFIG_NX_DISABLE_4BPP=y
          CONFIG_NX_DISABLE_8BPP=y
@@ -817,11 +857,7 @@ Configuration sub-directories
          CONFIG_NXFONTS_CHARBITS=7          : 7-bit fonts
          CONFIG_NXFONT_SANS17X23B=y         : Pick a font (any that will fit)
 
-        * This orientation will put the buttons "above" the LCD.  The
-          reverse landscape configuration (CONFIG_LCD_RLANDSCAPE) will
-          "flip" the display so that the buttons are "below" the LCD.
-
-       ** The hardware is write only, but the driver maintains a frame buffer
+        * The hardware is write only, but the driver maintains a frame buffer
           to support read and read-write-modiry operations on the LCD.
           Reading from the frame buffer is, however, untested.
 
