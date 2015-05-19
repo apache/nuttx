@@ -62,7 +62,10 @@
 
 #include <arch/board/board.h>
 
+#include "samd_periphclks.h"
 #include "sam_clockconfig.h"
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -886,9 +889,7 @@ static inline void sam_config_gclks(void)
 
   /* Turn on the GCLK interface clock */
 
-  regval  = getreg32(SAM_PM_APBAMASK);
-  regval |= PM_APBAMASK_GCLK;
-  putreg32(regval, SAM_PM_APBAMASK);
+  sam_gclk_enableperiph();
 
   /* Reset the GCLK module */
 
@@ -1025,3 +1026,5 @@ void sam_clockconfig(void)
 
   sam_dividers();
 }
+
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */

@@ -119,7 +119,7 @@
 #define MCLK_APBAMASK_PM           (1 << 0)  /* Bit 0:  PM APBA clock enable */
 #define MCLK_APBAMASK_MCLK         (1 << 1)  /* Bit 1:  MCLK APBA clock enable */
 #define MCLK_APBAMASK_RSTC         (1 << 2)  /* Bit 2:  RSTC APBA clock enable */
-#define MCLK_APBAMASK_OCCTRL       (1 << 3)  /* Bit 3:  OSCCTRL APBA clock enable */
+#define MCLK_APBAMASK_OSCCTRL      (1 << 3)  /* Bit 3:  OSCCTRL APBA clock enable */
 #define MCLK_APBAMASK_OSC32KCTRL   (1 << 4)  /* Bit 4:  OSC32KCTRL APBA clock enable */
 #define MCLK_APBAMASK_SUPC         (1 << 5)  /* Bit 5:  SUPC APBA clock enable */
 #define MCLK_APBAMASK_GCLK         (1 << 6)  /* Bit 6:  GCLK APBA clock enable */
@@ -136,11 +136,12 @@
 
 /* APBC mask */
 
-#define MCLK_APBCMASK_SERCOM0      (1 << 0)  /* Bit 0:  SERCOM0 APBC clock enable */
-#define MCLK_APBCMASK_SERCOM1      (1 << 1)  /* Bit 1:  SERCOM1 APBC clock enable */
-#define MCLK_APBCMASK_SERCOM2      (1 << 2)  /* Bit 2:  SERCOM2 APBC clock enable */
-#define MCLK_APBCMASK_SERCOM3      (1 << 3)  /* Bit 3:  SERCOM3 APBC clock enable */
-#define MCLK_APBCMASK_SERCOM4      (1 << 4)  /* Bit 4:  SERCOM4 APBC clock enable */
+#define MCLK_APBCMASK_SERCOM(n)    (1 << (n))  /* Bit n:  SERCOMn APBC clock enable, n=0-4 */
+#  define MCLK_APBCMASK_SERCOM0    (1 << 0)  /* Bit 0:  SERCOM0 APBC clock enable */
+#  define MCLK_APBCMASK_SERCOM1    (1 << 1)  /* Bit 1:  SERCOM1 APBC clock enable */
+#  define MCLK_APBCMASK_SERCOM2    (1 << 2)  /* Bit 2:  SERCOM2 APBC clock enable */
+#  define MCLK_APBCMASK_SERCOM3    (1 << 3)  /* Bit 3:  SERCOM3 APBC clock enable */
+#  define MCLK_APBCMASK_SERCOM4    (1 << 4)  /* Bit 4:  SERCOM4 APBC clock enable */
 #define MCLK_APBCMASK_TCC0         (1 << 5)  /* Bit 5:  TCC0 APBC clock enable */
 #define MCLK_APBCMASK_TCC1         (1 << 6)  /* Bit 6:  TCC1 APBC clock enable */
 #define MCLK_APBCMASK_TCC2         (1 << 7)  /* Bit 7:  TCC2 APBC clock enable */

@@ -9,6 +9,11 @@
  *       Datasheet", Atmel-42385C-SAML21_Datasheet_Preliminary-03/20/15
  *   2. The SAMD20 samd_clockconfig.c file.  See that file for additional
  *      references.
+ *   3. Atmel sample code for the SAML21.  This code has an ASF license
+ *      with is compatible with the NuttX BSD license, but includes the
+ *      provision that this code not be used in non-Atmel products.  That
+ *      sample code was used only as a reference so I believe that only the
+ *      NuttX BSD license applies.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,14 +57,15 @@
 #include "up_arch.h"
 
 #include "chip/saml_pm.h"
+#include "chip/saml_supc.h"
 #include "chip/saml_oscctrl.h"
 #include "chip/saml_osc32kctrl.h"
 #include "chip/saml_gclk.h"
 #include "chip/saml_nvmctrl.h"
-#include "sam_fuses.h"
 
 #include <arch/board/board.h>
 
+#include "saml_periphclks.h"
 #include "sam_clockconfig.h"
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
@@ -84,6 +90,36 @@ struct sam_gclkconfig_s
   uint16_t prescaler;   /* Prescaler value */
 };
 #endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static inline void sam_flash_waitstates(void);
+static void sam_performance_level(uint8_t level);
+#ifdef BOARD_XOSC_ENABLE
+static inline void sam_xosc_config(void);
+#endif
+#ifdef BOARD_XOSC32K_ENABLE
+static inline void sam_xosc32k_config(void);
+#endif
+#ifdef BOARD_OSC32K_ENABLE
+static inline void sam_osc32k_config(void);
+#endif
+static inline void sam_osc16m_config(void);
+#ifdef BOARD_DFLL_ENABLE
+static inline void sam_dfll48m_config(void);
+#endif
+#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL_ENABLE) && \
+   !defined(BOARD_DFLL_OPENLOOP)
+static inline void sam_dfll_reference(void);
+#endif
+static void sam_gclck_waitsyncbusy(void);
+static void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
+#ifdef BOARD_GCLK_ENABLE
+static inline void sam_config_gclks(void);
+#endif
+static inline void sam_dividers(void);
 
 /****************************************************************************
  * Private Data
@@ -230,6 +266,22 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
 #define NGCLKS_ENABLED (sizeof(g_gclkconfig) / sizeof(struct sam_gclkconfig_s))
 #endif
 
+/* These are temporary GLCK0 configuration that may be needed at power up */
+
+static const struct sam_gclkconfig_s g_gclk0_default =
+{
+  .gclk       = 0,
+  .prescaler  = 1,
+  .clksrc     = (uint8_t)(GCLK_GENCTRL_SRC_OSC16M >> GCLK_GENCTRL_SRC_SHIFT),
+};
+
+static const struct sam_gclkconfig_s g_gclk0_ulp32kconfig =
+{
+  .gclk       = 0,
+  .prescaler  = 1,
+  .clksrc     = (uint8_t)(GCLK_GENCTRL_SRC_OSCULP32K >> GCLK_GENCTRL_SRC_SHIFT),
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -255,10 +307,47 @@ static inline void sam_flash_waitstates(void)
 {
   uint32_t regval;
 
-  regval = getreg32(SAM_NVMCTRL_CTRLB);
+  regval  = getreg32(SAM_NVMCTRL_CTRLB);
   regval &= ~NVMCTRL_CTRLB_RWS_MASK;
   regval |= NVMCTRL_CTRLB_RWS(BOARD_FLASH_WAITSTATES);
   putreg32(regval, SAM_NVMCTRL_CTRLB);
+}
+
+/****************************************************************************
+ * Name: sam_performance_level
+ *
+ * Description:
+ *   "When scaling down the performance level, the bus frequency should be
+ *    first scaled down in order to not exceed the maximum frequency allowed
+ *    for the low performance level.
+ *
+ *   "When scaling up the performance level (for example from PL0 to PL2),
+ *    the bus frequency can be increased only once the performance level
+ *    transition is completed, check the performance level status.
+ *
+ * Input Parameters:
+ *   level - The new performance level
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_performance_level(uint8_t level)
+{
+  /* Check if we are already at this performance level */
+
+  if (level != (getreg8(SAM_PM_PLCFG) & PM_PLCFG_PLSEL_MASK))
+    {
+      /* Clear performance level status and set the new performance level */
+
+      putreg8(PM_INT_PLRDY, SAM_PM_INTFLAG);
+      putreg8(level, SAM_PM_PLCFG);
+
+      /* Wait for the new performance level to be ready */
+
+      while ((getreg16(SAM_PM_INTFLAG) & PM_INT_PLRDY) == 0);
+    }
 }
 
 /****************************************************************************
@@ -291,7 +380,11 @@ static inline void sam_xosc_config(void)
 
   /* Configure the XOSC clock */
 
-  regval = BOARD_XOSC_STARTUPTIME
+  regval  = getreg16(SAM_OSCCTRL_XOSCCTRL);
+  regval &= ~(OSCCTRL_XOSCCTRL_RUNSTDBY  | OSCCTRL_XOSCCTRL_ONDEMAND |
+              OSCCTRL_XOSCCTRL_GAIN_MASK | OSCCTRL_XOSCCTRL_XTALEN   |
+              OSCCTRL_XOSCCTRL_AMPGC    | OSCCTRL_XOSCCTRL_STARTUP_MASK);
+  regval |= BOARD_XOSC_STARTUPTIME
 
 #ifdef BOARD_XOSC_ISCRYSTAL
   /* XOSC is a crystal */
@@ -330,7 +423,7 @@ static inline void sam_xosc_config(void)
   regval |= OSCCTRL_XOSCCTRL_RUNSTDBY;
 #endif
 
-  putreg16(regval,  SAM_OSCCTRL_XOSCCTRL);
+  putreg16(regval, SAM_OSCCTRL_XOSCCTRL);
 
   /* Then enable the XOSC clock */
 
@@ -350,13 +443,14 @@ static inline void sam_xosc_config(void)
  *
  *     BOARD_XOSC32K_ENABLE       - Boolean (defined / not defined)
  *     BOARD_XOSC32K_FREQUENCY    - In Hz
- *     BOARD_XOSC32K_STARTUPTIME  - See OS32KCCTRL_XOSC32K_STARTUP_* definitions
+ *     BOARD_XOSC32K_STARTUPTIME  - See OSC32KCTRL_XOSC32K_STARTUP_* definitions
  *     BOARD_XOSC32K_ISCRYSTAL    - Boolean (defined / not defined)
  *     BOARD_XOSC32K_AAMPEN       - Boolean (defined / not defined)
  *     BOARD_XOSC32K_EN1KHZ       - Boolean (defined / not defined)
  *     BOARD_XOSC32K_EN32KHZ      - Boolean (defined / not defined)
  *     BOARD_XOSC32K_ONDEMAND     - Boolean (defined / not defined)
  *     BOARD_XOSC32K_RUNINSTANDBY - Boolean (defined / not defined)
+ *     BOARD_XOSC32K_WRITELOCK    - Boolean (defined / not defined)
  *
  * Input Parameters:
  *   None
@@ -373,38 +467,54 @@ static inline void sam_xosc32k_config(void)
 
   /* Configure XOSC32K */
 
-  regval = BOARD_XOSC32K_STARTUPTIME
+  regval  = getreg16(SAM_OSC32KCTRL_XOSC32K);
+  regval &= ~(OSC32KCTRL_XOSC32K_XTALEN   | OSC32KCTRL_XOSC32K_EN32K        |
+              OSC32KCTRL_XOSC32K_EN1K     | OSC32KCTRL_XOSC32K_RUNSTDBY     |
+              OSC32KCTRL_XOSC32K_ONDEMAND | OSC32KCTRL_XOSC32K_STARTUP_MASK |
+              OSC32KCTRL_XOSC32K_WRTLOCK);
+  regval |= BOARD_XOSC32K_STARTUPTIME
 
 #ifdef BOARD_XOSC32K_ISCRYSTAL
-  regval |= OS32KCCTRL_XOSC32K_XTALEN;
+  regval |= OSC32KCTRL_XOSC32K_XTALEN;
 #endif
 
 #ifdef BOARD_XOSC32K_AAMPEN
-  regval |= OS32KCCTRL_XOSC32K_AAMPEN;
+  regval |= OSC32KCTRL_XOSC32K_AAMPEN;
 #endif
 
 #ifdef BOARD_XOSC32K_EN1KHZ
-  regval |= OS32KCCTRL_XOSC32K_EN1K;
+  regval |= OSC32KCTRL_XOSC32K_EN1K;
 #endif
 
 #ifdef BOARD_XOSC32K_EN32KHZ
-  regval |= OS32KCCTRL_XOSC32K_EN32K;
+  regval |= OSC32KCTRL_XOSC32K_EN32K;
 #endif
 
 #ifdef BOARD_XOSC32K_ONDEMAND
-  regval |= OS32KCCTRL_XOSC32K_ONDEMAND;
+  regval |= OSC32KCTRL_XOSC32K_ONDEMAND;
 #endif
 
 #ifdef BOARD_XOSC32K_RUNINSTANDBY
-  regval |= OS32KCCTRL_XOSC32K_RUNSTDBY;
+  regval |= OSC32KCTRL_XOSC32K_RUNSTDBY;
 #endif
 
-  putreg16(regval, SAM_OS32KCCTRL_XOSC32K);
+  putreg16(regval, SAM_OSC32KCTRL_XOSC32K);
 
   /* Then enable the XOSC clock */
 
-  regval |= OS32KCCTRL_XOSC32K_ENABLE;
-  putreg16(regval, SAM_OS32KCCTRL_XOSC32K);
+  regval |= OSC32KCTRL_XOSC32K_ENABLE;
+  putreg16(regval, SAM_OSC32KCTRL_XOSC32K);
+
+  /* Wait for XOSC32K to be ready */
+
+  while ((getreg32(SAM_OSC32CTRL_STATUS) & OSC32KCTRL_INT_XOSC32KRDY) == 0);
+
+#ifdef BOARD_XOSC32K_WRITELOCK
+  /* Lock this configuration until the next power up */
+
+  regval |= OSC32KCTRL_XOSC32K_WRTLOCK;
+  putreg16(regval, SAM_OSC32KCTRL_XOSC32K);
+#endif
 }
 #else
 #  define sam_xosc32k_config()
@@ -419,11 +529,12 @@ static inline void sam_xosc32k_config(void)
  *
  *     BOARD_OSC32K_ENABLE       - Boolean (defined / not defined)
  *     BOARD_OSC32K_FREQUENCY    - In Hz
- *     BOARD_OSC32K_STARTUPTIME  - See OS32KCCTRL_OSC32K_STARTUP_* definitions
+ *     BOARD_OSC32K_STARTUPTIME  - See OSC32KCTRL_OSC32K_STARTUP_* definitions
  *     BOARD_OSC32K_EN1KHZ       - Boolean (defined / not defined)
  *     BOARD_OSC32K_EN32KHZ      - Boolean (defined / not defined)
  *     BOARD_OSC32K_ONDEMAND     - Boolean (defined / not defined)
  *     BOARD_OSC32K_RUNINSTANDBY - Boolean (defined / not defined)
+ *     BOARD_OSC32K_WRITELOCK    - Boolean (defined / not defined)
  *
  * Input Parameters:
  *   None
@@ -437,44 +548,64 @@ static inline void sam_xosc32k_config(void)
 static inline void sam_osc32k_config(void)
 {
   uint32_t regval;
-  uint32_t calib;
-
-  /* Recover OSC32K calibration data from OTP "fuse" memory */
-
-  regval  = getreg32(SAM_FUSES_OSC32KCAL_ADDR);
-  calib   = (regval & SAM_FUSES_OSC32KCAL_MASK) >> SAM_FUSES_OSC32KCAL_SHIFT;
-  regval  = calib << OS32KCCTRL_OSC32K_CALIB_SHIFT;
 
   /* Configure OSC32K */
 
+  regval  = getreg32(SAM_OSC32KCTRL_OSC32K);
+  regval &= ~(OSC32KCTRL_OSC32K_EN32K        | OSC32KCTRL_OSC32K_EN1K     |
+              OSC32KCTRL_OSC32K_RUNSTDBY     | OSC32KCTRL_OSC32K_ONDEMAND |
+              OSC32KCTRL_OSC32K_STARTUP_MASK | OSC32KCTRL_OSC32K_WRTLOCK);
   regval |= BOARD_OSC32K_STARTUPTIME;
 
-#ifdef BOARD_OSC32K_EN1KHZ
-  regval |= OS32KCCTRL_OSC32K_EN1K;
-#endif
-
 #ifdef BOARD_OSC32K_EN32KHZ
-  regval |= OS32KCCTRL_OSC32K_EN32K;
+  regval |= OSC32KCTRL_OSC32K_EN32K;
 #endif
 
-#ifdef BOARD_OSC32K_ONDEMAND
-  regval |= OS32KCCTRL_OSC32K_ONDEMAND;
+#ifdef BOARD_OSC32K_EN1KHZ
+  regval |= OSC32KCTRL_OSC32K_EN1K;
 #endif
 
 #ifdef BOARD_OSC32K_RUNINSTANDBY
-  regval |= OS32KCCTRL_OSC32K_RUNSTDBY;
+  regval |= OSC32KCTRL_OSC32K_RUNSTDBY;
 #endif
 
-  putreg32(regval, SAM_OS32KCCTRL_OSC32K);
+#ifdef BOARD_OSC32K_ONDEMAND
+  regval |= OSC32KCTRL_OSC32K_ONDEMAND;
+#endif
+
+  putreg32(regval, SAM_OSC32KCTRL_OSC32K);
 
   /* Then enable OSC32K */
 
-  regval |= OS32KCCTRL_OSC32K_ENABLE;
-  putreg32(regval, SAM_OS32KCCTRL_OSC32K);
+  regval |= OSC32KCTRL_OSC32K_ENABLE;
+  putreg32(regval, SAM_OSC32KCTRL_OSC32K);
+
+#ifdef BOARD_XOSC32K_WRITELOCK
+  /* Lock this configuration until the next power up */
+
+  regval |= OSC32KCTRL_OSC32K_WRTLOCK;
+  putreg16(regval, SAM_OSC32KCTRL_OSC32K);
+#endif
 }
 #else
 #  define sam_osc32k_config()
 #endif
+
+/****************************************************************************
+ * Name: sam_osculp32k_config
+ *
+ * Description:
+ *   Configure OSCULP32K
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define sam_osculp32k_config()
 
 /****************************************************************************
  * Name: sam_osc16m_config
@@ -483,7 +614,7 @@ static inline void sam_osc32k_config(void)
  *   Configure OSC16M based on settings in the board.h header file.
  *   Depends on:
  *
- *     BOARD_OSC16M_PRESCALER     - See OSCCTRL_OSC16MCTRL_PRESC_DIV* definitions
+ *     BOARD_OSC16M_FSEL          - See OSCCTRL_OSC16MCTRL_FSEL_* definitions
  *     BOARD_OSC16M_ONDEMAND      - Boolean (defined / not defined)
  *     BOARD_OSC16M_RUNINSTANDBY  - Boolean (defined / not defined)
  *
@@ -518,32 +649,102 @@ static inline void sam_osc32k_config(void)
 static inline void sam_osc16m_config(void)
 {
   uint32_t regval;
+  bool enabled;
+
+  /* After reset, OSC16M is enabled and serve4s as the default clock source
+   * at 4MHz.  Since this particular logic only runs on reset, there is
+   * some additional unnecessary logic in the following.
+   */
 
   /* Configure OSC16M */
 
   regval  = getreg32(SAM_OSCCTRL_OSC16MCTRL);
-  regval &= ~(OSCCTRL_OSC16MCTRL_PRESC_MASK | OSCCTRL_OSC16MCTRL_ONDEMAND |
-              OSCCTRL_OSC16MCTRL_RUNSTDBY);
 
-  /* Select the prescaler */
+  /* Is OSC16M already enabled? Is it already running at the requested
+   * frequency?
+   */
 
-  regval |= (BOARD_OSC16M_PRESCALER | OSCCTRL_OSC16MCTRL_ENABLE);
+  enabled = ((regval & OSCCTRL_OSC16MCTRL_ENABLE) !=  0);
+  if (enabled && (regval & OSCCTRL_OSC16MCTRL_FSEL_MASK) == BOARD_OSC16M_FSEL)
+    {
+      regval &= ~(OSCCTRL_OSC16MCTRL_ONDEMAND | OSCCTRL_OSC16MCTRL_RUNSTDBY);
 
 #ifdef BOARD_OSC16M_ONDEMAND
-  /* Select on-demand oscillator controls */
+      /* Select on-demand oscillator controls */
 
-  regval |= OSCCTRL_OSC16MCTRL_ONDEMAND;
+      regval |= OSCCTRL_OSC16MCTRL_ONDEMAND;
 #endif
 
 #ifdef BOARD_OSC16M_RUNINSTANDBY
-  /* The oscillator continues to run in standby sleep mode  */
+      /* The oscillator continues to run in standby sleep mode  */
 
-  regval |= OSCCTRL_OSC16MCTRL_RUNSTDBY;
+      regval |= OSCCTRL_OSC16MCTRL_RUNSTDBY;
 #endif
 
-  /* Set the OSC16M configuration */
+      /* Save the new OSC16M configuration */
 
-  putreg32(regval, SAM_OSCCTRL_OSC16MCTRL);
+      putreg32(regval, SAM_OSCCTRL_OSC16MCTRL);
+    }
+
+  /* Either the OSC16M is not running (which is not possible in this
+   * context) or else OSC16M is configured to run at a different frequency.
+   */
+
+  else
+    {
+      /* If it is enabled, then we are probably running on OSC16M now.
+       * Select OSCULP32K as new clock source for main clock temporarily.
+       * This depends on the fact the GCLK0 is enabled at reset.
+       */
+
+      if (enabled)
+        {
+          sam_gclk_config(&g_gclk0_ulp32kconfig);
+
+          /* Disable OSC16M clock */
+
+          regval &= ~OSCCTRL_OSC16MCTRL_ENABLE;
+          putreg32(regval, SAM_OSCCTRL_OSC16MCTRL);
+        }
+
+      /* Set the new OSC16M configuration */
+
+      regval &= ~(OSCCTRL_OSC16MCTRL_FSEL_MASK | OSCCTRL_OSC16MCTRL_RUNSTDBY |
+                  OSCCTRL_OSC16MCTRL_ONDEMAND);
+      regval |= BOARD_OSC16M_FSEL;
+
+#ifdef BOARD_OSC16M_ONDEMAND
+      /* Select on-demand oscillator controls */
+
+      regval |= OSCCTRL_OSC16MCTRL_ONDEMAND;
+#endif
+
+#ifdef BOARD_OSC16M_RUNINSTANDBY
+      /* The oscillator continues to run in standby sleep mode  */
+
+      regval |= OSCCTRL_OSC16MCTRL_RUNSTDBY;
+#endif
+
+      /* Save the new OSC16M configuration */
+
+      putreg32(regval, SAM_OSCCTRL_OSC16MCTRL);
+
+      /* Enable OSC16M */
+
+      regval |= OSCCTRL_OSC16MCTRL_ENABLE;
+      putreg32(regval, SAM_OSCCTRL_OSC16MCTRL);
+
+      /* Wait for OSC16M to be ready */
+
+      while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_OSC16MRDY) == 0);
+
+      /* Re-select OSC16M for main clock again */
+
+      if (enabled)
+        {
+          sam_gclk_config(&g_gclk0_default);
+        }
+    }
 }
 
 /****************************************************************************
@@ -745,8 +946,7 @@ static void sam_gclck_waitsyncbusy(void)
  *
  ****************************************************************************/
 
-#ifdef BOARD_GCLK_ENABLE
-static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
+static void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 {
   uint32_t genctrl;
   uint32_t gendiv;
@@ -848,7 +1048,6 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   sam_gclck_waitsyncbusy();
 }
-#endif
 
 /****************************************************************************
  * Name: sam_config_gclks
@@ -881,14 +1080,11 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 #ifdef BOARD_GCLK_ENABLE
 static inline void sam_config_gclks(void)
 {
-  uint32_t regval;
   int i;
 
   /* Turn on the GCLK interface clock */
 
-  regval  = getreg32(SAM_PM_APBAMASK);
-  regval |= PM_APBAMASK_GCLK;
-  putreg32(regval, SAM_PM_APBAMASK);
+  sam_gclk_enableperiph();
 
   /* Reset the GCLK module */
 
@@ -993,10 +1189,15 @@ void sam_clockconfig(void)
 
   putreg32(OSCCTRL_INT_ALL, SAM_OSCCTRL_INTFLAG);
   putreg32(OSC32KCTRL_INT_ALL, SAM_OSC32KCTRL_INTFLAG);
+  putreg32(SUPC_INT_ALL, SAM_SUPC_INTFLAG);
 
   /* Set FLASH wait states */
 
   sam_flash_waitstates();
+
+  /* Switch to PL2 to be sure configuration of GCLK0 is safe */
+
+  sam_performance_level(PM_PLCFG_PLSEL_PL2);
 
   /* Configure XOSC */
 

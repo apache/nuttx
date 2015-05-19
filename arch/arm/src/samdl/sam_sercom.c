@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samdl/sam_lowputc.c
+ * arch/arm/src/samdl/sam_sercom.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
