@@ -56,6 +56,7 @@
 
 #include "efm32_rmu.h"
 #include "efm32_rtc.h"
+#include "efm32_bitband.h"
 #include "clock/clock.h"
 
 /************************************************************************************
@@ -124,18 +125,14 @@
 #   error "BOARD_BURTC_CLKSRC badly setted !"
 #endif
 
-#define __SEC_OFF_REG           EFM32_BURTC_RET_REG(2)
-#define __BASETIME_SEC__OFF_REG EFM32_BURTC_RET_REG(3)
+#define __CNT_TOP               (((uint64_t)(_BURTC_CNT_MASK))+1)
+#define __CNT_CARRY_REG         EFM32_BURTC_RET_REG(0)
+#define __CNT_ZERO_REG          EFM32_BURTC_RET_REG(1)
 
-#ifdef CONFIG_RTC_HIRES
-#   define __CNT_OFF_REG           EFM32_BURTC_RET_REG(0)
-#   define __BASETIME_NSEC_OFF_REG EFM32_BURTC_RET_REG(1)
-#endif
-
-#ifndef CONFIG_DEBUG
-#  define burtcdbg lldbg
+#if defined CONFIG_DEBUG && defined CONFIG_RTC_DEBUG
+#   define burtcdbg lldbg
 #else
-#  define burtcdbg(x...)
+#   define burtcdbg(x...)
 #endif
 
 /************************************************************************************
@@ -199,11 +196,11 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context)
 #ifdef CONFIG_RTC_HIRES
   if (source & BURTC_IF_OF)
     {
-      int regval;
+      uint32_t regval;
 
-      regval  = getreg32(__SEC_OFF_REG);
-      regval += (_BURTC_CNT_MASK+1)/CONFIG_RTC_FREQUENCY;
-      putreg32(regval,__SEC_OFF_REG);
+      regval  = getreg32(__CNT_CARRY_REG);
+      regval++;
+      putreg32(regval, __CNT_CARRY_REG);
     }
 #endif
 
@@ -242,42 +239,41 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context)
 static void efm32_rtc_burtc_init(void)
 {
   uint32_t regval;
+  uint32_t regval2;
 
   regval = g_efm32_rstcause;
+  regval2 = getreg32(EFM32_BURTC_CTRL);
 
-  if (!(getreg32(EFM32_BURTC_CTRL) & BURTC_CTRL_RSTEN)
-      && !(regval & RMU_RSTCAUSE_BUBODREG)
-      && !(regval & RMU_RSTCAUSE_BUBODUNREG)
-      && !(regval & RMU_RSTCAUSE_BUBODBUVIN)
-      && !(regval & RMU_RSTCAUSE_EXTRST)
-      && !(regval & RMU_RSTCAUSE_PORST)
-)
+  burtcdbg("BURTC RESETCAUSE=0x%08X BURTC_CTRL=0x%08X\n", regval, regval2);
+
+  if (!(regval2 & BURTC_CTRL_RSTEN) &&
+      !(regval  & RMU_RSTCAUSE_BUBODREG) &&
+      !(regval  & RMU_RSTCAUSE_BUBODUNREG) &&
+      !(regval  & RMU_RSTCAUSE_BUBODBUVIN) &&
+      !(regval  & RMU_RSTCAUSE_EXTRST) &&
+      !(regval  & RMU_RSTCAUSE_PORST))
     {
       g_efm32_burtc_reset_status = getreg32(EFM32_BURTC_STATUS);
 
       /* Reset timestamp BURTC clear status */
 
-      putreg32(BURTC_CMD_CLRSTATUS,EFM32_BURTC_CMD);
+      putreg32(BURTC_CMD_CLRSTATUS, EFM32_BURTC_CMD);
 
       /* restore saved base time */
 
-      g_basetime.tv_sec   = __BASETIME_SEC__OFF_REG;
-#ifdef CONFIG_RTC_HIRES
-      g_basetime.tv_nsec  = __BASETIME_NSEC_OFF_REG;
-#else
-      g_basetime.tv_nsec  = 0;
-#endif
-
+      burtcdbg("BURTC OK\n");
       return;
     }
 
+  burtcdbg("BURTC RESETED\n");
+
   /* Disable reset of BackupDomain */
 
-  modifyreg32(EFM32_RMU_CTRL,_RMU_CTRL_BURSTEN_MASK,0);
+  bitband_set_peripheral(EFM32_RMU_CTRL, _RMU_CTRL_BURSTEN_SHIFT, 0);
 
   /* Make sure all registers are updated simultaneously */
 
-  putreg32(BURTC_FREEZE_REGFREEZE_FREEZE,EFM32_BURTC_FREEZE);
+  putreg32(BURTC_FREEZE_REGFREEZE_FREEZE, EFM32_BURTC_FREEZE);
 
   /* Restore all not setted BURTC registers to default value */
 
@@ -297,40 +293,73 @@ static void efm32_rtc_burtc_init(void)
 
   /* Clear interrupts */
 
-  putreg32(0xFFFFFFFF,EFM32_BURTC_IFC);
+  putreg32(0xFFFFFFFF, EFM32_BURTC_IFC);
 
   /* Set new configuration */
 
-  putreg32(regval|BURTC_CTRL_RSTEN,EFM32_BURTC_CTRL);
+  putreg32(regval | BURTC_CTRL_RSTEN, EFM32_BURTC_CTRL);
 
   /* Clear freeze */
 
-  putreg32(0,EFM32_BURTC_FREEZE);
+  putreg32(0, EFM32_BURTC_FREEZE);
 
   /* To enable BURTC counter, we need to disable reset */
 
-  putreg32(regval,EFM32_BURTC_CTRL);
+  putreg32(regval, EFM32_BURTC_CTRL);
 
   /* Enable BURTC interrupt on compare match and counter overflow */
 
-  putreg32(BURTC_IF_OF|BURTC_IF_LFXOFAIL, EFM32_BURTC_IEN);
+  putreg32(BURTC_IF_OF | BURTC_IF_LFXOFAIL, EFM32_BURTC_IEN);
 
   /* Lock BURTC to avoid modification */
 
-  putreg32(BURTC_LOCK_LOCKKEY_LOCK,EFM32_BURTC_LOCK);
+  putreg32(BURTC_LOCK_LOCKKEY_LOCK, EFM32_BURTC_LOCK);
 
   /* reset BURTC retention REG used */
 
-  putreg32(0,__CNT_OFF_REG);
-  putreg32(0,__SEC_OFF_REG);
-  putreg32(0,__BASETIME_SEC__OFF_REG);
-#ifdef CONFIG_RTC_HIRES
-  putreg32(0,__BASETIME_NSEC_OFF_REG);
-#endif
+  putreg32(0, __CNT_CARRY_REG);
+  putreg32(0, __CNT_ZERO_REG);
 
   /* inform rest of software that BURTC was reset at boot */
 
   g_efm32_burtc_reseted = true;
+}
+
+static uint64_t efm32_get_burtc_tick(void)
+{
+  uint32_t cnt_carry;
+  uint32_t cnt_zero;
+  uint32_t cnt;
+  uint64_t val;
+  irqstate_t flags;
+
+  flags = irqsave();
+
+  do
+    {
+      /* pending IRQ so theat it */
+
+      if (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0)
+        {
+          efm32_rtc_burtc_interrupt(EFM32_IRQ_BURTC, NULL);
+        }
+
+      cnt       = getreg32(EFM32_BURTC_CNT);
+      cnt_zero  = getreg32(__CNT_ZERO_REG);
+      cnt_carry = getreg32(__CNT_CARRY_REG);
+    }
+
+  /* Retry if IRQ appear during register reading  */
+
+  while (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0);
+
+  irqrestore(flags);
+
+  val = (uint64_t)cnt_carry*__CNT_TOP + cnt + cnt_zero;
+
+  burtcdbg("Get Tick carry %u zero %u reg %u\n", cnt_carry, cnt_carry,cnt);
+
+  return val;
 }
 
 /************************************************************************************
@@ -387,28 +416,7 @@ int up_rtcinitialize(void)
 #ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
 {
-  time_t t;
-  irqstate_t flags;
-
-  flags = irqsave();
-
-  do
-    {
-      /* pending IRQ so theat it */
-
-      if (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0)
-          efm32_rtc_burtc_interrupt(EFM32_IRQ_BURTC,NULL);
-
-      t = getreg32(__SEC_OFF_REG) + getreg32(EFM32_BURTC_CNT);
-    }
-
-  /* Retry if IRQ appear during register reading  */
-
-  while (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0);
-
-  irqrestore(flags);
-
-  return t;
+  return (time_t)efm32_get_burtc_tick()/CONFIG_RTC_FREQUENCY;
 }
 #endif
 
@@ -431,36 +439,16 @@ time_t up_rtc_time(void)
 #ifdef CONFIG_RTC_HIRES
 int up_rtc_gettime(FAR struct timespec *tp)
 {
-  time_t t;
-  uint32_t hires_val;
-  irqstate_t flags;
+  uint64_t val;
 
-  flags = irqsave();
-
-  do
-    {
-      /* pending IRQ so theat it */
-
-      if (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0)
-          efm32_rtc_burtc_interrupt(EFM32_IRQ_BURTC,NULL);
-
-      t         = getreg32(__SEC_OFF_REG);
-      hires_val = getreg32(EFM32_BURTC_CNT) + getreg32(__CNT_OFF_REG);
-    }
-
-  /* Retry if IRQ appear during register reading  */
-
-  while (getreg32(EFM32_BURTC_IF) & BURTC_IF_COMP0);
-
-  irqrestore(flags);
-
-  t += hires_val / CONFIG_RTC_FREQUENCY;
-  hires_val = hires_val % CONFIG_RTC_FREQUENCY;
+  val = efm32_get_burtc_tick();
 
   /* Then we can save the time in seconds and fractional seconds. */
 
-  tp->tv_sec  = t;
-  tp->tv_nsec = hires_val * (1000000000/CONFIG_RTC_FREQUENCY);
+  tp->tv_sec  = val  / CONFIG_RTC_FREQUENCY;
+  tp->tv_nsec = (val % CONFIG_RTC_FREQUENCY)*(NSEC_PER_SEC/CONFIG_RTC_FREQUENCY);
+
+  burtcdbg("Get RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);
 
   return OK;
 }
@@ -483,14 +471,38 @@ int up_rtc_gettime(FAR struct timespec *tp)
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
+  uint32_t cnt_carry;
+  uint32_t cnt;
+  uint32_t cnt_reg;
+  uint64_t val;
   irqstate_t flags;
 
   flags = irqsave();
 
-  putreg32(g_basetime.tv_sec, __BASETIME_SEC__OFF_REG);
-#ifdef CONFIG_RTC_HIRES
-  putreg32(g_basetime.tv_nsec,__BASETIME_NSEC_OFF_REG);
-#endif
+  cnt_reg  = getreg32(EFM32_BURTC_CNT);
+
+  /* Compute Burtc offset because we cannot reset counter */
+
+  val = (((uint64_t)tp->tv_sec) * CONFIG_RTC_FREQUENCY) + \
+        (tp->tv_nsec / (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY));
+
+  if (val < cnt_reg)
+    {
+      val = 0;
+    }
+  else
+    {
+      val -= cnt_reg;
+    }
+
+  cnt_carry = val / __CNT_TOP;
+  cnt       = val % __CNT_TOP;
+
+  burtcdbg("Set RTC %u.%09u carry %u zero %u reg %u\n",
+           tp->tv_sec, tp->tv_nsec, cnt_carry, cnt, cnt_reg);
+
+  putreg32(cnt_carry, __CNT_CARRY_REG);
+  putreg32(cnt      , __CNT_ZERO_REG);
 
   irqrestore(flags);
   return OK;
