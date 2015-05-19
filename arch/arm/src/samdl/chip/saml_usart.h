@@ -164,8 +164,8 @@
 #define USART_CTRLA_TXPO_SHIFT       (16)      /* Bits 16-17: Transmit data pinout */
 #define USART_CTRLA_TXPO_MASK        (3 << USART_CTRLA_TXPO_SHIFT)
 #  define USART_CTRLA_TXPAD0_1       (0 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; XCK=PAD[1] */
-#  define USART_CTRLA_TXPAD1         (1 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[1]; XCK=PAD[3] */
-#  define USART_CTRLA_TXPAD0_2       (2 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[2]; RTS=PAD[2]; CTS=PAD[3] */
+#  define USART_CTRLA_TXPAD2         (1 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[2]; XCK=PAD[3] */
+#  define USART_CTRLA_TXPAD0_2       (2 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; RTS=PAD[2]; CTS=PAD[3] */
 #define USART_CTRLA_RXPO_SHIFT       (20)      /* Bits 20-21: Receive data pinout */
 #define USART_CTRLA_RXPO_MASK        (3 << USART_CTRLA_RXPO_SHIFT)
 #  define USART_CTRLA_RXPAD0         (0 << USART_CTRLA_RXPO_SHIFT) /* RxD=SERCOM PAD[0] */

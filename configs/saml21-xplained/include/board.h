@@ -384,28 +384,28 @@
 #define BOARD_SERCOM0_GCLKGEN        GCLK_CLKCTRL_GEN0
 #define BOARD_SERCOM0_MUXCONFIG      (SPI_CTRLA_DOPO_DOPAD231 | SPI_CTRLA_DIPAD0)
 #define BOARD_SERCOM0_PINMAP_PAD0    PORT_SERCOM0_PAD0_2 /* SPI_MISO */
-#define BOARD_SERCOM0_PINMAP_PAD1    0                   /* microSD_SS */
+#define BOARD_SERCOM0_PINMAP_PAD1    0                   /* SPI_SS (not used) */
 #define BOARD_SERCOM0_PINMAP_PAD2    PORT_SERCOM0_PAD2_2 /* SPI_MOSI */
 #define BOARD_SERCOM0_PINMAP_PAD3    PORT_SERCOM0_PAD3_2 /* SPI_SCK */
 
 #define BOARD_SERCOM0_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
-/* SERCOM1 SPI is available on EXT2
+/* SERCOM1 USART is available on EXT2 and EXT3
  *
- *  PIN PORT SERCOM        FUNCTION
- *  --- ------------------ -----------
- *  15  PA17 SERCOM1 PAD1  SPI SS
- *  16  PA18 SERCOM1 PAD2  SPI MOSI
- *  17  PA16 SERCOM1 PAD0  SPI MISO
- *  18  PA19 SERCOM1 PAD3  SPI SCK
+ *   PIN   EXT1 EXT2 EXT3 GPIO Function
+ *   ----  ---- ---- ---- ------------------
+ *    13   ---  PA19 PA19 SERCOM1 / USART RX
+ *    14   ---  PA18 PA18 SERCOM1 / USART TX
+ *    19   GND  GND  GND  N/A
+ *    20   VCC  VCC  VCC  N/A
  */
 
 #define BOARD_SERCOM1_GCLKGEN        GCLK_CLKCTRL_GEN0
-#define BOARD_SERCOM1_MUXCONFIG      (SPI_CTRLA_DOPO_DOPAD231 | SPI_CTRLA_DIPAD0)
-#define BOARD_SERCOM1_PINMAP_PAD0    PORT_SERCOM1_PAD0_1 /* SPI_MISO */
-#define BOARD_SERCOM1_PINMAP_PAD1    0                   /* microSD_SS */
-#define BOARD_SERCOM1_PINMAP_PAD2    PORT_SERCOM1_PAD2_1 /* SPI_MOSI */
-#define BOARD_SERCOM1_PINMAP_PAD3    PORT_SERCOM1_PAD3_1 /* SPI_SCK */
+#define BOARD_SERCOM1_MUXCONFIG      (USART_CTRLA_TXPAD2 | USART_CTRLA_RXPAD3)
+#define BOARD_SERCOM1_PINMAP_PAD0    0                   /* (not used) */
+#define BOARD_SERCOM1_PINMAP_PAD1    0                   /* (not used) */
+#define BOARD_SERCOM1_PINMAP_PAD2    PORT_SERCOM1_PAD2_1 /* USART_TX */
+#define BOARD_SERCOM1_PINMAP_PAD3    PORT_SERCOM1_PAD3_1 /* USART_RX */
 
 #define BOARD_SERCOM1_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
@@ -414,59 +414,40 @@
  * The Embedded debugger also include a Virtual COM port interface over
  * SERCOM3.  Virtual COM port connections:
  *
- *   PA24 SERCOM3 / USART TXD
- *   PA25 SERCOM3 / USART RXD
+ *   PA22 SERCOM3 PAD[0] / USART TXD
+ *   PA23 SERCOM3 PAD[1] / USART RXD
  */
 
 #define BOARD_SERCOM3_GCLKGEN        GCLK_CLKCTRL_GEN0
-#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_RXPAD3 | USART_CTRLA_TXPAD2)
-#define BOARD_SERCOM3_PINMAP_PAD0    0
-#define BOARD_SERCOM3_PINMAP_PAD1    0
-#define BOARD_SERCOM3_PINMAP_PAD2    PORT_SERCOM3_PAD2_1 /* USART TX */
-#define BOARD_SERCOM3_PINMAP_PAD3    PORT_SERCOM3_PAD3_1 /* USART RX */
+#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0_1)
+#define BOARD_SERCOM3_PINMAP_PAD0    PORT_SERCOM3_PAD0_1 /* USART TX */
+#define BOARD_SERCOM3_PINMAP_PAD1    PORT_SERCOM3_PAD1_1 /* USART RX */
+#define BOARD_SERCOM3_PINMAP_PAD2    0                   /* (not used) */
+#define BOARD_SERCOM3_PINMAP_PAD3    0                   /* (not used) */
 
 #define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
-/* The SERCOM4 USART is available on connectors EXT1, EXT2, and EXT3
+/* The SERCOM4 USART is available on EXT1
  *
  *   PIN   EXT1 EXT2 EXT3 GPIO Function
  *   ----  ---- ---- ---- ------------------
- *    13   PB09 PB13 PB11 SERCOM4 / USART RX
- *    14   PB08 PB12 PB12 SERCOM4 / USART TX
+ *    13   PB09 ---  ---  SERCOM4 PAD[1] / USART RX
+ *    14   PB08 ---  ---  SERCOM4 PAD[0] / USART TX
  *    19   GND  GND  GND  N/A
  *    20   VCC  VCC  VCC  N/A
- *
- * If you have a TTL to RS-232 converter then this is the most convenient
- * serial console to use (because you don't lose the console device each time
- * you lose the USB connection).  It is the default in all of the SAML21
- * configurations.
  */
 
 #define BOARD_SERCOM4_GCLKGEN        GCLK_CLKCTRL_GEN0
 
-#if defined(CONFIG_SAML21_XPLAINED_USART4_EXT1)
-#  define BOARD_SERCOM4_MUXCONFIG    (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0)
-#  define BOARD_SERCOM4_PINMAP_PAD0  PORT_SERCOM4_PAD0_3 /* USART TX */
-#  define BOARD_SERCOM4_PINMAP_PAD1  PORT_SERCOM4_PAD1_3 /* USART RX */
-#  define BOARD_SERCOM4_PINMAP_PAD2  0
-#  define BOARD_SERCOM4_PINMAP_PAD3  0
-#elif defined(CONFIG_SAML21_XPLAINED_USART4_EXT2)
-#  define BOARD_SERCOM4_MUXCONFIG    (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0)
-#  define BOARD_SERCOM4_PINMAP_PAD0  PORT_SERCOM4_PAD0_1 /* USART TX */
-#  define BOARD_SERCOM4_PINMAP_PAD1  PORT_SERCOM4_PAD1_1 /* USART RX */
-#  define BOARD_SERCOM4_PINMAP_PAD2  0
-#  define BOARD_SERCOM4_PINMAP_PAD3  0
-#else /* if defined(CONFIG_SAML21_XPLAINED_USART4_EXT3) */
-#  define BOARD_SERCOM4_MUXCONFIG    (USART_CTRLA_RXPAD3 | USART_CTRLA_TXPAD2)
-#  define BOARD_SERCOM4_PINMAP_PAD0  0
-#  define BOARD_SERCOM4_PINMAP_PAD1  0
-#  define BOARD_SERCOM4_PINMAP_PAD2  PORT_SERCOM4_PAD2_3 /* USART TX */
-#  define BOARD_SERCOM4_PINMAP_PAD3  PORT_SERCOM4_PAD3_3 /* USART RX */
-#endif
+#define BOARD_SERCOM4_MUXCONFIG    (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0)
+#define BOARD_SERCOM4_PINMAP_PAD0  PORT_SERCOM4_PAD0_3 /* USART TX */
+#define BOARD_SERCOM4_PINMAP_PAD1  PORT_SERCOM4_PAD1_3 /* USART RX */
+#define BOARD_SERCOM4_PINMAP_PAD2  0
+#define BOARD_SERCOM4_PINMAP_PAD3  0
 
 #define BOARD_SERCOM4_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
-/* SERCOM5 SPI is available on EXT3
+/*  SERCOM5 is dedicated for use with SPI at the EXT2 and EXT3 connectors
  *
  *  PIN PORT SERCOM        FUNCTION
  *  --- ------------------ -----------
@@ -479,7 +460,7 @@
 #define BOARD_SERCOM5_GCLKGEN        GCLK_CLKCTRL_GEN0
 #define BOARD_SERCOM5_MUXCONFIG      (SPI_CTRLA_DOPO_DOPAD231 | SPI_CTRLA_DIPAD0)
 #define BOARD_SERCOM5_PINMAP_PAD0    PORT_SERCOM5_PAD0_1 /* SPI_MISO */
-#define BOARD_SERCOM5_PINMAP_PAD1    0                         /* microSD_SS */
+#define BOARD_SERCOM5_PINMAP_PAD1    0                   /* SPI_SS (not used) */
 #define BOARD_SERCOM5_PINMAP_PAD2    PORT_SERCOM5_PAD2_4 /* SPI_MOSI */
 #define BOARD_SERCOM5_PINMAP_PAD3    PORT_SERCOM5_PAD3_4 /* SPI_SCK */
 
@@ -492,7 +473,7 @@
  * connector.
  *
  * This LED is controlled by PC07 and the LED can be activated by driving the
- * PA14 to GND.
+ * PB10 to GND.
  */
 
 /* LED index values for use with sam_setled() */
@@ -527,7 +508,7 @@
  * RESET button connected to the SAML21 reset line and the other is a generic user
  * configurable button. When a button is pressed it will drive the I/O line to GND.
  *
- *   PA15 SW0
+ *   PA02 SW0
  */
 
 /* The SAML21 Xplained Pro supports one button: */
