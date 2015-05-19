@@ -100,7 +100,7 @@
 #define SUPC_INT_APWSRDY           (1 << 9)  /* Bit 9:  Automatic power switch ready interrupt */
 #define SUPC_INT_VCORERDY          (1 << 10) /* Bit 10: VDDCORE voltage ready interrupt */
 
-#define SUPC_INT_ALL               (0x00007fff)
+#define SUPC_INT_ALL               (0x0000073f)
 
 /* 3.3V brown-out detector control register */
 
@@ -187,7 +187,7 @@
 #define SUPC_VREG_RUNDSTDBY        (1 << 6)  /* Bit 6:  Run in standby */
 #define SUPC_VREG_LPEFF            (1 << 8)  /* Bit 8:  Low power mode efficiency */
 #define SUPC_VREG_VSVSTEP_SHIFT    (16)      /* Bits 16-19: Voltage scaling step */
-#define SUPC_VREG_VSVSTEP_SHIFT    (15 << SUPC_VREG_VSVSTEP_SHIFT)
+#define SUPC_VREG_VSVSTEP_MASK     (15 << SUPC_VREG_VSVSTEP_SHIFT)
 #  define SUPC_VREG_VSVSTEP(n)     ((uint32_t)(n) << SUPC_VREG_VSVSTEP_SHIFT)
 #define SUPC_VREG_VSPER_SHIFT      (24)      /* Bits 24-31: Voltage scaling period */
 #define SUPC_VREG_VSPER_MASK       (0xff << SUPC_VREG_VSPER_SHIFT)

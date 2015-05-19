@@ -101,6 +101,31 @@ struct sam_usart_config_s
 };
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+/************************************************************************************
+ * Name: sam_wait_synchronization
+ *
+ * Description:
+ *   Wait until the SERCOM USART reports that it is synchronized.
+ *
+ ***********************************************************************************/
+
+#ifdef SAMDL_HAVE_USART
+static inline void
+sam_wait_synchronization(const struct sam_usart_config_s * const config)
+{
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+  while ((getreg16(config->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#  warning Need SAML21 synchronization logic
+#else
+#  error Unrecognized SAMD/L family
+#endif
+}
+#endif
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
 
