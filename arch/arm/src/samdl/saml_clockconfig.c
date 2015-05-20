@@ -73,6 +73,23 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Force enabling of the FDPLL reference clock */
+
+#ifdef BOARD_FDPLL96M_ENABLE
+#  if BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_XOSC && \
+      !defined(BOARD_XOSC_ENABLE)
+#    warning Forcing BOARD_XOSC_ENABLE for FDPLL96M
+#    define BOARD_XOSC_ENABLE 1
+#  elif BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_XOSCK32K && \
+        !defined(BOARD_XOSC32K_ENABLE)
+#    warning Forcing BOARD_XOSC32K_ENABLE for FDPLL96M
+#    define BOARD_XOSC32K_ENABLE 1
+#  elif BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_GLCK && \
+        !defined(BOARD_GCLK_ENABLE)
+#    warning Forcing BOARD_GCLK_ENABLE for FDPLL96M
+#    define BOARD_GCLK_ENABLE 1
+#  endif
+#endif
 
 /****************************************************************************
  * Private Types

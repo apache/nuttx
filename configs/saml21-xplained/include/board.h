@@ -226,6 +226,14 @@
 
 #define BOARD_DFLL48M_FREQUENCY          (48000000)
 
+/* Fractional Digital Phase Locked Loop configuration.
+ *
+ *   BOARD_FDPLL96M_REFCLK - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ */
+
+#undef  BOARD_FDPLL96M_ENABLE
+#define BOARD_FDPLL96M_REFCLK            OSCCTRL_DPLLCTRLB_REFLCK_XOSC
+
 /* GCLK Configuration
  *
  * Global enable/disable.
