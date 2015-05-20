@@ -816,9 +816,9 @@ static inline void sam_dfll48m_config(void)
                OSCCTRL_DFLLCTRL_QLDIS    | OSCCTRL_DFLLCTRL_BPLCKC |
                OSCCTRL_DFLLCTRL_WAITLOCK);
 
-#if defined(BOARD_DFLL48M_CLOSELOOP
+#if defined(BOARD_DFLL48M_CLOSELOOP)
   control |= OSCCTRL_DFLLCTRL_MODE;     /* Closed loop mode */
-#if defined(BOARD_DFLL48M_RECOVERY
+#elif defined(BOARD_DFLL48M_RECOVERY)
   control |= OSCCTRL_DFLLCTRL_USBCRM;   /* USB clock recovery mode */
 #endif
 
@@ -897,7 +897,6 @@ static inline void sam_dfll48m_config(void)
 static inline void sam_dfll48m_enable(void)
 {
   uint16_t control;
-  uint32_t regval;
 
   /* Enable the DFLL48M (with ONDEMAND still set to zero). */
 
