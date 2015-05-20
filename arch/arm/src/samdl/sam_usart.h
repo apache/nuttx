@@ -107,20 +107,21 @@ struct sam_usart_config_s
  * Name: sam_wait_synchronization
  *
  * Description:
- *   Wait until the SERCOM USART reports that it is synchronized.
+ *   Return true is the SERCOM USART reports that it is synchronizing.  This inline
+ *   function hides register differences between the SAMD20 and SAML21.
  *
  ***********************************************************************************/
 
 #ifdef SAMDL_HAVE_USART
-static inline void
-sam_wait_synchronization(const struct sam_usart_config_s * const config)
+static inline bool usart_syncbusy(const struct sam_usart_config_s * const config)
 {
 #if defined(CONFIG_ARCH_FAMILY_SAMD20)
-  while ((getreg16(config->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
+  return ((getreg16(config->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  warning Need SAML21 synchronization logic
+  return ((getreg16(config->base + SAM_USART_SYNCBUSY_OFFSET) & USART_SYNCBUSY_ALL) != 0);
 #else
 #  error Unrecognized SAMD/L family
+  return false;
 #endif
 }
 #endif
