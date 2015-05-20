@@ -107,12 +107,18 @@ static inline void sam_xosc32k_config(void);
 static inline void sam_osc32k_config(void);
 #endif
 static inline void sam_osc16m_config(void);
-#ifdef BOARD_DFLL_ENABLE
+#ifdef BOARD_DFLL48M_ENABLE
 static inline void sam_dfll48m_config(void);
+static inline void sam_dfll48m_enable(void);
 #endif
-#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL_ENABLE) && \
-   !defined(BOARD_DFLL_OPENLOOP)
-static inline void sam_dfll_reference(void);
+#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL48M_ENABLE) && \
+   !defined(BOARD_DFLL48M_OPENLOOP)
+static inline void sam_dfll48m_reference(void);
+#endif
+#ifdef BOARD_FDPLL96M_ENABLE
+static inline void sam_fdpll96m_config(void);
+static inline void sam_fdpll96m_enable(void);
+static inline void sam_fdpll96m_reference(void);
 #endif
 static void sam_gclck_waitsyncbusy(void);
 static void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
@@ -751,27 +757,30 @@ static inline void sam_osc16m_config(void)
  * Name: sam_dfll48m_config
  *
  * Description:
- *   Configure the DFLL based on settings in the board.h header file.
+ *   Configure the DFLL48M based on settings in the board.h header file.
  *   Depends on:
  *
- *   BOARD_DFLL_OPENLOOP            - Boolean (defined / not defined)
- *   BOARD_DFLL_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
- *   BOARD_DFLL_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
- *   BOARD_DFLL_ENABLECHILLCYCLE    - Boolean (defined / not defined)
- *   BOARD_DFLL_QUICKLOCK           - Boolean (defined / not defined)
- *   BOARD_DFLL_ONDEMAND            - Boolean (defined / not defined)
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
+ *   BOARD_DFLL48M_CLOSEDLOOP          - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_OPENLOOP            - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_RECOVERY            - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_ENABLECHILLCYCLE    - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_QUICKLOCK           - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_RUNINSTDBY          - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_ONDEMAND            - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_COARSEVALUE         - Value
+ *   BOARD_DFLL48M_FINEVALUE           - Value
  *
  * Open Loop mode only:
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
+ *   BOARD_DFLL48M_COARSEVALUE         - Value
+ *   BOARD_DFLL48M_FINEVALUE           - Value
  *
  * Closed loop mode only:
- *   BOARD_DFLL_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
- *   BOARD_DFLL_MULTIPLIER          - Value
- *   BOARD_DFLL_MAXCOARSESTEP       - Value
- *   BOARD_DFLL_MAXFINESTEP         - Value
+ *   BOARD_DFLL48M_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL48M_MULTIPLIER          - Value
+ *   BOARD_DFLL48M_MAXCOARSESTEP       - Value
+ *   BOARD_DFLL48M_MAXFINESTEP         - Value
  *
  * Input Parameters:
  *   None
@@ -781,34 +790,64 @@ static inline void sam_osc16m_config(void)
  *
  ****************************************************************************/
 
-#ifdef BOARD_DFLL_ENABLE
+#ifdef BOARD_DFLL48M_ENABLE
 static inline void sam_dfll48m_config(void)
 {
   uint16_t control;
   uint32_t regval;
 
+  /* Disable ONDEMAND mode while writing configurations (Errata 9905).  This
+   * is probably not necessary on the first time configuration after reset.
+   */
+
+  control  = getreg16(SAM_OSCCTRL_DFLLCTRL);
+  control &= ~(OSCCTRL_DFLLCTRL_ENABLE | OSCCTRL_DFLLCTRL_ONDEMAND);
+  putreg16(control, SAM_OSCCTRL_DFLLCTRL);
+
+  /* Wait for the DFLL to synchronize */
+
+  while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_DFLLRDY) == 0);
+
   /* Set up the DFLL control register */
 
-  control  = OSCCTRL_DFLLCTRL_ENABLE;   /* Enable the DFLL */
+  control &= ~(OSCCTRL_DFLLCTRL_MODE     | OSCCTRL_DFLLCTRL_STABLE |
+               OSCCTRL_DFLLCTRL_LLAW     | OSCCTRL_DFLLCTRL_USBCRM |
+               OSCCTRL_DFLLCTRL_RUNSTDBY | OSCCTRL_DFLLCTRL_CCDIS  |
+               OSCCTRL_DFLLCTRL_QLDIS    | OSCCTRL_DFLLCTRL_BPLCKC |
+               OSCCTRL_DFLLCTRL_WAITLOCK);
 
-#ifndef BOARD_DFLL_OPENLOOP
+#if defined(BOARD_DFLL48M_CLOSELOOP
   control |= OSCCTRL_DFLLCTRL_MODE;     /* Closed loop mode */
+#if defined(BOARD_DFLL48M_RECOVERY
+  control |= OSCCTRL_DFLLCTRL_USBCRM;   /* USB clock recovery mode */
 #endif
 
-#ifndef BOARD_DFLL_TRACKAFTERFINELOCK
+#ifndef BOARD_DFLL48M_TRACKAFTERFINELOCK
   control |= OSCCTRL_DFLLCTRL_STABLE;   /* FINE calibration fixed after a fine lock */
 #endif
 
-#ifndef BOARD_DFLL_KEEPLOCKONWAKEUP
+#ifndef BOARD_DFLL48M_KEEPLOCKONWAKEUP
   control |= OSCCTRL_DFLLCTRL_LLAW;     /* Lose lock after wake */
 #endif
 
-#ifndef BOARD_DFLL_ENABLECHILLCYCLE
+#ifndef BOARD_DFLL48M_RUNINSTDBY
+  control |= OSCCTRL_DFLLCTRL_RUNSTDBY;    /* Chill cycle disable */
+#endif
+
+#ifndef BOARD_DFLL48M_ENABLECHILLCYCLE
   control |= OSCCTRL_DFLLCTRL_CCDIS;    /* Chill cycle disable */
 #endif
 
-#ifndef BOARD_DFLL_QUICKLOCK
+#ifndef BOARD_DFLL48M_QUICKLOCK
   control |= OSCCTRL_DFLLCTRL_QLDIS; /* Quick lock disable */
+#endif
+
+#ifndef BOARD_DFLL48M_BPLCKC
+  control |= OSCCTRL_DFLLCTRL_BPLCKC; /* Bypass coarse clock */
+#endif
+
+#ifndef BOARD_DFLL48M_WAITLOCK
+  control |= OSCCTRL_DFLLCTRL_WAITLOCK; /*  Wait lock */
 #endif
 
   /* Then enable the DFLL (with ONDEMAND set to zero). */
@@ -821,10 +860,10 @@ static inline void sam_dfll48m_config(void)
 
   /* Set up the open loop mode multiplier register */
 
-#ifndef BOARD_DFLL_OPENLOOP
-  regval = OSCCTRL_DFLLMUL_CSTEP(BOARD_DFLL_MAXCOARSESTEP) |
-           OSCCTRL_DFLLMUL_FSTEP(BOARD_DFLL_MAXFINESTEP) |
-           OSCCTRL_DFLLMUL_MUL(BOARD_DFLL_MULTIPLIER);
+#ifndef BOARD_DFLL48M_OPENLOOP
+  regval = OSCCTRL_DFLLMUL_CSTEP(BOARD_DFLL48M_MAXCOARSESTEP) |
+           OSCCTRL_DFLLMUL_FSTEP(BOARD_DFLL48M_MAXFINESTEP) |
+           OSCCTRL_DFLLMUL_MUL(BOARD_DFLL48M_MULTIPLIER);
   putreg32(regval, SAM_OSCCTRL_DFLLMUL);
 #else
   putreg32(0, SAM_OSCCTRL_DFLLMUL);
@@ -832,29 +871,19 @@ static inline void sam_dfll48m_config(void)
 
   /* Set up the DFLL value register */
 
-  regval = OSCCTRL_DFLLVAL_COARSE(BOARD_DFLL_COARSEVALUE) |
-           OSCCTRL_DFLLVAL_FINE(BOARD_DFLL_FINEVALUE);
+  regval = OSCCTRL_DFLLVAL_COARSE(BOARD_DFLL48M_COARSEVALUE) |
+           OSCCTRL_DFLLVAL_FINE(BOARD_DFLL48M_FINEVALUE);
   putreg32(regval, SAM_OSCCTRL_DFLLVAL);
-
-  /* Finally, set the state of the ONDEMAND bit if necessary */
-
-#ifdef BOARD_DFLL_ONDEMAND
-  control |= OSCCTRL_DFLLCTRL_ONDEMAND; /* On demand control */
-  putreg16(control, SAM_OSCCTRL_DFLLCTRL);
-#endif
 }
 #else
 #  define sam_dfll48m_config()
 #endif
 
 /****************************************************************************
- * Name: sam_dfll_reference
+ * Name: sam_dfll48m_enable
  *
  * Description:
- *   Enable DFLL reference clock if in closed loop mode.
- *   Depends on:
- *
- *   BOARD_DFLL_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *   Enable the DFLL48M.
  *
  * Input Parameters:
  *   None
@@ -864,9 +893,53 @@ static inline void sam_dfll48m_config(void)
  *
  ****************************************************************************/
 
-#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL_ENABLE) && \
-   !defined(BOARD_DFLL_OPENLOOP)
-static inline void sam_dfll_reference(void)
+#ifdef BOARD_DFLL48M_ENABLE
+static inline void sam_dfll48m_enable(void)
+{
+  uint16_t control;
+  uint32_t regval;
+
+  /* Enable the DFLL48M (with ONDEMAND still set to zero). */
+
+  control  = getreg16(SAM_OSCCTRL_DFLLCTRL);
+  control |= OSCCTRL_DFLLCTRL_ENABLE;   /* Enable the DFLL */
+  putreg16(control, SAM_OSCCTRL_DFLLCTRL);
+
+  /* Wait for the DFLL to synchronize */
+
+  while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_DFLLRDY) == 0);
+
+  /* Finally, set the state of the ONDEMAND bit if necessary */
+
+#ifdef BOARD_DFLL48M_ONDEMAND
+  control |= OSCCTRL_DFLLCTRL_ONDEMAND; /* On demand control */
+  putreg16(control, SAM_OSCCTRL_DFLLCTRL);
+#endif
+}
+#else
+#  define sam_dfll48m_enable()
+#endif
+
+/****************************************************************************
+ * Name: sam_dfll48m_reference
+ *
+ * Description:
+ *   Enable DFLL reference clock if in closed loop mode.
+ *   Depends on:
+ *
+ *   BOARD_DFLL48M_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL48M_ENABLE) && \
+   !defined(BOARD_DFLL48M_OPENLOOP)
+static inline void sam_dfll48m_reference(void)
 {
   uint16_t regval;
 
@@ -885,7 +958,7 @@ static inline void sam_dfll_reference(void)
    * NOTE: We could enable write lock here to prevent further modification
    */
 
-  regval = (BOARD_DFLL_SRCGCLKGEN | GCLK_CLKCTRL_ID_DFLL48M);
+  regval = (BOARD_DFLL48M_SRCGCLKGEN | GCLK_CLKCTRL_ID_DFLL48M);
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Enable the DFLL reference clock */
@@ -901,7 +974,98 @@ static inline void sam_dfll_reference(void)
   while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) == 0);
 }
 #else
-#  define sam_dfll_reference()
+#  define sam_dfll48m_reference()
+#endif
+
+/****************************************************************************
+ * Name: sam_fdpll96m_config
+ *
+ * Description:
+ *   Configure the DFLL based on settings in the board.h header file.
+ *   Depends on:
+ *
+ *   BOARD_FDPLL96M_OPENLOOP            - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_ENABLECHILLCYCLE    - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_QUICKLOCK           - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_ONDEMAND            - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_COARSEVALUE         - Value
+ *   BOARD_FDPLL96M_FINEVALUE           - Value
+ *
+ * Open Loop mode only:
+ *   BOARD_FDPLL96M_COARSEVALUE         - Value
+ *   BOARD_FDPLL96M_FINEVALUE           - Value
+ *
+ * Closed loop mode only:
+ *   BOARD_FDPLL96M_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_FDPLL96M_MULTIPLIER          - Value
+ *   BOARD_FDPLL96M_MAXCOARSESTEP       - Value
+ *   BOARD_FDPLL96M_MAXFINESTEP         - Value
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_FDPLL96M_ENABLE
+static inline void sam_fdpll96m_config(void)
+{
+#error Missing logic
+}
+#else
+#  define sam_fdpll96m_config()
+#endif
+
+/****************************************************************************
+ * Name: sam_fdpll96m_enable
+ *
+ * Description:
+ *   Enable the FDPLL96M.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_FDPLL96M_ENABLE
+static inline void sam_fdpll96m_enable(void)
+{
+#error Missing logic
+}
+#else
+#  define sam_fdpll96m_enable()
+#endif
+
+/****************************************************************************
+ * Name: sam_fdpll96m_reference
+ *
+ * Description:
+ *   Enable FDPLL96M reference clock.
+ *   Depends on:
+ *
+ *   BOARD_FDPLL96M_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_FDPLL96M_ENABLE)
+static inline void sam_fdpll96m_reference(void)
+{
+}
+#else
+#  define sam_fdpll96m_enable()
 #endif
 
 /****************************************************************************
@@ -1105,7 +1269,11 @@ static inline void sam_config_gclks(void)
 
   /* Enable DFLL reference clock if the DFLL is enabled in closed loop mode */
 
-  sam_dfll_reference();
+  sam_dfll48m_reference();
+
+  /* Enable FDPLL reference clock if the DFLL is enabled */
+
+  sam_fdpll96m_reference();
 
   /* Configure the GCLK_MAIN last as it may depend on the DFLL or other
    * generators
@@ -1230,6 +1398,14 @@ void sam_clockconfig(void)
   /* Configure GCLK(s) */
 
   sam_config_gclks();
+
+  /* Enable DFLL48M */
+
+  sam_dfll48m_enable();
+
+  /* Enable FDPLL96M */
+
+  sam_fdpll96m_enable();
 
   /* Set CPU and BUS clock dividers */
 

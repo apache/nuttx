@@ -175,50 +175,56 @@
  * be determined by the values written to the DFLL Coarse Value bit group
  * and the DFLL Fine Value bit group in the DFLL Value register.
  *
- *   BOARD_DFLL_OPENLOOP            - Boolean (defined / not defined)
- *   BOARD_DFLL_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
- *   BOARD_DFLL_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
- *   BOARD_DFLL_ENABLECHILLCYCLE    - Boolean (defined / not defined)
- *   BOARD_DFLL_QUICKLOCK           - Boolean (defined / not defined)
- *   BOARD_DFLL_ONDEMAND            - Boolean (defined / not defined)
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
+ *   BOARD_DFLL48M_CLOSEDLOOP          - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_OPENLOOP            - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_RECOVERY            - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_ENABLECHILLCYCLE    - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_QUICKLOCK           - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_RUNINSTDBY          - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_ONDEMAND            - Boolean (defined / not defined)
+ *   BOARD_DFLL48M_COARSEVALUE         - Value
+ *   BOARD_DFLL48M_FINEVALUE           - Value
  *
  * Open Loop mode only:
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
+ *   BOARD_DFLL48M_COARSEVALUE         - Value
+ *   BOARD_DFLL48M_FINEVALUE           - Value
  *
  * Closed loop mode only:
- *   BOARD_DFLL_GCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
- *   BOARD_DFLL_MULTIPLIER          - Value
- *   BOARD_DFLL_MAXCOARSESTEP       - Value
- *   BOARD_DFLL_MAXFINESTEP         - Value
+ *   BOARD_DFLL48M_GCLKGEN             - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL48M_MULTIPLIER          - Value
+ *   BOARD_DFLL48M_MAXCOARSESTEP       - Value
+ *   BOARD_DFLL48M_MAXFINESTEP         - Value
  *
- *   BOARD_DFLL_FREQUENCY           - The resulting frequency
+ *   BOARD_DFLL48M_FREQUENCY           - The resulting frequency
  */
 
-#define BOARD_DFLL_ENABLE            1
-#undef  BOARD_DFLL_OPENLOOP
-#undef  BOARD_DFLL_ONDEMAND
-#undef  BOARD_DFLL_RUNINSTANDBY
+#define BOARD_DFLL48M_ENABLE            1  /* Use the DFLL48M */
+#define BOARD_DFLL48M_CLOSEDLOOP        1  /* In closed loop mode */
+#undef  BOARD_DFLL48M_OPENLOOP
+#undef  BOARD_DFLL48M_RECOVERY
+#undef  BOARD_DFLL48M_RUNINSTDBY
+#undef  BOARD_DFLL48M_ONDEMAND
+#undef  BOARD_DFLL48M_RUNINSTANDBY
 
 /* DFLL open loop mode configuration */
 
-#define BOARD_DFLL_COARSEVALUE       (0x1f / 4)
-#define BOARD_DFLL_FINEVALUE         (0xff / 4)
+#define BOARD_DFLL48M_COARSEVALUE       (0x1f / 4)
+#define BOARD_DFLL48M_FINEVALUE         (0xff / 4)
 
 /* DFLL closed loop mode configuration */
 
-#define BOARD_DFLL_SRCGCLKGEN         GCLK_CLKCTRL_GEN1
-#define BOARD_DFLL_MULTIPLIER         12
-#define BOARD_DFLL_QUICKLOCK          1
-#define BOARD_DFLL_TRACKAFTERFINELOCK 1
-#define BOARD_DFLL_KEEPLOCKONWAKEUP   1
-#define BOARD_DFLL_ENABLECHILLCYCLE   1
-#define BOARD_DFLL_MAXCOARSESTEP      (0x1f / 4)
-#define BOARD_DFLL_MAXFINESTEP        (0xff / 4)
+#define BOARD_DFLL48M_SRCGCLKGEN         GCLK_CLKCTRL_GEN1
+#define BOARD_DFLL48M_MULTIPLIER         12
+#define BOARD_DFLL48M_QUICKLOCK          1
+#define BOARD_DFLL48M_TRACKAFTERFINELOCK 1
+#define BOARD_DFLL48M_KEEPLOCKONWAKEUP   1
+#define BOARD_DFLL48M_ENABLECHILLCYCLE   1
+#define BOARD_DFLL48M_MAXCOARSESTEP      (0x1f / 4)
+#define BOARD_DFLL48M_MAXFINESTEP        (0xff / 4)
 
-#define BOARD_DFLL_FREQUENCY          (48000000)
+#define BOARD_DFLL48M_FREQUENCY          (48000000)
 
 /* GCLK Configuration
  *
@@ -244,7 +250,7 @@
 #define BOARD_GCLK0_CLOCK_SOURCE      GCLK_GENCTRL_SRC_DFLL48M
 #define BOARD_GCLK0_PRESCALER         1
 #undef  BOARD_GCLK0_OUTPUT_ENABLE
-#define BOARD_GCLK0_FREQUENCY         (BOARD_DFLL_FREQUENCY / BOARD_GCLK0_PRESCALER)
+#define BOARD_GCLK0_FREQUENCY         (BOARD_DFLL48M_FREQUENCY / BOARD_GCLK0_PRESCALER)
 
 /* Configure GCLK generator 1 - Drives the DFLL */
 
