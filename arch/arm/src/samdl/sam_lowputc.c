@@ -81,6 +81,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sam_wait_synchronization
+ *
+ * Description:
+ *   Wait until the SERCOM USART reports that it is synchronized.
+ *
+ ****************************************************************************/
+
+#ifdef SAMDL_HAVE_USART
+static void
+sam_wait_synchronization(const struct sam_usart_config_s * const config)
+{
+  while (usart_syncbusy(config));
+}
+#endif
+
+/****************************************************************************
  * Name: sam_usart_configure
  *
  * Description:

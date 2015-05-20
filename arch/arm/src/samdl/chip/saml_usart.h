@@ -253,6 +253,8 @@
 #define USART_SYNCBUSY_ENABLE        (1 << 1)  /* Bit 1:  SERCOM enable synchronization busy */
 #define USART_SYNCBUSY_CTRLB         (1 << 2)  /* Bit 2:  CTRLB synchronization busy */
 
+#define USART_SYNCBUSY_ALL           0x00000007
+
 /* Data register */
 
 #define USART_DATA_MASK              (0x1ff)   /* Bits 0-8: Data */
