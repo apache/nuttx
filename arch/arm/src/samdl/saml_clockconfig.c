@@ -113,12 +113,11 @@ static inline void sam_dfll48m_enable(void);
 #endif
 #if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL48M_ENABLE) && \
    !defined(BOARD_DFLL48M_OPENLOOP)
-static inline void sam_dfll48m_reference(void);
+static inline void sam_dfll48m_refclk(void);
 #endif
 #ifdef BOARD_FDPLL96M_ENABLE
 static inline void sam_fdpll96m_config(void);
-static inline void sam_fdpll96m_enable(void);
-static inline void sam_fdpll96m_reference(void);
+static inline void sam_fdpll96m_refclk(void);
 #endif
 static void sam_gclck_waitsyncbusy(void);
 static void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
@@ -920,7 +919,7 @@ static inline void sam_dfll48m_enable(void)
 #endif
 
 /****************************************************************************
- * Name: sam_dfll48m_reference
+ * Name: sam_dfll48m_refclk
  *
  * Description:
  *   Enable DFLL reference clock if in closed loop mode.
@@ -938,7 +937,7 @@ static inline void sam_dfll48m_enable(void)
 
 #if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL48M_ENABLE) && \
    !defined(BOARD_DFLL48M_OPENLOOP)
-static inline void sam_dfll48m_reference(void)
+static inline void sam_dfll48m_refclk(void)
 {
   uint16_t regval;
 
@@ -973,14 +972,15 @@ static inline void sam_dfll48m_reference(void)
   while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) == 0);
 }
 #else
-#  define sam_dfll48m_reference()
+#  define sam_dfll48m_refclk()
 #endif
 
 /****************************************************************************
  * Name: sam_fdpll96m_config
  *
  * Description:
- *   Configure the DFLL based on settings in the board.h header file.
+ *   Configure and enable the DFLL based on settings in the board.h header
+ *   file.
  *   Depends on:
  *
  *   BOARD_FDPLL96M_OPENLOOP            - Boolean (defined / not defined)
@@ -1020,33 +1020,10 @@ static inline void sam_fdpll96m_config(void)
 #endif
 
 /****************************************************************************
- * Name: sam_fdpll96m_enable
+ * Name: sam_fdpll96m_refclk
  *
  * Description:
- *   Enable the FDPLL96M.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef BOARD_FDPLL96M_ENABLE
-static inline void sam_fdpll96m_enable(void)
-{
-#error Missing logic
-}
-#else
-#  define sam_fdpll96m_enable()
-#endif
-
-/****************************************************************************
- * Name: sam_fdpll96m_reference
- *
- * Description:
- *   Enable FDPLL96M reference clock.
+ *   Enable FDPLL96M internal lock timer and reference clock.
  *   Depends on:
  *
  *   BOARD_FDPLL96M_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
@@ -1060,7 +1037,7 @@ static inline void sam_fdpll96m_enable(void)
  ****************************************************************************/
 
 #if defined(BOARD_GCLK_ENABLE) && defined(BOARD_FDPLL96M_ENABLE)
-static inline void sam_fdpll96m_reference(void)
+static inline void sam_fdpll96m_refclk(void)
 {
 }
 #else
@@ -1268,11 +1245,11 @@ static inline void sam_config_gclks(void)
 
   /* Enable DFLL reference clock if the DFLL is enabled in closed loop mode */
 
-  sam_dfll48m_reference();
+  sam_dfll48m_refclk();
 
   /* Enable FDPLL reference clock if the DFLL is enabled */
 
-  sam_fdpll96m_reference();
+  sam_fdpll96m_refclk();
 
   /* Configure the GCLK_MAIN last as it may depend on the DFLL or other
    * generators
@@ -1390,10 +1367,6 @@ void sam_clockconfig(void)
 
   sam_dfll48m_config();
 
-  /* Configure FDPLL96M */
-
-  sam_fdpll96m_config();
-
   /* Configure GCLK(s) */
 
   sam_config_gclks();
@@ -1402,9 +1375,9 @@ void sam_clockconfig(void)
 
   sam_dfll48m_enable();
 
-  /* Enable FDPLL96M */
+  /* Configure and enable FDPLL96M */
 
-  sam_fdpll96m_enable();
+  sam_fdpll96m_config();
 
   /* Set CPU and BUS clock dividers */
 
