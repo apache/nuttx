@@ -47,6 +47,8 @@
 
 #include <arch/chip/chip.h>
 
+#include "up_arch.h"
+
 #if defined(CONFIG_ARCH_FAMILY_SAMD20)
 #  include "chip/samd_usart.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
