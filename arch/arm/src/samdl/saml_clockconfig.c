@@ -787,7 +787,7 @@ static inline void sam_osc16m_config(void)
  *   BOARD_DFLL48M_FINEVALUE           - Value
  *
  * Closed loop mode only:
- *   BOARD_DFLL48M_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL48M_REFCLK_CLKGEN       - See GCLK_PCHCTRL_GEN* definitions
  *   BOARD_DFLL48M_MULTIPLIER          - Value
  *   BOARD_DFLL48M_MAXCOARSESTEP       - Value
  *   BOARD_DFLL48M_MAXFINESTEP         - Value
@@ -936,7 +936,7 @@ static inline void sam_dfll48m_enable(void)
  *   Enable DFLL reference clock if in closed loop mode.
  *   Depends on:
  *
- *   BOARD_DFLL48M_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL48M_REFCLK_CLKGEN - See GCLK_PCHCTRL_GEN* definitions
  *
  * Input Parameters:
  *   None
@@ -950,37 +950,7 @@ static inline void sam_dfll48m_enable(void)
    !defined(BOARD_DFLL48M_OPENLOOP)
 static inline void sam_dfll48m_refclk(void)
 {
-  uint16_t regval;
-
-  /* Disabled the DFLL reference clock */
-
-  regval = GCLK_CLKCTRL_ID_DFLL48M;
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Wait for the clock to become disabled */
-
-  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
-
-  /* Select the configured clock generator as the source for the DFLL
-   * reference clock.
-   *
-   * NOTE: We could enable write lock here to prevent further modification
-   */
-
-  regval = (BOARD_DFLL48M_SRCGCLKGEN | GCLK_CLKCTRL_ID_DFLL48M);
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Enable the DFLL reference clock */
-
-  regval |= GCLK_CLKCTRL_CLKEN;
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* The CLKCTRL.CLKEN bit must be synchronized to the generic clock domain.
-   * CLKCTRL.CLKEN will continue to read as its previous state until the
-   * synchronization is complete.
-   */
-
-  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) == 0);
+  sam_gclk_chan_enable(GCLK_CHAN_DFLL48M_REF, BOARD_DFLL48M_REFCLK_CLKGEN);
 }
 #else
 #  define sam_dfll48m_refclk()
@@ -1123,9 +1093,9 @@ static inline void sam_fdpll96m_config(void)
  *
  *     BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
  *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
- *     BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_CLKCTRL_GEN* definitions
+ *     BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_PCHCTRL_GEN* definitions
  *     BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
- *     BOARD_FDPLL96M_LOCKTIME_CLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *     BOARD_FDPLL96M_LOCKTIME_CLKGEN - See GCLK_PCHCTRL_GEN* definitions
  *
  * Input Parameters:
  *   None
