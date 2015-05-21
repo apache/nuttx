@@ -10406,3 +10406,8 @@
 	* configs/tm4c1294-launchpad/include/board.h:  Added TM4C1294NCPDT
 	  EN0_LED2 (10/100-Base-Tx); removed all booster pack pin definitions.
 	  From Frank Sautter (2015-05-20).
+	* nuttx/arch/arm/src/sam34/sam_serial.c:  In NONBLOCKING mode serial
+	  does not receive bytes from UART.  This happens because RX interrupt
+	  was disabled in the setup routine.  To fix this I save interrupt
+	  configuration before uart shutdown and restore it after.  From Max
+	  Neklyudov (2015-05-21).
