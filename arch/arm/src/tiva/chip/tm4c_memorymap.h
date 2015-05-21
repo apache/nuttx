@@ -461,9 +461,7 @@
 #  define TIVA_EPHY_BASE      (TIVA_PERIPH2_BASE + 0x54000) /* -0x54fff: EPHY */
                                                             /* -0xfffff: Reserved */
 #elif defined(CONFIG_ARCH_CHIP_TM4C1294NC)
-// FIXME sauttefk
 /* Peripheral region 1 */
-
 #  define TIVA_WDOG0_BASE     (TIVA_PERIPH1_BASE + 0x00000) /* -0x00fff: Watchdog Timer 0 */
 #  define TIVA_WDOG1_BASE     (TIVA_PERIPH1_BASE + 0x01000) /* -0x00fff: Watchdog Timer 1 */
                                                             /* -0x03fff: Reserved */
@@ -557,14 +555,8 @@
 /* Peripheral region 2 */
                                                             /* -0x2ffff: Reserved */
 #  define TIVA_CCM_BASE       (TIVA_PERIPH2_BASE + 0x30000) /* -0x30fff: CRC/Cryptographic Control */
-                                                            /* -0x33fff: Reserved */
-#  define TIVA_SHAMD5_BASE    (TIVA_PERIPH2_BASE + 0x34000) /* -0x35fff: SHA/MD5 */
-#  define TIVA_AES_BASE       (TIVA_PERIPH2_BASE + 0x36000) /* -0x37fff: AES */
-#  define TIVA_DES_BASE       (TIVA_PERIPH2_BASE + 0x38000) /* -0x39fff: DES */
-                                                            /* -0x4ffff: Reserved */
-#  define TIVA_LCD_BASE       (TIVA_PERIPH2_BASE + 0x50000) /* -0x50fff: LCD */
                                                             /* -0x53fff: Reserved */
-#  define TIVA_EPHY_BASE      (TIVA_PERIPH2_BASE + 0x54000) /* -0x54fff: EPHY */
+#  define TIVA_EPHY_BASE      (TIVA_PERIPH2_BASE + 0x54000) /* -0x54fff: EPHY 0 */
                                                             /* -0xfffff: Reserved */
 #else
 #  error "Peripheral base addresses not specified for this Tiva chip"
