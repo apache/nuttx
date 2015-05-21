@@ -228,11 +228,17 @@
 
 /* Fractional Digital Phase Locked Loop configuration.
  *
- *   BOARD_FDPLL96M_REFCLK - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ *   BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ *   BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
  */
 
 #undef  BOARD_FDPLL96M_ENABLE
 #define BOARD_FDPLL96M_REFCLK            OSCCTRL_DPLLCTRLB_REFLCK_XOSC
+#define BOARD_FDPLL96M_REFCLK_CLKGEN     GCLK_CLKCTRL_GEN1
+#undef  BOARD_FDPLL96M_LOCKTIME_ENABLE
+#define BOARD_FDPLL96M_LOCKTIME_CLKGEN   GCLK_CLKCTRL_GEN1
 
 /* GCLK Configuration
  *
