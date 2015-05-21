@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_serial.c
  *
- *   Copyright (C) 2010, 2012-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -650,7 +650,9 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 
 static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
-  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+  /* Re-enable previously disabled interrupts state (assuming all interrupts
+   * disabled)
+   */
 
   up_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }
@@ -693,6 +695,7 @@ static int up_setup(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t regval;
+  uint32_t imr;
 
   /* Note: The logic here depends on the fact that that the USART module
    * was enabled and the pins were configured in sam_lowsetup().
@@ -700,6 +703,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* The shutdown method will put the UART in a known, disabled state */
 
+  up_disableallints(priv, &imr);
   up_shutdown(dev);
 
   /* Set up the mode register.  Start with normal UART mode and the MCK
@@ -806,6 +810,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable receiver & transmitter */
 
   up_serialout(priv, SAM_UART_CR_OFFSET, (UART_CR_RXEN|UART_CR_TXEN));
+  up_restoreusartint(priv, imr);
+
 #endif
 
   return OK;
