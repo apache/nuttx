@@ -65,7 +65,7 @@
 #define SAM_OSCCTRL_DFLLVAL_OFFSET       0x001c  /* DFLL48M value */
 #define SAM_OSCCTRL_DFLLMUL_OFFSET       0x0020  /* DFLL48M multiplier */
 #define SAM_OSCCTRL_DFLLSYNC_OFFSET      0x0024  /* DFLL48M synchronization */
-#define SAM_OSCCTRL_DPCLLCTRLA_OFFSET    0x0028  /* DPLL control A */
+#define SAM_OSCCTRL_DPLLCTRLA_OFFSET     0x0028  /* DPLL control A */
 #define SAM_OSCCTRL_DPLLRATIO_OFFSET     0x002c  /* DPLL ratio control */
 #define SAM_OSCCTRL_DPLLCTRLB_OFFSET     0x0030  /* DPLL control B */
 #define SAM_OSCCTRL_DPLLPRESC_OFFSET     0x0034  /* DPLL prescaler */
@@ -84,7 +84,7 @@
 #define SAM_OSCCTRL_DFLLVAL              (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DFLLVAL_OFFSET)
 #define SAM_OSCCTRL_DFLLMUL              (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DFLLMUL_OFFSET)
 #define SAM_OSCCTRL_DFLLSYNC             (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DFLLSYNC_OFFSET)
-#define SAM_OSCCTRL_DPCLLCTRLA           (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPCLLCTRLA_OFFSET)
+#define SAM_OSCCTRL_DPLLCTRLA            (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPLLCTRLA_OFFSET)
 #define SAM_OSCCTRL_DPLLRATIO            (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPLLRATIO_OFFSET)
 #define SAM_OSCCTRL_DPLLCTRLB            (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPLLCTRLB_OFFSET)
 #define SAM_OSCCTRL_DPLLPRESC            (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPLLPRESC_OFFSET)
@@ -230,9 +230,9 @@
 
 /* DPLL control A */
 
-#define OSCCTRL_DPCLLCTRLA_ENABLE        (1 << 1)  /* Bit 1:  DPLL enable */
-#define OSCCTRL_DPCLLCTRLA_RUNSTDBY      (1 << 6)  /* Bit 6:  Run in standby */
-#define OSCCTRL_DPCLLCTRLA_ONDEMAND      (1 << 7)  /* Bit 7:  On demand clock activation */
+#define OSCCTRL_DPLLCTRLA_ENABLE         (1 << 1)  /* Bit 1:  DPLL enable */
+#define OSCCTRL_DPLLCTRLA_RUNSTDBY       (1 << 6)  /* Bit 6:  Run in standby */
+#define OSCCTRL_DPLLCTRLA_ONDEMAND       (1 << 7)  /* Bit 7:  On demand clock activation */
 
 /* DPLL ratio control */
 
@@ -265,7 +265,7 @@
 #  define OSCCTRL_DPLLCTRLB_LTIME_9MS    (5 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 9MS */
 #  define OSCCTRL_DPLLCTRLB_LTIME_10MS   (6 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 10MS */
 #  define OSCCTRL_DPLLCTRLB_LTIME_11MS   (7 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 11MS */
-#define OSCCTRL_DPLLCTRLB_LBYPASS        (1 << 12) /* Bit 12: Loop bypass */
+#define OSCCTRL_DPLLCTRLB_LBYPASS        (1 << 12) /* Bit 12: Lock bypass */
 #define OSCCTRL_DPLLCTRLB_DIV_SHIFT      (16)      /* Bits 16-26: Clock divider */
 #define OSCCTRL_DPLLCTRLB_DIV_MASK       (0x7ff << OSCCTRL_DPLLCTRLB_DIV_SHIFT)
 #  define OSCCTRL_DPLLCTRLB_DIV(n)       ((uint32_t)(n) << OSCCTRL_DPLLCTRLB_DIV_SHIFT)

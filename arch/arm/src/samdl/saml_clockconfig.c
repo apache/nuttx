@@ -986,24 +986,19 @@ static inline void sam_dfll48m_refclk(void)
  *   file.
  *   Depends on:
  *
- *   BOARD_FDPLL96M_OPENLOOP            - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_ENABLECHILLCYCLE    - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_QUICKLOCK           - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_ONDEMAND            - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_COARSEVALUE         - Value
- *   BOARD_FDPLL96M_FINEVALUE           - Value
- *
- * Open Loop mode only:
- *   BOARD_FDPLL96M_COARSEVALUE         - Value
- *   BOARD_FDPLL96M_FINEVALUE           - Value
- *
- * Closed loop mode only:
- *   BOARD_FDPLL96M_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
- *   BOARD_FDPLL96M_MULTIPLIER          - Value
- *   BOARD_FDPLL96M_MAXCOARSESTEP       - Value
- *   BOARD_FDPLL96M_MAXFINESTEP         - Value
+ *     BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_RUNINSTDBY      - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_ONDEMAND        - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_LBYPASS         - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_WUF             - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_LPEN            - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_* definitions
+ *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ *     BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_* definitions
+ *     BOARD_FDPLL96M_REFDIV          - Numeric value, 1 - 2047
+ *     BOARD_FDPLL96M_PRESCALER       - See OSCCTRL_DPLLPRESC_* definitions
+ *     BOARD_FDPLL96M_REFFREQ         - Numeric value
+ *     BOARD_FDPLL96M_FREQUENCY       - Numeric value
  *
  * Input Parameters:
  *   None
@@ -1016,7 +1011,96 @@ static inline void sam_dfll48m_refclk(void)
 #ifdef BOARD_FDPLL96M_ENABLE
 static inline void sam_fdpll96m_config(void)
 {
-#error Missing logic
+  uint32_t ldr;
+  uint32_t refclk;
+  uint32_t regval;
+  uint8_t  ldrfrac;
+  uint8_t  ctrla;
+
+  /* Get the reference clock frequency */
+
+  refclk  = BOARD_FDPLL96M_REFFREQ;
+
+#if BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_XOSC
+  /* Only XOSC reference clock can be divided */
+
+  refclk  = refclk / (2 * (BOARD_FDPLL96M_REFDIV + 1));
+#endif
+
+  /* Calculate LDRFRAC and LDR */
+
+  ldr     = (BOARD_FDPLL96M_FREQUENCY << 4) / refclk;
+  ldrfrac = (uint8_t)(ldr & 0x0f);
+  ldr     = (ldr >> 4) - 1;
+
+  /* Set DPLLCTRLA configuration (ut not the ONDEMAND bit) */
+
+  ctrla   = 0;
+
+#ifdef BOARD_FDPLL96M_RUNINSTDBY
+  ctrla  |= OSCCTRL_DPLLCTRLA_RUNSTDBY;
+#endif
+
+  putreg8(ctrla, SAM_OSCCTRL_DPLLCTRLA);
+
+  /* Set the FDPLL96M ration register */
+
+  regval = OSCCTRL_DPLLRATIO_LDR(ldr) | OSCCTRL_DPLLRATIO_LDRFRAC(ldrfrac)
+  putreg32(reval, SAM_OSCCTRL_DPLLRATIO);
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) & OSCCTRL_DPLLSYNCBUSY_DPLLRATIO) != 0);
+
+  /* Set DPLLCTRLB configuration */
+
+  regval  = BOARD_FDPLL96M_FILTER | BOARD_FDPLL96M_LOCKTIME |
+            BOARD_FDPLL96M_REFCLK |
+            OSCCTRL_DPLLCTRLB_DIV(BOARD_FDPLL96M_REFDIV);
+
+#ifdef BOARD_FDPLL96M_LBYPASS
+  regval |= OSCCTRL_DPLLCTRLB_LBYPASS;
+#endif
+#ifdef BOARD_FDPLL96M_WUF
+  regval |= OSCCTRL_DPLLCTRLB_WUF;
+#endif
+#ifdef BOARD_FDPLL96M_LPEN
+  regval |= OSCCTRL_DPLLCTRLB_LPEN;
+#endif
+
+  putreg8(regval, SAM_OSCCTRL_DPLLCTRLA);
+
+  /* Set the prescaler value */
+
+  putreg8(BOARD_FDPLL96M_PRESCALER, SAM_ OSCCTRL_DPLLPRESC);
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) & OSCCTRL_DPLLSYNCBUSY_DPLLPRESC) != 0);
+
+  /* Enable the FDPLL96M output */
+
+  ctrla = getreg8(SAM_OSCCTRL_DPLLCTRLA);
+  ctrla |= OSCCTRL_DPLLCTRLA_ENABLE;
+  putreg8(ctrla, SAM_OSCCTRL_DPLLCTRLA);
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_OSCCTRL_DPLLSYNCBUSY) & OSCCTRL_DPLLSYNCBUSY_ENABLE) != 0);
+
+  /* Wait for the FPDLL96M to become locked and ready */
+
+  while ((getreg8(SAM_OSCCTRL_DPLLSTATUS) &
+         (OSCCTRL_DPLLSTATUS_CLKRDY | OSCCTRL_DPLLSTATUS_LOCK)) !=
+         (OSCCTRL_DPLLSTATUS_CLKRDY | OSCCTRL_DPLLSTATUS_LOCK));
+
+#ifdef BOARD_FDPLL96M_ONDEMAND
+  /* Now set the ONDEMAND bit is so configured */
+
+  ctrla = getreg8(SAM_OSCCTRL_DPLLCTRLA);
+  ctrla |= OSCCTRL_DPLLCTRLA_ONDEMAND;
+  putreg8(ctrla, SAM_OSCCTRL_DPLLCTRLA);
+#endif
 }
 #else
 #  define sam_fdpll96m_config()
@@ -1059,7 +1143,7 @@ static inline void sam_fdpll96m_refclk(void)
 #endif
 }
 #else
-#  define sam_fdpll96m_enable()
+#  define sam_fdpll96m_refclk()
 #endif
 
 /****************************************************************************
