@@ -229,17 +229,40 @@
 /* Fractional Digital Phase Locked Loop configuration.
  *
  *   BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_RUNINSTDBY      - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_ONDEMAND        - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_LBYPASS         - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_WUF             - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_LPEN            - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_* definitions
  *   BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
  *   BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_CLKCTRL_GEN* definitions
  *   BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_* definitions
  *   BOARD_FDPLL96M_LOCKTIME_CLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_FDPLL96M_REFDIV          - Numeric value, 1 - 2047
+ *   BOARD_FDPLL96M_PRESCALER       - See OSCCTRL_DPLLPRESC_* definitions
+ *   BOARD_FDPLL96M_REFFREQ         - Numeric value
+ *   BOARD_FDPLL96M_FREQUENCY       - Numeric value
  */
 
 #undef  BOARD_FDPLL96M_ENABLE
-#define BOARD_FDPLL96M_REFCLK            OSCCTRL_DPLLCTRLB_REFLCK_XOSC
-#define BOARD_FDPLL96M_REFCLK_CLKGEN     GCLK_CLKCTRL_GEN1
+#undef  BOARD_FDPLL96M_RUNINSTDBY
+#define BOARD_FDPLL96M_ONDEMAND           1
+#undef  BOARD_FDPLL96M_LBYPASS
+#undef  BOARD_FDPLL96M_WUF
+#undef  BOARD_FDPLL96M_LPEN
+#define BOARD_FDPLL96M_FILTER             OSCCTRL_DPLLCTRLB_FILTER_DEFAULT
+#define BOARD_FDPLL96M_REFCLK             OSCCTRL_DPLLCTRLB_REFLCK_XOSCK32K
+#define BOARD_FDPLL96M_REFCLK_CLKGEN      GCLK_CLKCTRL_GEN1
 #undef  BOARD_FDPLL96M_LOCKTIME_ENABLE
+#define BOARD_FDPLL96M_LOCKTIME           OSCCTRL_DPLLCTRLB_LTIME_NONE
 #define BOARD_FDPLL96M_LOCKTIME_CLKGEN   GCLK_CLKCTRL_GEN1
+#define BOARD_FDPLL96M_REFDIV             1
+#define BOARD_FDPLL96M_PRESCALER          OSCCTRL_DPLLPRESC_DIV1
+
+#define BOARD_FDPLL96M_REFFREQ           32768
+#define BOARD_FDPLL96M_FREQUENCY         48000000
 
 /* GCLK Configuration
  *
