@@ -216,7 +216,7 @@ VECTOR(tiva_pwm1_gen2, TIVA_IRQ_PWM1_GEN2)   /* Vector 152: PWM1 Generator 2 */
 VECTOR(tiva_pwm1_gen3, TIVA_IRQ_PWM1_GEN3)   /* Vector 153: PWM1 Generator 3 */
 VECTOR(tiva_pwm1_fault, TIVA_IRQ_PWM1_FAULT) /* Vector 154: PWM1 Fault */
 
-# endif /* CONFIG_ARMV7M_CMNVECTOR */
+#  endif /* CONFIG_ARMV7M_CMNVECTOR */
 
 #elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI)
 
@@ -386,7 +386,7 @@ VECTOR(tiva_pwm1_gen2, TIVA_IRQ_PWM1_GEN2)   /* Vector 152: PWM1 Generator 2 */
 VECTOR(tiva_pwm1_gen3, TIVA_IRQ_PWM1_GEN3)   /* Vector 153: PWM1 Generator 3 */
 VECTOR(tiva_pwm1_fault, TIVA_IRQ_PWM1_FAULT) /* Vector 154: PWM1 Fault */
 
-# endif /* CONFIG_ARMV7M_CMNVECTOR */
+#  endif /* CONFIG_ARMV7M_CMNVECTOR */
 
 #elif defined(CONFIG_ARCH_CHIP_TM4C129XNC)
 
@@ -446,7 +446,7 @@ VECTOR(tiva_timer3b, TIVA_IRQ_TIMER3B)       /* Vector 52: 16/32-Bit Timer 3 B *
 VECTOR(tiva_i2c1, TIVA_IRQ_I2C1)             /* Vector 53: I2C 1 */
 VECTOR(tiva_can0, TIVA_IRQ_CAN0)             /* Vector 54: CAN 0 */
 VECTOR(tiva_can1, TIVA_IRQ_CAN1)             /* Vector 55: CAN 1 */
-VECTOR(tiva_ethcon, TIVA_IRQ_ETHCON)         /* Vector 56:  Ethernet MAC */
+VECTOR(tiva_ethcon, TIVA_IRQ_ETHCON)         /* Vector 56: Ethernet MAC */
 VECTOR(tiva_hibernate, TIVA_IRQ_HIBERNATE)   /* Vector 57: Hibernation Module */
 VECTOR(tiva_usb, TIVA_IRQ_USB)               /* Vector 58: USB MAC */
 VECTOR(tiva_pwm0_gen3, TIVA_IRQ_PWM0_GEN3)   /* Vector 59: PWM0 Generator 3 */
@@ -528,7 +528,8 @@ VECTOR(tiva_gpiot, TIVA_IRQ_GPIOT)           /* Vector 127: GPIO Port T */
 UNUSED(TIVA_RESERVED_128)                    /* Vector 128: Reserved */
 UNUSED(TIVA_RESERVED_129)                    /* Vector 129: Reserved */
 
-# endif /* CONFIG_ARMV7M_CMNVECTOR */
+#  endif /* CONFIG_ARMV7M_CMNVECTOR */
+
 #elif defined(CONFIG_ARCH_CHIP_TM4C1294NC)
 
 /* If the common ARMv7-M vector handling is used, then all it needs is the following
@@ -587,7 +588,7 @@ VECTOR(tiva_timer3b, TIVA_IRQ_TIMER3B)       /* Vector 52: 16/32-Bit Timer 3 B *
 VECTOR(tiva_i2c1, TIVA_IRQ_I2C1)             /* Vector 53: I2C 1 */
 VECTOR(tiva_can0, TIVA_IRQ_CAN0)             /* Vector 54: CAN 0 */
 VECTOR(tiva_can1, TIVA_IRQ_CAN1)             /* Vector 55: CAN 1 */
-VECTOR(tiva_ethcon, TIVA_IRQ_ETHCON)         /* Vector 56:  Ethernet MAC */
+VECTOR(tiva_ethcon, TIVA_IRQ_ETHCON)         /* Vector 56: Ethernet MAC */
 VECTOR(tiva_hibernate, TIVA_IRQ_HIBERNATE)   /* Vector 57: Hibernation Module */
 VECTOR(tiva_usb, TIVA_IRQ_USB)               /* Vector 58: USB MAC */
 VECTOR(tiva_pwm0_gen3, TIVA_IRQ_PWM0_GEN3)   /* Vector 59: PWM0 Generator 3 */
