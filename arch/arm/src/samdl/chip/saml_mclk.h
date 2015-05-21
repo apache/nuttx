@@ -55,7 +55,7 @@
  ************************************************************************************/
 /* MCLK register offsets ************************************************************/
 
-#define SAM_MCLK_CTRLA_OFFSET      0x0000  /* PAC write protection */
+#define SAM_MCLK_CTRLA_OFFSET      0x0000  /* CTRLA register */
 #define SAM_MCLK_INTENCLR_OFFSET   0x0001  /* Interrupt enable clear */
 #define SAM_MCLK_INTENSET_OFFSET   0x0002  /* Interrupt enable set */
 #define SAM_MCLK_INTFLAG_OFFSET    0x0003  /* Interrupt flag status and clear */
@@ -89,7 +89,10 @@
 
 /* MCLK register bit definitions ****************************************************/
 
-/* PAC write protection. All bits in this register are reserved. */
+/* CTRLA register */
+
+#define MCLK_CTRLA_CFDEN           (1 << 2)  /* Bit 2: Clock Failure Detector Enable */
+#define MCLK_CTRLA_EMCLK           (1 << 4)  /* Bit 4: Emergency Clock Select */
 
 /* Interrupt enable clear, Interrupt enable set, and  Interrupt flag status and
  * clear.
@@ -98,8 +101,37 @@
 #define MCLK_INT_CKRDY             (1 << 0)  /* Bit 0:  Clock ready */
 
 /* CPU clock division (8-bit divider) */
+
+#define MCLK_CPUDIV_DIV1           0x01
+#define MCLK_CPUDIV_DIV2           0x02
+#define MCLK_CPUDIV_DIV4           0x04
+#define MCLK_CPUDIV_DIV8           0x08
+#define MCLK_CPUDIV_DIV16          0x10
+#define MCLK_CPUDIV_DIV32          0x20
+#define MCLK_CPUDIV_DIV64          0x40
+#define MCLK_CPUDIV_DIV128         0x80
+
 /* Low-power clock division (8-bit divider) */
+
+#define MCLK_LPDIV_DIV1            0x01
+#define MCLK_LPDIV_DIV2            0x02
+#define MCLK_LPDIV_DIV4            0x04
+#define MCLK_LPDIV_DIV8            0x08
+#define MCLK_LPDIV_DIV16           0x10
+#define MCLK_LPDIV_DIV32           0x20
+#define MCLK_LPDIV_DIV64           0x40
+#define MCLK_LPDIV_DIV128          0x80
+
 /* Backup clock division (8-bit divider) */
+
+#define MCLK_BUPDIV_DIV1           0x01
+#define MCLK_BUPDIV_DIV2           0x02
+#define MCLK_BUPDIV_DIV4           0x04
+#define MCLK_BUPDIV_DIV8           0x08
+#define MCLK_BUPDIV_DIV16          0x10
+#define MCLK_BUPDIV_DIV32          0x20
+#define MCLK_BUPDIV_DIV64          0x40
+#define MCLK_BUPDIV_DIV128         0x80
 
 /* AHB mask */
 
