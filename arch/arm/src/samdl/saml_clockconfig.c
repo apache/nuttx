@@ -481,7 +481,7 @@ static inline void sam_xosc32k_config(void)
 {
   uint16_t regval;
 
-  /* Configure XOSC32K */
+  /* Configure XOSC32K (skipping the ONDEMANC SETTING until last) */
 
   regval  = getreg16(SAM_OSC32KCTRL_XOSC32K);
   regval &= ~(OSC32KCTRL_XOSC32K_XTALEN   | OSC32KCTRL_XOSC32K_EN32K        |
@@ -506,10 +506,6 @@ static inline void sam_xosc32k_config(void)
   regval |= OSC32KCTRL_XOSC32K_EN32K;
 #endif
 
-#ifdef BOARD_XOSC32K_ONDEMAND
-  regval |= OSC32KCTRL_XOSC32K_ONDEMAND;
-#endif
-
 #ifdef BOARD_XOSC32K_RUNINSTANDBY
   regval |= OSC32KCTRL_XOSC32K_RUNSTDBY;
 #endif
@@ -524,6 +520,13 @@ static inline void sam_xosc32k_config(void)
   /* Wait for XOSC32K to be ready */
 
   while ((getreg32(SAM_OSC32CTRL_STATUS) & OSC32KCTRL_INT_XOSC32KRDY) == 0);
+
+#ifdef BOARD_XOSC32K_ONDEMAND
+  /* Set the on-demand bit */
+
+  regval |= OSC32KCTRL_XOSC32K_ONDEMAND;
+  putreg16(regval, SAM_OSC32KCTRL_XOSC32K);
+#endif
 
 #ifdef BOARD_XOSC32K_WRITELOCK
   /* Lock this configuration until the next power up */
@@ -729,12 +732,6 @@ static inline void sam_osc16m_config(void)
                   OSCCTRL_OSC16MCTRL_ONDEMAND);
       regval |= BOARD_OSC16M_FSEL;
 
-#ifdef BOARD_OSC16M_ONDEMAND
-      /* Select on-demand oscillator controls */
-
-      regval |= OSCCTRL_OSC16MCTRL_ONDEMAND;
-#endif
-
 #ifdef BOARD_OSC16M_RUNINSTANDBY
       /* The oscillator continues to run in standby sleep mode  */
 
@@ -753,6 +750,13 @@ static inline void sam_osc16m_config(void)
       /* Wait for OSC16M to be ready */
 
       while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_OSC16MRDY) == 0);
+
+#ifdef BOARD_OSC16M_ONDEMAND
+      /* Select on-demand oscillator controls */
+
+      regval |= OSCCTRL_OSC16MCTRL_ONDEMAND;
+      putreg32(regval, SAM_OSCCTRL_OSC16MCTRL);
+#endif
 
       /* Re-select OSC16M for main clock again */
 
@@ -787,7 +791,7 @@ static inline void sam_osc16m_config(void)
  *   BOARD_DFLL48M_FINEVALUE           - Value
  *
  * Closed loop mode only:
- *   BOARD_DFLL48M_REFCLK_CLKGEN       - See GCLK_PCHCTRL_GEN* definitions
+ *   BOARD_DFLL48M_REFCLK_CLKGEN       - GCLK index in the range {0..8}
  *   BOARD_DFLL48M_MULTIPLIER          - Value
  *   BOARD_DFLL48M_MAXCOARSESTEP       - Value
  *   BOARD_DFLL48M_MAXFINESTEP         - Value
@@ -936,7 +940,7 @@ static inline void sam_dfll48m_enable(void)
  *   Enable DFLL reference clock if in closed loop mode.
  *   Depends on:
  *
- *   BOARD_DFLL48M_REFCLK_CLKGEN - See GCLK_PCHCTRL_GEN* definitions
+ *   BOARD_DFLL48M_REFCLK_CLKGEN - GCLK index in the range {0..8}
  *
  * Input Parameters:
  *   None
@@ -1058,7 +1062,6 @@ static inline void sam_fdpll96m_config(void)
 
   /* Enable the FDPLL96M output */
 
-  ctrla = getreg8(SAM_OSCCTRL_DPLLCTRLA);
   ctrla |= OSCCTRL_DPLLCTRLA_ENABLE;
   putreg8(ctrla, SAM_OSCCTRL_DPLLCTRLA);
 
@@ -1073,9 +1076,8 @@ static inline void sam_fdpll96m_config(void)
          (OSCCTRL_DPLLSTATUS_CLKRDY | OSCCTRL_DPLLSTATUS_LOCK));
 
 #ifdef BOARD_FDPLL96M_ONDEMAND
-  /* Now set the ONDEMAND bit is so configured */
+  /* Now set the ONDEMAND bit if so configured */
 
-  ctrla = getreg8(SAM_OSCCTRL_DPLLCTRLA);
   ctrla |= OSCCTRL_DPLLCTRLA_ONDEMAND;
   putreg8(ctrla, SAM_OSCCTRL_DPLLCTRLA);
 #endif
@@ -1093,9 +1095,9 @@ static inline void sam_fdpll96m_config(void)
  *
  *     BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
  *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
- *     BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_PCHCTRL_GEN* definitions
+ *     BOARD_FDPLL96M_REFCLK_CLKGEN   - GCLK index in the range {0..8}
  *     BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
- *     BOARD_FDPLL96M_LOCKTIME_CLKGEN - See GCLK_PCHCTRL_GEN* definitions
+ *     BOARD_FDPLL96M_LOCKTIME_CLKGEN - GCLK index in the range {0..8}
  *
  * Input Parameters:
  *   None
