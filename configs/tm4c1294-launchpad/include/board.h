@@ -178,13 +178,15 @@
 /* Pin Multiplexing Disambiguation **************************************************/
 /* Ethernet LEDs
  *
- *    PF1/PK4/PK6 are used for Ethernet LEDs.
- *      PF4/EN0LED1/LED3  Ethernet TX/RX activity
+ *    PF0/PF4/PF1 are used for Ethernet LEDs.
  *      PF0/EN0LED0/LED4  Ethernet link OK
+ *      PF4/EN0LED1/LED3  Ethernet TX/RX activity
+ *      PF1/EN0LED2       Ethernet 100-base TX
  */
 
 #define GPIO_EN0_LED0     GPIO_EN0_LED0_1
 #define GPIO_EN0_LED1     GPIO_EN0_LED1_1
+#define GPIO_EN0_LED2     GPIO_EN0_LED2_1
 
 /************************************************************************************
  * Public Function Prototypes
