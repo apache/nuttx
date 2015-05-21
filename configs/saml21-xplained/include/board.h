@@ -232,6 +232,7 @@
  *   BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
  *   BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_CLKCTRL_GEN* definitions
  *   BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
+ *   BOARD_FDPLL96M_LOCKTIME_CLKGEN - See GCLK_CLKCTRL_GEN* definitions
  */
 
 #undef  BOARD_FDPLL96M_ENABLE
