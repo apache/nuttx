@@ -1029,7 +1029,11 @@ static inline void sam_fdpll96m_config(void)
  *   Enable FDPLL96M internal lock timer and reference clock.
  *   Depends on:
  *
- *   BOARD_FDPLL96M_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *     BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
+ *     BOARD_FDPLL96M_REFCLK_CLKGEN   - See GCLK_CLKCTRL_GEN* definitions
+ *     BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
+ *     BOARD_FDPLL96M_LOCKTIME_CLKGEN - See GCLK_CLKCTRL_GEN* definitions
  *
  * Input Parameters:
  *   None
@@ -1042,6 +1046,17 @@ static inline void sam_fdpll96m_config(void)
 #if defined(BOARD_GCLK_ENABLE) && defined(BOARD_FDPLL96M_ENABLE)
 static inline void sam_fdpll96m_refclk(void)
 {
+#ifdef BOARD_FDPLL96M_LOCKTIME_ENABLE
+  /* Enable the GCLK that is configured to the the FDPLL lock timer */
+
+  sam_gclk_chan_enable(GCLK_CHAN_DPLL_32K, BOARD_FDPLL96M_LOCKTIME_CLKGEN);
+#endif
+
+#if BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_GLCK
+  /* Enable the GCLK that is configured to be the FDPLL reference clock */
+
+  sam_gclk_chan_enable(GCLK_CHAN_DPLL, BOARD_FDPLL96M_REFCLK_CLKGEN);
+#endif
 }
 #else
 #  define sam_fdpll96m_enable()

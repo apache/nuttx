@@ -58,8 +58,8 @@
 #define SAM_GCLK_CTRLA_OFFSET        0x0000 /* Control register */
 #define SAM_GCLK_SYNCHBUSY_OFFSET       0x0004 /* Status register */
 
-#define SAM_GCLK_GENCTRL_OFFSET(n)   (0x0020 + ((n) << 2) /* General clock generator n */
-#define SAM_GCLK_PCHCTRL_OFFSET(m)   (0x0080 + ((m) << 2) /* Peripheral channel control m */
+#define SAM_GCLK_GENCTRL_OFFSET(n)   (0x0020 + ((n) << 2)) /* General clock generator n */
+#define SAM_GCLK_PCHCTRL_OFFSET(m)   (0x0080 + ((m) << 2)) /* Peripheral channel control m */
 
 /* GCLK register addresses ******************************************************************/
 
@@ -132,51 +132,51 @@
 #define GCLK_PCHCTRL_CHEN            (1 << 6)  /* Bit 6:  Channel enable */
 #define GCLK_PCHCTRL_WRTLOCK         (1 << 7)  /* Bit 7:  Write lock */
 
-/* PCHCTRL mapping **************************************************************************/
+/* PCHCTRL channel mapping ******************************************************************/
 
-#define GCLK__DFLL48M_REF            0         /* DFLL48M Reference */
-#define GCLK__DPLL                   1         /* FDPLL96M input clock source for reference */
-#define GCLK__DPLL_32K               2         /* FDPLL96M 32kHz clock for FDPLL96M internal lock timer */
-#define GCLK__EIC                    3         /* EIC */
-#define GCLK__USB                    4         /* USB */
-#define GCLK__EVSYS_CHANNEL_0        5         /* EVSYS_CHANNEL_0 */
-#define GCLK__EVSYS_CHANNEL_1        6         /* EVSYS_CHANNEL_1 */
-#define GCLK__EVSYS_CHANNEL_2        7         /* EVSYS_CHANNEL_2 */
-#define GCLK__EVSYS_CHANNEL_3        8         /* EVSYS_CHANNEL_3 */
-#define GCLK__EVSYS_CHANNEL_4        9         /* EVSYS_CHANNEL_4 */
-#define GCLK__EVSYS_CHANNEL_5        10        /* EVSYS_CHANNEL_5 */
-#define GCLK__EVSYS_CHANNEL_6        11        /* EVSYS_CHANNEL_6 */
-#define GCLK__EVSYS_CHANNEL_7        12        /* EVSYS_CHANNEL_7 */
-#define GCLK__EVSYS_CHANNEL_8        13        /* EVSYS_CHANNEL_8 */
-#define GCLK__EVSYS_CHANNEL_9        14        /* EVSYS_CHANNEL_9 */
-#define GCLK__EVSYS_CHANNEL_10       15        /* EVSYS_CHANNEL_10 */
-#define GCLK__EVSYS_CHANNEL_11       16        /* EVSYS_CHANNEL_11 */
-#define GCLK__SERCOM0_SLOW           17        /* SERCOM0_SLOW */
-#define GCLK__SERCOM1_SLOW           17        /* SERCOM1_SLOW */
-#define GCLK__SERCOM2_SLOW           17        /* SERCOM2_SLOW */
-#define GCLK__SERCOM3_SLOW           17        /* SERCOM3_SLOW */
-#define GCLK__SERCOM4_SLOW           17        /* SERCOM4_SLOW */
-#define GCLK__SERCOM0_CORE           18        /* SERCOM0_CORE */
-#define GCLK__SERCOM1_CORE           19        /* SERCOM1_CORE */
-#define GCLK__SERCOM2_CORE           20        /* SERCOM2_CORE */
-#define GCLK__SERCOM3_CORE           21        /* SERCOM3_CORE */
-#define GCLK__SERCOM4_CORE           22        /* SERCOM4_CORE */
-#define GCLK__SERCOM5_SLOW           23        /* SERCOM5_SLOW */
-#define GCLK__SERCOM5_CORE           24        /* SERCOM5_CORE */
-#define GCLK_TCC0                    25        /* TCC0 */
-#define GCLK_TCC1                    25        /* TCC1 */
-#define GCLK_TCC2                    26        /* TCC2 */
-#define GCLK_TC3_1                   26        /* TC3 */
-#define GCLK_TC0                     27        /* TC0 */
-#define GCLK_TC1                     27        /* TC1 */
-#define GCLK_TC2                     28        /* TC2 */
-#define GCLK_TC3_2                   28        /* TC3 */
-#define GCLK__TC4                    29        /* TC4 */
-#define GCLK__ADC                    30        /* ADC */
-#define GCLK__AC                     31        /* AC */
-#define GCLK__DAC                    32        /* DAC */
-#define GCLK__PTC                    33        /* PTC */
-#define GCLK__CCL                    34        /* CCL */
+#define GCLK_CHAN_DFLL48M_REF        0         /* DFLL48M Reference */
+#define GCLK_CHAN_DPLL               1         /* FDPLL96M input clock source for reference */
+#define GCLK_CHAN_DPLL_32K           2         /* FDPLL96M 32kHz clock for FDPLL96M internal lock timer */
+#define GCLK_CHAN_EIC                3         /* EIC */
+#define GCLK_CHAN_USB                4         /* USB */
+#define GCLK_CHAN_EVSYS_CH0          5         /* EVSYS_CHANNEL_0 */
+#define GCLK_CHAN_EVSYS_CH1          6         /* EVSYS_CHANNEL_1 */
+#define GCLK_CHAN_EVSYS_CH2          7         /* EVSYS_CHANNEL_2 */
+#define GCLK_CHAN_EVSYS_CH3          8         /* EVSYS_CHANNEL_3 */
+#define GCLK_CHAN_EVSYS_CH4          9         /* EVSYS_CHANNEL_4 */
+#define GCLK_CHAN_EVSYS_CH5          10        /* EVSYS_CHANNEL_5 */
+#define GCLK_CHAN_EVSYS_CH6          11        /* EVSYS_CHANNEL_6 */
+#define GCLK_CHAN_EVSYS_CH7          12        /* EVSYS_CHANNEL_7 */
+#define GCLK_CHAN_EVSYS_CH8          13        /* EVSYS_CHANNEL_8 */
+#define GCLK_CHAN_EVSYS_CH9          14        /* EVSYS_CHANNEL_9 */
+#define GCLK_CHAN_EVSYS_CH10         15        /* EVSYS_CHANNEL_10 */
+#define GCLK_CHAN_EVSYS_CH11         16        /* EVSYS_CHANNEL_11 */
+#define GCLK_CHAN_SERCOM0_SLOW       17        /* SERCOM0_SLOW */
+#define GCLK_CHAN_SERCOM1_SLOW       17        /* SERCOM1_SLOW */
+#define GCLK_CHAN_SERCOM2_SLOW       17        /* SERCOM2_SLOW */
+#define GCLK_CHAN_SERCOM3_SLOW       17        /* SERCOM3_SLOW */
+#define GCLK_CHAN_SERCOM4_SLOW       17        /* SERCOM4_SLOW */
+#define GCLK_CHAN_SERCOM0_CORE       18        /* SERCOM0_CORE */
+#define GCLK_CHAN_SERCOM1_CORE       19        /* SERCOM1_CORE */
+#define GCLK_CHAN_SERCOM2_CORE       20        /* SERCOM2_CORE */
+#define GCLK_CHAN_SERCOM3_CORE       21        /* SERCOM3_CORE */
+#define GCLK_CHAN_SERCOM4_CORE       22        /* SERCOM4_CORE */
+#define GCLK_CHAN_SERCOM5_SLOW       23        /* SERCOM5_SLOW */
+#define GCLK_CHAN_SERCOM5_CORE       24        /* SERCOM5_CORE */
+#define GCLK_CHAN_TCC0               25        /* TCC0 */
+#define GCLK_CHAN_TCC1               25        /* TCC1 */
+#define GCLK_CHAN_TCC2               26        /* TCC2 */
+#define GCLK_CHAN_TC3_1              26        /* TC3 */
+#define GCLK_CHAN_TC0                27        /* TC0 */
+#define GCLK_CHAN_TC1                27        /* TC1 */
+#define GCLK_CHAN_TC2                28        /* TC2 */
+#define GCLK_CHAN_TC3_2              28        /* TC3 */
+#define GCLK_CHAN_TC4                29        /* TC4 */
+#define GCLK_CHAN_ADC                30        /* ADC */
+#define GCLK_CHAN_AC                 31        /* AC */
+#define GCLK_CHAN_DAC                32        /* DAC */
+#define GCLK_CHAN_PTC                33        /* PTC */
+#define GCLK_CHAN_CCL                34        /* CCL */
 
 /********************************************************************************************
  * Public Types
