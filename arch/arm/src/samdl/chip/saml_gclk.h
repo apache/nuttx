@@ -79,15 +79,16 @@
 /* Status register */
 
 #define GCLK_SYNCHBUSY_SWRST         (1 << 0)  /* Bit 0:  SWRST synchronization busy */
-#define GCLK_SYNCHBUSY_GENCTRL0      (1 << 2)  /* Bit 2:  Generator control 0 busy */
-#define GCLK_SYNCHBUSY_GENCTRL1      (1 << 3)  /* Bit 3:  Generator control 1 busy */
-#define GCLK_SYNCHBUSY_GENCTRL2      (1 << 4)  /* Bit 4:  Generator control 2 busy */
-#define GCLK_SYNCHBUSY_GENCTRL3      (1 << 5)  /* Bit 5:  Generator control 3 busy */
-#define GCLK_SYNCHBUSY_GENCTRL4      (1 << 6)  /* Bit 6:  Generator control 4 busy */
-#define GCLK_SYNCHBUSY_GENCTRL5      (1 << 7)  /* Bit 7:  Generator control 5 busy */
-#define GCLK_SYNCHBUSY_GENCTRL6      (1 << 8)  /* Bit 8:  Generator control 6 busy */
-#define GCLK_SYNCHBUSY_GENCTRL7      (1 << 9)  /* Bit 9:  Generator control 7 busy */
-#define GCLK_SYNCHBUSY_GENCTRL8      (1 << 10) /* Bit 10: Generator control 8 busy */
+#define GCLK_SYNCHBUSY_GENCTRL(n)    (1 << ((n) + 2))  /* Bit n+2: Generator control n busy */
+#  define GCLK_SYNCHBUSY_GENCTRL0    (1 << 2)  /* Bit 2:  Generator control 0 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL1    (1 << 3)  /* Bit 3:  Generator control 1 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL2    (1 << 4)  /* Bit 4:  Generator control 2 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL3    (1 << 5)  /* Bit 5:  Generator control 3 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL4    (1 << 6)  /* Bit 6:  Generator control 4 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL5    (1 << 7)  /* Bit 7:  Generator control 5 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL6    (1 << 8)  /* Bit 8:  Generator control 6 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL7    (1 << 9)  /* Bit 9:  Generator control 7 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL8    (1 << 10) /* Bit 10: Generator control 8 busy */
 
 /* General clock generator n */
 

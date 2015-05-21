@@ -63,22 +63,31 @@
  * Name: sam_gclck_waitsyncbusy
  *
  * Description:
- *   What until the SYNCBUSY bit is cleared.  This bit is cleared when the
- *   synchronization of registers between the clock domains is complete.
- *   This bit is set when the synchronization of registers between clock
- *   domains is started.
+ *   What until the SYNCBUSY bit is cleared.  The SYNCBUSY bit was set when
+ *   the synchronization of registers between clock domains is started.  The
+ *   SYNCBUSY bit is cleared when the synchronization of registers between
+ *   the clock domains is complete.
  *
  * Input Parameters:
- *   None
+ *   glck - GCLK clock index
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sam_gclck_waitsyncbusy(void)
+static void sam_gclck_waitsyncbusy(uint8_t gclk)
 {
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
   while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+  uintptr_t gclkbit = GCLK_SYNCHBUSY_GENCTRL(gclk);
+  while ((getreg8(SAM_GCLK_SYNCHBUSY) & gclkbit) != 0);
+
+#else
+#  error Unrecognized SAMD/L architecture
+#endif
 }
 
 /****************************************************************************
@@ -174,7 +183,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy();
+  sam_gclck_waitsyncbusy(config->gclk);
 
   /* Select the generator */
 
@@ -183,7 +192,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy();
+  sam_gclck_waitsyncbusy(config->gclk);
 
   /* Write the new generator configuration */
 
@@ -191,7 +200,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy();
+  sam_gclck_waitsyncbusy(config->gclk);
 
   /* Enable the clock generator */
 
@@ -200,7 +209,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy();
+  sam_gclck_waitsyncbusy(config->gclk);
 }
 
 /****************************************************************************
