@@ -74,6 +74,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* BOARD_GCLK_ENABLE looks optional, but it is not */
+
+#ifndef BOARD_GCLK_ENABLE
+#  warning BOARD_GCLK_ENABLE must be defined
+#  define BOARD_GCLK_ENABLE 1
+#endif
+
 /* Force enabling of the FDPLL reference clock */
 
 #ifdef BOARD_FDPLL96M_ENABLE
@@ -127,7 +134,8 @@ static inline void sam_fdpll96m_refclk(void);
 #ifdef BOARD_GCLK_ENABLE
 static inline void sam_config_gclks(void);
 #endif
-static inline void sam_dividers(void);
+static inline void sam_cpu_dividers(void);
+static inline void sam_periph_clocks(void);
 
 /****************************************************************************
  * Private Data
@@ -1147,6 +1155,53 @@ static inline void sam_fdpll96m_refclk(void)
 #endif
 
 /****************************************************************************
+ * Name: sam_cpu_dividers
+ *
+ * Description:
+ *   Setup PM main clock dividers to generate CPU and AHB.
+ *   Depends on:
+ *
+ *     BOARD_CPU_DIVIDER        - See MCLK_CPUDIV_DIV* definitions
+ *     BOARD_CPU_FRQUENCY       - In Hz
+ *     BOARD_CPU_FAILDECT       - Boolean (defined / not defined)
+ *     BOARD_LOWPOWER_DIVIDER   - See MCLK_LPDIV_DIV_* definitions
+ *     BOARD_LOWPOWER_FREQUENCY - In Hz
+ *     BOARD_BACKUP_DIVIDER     - See MCLK_BUPDIV_DIV_* definitions
+ *     BOARD_BACKUP_FREQUENCY   - In Hz
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void sam_cpu_dividers(void)
+{
+  uint8_t regval;
+
+  /* Set CPU divider and, optionally, enable failure detection */
+
+  putreg8(BOARD_CPU_DIVIDER, SAM_MCLK_CPUDIV);
+
+  /* Enable/disabled clock failure detection */
+
+  regval  = getreg8(SAM_MCLK_CTRLA);
+#ifdef BOARD_CPU_FAILDECT
+  regval |= MCLK_CTRLA_CFDEN;
+#else
+  regval &= ~MCLK_CTRLA_CFDEN;
+#endif
+  putreg8(regval, SAM_MCLK_CTRLA);
+
+  /* Setup up lower power and backup dividers */
+
+  putreg8(BOARD_LOWPOWER_DIVIDER, SAM_MCLK_LPDIV);
+  putreg8(BOARD_BACKUP_DIVIDER, SAM_MCLK_BUPDIV);
+}
+
+/****************************************************************************
  * Name: sam_config_gclks
  *
  * Description:
@@ -1155,7 +1210,7 @@ static inline void sam_fdpll96m_refclk(void)
  *
  *   Global enable/disable.
  *
- *     BOARD_GCLK_ENABLE            - Boolean (defined / not defined)
+ *     BOARD_GCLK_ENABLE            - *MUST* be defined
  *
  *   For n=1-7:
  *     BOARD_GCLKn_ENABLE           - Boolean (defined / not defined)
@@ -1208,6 +1263,10 @@ static inline void sam_config_gclks(void)
 
   sam_fdpll96m_refclk();
 
+  /* Setup CPU and BUS clocks */
+
+  sam_cpu_dividers();
+
   /* Configure the GCLK_MAIN last as it may depend on the DFLL or other
    * generators
    */
@@ -1219,21 +1278,10 @@ static inline void sam_config_gclks(void)
 #endif
 
 /****************************************************************************
- * Name: sam_dividers
+ * Name: sam_periph_clocks
  *
  * Description:
- *   Setup PM main clock dividers to generate CPU, AHB, and APB clocks.
- *   Depends on:
- *
- *  BOARD_CPU_DIVIDER   - See PM_CPUSEL_CPUDIV_* definitions
- *  BOARD_CPU_FRQUENCY  - In Hz
- *  BOARD_CPU_FAILDECT  - Boolean (defined / not defined)
- *  BOARD_APBA_DIVIDER  - See M_APBASEL_APBADIV_* definitions
- *  BOARD_APBA_FRQUENCY - In Hz
- *  BOARD_APBB_DIVIDER  - See M_APBBSEL_APBBDIV_* definitions
- *  BOARD_APBB_FRQUENCY - In Hz
- *  BOARD_APBC_DIVIDER  - See M_APBCSEL_APBCDIV_* definitions
- *  BOARD_APBC_FRQUENCY - In Hz
+ *   Setup initial peripheral clocking:
  *
  * Input Parameters:
  *   None
@@ -1243,27 +1291,9 @@ static inline void sam_config_gclks(void)
  *
  ****************************************************************************/
 
-static inline void sam_dividers(void)
+static inline void sam_periph_clocks(void)
 {
-  uint8_t regval;
-
-  /* Set CPU divider and, optionally, enable failure detection */
-
-  putreg8(BOARD_CPU_DIVIDER, SAM_PM_CPUSEL);
-
-  regval  = getreg8(SAM_PM_CTRLA);
-#ifdef BOARD_CPU_FAILDECT
-  regval |= PM_CTRLA_CFDEN;
-#else
-  regval &= ~PM_CTRLA_CFDEN;
-#endif
-  putreg8(regval, SAM_PM_CTRLA);
-
-  /* Set the APBA, B, and C dividers */
-
-  putreg8(BOARD_APBA_DIVIDER, SAM_PM_APBASEL);
-  putreg8(BOARD_APBB_DIVIDER, SAM_PM_APBBSEL);
-  putreg8(BOARD_APBC_DIVIDER, SAM_PM_APBCSEL);
+#warning Missing logic
 }
 
 /****************************************************************************
@@ -1336,9 +1366,17 @@ void sam_clockconfig(void)
 
   sam_fdpll96m_config();
 
-  /* Set CPU and BUS clock dividers */
+#if BOARD_CPU_FREQUENCY <= 12000000
+  /* If CPU frequency is less than 12MHz, scale down performance level to
+   * PL0.
+   */
 
-  sam_dividers();
+  sam_performance_level(PM_PLCFG_PLSEL_PL0);
+#endif
+
+  /* Set up initial peripheral clocking */
+
+  sam_periph_clocks();
 }
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */

@@ -268,7 +268,7 @@
  *
  * Global enable/disable.
  *
- *   BOARD_GCLK_ENABLE            - Boolean (defined / not defined)
+ *   BOARD_GCLK_ENABLE            - *MUST* be defined
  *
  * For n=1-7:
  *   BOARD_GCLKn_ENABLE           - Boolean (defined / not defined)
@@ -364,31 +364,31 @@
 
 /* Main clock dividers
  *
- *    BOARD_CPU_DIVIDER   - See PM_CPUSEL_CPUDIV_* definitions
- *    BOARD_CPU_FRQUENCY  - In Hz
- *    BOARD_CPU_FAILDECT  - Boolean (defined / not defined)
- *    BOARD_APBA_DIVIDER  - See M_APBASEL_APBADIV_* definitions
- *    BOARD_APBA_FRQUENCY - In Hz
- *    BOARD_APBB_DIVIDER  - See M_APBBSEL_APBBDIV_* definitions
- *    BOARD_APBB_FRQUENCY - In Hz
- *    BOARD_APBC_DIVIDER  - See M_APBCSEL_APBCDIV_* definitions
- *    BOARD_APBC_FRQUENCY - In Hz
+ *     BOARD_CPU_DIVIDER        - See MCLK_CPUDIV_DIV* definitions
+ *     BOARD_CPU_FRQUENCY       - In Hz
+ *     BOARD_CPU_FAILDECT       - Boolean (defined / not defined)
+ *     BOARD_LOWPOWER_DIVIDER   - See MCLK_LPDIV_DIV_* definitions
+ *     BOARD_LOWPOWER_FREQUENCY - In Hz
+ *     BOARD_BACKUP_DIVIDER     - See MCLK_BUPDIV_DIV_* definitions
+ *     BOARD_BACKUP_FREQUENCY   - In Hz
  */
 
-#define BOARD_CPU_FAILDECT           1
-#define BOARD_CPU_DIVIDER            PM_CPUSEL_CPUDIV_1
-#define BOARD_APBA_DIVIDER           PM_APBASEL_APBADIV_1
-#define BOARD_APBB_DIVIDER           PM_APBBSEL_APBBDIV_1
-#define BOARD_APBC_DIVIDER           PM_APBCSEL_APBCDIV_1
+#undef  BOARD_CPU_FAILDECT
+#define BOARD_CPU_DIVIDER            MCLK_CPUDIV_DIV1
+#define BOARD_LOWPOWER_DIVIDER       MCLK_LPDIV_DIV1
+#define BOARD_BACKUP_DIVIDER         MCLK_BUPDIV_DIV1
 
 /* Resulting frequencies */
 
 #define BOARD_MCK_FREQUENCY          (BOARD_GCLK_MAIN_FREQUENCY)
 #define BOARD_CPU_FREQUENCY          (BOARD_MCK_FREQUENCY)
-#define BOARD_PBA_FREQUENCY          (BOARD_MCK_FREQUENCY)
-#define BOARD_PBB_FREQUENCY          (BOARD_MCK_FREQUENCY)
-#define BOARD_PBC_FREQUENCY          (BOARD_MCK_FREQUENCY)
-#define BOARD_PBD_FREQUENCY          (BOARD_MCK_FREQUENCY)
+#define BOARD_LOWPOWER_FREQUENCY     (BOARD_MCK_FREQUENCY)
+#define BOARD_BACKUP_FREQUENCY       (BOARD_MCK_FREQUENCY)
+#define BOARD_APBA_FREQUENCY         (BOARD_MCK_FREQUENCY)
+#define BOARD_APBB_FREQUENCY         (BOARD_MCK_FREQUENCY)
+#define BOARD_APBC_FREQUENCY         (BOARD_MCK_FREQUENCY)
+#define BOARD_APBD_FREQUENCY         (BOARD_MCK_FREQUENCY)
+#define BOARD_APBE_FREQUENCY         (BOARD_MCK_FREQUENCY)
 
 /* FLASH wait states
  *
