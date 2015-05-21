@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samdl/sam_gclk.h
+ * arch/arm/src/samdl/sam_glck.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,9 +33,6 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMDL_SAM_GCLK_H
-#define __ARCH_ARM_SRC_SAMDL_SAM_GCLK_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -43,58 +40,47 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <assert.h>
 
-#include "sam_config.h"
-
-#if defined(CONFIG_ARCH_FAMILY_SAMD20)
-#  include "chip/samd_gclk.h"
-#elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_gclk.h"
-#else
-#  error Unrecognized SAMD/L architecture
-#endif
+#include "up_arch.h"
+#include "sam_gclk.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
-/* This structure describes the configuration of one GCLK */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-struct sam_gclkconfig_s
+/****************************************************************************
+ * Name: sam_gclck_waitsyncbusy
+ *
+ * Description:
+ *   What until the SYNCBUSY bit is cleared.  This bit is cleared when the
+ *   synchronization of registers between the clock domains is complete.
+ *   This bit is set when the synchronization of registers between clock
+ *   domains is started.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_gclck_waitsyncbusy(void)
 {
-  uint8_t  gclk;        /* Clock generator */
-  bool     runstandby;  /* Run clock in standby */
-  bool     output;      /* Output enable */
-  uint8_t  clksrc;      /* Encoded clock source */
-  uint16_t prescaler;   /* Prescaler value */
-};
+  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+}
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -112,11 +98,105 @@ extern "C"
  *
  ****************************************************************************/
 
-void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
+void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
+{
+  uint32_t genctrl;
+  uint32_t gendiv;
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+  /* Select the requested source clock for the generator */
+
+  genctrl = ((uint32_t)config->gclk << GCLK_GENCTRL_ID_SHIFT) |
+            ((uint32_t)config->clksrc << GCLK_GENCTRL_SRC_SHIFT);
+  gendiv  = ((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT);
+
+#if 0 /* Not yet supported */
+  /* Configure the clock to be either high or low when disabled */
+
+  if (config->level)
+    {
+      genctrl |= GCLK_GENCTRL_OOV;
+    }
 #endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMDL_SAM_GCLK_H */
+
+  /* Configure if the clock output to I/O pin should be enabled */
+
+  if (config->output)
+    {
+      genctrl |= GCLK_GENCTRL_OE;
+    }
+
+  /* Set the prescaler division factor */
+
+  if (config->prescaler > 1)
+    {
+      /* Check if division is a power of two */
+
+      if (((config->prescaler & (config->prescaler - 1)) == 0))
+        {
+          /* Determine the index of the highest bit set to get the
+           * division factor that must be loaded into the division
+           * register.
+           */
+
+          uint32_t count = 0;
+          uint32_t mask;
+
+          for (mask = 2; mask < (uint32_t)config->prescaler; mask <<= 1)
+            {
+              count++;
+            }
+
+          /* Set binary divider power of 2 division factor */
+
+          gendiv  |= count << GCLK_GENDIV_DIV_SHIFT;
+          genctrl |= GCLK_GENCTRL_DIVSEL;
+        }
+      else
+        {
+          /* Set integer division factor */
+
+          gendiv  |= GCLK_GENDIV_DIV((uint32_t)config->prescaler);
+
+          /* Enable non-binary division with increased duty cycle accuracy */
+
+          genctrl |= GCLK_GENCTRL_IDC;
+        }
+    }
+
+  /* Enable or disable the clock in standby mode */
+
+  if (config->runstandby)
+    {
+      genctrl |= GCLK_GENCTRL_RUNSTDBY;
+    }
+
+  /* Wait for synchronization */
+
+  sam_gclck_waitsyncbusy();
+
+  /* Select the generator */
+
+  putreg32(((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT),
+           SAM_GCLK_GENDIV);
+
+  /* Wait for synchronization */
+
+  sam_gclck_waitsyncbusy();
+
+  /* Write the new generator configuration */
+
+  putreg32(gendiv, SAM_GCLK_GENDIV);
+
+  /* Wait for synchronization */
+
+  sam_gclck_waitsyncbusy();
+
+  /* Enable the clock generator */
+
+  genctrl |= GCLK_GENCTRL_GENEN;
+  putreg32(genctrl, SAM_GCLK_GENCTRL);
+
+  /* Wait for synchronization */
+
+  sam_gclck_waitsyncbusy();
+}

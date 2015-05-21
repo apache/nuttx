@@ -62,6 +62,7 @@
 #include "chip/saml_osc32kctrl.h"
 #include "chip/saml_gclk.h"
 #include "chip/saml_nvmctrl.h"
+#include "sam_gclk.h"
 
 #include <arch/board/board.h>
 
@@ -95,19 +96,6 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the configuration of on GCLK */
-
-#ifdef BOARD_GCLK_ENABLE
-struct sam_gclkconfig_s
-{
-  uint8_t  gclk;        /* Clock generator */
-  bool     runstandby;  /* Run clock in standby */
-  bool     output;      /* Output enable */
-  uint8_t  clksrc;      /* Encoded clock source */
-  uint16_t prescaler;   /* Prescaler value */
-};
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -136,8 +124,6 @@ static inline void sam_dfll48m_refclk(void);
 static inline void sam_fdpll96m_config(void);
 static inline void sam_fdpll96m_refclk(void);
 #endif
-static void sam_gclck_waitsyncbusy(void);
-static void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
 #ifdef BOARD_GCLK_ENABLE
 static inline void sam_config_gclks(void);
 #endif
@@ -1060,151 +1046,6 @@ static inline void sam_fdpll96m_refclk(void)
 #else
 #  define sam_fdpll96m_enable()
 #endif
-
-/****************************************************************************
- * Name: sam_gclck_waitsyncbusy
- *
- * Description:
- *   What until the SYNCBUSY bit is cleared.  This bit is cleared when the
- *   synchronization of registers between the clock domains is complete.
- *   This bit is set when the synchronization of registers between clock
- *   domains is started.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sam_gclck_waitsyncbusy(void)
-{
-  while ((getreg8(SAM_GCLK_SYNCHBUSY) & GCLK_SYNCHBUSY_SYNCBUSY) != 0);
-}
-
-/****************************************************************************
- * Name: sam_config_gclks
- *
- * Description:
- *   Configure a single GCLK(s) based on settings in the board.h header file.
- *   Depends on:
- *
- *     BOARD_GCLKn_RUN_IN_STANDBY   - Boolean (defined / not defined)
- *     BOARD_GCLKn_CLOCK_SOURCE     - See GCLK_GENCTRL_SRC_* definitions
- *     BOARD_GCLKn_PRESCALER        - Value
- *     BOARD_GCLKn_OUTPUT_ENABLE    - Boolean (defined / not defined)
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
-{
-  uint32_t genctrl;
-  uint32_t gendiv;
-
-  /* Select the requested source clock for the generator */
-
-  genctrl = ((uint32_t)config->gclk << GCLK_GENCTRL_ID_SHIFT) |
-            ((uint32_t)config->clksrc << GCLK_GENCTRL_SRC_SHIFT);
-  gendiv  = ((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT);
-
-#if 0 /* Not yet supported */
-  /* Configure the clock to be either high or low when disabled */
-
-  if (config->level)
-    {
-      genctrl |= GCLK_GENCTRL_OOV;
-    }
-#endif
-
-  /* Configure if the clock output to I/O pin should be enabled */
-
-  if (config->output)
-    {
-      genctrl |= GCLK_GENCTRL_OE;
-    }
-
-  /* Set the prescaler division factor */
-
-  if (config->prescaler > 1)
-    {
-      /* Check if division is a power of two */
-
-      if (((config->prescaler & (config->prescaler - 1)) == 0))
-        {
-          /* Determine the index of the highest bit set to get the
-           * division factor that must be loaded into the division
-           * register.
-           */
-
-          uint32_t count = 0;
-          uint32_t mask;
-
-          for (mask = 2; mask < (uint32_t)config->prescaler; mask <<= 1)
-            {
-              count++;
-            }
-
-          /* Set binary divider power of 2 division factor */
-
-          gendiv  |= count << GCLK_GENDIV_DIV_SHIFT;
-          genctrl |= GCLK_GENCTRL_DIVSEL;
-        }
-      else
-        {
-          /* Set integer division factor */
-
-          gendiv  |= GCLK_GENDIV_DIV((uint32_t)config->prescaler);
-
-          /* Enable non-binary division with increased duty cycle accuracy */
-
-          genctrl |= GCLK_GENCTRL_IDC;
-        }
-    }
-
-  /* Enable or disable the clock in standby mode */
-
-  if (config->runstandby)
-    {
-      genctrl |= GCLK_GENCTRL_RUNSTDBY;
-    }
-
-  /* Wait for synchronization */
-
-  sam_gclck_waitsyncbusy();
-
-  /* Select the generator */
-
-  putreg32(((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT),
-           SAM_GCLK_GENDIV);
-
-  /* Wait for synchronization */
-
-  sam_gclck_waitsyncbusy();
-
-  /* Write the new generator configuration */
-
-  putreg32(gendiv, SAM_GCLK_GENDIV);
-
-  /* Wait for synchronization */
-
-  sam_gclck_waitsyncbusy();
-
-  /* Enable the clock generator */
-
-  genctrl |= GCLK_GENCTRL_GENEN;
-  putreg32(genctrl, SAM_GCLK_GENCTRL);
-
-  /* Wait for synchronization */
-
-  sam_gclck_waitsyncbusy();
-}
 
 /****************************************************************************
  * Name: sam_config_gclks
