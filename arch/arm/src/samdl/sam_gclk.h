@@ -114,6 +114,43 @@ extern "C"
 
 void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
 
+/****************************************************************************
+ * Name: sam_gclk_chan_enable
+ *
+ * Description:
+ *  Configure and enable a GCLK peripheral channel.
+ *
+ * Input Parameters:
+ *   channel - Index of the GCLK channel to be enabled
+ *   srcgen  - The GCLK source generator index
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen);
+#endif
+
+/****************************************************************************
+ * Name: sam_gclk_chan_disable
+ *
+ * Description:
+ *  Disable a GCLK peripheral channel.
+ *
+ * Input Parameters:
+ *   channel - Index of the GCLK channel to be disabled
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+void sam_gclk_chan_disable(uint8_t channel);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

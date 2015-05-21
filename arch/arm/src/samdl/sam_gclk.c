@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include <arch/irq.h>
+
 #include "up_arch.h"
 #include "sam_gclk.h"
 
@@ -200,3 +202,90 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   sam_gclck_waitsyncbusy();
 }
+
+/****************************************************************************
+ * Name: sam_gclk_chan_enable
+ *
+ * Description:
+ *  Configure and enable a GCLK peripheral channel.
+ *
+ * Input Parameters:
+ *   channel - Index of the GCLK channel to be enabled
+ *   srcgen  - The GCLK source generator index
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen)
+{
+  irqstate_t flags;
+  uint32_t regaddr;
+  uint32_t regval;
+
+  /* Get the address of the peripheral channel control register */
+
+  regaddr = SAM_GCLK_PCHCTRL(channel);
+
+  /* Disable generic clock channel */
+
+  flags = irqsave();
+  sam_gclk_chan_disable(channel);
+
+  /* Configure the peripheral channel */
+
+  regval =  GCLK_PCHCTRL_GEN(srcgen);
+  putreg32(regval, regaddr);
+
+  /* Enable the peripheral channel */
+
+  regval |= GCLK_PCHCTRL_CHEN;
+  putreg32(regval, regaddr);
+
+  /* Wait for clock synchronization */
+
+  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) == 0);
+  irqrestore(flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_gclk_chan_disable
+ *
+ * Description:
+ *  Disable a GCLK peripheral channel.
+ *
+ * Input Parameters:
+ *   channel - Index of the GCLK channel to be disabled
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FAMILY_SAML21
+void sam_gclk_chan_disable(uint8_t channel)
+{
+  irqstate_t flags;
+  uint32_t regaddr;
+  uint32_t regval;
+
+  /* Get the address of the peripheral channel control register */
+
+  regaddr = SAM_GCLK_PCHCTRL(channel);
+
+  /* Disable generic clock channel */
+
+  flags   = irqsave();
+  regval  = getreg32(regaddr);
+  regval &= ~GCLK_PCHCTRL_CHEN;
+  putreg32(regval, regaddr);
+
+  /* Wait for clock synchronization */
+
+  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) != 0);
+  irqrestore(flags);
+}
+#endif
