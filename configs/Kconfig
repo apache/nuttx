@@ -272,6 +272,14 @@ config ARCH_BOARD_LM4F120_LAUNCHPAD
 	---help---
 		Stellaris LM4F120 LaunchPad.
 
+config ARCH_BOARD_LPCXPRESSO_LPC1115
+	bool "NXP LPCXpresso LPC1115"
+	depends on ARCH_CHIP_LPC1115
+	select ARCH_HAVE_LEDS
+	---help---
+		Embedded Artists base board with NXP LPCExpresso LPC1115.  This board
+		is based on the NXP LPC1115.
+
 config ARCH_BOARD_LPCXPRESSO
 	bool "NXP LPCExpresso LPC1768"
 	depends on ARCH_CHIP_LPC1768
@@ -1171,6 +1179,7 @@ config ARCH_BOARD
 	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
 	default "lpc4357-evb"              if ARCH_BOARD_LPC4357_EVB
+	default "lpcxpresso-lpc1115"       if ARCH_BOARD_LPCXPRESSO_LPC1115
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "mbed"                     if ARCH_BOARD_MBED
