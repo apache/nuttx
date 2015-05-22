@@ -5,14 +5,6 @@ This README discusses issues unique to NuttX configurations for the
 Atmel SAML21 Xplained Pro development board.  This board features the
 ATSAML21J18A MCU.
 
-The SAML21 Xplained Pro Starter Kit may be bundled with three modules:
-
-1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, USART
-            loopback, TWI AT30TSE758 Temperature sensor.
-2) OLED1  - An OLED plus 3 additional switches and 3 additional LEDs
-3) PROTO1 - A prototyping board with logic on board (other than power-related
-            logic).
-
 Contents
 ========
 
@@ -30,7 +22,16 @@ Contents
 Modules
 =======
 
-  The SAML21 Xplained Pro Starter Kit is bundled with four modules:
+  There are several I/O modules available that will work with the SAML21
+  Xplained Pro Starter Kit:
+
+  1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, USART
+             loopback, TWI AT30TSE758 Temperature sensor.
+  2) OLED1  - An OLED plus 3 additional switches and 3 additional LEDs
+  3) PROTO1 - A prototyping board with logic on board (other than power-
+              related logic).
+
+Some of these are discussed further below.
 
   I/O1
   ----
@@ -656,7 +657,6 @@ Configurations
      virtual COM port on SERCOME could be used, instead, by
      reconfiguring to use SERCOM1 or SERCOM3 instead of SERCOM4:
 
-
        System Type -> SAMD/L Peripheral Support
          CONFIG_SAMDL_SERCOM1=y           : Enable one or both
          CONFIG_SAMDL_SERCOM3=y
@@ -720,10 +720,19 @@ Configuration sub-directories
        changed as described above under "Configurations."
 
     2. By default, this configuration provides a serial console on SERCOM4
-       via EXT3.  If you would prefer to use the EDBG serial COM port or
-       would prefer to use SERCOM4 on EXT1 or EXT2, you will need to
-       reconfigure the SERCOM as described under "Configurations".  See
-       also the section entitle "Serial Consoles" above.
+       at 115200 8N1 via EXT1:
+
+       PIN   EXT1 GPIO Function
+       ----  ---- ------------------
+        13   PB09 SERCOM4 / USART RX
+        14   PB08 SERCOM4 / USART TX
+        19   GND  N/A
+        20   VCC  N/A
+
+       If you would prefer to use the EDBG serial COM port or would prefer
+       to use SERCOM4 on EXT1 or EXT2, you will need to reconfigure the
+       SERCOM as described under "Configurations".  See also the section
+       entitled "Serial Consoles" above.
 
     3. NOTE: If you get a compilation error like:
 
