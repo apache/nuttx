@@ -268,7 +268,7 @@ static struct sam_spidev_s g_spi0dev =
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM0,
 #endif
-  .gclkgen   = (BOARD_SERCOM0_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
+  .gclkgen   = BOARD_SERCOM0_GCLKGEN,
   .pad0      = BOARD_SERCOM0_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM0_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM0_PINMAP_PAD2,
@@ -320,7 +320,7 @@ static struct sam_spidev_s g_spi1dev =
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM1,
 #endif
-  .gclkgen   = (BOARD_SERCOM1_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
+  .gclkgen   = BOARD_SERCOM1_GCLKGEN,
   .pad0      = BOARD_SERCOM1_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM1_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM1_PINMAP_PAD2,
@@ -372,7 +372,7 @@ static struct sam_spidev_s g_spi2dev =
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM2,
 #endif
-  .gclkgen   = (BOARD_SERCOM2_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
+  .gclkgen   = BOARD_SERCOM2_GCLKGEN,
   .pad0      = BOARD_SERCOM2_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM2_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM2_PINMAP_PAD2,
@@ -424,7 +424,7 @@ static struct sam_spidev_s g_spi3dev =
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM3,
 #endif
-  .gclkgen   = (BOARD_SERCOM3_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
+  .gclkgen   = BOARD_SERCOM3_GCLKGEN,
   .pad0      = BOARD_SERCOM3_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM3_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM3_PINMAP_PAD2,
@@ -476,7 +476,7 @@ static struct sam_spidev_s g_spi4dev =
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM4,
 #endif
-  .gclkgen   = (BOARD_SERCOM4_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
+  .gclkgen   = BOARD_SERCOM4_GCLKGEN,
   .pad0      = BOARD_SERCOM4_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM4_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM4_PINMAP_PAD2,
@@ -528,7 +528,7 @@ static struct sam_spidev_s g_spi5dev =
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM5,
 #endif
-  .gclkgen   = (BOARD_SERCOM5_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
+  .gclkgen   = BOARD_SERCOM5_GCLKGEN,
   .pad0      = BOARD_SERCOM5_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM5_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM5_PINMAP_PAD2,
