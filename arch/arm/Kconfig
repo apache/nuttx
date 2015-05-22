@@ -94,6 +94,13 @@ config ARCH_CHIP_TIVA
 	---help---
 		TI Tiva TM4C architectures (ARM Cortex-M4)
 
+config ARCH_CHIP_LPC11XX
+	bool "NXP LPC11xx"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_CMNVECTOR
+	---help---
+		NXP LPC11xx architectures (ARM Cortex-M0)
+
 config ARCH_CHIP_LPC17XX
 	bool "NXP LPC17xx"
 	select ARCH_CORTEXM3
@@ -281,6 +288,7 @@ config ARCH_CHIP
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
 	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA
+	default "lpc11xx"	if ARCH_CHIP_LPC11XX
 	default "lpc17xx"	if ARCH_CHIP_LPC17XX
 	default "lpc214x"	if ARCH_CHIP_LPC214X
 	default "lpc2378"	if ARCH_CHIP_LPC2378
@@ -386,7 +394,8 @@ config ARMV7M_MPU
 	select ARCH_USE_MPU
 	---help---
 		Build in support for the ARM Cortex-M3/4 Memory Protection Unit (MPU).
-		Check your chip specifications first; not all Cortex-M3/4 chips support the MPU.
+		Check your chip specifications first; not all Cortex-M3/4 chips
+		support the MPU.
 
 config ARMV7M_MPU_NREGIONS
 	int "Number of MPU regions"
@@ -459,6 +468,9 @@ source arch/arm/src/kl/Kconfig
 endif
 if ARCH_CHIP_LM || ARCH_CHIP_TIVA
 source arch/arm/src/tiva/Kconfig
+endif
+if ARCH_CHIP_LPC11XX
+source arch/arm/src/lpc11xx/Kconfig
 endif
 if ARCH_CHIP_LPC17XX
 source arch/arm/src/lpc17xx/Kconfig
