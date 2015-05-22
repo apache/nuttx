@@ -1079,9 +1079,11 @@ config ARCH_BOARD_CUSTOM_DIR
 	---help---
 		If the custom board configuration is selected, then it is necessary
 		to also tell the build system where it can find the board directory
-		for the custom board. This may be either a relative path from the
-		toplevel NuttX directory (like "configs/myboard") or an absolute path
-		to some location outside of the NuttX source tree (like
+		for the custom board.
+
+		In this case, the board directory is assume to lie outside the the
+		NuttX directory.  The provided path must then be a full, absolute
+		path to some location outside of the NuttX source tree (like
 		"~/projects/myboard").
 
 config BOARD_CRASHDUMP
