@@ -680,10 +680,19 @@ Configuration sub-directories
        changed as described above under "Configurations."
 
     2. By default, this configuration provides a serial console on SERCOM4
-       via EXT3.  If you would prefer to use the EDBG serial COM port or
-       would prefer to use SERCOM4 on EXT1 or EXT2, you will need to
-       reconfigure the SERCOM as described under "Configurations".  See
-       also the section entitle "Serial Consoles" above.
+       at 115200 8N1 via EXT3:
+
+       PIN   EXT3 GPIO Function
+       ----  ---- ------------------
+        13   PB11 SERCOM4 / USART RX
+        14   PB12 SERCOM4 / USART TX
+        19   GND  N/A
+        20   VCC  N/A
+
+       If you would prefer to use the EDBG serial COM port or would prefer
+       to use SERCOM4 on EXT1 or EXT2, you will need to reconfigure the
+       SERCOM as described under "Configurations".  See also the section
+       entitled "Serial Consoles" above.
 
     3. NOTE: If you get a compilation error like:
 
