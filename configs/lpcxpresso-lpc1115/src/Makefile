@@ -1,7 +1,7 @@
 ############################################################################
 # configs/lpcxpresso-lpc1115/src/Makefile
 #
-#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,26 +40,26 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c
+CSRCS = lpc11_boot.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
+CSRCS += lpc11_nsh.c
 endif
 
 ifeq ($(CONFIG_KL_SPI0),y)
-CSRCS += kl_spi.c
+CSRCS += lpc11_spi.c
 else
 ifeq ($(CONFIG_KL_SPI1),y)
-CSRCS += kl_spi.c
+CSRCS += lpc11_spi.c
 endif
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_leds.c
+CSRCS += lpc11_leds.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += up_pwm.c
+CSRCS += lpc11_pwm.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

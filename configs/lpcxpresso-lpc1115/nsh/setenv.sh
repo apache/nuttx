@@ -1,7 +1,7 @@
 #!/bin/bash
-# configs/lpcxpresso-lpc1768/nsh/setenv.sh
+# configs/lpcxpresso-lpc1115/nsh/setenv.sh
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,19 +41,32 @@ if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
 WD=`pwd`
 
-# This is where the buildroot might reside on a Linux or Cygwin system
-# export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+# This is the Cygwin path to the location where I installed the CodeSourcery
+# toolchain under windows.  You will also have to edit this if you install
+# the CodeSourcery toolchain in any other location
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
+# export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
+
+# This is the location where I installed the ARM "GNU Tools for ARM Embedded Processors"
+# You can this free toolchain here https://launchpad.net/gcc-arm-embedded
+export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/GNU Tools ARM Embedded/4.9 2014q4/bin"
+
+# This is the path to the location where I installed the devkitARM toolchain
+# You can get this free toolchain from http://devkitpro.org/ or http://sourceforge.net/projects/devkitpro/
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/devkitARM/bin"
 
 # This is the default install location for Code Red on Linux
-export TOOLCHAIN_BIN="/usr/local/LPCXpresso/tools/bin"
+# export TOOLCHAIN_BIN="/usr/local/LPCXpresso/tools/bin"
 
 # This is the Cygwin path to the LPCXpresso 3.6 install location under Windows
 #export TOOLCHAIN_BIN="/cygdrive/c/nxp/lpcxpresso_3.6/Tools/bin"
 
-# This is the path to the LPCXpression tool subdirectory
-export LPCTOOL_DIR="${WD}/configs/lpcxpresso-lpc1768/tools"
+# This is the Cygwin path to the location where I build the buildroot
+# toolchain.
+# export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
 # Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

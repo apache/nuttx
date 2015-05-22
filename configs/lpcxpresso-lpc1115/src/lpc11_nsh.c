@@ -1,8 +1,7 @@
 /****************************************************************************
- * config/lpcxpresso-lpc1768/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/lpcxpresso-lpc1115/src/lpc11_nsh.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,7 +126,7 @@ int nsh_archinitialize(void)
 
   /* Get the SSP port */
 
-  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  ssp = lpc11_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",

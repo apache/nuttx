@@ -1,7 +1,7 @@
 ############################################################################
-# configs/freedom-kl25z/nsh/Make.defs
+# configs/lpcxpresso-lpc1115/nsh/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -120,4 +120,3 @@ else
   # Linux/Cygwin-native host tools
   MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 endif
-

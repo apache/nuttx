@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc1168/src/up_leds.c
+ * configs/lpcxpresso-lpc1115/src/lpc11_leds.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,12 @@
 #include "up_internal.h"
 
 #include "lpc11_gpio.h"
-#include "lpcxpresso_internal.h"
+#include "lpcxpresso_lpc1115.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
@@ -108,19 +108,19 @@ void board_led_on(int led)
 
   switch (led)
     {
-	case 0:
-	case 2:
-	  off = true;
-	  break;
+    case 0:
+    case 2:
+      off = true;
+      break;
 
-	case 1:
-	  off       = false;
+    case 1:
+      off       = false;
       g_ncstate = false;
-	  break;
+      break;
 
-	default:
-	  return;
-	}
+    default:
+      return;
+    }
 
   lpc11_gpiowrite(LPCXPRESSO_LED, off);
 }
@@ -135,18 +135,18 @@ void board_led_off(int led)
 
   switch (led)
     {
-	case 0:
-	case 1:
-	  off = false;
-	  break;
+    case 0:
+    case 1:
+      off = false;
+      break;
 
-	case 2:
-	  off = g_ncstate;
-	  break;
+    case 2:
+      off = g_ncstate;
+      break;
 
-	default:
-	  return;
-	}
+    default:
+      return;
+    }
 
   lpc11_gpiowrite(LPCXPRESSO_LED, off);
 }
