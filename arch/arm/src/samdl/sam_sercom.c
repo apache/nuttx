@@ -87,6 +87,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 {
   uint16_t regval;
@@ -126,6 +127,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 }
+#endif
 
 /****************************************************************************
  * Name: sercom_slowclk_configure
@@ -143,10 +145,46 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 
 void sercom_slowclk_configure(int gclkgen)
 {
+#if defined(CONFIG_ARCH_FAMILY_SAMDL21)
+  static bool configured = false;
+#ifdef CONFIG_DEBUG
+  static uint8_t slowgen = 0xff;
+#endif
+
+  /* Setup the SERCOMn_GCLK channel.  This is common to all SERCOM modules
+   * and should be done only once.
+   */
+
+  if (!configured)
+    {
+      /* Configure the common slow clock channel */
+
+      sam_gclk_chan_enable(BOARD_SERCOM_SLOW_GCLKCHAN, gclkgen);
+
+      /* The slow clock is now configured and should not be configured again. */
+
+      configured = true;
+#ifdef CONFIG_DEBUG
+      slowgen    = (uint8_t)clkgen;
+#endif
+    }
+
+#ifdef CONFIG_DEBUG
+  /* Already configured.  This is okay provided that the same GCLK generator
+   * is being used.  Otherwise, there is a problem.
+   */
+
+  else
+    {
+      DEBUGASSERT((int)slowgen == clkgen);
+    }
+#endif
+
+#elif defined(CONFIG_ARCH_FAMILY_SAMD20)
   static bool configured = false;
   uint16_t regval;
 
-  /* Since GCLK_SERCOM_SLOW is shard amongst all SERCOM modules, it should
+  /* Since GCLK_SERCOM_SLOW is shared amongst all SERCOM modules, it should
    * only be configured one time.
    */
 
@@ -189,4 +227,5 @@ void sercom_slowclk_configure(int gclkgen)
 
       configured = true;
     }
+#endif
 }

@@ -130,7 +130,9 @@ static inline void sercom_enable(int sercom)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
 void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock);
+#endif
 
 /****************************************************************************
  * Name: sercom_slowclk_configure

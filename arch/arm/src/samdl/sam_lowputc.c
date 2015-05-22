@@ -295,13 +295,18 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 {
   int ret;
 
-  /* Enable clocking to the SERCOM module in PM */
+  /* Enable clocking to the SERCOM module */
 
   sercom_enable(config->sercom);
 
   /* Configure the GCLKs for the SERCOM module */
 
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
   sercom_coreclk_configure(config->sercom, config->gclkgen, false);
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+  sam_gclk_chan_enable(config->sercom + GCLK_CHAN_SERCOM0_CORE,
+                       config->gclkgen);
+#endif
   sercom_slowclk_configure(BOARD_SERCOM_SLOW_GCLKGEN);
 
   /* Set USART configuration according to the board configuration */
