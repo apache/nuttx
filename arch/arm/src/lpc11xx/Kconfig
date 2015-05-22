@@ -1,0 +1,263 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+comment "LPC11xx Configuration Options"
+
+choice
+	prompt "NXP LPC11XX Chip Selection"
+	default ARCH_CHIP_LPC1115
+	depends on ARCH_CHIP_LPC11XX
+
+config ARCH_CHIP_LPC1114
+	bool "LPC1114"
+	select ARCH_FAMILY_LPC111X
+
+config ARCH_CHIP_LPC1115
+	bool "LPC1115"
+	select ARCH_FAMILY_LPC111X
+
+endchoice
+
+config ARCH_FAMILY_LPC111X
+	bool
+
+menu "LPC11xx Peripheral Support"
+
+choice
+	prompt "System Clock:"
+	default LPC11_INTRCOSC
+
+config LPC11_INTRCOSC
+	bool "Internal RC"
+
+config LPC11_MAINOSC
+	bool "External Crystal"
+
+endchoice
+
+choice
+	prompt "SysTick clock source"
+	default LPC11_SYSTICK_CORECLK
+
+config LPC11_SYSTICK_CORECLK
+	bool "Cortex-M0 core clock"
+
+config LPC11_SYSTICK_CORECLK_DIV16
+	bool "Cortex-M0 core clock divided by 16"
+
+endchoice
+
+config LPC11_PLL
+	bool "PLL"
+	default y
+
+config LPC11_UART0
+	bool "UART0"
+	select ARCH_HAVE_UART0
+	default y
+
+config LPC11_CAN0
+	bool "CAN0"
+	default n
+
+config LPC11_SPI
+	bool "SPI"
+	default n
+
+config LPC11_SSP0
+	bool "SSP0"
+	default n
+
+config LPC11_SSP1
+	bool "SSP1"
+	default n
+
+config LPC11_I2C0
+	bool "I2C0"
+	default n
+
+config LPC11_TMR0
+	bool "Timer 0"
+	default n
+
+config LPC11_TMR1
+	bool "Timer 1"
+	default n
+
+config LPC11_WDT
+	bool "WDT"
+	default n
+
+config LPC11_ADC
+	bool "ADC"
+	default n
+
+config LPC11_FLASH
+	bool "FLASH"
+	default n
+
+endmenu
+
+menu "Serial driver options"
+	depends on LPC11_UART0 || LPC11_UART1 || LPC11_UART2 || LPC11_UART3 || LPC11_UART4
+
+config SERIAL_TERMIOS
+	bool "Serial driver TERMIOS supported"
+	depends on LPC11_UART0 || LPC11_UART1 || LPC11_UART2 || LPC11_UART3
+	default n
+	---help---
+		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
+		If this is not defined, then the terminal settings (baud, parity, etc).
+		are not configurable at runtime; serial streams cannot be flushed, etc..
+
+endmenu
+
+menu "ADC driver options"
+	depends on LPC11_ADC
+
+config ADC0_AVERAGE
+	int "ADC0 average"
+	default 200
+
+config ADC0_MASK
+	int "ADC0 mask"
+	default 1
+
+config ADC0_SPS
+	int "ADC0 SPS"
+	default 1000
+
+config ADC_CHANLIST
+	bool "Use ADC channel list"
+	default n
+	---help---
+		The errata that states: "A/D Global Data register should not be used
+		with burst mode or hardware triggering".  If this option is selected,
+		then the ADC driver will grab from the individual channel registers
+		rather than from the global data register as this is the stated
+		workaround in the errata.
+
+		The ADC interrupt will trigger on conversion complete on the last
+		channel listed in the array g_adc_chanlist[] (as opposed to
+		triggering interrupt from the global DONE flag).
+
+		If this option is enabled, then the platform specific code must do
+		two things:  (1) define ADC_NCHANNELS in the configuration file and
+		(2) provide an array g_adc_chanlist[] with the channel numbers
+		matching the ADC0_MASK within the board-specific library.
+
+config ADC_BURSTMODE
+	bool "One interrupt at the end of all ADC cconversions"
+	default n
+	---help---
+		Select this if you want to generate only one interrupt once all selected channels has been converted by the ADC
+
+config ADC_NCHANNELS
+	int "ADC0 number of channels"
+	depends on ADC_CHANLIST
+	default 0
+	---help---
+		If ADC_CHANLIST is enabled, then the platform specific code
+		must do two things:  (1) define ADC_NCHANNELS in the configuration
+		file and (2) provide an array g_adc_chanlist[] with the channel
+		numbers matching the ADC0_MASK within the board-specific library.
+
+endmenu
+
+menu "CAN driver options"
+	depends on LPC11_CAN1 || LPC11_CAN2
+
+config CAN_EXTID
+	bool "CAN extended IDs"
+	default n
+	---help---
+		Enables support for the 29-bit extended ID.  Default Standard 11-bit IDs.
+
+config CAN1_BAUD
+	int "CAN1 BAUD"
+	depends on LPC11_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if LPC11_CAN1 is defined.
+
+config CAN2_BAUD
+	int "CAN2 BAUD"
+	depends on LPC11_CAN2
+	---help---
+		CAN2 BAUD rate.  Required if LPC11_CAN2 is defined.
+
+config CAN1_DIVISOR
+	int "CAN1 CCLK divisor"
+	depends on LPC11_CAN1
+	default 4
+	---help---
+		CAN1 is clocked at CCLK divided by this number. (the CCLK frequency is divided
+		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
+
+config CAN2_DIVISOR
+	int "CAN2 CCLK divisor"
+	depends on LPC11_CAN2
+	default 4
+	---help---
+		CAN2 is clocked at CCLK divided by this number. (the CCLK frequency is divided
+		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
+
+config CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config CAN_TSEG2
+	int "TSEG2 quanta"
+	default 4
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
+
+config CAN_SAM
+	bool "CAN sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses to spikes on the bus-line).
+
+config CAN_LOOPBACK
+	bool "CAN looopback mode"
+	default n
+	---help---
+		Enable CAN loopback mode
+
+config CAN_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN debug information.  Requires also DEBUG and DEBUG_CAN.
+
+endmenu
+
+config GPIO_IRQ
+	bool "GPIO interrupt support"
+	default n
+	---help---
+		Enable support for GPIO interrupts
+
+menu "I2C driver options"
+	depends on LPC11_I2C0 || LPC11_I2C1 || LPC11_I2C2
+
+config I2C0_FREQ
+	int "I2C0 frequency"
+	depends on LPC11_I2C0
+	default 100000
+
+config I2C1_FREQ
+	int "I2C1 frequency"
+	depends on LPC11_I2C1
+	default 100000
+
+config I2C2_FREQ
+	int "I2C2 frequency"
+	depends on LPC11_I2C2
+	default 100000
+
+endmenu
