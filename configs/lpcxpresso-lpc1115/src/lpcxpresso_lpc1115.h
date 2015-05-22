@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/lpcxpresso-lpc1768/src/lpcxpresso_internal.h
- * arch/arm/src/board/lpcxpresso_internal.n
+ * configs/lpcxpresso-lpc1115/src/lpcxpresso_lpc1115.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_INTERNAL_H
-#define _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_INTERNAL_H
+#ifndef _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_LPC1115L_H
+#define _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_LPC1115L_H
 
 /************************************************************************************
  * Included Files
@@ -141,8 +140,8 @@
  * SD   Signal      Pin   Pin
  * ---  ----------- ----- --------
  * CS   PIO1_11*     55   P2.2        (See LPCXPRESSO_SD_CS)
- * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/lpc17_ssp.h)
- * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/lpc17_ssp.h)
+ * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/lpc11_ssp.h)
+ * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/lpc11_ssp.h)
  * CLK  PIO2_11-SCK   7   P0.9 SCK1   (See GPIO_SSP1_SCK in board.h)
  * CD   PIO2_10      52   P2.11       (See LPCXPRESSO_SD_CD)
  */
@@ -232,5 +231,4 @@
 void weak_function lpcxpresso_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_INTERNAL_H */
-
+#endif /* _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_LPC1115L_H */

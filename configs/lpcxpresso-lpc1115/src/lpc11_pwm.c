@@ -1,13 +1,7 @@
 /************************************************************************************
- * configs/lpcexpresso-1768/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/lpcexpresso-lpc1115/lpc11_pwm.c
  *
- *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
- *   Author: Kannan <code@nuttx.org>
- *
- * Based on configs/stm3220g-eval/src/up_adc.c
- *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,28 +38,29 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/analog/adc.h>
+#include <nuttx/pwm.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
-
-#include "lpc17_adc.h"
-#include "lpcxpresso_internal.h"
-
-#ifdef CONFIG_ADC
+#include "lpc11_pwm.h"
+#include "lpc11_timer.h"
+#include "lpcxpresso_lpc1115.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Private Data
- ************************************************************************************/
+#ifdef CONFIG_PWM
+
+FAR struct pwm_lowerhalf_s *lpc11_pwminitialize(int timer);
+FAR struct pwm_lowerhalf_s *lpc11_mcpwminitialize(int timer);
+FAR struct pwm_lowerhalf_s *lpc11_timerinitialize(int timer);
 
 /************************************************************************************
  * Private Functions
@@ -76,39 +71,73 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: pwm_devinit
  *
  * Description:
  *   All LPC17 architectures must provide the following interface to work with
- *   examples/adc.
+ *   examples/pwm.
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+int pwm_devinit(void)
 {
   static bool initialized = false;
-  struct adc_dev_s *adc;
+  struct pwm_lowerhalf_s *pwm;
+  struct pwm_lowerhalf_s *mcpwm;
+  struct pwm_lowerhalf_s *timer;
   int ret;
 
-  /* Check if we have already initialized */
+  /* Have we already initialized? */
 
   if (!initialized)
     {
-      /* Call lpc17_adcinitialize() to get an instance of the ADC interface */
+      /* Call lpc11_pwminitialize() to get an instance of the PWM interface */
 
-      adc = lpc17_adcinitialize();
-      if (adc == NULL)
+      pwm = lpc11_pwminitialize(0);
+      if (!pwm)
         {
-          adbg("ERROR: Failed to get ADC interface\n");
+          adbg("Failed to get the LPC17XX PWM lower half\n");
           return -ENODEV;
         }
 
-      /* Register the ADC driver at "/dev/adc0" */
+      /* Register the PWM driver at "/dev/pwm0" */
 
-      ret = adc_register("/dev/adc0", adc);
+      ret = pwm_register("/dev/pwm0", pwm);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          adbg("pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      mcpwm = lpc11_mcpwminitialize(0);
+      if (!mcpwm)
+        {
+          adbg("Failed to get the LPC17XX MOTOR PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the MOTOR CONTROL PWM driver at "/dev/mcpwm0" */
+
+      ret = pwm_register("/dev/mcpwm0", mcpwm);
+      if (ret < 0)
+        {
+          adbg("mcpwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      timer = lpc11_timerinitialize(0);
+      if (!timer)
+        {
+          adbg("Failed to get the LPC17XX TIMER lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/timer0" */
+
+      ret = pwm_register("/dev/timer0", timer);
+      if (ret < 0)
+        {
+          adbg("timer_register failed: %d\n", ret);
           return ret;
         }
 
@@ -120,4 +149,4 @@ int adc_devinit(void)
   return OK;
 }
 
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_PWM */

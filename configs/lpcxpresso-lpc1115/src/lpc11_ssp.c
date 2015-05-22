@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/lpcxpresso-lpc1768/src/up_ssp.c
- * arch/arm/src/board/up_ssp.c
+ * configs/lpcxpresso-lpc1115/src/lpc11_ssp.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,14 +48,14 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "lpc17_gpio.h"
-#include "lpc17_ssp.h"
-#include "lpcxpresso_internal.h"
+#include "lpc11_gpio.h"
+#include "lpc11_ssp.h"
+#include "lpcxpresso_lpc1115.h"
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */
@@ -80,7 +79,7 @@
 /* Dump GPIO registers */
 
 #ifdef SSP_VERBOSE
-#  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
+#  define ssp_dumpgpio(m) lpc11_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssp_dumpgpio(m)
 #endif
@@ -112,15 +111,15 @@ void weak_function lpcxpresso_sspinitialize(void)
    */
 
 #ifdef CONFIG_LPC17_SSP1
-  (void)lpc17_configgpio(LPCXPRESSO_SD_CS);
-  (void)lpc17_configgpio(LPCXPRESSO_SD_CD);
+  (void)lpc11_configgpio(LPCXPRESSO_SD_CS);
+  (void)lpc11_configgpio(LPCXPRESSO_SD_CD);
 
   /* Configure chip select for the OLED. For the SPI interface, insert jumpers in
    * J42, J43, J45 pin1-2 and J46 pin 1-2.
    */
 
 #ifdef CONFIG_NX_LCDDRIVER
-  (void)lpc17_configgpio(LPCXPRESSO_OLED_CS);
+  (void)lpc11_configgpio(LPCXPRESSO_OLED_CS);
 #endif
 #endif
 
@@ -128,24 +127,24 @@ void weak_function lpcxpresso_sspinitialize(void)
 }
 
 /************************************************************************************
- * Name:  lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
+ * Name:  lpc11_ssp0/ssp1select and lpc11_ssp0/ssp1status
  *
  * Description:
- *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
+ *   The external functions, lpc11_ssp0/ssp1select and lpc11_ssp0/ssp1status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc11_sspinitialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *
- *   1. Provide logic in lpc17_boardinitialize() to configure SPI/SSP chip select
+ *   1. Provide logic in lpc11_boardinitialize() to configure SPI/SSP chip select
  *      pins.
- *   2. Provide lpc17_ssp0/ssp1select() and lpc17_ssp0/ssp1status() functions
+ *   2. Provide lpc11_ssp0/ssp1select() and lpc11_ssp0/ssp1status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_sspinitialize() in your low level application
+ *   3. Add a calls to lpc11_sspinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by lpc17_sspinitialize() may then be used to bind the
+ *   4. The handle returned by lpc11_sspinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -153,17 +152,17 @@ void weak_function lpcxpresso_sspinitialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_SSP0
-void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc11_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_ssp0select() Entry");
+  ssp_dumpgpio("lpc11_ssp0select() Entry");
 
 #warning "Assert CS here (false)"
 
-  ssp_dumpgpio("lpc17_ssp0select() Exit");
+  ssp_dumpgpio("lpc11_ssp0select() Exit");
 }
 
-uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc11_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   sspdbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
@@ -171,35 +170,35 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_LPC17_SSP1
-void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc11_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_ssp1select() Entry");
+  ssp_dumpgpio("lpc11_ssp1select() Entry");
 
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert/de-assert the CS pin to the card */
 
-      (void)lpc17_gpiowrite(LPCXPRESSO_SD_CS, !selected);
+      (void)lpc11_gpiowrite(LPCXPRESSO_SD_CS, !selected);
     }
 #ifdef CONFIG_NX_LCDDRIVER
   else if (devid == SPIDEV_DISPLAY)
     {
       /* Assert the CS pin to the OLED display */
 
-      (void)lpc17_gpiowrite(LPCXPRESSO_OLED_CS, !selected);
+      (void)lpc11_gpiowrite(LPCXPRESSO_OLED_CS, !selected);
     }
 #endif
-  ssp_dumpgpio("lpc17_ssp1select() Exit");
+  ssp_dumpgpio("lpc11_ssp1select() Exit");
 }
 
-uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc11_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   if (devid == SPIDEV_MMCSD)
     {
       /* Read the state of the card-detect bit */
 
-      if (lpc17_gpioread(LPCXPRESSO_SD_CD) == 0)
+      if (lpc11_gpioread(LPCXPRESSO_SD_CD) == 0)
         {
           sspdbg("Returning SPI_STATUS_PRESENT\n");
           return SPI_STATUS_PRESENT;
