@@ -10411,3 +10411,8 @@
 	  was disabled in the setup routine.  To fix this I save interrupt
 	  configuration before uart shutdown and restore it after.  From Max
 	  Neklyudov (2015-05-21).
+	* arch/arm/include/lpc11xx and src/lpc11xx:  Support for the LPC11xx
+	  family (the LPC1115 MCU in particular).  Contribuited by Alan Carvalho
+	  de Assis (2015-05-22).
+	* configs/lpcxpresso-lpc1115:  Support for the LPCXpression LPC1115
+	  board.  Contribuited by Alan Carvalho de Assis (2015-05-22).
