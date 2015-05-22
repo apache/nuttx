@@ -69,7 +69,6 @@
 #define SAM_GCLK_GENCTRL(n)          (SAM_GCLK_BASE+SAM_GCLK_GENCTRL_OFFSET(n))
 #define SAM_GCLK_PCHCTRL(m)          (SAM_GCLK_BASE+SAM_GCLK_PCHCTRL_OFFSET(m))
 
-
 /* GCLK register bit definitions ************************************************************/
 
 /* Control register */

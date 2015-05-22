@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samdl/sam_glck.c
+ * arch/arm/src/samdl/samd_glck.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,6 +47,8 @@
 #include "up_arch.h"
 #include "sam_gclk.h"
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -69,25 +71,16 @@
  *   the clock domains is complete.
  *
  * Input Parameters:
- *   glck - GCLK clock index
+ *   None
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sam_gclck_waitsyncbusy(uint8_t gclk)
+static void sam_gclck_waitsyncbusy(void)
 {
-#if defined(CONFIG_ARCH_FAMILY_SAMD20)
   while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
-
-#elif defined(CONFIG_ARCH_FAMILY_SAML21)
-  uintptr_t gclkbit = GCLK_SYNCHBUSY_GENCTRL(gclk);
-  while ((getreg8(SAM_GCLK_SYNCHBUSY) & gclkbit) != 0);
-
-#else
-#  error Unrecognized SAMD/L architecture
-#endif
 }
 
 /****************************************************************************
@@ -183,7 +176,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy(config->gclk);
+  sam_gclck_waitsyncbusy();
 
   /* Select the generator */
 
@@ -192,7 +185,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy(config->gclk);
+  sam_gclck_waitsyncbusy();
 
   /* Write the new generator configuration */
 
@@ -200,7 +193,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy(config->gclk);
+  sam_gclck_waitsyncbusy();
 
   /* Enable the clock generator */
 
@@ -209,92 +202,7 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy(config->gclk);
+  sam_gclck_waitsyncbusy();
 }
 
-/****************************************************************************
- * Name: sam_gclk_chan_enable
- *
- * Description:
- *  Configure and enable a GCLK peripheral channel.
- *
- * Input Parameters:
- *   channel - Index of the GCLK channel to be enabled
- *   srcgen  - The GCLK source generator index
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FAMILY_SAML21
-void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen)
-{
-  irqstate_t flags;
-  uint32_t regaddr;
-  uint32_t regval;
-
-  /* Get the address of the peripheral channel control register */
-
-  regaddr = SAM_GCLK_PCHCTRL(channel);
-
-  /* Disable generic clock channel */
-
-  flags = irqsave();
-  sam_gclk_chan_disable(channel);
-
-  /* Configure the peripheral channel */
-
-  regval =  GCLK_PCHCTRL_GEN(srcgen);
-  putreg32(regval, regaddr);
-
-  /* Enable the peripheral channel */
-
-  regval |= GCLK_PCHCTRL_CHEN;
-  putreg32(regval, regaddr);
-
-  /* Wait for clock synchronization */
-
-  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) == 0);
-  irqrestore(flags);
-}
-#endif
-
-/****************************************************************************
- * Name: sam_gclk_chan_disable
- *
- * Description:
- *  Disable a GCLK peripheral channel.
- *
- * Input Parameters:
- *   channel - Index of the GCLK channel to be disabled
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FAMILY_SAML21
-void sam_gclk_chan_disable(uint8_t channel)
-{
-  irqstate_t flags;
-  uint32_t regaddr;
-  uint32_t regval;
-
-  /* Get the address of the peripheral channel control register */
-
-  regaddr = SAM_GCLK_PCHCTRL(channel);
-
-  /* Disable generic clock channel */
-
-  flags   = irqsave();
-  regval  = getreg32(regaddr);
-  regval &= ~GCLK_PCHCTRL_CHEN;
-  putreg32(regval, regaddr);
-
-  /* Wait for clock synchronization */
-
-  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) != 0);
-  irqrestore(flags);
-}
-#endif
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
