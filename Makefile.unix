@@ -74,7 +74,7 @@ ARCH_INC = $(ARCH_DIR)/include
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
   BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
 else
-  BOARD_DIR = configs/$(CONFIG_ARCH_BOARD)
+  BOARD_DIR = $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)
 endif
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
@@ -293,13 +293,13 @@ include/arch: Make.defs
 
 include/arch/board: include/arch Make.defs include/arch
 	@echo "LN: include/arch/board to $(BOARD_DIR)/include"
-	$(Q) $(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
+	$(Q) $(DIRLINK) $(BOARD_DIR)/include include/arch/board
 
 # Link the configs/<board-name>/src dir to arch/<arch-name>/src/board
 
 $(ARCH_SRC)/board: Make.defs
 	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/src"
-	$(Q) $(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/src $(ARCH_SRC)/board
+	$(Q) $(DIRLINK) $(BOARD_DIR)/src $(ARCH_SRC)/board
 
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
 
