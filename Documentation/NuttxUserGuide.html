@@ -4729,7 +4729,7 @@ Differences from the POSIX implementation include:
   </li>
   <li>
     All <code>sa_flags</code> in struct sigaction of act input are ignored (all treated like <code>SA_SIGINFO</code>).
-    The one exception is if <code>CONFIG_SCHED_CHILDSTATUS</code> is defined;
+    The one exception is if <code>CONFIG_SCHED_CHILD_STATUS</code> is defined;
     then <code>SA_NOCLDWAIT</code> is supported but only for <code>SIGCHLD</code>.
   </li>
 </ul>
