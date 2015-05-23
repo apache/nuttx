@@ -791,6 +791,15 @@ static int up_setup(struct uart_dev_s *dev)
       regval |= UART_MR_NBSTOP_1;
     }
 
+#ifdef CONFIG_SAM34_UART1_OPTICAL
+  if (priv == &g_uart1priv)
+    {
+      /* Enable optical mode. */
+
+      regval |= UART_MR_OPT_EN;
+    }
+#endif
+
   /* And save the new mode register value */
 
   up_serialout(priv, SAM_UART_MR_OFFSET, regval);
