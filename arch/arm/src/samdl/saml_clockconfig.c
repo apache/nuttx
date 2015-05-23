@@ -323,7 +323,14 @@ static inline void sam_flash_waitstates(void)
 {
   uint32_t regval;
 
+  /* Errate 13134: Correct the default value of the NVMCTRL.CTRLB.MANW bit */
+
   regval  = getreg32(SAM_NVMCTRL_CTRLB);
+  regval |= NVMCTRL_CTRLB_MANW;
+  putreg32(regval, SAM_NVMCTRL_CTRLB);
+
+  /* Set the configured number of flash wait states */
+
   regval &= ~NVMCTRL_CTRLB_RWS_MASK;
   regval |= NVMCTRL_CTRLB_RWS(BOARD_FLASH_WAITSTATES);
   putreg32(regval, SAM_NVMCTRL_CTRLB);
