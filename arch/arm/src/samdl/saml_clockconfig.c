@@ -1233,24 +1233,6 @@ static inline void sam_config_gclks(void)
     {
       sam_gclk_config(&g_gclkconfig[i]);
     }
-
-  /* Enable DFLL reference clock if the DFLL is enabled in closed loop mode */
-
-  sam_dfll48m_refclk();
-
-  /* Enable FDPLL reference clock if the DFLL is enabled */
-
-  sam_fdpll96m_refclk();
-
-  /* Setup CPU and BUS clocks */
-
-  sam_cpu_dividers();
-
-  /* Configure the GCLK_MAIN last as it may depend on the DFLL or other
-   * generators
-   */
-
-  sam_gclk_config(&g_gclkconfig[0]);
 }
 #else
 #  define sam_config_gclks()
@@ -1337,13 +1319,31 @@ void sam_clockconfig(void)
 
   sam_config_gclks();
 
+  /* Enable DFLL reference clock if the DFLL is enabled in closed loop mode */
+
+  sam_dfll48m_refclk();
+
   /* Enable DFLL48M */
 
   sam_dfll48m_enable();
 
+  /* Enable FDPLL reference clock if the DFLL is enabled */
+
+  sam_fdpll96m_refclk();
+
   /* Configure and enable FDPLL96M */
 
   sam_fdpll96m_config();
+
+  /* Setup CPU and BUS clocks */
+
+  sam_cpu_dividers();
+
+  /* Configure the GCLK_MAIN last as it may depend on the DFLL, FDPLL or
+   * other generators
+   */
+
+  sam_gclk_config(&g_gclkconfig[0]);
 
 #if BOARD_CPU_FREQUENCY <= 12000000
   /* If CPU frequency is less than 12MHz, scale down performance level to
