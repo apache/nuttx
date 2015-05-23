@@ -10419,3 +10419,9 @@
 	* arch/arm/src/sam34/Kconfig, sam_serial.c, and chip/sam_uart.h:  Add
 	  support for optical mode for the SAM4CM UART1.  From Max Neklyudov
 	  (2015-05-23).
+	* arch/arm/src/lpc11xx/: Add support for up_getc() which is needed
+	  for NSH if there is no file system.  From Alan Carvalho de Assis
+	  (2015-05-23).
+	* LPCXpresso-LPC1115:  Add a minimal NSH configuration that has the
+	  file system disabled.  Update README with OpenOCD instructions.
+	  From Alan Carvalho de Assis (2015-05-23).
