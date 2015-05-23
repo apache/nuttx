@@ -65,7 +65,7 @@
 #define SAM_USART_INTFLAG_OFFSET     0x0018  /* Interrupt flag and status clear register */
 #define SAM_USART_STATUS_OFFSET      0x001a  /* Status register */
 #define SAM_USART_SYNCBUSY_OFFSET    0x001c /* Synchronization busy register */
-#define SAM_USART_DATA_OFFSET        0x0018  /* Data register */
+#define SAM_USART_DATA_OFFSET        0x0028  /* Data register */
 #define SAM_USART_DBGCTRL_OFFSET     0x0030  /* Debug control register */
 
 /* USART register addresses *****************************************************************/
@@ -156,11 +156,11 @@
 #define USART_CTRLA_IBON             (1 << 8)  /* Bit 8:  Immediate BUFOVF notification */
 #define USART_CTRLA_SAMPR_SHIFT      (11)      /* Bits 11-12: Sample rate */
 #define USART_CTRLA_SAMPR_MASK       (3 << USART_CTRLA_SAMPR_SHIFT)
-#  define USART_CTRLA_SAMPR_16XA     (xx << USART_CTRLA_SAMPR_SHIFT) /* 16x oversampling; arithmetic baud */
-#  define USART_CTRLA_SAMPR_16XF     (xx << USART_CTRLA_SAMPR_SHIFT) /* 16x oversampling; fractional baud */
-#  define USART_CTRLA_SAMPR_8XA      (xx << USART_CTRLA_SAMPR_SHIFT) /* 8x oversampling; arithmetic baud */
-#  define USART_CTRLA_SAMPR_8XF      (xx << USART_CTRLA_SAMPR_SHIFT) /* 8x oversampling; fractional baud */
-#  define USART_CTRLA_SAMPR_3XA      (xx << USART_CTRLA_SAMPR_SHIFT) /* 3x oversampling; arithmetic baud */
+#  define USART_CTRLA_SAMPR_16XA     (0 << USART_CTRLA_SAMPR_SHIFT) /* 16x oversampling; arithmetic baud */
+#  define USART_CTRLA_SAMPR_16XF     (1 << USART_CTRLA_SAMPR_SHIFT) /* 16x oversampling; fractional baud */
+#  define USART_CTRLA_SAMPR_8XA      (2 << USART_CTRLA_SAMPR_SHIFT) /* 8x oversampling; arithmetic baud */
+#  define USART_CTRLA_SAMPR_8XF      (3 << USART_CTRLA_SAMPR_SHIFT) /* 8x oversampling; fractional baud */
+#  define USART_CTRLA_SAMPR_3XA      (4 << USART_CTRLA_SAMPR_SHIFT) /* 3x oversampling; arithmetic baud */
 #define USART_CTRLA_TXPO_SHIFT       (16)      /* Bits 16-17: Transmit data pinout */
 #define USART_CTRLA_TXPO_MASK        (3 << USART_CTRLA_TXPO_SHIFT)
 #  define USART_CTRLA_TXPAD0_1       (0 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; XCK=PAD[1] */

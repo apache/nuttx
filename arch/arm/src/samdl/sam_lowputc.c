@@ -132,6 +132,9 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
    *
    *   BAUD  = 63,019
    *   Fbaud = 115,219
+   *
+   * REVISIT: For the SAML21, only 16x sampling with arithmetic BAUD is
+   * supported.
    */
 
   tmp = (uint64_t)config->baud << 20;

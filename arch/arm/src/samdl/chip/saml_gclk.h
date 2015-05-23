@@ -56,7 +56,7 @@
 /* GCLK register offsets ********************************************************************/
 
 #define SAM_GCLK_CTRLA_OFFSET        0x0000 /* Control register */
-#define SAM_GCLK_SYNCHBUSY_OFFSET       0x0004 /* Status register */
+#define SAM_GCLK_SYNCHBUSY_OFFSET    0x0004 /* Status register */
 
 #define SAM_GCLK_GENCTRL_OFFSET(n)   (0x0020 + ((n) << 2)) /* General clock generator n */
 #define SAM_GCLK_PCHCTRL_OFFSET(m)   (0x0080 + ((m) << 2)) /* Peripheral channel control m */
