@@ -392,6 +392,7 @@
 
 /* FLASH wait states
  *
+ * REVISIT: These values come from the SAMD20
  * Vdd Range     Wait states    Maximum Operating Frequency
  * ------------- -------------- ---------------------------
  * 1.62V to 2.7V  0             14 MHz
@@ -402,10 +403,10 @@
  *                1             48 MHz
  */
 
-#if 0 /* REVISIT -- should not be necessary */
-#  define BOARD_FLASH_WAITSTATES     1
+#if 0 /* REVISIT -- Sample code is running with zero wait states */
+#  define BOARD_FLASH_WAITSTATES     0
 #else
-#  define BOARD_FLASH_WAITSTATES     2
+#  define BOARD_FLASH_WAITSTATES     1
 #endif
 
 /* SERCOM definitions ***************************************************************/
