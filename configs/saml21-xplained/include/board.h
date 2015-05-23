@@ -156,7 +156,7 @@
 #define BOARD_OSC16M_ONDEMAND        1
 #undef  BOARD_OSC16M_RUNINSTANDBY
 
-#define BOARD_OSC16M_FREQUENCY       16000000 /* 16MHz high-accuracy internal oscillator */
+#define BOARD_OSC16M_FREQUENCY       4000000 /* 4MHz high-accuracy internal oscillator */
 
 /* OSCULP32K Configuration -- not used. */
 
