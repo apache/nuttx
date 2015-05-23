@@ -277,8 +277,8 @@ config ARCH_BOARD_LPCXPRESSO_LPC1115
 	depends on ARCH_CHIP_LPC1115
 	select ARCH_HAVE_LEDS
 	---help---
-		Embedded Artists base board with NXP LPCExpresso LPC1115.  This board
-		is based on the NXP LPC1115.
+		The NXP LPCXpresso daughter board.  This board is based on the NXP
+		LPC1115.
 
 config ARCH_BOARD_LPCXPRESSO
 	bool "NXP LPCExpresso LPC1768"
