@@ -110,7 +110,6 @@
 #  define NVMCTRL_CTRLB_SLEEPPRM_WAKEONACCESS    (0 << NVMCTRL_CTRLB_SLEEPPRM_SHIFT) /* Exit low power on first access */
 #  define NVMCTRL_CTRLB_SLEEPPRM_WAKEUPINSTANT   (1 << NVMCTRL_CTRLB_SLEEPPRM_SHIFT) /* Exit low power when exit sleep */
 #  define NVMCTRL_CTRLB_SLEEPPRM_DISABLED        (3 << NVMCTRL_CTRLB_SLEEPPRM_SHIFT) /* Auto power reduction disabled */
-
 #define NVMCTRL_CTRLB_READMODE_SHIFT (16)      /* Bits 16-17: NVMCTRL Read Mode */
 #define NVMCTRL_CTRLB_READMODE_MASK  (3 << NVMCTRL_CTRLB_READMODE_SHIFT)
 #  define NVMCTRL_CTRLB_READMODE_NO_MISS_PENALTY (0 << NVMCTRL_CTRLB_READMODE_SHIFT) /* No extra wait states on miss */
