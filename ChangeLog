@@ -10416,3 +10416,6 @@
 	  de Assis (2015-05-22).
 	* configs/lpcxpresso-lpc1115:  Support for the LPCXpression LPC1115
 	  board.  Contribuited by Alan Carvalho de Assis (2015-05-22).
+	* arch/arm/src/sam34/Kconfig, sam_serial.c, and chip/sam_uart.h:  Add
+	  support for optical mode for the SAM4CM UART1.  From Max Neklyudov
+	  (2015-05-23).
