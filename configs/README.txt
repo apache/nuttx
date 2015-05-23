@@ -285,6 +285,10 @@ configs/lm4f120-launchpad
   platform for ARM® Cortex™-M4F-based microcontrollers from Texas
   Instruments.
 
+configs/lpcxpresso-lpc1115
+  NuttX board support for the NXP LPCXpresso daughter board.  This board
+  is based on the NXP LPC1115.
+
 configs/lpcxpresso-lpc1768
   Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
   is based on the NXP LPC1768.  The Code Red toolchain is used by default.

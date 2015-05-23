@@ -1176,6 +1176,8 @@ nuttx
  |   |   `- README.txt
  |   |- lpc4357-evb/
  |   |   `- README.txt
+ |   |- lpcxpresso-lpc1115/
+ |   |   `- README.txt
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
  |   |- maple/

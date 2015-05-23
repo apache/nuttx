@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 18, 2015</p>
+      <p>Last Updated: May 22, 2015</p>
     </td>
   </tr>
 </table>
@@ -1330,7 +1330,7 @@
       <li><a href="#arm926ejs">ARM926EJS</a> (4)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
-      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (5)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (6)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (32)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (20)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (1)</li>
@@ -1452,6 +1452,7 @@
   </li>
   <li>NXP
     <ul>
+      <li><a href="#nxplpc11xx">NXP LPC11xx</a> <small>(Cortex-M0)</small></li>
       <li><a href="#nxplpc214x">NXP LPC214x</a> <small>(ARM7TDMI)</small></li>
       <li><a href="#nxplpc2378">NXP LPC2378</a> <small>(ARM7TDMI)</small></li>
       <li><a href="#nxplpc3131">NXP LPC3131</a> <small>(ARM9E6JS)</small></li>
@@ -2248,6 +2249,29 @@ nsh>
         This is a work in progress.
         Initial support for the SAML21 Xplained Pro is expected in the NuttX 7.10 timeframe.
         Refer to the SAML21 Explained Pro board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/saml21-xplained/README.txt">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="nxplpc11xx"><b>NXP LPC11xx</b>.</a>
+      Support is provided for the NXP LPC11xx family of processors.  In particular,
+      support is provided for LPCXpression LPC1115 board.
+      This port was contributed by Alan Carvalho de Assis.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        This port is still very much a work in progress.
+        The first usable version is expected in NuttX 7.10.
+        Refer to the board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/lpcxpresso-lpc1115/README.txt">README.txt</a> file for further information.
       </p>
     </ul>
   </td>

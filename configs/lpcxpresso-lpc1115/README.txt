@@ -1,14 +1,12 @@
 README
 ^^^^^^
 
-README for NuttX port to the Embedded Artists' base board with the NXP
-the LPCXpresso daughter board. Product code: EA-XPR-009
+README for NuttX port to the NXP the LPCXpresso board.
 
 Contents
 ^^^^^^^^
 
   LCPXpresso LPC1115 Board
-  Embedded Artist's Base Board
   Development Environment
   GNU Toolchain Options
   NuttX EABI "buildroot" Toolchain
@@ -345,8 +343,7 @@ LEDs
 
   - configs/lpcxpresso-lpc1115/src/up_leds.c - LED control logic.
 
-  The LPCXpresso LPC1115 has a single LEDs (there are more on the Embedded Artists
-  base board, but those are not controlled by NuttX).  Usage this single LED by NuttX
+  The LPCXpresso LPC1115 has a single LEDs.  Usage this single LED by NuttX
   is as follows:
 
   - The LED is not illuminated until the LPCXpresso completes initialization.
