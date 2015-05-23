@@ -13,6 +13,7 @@ Contents
   NuttX OABI "buildroot" Toolchain
   NXFLAT Toolchain
   Code Red IDE
+  Using OpenOCD
   LEDs
   LPCXpresso Configuration Options
   Configurations
@@ -330,6 +331,199 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
+Using OpenOCD
+^^^^^^^^^^^^^
+
+  https://acassis.wordpress.com/2015/03/29/using-openocd-to-program-the-lpc1115-lpcxpresso-board/
+
+  Using OpenOCD to program the LPC1115 LPCXpresso board
+  March 29, 2015 by acassis
+
+  Unfortunately NXP uses a built-in programmer in the LPCXpresso board
+  called LPCLink that is not supported by OpenOCD and there is not (AFAIK)
+  an option to replace its firmware.
+
+  Then I decided to cut the board to separate the “LPCXpresso LPC1115 REV A”
+  from the LPCLink programmer.
+
+  So I used a simple and low cost STLink-v2 programmer board that is
+  supported by OpenOCD. In order to use OpenOCD to reprogram the LPC1115
+  board we need to connect four wires from STLink-v2 to LPC1115 board:
+
+    STLink-v2    |   LPC1115 Board
+    ------------------------------
+    GND              GND
+    3V3              3V3
+    IO               AD4
+    CLK              P0.10
+
+
+  Also we need to instruct OpenOCD to use SWD protocol. You can do it
+  creating the following config openocd.cfg file:
+
+    # LPC1115 LPCXpresso Target
+
+    # Using stlink as SWD programmer
+    source [find interface/stlink-v2.cfg]
+
+    # SWD as transport
+    transport select hla_swd
+
+    # Use LPC1115 target
+    set WORKAREASIZE 0x4000
+    source [find target/lpc11xx.cfg]
+
+  Now execute OpenOCD using the created config file:
+
+    $ sudo openocd -f openocd.cfg
+    Open On-Chip Debugger 0.9.0-dev-00251-g1fa4c72 (2015-01-28-20:08)
+    Licensed under GNU GPL v2
+    For bug reports, read
+        http://openocd.sourceforge.net/doc/doxygen/bugs.html
+    Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+    adapter speed: 10 kHz
+    adapter_nsrst_delay: 200
+    Info : Unable to match requested speed 10 kHz, using 5 kHz
+    Info : Unable to match requested speed 10 kHz, using 5 kHz
+    Info : clock speed 5 kHz
+    Info : STLINK v2 JTAG v17 API v2 SWIM v4 VID 0x0483 PID 0x3748
+    Info : using stlink api v2
+    Info : Target voltage: 3.137636
+    Info : lpc11xx.cpu: hardware has 4 breakpoints, 2 watchpoints
+
+  Connect to OpenOCD server:
+
+    $ telnet 127.0.0.1 4444
+
+    Reset the CPU and flash the lpc1115_blink.bin file:
+
+      > reset halt
+    target state: halted
+    target halted due to debug-request, current mode: Thread
+    xPSR: 0xc1000000 pc: 0x1fff0040 msp: 0x10000ffc
+
+    > flash probe 0
+    flash 'lpc2000' found at 0x00000000
+
+    > flash write_image erase blink_lpc1115.bin 0x00000000
+    auto erase enabled
+    target state: halted
+    target halted due to breakpoint, current mode: Thread
+    xPSR: 0x01000000 pc: 0x10000108 msp: 0x100001b8
+    Verification will fail since checksum in image (0x00000000) to be written to flash is different from calculated vector checksum (0xefffebe9).
+    To remove this warning modify build tools on developer PC to inject correct LPC vector checksum.
+    wrote 4096 bytes from file blink_lpc1115.bin in 0.592621s (6.750 KiB/s)
+
+    > reset run
+
+  The checksum warning message could be removed if you add the checksum to
+  binary, read this post:
+
+    http://sigalrm.blogspot.com.br/2011/10/cortex-m3-exception-vector-checksum.html.
+
+  The blink LED sample I got from Frank Duignan’s page:
+
+    http://eleceng.dit.ie/frank/arm/BareMetalLPC1114/index.html
+
+  Edit Makefile and configure LIBSPEC to point out to the right path:
+
+     LIBSPEC=-L /usr/lib/gcc/arm-none-eabi/4.8/armv6-m
+
+  $ make
+
+  To generate the final binary I used objcopy:
+
+  $ arm-none-eabi-objcopy -O binary main.elf blink_lpc1115.bin
+
+  https://acassis.wordpress.com/2015/05/22/using-openocd-and-gdb-to-debug-my-nuttx-port-to-lpc11xx/
+
+  Using OpenOCD and gdb to debug my NuttX port to LPC11xx
+  May 22, 2015 by acassis
+
+  I’m porting NuttX to LPC11xx (using the LPCXpresso LPC1115 board) and
+  these are the steps I used to get OpenOCD and GDB working to debug my firmware:
+
+  The openocd.cfg to use with STLink-v2 SWD programmer:
+
+    # LPC1115 LPCXpresso Target
+
+    # Using stlink as SWD programmer
+    source [find interface/stlink-v2.cfg]
+
+    # SWD as transport
+    transport select hla_swd
+
+    # Use LPC1115 target
+    set WORKAREASIZE 0x4000
+    source [find target/lpc11xx.cfg]
+
+  You need to execute “reset halt” from OpenOCD telnet server to get
+  “monitor reset halt” working on gdb:
+
+    $ telnet 127.0.0.1 4444Trying 127.0.0.1...
+    Connected to 127.0.0.1.
+    Escape character is '^]'.
+    Open On-Chip Debugger
+
+    > reset halt
+    target state: halted
+    target halted due to debug-request, current mode: Thread
+    xPSR: 0xc1000000 pc: 0x1fff0040 msp: 0x10000ffc
+
+    > exit
+
+  Now execute the command arm-none-eabi-gdb (from Debian/Ubuntu package
+  “gdb-arm-none-eabi”) passing the nuttx ELF file:
+
+    $ arm-none-eabi-gdb nuttx
+    GNU gdb (7.7.1+dfsg-1+6) 7.7.1
+    Reading symbols from nuttx...done.
+
+    (gdb) target remote localhost:3333
+    Remote debugging using localhost:3333
+    0x1fff0040 in ?? ()
+
+    (gdb) monitor reset halt
+    target state: halted
+    target halted due to debug-request, current mode: Thread
+    xPSR: 0xc1000000 pc: 0x1fff0040 msp: 0x10000ffc
+
+    (gdb) load
+    Loading section .vectors, size 0xc0 lma 0x0
+    Loading section .text, size 0x9197 lma 0x410
+    Loading section .ARM.exidx, size 0x8 lma 0x95a8
+    Loading section .data, size 0x48 lma 0x95b0
+    Start address 0x410, load size 37543
+    Transfer rate: 9 KB/sec, 6257 bytes/write.
+
+    (gdb) b __start
+    Breakpoint 1 at 0x410: file chip/lpc11_start.c, line 109.
+
+    (gdb) step
+
+    Note: automatically using hardware breakpoints for read-only addresses.
+
+    Breakpoint 1, __start () at chip/lpc11_start.c:109
+    109	{
+
+    (gdb)
+    115	  lpc11_clockconfig();
+
+    (gdb)
+    lpc11_clockconfig () at chip/lpc11_clockconfig.c:93
+    93	  putreg32(SYSCON_SYSPLLCLKSEL_IRCOSC, LPC11_SYSCON_SYSPLLCLKSEL);
+
+    (gdb)
+    96	  putreg32((SYSCON_SYSPLLCTRL_MSEL_DIV(4) | SYSCON_SYSPLLCTRL_PSEL_DIV2), LPC11_SYSCON_SYSPLLCTRL);
+
+    (gdb) p /x *0x40048008      <--- this is the LPC11_SYSCON_SYSPLLCTRL register address
+    $2 = 0x23
+    (gdb)
+
+    You can use breakpoints, steps and many other GDB features.
+
+    That is it!
+
 LEDs
 ^^^^
 
@@ -491,26 +685,57 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
-  dhcpd:
-    This builds the DCHP server using the apps/examples/dhcpd application
-    (for execution from FLASH.) See apps/examples/README.txt for information
-    about the dhcpd example.
+  minnsh:
+  ------
 
-    NOTES:
+    This is a experiment to see just how small we can get a usable NSH
+    configuration.  This configuration has far fewer features than the nsh
+    configuration but is also a fraction of the size.
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
+    STATUS:
+    2015-5-23
+      The nuttx.bin minnsh firmware file size:
 
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
+    $ ls -l nuttx.bin
+    -rwxr-xr-x 1 alan alan 17409 May 23 11:01 nuttx.bin
 
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
+    $ arm-none-eabi-size nuttx
+    text data bss dec hex filename
+    16367 193 704 17264 4370 nuttx
 
-    2. Jumpers: Nothing special.  Use the default base board jumper
-       settings.
+    This is serial console output (and input) :
+
+    NuttShell (NSH)
+    nsh> ls /dev
+    nsh: ls: command not found
+
+    No filesystem, no "ls" command :-)
+
+    nsh> ?
+    help usage: help [-v] [<cmd>]
+
+    ? exec free mb mw xd
+    echo exit help mh ps
+    nsh> free
+    total used free largest
+    Mem: 6464 1816 4648 4648
+
+    nsh> echo "NuttX is magic!"
+    NuttX is magic!
+    nsh>
+
+    Replace NSH with apps/examples/hello:
+
+    $ ls -l nuttx.bin
+    -rwxr-xr-x 1 alan alan 12873 May 23 11:05 nuttx.bin
+
+    $ arm-none-eabi-size nuttx
+    text data bss dec hex filename
+    11829 193 704 12726 31b6 nuttx
 
   nsh:
+  ---
+
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
@@ -535,19 +760,3 @@ Where <subdir> is one of the following:
 
        Jumpers: J55 must be set to provide chip select PIO1_11 signal as
        the SD slot chip select.
-
-  nx:
-    And example using the NuttX graphics system (NX).  This example
-    uses the UG-9664HSWAG01 driver.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
