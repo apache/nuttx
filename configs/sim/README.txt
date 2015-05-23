@@ -201,7 +201,7 @@ BASIC
 
   Enable the BASIC interpreter.  Other default options should be okay:
     CONFIG_INTERPRETERS_BAS=y    : Enables the interpreter
-    CONFIG_INTERPREPTER_BAS_VT100=y
+    CONFIG_INTERPRETER_BAS_VT100=y
 
   The BASIC test suite can be included:
      CONFIG_FS_ROMFS=y           : ROMFS support is needed
@@ -309,7 +309,7 @@ cxxtest
      how to install uClibc++
 
   2. At present (2012/11/02), exceptions are disabled in this example
-     CONFIG_UCLIBCXX_EXCEPTIONS=n).  It is probably not necessary to
+     CONFIG_UCLIBCXX_EXCEPTION=n).  It is probably not necessary to
      disable exceptions.
 
   3. Unfortunately, this example will not run now.

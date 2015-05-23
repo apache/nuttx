@@ -2223,7 +2223,7 @@ SDRAM Support
 
     System Type->Heap Configuration
       CONFIG_SAMA5_ISRAM_HEAP=n              : These do not apply in this case
-      CONFIG_SAMA5_DCRS_HEAP=n
+      CONFIG_SAMA5_DDRCS_HEAP=n
 
     System Type->Boot Memory Configuration
       CONFIG_RAM_START=0x20000000           : Physical address of SDRAM
@@ -4139,7 +4139,7 @@ Configurations
        this, the board logic supports these special configurations:
 
        Board Selection ->
-         CONFIG_SAMA5D4EK_HSMCI0_AMOUNT=y
+         CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT=y
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV="/dev/mmcsd0"
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_FSTYPE="vfat"
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT="/bin"

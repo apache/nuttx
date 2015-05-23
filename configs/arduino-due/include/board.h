@@ -200,7 +200,7 @@
 
 /* GPIO pin configurations **********************************************************/
 
-#if 1 /* #ifdef CONFIG_ADRUINO_DUE_REV3 works with REV2 as well */
+#if 1 /* #ifdef CONFIG_ARDUINO_DUE_REV3 works with REV2 as well */
 /* This port was performed on the Arduino Due Rev 2 board.  A NuttX user reported
  * issues with the serial port on his Aduino Due Rev 3 board.  That problem was
  * resolved as follows:

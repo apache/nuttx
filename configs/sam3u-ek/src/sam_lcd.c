@@ -774,7 +774,7 @@ static int sam_getpower(struct lcd_dev_s *dev)
  * Name:  sam_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWERL: full on). On
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
  *   LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3194 charge

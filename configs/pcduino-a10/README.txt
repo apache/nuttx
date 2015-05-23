@@ -363,7 +363,7 @@ Configurations
      Here are the relevant current settings:
 
      Build Setup:
-       CONFIG_HOST_WINDOS=y                    : Microsoft Windows
+       CONFIG_HOST_WINDOWS=y                   : Microsoft Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
