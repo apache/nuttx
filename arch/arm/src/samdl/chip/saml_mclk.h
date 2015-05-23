@@ -64,11 +64,11 @@
 #define SAM_MCLK_BUPDIV_OFFSET     0x0006  /* Backup clock division */
                                            /* 0x0007-0x000f: Reserved */
 #define SAM_MCLK_AHBMASK_OFFSET    0x0010  /* AHB mask */
-#define SAM_MCLK_APBAMASK_OFFSET   0x0010  /* APBA mask */
-#define SAM_MCLK_APBBMASK_OFFSET   0x0010  /* APBB mask */
-#define SAM_MCLK_APBCMASK_OFFSET   0x0010  /* APBC mask */
-#define SAM_MCLK_APBDMASK_OFFSET   0x0010  /* APBD mask */
-#define SAM_MCLK_APBEMASK_OFFSET   0x0010  /* APBE mask */
+#define SAM_MCLK_APBAMASK_OFFSET   0x0014  /* APBA mask */
+#define SAM_MCLK_APBBMASK_OFFSET   0x0018  /* APBB mask */
+#define SAM_MCLK_APBCMASK_OFFSET   0x001c  /* APBC mask */
+#define SAM_MCLK_APBDMASK_OFFSET   0x0020  /* APBD mask */
+#define SAM_MCLK_APBEMASK_OFFSET   0x0024  /* APBE mask */
 
 /* MCLK register addresses **********************************************************/
 
