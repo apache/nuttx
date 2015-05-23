@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "up_arch.h"
 
@@ -53,6 +54,8 @@
 #include "sam_pm.h"
 #include "sam_gclk.h"
 #include "sam_sercom.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -145,7 +148,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 
 void sercom_slowclk_configure(int gclkgen)
 {
-#if defined(CONFIG_ARCH_FAMILY_SAMDL21)
+#if defined(CONFIG_ARCH_FAMILY_SAML21)
   static bool configured = false;
 #ifdef CONFIG_DEBUG
   static uint8_t slowgen = 0xff;
@@ -165,7 +168,7 @@ void sercom_slowclk_configure(int gclkgen)
 
       configured = true;
 #ifdef CONFIG_DEBUG
-      slowgen    = (uint8_t)clkgen;
+      slowgen    = (uint8_t)gclkgen;
 #endif
     }
 
@@ -176,7 +179,7 @@ void sercom_slowclk_configure(int gclkgen)
 
   else
     {
-      DEBUGASSERT((int)slowgen == clkgen);
+      DEBUGASSERT((int)slowgen == gclkgen);
     }
 #endif
 
