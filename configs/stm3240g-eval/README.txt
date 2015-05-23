@@ -1177,7 +1177,7 @@ Where <subdir> is one of the following:
        must be manually enabled by selecting:
 
        CONFIG_CAN=y             : Enable the generic CAN infrastructure
-       CONFIG_CAN_EXID=y or n   : Enable to support extended ID frames
+       CONFIG_CAN_EXTID=y or n  : Enable to support extended ID frames
        CONFIG_STM32_CAN1=y      : Enable CAN1
        CONFIG_CAN_LOOPBACK=y    : Enable CAN loopback mode
 

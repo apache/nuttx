@@ -121,7 +121,7 @@ static const struct procfs_entry_s g_procfsentries[] =
   { "mtd",              &mtd_procfsoperations },
 #endif
 
-#if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITON)
+#if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITIONS)
   { "partitions",       &part_procfsoperations },
 #endif
 

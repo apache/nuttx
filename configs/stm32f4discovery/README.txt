@@ -1075,7 +1075,7 @@ BASIC
 
   Enable the BASIC interpreter.  Other default options should be okay:
     CONFIG_INTERPRETERS_BAS=y    : Enables the interpreter
-    CONFIG_INTERPREPTER_BAS_VT100=y
+    CONFIG_INTERPRETER_BAS_VT100=y
 
   The BASIC test suite can be included:
      CONFIG_FS_ROMFS=y           : ROMFS support is needed
@@ -1214,7 +1214,7 @@ Where <subdir> is one of the following:
 
        arm-none-eabi-ar.exe rcs libsupc++.a vterminate.o
 
-  4. Exceptions are enabled and workking (CONFIG_UCLIBCXX_EXCEPTIONS=y)
+  4. Exceptions are enabled and workking (CONFIG_UCLIBCXX_EXCEPTION=y)
 
   elf:
   ---

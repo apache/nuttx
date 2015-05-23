@@ -181,19 +181,19 @@
 /* Check orientation */
 
 #if defined(CONFIG_LCD_LANDSCAPE)
-#  if defined(CONFIG_LCD_PORTAIT) || defined(CONFIG_LCD_RPORTAIT) || \
+#  if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT) || \
       defined(CONFIG_LCD_RLANDSCAPE)
 #    error "Cannot define both portrait and any other orientations"
 #  endif
 #elif defined(CONFIG_LCD_RLANDSCAPE)
-#  if defined(CONFIG_LCD_PORTAIT) || defined(CONFIG_LCD_RPORTAIT)
+#  if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
 #    error "Cannot define both rportrait and any other orientations"
 #  endif
-#elif defined(CONFIG_LCD_PORTAIT)
-#  ifdef CONFIG_LCD_RPORTAIT
+#elif defined(CONFIG_LCD_PORTRAIT)
+#  ifdef CONFIG_LCD_RPORTRAIT
 #    error "Cannot define both landscape and any other orientations"
 #  endif
-#elif !defined(CONFIG_LCD_RPORTAIT)
+#elif !defined(CONFIG_LCD_RPORTRAIT)
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 

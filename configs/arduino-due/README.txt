@@ -115,7 +115,7 @@ Rev 2 vs. Rev 3
   (see include/board.h).  That fix as well as any others that we may find
   will be enabled by selecting
 
-    CONFIG_ADRUINO_DUE_REV3=y
+    CONFIG_ARDUINO_DUE_REV3=y
 
 ITEAD 2.4" TFT with Touch
 ^^^^^^^^^^^^^^^^^^^^^^^^^

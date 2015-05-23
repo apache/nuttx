@@ -266,7 +266,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_setschedprio,    2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,     2, STUB_pthread_setspecific)
   SYSCALL_LOOKUP(pthread_yield,           0, STUB_pthread_yield)
-#  ifndef CONFIG_DISABLE_SIGNAL
+#  ifndef CONFIG_DISABLE_SIGNALS
   SYSCALL_LOOKUP(pthread_cond_timedwait,  3, STUB_pthread_cond_timedwait)
   SYSCALL_LOOKUP(pthread_kill,            2, STUB_pthread_kill)
   SYSCALL_LOOKUP(pthread_sigmask,         3, STUB_pthread_sigmask)

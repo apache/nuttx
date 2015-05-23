@@ -76,7 +76,7 @@
  * can be used in its place.
  */
 
-#ifndef CONFIG_DISABLE_ENIVRON
+#ifndef CONFIG_DISABLE_ENVIRON
 # define environ get_environ_ptr()
 #endif
 
@@ -120,7 +120,7 @@ int       rand(void);
 
 /* Environment variable support */
 
-#ifndef CONFIG_DISABLE_ENIVRON
+#ifndef CONFIG_DISABLE_ENVIRON
 FAR char **get_environ_ptr( void );
 FAR char *getenv(FAR const char *name);
 int       putenv(FAR const char *string);

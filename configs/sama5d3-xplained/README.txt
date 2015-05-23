@@ -1671,7 +1671,7 @@ SDRAM Support
 
     System Type->Heap Configuration
       CONFIG_SAMA5_ISRAM_HEAP=n              : These do not apply in this case
-      CONFIG_SAMA5_DCRS_HEAP=n
+      CONFIG_SAMA5_DDRCS_HEAP=n
 
     System Type->Boot Memory Configuration
       CONFIG_RAM_START=0x20000000           : Physical address of SDRAM

@@ -399,7 +399,7 @@ CONFIG_NXTERM_NXKBDIN
   the interface nxterm_kdbin() is enabled.  That interface may be driven
   by window callback functions so that keyboard input *only* goes to the
   top window.
-CONFIG__NXTERM_KBDBUFSIZE
+CONFIG_NXTERM_KBDBUFSIZE
   If CONFIG_NXTERM_NXKBDIN is enabled, then this value may be used to
   define the size of the per-window keyboard input buffer.  Default: 16
 CONFIG_NXTERM_NPOLLWAITERS

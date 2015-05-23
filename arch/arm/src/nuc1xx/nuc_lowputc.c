@@ -160,7 +160,7 @@ void nuc_lowsetup(void)
   regval = getreg32(NUC_GCR_GPB_MFP);
 
 #ifdef CONFIG_NUC_UART0
-#ifdef CONFIG_UART0_FLOW_CONTROL
+#ifdef CONFIG_UART0_FLOWCONTROL
   regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1 | GCR_GPB_MFP2| GCR_GPB_MFP3);
 #else
   regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1);
@@ -173,7 +173,7 @@ void nuc_lowsetup(void)
    */
 
 #ifdef CONFIG_NUC_UART1
-#ifdef CONFIG_UART1_FLOW_CONTROL
+#ifdef CONFIG_UART1_FLOWCONTROL
   regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5 | GCR_GPB_MFP6| GCR_GPB_MFP7)
 #else
   regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5);
@@ -182,14 +182,14 @@ void nuc_lowsetup(void)
 
   putreg32(regval, NUC_GCR_GPB_MFP);
 
-#if defined(CONFIG_UART0_FLOW_CONTROL) || defined(CONFIG_UART1_FLOW_CONTROL)
+#if defined(CONFIG_UART0_FLOWCONTROL) || defined(CONFIG_UART1_FLOWCONTROL)
   regval = getreg32(NUC_GCR_ALT_MFP);
   regval &= ~GCR_ALT_MFP_EBI_EN;
-#ifdef CONFIG_UART0_FLOW_CONTROL
+#ifdef CONFIG_UART0_FLOWCONTROL
   regval &= ~(GCR_ALT_MFP_EBI_NWRL_EN | GCR_ALT_MFP_EBI_NWRH_WN);
 #endif
   putreg32(NUC_GCR_ALT_MFP);
-#endif /* CONFIG_UART0_FLOW_CONTROL || CONFIG_UART1_FLOW_CONTROL */
+#endif /* CONFIG_UART0_FLOWCONTROL || CONFIG_UART1_FLOWCONTROL */
 #endif /* CONFIG_NUC_UART0 || CONFIG_NUC_UART1 */
 
   /* UART1 TX/RX support requires that GPIOD bits 14 and 15 be set.  UART2

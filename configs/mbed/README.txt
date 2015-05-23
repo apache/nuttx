@@ -423,7 +423,7 @@ USB Host Configuration
 
      Device Drivers -> USB Host Driver Support
        CONFIG_USBHOST=y              : USB host support
-       CONFIG_USBHOST_ISCO_DISABLE=y : Not needed
+       CONFIG_USBHOST_ISOC_DISABLE=y : Not needed
        CONFIG_USBHOST_MSC=y          : Mass storage class support
 
      Library Routines

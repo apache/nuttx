@@ -362,7 +362,7 @@
 #  define SYS_pthread_setspecific      (__SYS_pthread+26)
 #  define SYS_pthread_yield            (__SYS_pthread+27)
 
-#  ifndef CONFIG_DISABLE_SIGNAL
+#  ifndef CONFIG_DISABLE_SIGNALS
 #    define SYS_pthread_cond_timedwait (__SYS_pthread+28)
 #    define SYS_pthread_kill           (__SYS_pthread+29)
 #    define SYS_pthread_sigmask        (__SYS_pthread+30)

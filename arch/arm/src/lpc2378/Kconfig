@@ -56,7 +56,7 @@ config LPC2378_MAM_SETUP
 	bool "Configure the Memory Accelerator Module (MAM)"
 	default y
 
-config LPC2378_LPC2378_MAMCR_VALUE
+config LPC2378_MAMCR_VALUE
 	int "Memory accelerator mode"
 	default 1
 	range 0 2
@@ -67,7 +67,7 @@ config LPC2378_LPC2378_MAMCR_VALUE
 		PART	1
 		FULL	2
 
-config LPC2378_LPC2378_MAMTIM_VALUE
+config LPC2378_MAMTIM_VALUE
 	int "Memory accelerator timing value"
 	default 3
 	---help---

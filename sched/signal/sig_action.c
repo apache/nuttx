@@ -158,7 +158,7 @@ static FAR sigactq_t *sig_allocateaction(void)
  * - There are no default actions so the special value SIG_DFL is treated
  *   like SIG_IGN.
  * - All sa_flags in struct sigaction of act input are ignored (all
- *   treated like SA_SIGINFO). The one exception is if CONFIG_SCHED_CHILDSTATUS
+ *   treated like SA_SIGINFO). The one exception is if CONFIG_SCHED_CHILD_STATUS
  *   is defined; then SA_NOCLDWAIT is supported but only for SIGCHLD
  *
  ****************************************************************************/

@@ -590,7 +590,7 @@ Where <subdir> is one of the following:
     microSD     Yes (5)                 Yes (5)
     Support
     ----------- ----------------------- --------------------------------
-    FAT FS      CONFIG_FAT_LCNAME=y     CONFIG_FAT_LCNAME=y
+    FAT FS      CONFIG_FAT_LCNAMES=y    CONFIG_FAT_LCNAMES=y
     Config      CONFIG_FAT_LFN=n        CONFIG_FAT_LFN=y (3)
     ----------- ----------------------- --------------------------------
     LCD Driver  No                      Yes

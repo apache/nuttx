@@ -9705,7 +9705,7 @@
 	* arch/arm/src/armv7-a/arm_doirq.c: ARMv7-A interrupt handler should not
 	  automatically re-enable interrupts on interrupt return.  That
 	  interferes with the driver's ability to manage interrupts (2015-02-09).
-	* arch/arm/src/sama5/sam_emacb.c: Add support for CONFIG_NET_NOTINTS in
+	* arch/arm/src/sama5/sam_emacb.c: Add support for CONFIG_NET_NOINTS in
 	  the SAMA5D4 Ethernet driver so that the driver can operate from the
 	  work queue thread instead of doing everything from the interrupt level
 	  (2015-02-09).
