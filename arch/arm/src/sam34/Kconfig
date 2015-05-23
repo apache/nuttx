@@ -592,6 +592,14 @@ config SAM34_UART1
 	select ARCH_HAVE_UART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+if SAM34_UART1 && ARCH_CHIP_SAM4CM
+
+config SAM34_UART1_OPTICAL
+	bool "UART 1 is optical"
+	default n
+
+endif
+
 config SAM34_UDP
 	bool "USB Device Full Speed (UDP)"
 	default n
