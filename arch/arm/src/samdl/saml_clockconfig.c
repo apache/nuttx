@@ -277,6 +277,23 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
     .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
+
+  /* GCLK generator 8 */
+
+#ifdef BOARD_GCLK8_ENABLE
+  ,
+  {
+    .gclk       = 8,
+#ifdef BOARD_GCLK8_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK8_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK8_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
 };
 
 #define NGCLKS_ENABLED (sizeof(g_gclkconfig) / sizeof(struct sam_gclkconfig_s))

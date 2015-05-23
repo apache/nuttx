@@ -977,9 +977,9 @@ void up_earlyserialinit(void)
   sam_disableallints(TTYS5_DEV.priv);
 #endif
 
+#ifdef HAVE_SERIAL_CONSOLE
   /* Mark the serial console (if any) */
 
-#ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
 #endif
 }
