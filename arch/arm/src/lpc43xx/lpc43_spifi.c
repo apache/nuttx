@@ -73,7 +73,7 @@
  * mtd device on the SPIFI FLASH.  NOTE:  CONFIG_LPC43_SPIFI=y must also
  * be defined to enable SPIFI setup support:
  *
- * CONFIG_SPIFI_RDONLY - Create a read only device on SPIFI.
+ * CONFIG_SPIFI_READONLY - Create a read only device on SPIFI.
  * CONFIG_SPIFI_OFFSET - Offset the beginning of the block driver this many
  *   bytes into the device address space.  This offset must be an exact
  *   multiple of the erase block size. Default 0.
