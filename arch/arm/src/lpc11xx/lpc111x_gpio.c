@@ -105,68 +105,63 @@ const uint32_t g_intbase[GPIO_NPORTS] =
 /* Note: The IOCON offset is not linear. See User manual UM10398 Page 74 */
 /* Note: The IOCON base is not linear. See User manual UM10398 Page 74 */
 
-const uint32_t iocon_port0[IOCON_NPINS] =
+const uint8_t iocon_port0[IOCON_NPINS] =
 {
-  LPC11_IOCON_P0_0,
-  LPC11_IOCON_P0_1,
-  LPC11_IOCON_P0_2,
-  LPC11_IOCON_P0_3,
-  LPC11_IOCON_P0_4,
-  LPC11_IOCON_P0_5,
-  LPC11_IOCON_P0_6,
-  LPC11_IOCON_P0_7,
-  LPC11_IOCON_P0_8,
-  LPC11_IOCON_P0_9,
-  LPC11_IOCON_P0_10,
-  LPC11_IOCON_P0_11
+  LPC11_IOCON_P0_0_OFFSET,
+  LPC11_IOCON_P0_1_OFFSET,
+  LPC11_IOCON_P0_2_OFFSET,
+  LPC11_IOCON_P0_3_OFFSET,
+  LPC11_IOCON_P0_4_OFFSET,
+  LPC11_IOCON_P0_5_OFFSET,
+  LPC11_IOCON_P0_6_OFFSET,
+  LPC11_IOCON_P0_7_OFFSET,
+  LPC11_IOCON_P0_8_OFFSET,
+  LPC11_IOCON_P0_9_OFFSET,
+  LPC11_IOCON_P0_10_OFFSET,
+  LPC11_IOCON_P0_11_OFFSET
 };
 
-const uint32_t iocon_port1[IOCON_NPINS] =
+const uint8_t iocon_port1[IOCON_NPINS] =
 {
-  LPC11_IOCON_P1_0,
-  LPC11_IOCON_P1_1,
-  LPC11_IOCON_P1_2,
-  LPC11_IOCON_P1_3,
-  LPC11_IOCON_P1_4,
-  LPC11_IOCON_P1_5,
-  LPC11_IOCON_P1_6,
-  LPC11_IOCON_P1_7,
-  LPC11_IOCON_P1_8,
-  LPC11_IOCON_P1_9,
-  LPC11_IOCON_P1_10,
-  LPC11_IOCON_P1_11
+  LPC11_IOCON_P1_0_OFFSET,
+  LPC11_IOCON_P1_1_OFFSET,
+  LPC11_IOCON_P1_2_OFFSET,
+  LPC11_IOCON_P1_3_OFFSET,
+  LPC11_IOCON_P1_4_OFFSET,
+  LPC11_IOCON_P1_5_OFFSET,
+  LPC11_IOCON_P1_6_OFFSET,
+  LPC11_IOCON_P1_7_OFFSET,
+  LPC11_IOCON_P1_8_OFFSET,
+  LPC11_IOCON_P1_9_OFFSET,
+  LPC11_IOCON_P1_10_OFFSET,
+  LPC11_IOCON_P1_11_OFFSET
 };
 
-const uint32_t iocon_port2[IOCON_NPINS] =
+const uint8_t iocon_port2[IOCON_NPINS] =
 {
-  LPC11_IOCON_P2_0,
-  LPC11_IOCON_P2_1,
-  LPC11_IOCON_P2_2,
-  LPC11_IOCON_P2_3,
-  LPC11_IOCON_P2_4,
-  LPC11_IOCON_P2_5,
-  LPC11_IOCON_P2_6,
-  LPC11_IOCON_P2_7,
-  LPC11_IOCON_P2_8,
-  LPC11_IOCON_P2_9,
-  LPC11_IOCON_P2_10,
-  LPC11_IOCON_P2_11
+  LPC11_IOCON_P2_0_OFFSET,
+  LPC11_IOCON_P2_1_OFFSET,
+  LPC11_IOCON_P2_2_OFFSET,
+  LPC11_IOCON_P2_3_OFFSET,
+  LPC11_IOCON_P2_4_OFFSET,
+  LPC11_IOCON_P2_5_OFFSET,
+  LPC11_IOCON_P2_6_OFFSET,
+  LPC11_IOCON_P2_7_OFFSET,
+  LPC11_IOCON_P2_8_OFFSET,
+  LPC11_IOCON_P2_9_OFFSET,
+  LPC11_IOCON_P2_10_OFFSET,
+  LPC11_IOCON_P2_11_OFFSET
 };
 
-const uint32_t iocon_port3[IOCON_NPINS] =
+/* There is only IOCON_P3_[0-5] */
+const uint8_t iocon_port3[IOCON_NPINS - 6] =
 {
-  LPC11_IOCON_P3_0,
-  LPC11_IOCON_P3_1,
-  LPC11_IOCON_P3_2,
-  LPC11_IOCON_P3_3,
-  LPC11_IOCON_P3_4,
-  LPC11_IOCON_P3_5,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0
+  LPC11_IOCON_P3_0_OFFSET,
+  LPC11_IOCON_P3_1_OFFSET,
+  LPC11_IOCON_P3_2_OFFSET,
+  LPC11_IOCON_P3_3_OFFSET,
+  LPC11_IOCON_P3_4_OFFSET,
+  LPC11_IOCON_P3_5_OFFSET
 };
 
 /****************************************************************************
@@ -184,7 +179,7 @@ const uint32_t iocon_port3[IOCON_NPINS] =
 static int lpc11_pinfunc(unsigned int port, unsigned int pin,
                          unsigned int value)
 {
-  const uint32_t *table = NULL;
+  const uint8_t *table = NULL;
   uint32_t regaddr;
   uint32_t regval;
 
@@ -204,7 +199,7 @@ static int lpc11_pinfunc(unsigned int port, unsigned int pin,
       break;
    }
 
-  regaddr = table[pin];
+  regaddr = LPC11_IOCON_BASE + table[pin];
   if (regaddr != 0)
     {
       /* Set the requested value in the IOCON register */
@@ -232,7 +227,7 @@ static int lpc11_pinfunc(unsigned int port, unsigned int pin,
 static int lpc11_pullup(lpc11_pinset_t cfgset, unsigned int port,
                         unsigned int pin)
 {
-  const uint32_t *table = NULL;
+  const uint8_t *table = NULL;
   uint32_t regaddr;
   uint32_t regval;
   uint32_t value;
@@ -276,7 +271,7 @@ static int lpc11_pullup(lpc11_pinset_t cfgset, unsigned int port,
 
   /* Fetch the IOCON register address for this port/pin combination */
 
-  regaddr = table[pin];
+  regaddr = LPC11_IOCON_BASE + table[pin];
   if (regaddr != 0)
     {
       /* Set the requested value in the IOCON register */
@@ -340,7 +335,7 @@ static void lpc11_setintedge(unsigned int port, unsigned int pin,
 
 static void lpc11_setopendrain(unsigned int port, unsigned int pin)
 {
-  const uint32_t *table = NULL;
+  const uint8_t *table = NULL;
   uint32_t regaddr;
   uint32_t regval;
 
@@ -360,7 +355,7 @@ static void lpc11_setopendrain(unsigned int port, unsigned int pin)
       break;
    }
 
-  regaddr = table[pin];
+  regaddr = LPC11_IOCON_BASE + table[pin];
   if (regaddr != 0)
     {
       /* Set the requested value in the IOCON register */
@@ -382,7 +377,7 @@ static void lpc11_setopendrain(unsigned int port, unsigned int pin)
 
 static void lpc11_clropendrain(unsigned int port, unsigned int pin)
 {
-  const uint32_t *table = NULL;
+  const uint8_t *table = NULL;
   uint32_t regaddr;
   uint32_t regval;
 
@@ -402,7 +397,7 @@ static void lpc11_clropendrain(unsigned int port, unsigned int pin)
       break;
    }
 
-  regaddr = table[pin];
+  regaddr = LPC11_IOCON_BASE + table[pin];
   if (regaddr != 0)
     {
       /* Set the requested value in the IOCON register */
