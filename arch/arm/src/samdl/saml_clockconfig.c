@@ -854,7 +854,7 @@ static inline void sam_dfll48m_config(void)
                OSCCTRL_DFLLCTRL_QLDIS    | OSCCTRL_DFLLCTRL_BPLCKC |
                OSCCTRL_DFLLCTRL_WAITLOCK);
 
-#if defined(BOARD_DFLL48M_CLOSELOOP)
+#if defined(BOARD_DFLL48M_CLOSEDLOOP)
   control |= OSCCTRL_DFLLCTRL_MODE;     /* Closed loop mode */
 #elif defined(BOARD_DFLL48M_RECOVERY)
   control |= OSCCTRL_DFLLCTRL_USBCRM;   /* USB clock recovery mode */
