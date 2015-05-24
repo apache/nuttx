@@ -35,7 +35,6 @@ choice
 
 config SAML21_XPLAINED_DFLL_OPENLOOP
 	bool "DFLL Open Loop Mode"
-	depends on EXPERIMENTAL
 
 config SAML21_XPLAINED_DFLL_CLOSEDLOOP
 	bool "DFLL Closed Loop Mode"
