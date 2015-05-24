@@ -16,6 +16,7 @@ The SAMD20 Xplained Pro Starter Kit may be bundled with three modules:
 Contents
 ^^^^^^^^
 
+  - STATUS
   - Modules
   - Development Environment
   - GNU Toolchain Options
@@ -26,6 +27,45 @@ Contents
   - Atmel Studio 6.1
   - SAMD20 Xplained Pro-specific Configuration Options
   - Configurations
+
+    STATUS/ISSUES:
+
+    1. The FLASH waitstates is set to 2 (see include/board.h).  According to
+       the data sheet, it should work at 1 but I sometimes see crashes when
+       the waitstates are set to one (about half of the time) (2014-2-18).
+
+    2. Garbage appears on the display sometimes after a reset (maybe 20% of
+       the time) or after a power cycle (less after a power cycle).  I don't
+       understand the cause of of this but most of this can be eliminated by
+       simply holding the the reset button longer and releasing it cleanly
+       (then it fails maybe 5-10% of the time, maybe because of button
+       chatter?) (2014-2-18).
+
+       - The garbage is not random:  It is always the same.
+       - This is not effected by BAUD rate.  Curiously, the same garbage
+         appears at different BAUD settings implying that this may not even
+         be clock related???
+       - The program seems to be running normally, just producing bad output.
+
+    3. SPI current hangs so not much progress has been made testing the I/O1
+       module.  The hang occurs because the SPI is waiting for SYNCBUSY to
+       be cleared after enabling the SPI.  This even does not happen and so
+       causes the hang.
+
+       Another note:  Enabling the SPI on SERCOM0 also seems to interfere
+       with the USART output on SERCOM4.  Both symptoms imply some clock-
+       related issue.
+
+       The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
+       this writing, there is no support for EIC pin interrupts.
+
+    4. OLED1 module is untested.  These instructions were just lifted from
+       the SAM4L Xplained Pro README.txt file.
+
+    5. As of 20154-05-24, this SAMD20 configurations are broken.  This
+       seems to have occurred as a consequence of the SAML21 integration
+       between NuttX-7.9 and NuttX-7.10.  Hence, I expect that the problem
+       is trivial but nevertheless real.
 
 Modules
 ^^^^^^^
@@ -857,37 +897,3 @@ Configuration sub-directories
        This is clearly some issue with initializing, un-initializing, and
        then re-initializing. If you want to fix this, patches are quite
        welcome.
-
-    STATUS/ISSUES:
-
-    1. The FLASH waitstates is set to 2 (see include/board.h).  According to
-       the data sheet, it should work at 1 but I sometimes see crashes when
-       the waitstates are set to one (about half of the time) (2014-2-18).
-
-    2. Garbage appears on the display sometimes after a reset (maybe 20% of
-       the time) or after a power cycle (less after a power cycle).  I don't
-       understand the cause of of this but most of this can be eliminated by
-       simply holding the the reset button longer and releasing it cleanly
-       (then it fails maybe 5-10% of the time, maybe because of button
-       chatter?) (2014-2-18).
-
-       - The garbage is not random:  It is always the same.
-       - This is not effected by BAUD rate.  Curiously, the same garbage
-         appears at different BAUD settings implying that this may not even
-         be clock related???
-       - The program seems to be running normally, just producing bad output.
-
-    3. SPI current hangs so not much progress has been made testing the I/O1
-       module.  The hang occurs because the SPI is waiting for SYNCBUSY to
-       be cleared after enabling the SPI.  This even does not happen and so
-       causes the hang.
-
-       Another note:  Enabling the SPI on SERCOM0 also seems to interfere
-       with the USART output on SERCOM4.  Both symptoms imply some clock-
-       related issue.
-
-       The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
-       this writing, there is no support for EIC pin interrupts.
-
-    4. OLED1 module is untested.  These instructions were just lifted from
-       the SAM4L Xplained Pro README.txt file.
