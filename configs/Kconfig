@@ -1622,7 +1622,7 @@ source "configs/sim/Kconfig"
 endif
 
 config LIB_BOARDCTL
-	bool "Enabled boardctl() interface"
+	bool "Enable boardctl() interface"
 	default n
 
 if LIB_BOARDCTL

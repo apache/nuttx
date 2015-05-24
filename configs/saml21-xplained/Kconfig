@@ -5,6 +5,49 @@
 
 if ARCH_BOARD_SAML21_XPLAINED
 
+menu "CPU Clock Configuration"
+
+choice
+	prompt "OSC16M Frequency"
+	default SAML21_XPLAINED_OSC16M_4MHZ
+
+config SAML21_XPLAINED_OSC16M_4MHZ
+	bool "4 MHz"
+
+config SAML21_XPLAINED_OSC16M_8MHZ
+	bool "8 MHz"
+
+config SAML21_XPLAINED_OSC16M_12MHZ
+	bool "12 MHz"
+
+config SAML21_XPLAINED_OSC16M_16MHZ
+	bool "16 MHz"
+
+endchoice # OSC16M Frequency
+
+config SAML21_XPLAINED_DFLL
+	bool "Use DFLL"
+	default n
+
+choice
+	prompt "DLL Operating Mode"
+	default SAML21_XPLAINED_DFLL_OPENLOOP
+
+config SAML21_XPLAINED_DFLL_OPENLOOP
+	bool "DFLL Open Loop Mode"
+	depends on EXPERIMENTAL
+
+config SAML21_XPLAINED_DFLL_CLOSEDLOOP
+	bool "DFLL Closed Loop Mode"
+	depends on EXPERIMENTAL
+
+config SAML21_XPLAINED_DFLL_RECOVERY
+	bool "DFLL USB Recovery Mode"
+	depends on EXPERIMENTAL
+
+endchoice # DLL Operating Mode
+endmenu # CPU Clock Configuration
+
 menu "SAML21 Xplained Pro Modules"
 
 config SAML21_XPLAINED_IOMODULE

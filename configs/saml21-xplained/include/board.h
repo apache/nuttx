@@ -152,11 +152,34 @@
  *   BOARD_OSC16M_RUNINSTANDBY  - Boolean (defined / not defined)
  */
 
-#define BOARD_OSC16M_FSEL            OSCCTRL_OSC16MCTRL_FSEL_4MHZ
-#define BOARD_OSC16M_ONDEMAND        1
-#undef  BOARD_OSC16M_RUNINSTANDBY
 
-#define BOARD_OSC16M_FREQUENCY       4000000 /* 4MHz high-accuracy internal oscillator */
+#if defined(CONFIG_SAML21_XPLAINED_OSC16M_4MHZ)
+#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_4MHZ
+#  define BOARD_OSC16M_ONDEMAND      1
+#  undef  BOARD_OSC16M_RUNINSTANDBY
+#  define BOARD_OSC16M_FREQUENCY     4000000  /* 4MHz high-accuracy internal oscillator */
+
+#elif defined(CONFIG_SAML21_XPLAINED_OSC16M_8MHZ)
+#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_8MHZ
+#  define BOARD_OSC16M_ONDEMAND      1
+#  undef  BOARD_OSC16M_RUNINSTANDBY
+#  define BOARD_OSC16M_FREQUENCY     8000000  /* 8MHz high-accuracy internal oscillator */
+
+#elif defined(CONFIG_SAML21_XPLAINED_OSC16M_12MHZ)
+#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_12MHZ
+#  define BOARD_OSC16M_ONDEMAND      1
+#  undef  BOARD_OSC16M_RUNINSTANDBY
+#  define BOARD_OSC16M_FREQUENCY     12000000 /* 12MHz high-accuracy internal oscillator */
+
+#elif defined(CONFIG_SAML21_XPLAINED_OSC16M_16MHZ)
+#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_16MHZ
+#  define BOARD_OSC16M_ONDEMAND      1
+#  undef  BOARD_OSC16M_RUNINSTANDBY
+#  define BOARD_OSC16M_FREQUENCY     16000000 /* 18MHz high-accuracy internal oscillator */
+
+#else
+#  error OSC16M operating freqency not defined (CONFIG_SAML21_XPLAINED_OSC16M_*MHZ)
+#endif
 
 /* OSCULP32K Configuration -- not used. */
 
@@ -200,31 +223,47 @@
  *   BOARD_DFLL48M_FREQUENCY           - The resulting frequency
  */
 
-#define BOARD_DFLL48M_ENABLE            1  /* Use the DFLL48M */
-#define BOARD_DFLL48M_CLOSEDLOOP        1  /* In closed loop mode */
-#undef  BOARD_DFLL48M_OPENLOOP
-#undef  BOARD_DFLL48M_RECOVERY
-#undef  BOARD_DFLL48M_RUNINSTDBY
-#undef  BOARD_DFLL48M_ONDEMAND
-#undef  BOARD_DFLL48M_RUNINSTANDBY
+#undef BOARD_DFLL48M_ENABLE                1  /* Assume not using the DFLL48M */
+#undef BOARD_DFLL48M_CLOSEDLOOP
+#undef BOARD_DFLL48M_OPENLOOP
+#undef BOARD_DFLL48M_RECOVERY
+
+#ifdef CONFIG_SAML21_XPLAINED_DFLL
+#  define BOARD_DFLL48M_ENABLE             1  /* Using the DFLL48M */
+
+#  if defined(SAML21_XPLAINED_DFLL_OPENLOOP
+#    define BOARD_DFLL48M_OPENLOOP         1  /* In open loop mode */
+#  elif defined(SAML21_XPLAINED_DFLL_CLOSEDLOOP
+#    define BOARD_DFLL48M_CLOSEDLOOP       1  /* In closed loop mode */
+#  elif defined(SAML21_XPLAINED_DFLL_RECOVERY
+#    define BOARD_DFLL48M_RECOVERY         1  /* In USB recover mode */
+#  else
+#    error DFLL mode not provided
+#  endif
+
+/* Mode-independent options */
+
+#  undef  BOARD_DFLL48M_RUNINSTDBY
+#  undef  BOARD_DFLL48M_ONDEMAND
 
 /* DFLL open loop mode configuration */
 
-#define BOARD_DFLL48M_COARSEVALUE       (0x1f / 4)
-#define BOARD_DFLL48M_FINEVALUE         (0xff / 4)
+#  define BOARD_DFLL48M_COARSEVALUE        (0x1f / 4)
+#  define BOARD_DFLL48M_FINEVALUE          (0xff / 4)
 
 /* DFLL closed loop mode configuration */
 
-#define BOARD_DFLL48M_REFCLK_CLKGEN      1
-#define BOARD_DFLL48M_MULTIPLIER         12
-#define BOARD_DFLL48M_QUICKLOCK          1
-#define BOARD_DFLL48M_TRACKAFTERFINELOCK 1
-#define BOARD_DFLL48M_KEEPLOCKONWAKEUP   1
-#define BOARD_DFLL48M_ENABLECHILLCYCLE   1
-#define BOARD_DFLL48M_MAXCOARSESTEP      (0x1f / 4)
-#define BOARD_DFLL48M_MAXFINESTEP        (0xff / 4)
+#  define BOARD_DFLL48M_REFCLK_CLKGEN      1
+#  define BOARD_DFLL48M_MULTIPLIER         (48000000 / BOARD_OSC16M_FREQUENCY)
+#  define BOARD_DFLL48M_QUICKLOCK          1
+#  define BOARD_DFLL48M_TRACKAFTERFINELOCK 1
+#  define BOARD_DFLL48M_KEEPLOCKONWAKEUP   1
+#  define BOARD_DFLL48M_ENABLECHILLCYCLE   1
+#  define BOARD_DFLL48M_MAXCOARSESTEP      (0x1f / 4)
+#  define BOARD_DFLL48M_MAXFINESTEP        (0xff / 4)
 
-#define BOARD_DFLL48M_FREQUENCY          (BOARD_DFLL48M_MULTIPLIER * BOARD_OSC16M_FREQUENCY)
+#  define BOARD_DFLL48M_FREQUENCY          (BOARD_DFLL48M_MULTIPLIER * BOARD_OSC16M_FREQUENCY)
+#endif
 
 /* Fractional Digital Phase Locked Loop configuration.
  *
@@ -284,11 +323,19 @@
 
 /* GCLK generator 0 (Main Clock) - Source is the DFLL */
 
-#undef  BOARD_GCLK0_RUN_IN_STANDBY
-#define BOARD_GCLK0_CLOCK_SOURCE      GCLK_GENCTRL_SRC_DFLL48M
-#define BOARD_GCLK0_PRESCALER         1
-#undef  BOARD_GCLK0_OUTPUT_ENABLE
-#define BOARD_GCLK0_FREQUENCY         (BOARD_DFLL48M_FREQUENCY / BOARD_GCLK0_PRESCALER)
+#ifdef CONFIG_SAML21_XPLAINED_DFLL
+#  undef  BOARD_GCLK0_RUN_IN_STANDBY
+#  define BOARD_GCLK0_CLOCK_SOURCE    GCLK_GENCTRL_SRC_DFLL48M
+#  define BOARD_GCLK0_PRESCALER       1
+#  undef  BOARD_GCLK0_OUTPUT_ENABLE
+#  define BOARD_GCLK0_FREQUENCY       (BOARD_DFLL48M_FREQUENCY / BOARD_GCLK0_PRESCALER)
+#else
+#  undef  BOARD_GCLK0_RUN_IN_STANDBY
+#  define BOARD_GCLK0_CLOCK_SOURCE    GCLK_GENCTRL_SRC_OSC16M
+#  define BOARD_GCLK0_PRESCALER       1
+#  undef  BOARD_GCLK0_OUTPUT_ENABLE
+#  define BOARD_GCLK0_FREQUENCY       (BOARD_OSC16M_FREQUENCY / BOARD_GCLK0_PRESCALER)
+#endif
 
 /* Configure GCLK generator 1 - Drives the DFLL */
 
