@@ -60,16 +60,16 @@
  * We will use its default, POR frequency of 4MHz to avoid an additional clock
  * switch.
  *
- * OSC16M             Output = 4MHz
- *  `- GCLK1          Input  = 4MHz Prescaler     = 1  output         = 4MHz
- *      `- DFLL       Input  = 4MHz  Multiplier   = 12 output         = 48MHz
- *          `- GCLK0  Input  = 48MHz Prescaler    = 1  output         = 48MHz
- *              `- PM Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
- *                                   APBA divider = 1  APBA frequency = 48MHz
- *                                   APBB divider = 1  APBB frequency = 48MHz
- *                                   APBC divider = 1  APBC frequency = 48MHz
- *                                   APBD divider = 1  APBD frequency = 48MHz
- *                                   APBE divider = 1  APBE frequency = 48MHz
+ * OSC16M               Output = 4MHz
+ *  `- GCLK1            Input  = 4MHz Prescaler     = 1  output         = 4MHz
+ *      `- DFLL         Input  = 4MHz  Multiplier   = 12 output         = 48MHz
+ *          `- GCLK0    Input  = 48MHz Prescaler    = 1  output         = 48MHz
+ *              `- MCLK Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
+ *                                     APBA divider = 1  APBA frequency = 48MHz
+ *                                     APBB divider = 1  APBB frequency = 48MHz
+ *                                     APBC divider = 1  APBC frequency = 48MHz
+ *                                     APBD divider = 1  APBD frequency = 48MHz
+ *                                     APBE divider = 1  APBE frequency = 48MHz
  *
  * The SAML21 Xplained Pro has one on-board crystal:
  *
@@ -412,8 +412,8 @@
  *                1             48 MHz
  */
 
-#if 0 /* REVISIT -- Sample code is running with zero wait states */
-#  define BOARD_FLASH_WAITSTATES     0
+#if 0
+#  define BOARD_FLASH_WAITSTATES     3
 #else
 #  define BOARD_FLASH_WAITSTATES     1
 #endif
