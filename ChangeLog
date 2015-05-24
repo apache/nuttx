@@ -10425,3 +10425,6 @@
 	* LPCXpresso-LPC1115:  Add a minimal NSH configuration that has the
 	  file system disabled.  Update README with OpenOCD instructions.
 	  From Alan Carvalho de Assis (2015-05-23).
+	* Fix numerous typos in configuration variable names.  Tracked down
+	  by Alan Carvalho de Assis (2015-05-23).
+
