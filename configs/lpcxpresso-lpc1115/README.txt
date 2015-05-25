@@ -696,42 +696,52 @@ Where <subdir> is one of the following:
     2015-5-23
       The nuttx.bin minnsh firmware file size:
 
-    $ ls -l nuttx.bin
-    -rwxr-xr-x 1 alan alan 17409 May 23 11:01 nuttx.bin
+        $ ls -l nuttx.bin
+        -rwxr-xr-x 1 alan alan 17409 May 23 11:01 nuttx.bin
 
-    $ arm-none-eabi-size nuttx
-    text data bss dec hex filename
-    16367 193 704 17264 4370 nuttx
+        $ arm-none-eabi-size nuttx
+        text data bss dec hex filename
+        16367 193 704 17264 4370 nuttx
 
-    This is serial console output (and input) :
+        This is serial console output (and input) :
 
-    NuttShell (NSH)
-    nsh> ls /dev
-    nsh: ls: command not found
+        NuttShell (NSH)
+        nsh> ls /dev
+        nsh: ls: command not found
 
-    No filesystem, no "ls" command :-)
+        No filesystem, no "ls" command :-)
 
-    nsh> ?
-    help usage: help [-v] [<cmd>]
+        nsh> ?
+        help usage: help [-v] [<cmd>]
 
-    ? exec free mb mw xd
-    echo exit help mh ps
-    nsh> free
-    total used free largest
-    Mem: 6464 1816 4648 4648
+        ? exec free mb mw xd
+        echo exit help mh ps
+        nsh> free
+        total used free largest
+        Mem: 6464 1816 4648 4648
 
-    nsh> echo "NuttX is magic!"
-    NuttX is magic!
-    nsh>
+        nsh> echo "NuttX is magic!"
+        NuttX is magic!
+        nsh>
 
-    Replace NSH with apps/examples/hello:
+        Replace NSH with apps/examples/hello:
 
-    $ ls -l nuttx.bin
-    -rwxr-xr-x 1 alan alan 12873 May 23 11:05 nuttx.bin
+        $ ls -l nuttx.bin
+        -rwxr-xr-x 1 alan alan 12873 May 23 11:05 nuttx.bin
 
-    $ arm-none-eabi-size nuttx
-    text data bss dec hex filename
-    11829 193 704 12726 31b6 nuttx
+        $ arm-none-eabi-size nuttx
+        text data bss dec hex filename
+        11829 193 704 12726 31b6 nuttx
+
+    2015-05-25:
+      Some additional commits from Alan reduce this FLASH size by
+      about another kilobyte.  That changes:  (1) disable stack
+      dumping on assertions,and (2) make some FLASH data structures
+      smaller.
+
+      Almost 2Kb of the remaining size is due to some arithmetic
+      functions drawn from libgcc.a.  Alan is currently looking
+      into ways to eliminate thost libgcc.a objects from the link.
 
   nsh:
   ---
