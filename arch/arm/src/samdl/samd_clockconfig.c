@@ -558,7 +558,7 @@ static inline void sam_osc8m_config(void)
  *   BOARD_DFLL_FINEVALUE           - Value
  *
  * Closed loop mode only:
- *   BOARD_DFLL_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL_SRCGCLKGEN          - GCLK index
  *   BOARD_DFLL_MULTIPLIER          - Value
  *   BOARD_DFLL_MAXCOARSESTEP       - Value
  *   BOARD_DFLL_MAXFINESTEP         - Value
@@ -644,7 +644,7 @@ static inline void sam_dfll_config(void)
  *   Enable DFLL reference clock if in closed loop mode.
  *   Depends on:
  *
- *   BOARD_DFLL_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL_SRCGCLKGEN - GCLK index
  *
  * Input Parameters:
  *   None
@@ -675,7 +675,8 @@ static inline void sam_dfll_reference(void)
    * NOTE: We could enable write lock here to prevent further modification
    */
 
-  regval = (BOARD_DFLL_SRCGCLKGEN | GCLK_CLKCTRL_ID_DFLL48M);
+  regval = ((BOARD_DFLL_SRCGCLKGEN << GCLK_CLKCTRL_GEN_SHIFT) |
+            GCLK_CLKCTRL_ID_DFLL48M);
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Enable the DFLL reference clock */
