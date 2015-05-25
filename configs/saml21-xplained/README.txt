@@ -8,6 +8,7 @@ ATSAML21J18A MCU.
 Contents
 ========
 
+  - STATUS/ISSUES
   - Modules
   - Development Environment
   - GNU Toolchain Options
@@ -19,6 +20,24 @@ Contents
   - JTAG
   - SAML21 Xplained Pro-specific Configuration Options
   - Configurations
+
+STATUS/ISSUES
+=============
+
+  - Since this port is a leverage of the SAMD20 Xplained port, some of the
+    STATUS/ISSUES in the SAMD20 Xplained README.txt may apply here as well.
+
+  - 2015-5-25: The basic port is running but using OSC16M and with a CPU
+    frequency of only 16MHz.  Attempts to use the DFLL to get the 48MHz
+    has so far been unsuccessful.  I can't find any example in the Atmel
+    ASF files the run at 48MHz with the DFLL (in closed loop mode) or
+    with the DPLL.
+
+    If I enable the DFLL now in open loop mode.  It kind of works but with
+    a some random CPU frequenycy (soemthing like 13.7MHz).  Of course the
+    results in a crazy UART baud so that is not usable.  If I try to enable
+    the DFLL in closed loop mode, it hangs waiting for the DFLL to become
+    ready.  I have not tried the DPLL.
 
 Modules
 =======
@@ -753,7 +772,10 @@ Configuration sub-directories
        an 'unsigned long int'.  If this error occurs, then you may need to
        toggle the value of CONFIG_CXX_NEWLONG.
 
-    4. If the I/O1 module is connected to the SAML21 Xplained Pro, then
+    4. WARNING: This info comes from the SAMD20 Xplained README.  I have
+       not tried the I/O1 module on the SAML21!
+
+       If the I/O1 module is connected to the SAML21 Xplained Pro, then
        support for the SD card slot can be enabled by making the following
        changes to the configuration.  These changes assume that the I/O1
        modules is connected in EXT1.  Most of the modifications necessary
@@ -824,6 +846,9 @@ Configuration sub-directories
          This is a test
          nsh>
 
+    5. WARNING: This info comes from the SAMD20 Xplained README.  I have
+       not tried the OLED1 module on the SAML21!
+
     5. If the OLED1 module is connected to the SAML21 Xplained Pro, then
        support for the OLED display can be enabled by making the following
        changes to the configuration.  These changes assume that the I/O1
@@ -890,49 +915,7 @@ Configuration sub-directories
          CONFIG_EXAMPLES_NXHELLO_BPP=1            : One bit per pixel
          CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=y     : Special initialization is required.
 
-        * The OLED is monochrome so the only "colors" are blacka nd white.
+        * The OLED is monochrome so the only "colors" are black and white.
           The default "colors" will give you while text on a black background.
           You can override the faults it you want black text on a while background.
 
-       NOTE:  One issue that I have seen with the NXHello example when
-       running as an NSH command is that it only works the first time.
-       So, after you run the 'nxhello' command one time, you will have to
-       reset the board before you run it again.
-
-       This is clearly some issue with initializing, un-initializing, and
-       then re-initializing. If you want to fix this, patches are quite
-       welcome.
-
-    STATUS/ISSUES:
-
-    1. The FLASH waitstates is set to 2 (see include/board.h).  According to
-       the data sheet, it should work at 1 but I sometimes see crashes when
-       the waitstates are set to one (about half of the time) (2014-2-18).
-
-    2. Garbage appears on the display sometimes after a reset (maybe 20% of
-       the time) or after a power cycle (less after a power cycle).  I don't
-       understand the cause of of this but most of this can be eliminated by
-       simply holding the the reset button longer and releasing it cleanly
-       (then it fails maybe 5-10% of the time, maybe because of button
-       chatter?) (2014-2-18).
-
-       - The garbage is not random:  It is always the same.
-       - This is not effected by BAUD rate.  Curiously, the same garbage
-         appears at different BAUD settings implying that this may not even
-         be clock related???
-       - The program seems to be running normally, just producing bad output.
-
-    3. SPI current hangs so not much progress has been made testing the I/O1
-       module.  The hang occurs because the SPI is waiting for SYNCBUSY to
-       be cleared after enabling the SPI.  This even does not happen and so
-       causes the hang.
-
-       Another note:  Enabling the SPI on SERCOM0 also seems to interfere
-       with the USART output on SERCOM4.  Both symptoms imply some clock-
-       related issue.
-
-       The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
-       this writing, there is no support for EIC pin interrupts.
-
-    4. OLED1 module is untested.  These instructions were just lifted from
-       the SAM4L Xplained Pro README.txt file.
