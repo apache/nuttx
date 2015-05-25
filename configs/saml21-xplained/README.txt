@@ -16,6 +16,7 @@ Contents
   - LEDs and Buttons
   - Serial Consoles
   - Atmel Studio 6.1
+  - JTAG
   - SAML21 Xplained Pro-specific Configuration Options
   - Configurations
 
@@ -490,6 +491,14 @@ Atmel Studio 6.1
 
   3) Debug menu: Debug -> Start debugging and break
      - This will reload the nuttx.elf file into FLASH
+
+JTAG
+====
+
+  I did all of the debug of the SAML21 Xplained using a Segger J-Link
+  connected to the micro JTAG connector on board the SAML21 Xplained.
+  I used an Olimex ARM-JTAG 20-10 Adapter to connect the J-Link to
+  the SAML21 Xplained.
 
 SAML21 Xplained Pro-specific Configuration Options
 ==================================================
