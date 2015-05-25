@@ -495,20 +495,24 @@ Atmel Studio 6.1
 
   Loading Code into FLASH:
   -----------------------
+
   Tools menus:  Tools -> Device Programming.
 
   Debugging the NuttX Object File
   -------------------------------
+
   1) Rename object file from nutt to nuttx.elf.  That is an extension that
      will be recognized by the file menu.
 
   2) File menu: File -> Open -> Open object file for debugging
+
      - Select nuttx.elf object file
      - Select AT91SAML21J18
      - Select files for symbols as desired
      - Select debugger
 
   3) Debug menu: Debug -> Start debugging and break
+
      - This will reload the nuttx.elf file into FLASH
 
 JTAG
