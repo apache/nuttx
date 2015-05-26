@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/teensy/src/at90usb_boot.c
+ * configs/teensy-2.0/src/at90usb_boot.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

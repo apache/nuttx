@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/teensy/usbmsc/setenv.sh
+# configs/teensy-2.0/usbmsc/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

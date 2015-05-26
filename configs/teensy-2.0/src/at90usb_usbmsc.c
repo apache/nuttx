@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/teensy/src/at90usb_usbmsc.c
+ * configs/teens-2.0/src/at90usb_usbmsc.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -63,7 +63,7 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_TEENSY
+#ifdef CONFIG_ARCH_BOARD_TEENSY_20
 #  undef AVR_MMCSDSPIPORTNO
 #  define AVR_MMCSDSPIPORTNO 0
 #  undef AVR_MMCSDSLOTNO

@@ -3,5 +3,5 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if ARCH_BOARD_TEENSY
+if ARCH_BOARD_TEENSY_20
 endif

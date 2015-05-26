@@ -277,8 +277,8 @@ config ARCH_BOARD_LPCXPRESSO_LPC1115
 	depends on ARCH_CHIP_LPC1115
 	select ARCH_HAVE_LEDS
 	---help---
-		The NXP LPCXpresso daughter board.  This board is based on the NXP
-		LPC1115.
+		The Embedded Artists LPCXpresso LPC1115 board featuring the NXP
+		LPC1115 MCU.
 
 config ARCH_BOARD_LPCXPRESSO
 	bool "NXP LPCExpresso LPC1768"
@@ -899,7 +899,7 @@ config ARCH_BOARD_SUREPIC32MX
 		http://www.sureelectronics.net/goods.php?id=1168 for further
 		information about the Sure DB-DP11215 board.
 
-config ARCH_BOARD_TEENSY
+config ARCH_BOARD_TEENSY_20
 	bool "PJRC Teensy++ 2.0 board"
 	depends on ARCH_CHIP_AT90USB1286
 	select ARCH_HAVE_LEDS
@@ -1237,7 +1237,7 @@ config ARCH_BOARD
 	default "stm32vldiscovery"         if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"           if ARCH_BOARD_MIKROE_STM32F4
 	default "sure-pic32mx"             if ARCH_BOARD_SUREPIC32MX
-	default "teensy"                   if ARCH_BOARD_TEENSY
+	default "teensy-2.0"               if ARCH_BOARD_TEENSY_20
 	default "teensy-lc"                if ARCH_BOARD_TEENSY_LC
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
@@ -1566,8 +1566,8 @@ endif
 if ARCH_BOARD_SUREPIC32MX
 source "configs/sure-pic32mx/Kconfig"
 endif
-if ARCH_BOARD_TEENSY
-source "configs/teensy/Kconfig"
+if ARCH_BOARD_TEENSY_20
+source "configs/teensy-2.0/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_LC
 source "configs/teensy-lc/Kconfig"

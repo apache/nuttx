@@ -1297,7 +1297,7 @@ nuttx
  |   |   `- README.txt
  |   |- sure-pic32mx/
  |   |   `- README.txt
- |   |- teensy/
+ |   |- teensy-2.0/
  |   |   `- README.txt
  |   |- teensy-lc/
  |   |   `- README.txt
