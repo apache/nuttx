@@ -36,6 +36,7 @@ config SAML21_XPLAINED_DFLL
 choice
 	prompt "DFLL Clock Source"
 	default SAML21_XPLAINED_DFLL_OSC16MSRC
+	depends on SAML21_XPLAINED_DFLL
 
 config SAML21_XPLAINED_DFLL_OSC16MSRC
 	bool "OSC16M"
@@ -49,6 +50,7 @@ endchoice # DFLL Clock Source
 choice
 	prompt "DFLL Operating Mode"
 	default SAML21_XPLAINED_DFLL_OPENLOOP
+	depends on SAML21_XPLAINED_DFLL
 
 config SAML21_XPLAINED_DFLL_OPENLOOP
 	bool "DFLL Open Loop Mode"

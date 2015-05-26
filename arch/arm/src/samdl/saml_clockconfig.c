@@ -864,8 +864,8 @@ static inline void sam_dfll48m_config(void)
   control |= OSCCTRL_DFLLCTRL_LLAW;     /* Lose lock after wake */
 #endif
 
-#ifndef BOARD_DFLL48M_RUNINSTDBY
-  control |= OSCCTRL_DFLLCTRL_RUNSTDBY;    /* Chill cycle disable */
+#ifdef BOARD_DFLL48M_RUNINSTDBY
+  control |= OSCCTRL_DFLLCTRL_RUNSTDBY; /* Run in standby */
 #endif
 
 #ifndef BOARD_DFLL48M_ENABLECHILLCYCLE
@@ -873,14 +873,14 @@ static inline void sam_dfll48m_config(void)
 #endif
 
 #ifndef BOARD_DFLL48M_QUICKLOCK
-  control |= OSCCTRL_DFLLCTRL_QLDIS; /* Quick lock disable */
+  control |= OSCCTRL_DFLLCTRL_QLDIS;    /* Quick lock disable */
 #endif
 
-#ifndef BOARD_DFLL48M_BPLCKC
-  control |= OSCCTRL_DFLLCTRL_BPLCKC; /* Bypass coarse clock */
+#ifdef BOARD_DFLL48M_BPLCKC
+  control |= OSCCTRL_DFLLCTRL_BPLCKC;   /* Bypass coarse clock */
 #endif
 
-#ifndef BOARD_DFLL48M_WAITLOCK
+#ifdef BOARD_DFLL48M_WAITLOCK
   control |= OSCCTRL_DFLLCTRL_WAITLOCK; /*  Wait lock */
 #endif
 
