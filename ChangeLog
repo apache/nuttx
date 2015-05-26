@@ -10432,4 +10432,8 @@
 	* include/nuttx/mtd/mtd.h:  Increase the size of the fields in the
 	  geometry structure (again) to support larger FLASH sizes.  Needed
 	  by Sébastien Lorquet (2015-05-26).
-
+	* SAM4CM and SAMA5D Free-running timer: Logic that samples the free
+	  running counter reads the pending interrupt status regsiter and
+	  can cause interrupts to be lost.  So, if when the status register
+	  is read, the logic must also handle the timer overflow event.
+	  Found and fixed by Max Neklyudov (2015-05-26).
