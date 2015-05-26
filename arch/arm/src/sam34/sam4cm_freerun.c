@@ -226,21 +226,19 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
 
   DEBUGASSERT(freerun && freerun->tch && ts);
 
-  /* Temporarily disable the overflow counter */
+  /* Temporarily disable the overflow counter.  NOTE that we have to be careful
+   * here because  sam_tc_getpending() will reset the pending interrupt status.
+   * If we do not handle the overflow here then, it will be lost.
+   */
 
   flags    = irqsave();
   overflow = freerun->overflow;
   counter  = sam_tc_getcounter(freerun->tch);
   sr       = sam_tc_getpending(freerun->tch);
   verify   = sam_tc_getcounter(freerun->tch);
-  irqrestore(flags);
-
-  tcvdbg("counter=%lu (%lu) overflow=%lu, sr=%08lx\n",
-         (unsigned long)counter,  (unsigned long)verify,
-         (unsigned long)overflow, (unsigned long)sr);
 
   /* If an interrupt was pending before we re-enabled interrupts,
-   * then our value of overflow needs to be incremented.
+   * then the overflow needs to be incremented.
    */
 
   if ((sr & TC_INT_COVFS) != 0)
@@ -252,9 +250,16 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
       overflow++;
       counter = verify;
 
-      tcvdbg("counter=%lu overflow=%lu\n",
-             (unsigned long)counter, (unsigned long)overflow);
+      /* Update freerun overflow counter. */
+
+      freerun->overflow = overflow;
     }
+
+  irqrestore(flags);
+
+  tcvdbg("counter=%lu (%lu) overflow=%lu, sr=%08lx\n",
+         (unsigned long)counter,  (unsigned long)verify,
+         (unsigned long)overflow, (unsigned long)sr);
 
   /* Convert the whole thing to units of microseconds.
    *
