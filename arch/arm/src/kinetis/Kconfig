@@ -10,6 +10,10 @@ choice
 	default ARCH_CHIP_MK60N512VMD100
 	depends on ARCH_CHIP_KINETIS
 
+config ARCH_CHIP_MK20DX256VLH7
+	bool "MK20DX256VLH7"
+	select ARCH_FAMILY_K20
+
 config ARCH_CHIP_MK40N512VLQ100
 	bool "MK40N512VLQ100"
 	select ARCH_FAMILY_K40
@@ -61,6 +65,10 @@ config ARCH_CHIP_MK60X256VMD100
 endchoice
 
 # Chip families
+
+config ARCH_FAMILY_K20
+	bool
+	default n
 
 config ARCH_FAMILY_K40
 	bool
