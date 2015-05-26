@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/kinetis/irq.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,13 +77,92 @@
 
 #define KINETIS_IRQ_EXTINT        (16)
 
+/* K20 Family ***********************************************************************
+ *
+ * The interrupt vectors  for the following parts is defined in Freescale document
+ * K20P64M72SF1RM
+ */
+
+#if defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+#  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
+#  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */
+#  define KINETIS_IRQ_DMACH2      (18)  /* Vector 18: DMA channel 2 transfer complete */
+#  define KINETIS_IRQ_DMACH3      (19)  /* Vector 19: DMA channel 3 transfer complete */
+#  define KINETIS_IRQ_DMACH4      (20)  /* Vector 20: DMA channel 4 transfer complete */
+#  define KINETIS_IRQ_DMACH5      (21)  /* Vector 21: DMA channel 5 transfer complete */
+#  define KINETIS_IRQ_DMACH6      (22)  /* Vector 22: DMA channel 6 transfer complete */
+#  define KINETIS_IRQ_DMACH7      (23)  /* Vector 23: DMA channel 7 transfer complete */
+#  define KINETIS_IRQ_DMACH8      (24)  /* Vector 24: DMA channel 8 transfer complete */
+#  define KINETIS_IRQ_DMACH9      (25)  /* Vector 25: DMA channel 9 transfer complete */
+#  define KINETIS_IRQ_DMACH10     (26)  /* Vector 26: DMA channel 10 transfer complete */
+#  define KINETIS_IRQ_DMACH11     (27)  /* Vector 27: DMA channel 11 transfer complete */
+#  define KINETIS_IRQ_DMACH12     (28)  /* Vector 28: DMA channel 12 transfer complete */
+#  define KINETIS_IRQ_DMACH13     (29)  /* Vector 29: DMA channel 13 transfer complete */
+#  define KINETIS_IRQ_DMACH14     (30)  /* Vector 30: DMA channel 14 transfer complete */
+#  define KINETIS_IRQ_DMACH15     (31)  /* Vector 31: DMA channel 15 transfer complete */
+#  define KINETIS_IRQ_DMAERR      (32)  /* Vector 32: DMA error interrupt channels 0-15 */
+#  define KINETIS_IRQ_FLASHCC     (34)  /* Vector 34: Flash memory command complete */
+#  define KINETIS_IRQ_FLASHRC     (35)  /* Vector 35: Flash memory read collision */
+#  define KINETIS_IRQ_SMCLVD      (36)  /* Vector 36: Mode Controller low-voltage
+                                         *            detect, low-voltage warning */
+#  define KINETIS_IRQ_LLWU        (37)  /* Vector 37: LLWU Normal Low Leakage Wakeup */
+#  define KINETIS_IRQ_WDOG        (38)  /* Vector 38: Watchdog */
+#  define KINETIS_IRQ_I2C0        (40)  /* Vector 40: I2C0 */
+#  define KINETIS_IRQ_I2C1        (41)  /* Vector 41: I2C1 */
+#  define KINETIS_IRQ_SPI0        (42)  /* Vector 42: SPI0 all sources */
+#  define KINETIS_IRQ_SPI1        (43)  /* Vector 43: SPI1 all sources */
+#  define KINETIS_IRQ_CAN0MB      (45)  /* Vector 45: CAN0 OR'ed Message buffer (0-15) */
+#  define KINETIS_IRQ_CAN0BO      (46)  /* Vector 46: CAN0 Bus Off */
+#  define KINETIS_IRQ_CAN0ERR     (47)  /* Vector 47: CAN0 Error */
+#  define KINETIS_IRQ_CAN0TW      (48)  /* Vector 48: CAN0 Transmit Warning */
+#  define KINETIS_IRQ_CAN0RW      (49)  /* Vector 49: CAN0 Receive Warning */
+#  define KINETIS_IRQ_CAN0WU      (50)  /* Vector 50: CAN0 Wake UP */
+//TODO UART0_LON
+#  define KINETIS_IRQ_UART0S      (61)  /* Vector 61: UART0 status */
+#  define KINETIS_IRQ_UART0E      (62)  /* Vector 62: UART0 error */
+#  define KINETIS_IRQ_UART1S      (63)  /* Vector 63: UART1 status */
+#  define KINETIS_IRQ_UART1E      (64)  /* Vector 64: UART1 error */
+#  define KINETIS_IRQ_UART2S      (65)  /* Vector 65: UART2 status */
+#  define KINETIS_IRQ_UART2E      (66)  /* Vector 66: UART2 error */
+#  define KINETIS_IRQ_ADC0        (73)  /* Vector 73: ADC0 */
+#  define KINETIS_IRQ_ADC1        (74)  /* Vector 74: ADC1 */
+#  define KINETIS_IRQ_CMP0        (75)  /* Vector 75: CMP0 */
+#  define KINETIS_IRQ_CMP1        (76)  /* Vector 76: CMP1 */
+#  define KINETIS_IRQ_CMP2        (77)  /* Vector 77: CMP2 */
+#  define KINETIS_IRQ_FTM0        (78)  /* Vector 78: FTM0 all sources */
+#  define KINETIS_IRQ_FTM1        (79)  /* Vector 79: FTM1 all sources */
+#  define KINETIS_IRQ_FTM2        (80)  /* Vector 80: FTM2 all sources */
+#  define KINETIS_IRQ_CMT         (81)  /* Vector 81: CMT */
+#  define KINETIS_IRQ_RTC         (82)  /* Vector 82: RTC alarm interrupt */
+//TODO RTC_SECOND
+#  define KINETIS_IRQ_PITCH0      (84)  /* Vector 84: PIT channel 0 */
+#  define KINETIS_IRQ_PITCH1      (85)  /* Vector 85: PIT channel 1 */
+#  define KINETIS_IRQ_PITCH2      (86)  /* Vector 86: PIT channel 2 */
+#  define KINETIS_IRQ_PITCH3      (87)  /* Vector 87: PIT channel 3 */
+#  define KINETIS_IRQ_PDB         (88)  /* Vector 88: PDB */
+#  define KINETIS_IRQ_USBOTG      (89)  /* Vector 88: USB OTG */
+#  define KINETIS_IRQ_USBCD       (90)  /* Vector 90: USB charger detect */
+#  define KINETIS_IRQ_DAC0        (97)  /* Vector 97: DAC0 */
+#  define KINETIS_IRQ_TSI         (99)  /* Vector 97: TSI all sources */
+#  define KINETIS_IRQ_MCG         (100) /* Vector 100: MCG */
+#  define KINETIS_IRQ_LPT         (101) /* Vector 101: Low power timer */
+#  define KINETIS_IRQ_PORTA       (103) /* Vector 103: Pin detect port A */
+#  define KINETIS_IRQ_PORTB       (104) /* Vector 104: Pin detect port B */
+#  define KINETIS_IRQ_PORTC       (105) /* Vector 105: Pin detect port C */
+#  define KINETIS_IRQ_PORTD       (106) /* Vector 106: Pin detect port D */
+#  define KINETIS_IRQ_PORTE       (107) /* Vector 107: Pin detect port E */
+#  define KINETIS_IRQ_SWI         (110) /* Vector 110: Software interrupt */
+
+#  define NR_VECTORS              (111) /* 111 vectors */
+#  define NR_IRQS                 (111) /* 94 interrupts but 111 IRQ numbers */
+
 /* K40 Family ***********************************************************************
  *
  * The interrupt vectors  for the following parts is defined in Freescale document
  * K40P144M100SF2RM
  */
 
-#if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) || \
+#elif defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) || \
     defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) || \
     defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
 
@@ -324,7 +403,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

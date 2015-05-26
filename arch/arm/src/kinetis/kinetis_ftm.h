@@ -54,8 +54,8 @@
 #define KINETIS_FTM_CNT_OFFSET      0x0004 /* Counter */
 #define KINETIS_FTM_MOD_OFFSET      0x0008 /* Modulo */
 
-#define KINETIS_FTM_CSC_OFFSET(n)   (0x000c+((n)<<3) /* Channel (n) Status and Control */
-#define KINETIS_FTM_CV_OFFSET(n)    (0x0010+((n)<<3) /* Channel (n) Value */
+#define KINETIS_FTM_CSC_OFFSET(n)   (0x000c+((n)<<3)) /* Channel (n) Status and Control */
+#define KINETIS_FTM_CV_OFFSET(n)    (0x0010+((n)<<3)) /* Channel (n) Value */
 #define KINETIS_FTM_C0SC_OFFSET     0x000c /* Channel 0 Status and Control */
 #define KINETIS_FTM_C0V_OFFSET      0x0010 /* Channel 0 Value */
 #define KINETIS_FTM_C1SC_OFFSET     0x0014 /* Channel 1 Status and Control */
@@ -479,7 +479,7 @@
                                                /* Bits 4-31: Reserved */
 /* FTM Software Output Control */
 
-#define FTM_SWOCTRL_CH7OC(n)         (1 << (n)) /* Bits 0-7: Channel (n) Software Output Control Enable */
+#define FTM_SWOCTRL_CHOC(n)         (1 << (n)) /* Bits 0-7: Channel (n) Software Output Control Enable */
 #define FTM_SWOCTRL_CH0OC            (1 << 0)  /* Bit 0:  Channel 0 Software Output Control Enable */
 #define FTM_SWOCTRL_CH1OC            (1 << 1)  /* Bit 1:  Channel 1 Software Output Control Enable */
 #define FTM_SWOCTRL_CH2OC            (1 << 2)  /* Bit 2:  Channel 2 Software Output Control Enable */
@@ -500,7 +500,7 @@
                                                /* Bits 16-31: Reserved */
 /* FTM PWM Load */
 
-#define FTM_PWMLOAD_CH7SEL(n)        (1 << (n)) /* Bits 0-7: Channel (n) Select */
+#define FTM_PWMLOAD_CHSEL(n)        (1 << (n)) /* Bits 0-7: Channel (n) Select */
 #define FTM_PWMLOAD_CH0SEL           (1 << 0)  /* Bit 0:  Channel 0 Select */
 #define FTM_PWMLOAD_CH1SEL           (1 << 1)  /* Bit 1:  Channel 1 Select */
 #define FTM_PWMLOAD_CH2SEL           (1 << 2)  /* Bit 2:  Channel 2 Select */
