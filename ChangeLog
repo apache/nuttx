@@ -10437,3 +10437,6 @@
 	  can cause interrupts to be lost.  So, if when the status register
 	  is read, the logic must also handle the timer overflow event.
 	  Found and fixed by Max Neklyudov (2015-05-26).
+	* arch/arm/include/kinetis and arch/arm/src/kinetis: Basic support
+	  for the Kinetis K20 architecture.  Taken from PX4.  This is the
+	  work of Jakob Odersky (2015-05-26).
