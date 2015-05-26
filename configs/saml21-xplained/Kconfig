@@ -25,12 +25,29 @@ config SAML21_XPLAINED_OSC16M_16MHZ
 
 endchoice # OSC16M Frequency
 
+config SAM21_XPLAINED_XOSC32K
+	bool "Enable XOSC32K"
+	default n
+
 config SAML21_XPLAINED_DFLL
 	bool "Use DFLL"
 	default n
 
 choice
-	prompt "DLL Operating Mode"
+	prompt "DFLL Clock Source"
+	default SAML21_XPLAINED_DFLL_OSC16MSRC
+
+config SAML21_XPLAINED_DFLL_OSC16MSRC
+	bool "OSC16M"
+
+config SAML21_XPLAINED_DFLL_XOSC32KSRC
+	bool "XOSCK32K"
+	select SAM21_XPLAINED_XOSC32K
+
+endchoice # DFLL Clock Source
+
+choice
+	prompt "DFLL Operating Mode"
 	default SAML21_XPLAINED_DFLL_OPENLOOP
 
 config SAML21_XPLAINED_DFLL_OPENLOOP
@@ -38,7 +55,6 @@ config SAML21_XPLAINED_DFLL_OPENLOOP
 
 config SAML21_XPLAINED_DFLL_CLOSEDLOOP
 	bool "DFLL Closed Loop Mode"
-	depends on EXPERIMENTAL
 
 config SAML21_XPLAINED_DFLL_RECOVERY
 	bool "DFLL USB Recovery Mode"
