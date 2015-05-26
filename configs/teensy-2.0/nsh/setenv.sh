@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/teensy/hello/setenv.sh
+# configs/teensy-2.0/nsh/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

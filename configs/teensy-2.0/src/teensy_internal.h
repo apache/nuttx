@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/teensy/src/pcblogic-internal.h
+ * configs/teensy-2.0/src/pcblogic-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_TEENSY_SRC_TEENSY_INTERNAL_H
-#define __CONFIGS_TEENSY_SRC_TEENSY_INTERNAL_H
+#ifndef __CONFIGS_TEENSY_20_SRC_TEENSY_INTERNAL_H
+#define __CONFIGS_TEENSY_20_SRC_TEENSY_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -99,4 +99,4 @@ void at90usb_ledinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_TEENSY_SRC_TEENSY_INTERNAL_H */
+#endif /* __CONFIGS_TEENSY_20_SRC_TEENSY_INTERNAL_H */

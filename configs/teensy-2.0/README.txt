@@ -415,11 +415,11 @@ Teensy++ Configuration Options
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=teensy
+       CONFIG_ARCH_BOARD=teensy-2.0
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_TEENSY=y
+       CONFIG_ARCH_BOARD_TEENSY_20=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -520,7 +520,7 @@ Common Configuration Notes
      can be selected as follow:
 
        cd tools
-       ./configure.sh teensy/<subdir>
+       ./configure.sh teensy-2.0/<subdir>
        cd -
        . ./setenv.sh
 
@@ -569,7 +569,7 @@ Configuration Sub-Directories
     IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.
 
     Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
-    believe that the current teensy/usbmsc configuration uses too
+    believe that the current teensy-2.0/usbmsc configuration uses too
     much SRAM for the system to behave sanely.  A lower memory footprint
     version of the mass storage driver will be required before this can
     be debugged.

@@ -286,8 +286,8 @@ configs/lm4f120-launchpad
   Instruments.
 
 configs/lpcxpresso-lpc1115
-  NuttX board support for the NXP LPCXpresso daughter board.  This board
-  is based on the NXP LPC1115.
+  NuttX board support for the Embedded Artists LPCXpresso LPC1115 board
+  featuring the NXP LPC1115 MCU.
 
 configs/lpcxpresso-lpc1768
   Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
@@ -602,7 +602,7 @@ configs/sure-pic32mx
   http://www.sureelectronics.net/goods.php?id=1168 for further
   information about the Sure DB-DP11215 board.
 
-configs/teensy
+configs/teensy-2.0
   This is the port of NuttX to the PJRC Teensy++ 2.0 board.  This board is
   developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
   on an Atmel AT90USB1286 MCU.

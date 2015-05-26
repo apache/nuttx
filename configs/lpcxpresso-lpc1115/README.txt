@@ -1,7 +1,8 @@
 README
 ^^^^^^
 
-README for NuttX port to the NXP the LPCXpresso board.
+README for NuttX port to the Embedded Artists LPCXpresso LPC1115 board
+featuring the NXP LPC1115 MCU.
 
 Contents
 ^^^^^^^^

@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/teensy/include/board.h
- * include/arch/board/board.h
+ * configs/teensy-2.0/include/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_TEENSY_INCLUDE_BOARD_H
-#define __CONFIGS_TEENSY_INCLUDE_BOARD_H
+#ifndef __CONFIGS_TEENSY_20_INCLUDE_BOARD_H
+#define __CONFIGS_TEENSY_20_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -96,4 +95,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_TEENSY_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_TEENSY_20_INCLUDE_BOARD_H */
