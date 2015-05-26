@@ -10427,4 +10427,6 @@
 	  From Alan Carvalho de Assis (2015-05-23).
 	* Fix numerous typos in configuration variable names.  Tracked down
 	  by Alan Carvalho de Assis (2015-05-23).
+	* configs/teensy-2.0:  Rename configs/teensy so that it is clearly
+	  distinguished from teensy-lc and teensy-3.1 (2015-05-15).
 
