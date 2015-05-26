@@ -10429,4 +10429,7 @@
 	  by Alan Carvalho de Assis (2015-05-23).
 	* configs/teensy-2.0:  Rename configs/teensy so that it is clearly
 	  distinguished from teensy-lc and teensy-3.1 (2015-05-15).
+	* include/nuttx/mtd/mtd.h:  Increase the size of the fields in the
+	  geometry structure (again) to support larger FLASH sizes.  Needed
+	  by Sébastien Lorquet (2015-05-26).
 
