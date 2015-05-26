@@ -512,14 +512,10 @@ static inline void sam_xosc32k_config(void)
               OSC32KCTRL_XOSC32K_EN1K     | OSC32KCTRL_XOSC32K_RUNSTDBY     |
               OSC32KCTRL_XOSC32K_ONDEMAND | OSC32KCTRL_XOSC32K_STARTUP_MASK |
               OSC32KCTRL_XOSC32K_WRTLOCK);
-  regval |= BOARD_XOSC32K_STARTUPTIME
+  regval |= BOARD_XOSC32K_STARTUPTIME;
 
 #ifdef BOARD_XOSC32K_ISCRYSTAL
   regval |= OSC32KCTRL_XOSC32K_XTALEN;
-#endif
-
-#ifdef BOARD_XOSC32K_AAMPEN
-  regval |= OSC32KCTRL_XOSC32K_AAMPEN;
 #endif
 
 #ifdef BOARD_XOSC32K_EN1KHZ
@@ -543,7 +539,7 @@ static inline void sam_xosc32k_config(void)
 
   /* Wait for XOSC32K to be ready */
 
-  while ((getreg32(SAM_OSC32CTRL_STATUS) & OSC32KCTRL_INT_XOSC32KRDY) == 0);
+  while ((getreg32(SAM_OSC32KCTRL_STATUS) & OSC32KCTRL_INT_XOSC32KRDY) == 0);
 
 #ifdef BOARD_XOSC32K_ONDEMAND
   /* Set the on-demand bit */
