@@ -10440,3 +10440,10 @@
 	* arch/arm/include/kinetis and arch/arm/src/kinetis: Basic support
 	  for the Kinetis K20 architecture.  Taken from PX4.  This is the
 	  work of Jakob Odersky (2015-05-26).
+	* net/: Move some ICMP event lists to the device structure.  That
+	  allows for both device-specific event processing and also devices
+	  to generate events like network down.  From Max Neklyudov (2015-05-27).
+	* net/: Extend Macs logic to ARP and ICMPv6.  Also found and fix
+	  several IPv6-related compilation errors that have crept in.  IPv6
+	  has been broken for awhile (2015-05-27).
+ 
