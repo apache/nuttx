@@ -98,8 +98,8 @@
 void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec)
 {
+  uint16_t result;
   uint8_t hdrlen;
-  uint8_t result;
 
   /* Set up for the callback.  We can't know in advance if the application
    * is going to send a IPv4 or an IPv6 packet, so this setup may not

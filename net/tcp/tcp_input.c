@@ -103,8 +103,8 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   unsigned int hdrlen;
   uint16_t tmp16;
   uint16_t flags;
+  uint16_t result;
   uint8_t  opt;
-  uint8_t  result;
   int      len;
   int      i;
 
