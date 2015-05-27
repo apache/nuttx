@@ -114,91 +114,14 @@
 #define CONSOLE_FCR_VALUE (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
                            UART_FCR_RXRST | UART_FCR_FIFOEN)
 
-/* Select a CCLK divider to produce the UART PCLK.  The strategy is to select the
- * smallest divisor that results in an solution within range of the 16-bit
- * DLM and DLL divisor:
+/**************************************************************************
+ * This Baud Rate configuration is based on idea suggested at LPCWare:
+ * www.lpcware.com/content/blog/lpc17xx-uart-simpler-way-calculate-baudrate-timming
  *
- *   BAUD = PCLK / (16 * DL), or
- *   DL   = PCLK / BAUD / 16
+ * The original code is for LPC17xx but with few modifications it worked
+ * fine in the LPC11xx as well.
  *
- * The PCLK is determined by the UART-specific divisor:
- *
- *   PCLK = CCLK / divisor
- *
- * Ignoring the fractional divider for now. (If you want to extend this driver
- * to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
- * the same peripheral and that logic could easily leveraged here).
- */
-
-/* Calculate and optimal PCLKSEL0/1 divisor.
- * First, check divisor == 1.  This works if the upper limit is met:
- *
- *   DL < 0xffff, or
- *   PCLK / BAUD / 16 < 0xffff, or
- *   CCLK / BAUD / 16 < 0xffff, or
- *   CCLK < BAUD * 0xffff * 16
- *   BAUD > CCLK / 0xffff / 16
- *
- * And the lower limit is met (we can't allow DL to get very close to one).
- *
- *   DL >= MinDL
- *   CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 16 / MinDL
- */
-
-#if CONSOLE_BAUD < (LPC11_CCLK / 16 / UART_MINDL)
-#  define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
-#  define CONSOLE_NUMERATOR (LPC11_CCLK)
-
-/* Check divisor == 2.  This works if:
- *
- *   2 * CCLK / BAUD / 16 < 0xffff, or
- *   BAUD > CCLK / 0xffff / 8
- *
- * And
- *
- *   2 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 8 / MinDL
- */
-
-#elif CONSOLE_BAUD < (LPC11_CCLK / 8 / UART_MINDL)
-#  define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK2
-#  define CONSOLE_NUMERATOR (LPC11_CCLK / 2)
-
-/* Check divisor == 4.  This works if:
- *
- *   4 * CCLK / BAUD / 16 < 0xffff, or
- *   BAUD > CCLK / 0xffff / 4
- *
- * And
- *
- *   4 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 4 / MinDL
- */
-
-#elif CONSOLE_BAUD < (LPC11_CCLK / 4 / UART_MINDL)
-# define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK4
-# define CONSOLE_NUMERATOR (LPC11_CCLK / 4)
-
-/* Check divisor == 8.  This works if:
- *
- *   8 * CCLK / BAUD / 16 < 0xffff, or
- *   BAUD > CCLK / 0xffff / 2
- *
- * And
- *
- *   8 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 2 / MinDL
- */
-
-#else /* if CONSOLE_BAUD < (LPC11_CCLK / 2 / UART_MINDL) */
-#  define CONSOLE_CCLKDIV   SYSCON_PCLKSEL_CCLK8
-#  define CONSOLE_NUMERATOR (LPC11_CCLK /  8)
-#endif
-
-/* Then this is the value to use for the DLM and DLL registers */
-
-#define CONSOLE_DL (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4))
+ **************************************************************************/
 
 /**************************************************************************
  * Private Types
@@ -250,7 +173,7 @@ void up_lowputc(char ch)
  *
  * Description:
  *   This performs basic initialization of the UART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
+ *   console.  Its purpose is to get the console output available as soon
  *   as possible.
  *
  *   The UART peripheral is configured using the following registers:
@@ -269,6 +192,11 @@ void lpc11_lowsetup(void)
 {
 #ifdef HAVE_UART
   uint32_t regval;
+  uint32_t coreclk = LPC11_MCLK;
+  uint32_t rate16 = 16 * CONSOLE_BAUD;
+  uint32_t dval;
+  uint32_t mval;
+  uint32_t dl;
 
   /* Enable clock for GPIO and I/O block */
 
@@ -276,19 +204,18 @@ void lpc11_lowsetup(void)
   regval |= (SYSCON_SYSAHBCLKCTRL_GPIO | SYSCON_SYSAHBCLKCTRL_IOCON);
   putreg32(regval, LPC11_SYSCON_SYSAHBCLKCTRL);
 
-
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
   /* Step 1: Pins configuration */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
   lpc11_configgpio(GPIO_UART0_TXD);
   lpc11_configgpio(GPIO_UART0_RXD);
 #endif
 
   /* Step 2: Enable power for all console UART and disable power for
-   * other UARTs
+   * other UARTs.
    */
-  regval = getreg32(LPC11_SYSCON_SYSAHBCLKCTRL);
 
+  regval = getreg32(LPC11_SYSCON_SYSAHBCLKCTRL);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= SYSCON_SYSAHBCLKCTRL_UART;
 #endif
@@ -298,10 +225,9 @@ void lpc11_lowsetup(void)
    * clocking for all other UARTs
    */
 
+  /* Don't divide the UART Clock it is be equal to Peripheral Clock */
+
   putreg32(1, LPC11_SYSCON_UARTCLKDIV);
-
-  /* Configure Baud rate */
-
 
   /* Configure the console (only) */
 
@@ -309,47 +235,72 @@ void lpc11_lowsetup(void)
 
   /* Clear fifos */
 
-  putreg32(UART_FCR_RXRST|UART_FCR_TXRST, CONSOLE_BASE+LPC11_UART_FCR_OFFSET);
+  putreg32(UART_FCR_RXRST | UART_FCR_TXRST,
+          CONSOLE_BASE + LPC11_UART_FCR_OFFSET);
 
   /* Set trigger */
 
-  putreg32(UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8, CONSOLE_BASE+LPC11_UART_FCR_OFFSET);
+  putreg32(UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8,
+           CONSOLE_BASE + LPC11_UART_FCR_OFFSET);
 
   /* Set up the LCR and set DLAB=1 */
 
-  putreg32(CONSOLE_LCR_VALUE|UART_LCR_DLAB, CONSOLE_BASE+LPC11_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE | UART_LCR_DLAB,
+           CONSOLE_BASE + LPC11_UART_LCR_OFFSET);
+
+  /* Configure the Baud rate
+   *
+   * The fractional is calculated as
+   * (PCLK % (16 * Baudrate)) / (16 * Baudrate)
+   */
+
+  dval = coreclk % rate16;
+
+  /* The PCLK / (16 * Baudrate) is fractional
+   * dval = pclk % rate16
+   * mval = rate16
+   * now normalize the ratio
+   * dval / mval = 1 / new_mval
+   * new_mval = mval / dval;
+   * new_dval = 1
+   */
+
+  if (dval > 0)
+    {
+      mval = rate16 / dval;
+      dval = 1;
+
+      if (mval > 12)
+        {
+          dval = 0;
+        }
+    }
+
+  dval &= 0xf;
+  mval &= 0xf;
+
+  dl = coreclk / (rate16 + rate16 * dval / mval);
 
   /* Set the BAUD divisor */
 
-  //putreg32(CONSOLE_DL >> 8, CONSOLE_BASE+LPC11_UART_DLM_OFFSET);
-  //putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE+LPC11_UART_DLL_OFFSET);
+  putreg32(dl & 0xff, CONSOLE_BASE + LPC11_UART_DLL_OFFSET);
+  putreg32(dl >> 8,   CONSOLE_BASE + LPC11_UART_DLM_OFFSET);
 
-  regval = getreg32(LPC11_UART0_LCR);
-  regval |=  UART_LCR_DLAB;
-  putreg32(regval, LPC11_UART0_LCR);
+  /* Set the BAUD fractional */
 
-  putreg32((1 << UART_FDR_MULVAL_SHIFT), LPC11_UART0_FDR);
-
-  putreg32(56, LPC11_UART0_DLL);
-
-  putreg32(1, LPC11_UART0_DLM);
-
-  regval = getreg32(LPC11_UART0_LCR);
-  regval &= ~UART_LCR_DLAB;
-  putreg32(regval, LPC11_UART0_LCR);
-
-  regval = getreg32(LPC11_UART0_LCR);
-  regval |= UART_LCR_WLS_8BIT;
-  putreg32(regval, LPC11_UART0_LCR);
+  putreg32((mval << UART_FDR_MULVAL_SHIFT) |
+           (dval << UART_FDR_DIVADDVAL_SHIFT),
+           CONSOLE_BASE + LPC11_UART_FDR_OFFSET);
 
   /* Clear DLAB */
 
-  //putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE+LPC11_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE + LPC11_UART_LCR_OFFSET);
 
   /* Configure the FIFOs */
 
-  putreg32(UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN,
-           CONSOLE_BASE+LPC11_UART_FCR_OFFSET);
+  putreg32(UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST | UART_FCR_RXRST |
+           UART_FCR_FIFOEN,
+           CONSOLE_BASE + LPC11_UART_FCR_OFFSET);
 #endif
 #endif /* HAVE_UART */
 }
