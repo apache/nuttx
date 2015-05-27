@@ -82,11 +82,32 @@ struct icmpv6_router_s
 #ifdef CONFIG_NETDEV_MULTINIC
   uint8_t snd_ifname[IFNAMSIZ];        /* Interface name */
 #endif
+  int16_t snd_result;                  /* Result of the send */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: icmpv6_router_terminate
+ ****************************************************************************/
+
+static void icmpv6_router_terminate(FAR struct icmpv6_router_s *state,
+                                    int result)
+{
+  /* Don't allow any further call backs. */
+
+  state->snd_sent         = true;
+  state->snd_result       = (int16_t)result;
+  state->snd_cb->flags    = 0;
+  state->snd_cb->priv     = NULL;
+  state->snd_cb->event    = NULL;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&state->snd_sem);
+}
 
 /****************************************************************************
  * Name: icmpv6_router_interrupt
@@ -102,18 +123,14 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 
   if (state)
     {
-#ifdef CONFIG_NETDEV_MULTINIC
-      /* Is this the device that we need to route this request? */
+      /* Check if the network is still up */
 
-      if (strncmp((FAR const char *)dev->d_ifname,
-                  (FAR const char *)state->snd_ifname, IFNAMSIZ) != 0)
+      if ((flags & NETDEV_DOWN) != 0)
         {
-          /* No... pass on this one and wait for the device that we want */
-
+          nlldbg("ERROR: Interface is down\n");
+          icmpv6_router_terminate(state, -ENETUNREACH);
           return flags;
         }
-
-#endif
 
       /* Check if the outgoing packet is available. It may have been claimed
        * by a send interrupt serving a different thread -OR- if the output
@@ -121,7 +138,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
        * we will just have to wait for the next polling cycle.
        */
 
-      if (dev->d_sndlen > 0 || (flags & ICMPv6_NEWDATA) != 0)
+      else if (dev->d_sndlen > 0 || (flags & ICMPv6_NEWDATA) != 0)
         {
           /* Another thread has beat us sending data or the buffer is busy,
            * Check for a timeout. If not timed out, wait for the next
@@ -157,14 +174,7 @@ static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
 
       /* Don't allow any further call backs. */
 
-      state->snd_sent         = true;
-      state->snd_cb->flags    = 0;
-      state->snd_cb->priv     = NULL;
-      state->snd_cb->event    = NULL;
-
-      /* Wake up the waiting thread */
-
-      sem_post(&state->snd_sem);
+      icmpv6_router_terminate(state, OK);
     }
 
   return flags;
@@ -212,7 +222,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    * want anything to happen until we are ready.
    */
 
-  state.snd_cb = icmpv6_callback_alloc();
+  state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
       ndbg("ERROR: Failed to allocate a cllback\n");
@@ -223,8 +233,9 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   /* Arm the callback */
 
   state.snd_sent      = false;
+  state.snd_result    = -EBUSY;
   state.snd_advertise = advertise;
-  state.snd_cb->flags = ICMPv6_POLL;
+  state.snd_cb->flags = (ICMPv6_POLL | NETDEV_DOWN);
   state.snd_cb->priv  = (FAR void *)&state;
   state.snd_cb->event = icmpv6_router_interrupt;
 
@@ -244,8 +255,8 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
     }
   while (!state.snd_sent);
 
-  icmpv6_callback_free(state.snd_cb);
-  ret = OK;
+  ret = state.snd_result;
+  icmpv6_callback_free(dev, state.snd_cb);
 
 errout_with_semaphore:
   sem_destroy(&state.snd_sem);

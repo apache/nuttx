@@ -91,7 +91,7 @@ struct icmpv6_ping_s
   int            png_result;  /* 0: success; <0:negated errno on fail */
   net_ipv6addr_t png_addr;    /* The peer to be ping'ed */
   uint16_t       png_id;      /* Used to match requests with replies */
-  uint16_t       png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
+  uint16_t       png_seqno;   /* IN: seqno to send; OUT: seqno received */
   uint16_t       png_datlen;  /* The length of data to send in the ECHO request */
   bool           png_sent;    /* true... the PING request has been sent */
 };
