@@ -70,6 +70,8 @@
  * Public Types
  ****************************************************************************/
 
+struct devif_callback_s; /* Forward reference */
+
 /* This structure collects information that is specific to a specific network
  * interface driver.  If the hardware platform supports only a single instance
  * of this structure.
@@ -189,6 +191,17 @@ struct net_driver_s
 
   sq_queue_t grplist;
 #endif
+
+  /* Application callbacks:
+   *
+   * Network device event handlers are retained in a 'list' and are called
+   * for events specified in the flags set within struct devif_callback_s.
+   * The following network event flags may be specified:
+   *
+   *   NETDEV_DOWN - The network is down
+   */
+
+  FAR struct devif_callback_s *d_callbacks;
 
   /* Driver callbacks */
 

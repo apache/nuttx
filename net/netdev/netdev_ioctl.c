@@ -65,6 +65,7 @@
 
 #include "socket/socket.h"
 #include "netdev/netdev.h"
+#include "devif/devif.h"
 #include "igmp/igmp.h"
 #include "icmpv6/icmpv6.h"
 #include "route/route.h"
@@ -1024,7 +1025,7 @@ void netdev_ifup(FAR struct net_driver_s *dev)
 
 void netdev_ifdown(FAR struct net_driver_s *dev)
 {
-  /* Make sure that the device supports the d_ifdown() method */
+  /* Check sure that the device supports the d_ifdown() method */
 
   if (dev->d_ifdown)
     {
@@ -1041,6 +1042,11 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
               dev->d_flags &= ~IFF_UP;
             }
         }
+
+      /* Notify clients that the network has been taken down */
+
+      (void)devif_callback_execute(dev, NULL, NETDEV_DOWN,
+                                   dev->d_callbacks);
     }
 }
 

@@ -69,16 +69,12 @@
 #define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMP_PING
-FAR struct devif_callback_s *g_icmp_echocallback = NULL;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -182,9 +178,9 @@ void icmp_input(FAR struct net_driver_s *dev)
    */
 
 #ifdef CONFIG_NET_ICMP_PING
-  else if (picmp->type == ICMP_ECHO_REPLY && g_icmp_echocallback)
+  else if (picmp->type == ICMP_ECHO_REPLY && dev->d_callbacks)
     {
-      (void)devif_callback_execute(dev, picmp, ICMP_ECHOREPLY, g_icmp_echocallback);
+      (void)devif_callback_execute(dev, picmp, ICMP_ECHOREPLY, dev->d_callbacks);
     }
 #endif
 

@@ -70,8 +70,8 @@
 
 /* Allocate a new ICMP data callback */
 
-#define icmp_callback_alloc()   devif_callback_alloc(&g_icmp_echocallback)
-#define icmp_callback_free(cb)  devif_callback_free(cb, &g_icmp_echocallback)
+#define icmp_callback_alloc()   devif_callback_alloc(&dev->d_callbacks)
+#define icmp_callback_free(cb)  devif_callback_free(cb, &dev->d_callbacks)
 
 /****************************************************************************
  * Private Types
@@ -87,7 +87,7 @@ struct icmp_ping_s
   int       png_result;  /* 0: success; <0:negated errno on fail */
   in_addr_t png_addr;    /* The peer to be ping'ed */
   uint16_t  png_id;      /* Used to match requests with replies */
-  uint16_t  png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
+  uint16_t  png_seqno;   /* IN: seqno to send; OUT: seqno received */
   uint16_t  png_datlen;  /* The length of data to send in the ECHO request */
   bool      png_sent;    /* true... the PING request has been sent */
 };
@@ -164,13 +164,25 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   nllvdbg("flags: %04x\n", flags);
   if (pstate)
     {
+      /* Check if the network is still up
+       *
+       * REVISIT: Now does the ICMP logic know that this was the correct device?
+       */
+
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          nlldbg("ERROR: Interface is down\n");
+          pstate->png_result = -ENETUNREACH;
+          goto end_wait;
+        }
+
       /* Check if this is a ICMP ECHO reply.  If so, return the sequence
        * number to the caller.  NOTE: We may not even have sent the
        * requested ECHO request; this could have been the delayed ECHO
        * response from a previous ping.
        */
 
-      if ((flags & ICMP_ECHOREPLY) != 0 && conn != NULL)
+      else if ((flags & ICMP_ECHOREPLY) != 0 && conn != NULL)
         {
           FAR struct icmp_iphdr_s *icmp = (FAR struct icmp_iphdr_s *)conn;
 
@@ -332,7 +344,22 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   net_lock_t save;
 #ifdef CONFIG_NET_ARP_SEND
   int ret;
+#endif
+ 
+#ifdef CONFIG_NETDEV_MULTINIC
+  FAR struct net_driver_s *dev;
 
+  /* Get the device that will be used to route this ICMP ECHO request */
+
+  dev = netdev_findby_ipv4addr(g_ipv4_allzeroaddr, addr);
+  if (dev == 0)
+    {
+      ndbg("ERROR: Not reachable\n");
+      return -ENETUNREACH;
+    }
+#endif
+
+#ifdef CONFIG_NET_ARP_SEND
   /* Make sure that the IP address mapping is in the ARP table */
 
   ret = arp_send(addr);
@@ -362,7 +389,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
   state.png_cb = icmp_callback_alloc();
   if (state.png_cb)
     {
-      state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY);
+      state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY | NETDEV_DOWN);
       state.png_cb->priv    = (void*)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
@@ -370,7 +397,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
       /* Notify the device driver of the availability of TX data */
 
 #ifdef CONFIG_NETDEV_MULTINIC
-      netdev_ipv4_txnotify(g_ipv4_allzeroaddr, state.png_addr);
+      netdev_ipv4_txnotify_dev(dev);
 #else
       netdev_ipv4_txnotify(state.png_addr);
 #endif

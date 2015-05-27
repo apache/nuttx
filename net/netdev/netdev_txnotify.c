@@ -166,4 +166,35 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr)
 }
 #endif /* CONFIG_NET_IPv6 */
 
+/****************************************************************************
+ * Function: netdev_ipv4_txnotify_dev
+ *
+ * Description:
+ *   Notify the device driver that new TX data is available.  This variant
+ *   would be called when the upper level logic already understands how the
+ *   packet will be routed.
+ *
+ * Parameters:
+ *   dev - The network device driver state structure.
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_MULTINIC
+void netdev_ipv4_txnotify_dev(FAR struct net_driver_s *dev)
+{
+  if (dev && dev->d_txavail)
+    {
+      /* Notify the device driver that new TX data is available. */
+
+      (void)dev->d_txavail(dev);
+    }
+}
+#endif /* CONFIG_NET_IPv6 */
+
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

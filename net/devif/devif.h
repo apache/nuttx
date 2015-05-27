@@ -115,6 +115,7 @@
  *                  OUT: Cleared (only) by the socket layer logic to indicate
  *                       that the reply was processed, suppressing further
  *                       attempts to process the reply.
+ *   NETDEV_DOWN:    IN: The network device has been taken down.
  */
 
 #define TCP_ACKDATA      (1 << 0)
@@ -138,8 +139,10 @@
 #define TCP_TIMEDOUT     (1 << 9)
 #define ICMP_ECHOREPLY   (1 << 10)
 #define ICMPv6_ECHOREPLY ICMP_ECHOREPLY
+#define NETDEV_DOWN      (1 << 11)
 
-#define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT)
+#define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | \
+                         TCP_TIMEDOUT | NETDEV_DOWN)
 
 /* IPv4/IPv6 Helpers */
 

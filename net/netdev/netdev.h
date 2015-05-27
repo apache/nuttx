@@ -130,6 +130,7 @@ FAR struct net_driver_s *netdev_default(void);
 #ifdef CONFIG_NET_IPv4
 #  ifdef CONFIG_NETDEV_MULTINIC
 void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
+void netdev_ipv4_txnotify_dev(FAR struct net_driver_s *dev);
 #  else
 void netdev_ipv4_txnotify(in_addr_t ripaddr);
 #  endif
