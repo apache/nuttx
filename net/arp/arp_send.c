@@ -342,7 +342,7 @@ int arp_send(in_addr_t ipaddr)
 
       state.snd_sent      = false;
       state.snd_result    = -EBUSY;
-      state.snd_cb->flags = ARP_POLL;
+      state.snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = arp_send_interrupt;
 
