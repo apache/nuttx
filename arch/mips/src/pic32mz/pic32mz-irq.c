@@ -276,7 +276,7 @@ void up_disable_irq(int irq)
 
   /* Disable the interrupt by clearing the associated bit in the IEC register */
 
-  DEBUGASSERT((unsigned)irq < NR_IRQS)
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
   regaddr = pic32mz_iecclr(irq);
   bitno   = (unsigned)irq & 31;
 

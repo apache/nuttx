@@ -568,7 +568,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
   dev   = inode->i_private;
 
-  DEBUGASSERT(dev, dev->priv)
+  DEBUGASSERT(dev, dev->priv);
   priv = (struct efm32_leuart_s*)dev->priv;
 
   switch (cmd)
