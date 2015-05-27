@@ -448,12 +448,12 @@ struct stm32_usbdev_s
    *   the accompanying EP0 IN data in ep0data[] before the SETUP command is
    *   processed.
    *
-   *   For IN SETUP requests, the DATA phase will occurr AFTER the SETUP
+   *   For IN SETUP requests, the DATA phase will occur AFTER the SETUP
    *   control request is processed.  In that case, ep0data[] may be used as
    *   the response buffer.
    *
    * ep0datlen
-   *   Lenght of OUT DATA received in ep0data[] (Not used with OUT data)
+   *   Length of OUT DATA received in ep0data[] (Not used with OUT data)
    */
 
   struct usb_ctrlreq_s    ctrlreq;
@@ -681,7 +681,7 @@ static const struct usbdev_ops_s g_devops =
   .pullup      = stm32_pullup,
 };
 
-/* Device error strings that may be enabled for more desciptive USB trace
+/* Device error strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -723,7 +723,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 };
 #endif
 
-/* Interrupt event strings that may be enabled for more desciptive USB trace
+/* Interrupt event strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -803,7 +803,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
+  /* Is this the same value that we read from the same register last time?  Are
    * we polling the register?  If so, suppress some of the output.
    */
 
@@ -1104,7 +1104,7 @@ static void stm32_epin_transfer(FAR struct stm32_ep_s *privep,
   regval |= (pktcnt << OTGFS_DIEPTSIZ_PKTCNT_SHIFT);
   regval |= ((uint32_t)nbytes << OTGFS_DIEPTSIZ_XFRSIZ_SHIFT);
 
-  /* If this is an isconchronous endpoint, then set the multi-count field to
+  /* If this is an isochronous endpoint, then set the multi-count field to
    * the PKTCNT as well.
    */
 
@@ -1391,7 +1391,7 @@ static void stm32_rxfifo_read(FAR struct stm32_ep_s *privep,
   int i;
 
   /* Get the address of the RxFIFO.  Note:  there is only one RxFIFO so
-   * we might as well use the addess associated with EP0.
+   * we might as well use the address associated with EP0.
    */
 
   regaddr = STM32_OTGFS_DFIFO_DEP(EP0);
@@ -1435,7 +1435,7 @@ static void stm32_rxfifo_discard(FAR struct stm32_ep_s *privep, int len)
       int i;
 
       /* Get the address of the RxFIFO  Note:  there is only one RxFIFO so
-       * we might as well use the addess associated with EP0.
+       * we might as well use the address associated with EP0.
        */
 
       regaddr = STM32_OTGFS_DFIFO_DEP(EP0);
@@ -2147,7 +2147,7 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
                     {
                       usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_DEVGETSTATUS), 0);
 
-                      /* Features:  Remote Wakeup and selfpowered */
+                      /* Features:  Remote Wakeup and self-powered */
 
                       priv->ep0data[0]  = (priv->selfpowered << USB_FEATURE_SELFPOWERED);
                       priv->ep0data[0] |= (priv->wakeup      << USB_FEATURE_REMOTEWAKEUP);
@@ -2796,7 +2796,7 @@ static inline void stm32_epin_txfifoempty(FAR struct stm32_usbdev_s *priv, int e
   FAR struct stm32_ep_s *privep = &priv->epin[epno];
 
   /* Continue processing the write request queue.  This may mean sending
-   * more data from the exisiting request or terminating the current requests
+   * more data from the existing request or terminating the current requests
    * and (perhaps) starting the IN transfer from the next write request.
    */
 
@@ -3721,7 +3721,7 @@ static void stm32_enablegonak(FAR struct stm32_ep_s *privep)
 
 #else
   /* Since we are in the interrupt handler, we cannot wait inline for the
-   * GONAKEFF because it cannot occur until service th RXFLVL global interrupt
+   * GONAKEFF because it cannot occur until service the RXFLVL global interrupt
    * and pop the OUTNAK word from the RxFIFO.
    *
    * Perhaps it is sufficient to wait for Global OUT NAK status to be reported
@@ -4059,7 +4059,7 @@ static void stm32_epout_disable(FAR struct stm32_ep_s *privep)
 
   stm32_putreg(OTGFS_DOEPINT_EPDISD, STM32_OTGFS_DOEPINT(privep->epphy));
 
-  /* Then disble the Global OUT NAK mode to continue receiving data
+  /* Then disable the Global OUT NAK mode to continue receiving data
    * from other non-disabled OUT endpoints.
    */
 
@@ -4388,7 +4388,7 @@ static int stm32_ep_submit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *
                 }
             }
 
-          /* If the request was added to an OUT endoutput, then attempt to
+          /* If the request was added to an OUT endpoint, then attempt to
            * setup a read into the request data buffer now (this will, of
            * course, fail if there is already a read in place).
            */
