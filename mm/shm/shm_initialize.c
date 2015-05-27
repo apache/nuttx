@@ -164,7 +164,7 @@ int shm_group_initialize(FAR struct task_group_s *group)
 void shm_group_release(FAR struct task_group_s *group)
 {
   GRAN_HANDLE handle;
-  DEBUGASSERT(group)
+  DEBUGASSERT(group);
 
   handle = group->tg_shm.gs_handle;
   if (handle)

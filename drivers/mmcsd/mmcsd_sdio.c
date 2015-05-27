@@ -1559,7 +1559,7 @@ static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
 #endif
   ssize_t ret;
 
-  DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0)
+  DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0);
 
 #ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
   /* Read each block using only the single block transfer method */
@@ -1937,7 +1937,7 @@ static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
 #endif
   ssize_t ret;
 
-  DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0)
+  DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0);
 
 #ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
   /* Write each block using only the single block transfer method */
