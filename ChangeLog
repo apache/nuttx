@@ -10446,4 +10446,6 @@
 	* net/: Extend Macs logic to ARP and ICMPv6.  Also found and fix
 	  several IPv6-related compilation errors that have crept in.  IPv6
 	  has been broken for awhile (2015-05-27).
- 
+	* net/tcp:  Fix an important TCP networking bug: 16-bit flags was
+	  being converted to 8-bits in a few locations, causing loss of
+	  status indications (2015-05-27).
