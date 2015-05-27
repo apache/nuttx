@@ -610,7 +610,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
          paddr, maddr, ntransfers, scr);
 
 #ifdef CONFIG_STM32_DMACAPABLE
-  DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr))
+  DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr));
 #endif
 
   /* "If the stream is enabled, disable it by resetting the EN bit in the
