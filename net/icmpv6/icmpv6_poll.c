@@ -97,7 +97,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev)
 
   /* Perform the application callback */
 
-  (void)devif_callback_execute(dev, NULL, ICMPv6_POLL, g_icmpv6_conn.list);
+  (void)devif_callback_execute(dev, NULL, ICMPv6_POLL, dev->d_callbacks);
 }
 
 #endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_ICMPv6_NEIGHBOR */

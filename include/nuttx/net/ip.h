@@ -336,8 +336,8 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
  *   of:
  *
  *     1. An 80-bit prefix of zeros,
- *     2. Te next 16 bits are one, and
- *     3. he remaining, least-significant 32 bits contain the IPv4 address.
+ *     2. The next 16 bits are one, and
+ *     3. The remaining, least-significant 32 bits contain the IPv4 address.
  *
  *   This macro encodes an IPv4 address in an IPv6 address in this fashion.
  *
@@ -355,8 +355,8 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
     { \
       memset(ipv6addr, 0, 5 * sizeof(uint16_t)); \
       ipv6addr[5] = 0xffff; \
-      ipv6addr[6] = (uint16_t)((uint32_t)ip4addr >> 16); \
-      ipv6addr[7] = (uint16_t)ip4addr & 0xffff; \
+      ipv6addr[6] = (uint16_t)((uint32_t)ipv4addr >> 16); \
+      ipv6addr[7] = (uint16_t)ipv4addr & 0xffff; \
     } \
   while (0)
 

@@ -87,8 +87,8 @@
 
 /* Allocate a new ARP data callback */
 
-#define arp_callback_alloc(conn)   devif_callback_alloc(&(conn)->list)
-#define arp_callback_free(conn,cb) devif_callback_free(cb, &(conn)->list)
+#define arp_callback_alloc(dev)   devif_callback_alloc(&(dev)->d_callbacks)
+#define arp_callback_free(dev,cb) devif_callback_free(cb, &(dev)->d_callbacks)
 
 /****************************************************************************
  * Public Types
@@ -140,6 +140,7 @@ struct arp_send_s
 #ifdef CONFIG_NETDEV_MULTINIC
   uint8_t   snd_ifname[IFNAMSIZ];      /* Interface name */
 #endif
+  int16_t   snd_result;                /* The result of the send operation */
   in_addr_t snd_ipaddr;                /* The IP address to be queried */
 };
 #endif
@@ -170,12 +171,6 @@ struct arp_notify_s
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#ifdef CONFIG_NET_ARP_SEND
-/* This is the singleton "connection" structure */
-
-extern struct arp_conn_s g_arp_conn;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes

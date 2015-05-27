@@ -295,7 +295,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    */
 
   save = net_lock();
-  state.snd_cb = icmpv6_callback_alloc();
+  state.snd_cb = icmpv6_callback_alloc(dev);
   if (!state.snd_cb)
     {
       ndbg("ERROR: Failed to allocate a cllback\n");
@@ -395,7 +395,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
     }
 
   sem_destroy(&state.snd_sem);
-  icmpv6_callback_free(state.snd_cb);
+  icmpv6_callback_free(dev, state.snd_cb);
 errout_with_lock:
   net_unlock(save);
 errout:

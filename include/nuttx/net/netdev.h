@@ -520,7 +520,7 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
  * Function: netdev_ipv6_hdrlen
  *
  * Description:
- *    Provide header lenght for interface based on device
+ *    Provide header length for interface based on device
  *
  * Input Parameters:
  *   dev Device structure pointer

@@ -55,8 +55,8 @@
 
 /* Allocate a new ICMPv6 data callback */
 
-#define icmpv6_callback_alloc()  devif_callback_alloc(&g_icmpv6_conn.list)
-#define icmpv6_callback_free(cb) devif_callback_free(cb, &g_icmpv6_conn.list)
+#define icmpv6_callback_alloc(dev)  devif_callback_alloc(&(dev)->d_callbacks)
+#define icmpv6_callback_free(dev,cb) devif_callback_free(cb, &(dev)->d_callbacks)
 
 /****************************************************************************
  * Public Type Definitions
@@ -110,12 +110,6 @@ extern "C"
 {
 #else
 #  define EXTERN extern
-#endif
-
-#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-/* This is the singleton "connection" structure for TX polls and echo replies */
-
-EXTERN struct icmpv6_conn_s g_icmpv6_conn;
 #endif
 
 /****************************************************************************

@@ -70,8 +70,8 @@
 
 /* Allocate a new ICMP data callback */
 
-#define icmp_callback_alloc()   devif_callback_alloc(&dev->d_callbacks)
-#define icmp_callback_free(cb)  devif_callback_free(cb, &dev->d_callbacks)
+#define icmp_callback_alloc(dev)   devif_callback_alloc(&(dev)->d_callbacks)
+#define icmp_callback_free(dev,cb)  devif_callback_free(cb, &(dev)->d_callbacks)
 
 /****************************************************************************
  * Private Types
@@ -162,12 +162,10 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   int i;
 
   nllvdbg("flags: %04x\n", flags);
+
   if (pstate)
     {
-      /* Check if the network is still up
-       *
-       * REVISIT: Now does the ICMP logic know that this was the correct device?
-       */
+      /* Check if the network is still up */
 
       if ((flags & NETDEV_DOWN) != 0)
         {
@@ -340,24 +338,25 @@ end_wait:
 int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
               int dsecs)
 {
+  FAR struct net_driver_s *dev;
   struct icmp_ping_s state;
   net_lock_t save;
 #ifdef CONFIG_NET_ARP_SEND
   int ret;
 #endif
  
-#ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
-
   /* Get the device that will be used to route this ICMP ECHO request */
 
+#ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv4addr(g_ipv4_allzeroaddr, addr);
+#else
+  dev = netdev_findby_ipv4addr(addr);
+#endif
   if (dev == 0)
     {
       ndbg("ERROR: Not reachable\n");
       return -ENETUNREACH;
     }
-#endif
 
 #ifdef CONFIG_NET_ARP_SEND
   /* Make sure that the IP address mapping is in the ARP table */
@@ -386,7 +385,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
   /* Set up the callback */
 
-  state.png_cb = icmp_callback_alloc();
+  state.png_cb = icmp_callback_alloc(dev);
   if (state.png_cb)
     {
       state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY | NETDEV_DOWN);
@@ -396,11 +395,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
       /* Notify the device driver of the availability of TX data */
 
-#ifdef CONFIG_NETDEV_MULTINIC
-      netdev_ipv4_txnotify_dev(dev);
-#else
-      netdev_ipv4_txnotify(state.png_addr);
-#endif
+      netdev_txnotify_dev(dev);
 
       /* Wait for either the full round trip transfer to complete or
        * for timeout to occur. (1) net_lockedwait will also terminate if a
@@ -412,7 +407,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
       nllvdbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
-      icmp_callback_free(state.png_cb);
+      icmp_callback_free(dev, state.png_cb);
     }
 
   net_unlock(save);

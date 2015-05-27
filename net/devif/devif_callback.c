@@ -216,8 +216,18 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *   This is called internally as part of uIP initialization and should not
  *   be accessed from the application or socket layer.
  *
+ * Input parameters:
+ *   dev - The network device state structure associated with the network
+ *     device that initiated the callback event.
+ *   pvconn - Holds a reference to the TCP connection structure or the UDP
+ *     port structure.  May be NULL if the even is not related to a TCP
+ *     connection or UDP port.
+ *
+ * Returned value:
+ *   The updated flags as modified by the callback functions.
+ *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   This function is called with the network locked.
  *
  ****************************************************************************/
 
