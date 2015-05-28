@@ -1045,8 +1045,7 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
 
       /* Notify clients that the network has been taken down */
 
-      (void)devif_callback_execute(dev, NULL, NETDEV_DOWN,
-                                   dev->d_callbacks);
+      (void)devif_dev_event(dev, NULL, NETDEV_DOWN);
     }
 }
 

@@ -87,8 +87,10 @@
 
 /* Allocate a new ARP data callback */
 
-#define arp_callback_alloc(dev)   devif_callback_alloc(&(dev)->d_callbacks)
-#define arp_callback_free(dev,cb) devif_callback_free(cb, &(dev)->d_callbacks)
+#define arp_callback_alloc(dev) \
+  devif_callback_alloc(dev, &(dev)->d_conncb)
+#define arp_callback_free(dev,cb) \
+  devif_callback_free(dev, cb, &(dev)->d_conncb)
 
 /****************************************************************************
  * Public Types

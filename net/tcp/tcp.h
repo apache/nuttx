@@ -62,8 +62,8 @@
 
 /* Allocate a new TCP data callback */
 
-#define tcp_callback_alloc(conn)   devif_callback_alloc(&conn->list)
-#define tcp_callback_free(conn,cb) devif_callback_free(cb, &conn->list)
+#define tcp_callback_alloc(conn)   devif_callback_alloc(NULL, &conn->list)
+#define tcp_callback_free(conn,cb) devif_callback_free(NULL, cb, &conn->list)
 
 /* Get the current maximum segment size that can be sent on the current
  * TCP connection.

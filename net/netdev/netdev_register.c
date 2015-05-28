@@ -249,7 +249,8 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       /* There are no clients of the device yet */
 
-      dev->d_callbacks = NULL;
+      dev->d_conncb = NULL;
+      dev->d_devcb = NULL;
 
       /* Get the next available device number and sssign a device name to
        * the interface

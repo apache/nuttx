@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif_callback.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,10 +82,11 @@ static FAR struct devif_callback_s *g_cbfreelist = NULL;
 void devif_callback_init(void)
 {
   int i;
+
   for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
     {
-      g_cbprealloc[i].flink = g_cbfreelist;
-      g_cbfreelist          = &g_cbprealloc[i];
+      g_cbprealloc[i].nxtconn = g_cbfreelist;
+      g_cbfreelist = &g_cbprealloc[i];
     }
 }
 
@@ -94,15 +95,15 @@ void devif_callback_init(void)
  *
  * Description:
  *   Allocate a callback container from the free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
  *
  ****************************************************************************/
 
-FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **list)
+FAR struct devif_callback_s *
+  devif_callback_alloc(FAR struct net_driver_s *dev,
+                       FAR struct devif_callback_s **list)
 {
   FAR struct devif_callback_s *ret;
   net_lock_t save;
@@ -115,19 +116,25 @@ FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **
     {
       /* Remove the next instance from the head of the free list */
 
-      g_cbfreelist = ret->flink;
+      g_cbfreelist = ret->nxtconn;
       memset(ret, 0, sizeof(struct devif_callback_s));
+
+      /* Add the newly allocated instance to the head of the device event
+       * list.
+       */
+      
+      if (dev)
+        {
+           ret->nxtdev  = dev->d_devcb;
+           dev->d_devcb = ret;
+        }
 
       /* Add the newly allocated instance to the head of the specified list */
 
       if (list)
         {
-           ret->flink = *list;
-           *list      = ret;
-        }
-      else
-        {
-           ret->flink   = NULL;
+           ret->nxtconn = *list;
+           *list = ret;
         }
     }
 #ifdef CONFIG_DEBUG
@@ -146,15 +153,14 @@ FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **
  *
  * Description:
  *   Return a callback container to the free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
  *
  ****************************************************************************/
 
-void devif_callback_free(FAR struct devif_callback_s *cb,
+void devif_callback_free(FAR struct net_driver_s *dev,
+                         FAR struct devif_callback_s *cb,
                          FAR struct devif_callback_s **list)
 {
   FAR struct devif_callback_s *prev;
@@ -173,48 +179,71 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
       while (curr != NULL)
         {
           DEBUGASSERT(cb != curr);
-          curr = curr->flink;
+          curr = curr->nxtconn;
         }
 #endif
 
-      /* Find the callback structure in the connection's list */
+      /* Find the callback structure in the device event list */
+
+      if (dev)
+        {
+          for (prev = NULL, curr = dev->d_devcb;
+               curr && curr != cb;
+               prev = curr, curr = curr->nxtdev);
+
+          /* Remove the structure from the device event list */
+
+          DEBUGASSERT(curr);
+          if (curr)
+            {
+              if (prev)
+                {
+                  prev->nxtdev = cb->nxtdev;
+                }
+              else
+                {
+                  dev->d_devcb = cb->nxtdev;
+                }
+            }
+        }
+
+      /* Find the callback structure in the connection event list */
 
       if (list)
         {
           for (prev = NULL, curr = *list;
                curr && curr != cb;
-               prev = curr, curr = curr->flink);
+               prev = curr, curr = curr->nxtconn);
 
-          /* Remove the structure from the connection's list */
+          /* Remove the structure from the connection event list */
 
+          DEBUGASSERT(curr);
           if (curr)
             {
               if (prev)
                 {
-                  prev->flink = cb->flink;
+                  prev->nxtconn = cb->nxtconn;
                 }
               else
                 {
-                  *list = cb->flink;
+                  *list = cb->nxtconn;
                 }
             }
         }
 
       /* Put the structure into the free list */
 
-      cb->flink    = g_cbfreelist;
+      cb->nxtconn = g_cbfreelist;
       g_cbfreelist = cb;
       net_unlock(save);
     }
 }
 
 /****************************************************************************
- * Function: devif_callback_execute
+ * Function: devif_conn_event
  *
  * Description:
- *   Execute a list of callbacks.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
+ *   Execute a list of callbacks using the packet event chain.
  *
  * Input parameters:
  *   dev - The network device state structure associated with the network
@@ -222,6 +251,8 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
  *     port structure.  May be NULL if the even is not related to a TCP
  *     connection or UDP port.
+ *   flags - The bit set of events to be notified.
+ *   list - The list to traverse in performing the notifications
  *
  * Returned value:
  *   The updated flags as modified by the callback functions.
@@ -231,8 +262,8 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *
  ****************************************************************************/
 
-uint16_t devif_callback_execute(FAR struct net_driver_s *dev, void *pvconn,
-                                uint16_t flags, FAR struct devif_callback_s *list)
+uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
+                          uint16_t flags, FAR struct devif_callback_s *list)
 {
   FAR struct devif_callback_s *next;
   net_lock_t save;
@@ -249,7 +280,7 @@ uint16_t devif_callback_execute(FAR struct net_driver_s *dev, void *pvconn,
        * list.
        */
 
-      next = list->flink;
+      next = list->nxtconn;
 
       /* Check if this callback handles any of the events in the flag set */
 
@@ -267,6 +298,71 @@ uint16_t devif_callback_execute(FAR struct net_driver_s *dev, void *pvconn,
       /* Set up for the next time through the loop */
 
       list = next;
+    }
+
+  net_unlock(save);
+  return flags;
+}
+
+/****************************************************************************
+ * Function: devif_dev_event
+ *
+ * Description:
+ *   Execute a list of callbacks using the device event chain.
+ *
+ * Input parameters:
+ *   dev - The network device state structure associated with the network
+ *     device that initiated the callback event.
+ *   pvconn - Holds a reference to the TCP connection structure or the UDP
+ *     port structure.  May be NULL if the even is not related to a TCP
+ *     connection or UDP port.
+ *   flags - The bit set of events to be notified.
+ *
+ * Returned value:
+ *   The updated flags as modified by the callback functions.
+ *
+ * Assumptions:
+ *   This function is called with the network locked.
+ *
+ ****************************************************************************/
+
+uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
+                         uint16_t flags)
+{
+  FAR struct devif_callback_s *cb;
+  FAR struct devif_callback_s *next;
+  net_lock_t save;
+
+  /* Loop for each callback in the list and while there are still events
+   * set in the flags set.
+   */
+
+  save = net_lock();
+  for (cb = dev->d_devcb; cb != NULL && flags != 0; cb = next)
+    {
+      /* Save the pointer to the next callback in the lists.  This is done
+       * because the callback action might delete the entry pointed to by
+       * list.
+       */
+
+      next = cb->nxtdev;
+
+      /* Check if this callback handles any of the events in the flag set */
+
+      if (cb->event && (flags & cb->flags) != 0)
+        {
+          /* Yes.. perform the callback.  Actions perform by the callback
+           * may delete the current list entry or add a new list entry to
+           * beginning of the list (which will be ignored on this pass)
+           */
+
+          nllvdbg("Call event=%p with flags=%04x\n", cb->event, flags);
+          flags = cb->event(dev, pvconn, cb->priv, flags);
+        }
+
+      /* Set up for the next time through the loop */
+
+      cb = next;
     }
 
   net_unlock(save);

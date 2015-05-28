@@ -790,7 +790,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   for (cb = conn->list; cb; cb = next)
     {
-      next = cb->flink;
+      next = cb->nxtconn;
       tcp_callback_free(conn, cb);
     }
 

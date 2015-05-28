@@ -291,7 +291,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
         /* Dispatch the ECHO reply to the waiting thread */
 
-        flags = devif_callback_execute(dev, icmp, flags, dev->d_callbacks);
+        flags = devif_conn_event(dev, icmp, flags, dev->d_conncb);
 
         /* If the ECHO reply was not handled, then drop the packet */
 

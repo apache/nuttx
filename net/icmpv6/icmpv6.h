@@ -55,8 +55,10 @@
 
 /* Allocate a new ICMPv6 data callback */
 
-#define icmpv6_callback_alloc(dev)  devif_callback_alloc(&(dev)->d_callbacks)
-#define icmpv6_callback_free(dev,cb) devif_callback_free(cb, &(dev)->d_callbacks)
+#define icmpv6_callback_alloc(dev) \
+  devif_callback_alloc(dev, &(dev)->d_conncb)
+#define icmpv6_callback_free(dev,cb) \
+  devif_callback_free(dev, cb, &(dev)->d_conncb)
 
 /****************************************************************************
  * Public Type Definitions

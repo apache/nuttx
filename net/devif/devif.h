@@ -214,22 +214,26 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Describes a device interface callback
+/* Describes a connection/device event callback interface
  *
- *   flink   - Supports a singly linked list
+ *   nxtconn - Supports a singly linked list that supports connection
+ *             specific event handlers.
+ *   nxtdev  - Supports a singly linked list that supports device specific
+ *             event handlers
  *   event   - Provides the address of the callback function entry point.
- *             pvconn is a pointer to one of struct tcp_conn_s or struct
- *             udp_conn_s.
+ *             pvconn is a pointer to a connection-specific datat structure
+ *             such as struct tcp_conn_s or struct udp_conn_s.
  *   priv    - Holds a reference to socket layer specific data that will
  *             provided
  *   flags   - Set by the socket layer to inform the lower layer which flags
- *             were and were not handled by the callback.
+ *             are and are not handled by the callback.
  */
 
 struct net_driver_s;       /* Forward reference */
 struct devif_callback_s
 {
-  FAR struct devif_callback_s *flink;
+  FAR struct devif_callback_s *nxtconn;
+  FAR struct devif_callback_s *nxtdev;
   uint16_t (*event)(FAR struct net_driver_s *dev, FAR void *pvconn,
                     FAR void *pvpriv, uint16_t flags);
   FAR void *priv;
@@ -282,8 +286,6 @@ void devif_initialize(void);
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
@@ -297,39 +299,36 @@ void devif_callback_init(void);
  *
  * Description:
  *   Allocate a callback container from the free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
  *
  ****************************************************************************/
 
-FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **list);
+FAR struct devif_callback_s *
+  devif_callback_alloc(FAR struct net_driver_s *dev,
+                       FAR struct devif_callback_s **list);
 
 /****************************************************************************
  * Function: devif_callback_free
  *
  * Description:
  *   Return a callback container to the free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
  *
  ****************************************************************************/
 
-void devif_callback_free(FAR struct devif_callback_s *cb,
+void devif_callback_free(FAR struct net_driver_s *dev,
+                         FAR struct devif_callback_s *cb,
                          FAR struct devif_callback_s **list);
 
 /****************************************************************************
- * Function: devif_callback_execute
+ * Function: devif_conn_event
  *
  * Description:
  *   Execute a list of callbacks.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Input parameters:
  *   dev - The network device state structure associated with the network
@@ -337,6 +336,8 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
  *     port structure.  May be NULL if the even is not related to a TCP
  *     connection or UDP port.
+ *   flags - The bit set of events to be notified.
+ *   list - The list to traverse in performing the notifications
  *
  * Returned value:
  *   The updated flags as modified by the callback functions.
@@ -346,8 +347,33 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *
  ****************************************************************************/
 
-uint16_t devif_callback_execute(FAR struct net_driver_s *dev, FAR void *pvconn,
-                                uint16_t flags, FAR struct devif_callback_s *list);
+uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
+                          uint16_t flags, FAR struct devif_callback_s *list);
+
+/****************************************************************************
+ * Function: devif_dev_event
+ *
+ * Description:
+ *   Execute a list of callbacks using the device event chain.
+ *
+ * Input parameters:
+ *   dev - The network device state structure associated with the network
+ *     device that initiated the callback event.
+ *   pvconn - Holds a reference to the TCP connection structure or the UDP
+ *     port structure.  May be NULL if the even is not related to a TCP
+ *     connection or UDP port.
+ *   flags - The bit set of events to be notified.
+ *
+ * Returned value:
+ *   The updated flags as modified by the callback functions.
+ *
+ * Assumptions:
+ *   This function is called with the network locked.
+ *
+ ****************************************************************************/
+
+uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
+                         uint16_t flags);
 
 /****************************************************************************
  * Send data on the current connection.
@@ -375,11 +401,44 @@ uint16_t devif_callback_execute(FAR struct net_driver_s *dev, FAR void *pvconn,
 
 void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
 
+/****************************************************************************
+ * Name: devif_iob_send
+ *
+ * Description:
+ *   Called from socket logic in response to a xmit or poll request from the
+ *   the network interface driver.
+ *
+ *   This is identical to calling devif_send() except that the data is
+ *   in an I/O buffer chain, rather than a flat buffer.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_NET_IOB
 struct iob_s;
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
                     unsigned int len, unsigned int offset);
 #endif
+
+/****************************************************************************
+ * Name: devif_pkt_send
+ *
+ * Description:
+ *   Called from socket logic in order to send a raw packet in response to
+ *   an xmit or poll request from the the network interface driver.
+ *
+ *   This is almost identical to calling devif_send() except that the data to
+ *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is
+ *   no header on the data.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
 void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,

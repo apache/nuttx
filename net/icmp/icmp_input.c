@@ -178,9 +178,9 @@ void icmp_input(FAR struct net_driver_s *dev)
    */
 
 #ifdef CONFIG_NET_ICMP_PING
-  else if (picmp->type == ICMP_ECHO_REPLY && dev->d_callbacks)
+  else if (picmp->type == ICMP_ECHO_REPLY && dev->d_conncb)
     {
-      (void)devif_callback_execute(dev, picmp, ICMP_ECHOREPLY, dev->d_callbacks);
+      (void)devif_conn_event(dev, picmp, ICMP_ECHOREPLY, dev->d_conncb);
     }
 #endif
 
