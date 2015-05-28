@@ -151,34 +151,255 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* net_sockets.c *************************************************************/
-
-int  sockfd_allocate(int minsd);
-void sock_release(FAR struct socket *psock);
-void sockfd_release(int sockfd);
-FAR struct socket *sockfd_socket(int sockfd);
-
-/* net_connect.c *************************************************************/
-
 #ifdef CONFIG_NET_TCP
 struct tcp_conn_s; /* Forward reference */
+#endif
 
+/****************************************************************************
+ * Name: sockfd_allocate
+ *
+ * Description:
+ *   Allocate a socket descriptor
+ *
+ * Input Parameters:
+ *   Lowest socket descriptor index to be used.
+ *
+ * Returned Value:
+ *   On success, a socket descriptor >= minsd is returned.  A negated errno
+ *   value is returned on failure.
+ *
+ ****************************************************************************/
+
+int  sockfd_allocate(int minsd);
+
+/****************************************************************************
+ * Name: sock_release
+ *
+ * Description:
+ *   Free a socket.
+ *
+ * Input Parameters:
+ *   psock - A reference to the socket instance to be freed.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sock_release(FAR struct socket *psock);
+
+/****************************************************************************
+ * Name: sockfd_release
+ *
+ * Description:
+ *   Free the socket by its socket descriptor.
+ *
+ * Input Parameters:
+ *   sockfd - Socket descriptor identifies the socket to be released.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sockfd_release(int sockfd);
+
+/****************************************************************************
+ * Name: sockfd_socket
+ *
+ * Description:
+ *   Given a socket descriptor, return the underlying socket structure.
+ *
+ * Input Parameters:
+ *   sockfd - The socket descriptor index o use.
+ *
+ * Returned Value:
+ *   On success, a reference to the socket structure associated with the
+ *   the socket descriptor is returned.  NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR struct socket *sockfd_socket(int sockfd);
+
+/****************************************************************************
+ * Name: net_startmonitor
+ *
+ * Description:
+ *   Set up to receive TCP connection state changes for a given socket
+ *
+ * Input Parameters:
+ *   psock - The socket of interest
+ *
+ * Returned Value:
+ *   For now, this function always returns OK.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
 int net_startmonitor(FAR struct socket *psock);
+#endif
+
+/****************************************************************************
+ * Name: net_stopmonitor
+ *
+ * Description:
+ *   Stop monitoring TCP connection changes for a given socket
+ *
+ * Input Parameters:
+ *   conn - The TCP connection of interest
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
 void net_stopmonitor(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Name: net_lostconnection
+ *
+ * Description:
+ *   Called when a loss-of-connection event has occurred.
+ *
+ * Parameters:
+ *   psock    The TCP socket structure associated.
+ *   flags    Set of connection events events
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
 void net_lostconnection(FAR struct socket *psock, uint16_t flags);
 #endif
 
-/* net_close.c ***************************************************************/
+/****************************************************************************
+ * Function: psock_close
+ *
+ * Description:
+ *   Performs the close operation on a socket instance
+ *
+ * Parameters:
+ *   psock   Socket instance
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 int psock_close(FAR struct socket *psock);
 
-/* sockopt support ***********************************************************/
+/****************************************************************************
+ * Function: net_close
+ *
+ * Description:
+ *   Performs the close operation on socket descriptors
+ *
+ * Parameters:
+ *   sockfd   Socket descriptor of socket
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int net_close(int sockfd);
+
+/****************************************************************************
+ * Function: net_timeo
+ *
+ * Description:
+ *   Check if a timeout has elapsed.  This can be called from a socket poll
+ *   function to determine if a timeout has occurred.
+ *
+ * Parameters:
+ *   start_time Timeout start time in system clock ticks
+ *   timeout    Timeout value in deciseconds.
+ *
+ * Returned Value:
+ *   0 (FALSE) if not timeout; 1 (TRUE) if timeout
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_SOCKOPTS
 int net_timeo(uint32_t start_time, socktimeo_t timeo);
 #endif
 
-/* send.c ********************************************************************/
+/****************************************************************************
+ * Function: psock_send
+ *
+ * Description:
+ *   The send() call may be used only when the socket is in a connected state
+ *   (so that the intended recipient is known). The only difference between
+ *   send() and write() is the presence of flags. With zero flags parameter,
+ *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
+ *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately:
+ *
+ *   EAGAIN or EWOULDBLOCK
+ *     The socket is marked non-blocking and the requested operation
+ *     would block.
+ *   EBADF
+ *     An invalid descriptor was specified.
+ *   ECONNRESET
+ *     Connection reset by peer.
+ *   EDESTADDRREQ
+ *     The socket is not connection-mode, and no peer address is set.
+ *   EFAULT
+ *      An invalid user space address was specified for a parameter.
+ *   EINTR
+ *      A signal occurred before any data was transmitted.
+ *   EINVAL
+ *      Invalid argument passed.
+ *   EISCONN
+ *     The connection-mode socket was connected already but a recipient
+ *     was specified. (Now either this error is returned, or the recipient
+ *     specification is ignored.)
+ *   EMSGSIZE
+ *     The socket type requires that message be sent atomically, and the
+ *     size of the message to be sent made this impossible.
+ *   ENOBUFS
+ *     The output queue for a network interface was full. This generally
+ *     indicates that the interface has stopped sending, but may be
+ *     caused by transient congestion.
+ *   ENOMEM
+ *     No memory available.
+ *   ENOTCONN
+ *     The socket is not connected, and no target has been given.
+ *   ENOTSOCK
+ *     The argument s is not a socket.
+ *   EOPNOTSUPP
+ *     Some bit in the flags argument is inappropriate for the socket
+ *     type.
+ *   EPIPE
+ *     The local end has been shut down on a connection oriented socket.
+ *     In this case the process will also receive a SIGPIPE unless
+ *     MSG_NOSIGNAL is set.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags);

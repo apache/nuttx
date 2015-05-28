@@ -157,10 +157,10 @@ void net_releaselist(FAR struct socketlist *list)
  *   Allocate a socket descriptor
  *
  * Input Parameters:
- *   Lowest socket descripor index to be used.
+ *   Lowest socket descriptor index to be used.
  *
  * Returned Value:
- *   On success, a socket desrciptor >= minsd is returned.  A negater errno
+ *   On success, a socket descriptor >= minsd is returned.  A negated errno
  *   value is returned on failure.
  *
  ****************************************************************************/
@@ -208,8 +208,10 @@ int sockfd_allocate(int minsd)
  *   Free a socket.
  *
  * Input Parameters:
+ *   psock - A reference to the socket instance to be freed.
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
