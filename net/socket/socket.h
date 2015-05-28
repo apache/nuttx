@@ -231,7 +231,13 @@ FAR struct socket *sockfd_socket(int sockfd);
  *   psock - The socket of interest
  *
  * Returned Value:
- *   For now, this function always returns OK.
+ *   On success, net_startmonitor returns OK; On any failure,
+ *   net_startmonitor will return a negated errno value.  The only failure
+ *   that can occur is if the socket has already been closed and, in this
+ *   case, -ENOTCONN is returned.
+ *
+ * Assumptions:
+ *   The caller holds the network lock.
  *
  ****************************************************************************/
 

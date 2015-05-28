@@ -299,7 +299,19 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
        * socket
        */
 
-      net_startmonitor(pnewsock);
+      ret = net_startmonitor(pnewsock);
+      if (ret < 0)
+        {
+          /* net_startmonitor() can only fail on certain race conditions
+           * where the connection was lost just before this function was
+           * called.  Undo everything we have done and return a failure.
+           */
+
+          net_unlock(state);
+          err = -ret;
+          goto errout_after_accept;
+        }
+
       net_unlock(state);
     }
 #endif /* CONFIG_NET_TCP */
@@ -309,6 +321,9 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   pnewsock->s_flags |= _SF_CONNECTED;
   pnewsock->s_flags &= ~_SF_CLOSED;
   return newfd;
+
+errout_after_accept:
+  psock_close(pnewsock);
 
 errout_with_socket:
   sockfd_release(newfd);

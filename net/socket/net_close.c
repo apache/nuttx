@@ -523,8 +523,9 @@ int psock_close(FAR struct socket *psock)
       goto errout;
     }
 
-  /* We perform the uIP close operation only if this is the last count on the socket.
-   * (actually, I think the socket crefs only takes the values 0 and 1 right now).
+  /* We perform the uIP close operation only if this is the last count on
+   * the socket. (actually, I think the socket crefs only takes the values
+   * 0 and 1 right now).
    */
 
   if (psock->s_crefs <= 1)

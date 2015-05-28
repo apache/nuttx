@@ -121,7 +121,13 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
  *   psock - The socket of interest
  *
  * Returned Value:
- *   For now, this function always returns OK.
+ *   On success, net_startmonitor returns OK; On any failure,
+ *   net_startmonitor will return a negated errno value.  The only failure
+ *   that can occur is if the socket has already been closed and, in this
+ *   case, -ENOTCONN is returned.
+ *
+ * Assumptions:
+ *   The caller holds the network lock.
  *
  ****************************************************************************/
 
@@ -131,21 +137,34 @@ int net_startmonitor(FAR struct socket *psock)
 
   DEBUGASSERT(psock && conn);
 
-  /* Set up to receive callbacks on connection-related events */
-
-  conn->connection_private = (void*)psock;
-  conn->connection_event   = connection_event;
-
-  /* Check if the connection has already been closed before any callbacks have
-   * been registered. (Maybe the connection is lost before accept has registered
-   * the monitoring callback.)
+  /* Check if the connection has already been closed before any callbacks
+   * have been registered. (Maybe the connection is lost before accept has
+   * registered the monitoring callback.)
    */
 
   if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
         conn->tcpstateflags == TCP_SYN_RCVD))
     {
+      /* Invoke the TCP_CLOSE connection event now */
+
       connection_event(conn, TCP_CLOSE);
+
+      /* Make sure that the monitor is stopped */
+
+      conn->connection_private = NULL;
+      conn->connection_event   = NULL;
+
+      /* And return -ENOTCONN to indicate the the monitor was not started
+       * because the socket was already disconnected.
+       */
+
+      return -ENOTCONN;
     }
+
+  /* Set up to receive callbacks on connection-related events */
+
+  conn->connection_private = (void*)psock;
+  conn->connection_event   = connection_event;
 
   return OK;
 }

@@ -81,8 +81,8 @@ struct tcp_connect_s
 #ifdef CONFIG_NET_TCP
 static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
-static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
-                                          int status);
+static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
+                                     int status);
 static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags);
@@ -124,9 +124,18 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
       /* Set up the connection event monitor */
 
-      net_startmonitor(psock);
-      ret = OK;
+      ret = net_startmonitor(psock);
+      if (ret < 0)
+        {
+          /* net_startmonitor() can only fail on certain race conditions
+           * where the connection was lost just before this function was
+           * called.  Undo everything we have done and return a failure.
+           */
+
+          psock_teardown_callbacks(pstate, ret);
+        }
     }
+
   return ret;
 }
 #endif /* CONFIG_NET_TCP */
@@ -136,15 +145,14 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
-                                            int status)
+static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
+                                     int status)
 {
   FAR struct tcp_conn_s *conn = pstate->tc_conn;
 
   /* Make sure that no further interrupts are processed */
 
   tcp_callback_free(conn, pstate->tc_cb);
-
   pstate->tc_cb = NULL;
 
   /* If we successfully connected, we will continue to monitor the connection
