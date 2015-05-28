@@ -52,8 +52,8 @@
 
 /* Allocate a new packet socket data callback */
 
-#define pkt_callback_alloc(conn)   devif_callback_alloc(NULL, &conn->list)
-#define pkt_callback_free(conn,cb) devif_callback_free(NULL, cb, &conn->list)
+#define pkt_callback_alloc(dev,conn)   devif_callback_alloc(dev, &conn->list)
+#define pkt_callback_free(dev,conn,cb) devif_callback_free(dev, cb, &conn->list)
 
 /****************************************************************************
  * Public Type Definitions

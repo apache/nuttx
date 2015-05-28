@@ -1300,6 +1300,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
   FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
+  FAR struct net_driver_s *dev;
   struct recvfrom_s state;
   net_lock_t save;
   int ret;
@@ -1313,6 +1314,16 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   save = net_lock();
   recvfrom_init(psock, buf, len, from, fromlen, &state);
+
+  /* Get the device driver that will service this transfer */
+  /* TODO better lookup network interface from *psock or *conn */
+
+  dev  = netdev_findbyname("eth0");
+  if (dev == NULL)
+    {
+      err = ENODEV;
+      goto errout_with_state;
+    }
 
   /* TODO recvfrom_init() expects from to be of type sockaddr_in, but
    * in our case is sockaddr_ll
@@ -1328,7 +1339,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  state.rf_cb = pkt_callback_alloc(conn);
+  state.rf_cb = pkt_callback_alloc(dev, conn);
   if (state.rf_cb)
     {
       state.rf_cb->flags  = (PKT_NEWDATA | PKT_POLL);
@@ -1351,7 +1362,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      pkt_callback_free(conn, state.rf_cb);
+      pkt_callback_free(dev, conn, state.rf_cb);
       ret = recvfrom_result(ret, &state);
     }
   else
@@ -1359,9 +1370,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       ret = -EBUSY;
     }
 
-#if 0 /* Not used */
 errout_with_state:
-#endif
   net_unlock(save);
   recvfrom_uninit(&state);
   return ret;
