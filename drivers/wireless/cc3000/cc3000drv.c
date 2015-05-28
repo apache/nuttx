@@ -271,7 +271,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
       pthread_attr_setschedparam(&attr, &param);
       status = pthread_create(&spiconf.unsoliced_thread, &attr,
                               unsoliced_thread_func, NULL);
-      DEBUGASSERT(status == 0)
+      DEBUGASSERT(status == 0);
       UNUSED(status);
 
       /* Wait unsoliced_thread to wake-up. */
