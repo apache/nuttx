@@ -10449,3 +10449,13 @@
 	* net/tcp:  Fix an important TCP networking bug: 16-bit flags was
 	  being converted to 8-bits in a few locations, causing loss of
 	  status indications (2015-05-27).
+	* include/nuttx/net, net/arp, net/devif, net/icmp, net/icmpv6,
+	  net/netdev, net/pkt, net/tcp, net/udp: Modify event list handling:
+	  Now there are two event lists each device structure:  (1) One is
+	  for ARP and ICMP data related events, the other is for device
+	  related events.  Callback allocation/free routines no accept a
+	  device parameter as well as a list: If the device parameter is
+	  added, then the callback goes into both the connection-related
+	  list AND the device event list.  Thus each socket type can
+	  received both custom data-related events as well as common
+	  device related events (2015-05-28).
