@@ -61,6 +61,10 @@
  * TCP_ACKDATA, XYZ_NEWDATA, and TCP_CLOSE flags may be set at the same time,
  * whereas the others are mutually exclusive.
  *
+ * Connection Specific Events:  These are events that may be notified
+ * through callback lists residing in TCP, UDP, or PKT port connection
+ * structures:
+ *
  *   TCP_ACKDATA      IN: Signifies that the outstanding data was ACKed and
  *                        the socket layer should send out new data instead
  *                        of retransmitting the last data (TCP only)
@@ -69,8 +73,7 @@
  *   TCP_NEWDATA      IN: Set to indicate that the peer has sent us new data.
  *   UDP_NEWDATA     OUT: Cleared (only) by the socket layer logic to indicate
  *   PKT_NEWDATA          that the new data was consumed, suppressing further
- *   ICMP_NEWDATA         attempts to process the new data.
- *   ICMPv6_NEWDATA
+ *                        attempts to process the new data.
  *
  *   TCP_SNDACK       IN: Not used; always zero
  *                   OUT: Set by the socket layer if the new data was consumed
@@ -78,31 +81,6 @@
  *
  *   TCP_REXMIT       IN: Tells the socket layer to retransmit the data that
  *                        was last sent. (TCP only)
- *                   OUT: Not used
- *
- *   ARP_POLL         IN: Used for polling the socket layer.  This is provided
- *                        periodically from the drivers to support (1) timed
- *                        operations, and (2) to check if the ARP layer needs
- *                        to send an ARP request.  This is a device oriented
- *                        event, not associated with a socket.
- *                   OUT: Not used
- *
- *   ICMP_POLL        IN: Used for polling the socket layer.  This is provided
- *                        periodically from the drivers to support (1) timed
- *                        operations, and (2) to check if the ICMP layer needs
- *                        to send an ARP request.  This is a device oriented
- *                        event, not associated with a socket.  This differs
- *                        from ICMPv6_POLL only in that the appdata pointer
- *                        is set differently
- *                   OUT: Not used
- *
- *   ICMPv6_POLL      IN: Used for polling the socket layer.  This is provided
- *                        periodically from the drivers to support (1) timed
- *                        operations, and (2) to check if the ICMP layer needs
- *                        to send an ARP request.  This is a device oriented
- *                        event, not associated with a socket.  This differs
- *                        from ICMP_POLL only in that the appdata pointer
- *                        is set differently
  *                   OUT: Not used
  *
  *   TCP_POLL        IN:  Used for polling the socket layer.  This is provided
@@ -136,6 +114,39 @@
  *                        retransmissions. (TCP only)
  *                   OUT: Not used
  *
+ * Device Specific Events:  These are events that may be notified through
+ * callback lists residing in the network device structure.
+ *
+ *   ICMP_NEWDATA     IN: Set to indicate that the peer has sent us new data.
+ *   ICMPv6_NEWDATA OUT: Cleared (only) by the socket layer logic to indicate
+ *                       that the new data was consumed, suppressing further
+ *                       attempts to process the new data.
+ *
+ *   ARP_POLL         IN: Used for polling the socket layer.  This is provided
+ *                        periodically from the drivers to support (1) timed
+ *                        operations, and (2) to check if the ARP layer needs
+ *                        to send an ARP request.  This is a device oriented
+ *                        event, not associated with a socket.
+ *                   OUT: Not used
+ *
+ *   ICMP_POLL        IN: Used for polling the socket layer.  This is provided
+ *                        periodically from the drivers to support (1) timed
+ *                        operations, and (2) to check if the ICMP layer needs
+ *                        to send an ARP request.  This is a device oriented
+ *                        event, not associated with a socket.  This differs
+ *                        from ICMPv6_POLL only in that the appdata pointer
+ *                        is set differently
+ *                   OUT: Not used
+ *
+ *   ICMPv6_POLL      IN: Used for polling the socket layer.  This is provided
+ *                        periodically from the drivers to support (1) timed
+ *                        operations, and (2) to check if the ICMP layer needs
+ *                        to send an ARP request.  This is a device oriented
+ *                        event, not associated with a socket.  This differs
+ *                        from ICMP_POLL only in that the appdata pointer
+ *                        is set differently
+ *                   OUT: Not used
+ *
  *   ICMP_ECHOREPLY   IN: An ICMP Echo Reply has been received.  Used to support
  *                        ICMP ping from the socket layer. (ICMPv4 only)
  *                   OUT: Cleared (only) by the socket layer logic to indicate
@@ -152,28 +163,35 @@
  *                   OUT: Not used
  */
 
+/* Connection specific events */
+
 #define TCP_ACKDATA      (1 << 0)
 #define TCP_NEWDATA      (1 << 1)
 #define UDP_NEWDATA      TCP_NEWDATA
 #define PKT_NEWDATA      TCP_NEWDATA
-#define ICMP_NEWDATA     TCP_NEWDATA
-#define ICMPv6_NEWDATA   TCP_NEWDATA
 #define TCP_SNDACK       (1 << 2)
 #define TCP_REXMIT       (1 << 3)
-#define ARP_POLL         (1 << 4)
-#define ICMP_POLL        (1 << 5)
-#define ICMPv6_POLL      (1 << 6)
-#define TCP_POLL         (1 << 7)
+#define TCP_POLL         (1 << 4)
 #define UDP_POLL         TCP_POLL
 #define PKT_POLL         TCP_POLL
-#define TCP_BACKLOG      (1 << 8)
-#define TCP_CLOSE        (1 << 9)
-#define TCP_ABORT        (1 << 10)
-#define TCP_CONNECTED    (1 << 11)
-#define TCP_TIMEDOUT     (1 << 12)
+#define TCP_BACKLOG      (1 << 5)
+#define TCP_CLOSE        (1 << 6)
+#define TCP_ABORT        (1 << 7)
+#define TCP_CONNECTED    (1 << 8)
+#define TCP_TIMEDOUT     (1 << 9)
+
+/* Device specific events */
+
+#define ICMP_NEWDATA     TCP_NEWDATA
+#define ICMPv6_NEWDATA   TCP_NEWDATA
+#define ARP_POLL         (1 << 10)
+#define ICMP_POLL        (1 << 11)
+#define ICMPv6_POLL      (1 << 12)
 #define ICMP_ECHOREPLY   (1 << 13)
 #define ICMPv6_ECHOREPLY (1 << 14)
 #define NETDEV_DOWN      (1 << 15)
+
+/* The set of events that and implications to the TCP connection state */
 
 #define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | \
                          TCP_TIMEDOUT | NETDEV_DOWN)
