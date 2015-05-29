@@ -293,7 +293,7 @@ int arp_send(in_addr_t ipaddr)
   state.snd_cb = arp_callback_alloc(dev);
   if (!state.snd_cb)
     {
-      ndbg("ERROR: Failed to allocate a cllback\n");
+      ndbg("ERROR: Failed to allocate a callback\n");
       ret = -ENOMEM;
       goto errout_with_lock;
     }
@@ -373,6 +373,7 @@ int arp_send(in_addr_t ipaddr)
         {
           /* Break out on a send failure */
 
+          ndbg("ERROR: Send failed: %d\n", ret);
           break;
         }
 
@@ -390,7 +391,7 @@ int arp_send(in_addr_t ipaddr)
        * is received.  Otherwise, it will return -ETIMEDOUT.
        */
 
-      if (ret == OK)
+      if (ret >= OK)
         {
           /* Break out if arp_wait() fails */
 
@@ -400,6 +401,7 @@ int arp_send(in_addr_t ipaddr)
       /* Increment the retry count */
 
       state.snd_retries++;
+      ndbg("ERROR: arp_wait failed: %d\n", ret);
     }
 
   sem_destroy(&state.snd_sem);

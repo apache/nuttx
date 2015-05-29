@@ -134,8 +134,8 @@ FAR struct devif_callback_s *
               return NULL;
             }
 
-           ret->nxtdev  = dev->d_devcb;
-           dev->d_devcb = ret;
+          ret->nxtdev  = dev->d_devcb;
+          dev->d_devcb = ret;
         }
 
       /* Add the newly allocated instance to the head of the specified list */

@@ -218,7 +218,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
         }
       else
         {
-          /* Wait as long as necessary to get the lot */
+          /* Wait as long as necessary to get the lock */
 
           ret = sem_wait(sem);
         }

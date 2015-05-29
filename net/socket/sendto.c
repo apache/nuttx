@@ -226,7 +226,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (nsent < 0)
     {
-      ndbg("ERROR: Unix domain sendto() failed: %ld\n", (long)nsent);
+      ndbg("ERROR: UDP or Unix domain sendto() failed: %ld\n", (long)nsent);
       err = -nsent;
       goto errout;
     }

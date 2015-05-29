@@ -42,6 +42,7 @@
 #include <time.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <netinet/in.h>
@@ -67,7 +68,7 @@
 
 /* List of tasks waiting for ARP events */
 
-static struct arp_notify_s *g_arp_waiters;
+static FAR struct arp_notify_s *g_arp_waiters;
 
 /****************************************************************************
  * Private Functions
@@ -176,6 +177,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
 {
   struct timespec abstime;
   irqstate_t flags;
+  int errcode;
   int ret;
 
   /* And wait for the ARP response (or a timeout).  Interrupts will be re-
@@ -193,11 +195,21 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
       abstime.tv_nsec -= 1000000000;
     }
 
-   /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
-    * the wrong error code.
-    */
+  /* Wait to get either the correct response or a timeout. */
 
-  (void)net_timedwait(&notify->nt_sem, &abstime);
+  do
+    {
+      /* The only errors that we expect would be if the abstime timeout
+       * expires or if the wait were interrupted by a signal.
+       */
+
+      ret     = net_timedwait(&notify->nt_sem, &abstime);
+      errcode = ((ret < 0) ? errno : 0);
+    }
+  while (ret < 0 && errcode == EINTR);
+
+  /* Then get the real result of the transfer */
+
   ret = notify->nt_result;
 
   /* Remove our wait structure from the list (we may no longer be at the
