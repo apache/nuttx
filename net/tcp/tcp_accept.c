@@ -219,7 +219,8 @@ static int accept_interrupt(FAR struct tcp_conn_s *listener,
  * Parameters:
  *   psock    The listening TCP socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of
+ *            'addr'
  *   newconn  The new, accepted TCP connection structure
  *
  * Returned Value:
@@ -259,9 +260,9 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
     }
 
   /* In general, this uIP-based implementation will not support non-blocking
-   * socket operations... except in a few cases:  Here for TCP accept with backlog
-   * enabled.  If this socket is configured as non-blocking then return EAGAIN
-   * if there is no pending connection in the backlog.
+   * socket operations... except in a few cases:  Here for TCP accept with
+   * backlog enabled.  If this socket is configured as non-blocking then
+   * return EAGAIN if there is no pending connection in the backlog.
    */
 
   else if (_SS_ISNONBLOCK(psock->s_flags))

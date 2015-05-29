@@ -10449,6 +10449,13 @@
 	* net/tcp:  Fix an important TCP networking bug: 16-bit flags was
 	  being converted to 8-bits in a few locations, causing loss of
 	  status indications (2015-05-27).
+	* net/socket and net/tcp: net_startmonitor.c always returned OK.  In
+	  the case where a socket has already been closed, it correctly handled
+	  the disconnetion event but still returned OK.  Returning OK caused
+	  the callers of net_startmonitor to assume that the connection was
+	  okay, undoing the good things that net_startmonitor did and causing
+	  the socket to be marked as connected.  This behavior was noted by
+	  Pelle Windestam (2015-05-28).
 	* include/nuttx/net, net/arp, net/devif, net/icmp, net/icmpv6,
 	  net/netdev, net/pkt, net/tcp, net/udp: Modify event list handling:
 	  Now there are two event lists each device structure:  (1) One is
