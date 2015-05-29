@@ -375,11 +375,44 @@ uint16_t devif_callback_execute(FAR struct net_driver_s *dev, FAR void *pvconn,
 
 void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
 
+/****************************************************************************
+ * Name: devif_iob_send
+ *
+ * Description:
+ *   Called from socket logic in response to a xmit or poll request from the
+ *   the network interface driver.
+ *
+ *   This is identical to calling devif_send() except that the data is
+ *   in an I/O buffer chain, rather than a flat buffer.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_NET_IOB
 struct iob_s;
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
                     unsigned int len, unsigned int offset);
 #endif
+
+/****************************************************************************
+ * Name: devif_pkt_send
+ *
+ * Description:
+ *   Called from socket logic in order to send a raw packet in response to
+ *   an xmit or poll request from the the network interface driver.
+ *
+ *   This is almost identical to calling devif_send() except that the data to
+ *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is
+ *   no header on the data.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
 void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
