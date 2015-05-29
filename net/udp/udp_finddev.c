@@ -79,6 +79,19 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
 #ifdef CONFIG_NETDEV_MULTINIC
   FAR struct net_driver_s *dev;
 
+  /* Return NULL if the address is INADDR_ANY.  In this case, there is
+   * there may be multiple devices that can provide data so the exceptional
+   * events from any particular device are not important.
+   *
+   * Of course, it would be a problem if this is the remote address of
+   * sendto().
+   */
+
+  if (ipv4addr == INADDR_ANY)
+    {
+      return NULL;
+    }
+
   /* There are multiple network devices.  We need to select the device that
    * is going to route the UDP packet based on the provided IP address.
    */
@@ -86,6 +99,8 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
   return netdev_findby_ipv4addr(conn->u.ipv4.laddr, ipv4addr);
 
 #else
+  /* Return NULL if the address is IN6ADDR_ANY */
+
   /* There is only a single network device... the one at the head of the
    * g_netdevices list.
    */
@@ -115,6 +130,19 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
 {
 #ifdef CONFIG_NETDEV_MULTINIC
   FAR struct net_driver_s *dev;
+
+  /* Return NULL if the address is IN6ADDR_ANY.  In this case, there is
+   * there may be multiple devices that can provide data so the exceptional
+   * events from any particular device are not important.
+   *
+   * Of course, it would be a problem if this is the remote address of
+   * sendto().
+   */
+
+  if (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr))
+    {
+      return NULL;
+    }
 
   /* There are multiple network devices.  We need to select the device that
    * is going to route the UDP packet based on the provided IP address.
