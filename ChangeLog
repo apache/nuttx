@@ -10475,5 +10475,8 @@
 	  remainder to round to the closed decisecond value, or use any non-zero
 	  remainder to the next larger whole decisecond value.  Bug discovered
 	  by Librae (2015-05-29).
+	* configs/stm32f4discovery/src: Move up_cxxinitialize from
+	  nuttx/configs/stm32f4discovery/src to apps/platform/stm32f4discovery
+	  where it belongs (2015-05-29).
 	* net/sockets, net/tcp, net/udp: UDP Networking: Add support for
 	  device event notification for UDP transfers (2015-05-29).
