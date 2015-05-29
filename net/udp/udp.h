@@ -65,8 +65,10 @@
 
 /* Allocate a new UDP data callback */
 
-#define udp_callback_alloc(conn)   devif_callback_alloc(NULL, &conn->list)
-#define udp_callback_free(conn,cb) devif_callback_free(NULL, cb, &conn->list)
+#define udp_callback_alloc(dev, conn) \
+  devif_callback_alloc(dev, &conn->list)
+#define udp_callback_free(dev, conn,cb) \
+  devif_callback_free(dev, cb, &conn->list)
 
 /****************************************************************************
  * Public Type Definitions

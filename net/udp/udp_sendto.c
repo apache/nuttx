@@ -227,13 +227,25 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
   nllvdbg("flags: %04x\n", flags);
   if (pstate)
     {
+      /* If the network device has gone down, then we will have terminate
+       * the wait now with an error.
+       */
+
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          /* Terminate the transfer with an error. */
+
+          nlldbg("ERROR: Network is down\n");
+          pstate->st_sndlen = -ENETUNREACH;
+        }
+
       /* Check if the outgoing packet is available.  It may have been claimed
        * by a sendto interrupt serving a different thread -OR- if the output
        * buffer currently contains unprocessed incoming data.  In these cases
        * we will just have to wait for the next polling cycle.
        */
 
-      if (dev->d_sndlen > 0 || (flags & UDP_NEWDATA) != 0)
+      else if (dev->d_sndlen > 0 || (flags & UDP_NEWDATA) != 0)
         {
            /* Another thread has beat us sending data or the buffer is busy,
             * Check for a timeout.  If not timed out, wait for the next
@@ -245,7 +257,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
             {
               /* Yes.. report the timeout */
 
-              nlldbg("SEND timeout\n");
+              nlldbg("ERROR: SEND timeout\n");
               pstate->st_sndlen = -ETIMEDOUT;
             }
           else
@@ -380,6 +392,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
                          socklen_t tolen)
 {
   FAR struct udp_conn_s *conn;
+  FAR struct net_driver_s *dev;
   struct sendto_s state;
   net_lock_t save;
   int ret;
@@ -392,13 +405,17 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     {
       FAR const struct sockaddr_in *into;
 
+      /* Get the device that will service this transfer.  This may be the
+       * same device that the
+
+conn->u.ipv4.raddr
+
       /* Make sure that the IP address mapping is in the ARP table */
 
       into = (FAR const struct sockaddr_in *)to;
       ret = arp_send(into->sin_addr.s_addr);
     }
 #endif /* CONFIG_NET_ARP_SEND */
-
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
 #ifdef CONFIG_NET_ARP_SEND
@@ -452,7 +469,9 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_time = clock_systimer();
 #endif
 
-  /* Setup the UDP socket */
+  /* Setup the UDP socket.  udp_connect will set the remote address in the
+   * connection structure.
+   */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn);
@@ -460,16 +479,26 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = udp_connect(conn, to);
   if (ret < 0)
     {
-      net_unlock(save);
-      return ret;
+      goto errout_with_lock;
     }
+
+  /* Get the device that will handle the remote packet transfers.  This
+   * should never be NULL.
+   */
+
+  dev = udp_find_raddr_device(conn);
+  if (dev == NULL)
+    {
+      ret = -ENETUNREACH;
+      goto errout_with_lock;
+   }
 
   /* Set up the callback in the connection */
 
-  state.st_cb = udp_callback_alloc(conn);
+  state.st_cb = udp_callback_alloc(dev, conn);
   if (state.st_cb)
     {
-      state.st_cb->flags   = UDP_POLL;
+      state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
       state.st_cb->priv    = (void*)&state;
       state.st_cb->event   = sendto_interrupt;
 
@@ -487,19 +516,26 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Make sure that no further interrupts are processed */
 
-      udp_callback_free(conn, state.st_cb);
+      udp_callback_free(dev, conn, state.st_cb);
     }
 
-  net_unlock(save);
+  /* The result of the sendto operation is the number of bytes transferred */
+
+  ret = state.st_sndlen;
+
+errout_with_lock:
+  /* Release the semaphore */
+
   sem_destroy(&state.st_sem);
 
-  /* Set the socket state to idle */
+  /* Set the socket state back to idle */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  /* Return the result of the sendto() operation */
+  /* Unlock the network and return the result of the sendto() operation */
 
-  return state.st_sndlen;
+  net_unlock(save);
+  return ret;
 }
 
 #endif /* CONFIG_NET_UDP */

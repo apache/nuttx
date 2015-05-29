@@ -119,7 +119,7 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       /* Check for a loss of connection events. */
 
-      if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+      if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
         {
           /* Marki that the connection has been lost */
 
@@ -209,7 +209,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    */
 
   cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_CLOSE |
-                  TCP_ABORT | TCP_TIMEDOUT);
+                  TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN);
   cb->priv     = (FAR void *)info;
   cb->event    = tcp_poll_interrupt;
 

@@ -59,6 +59,7 @@
 struct udp_poll_s
 {
   FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
@@ -104,16 +105,23 @@ static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       /* Check for data or connection availability events. */
 
-      if ((flags & (UDP_NEWDATA)) != 0)
+      if ((flags & UDP_NEWDATA) != 0)
         {
           eventset |= (POLLIN & info->fds->events);
         }
 
-      /* A poll is a sign that we are free to send data. */
+      /*  poll is a sign that we are free to send data. */
 
       if ((flags & UDP_POLL) != 0)
         {
           eventset |= (POLLOUT & info->fds->events);
+        }
+
+      /* Check for loss of connection events. */
+
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          eventset |= ((PULLHUP | POLLERR) & info->fds->events);
         }
 
       /* Awaken the caller of poll() is requested event occurred. */
@@ -177,6 +185,13 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   flags = net_lock();
 
+  /* Get the device that will provide the provide the NETDEV_DOWN event.
+   * NOTE: in the event that the local socket is bound to INADDR_ANY, the
+   * dev value will be zero and there will be no NETDEV_DOWN notifications.
+   */
+
+  info->dev = udp_find_laddr_device(conn);
+
   /* Setup the UDP remote connection */
 
   ret = udp_connect(conn, NULL);
@@ -187,7 +202,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Allocate a TCP/IP callback structure */
 
-  cb = udp_callback_alloc(conn);
+  cb = udp_callback_alloc(info->dev, conn);
   if (!cb)
     {
       ret = -EBUSY;
@@ -205,20 +220,30 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = (0);
+  cb->flags    = 0;
   cb->priv     = (FAR void *)info;
   cb->event    = udp_poll_interrupt;
 
-  if (info->fds->events & POLLOUT)
-    cb->flags |= UDP_POLL;
-  if (info->fds->events & POLLIN)
-    cb->flags |= UDP_NEWDATA;
+  if ((info->fds->events & POLLOUT) != 0)
+    {
+      cb->flags |= UDP_POLL;
+    }
+
+  if ((info->fds->events & POLLIN) != 0)
+    {
+      cb->flags |= UDP_NEWDATA;
+    }
+
+  if ((info->fds->events & (POLLHUP | POLLERR)) != 0)
+    {
+      cb->flags |= NETDEV_DOWN;
+    }
 
   /* Save the reference in the poll info structure as fds private as well
-   * for use durring poll teardown as well.
+   * for use during poll teardown as well.
    */
 
-  fds->priv    = (FAR void *)info;
+  fds->priv = (FAR void *)info;
 
   /* Check for read data availability now */
 
@@ -286,7 +311,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Release the callback */
 
       flags = net_lock();
-      udp_callback_free(conn, info->cb);
+      udp_callback_free(info->dev, conn, info->cb);
       net_unlock(flags);
 
       /* Release the poll/select data slot */
