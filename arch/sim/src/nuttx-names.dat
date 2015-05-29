@@ -8,9 +8,11 @@ free           NXfree
 fclose         NXfclose
 fopen          NXfopen
 fputc          NXfputc
+fcntl          NXfcntl
 fread          NXfread
 fwrite         NXfwrite
 fsync          NXfsync
+getenv         NXgetenv
 gettimeofday   NXgettimeofday
 ioctl          NXioctl
 isatty         NXisatty
@@ -23,6 +25,8 @@ mount          NXmount
 open           NXopen
 opendir        NXopendir
 nanosleep      NXnanosleep
+poll           NXpoll
+printf         NXprintf
 pthread_create NXpthread_create
 read           NXread
 realloc        NXrealloc
@@ -32,6 +36,9 @@ rewinddir      NXrewinddir
 rmdir          NXrmdir
 seekdir        NXseekdir
 select         NXselect
+sem_init       NXsem_init
+sem_post       NXsem_post
+sem_wait       NXsem_wait
 send           NXsend
 sighold        NXsighold
 sigprocmask    NXsigprocmask
