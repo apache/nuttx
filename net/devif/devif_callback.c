@@ -49,6 +49,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
+#include "netdev/netdev.h"
 #include "devif/devif.h"
 
 /****************************************************************************
@@ -123,6 +124,16 @@ FAR struct devif_callback_s *
       
       if (dev)
         {
+          /* Verify that the device is valid */
+
+          if (!netdev_verify(dev))
+            {
+              /* No.. release the callback structure and fail */
+
+              devif_callback_free(NULL, NULL, list);
+              return NULL;
+            }
+
            ret->nxtdev  = dev->d_devcb;
            dev->d_devcb = ret;
         }
@@ -181,10 +192,15 @@ void devif_callback_free(FAR struct net_driver_s *dev,
         }
 #endif
 
-      /* Find the callback structure in the device event list */
+      /* Remove the callback structure from the device notification list if
+       * it is supposed to be in the device notification list AND if the
+       * device pointer is still valid.
+       */
 
-      if (dev)
+      if (dev && netdev_verify(dev))
         {
+          /* Find the callback structure in the device event list */
+
           for (prev = NULL, curr = dev->d_devcb;
                curr && curr != cb;
                prev = curr, curr = curr->nxtdev);
@@ -205,10 +221,14 @@ void devif_callback_free(FAR struct net_driver_s *dev,
             }
         }
 
-      /* Find the callback structure in the connection event list */
+      /* Remove the callback structure from the data notification list if
+       * it is supposed to be in the data notification list.
+       */
 
       if (list)
         {
+          /* Find the callback structure in the connection event list */
+
           for (prev = NULL, curr = *list;
                curr && curr != cb;
                prev = curr, curr = curr->nxtconn);

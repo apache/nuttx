@@ -89,9 +89,9 @@
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyname(const char *ifname)
+FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
 {
-  struct net_driver_s *dev;
+  FAR struct net_driver_s *dev;
   if (ifname)
     {
       netdev_semtake();

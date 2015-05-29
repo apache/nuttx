@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <nuttx/net/ip.h>
 
@@ -123,6 +124,19 @@ void netdev_semgive(void);
 
 void netdev_ifup(FAR struct net_driver_s *dev);
 void netdev_ifdown(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Function: netdev_verify
+ *
+ * Description:
+ *   Verify that the specified device still exists
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+bool netdev_verify(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Function: netdev_findbyname
