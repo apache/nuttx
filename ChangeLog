@@ -10456,3 +10456,12 @@
 	  okay, undoing the good things that net_startmonitor did and causing
 	  the socket to be marked as connected.  This behavior was noted by
 	  Pelle Windestam (2015-05-28).
+	* net/socket and net/utils: setsockopt() fails when setting timeouts
+	  to values less that an 100 msec.  That is because the timeout is
+	  limited to stops of 1 decisecond and because the conversion of
+	  structure timeval was truncating the microsecond remainder.  The
+	  utility net_timeval2dsec now accespts and option to determin how it
+	  handles the remainder:  truncate, discarding the remainder, use the
+	  remainder to round to the closed decisecond value, or use any non-zero
+	  remainder to the next larger whole decisecond value.  Bug discovered
+	  by Librae (2015-05-29).
