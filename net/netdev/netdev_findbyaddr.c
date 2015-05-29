@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <netinet/in.h>
+
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 
@@ -219,12 +221,12 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 
   /* First, check if this is the broadcast IP address */
 
-  if (net_ipv4addr_cmp(ripaddr, g_ipv4_alloneaddr))
+  if (net_ipv4addr_cmp(ripaddr, INADDR_BROADCAST))
     {
 #ifdef CONFIG_NETDEV_MULTINIC
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
-      if (net_ipv4addr_cmp(lipaddr, g_ipv4_allzeroaddr))
+      if (net_ipv4addr_cmp(lipaddr, INADDR_ANY))
         {
           /* Yes.. In this case, I think we are supposed to send the
            * broadcast packet out ALL local networks.  I am not sure

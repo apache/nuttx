@@ -49,6 +49,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <netinet/in.h>
+
 #include <arch/irq.h>
 
 #include <nuttx/net/netconfig.h>
@@ -395,7 +397,7 @@ static inline FAR struct tcp_conn_s *
           tcp->destport == conn->lport &&
           tcp->srcport  == conn->rport &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr) ||
+          (net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
            net_ipv4addr_cmp(destipaddr, conn->u.ipv4.laddr)) &&
 #endif
           net_ipv4addr_cmp(srcipaddr, conn->u.ipv4.raddr))

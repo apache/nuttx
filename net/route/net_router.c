@@ -43,6 +43,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <netinet/in.h>
+
 #include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
@@ -177,7 +179,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
 
   /* Do not route the special broadcast IP address */
 
-  if (net_ipv4addr_cmp(target, g_ipv4_alloneaddr))
+  if (net_ipv4addr_cmp(target, INADDR_BROADCAST))
     {
       return -ENOENT;
     }

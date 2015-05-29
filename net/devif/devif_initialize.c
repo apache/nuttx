@@ -69,19 +69,11 @@ struct net_stats_s g_netstats;
 
 uint16_t g_ipid;
 
-#ifdef CONFIG_NET_IPv4
-
-const in_addr_t g_ipv4_alloneaddr  = 0xffffffff;
-const in_addr_t g_ipv4_allzeroaddr = 0x00000000;
-
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_TCP_REASSEMBLY)
 /* Reassembly timer (units: deci-seconds) */
 
-#ifdef CONFIG_NET_TCP_REASSEMBLY
-
 uint8_t g_reassembly_timer;
-
-#endif /* CONFIG_NET_TCP_REASSEMBLY */
-#endif /* CONFIG_NET_IPv4 */
+#endif
 
 #ifdef CONFIG_NET_IPv6
 

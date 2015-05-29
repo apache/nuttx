@@ -219,11 +219,6 @@ extern "C"
 
 /* Well-known IP addresses */
 
-#ifdef CONFIG_NET_IPv4
-EXTERN const in_addr_t g_ipv4_alloneaddr;       /* An address of all ones */
-EXTERN const in_addr_t g_ipv4_allzeroaddr;      /* An address of all zeroes */
-#endif
-
 #ifdef CONFIG_NET_IPv6
 EXTERN const net_ipv6addr_t g_ipv6_alloneaddr;  /* An address of all ones */
 EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr; /* An address of all zeroes */

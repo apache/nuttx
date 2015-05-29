@@ -87,7 +87,7 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
    * sendto().
    */
 
-  if (ipv4addr == INADDR_ANY)
+  if ((net_ipv4addr_cmp(ipv4addr, INADDR_ANY))
     {
       return NULL;
     }
@@ -139,7 +139,7 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
    * sendto().
    */
 
-  if (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr))
+  if (net_ipv6addr_cmp(ipv6addr, g_ipv6_allzeroaddr))
     {
       return NULL;
     }

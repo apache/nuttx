@@ -50,6 +50,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <netinet/in.h>
+
 #include <arch/irq.h>
 
 #include <nuttx/net/netconfig.h>
@@ -305,12 +307,12 @@ static inline FAR struct udp_conn_s *
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
 #ifdef CONFIG_NETDEV_MULTINIC
-          (net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_allzeroaddr) ||
-           net_ipv4addr_cmp(conn->u.ipv4.laddr, g_ipv4_alloneaddr) ||
+          (net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
+           net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_BROADCAST) ||
            net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
 #endif
-          (net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_allzeroaddr) ||
-           net_ipv4addr_cmp(conn->u.ipv4.raddr, g_ipv4_alloneaddr) ||
+          (net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_ANY) ||
+           net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_BROADCAST) ||
            net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
         {
           /* Matching connection found.. return a reference to it */
@@ -746,7 +748,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
       if (conn->domain == PF_INET)
 #endif
         {
-          net_ipv4addr_copy(conn->u.ipv4.raddr, g_ipv4_allzeroaddr);
+          net_ipv4addr_copy(conn->u.ipv4.raddr, INADDR_ANY);
         }
 #endif /* CONFIG_NET_IPv4 */
 
