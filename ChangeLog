@@ -10466,3 +10466,12 @@
 	  list AND the device event list.  Thus each socket type can
 	  received both custom data-related events as well as common
 	  device related events (2015-05-28).
+	* net/socket and net/utils: setsockopt() fails when setting timeouts
+	  to values less that an 100 msec.  That is because the timeout is
+	  limited to stops of 1 decisecond and because the conversion of
+	  structure timeval was truncating the microsecond remainder.  The
+	  utility net_timeval2dsec now accespts and option to determin how it
+	  handles the remainder:  truncate, discarding the remainder, use the
+	  remainder to round to the closed decisecond value, or use any non-zero
+	  remainder to the next larger whole decisecond value.  Bug discovered
+	  by Librae (2015-05-29).

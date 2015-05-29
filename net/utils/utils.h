@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/utils.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,15 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* These values control the behavior of net_timeval2desc */
+
+enum tv2ds_remainder_e
+{
+  TV2DS_TRUNC = 0, /* Truncate microsecond remainder */
+  TV2DS_ROUND,     /* Round to the nearest full decisecond */
+  TV2DS_CEIL       /* Force to next larger full decisecond */
+};
 
 /****************************************************************************
  * Public Data
@@ -128,7 +137,8 @@ unsigned int net_dsec2tick(int dsec);
  *   save new timeout values.
  *
  * Parameters:
- *   tv   The struct timeval to convert
+ *   tv        - The struct timeval to convert
+ *   remainder - Determines how to handler the microsecond remainder
  *
  * Returned Value:
  *   The converted value
@@ -137,7 +147,8 @@ unsigned int net_dsec2tick(int dsec);
  *
  ****************************************************************************/
 
-unsigned int net_timeval2dsec(FAR struct timeval *tv);
+unsigned int net_timeval2dsec(FAR struct timeval *tv,
+                              enum tv2ds_remainder_e remainder);
 
 /****************************************************************************
  * Function: net_ipv6_pref2mask
