@@ -405,11 +405,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     {
       FAR const struct sockaddr_in *into;
 
-      /* Get the device that will service this transfer.  This may be the
-       * same device that the
-
-conn->u.ipv4.raddr
-
       /* Make sure that the IP address mapping is in the ARP table */
 
       into = (FAR const struct sockaddr_in *)to;

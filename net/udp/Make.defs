@@ -49,8 +49,8 @@ endif
 
 # Transport layer
 
-NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_callback.c
-NET_CSRCS += udp_ipselect.c
+NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c
+NET_CSRCS += udp_callback.c udp_ipselect.c
 
 # Include UDP build support
 

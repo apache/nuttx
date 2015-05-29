@@ -1038,6 +1038,7 @@ static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
 
   sem_post(&pstate->rf_sem);
 }
+#endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
  * Function: recvfrom_udp_interrupt

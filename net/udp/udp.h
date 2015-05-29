@@ -335,6 +335,78 @@ int udp_ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
+ * Function: udp_find_ipv4_device
+ *
+ * Description:
+ *   Select the network driver to use with the IPv4 UDP transaction.
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
+                                              in_addr_t ipv4addr);
+#endif
+
+/****************************************************************************
+ * Function: udp_find_ipv6_device
+ *
+ * Description:
+ *   Select the network driver to use with the IPv6 UDP transaction.
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
+                                              net_ipv6addr_t ipv6addr);
+#endif
+
+/****************************************************************************
+ * Function: udp_find_laddr_device
+ *
+ * Description:
+ *   Select the network driver to use with the UDP transaction using the
+ *   locally bound IP address.
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.
+ *
+ ****************************************************************************/
+
+FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn);
+
+/****************************************************************************
+ * Function: udp_find_raddr_device
+ *
+ * Description:
+ *   Select the network driver to use with the UDP transaction using the
+ *   remote IP address.
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.
+ *
+ ****************************************************************************/
+
+FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn);
+
+/****************************************************************************
  * Function: udp_callback
  *
  * Description:
