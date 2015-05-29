@@ -228,9 +228,8 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
     }
 
   /* Get the device driver that will service this transfer */
-  /* TODO better lookup network interface from *psock or *conn */
 
-  dev = netdev_findbyname("eth0");
+  dev = pkt_find_device((FAR struct pkt_conn_s *)psock->s_conn);
   if (dev == NULL)
     {
       err = ENODEV;

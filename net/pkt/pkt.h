@@ -196,7 +196,22 @@ uint16_t pkt_callback(FAR struct net_driver_s *dev,
 
 /* pkt_input() is prototyped in include/nuttx/net/pkt.h */
 
-/* Defined in pkt_poll.c ****************************************************/
+/****************************************************************************
+ * Function: pkt_find_device
+ *
+ * Description:
+ *   Select the network driver to use with the PKT transaction.
+ *
+ * Input Parameters:
+ *   conn - PKT connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.
+ *
+ ****************************************************************************/
+
+FAR struct net_driver_s *pkt_find_device(FAR struct pkt_conn_s *conn);
+
 /****************************************************************************
  * Name: pkt_poll
  *

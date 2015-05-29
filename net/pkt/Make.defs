@@ -1,7 +1,7 @@
 ############################################################################
 # net/pkt/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ NET_CSRCS += pkt_conn.c
 NET_CSRCS += pkt_input.c
 NET_CSRCS += pkt_callback.c
 NET_CSRCS += pkt_poll.c
+NET_CSRCS += pkt_finddev.c
 
 # Include packet socket build support
 

@@ -1316,12 +1316,11 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   recvfrom_init(psock, buf, len, from, fromlen, &state);
 
   /* Get the device driver that will service this transfer */
-  /* TODO better lookup network interface from *psock or *conn */
 
-  dev  = netdev_findbyname("eth0");
+  dev  = pkt_find_device(conn);
   if (dev == NULL)
     {
-      err = ENODEV;
+      ret = -ENODEV;
       goto errout_with_state;
     }
 
