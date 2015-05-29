@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/setsockopt.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012, 2014 Gregory Nutt. All rights
+ *   Copyright (C) 2007, 2008, 2011-2012, 2014-2015 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -173,19 +173,22 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
       case SO_RCVTIMEO:
       case SO_SNDTIMEO:
         {
+          FAR struct timeval *tv = (FAR struct timeval *)value;
           socktimeo_t timeo;
 
           /* Verify that option is the size of an 'struct timeval'. */
 
-          if (value_len != sizeof(struct timeval))
+          if (tv == NULL || value_len != sizeof(struct timeval))
             {
               err = EINVAL;
               goto errout;
             }
 
-          /* Get the timeout value */
+          /* Get the timeout value.  Any microsecond remainder will be
+           * force to the next larger, whole decisecond value.
+           */
 
-          timeo = (socktimeo_t)net_timeval2dsec((struct timeval *)value);
+          timeo = (socktimeo_t)net_timeval2dsec(tv, TV2DS_CEIL);
 
           /* Save the timeout value */
 
