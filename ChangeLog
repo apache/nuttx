@@ -10475,3 +10475,5 @@
 	  remainder to round to the closed decisecond value, or use any non-zero
 	  remainder to the next larger whole decisecond value.  Bug discovered
 	  by Librae (2015-05-29).
+	* net/sockets, net/tcp, net/udp: UDP Networking: Add support for
+	  device event notification for UDP transfers (2015-05-29).
