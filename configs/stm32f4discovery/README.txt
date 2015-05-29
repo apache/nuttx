@@ -1251,6 +1251,19 @@ Where <subdir> is one of the following:
        on your system and that you have the full path to the installed genromfs
        executable in PATH variable (see apps/examples/README.txt)
 
+    6. This configuration can be extended to use the hello++4 example and to build uClibc with the following additions to to the configuration file (from Leo aloe3132):
+
+       CONFIG_C99_BOOL8=y
+       CONFIG_HAVE_CXXINITIALIZE=y
+
+       CONFIG_UCLIBCXX=y
+       CONFIG_UCLIBCXX_EXCEPTION=y
+       CONFIG_UCLIBCXX_HAVE_LIBSUPCXX=y
+       CONFIG_UCLIBCXX_IOSTREAM_BUFSIZE=32
+
+       CONFIG_EXAMPLES_ELF_CXXINITIALIZE=y
+       CONFIG_EXAMPLES_ELF_UCLIBCXX=y
+
   ipv6:
   ----
     This is another version of the NuttShell configuration for the
