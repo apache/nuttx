@@ -71,8 +71,6 @@ static FAR struct devif_callback_s *g_cbfreelist = NULL;
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
