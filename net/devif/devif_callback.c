@@ -71,8 +71,6 @@ static FAR struct devif_callback_s *g_cbfreelist = NULL;
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
@@ -94,8 +92,6 @@ void devif_callback_init(void)
  *
  * Description:
  *   Allocate a callback container from the free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
@@ -146,8 +142,6 @@ FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **
  *
  * Description:
  *   Return a callback container to the free list.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Assumptions:
  *   This function is called with interrupts disabled.
@@ -213,8 +207,6 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *
  * Description:
  *   Execute a list of callbacks.
- *   This is called internally as part of uIP initialization and should not
- *   be accessed from the application or socket layer.
  *
  * Input parameters:
  *   dev - The network device state structure associated with the network
@@ -222,6 +214,8 @@ void devif_callback_free(FAR struct devif_callback_s *cb,
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
  *     port structure.  May be NULL if the even is not related to a TCP
  *     connection or UDP port.
+ *   flags - The bit set of events to be notified.
+ *   list - The list to traverse in performing the notifications
  *
  * Returned value:
  *   The updated flags as modified by the callback functions.
