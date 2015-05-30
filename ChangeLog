@@ -10480,3 +10480,5 @@
 	  where it belongs (2015-05-29).
 	* net/sockets, net/tcp, net/udp: UDP Networking: Add support for
 	  device event notification for UDP transfers (2015-05-29).
+	* net/sockets and net/tcp: TCP Networking: Add support for device event
+	  notification for UDP transfers (2015-05-30).
