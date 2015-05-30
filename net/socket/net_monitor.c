@@ -58,7 +58,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags);
+static uint16_t connection_event(FAR struct net_driver_s *dev,
+                                 FAR void *pvconn, FAR void *pvpriv,
+                                 uint16_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -70,6 +72,7 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags);
  *   Some connection related event has occurred
  *
  * Parameters:
+ *   dev      The device which as active when the event was detected.
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -77,13 +80,15 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags);
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
+static uint16_t connection_event(FAR struct net_driver_s *dev,
+                                 FAR void *pvconn, FAR void *pvpriv,
+                                 uint16_t flags)
 {
-  FAR struct socket *psock = (FAR struct socket *)conn->connection_private;
+  FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
   if (psock)
     {
@@ -108,6 +113,8 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
           psock->s_flags &= ~_SF_CLOSED;
         }
     }
+
+  return flags;
 }
 
 /****************************************************************************
@@ -129,13 +136,16 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
  *   case, -ENOTCONN is returned.
  *
  * Assumptions:
- *   The caller holds the network lock.
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
  *
  ****************************************************************************/
 
 int net_startmonitor(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
+  FAR struct devif_callback_s *cb;
+  net_lock_t save;
 
   DEBUGASSERT(psock && conn);
 
@@ -144,30 +154,51 @@ int net_startmonitor(FAR struct socket *psock)
    * registered the monitoring callback.)
    */
 
+  save = net_lock();
   if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
         conn->tcpstateflags == TCP_SYN_RCVD))
     {
       /* Invoke the TCP_CLOSE connection event now */
 
-      connection_event(conn, TCP_CLOSE);
+      (void)connection_event(NULL, conn, psock, TCP_CLOSE);
 
       /* Make sure that the monitor is stopped */
 
       conn->connection_private = NULL;
+      conn->connection_devcb   = NULL;
       conn->connection_event   = NULL;
 
       /* And return -ENOTCONN to indicate the the monitor was not started
        * because the socket was already disconnected.
        */
 
+      net_unlock(save);
       return -ENOTCONN;
     }
+
+  DEBUGASSERT(conn->connection_event == NULL &&
+              conn->connection_devcb == NULL);
+
+  /* Allocate a callback structure that we will use to get callbacks if
+   * the network goes down.
+   */
+
+  cb = tcp_monitor_callback_alloc(conn);
+  if (cb != NULL)
+    {
+      cb->event = connection_event;
+      cb->priv  = (void*)psock;
+      cb->flags = NETDEV_DOWN;
+    }
+
+  conn->connection_devcb = cb;
 
   /* Set up to receive callbacks on connection-related events */
 
   conn->connection_private = (void*)psock;
   conn->connection_event   = connection_event;
 
+  net_unlock(save);
   return OK;
 }
 
@@ -183,14 +214,32 @@ int net_startmonitor(FAR struct socket *psock)
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
+ *
  ****************************************************************************/
 
 void net_stopmonitor(FAR struct tcp_conn_s *conn)
 {
+  net_lock_t save;
+
   DEBUGASSERT(conn);
 
+  /* Free any allocated device event callback structure */
+
+  save = net_lock();
+  if (conn->connection_devcb)
+    {
+      tcp_monitor_callback_free(conn, conn->connection_devcb);
+    }
+
+  /* Nullify all connection event data */
+
   conn->connection_private = NULL;
+  conn->connection_devcb   = NULL;
   conn->connection_event   = NULL;
+  net_unlock(save);
 }
 
 /****************************************************************************
@@ -207,7 +256,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The caller holds the network lock.
  *
  ****************************************************************************/
 

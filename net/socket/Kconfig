@@ -15,8 +15,8 @@ config NET_NACTIVESOCKETS
 	int "Max socket operations"
 	default 16
 	---help---
-		Maximum number of concurrent socket operations (recv, send, etc.).
-		Default: 16
+		Maximum number of concurrent socket operations (recv, send,
+		connection monitoring, etc.). Default: 16
 
 config NET_SOCKOPTS
 	bool "Socket options"

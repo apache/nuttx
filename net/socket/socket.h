@@ -237,7 +237,8 @@ FAR struct socket *sockfd_socket(int sockfd);
  *   case, -ENOTCONN is returned.
  *
  * Assumptions:
- *   The caller holds the network lock.
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
  *
  ****************************************************************************/
 
@@ -256,6 +257,10 @@ int net_startmonitor(FAR struct socket *psock);
  *
  * Returned Value:
  *   None
+ *
+ * Assumptions:
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
  *
  ****************************************************************************/
 
@@ -277,7 +282,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn);
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The caller holds the network lock.
  *
  ****************************************************************************/
 

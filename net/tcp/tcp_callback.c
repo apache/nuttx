@@ -201,7 +201,8 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
     {
       /* Perform the callback */
 
-      conn->connection_event(conn, flags);
+      flags = conn->connection_event(dev, conn, conn->connection_private,
+                                     flags);
     }
 
   return flags;
