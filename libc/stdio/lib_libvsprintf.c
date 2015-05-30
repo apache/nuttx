@@ -182,7 +182,7 @@ static int  getlusize(uint8_t fmt, FAR uint8_t flags, unsigned long ln);
 
 /* Unsigned long long int to ASCII conversions */
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
 static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long lln);
 static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long lln, uint8_t a);
 static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long lln);
@@ -805,7 +805,7 @@ static int getlusize(uint8_t fmt, uint8_t flags, unsigned long ln)
 #endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 #endif /* CONFIG_LONG_IS_NOT_INT */
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
 /****************************************************************************
  * Name: llutodec
  ****************************************************************************/
@@ -1426,7 +1426,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list a
 
       if (strchr("diuxXpob", FMT_CHAR))
         {
-#ifdef CONFIG_HAVE_LONG_LONG
+#if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
           if (IS_LONGLONGPRECISION(flags) && FMT_CHAR != 'p')
             {
               long long lln;

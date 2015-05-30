@@ -10482,3 +10482,6 @@
 	  device event notification for UDP transfers (2015-05-29).
 	* net/sockets and net/tcp: TCP Networking: Add support for device event
 	  notification for UDP transfers (2015-05-30).
+	* libc/Kconfig and stdio/lib_libvsprintf.c: Add an option to disable
+	  support for long long formats in lib_vsprintf.  From Alan Carvalho
+	  de Assis (2015-05-30).
