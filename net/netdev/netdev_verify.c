@@ -65,12 +65,18 @@ bool netdev_verify(FAR struct net_driver_s *dev)
   FAR struct net_driver_s *chkdev;
   bool valid = false;
 
+  /* Search the list of registered devices */
+
   netdev_semtake();
   for (chkdev = g_netdevices; chkdev != NULL; chkdev = chkdev->flink)
     {
+      /* Is the the network device that we are looking for? */
+
       if (chkdev == dev)
         {
-          valid = true;
+          /* Yes.. return true if the interface is in the UP state */
+
+          valid = ((dev->d_flags & IFF_UP) != 0);
           break;
         }
     }
