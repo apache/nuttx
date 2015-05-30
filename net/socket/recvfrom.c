@@ -804,12 +804,14 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
       /* Check for a loss of connection.
        *
-       * TCP_CLOSE: The remote host has closed the connection
-       * TCP_ABORT: The remote host has aborted the connection
-       * TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
+       * TCP_DISCONN_EVENTS:
+       *   TCP_CLOSE:    The remote host has closed the connection
+       *   TCP_ABORT:    The remote host has aborted the connection
+       *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
+       *   NETDEV_DOWN:  The network device went down
        */
 
-      else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+      else if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
           nllvdbg("Lost connection\n");
 
@@ -1692,8 +1694,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.rf_cb = tcp_callback_alloc(conn);
       if (state.rf_cb)
         {
-          state.rf_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_CLOSE |
-                                  TCP_ABORT | TCP_TIMEDOUT);
+          state.rf_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
           state.rf_cb->priv    = (void*)&state;
           state.rf_cb->event   = recvfrom_tcpinterrupt;
 

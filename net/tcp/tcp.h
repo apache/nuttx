@@ -62,8 +62,17 @@
 
 /* Allocate a new TCP data callback */
 
-#define tcp_callback_alloc(conn)   devif_callback_alloc(NULL, &conn->list)
-#define tcp_callback_free(conn,cb) devif_callback_free(NULL, cb, &conn->list)
+#ifdef CONFIG_NETDEV_MULTINIC
+#  define tcp_callback_alloc(conn) \
+    devif_callback_alloc(conn->dev, &conn->list)
+#  define tcp_callback_free(conn,cb) \
+    devif_callback_free(conn->dev, cb, &conn->list)
+#else
+#  define tcp_callback_alloc(conn) \
+    devif_callback_alloc(g_netdevices, &conn->list)
+#  define tcp_callback_free(conn,cb) \
+    devif_callback_free(g_netdevices, cb, &conn->list)
+#endif
 
 /* Get the current maximum segment size that can be sent on the current
  * TCP connection.
@@ -141,16 +150,26 @@ struct tcp_conn_s
   uint16_t unacked;       /* Number bytes sent but not yet ACKed */
 #endif
 
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* If the TCP socket is bound to a local address, then this is
+   * a reference to the device that routes traffic on the corresponding
+   * network.
+   */
+
+  FAR struct net_driver_s *dev;
+#endif
+
+#ifdef CONFIG_NET_TCP_READAHEAD
   /* Read-ahead buffering.
    *
    *   readahead - A singly linked list of type struct iob_qentry_s
    *               where the TCP/IP read-ahead data is retained.
    */
 
-#ifdef CONFIG_NET_TCP_READAHEAD
   struct iob_queue_s readahead;   /* Read-ahead buffering */
 #endif
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Write buffering
    *
    *   write_q   - The queue of unsent I/O buffers.  The head of this
@@ -159,7 +178,6 @@ struct tcp_conn_s
    *               chains.  Sequence number ordering.
    */
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   sq_queue_t write_q;     /* Write buffering for segments */
   sq_queue_t unacked_q;   /* Write buffering for un-ACKed segments */
   uint16_t   expired;     /* Number segments retransmitted but not yet ACKed,
@@ -168,6 +186,7 @@ struct tcp_conn_s
   uint32_t   isn;         /* Initial sequence number */
 #endif
 
+#ifdef CONFIG_NET_TCPBACKLOG
   /* Listen backlog support
    *
    *   blparent - The backlog parent.  If this connection is backlogged,
@@ -178,7 +197,6 @@ struct tcp_conn_s
    *     struct tcp_backlog_s tear-off structure that manages that backlog.
    */
 
-#ifdef CONFIG_NET_TCPBACKLOG
   FAR struct tcp_conn_s    *blparent;
   FAR struct tcp_backlog_s *backlog;
 #endif
@@ -269,6 +287,14 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+/* List of registered Ethernet device drivers.  This duplicates a declaration
+ * in net/tcp/tcp.h
+ */
+
+EXTERN struct net_driver_s *g_netdevices;
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -339,6 +365,46 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Function: tcp_find_ipv4_device
+ *
+ * Description:
+ *   Select the network driver to use with the IPv4 TCP transaction.
+ *
+ * Input Parameters:
+ *   conn - TCP connection structure.  The locally bound address, laddr,
+ *     should be set to a non-zero value in this structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.  -ENODEV is the only expected error value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Function: tcp_find_ipv6_device
+ *
+ * Description:
+ *   Select the network driver to use with the IPv6 TCP transaction.
+ *
+ * Input Parameters:
+ *   conn - TCP connection structure.  The locally bound address, laddr,
+ *     should be set to a non-zero value in this structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.  -EHOSTUNREACH is the only expected error value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Name: tcp_alloc_accept

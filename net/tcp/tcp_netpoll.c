@@ -119,9 +119,9 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       /* Check for a loss of connection events. */
 
-      if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
+      if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          /* Marki that the connection has been lost */
+          /* Mark that the connection has been lost */
 
           net_lostconnection(info->psock, flags);
           eventset |= (POLLERR | POLLHUP);
@@ -208,13 +208,12 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_CLOSE |
-                  TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN);
+  cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_DISCONN_EVENTS);
   cb->priv     = (FAR void *)info;
   cb->event    = tcp_poll_interrupt;
 
   /* Save the reference in the poll info structure as fds private as well
-   * for use durring poll teardown as well.
+   * for use during poll teardown as well.
    */
 
   fds->priv    = (FAR void *)info;

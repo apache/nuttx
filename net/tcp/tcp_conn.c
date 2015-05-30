@@ -514,6 +514,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 {
   net_lock_t flags;
   int port;
+  int ret;
 
   /* Verify or select a local port and address */
 
@@ -529,21 +530,40 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
   port = tcp_selectport(ntohs(addr->sin_port));
 #endif
 
-  net_unlock(flags);
-
   if (port < 0)
     {
+      ndbg("tcp_selectport failed: %d\n", port);
       return port;
     }
 
   /* Save the local address in the connection structure. */
 
   conn->lport = addr->sin_port;
-
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
 #endif
 
+  /* Find the device that can receive packets on the network
+   * associated with this local address.
+   */
+
+  ret = tcp_find_ipv4_device(conn);
+  if (ret < 0)
+    {
+      /* If no device is found, then the address is not reachable */
+
+      ndbg("tcp_find_ipv4_device failed: %d\n", ret);
+
+      /* Back out the local address setting */
+
+      conn->lport = 0;
+#ifdef CONFIG_NETDEV_MULTINIC
+      net_ipv4addr_copy(conn->u.ipv4.laddr, INADDR_ANY);
+#endif
+      return ret;
+    }
+
+  net_unlock(flags);
   return OK;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -569,6 +589,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 {
   net_lock_t flags;
   int port;
+  int ret;
 
   /* Verify or select a local port and address */
 
@@ -590,21 +611,40 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
   port = tcp_selectport(ntohs(addr->sin6_port));
 #endif
 
-  net_unlock(flags);
-
   if (port < 0)
     {
+      ndbg("tcp_selectport failed: %d\n", port);
       return port;
     }
 
   /* Save the local address in the connection structure. */
 
   conn->lport = addr->sin6_port;
-
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_copy(conn->u.ipv6.laddr, addr->sin6_addr.in6_u.u6_addr16);
 #endif
 
+  /* Find the device that can receive packets on the network
+   * associated with this local address.
+   */
+
+  ret = tcp_find_ipv6_device(conn);
+  if (ret < 0)
+    {
+      /* If no device is found, then the address is not reachable */
+
+      ndbg("tcp_find_ipv6_device failed: %d\n", ret);
+
+      /* Back out the local address setting */
+
+      conn->lport = 0;
+#ifdef CONFIG_NETDEV_MULTINIC
+      net_ipv6addr_copy(conn->u.ipv6.laddr, g_ipv6_allzeroaddr);
+#endif
+      return ret;
+    }
+
+  net_unlock(flags);
   return OK;
 }
 #endif /* CONFIG_NET_IPv6 */
@@ -928,6 +968,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 {
   FAR struct tcp_conn_s *conn;
   uint8_t domain;
+  int ret;
 
   /* Get the appropriate IP domain */
 
@@ -945,15 +986,9 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
   conn = tcp_alloc(domain);
   if (conn)
     {
-      /* Fill in the necessary fields for the new connection. */
-
-      conn->rto           = TCP_RTO;
-      conn->timer         = TCP_RTO;
-      conn->sa            = 0;
-      conn->sv            = 4;
-      conn->nrtx          = 0;
-      conn->lport         = tcp->destport;
-      conn->rport         = tcp->srcport;
+      /* Set up the local address (laddr) and the remote address (raddr)
+       * that describes the TCP connection.
+       */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
@@ -962,11 +997,19 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
         {
           FAR struct ipv6_hdr_s *ip = IPv6BUF;
 
+          /* Set the IPv6 specific MSS and the IPv6 locally bound address */
+
           conn->mss = TCP_IPv6_INITIAL_MSS(dev);
           net_ipv6addr_copy(conn->u.ipv6.raddr, ip->srcipaddr);
 #ifdef CONFIG_NETDEV_MULTINIC
           net_ipv6addr_copy(conn->u.ipv6.laddr, ip->destipaddr);
 #endif
+
+          /* Find the device that can receive packets on the network
+           * associated with this local address.
+           */
+
+          ret = tcp_find_ipv6_device(conn);
         }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -977,6 +1020,8 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
         {
           FAR struct ipv4_hdr_s *ip = IPv4BUF;
 
+          /* Set the IPv6 specific MSS and the IPv4 locally bound address. */
+
           conn->mss = TCP_IPv4_INITIAL_MSS(dev);
           net_ipv4addr_copy(conn->u.ipv4.raddr,
                             net_ip4addr_conv32(ip->srcipaddr));
@@ -984,9 +1029,40 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
           net_ipv4addr_copy(conn->u.ipv4.laddr,
                             net_ip4addr_conv32(ip->destipaddr));
 #endif
+
+          /* Find the device that can receive packets on the network
+           * associated with this local address.
+           */
+
+          ret = tcp_find_ipv4_device(conn);
         }
 #endif /* CONFIG_NET_IPv4 */
 
+      /* Verify that a network device that can provide packets to this
+       * local address was found.
+       */
+
+      if (ret < 0)
+        {
+          /* If no device is found, then the address is not reachable.
+           * That should be impossible in this context and we should
+           * probably really just assert here.
+           */
+
+          ndbg("Failed to find network device: %d\n", ret);
+          tcp_free(conn);
+          return NULL;
+        }
+
+      /* Fill in the necessary fields for the new connection. */
+
+      conn->rto           = TCP_RTO;
+      conn->timer         = TCP_RTO;
+      conn->sa            = 0;
+      conn->sv            = 4;
+      conn->nrtx          = 0;
+      conn->lport         = tcp->destport;
+      conn->rport         = tcp->srcport;
       conn->tcpstateflags = TCP_SYN_RCVD;
 
       tcp_initsequence(conn->sndseq);
@@ -1090,6 +1166,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   net_lock_t flags;
   int port;
+  int ret;
 
   /* The connection is expected to be in the TCP_ALLOCATED state.. i.e.,
    * allocated via up_tcpalloc(), but not yet put into the active connections
@@ -1153,13 +1230,80 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
 #endif /* CONFIG_NETDEV_MULTINIC */
 
-  net_unlock(flags);
-
   /* Did we have a port assignment? */
 
   if (port < 0)
     {
-      return port;
+      ret = port;
+      goto errout_with_lock;
+    }
+
+  /* Set up the local address (laddr) and the remote address (raddr) that describes the TCP connection.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (conn->domain == PF_INET)
+#endif
+    {
+      FAR const struct sockaddr_in *inaddr =
+        (FAR const struct sockaddr_in *)addr;
+
+      /* Save MSS and the port from the sockaddr (already in network order) */
+
+      conn->mss    = MIN_IPv4_TCP_INITIAL_MSS;
+      conn->rport  = inaddr->sin_port;
+
+      /* The sockaddr address is 32-bits in network order. */
+
+      net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+
+      /* Find the device that can receive packets on the network associated
+       * with this local address.
+       */
+
+      ret = tcp_find_ipv4_device(conn);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      FAR const struct sockaddr_in6 *inaddr =
+        (FAR const struct sockaddr_in6 *)addr;
+
+      /* Save MSS and the port from the sockaddr (already in network order) */
+
+      conn->mss     = MIN_IPv6_TCP_INITIAL_MSS;
+      conn->rport   = inaddr->sin6_port;
+
+      /* The sockaddr address is 128-bits in network order. */
+
+      net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
+
+      /* Find the device that can receive packets on the network associated
+       * with this local address.
+       */
+
+      ret = tcp_find_ipv6_device(conn);
+    }
+#endif /* CONFIG_NET_IPv6 */
+
+  /* Verify that a network device that can provide packets to this local
+   * address was found.
+   */
+
+  if (ret < 0)
+    {
+      /* If no device is found, then the address is not reachable.  That
+       * should be impossible in this context and we should probably really
+       * just assert here.
+       */
+
+      ndbg("Failed to find network device: %d\n", ret);
+      goto errout_with_lock;
     }
 
   /* Initialize and return the connection structure, bind it to the port
@@ -1184,46 +1328,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->sent       = 0;
 #endif
 
-  /* Save values that are specific to the IP address domain */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
-#endif
-    {
-      FAR const struct sockaddr_in *inaddr =
-        (FAR const struct sockaddr_in *)addr;
-
-      /* Save MSS and the port from the sockaddr (already in network order) */
-
-      conn->mss    = MIN_IPv4_TCP_INITIAL_MSS;
-      conn->rport  = inaddr->sin_port;
-
-      /* The sockaddr address is 32-bits in network order. */
-
-      net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      FAR const struct sockaddr_in6 *inaddr =
-        (FAR const struct sockaddr_in6 *)addr;
-
-      /* Save MSS and the port from the sockaddr (already in network order) */
-
-      conn->mss     = MIN_IPv6_TCP_INITIAL_MSS;
-      conn->rport   = inaddr->sin6_port;
-
-      /* The sockaddr address is 32-bits in network order. */
-
-      net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
-    }
-#endif /* CONFIG_NET_IPv6 */
-
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Initialize the list of TCP read-ahead buffers */
 
@@ -1237,17 +1341,14 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   sq_init(&conn->unacked_q);
 #endif
 
-  /* And, finally, put the connection structure into the active
-   * list. Because g_active_tcp_connections is accessed from user level and
-   * interrupt level, code, it is necessary to keep interrupts disabled during
-   * this operation.
-   */
+  /* And, finally, put the connection structure into the active list. */
 
-  flags = net_lock();
   dq_addlast(&conn->node, &g_active_tcp_connections);
-  net_unlock(flags);
+  ret = OK;
 
-  return OK;
+errout_with_lock:
+  net_unlock(flags);
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

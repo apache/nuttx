@@ -217,7 +217,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
   /* Check for a loss of connection */
 
-  else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+  else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
       /* Report not connected */
 
@@ -329,7 +329,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
   /* Check for a loss of connection */
 
-  if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+  if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
       /* Report not connected */
 
@@ -707,8 +707,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   /* Set up the ACK callback in the connection */
 
-  state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_CLOSE |
-                            TCP_ABORT | TCP_TIMEDOUT);
+  state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_DISCONN_EVENTS);
   state.snd_ackcb->priv  = (void*)&state;
   state.snd_ackcb->event = ack_interrupt;
 

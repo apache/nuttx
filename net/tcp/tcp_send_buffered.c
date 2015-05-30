@@ -488,7 +488,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
   /* Check for a loss of connection */
 
-  else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+  else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
       nllvdbg("Lost connection: %04x\n", flags);
 
@@ -1024,7 +1024,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       /* Set up the callback in the connection */
 
       psock->s_sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                               TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT);
+                               TCP_DISCONN_EVENTS);
       psock->s_sndcb->priv  = (void*)psock;
       psock->s_sndcb->event = psock_send_interrupt;
 

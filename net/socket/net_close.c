@@ -167,12 +167,14 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 
   nllvdbg("conn: %p flags: %04x\n", conn, flags);
 
-  /* TCP_CLOSE:    The remote host has closed the connection
-   * TCP_ABORT:    The remote host has aborted the connection
-   * TCP_TIMEDOUT: The remote did not respond, the connection timed out
+  /* TCP_DISCONN_EVENTS:
+   *   TCP_CLOSE:    The remote host has closed the connection
+   *   TCP_ABORT:    The remote host has aborted the connection
+   *   TCP_TIMEDOUT: The remote did not respond, the connection timed out
+   *   NETDEV_DOWN:  The network device went down
    */
 
-  if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+  if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
       /* The disconnection is complete */
 
@@ -371,8 +373,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
     {
       /* Set up to receive TCP data event callbacks */
 
-      state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_CLOSE | TCP_ABORT |
-                            TCP_TIMEDOUT);
+      state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
       state.cl_cb->event = netclose_interrupt;
 
 #ifdef CONFIG_NET_SOLINGER

@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
+#include <string.h>
+
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 
@@ -66,6 +68,7 @@
  *
  * Input Parameters:
  *   conn - UDP connection structure (not currently used).
+ *   ipv4addr - The IPv4 address to use in the device selection.
  *
  * Returned Value:
  *   A pointer to the network driver to use.
@@ -77,17 +80,15 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
                                               in_addr_t ipv4addr)
 {
 #ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
-
-  /* Return NULL if the address is INADDR_ANY.  In this case, there is
-   * there may be multiple devices that can provide data so the exceptional
-   * events from any particular device are not important.
+  /* Return NULL if the address is INADDR_ANY.  In this case, there may
+   * be multiple devices that can provide data so the exceptional events
+   * from any particular device are not important.
    *
    * Of course, it would be a problem if this is the remote address of
    * sendto().
    */
 
-  if ((net_ipv4addr_cmp(ipv4addr, INADDR_ANY))
+  if (net_ipv4addr_cmp(ipv4addr, INADDR_ANY))
     {
       return NULL;
     }
@@ -99,8 +100,6 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
   return netdev_findby_ipv4addr(conn->u.ipv4.laddr, ipv4addr);
 
 #else
-  /* Return NULL if the address is IN6ADDR_ANY */
-
   /* There is only a single network device... the one at the head of the
    * g_netdevices list.
    */
@@ -118,6 +117,7 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
  *
  * Input Parameters:
  *   conn - UDP connection structure (not currently used).
+ *   ipv6addr - The IPv6 address to use in the device selection.
  *
  * Returned Value:
  *   A pointer to the network driver to use.
@@ -129,11 +129,9 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
                                               net_ipv6addr_t ipv6addr)
 {
 #ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
-
-  /* Return NULL if the address is IN6ADDR_ANY.  In this case, there is
-   * there may be multiple devices that can provide data so the exceptional
-   * events from any particular device are not important.
+  /* Return NULL if the address is IN6ADDR_ANY.  In this case, there may
+   * be multiple devices that can provide data so the exceptional events
+   * from any particular device are not important.
    *
    * Of course, it would be a problem if this is the remote address of
    * sendto().
@@ -178,8 +176,6 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
 FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
 {
 #ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
-
   /* There are multiple network devices.  We need to select the device that
    * is going to route the UDP packet based on the provided IP address.
    */
@@ -189,7 +185,7 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
       if (conn->domain == PF_INET)
 #endif
         {
-          return upd_find_ipv4_device(conn, conn->u.ipv4.laddr);
+          return udp_find_ipv4_device(conn, conn->u.ipv4.laddr);
         }
 #endif
 
@@ -198,7 +194,7 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
       else
 #endif
         {
-          return upd_find_ipv6_device(conn, conn->u.ipv6.laddr);
+          return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
         }
 #endif
 
@@ -229,8 +225,6 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
 FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 {
 #ifdef CONFIG_NETDEV_MULTINIC
-  FAR struct net_driver_s *dev;
-
   /* There are multiple network devices.  We need to select the device that
    * is going to route the UDP packet based on the provided IP address.
    */
@@ -240,7 +234,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
       if (conn->domain == PF_INET)
 #endif
         {
-          return upd_find_ipv4_device(conn, conn->u.ipv4.raddr);
+          return udp_find_ipv4_device(conn, conn->u.ipv4.raddr);
         }
 #endif
 
@@ -249,7 +243,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
       else
 #endif
         {
-          return upd_find_ipv6_device(conn, conn->u.ipv6.raddr);
+          return udp_find_ipv6_device(conn, conn->u.ipv6.raddr);
         }
 #endif
 

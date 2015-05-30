@@ -193,8 +193,11 @@
 
 /* The set of events that and implications to the TCP connection state */
 
-#define TCP_CONN_EVENTS (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | \
-                         TCP_TIMEDOUT | NETDEV_DOWN)
+#define TCP_CONN_EVENTS \
+  (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT | NETDEV_DOWN)
+
+#define TCP_DISCONN_EVENTS \
+  (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)
 
 /* IPv4/IPv6 Helpers */
 

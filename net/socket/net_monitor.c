@@ -89,9 +89,11 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
     {
       nllvdbg("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
 
-      /* TCP_CLOSE, TCP_ABORT, or TCP_TIMEDOUT: Loss-of-connection events */
+      /* TCP_DISCONN_EVENTS: TCP_CLOSE, TCP_ABORT, TCP_TIMEDOUT, or
+       * NETDEV_DOWN.  All loss-of-connection events.
+       */
 
-      if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+      if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
           net_lostconnection(psock, flags);
         }
@@ -218,6 +220,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
    *   TCP_CLOSE: The remote host has closed the connection
    *   TCP_ABORT: The remote host has aborted the connection
    *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
+   *   NETDEV_DOWN: The network device went down
    *
    * And we need to set these two socket status bits appropriately:
    *
@@ -237,7 +240,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
       psock->s_flags &= ~_SF_CONNECTED;
       psock->s_flags |= _SF_CLOSED;
     }
-  else if ((flags & (TCP_ABORT | TCP_TIMEDOUT)) != 0)
+  else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
     {
       /* The loss of connection was less than graceful.  This will (eventually)
        * be reported as an ENOTCONN error.

@@ -89,7 +89,7 @@
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 

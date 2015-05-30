@@ -118,7 +118,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
       /* Set up the connection "interrupt" handler */
 
       pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
-                                TCP_TIMEDOUT | TCP_CONNECTED);
+                                TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
       pstate->tc_cb->priv    = (void*)pstate;
       pstate->tc_cb->event   = psock_connect_interrupt;
 
@@ -227,9 +227,18 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_TIMEDOUT) != 0)
         {
-          /* Indicate that the remote host is unreachable (or should this be timedout?) */
+          /* Indicate that the connection timedout?)*/
 
           pstate->tc_result = -ETIMEDOUT;
+        }
+
+      else if ((flags & NETDEV_DOWN) != 0)
+        {
+          /* The network device went down.  Indicate that the remote host
+           * is unreachable.
+           */
+
+          pstate->tc_result = -ENETUNREACH;
         }
 
       /* TCP_CONNECTED: The socket is successfully connected */

@@ -376,7 +376,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
  /* Check for a loss of connection */
 
-  else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
+  else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
       /* Report not connected */
 
@@ -810,7 +810,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
           /* Set up the callback in the connection */
 
           state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                                   TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT);
+                                   TCP_DISCONN_EVENTS);
           state.snd_cb->priv    = (FAR void *)&state;
           state.snd_cb->event   = tcpsend_interrupt;
 

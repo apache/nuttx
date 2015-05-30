@@ -342,6 +342,7 @@ int udp_ipv6_input(FAR struct net_driver_s *dev);
  *
  * Input Parameters:
  *   conn - UDP connection structure (not currently used).
+ *   ipv4addr - The IPv4 address to use in the device selection.
  *
  * Returned Value:
  *   A pointer to the network driver to use.
@@ -361,6 +362,7 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
  *
  * Input Parameters:
  *   conn - UDP connection structure (not currently used).
+ *   ipv6addr - The IPv6 address to use in the device selection.
  *
  * Returned Value:
  *   A pointer to the network driver to use.

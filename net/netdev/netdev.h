@@ -68,9 +68,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* List of registered Ethernet device drivers */
-
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
+/* List of registered Ethernet device drivers.  This duplicates a declaration
+ * in net/netdev/netdev.h
+ */
+
 EXTERN struct net_driver_s *g_netdevices;
 #endif
 
