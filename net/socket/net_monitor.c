@@ -58,6 +58,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static void connection_closed(FAR struct socket *psock, uint16_t flags);
 static uint16_t connection_event(FAR struct net_driver_s *dev,
                                  FAR void *pvconn, FAR void *pvpriv,
                                  uint16_t flags);
@@ -65,6 +66,61 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+/****************************************************************************
+ * Name: connection_closed
+ *
+ * Description:
+ *   Called when a loss-of-connection event has occurred.
+ *
+ * Parameters:
+ *   psock    The TCP socket structure associated.
+ *   flags    Set of connection events events
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller holds the network lock.
+ *
+ ****************************************************************************/
+
+static void connection_closed(FAR struct socket *psock, uint16_t flags)
+{
+  /* These loss-of-connection events may be reported:
+   *
+   *   TCP_CLOSE: The remote host has closed the connection
+   *   TCP_ABORT: The remote host has aborted the connection
+   *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
+   *   NETDEV_DOWN: The network device went down
+   *
+   * And we need to set these two socket status bits appropriately:
+   *
+   *  _SF_CONNECTED==1 && _SF_CLOSED==0 - the socket is connected
+   *  _SF_CONNECTED==0 && _SF_CLOSED==1 - the socket was gracefully disconnected
+   *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
+   */
+
+  if ((flags & TCP_CLOSE) != 0)
+    {
+      /* The peer gracefully closed the connection.  Marking the
+       * connection as disconnected will suppress some subsequent
+       * ENOTCONN errors from receive.  A graceful disconnection is
+       * not handle as an error but as an "end-of-file"
+       */
+
+      psock->s_flags &= ~_SF_CONNECTED;
+      psock->s_flags |= _SF_CLOSED;
+    }
+  else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
+    {
+      /* The loss of connection was less than graceful.  This will (eventually)
+       * be reported as an ENOTCONN error.
+       */
+
+      psock->s_flags &= ~(_SF_CONNECTED |_SF_CLOSED);
+    }
+}
+
 /****************************************************************************
  * Name: connection_event
  *
@@ -100,7 +156,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          net_lostconnection(psock, flags);
+          connection_closed(psock, flags);
         }
 
       /* TCP_CONNECTED: The socket is successfully connected */
@@ -143,11 +199,12 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 
 int net_startmonitor(FAR struct socket *psock)
 {
-  FAR struct tcp_conn_s *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn;
   FAR struct devif_callback_s *cb;
   net_lock_t save;
 
-  DEBUGASSERT(psock && conn);
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
   /* Check if the connection has already been closed before any callbacks
    * have been registered. (Maybe the connection is lost before accept has
@@ -256,47 +313,26 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
  *   None
  *
  * Assumptions:
- *   The caller holds the network lock.
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
  *
  ****************************************************************************/
 
 void net_lostconnection(FAR struct socket *psock, uint16_t flags)
 {
-  DEBUGASSERT(psock);
+  net_lock_t save;
 
-  /* These loss-of-connection events may be reported:
-   *
-   *   TCP_CLOSE: The remote host has closed the connection
-   *   TCP_ABORT: The remote host has aborted the connection
-   *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
-   *   NETDEV_DOWN: The network device went down
-   *
-   * And we need to set these two socket status bits appropriately:
-   *
-   *  _SF_CONNECTED==1 && _SF_CLOSED==0 - the socket is connected
-   *  _SF_CONNECTED==0 && _SF_CLOSED==1 - the socket was gracefully disconnected
-   *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
-   */
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
-  if ((flags & TCP_CLOSE) != 0)
-    {
-      /* The peer gracefully closed the connection.  Marking the
-       * connection as disconnected will suppress some subsequent
-       * ENOTCONN errors from receive.  A graceful disconnection is
-       * not handle as an error but as an "end-of-file"
-       */
+  /* Close the connection */
 
-      psock->s_flags &= ~_SF_CONNECTED;
-      psock->s_flags |= _SF_CLOSED;
-    }
-  else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
-    {
-      /* The loss of connection was less than graceful.  This will (eventually)
-       * be reported as an ENOTCONN error.
-       */
+  save = net_lock();
+  connection_closed(psock, flags);
 
-      psock->s_flags &= ~(_SF_CONNECTED |_SF_CLOSED);
-    }
+  /* Stop the network monitor */
+
+  net_stopmonitor((FAR struct tcp_conn_s *)psock->s_conn);
+  net_unlock(save);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

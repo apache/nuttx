@@ -578,6 +578,10 @@ int psock_close(FAR struct socket *psock)
 
                           goto errout_with_psock;
                         }
+
+                      /* Stop the network monitor */
+
+                      net_stopmonitor(conn);
                     }
                   else
                     {
