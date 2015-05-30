@@ -48,6 +48,19 @@ config LIBC_FLOATINGPOINT
 		By default, floating point
 		support in printf, sscanf, etc. is disabled.
 
+config LIBC_LONG_LONG
+	bool "Enable long long support in printf"
+	default y if !DEFAULT_SMALL
+	default n if DEFAULT_SMALL
+	---help---
+		Enables support for long long formats in printf, sscanf, etc. is
+		enabled.  This is enabled by default but if you are trying to
+		reduce the FLASH footprint, then disabling this feature is one
+		option.  The FLASH saves comes not from disabling the long long
+		formats, but rather from omitting the large long long arithmetic
+		libraries that will be drawn into the build if long long support
+		is enabled.
+
 config LIBC_IOCTL_VARIADIC
 	bool "Enable variadic ioctl()"
 	default n
