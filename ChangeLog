@@ -10497,3 +10497,11 @@
 	  and replace them with net_lock() and net_unlock() which have the
 	  larger scope that is needed and will integrate properly with the
 	  dinosaur interrupt driven stack (2015-05-31).
+	* net/socket/connect.c: In the TCP connection operation, it was trying
+	  to setup the network monitor BEFORE the socket was successfully
+	  connected.  This, of course, has ALWAYS failed because the socket is
+	  not yet connected and the TCP state is not yet correct for a connected
+	  socket.  However, because of other changes net_startmonitor() now
+	  returns a failure condition that causes worse problems when trying to
+	  connect.  The fix is to move the logic that starts the network monitor
+	  to AFTER the socket has been successfully connected (2015-05-31).
