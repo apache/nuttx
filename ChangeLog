@@ -10485,3 +10485,15 @@
 	* libc/Kconfig and stdio/lib_libvsprintf.c: Add an option to disable
 	  support for long long formats in lib_vsprintf.  From Alan Carvalho
 	  de Assis (2015-05-30).
+	* net/net_initialize.c, net/detdev, and net/socket: The network device
+	  list was protected by a re-entrant semaphore.  With the recent change
+	  to support network device callback, the network stack needs to access
+	  the network device list too. Some drivers, however, run the network
+	  stack from the interrupt level -- this is bad but a fact in the
+	  current state.  Of course, those drivers are unable to take the
+	  semaphore and would assert.
+	  The solution here is to eliminate the device devices semaphore
+	  altogether.  This eliminates netdev_semtake() and netdev_semgive()
+	  and replace them with net_lock() and net_unlock() which have the
+	  larger scope that is needed and will integrate properly with the
+	  dinosaur interrupt driven stack (2015-05-31).
