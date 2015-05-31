@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_findbyname.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <nuttx/net/netdev.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 
 /****************************************************************************
@@ -92,19 +93,21 @@
 FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
 {
   FAR struct net_driver_s *dev;
+  net_lock_t save;
+
   if (ifname)
     {
-      netdev_semtake();
+      save = net_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (strcmp(ifname, dev->d_ifname) == 0)
             {
-              netdev_semgive();
+              net_unlock(save);
               return dev;
             }
         }
 
-      netdev_semgive();
+      net_unlock(save);
     }
 
   return NULL;

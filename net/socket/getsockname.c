@@ -49,6 +49,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -98,6 +99,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   in_addr_t lipaddr;
   in_addr_t ripaddr;
 #endif
+  net_lock_t save;
 
   /* Check if enough space has been provided for the full address */
 
@@ -150,7 +152,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
    * a single network device and only the network device knows the IP address.
    */
 
-  netdev_semtake();
+  save = net_lock();
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Find the device matching the IPv4 address in the connection structure */
@@ -164,7 +166,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (!dev)
     {
-      netdev_semgive();
+      net_unlock(save);
       return -EINVAL;
     }
 
@@ -175,7 +177,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   outaddr->sin_addr.s_addr = dev->d_ipaddr;
   *addrlen = sizeof(struct sockaddr_in);
 #endif
-  netdev_semgive();
+  net_unlock(save);
 
   /* Return success */
 
@@ -273,7 +275,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
    * a single network device and only the network device knows the IP address.
    */
 
-  netdev_semtake();
+  save = net_lock();
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Find the device matching the IPv6 address in the connection structure */
@@ -287,7 +289,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (!dev)
     {
-      netdev_semgive();
+      net_unlock(save);
       return -EINVAL;
     }
 
@@ -298,7 +300,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   memcpy(outaddr->sin6_addr.in6_u.u6_addr8, dev->d_ipv6addr, 16);
   *addrlen = sizeof(struct sockaddr_in6);
 #endif
-  netdev_semgive();
+  net_unlock(save);
 
   /* Return success */
 

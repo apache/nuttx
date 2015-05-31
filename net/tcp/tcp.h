@@ -332,8 +332,10 @@ extern "C"
 #endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-/* List of registered Ethernet device drivers.  This duplicates a declaration
- * in net/tcp/tcp.h
+/* List of registered Ethernet device drivers.  You must have the network
+ * locked in order to access this list.
+ *
+ * NOTE that this duplicates a declaration in net/netdev/netdev.h
  */
 
 EXTERN struct net_driver_s *g_netdevices;

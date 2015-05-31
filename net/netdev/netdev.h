@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,10 @@ extern "C"
 #endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-/* List of registered Ethernet device drivers.  This duplicates a declaration
- * in net/netdev/netdev.h
+/* List of registered Ethernet device drivers.  You must have the network
+ * locked in order to access this list.
+ *
+ * NOTE that this duplicates a declaration in net/tcp/tcp.h
  */
 
 EXTERN struct net_driver_s *g_netdevices;
@@ -79,42 +81,6 @@ EXTERN struct net_driver_s *g_netdevices;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Function: netdev_seminit
- *
- * Description:
- *   Initialize the network device semaphore.
- *
- ****************************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_seminit(void);
-#endif
-
-/****************************************************************************
- * Function: netdev_semtake
- *
- * Description:
- *   Get exclusive access to the network device list.
- *
- ****************************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_semtake(void);
-#endif
-
-/****************************************************************************
- * Function: netdev_semgive
- *
- * Description:
- *   Release exclusive access to the network device list
- *
- ****************************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_semgive(void);
-#endif
 
 /****************************************************************************
  * Name: netdev_ifup / netdev_ifdown

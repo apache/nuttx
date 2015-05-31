@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_count.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <nuttx/net/netdev.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 
 /****************************************************************************
@@ -91,11 +92,12 @@
 int netdev_count(void)
 {
   struct net_driver_s *dev;
+  net_lock_t save;
   int ndev;
 
-  netdev_semtake();
+  save = net_lock();
   for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
-  netdev_semgive();
+  net_unlock(save);
   return ndev;
 }
 

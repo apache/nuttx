@@ -43,6 +43,7 @@
 
 #include <nuttx/net/netdev.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 
 /****************************************************************************
@@ -63,11 +64,12 @@
 bool netdev_verify(FAR struct net_driver_s *dev)
 {
   FAR struct net_driver_s *chkdev;
+  net_lock_t save;
   bool valid = false;
 
   /* Search the list of registered devices */
 
-  netdev_semtake();
+  save = net_lock();
   for (chkdev = g_netdevices; chkdev != NULL; chkdev = chkdev->flink)
     {
       /* Is the the network device that we are looking for? */
@@ -81,6 +83,6 @@ bool netdev_verify(FAR struct net_driver_s *dev)
         }
     }
 
-  netdev_semgive();
+  net_unlock(save);
   return valid;
 }

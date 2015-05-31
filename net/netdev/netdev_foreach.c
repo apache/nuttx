@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_foreach.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,14 +90,15 @@
  *
  ****************************************************************************/
 
-int netdev_foreach(netdev_callback_t callback, void *arg)
+int netdev_foreach(netdev_callback_t callback, FAR void *arg)
 {
-  struct net_driver_s *dev;
+  FAR struct net_driver_s *dev;
+  net_lock_t save;
   int ret = 0;
 
   if (callback)
     {
-      netdev_semtake();
+      save = net_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (callback(dev, arg) != 0)
@@ -106,8 +107,10 @@ int netdev_foreach(netdev_callback_t callback, void *arg)
               break;
             }
         }
-      netdev_semgive();
+
+      net_unlock(save);
     }
+
   return ret;
 }
 

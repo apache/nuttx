@@ -49,6 +49,10 @@
 #include <stdarg.h>
 #include <semaphore.h>
 
+#ifndef CONFIG_NET_NOINTS
+#  include <arch/irq.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

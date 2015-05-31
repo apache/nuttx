@@ -50,9 +50,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 
-#include "netdev/netdev.h"
+#include "utils/utils.h"
 #include "devif/devif.h"
 #include "route/route.h"
+#include "netdev/netdev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -97,10 +98,11 @@
 static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
+  net_lock_t save;
 
   /* Examine each registered network device */
 
-  netdev_semtake();
+  save = net_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -114,7 +116,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
             {
               /* Its a match */
 
-              netdev_semgive();
+              net_unlock(save);
               return dev;
             }
         }
@@ -122,7 +124,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 
   /* No device with the matching address found */
 
-  netdev_semgive();
+  net_unlock(save);
   return NULL;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -151,10 +153,11 @@ static FAR struct net_driver_s *
 netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
+  net_lock_t save;
 
   /* Examine each registered network device */
 
-  netdev_semtake();
+  save = net_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -168,7 +171,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
             {
               /* Its a match */
 
-              netdev_semgive();
+              net_unlock(save);
               return dev;
             }
         }
@@ -176,7 +179,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 
   /* No device with the matching address found */
 
-  netdev_semgive();
+  net_unlock(save);
   return NULL;
 }
 #endif /* CONFIG_NET_IPv6 */

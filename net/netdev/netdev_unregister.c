@@ -52,6 +52,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 
 /****************************************************************************
@@ -106,10 +107,11 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 {
   struct net_driver_s *prev;
   struct net_driver_s *curr;
+  net_lock_t save;
 
   if (dev)
     {
-      netdev_semtake();
+      save = net_lock();
 
       /* Find the device in the list of known network devices */
 
@@ -139,7 +141,7 @@ int netdev_unregister(FAR struct net_driver_s *dev)
           curr->flink = NULL;
         }
 
-      netdev_semgive();
+      net_unlock(save);
 
 #ifdef CONFIG_NET_ETHERNET
       nlldbg("Unregistered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",

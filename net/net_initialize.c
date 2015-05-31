@@ -176,12 +176,6 @@ void net_setup(void)
 
   net_initroute();
 #endif
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-  /* Initialize the socket layer */
-
-  netdev_seminit();
-#endif
 }
 
 /****************************************************************************
