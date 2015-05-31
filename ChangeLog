@@ -10508,4 +10508,6 @@
 	* tools/configure.c: Fix test for the existence of the apps/ directory.
 	  Fix backward interpretation of options, -l was selecting Windows and
 	  -w was selecting Linux. This was SourceForege Ticket #39 (2015-05-31).
-
+	* arch/include/stm32/chip.h and arch/src/stm32/Kconfig: Add basic
+	  support for the STM32F205RG.  From SourceForge Ticket 40 (anonymous,
+	  2015-05-31).
