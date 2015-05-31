@@ -69,8 +69,9 @@ struct tcp_connect_s
 {
   FAR struct tcp_conn_s  *tc_conn;    /* Reference to TCP connection structure */
   FAR struct devif_callback_s *tc_cb; /* Reference to callback instance */
-  sem_t                   tc_sem;     /* Semaphore signals recv completion */
-  int                     tc_result;  /* OK on success, otherwise a negated errno. */
+  FAR struct socket *tc_psock;        /* The socket being connected */
+  sem_t tc_sem;                       /* Semaphore signals recv completion */
+  int tc_result;                      /* OK on success, otherwise a negated errno. */
 };
 #endif
 
@@ -108,6 +109,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   (void)sem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
   pstate->tc_conn   = conn;
+  pstate->tc_psock  = psock;
   pstate->tc_result = -EAGAIN;
 
   /* Set up the callbacks in the connection */
@@ -233,6 +235,17 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_CONNECTED) != 0)
         {
+          FAR struct socket *psock = pstate->tc_psock;
+          DEBUGASSERT(psock);
+
+          /* Mark the connection bound and connected.  NOTE this is
+           * is done here (vs. later) in order to avoid any race condition
+           * in the socket state.  It is known to connected here and now,
+           * but not necessarily at any time later.
+           */
+
+          psock->s_flags |= (_SF_BOUND | _SF_CONNECTED);
+
           /* Indicate that the socket is no longer connected */
 
           pstate->tc_result = OK;
@@ -378,16 +391,12 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
           psock_teardown_callbacks(&state, ret);
         }
 
-      /* Check if the socket was successffully connected. */
+      /* Check if the socket was successfully connected. */
 
       if (ret >= 0)
         {
-          /* Yes.. Mark the connection bound and connected */
-
-          psock->s_flags |= (_SF_BOUND | _SF_CONNECTED);
-
-          /* Now that we are connected, we need to set up to monitor the
-           * state of the connection up the connection event monitor.
+          /* Yes... Now that we are connected, we need to set up to monitor
+           * the state of the connection up the connection event monitor.
            */
 
           ret = net_startmonitor(psock);
