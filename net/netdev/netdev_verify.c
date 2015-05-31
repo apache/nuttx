@@ -74,9 +74,9 @@ bool netdev_verify(FAR struct net_driver_s *dev)
 
       if (chkdev == dev)
         {
-          /* Yes.. return true if the interface is in the UP state */
+          /* Yes.. return true  */
 
-          valid = ((dev->d_flags & IFF_UP) != 0);
+          valid = true;
           break;
         }
     }

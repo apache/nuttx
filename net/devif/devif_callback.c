@@ -124,13 +124,19 @@ FAR struct devif_callback_s *
       
       if (dev)
         {
-          /* Verify that the device is valid */
+          /* Verify that the device pointer is valid, i.e., that it still
+           * points to a registered network device and also that the network
+           * device in in the UP state.
+           *
+           * And if it does, should that device also not be in the UP state?
+           */
 
-          if (!netdev_verify(dev))
+          if (!netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
             {
               /* No.. release the callback structure and fail */
 
               devif_callback_free(NULL, NULL, list);
+              net_unlock(save);
               return NULL;
             }
 
