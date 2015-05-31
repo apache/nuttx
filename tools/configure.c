@@ -588,8 +588,7 @@ static void check_appdir(void)
     }
   else
     {
-      snprintf(g_buffer, BUFFER_SIZE, "%s%c%s", g_topdir, g_delim, g_appdir);
-      if (!verify_appdir(g_buffer))
+      if (!verify_appdir(g_appdir))
         {
           fprintf(stderr, "ERROR: Command line path to application directory does not exist\n");
           exit(EXIT_FAILURE);
