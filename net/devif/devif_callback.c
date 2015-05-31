@@ -257,7 +257,8 @@ void devif_callback_free(FAR struct net_driver_s *dev,
 
       /* Put the structure into the free list */
 
-      cb->nxtconn = g_cbfreelist;
+      cb->nxtconn  = g_cbfreelist;
+      cb->nxtdev   = NULL;
       g_cbfreelist = cb;
       net_unlock(save);
     }

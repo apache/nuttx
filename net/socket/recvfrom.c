@@ -895,7 +895,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
           /* Wake up the waiting thread, returning either the error -EAGAIN
            * that signals the timeout event or the data received up to
-           * the point tht the timeout occured (no error).
+           * the point that the timeout occurred (no error).
            */
 
           sem_post(&pstate->rf_sem);
