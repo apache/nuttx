@@ -121,19 +121,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
                                 TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
       pstate->tc_cb->priv    = (void*)pstate;
       pstate->tc_cb->event   = psock_connect_interrupt;
-
-      /* Set up the connection event monitor */
-
-      ret = net_startmonitor(psock);
-      if (ret < 0)
-        {
-          /* net_startmonitor() can only fail on certain race conditions
-           * where the connection was lost just before this function was
-           * called.  Undo everything we have done and return a failure.
-           */
-
-          psock_teardown_callbacks(pstate, ret);
-        }
+      ret                    = OK;
     }
 
   return ret;
@@ -390,11 +378,29 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
           psock_teardown_callbacks(&state, ret);
         }
 
-      /* Mark the connection bound and connected */
+      /* Check if the socket was successffully connected. */
 
       if (ret >= 0)
         {
-          psock->s_flags |= (_SF_BOUND|_SF_CONNECTED);
+          /* Yes.. Mark the connection bound and connected */
+
+          psock->s_flags |= (_SF_BOUND | _SF_CONNECTED);
+
+          /* Now that we are connected, we need to set up to monitor the
+           * state of the connection up the connection event monitor.
+           */
+
+          ret = net_startmonitor(psock);
+          if (ret < 0)
+            {
+              /* net_startmonitor() can only fail on certain race
+               * conditions where the connection was lost just before
+               * this function was called.  That is not expected to
+               * happen in this context, but just in case...
+               */
+
+              net_lostconnection(psock, TCP_ABORT);
+            }
         }
     }
 
