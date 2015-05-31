@@ -10505,3 +10505,7 @@
 	  returns a failure condition that causes worse problems when trying to
 	  connect.  The fix is to move the logic that starts the network monitor
 	  to AFTER the socket has been successfully connected (2015-05-31).
+	* tools/configure.c: Fix test for the existence of the apps/ directory.
+	  Fix backward interpretation of options, -l was selecting Windows and
+	  -w was selecting Linux. This was SourceForege Ticket #39 (2015-05-31).
+
