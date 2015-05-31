@@ -544,8 +544,8 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-
 /* STM32 F102x8/102xB Medium Density USB Access Family ***************************/
+
 #elif defined(CONFIG_ARCH_CHIP_STM32F102CB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
@@ -928,7 +928,7 @@
 
 /* STM32 F2 Family ******************************************************************/
 
-elif defined(CONFIG_ARCH_CHIP_STM32F205RG)   /* UFBGA-176 1024Kb FLASH 128Kb SRAM */
+#elif defined(CONFIG_ARCH_CHIP_STM32F205RG)  /* UFBGA-176 1024Kb FLASH 128Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
