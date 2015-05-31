@@ -178,13 +178,13 @@ static void parse_args(int argc, char **argv)
             break;
 
           case 'w' :
-             g_delim = '/';
-             g_winpaths = true;
+             g_delim = '\\';
+             g_winpaths = false;
              break;
 
           case 'l' :
-             g_delim = '\\';
-             g_winpaths = false;
+             g_delim = '/';
+             g_winpaths = true;
              break;
 
           case 'h' :
