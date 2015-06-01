@@ -1136,7 +1136,6 @@ static void lpc17_txdone_process(struct lpc17_driver_s *priv)
 static void lpc17_txdone_work(FAR void *arg)
 {
   FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
-  irqstate_t flags;
   net_lock_t state;
 
   DEBUGASSERT(priv);
@@ -1306,11 +1305,10 @@ static int lpc17_interrupt(int irq, void *context)
 
               work_cancel(HPWORK, &priv->lp_rxwork);
 
-              /* Schedule TX-related work to be performed on the work thread */
+              /* Schedule RX-related work to be performed on the work thread */
 
-              work_queue(HPWORK, &priv->lp_rxwork,
-                        (worker_t)lpc17_rxdone_work,
-                        (FAR void *)priv, 0);
+              work_queue(HPWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
+                         priv, 0);
 
 #else /* CONFIG_NET_NOINTS */
               lpc17_rxdone_process(priv);
@@ -1364,15 +1362,16 @@ static int lpc17_interrupt(int irq, void *context)
               lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
 
 #ifdef CONFIG_NET_NOINTS
-              /* Cancel any pending TX done work */
+              /* Cancel any pending TX done work (to prevent overruns and also
+               * to avoid race conditions with the TX timeout work)
+               */
 
               work_cancel(HPWORK, &priv->lp_txwork);
 
               /* Schedule TX-related work to be performed on the work thread */
 
-              work_queue(HPWORK, &priv->lp_txwork,
-                         (worker_t)lpc17_txdone_work,
-                         (FAR void *)priv, 0);
+              work_queue(HPWORK, &priv->lp_txwork, (worker_t)lpc17_txdone_work,
+                         priv, 0);
 
 #else /* CONFIG_NET_NOINTS */
               /* Perform the TX work at the interrupt level */
@@ -1503,7 +1502,7 @@ static void lpc17_txtimeout_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->lp_txwork, lpc17_poll_work, priv, 0);
+      work_queue(HPWORK, &priv->lp_txwork, lpc17_txtimeout_work, priv, 0);
     }
 
 #else
@@ -1561,9 +1560,8 @@ static void lpc17_poll_process(FAR struct lpc17_driver_s *priv)
   if (considx != prodidx)
     {
 #if CONFIG_NET_NOINTS
-      work_queue(HPWORK, &priv->lp_rxwork,
-                 (worker_t)lpc17_rxdone_work,
-                 (FAR void *)priv, 0);
+      work_queue(HPWORK, &priv->lp_rxwork, (worker_t)lpc17_rxdone_work,
+                 priv, 0);
 
 #else /* CONFIG_NET_NOINTS */
       lpc17_rxdone_process(priv);
@@ -1573,7 +1571,8 @@ static void lpc17_poll_process(FAR struct lpc17_driver_s *priv)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry, 1, priv);
+  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry,
+                1, priv);
 }
 
 /****************************************************************************
@@ -1637,11 +1636,11 @@ static void lpc17_poll_expiry(int argc, uint32_t arg, ...)
    * pending interrupt actions.
    */
 
-  if (work_available(&priv->lpc17_poll_work))
+  if (work_available(&priv->lp_pollwork))
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(HPWORK, &priv->lpc17_poll_work, lpc17_poll_work, priv, 0);
+      work_queue(HPWORK, &priv->lp_pollwork, lpc17_poll_work, priv, 0);
     }
   else
     {
@@ -2045,11 +2044,11 @@ static int lpc17_txavail(struct net_driver_s *dev)
    * ultimately, the same effect.
    */
 
-  if (work_available(&priv->sk_work))
+  if (work_available(&priv->lp_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->sk_work, lpc17_txavail_work, priv, 0);
+      work_queue(HPWORK, &priv->lp_pollwork, lpc17_txavail_work, priv, 0);
     }
 
 #else
