@@ -108,7 +108,8 @@ config ARMV7M_OABI_TOOLCHAIN
 
 config ARMV7M_TARGET2_PREL
 	bool "R_ARM_TARGET2 is PC relative"
-	default n
+	default n if !UCLIBCXX_EXCEPTION
+	default y if UCLIBCXX_EXCEPTION
 	depends on ELF
 	---help---
 		Perform a PC relative relocation for relocation type R_ARM_TARGET2
