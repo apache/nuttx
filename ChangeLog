@@ -10511,3 +10511,8 @@
 	* arch/include/stm32/chip.h and arch/src/stm32/Kconfig: Add basic
 	  support for the STM32F205RG.  From SourceForge Ticket 40 (anonymous,
 	  2015-05-31).
+	* arch/arm/src/lpc17xx: Review, update, and modify the Ethernet driver
+	  so that it works better with CONFIG_NET_NOINTS=y (2015-06-01).
+	* configs/: Update all LPC17xx networking configurations so that they
+	  have CONFIG_NET_NOTINTS=y selected (2015-06-01).
+
