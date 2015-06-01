@@ -10515,4 +10515,8 @@
 	  so that it works better with CONFIG_NET_NOINTS=y (2015-06-01).
 	* configs/: Update all LPC17xx networking configurations so that they
 	  have CONFIG_NET_NOTINTS=y selected (2015-06-01).
-
+	* /arch/arm/src/armv7-m, binfmt/libelf, configs/stm32f4discovery/scripts,
+	  /include/nuttx/binfmt, and libxx: Add support uClibc++ excpetions.  This
+	  involves additional handling for relative relation types, additional
+	  support for unwinding, as well as additional changes.  The culmination
+	  of a big effort from Leo Aloe3132 (2015-06-01).
