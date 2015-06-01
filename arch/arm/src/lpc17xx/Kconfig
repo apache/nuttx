@@ -729,14 +729,6 @@ config NET_MULTICAST
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set
 		if NET_IGMP is selected.
-
-config NET_WORKER_THREAD
-    bool "Net worker thread enable"
-    default y
-    depends on SCHED_WORKQUEUE
-    ---help---
-        Enable use of ethernet worker thread (depends on CONFIG_SCHED_WORKQUEUE).
-
 endmenu
 
 menu "LCD device driver options"

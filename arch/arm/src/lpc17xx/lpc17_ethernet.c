@@ -52,11 +52,14 @@
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+
+#ifdef CONFIG_NET_NOINTS
+#  include <nuttx/wqueue.h>
+#endif
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -72,15 +75,22 @@
 
 #include <arch/board/board.h>
 
-/* Does this chip have and ethernet controller? */
+/* Does this chip have and Ethernet controller? */
 
 #if LPC17_NETHCONTROLLERS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
+/* If processing is not done at the interrupt level, then high priority
+ * work queue support is required.
+ */
+
+#if defined(CONFIG_NET_NOINTS) && !defined(CONFIG_SCHED_HPWORK)
+#  error High priority work queue support is required
+#endif
+
 /* CONFIG_LPC17_NINTERFACES determines the number of physical interfaces
  * that will be supported -- unless it is more than actually supported by the
  * hardware!
@@ -150,8 +160,10 @@
 
 /* Interrupts ***************************************************************/
 
-#define ETH_RXINTS           (ETH_INT_RXOVR | ETH_INT_RXERR | ETH_INT_RXFIN | ETH_INT_RXDONE)
-#define ETH_TXINTS           (ETH_INT_TXUNR | ETH_INT_TXERR | ETH_INT_TXFIN | ETH_INT_TXDONE)
+#define ETH_RXINTS           (ETH_INT_RXOVR | ETH_INT_RXERR | \
+                              ETH_INT_RXFIN | ETH_INT_RXDONE)
+#define ETH_TXINTS           (ETH_INT_TXUNR | ETH_INT_TXERR | \
+                              ETH_INT_TXFIN | ETH_INT_TXDONE)
 
 /* Misc. Helpers ***********************************************************/
 
@@ -285,19 +297,20 @@ struct lpc17_driver_s
   WDOG_ID  lp_txpoll;           /* TX poll timer */
   WDOG_ID  lp_txtimeout;        /* TX timeout timer */
 
-#ifdef CONFIG_NET_WORKER_THREAD
-  struct work_s irqwork_txdone; /* Interrupt continuation work queue support */
-  struct work_s irqwork_rxdone; /* Interrupt continuation work queue support */
+#ifdef CONFIG_NET_NOINTS
+  struct work_s lp_txwork;      /* TX work continuation */
+  struct work_s lp_rxwork;      /* RX work continuation */
+  struct work_s lp_pollwork;    /* Poll work continuation */
   uint32_t status;
-#endif /*CONFIG_NET_WORKER_THREAD*/
+#endif /* CONFIG_NET_NOINTS */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
   struct lpc17_statistics_s lp_stat;
 #endif
 
-  /* This holds the information visible to uIP/NuttX */
+  /* This holds the information visible to the NuttX networking layer */
 
-  struct net_driver_s lp_dev;  /* Interface understood by uIP */
+  struct net_driver_s lp_dev;  /* Interface understood by the network layer */
 };
 
 /****************************************************************************
@@ -346,18 +359,27 @@ static int  lpc17_txpoll(struct net_driver_s *dev);
 /* Interrupt handling */
 
 static void lpc17_response(struct lpc17_driver_s *priv);
-static void lpc17_rxdone(struct lpc17_driver_s *priv);
-static void lpc17_txdone(struct lpc17_driver_s *priv);
-#ifdef CONFIG_NET_WORKER_THREAD
-static void lpc17_eth_irqworker_txdone(FAR void *arg);
-static void lpc17_eth_irqworker_rxdone(FAR void *arg);
-#endif /*CONFIG_NET_WORKER_THREAD*/
+static void lpc17_rxdone_process(struct lpc17_driver_s *priv);
+static void lpc17_txdone_process(struct lpc17_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_txdone_work(FAR void *arg);
+static void lpc17_rxdone_work(FAR void *arg);
+#endif /* CONFIG_NET_NOINTS */
 static int  lpc17_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
-static void lpc17_polltimer(int argc, uint32_t arg, ...);
-static void lpc17_txtimeout(int argc, uint32_t arg, ...);
+static void lpc17_txtimeout_process(FAR struct lpc17_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_txtimeout_work(FAR void *arg);
+#endif /* CONFIG_NET_NOINTS */
+static void lpc17_txtimeout_expiry(int argc, uint32_t arg, ...);
+
+static void lpc17_poll_process(FAR struct lpc17_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_poll_work(FAR void *arg);
+#endif /* CONFIG_NET_NOINTS */
+static void lpc17_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -366,6 +388,11 @@ static void lpc17_ipv6multicast(FAR struct lpc17_driver_s *priv);
 #endif
 static int lpc17_ifup(struct net_driver_s *dev);
 static int lpc17_ifdown(struct net_driver_s *dev);
+
+static void lpc17_txavail_process(FAR struct lpc17_driver_s *priv);
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_txavail_work(FAR void *arg);
+#endif
 static int lpc17_txavail(struct net_driver_s *dev);
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static uint32_t lpc17_calcethcrc(const uint8_t *data, size_t length);
@@ -663,7 +690,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->lp_txtimeout, LPC17_TXTIMEOUT, lpc17_txtimeout,
+  (void)wd_start(priv->lp_txtimeout, LPC17_TXTIMEOUT, lpc17_txtimeout_expiry,
                  1, (uint32_t)priv);
   return OK;
 }
@@ -672,8 +699,9 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
  * Function: lpc17_txpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network layer has any
+ *   outgoing packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -784,19 +812,21 @@ static void lpc17_response(struct lpc17_driver_s *priv)
     }
   else
     {
-      /* No.. mark the Tx as pending and halt further Tx interrupts */
+      /* No.. mark the Tx as pending and halt further RX interrupts that
+       * could generate more TX activity.
+       */
 
       DEBUGASSERT((priv->lp_inten & ETH_INT_TXDONE) != 0);
 
       priv->lp_txpending = true;
-      priv->lp_inten    &= ~ETH_TXINTS;
+      priv->lp_inten    &= ~ETH_RXINTS;
       lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
       EMAC_STAT(priv, tx_pending);
     }
 }
 
 /****************************************************************************
- * Function: lpc17_rxdone
+ * Function: lpc17_rxdone_process
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -812,7 +842,7 @@ static void lpc17_response(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc17_rxdone(struct lpc17_driver_s *priv)
+static void lpc17_rxdone_process(struct lpc17_driver_s *priv)
 {
   uint32_t    *rxstat;
   bool         fragment;
@@ -1036,7 +1066,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: lpc17_txdone
+ * Function: lpc17_txdone_process
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
@@ -1052,19 +1082,8 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc17_txdone(struct lpc17_driver_s *priv)
+static void lpc17_txdone_process(struct lpc17_driver_s *priv)
 {
-  /* Cancel the pending Tx timeout */
-
-  wd_cancel(priv->lp_txtimeout);
-
-  /* Disable further Tx interrupts.  Tx interrupts may be re-enabled again
-   * depending upon the result of the poll.
-   */
-
-  priv->lp_inten &= ~ETH_TXINTS;
-  lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
-
   /* Verify that the hardware is ready to send another packet.  Since a Tx
    * just completed, this must be the case.
    */
@@ -1084,11 +1103,11 @@ static void lpc17_txdone(struct lpc17_driver_s *priv)
 
       lpc17_transmit(priv);
 
-      priv->lp_inten    |= ETH_RXINTS;
+      priv->lp_inten |= ETH_RXINTS;
       lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
     }
 
-  /* Otherwise poll uIP for new XMIT data */
+  /* Otherwise poll the network layer for new XMIT data */
 
   else
     {
@@ -1097,7 +1116,7 @@ static void lpc17_txdone(struct lpc17_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: lpc17_eth_irqworker_txdone and lpc17_eth_irqworker_rxdone
+ * Function: lpc17_txdone_work and lpc17_rxdone_work
  *
  * Description:
  *   Perform interrupt handling logic outside of the interrupt handler (on
@@ -1113,28 +1132,55 @@ static void lpc17_txdone(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_WORKER_THREAD
-static void lpc17_eth_irqworker_txdone(FAR void *arg)
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_txdone_work(FAR void *arg)
 {
   FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+  irqstate_t flags;
+  net_lock_t state;
 
   DEBUGASSERT(priv);
 
-  lpc17_txdone(priv);
+  /* Perform pending TX work.  At this point TX interrupts are disable but
+   * may be re-enabled again depending on the actions of
+   * lpc17_txdone_process().
+   */
 
-  work_cancel(HPWORK, &priv->irqwork_txdone);
+  state = net_lock();
+  lpc17_txdone_process(priv);
+  net_unlock(state);
 }
 
-static void lpc17_eth_irqworker_rxdone(FAR void *arg)
+static void lpc17_rxdone_work(FAR void *arg)
 {
   FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+  irqstate_t flags;
+  net_lock_t state;
 
   DEBUGASSERT(priv);
 
-  lpc17_rxdone(priv);
-  work_cancel(HPWORK, &priv->irqwork_rxdone);
+  /* Perform pending RX work.  RX interrupts were disabled prior to
+   * scheduling this work to prevent work queue overruns.
+   */
+
+  state = net_lock();
+  lpc17_rxdone_process(priv);
+  net_unlock(state);
+
+  /* Re-enable RX interrupts (this must be atomic).  Skip this step if the
+   * lp-txpending TX underrun state is in effect.
+   */
+
+  flags = irqsave();
+  if (!priv->lp_txpending)
+    {
+      priv->lp_inten |= ETH_RXINTS;
+      lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+    }
+
+  irqrestore(flags);
 }
-#endif /*CONFIG_NET_WORKER_THREAD */
+#endif /* CONFIG_NET_NOINTS */
 
 /****************************************************************************
  * Function: lpc17_interrupt
@@ -1218,7 +1264,7 @@ static int lpc17_interrupt(int irq, void *context)
           /* Check for receive events ***************************************/
           /* RX ERROR -- Triggered on receive errors: AlignmentError,
            * RangeError, LengthError, SymbolError, CRCError or NoDescriptor
-           * or Overrun.  NOTE:  (1) We will still need to call lpc17_rxdone
+           * or Overrun.  NOTE:  (1) We will still need to call lpc17_rxdone_process
            * on RX errors to bump the considx over the bad packet.  (2) The
            * DMA engine reports bogus length errors, making this a pretty
            * useless check anyway.
@@ -1248,21 +1294,34 @@ static int lpc17_interrupt(int irq, void *context)
 
               /* We have received at least one new incoming packet. */
 
-#ifdef CONFIG_NET_WORKER_THREAD
-              work_queue(HPWORK, &priv->irqwork_rxdone,
-                        (worker_t)lpc17_eth_irqworker_rxdone,
+#ifdef CONFIG_NET_NOINTS
+              /* Disable further TX interrupts for now.  TX interrupts will
+               * be re-enabled after the work has been processed.
+               */
+
+              priv->lp_inten &= ~ETH_RXINTS;
+              lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+
+              /* Cancel any pending RX done work */
+
+              work_cancel(HPWORK, &priv->lp_rxwork);
+
+              /* Schedule TX-related work to be performed on the work thread */
+
+              work_queue(HPWORK, &priv->lp_rxwork,
+                        (worker_t)lpc17_rxdone_work,
                         (FAR void *)priv, 0);
 
-#else /*CONFIG_NET_WORKER_THREAD*/
-              lpc17_rxdone(priv);
+#else /* CONFIG_NET_NOINTS */
+              lpc17_rxdone_process(priv);
 
-#endif /*CONFIG_NET_WORKER_THREAD*/
+#endif /* CONFIG_NET_NOINTS */
             }
 
           /* Check for Tx events ********************************************/
           /* TX ERROR -- Triggered on transmit errors: LateCollision,
            * ExcessiveCollision and ExcessiveDefer, NoDescriptor or Underrun.
-           * NOTE: We will still need to call lpc17_txdone() in order to
+           * NOTE: We will still need to call lpc17_txdone_process() in order to
            * clean up after the failed transmit.
            */
 
@@ -1292,20 +1351,35 @@ static int lpc17_interrupt(int irq, void *context)
               EMAC_STAT(priv, tx_done);
 
               /* A packet transmission just completed */
+              /* Cancel the pending Tx timeout */
 
-#ifdef CONFIG_NET_WORKER_THREAD
-              /* Disable the Ethernet interrupt for now, will be re-enabled
-               * later
+              wd_cancel(priv->lp_txtimeout);
+
+              /* Disable further Tx interrupts.  Tx interrupts may be
+               * re-enabled again depending upon the actions of
+               * lpc17_txdone_process()
                */
 
-              work_queue(HPWORK, &priv->irqwork_txdone,
-                         (worker_t)lpc17_eth_irqworker_txdone,
+              priv->lp_inten &= ~ETH_TXINTS;
+              lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+
+#ifdef CONFIG_NET_NOINTS
+              /* Cancel any pending TX done work */
+
+              work_cancel(HPWORK, &priv->lp_txwork);
+
+              /* Schedule TX-related work to be performed on the work thread */
+
+              work_queue(HPWORK, &priv->lp_txwork,
+                         (worker_t)lpc17_txdone_work,
                          (FAR void *)priv, 0);
 
-#else /*CONFIG_NET_WORKER_THREAD*/
-              lpc17_txdone(priv);
+#else /* CONFIG_NET_NOINTS */
+              /* Perform the TX work at the interrupt level */
 
-#endif /*CONFIG_NET_WORKER_THREAD*/
+              lpc17_txdone_process(priv);
+
+#endif /* CONFIG_NET_NOINTS */
             }
         }
     }
@@ -1324,7 +1398,74 @@ static int lpc17_interrupt(int irq, void *context)
 }
 
 /****************************************************************************
- * Function: lpc17_txtimeout
+ * Function: lpc17_txtimeout_process
+ *
+ * Description:
+ *   Process a TX timeout.  Called from the either the watchdog timer
+ *   expiration logic or from the worker thread, depending upon the
+ *   configuration.  The timeout means that the last TX never completed.
+ *   Reset the hardware and start again.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc17_txtimeout_process(FAR struct lpc17_driver_s *priv)
+{
+  /* Increment statistics and dump debug info */
+
+  EMAC_STAT(priv, tx_timeouts);
+  if (priv->lp_ifup)
+    {
+      /* Then reset the hardware. ifup() will reset the interface, then bring
+       * it back up.
+       */
+
+      (void)lpc17_ifup(&priv->lp_dev);
+
+      /* Then poll the network layer for new XMIT data */
+
+      (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
+    }
+}
+
+/****************************************************************************
+ * Function: lpc17_txtimeout_work
+ *
+ * Description:
+ *   Perform TX timeout related work from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_txtimeout_work(FAR void *arg)
+{
+  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+  net_lock_t state;
+
+  /* Process pending Ethernet interrupts */
+
+  state = net_lock();
+  lpc17_txtimeout_process(priv);
+  net_unlock(state);
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -1342,48 +1483,55 @@ static int lpc17_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static void lpc17_txtimeout(int argc, uint32_t arg, ...)
+static void lpc17_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)arg;
 
-  /* Increment statistics and dump debug info */
+  /* Disable further Tx interrupts.  Tx interrupts may be re-enabled again
+   * depending upon the actions of lpc17_poll_process()
+   */
 
-  EMAC_STAT(priv, tx_timeouts);
-  if (priv->lp_ifup)
+  priv->lp_inten &= ~ETH_TXINTS;
+  lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+
+#ifdef CONFIG_NET_NOINTS
+  /* Is the single TX work structure available?  If not, then there is
+   * pending TX work to be done this must be a false alarm TX timeout.
+   */
+
+  if (work_available(&priv->lp_txwork))
     {
-      /* Then reset the hardware. ifup() will reset the interface, then bring
-       * it back up.
-       */
+      /* Schedule to perform the interrupt processing on the worker thread. */
 
-      (void)lpc17_ifup(&priv->lp_dev);
-
-      /* Then poll uIP for new XMIT data */
-
-      (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
+      work_queue(HPWORK, &priv->lp_txwork, lpc17_poll_work, priv, 0);
     }
+
+#else
+  /* Process the timeout now */
+
+  lpc17_txtimeout_process(priv);
+#endif
 }
 
 /****************************************************************************
- * Function: lpc17_polltimer
+ * Function: lpc17_poll_process
  *
  * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
+ *   Perform the periodic poll.  This may be called either from watchdog
+ *   timer logic or from the worker thread, depending upon the configuration.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   priv - Reference to the driver state structure
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
-static void lpc17_polltimer(int argc, uint32_t arg, ...)
+static void lpc17_poll_process(FAR struct lpc17_driver_s *priv)
 {
-  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)arg;
   unsigned int prodidx;
   unsigned int considx;
 
@@ -1393,9 +1541,9 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
 
   if (lpc17_txdesc(priv) == OK)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-       * might be bug here.  Does this mean if there is a transmit in progress,
-       * we will missing TCP time state updates?
+      /* If so, update TCP timing states and poll the network layer for new
+       * XMIT data. Hmmm.. might be bug here.  Does this mean if there is a
+       * transmit in progress, we will missing TCP time state updates?
        */
 
       (void)devif_timer(&priv->lp_dev, lpc17_txpoll, LPC17_POLLHSEC);
@@ -1412,20 +1560,103 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
 
   if (considx != prodidx)
     {
-#if CONFIG_NET_WORKER_THREAD
-      work_queue(HPWORK, &priv->irqwork_rxdone,
-                 (worker_t)lpc17_eth_irqworker_rxdone,
+#if CONFIG_NET_NOINTS
+      work_queue(HPWORK, &priv->lp_rxwork,
+                 (worker_t)lpc17_rxdone_work,
                  (FAR void *)priv, 0);
 
-#else /*CONFIG_NET_WORKER_THREAD*/
-      lpc17_rxdone(priv);
+#else /* CONFIG_NET_NOINTS */
+      lpc17_rxdone_process(priv);
 
-#endif /*CONFIG_NET_WORKER_THREAD*/
+#endif /* CONFIG_NET_NOINTS */
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_polltimer, 1, arg);
+  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry, 1, priv);
+}
+
+/****************************************************************************
+ * Function: lpc17_poll_work
+ *
+ * Description:
+ *   Perform periodic polling from the worker thread
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   Ethernet interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_poll_work(FAR void *arg)
+{
+  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+  net_lock_t state;
+
+  /* Perform the poll */
+
+  state = net_lock();
+  lpc17_poll_process(priv);
+  net_unlock(state);
+}
+#endif
+
+
+/****************************************************************************
+ * Function: lpc17_poll_expiry
+ *
+ * Description:
+ *   Periodic timer handler.  Called from the timer interrupt handler.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void lpc17_poll_expiry(int argc, uint32_t arg, ...)
+{
+  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+
+  DEBUGASSERT(arg);
+
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions.
+   */
+
+  if (work_available(&priv->lpc17_poll_work))
+    {
+      /* Schedule to perform the interrupt processing on the worker thread. */
+
+      work_queue(HPWORK, &priv->lpc17_poll_work, lpc17_poll_work, priv, 0);
+    }
+  else
+    {
+      /* No.. Just re-start the watchdog poll timer, missing one polling
+       * cycle.
+       */
+
+      (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry, 1, arg);
+    }
+
+#else
+  /* Process the interrupt now */
+
+  lpc17_poll_process(priv);
+#endif
 }
 
 /****************************************************************************
@@ -1661,7 +1892,7 @@ static int lpc17_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_polltimer, 1,
+  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_poll_expiry, 1,
                 (uint32_t)priv);
 
   /* Finally, make the interface up and enable the Ethernet interrupt at
@@ -1717,6 +1948,74 @@ static int lpc17_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: lpc17_txavail_process
+ *
+ * Description:
+ *   Perform an out-of-cycle poll.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in normal user mode
+ *
+ ****************************************************************************/
+
+static inline void lpc17_txavail_process(FAR struct lpc17_driver_s *priv)
+{
+  net_lock_t state;
+
+  /* Ignore the notification if the interface is not yet up */
+
+  state = net_lock();
+  if (priv->lp_ifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      if (lpc17_txdesc(priv) == OK)
+        {
+          /* If so, then poll the network layer for new XMIT data */
+
+          (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
+        }
+    }
+
+  net_unlock(state);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: lpc17_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Parameters:
+ *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called on the higher priority worker thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+static void lpc17_txavail_work(FAR void *arg)
+{
+  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+
+  /* Perform the poll */
+
+  lpc17_txavail_process(priv);
+}
+#endif
+
+/****************************************************************************
  * Function: lpc17_txavail
  *
  * Description:
@@ -1737,36 +2036,29 @@ static int lpc17_ifdown(struct net_driver_s *dev)
 
 static int lpc17_txavail(struct net_driver_s *dev)
 {
-  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
-#ifndef CONFIG_NET_WORKER_THREAD
-  irqstate_t flags;
-#endif /*CONFIG_NET_WORKER_THREAD*/
+  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
 
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
+#ifdef CONFIG_NET_NOINTS
+  /* Is our single poll work structure available?  It may not be if there
+   * are pending polling actions and we will have to ignore the Tx
+   * availability action (which is okay because all poll actions have,
+   * ultimately, the same effect.
    */
 
-#ifndef CONFIG_NET_WORKER_THREAD
-  flags = irqsave();
-#endif /*CONFIG_NET_WORKER_THREAD*/
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (priv->lp_ifup)
+  if (work_available(&priv->sk_work))
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Schedule to serialize the poll on the worker thread. */
 
-      if (lpc17_txdesc(priv) == OK)
-        {
-          /* If so, then poll uIP for new XMIT data */
-
-          (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
-        }
+      work_queue(HPWORK, &priv->sk_work, lpc17_txavail_work, priv, 0);
     }
 
-#ifndef CONFIG_NET_WORKER_THREAD
-  irqrestore(flags);
-#endif /*CONFIG_NET_WORKER_THREAD*/
+#else
+
+  /* Perform the out-of-cycle poll now */
+
+  lpc17_txavail_process(priv);
+#endif
+
   return OK;
 }
 
