@@ -320,6 +320,25 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 int up_relocateadd(FAR const Elf32_Rela *rel,
                    FAR const Elf32_Sym *sym, uintptr_t addr);
 
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+/****************************************************************************
+ * Name: up_init_exidx
+ *
+ * Description:
+ *   Load the boundaries of the Exception Index ELF section in order to
+ *   support exception handling for loaded ELF modules.
+ *
+ * Input Parameters:
+ *   address - The ELF section address for the Exception Index
+ *   size    - The size of the ELF section.
+ *
+ * Returned Value:
+ *   Always returns Zero (OK).
+ *
+ ****************************************************************************/
+int up_init_exidx(Elf32_Addr address, Elf32_Word size);
+#endif
+
 /****************************************************************************
  * Name: up_coherent_dcache
  *

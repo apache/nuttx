@@ -38,3 +38,13 @@ config ELF_DUMPBUFFER
 	depends on DEBUG && DEBUG_VERBOSE
 	---help---
 		Dump various ELF buffers for debug purposes
+
+config ELF_EXIDX_SECTNAME
+	string "ELF Section Name for Exception Index"
+	default ".ARM.exidx"
+	depends on UCLIBCXX_EXCEPTION
+	---help---
+		Set the name string for the exception index section on the ELF modules to
+		be loaded by the ELF binary loader.
+
+		This is needed to support exception handling on loadable ELF modules.

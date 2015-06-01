@@ -41,6 +41,9 @@ ASRCS =
 CSRCS =
 
 CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx  libxx_cxa_atexit.cxx
+ifeq ($(CONFIG_UCLIBCXX_EXCEPTION),y)
+CXXSRCS += libxx__gnu_unwind_find_exidx.cxx
+endif
 
 # Some of the libxx/ files are not need if uClibc++ is installed because
 # uClibx++ replaces them

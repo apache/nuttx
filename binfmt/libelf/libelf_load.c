@@ -245,6 +245,9 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 {
   size_t heapsize;
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+  int exidx;
+#endif
   int ret;
 
   bvdbg("loadinfo: %p\n", loadinfo);
@@ -325,6 +328,18 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
     {
       bdbg("ERROR: elf_loaddtors failed: %d\n", ret);
       goto errout_with_addrenv;
+    }
+#endif
+
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+  exidx = elf_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
+  if (exidx < 0)
+    {
+      bvdbg("elf_findsection: Exception Index section not found: %d\n", exidx);
+    }
+  else
+    {
+      up_init_exidx(loadinfo->shdr[exidx].sh_addr, loadinfo->shdr[exidx].sh_size);
     }
 #endif
 
