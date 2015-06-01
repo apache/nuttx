@@ -106,6 +106,13 @@ config ARMV7M_OABI_TOOLCHAIN
 		Most of the older buildroot toolchains are OABI and are named
 		arm-nuttx-elf- vs. arm-nuttx-eabi-
 
+config ARMV7M_TARGET2_PREL
+	bool "R_ARM_TARGET2 is PC relative"
+	default n
+	depends on ELF
+	---help---
+		Perform a PC relative relocation for relocation type R_ARM_TARGET2
+
 config ARMV7M_HAVE_STACKCHECK
 	bool
 	default n

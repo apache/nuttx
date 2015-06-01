@@ -48,6 +48,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/elf.h>
 
+#ifdef CONFIG_ELF
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -59,6 +61,14 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+extern void init_unwind_exidx(Elf32_Addr start, Elf32_Addr end);
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -203,6 +213,18 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         *(uint32_t*)addr += sym->st_value;
       }
       break;
+
+#ifdef CONFIG_ARMV7M_TARGET2_PREL
+    case R_ARM_TARGET2:  /* TARGET2 is a platform-specific relocation: gcc-arm-none-eabi
+                          * performs a self relocation */
+      {
+        bvdbg("Performing TARGET2 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t*)addr), sym, (long)sym->st_value);
+
+        *(uint32_t*)addr += sym->st_value - addr;
+      }
+      break;
+#endif
 
     case R_ARM_THM_CALL:
     case R_ARM_THM_JUMP24:
@@ -464,3 +486,14 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   bdbg("RELA relocation not supported\n");
   return -ENOSYS;
 }
+
+#ifdef CONFIG_UCLIBCXX_EXCEPTION
+int up_init_exidx(Elf32_Addr address, Elf32_Word size)
+{
+  init_unwind_exidx(address, size);
+
+  return OK;
+}
+#endif
+
+#endif /* CONFIG_ELF */
