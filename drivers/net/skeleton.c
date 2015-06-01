@@ -598,9 +598,6 @@ static int skel_interrupt(int irq, FAR void *context)
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
  ****************************************************************************/
 
 static inline void skel_txtimeout_process(FAR struct skel_driver_s *priv)

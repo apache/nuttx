@@ -880,7 +880,7 @@ o Network (net/, drivers/net)
                  LM3S         NO                      NO
                  TM4C         YES                     YES
                eZ80           NO                      NO
-               LPC17xx        YES (could be issues)   YES (not tested)
+               LPC17xx        YES                     YES (not tested)
                DMxxx NIC      NO                      NO
                PIC32          NO                      NO
                RGMP           ???                     ???
