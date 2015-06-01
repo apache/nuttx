@@ -56,6 +56,16 @@ SECTIONS
       _etext = . ;
     }
 
+  .ARM.extab :
+    {
+      *(.ARM.extab*)
+    }
+
+  .ARM.exidx :
+    {
+      *(.ARM.exidx*)
+    }
+
   .rodata :
     {
       _srodata = . ;
