@@ -10524,3 +10524,6 @@
 	  Add a new configuration, thttpd-binfs, that provides an example of how
 	  to build apps/netutils/thttpd using binfs instead NXFLAT+ROMFS
 	  (2015-06-02).
+	* tools/cfgdefine.c: Extend the mkconfig tool so that it can dequote a
+	  quoted list of quoted strings.  THTTPD uses such a configration
+	  setting to provide the list of index files (2015-06-02).
