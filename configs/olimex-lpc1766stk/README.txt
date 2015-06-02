@@ -1131,11 +1131,8 @@ Configuration Sub-Directories
 
   STATUS:
     2015-06-02.  This configuration was added in an attempt to replace
-      thttpd-nxflat (see below).  It concurrent does not run.  It fails
-      because there is index.html file in the binfs directory.  THTTPD
-      does support indexing directories if CONFIG_THTTPD_GENERATE_INDICES=y,
-      but there are some compilation issues that need to be fixed when
-      that option is selected.
+      thttpd-nxflat (see below).  It concurrent does not run properly.
+      It looks like I get out-of-memory errors during execution of CGI.
 
   thttpd-nxflat:
     This builds the THTTPD web server example using the THTTPD and
@@ -1154,7 +1151,9 @@ Configuration Sub-Directories
 
   STATUS:
     2015-06-02.  Do to issues introduced by recent versions of GCC, NXFLAT
-      is not often usable.  See http://www.nuttx.org/doku.php?id=wiki:vfs:nxflat#toolchain_compatibility_problem
+      is not often usable.
+
+      See http://www.nuttx.org/doku.php?id=wiki:vfs:nxflat#toolchain_compatibility_problem
 
   usbserial:
     This configuration directory exercises the USB serial class
