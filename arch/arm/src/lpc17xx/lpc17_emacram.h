@@ -132,8 +132,9 @@
  *
  *  16384 <= ntx * (pktsize + 8 + 4) + nrx * (pktsize + 8 + 8)
  *
- * If ntx == nrx and pktsize == 590, then you could have ntx = nrx = 13.  In this
- * case, you would need only 15,704 bytes of EMAC RAM (but be careful with alignment!).
+ * If ntx == nrx and pktsize == 590+2, then you could have ntx = nrx = 13.  In this
+ * case, you would need only 15,756 bytes of EMAC RAM (but be careful with alignment!
+ * 15,756 is not well aligned.).
  */
 
 #define LPC17_TXDESCTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXDESC_SIZE)
