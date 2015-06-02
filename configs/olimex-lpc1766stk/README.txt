@@ -1114,9 +1114,26 @@ Configuration Sub-Directories
     hardware flow control is partially implemented but does not behave as
     expected.  It needs a little more work.
 
-  thttpd:
+  thttpd-binfs:
     This builds the THTTPD web server example using the THTTPD and
-    the apps/examples/thttpd application.
+    the apps/examples/thttpd application.  This version uses the built-in
+    binary format with the BINFS file system, otherwise it is equivalent to
+    thttpd-binfs.
+
+    NOTES:
+
+    1. Uses the CodeSourcery EABI toolchain under Windows.  But that is
+       easily reconfigured:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery toolchain
+
+  thttpd-nxflat:
+    This builds the THTTPD web server example using the THTTPD and
+    the apps/examples/thttpd application.  This version uses the NXFLAT
+    binary format with the ROMFS file system, otherwise it is equivalent to
+    thttpd-binfs.
 
     NOTES:
 
