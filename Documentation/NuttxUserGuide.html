@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: April 9, 2015</p>
+      <p>Last Updated: June 2, 2015</p>
     </td>
   </tr>
 </table>
@@ -8097,7 +8097,9 @@ FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
+#if 0 /* Not yet supported */
 int fstat(int fd, FAR struct stat *buf);
+#endif
 
 #include &lt;sys/statfs.h&gt;
 
