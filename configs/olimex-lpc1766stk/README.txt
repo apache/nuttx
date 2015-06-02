@@ -1129,6 +1129,14 @@ Configuration Sub-Directories
        CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery toolchain
 
+  STATUS:
+    2015-06-02.  This configuration was added in an attempt to replace
+      thttpd-nxflat (see below).  It concurrent does not run.  It fails
+      because there is index.html file in the binfs directory.  THTTPD
+      does support indexing directories if CONFIG_THTTPD_GENERATE_INDICES=y,
+      but there are some compilation issues that need to be fixed when
+      that option is selected.
+
   thttpd-nxflat:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.  This version uses the NXFLAT
@@ -1143,6 +1151,10 @@ Configuration Sub-Directories
        CONFIG_HOST_LINUX=y                 : Linux
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=n      : Newer, EABI toolchain
+
+  STATUS:
+    2015-06-02.  Do to issues introduced by recent versions of GCC, NXFLAT
+      is not often usable.  See http://www.nuttx.org/doku.php?id=wiki:vfs:nxflat#toolchain_compatibility_problem
 
   usbserial:
     This configuration directory exercises the USB serial class
