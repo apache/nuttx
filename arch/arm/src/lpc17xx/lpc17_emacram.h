@@ -132,51 +132,8 @@
  *
  *  16384 <= ntx * (pktsize + 8 + 4) + nrx * (pktsize + 8 + 8)
  *
- * If ntx == nrx and pktsize == 424, then you could have
- * ntx = nrx = 18.
- *
- * An example with all of the details:
- *
- * NTXDESC=18 NRXDESC=18 CONFIG_NET_EMACRAM_SIZE=16Kb CONFIG_NET_ETH_MTU=420:
- *   LPC17_TXDESCTAB_SIZE = 18*8 = 144
- *   LPC17_TXSTATTAB_SIZE = 18*4 =  72
- *   LPC17_TXTAB_SIZE     = 216
- *
- *   LPC17_RXDESCTAB_SIZE = 16*8 = 144
- *   LPC17_RXSTATTAB_SIZE = 16*8 = 144
- *   LPC17_TXTAB_SIZE     = 288
- *
- *   LPC17_DESCTAB_SIZE   = 504
- *   LPC17_DESC_BASE      = LPC17_SRAM_BANK0 + 0x00004000 - 504
- *                        = LPC17_SRAM_BANK0 + 0x00003e08
- *   LPC17_TXDESC_BASE    = LPC17_SRAM_BANK0 + 0x00003e08
- *   LPC17_TXSTAT_BASE    = LPC17_SRAM_BANK0 + 0x00003e98
- *   LPC17_RXDESC_BASE    = LPC17_SRAM_BANK0 + 0x00003ee0
- *   LPC17_RXSTAT_BASE    = LPC17_SRAM_BANK0 + 0x00003f70
- *
- *   LPC17_PKTMEM_BASE    = LPC17_SRAM_BANK0
- *   LPC17_PKTMEM_SIZE    = 0x00004000-504 = 0x00003e40
- *   LPC17_PKTMEM_END     = LPC17_SRAM_BANK0 + 0x00003e08
-
- *   LPC17_MAXPACKET_SIZE = ((420 + 3 + 2) & ~3) = 424
- *   LPC17_NTXPKTS        = 18
- *   LPC17_NRXPKTS        = 18
-
- *   LPC17_TXBUFFER_SIZE  = 18 * 424 = 0x00001dd0
- *   LPC17_RXBUFFER_SIZE  = 18 * 424 = 0x00001dd0
- *   LPC17_BUFFER_SIZE    = 0x00003ba0
-
- *   LPC17_BUFFER_BASE    = LPC17_SRAM_BANK0
- *   LPC17_TXBUFFER_BASE  = LPC17_SRAM_BANK0
- *   LPC17_RXBUFFER_BASE  = LPC17_SRAM_BANK0 + 0x00001dd0
- *   LPC17_BUFFER_END     = LPC17_SRAM_BANK0 + 0x00003ba0
- *
- *   Then the check LPC17_BUFFER_END < LPC17_PKTMEM_END passes. The amount of
- *   unused memory is small: 0x00003e08-0x00003ba0 or about 616 bytes -- not
- *   enough for two more packets.
- *
- * [It is also possible, with some effort, to reclaim any unused
- *  SRAM for the use in the heap.  But that has not yet been pursued.]
+ * If ntx == nrx and pktsize == 590, then you could have ntx = nrx = 13.  In this
+ * case, you would need only 15,704 bytes of EMAC RAM (but be careful with alignment!).
  */
 
 #define LPC17_TXDESCTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXDESC_SIZE)
