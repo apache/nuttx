@@ -100,8 +100,9 @@
  * Type Definitions
  ****************************************************************************/
 
-/* This is the simplified struct stat as returned by fstat(). This structure
- * provides information about a specific file or directory in the file system.
+/* This is the simplified struct stat as returned by stat() and fstat().
+ * This structure provides information about a specific file or directory in
+ * the file system.
  */
 
 struct stat
@@ -131,7 +132,9 @@ extern "C"
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(const char *path, FAR struct stat *buf);
+#if 0 /* Not yet supported */
 int fstat(int fd, FAR struct stat *buf);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
