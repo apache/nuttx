@@ -10520,3 +10520,7 @@
 	  involves additional handling for relative relation types, additional
 	  support for unwinding, as well as additional changes.  The culmination
 	  of a big effort from Leo Aloe3132 (2015-06-01).
+	* configs/olimex-lpc1766stk: Rename the thttpd configuration to thttpd-nxflat.
+	  Add a new configuration, thttpd-binfs, that provides an example of how
+	  to build apps/netutils/thttpd using binfs instead NXFLAT+ROMFS
+	  (2015-06-02).
