@@ -1983,7 +1983,6 @@ static inline void lpc17_txavail_process(FAR struct lpc17_driver_s *priv)
     }
 
   net_unlock(state);
-  return OK;
 }
 
 /****************************************************************************
