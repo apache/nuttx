@@ -90,7 +90,7 @@ static const char *dequote_list[] =
 
   "CONFIG_EXAMPLES_HELLO_PROGNAME",    /* Name of installed hello example program */
   "CONFIG_EXAMPLES_NSH_PROGNAME",      /* Name of installed NSH example program */
-
+  "CONFIG_THTTPD_INDEX_NAMES",         /* List of index file names */
   NULL                                 /* Marks the end of the list */
 };
 
@@ -225,7 +225,9 @@ static char *dequote_value(const char *varname, char *varval)
 {
   const char **dqnam;
   char *dqval = varval;
+  char *ptr;
   int len;
+  int i;
 
   if (dqval)
     {
@@ -240,12 +242,12 @@ static char *dequote_value(const char *varname, char *varval)
         }
 
       /* Did we find the variable name in the list of configuration variables
-       * to be dequoated?
+       * to be dequoted?
        */
 
       if (*dqnam)
         {
-          /* Yes... Check if there is a traiing quote */
+          /* Yes... Check if there is a trailing quote */
 
           len = strlen(dqval);
           if (dqval[len-1] == '"')
@@ -264,6 +266,28 @@ static char *dequote_value(const char *varname, char *varval)
 
                dqval++;
                len--;
+             }
+
+           /* A special case is a quoted list of quoted strings.  In that case
+            * we will need to remove the backspaces from the internally quoted
+            * strings.  NOTE: this will not handle nested quoted quotes.
+            */
+
+           for (ptr = dqval; *ptr; ptr++)
+             {
+               /* Check for a quoted quote */
+
+               if (ptr[0] == '\\' && ptr[1] == '"')
+                 {
+                   /* Delete the backslash by moving the rest of the string */
+
+                   for (i = 0; ptr[i]; i++)
+                     {
+                       ptr[i] = ptr[i+1];
+                     }
+
+                   len--;
+                 }
              }
 
            /* Handle the case where nothing is left after dequoting */
