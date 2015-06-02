@@ -121,7 +121,7 @@ static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          eventset |= ((PULLHUP | POLLERR) & info->fds->events);
+          eventset |= ((POLLHUP | POLLERR) & info->fds->events);
         }
 
       /* Awaken the caller of poll() is requested event occurred. */
