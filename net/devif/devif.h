@@ -303,8 +303,13 @@ void devif_callback_init(void);
  * Description:
  *   Allocate a callback container from the free list.
  *
+ *   If dev is non-NULL, then this function verifies that the device
+ *   reference is still  valid and that the device is still UP status.  If
+ *   those conditions are not true, this function will fail to allocate the
+ *   callback.
+ *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   This function is called with the network locked.
  *
  ****************************************************************************/
 
@@ -313,19 +318,49 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list);
 
 /****************************************************************************
- * Function: devif_callback_free
+ * Function: devif_conn_callback_free
  *
  * Description:
- *   Return a callback container to the free list.
+ *   Return a connection/port callback container to the free list.
+ *
+ *   This function is just a front-end for devif_callback_free().  If the
+ *   dev argument is non-NULL, it will verify that the device reference is
+ *   still valid before attempting to free the callback structure.  A
+ *   non-NULL list pointer is assumed to be valid in any case.
+ *
+ *   The callback structure will be freed in any event.
  *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   This function is called with the network locked.
  *
  ****************************************************************************/
 
-void devif_callback_free(FAR struct net_driver_s *dev,
-                         FAR struct devif_callback_s *cb,
-                         FAR struct devif_callback_s **list);
+void devif_conn_callback_free(FAR struct net_driver_s *dev,
+                              FAR struct devif_callback_s *cb,
+                              FAR struct devif_callback_s **list);
+
+/****************************************************************************
+ * Function: devif_dev_callback_free
+ *
+ * Description:
+ *   Return a device callback container to the free list.
+ *
+ *   This function is just a front-end for devif_callback_free().  If the
+ *   de argument is non-NULL, it will verify that the device reference is
+ *   still valid before attempting to free the callback structure.  It
+ *   differs from devif_conn_callback_free in that connection/port-related
+ *   connections are also associated with the device and, hence, also will
+ *   not be valid if the device pointer is not valid.
+ *
+ *   The callback structure will be freed in any event.
+ *
+ * Assumptions:
+ *   This function is called with the network locked.
+ *
+ ****************************************************************************/
+
+void devif_dev_callback_free(FAR struct net_driver_s *dev,
+                             FAR struct devif_callback_s *cb);
 
 /****************************************************************************
  * Function: devif_conn_event

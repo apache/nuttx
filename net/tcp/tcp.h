@@ -70,7 +70,7 @@
 #  define tcp_callback_alloc(conn) \
     devif_callback_alloc(conn->dev, &conn->list)
 #  define tcp_callback_free(conn,cb) \
-    devif_callback_free(conn->dev, cb, &conn->list)
+    devif_conn_callback_free(conn->dev, cb, &conn->list)
 
 /* These macros allocate and free callback structures used for receiving
  * notifications of device-related events.
@@ -79,7 +79,7 @@
 #  define tcp_monitor_callback_alloc(conn) \
     devif_callback_alloc(conn->dev, NULL)
 #  define tcp_monitor_callback_free(conn,cb) \
-    devif_callback_free(conn->dev, cb, NULL)
+    devif_conn_callback_free(conn->dev, cb, NULL)
 
 #else
 /* These macros allocate and free callback structures used for receiving
@@ -89,7 +89,7 @@
 #  define tcp_callback_alloc(conn) \
     devif_callback_alloc(g_netdevices, &conn->list)
 #  define tcp_callback_free(conn,cb) \
-    devif_callback_free(g_netdevices, cb, &conn->list)
+    devif_conn_callback_free(g_netdevices, cb, &conn->list)
 
 /* These macros allocate and free callback structures used for receiving
  * notifications of device-related events.
@@ -98,7 +98,7 @@
 #  define tcp_monitor_callback_alloc(conn) \
     devif_callback_alloc(g_netdevices, NULL)
 #  define tcp_monitor_callback_free(conn,cb) \
-    devif_callback_free(g_netdevices, cb, NULL)
+    devif_conn_callback_free(g_netdevices, cb, NULL)
 #endif
 
 /* Get the current maximum segment size that can be sent on the current

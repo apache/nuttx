@@ -64,6 +64,106 @@ static FAR struct devif_callback_s *g_cbfreelist = NULL;
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: devif_callback_free
+ *
+ * Description:
+ *   Return a callback container to the free list.
+ *
+ * Assumptions:
+ *   This function is called with the network locked.
+ *
+ ****************************************************************************/
+
+static void devif_callback_free(FAR struct net_driver_s *dev,
+                                FAR struct devif_callback_s *cb,
+                                FAR struct devif_callback_s **list)
+{
+  FAR struct devif_callback_s *prev;
+  FAR struct devif_callback_s *curr;
+  net_lock_t save;
+
+  if (cb)
+    {
+      save = net_lock();
+
+#ifdef CONFIG_DEBUG
+      /* Check for double freed callbacks */
+
+      curr = g_cbfreelist;
+
+      while (curr != NULL)
+        {
+          DEBUGASSERT(cb != curr);
+          curr = curr->nxtconn;
+        }
+#endif
+
+      /* Remove the callback structure from the device notification list if
+       * it is supposed to be in the device notification list.
+       */
+
+      if (dev)
+        {
+          /* Find the callback structure in the device event list */
+
+          for (prev = NULL, curr = dev->d_devcb;
+               curr && curr != cb;
+               prev = curr, curr = curr->nxtdev);
+
+          /* Remove the structure from the device event list */
+
+          DEBUGASSERT(curr);
+          if (curr)
+            {
+              if (prev)
+                {
+                  prev->nxtdev = cb->nxtdev;
+                }
+              else
+                {
+                  dev->d_devcb = cb->nxtdev;
+                }
+            }
+        }
+
+      /* Remove the callback structure from the data notification list if
+       * it is supposed to be in the data notification list.
+       */
+
+      if (list)
+        {
+          /* Find the callback structure in the connection event list */
+
+          for (prev = NULL, curr = *list;
+               curr && curr != cb;
+               prev = curr, curr = curr->nxtconn);
+
+          /* Remove the structure from the connection event list */
+
+          DEBUGASSERT(curr);
+          if (curr)
+            {
+              if (prev)
+                {
+                  prev->nxtconn = cb->nxtconn;
+                }
+              else
+                {
+                  *list = cb->nxtconn;
+                }
+            }
+        }
+
+      /* Put the structure into the free list */
+
+      cb->nxtconn  = g_cbfreelist;
+      cb->nxtdev   = NULL;
+      g_cbfreelist = cb;
+      net_unlock(save);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -95,8 +195,13 @@ void devif_callback_init(void)
  * Description:
  *   Allocate a callback container from the free list.
  *
+ *   If dev is non-NULL, then this function verifies that the device
+ *   reference is still  valid and that the device is still UP status.  If
+ *   those conditions are not true, this function will fail to allocate the
+ *   callback.
+ *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   This function is called with the network locked.
  *
  ****************************************************************************/
 
@@ -164,104 +269,93 @@ FAR struct devif_callback_s *
 }
 
 /****************************************************************************
- * Function: devif_callback_free
+ * Function: devif_conn_callback_free
  *
  * Description:
- *   Return a callback container to the free list.
+ *   Return a connection/port callback container to the free list.
+ *
+ *   This function is just a front-end for devif_callback_free().  If the
+ *   dev argument is non-NULL, it will verify that the device reference is
+ *   still valid before attempting to free the callback structure.  A
+ *   non-NULL list pointer is assumed to be valid in any case.
+ *
+ *   The callback structure will be freed in any event.
  *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   This function is called with the network locked.
  *
  ****************************************************************************/
 
-void devif_callback_free(FAR struct net_driver_s *dev,
-                         FAR struct devif_callback_s *cb,
-                         FAR struct devif_callback_s **list)
+void devif_conn_callback_free(FAR struct net_driver_s *dev,
+                              FAR struct devif_callback_s *cb,
+                              FAR struct devif_callback_s **list)
 {
-  FAR struct devif_callback_s *prev;
-  FAR struct devif_callback_s *curr;
-  net_lock_t save;
+  /* Check if the device pointer is still valid.  It could be invalid if, for
+   * example, the device were unregistered between the time when the callback
+   * was allocated and the time when the callback was freed.
+   */
 
-  if (cb)
+  if (dev && !netdev_verify(dev))
     {
-      save = net_lock();
+      /* The device reference is longer valid */
 
-#ifdef CONFIG_DEBUG
-      /* Check for double freed callbacks */
-
-      curr = g_cbfreelist;
-
-      while (curr != NULL)
-        {
-          DEBUGASSERT(cb != curr);
-          curr = curr->nxtconn;
-        }
-#endif
-
-      /* Remove the callback structure from the device notification list if
-       * it is supposed to be in the device notification list AND if the
-       * device pointer is still valid.
-       */
-
-      if (dev && netdev_verify(dev))
-        {
-          /* Find the callback structure in the device event list */
-
-          for (prev = NULL, curr = dev->d_devcb;
-               curr && curr != cb;
-               prev = curr, curr = curr->nxtdev);
-
-          /* Remove the structure from the device event list */
-
-          DEBUGASSERT(curr);
-          if (curr)
-            {
-              if (prev)
-                {
-                  prev->nxtdev = cb->nxtdev;
-                }
-              else
-                {
-                  dev->d_devcb = cb->nxtdev;
-                }
-            }
-        }
-
-      /* Remove the callback structure from the data notification list if
-       * it is supposed to be in the data notification list.
-       */
-
-      if (list)
-        {
-          /* Find the callback structure in the connection event list */
-
-          for (prev = NULL, curr = *list;
-               curr && curr != cb;
-               prev = curr, curr = curr->nxtconn);
-
-          /* Remove the structure from the connection event list */
-
-          DEBUGASSERT(curr);
-          if (curr)
-            {
-              if (prev)
-                {
-                  prev->nxtconn = cb->nxtconn;
-                }
-              else
-                {
-                  *list = cb->nxtconn;
-                }
-            }
-        }
-
-      /* Put the structure into the free list */
-
-      cb->nxtconn  = g_cbfreelist;
-      cb->nxtdev   = NULL;
-      g_cbfreelist = cb;
-      net_unlock(save);
+      dev = NULL;
     }
+
+  /* Then free the callback */
+
+  devif_callback_free(dev, cb, list);
+}
+
+/****************************************************************************
+ * Function: devif_dev_callback_free
+ *
+ * Description:
+ *   Return a device callback container to the free list.
+ *
+ *   This function is just a front-end for devif_callback_free().  If the
+ *   de argument is non-NULL, it will verify that the device reference is
+ *   still valid before attempting to free the callback structure.  It
+ *   differs from devif_conn_callback_free in that connection/port-related
+ *   connections are also associated with the device and, hence, also will
+ *   not be valid if the device pointer is not valid.
+ *
+ *   The callback structure will be freed in any event.
+ *
+ * Assumptions:
+ *   This function is called with the network locked.
+ *
+ ****************************************************************************/
+
+void devif_dev_callback_free(FAR struct net_driver_s *dev,
+                             FAR struct devif_callback_s *cb)
+{
+  FAR struct devif_callback_s **list;
+
+  /* Check if the device pointer is still valid.  It could be invalid if, for
+   * example, the device were unregistered between the time when the callback
+   * was allocated and the time when the callback was freed.
+   */
+
+  if (dev && netdev_verify(dev))
+    {
+      /* The device reference is valid.. the use the list pointer in the
+       * device structure as well.
+       */
+
+      list = &dev->d_conncb;
+    }
+  else
+    {
+      /* The device reference is longer valid */
+
+      dev  = NULL;
+      list = NULL;
+    }
+
+  /* Then free the callback */
+
+  devif_callback_free(dev, cb, list);
 }
 
 /****************************************************************************

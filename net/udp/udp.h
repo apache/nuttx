@@ -68,7 +68,7 @@
 #define udp_callback_alloc(dev, conn) \
   devif_callback_alloc(dev, &conn->list)
 #define udp_callback_free(dev, conn,cb) \
-  devif_callback_free(dev, cb, &conn->list)
+  devif_conn_callback_free(dev, cb, &conn->list)
 
 /****************************************************************************
  * Public Type Definitions
