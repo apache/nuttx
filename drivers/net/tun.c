@@ -438,6 +438,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
       if (priv->dev.d_len > 0)
         {
           priv->write_d_len = priv->dev.d_len;
+          tun_transmit(priv);
         }
       else
         {
