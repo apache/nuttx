@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "lpc17_gpio.h"
-#include "lincoln60_internal.h"
+#include "lincoln60.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

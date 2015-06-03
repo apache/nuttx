@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/lincoln60/src/lincoln60_internal.h
+ * configs/lincoln60/src/lincoln60.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LINCOLN60_SRC_LINCOLN60_INTERNAL_H
-#define _CONFIGS_LINCOLN60_SRC_LINCOLN60_INTERNAL_H
+#ifndef _CONFIGS_LINCOLN60_SRC_LINCOLN60_H
+#define _CONFIGS_LINCOLN60_SRC_LINCOLN60_H
 
 /****************************************************************************
  * Included Files
@@ -100,5 +100,4 @@
 void weak_function lincoln60_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LINCOLN60_SRC_LINCOLN60_INTERNAL_H */
-
+#endif /* _CONFIGS_LINCOLN60_SRC_LINCOLN60_H */
