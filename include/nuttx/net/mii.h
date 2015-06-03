@@ -110,6 +110,13 @@
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
 #define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
+/* Micrel KSZ8041:  0x15, 0x1b, 0x1e-0x1f */
+
+#define MII_KSZ8041_RXERR            0x15      /* RXERR Counter */
+#define MII_KSZ8041_INT              0x1b      /* Interrupt Control/Status */
+#define MII_KSZ8041_PHYCTRL1         0x1e      /* PHY Control 1 */
+#define MII_KSZ8041_PHYCTRL2         0x1f      /* PHY Control 2 */
+
 /* Micrel KSZ8051:  0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
 
 #define MII_KSZ8051_AFEC1            0x11      /* AFE Control 1 */
@@ -499,7 +506,10 @@
 #define KS8721_10BTCR_PAIRSWAPD      (1 << 13) /* Bit 13: Pairswap disable */
 
 /* KSZ8051/81-specific register bit settings ********************************/
-/* KSZ8051/81 MII ID1/2 register bits */
+/* KSZ8041/51/81 MII ID1/2 register bits */
+
+#define MII_PHYID1_KSZ8041           0x0022    /* ID1 value for Micrel KSZ8041 */
+#define MII_PHYID2_KSZ8041           0x1510    /* ID2 value for Micrel KSZ8041 */
 
 #define MII_PHYID1_KSZ8051           0x0022    /* ID1 value for Micrel KSZ8051 */
 #define MII_PHYID2_KSZ8051           0x1550    /* ID2 value for Micrel KSZ8051 */
@@ -511,7 +521,7 @@
                                                /* Bits 5-15: Reserved */
 #define KSZ8081_DRCTRL_PLLOFF        (1 << 4)  /* Bit 4: Turn PLL off in EDPD mode */
                                                /* Bits 0-3: Reserved */
-/* KSZ8051/81 Register 0x1b: Interrupt control/status */
+/* KSZ8041/51/81 Register 0x1b: Interrupt control/status */
 
 #define MII_KSZ80x1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
 #define MII_KSZ80x1_INT_REEN         (1 << 14) /* Receive error interrupt enable */
@@ -531,15 +541,39 @@
 #define MII_KSZ80x1_INT_RF           (1 << 1)  /* Remote fault interrupt */
 #define MII_KSZ80x1_INT_LU           (1 << 0)  /* Link up interrupt */
 
+/* KSZ8041 Register 0x1e: PHY Control 1 -- To be provided */
+/* KSZ8041 Register 0x1e: PHY Control 2 */
+
+#define MII_PHYCTRL2_MDIX            (1 << 15) /* Bit 15: Micrel/HP MDI/MDI-X state */
+#define MII_PHYCTRL2_MDIX_SEL        (1 << 14) /* Bit 14: MDI/MDI-X select */
+#define MII_PHYCTRL2_PSDIS           (1 << 13) /* Bit 13: Pair swap disable */
+#define MII_PHYCTRL2_ENERGYDET       (1 << 12) /* Bit 12: Energy detect */
+#define MII_PHYCTRL2_FORCE           (1 << 11) /* Bit 11: Force link */
+#define MII_PHYCTRL2_PWRSAVE         (1 << 10) /* Bit 10: Power saving */
+#define MII_PHYCTRL2_INTLVL          (1 << 9)  /* Bit 9:  Interrupt level */
+#define MII_PHYCTRL2_ENJABBER        (1 << 8)  /* Bit 8:  Enable jabber */
+#define MII_PHYCTRL2_ANEGCOMP        (1 << 7)  /* Bit 7:  Auto-negotiation complete */
+#define MII_PHYCTRL2_ENPAUSE         (1 << 6)  /* Bit 6:  Enable pause */
+#define MII_PHYCTRL2_ISOLATE         (1 << 5)  /* Bit 5:  PHY isolate */
+#define MII_PHYCTRL2_MODE_SHIFT      (2)       /* Bits 2-4: Operation mode */
+#define MII_PHYCTRL2_MODE_MASK       (7 << MII_PHYCTRL2_MODE_SHIFT)
+#  define MII_PHYCTRL2_MODE_BUSY     (0 << MII_PHYCTRL2_MODE_SHIFT) /* Still in autonegotiation */
+#  define MII_PHYCTRL2_MODE_10HDX    (1 << MII_PHYCTRL2_MODE_SHIFT) /* 10Base-T half-duplex */
+#  define MII_PHYCTRL2_MODE_100HDX   (2 << MII_PHYCTRL2_MODE_SHIFT) /* 100Base-T half-duplex */
+#  define MII_PHYCTRL2_MODE_10FDX    (5 << MII_PHYCTRL2_MODE_SHIFT) /* 10Base-T full-duplex */
+#  define MII_PHYCTRL2_MODE_100FDX   (6 << MII_PHYCTRL2_MODE_SHIFT) /* 100Base-T full-duplex */
+#define MII_PHYCTRL2_SEQTEST         (1 << 1)  /* Bit 1:  Enable SQE test */
+#define MII_PHYCTRL2_DISDS           (1 << 0)  /* Bit 1:  Disable data scrambling */
+
 /* KSZ8051/81 Register 0x1e: PHY Control 1 */
                                                /* Bits 10-15: Reserved */
-#define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9: Enable pause */
-#define MII_PHYCTRL1_LINKSTATUS      (1 << 8)  /* Bit 8: Link status */
-#define MII_PHYCTRL1_POLARITY        (1 << 7)  /* Bit 7: Polarity status */
-                                               /* Bit 6: Reserved */
-#define MII_PHYCTRL1_MDIX            (1 << 5)  /* Bit 5: MDI/MDI-X state */
-#define MII_PHYCTRL1_ENERGYDET       (1 << 4)  /* Bit 4: Energy detect */
-#define MII_PHYCTRL1_ISOLATE         (1 << 3)  /* Bit 3: PHY isolate */
+#define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9:  Enable pause */
+#define MII_PHYCTRL1_LINKSTATUS      (1 << 8)  /* Bit 8:  Link status */
+#define MII_PHYCTRL1_POLARITY        (1 << 7)  /* Bit 7:  Polarity status */
+                                               /* Bit 6:  Reserved */
+#define MII_PHYCTRL1_MDIX            (1 << 5)  /* Bit 5:  MDI/MDI-X state */
+#define MII_PHYCTRL1_ENERGYDET       (1 << 4)  /* Bit 4:  Energy detect */
+#define MII_PHYCTRL1_ISOLATE         (1 << 3)  /* Bit 3:  PHY isolate */
 #define MII_PHYCTRL1_MODE_SHIFT      (0)       /* Bits 0-2: Operation mode */
 #define MII_PHYCTRL1_MODE_MASK       (7 << MII_PHYCTRL1_MODE_SHIFT)
 #  define MII_PHYCTRL1_MODE_BUSY     (0 << MII_PHYCTRL1_MODE_SHIFT) /* Still in autonegotiation */

@@ -293,6 +293,9 @@ config ETH0_PHY_AM79C874
 config ETH0_PHY_KS8721
 	bool "Micrel KS8721 PHY"
 
+config ETH0_PHY_KSZ8041
+	bool "Micrel KSZ8041 PHY"
+
 config ETH0_PHY_KSZ8051
 	bool "Micrel KSZ8051 PHY"
 
@@ -338,6 +341,9 @@ config ETH1_PHY_AM79C874
 
 config ETH1_PHY_KS8721
 	bool "Micrel KS8721 PHY"
+
+config ETH1_PHY_KSZ8041
+	bool "Micrel KSZ8041 PHY"
 
 config ETH1_PHY_KSZ8051
 	bool "Micrel KSZ8051 PHY"
