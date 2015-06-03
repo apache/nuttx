@@ -143,4 +143,3 @@ void mq_waitirq(FAR struct tcb_s *wtcb, int errcode)
 
   irqrestore(saved_state);
 }
-

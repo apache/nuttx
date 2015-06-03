@@ -258,11 +258,13 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
       if (result != OK)
         {
-          set_errno(result);
           irqrestore(saved_state);
           sched_unlock();
+
           wd_delete(rtcb->waitdog);
           rtcb->waitdog = NULL;
+
+          set_errno(result);
           return ERROR;
         }
 

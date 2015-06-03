@@ -351,7 +351,8 @@ errout_with_irqsave:
 
 errout_with_mqmsg:
   mq_msgfree(mqmsg);
-  set_errno(result);
   sched_unlock();
+
+  set_errno(result);
   return ERROR;
 }
