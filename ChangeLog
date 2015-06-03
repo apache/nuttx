@@ -10538,3 +10538,4 @@
 	  kernel builds because in those cases the message queue structure is
 	  protected and cannot be accessed directly from user mode code.  Noted
 	  by Jouko Holopainen (2015-06-03).
+	* rivers/net/tun.c: TUN driver bug fix.  From Max Neklyudov (2015-06-03.
