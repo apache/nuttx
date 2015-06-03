@@ -63,12 +63,13 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQBUTTONS
+
 #define HAVE_IRQBUTTONS 1
-#if !defined(CONFIG_SAMV7_GPIO1_IRQ) && !defined(CONFIG_SAMV7_GPIOB_IRQ)
+#if !defined(CONFIG_SAMV7_GPIOA_IRQ) && !defined(CONFIG_SAMV7_GPIOB_IRQ)
 #  undef HAVE_IRQBUTTONS
 #endif
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
 static xcpt_t g_irq_sw0;
 #endif
