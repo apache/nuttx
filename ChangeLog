@@ -10530,3 +10530,5 @@
 	* mq_timedreceive(): move the location where the errno value is set; the
 	  ETIMEDOUT errno setting was being overwritten by subsequent actions
 	  before returning.  Noted by Freddie Chopin (2015-06-03).
+	* Networking:  Modify how callback structures are stored to avoid
+	  another potential use of a stal pointer (2015-06-03).
