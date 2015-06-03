@@ -10527,3 +10527,6 @@
 	* tools/cfgdefine.c: Extend the mkconfig tool so that it can dequote a
 	  quoted list of quoted strings.  THTTPD uses such a configration
 	  setting to provide the list of index files (2015-06-02).
+	* mq_timedreceive(): move the location where the errno value is set; the
+	  ETIMEDOUT errno setting was being overwritten by subsequent actions
+	  before returning.  Noted by Freddie Chopin (2015-06-03).
