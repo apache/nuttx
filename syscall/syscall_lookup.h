@@ -277,10 +277,12 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 
 #ifndef CONFIG_DISABLE_MQUEUE
   SYSCALL_LOOKUP(mq_close,                1, STUB_mq_close)
+  SYSCALL_LOOKUP(mq_getattr,              2, STUB_mq_getattr)
   SYSCALL_LOOKUP(mq_notify,               2, STUB_mq_notify)
   SYSCALL_LOOKUP(mq_open,                 6, STUB_mq_open)
   SYSCALL_LOOKUP(mq_receive,              4, STUB_mq_receive)
   SYSCALL_LOOKUP(mq_send,                 4, STUB_mq_send)
+  SYSCALL_LOOKUP(mq_setattr,              3, STUB_mq_setattr)
   SYSCALL_LOOKUP(mq_timedreceive,         5, STUB_mq_timedreceive)
   SYSCALL_LOOKUP(mq_timedsend,            5, STUB_mq_timedsend)
   SYSCALL_LOOKUP(mq_unlink,               1, STUB_mq_unlink)

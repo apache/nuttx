@@ -32,7 +32,6 @@ we have:
   libgen    - libgen.h
   fixedmath - fixedmath.h
   math      - math.h
-  mqueue    - pthread.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
   pthread   - pthread.h
   queue     - queue.h

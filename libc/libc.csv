@@ -75,8 +75,6 @@
 "memmove","string.h","","FAR void","FAR void *","FAR const void *","size_t"
 "memset","string.h","","FAR void","FAR void *","int c","size_t"
 "mktime","time.h","","time_t","const struct tm *"
-"mq_getattr","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t","struct mq_attr *"
-"mq_setattr","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t","const struct mq_attr *","struct mq_attr *"
 "ntohl","arpa/inet.h","","uint32_t","uint32_t"
 "ntohs","arpa/inet.h","","uint16_t","uint16_t"
 "perror","stdio.h","CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0","void","FAR const char *"

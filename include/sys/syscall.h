@@ -379,14 +379,16 @@
 
 #ifndef CONFIG_DISABLE_MQUEUE
 #  define SYS_mq_close                 (__SYS_mqueue+0)
-#  define SYS_mq_notify                (__SYS_mqueue+1)
-#  define SYS_mq_open                  (__SYS_mqueue+2)
-#  define SYS_mq_receive               (__SYS_mqueue+3)
-#  define SYS_mq_send                  (__SYS_mqueue+4)
-#  define SYS_mq_timedreceive          (__SYS_mqueue+5)
-#  define SYS_mq_timedsend             (__SYS_mqueue+6)
-#  define SYS_mq_unlink                (__SYS_mqueue+7)
-#  define __SYS_environ                (__SYS_mqueue+8)
+#  define SYS_mq_getattr               (__SYS_mqueue+1)
+#  define SYS_mq_notify                (__SYS_mqueue+2)
+#  define SYS_mq_open                  (__SYS_mqueue+3)
+#  define SYS_mq_receive               (__SYS_mqueue+4)
+#  define SYS_mq_send                  (__SYS_mqueue+5)
+#  define SYS_mq_setattr               (__SYS_mqueue+6)
+#  define SYS_mq_timedreceive          (__SYS_mqueue+7)
+#  define SYS_mq_timedsend             (__SYS_mqueue+8)
+#  define SYS_mq_unlink                (__SYS_mqueue+9)
+#  define __SYS_environ                (__SYS_mqueue+10)
 #else
 #  define __SYS_environ                __SYS_mqueue
 #endif
