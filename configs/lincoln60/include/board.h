@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_LINCOLN60_INCLUDE_BOARD_H
+#define __CONFIGS_LINCOLN60_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -180,7 +180,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -193,24 +194,26 @@ extern "C" {
  * Name: lpc17_boardinitialize
  *
  * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC17xx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
-EXTERN void lpc17_boardinitialize(void);
+void lpc17_boardinitialize(void);
 
 /****************************************************************************
  * Name: lpc17_led
  *
  * Description:
- *   Once the system has booted, these functions can be used to control LEDs 1 & 2
+ *   Once the system has booted, these functions can be used to control
+ *   LEDs 1 & 2
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void lpc17_led(int lednum, int state);
+void lpc17_led(int lednum, int state);
 #endif
 
 #undef EXTERN
@@ -219,4 +222,4 @@ EXTERN void lpc17_led(int lednum, int state);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_LINCOLN60_INCLUDE_BOARD_H */
