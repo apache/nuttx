@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_ethernet.c
  *
- *   Copyright (C) 2010-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,6 +182,11 @@
 #  define LPC17_PHYNAME      "KS8721"
 #  define LPC17_PHYID1       MII_PHYID1_KS8721
 #  define LPC17_PHYID2       MII_PHYID2_KS8721
+#  define LPC17_HAVE_PHY     1
+#if defined(CONFIG_ETH0_PHY_KSZ8041)
+#  define LPC17_PHYNAME      "KSZ8041"
+#  define LPC17_PHYID1       MII_PHYID1_KSZ8041
+#  define LPC17_PHYID2       MII_PHYID2_KSZ8041
 #  define LPC17_HAVE_PHY     1
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
 #  define LPC17_PHYNAME      "DP83848C"
@@ -2773,20 +2778,53 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         priv->lp_mode = LPC17_10BASET_HD;
         lpc17_putreg(0, LPC17_ETH_SUPP);
         break;
+
       case KS8721_10BTCR_MODE_100BTHD: /* 100BASE-T half duplex */
         priv->lp_mode = LPC17_100BASET_HD;
         break;
+
       case KS8721_10BTCR_MODE_10BTFD: /* 10BASE-T full duplex */
         priv->lp_mode = LPC17_10BASET_FD;
         lpc17_putreg(0, LPC17_ETH_SUPP);
         break;
+
       case KS8721_10BTCR_MODE_100BTFD: /* 100BASE-T full duplex */
         priv->lp_mode = LPC17_100BASET_FD;
         break;
+
       default:
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+
+#if defined(CONFIG_ETH0_PHY_KSZ8041)
+  phyreg = lpc17_phyread(phyaddr, MII_KSZ8041_PHYCTRL2);
+
+  switch (phyreg & MII_PHYCTRL2_MODE_MASK)
+    {
+      case MII_PHYCTRL2_MODE_10HDX:  /* 10BASE-T half duplex */
+        priv->lp_mode = LPC17_10BASET_HD;
+        lpc17_putreg(0, LPC17_ETH_SUPP);
+        break;
+
+      case MII_PHYCTRL2_MODE_100HDX: /* 100BASE-T half duplex */
+        priv->lp_mode = LPC17_100BASET_HD;
+        break;
+
+      case MII_PHYCTRL2_MODE_10FDX: /* 10BASE-T full duplex */
+        priv->lp_mode = LPC17_10BASET_FD;
+        lpc17_putreg(0, LPC17_ETH_SUPP);
+        break;
+
+      case MII_PHYCTRL2_MODE_100FDX: /* 100BASE-T full duplex */
+        priv->lp_mode = LPC17_100BASET_FD;
+        break;
+
+      default:
+        ndbg("Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+    }
+
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
   phyreg = lpc17_phyread(phyaddr, MII_DP83848C_STS);
 
@@ -2797,19 +2835,24 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
       case 0x0000:
         priv->lp_mode = LPC17_100BASET_HD;
         break;
+
       case 0x0002:
         priv->lp_mode = LPC17_10BASET_HD;
         break;
+
       case 0x0004:
         priv->lp_mode = LPC17_100BASET_FD;
         break;
+
       case 0x0006:
         priv->lp_mode = LPC17_10BASET_FD;
         break;
+
       default:
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+
 #elif defined(CONFIG_ETH0_PHY_LAN8720)
   {
     uint16_t advertise;
@@ -2856,6 +2899,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         return -ENODEV;
       }
   }
+
 #else
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
