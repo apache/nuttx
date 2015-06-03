@@ -10538,4 +10538,7 @@
 	  kernel builds because in those cases the message queue structure is
 	  protected and cannot be accessed directly from user mode code.  Noted
 	  by Jouko Holopainen (2015-06-03).
-	* rivers/net/tun.c: TUN driver bug fix.  From Max Neklyudov (2015-06-03.
+	* drivers/net/tun.c: TUN driver bug fix.  From Max Neklyudov (2015-06-03.
+	* drivers/net/Kconfig, include/nuttx/net/mii.h, and
+	  arch/arm/src/lpc17xx/lpc17_ethernet.c: Add support for the Micrel
+	  KSZ8041 PHY to the LPC17xx Ethernet driver (2015-06-03).
