@@ -490,5 +490,9 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2.  This configuration enables only the serial NSH interface.  See
-        notes above for enabling USB host support in this configuration.
+    2. This configuration uses a serial console on UART0 at 115200 8N1.
+       This is the serial port at the connector labelled COM1 on the
+       Lincoln 60.
+
+    3. This configuration enables only the serial NSH interface.  See
+       notes above for enabling USB host support in this configuration.
