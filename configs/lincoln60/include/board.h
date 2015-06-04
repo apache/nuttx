@@ -128,6 +128,10 @@
 #define CONFIG_LPC17_FLASH         1
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
+/* Ethernet configuration */
+
+#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
+
 /* LED definitions *********************************************************/
 /* The Lincoln 60 has 2 LEDs along the bottom of the board. Green or off.
  * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
@@ -163,9 +167,14 @@
 #ifdef CONFIG_USBHOST
 #  ifdef GPIO_USB_PWRD
 #    undef  GPIO_USB_PWRD
-#    define GPIO_USB_PWRD    (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
+#    define GPIO_USB_PWRD          (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
 #  endif
 #endif
+
+/* Ethernet PHY */
+
+#define GPIO_ENET_MDC              GPIO_ENET_MDC_1
+#define GPIO_ENET_MDIO             GPIO_ENET_MDIO_1
 
 /****************************************************************************
  * Public Types
