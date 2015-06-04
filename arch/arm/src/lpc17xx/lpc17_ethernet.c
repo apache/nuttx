@@ -183,7 +183,7 @@
 #  define LPC17_PHYID1       MII_PHYID1_KS8721
 #  define LPC17_PHYID2       MII_PHYID2_KS8721
 #  define LPC17_HAVE_PHY     1
-#if defined(CONFIG_ETH0_PHY_KSZ8041)
+#elif defined(CONFIG_ETH0_PHY_KSZ8041)
 #  define LPC17_PHYNAME      "KSZ8041"
 #  define LPC17_PHYID1       MII_PHYID1_KSZ8041
 #  define LPC17_PHYID2       MII_PHYID2_KSZ8041
@@ -2797,7 +2797,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         return -ENODEV;
     }
 
-#if defined(CONFIG_ETH0_PHY_KSZ8041)
+#elif defined(CONFIG_ETH0_PHY_KSZ8041)
   phyreg = lpc17_phyread(phyaddr, MII_KSZ8041_PHYCTRL2);
 
   switch (phyreg & MII_PHYCTRL2_MODE_MASK)
