@@ -686,15 +686,15 @@ config NET_EMACRAM_SIZE
 
 config NET_NTXDESC
 	int "Number of Tx descriptors"
-	default 18
+	default 13
 	---help---
-		Configured number of Tx descriptors. Default: 18
+		Configured number of Tx descriptors. Default: 13
 
 config NET_NRXDESC
 	int "Number of Rx descriptors"
-	default 18
+	default 13
 	---help---
-		Configured number of Rx descriptors. Default: 18
+		Configured number of Rx descriptors. Default: 13
 
 config NET_PRIORITY
 	int "Ethernet interrupt priority"
