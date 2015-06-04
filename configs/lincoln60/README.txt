@@ -41,6 +41,13 @@ Lincoln 60 board
   P3[26]                            26  LED2
   P2[10]                            53  BTN1
 
+  microSD                          PIN   SIGNAL NAME
+  -------------------------------- ----- --------------
+  P0[15]                           J12 3  SPI SCK
+  P0[17]                           J12 4  SPI MISO
+  P0[18]                           J12 5  SPI MOSI
+  P0[16]                           J18 5  SPI slave select
+
   Console
   -------
 
