@@ -10544,4 +10544,6 @@
 	  KSZ8041 PHY to the LPC17xx Ethernet driver (2015-06-03).
 	* configs/lincoln60/netnsh:  Add a network enabled configuration for
 	  the Lincoln60 board (2015-06-03).
+	* drivers/net/tun.c: Misc. improvements to the TUN driver, mostly related
+	  to poll().  From Max Neklyudov (2015-06-04).
 
