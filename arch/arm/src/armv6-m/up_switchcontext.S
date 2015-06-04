@@ -90,9 +90,9 @@ up_switchcontext:
 	mov		r0, #SYS_switch_context	/* R0: context switch */
 	svc		0						/* Force synchronous SVCall (or Hard Fault) */
 
-	/* This call should not return */
+	/*  We will get here only after the rerturn from the context switch */
 
-	bx		lr						/* Unnecessary ... will not return */
+	bx		lr
 	.size	up_switchcontext, .-up_switchcontext
 	.end
 
