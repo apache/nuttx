@@ -69,11 +69,24 @@
  *  P2[10]                            53  BTN1
  ****************************************************************************/
 
-#define LINCOLN60_BUT1              (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN10)
+#define LINCOLN60_BUT1              (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | \
+                                     GPIO_PIN10)
 
 /* Button IRQ numbers */
 
 #define LINCOLN60_BUT1_IRQ          LPC17_IRQ_P0p23
+
+/****************************************************************************
+ *  microSD                          PIN   SIGNAL NAME
+ *  -------------------------------- ----- --------------
+ *  P0[15]                           J12 3  SPI SCK
+ *  P0[17]                           J12 4  SPI MISO
+ *  P0[18]                           J12 5  SPI MOSI
+ *  P0[16]                           J18 5  SPI slave select
+ ****************************************************************************/
+
+#define LINCOLN60_CS               (GPIO_OUTPUT | GPIO_VALUE_ONE | \
+                                    GPIO_PORT0 | GPIO_PIN16)
 
 /****************************************************************************
  * Public Types

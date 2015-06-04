@@ -238,7 +238,7 @@ FAR DIR *opendir(FAR const char *path)
   if (!path || *path == 0 || strcmp(path, "/") == 0)
     {
       inode   = root_inode;
-      isroot = true;
+      isroot  = true;
       relpath = NULL;
     }
   else
@@ -253,7 +253,8 @@ FAR DIR *opendir(FAR const char *path)
 
       /* Find the node matching the path. */
 
-      inode = inode_search(&path, (FAR struct inode**)NULL, (FAR struct inode**)NULL, &relpath);
+      inode = inode_search(&path, (FAR struct inode**)NULL,
+                           (FAR struct inode**)NULL, &relpath);
     }
 
   /* Did we get an inode? */
