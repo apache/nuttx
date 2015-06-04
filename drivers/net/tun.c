@@ -120,7 +120,6 @@ struct tun_device_s
   FAR struct pollfd *poll_fds;
 #endif
 
-  bool              read_ready;
   bool              read_wait;
 
   uint8_t           read_buf[CONFIG_NET_TUN_MTU];
@@ -165,7 +164,7 @@ static inline void tun_poll_process(FAR struct tun_device_s *priv);
 #ifdef CONFIG_NET_NOINTS
 static void tun_poll_work(FAR void *arg);
 #endif
-static void tun_poll_expiry(int argc, uint32_t arg, ...);
+static void tun_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -287,6 +286,11 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
 {
   FAR struct pollfd *fds = priv->poll_fds;
 
+  if (fds == NULL)
+    {
+      return;
+    }
+
   eventset &= fds->events;
 
   if (eventset != 0)
@@ -297,7 +301,7 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
     }
 }
 #else
-#  define uart_pollnotify(dev,event)
+#  define tun_pollnotify(dev, event)
 #endif
 
 /****************************************************************************
@@ -327,19 +331,13 @@ static int tun_transmit(FAR struct tun_device_s *priv)
    * must have assured that there is no transmission in progress.
    */
 
-  priv->read_ready  = true;
-
   if (priv->read_wait)
     {
       priv->read_wait = false;
       sem_post(&priv->read_wait_sem);
     }
 
-  if (priv->poll_fds)
-    {
-      tun_pollnotify(priv, POLLIN);
-    }
-
+  tun_pollnotify(priv, POLLIN);
   return OK;
 }
 
@@ -443,6 +441,7 @@ static void tun_receive(FAR struct tun_device_s *priv)
       else
         {
           priv->write_d_len = 0;
+          tun_pollnotify(priv, POLLOUT);
         }
     }
 #endif
@@ -532,7 +531,7 @@ static void tun_txdone(FAR struct tun_device_s *priv)
  *
  ****************************************************************************/
 
-static inline void tun_poll_process(FAR struct tun_device_s *priv)
+static void tun_poll_process(FAR struct tun_device_s *priv)
 {
   /* Check if there is room in the send another TX packet.  We cannot perform
    * the TX poll if he are unable to accept another packet for transmission.
@@ -601,7 +600,7 @@ static void tun_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void tun_poll_expiry(int argc, uint32_t arg, ...)
+static void tun_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
 
@@ -677,7 +676,7 @@ static int tun_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;
@@ -742,9 +741,9 @@ static int tun_txavail(struct net_driver_s *dev)
 
   tun_lock(priv);
 
-  /* Check if there is room to hold another outgoing packet. */
+  /* Check if there is room to hold another network packet. */
 
-  if (priv->read_ready)
+  if (priv->read_d_len)
     {
       tun_unlock(priv);
       return OK;
@@ -891,7 +890,6 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
   /* Initialize other variables */
 
   priv->write_d_len   = 0;
-  priv->read_ready    = false;
   priv->read_wait     = false;
 
   /* Put the interface in the down state */
@@ -1060,11 +1058,11 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
       ret = (ssize_t)write_d_len;
 
       priv->write_d_len = 0;
-
+      tun_pollnotify(priv, POLLOUT);
       goto out;
     }
 
-  if (!priv->read_ready)
+  if (priv->read_d_len == 0)
     {
       if ((filep->f_oflags & O_NONBLOCK) != 0)
         {
@@ -1091,7 +1089,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
       ret = (ssize_t)read_d_len;
     }
 
-  priv->read_ready = false;
+  priv->read_d_len = 0;
   tun_txdone(priv);
 
   net_unlock(state);
@@ -1139,9 +1137,18 @@ int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       eventset = 0;
 
-      eventset |= (fds->events & POLLOUT);
+      /* If write buffer is empty notify App.  */
 
-      if (priv->read_ready)
+      if (priv->write_d_len == 0)
+        {
+          eventset |= (fds->events & POLLOUT);
+        }
+
+      /* The write buffer sometimes could be used for TX.
+       * So check it too.
+       */
+
+      if (priv->read_d_len != 0 || priv->write_d_len != 0)
         {
           eventset |= (fds->events & POLLIN);
         }
