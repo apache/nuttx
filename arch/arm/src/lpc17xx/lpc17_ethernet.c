@@ -2688,12 +2688,18 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
        phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
        nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
 
+       /* Compare OUI bits 3-18 */
+
        if (phyreg == LPC17_PHYID1)
         {
           phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
           nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
 
-          if (phyreg  == LPC17_PHYID2)
+          /* Compare OUI bits 19-24 and the 6-bit model number (ignoring the
+           * 4-bit revision number).
+           */
+
+          if ((phyreg & 0xfff0) == LPC17_PHYID2)
             {
               break;
             }
