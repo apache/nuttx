@@ -249,7 +249,7 @@ static int unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint)
           DEBUGASSERT(errcode == EINTR);
           if (!noint)
             {
-              return -errno;
+              return -errcode;
             }
         }
     }
@@ -1602,14 +1602,16 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
   if (ret >= 0)
     {
-      return -EEXIST;
+      ret = -EEXIST;
+      goto errout_with_semaphore;
     }
 
   um  = &ui->ui_fs[1];
   ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
   if (ret >= 0)
     {
-      return -EEXIST;
+      ret = -EEXIST;
+      goto errout_with_semaphore;
     }
 
   /* Try to create the directory on both file systems. */
@@ -1636,6 +1638,7 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
       ret = ret1;
     }
 
+errout_with_semaphore:
   unionfs_semgive(ui);
   return ret;
 }
@@ -1823,12 +1826,13 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
        * shadow the second anyway.
        */
 
+      unionfs_semgive(ui);
       return OK;
     }
 
   /* stat failed on the file system 1.  Try again on file system 2. */
 
-  um  = &ui->ui_fs[0];
+  um  = &ui->ui_fs[1];
   ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, buf);
 
   unionfs_semgive(ui);
