@@ -10546,4 +10546,6 @@
 	  the Lincoln60 board (2015-06-03).
 	* drivers/net/tun.c: Misc. improvements to the TUN driver, mostly related
 	  to poll().  From Max Neklyudov (2015-06-04).
-
+	* fs/, fs/unionfs, include/nuttx, include/sys, Documentation: Add
+	  support for a union file system that can be used to overlay and merge
+	  the content of two mounted file systems (2015-06-05).
