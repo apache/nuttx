@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/dirent.h
  *
- *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,7 +144,20 @@ struct fs_smartfsdir_s
 {
   uint16_t fs_firstsector;                    /* First sector of directory list */
   uint16_t fs_currsector;                     /* Current sector of directory list */
-  uint16_t fs_curroffset;                     /* Current offset withing current sector */
+  uint16_t fs_curroffset;                     /* Current offset within current sector */
+};
+#endif
+
+#ifdef CONFIG_FS_UNIONFS
+/* The Union File System can be used to merge to different mountpoints so
+ * that they appear as a single merged directory.
+ */
+
+struct fs_dirent_s;                           /* Forward reference */
+struct fs_unionfsdir_s
+{
+  uint8_t fu_ndx;                             /* Index of file system being enumerated */
+  FAR struct fs_dirent_s *fu_lower[2];        /* dirent struct used by contained file system */
 };
 #endif
 
@@ -207,6 +220,9 @@ struct fs_dirent_s
 #endif
 #ifdef CONFIG_FS_SMARTFS
       struct fs_smartfsdir_s smartfs;
+#endif
+#ifdef CONFIG_FS_UNIONFS
+      struct fs_unionfsdir_s unionfs;
 #endif
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
    } u;

@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config FS_UNIONFS
+	bool "Union File System"
+	default n
+	---help---
+		The Union file system is provides a mechanism to overlay two
+		different, mounted file systems so that they appear as one.  In
+		general this works like this:
+
+			1) Mount file system 1 at some location, say /mnt/file1
+			2) Mount file system 2 at some location, say /mnt/file2
+			3) Call unionfs_mount() to combine and overly /mnt/file1 and
+			mnt/file2 as a new mount point, say /mnt/unionfs.
+
+		/mnt/file1 and /mnt/file2 will disappear and be replaced by the
+		single mountpoint /mnut/unionfs.  The previous contents under
+		/mnt/file1 and /mnt/file2 will appear merged under /mnt/unionfs.
+		Files at the same relative path in file system1 will take presence.
+		If another file of the same name and same relative location exists
+		in file system 2, it will not be visible because it will be occluded
+		by the file in file system1.
+
+		See include/nutts/unionfs.h for additional information.
+

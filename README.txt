@@ -1358,7 +1358,9 @@ nuttx
  |   |   `- README.txt
  |   |- smartfs/
  |   |   `- README.txt
- |   `- procfs/
+ |   |- procfs/
+ |   |   `- README.txt
+ |   `- unionfs/
  |       `- README.txt
  |- graphics/
  |   `- README.txt

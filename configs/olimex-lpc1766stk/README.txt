@@ -1131,8 +1131,10 @@ Configuration Sub-Directories
 
   STATUS:
     2015-06-02.  This configuration was added in an attempt to replace
-      thttpd-nxflat (see below).  It concurrent does not run properly.
-      It looks like I get out-of-memory errors during execution of CGI.
+      thttpd-nxflat (see below).  I concurrently get out-of-memory errors
+      during execution of CGI.  The 32KiB SRAM may be insufficient for
+      this configuration; this might be fixed with some carefult tuning
+      of stack usage.
 
   thttpd-nxflat:
     This builds the THTTPD web server example using the THTTPD and

@@ -102,6 +102,7 @@
 #define PROCFS_MAGIC          0x434f5250
 #define NXFFS_MAGIC           0x4747
 #define SMARTFS_MAGIC         0x54524D53
+#define UNIONFS_MAGIC         0x53464e55
 
 /****************************************************************************
  * Type Definitions

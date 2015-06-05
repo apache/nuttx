@@ -60,6 +60,7 @@ source fs/romfs/Kconfig
 source fs/smartfs/Kconfig
 source fs/binfs/Kconfig
 source fs/procfs/Kconfig
+source fs/unionfs/Kconfig
 
 comment "System Logging"
 
