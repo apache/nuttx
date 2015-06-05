@@ -633,7 +633,6 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   fvdbg("Opening: ui_nopen=%d\n", ui->ui_nopen);
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
 
   /* Get exclusive access to the file system data structures */
 
@@ -655,6 +654,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Try to open the file on file system 1 */
 
   um = &ui->ui_fs[0];
+  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
 
   uf->uf_file.f_oflags = filep->f_oflags;
   uf->uf_file.f_pos    = 0;
@@ -1618,7 +1618,7 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   ret1 = unionfs_trymkdir(um->um_node, relpath, um->um_prefix, mode);
 
   um  = &ui->ui_fs[1];
-  ret1 = unionfs_trymkdir(um->um_node, relpath, um->um_prefix, mode);
+  ret2 = unionfs_trymkdir(um->um_node, relpath, um->um_prefix, mode);
 
   /* We will say we were successful if we were able to create the
    * directory on either file system.  Perhaps one file system is
