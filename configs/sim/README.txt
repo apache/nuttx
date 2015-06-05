@@ -697,6 +697,15 @@ udgram
     nsh> server &
     nsh> client
 
+unionfs
+
+  This is a version of NSH dedicated to performing the simple test
+  of the Union File System at apps/exmaples/uniofs.  The command
+  'unionfs' will mount the Union File System at /mnt/unionfs.  You
+  can than compare what you see at /mnt/unionfs with the content
+  of the ROMFS file systems at apps/examples/unionfs/atestdir and
+  btestdir.
+
 ustream
 
   This is the same as the nsh configuration except that it includes
