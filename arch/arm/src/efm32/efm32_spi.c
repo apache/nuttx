@@ -65,6 +65,7 @@
 #include "efm32_dma.h"
 #include "efm32_lowputc.h"
 #include "efm32_spi.h"
+#include "efm32_gpio.h"
 
 #ifdef HAVE_SPI_DEVICE
 
@@ -1687,6 +1688,12 @@ struct spi_dev_s *efm32_spi_initialize(int port)
     {
       priv   = &g_spi0dev;
       config = &g_spi0config;
+      if (!priv->initialized)
+        {
+          efm32_configgpio(BOARD_SPI0_CLK);
+          efm32_configgpio(BOARD_SPI0_MOSI);
+          efm32_configgpio(BOARD_SPI0_MISO);
+        }
     }
   else
 #endif
@@ -1695,6 +1702,12 @@ struct spi_dev_s *efm32_spi_initialize(int port)
     {
       priv   = &g_spi1dev;
       config = &g_spi1config;
+      if (!priv->initialized)
+        {
+          efm32_configgpio(BOARD_SPI1_CLK);
+          efm32_configgpio(BOARD_SPI1_MOSI);
+          efm32_configgpio(BOARD_SPI1_MISO);
+        }
     }
   else
 #endif
@@ -1703,6 +1716,12 @@ struct spi_dev_s *efm32_spi_initialize(int port)
     {
       priv   = &g_spi2dev;
       config = &g_spi2config;
+      if (!priv->initialized)
+        {
+          efm32_configgpio(BOARD_SPI2_CLK);
+          efm32_configgpio(BOARD_SPI2_MOSI);
+          efm32_configgpio(BOARD_SPI2_MISO);
+        }
     }
   else
 #endif
