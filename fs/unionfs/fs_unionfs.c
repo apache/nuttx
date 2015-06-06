@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
 #include <semaphore.h>
@@ -133,6 +134,8 @@ static int     unionfs_trystatdir(FAR struct inode *inode,
                  FAR const char *relpath, FAR const char *prefix);
 static int     unionfs_trystatfile(FAR struct inode *inode,
                  FAR const char *relpath, FAR const char *prefix);
+static FAR char *unionfs_relpath(FAR const char *path,
+                 FAR const char *name);
 
 static void    unionfs_unhooked(FAR struct unionfs_inode_s *ui);
 static void    unionfs_destroy(FAR struct unionfs_inode_s *ui);
@@ -558,6 +561,52 @@ static int unionfs_tryrmdir(FAR struct inode *inode, FAR const char *relpath,
     }
 
   return ops->rmdir(inode, trypath);
+}
+
+/****************************************************************************
+ * Name: unionfs_relpath
+ ****************************************************************************/
+
+static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
+{
+  FAR char *relpath;
+  int pathlen;
+  int ret;
+
+  /* Check if there is a valid, non-zero-legnth path */
+
+  if (path && (pathlen = strlen(path)) > 0)
+    {
+      /* Yes.. extend the file name by prepending the path */
+
+      if (path[pathlen-1] == '/')
+        {
+          ret = asprintf(&relpath, "%s%s", path, name);
+        }
+      else
+        {
+          ret = asprintf(&relpath, "%s/%s", path, name);
+        }
+
+      /* Handle errors */
+
+      if (ret < 0)
+        {
+          return NULL;
+        }
+      else
+        {
+          return relpath;
+        }
+    }
+  else
+    {
+      /* There is no path... just duplicate the name (so that kmm_free()
+       * will work later).
+       */
+
+      return strdup(name);
+    }
 }
 
 /****************************************************************************
@@ -1123,13 +1172,26 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   DEBUGASSERT(dir);
   fu = &dir->u.unionfs;
 
+  /* Clone the path.  We will need this when we traverse file system 2 to
+   * omit duplicates on file system 1.
+   */
+
+  if (relpath && strlen(relpath) > 0)
+    {
+      fu->fu_relpath = strdup(relpath);
+      if (!fu->fu_relpath)
+        {
+          goto errout_with_semaphore;
+        }
+    }
+
   /* Allocate another dirent structure for the lower file system */
 
   lowerdir = (FAR struct fs_dirent_s *)kmm_zalloc(sizeof(struct fs_dirent_s));
   if (lowerdir == NULL)
     {
       ret = -ENOMEM;
-      goto errout_with_semaphore;
+      goto errout_with_relpath;
     }
 
   /* Check file system 2 first. */
@@ -1186,7 +1248,7 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
         {
           /* Neither file system was opened! */
 
-          goto errout_with_semaphore;
+          goto errout_with_relpath;
         }
     }
 
@@ -1207,6 +1269,12 @@ errout_with_fs2open:
     }
 
   kmm_free(fu->fu_lower[1]);
+
+errout_with_relpath:
+  if (fu->fu_relpath != NULL)
+    {
+      kmm_free(fu->fu_relpath);
+    }
 
 errout_with_semaphore:
   unionfs_semgive(ui);
@@ -1267,7 +1335,15 @@ static int unionfs_closedir(FAR struct inode *mountpt,
         }
     }
 
+  /* Free any allocated path */
+
+  if (fu->fu_relpath != NULL)
+    {
+      kmm_free(fu->fu_relpath);
+    }
+
   fu->fu_ndx      = 0;
+  fu->fu_relpath  = NULL;
   fu->fu_lower[0] = NULL;
   fu->fu_lower[1] = NULL;
 
@@ -1296,8 +1372,12 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
+  FAR struct unionfs_mountpt_s *um0;
   FAR const struct mountpt_operations *ops;
   FAR struct fs_unionfsdir_s *fu;
+  FAR char *relpath;
+  struct stat buf;
+  bool duplicate;
   int ret = -ENOSYS;
 
   /* Recover the union file system data from the struct inode instance */
@@ -1320,39 +1400,89 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   if (ops->readdir)
     {
-      ret = ops->readdir(um->um_node, fu->fu_lower[fu->fu_ndx]);
+      /* Loop if we discard duplicate directory entries in filey system 2 */
 
-      /* Did the read operation fail because we reached the end of the
-       * directory?  In that case, the error would be -ENOENT.  If we hit
-       * the end-of-directory on file system, we need to seamlessly move
-       * to the second file system (if there is one).
-       */
-
-      if (ret == -ENOENT && fu->fu_ndx == 0 && fu->fu_lower[1] != NULL)
+      do
         {
-          /* Switch to the second file system */
+          /* Read the directory entry */
 
-          fu->fu_ndx = 1;
-          um = &ui->ui_fs[1];
+          ret = ops->readdir(um->um_node, fu->fu_lower[fu->fu_ndx]);
 
-          DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
-          ops = um->um_node->u.i_mops;
-
-          /* Make sure that the second file system directory enumeration
-           * is rewound to the beginning of the directory.
+          /* Did the read operation fail because we reached the end of the
+           * directory?  In that case, the error would be -ENOENT.  If we
+           * hit the end-of-directory on file system, we need to seamlessly
+           * move to the second file system (if there is one).
            */
 
-          if (ops->rewinddir != NULL)
+          if (ret == -ENOENT && fu->fu_ndx == 0 && fu->fu_lower[1] != NULL)
             {
-              ret = ops->rewinddir(um->um_node, fu->fu_lower[1]);
+              /* Switch to the second file system */
+
+              fu->fu_ndx = 1;
+              um = &ui->ui_fs[1];
+
+              DEBUGASSERT(um != NULL && um->um_node != NULL &&
+                          um->um_node->u.i_mops != NULL);
+              ops = um->um_node->u.i_mops;
+
+              /* Make sure that the second file system directory enumeration
+               * is rewound to the beginning of the directory.
+               */
+
+              if (ops->rewinddir != NULL)
+                {
+                  ret = ops->rewinddir(um->um_node, fu->fu_lower[1]);
+                }
+
+              /* Then try the read operation again */
+
+              ret = ops->readdir(um->um_node, fu->fu_lower[1]);
             }
 
-          /* Then try the read operation again */
+          /* Did we successfully read a directory from file system 2?  If
+           * so, we need to omit an duplicates that should be occluded by
+           * the matching file on file system 1 (if we are enumerating
+           * file system 1).
+           */
 
-          ret = ops->readdir(um->um_node, fu->fu_lower[1]);
+          duplicate = false;
+          if (ret >= 0 && fu->fu_ndx == 1 && fu->fu_lower[0] != NULL)
+            {
+              /* Get the relative path to the same file on file system 1.
+               * NOTE: the on any failures we just assume that the filep
+               * is not a duplicate.
+               */
+
+              relpath = unionfs_relpath(fu->fu_relpath,
+                                        fu->fu_lower[1]->fd_dir.d_name);
+              if (relpath)
+                {
+                  int tmp;
+
+                  /* Check if anything exists at this path on file system 1 */
+
+                  um0 = &ui->ui_fs[0];
+                  tmp = unionfs_trystat(um0->um_node, relpath,
+                                        um0->um_prefix, &buf);
+                  if (tmp >= 0)
+                    {
+                      /* There is something there!
+                       * REVISIT: We could allow files and directories to
+                       * have duplicat names.
+                       */
+
+                      duplicate = true;
+                    }
+
+                  /* Free the allocated relpath */
+
+                  kmm_free(relpath);
+                }
+            }
         }
+      while (duplicate);
 
-      /* Copy the return information into the diret structure that the
+      /* Copy the return information into the dirent structure that the
        * application will see.
        */
 

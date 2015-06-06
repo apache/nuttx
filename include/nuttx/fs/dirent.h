@@ -157,6 +157,7 @@ struct fs_dirent_s;                           /* Forward reference */
 struct fs_unionfsdir_s
 {
   uint8_t fu_ndx;                             /* Index of file system being enumerated */
+  FAR char *fu_relpath;                       /* Path being enumerated */
   FAR struct fs_dirent_s *fu_lower[2];        /* dirent struct used by contained file system */
 };
 #endif
