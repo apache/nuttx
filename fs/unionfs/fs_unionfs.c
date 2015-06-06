@@ -1117,7 +1117,7 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = unionfs_semtake(ui, false);
   if (ret < 0)
     {
-      goto errout_with_lowerdir;
+      return ret;
     }
 
   DEBUGASSERT(dir);
@@ -1128,7 +1128,8 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   lowerdir = (FAR struct fs_dirent_s *)kmm_zalloc(sizeof(struct fs_dirent_s));
   if (lowerdir == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout_with_semaphore;
     }
 
   /* Check file system 2 first. */
@@ -1159,7 +1160,7 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Check file system 1 last, possibly overwriting fu_ndx */
 
-  um = &ui->ui_fs[1];
+  um = &ui->ui_fs[0];
   lowerdir->fd_root = um->um_node;
   ret = unionfs_tryopendir(um->um_node, relpath, um->um_prefix, lowerdir);
   if (ret >= 0)
@@ -1189,11 +1190,15 @@ errout_with_fs2open:
   DEBUGASSERT(ops != NULL);
   if (ops->closedir)
     {
-      ret = ops->closedir(um->um_node, fu->fu_lower[fu->fu_ndx]);
+      ret = ops->closedir(um->um_node, fu->fu_lower[1]);
     }
+
+  kmm_free(fu->fu_lower[1]);
 
 errout_with_lowerdir:
   kmm_free(lowerdir);
+
+errout_with_semaphore:
   unionfs_semgive(ui);
   return ret;
 }
