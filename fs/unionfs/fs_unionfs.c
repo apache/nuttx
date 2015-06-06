@@ -791,7 +791,7 @@ static int unionfs_close(FAR struct file *filep)
    * unlinked, then destroy the file system now.
    */
 
-  if (--ui->ui_nopen <= 0)
+  if (--ui->ui_nopen <= 0 && ui->ui_unhooked)
     {
       unionfs_destroy(ui);
     }
