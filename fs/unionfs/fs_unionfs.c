@@ -1143,7 +1143,7 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = unionfs_tryopendir(um->um_node, relpath, um->um_prefix, lowerdir);
   if (ret >= 0)
     {
-      /* Save the filsystem2 access info */
+      /* Save the file system 2 access info */
 
       fu->fu_ndx = 1;
       fu->fu_lower[1] = lowerdir;
@@ -1165,16 +1165,29 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = unionfs_tryopendir(um->um_node, relpath, um->um_prefix, lowerdir);
   if (ret >= 0)
     {
-      /* Save the filsystem1 access info */
+      /* Save the file system 1 access info */
 
       fu->fu_ndx = 0;
       fu->fu_lower[0] = lowerdir;
     }
-  else if (fu->fu_lower[1] == NULL)
+  else
     {
-      /* Neither file system was opened! */
+      /* File system 1 was not opened... then we won't be needing that last
+       * localdir allocation after all.
+       */
 
-      goto errout_with_lowerdir;
+      kmm_free(lowerdir);
+
+      /* If the directory was not found on either file system, then we have
+       * failed.
+       */
+
+      if (fu->fu_lower[1] == NULL)
+        {
+          /* Neither file system was opened! */
+
+          goto errout_with_semaphore;
+        }
     }
 
   /* Increment the number of open references and return success */
@@ -1194,9 +1207,6 @@ errout_with_fs2open:
     }
 
   kmm_free(fu->fu_lower[1]);
-
-errout_with_lowerdir:
-  kmm_free(lowerdir);
 
 errout_with_semaphore:
   unionfs_semgive(ui);
