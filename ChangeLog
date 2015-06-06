@@ -10553,4 +10553,6 @@
 	  Pierre-noel Bouteville (2015-06-05).
 	* configs/sim/unionfs:  Add a configuration for testing the Union File
 	  System (2015-06-05).
+	* apps/examples/thttpd now uses the Union File System if BINFS is
+	  selected for CGI binaries (2015-06-06).
 
