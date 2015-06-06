@@ -863,7 +863,7 @@ static off_t unionfs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR const struct mountpt_operations *ops;
   int ret;
 
-  fvdbg("offset: %lu whence: %d\n", (unsigned long)off_t, whence);
+  fvdbg("offset: %lu whence: %d\n", (unsigned long)offset, whence);
 
   /* Recover the open file data from the struct file instance */
 
@@ -1300,8 +1300,6 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   FAR struct fs_unionfsdir_s *fu;
   int ret = -ENOSYS;
 
-  fvdbg("Entry\n");
-
   /* Recover the union file system data from the struct inode instance */
 
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
@@ -1315,6 +1313,8 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
+
+  fvdbg("fu_ndx: %d\n", fu->fu_ndx);
 
   /* Perform the lower level readdir operation */
 
