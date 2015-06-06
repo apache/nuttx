@@ -701,7 +701,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
       return ret;
     }
 
-  /* Alloate a container to hold the open file system information */
+  /* Allocate a container to hold the open file system information */
 
   uf = (FAR struct unionfs_file_s *)kmm_malloc(sizeof(struct unionfs_file_s));
   if (uf == NULL)
@@ -748,6 +748,13 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
 
       uf->uf_ndx = 1;
     }
+
+  /* Increment the open reference count */
+
+  ui->ui_nopen++;
+  DEBUGASSERT(ui->ui_nopen > 0);
+
+  /* Save our private data in the file structure */
 
   filep->f_priv = (FAR void *)uf;
   ret = OK;
