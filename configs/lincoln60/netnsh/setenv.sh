@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/lincoln60/nsh/setenv.sh
+# configs/lincoln60/netnsh/setenv.sh
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
