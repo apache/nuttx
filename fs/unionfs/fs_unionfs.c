@@ -92,7 +92,7 @@ struct unionfs_inode_s
   struct unionfs_mountpt_s ui_fs[2]; /* Contained file systems */
   sem_t ui_exclsem;                  /* Enforces mutually exclusive access */
   int16_t ui_nopen;                  /* Number of open references */
-  bool ui_unhooked;                  /* Driver is unlinked or unbound */
+  bool ui_unmounted;                 /* File system has been unmounted */
 };
 
 /* This structure descries one opened file */
@@ -124,6 +124,8 @@ static int     unionfs_trymkdir(FAR struct inode *inode,
                  mode_t mode);
 static int     unionfs_tryrmdir(FAR struct inode *inode,
                  FAR const char *relpath, FAR const char *prefix);
+static int     unionfs_tryunlink(FAR struct inode *inode,
+                 FAR const char *relpath, FAR const char *prefix);
 static int     unionfs_tryrename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath,
                  FAR const char *prefix);
@@ -137,7 +139,6 @@ static int     unionfs_trystatfile(FAR struct inode *inode,
 static FAR char *unionfs_relpath(FAR const char *path,
                  FAR const char *name);
 
-static void    unionfs_unhooked(FAR struct unionfs_inode_s *ui);
 static void    unionfs_destroy(FAR struct unionfs_inode_s *ui);
 
 /* Operations on opened files (with struct file) */
@@ -552,7 +553,7 @@ static int unionfs_tryrmdir(FAR struct inode *inode, FAR const char *relpath,
       return -ENOENT;
     }
 
-  /* Yes.. Try to create the directory */
+  /* Yes.. Try to remove the directory */
 
   ops = inode->u.i_mops;
   if (!ops->rmdir)
@@ -561,6 +562,38 @@ static int unionfs_tryrmdir(FAR struct inode *inode, FAR const char *relpath,
     }
 
   return ops->rmdir(inode, trypath);
+}
+
+/****************************************************************************
+ * Name: unionfs_tryunlink
+ ****************************************************************************/
+
+static int unionfs_tryunlink(FAR struct inode *inode,
+                             FAR const char *relpath,
+                             FAR const char *prefix)
+{
+  FAR const struct mountpt_operations *ops;
+  FAR const char *trypath;
+
+  /* Is this path valid on this file system? */
+
+  trypath = unionfs_trypath(relpath, prefix);
+  if (trypath == NULL)
+    {
+      /* No.. return -ENOENT */
+
+      return -ENOENT;
+    }
+
+  /* Yes.. Try to unlink the file */
+
+  ops = inode->u.i_mops;
+  if (!ops->unlink)
+    {
+      return -ENOSYS;
+    }
+
+  return ops->unlink(inode, trypath);
 }
 
 /****************************************************************************
@@ -606,29 +639,6 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
        */
 
       return strdup(name);
-    }
-}
-
-/****************************************************************************
- * Name: unionfs_unhooked
- ****************************************************************************/
-
-static void unionfs_unhooked(FAR struct unionfs_inode_s *ui)
-{
-  fvdbg("Entry\n");
-  DEBUGASSERT(ui);
-
-  /* Mark the file system as unhooked (unlinked or unmounted) */
-
-  ui->ui_unhooked = true;
-
-  /* If there are no open references, then we can destroy the file system
-   * now.
-   */
-
-  if (ui->ui_nopen <= 0)
-    {
-      unionfs_destroy(ui);
     }
 }
 
@@ -787,11 +797,11 @@ static int unionfs_close(FAR struct file *filep)
     }
 
   /* Decrement the count of open reference.  If that count would go to zero
-   * and if the file system has been unmounted or if the mountpoint has been
-   * unlinked, then destroy the file system now.
+   * and if the file system has been unmounted, then destroy the file system
+   * now.
    */
 
-  if (--ui->ui_nopen <= 0 && ui->ui_unhooked)
+  if (--ui->ui_nopen <= 0 && ui->ui_unmounted)
     {
       unionfs_destroy(ui);
     }
@@ -1348,11 +1358,11 @@ static int unionfs_closedir(FAR struct inode *mountpt,
   fu->fu_lower[1] = NULL;
 
   /* Decrement the count of open reference.  If that count would go to zero
-   * and if the file system has been unmounted or if the mountpoint has been
-   * unlinked, then destroy the file system now.
+   * and if the file system has been unmounted, then destroy the file system
+   * now.
    */
 
-  if (--ui->ui_nopen <= 0 && ui->ui_unhooked)
+  if (--ui->ui_nopen <= 0 && ui->ui_unmounted)
     {
       unionfs_destroy(ui);
     }
@@ -1563,7 +1573,33 @@ static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 static int unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                           unsigned int flags)
 {
-  unionfs_unhooked((FAR struct unionfs_inode_s *)handle);
+  FAR struct unionfs_inode_s *ui;
+
+  fvdbg("Entry\n");
+
+  /* Recover the union file system data from the struct inode instance */
+
+  DEBUGASSERT(handle != NULL);
+  ui = (FAR struct unionfs_inode_s *)handle;
+
+  /* Get exclusive access to the file system data structures */
+
+  (void)unionfs_semtake(ui, true);
+
+  /* Mark the file system as unmounted. */
+
+  ui->ui_unmounted = true;
+
+  /* If there are no open references, then we can destroy the file system
+   * now.
+   */
+
+  if (ui->ui_nopen <= 0)
+    {
+      unionfs_destroy(ui);
+    }
+
+  unionfs_semgive(ui);
   return OK;
 }
 
@@ -1688,6 +1724,8 @@ static int unionfs_unlink(FAR struct inode *mountpt,
                           FAR const char *relpath)
 {
   FAR struct unionfs_inode_s *ui;
+  FAR struct unionfs_mountpt_s *um;
+  struct stat buf;
   int ret;
 
   fdbg("relpath: %s\n", relpath);
@@ -1705,11 +1743,46 @@ static int unionfs_unlink(FAR struct inode *mountpt,
       return ret;
     }
 
-  /* Unhook/unlink the union file system */
+  /* Check if some exists at this path on file system 1.  This might be
+   * a file or a directory*/
 
-  unionfs_unhooked((FAR struct unionfs_inode_s *)mountpt->i_private);
+  um  = &ui->ui_fs[0];
+  ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
+  if (ret >= 0)
+    {
+      /* Yes.. Try to unlink the file on file system 1 (perhaps exposing
+       * a file of the same name on file system 2).  This would fail
+       * with -ENOSYS if file system 1 is a read-only only file system or
+       * -EISDIR if the path is not a file.
+       */
+
+      ret = unionfs_tryunlink(um->um_node, relpath, um->um_prefix);
+    }
+
+  /* There is nothing at this path on file system 1 */
+
+  else
+    {
+      /* Check if the file exists with with name on file system 2.  The only
+       * reason that we check here is so that we can return the more
+       * meaningful -ENOSYS if file system 2 is a read-only file system.
+       */
+
+      um  = &ui->ui_fs[1];
+      ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
+      if (ret >= 0)
+        {
+          /* Yes.. Try to unlink the file on file system 1.  This would fail
+           * with -ENOSYS if file system 2 is a read-only only file system or
+           * -EISDIR if the path is not a file.
+           * */
+
+          ret = unionfs_tryunlink(um->um_node, relpath, um->um_prefix);
+        }
+    }
+
   unionfs_semgive(ui);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1797,7 +1870,7 @@ static int unionfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
   int tmp;
-  int ret = -ENOENT;
+  int ret;
 
   fdbg("relpath: %s\n", relpath);
 
@@ -1813,6 +1886,8 @@ static int unionfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
     {
       return ret;
     }
+
+  ret = -ENOENT;
 
   /* We really don't know any better so we will try to remove the directory
    * from both file systems.
