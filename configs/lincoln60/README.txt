@@ -542,3 +542,24 @@ Where <subdir> is one of the following:
 
     3. This configuration enables only the serial NSH interface.  See
        notes above for enabling USB host support in this configuration.
+
+  thttpd-binfs:
+    This builds the THTTPD web server example using the THTTPD and
+    the apps/examples/thttpd application.  This version uses the built-in
+    binary format with the BINFS file system and the Union File System.
+
+    NOTES:
+
+    1. Uses the CodeSourcery EABI toolchain under Windows.  But that is
+       easily reconfigured:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery toolchain
+
+  STATUS:
+    2015-06-06:  The BINFS CGI files are seems to be running, but the
+      output that they generate does not appear in the browser window.
+      I am suspecting that the redirected output is not working correctly
+      with the BINFS applications.
+

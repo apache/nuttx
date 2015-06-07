@@ -1117,8 +1117,8 @@ Configuration Sub-Directories
   thttpd-binfs:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.  This version uses the built-in
-    binary format with the BINFS file system, otherwise it is equivalent to
-    thttpd-binfs.
+    binary format with the BINFS file system and the Union File System.
+    Otherwise it is equivalent to thttpd-binfs.
 
     NOTES:
 
@@ -1133,8 +1133,15 @@ Configuration Sub-Directories
     2015-06-02.  This configuration was added in an attempt to replace
       thttpd-nxflat (see below).  I concurrently get out-of-memory errors
       during execution of CGI.  The 32KiB SRAM may be insufficient for
-      this configuration; this might be fixed with some carefult tuning
+      this configuration; this might be fixed with some careful tuning
       of stack usage.
+
+    2015-06-06: Modified to use the Union File System.  Untested.
+      This configuration was ported to the lincoln60 which has an LPC1769
+      and, hence, more SRAM.  Additional memory reduction steps were
+      required to run on the LPC1769 (suggesting that the LPC1766 is
+      hopeless).  See nuttx/configs/lincoln60/README.txt for additional
+      information.
 
   thttpd-nxflat:
     This builds the THTTPD web server example using the THTTPD and
