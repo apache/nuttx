@@ -10559,5 +10559,6 @@
 	  the Lincoln60.  That configuration still does not work on initial
 	  commit (2015-06-06).
 	* apps/nshlib/: The NSH mount command now recognizes the Union file
-	  sysem type when listing mounted file systems (2015-06-07).
-
+	  system type when listing mounted file systems (2015-06-07).
+	* arch/arm/src/sama5/sam_can.c: Fix SAMA5 CAN frame construction.  From
+	  Max Holtzberg (2015-06-07).
