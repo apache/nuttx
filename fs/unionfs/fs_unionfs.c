@@ -1749,11 +1749,11 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
    * depend on a uint64_t * temporary to avoid arithmetic overflow.
    */
 
+  buf->f_bsize           = buf1.f_bsize;
   if (buf1.f_bsize != buf2.f_bsize)
     {
       if (buf1.f_bsize < buf2.f_bsize)
         {
-          buf->f_bsize  = buf1.f_bsize;
           tmp           = (((uint64_t)buf2.f_blocks * (uint64_t)buf2.f_bsize) << 16);
           ratiob16      = (uint32_t)(tmp / buf1.f_bsize);
           adj           = &buf2;
@@ -1763,23 +1763,23 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
           buf->f_bsize  = buf2.f_bsize;
           tmp           = (((uint64_t)buf1.f_blocks * (uint64_t)buf1.f_bsize) << 16);
           ratiob16      = (uint32_t)(tmp / buf2.f_bsize);
-          adj           = &buf2;
+          adj           = &buf1;
         }
 
-      tmp               = (uint16_t)adj->f_blocks * ratiob16;
+      tmp               = (uint64_t)adj->f_blocks * ratiob16;
       adj->f_blocks     = (off_t)(tmp >> 16);
 
-      tmp               = (uint16_t)adj->f_bfree * ratiob16;
+      tmp               = (uint64_t)adj->f_bfree  * ratiob16;
       adj->f_bfree      = (off_t)(tmp >> 16);
 
-      tmp               = (uint16_t)adj->f_bavail * ratiob16;
+      tmp               = (uint64_t)adj->f_bavail * ratiob16;
       adj->f_bavail     = (off_t)(tmp >> 16);
     }
 
   /* Then we can just sum the adjusted sizes */
 
   buf->f_blocks         = buf1.f_blocks + buf2.f_blocks;
-  buf->f_bfree          = buf1.f_bfree + buf2.f_bfree;
+  buf->f_bfree          = buf1.f_bfree  + buf2.f_bfree;
   buf->f_bavail         = buf1.f_bavail + buf2.f_bavail;
 
   ret = OK;
