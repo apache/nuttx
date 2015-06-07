@@ -1683,8 +1683,10 @@ static int unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 {
   FAR struct unionfs_inode_s *ui;
-  FAR struct unionfs_mountpt_s *um;
-  FAR const struct mountpt_operations *ops;
+  FAR struct unionfs_mountpt_s *um1;
+  FAR struct unionfs_mountpt_s *um2;
+  FAR const struct mountpt_operations *ops1;
+  FAR const struct mountpt_operations *ops2;
   FAR struct statfs *adj;
   struct statfs buf1;
   struct statfs buf2;
@@ -1696,8 +1698,10 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Recover the union file system data from the struct inode instance */
 
-  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && buf != NULL);
   ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
+
+  memset(buf, 0, sizeof(struct statfs));
 
   /* Get exclusive access to the file system data structures */
 
@@ -1707,39 +1711,64 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
       return ret;
     }
 
-  /* Get statfs info from file system 1 */
+  /* Get statfs info from file system 1.
+   *
+   * REVISIT: What would it mean if one file system did not support statfs?
+   * Perhaps we could simplify the following by simply insisting that both
+   * file systems support the statfs method.
+   */
 
-  um = &ui->ui_fs[0];
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
-  ops = um->um_node->u.i_mops;
+  um1 = &ui->ui_fs[0];
+  DEBUGASSERT(um1 != NULL && um1->um_node != NULL && um1->um_node->u.i_mops != NULL);
+  ops1 = um1->um_node->u.i_mops;
 
-  if (ops->statfs)
+  um2 = &ui->ui_fs[1];
+  DEBUGASSERT(um2 != NULL && um2->um_node != NULL && um2->um_node->u.i_mops != NULL);
+  ops2 = um2->um_node->u.i_mops;
+
+  if (ops1->statfs != NULL && ops2->statfs != NULL)
     {
-      ret = ops->statfs(um->um_node, &buf1);
+      ret = ops1->statfs(um1->um_node, &buf1);
+      if (ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+
+      /* Get stafs info from file system 2 */
+
+      ret = ops2->statfs(um2->um_node, &buf2);
       if (ret < 0)
         {
           goto errout_with_semaphore;
         }
     }
-
-  /* Get statfs info from file system 2 */
-
-  um = &ui->ui_fs[1];
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
-  ops = um->um_node->u.i_mops;
-
-  if (ops->statfs)
+  else if (ops1->statfs != NULL)
     {
-      ret = ops->statfs(um->um_node, &buf2);
-      if (ret < 0)
-        {
-          goto errout_with_semaphore;
-        }
+      /* We have statfs for file system 1 only */
+
+      ret = ops1->statfs(um1->um_node, buf);
+      goto errout_with_semaphore;
+    }
+  else if (ops2->statfs != NULL)
+    {
+      /* We have statfs for file system 2 only */
+
+      ret = ops2->statfs(um2->um_node, buf);
+      goto errout_with_semaphore;
+    }
+  else
+    {
+      /* We could not get stafs info from either file system */
+
+      ret = -ENOSYS;
+      goto errout_with_semaphore;
     }
 
-  /* Now try to reconcile the statfs info */
+  /* We get here is we successfully obtained statfs info from both file
+   * systems.  Now combine those results into one statfs report, trying to
+   * reconcile any conflicts between the file system geometries.
+   */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = UNIONFS_MAGIC;
   buf->f_namelen = MIN(buf1.f_namelen, buf2.f_namelen);
   buf->f_files   = buf1.f_files + buf2.f_files;
