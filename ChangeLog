@@ -10555,4 +10555,7 @@
 	  System (2015-06-05).
 	* apps/examples/thttpd now uses the Union File System if BINFS is
 	  selected for CGI binaries (2015-06-06).
+	* configs/lincoln60/thttpd-binfs: Add a thttpd-binfs configuration for
+	  the Lincoln60.  That configuration still does not work on initial
+	  commit (2015-06-06).
 
