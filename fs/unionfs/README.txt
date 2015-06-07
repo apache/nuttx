@@ -1,6 +1,8 @@
 fs/unionfs/README.txt
 =====================
 
+  Overview
+  --------
   This directory contains the NuttX Union File System.  The Union file
   system is provides a mechanism to overlay two different, mounted file
   systems so that they appear as one.  In general this works like this:
@@ -22,6 +24,8 @@ fs/unionfs/README.txt
   The Union File Sysem is enabled by selecting the CONFIG_FS_UNIONFS option
   in the NuttX configruation file.
 
+  Uses of the Unioin File System
+  ------------------------------
   The original motivation for this file was for the use of the built-in
   function file system (BINFS) with a web server.  In that case, the built
   in functions provide CGI programs.  But the BINFS file system cannot hold
@@ -37,3 +41,30 @@ fs/unionfs/README.txt
   on-board FLASH.  Later, you overlay that ROMFS file system with additional
   files from an SD card by using the Union File System to overlay, and
   perhaps replace, the ROMFS files.
+
+  Another use case might be to overlay a read-only file system like ROMFS
+  with a writable file system (like a RAM disk).  This should then give
+  to a readable/write-able file system with some fixed content.
+
+  Example Configurations
+  ----------------------
+
+  o configs/sim/unionfs - This is a simulator configuration that uses the
+    Union File System test at apps/examples/unionfs.  That test overlays two
+    small ROMFS file systems with many conflicts in directories and file
+    names.  This is a good platform for testing the Union file System and
+    apps/examples/unionfs is a good example of how to configure the Union
+    File System.
+
+  o configs/lincoln60/thttpd-binfs - This is an example using the THTTPD
+    web server.  It server up content from a Union File System with fixed
+    content provided by a ROMFS file system and CGI content provided by a
+    BINFS file system.
+
+    You can see how the Union File System content directory is configured
+    by logic in apps/example/thttpd/.
+
+  o configs/olimex-lpc1766stk/thttpd-binfs - This is essentially the same
+    as the lincoln60 configuration.  It does not work, however, because the
+    LPC1766 has insufficient RAM to support the THTTPD application in this
+    configuration.
