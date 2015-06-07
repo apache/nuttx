@@ -74,3 +74,6 @@ fs/unionfs/README.txt
     as the lincoln60 configuration.  It does not work, however, because the
     LPC1766 has insufficient RAM to support the THTTPD application in this
     configuration.
+
+  See the README.txt file in each of these board directories for additional
+  information about these configurations.
