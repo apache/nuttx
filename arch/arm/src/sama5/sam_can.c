@@ -1170,7 +1170,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* The message buffer is probably not properaly aligned for 32-bit accesses */
 
   ptr    = msg->cm_data;
-  regval = CAN_MDL0(ptr[0]) | CAN_MDL1(ptr[1]) | CAN_MDL2(ptr[1]) | CAN_MDL3(ptr[1]);
+  regval = CAN_MDL0(ptr[0]) | CAN_MDL1(ptr[1]) | CAN_MDL2(ptr[2]) | CAN_MDL3(ptr[3]);
   can_putreg(priv, SAM_CAN_MnDL_OFFSET(mbndx), regval);
 
   regval = CAN_MDH4(ptr[4]) | CAN_MDH5(ptr[5]) | CAN_MDH6(ptr[6]) | CAN_MDH7(ptr[7]);
