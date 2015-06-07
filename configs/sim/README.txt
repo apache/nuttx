@@ -706,6 +706,41 @@ unionfs
   of the ROMFS file systems at apps/examples/unionfs/atestdir and
   btestdir.
 
+  Here is some sample output from the test:
+
+    NuttShell (NSH)
+    nsh> unionfs
+    Mounting ROMFS file system 1 at target=/mnt/a with source=/dev/ram4
+    Mounting ROMFS file system 2 at target=/mnt/b with source=/dev/ram5
+    nsh> ls /mnt/unionfs/adir
+    /mnt/unionfs/adir:
+     ..
+     asubdir/
+     adirfile.txt
+     bsubdir/
+     bdirfile.txt
+
+  adir/ exists in both file system 1 and file system 2.   Above you are
+  looking at the merged content.  The unified directory listing is showing
+  files from both file systems in their respective adir/ subdirectory.
+  The file adirfile.txt exists in both file system 1 and file system 2 but
+  the version if file system 2 is occluded by the version in file system 1.
+  The only way that you can which are looking at is by cat'ing the file:
+
+    nsh> cat /mnt/unionfs/adir/adirfile.txt
+    This is a file in directory adir on file system 1
+
+
+  The file on file system 1 has correctly occluded the file with the same
+  name on file system 2.  bdirfile.txt, however, only exists on file
+  system 2, so it is not occluded:
+
+    nsh> cat /mnt/unionfs/adir/bdirfile.txt
+    This is another file in directory adir on file system 2
+
+  You can see the files in the two file systems before they were unified at
+  apps/examples/unionfs/atestdir and btestdir.
+
 ustream
 
   This is the same as the nsh configuration except that it includes

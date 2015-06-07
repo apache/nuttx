@@ -21,10 +21,10 @@ fs/unionfs/README.txt
 
   See include/nutts/unionfs.h for additional information.
 
-  The Union File Sysem is enabled by selecting the CONFIG_FS_UNIONFS option
-  in the NuttX configruation file.
+  The Union File System is enabled by selecting the CONFIG_FS_UNIONFS option
+  in the NuttX configuration file.
 
-  Uses of the Unioin File System
+  Uses of the Union File System
   ------------------------------
   The original motivation for this file was for the use of the built-in
   function file system (BINFS) with a web server.  In that case, the built
