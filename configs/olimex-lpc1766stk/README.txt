@@ -1139,9 +1139,8 @@ Configuration Sub-Directories
     2015-06-06: Modified to use the Union File System.  Untested.
       This configuration was ported to the lincoln60 which has an LPC1769
       and, hence, more SRAM.  Additional memory reduction steps were
-      required to run on the LPC1769 (suggesting that the LPC1766 is
-      hopeless).  See nuttx/configs/lincoln60/README.txt for additional
-      information.
+      required to run on the LPC1769.  See nuttx/configs/lincoln60/README.txt
+      for additional information.
 
   thttpd-nxflat:
     This builds the THTTPD web server example using the THTTPD and
