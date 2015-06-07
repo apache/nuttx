@@ -10558,4 +10558,6 @@
 	* configs/lincoln60/thttpd-binfs: Add a thttpd-binfs configuration for
 	  the Lincoln60.  That configuration still does not work on initial
 	  commit (2015-06-06).
+	* apps/nshlib/: The NSH mount command now recognizes the Union file
+	  sysem type when listing mounted file systems (2015-06-07).
 
