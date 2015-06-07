@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
+#include <sys/mount.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -139,6 +140,7 @@ static int     unionfs_trystatfile(FAR struct inode *inode,
 static FAR char *unionfs_relpath(FAR const char *path,
                  FAR const char *name);
 
+static int     unionfs_unbind_child(FAR struct unionfs_mountpt_s *um);
 static void    unionfs_destroy(FAR struct unionfs_inode_s *ui);
 
 /* Operations on opened files (with struct file) */
@@ -643,6 +645,70 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
 }
 
 /****************************************************************************
+ * Name: unionfs_unbind_child
+ ****************************************************************************/
+
+static int unionfs_unbind_child(FAR struct unionfs_mountpt_s *um)
+{
+  FAR struct inode *mpinode = um->um_node;
+  FAR struct inode *bdinode = NULL;
+  int ret;
+
+  /* Unbind the block driver from the file system (destroying any fs
+   * private data.
+   */
+
+  if (!mpinode->u.i_mops->unbind)
+    {
+      /* The filesystem does not support the unbind operation ??? */
+
+      return -EINVAL;
+    }
+
+  /* The unbind method returns the number of references to the file system
+   * (i.e., open files), zero if the unbind was performed, or a negated
+   * error code on a failure.
+   */
+
+  ret = mpinode->u.i_mops->unbind(mpinode->i_private, &bdinode, MNT_FORCE);
+  if (ret < 0)
+    {
+      /* Some failure occurred */
+
+      return ret;
+    }
+  else if (ret > 0)
+    {
+      /* REVISIT: This is bad if the file sysem cannot support a deferred
+       * unmount.  Ideally it would perform the unmount when the last file
+       * is closed.  But I don't think any file system do that.
+       */
+
+      return -EBUSY;
+    }
+
+  /* Successfully unbound */
+
+  mpinode->i_private = NULL;
+
+  /* Release the mountpoint inode and any block driver inode
+   * returned by the file system unbind above.  This should cause
+   * the inode to be deleted (unless there are other references)
+   */
+
+  inode_release(mpinode);
+
+  /* Did the unbind method return a contained block driver */
+
+  if (bdinode)
+    {
+      inode_release(bdinode);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: unionfs_destroy
  ****************************************************************************/
 
@@ -651,10 +717,10 @@ static void unionfs_destroy(FAR struct unionfs_inode_s *ui)
   DEBUGASSERT(ui != NULL && ui->ui_fs[0].um_node != NULL &&
               ui->ui_fs[1].um_node != NULL && ui->ui_nopen == 0);
 
-  /* Release our references on the contained inodes */
+  /* Unbind the contained file systems */
 
-  inode_release(ui->ui_fs[0].um_node);
-  inode_release(ui->ui_fs[1].um_node);
+  (void)unionfs_unbind_child(&ui->ui_fs[0]);
+  (void)unionfs_unbind_child(&ui->ui_fs[1]);
 
   /* Free any allocated prefix strings */
 
