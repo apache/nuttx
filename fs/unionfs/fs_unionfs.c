@@ -655,7 +655,8 @@ static int unionfs_unbind_child(FAR struct unionfs_mountpt_s *um)
   int ret;
 
   /* Unbind the block driver from the file system (destroying any fs
-   * private data.
+   * private data).  This logic is essentially the same as the logic in
+   * nuttx/fs/mount/fs_umount2.c.
    */
 
   if (!mpinode->u.i_mops->unbind)

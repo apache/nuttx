@@ -434,9 +434,10 @@ NuttX Configuration Tool
   but may be less intuitive for modifying existing configurations.
 
   If you have an environment that supports the Qt or GTK graphical systems
-  (probably KDE or gnome, respectively), then you can also build the
-  graphical kconfig-frontends, kconfig-qconf and kconfig-gconf.  In
-  these case, you can start the graphical configurator with either:
+  (probably KDE or gnome, respectively, or Cygwin under Windows with Qt or
+  GTK installed), then you can also build the graphical kconfig-frontends,
+  kconfig-qconf and kconfig-gconf.  In these case, you can start the
+  graphical configurator with either:
 
     make qconfig
 
