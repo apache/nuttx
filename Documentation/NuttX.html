@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 6, 2015</p>
+      <p>Last Updated: June 9, 2015</p>
     </td>
   </tr>
 </table>
@@ -1279,11 +1279,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.9.
-  NuttX 7.9 is the 109<sup>th</sup> release of NuttX.
-  It was released on April 14, 2015, and is available for download from the
+  The current release is NuttX 7.10.
+  NuttX 7.10 is the 110<sup>th</sup> release of NuttX.
+  It was released on June 9, 2015, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.9.tar.gz</code> and <code>apps-7.9.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.10.tar.gz</code> and <code>apps-7.10.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1292,7 +1292,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.9 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.9/">here</a>;
+      Release notes for NuttX 7.10 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.10/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes" target="_blank">SourceForge GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog" target="_blank">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1300,7 +1300,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.9 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.9/">here</a>;
+      Release notes for NuttX 7.10 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.10/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes" target="_blank">SourceForge GIT</a>
       The ChangeLog for the all releases of apps is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt" target="_blank">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1353,9 +1353,9 @@
       <li><a href="#arm926ejs">ARM926EJS</a> (4)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
-      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (6)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (32)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (20)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (33)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (22)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (1)</li>
     </ul>
   <li>Atmel AVR
@@ -1443,6 +1443,7 @@
       <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
       <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#kinetisk20">FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#kinetisk40">FreeScale Kinetis K40</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#kinetisk60">FreeScale Kinetis K60</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
@@ -1507,12 +1508,14 @@
       <li><a href="#stm32f103cx">STMicro STM32F103C4/C8</a> <small>(STM32 F1 &quot;Low- and Medium-Density Line&quot; Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103x">STMicro STM32F103x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f107x">STMicro STM32F107x</a> <small>(STM32 F1 &quot;Connectivity Line&quot; family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f205x">STMicro STM32F205x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f207x">STMicro STM32F207x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
     <ul>
+      <li><a href="#stm32302x">STMicro STM32F302x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
       <li><a href="#stm32303x">STMicro STM32F303x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
       <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#stm32f401x">STMicro STM32F401x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
@@ -2190,21 +2193,40 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="freescalekl25z"><b>FreeScale Freedom KL25Z</b>.</a>
-      This is a port of NuttX to the Freedom KL25Z board that features the MKL25Z128 Cortex-M0+ MCU, 128KB of FLASH and 16KB of SRAM.
-      See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z">Freescale</a> website for further information about this board.
+      <a name="freescalekl25z"><b>FreeScale KL25Z</b>.</a>
+      There are two board ports for the KL25Z parts:
     </p>
     <ul>
-      <p>
-        <b>STATUS</b>.
-        This is the work of Alan Carvalho de Assis.
-        Verified, initial, minimal support for the Freedom KL25Z is in place in NuttX 6.27 and 6.28:
-        There is a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
-        As of NuttX-6.28 more device driver development would be needed to make this a complete port, particularly to support USB OTG.
-        A TSI and a SPI driver were added in NuttX-6.29.
-        Alan contributed a PWM driver in NuttX-6.32.
-        Refer to the Freedom KL25Z board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/freedom-kl25z/README.txt" target="_blank">README</a> file for further information.
+      <p><b>Freedom KL25Z</b>.
+        This is a port of NuttX to the Freedom KL25Z board that features the MKL25Z128 Cortex-M0+ MCU, 128KB of FLASH and 16KB of SRAM.
+        See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z">Freescale</a> website for further information about this board.
       </p>
+      <ul>
+        <p>
+          <b>STATUS</b>.
+          This is the work of Alan Carvalho de Assis.
+          Verified, initial, minimal support for the Freedom KL25Z is in place in NuttX 6.27 and 6.28:
+          There is a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
+          As of NuttX-6.28 more device driver development would be needed to make this a complete port, particularly to support USB OTG.
+          A TSI and a SPI driver were added in NuttX-6.29.
+          Alan contributed a PWM driver in NuttX-6.32.
+          Refer to the Freedom KL25Z board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/freedom-kl25z/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </ul>
+      <p>
+        <b>PJRC Teensy-LC</b>.</a>
+        This is a port of NuttX to the PJRC Teensy-LC board that features the MKL25Z64 Cortex-M0+ MCU, 64KB of FLASH and 8KB of SRAM.
+        The Teensy LC is a DIP style breakout board for the MKL25Z64 and comes with a USB based bootloader.
+        See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z">Freescale</a> website for further information about this board.
+      </p>
+      <ul>
+        <p>
+          <b>STATUS</b>.
+          This is the work of Michael Hope.
+          Verified, initial support for the Teensy-LC first appeared in NuttX-7.10.
+          Refer to the Teensy-LC board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/teensy-lc/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </ul>
     </ul>
   </td>
 </tr>
@@ -2270,7 +2292,9 @@ nsh>
       <p>
         <b>STATUS</b>.
         This is a work in progress.
-        Initial support for the SAML21 Xplained Pro is expected in the NuttX 7.10 timeframe.
+        Initial support for the SAML21 Xplained Pro was release in the NuttX 7.10.
+        This initial support included a basic configuration for the NuttShell (NSH)
+        (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
         Refer to the SAML21 Explained Pro board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/saml21-xplained/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
@@ -2285,15 +2309,14 @@ nsh>
   <td>
     <p>
       <a name="nxplpc11xx"><b>NXP LPC11xx</b>.</a>
-      Support is provided for the NXP LPC11xx family of processors.  In particular,
-      support is provided for LPCXpression LPC1115 board.
+      Support is provided for the NXP LPC11xx family of processors.
+      In particular, support is provided for LPCXpression LPC1115 board.
       This port was contributed by Alan Carvalho de Assis.
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-        This port is still very much a work in progress.
-        The first usable version is expected in NuttX 7.10.
+        The first released version was provided in NuttX 7.10.
         Refer to the board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/lpcxpresso-lpc1115/README.txt" target="_blank">README.txt</a> file for further information.
       </p>
     </ul>
@@ -2962,6 +2985,22 @@ nsh>
   <td><br></td>
   <td>
     <p>
+      <a name="stm32f205x"><b>STMicro STM32F205 (STM32 F2 family)</b>.</a>
+      Architecture only support for the STM32F205RG was contributed as an anonymous contribution in NuttX-7.10
+    </p>
+    <ul>
+      <b>STATUS:</b>
+      There are currently on board configurations for any board using the STM32F205.
+   </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <a name="stm32f207x"><b>STMicro STM32F207 (STM32 F2 family)</b>.</a>
       <ul>
         <li>
@@ -3233,6 +3272,28 @@ nsh>
   <td><br></td>
   <td>
     <p>
+      <a name="kinetisk20"><b>FreeScale Kinetis K20</b>.</a>
+      Archicture support (only) was added in NuttX-7.10.
+      This support was taken from PX4 and is the work of Jakob Odersky.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        There are no K20 boards yet supported.
+        Work is underway on the the PJRC Teensy-3.1 board and that port is expected in NuttX-7.11.
+        Refer to the Teensy-3.1 board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/teensy-3.1/README.txt" target="_blank">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <a name="kinetisk40"><b>FreeScale Kinetis K40</b>.</a>
       This port uses the Freescale Kinetis KwikStik K40.
       Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=KWIKSTIK-K40">Freescale web site</a> for further information about this board.
@@ -3291,7 +3352,26 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32303x"><b>STMicro STM32F3-Discovery (STM32 F3 family)</b>.</a>
+      <a name="stm32302x"><b>STMicro STM32 F302 (STM32 F3 family)</b>.</a>
+      Architecture (only) support for the STM32 F302 was contributed in NuttX-7.10 by Ben Dyer (vi the PX4 team and David Sidrane).
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        There are currently no board configurations using the STM32 F302.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32303x"><b>STMicro STM32 F302 / STM32F3-Discovery (STM32 F3 family)</b>.</a>
       This port uses the STMicro STM32F3-Discovery board featuring the STM32F303VCT6 MCU (STM32 F3 family).
       Refer to the <a href="http://www.st.com/internet/evalboard/product/254044.jsp">STMicro web site</a> for further information about this board.
     </p>
@@ -3954,7 +4034,8 @@ Mem:         29232       5920      23312      23312
         <b>STATUS:</b>
         The basic port is complete and there are several different, verified configurations available.
         All configurations use the the NuttShell (NSH) and a serial console.
-        The first release of the SAMV71-XULT port is expected in NuttX-7.9.
+        The first release of the SAMV71-XULT port was available in NuttX-7.9.
+        Support for the connect maXTouch Xplained Pro LCD as added in NuttX-7.10.
       </p>
       <p>
         Additional drivers, with status as of 2015-04-03, include:
@@ -4503,7 +4584,7 @@ Mem:         29232       5920      23312      23312
         <b>STATUS:</b>
         This is a collaborative effort between Kristopher Tate, David Sidrane and myself.
         The basic port is functional and a NuttShell (NSH) configurqation is available.
-        The first official is expected in NuttX-7.9.
+        The first official release was in NuttX-7.9.
         Current efforts are focused on driver development.
         Many drivers port simply from the PIC32MX; others require more extensive efforts.
         Driver status as of (2015-03-29) is provided below:
