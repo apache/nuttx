@@ -27,17 +27,10 @@ STATUS/ISSUES
   - Since this port is a leverage of the SAMD20 Xplained port, some of the
     STATUS/ISSUES in the SAMD20 Xplained README.txt may apply here as well.
 
-  - 2015-5-25: The basic port is running but using OSC16M and with a CPU
-    frequency of only 16MHz.  Attempts to use the DFLL to get the 48MHz
-    has so far been unsuccessful.  I can't find any example in the Atmel
-    ASF files the run at 48MHz with the DFLL (in closed loop mode) or
-    with the DPLL.
-
-    If I enable the DFLL now in open loop mode.  It kind of works but with
-    a some random CPU frequenycy (soemthing like 13.7MHz).  Of course the
-    results in a crazy UART baud so that is not usable.  If I try to enable
-    the DFLL in closed loop mode, it hangs waiting for the DFLL to become
-    ready.  I have not tried the DPLL.
+  - 2015-5-26: The basic port is running at 48MHz (using 32.768 XTAL input
+    and the digital frequency locked loop).  The basic NuttShell (NSH)
+    configuration is working well with the serial console provided by
+    SERCOM4 as 115200 8N1.
 
 Modules
 =======
@@ -51,7 +44,7 @@ Modules
   3) PROTO1 - A prototyping board with logic on board (other than power-
               related logic).
 
-Some of these are discussed further below.
+  Some of these are discussed further below.
 
   I/O1
   ----
