@@ -138,12 +138,12 @@
 
 /* LED index values for use with sam_setled() */
 
-#define BOARD_STATUS_LED             0
+#define BOARD_LED                    0
 #define BOARD_NLEDS                  1
 
 /* LED bits for use with sam_setleds() */
 
-#define BOARD_STATUS LED_BIT         (1 << BOARD_STATUS_LED)
+#define BOARD_LED_BIT                (1 << BOARD_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED as defined below.  Thus if the LED is statically on, NuttX has
@@ -165,7 +165,40 @@
 /* The teensy-3.1 board has no standard GPIO contact buttons */
 
 /* Alternative pin resolution *******************************************************/
-/* To be provided */
+/* The K20 has three UARTs with pin availability as follows:
+ *
+ *   --------- ------ ----------- -------------------------
+ *   UART      PORT   BOARD       PJRC PINOUT DESCRIPTION
+ *   FUNCTION         LABEL
+ *   --------- ------ ----------- -------------------------
+ *   UART0_RX  PTA1   (See above) MINI54TAN / Bootloader
+ *             PTB16  Pin 0       RX1 / Touch
+ *             PTD6   Pin 21 / A7 RX1 / CS / PWM
+ *   UART0_TX  PTA2   (See above) MINI54TAN / Bootloader
+ *             PTB17  Pin 1       TX1 / Touch
+ *             PTD7   Pin 5       TX1 / PWM
+ *   --------- ------ ----------- -------------------------
+ *   UART1_RX  PTC3   Pin 9       RX2 / CS / PWM
+ *             PTE1   Pad 26      (Pad on back of board)
+ *   UART1_TX  PTC4   Pin 10      TX2 / CS / PWM
+ *             PTE0   Pad 31      (Pad on back of board)
+ *   --------- ------ ----------- -------------------------
+ *   UART2_RX  PTD2   Pin 7       RX3 / DOUT
+ *   UART2_TX  PTD3   Pin 8       TX3 / DIN
+ *   --------- ------ ----------- -------------------------
+ *
+ * The default serial console is UART0 on pins 0 (RX) and 1 (TX).
+ */
+
+#ifdef CONFIG_KINETIS_UART0
+#  define PIN_UART0_RX  PIN_UART0_RX_2
+#  define PIN_UART0_TX  PIN_UART0_TX_2
+#endif
+
+#ifdef CONFIG_KINETIS_UART1
+#  define PIN_UART0_RX  PIN_UART1_RX_1
+#  define PIN_UART0_TX  PIN_UART1_TX_1
+#endif
 
 /************************************************************************************
  * Public Data
