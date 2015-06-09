@@ -978,7 +978,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
       regval  = spi_getreg(config, EFM32_USART_CTRL_OFFSET);
       regval &= ~(_USART_CTRL_CLKPOL_MASK | _USART_CTRL_CLKPHA_MASK);
       regval |= setting;
-      spi_putreg(config, EFM32_USART_CLKDIV_OFFSET, regval);
+      spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
 #ifndef CONFIG_SPI_OWNBUS
       /* Save the mode so that subsequent re-configurations will be faster */
