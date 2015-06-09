@@ -10563,3 +10563,6 @@
 
 	* arch/arm/src/efm32/efm32_spi.c: Correct write to incorrect register in
 	  EFM32 SPI driver.  From Pierre-noel Bouteville (2015-06-09).
+	* configs/teensy-3.x:  Add board support for the PJRC Teensy-3.1 board
+	  (2015-06-09).
+
