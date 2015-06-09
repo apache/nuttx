@@ -50,7 +50,7 @@
 /* Reference: Paragraph 10.3.1, p 207, of FreeScale document K20P64M72SF1RM
  *
  * In most cases, there are alternative configurations for various pins. Those alternative
- * pins are labeled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
+ * pins are labelled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in
  * the board.h file must select the correct pin configuration for the board by defining a pin
  * configuration (with no suffix) that maps to the correct alternative.
  */
@@ -324,6 +324,7 @@
 #  define PIN_UART2_RTS_b     (PIN_ALT3 | PIN_PORTD | PIN0)
 #  define PIN_UART2_RX        (PIN_ALT3 | PIN_PORTD | PIN2)
 #  define PIN_UART2_TX        (PIN_ALT3 | PIN_PORTD | PIN3)
+
 #  define PIN_USB_CLKIN       (PIN_ALT1 | PIN_PORTA | PIN5)
 #  define PIN_USB_SOF_OUT     (PIN_ALT3 | PIN_PORTC | PIN7)
 

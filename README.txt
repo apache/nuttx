@@ -1330,6 +1330,8 @@ nuttx
  |   |   `- README.txt
  |   |- teensy-2.0/
  |   |   `- README.txt
+ |   |- teensy-3.1/
+ |   |   `- README.txt
  |   |- teensy-lc/
  |   |   `- README.txt
  |   |- tm4c123g-launchpad/
