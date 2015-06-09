@@ -6,9 +6,14 @@ README
   MK30DX256VLH7 chip (now NXP).  The MK30DX256VLH7 is a 64-pin Cortex-M4
   running at 72MHz.  It has 256KiB of program FLASH memory and 64KiB of
   SRAM.  For more information about the Teensy 3.1, see
-  
+
     https://www.pjrc.com/teensy/teensy31.html
     https://www.pjrc.com/store/teensy31.html
+
+  This board configuration can also be used with the older Teensy-3.0.  The
+  Teensy-3.0 has the same schematic (although some pins are not used on the
+  Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
+  MK30DX128VLH5 with slightly less capability.
 
 Contents
 ========
@@ -133,11 +138,11 @@ Teensy-3.1 Configuration settings
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD="teensy-3.1"
+       CONFIG_ARCH_BOARD="teensy-3.x"
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_TEENSY_31=y
+       CONFIG_ARCH_BOARD_TEENSY_3X=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -179,11 +184,11 @@ Configurations
 
   Common Configuration Information
   --------------------------------
-  Each Teensy-3.1 configurations are maintained in sub-directories and
+  Each Teensy-3.x configurations are maintained in sub-directories and
   can be selected as follow:
 
     cd tools
-    ./configure.sh teensy-3.1/<subdir>
+    ./configure.sh teensy-3.x/<subdir>
     cd -
     make oldconfig
     . ./setenv.sh
@@ -195,7 +200,7 @@ Configurations
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:
 
-    configure.bat teensy-3.1\<subdir>
+    configure.bat teensy-3.x\<subdir>
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply,

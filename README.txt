@@ -1330,7 +1330,7 @@ nuttx
  |   |   `- README.txt
  |   |- teensy-2.0/
  |   |   `- README.txt
- |   |- teensy-3.1/
+ |   |- teensy-3.x/
  |   |   `- README.txt
  |   |- teensy-lc/
  |   |   `- README.txt
