@@ -1,9 +1,9 @@
 Teensy LC README
 ================
 
-  This is the README file for NuttX on the Teensy LC.  The Teensy LC
+  This is the README file for NuttX on the PJRC Teensy LC.  The Teensy LC
   is a DIP style breakout board for the MKL25Z64 and comes with a USB
-  based bootloader.
+  based bootloader.  Contributed by Michael Hope.
 
 Development Environment
 =======================

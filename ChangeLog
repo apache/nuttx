@@ -5119,7 +5119,7 @@
 	  to the endpoint allocation logic.  Apparently the same endpoint can
 	  be allocated as both an IN or an OUT endpoint.  The existing
 	  implementation only supported one allocation, either IN or OUT.  This
-	  resulted in failures to allocate enpoints when used with the CDC/ACM +
+	  resulted in failures to allocate endpoints when used with the CDC/ACM +
 	  MSC composite driver (From Chia Cheng Tsao, 2013-7-8).
 	* arch/arm/src/stm32/stm32_sdio.c:  SourceForge bug #17:  Add
 	  support for the data block end (DBCKEND) interrupt to terminate
@@ -10167,7 +10167,7 @@
 	* atexit(): Fix reference to undefined variable in certain
 	  configurations.  From Juha Niskanen (2015-04-14).
 
-7.10 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.10 2015-06-09 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/sim/src/sim.h, sim_zoneinfo.c, Makefile, and sim_boot.c: Add
 	  logic to test localtime and TZ database.  See apps/system/README.txt
@@ -10282,7 +10282,7 @@
 	  GPIO is configured in order to avoid transient bad values from being
 	  output.  From Hal Glenn (2015-05-02).
 	* arch/arm/src/stm32/stm32_otgfsdev.c and stm32_otghsdev.c: Add
-	  protection in the event that out-of-bound enpoint numbers are
+	  protection in the event that out-of-bound endpoint numbers are
 	  received.  From David Sidrane (2015-05-02).
 	* USB host:  Merged in the USB hub support that has been happening on
 	  a separate branch up until this point.  The interfaces are complete
@@ -10292,7 +10292,7 @@
 	  chip.h:  Fix cache related problem in LPC31 and SAMA5Dx EHCI drivers.
 	  All buffers are now aligned with the cache line size in both starting
 	  address and in length.  This cause major problems in unlucky builds
-	  where the USB host buffers where unaligned and abbutting other data.
+	  where the USB host buffers where unaligned and abutting other data.
 	  The cache flush and invalidate operations could be subverted by
 	  accesses to adjacent data or could have unexpected side effects.  This
 	  bug has been in the ECHI drivers forever, but was only revealed due to
@@ -10366,9 +10366,9 @@
 	  the allocated request buffer.  Strings such as vendor names or product
 	  names will be truncated to fit in the request buffer (2015-05-12).
 	* arch/arm/src/samv7/sam_twihs.c:  Fix SAMV TWIHS logic that performs
-	  multi-message tranfers with and without repeated starts (2015-05-12).
+	  multi-message transfers with and without repeated starts (2015-05-12).
 	* maXTouch Xplained Pro:  The above TWIHS fix was the last barrier to
-	  getting the touchscreen workingoin the maXTouch Xplained Pro LCD
+	  getting the touchscreen working in the maXTouch Xplained Pro LCD
 	  (2015-05-12).
 	* net/route/ and net/netdev/netdev_ioctl.c: Complete implementation of
 	  the IPv6 routing logic.  From Max Neklyudov (2015-05-13).
@@ -10376,9 +10376,9 @@
 	  to avoid compilation errors.  From Max Neklyudov (2015-05-13).
 	* /net/route/netdev_router.c: Fix bug in IPv6 router from Max Neklyudov
 	  (2015-05-13).
-	* sched/pthread/pthread_kill.c: Re-implemened pthread_kill().  It was
+	* sched/pthread/pthread_kill.c: Re-implemented pthread_kill().  It was
 	  just a simple wrapper around kill() but since the correct dispatching
-	  of singles for multi-threaded task groups has been implemented,
+	  of signals for multi-threaded task groups has been implemented,
 	  calling kill() does not do what pthread_kill() is supposed to do.  The
 	  corrected implementation of pthread_kill() will direct the signal
 	  specifically to the specific pthread and no other (2015-05-13).
@@ -10409,13 +10409,13 @@
 	* nuttx/arch/arm/src/sam34/sam_serial.c:  In NONBLOCKING mode serial
 	  does not receive bytes from UART.  This happens because RX interrupt
 	  was disabled in the setup routine.  To fix this I save interrupt
-	  configuration before uart shutdown and restore it after.  From Max
+	  configuration before UART shutdown and restore it after.  From Max
 	  Neklyudov (2015-05-21).
 	* arch/arm/include/lpc11xx and src/lpc11xx:  Support for the LPC11xx
-	  family (the LPC1115 MCU in particular).  Contribuited by Alan Carvalho
+	  family (the LPC1115 MCU in particular).  Contributed by Alan Carvalho
 	  de Assis (2015-05-22).
 	* configs/lpcxpresso-lpc1115:  Support for the LPCXpression LPC1115
-	  board.  Contribuited by Alan Carvalho de Assis (2015-05-22).
+	  board.  Contributed by Alan Carvalho de Assis (2015-05-22).
 	* arch/arm/src/sam34/Kconfig, sam_serial.c, and chip/sam_uart.h:  Add
 	  support for optical mode for the SAM4CM UART1.  From Max Neklyudov
 	  (2015-05-23).
@@ -10433,7 +10433,7 @@
 	  geometry structure (again) to support larger FLASH sizes.  Needed
 	  by Sébastien Lorquet (2015-05-26).
 	* SAM4CM and SAMA5D Free-running timer: Logic that samples the free
-	  running counter reads the pending interrupt status regsiter and
+	  running counter reads the pending interrupt status register and
 	  can cause interrupts to be lost.  So, if when the status register
 	  is read, the logic must also handle the timer overflow event.
 	  Found and fixed by Max Neklyudov (2015-05-26).
@@ -10451,7 +10451,7 @@
 	  status indications (2015-05-27).
 	* net/socket and net/tcp: net_startmonitor.c always returned OK.  In
 	  the case where a socket has already been closed, it correctly handled
-	  the disconnetion event but still returned OK.  Returning OK caused
+	  the disconnection event but still returned OK.  Returning OK caused
 	  the callers of net_startmonitor to assume that the connection was
 	  okay, undoing the good things that net_startmonitor did and causing
 	  the socket to be marked as connected.  This behavior was noted by
@@ -10470,7 +10470,7 @@
 	  to values less that an 100 msec.  That is because the timeout is
 	  limited to stops of 1 decisecond and because the conversion of
 	  structure timeval was truncating the microsecond remainder.  The
-	  utility net_timeval2dsec now accespts and option to determin how it
+	  utility net_timeval2dsec now accepts and option to determine how it
 	  handles the remainder:  truncate, discarding the remainder, use the
 	  remainder to round to the closed decisecond value, or use any non-zero
 	  remainder to the next larger whole decisecond value.  Bug discovered
@@ -10516,7 +10516,7 @@
 	* configs/: Update all LPC17xx networking configurations so that they
 	  have CONFIG_NET_NOTINTS=y selected (2015-06-01).
 	* /arch/arm/src/armv7-m, binfmt/libelf, configs/stm32f4discovery/scripts,
-	  /include/nuttx/binfmt, and libxx: Add support uClibc++ excpetions.  This
+	  /include/nuttx/binfmt, and libxx: Add support uClibc++ exceptions.  This
 	  involves additional handling for relative relation types, additional
 	  support for unwinding, as well as additional changes.  The culmination
 	  of a big effort from Leo Aloe3132 (2015-06-01).
@@ -10525,15 +10525,15 @@
 	  to build apps/netutils/thttpd using binfs instead NXFLAT+ROMFS
 	  (2015-06-02).
 	* tools/cfgdefine.c: Extend the mkconfig tool so that it can dequote a
-	  quoted list of quoted strings.  THTTPD uses such a configration
+	  quoted list of quoted strings.  THTTPD uses such a configuration
 	  setting to provide the list of index files (2015-06-02).
 	* mq_timedreceive(): move the location where the errno value is set; the
 	  ETIMEDOUT errno setting was being overwritten by subsequent actions
 	  before returning.  Noted by Freddie Chopin (2015-06-03).
 	* Networking:  Modify how callback structures are stored to avoid
-	  another potential use of a stal pointer (2015-06-03).
+	  another potential use of a stale pointer (2015-06-03).
 	* POSIX message queues:  Move mq_setattr() and mq_getattr() from
-	  nuttx/libc/mqueue to nuttx/sched/mqueue.  Also add sysyscall support
+	  nuttx/libc/mqueue to nuttx/sched/mqueue.  Also add syscall support
 	  for mq_setattr() and mq_getattr().  This is necessary in protected and
 	  kernel builds because in those cases the message queue structure is
 	  protected and cannot be accessed directly from user mode code.  Noted
@@ -10553,12 +10553,10 @@
 	  Pierre-noel Bouteville (2015-06-05).
 	* configs/sim/unionfs:  Add a configuration for testing the Union File
 	  System (2015-06-05).
-	* apps/examples/thttpd now uses the Union File System if BINFS is
-	  selected for CGI binaries (2015-06-06).
 	* configs/lincoln60/thttpd-binfs: Add a thttpd-binfs configuration for
 	  the Lincoln60.  That configuration still does not work on initial
 	  commit (2015-06-06).
-	* apps/nshlib/: The NSH mount command now recognizes the Union file
-	  system type when listing mounted file systems (2015-06-07).
 	* arch/arm/src/sama5/sam_can.c: Fix SAMA5 CAN frame construction.  From
 	  Max Holtzberg (2015-06-07).
+
+7.11 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>

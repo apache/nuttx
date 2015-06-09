@@ -8429,7 +8429,7 @@ file for build information).
 
 Additional new features and extended functionality:
 
-
+    * Core OS:
 
       - Assertions: Add support for dumping board-specific information on
         assertions. From David Sidrane.
@@ -8822,3 +8822,420 @@ detailed bugfix information):
     * Applications:
 
       - Modbus:  Fix some compile problems when TCP is enabled.
+
+NuttX-7.10
+----------
+
+The 110th release of NuttX, Version 7.10, was made on June 9, 2015,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-7.10.tar.gz and
+apps-7.10.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * Binary Loader:
+
+      - ARMv-7M, binfmt/, STM32: Add support uClibc++ exceptions.  This
+        involved additional handling for relative relation types, additional
+        support for unwinding, as well as additional changes.  The
+        culmination of a big effort from Leo Aloe3132.
+
+    * Graphics/Graphic Drivers:
+
+      - RA8875 LCD driver contributed by Marten Svanfeldt.
+
+    * File Systems/Block Drivers/MTD:
+
+      - Union File System: Add support for a union file system that can be
+        used to overlay and merge the content of two mounted file systems.
+
+    * USB Host:
+
+      - USB Hub Support: Bring in USB hub-related files from
+        https://github.com/kaushalparikh/nuttx.  This is the work of Kaushal
+        Parikh.  This is quite a bit more hub logic was needed in before the
+        USB hub support was fully functional.  This involved changing many
+        USB host controller driver interfaces and modifications to many
+        drivers.
+      - USB host CDC/ACM class driver:  Added initial implementation of a
+        host-side CDC/ACM driver.  Initial version was a great learning
+        experience, but probably should be partially redesigned (as
+        discussed in the top-level TODO file).
+      - IPv6 Routing: Complete implementation of the IPv6 routing logic.
+        From Max Neklyudov.
+
+    * Networking:
+
+      - Local Sockets: Add poll support for Unix stream sockets.  From Jussi
+        Kivilinna.
+      - net/: ARP, ICMP, ICMPv6, PKT, TCP, and UDP now all receive event
+        notifications from both network device packet processing, but now
+        also from Device-specific events such as when the network goes down.
+        The device notification callback structure is now supports dual
+        linkages so that the client can receive notifications from both
+        source; The device structure now includes a list of clients that
+        want to receive device related notifications.  This prevents network
+        actions from hanging when the device goes down and will be an
+        essential part of future support for removable network devices.
+        Some of the core logic was contributed by Max Neklyudov.
+      - TUN: Misc. improvements to the TUN driver, mostly related to poll().
+        Also several bugfixes. From Max Neklyudov.
+
+    * Simulation Platform:
+
+      - Simulator: Add logic to test localtime and TZ database.  See
+        apps/system/README.txt for info.
+      - Simulation:  Add a configuration for testing the Union File System.
+
+    * Calypso:
+
+      - Calypso Compal-E86: Updates for execution out of FLASH on the C139
+        phone.  From Craig Comstock.
+
+    * Atmel SAMD/L:
+
+      - SAML21 Support: And chip definitions, configuration framework,
+        memory map and pin configuration files for SAML21 support.
+
+    * Atmel SAMD/L Boards:
+
+      - SAML21-Xplained:  Add a board support for the SAML21 Xplained Pro.
+        This is based on the similar SAMD20 Xplained Pro board.
+
+    * Freescale/NXP KL:
+  
+      - KL25Z64: Added support for the KL25Z64.  The KL25Z64 is a lower
+        memory variant of the KL25Z128 and is used on the Teensy LC.  From
+        Michael as SourceForge patch 50.
+
+    * Freescale/NXP KL Boards:
+  
+      - Teensy-LC: Add board support for the Teensy LC board.  Support is
+        based off the Freedom KL25Z board.  LED, PWM, and UART0 have been
+        tested. The SPI pins are mapped correctly but have not yet been
+        tested.  From Michael Hope as SourceForge patch 51.
+
+    * NXP LPC111x:
+    
+      - LPC111x:  Support for the LPC11xx family (the LPC1115 MCU in
+        particular).  Contributed by Alan Carvalho de Assis.
+
+    * NXP LPC111x Boards:
+    
+      - LPCXpresso LPC1115:  Support for the LPCXpression LPC1115
+        board.  Contributed by Alan Carvalho de Assis.
+
+    * NXP LPC17xx Drivers:
+
+      - LPC17xx Ethernet: Add support for the Micrel KSZ8041 PHY to the
+        LPC17xx Ethernet driver.
+
+    * NXP LPC17xx Boards:
+
+      - Lincoln60:  Add a network enabled configuration for the Lincoln60
+        board.
+
+    * Atmel SAM3/4 Drivers:
+
+      - SAM4CM:  Add support for optical mode for the SAM4CM UART1.  From
+        Max Neklyudov.
+
+    * Freescale (NXP) Kinetis:
+
+      - Kinetis K20: Basic support for the Kinetis K20 architecture.  Taken
+        from PX4.  This is the work of Jakob Odersky.
+
+    * Atmel SAMV7 Boards:
+
+      - SAMV71-Xplained w/maXTouch Xplained Pro:  A TWIHS fix was the last
+        barrier to getting the touchscreen working in the maXTouch Xplained
+        Pro LCD.  Added the NxWM integrated graphics demonstration
+        configuration.
+
+    * STMicro STM32:
+
+      - STM32: Added support for STM32F302K8 and STM32F302K6.  From Ben Dyer
+        via PX4/David Sidrane.
+      - STM32F205RG: Add basic support for the STM32F205RG.  From SourceForge
+        Ticket 40 (anonymous, 2015-05-31).
+      - STM32 F3:  Add DBGMCU register definitions for the F3 family.  From
+        Greg Meiste.
+
+    * STMicro STM32 Drivers:
+
+      - STM32 LCDC: Defined a second interface for the dma2d controller.
+        LTDC only controls the display visibility but the DMA2D controller
+        changes the content of the frame buffer (buffer of the layer). From
+        Marco Krahl.
+      - STM32 PVD: Added support for STM32's Programmable Voltage Detector
+        (PVD) feature. By Dmitry Nikolaev, submitted by Juha Niskanen.
+
+    * STMicro STM32 Boards:
+
+      - STM32F429i-Disco: Add support for the new DMA2D features to the LTDC
+        configuration.  From Marco Krahl.
+
+    * TI Tiva Boards:
+
+      - TM4C1294 Launchpad:  Added TM4C1294NCPDT EN0_LED2 (10/100-Base-Tx);
+        removed all booster pack pin definitions. From Frank Sautter.
+
+    * C Library/Header Files:
+
+      - libc:  Add an option to disable support for long long formats in
+        lib_vsprintf().  On very tiny platforms, this reduces the footprint
+        by omitting large libgcc.a libraries to perform the 64-bit
+        arithmetic operations. From Alan Carvalho de Assis.
+
+    * Applications: apps/system:
+
+      - apps/system/zoneinfo:  Add logic to build a ROMFS file system
+        containing the timezone data.
+
+    * Applications: apps/nshlib:
+
+      - Add poll support for Unix stream sockets.  From Jussi Kivilinna.
+      - Enhancements to NSH ifconfig for case of multi-link operation, TUN
+        device and local connections.  From Max Neklyudov.
+      - Enhanced output to NSH ping command from Max Neklyudov.
+      - The NSH mount command now recognizes the Union filesystem type when
+        listing mounted file systems.
+
+    * Applications: apps/netutils:
+
+      - apps/netutils/thttpd/ and apps/examples/thttpd/: Add support for
+        using binfs/ with the Union FS instead of NXFLAT.  NXFLAT is
+        probably the better solution but recently compiler changes make it
+        unusable.  binfs or ELF are fallback binary formats.  This commit
+        adds an option to use binfs with the Union FS.
+
+    * Applications: apps/examples:
+
+      - Modify/simpify apps/examples build files.  From Roman Saveljev.
+      - apps/examples/ltdc:  Add testing support for the STM32 LTDC's 2D DMA.
+        From Marco Krahl.
+      - apps/examples/ostest: Add a test of nested signals.  There are no
+        failures to handle signals but neither am I getting any nested signal
+        handling.
+      - apps/examples/elf: Add configuration options to support building the
+        hello++4 example that depends upon having uClibc++ available.  Also
+        add hello++5 to the ELF example  From  Leo aloe3132.
+      - apps/examples/unionfs: Add a test of the union file system to
+        apps/examples.
+
+Efforts In Progress.  The following are features that are partially
+implemented but present in this release.  They are not likely to be
+completed soon.
+
+    * Processes.  Much of the work in this release is focused on the
+      realization of Unix-style user processes in NuttX.  There is more to
+      be done, however.  The full roadmap and status is available at:
+      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+
+    * XMega:  There are some fragments in place for an XMega port.  That
+      port has not really started, however.
+
+Bugfixes.  Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+    * Core OS:
+
+      - boardctl():  Add missing case causing that caused failures of PWM
+        test.
+      - pthread_kill(): Re-implemented pthread_kill().  It was just a simple
+        wrapper around kill() but since the correct dispatching of signals
+        for multi-threaded task groups has been implemented, calling kill()
+        does not do what pthread_kill() is supposed to do.  The corrected
+        implementation of pthread_kill() will direct the signal specifically
+        to the specific pthread and no other.
+      - uint32_t callbacks: Update the type passed to watchdog timer
+        handlers.  Using uint32_t is a problem for 64-bit machines because
+        it it too small to pass a pointer.  uintptr_t is a more appropriate
+        type.
+      - mq_timedreceive(): move the location where the errno value is set;
+        the ETIMEDOUT errno setting was being overwritten by subsequent
+        actions before returning.  Noted by Freddie Chopin.
+      - POSIX message queues:  Move mq_setattr() and mq_getattr() from
+        nuttx/libc/mqueue to nuttx/sched/mqueue.  Also add syscall support
+        for mq_setattr() and mq_getattr().  This is necessary in protected
+        and kernel builds because in those cases the message queue
+        structure is protected and cannot be accessed directly from user
+        mode code.  Noted by Jouko Holopainen.
+
+    * File Systems/Block Drivers/MTD:
+
+      - MTD:  Increase the size of the fields in the geometry structure
+        (again) to support larger FLASH sizes.  Needed by Sebastien Lorquet.
+
+    * Common Drivers:
+
+      - poll(): Fix resource leak and memory corruption on poll failure.
+        From Jussi Kivilinna.
+
+    * USB Host:
+
+      - LPC31xx and SAMA5Dx EHCI:  Fix cache related problem in LPC31 and
+        SAMA5Dx EHCI drivers. All buffers are now aligned with the cache
+        line size in both starting address and in length.  This cause major
+        problems in unlucky builds where the USB host buffers where
+        unaligned and abutting other data. The cache flush and invalidate
+        operations could be subverted by accesses to adjacent data or could
+        have unexpected side effects.  This bug has been in the ECHI drivers
+        forever, but was only revealed due to unlucky memory allocations
+        during the integration of the hub feature.
+
+    * USB Device:
+
+      - All USB device class drivers:  There needs to be a check to make
+        sure that the size of a returned string does not exceed the size of
+        the allocated request buffer.  Strings such as vendor names or
+        product names will be truncated to fit in the request buffer.
+
+    * Networking:
+
+      - TCP:  Correct failures in long Telnet sessions by increasing th
+        size of the number of bytes sent from uint16_t to uint32_t.  This
+        avoids an integer overflow that causes a long Telnet session to be
+        closed unexpectedly.  From Rony XLN.
+      - Network locks: Correct some network lock logic:  Two error
+        conditions where the network was not being unlocked and one where it
+        was getting unlocked twice.  From Jussi Kivilinna.
+      - Local Sockets: Local stream sockets had problem of double releasing
+        pipes (both server and client attempt release), which causes wrong
+        pipe pair being closed in multi-client case. Solve by adding per
+        connection instance ID to pipe names.  From  Jussi Kivilinna.
+      - TCP:  Fix an important TCP networking bug: 16-bit flags was being
+        converted to 8-bits in a few locations, causing loss of status
+        indications.
+      - TCP: net_startmonitor() always returned OK.  In the race case
+        where a socket has already been closed, it correctly handled the
+        disconnection event but still returned OK.  Returning OK caused the
+        callers of net_startmonitor() to assume that the connection was
+        okay, undoing the good things that net_startmonitor() did and
+        causing the socket to be incorrectly marked as connected.  This
+        behavior was noted by Pelle Windestam.
+      - setsockopt() failed when setting timeouts to values less tha 100
+        msec.  That is because the timeout is limited to stops of 1
+        decisecond and because the conversion of structure timeval was
+        truncating the microsecond remainder.  The utility
+        net_timeval2dsec() now accepts and option to determine how it
+        handles the remainder:  truncate, discarding the remainder, use
+        the remainder to round to the closed decisecond value, or use any
+        non-zero remainder to the next larger whole decisecond value.  Bug
+        discovered by Librae.
+      - TCP: In the TCP connection operation, it was trying to setup the
+        network monitor BEFORE the socket was successfully connected.  This,
+        of course, has ALWAYS failed because the socket is not yet connected
+        and the TCP state is not yet correct for a connected socket.  However,
+        because of other changes net_startmonitor() now returns a failure
+        condition that causes worse problems when trying to connect.  The fix
+        is to move the logic that starts the network monitor to AFTER the
+        socket has been successfully connected.
+
+    * Atmel SAM3/4 Drivers:
+
+      - SAM4CM and SAMA5D Free-running timer: Logic that samples the free
+        running counter reads the pending interrupt status register and can
+        cause interrupts to be lost.  So, if when the status register is
+        read, the logic must also handle the timer overflow event. Found
+        and fixed by Max Neklyudov.
+
+    * Atmel SAMA5 Drivers:
+
+      - SAM3/4 Serial:  When reconfigured, serial does not receive bytes
+        from UART.  This happens because RX interrupt was disabled in the
+        setup routine.  Fixed this I save interrupt configuration before
+        UART shutdown and restore it after.  From Max Neklyudov.
+
+    * NXP LPC17xx Drivers:
+
+      - LPC176x GPIO:  Reorder steps when an output GPIO is configured in
+        order to avoid transient bad values from being output.  From Hal
+        Glenn.
+      - LPC17 USB OHCI:  Correct some initialization of data structures.
+        When hub support is enabled, it would overwrite the end of an array
+        and clobber some OS data structures.
+      - LPC17xx Ethernet:  Review, update, and modify the Ethernet driver so 
+        that it works better with CONFIG_NET_NOINTS=y.  Also, update all
+        LPC17xx networking configurations so that they have
+        CONFIG_NET_NOTINTS=y selected.
+
+    * SiLabs EMF32 Drivers:
+
+      - EFM32 SPI: Add missing SPI GPIO pin initialization.  From Pierre-noel
+        Bouteville.
+
+    * STMicro STM32:
+
+      - STM32 F3:  Added missing EXTI definitions for the STM32 F3; Correct
+        an error the port D base address in the STM32 F30x and F37x memory
+        maps.  From Greg Meiste.
+
+    * STMicro STM32 Drivers:
+
+      - STM23 RTC: Fix an error introduced into stm32_pwr_enablebkp().
+        That function must preserve the previous state of backup domain
+        access on return.
+      - STM32 RTC counter: Now need to enable backup domain write access
+        when setting the time.  From Darcy Gong.
+      - STM32 OTG FS and HS: Added protection in the event that out-of-bound
+        endpoint numbers are received.  From David Sidrane.
+
+    * STMicro STM32 Boards:
+
+      - STM32F429i Disco: (1) Fix a bad return value if the LCD driver is
+        already initialized. (2) The LCD driver initialization is now
+        performed during the early boot sequence.  (3) Increased the size
+        of the message queue from 32 to 64 in the lcd configuration.  From
+        Marco Krahl.
+
+    * TI Tiva
+
+      - Fixes for Tiva TM4C1294NCPDT.  From Frank Sautter.
+
+    * Atmel SAMV71 Drivers:
+
+      - SAMV7 TWIHS: Fix SAMV TWIHS logic that performs multi-message
+        transfers with and without repeated starts.
+
+    * Atmel SAMA5D3/4 Dirvers:
+
+      - SAMA5 CAN: Fix SAMA5 CAN frame construction.  From Max Holtzberg.
+
+    * C Library/Header Files:
+
+      - stdlib.h:  MAX_RAND should be RAND_MAX.
+      - assert.h: Wrap definitions of assertion macros in do while so that
+        they are valid C statements.  Numerous places throughout the code
+        where semicolons were missing at the end of an assertion also had to
+        be fixed. Suggested by orbitalfox.
+      - inetntoa(): Correct errors in printing IP address when type char is
+        signed and the value is >= 128.  From Max Neklyudov.
+
+    * Tools:
+
+      - Tools: Fix test for the existence of the apps/ directory in
+        configure.c. Fix backward interpretation of options, -l was selecting
+        Windows and -w was selecting Linux. This was SourceForege Ticket #39.
+
+    * Applications: apps/nshlib:
+
+      - apps/nshlib/nsh_timcmds.c: Check return values from time functions.
+      - apps/nshlib/: Fix handling of gmtime_r return value in time commands.
+        gmtime_r returns a pointer, not an int.
+
+    * Applications: apps/netutils:
+
+      - apps/netutils/ntp: Fix mismatched sched_lock/unlock.  Noted by Juha
+        Niskanen.
+
+    * Applications: apps/examples:
+
+      - apps/examples/nxlines:  Fix missing right bracket that causes
+        compile error when CONFIG_NX_XYINPUT=y.  From Librae.
+      - apps/examples: When boardctl() fails, need to print errno not the
+        returned value which will always be -1.
+      - apps/examples: Correct use of the BOARDIOC_GRAPHICS_SETUP boardctl()
+        call.
