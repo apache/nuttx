@@ -694,15 +694,15 @@ Where <subdir> is one of the following:
     configuration but is also a fraction of the size.
 
     STATUS:
-    2015-5-23
+    2015-6-10
       The nuttx.bin minnsh firmware file size:
 
         $ ls -l nuttx.bin
-        -rwxr-xr-x 1 alan alan 17409 May 23 11:01 nuttx.bin
+        -rwxr-xr-x 1 alan alan 13859 Jun 10 08:54 nuttx.bin
 
         $ arm-none-eabi-size nuttx
-        text data bss dec hex filename
-        16367 193 704 17264 4370 nuttx
+        text   data   bss    dec    hex    filename
+        12818  193    704    13715  3593   nuttx
 
         This is serial console output (and input) :
 
@@ -728,21 +728,21 @@ Where <subdir> is one of the following:
         Replace NSH with apps/examples/hello:
 
         $ ls -l nuttx.bin
-        -rwxr-xr-x 1 alan alan 12873 May 23 11:05 nuttx.bin
+        -rwxr-xr-x 1 alan alan 9318 Jun 10 09:02 nuttx.bin
 
         $ arm-none-eabi-size nuttx
-        text data bss dec hex filename
-        11829 193 704 12726 31b6 nuttx
+        text   data   bss    dec    hex    filename
+        8277   193    704    9174   23d6   nuttx
 
-    2015-05-25:
       Some additional commits from Alan reduce this FLASH size by
       about another kilobyte.  That changes:  (1) disable stack
       dumping on assertions,and (2) make some FLASH data structures
       smaller.
 
-      Almost 2Kb of the remaining size is due to some arithmetic
-      functions drawn from libgcc.a.  Alan is currently looking
-      into ways to eliminate thost libgcc.a objects from the link.
+      Almost 2Kb of the remaining size was due to some arithmetic
+      "long long" (64 bits) operations drawn from libgcc.a.
+      Alan changed vsprintf to make "long long" support optional.
+      This change reduced the NuttX kernel to less than 8KiB!
 
   nsh:
   ---
