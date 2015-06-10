@@ -48,6 +48,92 @@
 
 /* Get customizations for each supported chip */
 
+/* MK20DX/DN---VLH5
+ *
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  PART NUMBER   CPU    PIN PACKAGE TOTAL  PROGRAM EEPROM SRAM  GPIO
+ *                FREQ   CNT         FLASH  FLASH
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  MK20DN32VLH5  50 MHz 64  LQFP     32 KB 32 KB   —       8 KB 40
+ *  MK20DX32VLH5  50 MHz 64  LQFP     64 KB 32 KB   2 KB    8 KB 40
+ *  MK20DN64VLH5  50 MHz 64  LQFP     64 KB 64 KB   —      16 KB 40
+ *  MK20DX64VLH5  50 MHz 64  LQFP     96 KB 64 KB   2 KB   16 KB 40
+ *  MK20DN128VLH5 50 MHz 64  LQFP    128 KB 128 KB  —      16 KB 40
+ *  MK20DX128VLH5 50 MHz 64  LQFP    160 KB 128 KB  2 KB   16 KB 40
+ */
+
+#if defined(CONFIG_ARCH_CHIP_MK20DN32VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX32VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DN64VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX64VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DN128VLH5) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
+
+#  define KINETIS_K20             1          /* Kinetics K20 family */
+#  undef  KINETIS_K40                        /* Not Kinetics K40 family */
+#  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+
+#if defined(CONFIG_ARCH_CHIP_MK20DN32VLH5)
+#  define KINETIS_FLASH_SIZE      (64*1024)  /* 32Kb */
+#  define KINETIS_FLEXMEM_SIZE    (0*1024)   /* No FlexMEM */
+#  define KINETIS_SRAM_SIZE       (8*1024)   /* 8Kb */
+#elif defined(CONFIG_ARCH_CHIP_MK20DX32VLH5)
+#  define KINETIS_FLASH_SIZE      (64*1024)  /* 32Kb */
+#  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
+#  define KINETIS_SRAM_SIZE       (8*1024)   /* 8Kb */
+#elif defined(CONFIG_ARCH_CHIP_MK20DN64VLH5)
+#  define KINETIS_FLASH_SIZE      (64*1024)  /* 64Kb */
+#  define KINETIS_FLEXMEM_SIZE    (0*1024)   /* No FlexMEM */
+#  define KINETIS_SRAM_SIZE       (16*1024)  /* 16Kb */
+#elif defined(CONFIG_ARCH_CHIP_MK20DX64VLH5)
+#  define KINETIS_FLASH_SIZE      (64*1024)  /* 64Kb */
+#  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
+#  define KINETIS_SRAM_SIZE       (16*1024)  /* 16Kb */
+#elif defined(CONFIG_ARCH_CHIP_MK20DN128VLH5)
+#  define KINETIS_FLASH_SIZE      (128*1024) /* 128Kb */
+#  define KINETIS_FLEXMEM_SIZE    (0*1024)   /* No FlexMEM */
+#  define KINETIS_SRAM_SIZE       (16*1024)  /* 16Kb */
+#elif defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
+#  define KINETIS_FLASH_SIZE      (128*1024) /* 128Kb */
+#  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
+#  define KINETIS_SRAM_SIZE       (16*1024)  /* 16Kb */
+#endif
+
+#  undef  KINETIS_MPU                        /* No memory protection unit */
+#  undef  KINETIS_EXTBUS                     /* No external bus interface */
+#  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
+#  define KINETIS_NUSBHOST        1          /* One USB host controller */
+#  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
+#  define KINETIS_NUSBDEV         1          /* One USB device controller */
+#  undef  KINETIS_NSDHC                      /* No SD host controller */
+#  define KINETIS_NTOUCHIF        1          /* Xtrinsic touch sensing interface */
+#  define KINETIS_NI2C            1          /* One I2C modules */
+#  undef  KINETIS_NISO7816                   /* No UART with ISO-786 */
+#  define KINETIS_NUART           3          /* Three UARTs */
+#  define KINETIS_NSPI            2          /* Two SPI modules */
+#  undef  KINETIS_NCAN                       /* No CAN controllers */
+#  define KINETIS_NI2S            1          /* One I2S module */
+#  undef  KINETIS_NSLCD                      /* No segment LCD interface */
+#  define KINETIS_NADC16          1          /* One 16-bit ADC */
+#  undef  KINETIS_NADC12                     /* No 12-channel ADC */
+#  undef  KINETIS_NADC13                     /* No 13-channel ADC */
+#  undef  KINETIS_NADC15                     /* No 15-channel ADC */
+#  undef  KINETIS_NADC18                     /* No 18-channel ADC */
+#  define KINETIS_NPGA            1          /* One Programmable Gain Amplifiers */
+#  define KINETIS_NCMP            2          /* Two analog comparators */
+#  define KINETIS_NDAC6           2          /* Two 6-bit DAC */
+#  undef  KINETIS_NDAC12          0          /* No 12-bit DAC */
+#  define KINETIS_NVREF           1          /* Voltage reference */
+#  define KINETIS_NTIMERS8        2          /* Two 2-8 channel FlexTimers */
+#  undef  KINETIS_NTIMERS12                  /* No 12 channel timers */
+#  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
+#  undef  KINETIS_NRNG                       /* No random number generator */
+#  define KINETIS_NRTC            1          /* Real time clock */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
+#  undef  KINETIS_NTAMPER                    /* No tamper detect */
+#  define KINETIS_NCRC            1          /* One CRC */
+
 /* MK20DX---VLH7
  *
  *  ------------- ------ --- ------- ------ ------- ------ ----- ----
@@ -60,9 +146,9 @@
  *  ------------- ------ --- ------- ------ ------- ------ ----- ----
  */
 
-#if defined(CONFIG_ARCH_CHIP_MK20DX64VLH7) || \
-    defined(CONFIG_ARCH_CHIP_MK20DX128VLH7) || \
-    defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+#elif defined(CONFIG_ARCH_CHIP_MK20DX64VLH7) || \
+      defined(CONFIG_ARCH_CHIP_MK20DX128VLH7) || \
+      defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
 
 #  define KINETIS_K20             1          /* Kinetics K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
@@ -97,7 +183,7 @@
 #  define KINETIS_NSPI            1          /* One SPI module */
 #  define KINETIS_NCAN            1          /* Two CAN controller */
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  undef  KINETIS_NSLCD                      /* No segment LCD interface (up to 25x8/29x4) */
+#  undef  KINETIS_NSLCD                      /* No segment LCD interface */
 #  define KINETIS_NADC16          2          /* Two 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -114,7 +200,7 @@
 #  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
-#  undef KINETIS_NCRC                       /* CRC */
+#  undef  KINETIS_NCRC                       /* No CRC */
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
     defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
