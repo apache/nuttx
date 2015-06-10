@@ -496,11 +496,11 @@
 
 /* SERCOM definitions ***************************************************************/
 /* This is the source clock generator for the GCLK_SERCOM_SLOW clock that is common
- * to all SERCOM modules.
+ * to SERCOM modules 0-4.  It will generate clocking on the common SERCOM0-4
+ * channel.
  */
 
 #define BOARD_SERCOM_SLOW_GCLKGEN    0
-#define BOARD_SERCOM_SLOW_GCLKCHAN   GCLK_CHAN_SERCOM0_SLOW
 
 /* SERCOM0 SPI is available on EXT1
  *

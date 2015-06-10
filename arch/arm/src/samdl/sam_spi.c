@@ -1528,7 +1528,7 @@ struct spi_dev_s *up_spiinitialize(int port)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(priv->sercom, priv->gclkgen, false);
-  sercom_slowclk_configure(BOARD_SERCOM_SLOW_GCLKGEN);
+  sercom_slowclk_configure(priv->sercom, BOARD_SERCOM_SLOW_GCLKGEN);
 
   /* Set the SERCOM in SPI master mode (no address) */
 
