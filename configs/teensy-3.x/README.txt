@@ -12,8 +12,22 @@ README
 
   This board configuration can also be used with the older Teensy-3.0.  The
   Teensy-3.0 has the same schematic (although some pins are not used on the
-  Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
-  MK30DX128VLH5 with slightly less capability.
+  Teensy-3.0).  The primary difference is that the Teensy 3.0 has a
+  MK30DX128VLH5 with slightly less capability.  There are many difference
+  between the MK30DX256VLH7 and the MK30DX128VLH5 but the basic differences
+  that effect how you configure NuttX are:
+
+    --------------- -------------- -------------- ---------------------------
+    Feature         Teensy 3.0     Teensy 3.1     CONFIGURATION
+    --------------- -------------- -------------- ---------------------------
+    Processor
+      Core          MK20DX128VLH5  MK20DX256VLH7  CONFIG_ARCH_CHIP_xyz
+      Rated Speed    48 MHz         72 MHz        Settings in include/board.h
+      Overclockable  96 MHz         96 MHz        Settings in include/board.h
+    Flash Memory    128 KB         256 KB         See scripts/flash.ld
+    SRAM             16 KB          64 KB         See scripts/flash.ld and
+                                                  set CONFIG_RAM_SIZE=???
+    --------------- -------------- -------------- ---------------------------
 
 Contents
 ========
