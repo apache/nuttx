@@ -10565,4 +10565,9 @@
 	  EFM32 SPI driver.  From Pierre-noel Bouteville (2015-06-09).
 	* configs/teensy-3.x:  Add board support for the PJRC Teensy-3.1 board
 	  (2015-06-09).
+	* arch/arm/src/samdl, configs/samd20-xplained, and configs/saml21-xplained:
+	  In the SAML21, SERCOM5 uses a different SLOW clock channel (and, hence,
+	  also a different SLOW GCLK generator).  This means that the channel
+	  selection cannot be a global definition but must be a per SERCOM
+	  configuration setting (2015-06-10).
 
