@@ -24,6 +24,12 @@ fs/unionfs/README.txt
   The Union File System is enabled by selecting the CONFIG_FS_UNIONFS option
   in the NuttX configuration file.
 
+  Disclaimer:  This Union File System was certainly inspired by UnionFS
+  (http://en.wikipedia.org/wiki/UnionFS) and the similarity in naming is
+  unavoidable.  However, other than that, the NuttX Union File System
+  has no relationship with the UnioinFS project in specification, usage,
+  design, or implementation.
+
   Uses of the Union File System
   ------------------------------
   The original motivation for this file was for the use of the built-in

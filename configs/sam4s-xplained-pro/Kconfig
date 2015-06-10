@@ -20,5 +20,4 @@ config SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH
 	default "/dev/tc0"
 	depends on TIMER && SCHED_CPULOAD && SCHED_CPULOAD_EXTCLK
 
-
 endif
