@@ -48,13 +48,40 @@
 
 /* Get customizations for each supported chip */
 
-#if defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+/* MK20DX---VLH7
+ *
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  PART NUMBER   CPU    PIN PACKAGE TOTAL  PROGRAM EEPROM SRAM  GPIO
+ *                FREQ   CNT         FLASH  FLASH
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ *  MK20DX64VLH7  72 MHz 64  LQFP     96 KB  64 KB  2 KB   16 KB 40
+ *  MK20DX128VLH7 72 MHz 64  LQFP    160 KB 128 KB  2 KB   32 KB 40
+ *  MK20DX256VLH7 72 MHz 64  LQFP    288 KB 256 KB  2 KB   64 KB 40
+ *  ------------- ------ --- ------- ------ ------- ------ ----- ----
+ */
+
+#if defined(CONFIG_ARCH_CHIP_MK20DX64VLH7) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX128VLH7) || \
+    defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+
 #  define KINETIS_K20             1          /* Kinetics K20 family */
 #  undef  KINETIS_K40                        /* Not Kinetics K40 family */
 #  undef  KINETIS_K60                        /* Not Kinetis K60 family */
+
+#if defined(CONFIG_ARCH_CHIP_MK20DX64VLH7)
+#  define KINETIS_FLASH_SIZE      (64*1024)  /* 64Kb */
+#  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
+#  define KINETIS_SRAM_SIZE       (16*1024)  /* 16Kb */
+#elif defined(CONFIG_ARCH_CHIP_MK20DX128VLH7)
+#  define KINETIS_FLASH_SIZE      (128*1024) /* 128Kb */
+#  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
+#  define KINETIS_SRAM_SIZE       (32*1024)  /* 32Kb */
+#else /* if defined(CONFIG_ARCH_CHIP_MK20DX256VLH7) */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define KINETIS_FLEXMEM_SIZE    (32*1024)  /* 32Kb */
 #  define KINETIS_SRAM_SIZE       (64*1024)  /* 64Kb */
+#endif
+
 #  undef  KINETIS_MPU                        /* No memory protection unit */
 #  undef  KINETIS_EXTBUS                     /* No external bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
