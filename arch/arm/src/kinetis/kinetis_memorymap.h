@@ -65,7 +65,7 @@
 #  define KINETIS_FLEXRAM_BASE  0x14000000 /* –0x17ffffff FlexRAM */
 # endif
                              /* 0x18000000  * –0x1bffffff Reserved */
-# define KINETIS_SRAML_BASE     0x1C000000 /* –0x1fffffff SRAM_L: Lower SRAM
+# define KINETIS_SRAML_BASE     0x1c000000 /* –0x1fffffff SRAM_L: Lower SRAM
                                             *             (ICODE/DCODE) */
 # define KINETIS_SRAMU_BASE     0x20000000 /* –0x200fffff SRAM_U: Upper SRAM bitband
                                             *             region */
