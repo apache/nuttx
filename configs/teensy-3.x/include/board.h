@@ -42,8 +42,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 # include <stdint.h>
+# include <stdbool.h>
 #endif
 
 /************************************************************************************
@@ -135,12 +137,12 @@
  * high will illuminate the LED.
  */
 
-/* LED index values for use with sam_setled() */
+/* LED index values for use with kinetis_setled() */
 
 #define BOARD_LED                    0
 #define BOARD_NLEDS                  1
 
-/* LED bits for use with sam_setleds() */
+/* LED bits for use with kinetis_setleds() */
 
 #define BOARD_LED_BIT                (1 << BOARD_LED)
 
@@ -228,6 +230,22 @@ extern "C"
  ************************************************************************************/
 
 void kinetis_boardinitialize(void);
+
+/************************************************************************************
+ * Name:  kinetis_ledinit, kinetis_setled, and kinetis_setleds
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LED.  If
+ *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
+ *   control the LEDs from user applications.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_LEDS
+void kinetis_ledinit(void);
+void kinetis_setled(int led, bool ledon);
+void kinetis_setleds(uint8_t ledset);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

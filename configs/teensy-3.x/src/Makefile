@@ -44,6 +44,8 @@ CSRCS = k20_boot.c k20_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += k20_autoleds.c
+else
+CSRCS += k20_userleds.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
