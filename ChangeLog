@@ -10570,4 +10570,8 @@
 	  also a different SLOW GCLK generator).  This means that the channel
 	  selection cannot be a global definition but must be a per SERCOM
 	  configuration setting (2015-06-10).
-
+	* arch/arm/src/kinetis and include/kinetis: Add support for MK20DN--VLH5
+	  and MK20DX---VLH5.  Needed for backward compatible support for
+	  Teensy-3.0 (2015-06-10).
+	* configs/Kconfig and configs/teensy-3.x:  Add support for Teensy-3.0
+	  (2015-06-10).
