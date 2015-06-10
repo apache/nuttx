@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/teensy-3.x/src/k20_autoleds.c
+ * configs/teensy-3.x/src/kinetis_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,25 +39,16 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <debug.h>
-
-#include <nuttx/board.h>
 
 #include "kinetis_internal.h"
 #include "teensy-3x.h"
 
-#ifdef CONFIG_ARCH_LEDS
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,40 +56,33 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
- *
- * Description:
- *   Initialize LED GPIOs so that LEDs can be controlled.
- *
+ * Name: kinetis_ledinit
  ****************************************************************************/
 
-void board_led_initialize(void)
+void kinetis_ledinit(void)
 {
   kinetis_pinconfig(GPIO_LED);
 }
 
 /****************************************************************************
- * Name: board_led_on
+ * Name: kinetis_setled
  ****************************************************************************/
 
-void board_led_on(int led)
+void kinetis_setled(int led, bool ledon)
 {
-  if (led != 2)
+  if (led == BOARD_LED)
     {
-      kinetis_gpiowrite(GPIO_LED, (led != 0));
+      kinetis_pinconfig(GPIO_LED);
     }
 }
 
 /****************************************************************************
- * Name: board_led_off
+ * Name: kinetis_setleds
  ****************************************************************************/
 
-void board_led_off(int led)
+void kinetis_setleds(uint8_t ledset)
 {
-  if (led != 2)
-    {
-      kinetis_gpiowrite(GPIO_LED, false);
-    }
+  kinetis_pinconfig((ledset & BOARD_LED_BIT) != 0);
 }
 
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* !CONFIG_ARCH_LEDS */
