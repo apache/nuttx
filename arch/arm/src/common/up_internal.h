@@ -254,7 +254,7 @@ EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
 #ifdef CONFIG_ARCH_RAMFUNCS
 
-#  define __ramfunc__ __attribute__ ((section(".ramfunc"),long_call))
+#  define __ramfunc__ __attribute__ ((section(".ramfunc"),long_call,noinline))
 
 /* Functions declared in the .ramfunc section will be packaged together
  * by the linker script and stored in FLASH.  During boot-up, the start
