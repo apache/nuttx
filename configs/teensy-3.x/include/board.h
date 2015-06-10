@@ -58,8 +58,9 @@
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator (not populated) */
 
 /* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
- * produce a 2MHz reference clock to the PLL.  The rated speed is 72MHz, but can
- * be overclocked at 96MHz
+ * produce a 2MHz reference clock to the PLL.  The rated speed for the MK20DX256VLH7
+ * is 72MHz and 50MHz for the MK20DX128VLH5, but according to the PJRC website,
+ * both can be overclocked at 96MHz
  *
  * 48MHz (rated 50MHz)
  *
@@ -79,7 +80,7 @@
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 
-#if defiend(CONFIG_TEENSY_3X_OVERCLOCK)
+#if defined(CONFIG_TEENSY_3X_OVERCLOCK)
 /* PLL Configuration */
 
 #  define BOARD_PRDIV        1              /* PLL External Reference Divider */
