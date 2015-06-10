@@ -29,6 +29,9 @@ README
                                                   set CONFIG_RAM_SIZE=???
     --------------- -------------- -------------- ---------------------------
 
+  The initial Teensy-3.1 port is largely the effort of Jakob Odersky.
+  https://github.com/jodersky/nuttx/tree/teensy31-7.6
+
 Contents
 ========
 
@@ -43,9 +46,27 @@ Contents
 STATUS
 ======
 
-  2005-08-08:
-    At present, this README is merely a placeholder for a planned port of
-    NuttX to the Teensy-3.1
+  2005-06-10:
+    The board does not boot.  I suspect that it is hanging very early in the
+    boot sequence, perhaps in the clock configuration.  I am afraid that I
+    might have been overly optimistic in the compatibility of the K20 with
+    the (working) K40 and K60.
+
+    And, at this point, I don't know how to debug the board.  There is no
+    way to connect a debuggger, at least not without cutting leads to the
+    the MINI54TAN device:
+
+    See: http://mcuoneclipse.com/2014/08/09/hacking-the-teensy-v3-1-for-swd-debugging/
+
+    Jakob Odersky's original NuttX port does work:
+
+       https://github.com/jodersky/nuttx/tree/teensy31-7.6
+
+    I do not yet discovered anything fundamentally different between the two
+    ports.
+
+    Oddly, I have seen a couple of builds work correctly (with BAUD 57600
+    and overclocked at 96MHz).  But I have been unable to replicate that.
 
 Pin Configuration
 =================
