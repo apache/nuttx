@@ -61,6 +61,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef HAVE_SERCOM0_4
+#if defined(CONFIG_SAMDL_SERCOM0) || defined(CONFIG_SAMDL_SERCOM1) || \
+    defined(CONFIG_SAMDL_SERCOM2) || defined(CONFIG_SAMDL_SERCOM3) || \
+    defined(CONFIG_SAMDL_SERCOM4)
+#  define HAVE_SERCOM0_4
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -146,42 +153,113 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
  *
  ****************************************************************************/
 
-void sercom_slowclk_configure(int gclkgen)
+void sercom_slowclk_configure(int sercom, int gclkgen)
 {
 #if defined(CONFIG_ARCH_FAMILY_SAML21)
-  static bool configured = false;
+#ifdef HAVE_SERCOM0_4
+  static bool configured  = false;
+#endif
+#ifdef CONFIG_SAMDL_SERCOM5
+  static bool configured5 = false;
+#endif
 #ifdef CONFIG_DEBUG
-  static uint8_t slowgen = 0xff;
+#ifdef HAVE_SERCOM0_4
+  static uint8_t slowgen  = 0xff;
+#endif
+#ifdef CONFIG_SAMDL_SERCOM5
+  static uint8_t slowgen5 = 0xff;
+#endif
 #endif
 
-  /* Setup the SERCOMn_GCLK channel.  This is common to all SERCOM modules
-   * and should be done only once.
+  /* Setup the SERCOMn_GCLK channel.  SERCOM0-4 use a common channel, but
+   * SERCOM5 uses a different channel.  Configuration should be done only
+   * once.
    */
 
-  if (!configured)
+  switch (sercom)
     {
-      /* Configure the common slow clock channel */
-
-      sam_gclk_chan_enable(BOARD_SERCOM_SLOW_GCLKCHAN, gclkgen);
-
-      /* The slow clock is now configured and should not be configured again. */
-
-      configured = true;
-#ifdef CONFIG_DEBUG
-      slowgen    = (uint8_t)gclkgen;
+#ifdef HAVE_SERCOM0_4
+#ifdef CONFIG_SAMDL_SERCOM0
+    case 0:
 #endif
-    }
+#ifdef CONFIG_SAMDL_SERCOM1
+    case 1:
+#endif
+#ifdef CONFIG_SAMDL_SERCOM2
+    case 2:
+#endif
+#ifdef CONFIG_SAMDL_SERCOM3
+    case 3:
+#endif
+#ifdef CONFIG_SAMDL_SERCOM4
+    case 4:
+#endif
+      if (!configured)
+        {
+          /* Configure the common slow clock channel */
+
+          sam_gclk_chan_enable(GCLK_CHAN_SERCOM0_SLOW, gclkgen);
+
+          /* The slow clock is now configured and should not be configured
+           * again.
+           */
+
+          configured = true;
+#ifdef CONFIG_DEBUG
+          slowgen    = (uint8_t)gclkgen;
+#endif
+        }
 
 #ifdef CONFIG_DEBUG
-  /* Already configured.  This is okay provided that the same GCLK generator
-   * is being used.  Otherwise, there is a problem.
-   */
+      /* Already configured.  This is okay provided that the same GCLK
+       * generator is being used.  Otherwise, there is a problem.
+       */
 
-  else
-    {
-      DEBUGASSERT((int)slowgen == gclkgen);
-    }
+      else
+        {
+          DEBUGASSERT((int)slowgen == gclkgen);
+        }
 #endif
+      break;
+#endif  /* HAVE_SERCOM0_4 */
+
+#ifdef CONFIG_SAMDL_SERCOM5
+    case 5:
+      if (!configured5)
+        {
+          /* Configure the common slow clock channel */
+
+          sam_gclk_chan_enable(GCLK_CHAN_SERCOM5_SLOW, gclkgen);
+
+          /* The slow clock is now configured and should not be configured
+           * again.
+           */
+
+          configured5 = true;
+#ifdef CONFIG_DEBUG
+          slowgen5    = (uint8_t)gclkgen;
+#endif
+        }
+
+#ifdef CONFIG_DEBUG
+      /* Already configured.  This is okay provided that the same GCLK
+       * generator is being used.  Otherwise, there is a problem.
+       */
+
+      else
+        {
+          DEBUGASSERT((int)slowgen5 == gclkgen);
+        }
+#endif
+      break;
+#endif /* CONFIG_SAMDL_SERCOM5 */
+
+    /* Unsupport or invalid SERCOM number provided */
+
+    default:
+      DEBUGPANIC();
+      break;
+    }
 
 #elif defined(CONFIG_ARCH_FAMILY_SAMD20)
   static bool configured = false;

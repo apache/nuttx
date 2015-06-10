@@ -148,7 +148,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock);
  *
  ****************************************************************************/
 
-void sercom_slowclk_configure(int gclkgen);
+void sercom_slowclk_configure(int sercom, int gclkgen);
 
 #undef EXTERN
 #if defined(__cplusplus)
