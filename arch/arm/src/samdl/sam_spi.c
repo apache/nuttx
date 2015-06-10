@@ -118,6 +118,7 @@ struct sam_spidev_s
   uint8_t irq;                 /* SERCOM IRQ number */
 #endif
   uint8_t gclkgen;             /* Source GCLK generator */
+  uint8_t slowgen;             /* Slow GCLK generator */
   port_pinset_t pad0;          /* Pin configuration for PAD0 */
   port_pinset_t pad1;          /* Pin configuration for PAD1 */
   port_pinset_t pad2;          /* Pin configuration for PAD2 */
@@ -269,6 +270,7 @@ static struct sam_spidev_s g_spi0dev =
   .irq       = SAM_IRQ_SERCOM0,
 #endif
   .gclkgen   = BOARD_SERCOM0_GCLKGEN,
+  .slowgen   = BOARD_SERCOM0_SLOW_GCLKGEN,
   .pad0      = BOARD_SERCOM0_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM0_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM0_PINMAP_PAD2,
@@ -321,6 +323,7 @@ static struct sam_spidev_s g_spi1dev =
   .irq       = SAM_IRQ_SERCOM1,
 #endif
   .gclkgen   = BOARD_SERCOM1_GCLKGEN,
+  .slowgen   = BOARD_SERCOM1_SLOW_GCLKGEN,
   .pad0      = BOARD_SERCOM1_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM1_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM1_PINMAP_PAD2,
@@ -373,6 +376,7 @@ static struct sam_spidev_s g_spi2dev =
   .irq       = SAM_IRQ_SERCOM2,
 #endif
   .gclkgen   = BOARD_SERCOM2_GCLKGEN,
+  .slowgen   = BOARD_SERCOM2_SLOW_GCLKGEN,
   .pad0      = BOARD_SERCOM2_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM2_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM2_PINMAP_PAD2,
@@ -425,6 +429,7 @@ static struct sam_spidev_s g_spi3dev =
   .irq       = SAM_IRQ_SERCOM3,
 #endif
   .gclkgen   = BOARD_SERCOM3_GCLKGEN,
+  .slowgen   = BOARD_SERCOM3_SLOW_GCLKGEN,
   .pad0      = BOARD_SERCOM3_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM3_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM3_PINMAP_PAD2,
@@ -477,6 +482,7 @@ static struct sam_spidev_s g_spi4dev =
   .irq       = SAM_IRQ_SERCOM4,
 #endif
   .gclkgen   = BOARD_SERCOM4_GCLKGEN,
+  .slowgen   = BOARD_SERCOM4_SLOW_GCLKGEN,
   .pad0      = BOARD_SERCOM4_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM4_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM4_PINMAP_PAD2,
@@ -529,6 +535,7 @@ static struct sam_spidev_s g_spi5dev =
   .irq       = SAM_IRQ_SERCOM5,
 #endif
   .gclkgen   = BOARD_SERCOM5_GCLKGEN,
+  .slowgen   = BOARD_SERCOM5_SLOW_GCLKGEN,
   .pad0      = BOARD_SERCOM5_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM5_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM5_PINMAP_PAD2,
@@ -1528,7 +1535,7 @@ struct spi_dev_s *up_spiinitialize(int port)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(priv->sercom, priv->gclkgen, false);
-  sercom_slowclk_configure(priv->sercom, BOARD_SERCOM_SLOW_GCLKGEN);
+  sercom_slowclk_configure(priv->sercom, priv->slowgen);
 
   /* Set the SERCOM in SPI master mode (no address) */
 

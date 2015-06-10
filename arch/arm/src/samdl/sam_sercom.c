@@ -254,7 +254,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
       break;
 #endif /* CONFIG_SAMDL_SERCOM5 */
 
-    /* Unsupport or invalid SERCOM number provided */
+    /* Unsupported or invalid SERCOM number provided */
 
     default:
       DEBUGPANIC();
