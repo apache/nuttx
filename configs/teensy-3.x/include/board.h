@@ -61,75 +61,73 @@
  * produce a 2MHz reference clock to the PLL.  The rated speed is 72MHz, but can
  * be overclocked at 96MHz
  *
+ * 48MHz (rated 50MHz)
+ *
+ *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/1 = 16MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 8Mhz*3  = 72MHz
+ *   MCG Frequency:         PLLOUT = 48MHz
+ *
  * 72MHz
  *
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/2 = 8MHz
  *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 8Mhz*9  = 72MHz
- *   MCG Frequency:         PLLOUT = 96MHz
+ *   MCG Frequency:         PLLOUT = 72MHz
  *
- * 96MHz
+ * 96MHz (Overclocked)
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/1 = 16MHz
  *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 16Mhz*6 = 96MHz
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 
-#define BOARD_PRDIV          2              /* PLL External Reference Divider */
-#define BOARD_VDIV           24             /* PLL VCO Divider (frequency multiplier) */
+#if defiend(CONFIG_TEENSY_3X_OVERCLOCK)
+/* PLL Configuration */
+
+#  define BOARD_PRDIV        1              /* PLL External Reference Divider */
+#  define BOARD_VDIV         6              /* PLL VCO Divider (frequency multiplier) */
+
+/* SIM CLKDIV1 dividers */
+
+#  define BOARD_OUTDIV1      1              /* Core        = MCG, 96MHz */
+#  define BOARD_OUTDIV2      2              /* Bus         = MCG/2, 48MHz */
+#  define BOARD_OUTDIV3      2              /* FlexBus     = MCG/2, 48MHz */
+#  define BOARD_OUTDIV4      4              /* Flash clock = MCG/4, 24MHz */
+
+#elif defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
+
+/* PLL Configuration */
+
+#  define BOARD_PRDIV        2              /* PLL External Reference Divider */
+#  define BOARD_VDIV         9              /* PLL VCO Divider (frequency multiplier) */
+
+/* SIM CLKDIV1 dividers */
+
+#  define BOARD_OUTDIV1      1              /* Core        = MCG, 72MHz */
+#  define BOARD_OUTDIV2      2              /* Bus         = MCG/2, 36MHz */
+#  define BOARD_OUTDIV3      2              /* FlexBus     = MCG/2, 36MHz */
+#  define BOARD_OUTDIV4      3              /* Flash clock = MCG/3, 72MHz */
+
+#elif defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
+/* PLL Configuration */
+
+#  define BOARD_PRDIV        1              /* PLL External Reference Divider */
+#  define BOARD_VDIV         3              /* PLL VCO Divider (frequency multiplier) */
+
+/* SIM CLKDIV1 dividers */
+
+#  define BOARD_OUTDIV1      1              /* Core        = MCG, 48MHz */
+#  define BOARD_OUTDIV2      1              /* Bus         = MCG/1, 48MHz */
+#  define BOARD_OUTDIV3      1              /* FlexBus     = MCG/1, 48MHz */
+#  define BOARD_OUTDIV4      2              /* Flash clock = MCG/2, 24MHz */
+#endif
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
 #define BOARD_MCG_FREQ       BOARD_PLLOUT_FREQ
 
-/* SIM CLKDIV1 dividers */
-
-#define BOARD_OUTDIV1        1              /* Core        = MCG, 96MHz */
-#define BOARD_OUTDIV2        2              /* Bus         = MCG/2, 48MHz */
-#define BOARD_OUTDIV3        2              /* FlexBus     = MCG/2, 48MHz */
-#define BOARD_OUTDIV4        4              /* Flash clock = MCG/4, 24MHz */
-
-#define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
-#define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
-#define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
-#define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
-
-/* SDHC clocking ********************************************************************/
-
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
- *
- *   SDCLK  frequency = (base clock) / (prescaler * divisor)
- *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.
- */
-
-/* Identification mode:  400KHz = 96MHz / ( 16 * 15) */
-
-#define BOARD_SDHC_IDMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV16
-#define BOARD_SDHC_IDMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(15)
-
-/* MMC normal mode: 16MHz  = 96MHz / (2 * 3) */
-
-#define BOARD_SDHC_MMCMODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
-#define BOARD_SDHC_MMCMODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(3)
-
-/* SD normal mode (1-bit): 16MHz  = 96MHz / (2 * 3) */
-
-#define BOARD_SDHC_SD1MODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
-#define BOARD_SDHC_SD1MODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(3)
-
-/* SD normal mode (4-bit): 24MHz  = 96MHz / (2 * 2) (with DMA)
- * SD normal mode (4-bit): 16MHz  = 96MHz / (2 * 3) (no DMA)
- */
-
-#ifdef CONFIG_SDIO_DMA
-#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(2)
-#else
-//#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-//#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
-#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV16
-#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
-#endif
+#define BOARD_CORECLK_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV1)
+#define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
+#define BOARD_FLEXBUS_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV3)
+#define BOARD_FLASHCLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
 /* LED definitions ******************************************************************/
 /* A single LED is available driven by PTC5.  The LED is grounded so bringing PTC5

@@ -910,7 +910,7 @@ config ARCH_BOARD_TEENSY_20
 
 config ARCH_BOARD_TEENSY_3X
 	bool "PJRC Teensy++ 3.1 board"
-	depends on ARCH_CHIP_MK20DX256VLH7
+	depends on ARCH_CHIP_MK20DX256VLH7 || ARCH_CHIP_MK20DX128VLH5
 	select ARCH_HAVE_LEDS
 	---help---
 		This is the port of NuttX to the PJRC Teensy++ 2.0 board.  This board is
@@ -929,7 +929,7 @@ config ARCH_BOARD_TEENSY_3X
 		This board configuration can also be used with the older Teensy-3.0.  The
 		Teensy-3.0 has the same schematic (although some pins are not used on the
 		Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
-		MK30DX128VLH5 with slightly less capability.
+		MK20DX128VLH5 with slightly less capability.
 
 config ARCH_BOARD_TEENSY_LC
 	bool "Teensy LC"
