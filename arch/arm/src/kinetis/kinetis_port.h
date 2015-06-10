@@ -390,8 +390,6 @@
 
 /* Global Pin Control High Register */
 
-#define PORT_GPCHR_
-
 #define PORT_GPCHR_GPWD_SHIFT       (0)       /* Bits 0-15: Global Pin Write Data */
 #define PORT_GPCHR_GPWD_MASK        (0xffff << PORT_GPCHR_GPWD_SHIFT)
 #  define PORT_GPCHR_GPWD(n)        ((1 << (n)) << PORT_GPCHR_GPWD_SHIFT)
