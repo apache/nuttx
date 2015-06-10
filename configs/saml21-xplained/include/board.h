@@ -498,9 +498,12 @@
 /* This is the source clock generator for the GCLK_SERCOM_SLOW clock that is common
  * to SERCOM modules 0-4.  It will generate clocking on the common SERCOM0-4
  * channel.
+ *
+ * SERCOM5 uses a different channel and will probably need to use a different GCLK
+ * generator.
  */
 
-#define BOARD_SERCOM_SLOW_GCLKGEN    0
+#define BOARD_SERCOM04_SLOW_GCLKGEN  0
 
 /* SERCOM0 SPI is available on EXT1
  *
@@ -513,6 +516,7 @@
  */
 
 #define BOARD_SERCOM0_GCLKGEN        0
+#define BOARD_SERCOM0_SLOW_GCLKGEN   BOARD_SERCOM04_SLOW_GCLKGEN
 #define BOARD_SERCOM0_MUXCONFIG      (SPI_CTRLA_DOPO_DOPAD231 | SPI_CTRLA_DIPAD0)
 #define BOARD_SERCOM0_PINMAP_PAD0    PORT_SERCOM0_PAD0_2 /* SPI_MISO */
 #define BOARD_SERCOM0_PINMAP_PAD1    0                   /* SPI_SS (not used) */
@@ -532,6 +536,7 @@
  */
 
 #define BOARD_SERCOM1_GCLKGEN        0
+#define BOARD_SERCOM1_SLOW_GCLKGEN   BOARD_SERCOM04_SLOW_GCLKGEN
 #define BOARD_SERCOM1_MUXCONFIG      (USART_CTRLA_TXPAD2 | USART_CTRLA_RXPAD3)
 #define BOARD_SERCOM1_PINMAP_PAD0    0                   /* (not used) */
 #define BOARD_SERCOM1_PINMAP_PAD1    0                   /* (not used) */
@@ -550,6 +555,7 @@
  */
 
 #define BOARD_SERCOM3_GCLKGEN        0
+#define BOARD_SERCOM3_SLOW_GCLKGEN   BOARD_SERCOM04_SLOW_GCLKGEN
 #define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0_2)
 #define BOARD_SERCOM3_PINMAP_PAD0    PORT_SERCOM3_PAD0_1 /* USART TX */
 #define BOARD_SERCOM3_PINMAP_PAD1    PORT_SERCOM3_PAD1_1 /* USART RX */
@@ -569,7 +575,7 @@
  */
 
 #define BOARD_SERCOM4_GCLKGEN        0
-
+#define BOARD_SERCOM4_SLOW_GCLKGEN   BOARD_SERCOM04_SLOW_GCLKGEN
 #define BOARD_SERCOM4_MUXCONFIG      (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0_2)
 #define BOARD_SERCOM4_PINMAP_PAD0    PORT_SERCOM4_PAD0_3 /* USART TX */
 #define BOARD_SERCOM4_PINMAP_PAD1    PORT_SERCOM4_PAD1_3 /* USART RX */
@@ -589,6 +595,7 @@
  */
 
 #define BOARD_SERCOM5_GCLKGEN        0
+#define BOARD_SERCOM5_SLOW_GCLKGEN   ?
 #define BOARD_SERCOM5_MUXCONFIG      (SPI_CTRLA_DOPO_DOPAD231 | SPI_CTRLA_DIPAD0)
 #define BOARD_SERCOM5_PINMAP_PAD0    PORT_SERCOM5_PAD0_1 /* SPI_MISO */
 #define BOARD_SERCOM5_PINMAP_PAD1    0                   /* SPI_SS (not used) */

@@ -91,6 +91,7 @@ struct sam_usart_config_s
   uint8_t bits;       /* Number of bits (5-9) */
   uint8_t irq;        /* SERCOM IRQ number */
   uint8_t gclkgen;    /* Source GCLK generator */
+  uint8_t slowgen;    /* Slow GCLK generator */
   bool stopbits2;     /* True: Configure with 2 stop bits instead of 1 */
   uint32_t baud;      /* Configured baud */
   port_pinset_t pad0; /* Pin configuration for PAD0 */
