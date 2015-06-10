@@ -72,7 +72,7 @@ void kinetis_setled(int led, bool ledon)
 {
   if (led == BOARD_LED)
     {
-      kinetis_pinconfig(GPIO_LED);
+      kinetis_gpiowrite(GPIO_LED, ledon);
     }
 }
 
@@ -82,7 +82,7 @@ void kinetis_setled(int led, bool ledon)
 
 void kinetis_setleds(uint8_t ledset)
 {
-  kinetis_pinconfig((ledset & BOARD_LED_BIT) != 0);
+  kinetis_gpiowrite(GPIO_LED, (ledset & BOARD_LED_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */
