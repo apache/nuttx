@@ -110,6 +110,7 @@ static inline void rcc_reset(void)
    * the SYSCLK and we want the PLL to be stable through the transition.
    */
 
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~(RCC_CFGR_SW_MASK | RCC_CFGR_HPRE_MASK | RCC_CFGR_PPRE1_MASK |
               RCC_CFGR_PPRE2_MASK | RCC_CFGR_MCOSEL_MASK | RCC_CFGR_MCOPRE_MASK);
   putreg32(regval, STM32_RCC_CFGR);
@@ -524,6 +525,12 @@ static void stm32_stdclockconfig(void)
   uint16_t pwrcr;
 #endif
 
+  /* Enable PWR clock from APB1 to give access to PWR_CR register */
+
+  regval  = getreg32(STM32_RCC_APB1ENR);
+  regval |= RCC_APB1ENR_PWREN;
+  putreg32(regval, STM32_RCC_APB1ENR);
+
   /* Go to the high performance voltage range 1 if necessary.  In this mode,
    * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
    *
@@ -563,7 +570,7 @@ static void stm32_stdclockconfig(void)
 
   regval = getreg32(STM32_RCC_CR);
   regval &= ~RCC_CR_RTCPRE_MASK;
-  regval |= HSE_DIVISOR);
+  regval |= HSE_DIVISOR;
   putreg32(regval, STM32_RCC_CR);
 
    /* Restore the previous state of the DBP bit */
