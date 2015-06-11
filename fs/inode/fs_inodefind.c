@@ -77,7 +77,7 @@ FAR struct inode *inode_find(FAR const char *path, FAR const char **relpath)
 {
   FAR struct inode *node;
 
-  if (!path || !*path || path[0] != '/')
+  if (path == NULL || path[0] == '\0' || path[0] != '/')
     {
       return NULL;
     }
