@@ -132,8 +132,8 @@ static void inode_insert(FAR struct inode *node,
 
   else
     {
-      node->i_peer = root_inode;
-      root_inode   = node;
+      node->i_peer = g_root_inode;
+      g_root_inode = node;
     }
 }
 

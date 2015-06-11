@@ -93,9 +93,14 @@ void inode_release(FAR struct inode *node)
 
       if (node->i_crefs <= 0 && (node->i_flags & FSNODEFLAG_DELETED) != 0)
         {
+          /* If the inode has been properly unlinked, then the peer pointer
+           * should be NULL.
+           */
+
           inode_semgive();
-          inode_free(node->i_child);
-          kmm_free(node);
+
+          DEBUGASSERT(node->i_peer == NULL);
+          inode_free(node);
         }
       else
         {

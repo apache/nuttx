@@ -235,9 +235,9 @@ FAR DIR *opendir(FAR const char *path)
    */
 
   inode_semtake();
-  if (!path || *path == 0 || strcmp(path, "/") == 0)
+  if (path == NULL || *path == '\0' || strcmp(path, "/") == 0)
     {
-      inode   = root_inode;
+      inode   = g_root_inode;
       isroot  = true;
       relpath = NULL;
     }

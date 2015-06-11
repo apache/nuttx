@@ -123,7 +123,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN FAR struct inode *root_inode;
+EXTERN FAR struct inode *g_root_inode;
 
 /****************************************************************************
  * Public Function Prototypes

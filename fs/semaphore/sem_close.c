@@ -134,11 +134,14 @@ int sem_close(FAR sem_t *sem)
        sem_destroy(&nsem->ns_sem);
        group_free(NULL, nsem);
 
-       /* Release and free the inode */
+       /* Release and free the inode container.  If it has been properly
+        * unlinked, then the peer pointer should be NULL.
+        */
 
        inode_semgive();
-       inode_free(inode->i_child);
-       kmm_free(inode);
+
+       DEBUGASSERT(inode->i_peer == NULL);
+       inode_free(inode);
        return OK;
      }
 

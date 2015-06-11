@@ -203,7 +203,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
   /* Start the recursion at the root inode */
 
   inode_semtake();
-  ret = foreach_inodelevel(root_inode, info);
+  ret = foreach_inodelevel(g_root_inode, info);
   inode_semgive();
 
   /* Free the info structure and return the result */
@@ -224,7 +224,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
   /* Start the recursion at the root inode */
 
   inode_semtake();
-  ret = foreach_inodelevel(root_inode, &info);
+  ret = foreach_inodelevel(g_root_inode, &info);
   inode_semgive();
 
   return ret;

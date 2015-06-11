@@ -82,7 +82,7 @@ static struct inode_sem_s g_inode_sem;
  * Public Variables
  ****************************************************************************/
 
-FAR struct inode *root_inode = NULL;
+FAR struct inode *g_root_inode = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -290,7 +290,7 @@ FAR struct inode *inode_search(FAR const char **path,
                                FAR const char **relpath)
 {
   FAR const char   *name  = *path + 1; /* Skip over leading '/' */
-  FAR struct inode *node  = root_inode;
+  FAR struct inode *node  = g_root_inode;
   FAR struct inode *left  = NULL;
   FAR struct inode *above = NULL;
 
@@ -396,7 +396,9 @@ FAR struct inode *inode_search(FAR const char **path,
 
 void inode_free(FAR struct inode *node)
 {
-  if (node)
+  /* Verify that we were passed valid pointer to an inode */
+
+  if (node != NULL)
     {
       inode_free(node->i_peer);
       inode_free(node->i_child);

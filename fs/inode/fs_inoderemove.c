@@ -120,7 +120,7 @@ FAR struct inode *inode_unlink(FAR const char *path)
 
       else
         {
-           root_inode = node->i_peer;
+           g_root_inode = node->i_peer;
         }
 
       node->i_peer = NULL;
@@ -167,10 +167,12 @@ int inode_remove(FAR const char *path)
         }
       else
         {
-          /* And delete it now -- recursively to delete all of its children */
+          /* And delete it now -- recursively to delete all of its children.
+           * Since it has been unlinked, then the peer pointer should be NULL.
+           */
 
-          inode_free(node->i_child);
-          kmm_free(node);
+          DEBUGASSERT(node->i_peer == NULL);
+          inode_free(node);
           return OK;
         }
     }

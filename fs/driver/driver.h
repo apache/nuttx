@@ -44,6 +44,8 @@
 #include <nuttx/compiler.h>
 #include <nuttx/fs/fs.h>
 
+#include "inode/inode.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -60,8 +62,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-extern FAR struct inode *root_inode;
 
 /****************************************************************************
  * Public Function Prototypes
