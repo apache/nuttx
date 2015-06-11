@@ -16,7 +16,7 @@ README
   MK20DX128VLH5 with slightly less capability.  There are many difference
   between the MK20DX256VLH7 and the MK20DX128VLH5 but the basic differences
   that effect how you configure NuttX are:
-mk20dx128vlh5
+
     --------------- -------------- -------------- ---------------------------
     Feature         Teensy 3.0     Teensy 3.1     Teensy 3.0 CONFIGURATION
     --------------- -------------- -------------- ---------------------------
