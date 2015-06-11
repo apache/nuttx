@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_registerreserve.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,7 +176,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
 
   /* Handle paths that are interpreted as the root directory */
 
-  if (!*path || path[0] != '/')
+  if (path[0] == '\0' || path[0] != '/' || path[1] == '\0')
     {
       return -EINVAL;
     }
