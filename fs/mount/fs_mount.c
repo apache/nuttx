@@ -266,25 +266,54 @@ int mount(FAR const char *source, FAR const char *target,
       goto errout;
     }
 
+  inode_semtake();
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  /* Check if the inode already exists */
+
+  mountpt_inode = inode_find(target, NULL);
+  if (mountpt_inode != NULL)
+    {
+      /* Yes... Is is a directory node (i.e., not a driver or other special
+       * node.
+       */
+
+      if (INODE_IS_SPECIAL(mountpt_inode))
+        {
+         fdbg("ERROR: target %s exists and is a special nodes\n", target);
+          errcode = -ENOTDIR;
+          goto errout_with_semaphore;
+        }
+
+      /* Successfully found.  The reference count on the inode has been
+       * incremented.
+       */
+
+      DEBUGASSERT(mountpt_inode->u.i_mops == NULL);
+    }
+  else
+#endif
+
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
    */
 
-  inode_semtake();
-  ret = inode_reserve(target, &mountpt_inode);
-  if (ret < 0)
     {
-      /* inode_reserve can fail for a couple of reasons, but the most likely
-       * one is that the inode already exists. inode_reserve may return:
-       *
-       *  -EINVAL - 'path' is invalid for this operation
-       *  -EEXIST - An inode already exists at 'path'
-       *  -ENOMEM - Failed to allocate in-memory resources for the operation
-       */
+      ret = inode_reserve(target, &mountpt_inode);
+      if (ret < 0)
+        {
+          /* inode_reserve can fail for a couple of reasons, but the most likely
+           * one is that the inode already exists. inode_reserve may return:
+           *
+           *  -EINVAL - 'path' is invalid for this operation
+           *  -EEXIST - An inode already exists at 'path'
+           *  -ENOMEM - Failed to allocate in-memory resources for the operation
+           */
 
-      fdbg("ERROR: Failed to reserve inode\n");
-      errcode = -ret;
-      goto errout_with_semaphore;
+          fdbg("ERROR: Failed to reserve inode for target %s\n", target);
+          errcode = -ret;
+          goto errout_with_semaphore;
+        }
     }
 
   /* Bind the block driver to an instance of the file system.  The file

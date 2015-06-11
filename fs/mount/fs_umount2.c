@@ -41,6 +41,8 @@
 
 #include <sys/mount.h>
 #include <errno.h>
+#include <assert.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -152,34 +154,53 @@ int umount2(FAR const char *target, unsigned int flags)
       goto errout_with_semaphore;
     }
 
-  /* Successfully unbound */
+  /* Successfully unbound.  Convert the mountpoint inode to regular
+   * pseudo-file inode.
+   */
 
+
+  mountpt_inode->i_flags  &= ~FSNODEFLAG_TYPE_MASK;
   mountpt_inode->i_private = NULL;
+  mountpt_inode->u.i_mops  = NULL;
 
-  /* Successfully unbound, remove the mountpoint inode from
-   * the inode tree.  The inode will not be deleted yet because
-   * there is still at least reference on it (from the mount)
-   */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  /* If the node has children, then do not delete it. */
 
-  ret = inode_remove(target);
-  inode_semgive();
-
-  /* The return value of -EBUSY is normal (in fact, it should
-   * not be OK)
-   */
-
-  if (ret != OK && ret != -EBUSY)
+  if (mountpt_inode->i_child != NULL)
     {
-      errcode = -ret;
-      goto errout_with_mountpt;
+       /* Just decrement the reference count (without deleting it) */
+
+       DEBUGASSERT(mountpt_inode->i_crefs > 0);
+       mountpt_inode->i_crefs--;
     }
+  else
+#endif
+    {
+      /* Remove the mountpoint inode from the inode tree.  The inode will
+       * not be deleted yet because there is still at least reference on
+       * it (from the mount)
+       */
 
-  /* Release the mountpoint inode and any block driver inode
-   * returned by the file system unbind above.  This should cause
-   * the inode to be deleted (unless there are other references)
-   */
+      ret = inode_remove(target);
+      inode_semgive();
 
-  inode_release(mountpt_inode);
+      /* The return value of -EBUSY is normal (in fact, it should
+       * not be OK)
+       */
+
+      if (ret != OK && ret != -EBUSY)
+        {
+          errcode = -ret;
+          goto errout_with_mountpt;
+       }
+
+      /* Release the mountpoint inode and any block driver inode
+       * returned by the file system unbind above.  This should cause
+       * the inode to be deleted (unless there are other references)
+       */
+
+      inode_release(mountpt_inode);
+    }
 
   /* Did the unbind method return a contained block driver */
 
