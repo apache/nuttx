@@ -10576,6 +10576,7 @@
 	* configs/Kconfig and configs/teensy-3.x:  Add support for Teensy-3.0
 	  (2015-06-10).
 	* arch/arm/src/stm32/stm32l15xxx_rcc.c: STM322 F15x stm32_stdclockconfig()
-	  was calling stm32_pw_setvos() which accessed PWR_CR via an inactive APB.i
+	  was calling stm32_pw_setvos() which accessed PWR_CR via an inactive APB
 	  From Juha Niskaneni (2015-06-11).
-
+	* fs/mount: Add the ability to mount a file system on top of en existing
+	  node in the psuedo-file system (2015-06-11).
