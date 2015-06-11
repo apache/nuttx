@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/teensy-3.x/scripts/flash.ld
+ * configs/teensy-3.x/scripts/mk20dx128vlh5.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* The MK20DX256VLH7 has 256Kb of FLASH beginning at address 0x0000:0000 and
- * 64Kb of SRAM beginning at address 0x1c00:0000 (SRAM_L) and 0x2000:000
+/* The _MK20DX128VLH5 has 128Kb of FLASH beginning at address 0x0000:0000 and
+ * 16Kb of SRAM beginning at address 0x1c00:0000 (SRAM_L) and 0x2000:000
  * bitband region (SRAM_U).
  *
  * NOTE: that the first part of the K20 FLASH region is reserved for
@@ -50,8 +50,8 @@ MEMORY
 {
 	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
 	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
-	progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 256K - 2K
-	datasram (rwx)  : ORIGIN = 0x1fff8000, LENGTH = 64K
+	progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 128K - 2K
+	datasram (rwx)  : ORIGIN = 0x1fffe000, LENGTH = 16K
 }
 
 OUTPUT_ARCH(arm)

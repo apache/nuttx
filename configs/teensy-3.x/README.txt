@@ -16,21 +16,29 @@ README
   MK20DX128VLH5 with slightly less capability.  There are many difference
   between the MK20DX256VLH7 and the MK20DX128VLH5 but the basic differences
   that effect how you configure NuttX are:
-
+mk20dx128vlh5
     --------------- -------------- -------------- ---------------------------
-    Feature         Teensy 3.0     Teensy 3.1     CONFIGURATION
+    Feature         Teensy 3.0     Teensy 3.1     Teensy 3.0 CONFIGURATION
     --------------- -------------- -------------- ---------------------------
     Processor
-      Core          MK20DX128VLH5  MK20DX256VLH7  CONFIG_ARCH_CHIP_MK20DX128VLH5
-      Rated Speed    48 MHz         72 MHz        Settings in include/board.h
-      Overclockable  96 MHz         96 MHz        CONFIG_TEENSY_3X_OVERCLOCK
-    Flash Memory    128 KB         256 KB         See scripts/flash.ld
-    SRAM             16 KB          64 KB         See scripts/flash.ld and
-                                                  set CONFIG_RAM_SIZE=???
+      Core          MK20DX128VLH5  MK20DX256VLH7  CONFIG_ARCH_CHIP_MK20DX128VLH5=y
+      Rated Speed    48 MHz         72 MHz        See Note 1
+      Overclockable  96 MHz         96 MHz        CONFIG_TEENSY_3X_OVERCLOCK=y
+    Flash Memory    128 KB         256 KB         See Note 1
+    SRAM             16 KB          64 KB         CONFIG_RAM_SIZE=16384 and
+                                                  see Note 2
     --------------- -------------- -------------- ---------------------------
 
+  NOTES:
+  1. Settings in configs/teensy-3.x/include/board.h will automatically
+     select the correct clocking based on CONFIG_ARCH_CHIP_MK20DX128VLH5=y.
+  2. The linker script at configs/teensy-3.x/scripts/mk30dx128vlh5.ld will
+     automatically be selected when CONFIG_ARCH_CHIP_MK20DX128VLH5=y.  It
+     will use the correct FLASH and SRAM sizes.
+
   The initial Teensy-3.1 port is largely the effort of Jakob Odersky.
-  https://github.com/jodersky/nuttx/tree/teensy31-7.6
+  https://github.com/jodersky/nuttx/tree/teensy31-7.6 and
+  https://github.com/jodersky/px4-nuttx
 
 Contents
 ========
