@@ -3,7 +3,7 @@ README
 
   This is a README file for the port of NuttX to the Teensy-3.1 from PJRC
   (https://www.pjrc.com/).  The Teensy-3.1 features the Freescale
-  MK30DX256VLH7 chip (now NXP).  The MK30DX256VLH7 is a 64-pin Cortex-M4
+  MK20DX256VLH7 chip (now NXP).  The MK20DX256VLH7 is a 64-pin Cortex-M4
   running at 72MHz.  It has 256KiB of program FLASH memory and 64KiB of
   SRAM.  For more information about the Teensy 3.1, see
 
@@ -14,7 +14,7 @@ README
   Teensy-3.0 has the same schematic (although some pins are not used on the
   Teensy-3.0).  The primary difference is that the Teensy 3.0 has a
   MK20DX128VLH5 with slightly less capability.  There are many difference
-  between the MK30DX256VLH7 and the MK20DX128VLH5 but the basic differences
+  between the MK20DX256VLH7 and the MK20DX128VLH5 but the basic differences
   that effect how you configure NuttX are:
 
     --------------- -------------- -------------- ---------------------------
@@ -40,33 +40,16 @@ Contents
   o Serial Console
   o LEDs
   o Using the Halfkey Loader
+  o Debugging
   o Teensy-3.1 Configuration settings
   o Configurations
 
 STATUS
 ======
 
-  2005-06-10:
-    The board does not boot.  I suspect that it is hanging very early in the
-    boot sequence, perhaps in the clock configuration.  I am afraid that I
-    might have been overly optimistic in the compatibility of the K20 with
-    the (working) K40 and K60.
-
-    And, at this point, I don't know how to debug the board.  There is no
-    way to connect a debuggger, at least not without cutting leads to the
-    the MINI54TAN device:
-
-    See: http://mcuoneclipse.com/2014/08/09/hacking-the-teensy-v3-1-for-swd-debugging/
-
-    Jakob Odersky's original NuttX port does work:
-
-       https://github.com/jodersky/nuttx/tree/teensy31-7.6
-
-    I do not yet discovered anything fundamentally different between the two
-    ports.
-
-    Oddly, I have seen a couple of builds work correctly (with BAUD 57600
-    and overclocked at 96MHz).  But I have been unable to replicate that.
+  2005-06-11:
+    After some extended tinkering with the PLL setup, the Teensy-3.1 is
+    fully functional using the basic NSH configuration.
 
 Pin Configuration
 =================
@@ -144,6 +127,15 @@ Using the Halfkey Loader
 
   See https://www.pjrc.com/teensy/first_use.html
       https://www.pjrc.com/teensy/loader_cli.html
+
+Debugging
+=========
+
+  And, at this point, I don't know how to debug the board.  There is no
+  way to connect a JTAG SWD debuggger, at least not without cutting leads
+  to the the MINI54TAN device:
+
+    See: http://mcuoneclipse.com/2014/08/09/hacking-the-teensy-v3-1-for-swd-debugging/
 
 Teensy-3.1 Configuration settings
 =================================
