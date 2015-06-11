@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/kwikstik-k40/scripts/ld.script
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 
 MEMORY
 {
-	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K - 16
+	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
 	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
 	progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 256K - 2K
 	datasram (rwx)  : ORIGIN = 0x1fff8000, LENGTH = 64K
@@ -56,6 +56,7 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
+EXTERN(__flashconfigbytes)
 SECTIONS
 {
 	.vectors : {
@@ -65,7 +66,7 @@ SECTIONS
 	} > vectflash
 
 	.cfmprotect : {
-		*(.cfmconfig)
+		KEEP(*(.cfmconfig))
 	} > cfmprotect
 
 	.text : {
