@@ -10575,3 +10575,7 @@
 	  Teensy-3.0 (2015-06-10).
 	* configs/Kconfig and configs/teensy-3.x:  Add support for Teensy-3.0
 	  (2015-06-10).
+	* arch/arm/src/stm32/stm32l15xxx_rcc.c: STM322 F15x stm32_stdclockconfig()
+	  was calling stm32_pw_setvos() which accessed PWR_CR via an inactive APB.i
+	  From Juha Niskaneni (2015-06-11).
+
