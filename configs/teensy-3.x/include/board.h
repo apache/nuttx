@@ -64,29 +64,29 @@
  * is 72MHz and 50MHz for the MK20DX128VLH5, but according to the PJRC website,
  * both can be overclocked at 96MHz
  *
- * 48MHz (rated 50MHz)
+ * MK20DX128VLH5 Rated Frequency 50MHz
  *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/1 = 16MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 8Mhz*3  = 72MHz
+ *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*25  = 50MHz
  *   MCG Frequency:         PLLOUT = 48MHz
  *
- * 72MHz
+ * MK20DX256VLH7 Rated Frequency 72MHz
  *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/2 = 8MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 8Mhz*9  = 72MHz
+ *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*36  = 72MHz
  *   MCG Frequency:         PLLOUT = 72MHz
  *
- * 96MHz (Overclocked)
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/1 = 16MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 16Mhz*6 = 96MHz
+ * Board can be overclocked at 96MHz (per PJRC.com)
+ *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = Mhz*48 = 96MHz
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 
 #if defined(CONFIG_TEENSY_3X_OVERCLOCK)
 /* PLL Configuration */
 
-#  define BOARD_PRDIV        1              /* PLL External Reference Divider */
-#  define BOARD_VDIV         6              /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_PRDIV        8              /* PLL External Reference Divider */
+#  define BOARD_VDIV         48             /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
@@ -99,8 +99,8 @@
 
 /* PLL Configuration */
 
-#  define BOARD_PRDIV        2              /* PLL External Reference Divider */
-#  define BOARD_VDIV         9              /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_PRDIV        8              /* PLL External Reference Divider */
+#  define BOARD_VDIV         36             /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
@@ -112,15 +112,15 @@
 #elif defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
 /* PLL Configuration */
 
-#  define BOARD_PRDIV        1              /* PLL External Reference Divider */
-#  define BOARD_VDIV         3              /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_PRDIV        8              /* PLL External Reference Divider */
+#  define BOARD_VDIV         25             /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
-#  define BOARD_OUTDIV1      1              /* Core        = MCG, 48MHz */
-#  define BOARD_OUTDIV2      1              /* Bus         = MCG/1, 48MHz */
-#  define BOARD_OUTDIV3      1              /* FlexBus     = MCG/1, 48MHz */
-#  define BOARD_OUTDIV4      2              /* Flash clock = MCG/2, 24MHz */
+#  define BOARD_OUTDIV1      1              /* Core        = MCG, 50MHz */
+#  define BOARD_OUTDIV2      1              /* Bus         = MCG/1, 50MHz */
+#  define BOARD_OUTDIV3      1              /* FlexBus     = MCG/1, 20MHz */
+#  define BOARD_OUTDIV4      2              /* Flash clock = MCG/2, 25MHz */
 #endif
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
