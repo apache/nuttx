@@ -110,7 +110,11 @@
 
 static inline void sam_efcsetup(void)
 {
+#if defined(EEFC_FMR_CLOE)
+  putreg32(EEFC_FMR_CLOE | (BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
+#else
   putreg32((BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
+#endif
 #if !defined(CONFIG_ARCH_CHIP_SAM4E)
   putreg32((BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC1_FMR);
 #endif
