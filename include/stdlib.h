@@ -187,8 +187,8 @@ int      mkstemp(FAR char *path_template);
 
 /* Sorting */
 
-void     qsort(void *base, size_t nmemb, size_t size,
-               int(*compar)(const void *, const void *));
+void     qsort(FAR void *base, size_t nmemb, size_t size,
+               int (*compar)(FAR const void *, FAR const void *));
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
 struct mallinfo mallinfo(void);
