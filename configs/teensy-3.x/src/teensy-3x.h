@@ -65,7 +65,7 @@
  * high will illuminate the LED.
  */
 
-#define GPIO_LED          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTC | PIN5)
+#define GPIO_LED          (GPIO_HIGHDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTC | PIN5)
 
 /************************************************************************************
  * Public Types
