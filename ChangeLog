@@ -10583,3 +10583,5 @@
 	* arch/arm/src/sam34/sam_clockconfig.c: Add default loop optimization if
 	  EEFC_FMR is available in the configuration (i.e., for SAM4S and 4E).
 	  From Marco Aurélio da Cruz (2015-06-11).
+	* include/time.h and libc/time: Add asctime(), asctime_r(), ctime(), and
+	  ctime_r() (2015-06-12).
