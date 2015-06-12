@@ -55,9 +55,11 @@ Contents
 STATUS
 ======
 
-  2005-06-11:
+  2015-06-11:
     After some extended tinkering with the PLL setup, the Teensy-3.1 is
     fully functional using the basic NSH configuration.
+  2015-06-12:
+    Fix LED (need high drive strength).  Calibrate delay loop.
 
 Pin Configuration
 =================
