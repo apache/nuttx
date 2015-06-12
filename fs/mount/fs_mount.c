@@ -280,7 +280,7 @@ int mount(FAR const char *source, FAR const char *target,
 
       if (INODE_IS_SPECIAL(mountpt_inode))
         {
-         fdbg("ERROR: target %s exists and is a special nodes\n", target);
+          fdbg("ERROR: target %s exists and is a special nodes\n", target);
           errcode = -ENOTDIR;
           goto errout_with_semaphore;
         }
