@@ -39,11 +39,13 @@ CSRCS += lib_strftime.c lib_calendar2utc.c lib_daysbeforemonth.c
 CSRCS += lib_gettimeofday.c lib_isleapyear.c lib_settimeofday.c lib_time.c
 
 ifdef CONFIG_LIBC_LOCALTIME
-CSRCS += lib_localtime.c
+CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
+CSRCS += lib_ctimer.c
 else
 CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
 ifdef CONFIG_TIME_EXTENDED
-CSRCS += lib_dayofweek.c
+CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
+CSRCS += lib_ctimer.c
 endif
 endif
 

@@ -194,16 +194,25 @@ int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
 
 time_t mktime(FAR struct tm *tp);
-FAR struct tm *gmtime(FAR const time_t *timer);
-FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result);
+FAR struct tm *gmtime(FAR const time_t *timep);
+FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result);
+
 #ifdef CONFIG_LIBC_LOCALTIME
-FAR struct tm *localtime(FAR const time_t *timer);
-FAR struct tm *localtime_r(FAR const time_t *timer, FAR struct tm *result);
+FAR struct tm *localtime(FAR const time_t *timep);
+FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
 #endif
+
 size_t strftime(FAR char *s, size_t max, FAR const char *format,
                 FAR const struct tm *tm);
 
-time_t time(FAR time_t *tloc);
+#ifdef CONFIG_TIME_EXTENDED
+FAR char *asctime(FAR const struct tm *tp);
+FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);
+FAR char *ctime(FAR const time_t *timep);
+FAR char *ctime_r(FAR const time_t *timep, FAR char *buf);
+#endif
+
+time_t time(FAR time_t *timep);
 
 int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid);

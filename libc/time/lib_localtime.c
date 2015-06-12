@@ -2533,28 +2533,6 @@ FAR struct tm *gmtime_r(FAR const time_t * const timep, struct tm *tmp)
   return gmtsub(timep, 0L, tmp);
 }
 
-#if 0 /* No asctime() */
-FAR char *ctime(FAR const time_t * const timep)
-{
-  /* Section 4.12.3.2 of X3.159-1989 requires that
-   *    The ctime function converts the calendar time pointed to by timer
-   *    to local time in the form of a string. It is equivalent to
-   *        asctime(localtime(timer))
-   */
-
-  return asctime(localtime(timep));
-}
-#endif
-
-#if 0 /* No asctime_r */
-FAR char *ctime_r(FAR const time_t * const timep, char *buf)
-{
-  struct tm mytm;
-
-  return asctime_r(localtime_r(timep, &mytm), buf);
-}
-#endif
-
 time_t mktime(struct tm * const tmp)
 {
   tzset();
