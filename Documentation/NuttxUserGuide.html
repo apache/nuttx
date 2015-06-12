@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: June 2, 2015</p>
+      <p>Last Updated: June 12, 2015</p>
     </td>
   </tr>
 </table>
@@ -3884,14 +3884,18 @@ interface of the same name.
   <li><a href="#mktime">2.6.4 mktime</a></li>
   <li><a href="#gmtime">2.6.5 gmtime</a></li>
   <li><a href="#localtime">2.6.6 localtime</a></li>
-  <li><a href="#gmtimer">2.6.7 gmtime_r</a></li>
-  <li><a href="#localtimer">2.6.8 localtime_r</a></li>
-  <li><a href="#timercreate">2.6.9 timer_create</a></li>
-  <li><a href="#timerdelete">2.6.10 timer_delete</a></li>
-  <li><a href="#timersettime">2.6.11 timer_settime</a></li>
-  <li><a href="#timergettime">2.6.12 timer_gettime</a></li>
-  <li><a href="#timergetoverrun">2.6.13 timer_getoverrun</a></li>
-  <li><a href="#gettimeofday">2.6.14 gettimeofday</a></li>
+  <li><a href="#asctime">2.6.7 asctime</a></li>
+  <li><a href="#ctime">2.6.8 ctime</a></li>
+  <li><a href="#gmtimer">2.6.9 gmtime_r</a></li>
+  <li><a href="#localtimer">2.6.10 localtime_r</a></li>
+  <li><a href="#asctimer">2.6.11 asctime_r</a></li>
+  <li><a href="#ctimer">2.6.12 ctime_r</a></li>
+  <li><a href="#timercreate">2.6.13 timer_create</a></li>
+  <li><a href="#timerdelete">2.6.14 timer_delete</a></li>
+  <li><a href="#timersettime">2.6.15 timer_settime</a></li>
+  <li><a href="#timergettime">2.6.16 timer_gettime</a></li>
+  <li><a href="#timergetoverrun">2.6.17 timer_getoverrun</a></li>
+  <li><a href="#gettimeofday">2.6.18 gettimeofday</a></li>
 </ul>
 
 <H3><a name="clocksettime">2.6.1 clock_settime</a></H3>
@@ -3913,14 +3917,9 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>clock_settime()</code> function will return zero (<code>OK</code>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
-<ul>
-  <li><code>To be provided</code>.</li>
-</ul>
 
 <H3><a name="clockgettime">2.6.2 clock_gettime</a></H3>
 <p>
@@ -3941,14 +3940,9 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>clock_gettime()</code> function will return zero (<code>OK</code>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
-<ul>
-  <li><code>To be provided</code>.</li>
-</ul>
 
 <H3><a name="clockgetres">2.6.3 clock_getres</a></H3>
 <p>
@@ -3969,14 +3963,9 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>clock_getres()</code> function will return zero (<code>OK</code>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
-<ul>
-  <li><code>To be provided</code>.</li>
-</ul>
 
 <H3><a name="mktime">2.6.4 mktime</a></H3>
 <p>
@@ -3997,14 +3986,9 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>mktime()</code> function will return zero (<code>OK</code>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
-<ul>
-  <li><code>To be provided</code>.</li>
-</ul>
 
 <H3><a name="gmtime">2.6.5 gmtime</a></H3>
 <p>
@@ -4012,80 +3996,241 @@ interface of the same name.
 </p>
 <pre>
     #include &lt;time.h&gt;
-    struct tm *gmtime(const time_t *clock);
+    FAR struct tm *gmtime(FAR const time_t *timep);
 </pre>
 <p>
   <b>Description:</b>
+  Represents GMT date/time in a type <code>struct tm</code>.
+  This function is not re-entrant.
 </p>
 <p>
   <b>Input Parameters:</b>
 </p>
 <ul>
-  <li><code>clock</code>.
-  Represents calendar time.
-  This is an absolute time  value representing the number of seconds elapsed since 00:00:00
-  on January 1, 1970, Coordinated Universal Time (UTC).
+  <li><code>timep</code>.
+  Represents GMT calendar time.
+  This is an absolute time  value representing the number of seconds elapsed since 00:00:00 on January 1, 1970, Coordinated Universal Time (UTC).
 </li>
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
-  If successful, the <code>gmtime()</code> function will return the pointer to a statically
-  defined instance of <code>struct tim</code>.
+  If successful, the <code>gmtime()</code> function will return the pointer to a statically defined instance of <code>struct tm</code>.
   Otherwise, a NULL will be returned to indicate the error:
 </p>
-<ul>
-  <li><code>To be provided</code>.</li>
-</ul>
 
 <H3><a name="localtime">2.6.6 localtime</a></H3>
-<pre>
-    #include &lt;time.h&gt;
-    #define localtime(c) gmtime(c)
-</pre>
+<ul><pre>
+#include &lt;time.h&gt;
+#ifdef CONFIG_LIBC_LOCALTIME
+#  define localtime(c) gmtime(c)
+#else
+FAR struct tm *localtime(FAR const time_t *timep);
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Represents local date/time in a type <code>struct tm</code>.
+  This function is not re-entrant.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>timep</code>.
+  Represents GMT calendar time.
+  This is an absolute time  value representing the number of seconds elapsed since 00:00:00 on January 1, 1970, Coordinated Universal Time (UTC).
+</ul>
+<p>
+  <b>Returned Value:</b>
+  <b>Returned Value:</b>
+  If successful, the <code>localtime()</code> function will return the pointer to a statically defined instance of <code>struct tm</code>.
+  Otherwise, a NULL will be returned to indicate the error:
+</p>
 
-<H3><a name="gmtimer">2.6.7 gmtime_r</a></H3>
+<h3><a name="asctime">2.6.7 asctime</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;time.h&gt;
+#ifdef CONFIG_TIME_EXTENDED
+FAR char *asctime(FAR const struct tm *tp);
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <code>asctime()</code> convert the time provided in a <code>struct tm</code> to a string representation.
+  <code>asctime()</code> is not re-entrant.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>tp</code>.
+    Pointer to the time to be converted.
+  </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  If successful, the <code>asctime()</code> function will return a pointer to a statically defined string holding the converted time.
+  Otherwise, a NULL will be returned to indicate the error.
+</p>
+
+<h3><a name="ctime">2.6.8 ctime</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;time.h&gt;
+#ifdef CONFIG_TIME_EXTENDED
+FAR char *ctime(FAR const time_t *timep);
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <code>ctime()</code> converts the time provided in seconds since the epoch to a string representation.
+  <code>ctime()</code> is not re-entrant.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>timep</code>.
+  The current time represented as seconds since the epoch.
+  </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  If successful, the <code>ctime()</code> function will return the pointer to the converted string.
+  Otherwise, a NULL will be returned to indicate the error.
+</p>
+
+<h3><a name="gmtimer">2.6.9 gmtime_r</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
     #include &lt;time.h&gt;
-    struct tm *gmtime_r(const time_t *clock, struct tm *result);
+    struct tm *gmtime_r(const time_t *timep, struct tm *result);
 </pre>
 <p>
   <b>Description:</b>
+  Represents GMT date/time in a type <code>struct tm</code>.
+  This function is re-entrant.
 </p>
 <p>
   <b>Input Parameters:</b>
 </p>
 <ul>
-  <li><code>clock</code>.
-  Represents calendar time.
-  This is an absolute time  value representing the number of seconds elapsed since 00:00:00
-  on January 1, 1970, Coordinated Universal Time (UTC).
+  <li><code>timep</code>.
+  Represents GMT calendar time.
+  This is an absolute time  value representing the number of seconds elapsed since 00:00:00 on January 1, 1970, Coordinated Universal Time (UTC).
   <li><code>result</code>.
   A user-provided buffer to receive the converted time structure.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>gmtime_r()</code> function will return the pointer, <code>result</code>,
   provided by the caller.
   Otherwise, a NULL will be returned to indicate the error:
 </p>
+
+<H3><a name="localtimer">2.6.10 localtime_r</a></H3>
+<ul><pre>
+#include &lt;time.h&gt;
+#ifdef CONFIG_LIBC_LOCALTIME
+#  define localtime_r(c,r) gmtime_r(c,r)
+#else
+FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Represents local date/time in a type <code>struct tm</code>.
+  This function is re-entrant.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li><code>timep</code>.
+  Represents GMT calendar time.
+  This is an absolute time  value representing the number of seconds elapsed since 00:00:00 on January 1, 1970, Coordinated Universal Time (UTC).
+  <li><code>result</code>.
+  A user-provided buffer to receive the converted time structure.
 </ul>
+<p>
+  <b>Returned Value:</b>
+  <b>Returned Value:</b>
+  If successful, the <code>localtime_r()</code> function will return the pointer, <code>result</code>,
+  provided by the caller.
+  Otherwise, a NULL will be returned to indicate the error:
+</p>
 
-<H3><a name="localtimer">2.6.8 localtime_r</a></H3>
-<pre>
-    #include &lt;time.h&gt;
-    #define localtime_r(c,r) gmtime_r(c,r)
-</pre>
+<h3><a name="asctimer">2.6.11 asctime_r</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;time.h&gt;
+#ifdef CONFIG_TIME_EXTENDED
+FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <code>asctime_r()</code> converts the time provided in a <code>struct tm</code> to a string representation.
+  <code>asctime-r()</code> is re-entrant.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>tp</code>.
+    Pointer to the time to be converted.
+  </li>
+  <li><code>buf</code>.
+    The user provider buffer. of size &gt;= 26 characters, to receive the converted time.
+  </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  If successful, the <code>asctime_r()</code> function will return the pointer, <code>buf</code>, provided by the caller.
+  Otherwise, a NULL will be returned to indicate the error.
+</p>
 
-<H3><a name="timercreate">2.6.9 timer_create</a></H3>
+<h3><a name="ctimer">2.6.12 ctime_r</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;time.h&gt;
+#ifdef CONFIG_TIME_EXTENDED
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <code>ctime_r()</code> converts the time provided in seconds since the epoch to a string representation.
+  <code>ctime()</code> is re-entrant.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>timep</code>.
+    The current time represented as seconds since the epoch.
+  </li>
+  <li><code>buf</code>.
+    The user provider buffer. of size &gt;= 26 characters, to receive the converted time.
+  </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  If successful, the <code>ctime_r()</code> function will return the pointer, <code>buf</code>, provided by the caller.
+  Otherwise, a NULL will be returned to indicate the error.
+</p>
+
+<h3><a name="timercreate">2.6.13 timer_create</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4130,8 +4275,6 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If the call succeeds, <code>timer_create()</code> will return 0 (<code>OK</code>) and update the
   location referenced by <code>timerid</code> to a <code>timer_t</code>, which can be passed to the
   other per-thread timer calls.  If an error occurs, the function will return
@@ -4155,7 +4298,7 @@ interface of the same name.
   <li>Only <code>CLOCK_REALTIME</code> is supported for the <code>clockid</code> argument.</li>
 </ul>
 
-<H3><a name="timerdelete">2.6.10 timer_delete</a></H3>
+<H3><a name="timerdelete">2.6.14 timer_delete</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4180,8 +4323,6 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>timer_delete()</code> function will return zero (<code>OK</code>).
   Otherwise, the function will return a value of -1 (<code>ERROR</code>) and set
   <a href="#ErrnoAccess"><code>errno</code></a> to indicate the error:
@@ -4194,7 +4335,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timersettime">2.6.11 timer_settime</a></H3>
+<H3><a name="timersettime">2.6.15 timer_settime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4258,8 +4399,6 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If the timer_gettime() succeeds, a value of 0 (<code>OK</code>) will be returned.
   If an error occurs, the value -1 (<code>ERROR</code>) will be returned, and
   <a href="#ErrnoAccess"><code>errno</code></a> set to indicate the error.
@@ -4277,7 +4416,7 @@ interface of the same name.
   <li>The <code>ovalue</code> argument is ignored.</li>
 </ul>
 
-<H3><a name="timergettime">2.6.12 timer_gettime</a></H3>
+<H3><a name="timergettime">2.6.16 timer_gettime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4309,8 +4448,6 @@ interface of the same name.
 </ul>
 <p>
   <b>Returned Value:</b>
-</p>
-<p>
   If successful, the <code>timer_gettime()</code> function will return zero (<code>OK</code>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
@@ -4324,7 +4461,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timergetoverrun">2.6.13 timer_getoverrun</a></H3>
+<H3><a name="timergetoverrun">2.6.17 timer_getoverrun</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4385,7 +4522,7 @@ interface of the same name.
 interface of the same name.
 </p>
 
-<h3><a name="gettimeofday">2.6.14 gettimeofday</a></h3>
+<h3><a name="gettimeofday">2.6.18 gettimeofday</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -9754,6 +9891,8 @@ notify a task when a message is available on a queue.
   <li><a href="#aio">aio_return</a></li>
   <li><a href="#aio">aio_suspend</a></li>
   <li><a href="#aio">aio_write</a></li>
+  <li><a href="#asctime">asctime</a></li>
+  <li><a href="#asctimer">asctime_r</a></li>
   <li><a href="#atexit">atexit</a>
   <li><a href="#bind">bind</a></li>
   <li><a href="#mmapxip">BIOC_XIPBASE</a></li>
@@ -9766,6 +9905,8 @@ notify a task when a message is available on a queue.
   <li><a href="#dirdirentops">closedir</a></li>
   <li><a href="#connect">connect</a></li>
   <li><a href="#drvrfcntlops">creat</a></li>
+  <li><a href="#ctime">ctime</a></li>
+  <li><a href="#ctimer">ctime_r</a></li>
   <li><a href="#Data_Structures">Data structures</a></li>
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#dirdirentops">dirent.h</a></li>
@@ -9829,10 +9970,10 @@ notify a task when a message is available on a queue.
   <li><a href="#mqtimedsend">mq_timedsend</a></li>
   <li><a href="#mqunlink">mq_unlink</a></li>
   <li><a href="#mmap">mmap</a></li>
-  <li><a href="#Network">Network Interfaces</a></li>
-  <li><a href="#onexit">on_exit</a>
 </td>
 <td valign="top" width="33%">
+  <li><a href="#Network">Network Interfaces</a></li>
+  <li><a href="#onexit">on_exit</a>
   <li><a href="#drvrfcntlops">open</a></li>
   <li><a href="#dirdirentops">opendir</a></li>
   <li><a href="#OS_Interfaces">OS Interfaces</a></li>
