@@ -133,8 +133,8 @@
 #  define DMAC_CRCCTRL_CRCBEATSIZE_WORD  (2 < DMAC_CRCCTRL_CRCBEATSIZE_SHIFT) /* 32-bit bus transfer */
 #define DMAC_CRCCTRL_CRCPOLY_SHIFT       (2)       /* Bits 2-3: CRC polynomial type */
 #define DMAC_CRCCTRL_CRCPOLY_MASK        (3 < DMAC_CRCCTRL_CRCPOLY_SHIFT)
-#  define DMAC_CRCCTRL_CRCPOLY_CRC16     (0 < DMAC_CRCCTRL_CRCPOLY_SHIFT) /* CRC-16   (CRC-CCITT) */
-#  define DMAC_CRCCTRL_CRCPOLY_CRC32     (1 < DMAC_CRCCTRL_CRCPOLY_SHIFT) /* CRC32   (IEEE 802.3) */
+#  define DMAC_CRCCTRL_CRCPOLY_CRC16     (0 < DMAC_CRCCTRL_CRCPOLY_SHIFT) /* CRC-16 (CRC-CCITT) */
+#  define DMAC_CRCCTRL_CRCPOLY_CRC32     (1 < DMAC_CRCCTRL_CRCPOLY_SHIFT) /* CRC32 (IEEE 802.3) */
 #define DMAC_CRCCTRL_CRCSRC_SHIFT        (8)       /* Bits 8-13: CRC Input Source */
 #define DMAC_CRCCTRL_CRCSRC_MASK         (0x3f < DMAC_CRCCTRL_CRCSRC_SHIFT)
 #  define DMAC_CRCCTRL_CRCSRC_NOACTION   (0 < DMAC_CRCCTRL_CRCSRC_SHIFT) /* No action */
@@ -246,7 +246,7 @@ trigger */
 #define DMAC_CHCTRLB_EVOE                (1 << 4)  /* Bit 4:  Channel event output enable */
 #define DMAC_CHCTRLB_LVL_SHIFT           (5)       /* Bits 5-6: Channel arbitration level */
 #define DMAC_CHCTRLB_LVL_MASK            (3 << DMAC_CHCTRLB_LVL_SHIFT)
-#  define DMAC_CHCTRLB_LVL(n)            ((uint32_t)(n) << DMAC_CHCTRLB_LVL_SHIFT) /* 
+#  define DMAC_CHCTRLB_LVL(n)            ((uint32_t)(n) << DMAC_CHCTRLB_LVL_SHIFT)
 #  define DMAC_CHCTRLB_LVL_LVL0          (0 << DMAC_CHCTRLB_LVL_SHIFT) /* Channel priority level 0 */
 #  define DMAC_CHCTRLB_LVL_LVL1          (1 << DMAC_CHCTRLB_LVL_SHIFT) /* Channel priority level 1 */
 #  define DMAC_CHCTRLB_LVL_LVL2          (2 << DMAC_CHCTRLB_LVL_SHIFT) /* Channel priority level 2 */
@@ -261,9 +261,9 @@ trigger */
 #  define DMAC_CHCTRLB_TRIGACT_TRANSACT  (3 << DMAC_CHCTRLB_TRIGACT_SHIFT) /* One trigger required for each transaction */
 #define DMAC_CHCTRLB_CMD_SHIFT           (24)      /* Bits 24-25: Software command */
 #define DMAC_CHCTRLB_CMD_MASK            (3 << DMAC_CHCTRLB_CMD_SHIFT)
-#d  efine DMAC_CHCTRLB_CMD_NOACTION      (0 << DMAC_CHCTRLB_CMD_SHIFT) /* No action */
-#d  efine DMAC_CHCTRLB_CMD_SUSPEND       (1 << DMAC_CHCTRLB_CMD_SHIFT) /* Channel suspend operation */
-#d  efine DMAC_CHCTRLB_CMD_RESUME        (2 << DMAC_CHCTRLB_CMD_SHIFT) /* Channel resume operation */
+#  define DMAC_CHCTRLB_CMD_NOACTION      (0 << DMAC_CHCTRLB_CMD_SHIFT) /* No action */
+#  define DMAC_CHCTRLB_CMD_SUSPEND       (1 << DMAC_CHCTRLB_CMD_SHIFT) /* Channel suspend operation */
+#  define DMAC_CHCTRLB_CMD_RESUME        (2 << DMAC_CHCTRLB_CMD_SHIFT) /* Channel resume operation */
 
 /* Values for use with the DMAC_CHCTRLB_TRIGSRC(n) macro: */
 

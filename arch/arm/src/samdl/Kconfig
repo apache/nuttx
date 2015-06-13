@@ -291,20 +291,38 @@ config SAMDL_HAVE_TC7
 
 menu "SAMD/L Peripheral Support"
 
-config SAMDL_WDT
-	bool "Watchdog Timer"
+config SAMDL_AC
+	bool "Analog Comparator"
 	default n
 
-config SAMDL_RTC
-	bool "Real Time Counter"
+config SAMDL_ADC
+	bool "Analog-to-Digital Converter"
+	default n
+
+config SAMDL_DAC
+	bool "Digital-to-Analog Converter"
+	default n
+
+config SAMDL_DMAC
+	bool "DMA Controller"
+	default n
+	select ARCH_DMA
+	depends on EXPERIMENTAL
+
+config SAMDL_EVSYS
+	bool "Event System"
 	default n
 
 config SAMDL_NVMCTRL
 	bool "Non-Volatile Memory Controller"
 	default n
 
-config SAMDL_EVSYS
-	bool "Event System"
+config SAMDL_PTC
+	bool "Peripheral Touch Controller"
+	default n
+
+config SAMDL_RTC
+	bool "Real Time Counter"
 	default n
 
 config SAMDL_SERCOM0
@@ -370,20 +388,8 @@ config SAMDL_TC7
 	default n
 	depends on SAMDL_HAVE_TC7
 
-config SAMDL_ADC
-	bool "Analog-to-Digital Converter"
-	default n
-
-config SAMDL_AC
-	bool "Analog Comparator"
-	default n
-
-config SAMDL_DAC
-	bool "Digital-to-Analog Converter"
-	default n
-
-config SAMDL_PTC
-	bool "Peripheral Touch Controller"
+config SAMDL_WDT
+	bool "Watchdog Timer"
 	default n
 
 endmenu
