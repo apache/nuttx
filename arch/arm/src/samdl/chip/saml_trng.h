@@ -53,7 +53,7 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-/* TRNG register offsets *********************************************************************/
+/* TRNG register offsets ********************************************************************/
 
 #define SAM_TRNG_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_TRNG_EVCTRL_OFFSET      0x0004  /* Event control register */
@@ -62,7 +62,7 @@
 #define SAM_TRNG_INTFLAG_OFFSET     0x000a  /* Interrupt flag and status clear register */
 #define SAM_TRNG_DATA_OFFSET        0x0020  /* Output data register */
 
-/* TRNG register addresses *******************************************************************/
+/* TRNG register addresses ******************************************************************/
 
 #define SAM_TRNG_CTRLA              (SAM_TRNG_BASE+SAM_TRNG_CTRLA_OFFSET)
 #define SAM_TRNG_EVCTRL             (SAM_TRNG_BASE+SAM_TRNG_EVCTRL_OFFSET)
@@ -71,7 +71,7 @@
 #define SAM_TRNG_INTFLAG            (SAM_TRNG_BASE+SAM_TRNG_INTFLAG_OFFSET)
 #define SAM_TRNG_DATA               (SAM_TRNG_BASE+SAM_TRNG_DATA_OFFSET)
 
-/* TRNG register bit definitions *************************************************************/
+/* TRNG register bit definitions ************************************************************/
 
 /* Control register */
 
