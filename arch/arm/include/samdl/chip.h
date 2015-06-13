@@ -270,7 +270,7 @@
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
 #  define SAMDL_NTCC                0             /* No TC control channels */
 #  define SAMDL_NTCCOUT             0             /* No TCC output channels */
-#  define SAMDL_NDMA                0             /* No DMA channels */
+#  define SAMDL_NDMACHAN            0             /* No DMA channels */
 #  define SAMDL_NUSBIF              0             /* No USB interface */
 #  define SAMDL_NAES                0             /* No AES engine */
 #  define SAMDL_NCCL                0             /* No Counfigurable Custom Logic */
@@ -293,7 +293,7 @@
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
 #  define SAMDL_NTCC                0             /* No TC control channels */
 #  define SAMDL_NTCCOUT             0             /* No TCC output channels */
-#  define SAMDL_NDMA                0             /* No DMA channels */
+#  define SAMDL_NDMACHAN            0             /* No DMA channels */
 #  define SAMDL_NUSBIF              0             /* No USB interface */
 #  define SAMDL_NAES                0             /* No AES engine */
 #  define SAMDL_NCCL                0             /* No Counfigurable Custom Logic */
@@ -316,7 +316,7 @@
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
 #  define SAMDL_NTCC                0             /* No TC control channels */
 #  define SAMDL_NTCCOUT             0             /* No TCC output channels */
-#  define SAMDL_NDMA                0             /* No DMA channels */
+#  define SAMDL_NDMACHAN            0             /* No DMA channels */
 #  define SAMDL_NUSBIF              0             /* No USB interface */
 #  define SAMDL_NAES                0             /* No AES engine */
 #  define SAMDL_NCCL                0             /* No Counfigurable Custom Logic */
@@ -556,7 +556,7 @@
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
 #  define SAMDL_NTCC                3             /* 3 TC control channels */
 #  define SAMDL_NTCCOUT             2             /* 2 TCC output channels */
-#  define SAMDL_NDMA                16            /* 16 DMA channels */
+#  define SAMDL_NDMACHAN            16            /* 16 DMA channels */
 #  define SAMDL_NUSBIF              1             /* 1 USB interface */
 #  define SAMDL_NAES                1             /* 1 AES engine */
 #  define SAMDL_NCCL                4             /* 4 Counfigurable Custom Logic */
@@ -579,7 +579,7 @@
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
 #  define SAMDL_NTCC                3             /* 3 TC control channels */
 #  define SAMDL_NTCCOUT             2             /* 2 TCC output channels */
-#  define SAMDL_NDMA                16            /* 16 DMA channels */
+#  define SAMDL_NDMACHAN            16            /* 16 DMA channels */
 #  define SAMDL_NUSBIF              1             /* 1 USB interface */
 #  define SAMDL_NAES                1             /* 1 AES engine */
 #  define SAMDL_NCCL                4             /* 4 Counfigurable Custom Logic */
@@ -602,7 +602,7 @@
 #  define SAMDL_NTCOUT              2             /* 2 TC output channels */
 #  define SAMDL_NTCC                3             /* 3 TC control channels */
 #  define SAMDL_NTCCOUT             2             /* 2 TCC output channels */
-#  define SAMDL_NDMA                16            /* 16 DMA channels */
+#  define SAMDL_NDMACHAN            16            /* 16 DMA channels */
 #  define SAMDL_NUSBIF              1             /* 1 USB interface */
 #  define SAMDL_NAES                1             /* 1 AES engine */
 #  define SAMDL_NCCL                4             /* 4 Counfigurable Custom Logic */

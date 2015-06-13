@@ -49,7 +49,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
- 
+
+#define sam_ahb_enableperiph(s)        modifyreg32(SAM_MCLK_AHBMASK,0,s)
+
+#if 0 /* Not used, conflicting names */
+#define sam_apba_enableperiph()        sam_ahb_enableperiph(MCLK_AHBMASK_APBA)
+#define sam_apbb_enableperiph()        sam_ahb_enableperiph(MCLK_AHBMASK_APBB)
+#define sam_apbc_enableperiph()        sam_ahb_enableperiph(MCLK_AHBMASK_APBC)
+#define sam_apbd_enableperiph()        sam_ahb_enableperiph(MCLK_AHBMASK_APBD)
+#define sam_apbe_enableperiph()        sam_ahb_enableperiph(MCLK_AHBMASK_APBE)
+#define sam_dsu_enableperiph()         sam_ahb_enableperiph(MCLK_AHBMASK_DSU)
+#define sam_nvmctrl_enableperiph()     sam_ahb_enableperiph(MCLK_AHBMASK_NVMCTRL)
+#endif
+#define sam_dmac_enableperiph()        sam_ahb_enableperiph(MCLK_AHBMASK_DMAC)
+#if 0 /* Not used, conflicting names */
+#define sam_usb_enableperiph()         sam_ahb_enableperiph(MCLK_AHBMASK_USB)
+#define sam_pac_enableperiph()         sam_ahb_enableperiph(MCLK_AHBMASK_PAC)
+#endif
+
 #define sam_apba_enableperiph(s)       modifyreg32(SAM_MCLK_APBAMASK,0,s)
 
 #define sam_pm_enableperiph()          sam_apba_enableperiph(MCLK_APBAMASK_PM)
@@ -104,6 +121,23 @@
 
 #define sam_pac_enableperiph()         sam_apbe_enableperiph(MCLK_APBEMASK_PAC)
 
+#define sam_ahb_disableperiph(s)       modifyreg32(SAM_MCLK_AHBMASK,s,0)
+
+#if 0 /* Not used, conflicting names */
+#define sam_apba_disableperiph()       sam_ahb_disableperiph(MCLK_AHBMASK_APBA)
+#define sam_apbb_disableperiph()       sam_ahb_disableperiph(MCLK_AHBMASK_APBB)
+#define sam_apbc_disableperiph()       sam_ahb_disableperiph(MCLK_AHBMASK_APBC)
+#define sam_apbd_disableperiph()       sam_ahb_disableperiph(MCLK_AHBMASK_APBD)
+#define sam_apbe_disableperiph()       sam_ahb_disableperiph(MCLK_AHBMASK_APBE)
+#define sam_dsu_disableperiph()        sam_ahb_disableperiph(MCLK_AHBMASK_DSU)
+#define sam_nvmctrl_disableperiph()    sam_ahb_disableperiph(MCLK_AHBMASK_NVMCTRL)
+#endif
+#define sam_dmac_disableperiph()       sam_ahb_disableperiph(MCLK_AHBMASK_DMAC)
+#if 0 /* Not used, conflicting names */
+#define sam_usb_disableperiph()        sam_ahb_disableperiph(MCLK_AHBMASK_USB)
+#define sam_pac_disableperiph()        sam_ahb_disableperiph(MCLK_AHBMASK_PAC)
+#endif
+
 #define sam_apba_disableperiph(s)      modifyreg32(SAM_MCLK_APBAMASK,s,0)
 
 #define sam_pm_disableperiph()         sam_apba_disableperiph(MCLK_APBAMASK_PM)
@@ -157,6 +191,23 @@
 #define sam_apbe_disableperiph(s)      modifyreg32(SAM_MCLK_APBEMASK,s,0)
 
 #define sam_pac_disableperiph()        sam_apbe_disableperiph(MCLK_APBEMASK_PAC)
+
+#define sam_ahb_isenabled(s)           (getreg32(SAM_MCLK_AHBMASK) & (s)) != 0)
+
+#if 0 /* Not used, conflicting names */
+#define sam_apba_isenabled()           sam_ahb_isenabled(MCLK_AHBMASK_APBA)
+#define sam_apbb_isenabled()           sam_ahb_isenabled(MCLK_AHBMASK_APBB)
+#define sam_apbc_isenabled()           sam_ahb_isenabled(MCLK_AHBMASK_APBC)
+#define sam_apbd_isenabled()           sam_ahb_isenabled(MCLK_AHBMASK_APBD)
+#define sam_apbe_isenabled()           sam_ahb_isenabled(MCLK_AHBMASK_APBE)
+#define sam_dsu_isenabled()            sam_ahb_isenabled(MCLK_AHBMASK_DSU)
+#define sam_nvmctrl_isenabled()        sam_ahb_isenabled(MCLK_AHBMASK_NVMCTRL)
+#endif
+#define sam_dmac_isenabled()           sam_ahb_isenabled(MCLK_AHBMASK_DMAC)
+#if 0 /* Not used, conflicting names */
+#define sam_usb_isenabled()            sam_ahb_isenabled(MCLK_AHBMASK_USB)
+#define sam_pac_isenabled()            sam_ahb_isenabled(MCLK_AHBMASK_PAC)
+#endif
 
 #define sam_apba_isenabled(s)          (getreg32(SAM_MCLK_APBAMASK) & (s)) != 0)
 
