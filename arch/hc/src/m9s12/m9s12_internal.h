@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/hc/src/m9s12/m9s12_internal.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -208,7 +208,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -225,7 +226,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void hcs12_gpioirqinitialize(void);
+void hcs12_gpioirqinitialize(void);
 
 /************************************************************************************
  * Name: hcs12_configgpio
@@ -235,7 +236,7 @@ EXTERN void hcs12_gpioirqinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN int hcs12_configgpio(uint16_t cfgset);
+int hcs12_configgpio(uint16_t cfgset);
 
 /************************************************************************************
  * Name: hcs12_gpiowrite
@@ -245,7 +246,7 @@ EXTERN int hcs12_configgpio(uint16_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN void hcs12_gpiowrite(uint16_t pinset, bool value);
+void hcs12_gpiowrite(uint16_t pinset, bool value);
 
 /************************************************************************************
  * Name: hcs12_gpioread
@@ -255,7 +256,7 @@ EXTERN void hcs12_gpiowrite(uint16_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool hcs12_gpioread(uint16_t pinset);
+bool hcs12_gpioread(uint16_t pinset);
 
 /************************************************************************************
  * Name: hcs12_gpioirqenable
@@ -266,7 +267,7 @@ EXTERN bool hcs12_gpioread(uint16_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void hcs12_gpioirqenable(int irq);
+void hcs12_gpioirqenable(int irq);
 #else
 #  define hcs12_gpioirqenable(irq)
 #endif
@@ -280,7 +281,7 @@ EXTERN void hcs12_gpioirqenable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void hcs12_gpioirqdisable(int irq);
+void hcs12_gpioirqdisable(int irq);
 #else
 #  define hcs12_gpioirqdisable(irq)
 #endif
@@ -294,7 +295,7 @@ EXTERN void hcs12_gpioirqdisable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-EXTERN int hcs12_dumpgpio(uint16_t pinset, const char *msg);
+int hcs12_dumpgpio(uint16_t pinset, const char *msg);
 #else
 #  define hcs12_dumpgpio(p,m)
 #endif
@@ -319,7 +320,7 @@ EXTERN int hcs12_dumpgpio(uint16_t pinset, const char *msg);
  ************************************************************************************/
 
 #if STM32_NTHERNET > 1
-EXTERN int hcs12_ethinitialize(int intf);
+int hcs12_ethinitialize(int intf);
 #endif
 
 /************************************************************************************
@@ -347,8 +348,8 @@ EXTERN int hcs12_ethinitialize(int intf);
  *
  ************************************************************************************/
 
-EXTERN void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 #undef EXTERN
 #if defined(__cplusplus)

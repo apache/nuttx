@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/include/mips32/syscall.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,7 +202,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -215,7 +216,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN uintptr_t sys_call0(unsigned int nbr);
+uintptr_t sys_call0(unsigned int nbr);
 
 /****************************************************************************
  * Name: up_syscall1
@@ -225,7 +226,7 @@ EXTERN uintptr_t sys_call0(unsigned int nbr);
  *
  ****************************************************************************/
 
-EXTERN uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
+uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
 
 /****************************************************************************
  * Name: up_syscall2
@@ -235,7 +236,7 @@ EXTERN uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
  *
  ****************************************************************************/
 
-EXTERN uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /****************************************************************************
  * Name: up_syscall3
@@ -245,8 +246,8 @@ EXTERN uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
  *
  ****************************************************************************/
 
-EXTERN uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
-                           uintptr_t parm2, uintptr_t parm3);
+uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2
+                    uintptr_t parm3);
 
 #undef EXTERN
 #ifdef __cplusplus

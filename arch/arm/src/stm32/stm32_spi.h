@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_spi.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,19 +136,19 @@ uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_spi1/2/...register
  *
  * Description:
- *   If the board supports a card detect callback to inform the SPI-based
- *   MMC/SD drvier when an SD card is inserted or removed, then
- *   CONFIG_SPI_CALLBACK should be defined and the following function(s) must
- *   be implemented.  These functiosn implements the registercallback method
- *   of the SPI interface (see include/nuttx/spi/spi.h for details)
+ *   If the board supports a card detect callback to inform the SPI-based MMC/SD
+ *   driver when an SD card is inserted or removed, then CONFIG_SPI_CALLBACK should
+ *   be defined and the following function(s) must be implemented.  These functions
+ *   implements the registercallback method of the SPI interface (see
+ *   include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:
  *   dev -      Device-specific state data
- *   callback - The funtion to call on the media change
+ *   callback - The function to call on the media change
  *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:
@@ -158,33 +158,33 @@ int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_STM32_SPI1
-EXTERN int stm32_spi1register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-EXTERN int stm32_spi2register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int stm32_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-EXTERN int stm32_spi3register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int stm32_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32_SPI4
-EXTERN int stm32_spi4register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int stm32_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32_SPI5
-EXTERN int stm32_spi5register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int stm32_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 
 #ifdef CONFIG_STM32_SPI6
-EXTERN int stm32_spi6register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 #endif
 

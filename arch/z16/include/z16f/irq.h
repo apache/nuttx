@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/include/z16f/irq.h
  *
- *   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -220,22 +220,23 @@ struct xcptcontext
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* ZDS-II intrinsic functions (normally declared in zneo.h) */
 
-EXTERN intrinsic void EI(void);
-EXTERN intrinsic void DI(void);
-EXTERN intrinsic void RI(unsigned short);
-EXTERN intrinsic void SET_VECTOR(int,void (* func) (void));
-EXTERN intrinsic unsigned short TDI(void);
+intrinsic void EI(void);
+intrinsic void DI(void);
+intrinsic void RI(unsigned short);
+intrinsic void SET_VECTOR(int,void (* func) (void));
+intrinsic unsigned short TDI(void);
 
 #ifndef __ZILOG__
-EXTERN irqstate_t irqsave(void);
-EXTERN void       irqrestore(irqstate_t flags);
+irqstate_t irqsave(void);
+void       irqrestore(irqstate_t flags);
 #endif
 
 #undef EXTERN

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_can.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -133,7 +134,7 @@ extern "C" {
  ****************************************************************************/
 
 struct can_dev_s;
-EXTERN FAR struct can_dev_s *stm32_caninitialize(int port);
+FAR struct can_dev_s *stm32_caninitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

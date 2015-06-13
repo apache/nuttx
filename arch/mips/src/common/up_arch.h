@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/common/up_arch.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,16 +69,17 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* Atomic modification of registers */
 
-EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 #undef EXTERN
 #if defined(__cplusplus)

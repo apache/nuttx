@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/lpc43/chip/lpc43_spifi.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -249,7 +249,8 @@ struct spifi_driver_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -258,12 +259,12 @@ extern "C" {
  * Public Functions
  ****************************************************************************/
 
-EXTERN int32_t spifi_init(struct spifi_dev_s *dev, uint32_t cshigh,
+int32_t spifi_init(struct spifi_dev_s *dev, uint32_t cshigh,
                    uint32_t options, uint32_t mhz);
-EXTERN int32_t spifi_program(struct spifi_dev_s *dev, const uint8_t *source,
-                   struct spifi_operands_s *opers);
-EXTERN int32_t spifi_erase(struct spifi_dev_s *dev,
-                   struct spifi_operands_s *opers);
+int32_t spifi_program(struct spifi_dev_s *dev, const uint8_t *source,
+                      struct spifi_operands_s *opers);
+int32_t spifi_erase(struct spifi_dev_s *dev,
+                    struct spifi_operands_s *opers);
 
 #undef EXTERN
 #ifdef __cplusplus
