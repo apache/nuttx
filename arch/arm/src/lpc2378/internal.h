@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/lpc2378/chip.h
  *
- *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
+ *   Copyright (C) 2010, 2015 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo
  *
  * This file is part of the NuttX RTOS and based on the lpc2148 port:
@@ -61,8 +61,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef CONFIG_ARCH_LEDS
-extern void lpc2378_statledoff(void);
-extern void lpc2378_statledon(void);
+void lpc2378_statledoff(void);
+void lpc2378_statledon(void);
 #endif
 
 #endif

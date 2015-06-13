@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/hc/src/common/up_internal.h
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,49 +159,49 @@ extern uint32_t g_intstackbase;
 
 /* Start-up functions */
 
-extern void up_boot(void);
+void up_boot(void);
 
 /* Context switching functions */
 
-extern void up_copystate(uint8_t *dest, uint8_t *src);
-extern void up_decodeirq(uint8_t *regs);
-extern void up_irqinitialize(void);
-extern int  up_saveusercontext(uint8_t *saveregs);
-extern void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
-extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
+void up_copystate(uint8_t *dest, uint8_t *src);
+void up_decodeirq(uint8_t *regs);
+void up_irqinitialize(void);
+int  up_saveusercontext(uint8_t *saveregs);
+void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
+void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 
 /* Interrupt handling */
 
-extern uint8_t *up_doirq(int irq, uint8_t *regs);
+uint8_t *up_doirq(int irq, uint8_t *regs);
 
 /* Signal handling */
 
-extern void up_sigdeliver(void);
+void up_sigdeliver(void);
 
 /* System timer initialization */
 
-extern void up_timer_initialize(void);
-extern int  up_timerisr(int irq, uint32_t *regs);
+void up_timer_initialize(void);
+int  up_timerisr(int irq, uint32_t *regs);
 
 /* Debug output */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+void up_earlyserialinit(void);
+void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
 #endif
 
 #ifdef CONFIG_DEV_LOWCONSOLE
-extern void lowconsole_init(void);
+void lowconsole_init(void);
 #else
 # define lowconsole_init()
 #endif
 
-extern void up_lowputc(char ch);
-extern void up_puts(const char *str);
-extern void up_lowputs(const char *str);
+void up_lowputc(char ch);
+void up_puts(const char *str);
+void up_lowputs(const char *str);
 
 /* Memory configuration */
 
@@ -214,20 +214,20 @@ void up_addregion(void);
 /* Sub-system/driver initialization */
 
 #ifdef CONFIG_ARCH_DMA
-extern void weak_function up_dmainitialize(void);
+void weak_function up_dmainitialize(void);
 #endif
 
-extern void up_wdtinit(void);
+void up_wdtinit(void);
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
 
 #ifdef CONFIG_USBDEV
-extern void up_usbinitialize(void);
-extern void up_usbuninitialize(void);
+void up_usbinitialize(void);
+void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()

@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,16 +143,16 @@ extern volatile FAR chipreg_t *current_regs;
 
 /* Defined in files with the same name as the function */
 
-extern void up_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
-extern FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs);
-extern void up_restoreusercontext(FAR chipreg_t *regs);
-extern void up_irqinitialize(void);
-extern int  up_saveusercontext(FAR chipreg_t *regs);
-extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, FAR chipreg_t *regs);
+void up_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
+FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs);
+void up_restoreusercontext(FAR chipreg_t *regs);
+void up_irqinitialize(void);
+int  up_saveusercontext(FAR chipreg_t *regs);
+void up_sigdeliver(void);
+int  up_timerisr(int irq, FAR chipreg_t *regs);
 
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
-extern void up_lowputc(char ch);
+void up_lowputc(char ch);
 #else
 # define up_lowputc(ch)
 #endif
@@ -166,39 +166,39 @@ void up_addregion(void);
 /* Defined in up_serial.c */
 
 #ifdef USE_SERIALDRIVER
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+void up_earlyserialinit(void);
+void up_serialinit(void);
 #endif
 
 #ifdef USE_LOWCONSOLE
-extern void lowconsole_init(void);
+void lowconsole_init(void);
 #endif
 
 /* Defined in up_timerisr.c */
 
-extern void up_timer_initialize(void);
+void up_timer_initialize(void);
 
 /* Defined in up_irq.c */
 
-extern void up_ack_irq(int irq);
+void up_ack_irq(int irq);
 
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
 
 /* Return the current value of the stack pointer (used in stack dump logic) */
 
-extern chipreg_t up_getsp(void);
+chipreg_t up_getsp(void);
 
 /* Dump stack and registers */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-extern void up_stackdump(void);
-extern void up_registerdump(void);
+void up_stackdump(void);
+void up_registerdump(void);
 #else
 # define up_stackdump()
 # define up_registerdump()

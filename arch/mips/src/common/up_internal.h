@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/common/up_internal.h
  *
- *   Copyright (C) 2011, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -193,17 +193,17 @@ extern uint32_t _bmxdupba_address;  /* BMX register setting */
 
 /* Context switching */
 
-extern void up_copystate(uint32_t *dest, uint32_t *src);
+void up_copystate(uint32_t *dest, uint32_t *src);
 
 /* Serial output */
 
-extern void up_puts(const char *str);
-extern void up_lowputs(const char *str);
+void up_puts(const char *str);
+void up_lowputs(const char *str);
 
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE
-extern void lowconsole_init(void);
+void lowconsole_init(void);
 #else
 # define lowconsole_init()
 #endif
@@ -211,7 +211,7 @@ extern void lowconsole_init(void);
 /* Debug */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-extern void up_dumpstate(void);
+void up_dumpstate(void);
 #else
 #  define up_dumpstate()
 #endif
@@ -219,28 +219,28 @@ extern void up_dumpstate(void);
 /* Common MIPS32 functions defined in arch/mips/src/MIPS32 */
 /* IRQs */
 
-extern uint32_t *up_doirq(int irq, uint32_t *regs);
+uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Software interrupt 0 handler */
 
-extern int up_swint0(int irq, FAR void *context);
+int up_swint0(int irq, FAR void *context);
 
 /* Signals */
 
-extern void up_sigdeliver(void);
+void up_sigdeliver(void);
 
 /* Chip-specific functions **************************************************/
 /* Chip specific functions defined in arch/mips/src/<chip> */
 /* IRQs */
 
-extern void up_irqinitialize(void);
-extern bool up_pending_irq(int irq);
-extern void up_clrpend_irq(int irq);
+void up_irqinitialize(void);
+bool up_pending_irq(int irq);
+void up_clrpend_irq(int irq);
 
 /* DMA */
 
 #ifdef CONFIG_ARCH_DMA
-extern void weak_function up_dmainitialize(void);
+void weak_function up_dmainitialize(void);
 #endif
 
 /* Memory management */
@@ -253,10 +253,10 @@ void up_addregion(void);
 
 /* Serial output */
 
-extern void up_lowputc(char ch);
+void up_lowputc(char ch);
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+void up_earlyserialinit(void);
+void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
@@ -264,12 +264,12 @@ extern void up_serialinit(void);
 
 /* System timer */
 
-extern void up_timer_initialize(void);
+void up_timer_initialize(void);
 
 /* Network */
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
@@ -277,8 +277,8 @@ extern void up_netinitialize(void);
 /* USB */
 
 #ifdef CONFIG_USBDEV
-extern void up_usbinitialize(void);
-extern void up_usbuninitialize(void);
+void up_usbinitialize(void);
+void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
