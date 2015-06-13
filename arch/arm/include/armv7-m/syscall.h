@@ -251,7 +251,8 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

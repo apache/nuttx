@@ -881,7 +881,8 @@ static inline void cp15_cleaninvalidate_dcacheline(unsigned int setway)
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

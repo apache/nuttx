@@ -354,7 +354,8 @@ static inline void cp15_wrvbar(unsigned int sctlr)
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

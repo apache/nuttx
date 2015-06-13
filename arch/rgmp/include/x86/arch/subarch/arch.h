@@ -43,7 +43,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include <rgmp/arch/hpet.h>

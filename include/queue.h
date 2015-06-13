@@ -96,7 +96,8 @@ typedef struct dq_queue_s dq_queue_t;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

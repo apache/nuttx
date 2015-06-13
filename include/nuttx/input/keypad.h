@@ -41,7 +41,8 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 int keypad_kbdinit(void);

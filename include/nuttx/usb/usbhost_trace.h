@@ -94,7 +94,8 @@ typedef int (*usbhost_trcallback_t)(FAR uint32_t trace, FAR void *arg);
 #undef EXTERN
 #if defined(__cplusplus)
 # define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 # define EXTERN extern
 #endif
