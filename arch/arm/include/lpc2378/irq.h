@@ -2,6 +2,7 @@
  * arch/lpc2378/irq.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Rommel Marcelo
  *
  * This file is part of the NuttX RTOS and based on the lpc2148 port:
@@ -103,10 +104,10 @@
  */
 #define SYSTIMER_VEC  0 /* System timer */
 
-#define CLASS_IRQ			0
-#define CLASS_FIQ			1
-#define PRIORITY_LOWEST		15
-#define PRIORITY_HIGHEST	0	/* System timer */
+#define CLASS_IRQ           0
+#define CLASS_FIQ           1
+#define PRIORITY_LOWEST     15
+#define PRIORITY_HIGHEST    0   /* System timer */
 
 /****************************************************************************
  * Public Types
@@ -131,14 +132,15 @@ typedef void (*vic_vector_t)(uint32_t *regs);
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
-EXTERN void up_attach_vector(int irq, int priority, vic_vector_t handler);
-EXTERN void up_detach_vector(int vector);
+void up_attach_vector(int irq, int priority, vic_vector_t handler);
+void up_detach_vector(int vector);
 #endif
 
 #undef EXTERN
@@ -148,4 +150,3 @@ EXTERN void up_detach_vector(int vector);
 #endif
 
 #endif /* __ARCH_LPC2378_IRQ_H */
-
