@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usb/hid_parser.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *
  * Adapted from the LUFA Library:
  *
@@ -235,13 +235,14 @@ struct hid_rptinfo_s
 typedef bool (*hid_rptfilter_t)(FAR struct hid_rptitem_s *item);
 
 /****************************************************************************
- * Public Function Protoypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 # define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 # define EXTERN extern
 #endif
@@ -257,23 +258,24 @@ extern "C" {
  *    report   Buffer containing the device's HID report table.
  *    rptlen   Size in bytes of the HID report table.
  *    filter   Callback function to decide if an item should be retained
- *    rptinfo  Pointer to a struct hid_rptinfo_s instance for the parser output.
+ *    rptinfo  Pointer to a struct hid_rptinfo_s instance for the parser
+ *             output.
  *
  * Returned Value:
  *  Zero on success, otherwise a negated errno value.
  ****************************************************************************/
 
-EXTERN int hid_parsereport(FAR const uint8_t *report, int rptlen,
-                           hid_rptfilter_t filter,
-                           FAR struct hid_rptinfo_s *rptinfo);
+int hid_parsereport(FAR const uint8_t *report, int rptlen,
+                    hid_rptfilter_t filter,
+                    FAR struct hid_rptinfo_s *rptinfo);
 
 /****************************************************************************
  * Name: hid_getitem
  *
  * Description:
  *   Extracts the given report item's value out of the given HID report and
- *   places it into the value member of the report item's struct hid_rptitem_s
- *   structure.
+ *   places it into the value member of the report item's struct
+ *   hid_rptitem_s structure.
  *
  *   When called on a report with an item that exists in that report, this
  *   copies the report item's Value to it's previous element for easy
@@ -282,27 +284,27 @@ EXTERN int hid_parsereport(FAR const uint8_t *report, int rptlen,
  *   does not modify the report item's data.
  *
  * Input Parameters
- *   report  Buffer containing an IN or FEATURE report from an attached
- *               device.
- *   item        Pointer to the report item of interest in a struct hid_rptinfo_s
- *               item array.
+ *   report Buffer containing an IN or FEATURE report from an attached
+ *          device.
+ *   item   Pointer to the report item of interest in a struct hid_rptinfo_s
+ *          item array.
  *
  * Returned Value:
  *   Zero on success, otherwise a negated errno value.
  *
  ****************************************************************************/
 
-EXTERN int hid_getitem(FAR const uint8_t *report, FAR struct hid_rptitem_s *item);
+int hid_getitem(FAR const uint8_t *report, FAR struct hid_rptitem_s *item);
 
 /****************************************************************************
  * Name: hid_putitem
  *
- * Desription:
+ * Description:
  *   Retrieves the given report item's value out of the value member of the
- *   report item's struct hid_rptitem_s structure and places it into the correct
- *   position in the HID report buffer. The report buffer is assumed to have
- *   the appropriate bits cleared before calling this function (i.e., the
- *   buffer should be explicitly cleared before report values are added).
+ *   report item's struct hid_rptitem_s structure and places it into the
+ *   correct position in the HID report buffer. The report buffer is assumed
+ *   to have the appropriate bits cleared before calling this function (i.e.,
+ *   the buffer should be explicitly cleared before report values are added).
  *
  *   When called, this copies the report item's Value element to it's
  *   previous element for easy checking to see if an item's value has
@@ -313,13 +315,13 @@ EXTERN int hid_getitem(FAR const uint8_t *report, FAR struct hid_rptitem_s *item
  *
  * Input Parameters:
  *   report  Buffer holding the current OUT or FEATURE report data.
- *   item    Pointer to the report item of interest in a struct hid_rptinfo_s
- *           item array.
+ *   item    Pointer to the report item of interest in a struct
+ *           hid_rptinfo_s item array.
  *
  ****************************************************************************/
 
 #if 0 /* Not needed by host */
-EXTERN void hid_putitem(FAR uint8_t *report, FAR struct hid_rptitem_s *item);
+void hid_putitem(FAR uint8_t *report, FAR struct hid_rptitem_s *item);
 #endif
 
 /****************************************************************************
@@ -329,17 +331,18 @@ EXTERN void hid_putitem(FAR uint8_t *report, FAR struct hid_rptitem_s *item);
  *   Retrieves the size of a given HID report in bytes from it's Report ID.
  *
  * InputParameters:
- *  rptinfo Pointer to a struct hid_rptinfo_s instance containing the parser output.
+ *  rptinfo Pointer to a struct hid_rptinfo_s instance containing the parser
+ *          output.
  *  id      Report ID of the report whose size is to be retrieved.
- *  rpttype Type of the report whose size is to be determined, a valued from the
- *          HID_ReportItemTypes_t enum.
+ *  rpttype Type of the report whose size is to be determined, a valued from
+ *          the HID_ReportItemTypes_t enum.
  *
  *  Size of the report in bytes, or 0 if the report does not exist.
  *
  ****************************************************************************/
 
-EXTERN size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo,
-                             uint8_t id, uint8_t rpttype);
+size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id,
+                      uint8_t rpttype);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -347,4 +350,4 @@ EXTERN size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo,
 #endif
 
 
-#endif                          /* __INCLUDE_NUTTX_USB_HID_PARSER_H */
+#endif /* __INCLUDE_NUTTX_USB_HID_PARSER_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/sensors/lm75.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -122,8 +123,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
-                         uint8_t addr);
+int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c,
+                  uint8_t addr);
 
 #undef EXTERN
 #ifdef __cplusplus

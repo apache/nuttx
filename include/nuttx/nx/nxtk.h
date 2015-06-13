@@ -104,7 +104,8 @@ typedef FAR void *NXTKWINDOW;
 #undef EXTERN
 #if defined(__cplusplus)
 # define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 # define EXTERN extern
 #endif
@@ -130,9 +131,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
-                                  FAR const struct nx_callback_s *cb,
-                                  FAR void *arg);
+NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
+                           FAR const struct nx_callback_s *cb, FAR void *arg);
 
 /****************************************************************************
  * Name: nxtk_closewindow
@@ -148,7 +148,7 @@ EXTERN NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_closewindow(NXTKWINDOW hfwnd);
+int nxtk_closewindow(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_block
@@ -158,10 +158,10 @@ EXTERN int nxtk_closewindow(NXTKWINDOW hfwnd);
  *   to the window and then (2) block any further window messaging.
  *
  *   The 'blocked' callback is the response from nx_block (or nxtk_block).
- *   Those blocking interfaces are used to assure that no further messages are
- *   are directed to the window. Receipt of the blocked callback signifies
- *   that (1) there are no further pending callbacks and (2) that the
- *   window is now 'defunct' and will receive no further callbacks.
+ *   Those blocking interfaces are used to assure that no further messages
+ *   are are directed to the window. Receipt of the blocked callback
+ *   signifies that (1) there are no further pending callbacks and (2) that
+ *   the window is now 'defunct' and will receive no further callbacks.
  *
  *   This callback supports coordinated destruction of a window in multi-
  *   user mode.  In multi-use mode, the client window logic must stay
@@ -182,7 +182,7 @@ EXTERN int nxtk_closewindow(NXTKWINDOW hfwnd);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
+int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -201,7 +201,7 @@ EXTERN int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_getposition(NXTKWINDOW hfwnd);
+int nxtk_getposition(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_setposition
@@ -220,7 +220,7 @@ EXTERN int nxtk_getposition(NXTKWINDOW hfwnd);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos);
+int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxtk_setsize
@@ -239,7 +239,7 @@ EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos
  *
  ****************************************************************************/
 
-EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size);
+int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nxtk_raise
@@ -257,7 +257,7 @@ EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_raise(NXTKWINDOW hfwnd);
+int nxtk_raise(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_lower
@@ -275,7 +275,7 @@ EXTERN int nxtk_raise(NXTKWINDOW hfwnd);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_lower(NXTKWINDOW hfwnd);
+int nxtk_lower(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_fillwindow
@@ -293,8 +293,8 @@ EXTERN int nxtk_lower(NXTKWINDOW hfwnd);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_getwindow
@@ -317,9 +317,9 @@ EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                          unsigned int plane, FAR uint8_t *dest,
-                          unsigned int deststride);
+int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                   unsigned int plane, FAR uint8_t *dest,
+                   unsigned int deststride);
 
 /****************************************************************************
  * Name: nxtk_filltrapwindow
@@ -337,9 +337,9 @@ EXTERN int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
-                               FAR const struct nxgl_trapezoid_s *trap,
-                               nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
+                        FAR const struct nxgl_trapezoid_s *trap,
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_drawlinewindow
@@ -362,11 +362,9 @@ EXTERN int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
-                              FAR struct nxgl_vector_s *vector,
-                              nxgl_coord_t width,
-                              nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                              uint8_t caps);
+int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+                        nxgl_coord_t width,
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES], uint8_t caps);
 
 /****************************************************************************
  * Name: nxtk_drawcirclewindow
@@ -386,10 +384,10 @@ EXTERN int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
-                                 FAR const struct nxgl_point_s *center,
-                                 nxgl_coord_t radius, nxgl_coord_t width,
-                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
+                          FAR const struct nxgl_point_s *center,
+                          nxgl_coord_t radius, nxgl_coord_t width,
+                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_fillcirclewindow
@@ -408,10 +406,10 @@ EXTERN int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_fillcirclewindow(NXWINDOW hfwnd,
-                                 FAR const struct nxgl_point_s *center,
-                                 nxgl_coord_t radius,
-                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_fillcirclewindow(NXWINDOW hfwnd,
+                          FAR const struct nxgl_point_s *center,
+                          nxgl_coord_t radius,
+                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_movewindow
@@ -432,8 +430,8 @@ EXTERN int nxtk_fillcirclewindow(NXWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                           FAR const struct nxgl_point_s *offset);
+int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                    FAR const struct nxgl_point_s *offset);
 
 /****************************************************************************
  * Name: nxtk_bitmapwindow
@@ -458,11 +456,10 @@ EXTERN int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
-                             FAR const struct nxgl_rect_s *dest,
-                             FAR const void **src,
-                             FAR const struct nxgl_point_s *origin,
-                             unsigned int stride);
+int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
+                      FAR const void **src,
+                      FAR const struct nxgl_point_s *origin,
+                      unsigned int stride);
 
 /****************************************************************************
  * Name: nxtk_opentoolbar
@@ -481,9 +478,8 @@ EXTERN int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
-                            FAR const struct nx_callback_s *cb,
-                            FAR void *arg);
+int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
+                     FAR const struct nx_callback_s *cb, FAR void *arg);
 
 /****************************************************************************
  * Name: nxtk_closetoolbar
@@ -499,14 +495,14 @@ EXTERN int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_closetoolbar(NXTKWINDOW hfwnd);
+int nxtk_closetoolbar(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_toolbarbounds
  *
  * Description:
  *   Return a bounding box that contains the toolbar in the coordinates of
- *   the containing, framed window.  For example, the recturned  origin
+ *   the containing, framed window.  For example, the returned  origin
  *  (rect.pt1) is the offset toolbar in the framed window.
  *
  *   NOTE: This function is unsafe in the case of the multi-user NX server
@@ -522,7 +518,7 @@ EXTERN int nxtk_closetoolbar(NXTKWINDOW hfwnd);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds);
+int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds);
 
 /****************************************************************************
  * Name: nxtk_filltoolbar
@@ -540,8 +536,8 @@ EXTERN int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                     nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_gettoolbar
@@ -564,9 +560,9 @@ EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  *
  ****************************************************************************/
 
-EXTERN int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                           unsigned int plane, FAR uint8_t *dest,
-                           unsigned int deststride);
+int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride);
 
 /****************************************************************************
  * Name: nxtk_filltraptoolbar
@@ -584,8 +580,9 @@ EXTERN int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *trap,
-                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_filltraptoolbar(NXTKWINDOW hfwnd,
+                         FAR const struct nxgl_trapezoid_s *trap,
+                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_drawlinetoolbar
@@ -609,11 +606,9 @@ EXTERN int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoi
  *
  ****************************************************************************/
 
-EXTERN int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
-                                FAR struct nxgl_vector_s *vector,
-                                nxgl_coord_t width,
-                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
-                                uint8_t caps);
+int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+                         nxgl_coord_t width,
+                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES], uint8_t caps);
 
 /****************************************************************************
  * Name: nxtk_drawcircletoolbar
@@ -633,10 +628,10 @@ EXTERN int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
-                                  FAR const struct nxgl_point_s *center,
-                                  nxgl_coord_t radius, nxgl_coord_t width,
-                                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
+                           FAR const struct nxgl_point_s *center,
+                           nxgl_coord_t radius, nxgl_coord_t width,
+                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_fillcircletoolbar
@@ -655,10 +650,10 @@ EXTERN int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
-                                  FAR const struct nxgl_point_s *center,
-                                  nxgl_coord_t radius,
-                                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
+                           FAR const struct nxgl_point_s *center,
+                           nxgl_coord_t radius,
+                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_movetoolbar
@@ -680,8 +675,8 @@ EXTERN int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                            FAR const struct nxgl_point_s *offset);
+int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxgl_point_s *offset);
 
 /****************************************************************************
  * Name: nxtk_bitmaptoolbar
@@ -691,7 +686,7 @@ EXTERN int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  *   specified toolbar sub-window.
  *
  * Input Parameters:
- *   hfwnd  - The sub-window twhose toolbar will receive the bitmap image
+ *   hfwnd  - The sub-window whose toolbar will receive the bitmap image
  *   dest   - Describes the rectangular region on in the toolbar sub-window
  *            will receive the bit map.
  *   src    - The start of the source image.
@@ -705,11 +700,10 @@ EXTERN int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  *
  ****************************************************************************/
 
-EXTERN int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd,
-                              FAR const struct nxgl_rect_s *dest,
-                              FAR const void *src[CONFIG_NX_NPLANES],
-                              FAR const struct nxgl_point_s *origin,
-                              unsigned int stride);
+int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
+                       FAR const void *src[CONFIG_NX_NPLANES],
+                       FAR const struct nxgl_point_s *origin,
+                       unsigned int stride);
 
 #undef EXTERN
 #if defined(__cplusplus)

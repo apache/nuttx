@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/mkfatfs.h
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 /* These are input parameters for the format.  On return, these values may be
- * overwritted with actual values used in the format.
+ * overwritten with actual values used in the format.
  */
 
 struct fat_format_s
@@ -105,7 +105,8 @@ struct fat_format_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -137,7 +138,8 @@ extern "C" {
  *     device is indeterminate (but likely not good).
  *
  ****************************************************************************/
-EXTERN int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
+
+int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/qencoder.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
 /* The Quadrature Encode module uses a standard character driver framework.
  * However, since the driver is a devices control interface and not a data
  * transfer interface, the majority of the functionality is implemented in
- * driver ioctl calls.  The PWM ioctal commands are lised below:
+ * driver ioctl calls.  The PWM ioctl commands are listed below:
  *
  * QEIOC_POSITION - Get the current position from the encoder.
  *   Argument: int32_t pointer to the location to return the position.
@@ -94,8 +94,8 @@ struct qe_ops_s
   CODE int (*setup)(FAR struct qe_lowerhalf_s *lower);
 
   /* This method is called when the driver is closed.  The lower half driver
-   * should stop data collection, free any resources, disable timer hardware, and
-   * put the system into the lowest possible power usage state
+   * should stop data collection, free any resources, disable timer hardware,
+   * and put the system into the lowest possible power usage state
    */
 
   CODE int (*shutdown)(FAR struct qe_lowerhalf_s *lower);
@@ -120,9 +120,9 @@ struct qe_ops_s
  * quadrature encoder driver is registered.
  *
  * Normally that lower half logic will have its own, custom state structure
- * that is simply cast to struct qe_lowerhalf_s.  In order to perform such casts,
- * the initial fields of the custom state structure match the initial fields
- * of the following generic lower half state structure.
+ * that is simply cast to struct qe_lowerhalf_s.  In order to perform such
+ * casts, the initial fields of the custom state structure match the initial
+ * fields of the following generic lower half state structure.
  */
 
 struct qe_lowerhalf_s
@@ -136,7 +136,6 @@ struct qe_lowerhalf_s
   /* The custom timer state structure may include additional fields after
    * the pointer to the callback structure.
    */
-
 };
 
 /****************************************************************************
@@ -145,7 +144,8 @@ struct qe_lowerhalf_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -169,7 +169,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower);
+int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus

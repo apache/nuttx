@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nxfonts.h
  *
- *   Copyright (C) 2008, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,8 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-/* Select the default font.  If no fonts are selected, then a compilation error
- * is likely down the road.
+/* Select the default font.  If no fonts are selected, then a compilation
+ * error is likely down the road.
  */
 
 /* Sans serif fonts */
@@ -450,7 +450,8 @@ struct nx_fontpackage_s
 #undef EXTERN
 #if defined(__cplusplus)
 # define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 # define EXTERN extern
 #endif
@@ -471,7 +472,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
+NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
 
 /****************************************************************************
  * Name: nxf_getfontset
@@ -484,7 +485,7 @@ EXTERN NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
+FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
 
 /****************************************************************************
  * Name: nxf_getbitmap
@@ -501,8 +502,7 @@ EXTERN FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_fontbitmap_s *
-  nxf_getbitmap(NXHANDLE handle, uint16_t ch);
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(NXHANDLE handle, uint16_t ch);
 
 /****************************************************************************
  * Name: nxf_convert_*bpp
@@ -525,34 +525,34 @@ EXTERN FAR const struct nx_fontbitmap_s *
  *
  ****************************************************************************/
 
-EXTERN int nxf_convert_1bpp(FAR uint8_t *dest, uint16_t height,
-                            uint16_t width, uint16_t stride,
-                            FAR const struct nx_fontbitmap_s *bm,
-                            nxgl_mxpixel_t color);
-EXTERN int nxf_convert_2bpp(FAR uint8_t *dest, uint16_t height,
-                            uint16_t width, uint16_t stride,
-                            FAR const struct nx_fontbitmap_s *bm,
-                            nxgl_mxpixel_t color);
-EXTERN int nxf_convert_4bpp(FAR uint8_t *dest, uint16_t height,
-                            uint16_t width, uint16_t stride,
-                            FAR const struct nx_fontbitmap_s *bm,
-                            nxgl_mxpixel_t color);
-EXTERN int nxf_convert_8bpp(FAR uint8_t *dest, uint16_t height,
-                            uint16_t width, uint16_t stride,
-                            FAR const struct nx_fontbitmap_s *bm,
-                            nxgl_mxpixel_t color);
-EXTERN int nxf_convert_16bpp(FAR uint16_t *dest, uint16_t height,
-                             uint16_t width, uint16_t stride,
-                             FAR const struct nx_fontbitmap_s *bm,
-                             nxgl_mxpixel_t color);
-EXTERN int nxf_convert_24bpp(FAR uint32_t *dest, uint16_t height,
-                             uint16_t width, uint16_t stride,
-                             FAR const struct nx_fontbitmap_s *bm,
-                             nxgl_mxpixel_t color);
-EXTERN int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
-                             uint16_t width, uint16_t stride,
-                             FAR const struct nx_fontbitmap_s *bm,
-                             nxgl_mxpixel_t color);
+int nxf_convert_1bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
+                     FAR const struct nx_fontbitmap_s *bm,
+                     nxgl_mxpixel_t color);
+int nxf_convert_2bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
+                     FAR const struct nx_fontbitmap_s *bm,
+                     nxgl_mxpixel_t color);
+int nxf_convert_4bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
+                     FAR const struct nx_fontbitmap_s *bm,
+                     nxgl_mxpixel_t color);
+int nxf_convert_8bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
+                     FAR const struct nx_fontbitmap_s *bm,
+                     nxgl_mxpixel_t color);
+int nxf_convert_16bpp(FAR uint16_t *dest, uint16_t height,
+                      uint16_t width, uint16_t stride,
+                      FAR const struct nx_fontbitmap_s *bm,
+                      nxgl_mxpixel_t color);
+int nxf_convert_24bpp(FAR uint32_t *dest, uint16_t height,
+                      uint16_t width, uint16_t stride,
+                      FAR const struct nx_fontbitmap_s *bm,
+                      nxgl_mxpixel_t color);
+int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
+                      uint16_t width, uint16_t stride,
+                      FAR const struct nx_fontbitmap_s *bm,
+                      nxgl_mxpixel_t color);
 
 #undef EXTERN
 #if defined(__cplusplus)

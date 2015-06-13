@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/analog/pga11x.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -182,7 +182,8 @@ struct pga11x_settings_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -203,7 +204,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi);
+PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi);
 
 /****************************************************************************
  * Name: pga11x_select
@@ -220,12 +221,12 @@ EXTERN PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi);
  *   settings - New channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-EXTERN int pga11x_select(PGA11X_HANDLE handle,
-                         FAR const struct pga11x_settings_s *settings);
+int pga11x_select(PGA11X_HANDLE handle,
+                  FAR const struct pga11x_settings_s *settings);
 
 /****************************************************************************
  * Name: pga11x_uselect
@@ -242,13 +243,13 @@ EXTERN int pga11x_select(PGA11X_HANDLE handle,
  *   settings - New channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PGA11X_DAISYCHAIN
-EXTERN int pga11x_uselect(PGA11X_HANDLE handle, int pos,
-                          FAR const struct pga11x_usettings_s *settings);
+int pga11x_uselect(PGA11X_HANDLE handle, int pos,
+                   FAR const struct pga11x_usettings_s *settings);
 #endif
 
 /****************************************************************************
@@ -266,12 +267,11 @@ EXTERN int pga11x_uselect(PGA11X_HANDLE handle, int pos,
  *   settings - Returned channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-EXTERN int pga11x_read(PGA11X_HANDLE handle,
-                       FAR struct pga11x_settings_s *settings);
+int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings);
 
 /****************************************************************************
  * Name: pga11x_uread
@@ -288,13 +288,13 @@ EXTERN int pga11x_read(PGA11X_HANDLE handle,
  *   settings - Returned channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PGA11X_DAISYCHAIN
-EXTERN int pga11x_uread(PGA11X_HANDLE handle, int pos,
-                        FAR struct pga11x_usettings_s *settings);
+int pga11x_uread(PGA11X_HANDLE handle, int pos,
+                 FAR struct pga11x_usettings_s *settings);
 #endif
 
 /****************************************************************************
@@ -311,11 +311,11 @@ EXTERN int pga11x_uread(PGA11X_HANDLE handle, int pos,
  *   spi - An SPI "bottom half" device driver instance
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-EXTERN int pga11x_shutdown(PGA11X_HANDLE handle);
+int pga11x_shutdown(PGA11X_HANDLE handle);
 
 /****************************************************************************
  * Name: pga11x_ushutdown
@@ -331,12 +331,12 @@ EXTERN int pga11x_shutdown(PGA11X_HANDLE handle);
  *   pos      - Position of the chip in the daisy chain (0 or 1)
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PGA11X_DAISYCHAIN
-EXTERN int pga11x_ushutdown(PGA11X_HANDLE handle, int pos);
+int pga11x_ushutdown(PGA11X_HANDLE handle, int pos);
 #endif
 
 /****************************************************************************
@@ -353,11 +353,11 @@ EXTERN int pga11x_ushutdown(PGA11X_HANDLE handle, int pos);
  *   spi - An SPI "bottom half" device driver instance
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-EXTERN int pga11x_enable(PGA11X_HANDLE handle);
+int pga11x_enable(PGA11X_HANDLE handle);
 
 /****************************************************************************
  * Name: pga11x_uenable
@@ -373,12 +373,12 @@ EXTERN int pga11x_enable(PGA11X_HANDLE handle);
  *   pos      - Position of the chip in the daisy chain (0 or 1)
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PGA11X_DAISYCHAIN
-EXTERN int pga11x_uenable(PGA11X_HANDLE handle, int pos);
+int pga11x_uenable(PGA11X_HANDLE handle, int pos);
 #endif
 
 #undef EXTERN

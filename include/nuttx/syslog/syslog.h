@@ -2,7 +2,7 @@
  * include/nuttx/syslog/syslog.h
  * The NuttX SYSLOGing interface
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -108,7 +109,7 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CHAR
-EXTERN int syslog_initialize(void);
+int syslog_initialize(void);
 #endif
 
 /****************************************************************************
@@ -124,7 +125,7 @@ EXTERN int syslog_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG
-EXTERN int syslog_putc(int ch);
+int syslog_putc(int ch);
 #endif
 
 #undef EXTERN

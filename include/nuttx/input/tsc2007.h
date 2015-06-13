@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/input/tsc2007.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -91,7 +91,7 @@
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active. The
- * memory must be writable because, under certain circumstances, the driver
+ * memory must be writeable because, under certain circumstances, the driver
  * may modify frequency or X plate resistance values.
  */
 
@@ -135,7 +135,8 @@ struct tsc2007_config_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -150,7 +151,7 @@ extern "C" {
  *
  * Input Parameters:
  *   dev     - An I2C driver instance
- *   config  - Persistant board configuration data
+ *   config  - Persistent board configuration data
  *   minor   - The input device minor number
  *
  * Returned Value:
@@ -159,9 +160,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN  int tsc2007_register(FAR struct i2c_dev_s *dev,
-                             FAR struct tsc2007_config_s *config,
-                             int minor);
+int tsc2007_register(FAR struct i2c_dev_s *dev,
+                     FAR struct tsc2007_config_s *config, int minor);
 
 #undef EXTERN
 #ifdef __cplusplus

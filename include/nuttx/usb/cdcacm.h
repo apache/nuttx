@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usb/cdcacm.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -311,9 +311,9 @@ typedef FAR void (*cdcacm_callback_t)(enum cdcacm_event_e event);
  *
  * Description:
  *   If the CDC serial class driver is part of composite device, then
- *   board-specific logic must provide board_cdcclassobject().  In the simplest
- *   case, board_cdcclassobject() is simply a wrapper around cdcacm_classobject()
- *   that provides the correct device minor number.
+ *   board-specific logic must provide board_cdcclassobject().  In the
+ *   simplest case, board_cdcclassobject() is simply a wrapper around
+ *   cdcacm_classobject() that provides the correct device minor number.
  *
  * Input Parameters:
  *   classdev - The location to return the CDC serial class' device
@@ -326,7 +326,7 @@ typedef FAR void (*cdcacm_callback_t)(enum cdcacm_event_e event);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
 struct usbdevclass_driver_s;
-EXTERN int board_cdcclassobject(FAR struct usbdevclass_driver_s **classdev);
+int board_cdcclassobject(FAR struct usbdevclass_driver_s **classdev);
 #endif
 
 /****************************************************************************
@@ -334,11 +334,11 @@ EXTERN int board_cdcclassobject(FAR struct usbdevclass_driver_s **classdev);
  *
  * Description:
  *   Un-initialize the USB serial class driver.  This is just an application-
- *   specific wrapper aboutn cdcadm_unitialize() that is called form the composite
- *   device logic.
+ *   specific wrapper around cdcadm_unitialize() that is called form the
+ *   composite device logic.
  *
  * Input Parameters:
- *   classdev - The class driver instrance previously give to the composite
+ *   classdev - The class driver instance previously give to the composite
  *     driver by board_cdcclassobject().
  *
  * Returned Value:
@@ -348,7 +348,7 @@ EXTERN int board_cdcclassobject(FAR struct usbdevclass_driver_s **classdev);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
 struct usbdevclass_driver_s;
-EXTERN void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev);
+void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev);
 #endif
 
 /****************************************************************************
@@ -392,7 +392,7 @@ int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev);
  ****************************************************************************/
 
 #if !defined(CONFIG_USBDEV_COMPOSITE) || !defined(CONFIG_CDCACM_COMPOSITE)
-EXTERN int cdcacm_initialize(int minor, FAR void **handle);
+int cdcacm_initialize(int minor, FAR void **handle);
 #endif
 
 /****************************************************************************
@@ -400,18 +400,18 @@ EXTERN int cdcacm_initialize(int minor, FAR void **handle);
  *
  * Description:
  *   Un-initialize the USB storage class driver.  This function is used
- *   internally by the USB composite driver to unitialized the CDC/ACM
+ *   internally by the USB composite driver to uninitialized the CDC/ACM
  *   driver.  This same interface is available (with an untyped input
  *   parameter) when the CDC/ACM driver is used standalone.
  *
  * Input Parameters:
  *   There is one parameter, it differs in typing depending upon whether the
- *   CDC/ACM driver is an internal part of a composite device, or a standalone
- *   USB driver:
+ *   CDC/ACM driver is an internal part of a composite device, or a
+ *   standalone USB driver:
  *
  *     classdev - The class object returned by board_cdcclassobject() or
  *       cdcacm_classobject()
- *     handle - The opaque handle represetning the class object returned by
+ *     handle - The opaque handle representing the class object returned by
  *       a previous call to cdcacm_initialize().
  *
  * Returned Value:
@@ -420,9 +420,9 @@ EXTERN int cdcacm_initialize(int minor, FAR void **handle);
  ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
-EXTERN void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev);
+void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev);
 #else
-EXTERN void cdcacm_uninitialize(FAR void *handle);
+void cdcacm_uninitialize(FAR void *handle);
 #endif
 
 #undef EXTERN

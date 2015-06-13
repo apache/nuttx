@@ -4,7 +4,7 @@
  * Interface definition for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.
  * This LCD is based on the Himax HX8347-D LCD controller.
 
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,8 @@ struct mio283qt2_lcd_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -125,7 +126,7 @@ extern "C" {
  *
  **************************************************************************************/
 
-EXTERN FAR struct lcd_dev_s *mio283qt2_lcdinitialize(FAR struct mio283qt2_lcd_s *lcd);
+FAR struct lcd_dev_s *mio283qt2_lcdinitialize(FAR struct mio283qt2_lcd_s *lcd);
 
 /**************************************************************************************
  * Name:  mio283qt2_clear
@@ -138,7 +139,7 @@ EXTERN FAR struct lcd_dev_s *mio283qt2_lcdinitialize(FAR struct mio283qt2_lcd_s 
  *
  **************************************************************************************/
 
-EXTERN void mio283qt2_clear(FAR struct lcd_dev_s *dev, uint16_t color);
+void mio283qt2_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fat.h
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,8 @@ typedef uint8_t fat_attrib_t;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -84,8 +85,9 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int fat_getattrib(const char *path, fat_attrib_t *attrib);
-EXTERN int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t clearbits);
+int fat_getattrib(FAR const char *path, FAR fat_attrib_t *attrib);
+int fat_setattrib(FAR const char *path, fat_attrib_t setbits,
+                  fat_attrib_t clearbits);
 
 /****************************************************************************
  * Name: fat_dma_alloc and fat_dma_free
@@ -110,8 +112,8 @@ EXTERN int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t cl
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_DMAMEMORY
-EXTERN FAR void *fat_dma_alloc(size_t size);
-EXTERN void fat_dma_free(FAR void *memory, size_t size);
+FAR void *fat_dma_alloc(size_t size);
+void fat_dma_free(FAR void *memory, size_t size);
 #endif
 
 #undef EXTERN

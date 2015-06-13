@@ -55,13 +55,13 @@
  * Function:  ctime_r
  *
  * Description:
- *   ctime and ctime_r converts the time provided in seconds since the
- *   epoch to a string representation. asctime is not re-entrant. ctimer is
+ *   ctime and ctime_r convert the time provided in seconds since the
+ *   epoch to a string representation. ctime is not re-entrant; ctime_r is
  *   re-entrant.
  *
  * Parameters:
  *   timep - The current time represented as seconds since the epoch.
- *   buf - A user provided buffer to receive the 26 character time string.
+ *   buf   - A user provided buffer to receive the 26 character time string.
  *
  * Return Value:
  *   One success, the pointer to the 'buf' is returned; on failure, NULL is

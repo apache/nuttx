@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/composite.h
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -112,7 +113,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN FAR void *composite_initialize(void);
+FAR void *composite_initialize(void);
 
 /****************************************************************************
  * Name: composite_uninitialize
@@ -132,7 +133,7 @@ EXTERN FAR void *composite_initialize(void);
  *
  ***************************************************************************/
 
-EXTERN void composite_uninitialize(FAR void *handle);
+void composite_uninitialize(FAR void *handle);
 
 /****************************************************************************
  * Name: composite_initialize
@@ -156,7 +157,7 @@ EXTERN void composite_uninitialize(FAR void *handle);
  *
  ****************************************************************************/
 
-EXTERN FAR void *composite_initialize(void);
+FAR void *composite_initialize(void);
 
 /****************************************************************************
  * Name: composite_ep0submit
@@ -165,7 +166,7 @@ EXTERN FAR void *composite_initialize(void);
  *   Members of the composite cannot send on EP0 directly because EP0 is
  *   is "owned" by the composite device.  Instead, when configured as members
  *   of a composite device, those classes should call this method so that
- *   the composite device can send on EP0 onbehalf of the class.
+ *   the composite device can send on EP0 on behalf of the class.
  *
  ****************************************************************************/
 
@@ -173,9 +174,9 @@ struct usbdevclass_driver_s;
 struct usbdev_s;
 struct usbdev_req_s;
 
-EXTERN int composite_ep0submit(FAR struct usbdevclass_driver_s *driver,
-                               FAR struct usbdev_s *dev,
-                               FAR struct usbdev_req_s *ctrlreq);
+int composite_ep0submit(FAR struct usbdevclass_driver_s *driver,
+                        FAR struct usbdev_s *dev,
+                        FAR struct usbdev_req_s *ctrlreq);
 
 #undef EXTERN
 #if defined(__cplusplus)

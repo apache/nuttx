@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/netinet/ether.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,16 +58,18 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN FAR char *ether_ntoa(FAR const struct ether_addr *addr);
-EXTERN struct ether_addr *ether_aton(const char *asc);
-EXTERN int ether_ntohost(char *hostname, const struct ether_addr *addr);
-EXTERN int ether_hostton(const char *hostname, struct ether_addr *addr);
-EXTERN int ether_line(const char *line, struct ether_addr *addr, char *hostname);
+FAR char *ether_ntoa(FAR const struct ether_addr *addr);
+FAR struct ether_addr *ether_aton(FAR const char *asc);
+int ether_ntohost(FAR char *hostname, FAR const struct ether_addr *addr);
+int ether_hostton(FAR const char *hostname, FAR struct ether_addr *addr);
+int ether_line(FAR const char *line, FAR struct ether_addr *addr,
+               FAR char *hostname);
 
 #undef EXTERN
 #ifdef __cplusplus

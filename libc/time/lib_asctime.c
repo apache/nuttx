@@ -51,8 +51,9 @@
  * Function:  asctime
  *
  * Description:
- *   asctime and asctime_r converts the time provided in a struct tm to a
- *   string representation. asctime is not re-entrant.
+ *   asctime and asctime_r convert the time provided in a struct tm to a
+ *   string representation.  asctime is not re-entrant; asctime_r is re-
+ *   entrant
  *
  * Parameters:
  *   tp - Pointer to the time to be converted.

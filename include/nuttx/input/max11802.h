@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/input/max11802.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Petteri Aimonen <jpa@nx.mail.kapsi.fi>
  *
@@ -104,7 +104,7 @@
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active. The
- * memory must be writable because, under certain circumstances, the driver
+ * memory must be writeable because, under certain circumstances, the driver
  * may modify frequency or X plate resistance values.
  */
 
@@ -138,7 +138,8 @@ struct max11802_config_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -162,9 +163,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN  int max11802_register(FAR struct spi_dev_s *spi,
-                             FAR struct max11802_config_s *config,
-                             int minor);
+ int max11802_register(FAR struct spi_dev_s *spi,
+                       FAR struct max11802_config_s *config, int minor);
 
 #undef EXTERN
 #ifdef __cplusplus

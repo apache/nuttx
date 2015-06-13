@@ -2,7 +2,7 @@
  * include/nuttx/power/battery.h
  * NuttX Battery Interfaces
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
  * such as:
  *
  *   CONFIG_I2C - I2C support *may* be needed
- *   CONFIG_I2C_MAX1704X - The MAX1704x driver must be explictly selected.
+ *   CONFIG_I2C_MAX1704X - The MAX1704x driver must be explicitly selected.
  */
 
 /* IOCTL Commands ***********************************************************/
@@ -77,7 +77,7 @@
  * BATIOC_ONLINE - Return 1 if the battery is online; 0 if offline.
  *   Input value:  A pointer to type bool.
  * BATIOC_VOLTAGE - Return the current battery voltage.  The returned value
- *   is a fixed preceision number in units of volts.
+ *   is a fixed precision number in units of volts.
  *   Input value:  A pointer to type b16_t.
  * BATIOC_CAPACITY - Return the current battery capacity or State of Charge
  *   (SoC).  The returned value is a fixed precision percentage of the
@@ -146,7 +146,8 @@ struct battery_dev_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -171,8 +172,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int battery_register(FAR const char *devpath,
-                            FAR struct battery_dev_s *dev);
+int battery_register(FAR const char *devpath, FAR struct battery_dev_s *dev);
 
 /****************************************************************************
  * Name: max1704x_initialize
@@ -203,8 +203,8 @@ EXTERN int battery_register(FAR const char *devpath,
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_MAX1704X)
 struct i2c_dev_s; /* Forward reference */
 
-EXTERN FAR struct battery_dev_s *
-  max1704x_initialize(FAR struct i2c_dev_s *i2c, uint8_t addr, uint32_t frequency);
+FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c
+                                              uint8_t addr, uint32_t frequency);
 #endif
 
 #undef EXTERN

@@ -1,7 +1,7 @@
 /********************************************************************************************
  * include/nuttx/input/stmpe811.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -63,7 +63,7 @@
  * CONFIG_INPUT_STMPE811
  *   Enables support for the STMPE811 driver (Needs CONFIG_INPUT)
  * CONFIG_STMPE811_SPI
- *   Enables support for the SPI interface (not currenly supported)
+ *   Enables support for the SPI interface (not currently supported)
  * CONFIG_STMPE811_I2C
  *   Enables support for the I2C interface
  * CONFIG_STMPE811_MULTIPLE
@@ -78,7 +78,7 @@
  * CONFIG_STMPE811_GPIO_DISABLE
  *   Disable driver GPIO functionality.
  * CONFIG_STMPE811_GPIOINT_DISABLE
- *   Disable driver GPIO interrupt functionlality (ignored if GPIO functionality is
+ *   Disable driver GPIO interrupt functionality (ignored if GPIO functionality is
  *   disabled).
  * CONFIG_STMPE811_SWAPXY
  *   Reverse the meaning of X and Y to handle different LCD orientations.
@@ -459,11 +459,11 @@
 typedef void (*stmpe811_handler_t)(int pin);
 
 /* A reference to a structure of this type must be passed to the STMPE811 driver when the
- * driver is instantiaed. This structure provides information about the configuration of the
+ * driver is instantiated. This structure provides information about the configuration of the
  * STMPE811 and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied by the driver
- * and is presumed to persist while the driver is active. The memory must be writable
+ * and is presumed to persist while the driver is active. The memory must be writeable
  * because, under certain circumstances, the driver may modify the frequency.
  */
 
@@ -508,10 +508,10 @@ struct stmpe811_config_s
   void (*clear)(FAR struct stmpe811_config_s *state);
 };
 
-/* Since the STMPE811 is a multi-function device, no functionality is assumed when the device
- * is first created.  Rather, a multi-step initialization is required.  When
- * stmpe811_instantiate is called, it returns a handle of the following type.  That handle may
- * then be used to enable a configure the STMPE811 functionality.
+/* Since the STMPE811 is a multi-function device, no functionality is assumed when the
+ * device is first created.  Rather, a multi-step initialization is required.  When
+ * stmpe811_instantiate is called, it returns a handle of the following type.  That handle
+ * may then be used to enable a configure the STMPE811 functionality.
  */
 
 typedef FAR void *STMPE811_HANDLE;
@@ -522,7 +522,8 @@ typedef FAR void *STMPE811_HANDLE;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -536,7 +537,7 @@ extern "C" {
  *
  * Input Parameters:
  *   dev     - An I2C or SPI driver instance
- *   config  - Persistant board configuration data
+ *   config  - Persistent board configuration data
  *
  * Returned Value:
  *   A non-zero handle is returned on success.  This handle may then be used to configure
@@ -545,11 +546,11 @@ extern "C" {
  ********************************************************************************************/
 
 #ifdef CONFIG_STMPE811_SPI
-EXTERN STMPE811_HANDLE stmpe811_instantiate(FAR struct spi_dev_s *dev,
-                                            FAR struct stmpe811_config_s *config);
+STMPE811_HANDLE stmpe811_instantiate(FAR struct spi_dev_s *dev,
+                                     FAR struct stmpe811_config_s *config);
 #else
-EXTERN STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
-                                            FAR struct stmpe811_config_s *config);
+STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
+                                     FAR struct stmpe811_config_s *config);
 #endif
 
 /********************************************************************************************
@@ -557,7 +558,7 @@ EXTERN STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
  *
  * Description:
  *  Enable TSC functionality.  GPIO4-7 must be available.  This function will register the
- *  touchsceen driver as /dev/inputN where N is the minor device number
+ *  touchscreen driver as /dev/inputN where N is the minor device number
  *
  * Input Parameters:
  *   handle    - The handle previously returned by stmpe811_instantiate
@@ -570,7 +571,7 @@ EXTERN STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_TSC_DISABLE
-EXTERN int stmpe811_register(STMPE811_HANDLE handle, int minor);
+int stmpe811_register(STMPE811_HANDLE handle, int minor);
 #endif
 
 /********************************************************************************************
@@ -590,7 +591,7 @@ EXTERN int stmpe811_register(STMPE811_HANDLE handle, int minor);
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_GPIO_DISABLE
-EXTERN int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig);
+int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig);
 #endif
 
 /********************************************************************************************
@@ -610,7 +611,7 @@ EXTERN int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig);
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_GPIO_DISABLE
-EXTERN void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value);
+void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value);
 #endif
 
 /********************************************************************************************
@@ -631,7 +632,7 @@ EXTERN void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool v
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_GPIO_DISABLE
-EXTERN int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value);
+int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value);
 #endif
 
 /********************************************************************************************
@@ -656,8 +657,7 @@ EXTERN int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *va
  ********************************************************************************************/
 
 #if !defined(CONFIG_STMPE811_GPIO_DISABLE) && !defined(CONFIG_STMPE811_GPIOINT_DISABLE)
-EXTERN int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
-                               stmpe811_handler_t handler);
+int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig, stmpe811_handler_t handler);
 #endif
 
 /********************************************************************************************
@@ -676,7 +676,7 @@ EXTERN int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_ADC_DISABLE
-EXTERN int stmpe811_adcinitialize(STMPE811_HANDLE handle);
+int stmpe811_adcinitialize(STMPE811_HANDLE handle);
 #endif
 
 /********************************************************************************************
@@ -696,7 +696,7 @@ EXTERN int stmpe811_adcinitialize(STMPE811_HANDLE handle);
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_ADC_DISABLE
-EXTERN int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin);
+int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin);
 #endif
 
 /********************************************************************************************
@@ -715,7 +715,7 @@ EXTERN int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin);
  ********************************************************************************************/
 
 #ifndef CONFIG_STMPE811_ADC_DISABLE
-EXTERN uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin);
+uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin);
 #endif
 
 /********************************************************************************************
@@ -733,7 +733,7 @@ EXTERN uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin);
  *
  ********************************************************************************************/
 
-EXTERN int stmpe811_tempinitialize(STMPE811_HANDLE handle);
+int stmpe811_tempinitialize(STMPE811_HANDLE handle);
 
 /********************************************************************************************
  * Name: stmpe811_tempread
@@ -750,7 +750,7 @@ EXTERN int stmpe811_tempinitialize(STMPE811_HANDLE handle);
  *
  ********************************************************************************************/
 
-EXTERN uint16_t stmpe811_tempread(STMPE811_HANDLE handle);
+uint16_t stmpe811_tempread(STMPE811_HANDLE handle);
 
 /********************************************************************************************
  * Name: stmpe811_tempinterrupt
@@ -767,7 +767,7 @@ EXTERN uint16_t stmpe811_tempread(STMPE811_HANDLE handle);
  *               threshold value; False:  Generate an interrupt if the
  *               temperature falls below the threshold value.
  *   callback  - The client callback function that will be called when
- *               the termperature crosses the threshold.
+ *               the temperature crosses the threshold.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate

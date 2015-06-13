@@ -51,12 +51,12 @@
  * definitions could be combined to save a little FLASH space.
  */
 
-static const char g_wday_name[7][3] =
+static const char * const g_wday_name[7] =
 {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-static const char g_mon_name[12][3] =
+static const char * const g_mon_name[12] =
 {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -70,11 +70,12 @@ static const char g_mon_name[12][3] =
  * Function:  asctime_r
  *
  * Description:
- *   asctime and asctime_r converts the time provided in a struct tm to a
- *   string representation.  asctime_r is re-entrant.
+ *   asctime and asctime_r convert the time provided in a struct tm to a
+ *   string representation.  asctime is not re-entrant; asctime_r is re-
+ *   entrant.
  *
  * Parameters:
- *   tp - Pointer to the time to be converted.
+ *   tp  - Pointer to the time to be converted.
  *   buf - A user provided buffer to receive the 26 character time string.
  *
  * Return Value:

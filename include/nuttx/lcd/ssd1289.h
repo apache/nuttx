@@ -2,7 +2,7 @@
  * include/nuttx/lcd/ssd1289.h
  * Definitions for the Solomon Systech SSD1289 LCD controller
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: SSD1289, Rev 1.3, Apr 2007, Solomon Systech Limited
@@ -106,7 +106,8 @@ struct ssd1289_lcd_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -125,7 +126,7 @@ extern "C" {
  *
  **************************************************************************************/
 
-EXTERN FAR struct lcd_dev_s *ssd1289_lcdinitialize(FAR struct ssd1289_lcd_s *lcd);
+FAR struct lcd_dev_s *ssd1289_lcdinitialize(FAR struct ssd1289_lcd_s *lcd);
 
 /**************************************************************************************
  * Name:  ssd1289_clear
@@ -138,7 +139,7 @@ EXTERN FAR struct lcd_dev_s *ssd1289_lcdinitialize(FAR struct ssd1289_lcd_s *lcd
  *
  **************************************************************************************/
 
-EXTERN void ssd1289_clear(FAR struct lcd_dev_s *dev, uint16_t color);
+void ssd1289_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 
 #undef EXTERN
 #ifdef __cplusplus

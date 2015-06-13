@@ -2,6 +2,7 @@
  * include/nuttx/sensors/lis331dl.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
@@ -34,11 +35,6 @@
  *
  ****************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief ST LIS331DL I2C Device Driver
- **/
-
 #ifndef __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 #define __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 
@@ -54,11 +50,11 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
-
 
 /************************************************************************************
  * Public Data Types
@@ -66,72 +62,141 @@ extern "C" {
 
 struct lis331dl_dev_s;
 
-struct lis331dl_vector_s {
-    int8_t  x, y, z;
+struct lis331dl_vector_s
+{
+  int8_t x;
+  int8_t y;
+  int8_t z;
 };
-
 
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
-/** Initialize ST LIS331DL Chip
+/************************************************************************************
+ * Name: lis331dl_init
  *
- * \param i2c I2C Device Structure
- * \param address I2C Address of the proposed device
- * \return Pointer to newly allocated ST LIS331DL structure or NULL on error with errno set.
+ * Description:
+ *   Initialize ST LIS331DL Chip
+ *
+ * Input Parameters:
+ *   i2c - I2C Device Structure
+ *   address - I2C Address of the proposed device
+ *
+ * Returned Value:
+ *   Pointer to newly allocated ST LIS331DL structure or NULL on error with errno
+ *   set.
  *
  * Possible errno as set by this function on error:
- *  - ENODEV: When device addressed on given address is not compatible or it is not a LIS331DL
+ *  - ENODEV: When device addressed on given address is not compatible or it is not
+ *    a LIS331DL
  *  - EFAULT: When there is no device at given address.
- *  - EBUSY: When device is already addressed by other device driver (not yet supported by low-level driver)
- **/
-EXTERN struct lis331dl_dev_s * lis331dl_init(struct i2c_dev_s * i2c, uint16_t address);
-
-/** Deinitialize ST LIS331DL Chip
+ *  - EBUSY: When device is already addressed by other device driver (not yet
+ *    supported by low-level driver)
  *
- * \param dev Device to LIS331DL device structure, as returned by the lis331dl_init()
- * \return OK On success
+ ************************************************************************************/
+
+FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_dev_s * i2c,
+                                         uint16_t address);
+
+/************************************************************************************
+ * Name: lis331dl_deinit
  *
- **/
-EXTERN int lis331dl_deinit(struct lis331dl_dev_s * dev);
-
-/** Power up device, start conversion */
-EXTERN int lis331dl_powerup(struct lis331dl_dev_s * dev);
-
-/** Power down device, stop conversion */
-EXTERN int lis331dl_powerdown(struct lis331dl_dev_s * dev);
-
-/** Configure conversion
+ * Description:
+ *   Uninitialize ST LIS331DL Chip
  *
- * \param dev Device to LIS331DL device structure
- * \param full When set, range of [-9g, 9g] is selected, otherwise [-2g, +2g]
- * \param fast When set, conversion operates at 400 Hz, otherwise at 100 Hz
- * \return OK on success or errno is set
- **/
-EXTERN int lis331dl_setconversion(struct lis331dl_dev_s * dev, bool full, bool fast);
-
-/** Get precision
+ * Input Parameters:
+ *   dev - Device to LIS331DL device structure, as returned by the lis331dl_init()
  *
- * \return Precision of 1 LSB in terms of unit [mg]
- **/
-EXTERN int lis331dl_getprecision(struct lis331dl_dev_s * dev);
-
-/** Get sample rate
+ * Returned Value:
+ *   OK On success
  *
- * \return Sample rate in unit of [Hz]
- **/
-EXTERN int lis331dl_getsamplerate(struct lis331dl_dev_s * dev);
+ ************************************************************************************/
 
-/** Get readings, updates internal data structure
+int lis331dl_deinit(FAR struct lis331dl_dev_s * dev);
+
+/************************************************************************************
+ * Name: lis331dl_powerup
  *
- * \param dev Device to LIS331DL device structure
- * \return Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno set.
- *   If data is not yet ready to be read from the LIS331 then errno is set to EAGAIN otherwise
- *   errno is set by I2C_TRANSFER().
- */
-EXTERN const struct lis331dl_vector_s * lis331dl_getreadings(struct lis331dl_dev_s * dev);
+ * Description:
+ *   Power up device, start conversion
+ *
+ ************************************************************************************/
 
+int lis331dl_powerup(FAR struct lis331dl_dev_s * dev);
+
+/************************************************************************************
+ * Name: lis331dl_powerdown
+ *
+ * Description:
+ *   Power down device, stop conversion
+ *
+ ************************************************************************************/
+
+int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev);
+
+/************************************************************************************
+ * Name: lis331dl_setconversion
+ *
+ * Description:
+ *   Configure conversion
+ *
+ * Input Parameters:
+ *   dev  - Device to LIS331DL device structure
+ *   full - When set, range of [-9g, 9g] is selected, otherwise [-2g, +2g]
+ *   fast - When set, conversion operates at 400 Hz, otherwise at 100 Hz
+ *
+ * Returned Value:
+ *   OK on success or errno is set
+ *
+ ************************************************************************************/
+
+int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev, bool full, bool fast);
+
+/************************************************************************************
+ * Name: lis331dl_getprecision
+ *
+ * Description:
+ *   Get precision
+ *
+ * Returned Value:
+ *   Precision of 1 LSB in terms of unit [mg]
+ *
+ ************************************************************************************/
+
+int lis331dl_getprecision(FAR struct lis331dl_dev_s * dev);
+
+/************************************************************************************
+ * Name: lis331dl_getsamplerate
+ *
+ * Description:
+ *   Get sample rate
+ *
+ * Returned Value:
+ *   Sample rate in units of [Hz]
+ *
+ ************************************************************************************/
+
+int lis331dl_getsamplerate(FAR struct lis331dl_dev_s * dev);
+
+/************************************************************************************
+ * Name: lis331dl_getreadings
+ *
+ * Description:
+ *   Get readings, updates internal data structure
+ *
+ * Input Parameters:
+ *   dev - Device to LIS331DL device structure
+ *
+ * Returned Value:
+ *   Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno
+ *   set.  If data is not yet ready to be read from the LIS331 then errno is set
+ *   to EAGAIN otherwise errno is set by I2C_TRANSFER().
+ *
+ ************************************************************************************/
+
+FAR const struct lis331dl_vector_s *
+  lis331dl_getreadings(FAR struct lis331dl_dev_s * dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

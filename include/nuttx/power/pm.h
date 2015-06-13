@@ -2,7 +2,7 @@
  * include/nuttx/power/pm.h
  * NuttX Power Management Interfaces
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,8 @@
  * IDLE    - This is still basically normal operational mode, the system is,
  *           however, IDLE and some simple simple steps to reduce power
  *           consumption provided that they do not interfere with normal
- *           Operation.  Simply dimming the a backlight might be an example
- *           somethat that would be done when the system is idle.
+ *           Operation.  Simply dimming a backlight might be an example
+ *           something that would be done when the system is idle.
  * STANDBY - Standby is a lower power consumption mode that may involve more
  *           extensive power management steps such has disabling clocking or
  *           setting the processor into reduced power consumption modes. In
@@ -272,7 +272,7 @@ struct pm_callback_s
    *
    * Input Parameters:
    *   cb      - Returned to the driver.  The driver version of the callback
-   *             strucure may include additional, driver-specific state
+   *             structure may include additional, driver-specific state
    *             data at the end of the structure.
    *   pmstate - Identifies the new PM state
    *
@@ -300,7 +300,7 @@ struct pm_callback_s
    *
    * Input Parameters:
    *   cb      - Returned to the driver.  The driver version of the callback
-   *             strucure may include additional, driver-specific state
+   *             structure may include additional, driver-specific state
    *             data at the end of the structure.
    *   pmstate - Identifies the new PM state
    *
@@ -323,7 +323,8 @@ struct pm_callback_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -336,8 +337,8 @@ extern "C" {
  *
  * Description:
  *   This function is called by MCU-specific logic at power-on reset in
- *   order to provide one-time initialization the power management subystem.
- *   This function must be called *very* early in the initializeation sequence
+ *   order to provide one-time initialization the power management subsystem.
+ *   This function must be called *very* early in the initialization sequence
  *   *before* any other device drivers are initialized (since they may
  *   attempt to register with the power management subsystem).
  *
@@ -349,7 +350,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void pm_initialize(void);
+void pm_initialize(void);
 
 /****************************************************************************
  * Name: pm_register
@@ -367,14 +368,14 @@ EXTERN void pm_initialize(void);
  *
  ****************************************************************************/
 
-EXTERN int pm_register(FAR struct pm_callback_s *callbacks);
+int pm_register(FAR struct pm_callback_s *callbacks);
 
 /****************************************************************************
  * Name: pm_activity
  *
  * Description:
  *   This function is called by a device driver to indicate that it is
- *   performing meaningful activities (non-idle).  This increment an activty
+ *   performing meaningful activities (non-idle).  This increment an activity
  *   count and/or will restart a idle timer and prevent entering reduced
  *   power states.
  *
@@ -395,7 +396,7 @@ EXTERN int pm_register(FAR struct pm_callback_s *callbacks);
  *
  ****************************************************************************/
 
-EXTERN void pm_activity(int priority);
+void pm_activity(int priority);
 
 /****************************************************************************
  * Name: pm_checkstate
@@ -408,7 +409,7 @@ EXTERN void pm_activity(int priority);
  *   not automatically changed, however.  The IDLE loop must call
  *   pm_changestate() in order to make the state change.
  *
- *   These two steps are separated because the plaform-specific IDLE loop may
+ *   These two steps are separated because the platform-specific IDLE loop may
  *   have additional situational information that is not available to the
  *   the PM sub-system.  For example, the IDLE loop may know that the
  *   battery charge level is very low and may force lower power states
@@ -428,13 +429,13 @@ EXTERN void pm_activity(int priority);
  *
  ****************************************************************************/
 
-EXTERN enum pm_state_e pm_checkstate(void);
+enum pm_state_e pm_checkstate(void);
 
 /****************************************************************************
  * Name: pm_changestate
  *
  * Description:
- *   This function is used to platform-specific power managmeent logic.  It
+ *   This function is used to platform-specific power management logic.  It
  *   will announce the power management power management state change to all
  *   drivers that have registered for power management event callbacks.
  *
@@ -457,7 +458,7 @@ EXTERN enum pm_state_e pm_checkstate(void);
  *
  ****************************************************************************/
 
-EXTERN int pm_changestate(enum pm_state_e newstate);
+int pm_changestate(enum pm_state_e newstate);
 
 #undef EXTERN
 #ifdef __cplusplus

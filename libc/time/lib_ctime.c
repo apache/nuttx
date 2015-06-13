@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/time/lib_asctime.c
+ * libc/time/lib_ctime.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,9 +51,9 @@
  * Function:  ctime
  *
  * Description:
- *   ctime and ctime_r converts the time provided in seconds since the
- *   epoch to a string representation. asctime is not re-entrant. ctime is
- *   not re-entrant.
+ *   ctime and ctime_r convert the time provided in seconds since the
+ *   epoch to a string representation. ctime is not re-entrant; ctime_r is
+ *   re-entrant.
  *
  * Parameters:
  *   timep - The current time represented as seconds since the epoch.

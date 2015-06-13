@@ -124,8 +124,8 @@ struct timespec
  * REVISIT: This structure could be packed better using uint8_t's and
  * uint16_t's.  The standard definition does, however, call out type int for
  * all of the members.  NOTE: Any changes to this structure must be also be
- * reflected in struct rtc_time defined in include/nuttx/timers/rtc.h; these two
- * structures must be cast compatible.
+ * reflected in struct rtc_time defined in include/nuttx/timers/rtc.h; these
+ * two structures must be cast compatible.
  */
 
 struct tm

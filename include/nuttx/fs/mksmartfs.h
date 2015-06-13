@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/mksmartfs.h
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013, 2015 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -96,9 +97,9 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
-EXTERN int mksmartfs(FAR const char *pathname, uint8_t nrootdirs);
+int mksmartfs(FAR const char *pathname, uint8_t nrootdirs);
 #else
-EXTERN int mksmartfs(FAR const char *pathname);
+int mksmartfs(FAR const char *pathname);
 #endif
 
 #undef EXTERN

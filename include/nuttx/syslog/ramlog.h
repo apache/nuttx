@@ -2,7 +2,7 @@
  * include/nuttx/syslog/ramlog.h
  * The RAM logging driver
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
  ****************************************************************************/
 /* The RAM logging driver is a driver that was intended to support debugging
  * output (syslogging) when the normal serial output is not available.  For
- * example, if you are using a telnet or USB serial console, the debug
+ * example, if you are using a Telnet or USB serial console, the debug
  * output will get lost.
  *
  * The RAM logging  driver is similar to a pipe in that it saves the
@@ -137,7 +137,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -162,8 +163,7 @@ extern "C" {
  ****************************************************************************/
 
 #if !defined(CONFIG_RAMLOG_CONSOLE) && !defined(CONFIG_RAMLOG_SYSLOG)
-EXTERN int ramlog_register(FAR const char *devpath, FAR char *buffer,
-                           size_t buflen);
+int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen);
 #endif
 
 /****************************************************************************
@@ -179,7 +179,7 @@ EXTERN int ramlog_register(FAR const char *devpath, FAR char *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_CONSOLE
-EXTERN int ramlog_consoleinit(void);
+int ramlog_consoleinit(void);
 #endif
 
 /****************************************************************************
@@ -195,7 +195,7 @@ EXTERN int ramlog_consoleinit(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-EXTERN int ramlog_sysloginit(void);
+int ramlog_sysloginit(void);
 #endif
 
 #undef EXTERN

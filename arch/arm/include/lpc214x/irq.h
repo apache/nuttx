@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/lpc214x/irq.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,14 +110,15 @@ typedef void (*vic_vector_t)(uint32_t *regs);
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
-EXTERN void up_attach_vector(int irq, int vector, vic_vector_t handler);
-EXTERN void up_detach_vector(int vector);
+void up_attach_vector(int irq, int vector, vic_vector_t handler);
+void up_detach_vector(int vector);
 #endif
 
 #undef EXTERN

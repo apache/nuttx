@@ -2,7 +2,7 @@
  * include/nuttx/lcd/nokia6100.h
  * Application interface to the Nokia 6100 LCD display
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -95,43 +96,45 @@ extern "C" {
  * Public Function Prototypes
  ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  nokia_lcdinitialize
  *
  * Description:
- *   Initialize the NOKIA6100 video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off == sleep mode).
+ *   Initialize the NOKIA6100 video hardware.  The initial state of the LCD
+ *   is fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the powersetting at 0 (full off == sleep mode).
  *
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throuh CONFIG_NOKIA6100_NINTERFACES-1.  This
- *     allows support for multiple LCD devices.
+ *   devno - A value in the range of 0 throuh CONFIG_NOKIA6100_NINTERFACES-1.
+ *     This allows support for multiple LCD devices.
  *
  * Returned Value:
  *
- *   On success, this function returns a reference to the LCD object for the specified
- *   LCD.  NULL is returned on any failure.
+ *   On success, this function returns a reference to the LCD object for the
+ *   specified LCD.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
 struct spi_dev_s; /* see nuttx/spi/spi.h */
-EXTERN FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned int devno);
+FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi,
+                                          unsigned int devno);
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  nokia_backlight
  *
  * Description:
- *   The Nokia 6100 backlight is controlled by logic outside of the LCD assembly.  This
- *   function must be provided by board specific logic to manage the backlight.  This
- *   function will receive a power value (0: full off - CONFIG_LCD_MAXPOWER: full on)
- *   and should set the backlight accordingly.
+ *   The Nokia 6100 backlight is controlled by logic outside of the LCD
+ *   assembly.  This function must be provided by board specific logic to
+ *   manage the backlight.  This function will receive a power value (0: full
+ *   off - CONFIG_LCD_MAXPOWER: full on) and should set the backlight
+ *   accordingly.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-EXTERN int nokia_backlight(unsigned int power);
+int nokia_backlight(unsigned int power);
 
 #undef EXTERN
 #ifdef __cplusplus
