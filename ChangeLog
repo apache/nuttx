@@ -10587,4 +10587,6 @@
 	  ctime_r() (2015-06-12).
 	* include/ and arch/: Clean up and review of header files for conformance
 	  to standards (2015-06-12).
-
+	* arch/arm/src/samdl: Add build framework for SAML21 DMA support.
+	  Nothing there yet except for skeletal logic taken from SAM3/4
+	  (2015-06-12).
