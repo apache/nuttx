@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_exti.h
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -84,30 +85,29 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                                 bool event, xcpt_t func);
+xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                          bool event, xcpt_t func);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_exti_alarm
  *
  * Description:
  *   Sets/clears EXTI alarm interrupt.
  *
  * Parameters:
- *  - rising/falling edge: enables interrupt on rising/falling edget
+ *  - rising/falling edge: enables interrupt on rising/falling edges
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This
- *   value may, for example, be used to restore the previous handler when
- *   multiple handlers are used.
+ *   The previous value of the interrupt handler function pointer.  This value may,
+ *   for example, be used to restore the previous handler when multiple handlers are
+ *   used.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-EXTERN xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
-                               xcpt_t func);
+xcpt_t stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func);
 #endif
 
 #undef EXTERN

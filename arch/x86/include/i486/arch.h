@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/include/i486/arch.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -435,13 +435,14 @@ static inline uint32_t up_getss()
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN void gdt_flush(uint32_t gdt_addr);
-EXTERN void idt_flush(uint32_t idt_addr);
+void gdt_flush(uint32_t gdt_addr);
+void idt_flush(uint32_t idt_addr);
 
 #undef EXTERN
 #ifdef __cplusplus

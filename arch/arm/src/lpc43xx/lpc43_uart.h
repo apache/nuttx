@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_uart.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -79,7 +80,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void lpc43_lowsetup(void);
+void lpc43_lowsetup(void);
 
 /****************************************************************************
  * Name: lpc43_usart0_reset, lpc43_uart1_reset, lpc43_usart2_reset, and
@@ -92,16 +93,16 @@ EXTERN void lpc43_lowsetup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC43_USART0
-EXTERN void lpc43_usart0_reset(void);
+void lpc43_usart0_reset(void);
 #endif
 #ifdef CONFIG_LPC43_UART1
-EXTERN void lpc43_uart1_reset(void);
+void lpc43_uart1_reset(void);
 #endif
 #ifdef CONFIG_LPC43_USART2
-EXTERN void lpc43_usart2_reset(void);
+void lpc43_usart2_reset(void);
 #endif
 #ifdef CONFIG_LPC43_USART3
-EXTERN void lpc43_usart3_reset(void);
+void lpc43_usart3_reset(void);
 #endif
 
 /****************************************************************************
@@ -118,19 +119,19 @@ EXTERN void lpc43_usart3_reset(void);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC43_USART0
-EXTERN void lpc43_usart0_setup(void);
+void lpc43_usart0_setup(void);
 #endif
 
 #ifdef CONFIG_LPC43_UART1
-EXTERN void lpc43_uart1_setup(void);
+void lpc43_uart1_setup(void);
 #endif
 
 #ifdef CONFIG_LPC43_USART2
-EXTERN void lpc43_usart2_setup(void);
+void lpc43_usart2_setup(void);
 #endif
 
 #ifdef CONFIG_LPC43_USART3
-EXTERN void lpc43_usart3_setup(void);
+void lpc43_usart3_setup(void);
 #endif
 
 /****************************************************************************
@@ -145,7 +146,7 @@ EXTERN void lpc43_usart3_setup(void);
  *
  ****************************************************************************/
 
-EXTERN void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud);
+void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud);
 
 #undef EXTERN
 #if defined(__cplusplus)

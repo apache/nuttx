@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/stm32/stm32_waste.h
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Copyright (C) 2011, 2015 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -67,7 +68,7 @@ extern "C" {
  *   cannot be used for other purposes (yet).
  **/
 
-EXTERN void up_waste(void);
+void up_waste(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

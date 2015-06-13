@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_eth.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -82,7 +83,7 @@ extern "C" {
  ************************************************************************************/
 
 #if STM32_NETHERNET > 1
-EXTERN int stm32_ethinitialize(int intf);
+int stm32_ethinitialize(int intf);
 #endif
 
 /************************************************************************************
@@ -106,7 +107,7 @@ EXTERN int stm32_ethinitialize(int intf);
  ************************************************************************************/
 
 #ifdef CONFIG_STM32_PHYINIT
-EXTERN int stm32_phy_boardinitialize(int intf);
+int stm32_phy_boardinitialize(int intf);
 #endif
 
 #undef EXTERN

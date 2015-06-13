@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/imx/imx_cspi.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,7 +167,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif /* __cplusplus */
@@ -195,10 +196,10 @@ extern "C" {
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
 
-EXTERN void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int imx_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int imx_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 #undef EXTERN

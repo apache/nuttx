@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_wdt.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -57,7 +57,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -84,7 +85,7 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_WDT
-EXTERN void sam_wdtinitialize(FAR const char *devpath);
+void sam_wdtinitialize(FAR const char *devpath);
 #endif
 
 #undef EXTERN

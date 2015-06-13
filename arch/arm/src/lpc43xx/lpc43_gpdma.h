@@ -109,7 +109,8 @@ struct lpc43_dmaregs_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -129,7 +130,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void lpc43_dmainitilaize(void);
+void lpc43_dmainitilaize(void);
 
 /****************************************************************************
  * Name: lpc43_dmachannel
@@ -145,7 +146,7 @@ EXTERN void lpc43_dmainitilaize(void);
  *
  ****************************************************************************/
 
-EXTERN DMA_HANDLE lpc43_dmachannel(void);
+DMA_HANDLE lpc43_dmachannel(void);
 
 /****************************************************************************
  * Name: lpc43_dmafree
@@ -160,7 +161,7 @@ EXTERN DMA_HANDLE lpc43_dmachannel(void);
  *
  ****************************************************************************/
 
-EXTERN void lpc43_dmafree(DMA_HANDLE handle);
+void lpc43_dmafree(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: lpc43_dmasetup
@@ -170,10 +171,8 @@ EXTERN void lpc43_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN int lpc43_dmarxsetup(DMA_HANDLE handle,
-                            uint32_t control, uint32_t config,
-                            uint32_t srcaddr, uint32_t destaddr,
-                            size_t nbytes);
+int lpc43_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
 
 /****************************************************************************
  * Name: lpc43_dmastart
@@ -183,7 +182,7 @@ EXTERN int lpc43_dmarxsetup(DMA_HANDLE handle,
  *
  ****************************************************************************/
 
-EXTERN int lpc43_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
+int lpc43_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
 /****************************************************************************
  * Name: lpc43_dmastop
@@ -195,7 +194,7 @@ EXTERN int lpc43_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
  *
  ****************************************************************************/
 
-EXTERN void lpc43_dmastop(DMA_HANDLE handle);
+void lpc43_dmastop(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: lpc43_dmasample
@@ -206,7 +205,7 @@ EXTERN void lpc43_dmastop(DMA_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void lpc43_dmasample(DMA_HANDLE handle, struct lpc43_dmaregs_s *regs);
+void lpc43_dmasample(DMA_HANDLE handle, struct lpc43_dmaregs_s *regs);
 #else
 #  define lpc43_dmasample(handle,regs)
 #endif
@@ -220,8 +219,8 @@ EXTERN void lpc43_dmasample(DMA_HANDLE handle, struct lpc43_dmaregs_s *regs);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void lpc43_dmadump(DMA_HANDLE handle, const struct lpc43_dmaregs_s *regs,
-                          const char *msg);
+void lpc43_dmadump(DMA_HANDLE handle, const struct lpc43_dmaregs_s *regs,
+                   const char *msg);
 #else
 #  define lpc43_dmadump(handle,regs,msg)
 #endif

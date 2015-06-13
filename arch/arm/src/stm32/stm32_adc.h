@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_adc.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -571,7 +571,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -593,8 +594,8 @@ extern "C" {
  ****************************************************************************/
 
 struct adc_dev_s;
-EXTERN struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
-                                             int nchannels);
+struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
+                                      int nchannels);
 
 #undef EXTERN
 #ifdef __cplusplus

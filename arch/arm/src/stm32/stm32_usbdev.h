@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_usbdev.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -68,12 +69,10 @@ extern "C" {
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
  *   connect and disconnect), then the board software must provide stm32_pullup.
  *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
  *
  ************************************************************************************/
 
-EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int stm32_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 
 /************************************************************************************
  * Name:  stm32_usbsuspend
@@ -86,7 +85,7 @@ EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  *
  ************************************************************************************/
 
-EXTERN void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)

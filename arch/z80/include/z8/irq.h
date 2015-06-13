@@ -2,7 +2,7 @@
  * arch/z8/include/z8/irq.h
  * arch/chip/irq.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -350,13 +350,14 @@ struct xcptcontext
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN irqstate_t irqsave(void);
-EXTERN void irqrestore(irqstate_t flags);
+irqstate_t irqsave(void);
+void irqrestore(irqstate_t flags);
 
 #undef EXTERN
 #ifdef __cplusplus

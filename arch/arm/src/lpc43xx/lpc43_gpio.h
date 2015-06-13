@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_gpio.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -252,7 +252,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -273,7 +274,7 @@ extern "C" {
  *
  ********************************************************************************************/
 
-EXTERN int lpc43_gpio_config(uint16_t gpiocfg);
+int lpc43_gpio_config(uint16_t gpiocfg);
 
 /********************************************************************************************
  * Name: lpc43_gpio_write
@@ -286,7 +287,7 @@ EXTERN int lpc43_gpio_config(uint16_t gpiocfg);
  *
  ********************************************************************************************/
 
-EXTERN void lpc43_gpio_write(uint16_t gpiocfg, bool value);
+void lpc43_gpio_write(uint16_t gpiocfg, bool value);
 
 /********************************************************************************************
  * Name: lpc43_gpio_read
@@ -299,7 +300,7 @@ EXTERN void lpc43_gpio_write(uint16_t gpiocfg, bool value);
  *
  ********************************************************************************************/
 
-EXTERN bool lpc43_gpio_read(uint16_t gpiocfg);
+bool lpc43_gpio_read(uint16_t gpiocfg);
 
 /********************************************************************************************
  * Function:  lpc43_gpio_dump
@@ -310,7 +311,7 @@ EXTERN bool lpc43_gpio_read(uint16_t gpiocfg);
  ********************************************************************************************/
 
 #ifdef CONFIG_DEBUG
-EXTERN int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg);
+int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg);
 #else
 #  define lpc43_gpio_dump(p,m)
 #endif

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_gpio.h
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Uros Platise <uros.platise@isotel.eu>
@@ -408,7 +408,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -436,7 +437,7 @@ EXTERN const uint32_t g_gpiobase[STM32_NGPIO_PORTS];
  *
  ************************************************************************************/
 
-EXTERN int stm32_configgpio(uint32_t cfgset);
+int stm32_configgpio(uint32_t cfgset);
 
 /************************************************************************************
  * Name: stm32_unconfiggpio
@@ -457,7 +458,7 @@ EXTERN int stm32_configgpio(uint32_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN int stm32_unconfiggpio(uint32_t cfgset);
+int stm32_unconfiggpio(uint32_t cfgset);
 
 /************************************************************************************
  * Name: stm32_gpiowrite
@@ -467,7 +468,7 @@ EXTERN int stm32_unconfiggpio(uint32_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN void stm32_gpiowrite(uint32_t pinset, bool value);
+void stm32_gpiowrite(uint32_t pinset, bool value);
 
 /************************************************************************************
  * Name: stm32_gpioread
@@ -477,7 +478,7 @@ EXTERN void stm32_gpiowrite(uint32_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool stm32_gpioread(uint32_t pinset);
+bool stm32_gpioread(uint32_t pinset);
 
 /************************************************************************************
  * Name: stm32_gpiosetevent
@@ -498,8 +499,8 @@ EXTERN bool stm32_gpioread(uint32_t pinset);
  *
  ************************************************************************************/
 
-EXTERN xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                                 bool event, xcpt_t func);
+xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                          bool event, xcpt_t func);
 
 /************************************************************************************
  * Function:  stm32_dumpgpio
@@ -510,7 +511,7 @@ EXTERN xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallinge
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG
-EXTERN int stm32_dumpgpio(uint32_t pinset, const char *msg);
+int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define stm32_dumpgpio(p,m)
 #endif
@@ -526,7 +527,7 @@ EXTERN int stm32_dumpgpio(uint32_t pinset, const char *msg);
  *
  ************************************************************************************/
 
-EXTERN void stm32_gpioinit(void);
+void stm32_gpioinit(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

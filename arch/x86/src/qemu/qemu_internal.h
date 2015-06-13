@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/x86/src/qemu/qemu_internal.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -92,7 +93,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void i486_clockconfig(void);
+void i486_clockconfig(void);
 
 /************************************************************************************
  * Name: i486_lowsetup
@@ -104,7 +105,7 @@ EXTERN void i486_clockconfig(void);
  *
  ************************************************************************************/
 
-EXTERN void i486_lowsetup(void);
+void i486_lowsetup(void);
 
 /************************************************************************************
  * Name: i486_gpioirqinitialize
@@ -115,7 +116,7 @@ EXTERN void i486_lowsetup(void);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void i486_gpioirqinitialize(void);
+void i486_gpioirqinitialize(void);
 #else
 #  define i486_gpioirqinitialize()
 #endif
@@ -128,7 +129,7 @@ EXTERN void i486_gpioirqinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN int i486_configgpio(uint16_t cfgset);
+int i486_configgpio(uint16_t cfgset);
 
 /************************************************************************************
  * Name: i486_gpiowrite
@@ -138,7 +139,7 @@ EXTERN int i486_configgpio(uint16_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN void i486_gpiowrite(uint16_t pinset, bool value);
+void i486_gpiowrite(uint16_t pinset, bool value);
 
 /************************************************************************************
  * Name: i486_gpioread
@@ -148,7 +149,7 @@ EXTERN void i486_gpiowrite(uint16_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool i486_gpioread(uint16_t pinset);
+bool i486_gpioread(uint16_t pinset);
 
 /************************************************************************************
  * Name: i486_gpioirqenable
@@ -159,7 +160,7 @@ EXTERN bool i486_gpioread(uint16_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void i486_gpioirqenable(int irq);
+void i486_gpioirqenable(int irq);
 #else
 #  define i486_gpioirqenable(irq)
 #endif
@@ -173,7 +174,7 @@ EXTERN void i486_gpioirqenable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void i486_gpioirqdisable(int irq);
+void i486_gpioirqdisable(int irq);
 #else
 #  define i486_gpioirqdisable(irq)
 #endif
@@ -187,7 +188,7 @@ EXTERN void i486_gpioirqdisable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-EXTERN int i486_dumpgpio(uint16_t pinset, const char *msg);
+int i486_dumpgpio(uint16_t pinset, const char *msg);
 #else
 #  define i486_dumpgpio(p,m)
 #endif
@@ -225,10 +226,10 @@ struct spi_dev_s;
 enum spi_dev_e;
 
 #ifdef CONFIG_I486_SPI
-EXTERN void  i486_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t i486_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  i486_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t i486_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int i486_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int i486_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
@@ -250,10 +251,10 @@ EXTERN int i486_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool
 
 struct spi_dev_s;
 #ifdef CONFIG_I486_SPI
-EXTERN void spi_flush(FAR struct spi_dev_s *dev);
+void spi_flush(FAR struct spi_dev_s *dev);
 #endif
 #if defined(CONFIG_I486_SSP0) || defined(CONFIG_I486_SSP1)
-EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
+void ssp_flush(FAR struct spi_dev_s *dev);
 #endif
 
 /****************************************************************************
@@ -268,7 +269,7 @@ EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_I486_GPDMA
-EXTERN void i486_dmainitilaize(void);
+void i486_dmainitilaize(void);
 #endif
 
 /****************************************************************************
@@ -286,7 +287,7 @@ EXTERN void i486_dmainitilaize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_I486_GPDMA
-EXTERN DMA_HANDLE i486_dmachannel(void);
+DMA_HANDLE i486_dmachannel(void);
 #endif
 
 /****************************************************************************
@@ -303,7 +304,7 @@ EXTERN DMA_HANDLE i486_dmachannel(void);
  ****************************************************************************/
 
 #ifdef CONFIG_I486_GPDMA
-EXTERN void i486_dmafree(DMA_HANDLE handle);
+void i486_dmafree(DMA_HANDLE handle);
 #endif
 
 /****************************************************************************
@@ -315,10 +316,8 @@ EXTERN void i486_dmafree(DMA_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_I486_GPDMA
-EXTERN int i486_dmarxsetup(DMA_HANDLE handle,
-                            uint32_t control, uint32_t config,
-                            uint32_t srcaddr, uint32_t destaddr,
-                            size_t nbytes);
+int i486_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                    uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
 #endif
 
 /****************************************************************************
@@ -330,7 +329,7 @@ EXTERN int i486_dmarxsetup(DMA_HANDLE handle,
  ****************************************************************************/
 
 #ifdef CONFIG_I486_GPDMA
-EXTERN int i486_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
+int i486_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 #endif
 
 /****************************************************************************
@@ -344,7 +343,7 @@ EXTERN int i486_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_I486_GPDMA
-EXTERN void i486_dmastop(DMA_HANDLE handle);
+void i486_dmastop(DMA_HANDLE handle);
 #endif
 
 /****************************************************************************
@@ -357,7 +356,7 @@ EXTERN void i486_dmastop(DMA_HANDLE handle);
 
 #ifdef CONFIG_I486_GPDMA
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void i486_dmasample(DMA_HANDLE handle, struct i486_dmaregs_s *regs);
+void i486_dmasample(DMA_HANDLE handle, struct i486_dmaregs_s *regs);
 #else
 #  define i486_dmasample(handle,regs)
 #endif
@@ -373,8 +372,8 @@ EXTERN void i486_dmasample(DMA_HANDLE handle, struct i486_dmaregs_s *regs);
 
 #ifdef CONFIG_I486_GPDMA
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void i486_dmadump(DMA_HANDLE handle, const struct i486_dmaregs_s *regs,
-                          const char *msg);
+void i486_dmadump(DMA_HANDLE handle, const struct i486_dmaregs_s *regs,
+                  const char *msg);
 #else
 #  define i486_dmadump(handle,regs,msg)
 #endif
@@ -386,58 +385,58 @@ EXTERN void i486_dmadump(DMA_HANDLE handle, const struct i486_dmaregs_s *regs,
  * Description:
  *   These are the various ISR/IRQ vector address exported from
  *   qemu_vectors.S.  These addresses need to have global scope so that they
- *   can be known to the interrupt initializeation logic in qemu_irq.c.
+ *   can be known to the interrupt initialization logic in qemu_irq.c.
  *
  ****************************************************************************/
 
-EXTERN void vector_isr0(void);
-EXTERN void vector_isr1(void);
-EXTERN void vector_isr2(void);
-EXTERN void vector_isr3(void);
-EXTERN void vector_isr4(void);
-EXTERN void vector_isr5(void);
-EXTERN void vector_isr6(void);
-EXTERN void vector_isr7(void);
-EXTERN void vector_isr8(void);
-EXTERN void vector_isr9(void);
-EXTERN void vector_isr10(void);
-EXTERN void vector_isr11(void);
-EXTERN void vector_isr12(void);
-EXTERN void vector_isr13(void);
-EXTERN void vector_isr14(void);
-EXTERN void vector_isr15(void);
-EXTERN void vector_isr16(void);
-EXTERN void vector_isr17(void);
-EXTERN void vector_isr18(void);
-EXTERN void vector_isr19(void);
-EXTERN void vector_isr20(void);
-EXTERN void vector_isr21(void);
-EXTERN void vector_isr22(void);
-EXTERN void vector_isr23(void);
-EXTERN void vector_isr24(void);
-EXTERN void vector_isr25(void);
-EXTERN void vector_isr26(void);
-EXTERN void vector_isr27(void);
-EXTERN void vector_isr28(void);
-EXTERN void vector_isr29(void);
-EXTERN void vector_isr30(void);
-EXTERN void vector_isr31(void);
-EXTERN void vector_irq0(void);
-EXTERN void vector_irq1(void);
-EXTERN void vector_irq2(void);
-EXTERN void vector_irq3(void);
-EXTERN void vector_irq4(void);
-EXTERN void vector_irq5(void);
-EXTERN void vector_irq6(void);
-EXTERN void vector_irq7(void);
-EXTERN void vector_irq8(void);
-EXTERN void vector_irq9(void);
-EXTERN void vector_irq10(void);
-EXTERN void vector_irq11(void);
-EXTERN void vector_irq12(void);
-EXTERN void vector_irq13(void);
-EXTERN void vector_irq14(void);
-EXTERN void vector_irq15(void);
+void vector_isr0(void);
+void vector_isr1(void);
+void vector_isr2(void);
+void vector_isr3(void);
+void vector_isr4(void);
+void vector_isr5(void);
+void vector_isr6(void);
+void vector_isr7(void);
+void vector_isr8(void);
+void vector_isr9(void);
+void vector_isr10(void);
+void vector_isr11(void);
+void vector_isr12(void);
+void vector_isr13(void);
+void vector_isr14(void);
+void vector_isr15(void);
+void vector_isr16(void);
+void vector_isr17(void);
+void vector_isr18(void);
+void vector_isr19(void);
+void vector_isr20(void);
+void vector_isr21(void);
+void vector_isr22(void);
+void vector_isr23(void);
+void vector_isr24(void);
+void vector_isr25(void);
+void vector_isr26(void);
+void vector_isr27(void);
+void vector_isr28(void);
+void vector_isr29(void);
+void vector_isr30(void);
+void vector_isr31(void);
+void vector_irq0(void);
+void vector_irq1(void);
+void vector_irq2(void);
+void vector_irq3(void);
+void vector_irq4(void);
+void vector_irq5(void);
+void vector_irq6(void);
+void vector_irq7(void);
+void vector_irq8(void);
+void vector_irq9(void);
+void vector_irq10(void);
+void vector_irq11(void);
+void vector_irq12(void);
+void vector_irq13(void);
+void vector_irq14(void);
+void vector_irq15(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

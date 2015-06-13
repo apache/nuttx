@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc43xx/lpc43_ssp.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -98,7 +99,7 @@ extern "C" {
  *   port - Port number (0=SSP0, 1=SSP1)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -120,18 +121,18 @@ FAR struct spi_dev_s *lpc43_sspinitialize(int port)
  ************************************************************************************/
 
 #ifdef CONFIG_LPC43_SSP0
-EXTERN void  lpc43_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc43_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC43_SSP1
-EXTERN void  lpc43_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc43_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
@@ -152,7 +153,7 @@ EXTERN int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bo
  ****************************************************************************/
 
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
-EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
+void ssp_flush(FAR struct spi_dev_s *dev);
 #endif
 
 /****************************************************************************
@@ -160,14 +161,14 @@ EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
  *
  * Description:
  *   If the board supports a card detect callback to inform the SPI-based
- *   MMC/SD drvier when an SD card is inserted or removed, then
+ *   MMC/SD driver when an SD card is inserted or removed, then
  *   CONFIG_SPI_CALLBACK should be defined and the following function(s) must
- *   must be implemented.  These functiosn implements the registercallback
+ *   must be implemented.  These functions implements the registercallback
  *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:
  *   dev -      Device-specific state data
- *   callback - The funtion to call on the media change
+ *   callback - The function to call on the media change
  *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:
@@ -177,13 +178,13 @@ EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_LPC43_SSP0
-EXTERN int lpc43_ssp0register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int lpc43_ssp0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 
 #ifdef CONFIG_LPC43_SSP1
-EXTERN int lpc43_ssp1register(FAR struct spi_dev_s *dev,
-                              spi_mediachange_t callback, void *arg);
+int lpc43_ssp1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
 #endif
 #endif
 

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_uart.h
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -322,7 +322,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -331,21 +332,21 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_serial_dma_poll
  *
  * Description:
- *   Must be called periodically if any STM32 UART is configured for DMA.
- *   The DMA callback is triggered for each fifo size/2 bytes, but this can
- *   result in some bytes being transferred but not collected if the incoming
- *   data is not a whole multiple of half the FIFO size.
+ *   Must be called periodically if any STM32 UART is configured for DMA.  The DMA
+ *   callback is triggered for each fifo size/2 bytes, but this can result in some
+ *   bytes being transferred but not collected if the incoming data is not a whole
+ *   multiple of half the FIFO size.
  *
  *   May be safely called from either interrupt or thread context.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-EXTERN void stm32_serial_dma_poll(void);
+void stm32_serial_dma_poll(void);
 #endif
 
 #undef EXTERN

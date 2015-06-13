@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/include/mips32/irq.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -506,7 +506,8 @@ static inline void cp0_putcause(uint32_t cause)
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -525,7 +526,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN irqstate_t irqsave(void);
+irqstate_t irqsave(void);
 
 /****************************************************************************
  * Name: irqrestore
@@ -542,7 +543,7 @@ EXTERN irqstate_t irqsave(void);
  *
  ****************************************************************************/
 
-EXTERN void irqrestore(irqstate_t irqtate);
+void irqrestore(irqstate_t irqtate);
 
 #undef EXTERN
 #ifdef __cplusplus

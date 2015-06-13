@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_wdg.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -69,8 +70,8 @@ extern "C" {
  * Name: stm32_iwdginitialize
  *
  * Description:
- *   Initialize the IWDG watchdog time.  The watchdog timer is initializeed and
- *   registers as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the IWDG watchdog time.  The watchdog timer is initialized
+ *   and registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
  * Input Parameters:
@@ -84,7 +85,7 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_IWDG
-EXTERN void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
+void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
 #endif
 
 /****************************************************************************
@@ -105,7 +106,7 @@ EXTERN void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_WWDG
-EXTERN void stm32_wwdginitialize(FAR const char *devpath);
+void stm32_wwdginitialize(FAR const char *devpath);
 #endif
 
 #undef EXTERN

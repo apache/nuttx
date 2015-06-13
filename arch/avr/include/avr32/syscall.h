@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/include/avr32/syscall.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,17 +68,17 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* SWI with SYS_ call number and six parameters */
 
-EXTERN uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
-                           uintptr_t parm2, uintptr_t parm3,
-                           uintptr_t parm4, uintptr_t parm5,
-                           uintptr_t parm6);
+uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
+                    uintptr_t parm6);
 
 /* SWI with SYS_ call number and no parameters */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_internal.h
  *
- *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,38 +155,38 @@ extern uint32_t g_idle_topstack;
 
 /* Defined in files with the same name as the function */
 
-extern void up_boot(void);
-extern void up_copystate(uint32_t *dest, uint32_t *src);
-extern void up_dataabort(uint32_t *regs);
-extern void up_decodeirq(uint32_t *regs);
-extern uint32_t *up_doirq(int irq, uint32_t *regs);
-extern void up_fullcontextrestore(uint32_t *regs) noreturn_function;
-extern void up_irqinitialize(void);
-extern void up_prefetchabort(uint32_t *regs);
-extern int  up_saveusercontext(uint32_t *regs);
-extern void up_sigdeliver(void);
-extern void up_syscall(uint32_t *regs);
-extern int  up_timerisr(int irq, uint32_t *regs);
-extern void up_undefinedinsn(uint32_t *regs);
-extern void up_lowputc(char ch);
-extern void up_puts(const char *str);
-extern void up_lowputs(const char *str);
+void up_boot(void);
+void up_copystate(uint32_t *dest, uint32_t *src);
+void up_dataabort(uint32_t *regs);
+void up_decodeirq(uint32_t *regs);
+uint32_t *up_doirq(int irq, uint32_t *regs);
+void up_fullcontextrestore(uint32_t *regs) noreturn_function;
+void up_irqinitialize(void);
+void up_prefetchabort(uint32_t *regs);
+int  up_saveusercontext(uint32_t *regs);
+void up_sigdeliver(void);
+void up_syscall(uint32_t *regs);
+int  up_timerisr(int irq, uint32_t *regs);
+void up_undefinedinsn(uint32_t *regs);
+void up_lowputc(char ch);
+void up_puts(const char *str);
+void up_lowputs(const char *str);
 
 /* Defined in up_vectors.S */
 
-extern void up_vectorundefinsn(void);
-extern void up_vectorswi(void);
-extern void up_vectorprefetch(void);
-extern void up_vectordata(void);
-extern void up_vectoraddrexcptn(void);
-extern void up_vectorirq(void);
-extern void up_vectorfiq(void);
+void up_vectorundefinsn(void);
+void up_vectorswi(void);
+void up_vectorprefetch(void);
+void up_vectordata(void);
+void up_vectoraddrexcptn(void);
+void up_vectorirq(void);
+void up_vectorfiq(void);
 
 /* Defined in up_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyconsoleinit(void);
-extern void up_consoleinit(void);
+void up_earlyconsoleinit(void);
+void up_consoleinit(void);
 #else
 # define up_earlyconsoleinit()
 # define up_consoleinit()
@@ -195,24 +195,24 @@ extern void up_consoleinit(void);
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE
-extern void lowconsole_init(void);
+void lowconsole_init(void);
 #else
 # define lowconsole_init()
 #endif
 
 /* Defined in up_watchdog.c */
 
-extern void up_wdtinit(void);
+void up_wdtinit(void);
 
 /* Defined in up_timerisr.c */
 
-extern void up_timer_initialize(void);
+void up_timer_initialize(void);
 
 /* Defined in board/up_lcd.c */
 
 #ifdef CONFIG_LCD_CONSOLE
-extern void up_lcdinit(void);
-extern void up_lcdputc(char ch);
+void up_lcdinit(void);
+void up_lcdputc(char ch);
 #else
 # define up_lcdinit()
 # define up_lcdputc(ch)
@@ -221,7 +221,7 @@ extern void up_lcdputc(char ch);
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
@@ -229,8 +229,8 @@ extern void up_netinitialize(void);
 /* USB */
 
 #ifdef CONFIG_USBDEV
-extern void up_usbinitialize(void);
-extern void up_usbuninitialize(void);
+void up_usbinitialize(void);
+void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
@@ -239,11 +239,10 @@ extern void up_usbuninitialize(void);
 /* Defined in chip-specific logic */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-extern void up_dumpstate(void);
+void up_dumpstate(void);
 #else
 #  define up_dumpstate()
 #endif
 
 #endif /* __ASSEMBLY__ */
-
 #endif  /* ___ARCH_SH_SRC_COMMON_UP_INTERNAL_H */
