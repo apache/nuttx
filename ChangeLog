@@ -10585,6 +10585,6 @@
 	  From Marco Aurélio da Cruz (2015-06-11).
 	* include/time.h and libc/time: Add asctime(), asctime_r(), ctime(), and
 	  ctime_r() (2015-06-12).
-	* include/: Clean up and review of header files for conformance to standards
-	  (2015-06-12).
+	* include/ and arch/: Clean up and review of header files for conformance
+	  to standards (2015-06-12).
 
