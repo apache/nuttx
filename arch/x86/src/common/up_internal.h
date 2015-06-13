@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/common/up_internal.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,24 +192,24 @@ void x86_boardinitialize(void);
 
 /* Defined in files with the same name as the function */
 
-extern void up_boot(void);
-extern void up_copystate(uint32_t *dest, uint32_t *src);
-extern void up_savestate(uint32_t *regs);
-extern void up_decodeirq(uint32_t *regs);
-extern void up_irqinitialize(void);
+void up_boot(void);
+void up_copystate(uint32_t *dest, uint32_t *src);
+void up_savestate(uint32_t *regs);
+void up_decodeirq(uint32_t *regs);
+void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
-extern void weak_function up_dmainitialize(void);
+void weak_function up_dmainitialize(void);
 #endif
-extern int  up_saveusercontext(uint32_t *saveregs);
-extern void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
-extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
-extern void up_sigdeliver(void);
-extern void up_lowputc(char ch);
-extern void up_puts(const char *str);
-extern void up_lowputs(const char *str);
+int  up_saveusercontext(uint32_t *saveregs);
+void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+void up_sigdeliver(void);
+void up_lowputc(char ch);
+void up_puts(const char *str);
+void up_lowputs(const char *str);
 
-extern void up_syscall(uint32_t *regs);
-extern void up_registerdump(uint32_t *regs);
+void up_syscall(uint32_t *regs);
+void up_registerdump(uint32_t *regs);
 
 /* Defined in up_allocateheap.c */
 
@@ -222,8 +222,8 @@ void up_addregion(void);
 /* Defined in up_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+void up_earlyserialinit(void);
+void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
@@ -232,30 +232,30 @@ extern void up_serialinit(void);
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE
-extern void lowconsole_init(void);
+void lowconsole_init(void);
 #else
 # define lowconsole_init()
 #endif
 
 /* Defined in up_watchdog.c */
 
-extern void up_wdtinit(void);
+void up_wdtinit(void);
 
 /* Defined in up_timerisr.c */
 
-extern void up_timer_initialize(void);
+void up_timer_initialize(void);
 
 /* Defined in board/up_network.c */
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
 
 #ifdef CONFIG_USBDEV
-extern void up_usbinitialize(void);
-extern void up_usbuninitialize(void);
+void up_usbinitialize(void);
+void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()

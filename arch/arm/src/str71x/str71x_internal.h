@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/str71x/str71x_internal.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@
  ********************************************************************************/
 
 #ifdef CONFIG_STR71X_XTI
-extern int str71x_xtiinitialize(void);
+int str71x_xtiinitialize(void);
 #else
 #  define str71x_xtiinitialize()
 #endif /* CONFIG_STR71X_XTI */
@@ -120,7 +120,7 @@ extern int str71x_xtiinitialize(void);
  ********************************************************************************/
 
 #ifdef CONFIG_STR71X_XTI
-extern int str71x_xticonfig(int irq, bool rising);
+int str71x_xticonfig(int irq, bool rising);
 #else
 #  define str71x_xticonfig(irq,rising)
 #endif /* CONFIG_STR71X_XTI */
@@ -134,7 +134,7 @@ extern int str71x_xticonfig(int irq, bool rising);
  ****************************************************************************/
 
 #ifdef CONFIG_STR71X_XTI
-extern void str71x_enable_xtiirq(int irq);
+void str71x_enable_xtiirq(int irq);
 #else
 #  define str71x_enable_xtiirq(irq)
 #endif /* CONFIG_STR71X_XTI */
@@ -148,7 +148,7 @@ extern void str71x_enable_xtiirq(int irq);
  ****************************************************************************/
 
 #ifdef CONFIG_STR71X_XTI
-extern void str71x_disable_xtiirq(int irq);
+void str71x_disable_xtiirq(int irq);
 #else
 #  define str71x_disable_xtiirq(irq)
 #endif /* CONFIG_STR71X_XTI */

@@ -2,7 +2,7 @@
  * arch/arm/src/imx/imx_gpio.h
  * arch/arm/src/chip/imx_gpio.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -551,11 +551,11 @@ static inline void imxgpio_clroutput(int port, int bit)
 
 /* Useful functions for normal configurations */
 
-extern void imxgpio_configoutput(int port, int bit, int value);
-extern void imxgpio_configinput(int port, int bit);
+void imxgpio_configoutput(int port, int bit, int value);
+void imxgpio_configinput(int port, int bit);
 
-extern void imxgpio_configpfoutput(int port, int bit);
-extern void imxgpio_configpfinput(int port, int bit);
+void imxgpio_configpfoutput(int port, int bit);
+void imxgpio_configpfinput(int port, int bit);
 
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -174,7 +174,7 @@ void lowconsole_init(void);
 /* Defined in drivers/syslog_console.c */
 
 #ifdef defined(CONFIG_SYSLOG_CONSOLE)
-  syslog_console_init();
+void syslog_console_init();
 #else
 # define syslog_console_init()
 #endif
@@ -182,14 +182,14 @@ void lowconsole_init(void);
 /* Defined in drivers/ramlog.c */
 
 #ifdef CONFIG_RAMLOG_CONSOLE
-extern void ramlog_consoleinit(void);
+void ramlog_consoleinit(void);
 #else
 # define ramlog_consoleinit()
 #endif
 
 /* Low level string output */
 
-extern void up_puts(const char *str);
+void up_puts(const char *str);
 
 /* Defined in up_timerisr.c */
 

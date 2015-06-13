@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_internal.h
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@ void lowconsole_init(void);
 
 /* Defined in chip/xxx_timerisr.c */
 
-extern void up_timer_initialize(void);
+void up_timer_initialize(void);
 
 /* Defined in chip/xxx_ethernet.c */
 
