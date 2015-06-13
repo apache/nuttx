@@ -216,7 +216,8 @@ static inline void irqrestore(irqstate_t flags)
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

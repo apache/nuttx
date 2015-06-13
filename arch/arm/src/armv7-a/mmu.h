@@ -1365,7 +1365,8 @@ static inline uint32_t mmu_l2_getentry(uint32_t l2vaddr, uint32_t vaddr)
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

@@ -85,7 +85,8 @@ typedef FAR struct z180_cbr_s *group_addrenv_t;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
