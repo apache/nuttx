@@ -241,7 +241,7 @@ config ARCH_FAMILY_SAMD20J
 config ARCH_FAMILY_SAML21
 	bool
 	default n
-	selest SAMDL_HAVE_DMAC
+	select SAMDL_HAVE_DMAC
 
 config ARCH_FAMILY_SAML21E
 	bool
@@ -420,9 +420,18 @@ config SAMDL_SERCOM0_ISUSART
 endchoice
 
 config SAMDL_DMAC_NDESC
-	int "Number of DMA Descriptors"
-	default 64
+	int "Number of additional DMA Descriptors"
+	default 0
 	depends on SAMDL_DMAC
+	---help---
+		This provides the number of additional DMA descriptors that can be
+		use to support multi-linked DMA transfers.  A minimum of 16
+		descriptors will always be allocated (16 for the base descriptor which
+		overlap the writeback descriptors).  If this value is set to zero,
+		then only single block DMA transfers can be supported.
+
+		Each additional DMA descriptor will require 16-bytes for LPRAM
+		memory.
 
 choice
 	prompt "SERCOM1 mode"
