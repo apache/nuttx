@@ -84,6 +84,7 @@
 
 #  define SAMDL_FLASH_SIZE          (16*1024)     /* 16KB */
 #  define SAMDL_SRAM0_SIZE          (2*1024)      /*  2KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20E15)
 
@@ -96,6 +97,7 @@
 
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /*  4KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20E16)
 
@@ -108,6 +110,7 @@
 
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20E17)
 
@@ -120,6 +123,7 @@
 
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20E18)
 
@@ -132,6 +136,7 @@
 
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20G14)
 
@@ -144,6 +149,7 @@
 
 #  define SAMDL_FLASH_SIZE          (16*1024)     /* 16KB */
 #  define SAMDL_SRAM0_SIZE          (2*1024)      /*  2KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20G15)
 
@@ -156,6 +162,7 @@
 
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /*  4KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20G16)
 
@@ -168,6 +175,7 @@
 
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20G17)
 
@@ -180,6 +188,7 @@
 
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20G18)
 
@@ -192,6 +201,7 @@
 
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20J14)
 
@@ -204,6 +214,7 @@
 
 #  define SAMDL_FLASH_SIZE          (16*1024)     /* 16KB */
 #  define SAMDL_SRAM0_SIZE          (2*1024)      /*  2KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20J15)
 
@@ -216,6 +227,7 @@
 
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /*  4KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20J16)
 
@@ -228,6 +240,7 @@
 
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20J17)
 
@@ -240,6 +253,7 @@
 
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD20J18)
 
@@ -252,6 +266,7 @@
 
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+#  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
 #else
 
@@ -383,6 +398,7 @@
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_FLASHRWW_SIZE       (1*1024)      /*  1KB */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /*  4KB */
+#  define SAMDL_LPRAM_SIZE          (2*1024)      /*  2KB */
 
 /* TCC waveform outputs */
 
@@ -400,6 +416,7 @@
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
 #  define SAMDL_FLASHRWW_SIZE       (2*1024)      /*  2KB */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+#  define SAMDL_LPRAM_SIZE          (4*1024)      /*  4KB */
 
 /* TCC waveform outputs */
 
@@ -417,6 +434,7 @@
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
 #  define SAMDL_FLASHRWW_SIZE       (4*1024)      /*   4KB */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*   8KB */
 
 /* TCC waveform outputs */
 
@@ -434,6 +452,7 @@
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
 #  define SAMDL_FLASHRWW_SIZE       (8*1024)      /*   8KB */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*   8KB */
 
 /* TCC waveform outputs */
 
@@ -451,6 +470,7 @@
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
 #  define SAMDL_FLASHRWW_SIZE       (2*1024)      /*  2KB */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+#  define SAMDL_LPRAM_SIZE          (4*1024)      /*  4KB */
 
 /* TCC waveform outputs */
 
@@ -465,9 +485,10 @@
 
 /* Internal memory */
 
-#  define SAMDL_FLASH_SIZE          (128*1024)     /* 128KB */
-#  define SAMDL_FLASHRWW_SIZE       (4*1024)       /*   4KB */
-#  define SAMDL_SRAM0_SIZE          (16*1024)      /*  16KB */
+#  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
+#  define SAMDL_FLASHRWW_SIZE       (4*1024)      /*   4KB */
+#  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*   8KB */
 
 /* TCC waveform outputs */
 
@@ -482,9 +503,10 @@
 
 /* Internal memory */
 
-#  define SAMDL_FLASH_SIZE          (256*1024)     /* 256KB */
-#  define SAMDL_FLASHRWW_SIZE       (8*1024)       /*   8KB */
-#  define SAMDL_SRAM0_SIZE          (32*1024)      /*  32KB */
+#  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
+#  define SAMDL_FLASHRWW_SIZE       (8*1024)      /*   8KB */
+#  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*   8KB */
 
 /* TCC waveform outputs */
 
@@ -502,6 +524,7 @@
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
 #  define SAMDL_FLASHRWW_SIZE       (2*1024)      /*  2KB */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /*  8KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*  4KB */
 
 /* TCC waveform outputs */
 
@@ -519,6 +542,7 @@
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
 #  define SAMDL_FLASHRWW_SIZE       (4*1024)      /*   4KB */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /*  16KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*   8KB */
 
 /* TCC waveform outputs */
 
@@ -536,6 +560,7 @@
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
 #  define SAMDL_FLASHRWW_SIZE       (8*1024)      /*   8KB */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /*  32KB */
+#  define SAMDL_LPRAM_SIZE          (8*1024)      /*   8KB */
 
 /* TCC waveform outputs */
 

@@ -74,6 +74,12 @@
 #  warning "SAM3/4 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
+/* Number of DMA descriptors in LPRAM */
+
+#ifndef CONFIG_SAMDL_DMAC_NDESC
+#  define CONFIG_SAMDL_DMAC_NDESC 64
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -82,24 +88,55 @@
 
 struct sam_dmach_s
 {
-  uint8_t         dc_chan;       /* DMA channel number (0-6) */
-  bool            dc_inuse;      /* TRUE: The DMA channel is in use */
-  uint32_t        dc_flags;      /* DMA channel flags */
-  dma_callback_t  dc_callback;   /* Callback invoked when the DMA completes */
-  void           *dc_arg;        /* Argument passed to callback function */
+  uint8_t            dc_chan;     /* DMA channel number (0-6) */
+  bool               dc_inuse;    /* TRUE: The DMA channel is in use */
+  uint32_t           dc_flags;    /* DMA channel flags */
+  dma_callback_t     dc_callback; /* Callback invoked when the DMA completes */
+  void              *dc_arg;      /* Argument passed to callback function */
+  struct dma_desc_s *llhead;      /* DMA link list head */
+  struct dma_desc_s *lltail;      /* DMA link list head */
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void   sam_takechsem(void);
+static inline void sam_givechsem(void);
+static void   sam_takedsem(void);
+static inline void sam_givedsem(void);
+static void   sam_dmaterminate(struct sam_dmach_s *dmach, int result);
+static int    sam_dmainterrupt(int irq, void *context);
+static struct dma_desc_s *
+                sam_allocdesc(struct sam_dmach_s *dmach,
+                struct dma_desc_s *prev,  uint16_t btctrl, uint16_t btcnt,
+                uint32_t srcaddr,uint32_t dstaddr);
+static void   sam_freelinklist(struct sam_dmach_s *dmach);
+static size_t sam_maxtransfer(struct sam_dmach_s *dmach);
+static int    sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
+                uint32_t maddr, size_t nbytes);
+static int    sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
+                uint32_t maddr, size_t nbytes);
+static int    sam_single(struct sam_dmach_s *dmach);
+static int    sam_multiple(struct sam_dmach_s *dmach);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* These semaphores protect the DMA channel tables */
+/* These semaphores protect the DMA channel and descriptor tables */
 
 static sem_t g_chsem;
+static sem_t g_dsem;
 
 /* This array describes the state of each DMA channel */
 
 static struct sam_dmach_s g_dmach[SAMDL_NDMACHAN];
+
+/* DMA descriptors positioned in LPRAM */
+
+static struct dma_desc_s g_dma_desc[CONFIG_SAMDL_DMAC_NDESC]
+  __attribute__ ((section(".lpram"),aligned(16)));
 
 /****************************************************************************
  * Private Functions
@@ -133,6 +170,33 @@ static inline void sam_givechsem(void)
 }
 
 /****************************************************************************
+ * Name: sam_takedsem() and sam_givedsem()
+ *
+ * Description:
+ *   Used to wait for availability of descriptors in the descriptor table.
+ *
+ ****************************************************************************/
+
+static void sam_takedsem(void)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&g_dsem) != 0)
+    {
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+
+static inline void sam_givedsem(void)
+{
+  (void)sem_post(&g_dsem);
+}
+
+/****************************************************************************
  * Name: sam_dmaterminate
  *
  * Description:
@@ -148,8 +212,9 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
   /* Disable the channel */
 #warning Missing logic
 
-  /* Free the resources */
-#warning Missing logic
+  /* Free the linklist */
+
+  sam_freelinklist(dmach);
 
   /* Perform the DMA complete callback */
 
@@ -247,6 +312,141 @@ static size_t sam_addrincr(struct sam_dmach_s *dmach)
 #endif
 
 /****************************************************************************
+ * Name: sam_allocdesc
+ *
+ * Description:
+ *  Allocate and add one descriptor to the DMA channel's link list.
+ *
+ *  NOTE: link list entries are freed by the DMA interrupt handler.  However,
+ *  since the setting/clearing of the 'in use' indication is atomic, no
+ *  special actions need be performed.  It would be a good thing to add logic
+ *  to handle the case where all of the entries are exhausted and we could
+ *  wait for some to be freed by the interrupt handler.
+ *
+ ****************************************************************************/
+
+static struct dma_desc_s *
+sam_allocdesc(struct sam_dmach_s *dmach, struct dma_desc_s *prev, 
+              uint16_t btctrl, uint16_t btcnt, uint32_t srcaddr,
+              uint32_t dstaddr)
+{
+  struct dma_desc_s *desc = NULL;
+  int i;
+
+  /* Sanity check -- src == 0 is the indication that the link is unused.
+   * Obviously setting it to zero would break that usage.
+   */
+
+#ifdef CONFIG_DEBUG
+  if (src != 0)
+#endif
+    {
+      /* Table a descriptor table semaphore count.  When we get one, then there
+       * is at least one free descriptor in the table and it is ours.
+       */
+
+      sam_takedsem();
+
+      /* Examine each link list entry to find an available one -- i.e., one
+       * with src == 0.  That src field is set to zero by the DMA transfer
+       * complete interrupt handler.  The following should be safe because
+       * that is an atomic operation.
+       */
+
+      sam_takechsem();
+      for (i = 0; i < CONFIG_SAMDL_DMAC_NDESC; i++)
+        {
+          if (g_dma_desc[i].srcaddr == 0)
+            {
+              /* We have it.  Initialize the new link list entry */
+
+              desc           = &g_dma_desc[i];
+              desc->btctrl   = btctrl;   /* Block Transfer Control Register */
+              desc->btcnt    = btcnt;    /* Block Transfer Count Register */
+              desc->srcaddr  = srcaddr;  /* Block Transfer Source Address Register */
+              desc->dstaddr  = dstaddr;  /* Block Transfer Destination Address Register */
+              desc->descaddr = 0;        /* Next Address Descriptor Register */
+
+              /* And then hook it at the tail of the link list */
+
+              if (!prev)
+                {
+                  /* There is no previous link.  This is the new head of
+                   * the list
+                   */
+
+                  DEBUGASSERT(dmach->llhead == NULL && dmach->lltail == NULL);
+                  dmach->llhead = desc;
+                }
+              else
+                {
+                  DEBUGASSERT(dmach->llhead != NULL && dmach->lltail == prev);
+
+                  /* When the second link is added to the list, that is the
+                   * cue that we are going to do the link list transfer.
+                   */
+#warning Missing logic
+
+                  /* Link the previous tail to the new tail */
+
+                  prev->descaddr = (uint32_t)desc;
+                }
+
+              /* In any event, this is the new tail of the list. */
+#warning Missing logic
+
+              dmach->lltail = desc;
+              break;
+            }
+        }
+
+      /* Because we hold a count from the counting semaphore, the above
+       * search loop should always be successful.
+       */
+
+      sam_givechsem();
+      DEBUGASSERT(desc != NULL);
+    }
+
+  return desc;
+}
+
+/****************************************************************************
+ * Name: sam_freelinklist
+ *
+ * Description:
+ *  Free all descriptors in the DMA channel's link list.
+ *
+ *  NOTE: Called from the DMA interrupt handler.
+ *
+ ****************************************************************************/
+
+static void sam_freelinklist(struct sam_dmach_s *dmach)
+{
+  struct dma_desc_s *desc;
+  struct dma_desc_s *next;
+
+  /* Get the head of the link list and detach the link list from the DMA
+   * channel
+   */
+
+  desc             = dmach->llhead;
+  dmach->llhead    = NULL;
+  dmach->lltail    = NULL;
+
+  /* Reset each descriptor in the link list (thereby freeing them) */
+
+  while (desc != NULL)
+    {
+      next = (struct dma_desc_s *)desc->descaddr;
+      DEBUGASSERT(desc->src != 0);
+      memset(desc, 0, sizeof(struct dma_desc_s));
+      sam_givedsem();
+      desc = next;
+    }
+}
+
+/****************************************************************************
  * Name: sam_maxtransfer
  *
  * Description:
@@ -273,7 +473,18 @@ static size_t sam_maxtransfer(struct sam_dmach_s *dmach)
 static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
+  uint16_t btctrl;
+  uint16_t btcnt;
+
 #warning Missing logic
+
+  /* Add the new link list entry */
+
+  if (!sam_allocdesc(dmach, dmach->lltail, btctrl, btcnt, maddr, paddr))
+    {
+      return -ENOMEM;
+    }
+
   return OK;
 }
 
@@ -290,7 +501,18 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
+  uint16_t btctrl;
+  uint16_t btcnt;
+
 #warning Missing logic
+
+  /* Add the new link list entry */
+
+  if (!sam_allocdesc(dmach, dmach->lltail, btctrl, btcnt, maddr, paddr))
+    {
+      return -ENOMEM;
+    }
+
   return OK;
 }
 
@@ -302,8 +524,10 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
  *
  ****************************************************************************/
 
-static inline int sam_single(struct sam_dmach_s *dmach)
+static int sam_single(struct sam_dmach_s *dmach)
 {
+  struct dma_desc_s *llhead = dmach->llhead;
+
   /* Clear any pending interrupts from any previous DMAC transfer.
    *
    * REVISIT: If DMAC interrupts are disabled at the NVIKC, then reading the
@@ -313,6 +537,7 @@ static inline int sam_single(struct sam_dmach_s *dmach)
 
   /* Set up the DMA */
 #warning Missing logic
+  DEBUGASSERT(llhead != NULL && llhead->src != 0);
 
   /* Enable the channel */
 #warning Missing logic
@@ -331,8 +556,10 @@ static inline int sam_single(struct sam_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static inline int sam_multiple(struct sam_dmach_s *dmach)
+static int sam_multiple(struct sam_dmach_s *dmach)
 {
+  struct dma_desc_s *llhead = dmach->llhead;
+
   /* Clear any pending interrupts from any previous DMAC transfer.
    *
    * REVISIT: If DMAC interrupts are disabled at the NVIKC, then reading the
@@ -342,6 +569,8 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
 
   /* Set up the initial DMA */
 #warning Missing logic
+  DEBUGASSERT(llhead != NULL && llhead->src != 0);
+
 
   /* Enable the channel */
 #warning Missing logic
@@ -375,6 +604,7 @@ void weak_function up_dmainitialize(void)
   /* Initialize global semaphores */
 
   sem_init(&g_chsem, 0, 1);
+  sem_init(&g_dsem, 0, CONFIG_SAMDL_DMAC_NDESC);
 
   /* Initialized the DMA channel table */
 
@@ -676,9 +906,11 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   dmavdbg("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
   DEBUGASSERT(dmach != NULL);
 
-  /* Verify that the DMA has been setup */
-#warning Missing logic
+  /* Verify that the DMA has been setup (i.e., at least one entry in the
+   * link list).
+   */
 
+  if (dmach->llhead)
     {
       /* Save the callback info.  This will be invoked when the DMA completes */
 
@@ -686,9 +918,8 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       dmach->dc_arg      = arg;
 
       /* Is this a single block transfer?  Or a multiple block transfer? */
-#warning Missing logic
 
-      if (true)
+      if (dmach->llhead == dmach->lltail)
         {
           ret = sam_single(dmach);
         }
@@ -766,16 +997,6 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->chctrlb    = getreg32(SAM_DMAC_CHCTRLB);    /* Channel Control B Register */
   regs->chintflag  = getreg8(SAM_DMAC_CHINTFLAG);   /* Channel Interrupt Flag Status and Clear Register */
   regs->chstatus   = getreg8(SAM_DMAC_CHSTATUS);    /* Channel Status Register */
-
-  /* LPSRAM Registers Relative to BASEADDR or WRBADDR */
-#warning How do we get the base address
-
-  regs->btctrl     = getreg16(base + SAM_LPSRAM_BTCTRL_OFFSET);
-  regs->btcnt      = getreg16(base + SAM_LPSRAM_BTCNT_OFFSET);
-  regs->srcaddr    = getreg32(base + SAM_LPSRAM_SRCADDR_OFFSET);
-  regs->dstaddr    = getreg32(base + SAM_LPSRAM_DSTADDR_OFFSET);
-  regs->descaddr   = getreg32(base + SAM_LPSRAM_DESCADDR_OFFSET);
-  irqrestore(flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 
@@ -812,14 +1033,6 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag, 
   dmadbg("     CHSTATUS: %02x\n",
          regs->chstatus);
-
-  /* LPSRAM Registers Relative to BASEADDR or WRBADDR */
-#warning How do we get the base address
-
-  dmadbg("  LPSRAM Values:\n");
-  dmadbg("       BTCTRL: %04x        BTCNT: %04x        SRCADDR: %08x    DSTADDR: %08x\n",
-         regs->btctrl, regs->btcnt, regs->srcaddr, regs->dstaddr);
-  dmadbg("     DESCADDR: %08x\n", regs->descaddr);
 }
 #endif /* CONFIG_DEBUG_DMA */
 #endif /* CONFIG_SAMDL_DMAC */
