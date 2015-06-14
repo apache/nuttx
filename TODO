@@ -1080,7 +1080,7 @@ o USB (drivers/usbdev, drivers/usbhost)
                channels.
 
                This works okay until you add a hub and try connect multiple
-               devices.  A typical device will require 3-4 pipe and, hence,
+               devices.  A typical device will require 3-4 pipes and, hence,
                4-5 channels.  This effectively prevents using a hub with the
                STM32 devices.  This also applies to the EFM32 which uses the
                same IP.

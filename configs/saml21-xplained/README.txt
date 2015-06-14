@@ -32,6 +32,8 @@ STATUS/ISSUES
     configuration is working well with the serial console provided by
     SERCOM4 as 115200 8N1.
 
+  - 2015-6-14: Added a DMAC driver.  There is no way to verify it at present.
+
 Modules
 =======
 
