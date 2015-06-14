@@ -82,7 +82,10 @@
 #  define DMACH_FLAG_BEATSIZE_BYTE       (0 << DMACH_FLAG_BEATSIZE_SHIFT) /* 8-bit bus transfer */
 #  define DMACH_FLAG_BEATSIZE_HWORD      (1 << DMACH_FLAG_BEATSIZE_SHIFT) /* 16-bit bus transfer */
 #  define DMACH_FLAG_BEATSIZE_WORD       (2 << DMACH_FLAG_BEATSIZE_SHIFT) /* 32-bit bus transfer */
-#define DMACH_FLAG_STEPSIZE_SHIFT        (2)      /* Bits 2-4: Address increment step */
+#define DMACH_FLAG_STEPSEL               (1 << 2) /* Bit 2: Step selection */
+#  define DMACH_FLAG_STEPSEL_MEM         (0)      /*        0=Step size applies to memory */
+#  define DMACH_FLAG_STEPSEL_PERIPH      (1 << 2) /*        1=Step size applies to peripheral */
+#define DMACH_FLAG_STEPSIZE_SHIFT        (3)      /* Bits 3-5: Address increment step */
 #define DMACH_FLAG_STEPSIZE_MASK         (7 << DMACH_FLAG_STEPSIZE_SHIFT)
 #  define DMACH_FLAG_STEPSIZE_X1         (0 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 1 */
 #  define DMACH_FLAG_STEPSIZE_X2         (1 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 2 */
@@ -92,15 +95,18 @@
 #  define DMACH_FLAG_STEPSIZE_X32        (5 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 32 */
 #  define DMACH_FLAG_STEPSIZE_X64        (6 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 64 */
 #  define DMACH_FLAG_STEPSIZE_X128       (7 << DMACH_FLAG_STEPSIZE_SHIFT) /* Next ADDR = ADDR + (BEATSIZE+1) * 128 */
-#define DMACH_FLAG_RUNINSTDBY            (1 << 5)  /* Bit 5: Run in standby */
+#define DMACH_FLAG_PRIORITY_SHIFT        (6)       /* Bit 6-7: Arbitration priority */
+#define DMACH_FLAG_PRIORITY_MASK         (3 << DMACH_FLAG_PRIORITY_SHIFT)
+#  define DMACH_FLAG_PRIORITY(n)         ((uint32_t)(n) << DMACH_FLAG_PRIORITY_SHIFT)
+#define DMACH_FLAG_RUNINSTDBY            (1 << 8)  /* Bit 8: Run in standby */
 
 /* Peripheral endpoint characteristics */
 
-#define DMACH_FLAG_PERIPHTRIG_SHIFT      (6)       /* Bits 6-11: See DMAC_TRIGSRC_* */
+#define DMACH_FLAG_PERIPHTRIG_SHIFT      (9)       /* Bits 9-13: See DMAC_TRIGSRC_* */
 #define DMACH_FLAG_PERIPHTRIG_MASK       (0x3f << DMACH_FLAG_PERIPHTRIG_SHIFT)
 #  define DMACH_FLAG_PERIPHTRIG(n)       ((uint32_t)(n) << DMACH_FLAG_PERIPHTRIG_SHIFT)
-#define DMACH_FLAG_PERIPHINCREMENT       (1 << 12) /* Bit 12: Autoincrement peripheral address */
-#define DMACH_FLAG_PERIPHQOS_SHIFT       (14)      /* Bits 14-15:  Peripheral quality of service */
+#define DMACH_FLAG_PERIPHINCREMENT       (1 << 14) /* Bit 14: Autoincrement peripheral address */
+#define DMACH_FLAG_PERIPHQOS_SHIFT       (15)      /* Bits 15-16:  Peripheral quality of service */
 #define DMACH_FLAG_PERIPHQOS_MASK        (3 << DMACH_FLAG_PERIPHQOS_SHIFT)
 #  define DMACH_FLAG_PERIPHQOS_DISABLE   (0 << DMACH_FLAG_PERIPHQOS_SHIFT) /* Background */
 #  define DMACH_FLAG_PERIPHQOS_LOW       (1 << DMACH_FLAG_PERIPHQOS_SHIFT) /* Sensitve bandwidth */
@@ -109,14 +115,14 @@
 
 /* Memory endpoint characteristics */
 
-#define DMACH_FLAG_MEMINCREMENT          (1 << 16) /* Bit 16: Autoincrement memory address */
-#define DMACH_FLAG_MEMQOS_SHIFT          (17)      /* Bits 17-18:  Memory quality of service */
+#define DMACH_FLAG_MEMINCREMENT          (1 << 17) /* Bit 17: Autoincrement memory address */
+#define DMACH_FLAG_MEMQOS_SHIFT          (18)      /* Bits 18-19:  Memory quality of service */
 #define DMACH_FLAG_MEMQOS_MASK           (3 << DMACH_FLAG_MEMQOS_SHIFT)
 #  define DMACH_FLAG_MEMQOS_DISABLE      (0 << DMACH_FLAG_MEMQOS_SHIFT) /* Background */
 #  define DMACH_FLAG_MEMQOS_LOW          (1 << DMACH_FLAG_MEMQOS_SHIFT) /* Sensitve bandwidth */
 #  define DMACH_FLAG_MEMQOS_MEDIUM       (2 << DMACH_FLAG_MEMQOS_SHIFT) /* Sensitive latency */
 #  define DMACH_FLAG_MEMQOS_HIGH         (3 << DMACH_FLAG_MEMQOS_SHIFT) /* Critical latency */
-                                                   /* Bits 19-31: Not used */
+                                                   /* Bits 20-31: Not used */
 
 /************************************************************************************
  * Public Types

@@ -83,13 +83,23 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* The direction of the transfer */
+
+enum sam_dmadir_e
+{
+  DMADIR_UNKOWN = 0,              /* We don't know the direction of the
+                                   * transfer yet */
+  DMADIR_TX,                      /* Transmit: Memory to peripheral */
+  DMADIR_RX                       /* Receive: Peripheral to memory */
+};
 
 /* This structure describes one DMA channel */
 
 struct sam_dmach_s
 {
-  uint8_t            dc_chan;     /* DMA channel number (0-6) */
   bool               dc_inuse;    /* TRUE: The DMA channel is in use */
+  uint8_t            dc_chan;     /* DMA channel number (0-15) */
+  uint8_t            dc_dir;      /* See enum sam_dmadir_e */
   uint32_t           dc_flags;    /* DMA channel flags */
   dma_callback_t     dc_callback; /* Callback invoked when the DMA completes */
   void              *dc_arg;      /* Argument passed to callback function */
@@ -116,12 +126,11 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
                 uint32_t srcaddr,uint32_t dstaddr);
 static void   sam_freelinklist(struct sam_dmach_s *dmach);
 static size_t sam_maxtransfer(struct sam_dmach_s *dmach);
+static uint16_t sam_bytes2beats(struct sam_dmach_s *dmach, size_t nbytes);
 static int    sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
                 uint32_t maddr, size_t nbytes);
 static int    sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
                 uint32_t maddr, size_t nbytes);
-static int    sam_single(struct sam_dmach_s *dmach);
-static int    sam_multiple(struct sam_dmach_s *dmach);
 
 /****************************************************************************
  * Private Data
@@ -259,6 +268,7 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
 
   dmach->dc_callback = NULL;
   dmach->dc_arg      = NULL;
+  dmach->dc_dir      = DMADIR_UNKOWN;
 }
 
 /****************************************************************************
@@ -310,7 +320,7 @@ static int sam_dmainterrupt(int irq, void *context)
 
       else if ((intpend & DMAC_INTPEND_SUSP) != 0)
         {
-#warning Missing logic
+          /* REVISIT: Do we want to do anything here? */
         }
     }
 
@@ -538,8 +548,43 @@ static void sam_freelinklist(struct sam_dmach_s *dmach)
 
 static size_t sam_maxtransfer(struct sam_dmach_s *dmach)
 {
-#warning Missing logic
-  return 0;
+  int beatsize;
+
+  /* The number of bytes per beat is 2**BEATSIZE */
+
+  beatsize = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >>
+             LPSRAM_BTCTRL_STEPSIZE_SHIFT;
+
+  /* Maximum beats is UINT16_MAX */
+
+  return (size_t)UINT16_MAX << beatsize;
+}
+
+/****************************************************************************
+ * Name: sam_bytes2beats
+ *
+ * Description:
+ *   Convert a count of bytes into a count of beats
+ *
+ ****************************************************************************/
+
+static uint16_t sam_bytes2beats(struct sam_dmach_s *dmach, size_t nbytes)
+{
+  size_t mask;
+  int beatsize;
+  size_t nbeats;
+
+  /* The number of bytes per beat is 2**BEATSIZE */
+
+  beatsize = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >>
+             LPSRAM_BTCTRL_STEPSIZE_SHIFT;
+
+  /* The number of beats is then the ceiling of the division */
+
+  mask     = (1 < beatsize) - 1;
+  nbeats   = (nbytes + mask) >> beatsize;
+  DEBUGASSERT(nbeats <= UINT16_MAX);
+  return (uint16_t)nbeats;
 }
 
 /****************************************************************************
@@ -557,12 +602,55 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 {
   uint16_t btctrl;
   uint16_t btcnt;
+  uint16_t tmp;
 
-  /* Set up the Block Transfer Control Register configuration */
-#warning Missing logic
+  DEBUGASSERT(dmac->dc_dir == DMADIR_UNKOWN || dmac->dc_dir == DMADIR_TX);
+
+  /* Set up the Block Transfer Control Register configuration:
+   *
+   * This are fixed register selections:
+   *
+   *   LPSRAM_BTCTRL_VALID          - Descriptor is valid
+   *   LPSRAM_BTCTRL_EVOSEL_DISABLE - No event output
+   *   LPSRAM_BTCTRL_BLOCKACT_INT   - Disable channel and generate interrupt
+   *                                  when the last block transfer completes.
+   *
+   * Other settings come from the channel configuration:
+   *
+   *   LPSRAM_BTCTRL_BEATSIZE       - Determined by DMACH_FLAG_BEATSIZE
+   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_MEMINCREMENT
+   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_PERIPHINCREMENT
+   *   LPSRAM_BTCTRL_STEPSEL        - Determined by DMACH_FLAG_STEPSEL
+   *   LPSRAM_BTCTRL_STEPSIZE       - Determined by DMACH_FLAG_STEPSIZE
+   */
+
+  btctrl  = LPSRAM_BTCTRL_VALID | LPSRAM_BTCTRL_EVOSEL_DISABLE |
+            LPSRAM_BTCTRL_BLOCKACT_INT;
+
+  tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
+  btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
+
+  if ((dmach->dc_flags & DMACH_FLAG_MEMINCREMENT) != 0)
+    {
+      btctrl |= LPSRAM_BTCTRL_SRCINC;
+    }
+
+  if ((dmach->dc_flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+    {
+      btctrl |= LPSRAM_BTCTRL_DSTINC;
+    }
+
+  if ((dmach->dc_flags & DMACH_FLAG_STEPSEL) == DMACH_FLAG_STEPSEL_PERIPH)
+    {
+      btctrl |= LPSRAM_BTCTRL_STEPSEL;
+    }
+
+  tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> LPSRAM_BTCTRL_STEPSIZE_SHIFT;
+  btctrl |= tmp << LPSRAM_BTCTRL_STEPSIZE_SHIFT;
 
   /* Set up the Block Transfer Count Register configuration */
-#warning Missing logic
+
+  btcnt   = sam_bytes2beats(dmach, nbytes);
 
   /* Add the new link list entry */
 
@@ -571,6 +659,7 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       return -ENOMEM;
     }
 
+  dmach->dc_dir = DMADIR_TX;
   return OK;
 }
 
@@ -589,12 +678,55 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 {
   uint16_t btctrl;
   uint16_t btcnt;
+  uint16_t tmp;
 
-  /* Set up the Block Transfer Control Register configuration */
-#warning Missing logic
+  DEBUGASSERT(dmac->dc_dir == DMADIR_UNKOWN || dmac->dc_dir == DMADIR_RX);
+
+  /* Set up the Block Transfer Control Register configuration:
+   *
+   * This are fixed register selections:
+   *
+   *   LPSRAM_BTCTRL_VALID          - Descriptor is valid
+   *   LPSRAM_BTCTRL_EVOSEL_DISABLE - No event output
+   *   LPSRAM_BTCTRL_BLOCKACT_INT   - Disable channel and generate interrupt
+   *                                  when the last block transfer completes.
+   *
+   * Other settings come from the channel configuration:
+   *
+   *   LPSRAM_BTCTRL_BEATSIZE       - Determined by DMACH_FLAG_BEATSIZE
+   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_PERIPHINCREMENT
+   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_MEMINCREMENT
+   *   LPSRAM_BTCTRL_STEPSEL        - Determined by DMACH_FLAG_STEPSEL
+   *   LPSRAM_BTCTRL_STEPSIZE       - Determined by DMACH_FLAG_STEPSIZE
+   */
+
+  btctrl  = LPSRAM_BTCTRL_VALID | LPSRAM_BTCTRL_EVOSEL_DISABLE |
+            LPSRAM_BTCTRL_BLOCKACT_INT;
+
+  tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
+  btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
+
+  if ((dmach->dc_flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+    {
+      btctrl |= LPSRAM_BTCTRL_SRCINC;
+    }
+
+  if ((dmach->dc_flags & DMACH_FLAG_MEMINCREMENT) != 0)
+    {
+      btctrl |= LPSRAM_BTCTRL_DSTINC;
+    }
+
+  if ((dmach->dc_flags & DMACH_FLAG_STEPSEL) == DMACH_FLAG_STEPSEL_MEM)
+    {
+      btctrl |= LPSRAM_BTCTRL_STEPSEL;
+    }
+
+  tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> LPSRAM_BTCTRL_STEPSIZE_SHIFT;
+  btctrl |= tmp << LPSRAM_BTCTRL_STEPSIZE_SHIFT;
 
   /* Set up the Block Transfer Count Register configuration */
-#warning Missing logic
+
+  btcnt   = sam_bytes2beats(dmach, nbytes);
 
   /* Add the new link list entry */
 
@@ -603,66 +735,9 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       return -ENOMEM;
     }
 
+  dmach->dc_dir = DMADIR_RX;
   return OK;
 }
-
-/****************************************************************************
- * Name: sam_single
- *
- * Description:
- *   Start a single buffer DMA.
- *
- ****************************************************************************/
-
-static int sam_single(struct sam_dmach_s *dmach)
-{
-  struct dma_desc_s *head = &g_base_desc[dmach->dc_chan];
-
-  /* Clear any pending interrupts from any previous DMAC transfer. */
-#warning Missing logic
-
-  /* Set up the DMA */
-#warning Missing logic
-  DEBUGASSERT(head->srcaddr != 0);
-
-  /* Enable the channel */
-#warning Missing logic
-
-  /* Enable DMA interrupts */
-#warning Missing logic
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sam_multiple
- *
- * Description:
- *   Start a multiple buffer DMA.
- *
- ****************************************************************************/
-
-#if CONFIG_SAMDL_DMAC_NDESC > 0
-static int sam_multiple(struct sam_dmach_s *dmach)
-{
-  struct dma_desc_s *head = &g_base_desc[dmach->dc_chan];
-
-  /* Clear any pending interrupts from any previous DMAC transfer. */
-#warning Missing logic
-
-  /* Set up the initial DMA */
-#warning Missing logic
-  DEBUGASSERT(head->srcaddr != 0);
-
-  /* Enable the channel */
-#warning Missing logic
-
-  /* Enable DMA interrupts */
-#warning Missing logic
-
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -1014,6 +1089,13 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   struct dma_desc_s *head;
+  irqstate_t flags;
+  uint8_t ctrla;
+  uint32_t chctrlb;
+  uint32_t tmp;
+  uint8_t qosctrl;
+  uint8_t periphqos;
+  uint8_t memqos;
   int ret = -EINVAL;
 
   dmavdbg("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
@@ -1031,20 +1113,78 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       dmach->dc_callback = callback;
       dmach->dc_arg      = arg;
 
-#if CONFIG_SAMDL_DMAC_NDESC > 0
-      /* Is this a single block transfer?  Or a multiple block transfer? */
+      /* Clear any pending interrupts from any previous DMAC transfer. */
 
-      if (head == dmach->dc_tail)
+      flags = irqsave();
+      putreg8(dmach->dc_chan, SAM_DMAC_CHID);
+      putreg8(0, SAM_DMAC_CHCTRLA);
+
+      /* Setup the Channel Control B Register
+       *
+       *   DMAC_CHCTRLB_EVACT_TRIG   - Normal transfer and trigger
+       *   DMAC_CHCTRLB_EVIE=0       - No channel input actions
+       *   DMAC_CHCTRLB_EVOE=0       - Channel event output disabled
+       *   DMAC_CHCTRLB_LVL          - Determined by DMACH_FLAG_PRIORITY
+       *   DMAC_CHCTRLB_TRIGSRC      - Determined by DMACH_FLAG_PERIPHTRIG
+       *   DMAC_CHCTRLB_TRIGACT_BEAT - One trigger required for beat transfer
+       *   DMAC_CHCTRLB_CMD_NOACTION - No action
+       */
+
+      chctrlb = DMAC_CHCTRLB_EVACT_TRIG | DMAC_CHCTRLB_TRIGACT_BEAT |
+                DMAC_CHCTRLB_CMD_NOACTION;
+
+      tmp = (dmach->dc_flags & DMACH_FLAG_PRIORITY_MASK) >>
+             DMACH_FLAG_PRIORITY_SHIFT;
+      chctrlb |= tmp << DMAC_CHCTRLB_LVL_SHIFT;
+
+      tmp = (dmach->dc_flags & DMACH_FLAG_PERIPHTRIG_MASK) >>
+             DMACH_FLAG_PERIPHTRIG_SHIFT;
+      chctrlb |= tmp << DMAC_CHCTRLB_TRIGSRC_SHIFT;
+
+      putreg8(chctrlb, SAM_DMAC_CHCTRLB);
+
+      /* Setup the Quality of Service Control Register
+       *
+       *   DMAC_QOSCTRL_WRBQOS_DISABLE - Background
+       *   DMAC_QOSCTRL_FQOS, DMAC_QOSCTRL_DQOS - Depend on DMACH_FLAG_PERIPHQOS
+       *     and DMACH_FLAG_MEMQOS
+       */
+
+      periphqos = (dmach->dc_flags & DMACH_FLAG_PERIPHQOS_MASK) >>
+                  DMACH_FLAG_PERIPHQOS_SHIFT;
+      memqos    = (dmach->dc_flags & DMACH_FLAG_MEMQOS_MASK) >>
+                  DMACH_FLAG_MEMQOS_SHIFT;
+
+      if (dmach->dc_dir == DMADIR_TX)
         {
-          ret = sam_single(dmach);
+          /* Memory to periphery */
+
+          qosctrl = (memqos << DMAC_QOSCTRL_FQOS_SHIFT) |
+                    (periphqos << DMAC_QOSCTRL_DQOS_SHIFT);
         }
       else
         {
-          ret = sam_multiple(dmach);
+          qosctrl = (periphqos << DMAC_QOSCTRL_FQOS_SHIFT) |
+                    (memqos << DMAC_QOSCTRL_DQOS_SHIFT);
         }
-#else
-      ret = sam_single(dmach);
-#endif
+
+      putreg8(qosctrl | DMAC_QOSCTRL_WRBQOS_DISABLE, SAM_DMAC_QOSCTRL);
+
+      /* Enable the channel */
+
+      ctrla = DMAC_CHCTRLA_ENABLE;
+      if (dmach->dc_flags & DMACH_FLAG_RUNINSTDBY)
+        {
+          ctrla |= DMAC_CHCTRLA_RUNSTDBY;
+        }
+
+      putreg8(ctrla, SAM_DMAC_CHCTRLA);
+
+      /* Enable DMA channel interrupts */
+
+      putreg8(DMAC_INT_TERR | DMAC_INT_TCMPL, SAM_DMAC_CHINTENSET);
+      irqrestore(flags);
+      ret = OK;
     }
 
   return ret;
@@ -1146,7 +1286,7 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   dmadbg("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
          regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
   dmadbg("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
-         regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag, 
+         regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
   dmadbg("     CHSTATUS: %02x\n",
          regs->chstatus);
 }
