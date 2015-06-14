@@ -174,7 +174,7 @@
 #  define DMAC_QOSCTRL_DQOS_MEDIUM       (2 << DMAC_QOSCTRL_DQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_DQOS_HIGH         (3 << DMAC_QOSCTRL_DQOS_SHIFT) /* Critical latency */
             
-/* Common bit defintions for: Software Trigger Control Register, Interrupt Status Register,
+/* Common bit definitions for: Software Trigger Control Register, Interrupt Status Register,
  * Busy Channels Register, and Pending Channels Register 
  */
 
