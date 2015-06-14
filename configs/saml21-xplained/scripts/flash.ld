@@ -34,13 +34,15 @@
  ****************************************************************************/
 
 /* The ATSAML21J18A has 256KB of FLASH beginning at address 0x0000:0000 and
- * 32KB of SRAM beginning at address 0x2000:0000
+ * 32KB of SRAM beginning at address 0x2000:0000.  There is also 8KB low-
+ * power SRAM at 0x30000000 that may be used by the DMAC.
  */
 
 MEMORY
 {
     flash (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
     sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
+    lpram (rw)  : ORIGIN = 0x30000000, LENGTH = 8K
 }
 
 OUTPUT_ARCH(arm)
@@ -106,6 +108,10 @@ SECTIONS
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > sram
+
+	.lpram : {
+		*(.lpram)
+	} > lpram
 
 	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
