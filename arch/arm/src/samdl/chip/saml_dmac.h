@@ -365,6 +365,16 @@ trigger */
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
+/* DMA descriptor */
+
+struct dma_desc_s
+{
+  uint16_t btctrl;   /* Block Transfer Control Register */
+  uint16_t btcnt;    /* Block Transfer Count Register */
+  uint32_t srcaddr;  /* Block Transfer Source Address Register */
+  uint32_t dstaddr;  /* Block Transfer Destination Address Register */
+  uint32_t descaddr; /* Next Address Descriptor Register */
+};
 
 /********************************************************************************************
  * Public Data

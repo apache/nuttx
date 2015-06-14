@@ -241,6 +241,7 @@ config ARCH_FAMILY_SAMD20J
 config ARCH_FAMILY_SAML21
 	bool
 	default n
+	selest SAMDL_HAVE_DMAC
 
 config ARCH_FAMILY_SAML21E
 	bool
@@ -260,6 +261,12 @@ config ARCH_FAMILY_SAML21J
 	select SAMDL_HAVE_TC2
 	select SAMDL_HAVE_TC3
 	select SAMDL_HAVE_TC5
+
+menu "SAMD/L Peripheral Support"
+
+config SAMDL_HAVE_DMAC
+	bool
+	default n
 
 config SAMDL_HAVE_SERCOM4
 	bool
@@ -289,8 +296,6 @@ config SAMDL_HAVE_TC7
 	bool
 	default n
 
-menu "SAMD/L Peripheral Support"
-
 config SAMDL_AC
 	bool "Analog Comparator"
 	default n
@@ -307,7 +312,7 @@ config SAMDL_DMAC
 	bool "DMA Controller"
 	default n
 	select ARCH_DMA
-	depends on EXPERIMENTAL
+	depends on SAMDL_HAVE_DMAC && EXPERIMENTAL
 
 config SAMDL_EVSYS
 	bool "Event System"
@@ -413,6 +418,11 @@ config SAMDL_SERCOM0_ISUSART
 	select USART0_ISUART
 
 endchoice
+
+config SAMDL_DMAC_NDESC
+	int "Number of DMA Descriptors"
+	default 64
+	depends on SAMDL_DMAC
 
 choice
 	prompt "SERCOM1 mode"
