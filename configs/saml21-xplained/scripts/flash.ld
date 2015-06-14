@@ -110,7 +110,9 @@ SECTIONS
 	} > sram
 
 	.lpram : {
+		_slpram = ABSOLUTE(.);
 		*(.lpram)
+		_elpram = ABSOLUTE(.);
 	} > lpram
 
 	/* Stabs debugging sections. */
