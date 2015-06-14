@@ -803,9 +803,10 @@ void weak_function up_dmainitialize(void)
   putreg32((uint32_t)g_base_desc, SAM_DMAC_BASEADDR);
   putreg32((uint32_t)g_writeback_desc, SAM_DMAC_WRBADDR);
 
-  /* Enable the DMA controller */
+  /* Enable the DMA controller and all priority levels */
 
-  putreg16(DMAC_CTRL_DMAENABLE, SAM_DMAC_CTRL);
+  putreg16(DMAC_CTRL_DMAENABLE | DMAC_CTRL_LVLEN0 | DMAC_CTRL_LVLEN1 |
+           DMAC_CTRL_LVLEN2, SAM_DMAC_CTRL);
 
   /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
