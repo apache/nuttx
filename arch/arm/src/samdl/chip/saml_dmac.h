@@ -158,19 +158,19 @@
 #define DMAC_QOSCTRL_WRBQOS_SHIFT        (0)       /* Bits 0-1: Write back quality of service */
 #define DMAC_QOSCTRL_WRBQOS_MASK         (3 << DMAC_QOSCTRL_WRBQOS_SHIFT)
 #  define DMAC_QOSCTRL_WRBQOS_DISABLE    (0 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Background */
-#  define DMAC_QOSCTRL_WRBQOS_LOW        (1 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Sensitve bandwidth */
+#  define DMAC_QOSCTRL_WRBQOS_LOW        (1 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Sensitive bandwidth */
 #  define DMAC_QOSCTRL_WRBQOS_MEDIUM     (2 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_WRBQOS_HIGH       (3 << DMAC_QOSCTRL_WRBQOS_SHIFT) /* Critical latency */
 #define DMAC_QOSCTRL_FQOS_SHIFT          (2)       /* Bits 2-3: Fetch quality of service */
 #define DMAC_QOSCTRL_FQOS_MASK           (3 << DMAC_QOSCTRL_FQOS_SHIFT)
 #  define DMAC_QOSCTRL_FQOS_DISABLE      (0 << DMAC_QOSCTRL_FQOS_SHIFT) /* Background */
-#  define DMAC_QOSCTRL_FQOS_LOW          (1 << DMAC_QOSCTRL_FQOS_SHIFT) /* Sensitve bandwidth */
+#  define DMAC_QOSCTRL_FQOS_LOW          (1 << DMAC_QOSCTRL_FQOS_SHIFT) /* Sensitive bandwidth */
 #  define DMAC_QOSCTRL_FQOS_MEDIUM       (2 << DMAC_QOSCTRL_FQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_FQOS_HIGH         (3 << DMAC_QOSCTRL_FQOS_SHIFT) /* Critical latency */
 #define DMAC_QOSCTRL_DQOS_SHIFT          (4)       /* Bits 4-5: Data transfer quality of service */
 #define DMAC_QOSCTRL_DQOS_MASK           (3 << DMAC_QOSCTRL_DQOS_SHIFT)
 #  define DMAC_QOSCTRL_DQOS_DISABLE      (0 << DMAC_QOSCTRL_DQOS_SHIFT) /* Background */
-#  define DMAC_QOSCTRL_DQOS_LOW          (1 << DMAC_QOSCTRL_DQOS_SHIFT) /* Sensitve bandwidth */
+#  define DMAC_QOSCTRL_DQOS_LOW          (1 << DMAC_QOSCTRL_DQOS_SHIFT) /* Sensitive bandwidth */
 #  define DMAC_QOSCTRL_DQOS_MEDIUM       (2 << DMAC_QOSCTRL_DQOS_SHIFT) /* Sensitive latency */
 #  define DMAC_QOSCTRL_DQOS_HIGH         (3 << DMAC_QOSCTRL_DQOS_SHIFT) /* Critical latency */
             
@@ -208,9 +208,9 @@
 
 /* Active Channels and Levels Register */
 
-#define DMAC_ACTIVE_LVLEX0               (1 << 0)  /* Bit 0:  Level 0 channel trigger requrest executing */
-#define DMAC_ACTIVE_LVLEX1               (1 << 1)  /* Bit 1:  Level 1 channel trigger requrest executing */
-#define DMAC_ACTIVE_LVLEX2               (1 << 2)  /* Bit 2:  Level 2 channel trigger requrest executing */
+#define DMAC_ACTIVE_LVLEX0               (1 << 0)  /* Bit 0:  Level 0 channel trigger request executing */
+#define DMAC_ACTIVE_LVLEX1               (1 << 1)  /* Bit 1:  Level 1 channel trigger request executing */
+#define DMAC_ACTIVE_LVLEX2               (1 << 2)  /* Bit 2:  Level 2 channel trigger request executing */
 #define DMAC_ACTIVE_ID_SHIFT             (8)       /* Bits 8-11: Active channel ID */
 #define DMAC_ACTIVE_ID_MASK              (15 << DMAC_ACTIVE_ID_SHIFT)
 #define DMAC_ACTIVE_ABUSY                (1 << 15) /* Bit 15: Active channel busy */
