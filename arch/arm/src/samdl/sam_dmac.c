@@ -476,6 +476,10 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   uint16_t btctrl;
   uint16_t btcnt;
 
+  /* Set up the Block Transfer Control Register configuration */
+#warning Missing logic
+
+  /* Set up the Block Transfer Count Register configuration */
 #warning Missing logic
 
   /* Add the new link list entry */
@@ -504,11 +508,15 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   uint16_t btctrl;
   uint16_t btcnt;
 
+  /* Set up the Block Transfer Control Register configuration */
+#warning Missing logic
+
+  /* Set up the Block Transfer Count Register configuration */
 #warning Missing logic
 
   /* Add the new link list entry */
 
-  if (!sam_allocdesc(dmach, dmach->lltail, btctrl, btcnt, maddr, paddr))
+  if (!sam_allocdesc(dmach, dmach->lltail, btctrl, btcnt, paddr, maddr))
     {
       return -ENOMEM;
     }
