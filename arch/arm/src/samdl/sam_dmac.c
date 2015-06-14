@@ -229,11 +229,22 @@ static inline void sam_givedsem(void)
 
 static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
 {
-  /* Disable all channel interrupts */
-#warning Missing logic
+  irqstate_t flags;
 
-  /* Disable the channel */
-#warning Missing logic
+  /* Disable the DMA channel */
+
+  flags = irqsave();
+  putreg8(dmach->dc_chan, SAM_DMAC_CHID);
+  putreg8(0, SAM_DMAC_CHCTRLA);
+
+  /* Reset the DMA channel */
+
+  putreg8(DMAC_CHCTRLA_SWRST, SAM_DMAC_CHCTRLA);
+
+  /* Disable all channel interrupts */
+
+  putreg8(1 << dmach->dc_chan, SAM_DMAC_CHINTENCLR);
+  irqrestore(flags);
 
   /* Free the linklist */
 
@@ -262,43 +273,44 @@ static int sam_dmainterrupt(int irq, void *context)
 {
   struct sam_dmach_s *dmach;
   unsigned int chndx;
+  uint16_t intpend;
 
-  /* Get the DMAC status register value.  Ignore all masked interrupt
-   * status bits.
-   */
-#warning Missing logic
+  /* Process all pending channel interrupts */
 
-  /* Check if the any transfer has completed or any errors have occurred */
-#warning Missing logic
-
+  while (((intpend = getreg16(SAM_DMAC_INTPEND)) & DMAC_INTPEND_PEND) != 0)
     {
-      /* Yes.. Check each bit  to see which channel has interrupted */
-#warning Missing logic
+      /* Get the channel that generated the interrupt */
 
-      for (chndx = 0; chndx < SAMDL_NDMACHAN; chndx++)
+      chndx = (intpend & DMAC_INTPEND_ID_MASK) >> DMAC_INTPEND_ID_SHIFT;
+      dmach = &g_dmach[chndx];
+
+      /* Clear all pending channel interrupt */
+
+      putreg8(DMAC_INT_ALL, SAM_DMAC_CHINTFLAG);
+
+      /* Check for transfer error interrupt */
+
+      if ((intpend & DMAC_INTPEND_TERR) != 0)
         {
-          dmach = &g_dmach[chndx];
+          /* Yes... Terminate the transfer with an error? */
 
-          /* Are any interrupts pending for this channel? */
+          sam_dmaterminate(dmach, -EIO);
+        }
+
+      /* Check for channel transfer complete interrupt */
+
+      else if ((intpend & DMAC_INTPEND_TCMPL) != 0)
+        {
+          /* Yes.. Terminate the transfer with success */
+
+          sam_dmaterminate(dmach, OK);
+        }
+
+      /* Check for channel suspend interrupt */
+
+      else if ((intpend & DMAC_INTPEND_SUSP) != 0)
+        {
 #warning Missing logic
-
-            {
-              /* Yes.. Did an error occur? */
-
-                {
-                   /* Yes... Terminate the transfer with an error? */
-
-                  sam_dmaterminate(dmach, -EIO);
-                }
-
-              /* Is the transfer complete? */
-
-               {
-                  /* Yes.. Terminate the transfer with success */
-
-                  sam_dmaterminate(dmach, OK);
-                }
-            }
         }
     }
 
@@ -782,6 +794,10 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
           /* Reset the channel */
 
           putreg8(DMAC_CHCTRLA_SWRST, SAM_DMAC_CHCTRLA);
+
+          /* Disable all channel interrupts */
+
+          putreg8(1 << chndx, SAM_DMAC_CHINTENCLR);
           irqrestore(flags);
           break;
         }
@@ -1127,7 +1143,7 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
 
   dmadbg("%s\n", msg);
   dmadbg("  DMAC Registers:\n");
-  dmadbg("         CTRL: %04x      CRCCTRL: %04x       RCDATAIN: %08x  CRCCHKSUM: %08x\n",
+  dmadbg("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
          regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
   dmadbg("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
          regs->crcstatus, regs->dbgctrl, regs->qosctrl, regs->swtrigctrl);
@@ -1135,8 +1151,6 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
          regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
   dmadbg("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
          regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
-  dmadbg("     BASEADDR: %08x  WRBADDR: %08x       CHID: %08x    CHCTRLA: %08x\n",
-         regs->baseaddr, regs->wrbaddr, regs->chid, regs->chctrla);
   dmadbg("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag, 
   dmadbg("     CHSTATUS: %02x\n",
