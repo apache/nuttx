@@ -618,11 +618,7 @@ static int sam_single(struct sam_dmach_s *dmach)
 {
   struct dma_desc_s *head = &g_base_desc[dmach->dc_chan];
 
-  /* Clear any pending interrupts from any previous DMAC transfer.
-   *
-   * REVISIT: If DMAC interrupts are disabled at the NVIKC, then reading the
-   * EBCISR register could cause a loss of interrupts!
-   */
+  /* Clear any pending interrupts from any previous DMAC transfer. */
 #warning Missing logic
 
   /* Set up the DMA */
@@ -651,11 +647,7 @@ static int sam_multiple(struct sam_dmach_s *dmach)
 {
   struct dma_desc_s *head = &g_base_desc[dmach->dc_chan];
 
-  /* Clear any pending interrupts from any previous DMAC transfer.
-   *
-   * REVISIT: If DMAC interrupts are disabled at the NVIKC, then reading the
-   * EBCISR register could cause a loss of interrupts!
-   */
+  /* Clear any pending interrupts from any previous DMAC transfer. */
 #warning Missing logic
 
   /* Set up the initial DMA */
@@ -729,14 +721,16 @@ void weak_function up_dmainitialize(void)
 
   (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt);
 
-  /* Enable the DMA controller */
-
-  putreg16(DMAC_CTRL_DMAENABLE, SAM_DMAC_CTRL);
-
-  /* Set the LPRAM DMA descriptor table addresses */
+  /* Set the LPRAM DMA descriptor table addresses.  These can only be
+   * written when the DMAC is disabled.
+   */
 
   putreg32((uint32_t)g_base_desc, SAM_DMAC_BASEADDR);
   putreg32((uint32_t)g_writeback_desc, SAM_DMAC_WRBADDR);
+
+  /* Enable the DMA controller */
+
+  putreg16(DMAC_CTRL_DMAENABLE, SAM_DMAC_CTRL);
 
   /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
