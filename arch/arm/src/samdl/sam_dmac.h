@@ -155,14 +155,6 @@ struct sam_dmaregs_s
   uint32_t baseaddr;         /* Descriptor Memory Section Base Address Register */
   uint32_t wrbaddr;          /* Write-Back Memory Section Base Address Register */
   uint32_t chctrlb;          /* Channel Control B Register */
-
-  /* LPSRAM Registers Relative to BASEADDR or WRBADDR */
-
-  uint16_t btctrl;           /* Block Transfer Control Register */
-  uint16_t btcnt;            /* Block Transfer Count Register */
-  uint32_t srcaddr;          /* Block Transfer Source Address Register */
-  uint32_t dstaddr;          /* Block Transfer Destination Address Register */
-  uint32_t descaddr;         /* Next Address Descriptor Register */
 };
 #endif
 

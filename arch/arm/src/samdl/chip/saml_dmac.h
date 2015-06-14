@@ -317,6 +317,7 @@ trigger */
 #define DMAC_INT_TERR                    (1 << 0)  /* Bit 0:  Transfer error interrupt */
 #define DMAC_INT_TCMPL                   (1 << 1)  /* Bit 1:  Channel transfer complete interrupt */
 #define DMAC_INT_SUSP                    (1 << 2)  /* Bit 2:  Channel suspend interrupt */
+#define DMAC_INT_ALL                     (0x07)
 
 /* Channel Status Register */
 
