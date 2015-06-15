@@ -1158,13 +1158,16 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
       if (dmach->dc_dir == DMADIR_TX)
         {
-          /* Memory to periphery */
+          /* Memory to peripheral */
 
           qosctrl = (memqos << DMAC_QOSCTRL_FQOS_SHIFT) |
                     (periphqos << DMAC_QOSCTRL_DQOS_SHIFT);
         }
       else
         {
+          /* Peripheral to memory */
+
+          DEBUASSERT(dmach->dc_dir == DMADIR_RX);
           qosctrl = (periphqos << DMAC_QOSCTRL_FQOS_SHIFT) |
                     (memqos << DMAC_QOSCTRL_DQOS_SHIFT);
         }
