@@ -115,7 +115,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t
 
       /* Indicate that the semaphore is not held by any thread. */
 
-      mutex->pid = 0;
+      mutex->pid = -1;
 
       /* Initialize the mutex like a semaphore with initial count = 1 */
 

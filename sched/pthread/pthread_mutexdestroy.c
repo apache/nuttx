@@ -108,7 +108,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 
       /* Is the semaphore available? */
 
-      if (mutex->pid != 0)
+      if (mutex->pid != -1)
         {
           ret = EBUSY;
         }

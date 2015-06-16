@@ -137,8 +137,8 @@
 
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
- * mappings to prctl, they will return 0 sucess and -1 on failure with the
- * err number in errno.  This is an inconsistency with out pthread interfaces.
+ * mappings to prctl, they will return 0 on success and -1 on failure with the
+ * err number in errno.  This is an inconsistency with the pthread interfaces.
  */
 
 #define pthread_setname_np(thread, name) \
@@ -160,14 +160,13 @@ extern "C"
 
 typedef int             pthread_key_t;
 typedef FAR void       *pthread_addr_t;
-typedef pthread_addr_t  any_t;
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
 
 struct pthread_attr_s
 {
-  size_t  stacksize;    /* Size of the stack allocated for the pthead */
+  size_t  stacksize;    /* Size of the stack allocated for the pthread */
   int16_t priority;     /* Priority of the pthread */
   uint8_t policy;       /* Pthread scheduler policy */
   uint8_t inheritsched; /* Inherit parent prio/policy? */
@@ -206,9 +205,9 @@ struct pthread_mutex_s
 typedef struct pthread_mutex_s pthread_mutex_t;
 
 #ifdef CONFIG_MUTEX_TYPES
-#  define PTHREAD_MUTEX_INITIALIZER {0, SEM_INITIALIZER(1), PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1), PTHREAD_MUTEX_DEFAULT, 0}
 #else
-#  define PTHREAD_MUTEX_INITIALIZER {0, SEM_INITIALIZER(1)}
+#  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1)}
 #endif
 
 struct pthread_barrierattr_s
@@ -307,7 +306,7 @@ void pthread_yield(void);
 
 /* Compare two thread IDs. */
 
-#define pthread_equal(t1,t2) (t1 == t2)
+#define pthread_equal(t1,t2) ((t1) == (t2))
 
 /* Thread scheduling parameters */
 

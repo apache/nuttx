@@ -270,7 +270,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                 {
                   /* Give up the mutex */
 
-                  mutex->pid = 0;
+                  mutex->pid = -1;
                   ret = pthread_givesemaphore((sem_t*)&mutex->sem);
                   if (ret)
                     {
