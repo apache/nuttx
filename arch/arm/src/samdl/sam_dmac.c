@@ -71,10 +71,10 @@
 /* If SAMD/L support is enabled, then OS DMA support should also be enabled */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAM3/4 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  warning "SAMDL DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
-/* Number of DMA descriptors in LPRAM */
+/* Number of additional DMA descriptors in LPRAM */
 
 #ifndef CONFIG_SAMDL_DMAC_NDESC
 #  define CONFIG_SAMDL_DMAC_NDESC 0
@@ -104,6 +104,7 @@ struct sam_dmach_s
   dma_callback_t     dc_callback; /* Callback invoked when the DMA completes */
   void              *dc_arg;      /* Argument passed to callback function */
 #if CONFIG_SAMDL_DMAC_NDESC > 0
+  struct dma_desc_s *dc_head;     /* First allocated DMA descriptor */
   struct dma_desc_s *dc_tail;     /* DMA link list tail */
 #endif
 };
@@ -124,7 +125,7 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach);
 static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
                 uint16_t btctrl, uint16_t btcnt,
                 uint32_t srcaddr,uint32_t dstaddr);
-static void   sam_freelinklist(struct sam_dmach_s *dmach);
+static void   sam_free_desc(struct sam_dmach_s *dmach);
 static size_t sam_maxtransfer(struct sam_dmach_s *dmach);
 static uint16_t sam_bytes2beats(struct sam_dmach_s *dmach, size_t nbytes);
 static int    sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
@@ -147,21 +148,19 @@ static sem_t g_dsem;
 
 static struct sam_dmach_s g_dmach[SAMDL_NDMACHAN];
 
-/* DMA descriptor tables positioned in LPRAM */
+/* DMA descriptor tables positioned in LPRAM.  In this use case, it is
+ * acceptable for the writeback descriptors to overlap the base
+ * descriptors since the base descriptors are always initialized prior
+ * to starting each DMA transaction.
+ */
 
 static struct dma_desc_s g_base_desc[SAMDL_NDMACHAN]
   __attribute__ ((section(".lpram"),aligned(16)));
-
-#if 0
-static struct dma_desc_s g_writeback_desc[SAMDL_NDMACHAN]
-  __attribute__ ((section(".lpram"),aligned(16)));
-#else
-#  define g_writeback_desc g_base_desc
-#endif
+#define g_writeback_desc g_base_desc
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-/* Additional DMA descriptors for multi-block transfers.  Also positioned
- * in LPRAM.
+/* Additional DMA descriptors for (optional) multi-block transfer support.
+ * Also positioned in LPRAM.
  */
 
 static struct dma_desc_s g_dma_desc[CONFIG_SAMDL_DMAC_NDESC]
@@ -255,9 +254,9 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
   putreg8(1 << dmach->dc_chan, SAM_DMAC_CHINTENCLR);
   irqrestore(flags);
 
-  /* Free the linklist */
+  /* Free the DMA descriptor list */
 
-  sam_freelinklist(dmach);
+  sam_free_desc(dmach);
 
   /* Perform the DMA complete callback */
 
@@ -408,9 +407,21 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
           desc = &g_dma_desc[i];
           if (desc->srcaddr == 0)
             {
-              /* We have it */
+              /* Set the srcaddr to any non-zero value to reserve
+               * the descriptor.
+               */
 
               desc->srcaddr = (uint32_t)-1; /* Any non-zero value */
+
+              /* Save a pointer to the first allocated DMA descriptor
+               * (for sam_free_desc).
+               */
+
+              if (dmach->dc_head == NULL)
+                {
+                  dmach->dc_head = desc;
+                }
+
               return desc;
             }
         }
@@ -462,7 +473,7 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
       /* And then hook it at the tail of the link list */
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-      if (dmach->dc_tail)
+      if (dmach->dc_tail != NULL)
         {
           struct dma_desc_s *prev;
 
@@ -481,7 +492,7 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
         }
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-      /* In either, this is the new tail of the list. */
+      /* In either case, this is the new tail of the list. */
 
       dmach->dc_tail = desc;
 #endif
@@ -491,16 +502,16 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
 }
 
 /****************************************************************************
- * Name: sam_freelinklist
+ * Name: sam_free_desc
  *
  * Description:
- *  Free all descriptors in the DMA channel's link list.
+ *  Free all descriptors in the DMA channel's descriptor list.
  *
  *  NOTE: Called from the DMA interrupt handler.
  *
  ****************************************************************************/
 
-static void sam_freelinklist(struct sam_dmach_s *dmach)
+static void sam_free_desc(struct sam_dmach_s *dmach)
 {
   struct dma_desc_s *desc;
 #if CONFIG_SAMDL_DMAC_NDESC > 0
@@ -511,14 +522,14 @@ static void sam_freelinklist(struct sam_dmach_s *dmach)
 
   desc           = &g_base_desc[dmach->dc_chan];
 #if CONFIG_SAMDL_DMAC_NDESC > 0
+  next           = dmach->dc_head;
+
+  dmach->dc_head = NULL;
   dmach->dc_tail = NULL;
 #endif
 
   /* Nullify the base descriptor */
 
-#if CONFIG_SAMDL_DMAC_NDESC > 0
-  next           = (struct dma_desc_s *)desc->descaddr;
-#endif
   memset(desc, 0, sizeof(struct dma_desc_s));
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
@@ -955,8 +966,9 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           dmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(dmach);
+
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  dmavdbg("dc_tail: %p\n", dmach->dc_tail);
+  dmavdbg("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
 #endif
 
   /* The maximum transfer size in bytes depends upon the maximum number of
@@ -1027,8 +1039,9 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
   dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
           dmach, (int)paddr, (int)maddr, (int)nbytes);
   DEBUGASSERT(dmach);
+
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  dmavdbg("dc_tail: %p\n", dmach->dc_tail);
+  dmavdbg("dc_head: %p dc_tail: %p\n", dmach->dc_head, dmach->dc_tail);
 #endif
 
   /* The maximum transfer size in bytes depends upon the maximum number of
