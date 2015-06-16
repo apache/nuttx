@@ -10590,3 +10590,7 @@
 	* arch/arm/src/samdl: Add build framework for SAML21 DMA support.
 	  Nothing there yet except for skeletal logic taken from SAM3/4
 	  (2015-06-12).
+	* include/pthread.h and nuttx/sched/pthread: Use -1 instead of 0 as PID
+	  for unclaimed mutexes.  From Juha Niskanen (2015-06-16).
+	* sched/pthread: Implement pthread_mutex_trylock() for recursive mutexes.
+	  From Juha Niskanen (2015-06-16).
