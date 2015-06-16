@@ -114,6 +114,11 @@
  *
  * Assumptions:
  *
+ * POSIX Compatibility:
+ *   - This implementation does not return EAGAIN when the mutex could not be
+ *     acquired because the maximum number of recursive locks for mutex has
+ *     been exceeded.
+ *
  ****************************************************************************/
 
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex)

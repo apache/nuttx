@@ -90,9 +90,14 @@
  *
  * Return Value:
  *   0 on success or an errno value on failure.  Note that the errno EINTR
- *   is never returned by pthread_mutex_lock().
+ *   is never returned by pthread_mutex_trylock().
  *
  * Assumptions:
+ *
+ * POSIX Compatibility:
+ *   - This implementation does not return EAGAIN when the mutex could not be
+ *     acquired because the maximum number of recursive locks for mutex has
+ *     been exceeded.
  *
  ****************************************************************************/
 
@@ -108,6 +113,8 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
     }
   else
     {
+      int mypid = (int)getpid();
+
       /* Make sure the semaphore is stable while we make the following
        * checks.  This all needs to be one atomic action.
        */
@@ -118,18 +125,41 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
       if (sem_trywait((sem_t*)&mutex->sem) == OK)
         {
-          /* If we succussfully obtained the semaphore, then indicate
+          /* If we successfully obtained the semaphore, then indicate
            * that we own it.
            */
 
-          mutex->pid = (int)getpid();
+          mutex->pid = mypid;
+
+#ifdef CONFIG_MUTEX_TYPES
+          if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
+            {
+              mutex->nlocks = 1;
+            }
+#endif
         }
 
       /* Was it not available? */
 
       else if (get_errno() == EAGAIN)
         {
+#ifdef CONFIG_MUTEX_TYPES
+
+          /* Check if recursive mutex was locked by ourself. */
+
+          if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->pid == mypid)
+            {
+              /* Increment the number of locks held and return successfully. */
+
+              mutex->nlocks++;
+            }
+          else
+            {
+              ret = EBUSY;
+            }
+#else
           ret = EBUSY;
+#endif
         }
       else
         {
