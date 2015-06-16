@@ -62,7 +62,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-
 /* Condition out the whole file unless DMA is selected in the configuration */
 
 #ifdef CONFIG_SAMDL_DMAC
@@ -416,7 +415,9 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
               desc->srcaddr = (uint32_t)-1; /* Any non-zero value */
 
               /* Save a pointer to the first allocated DMA descriptor
-               * (for sam_free_desc).
+               * (for sam_free_desc).  We have to do this because we cannot
+               * use the link in the base descriptor; it will be overwritten
+               * by the writeback.
                */
 
               if (dmach->dc_head == NULL)
