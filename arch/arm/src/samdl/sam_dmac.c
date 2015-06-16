@@ -61,7 +61,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
 
 /* Condition out the whole file unless DMA is selected in the configuration */
@@ -105,7 +104,7 @@ struct sam_dmach_s
   void              *dc_arg;      /* Argument passed to callback function */
 #if CONFIG_SAMDL_DMAC_NDESC > 0
   struct dma_desc_s *dc_head;     /* First allocated DMA descriptor */
-  struct dma_desc_s *dc_tail;     /* DMA link list tail */
+  struct dma_desc_s *dc_tail;     /* DMA descriptor list tail */
 #endif
 };
 
@@ -343,12 +342,14 @@ static size_t sam_addrincr(struct sam_dmach_s *dmach)
 
   /* How bit is one beat? {1,2,4} */
 
-  shift    = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
+  shift    = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >>
+             DMACH_FLAG_BEATSIZE_SHIFT;
   beatsize = (1 << shift);
 
   /* What is the address increment per beat? {1,4,6,...,128} */
 
-  shift    = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> DMACH_FLAG_STEPSIZE_SHIFT;
+  shift    = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >>
+             DMACH_FLAG_STEPSIZE_SHIFT;
   stepsize = (1 << shift);
 
   return (beatsize * stepsize);
@@ -363,18 +364,17 @@ static size_t sam_addrincr(struct sam_dmach_s *dmach)
  *  unused, then that value structure will be returned.  Otherwise, this
  *  function will search for a free descriptor in the g_desc[] list.
  *
- *  NOTE: link list entries are freed by the DMA interrupt handler.  However,
- *  since the setting/clearing of the 'in use' indication is atomic, no
- *  special actions need be performed.  It would be a good thing to add logic
- *  to handle the case where all of the entries are exhausted and we could
- *  wait for some to be freed by the interrupt handler.
+ *  NOTE: Descriptor list entries are freed by the DMA interrupt handler.
+ *  However, since the setting/clearing of the 'in use' indication is atomic,
+ *  no special actions need be performed.  It would be a good thing to add
+ *  logic to handle the case where all of the entries are exhausted and we
+ *  could wait for some to be freed by the interrupt handler.
  *
  ****************************************************************************/
 
 static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
 {
   struct dma_desc_s *desc;
-  int i;
 
   /* First check if the base descriptor for the DMA channel is available */
 
@@ -389,6 +389,8 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
 #if CONFIG_SAMDL_DMAC_NDESC > 0
   else
     {
+      int i;
+
       /* Wait if no descriptor is available.  When we get a semaphore count,
        * then there will be at least one free descriptor in the table and
        * it is ours.
@@ -396,7 +398,7 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
 
       sam_takedsem();
 
-      /* Examine each link list entry to find an available one -- i.e., one
+      /* Examine each list entry to find an available one -- i.e., one
        * with srcaddr == 0.  That srcaddr field is set to zero by the DMA
        * transfer complete interrupt handler.  The following should be safe
        * because that is an atomic operation.
@@ -441,7 +443,7 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
  * Name: sam_append_desc
  *
  * Description:
- *  Allocate and add one descriptor to the DMA channel's link list.
+ *  Allocate and add one descriptor to the DMA channel's descriptor list.
  *
  ****************************************************************************/
 
@@ -451,8 +453,8 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
 {
   struct dma_desc_s *desc;
 
-  /* Sanity check -- srcaddr == 0 is the indication that the link is unused.
-   * Obviously setting it to zero would break that usage.
+  /* Sanity check -- srcaddr == 0 is the indication that the descriptor is
+   * unused.  Obviously setting it to zero would break that usage.
    */
 
   DEBUGASSERT(srcaddr != 0);
@@ -462,7 +464,7 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
   desc = sam_alloc_desc(dmach);
   if (desc == NULL)
     {
-      /* We have it.  Initialize the new link list entry */
+      /* We have it.  Initialize the new descriptor list entry */
 
       desc->btctrl   = btctrl;   /* Block Transfer Control Register */
       desc->btcnt    = btcnt;    /* Block Transfer Count Register */
@@ -470,7 +472,7 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
       desc->dstaddr  = dstaddr;  /* Block Transfer Destination Address Register */
       desc->descaddr = 0;        /* Next Address Descriptor Register */
 
-      /* And then hook it at the tail of the link list */
+      /* And then hook it at the tail of the descriptor list */
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
       if (dmach->dc_tail != NULL)
@@ -533,8 +535,8 @@ static void sam_free_desc(struct sam_dmach_s *dmach)
   memset(desc, 0, sizeof(struct dma_desc_s));
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  /* Reset each additional descriptor in the link list (thereby freeing
-   * them)
+  /* Reset each additional descriptor in the descriptor list (thereby
+   * freeing them)
    */
 
   while (next != NULL)
@@ -663,7 +665,7 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
   btcnt   = sam_bytes2beats(dmach, nbytes);
 
-  /* Add the new link list entry */
+  /* Add the new descriptor list entry */
 
   if (!sam_append_desc(dmach, btctrl, btcnt, maddr, paddr))
     {
@@ -739,7 +741,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
   btcnt   = sam_bytes2beats(dmach, nbytes);
 
-  /* Add the new link list entry */
+  /* Add the new descriptor list entry */
 
   if (!sam_append_desc(dmach, btctrl, btcnt, paddr, maddr))
     {
@@ -1029,7 +1031,8 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *
  ****************************************************************************/
 
-int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
+int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                   size_t nbytes)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   ssize_t remaining = (ssize_t)nbytes;
@@ -1063,8 +1066,8 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
           remaining -= maxtransfer;
 
-          /* Increment the memory & peripheral address (if it is appropriate to
-           * do do).
+          /* Increment the memory & peripheral address (if it is appropriate
+           * to do so).
            *
            * REVISIT: What if stepsize is not 1?
            */
@@ -1117,12 +1120,14 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   head = &g_base_desc[dmach->dc_chan];
 
   /* Verify that the DMA has been setup (i.e., at least one entry in the
-   * link list, the base entry).
+   * descriptor list, the base entry).
    */
 
   if (head->srcaddr != 0)
     {
-      /* Save the callback info.  This will be invoked when the DMA completes */
+      /* Save the callback info.  This will be invoked when the DMA
+       * completes.
+       */
 
       dmach->dc_callback = callback;
       dmach->dc_arg      = arg;
@@ -1180,7 +1185,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
         {
           /* Peripheral to memory */
 
-          DEBUASSERT(dmach->dc_dir == DMADIR_RX);
+          DEBUGASSERT(dmach->dc_dir == DMADIR_RX);
           qosctrl = (periphqos << DMAC_QOSCTRL_FQOS_SHIFT) |
                     (memqos << DMAC_QOSCTRL_DQOS_SHIFT);
         }
@@ -1212,8 +1217,8 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
  *
  * Description:
  *   Cancel the DMA.  After sam_dmastop() is called, the DMA channel is
- *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can be
- *   called again
+ *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can
+ *   be called again
  *
  ****************************************************************************/
 
