@@ -108,18 +108,20 @@
 /* Peripheral endpoint characteristics.
  *
  * PERIPH_TXTRIG    - The TX ID of the peripheral that provides the DMA trigger.  This
- *                    is one of the DMA_TRIGSRC_*_TX definitions.
+ *                    is one of the DMA_TRIGSRC_*[_TX] definitions.  This trigger source
+ *                    is selected when sam_dmatxsetup() is called.
  * PERIPH_RXTRIG    - The RX ID of the peripheral that provides the DMA trigger.  This
- *                    is one of the DMA_TRIGSRC_*_RX definitions.
+ *                    is one of the DMA_TRIGSRC_*[_RX] definitions.  This trigger source
+ *                    is selected when sam_dmarxsetup() is called.
  * PERIPH_INCREMENT - Indicates the that peripheral address should be incremented on
  *                    each "beat"
  * PERIPH_QOS       - Quality of service for peripheral accesses
  */
 
-#define DMACH_FLAG_PERIPH_TXTRIG_SHIFT   (9)       /* Bits 9-14: See DMAC_TRIGSRC_*_TX */
+#define DMACH_FLAG_PERIPH_TXTRIG_SHIFT   (9)       /* Bits 9-14: See DMAC_TRIGSRC_*[_TX] */
 #define DMACH_FLAG_PERIPH_TXTRIG_MASK    (0x3f << DMACH_FLAG_PERIPH_TXTRIG_SHIFT)
 #  define DMACH_FLAG_PERIPH_TXTRIG(n)    ((uint32_t)(n) << DMACH_FLAG_PERIPH_TXTRIG_SHIFT)
-#define DMACH_FLAG_PERIPH_RXTRIG_SHIFT   (15)      /* Bits 15-20: See DMAC_TRIGSRC_*_RX */
+#define DMACH_FLAG_PERIPH_RXTRIG_SHIFT   (15)      /* Bits 15-20: See DMAC_TRIGSRC_*[_RX] */
 #define DMACH_FLAG_PERIPH_RXTRIG_MASK    (0x3f << DMACH_FLAG_PERIPH_RXTRIG_SHIFT)
 #  define DMACH_FLAG_PERIPH_RXTRIG(n)    ((uint32_t)(n) << DMACH_FLAG_PERIPH_RXTRIG_SHIFT)
 #define DMACH_FLAG_PERIPH_INCREMENT      (1 << 21) /* Bit 21: Autoincrement peripheral address */
