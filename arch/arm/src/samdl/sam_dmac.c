@@ -632,8 +632,8 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
    * Other settings come from the channel configuration:
    *
    *   LPSRAM_BTCTRL_BEATSIZE       - Determined by DMACH_FLAG_BEATSIZE
-   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_MEMINCREMENT
-   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_PERIPHINCREMENT
+   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_MEM_INCREMENT
+   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_PERIPH_INCREMENT
    *   LPSRAM_BTCTRL_STEPSEL        - Determined by DMACH_FLAG_STEPSEL
    *   LPSRAM_BTCTRL_STEPSIZE       - Determined by DMACH_FLAG_STEPSIZE
    */
@@ -644,12 +644,12 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
 
-  if ((dmach->dc_flags & DMACH_FLAG_MEMINCREMENT) != 0)
+  if ((dmach->dc_flags & DMACH_FLAG_MEM_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_SRCINC;
     }
 
-  if ((dmach->dc_flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+  if ((dmach->dc_flags & DMACH_FLAG_PERIPH_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_DSTINC;
     }
@@ -708,8 +708,8 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
    * Other settings come from the channel configuration:
    *
    *   LPSRAM_BTCTRL_BEATSIZE       - Determined by DMACH_FLAG_BEATSIZE
-   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_PERIPHINCREMENT
-   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_MEMINCREMENT
+   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_PERIPH_INCREMENT
+   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_MEM_INCREMENT
    *   LPSRAM_BTCTRL_STEPSEL        - Determined by DMACH_FLAG_STEPSEL
    *   LPSRAM_BTCTRL_STEPSIZE       - Determined by DMACH_FLAG_STEPSIZE
    */
@@ -720,12 +720,12 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
 
-  if ((dmach->dc_flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+  if ((dmach->dc_flags & DMACH_FLAG_PERIPH_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_SRCINC;
     }
 
-  if ((dmach->dc_flags & DMACH_FLAG_MEMINCREMENT) != 0)
+  if ((dmach->dc_flags & DMACH_FLAG_MEM_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_DSTINC;
     }
@@ -999,12 +999,12 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
            * REVISIT: What if stepsize is not 1?
            */
 
-          if ((dmach->dc_flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+          if ((dmach->dc_flags & DMACH_FLAG_PERIPH_INCREMENT) != 0)
             {
               paddr += maxtransfer;
             }
 
-          if ((dmach->dc_flags & DMACH_FLAG_MEMINCREMENT) != 0)
+          if ((dmach->dc_flags & DMACH_FLAG_MEM_INCREMENT) != 0)
             {
               maddr += maxtransfer;
             }
@@ -1073,12 +1073,12 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
            * REVISIT: What if stepsize is not 1?
            */
 
-          if ((dmach->dc_flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+          if ((dmach->dc_flags & DMACH_FLAG_PERIPH_INCREMENT) != 0)
             {
               paddr += maxtransfer;
             }
 
-          if ((dmach->dc_flags & DMACH_FLAG_MEMINCREMENT) != 0)
+          if ((dmach->dc_flags & DMACH_FLAG_MEM_INCREMENT) != 0)
             {
               maddr += maxtransfer;
             }
@@ -1145,7 +1145,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
        *   DMAC_CHCTRLB_EVIE=0       - No channel input actions
        *   DMAC_CHCTRLB_EVOE=0       - Channel event output disabled
        *   DMAC_CHCTRLB_LVL          - Determined by DMACH_FLAG_PRIORITY
-       *   DMAC_CHCTRLB_TRIGSRC      - Determined by DMACH_FLAG_PERIPHTRIG
+       *   DMAC_CHCTRLB_TRIGSRC      - Determined by DMACH_FLAG_PERIPH_TRIG
        *   DMAC_CHCTRLB_TRIGACT_BEAT - One trigger required for beat transfer
        *   DMAC_CHCTRLB_CMD_NOACTION - No action
        */
@@ -1157,23 +1157,36 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
              DMACH_FLAG_PRIORITY_SHIFT;
       chctrlb |= tmp << DMAC_CHCTRLB_LVL_SHIFT;
 
-      tmp = (dmach->dc_flags & DMACH_FLAG_PERIPHTRIG_MASK) >>
-             DMACH_FLAG_PERIPHTRIG_SHIFT;
-      chctrlb |= tmp << DMAC_CHCTRLB_TRIGSRC_SHIFT;
+      if (dmach->dc_dir == DMADIR_TX)
+        {
+          /* Memory to peripheral */
 
+          tmp = (dmach->dc_flags & DMACH_FLAG_PERIPH_TXTRIG_MASK) >>
+                 DMACH_FLAG_PERIPH_TXTRIG_SHIFT;
+        }
+      else
+        {
+          /* Peripheral to memory */
+
+          DEBUGASSERT(dmach->dc_dir == DMADIR_RX);
+          tmp = (dmach->dc_flags & DMACH_FLAG_PERIPH_RXTRIG_MASK) >>
+                 DMACH_FLAG_PERIPH_RXTRIG_SHIFT;
+        }
+
+      chctrlb |= tmp << DMAC_CHCTRLB_TRIGSRC_SHIFT;
       putreg8(chctrlb, SAM_DMAC_CHCTRLB);
 
       /* Setup the Quality of Service Control Register
        *
        *   DMAC_QOSCTRL_WRBQOS_DISABLE - Background
-       *   DMAC_QOSCTRL_FQOS, DMAC_QOSCTRL_DQOS - Depend on DMACH_FLAG_PERIPHQOS
-       *     and DMACH_FLAG_MEMQOS
+       *   DMAC_QOSCTRL_FQOS, DMAC_QOSCTRL_DQOS - Depend on DMACH_FLAG_PERIPH_QOS
+       *     and DMACH_FLAG_MEM_QOS
        */
 
-      periphqos = (dmach->dc_flags & DMACH_FLAG_PERIPHQOS_MASK) >>
-                  DMACH_FLAG_PERIPHQOS_SHIFT;
-      memqos    = (dmach->dc_flags & DMACH_FLAG_MEMQOS_MASK) >>
-                  DMACH_FLAG_MEMQOS_SHIFT;
+      periphqos = (dmach->dc_flags & DMACH_FLAG_PERIPH_QOS_MASK) >>
+                  DMACH_FLAG_PERIPH_QOS_SHIFT;
+      memqos    = (dmach->dc_flags & DMACH_FLAG_MEM_QOS_MASK) >>
+                  DMACH_FLAG_MEM_QOS_SHIFT;
 
       if (dmach->dc_dir == DMADIR_TX)
         {
