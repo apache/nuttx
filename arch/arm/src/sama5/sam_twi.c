@@ -1453,7 +1453,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       /* Select up TWI3 and setup invariant attributes */
 
       priv       = &g_twi3;
-      priv->attr = &g_twi2attr;
+      priv->attr = &g_twi3attr;
 
       /* Select the (initial) TWI frequency */
 
