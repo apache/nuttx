@@ -223,6 +223,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   net_ipv6addr_t *lipaddr;
   net_ipv6addr_t *ripaddr;
 #endif
+  net_lock_t save;
 
   /* Check if enough space has been provided for the full address */
 
