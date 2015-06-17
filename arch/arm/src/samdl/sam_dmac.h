@@ -75,7 +75,12 @@
  * be used if, for example, both sides were memory although the naming would be awkward)
  */
 
-/* Common characteristics */
+/* Common characteristics
+ *
+ *   BEATSIZE - The size of one bus transfer or "beat".  8-, 16-, or 32-bits
+ *   STEPSIZE - When the address is incremented, it is increments by how many "beats"?
+ *   STEPSEL  - The STEPSIZE may be applied only to the memory to the peripheral.
+ */
 
 #define DMACH_FLAG_BEATSIZE_SHIFT        (0)       /* Bits 0-1: Beat size */
 #define DMACH_FLAG_BEATSIZE_MASK         (3 << DMACH_FLAG_BEATSIZE_SHIFT)
@@ -100,7 +105,16 @@
 #  define DMACH_FLAG_PRIORITY(n)         ((uint32_t)(n) << DMACH_FLAG_PRIORITY_SHIFT)
 #define DMACH_FLAG_RUNINSTDBY            (1 << 8)  /* Bit 8: Run in standby */
 
-/* Peripheral endpoint characteristics */
+/* Peripheral endpoint characteristics.
+ *
+ * PERIPH_TXTRIG    - The TX ID of the peripheral that provides the DMA trigger.  This
+ *                    is one of the DMA_TRIGSRC_*_TX definitions.
+ * PERIPH_RXTRIG    - The RX ID of the peripheral that provides the DMA trigger.  This
+ *                    is one of the DMA_TRIGSRC_*_RX definitions.
+ * PERIPH_INCREMENT - Indicates the that peripheral address should be incremented on
+ *                    each "beat"
+ * PERIPH_QOS       - Quality of service for peripheral accesses
+ */
 
 #define DMACH_FLAG_PERIPH_TXTRIG_SHIFT   (9)       /* Bits 9-14: See DMAC_TRIGSRC_*_TX */
 #define DMACH_FLAG_PERIPH_TXTRIG_MASK    (0x3f << DMACH_FLAG_PERIPH_TXTRIG_SHIFT)
@@ -116,7 +130,12 @@
 #  define DMACH_FLAG_PERIPH_QOS_MEDIUM   (2 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Sensitive latency */
 #  define DMACH_FLAG_PERIPH_QOS_HIGH     (3 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Critical latency */
 
-/* Memory endpoint characteristics */
+/* Memory endpoint characteristics
+ *
+ * MEM_INCREMENT - Indicates the that memory address should be incremented on each
+ *                 "beat"
+ * MEM_QOS       - Quality of service for memory accesses
+ */
 
 #define DMACH_FLAG_MEM_INCREMENT         (1 << 24) /* Bit 24: Autoincrement memory address */
 #define DMACH_FLAG_MEM_QOS_SHIFT         (25)      /* Bits 25-26:  Memory quality of service */
