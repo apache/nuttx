@@ -1145,7 +1145,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
        *   DMAC_CHCTRLB_EVIE=0       - No channel input actions
        *   DMAC_CHCTRLB_EVOE=0       - Channel event output disabled
        *   DMAC_CHCTRLB_LVL          - Determined by DMACH_FLAG_PRIORITY
-       *   DMAC_CHCTRLB_TRIGSRC      - Determined by DMACH_FLAG_PERIPH_TRIG
+       *   DMAC_CHCTRLB_TRIGSRC      - Determined by DMACH_FLAG_PERIPH_*XTRIG
        *   DMAC_CHCTRLB_TRIGACT_BEAT - One trigger required for beat transfer
        *   DMAC_CHCTRLB_CMD_NOACTION - No action
        */
