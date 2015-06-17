@@ -102,27 +102,30 @@
 
 /* Peripheral endpoint characteristics */
 
-#define DMACH_FLAG_PERIPHTRIG_SHIFT      (9)       /* Bits 9-13: See DMAC_TRIGSRC_* */
-#define DMACH_FLAG_PERIPHTRIG_MASK       (0x3f << DMACH_FLAG_PERIPHTRIG_SHIFT)
-#  define DMACH_FLAG_PERIPHTRIG(n)       ((uint32_t)(n) << DMACH_FLAG_PERIPHTRIG_SHIFT)
-#define DMACH_FLAG_PERIPHINCREMENT       (1 << 14) /* Bit 14: Autoincrement peripheral address */
-#define DMACH_FLAG_PERIPHQOS_SHIFT       (15)      /* Bits 15-16:  Peripheral quality of service */
-#define DMACH_FLAG_PERIPHQOS_MASK        (3 << DMACH_FLAG_PERIPHQOS_SHIFT)
-#  define DMACH_FLAG_PERIPHQOS_DISABLE   (0 << DMACH_FLAG_PERIPHQOS_SHIFT) /* Background */
-#  define DMACH_FLAG_PERIPHQOS_LOW       (1 << DMACH_FLAG_PERIPHQOS_SHIFT) /* Sensitve bandwidth */
-#  define DMACH_FLAG_PERIPHQOS_MEDIUM    (2 << DMACH_FLAG_PERIPHQOS_SHIFT) /* Sensitive latency */
-#  define DMACH_FLAG_PERIPHQOS_HIGH      (3 << DMACH_FLAG_PERIPHQOS_SHIFT) /* Critical latency */
+#define DMACH_FLAG_PERIPH_TXTRIG_SHIFT   (9)       /* Bits 9-14: See DMAC_TRIGSRC_*_TX */
+#define DMACH_FLAG_PERIPH_TXTRIG_MASK    (0x3f << DMACH_FLAG_PERIPH_TXTRIG_SHIFT)
+#  define DMACH_FLAG_PERIPH_TXTRIG(n)    ((uint32_t)(n) << DMACH_FLAG_PERIPH_TXTRIG_SHIFT)
+#define DMACH_FLAG_PERIPH_RXTRIG_SHIFT   (15)      /* Bits 15-20: See DMAC_TRIGSRC_*_RX */
+#define DMACH_FLAG_PERIPH_RXTRIG_MASK    (0x3f << DMACH_FLAG_PERIPH_RXTRIG_SHIFT)
+#  define DMACH_FLAG_PERIPH_RXTRIG(n)    ((uint32_t)(n) << DMACH_FLAG_PERIPH_RXTRIG_SHIFT)
+#define DMACH_FLAG_PERIPH_INCREMENT      (1 << 21) /* Bit 21: Autoincrement peripheral address */
+#define DMACH_FLAG_PERIPH_QOS_SHIFT      (22)      /* Bits 22-23:  Peripheral quality of service */
+#define DMACH_FLAG_PERIPH_QOS_MASK       (3 << DMACH_FLAG_PERIPH_QOS_SHIFT)
+#  define DMACH_FLAG_PERIPH_QOS_DISABLE  (0 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Background */
+#  define DMACH_FLAG_PERIPH_QOS_LOW      (1 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Sensitve bandwidth */
+#  define DMACH_FLAG_PERIPH_QOS_MEDIUM   (2 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Sensitive latency */
+#  define DMACH_FLAG_PERIPH_QOS_HIGH     (3 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Critical latency */
 
 /* Memory endpoint characteristics */
 
-#define DMACH_FLAG_MEMINCREMENT          (1 << 17) /* Bit 17: Autoincrement memory address */
-#define DMACH_FLAG_MEMQOS_SHIFT          (18)      /* Bits 18-19:  Memory quality of service */
-#define DMACH_FLAG_MEMQOS_MASK           (3 << DMACH_FLAG_MEMQOS_SHIFT)
-#  define DMACH_FLAG_MEMQOS_DISABLE      (0 << DMACH_FLAG_MEMQOS_SHIFT) /* Background */
-#  define DMACH_FLAG_MEMQOS_LOW          (1 << DMACH_FLAG_MEMQOS_SHIFT) /* Sensitve bandwidth */
-#  define DMACH_FLAG_MEMQOS_MEDIUM       (2 << DMACH_FLAG_MEMQOS_SHIFT) /* Sensitive latency */
-#  define DMACH_FLAG_MEMQOS_HIGH         (3 << DMACH_FLAG_MEMQOS_SHIFT) /* Critical latency */
-                                                   /* Bits 20-31: Not used */
+#define DMACH_FLAG_MEM_INCREMENT         (1 << 24) /* Bit 24: Autoincrement memory address */
+#define DMACH_FLAG_MEM_QOS_SHIFT         (25)      /* Bits 25-26:  Memory quality of service */
+#define DMACH_FLAG_MEM_QOS_MASK          (3 << DMACH_FLAG_MEM_QOS_SHIFT)
+#  define DMACH_FLAG_MEM_QOS_DISABLE     (0 << DMACH_FLAG_MEM_QOS_SHIFT) /* Background */
+#  define DMACH_FLAG_MEM_QOS_LOW         (1 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitve bandwidth */
+#  define DMACH_FLAG_MEM_QOS_MEDIUM      (2 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitive latency */
+#  define DMACH_FLAG_MEM_QOS_HIGH        (3 << DMACH_FLAG_MEM_QOS_SHIFT) /* Critical latency */
+                                                   /* Bits 27-31: Not used */
 
 /************************************************************************************
  * Public Types
