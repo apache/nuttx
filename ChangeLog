@@ -10594,3 +10594,7 @@
 	  for unclaimed mutexes.  From Juha Niskanen (2015-06-16).
 	* sched/pthread: Implement pthread_mutex_trylock() for recursive mutexes.
 	  From Juha Niskanen (2015-06-16).
+	* libc/unistd/lib_getopt.c:  Uninitialized variable can cause hardfault
+	  from getopt if required argument is missing. From George McWilliams
+	  (2015-06-18)
+
