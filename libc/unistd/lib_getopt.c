@@ -258,6 +258,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 
         /* No argument was supplied */
 
+        g_optptr = NULL;
         optarg = NULL;
         optopt = *optchar;
         optind++;
