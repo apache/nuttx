@@ -745,7 +745,6 @@ static inline void sam_dfll_reference(void)
 #ifdef BOARD_GCLK_ENABLE
 static inline void sam_config_gclks(void)
 {
-  uint32_t regval;
   int i;
 
   /* Turn on the GCLK interface clock */
