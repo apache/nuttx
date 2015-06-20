@@ -131,6 +131,150 @@ config ARCH_CHIP_SAMD20J18
 	---help---
 		Flash 256KB SRAM 32KB
 
+config ARCH_CHIP_SAMD21E15A
+	bool "SAMD21E15A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD21E15B
+	bool "SAMD21E15B"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD21E16A
+	bool "SAMD21E16A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD21E16B
+	bool "SAMD21E16B"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD21E17A
+	bool "SAMD21E17A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAMD21E18A
+	bool "SAMD21E18A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 256KB SRAM 32KB
+
+config ARCH_CHIP_SAMD21G15A
+	bool "SAMD21G15A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21G
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD21G15B
+	bool "SAMD21G15B"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21G
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD21G16A
+	bool "SAMD21G16A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21G
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD21G16B
+	bool "SAMD21G16B"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD21G17A
+	bool "SAMD21G17A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21G
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAMD21G18A
+	bool "SAMD21G18A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21G
+	---help---
+		Flash 256KB SRAM 32KB
+
+config ARCH_CHIP_SAMD21J15A
+	bool "SAMD21J15A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21J
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD21J15B
+	bool "SAMD21J15B"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21J
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD21J16A
+	bool "SAMD21J16A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21J
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD21J16B
+	bool "SAMD21J16B"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21J
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD21J17A
+	bool "SAMD21J17A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21E
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAMD21J18A
+	bool "SAMD21J18A"
+	depends on ARCH_CHIP_SAMD
+	select ARCH_FAMILY_SAMD21
+	select ARCH_FAMILY_SAMD21J
+	---help---
+		Flash 256KB SRAM 32KB
+
 config ARCH_CHIP_SAML21E15
 	bool "SAML21E15"
 	depends on ARCH_CHIP_SAML
@@ -237,6 +381,30 @@ config ARCH_FAMILY_SAMD20J
 	select SAMDL_HAVE_SERCOM5
 	select SAMDL_HAVE_TC6
 	select SAMDL_HAVE_TC7
+
+config ARCH_FAMILY_SAMD21
+	bool
+	default n
+	select SAMDL_HAVE_DMAC
+
+config ARCH_FAMILY_SAMD21E
+	bool
+	default n
+
+config ARCH_FAMILY_SAMD21G
+	bool
+	default n
+	select SAMDL_HAVE_SERCOM4
+	select SAMDL_HAVE_SERCOM5
+
+config ARCH_FAMILY_SAMD21J
+	bool
+	default n
+	select SAMDL_HAVE_SERCOM4
+	select SAMDL_HAVE_SERCOM5
+	select SAMDL_HAVE_TC2
+	select SAMDL_HAVE_TC3
+	select SAMDL_HAVE_TC5
 
 config ARCH_FAMILY_SAML21
 	bool
