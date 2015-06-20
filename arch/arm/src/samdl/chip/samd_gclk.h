@@ -195,7 +195,7 @@
 #  define GCLK_GENCTRL_ID7      (7 << GCLK_GENCTRL_ID_SHIFT)   /* Generic clock generator 7 */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define GCLK_GENCTRL_ID8      (78<< GCLK_GENCTRL_ID_SHIFT)   /* Generic clock generator 8 */
+#  define GCLK_GENCTRL_ID8      (8 << GCLK_GENCTRL_ID_SHIFT)   /* Generic clock generator 8 */
 #endif
 
 #define GCLK_GENCTRL_SRC_SHIFT  (8)       /* Bits 8-12: Source Select */
@@ -208,6 +208,11 @@
 #  define GCLK_GENCTRL_SRC_XOSC32K   (5 << GCLK_GENCTRL_SRC_SHIFT) /* XOSC32K oscillator output */
 #  define GCLK_GENCTRL_SRC_OSC8M     (6 << GCLK_GENCTRL_SRC_SHIFT) /* OSC8M oscillator output */
 #  define GCLK_GENCTRL_SRC_DFLL48M   (7 << GCLK_GENCTRL_SRC_SHIFT) /* DFLL48M output */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define GCLK_GENCTRL_SRC_FDPLL96M  (8 << GCLK_GENCTRL_SRC_SHIFT) /* FDPLL96M output */
+#endif
+
 #define GCLK_GENCTRL_GENEN      (1 << 16) /* Bit 16: Generic Clock Generator Enable */
 #define GCLK_GENCTRL_IDC        (1 << 17) /* Bit 17: Improve Duty Cycle */
 #define GCLK_GENCTRL_OOV        (1 << 18) /* Bit 18: Output Off Value */
@@ -228,6 +233,11 @@
 #  define GCLK_GENDIV_ID5       (5 << GCLK_GENDIV_ID_SHIFT)   /* Generic clock generator 5 */
 #  define GCLK_GENDIV_ID6       (6 << GCLK_GENDIV_ID_SHIFT)   /* Generic clock generator 6 */
 #  define GCLK_GENDIV_ID7       (7 << GCLK_GENDIV_ID_SHIFT)   /* Generic clock generator 7 */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define GCLK_GENDIV_ID8       (8 << GCLK_GENCTRL_ID_SHIFT)  /* Generic clock generator 8 */
+#endif
+
 #define GCLK_GENDIV_DIV_SHIFT   (8)       /* Bits 8-23: Division Factor */
 #define GCLK_GENDIV_DIV_MASK    (0xffff << GCLK_GENDIV_DIV_SHIFT)
 #  define GCLK_GENDIV_DIV(n)    ((n) << GCLK_GENDIV_DIV_SHIFT)
