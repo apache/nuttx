@@ -10597,4 +10597,5 @@
 	* libc/unistd/lib_getopt.c:  Uninitialized variable can cause hardfault
 	  from getopt if required argument is missing. From George McWilliams
 	  (2015-06-18)
-
+	* arch/arm/include/samdl and arch/arm/src/samdl:  Add architecture support
+	  for the SAMD21 family (2015-06-19).
