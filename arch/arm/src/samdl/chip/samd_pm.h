@@ -48,7 +48,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -98,9 +98,9 @@
 
 #define PM_SLEEP_IDLE_SHIFT       (0)        /* Bits 0-1: Idle Mode Configuration */
 #define PM_SLEEP_IDLE_MASK        (3 << PM_SLEEP_IDLE_SHIFT)
-#define PM_SLEEP_IDLE_CPU         (0 << PM_SLEEP_IDLE_SHIFT) /* CPU clock domain stopped */
-#define PM_SLEEP_IDLE_CPUAHB      (1 << PM_SLEEP_IDLE_SHIFT) /* CPU and AHB clock domains stopped */
-#define PM_SLEEP_IDLE_CPUAHBAPB   (2 << PM_SLEEP_IDLE_SHIFT) /* CPU, AHB and APB clock domains stopped */
+#  define PM_SLEEP_IDLE_CPU       (0 << PM_SLEEP_IDLE_SHIFT) /* CPU clock domain stopped */
+#  define PM_SLEEP_IDLE_CPUAHB    (1 << PM_SLEEP_IDLE_SHIFT) /* CPU and AHB clock domains stopped */
+#  define PM_SLEEP_IDLE_CPUAHBAPB (2 << PM_SLEEP_IDLE_SHIFT) /* CPU, AHB, and APB clock domains stopped */
 
 /* CPU clock select register */
 
@@ -162,6 +162,11 @@
 #define PM_AHBMASK_DSU            (1 << 3)  /* Bit 3:  DSU */
 #define PM_AHBMASK_NVMCTRL        (1 << 4)  /* Bit 4:  NVMCTRL  */
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define PM_AHBMASK_DMAC         (1 << 5)  /* Bit 4:  DMA controller  */
+#  define PM_AHBMASK_USB          (1 << 6)  /* Bit 4:  USB  */
+#endif
+
 /* APBA mask register */
 
 #define PM_APBAMASK_PAC0          (1 << 0)  /* Bit 0:  PAC0 */
@@ -179,6 +184,11 @@
 #define PM_APBBMASK_NVMCTRL       (1 << 2)  /* Bit 2:  NVMCTRL */
 #define PM_APBBMASK_PORT          (1 << 3)  /* Bit 3:  PORT */
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define PM_APBBMASK_DMAC        (1 << 4)  /* Bit 4:  DMA controller */
+#  define PM_APBBMASK_USB         (1 << 5)  /* Bit 5:  USB  */
+#endif
+
 /* APBC mask register */
 
 #define PM_APBCMASK_PAC2          (1 << 0)  /* Bit 0:  PAC2 */
@@ -189,10 +199,20 @@
 #  define PM_APBCMASK_SERCOM2     (1 << 4)  /* Bit 4:  SERCOM2 */
 #  define PM_APBCMASK_SERCOM3     (1 << 5)  /* Bit 5:  SERCOM3 */
 #  define PM_APBCMASK_SERCOM4     (1 << 6)  /* Bit 6:  SERCOM4 */
-#define PM_APBCMASK_SERCOM5       (1 << 7)  /* Bit 7:  SERCOM5 */
-#define PM_APBCMASK_TC0           (1 << 8)  /* Bit 8:  TC0 */
-#define PM_APBCMASK_TC1           (1 << 9)  /* Bit 9:  TC1 */
-#define PM_APBCMASK_TC2           (1 << 10) /* Bit 10: TC2 */
+#  define PM_APBCMASK_SERCOM5     (1 << 7)  /* Bit 7:  SERCOM5 */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define PM_APBCMASK_TC0         (1 << 8)  /* Bit 8:  TC0 */
+#  define PM_APBCMASK_TC1         (1 << 9)  /* Bit 9:  TC1 */
+#  define PM_APBCMASK_TC2         (1 << 10) /* Bit 10: TC2 */
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define PM_APBCMASK_TCC0        (1 << 8)  /* Bit 8:  TCC0 */
+#  define PM_APBCMASK_TCC1        (1 << 9)  /* Bit 9:  TCC1 */
+#  define PM_APBCMASK_TCC2        (1 << 10) /* Bit 10: TCC2 */
+#endif
+
 #define PM_APBCMASK_TC3           (1 << 11) /* Bit 11: TC3 */
 #define PM_APBCMASK_TC4           (1 << 12) /* Bit 12: TC4 */
 #define PM_APBCMASK_TC5           (1 << 13) /* Bit 13: TC5 */
@@ -203,10 +223,17 @@
 #define PM_APBCMASK_DAC           (1 << 18) /* Bit 18: DAC */
 #define PM_APBCMASK_PTC           (1 << 19) /* Bit 19: PTC */
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define PM_APBBMASK_I2S         (1 << 10) /* Bit 20: Inter IC Sound */
+#endif
+
 /* Interrupt enable clear, Interrupt enable set, and Interrupt flag status and clear registers */
 
 #define PM_INT_CKRDY              (1 << 0)  /* Bit 0: Clock Ready Interrupt */
-#define PM_INT_CFD                (1 << 1)  /* Bit 1: Clock Failure Detector Interrupt */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define PM_INT_CFD              (1 << 1)  /* Bit 1: Clock Failure Detector Interrupt */
+#endif
 
 /* Reset cause register */
 
@@ -229,5 +256,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_PM_H */

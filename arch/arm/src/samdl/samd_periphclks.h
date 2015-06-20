@@ -44,7 +44,7 @@
 
 #include "chip/samd_pm.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,6 +67,11 @@
 #define sam_nvmctrl_enableperiph()    sam_apbb_enableperiph(PM_APBBMASK_NVMCTRL)
 #define sam_port_enableperiph()       sam_apbb_enableperiph(PM_APBBMASK_PORT)
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_dmac_enableperiph()     sam_apbb_enableperiph(PM_APBBMASK_DMAC)
+#  define sam_usb_enableperiph()      sam_apbb_enableperiph(PM_APBBMASK_USB)
+#endif
+
 #define sam_apbc_enableperiph(s)      modifyreg32(SAM_PM_APBCMASK,0,s)
 
 #define sam_pac2_enableperiph()       sam_apbc_enableperiph(PM_APBCMASK_PAC2)
@@ -78,9 +83,19 @@
 #define sam_sercom3_enableperiph()    sam_apbc_enableperiph(PM_APBCMASK_SERCOM3)
 #define sam_sercom4_enableperiph()    sam_apbc_enableperiph(PM_APBCMASK_SERCOM4)
 #define sam_sercom5_enableperiph()    sam_apbc_enableperiph(PM_APBCMASK_SERCOM5)
-#define sam_tc0_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_TC0)
-#define sam_tc1_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_TC1)
-#define sam_tc2_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_TC2)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define sam_tc0_enableperiph()      sam_apbc_enableperiph(PM_APBCMASK_TC0)
+#  define sam_tc1_enableperiph()      sam_apbc_enableperiph(PM_APBCMASK_TC1)
+#  define sam_tc2_enableperiph()      sam_apbc_enableperiph(PM_APBCMASK_TC2)
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_tcc0_enableperiph()     sam_apbc_enableperiph(PM_APBCMASK_TCC0)
+#  define sam_tcc1_enableperiph()     sam_apbc_enableperiph(PM_APBCMASK_TCC1)
+#  define sam_tcc2_enableperiph()     sam_apbc_enableperiph(PM_APBCMASK_TCC2)
+#endif
+
 #define sam_tc3_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_TC3)
 #define sam_tc4_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_TC4)
 #define sam_tc5_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_TC5)
@@ -90,6 +105,10 @@
 #define sam_ac_enableperiph()         sam_apbc_enableperiph(PM_APBCMASK_AC)
 #define sam_dac_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_DAC)
 #define sam_ptc_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_PTC)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_i2s_enableperiph()      sam_apbc_enableperiph(PM_APBBMASK_I2S)
+#endif
 
 #define sam_apba_disableperiph(s)     modifyreg32(SAM_PM_APBAMASK,s,0)
 
@@ -108,6 +127,11 @@
 #define sam_nvmctrl_disableperiph()   sam_apbb_disableperiph(PM_APBBMASK_NVMCTRL)
 #define sam_port_disableperiph()      sam_apbb_disableperiph(PM_APBBMASK_PORT)
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_dmac_disableperiph()    sam_apbb_disableperiph(PM_APBBMASK_DMAC)
+#  define sam_usb_disableperiph()     sam_apbb_disableperiph(PM_APBBMASK_USB)
+#endif
+
 #define sam_apbc_disableperiph(s)     modifyreg32(SAM_PM_APBCMASK,s,0)
 
 #define sam_pac2_disableperiph()      sam_apbc_disableperiph(PM_APBCMASK_PAC2)
@@ -119,9 +143,19 @@
 #define sam_sercom3_disableperiph()   sam_apbc_disableperiph(PM_APBCMASK_SERCOM3)
 #define sam_sercom4_disableperiph()   sam_apbc_disableperiph(PM_APBCMASK_SERCOM4)
 #define sam_sercom5_disableperiph()   sam_apbc_disableperiph(PM_APBCMASK_SERCOM5)
-#define sam_tc0_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_TC0)
-#define sam_tc1_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_TC1)
-#define sam_tc2_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_TC2)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define sam_tc0_disableperiph()     sam_apbc_disableperiph(PM_APBCMASK_TC0)
+#  define sam_tc1_disableperiph()     sam_apbc_disableperiph(PM_APBCMASK_TC1)
+#  define sam_tc2_disableperiph()     sam_apbc_disableperiph(PM_APBCMASK_TC2)
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_tcc0_disableperiph()    sam_apbc_disableperiph(PM_APBCMASK_TCC0)
+#  define sam_tcc1_disableperiph()    sam_apbc_disableperiph(PM_APBCMASK_TCC1)
+#  define sam_tcc2_disableperiph()    sam_apbc_disableperiph(PM_APBCMASK_TCC2)
+#endif
+
 #define sam_tc3_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_TC3)
 #define sam_tc4_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_TC4)
 #define sam_tc5_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_TC5)
@@ -131,6 +165,10 @@
 #define sam_ac_disableperiph()        sam_apbc_disableperiph(PM_APBCMASK_AC)
 #define sam_dac_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_DAC)
 #define sam_ptc_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_PTC)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_i2s_disableperiph()     sam_apbc_disableperiph(PM_APBBMASK_I2S)
+#endif
 
 #define sam_apba_isenabled(s)         (getreg32(SAM_PM_APBAMASK) & (s)) != 0)
 
@@ -149,6 +187,11 @@
 #define sam_nvmctrl_isenabled()       sam_apbb_isenabled(PM_APBBMASK_NVMCTRL)
 #define sam_port_isenabled()          sam_apbb_isenabled(PM_APBBMASK_PORT)
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_dmac_isenabled()        sam_apbb_isenabled(PM_APBBMASK_DMAC)
+#  define sam_usb_isenabled()         sam_apbb_isenabled(PM_APBBMASK_USB)
+#endif
+
 #define sam_apbc_isenabled(s)         (getreg32(SAM_PM_APBCMASK) & (s)) != 0)
 
 #define sam_pac2_isenabled()          sam_apbc_isenabled(PM_APBCMASK_PAC2)
@@ -160,9 +203,19 @@
 #define sam_sercom3_isenabled()       sam_apbc_isenabled(PM_APBCMASK_SERCOM3)
 #define sam_sercom4_isenabled()       sam_apbc_isenabled(PM_APBCMASK_SERCOM4)
 #define sam_sercom5_isenabled()       sam_apbc_isenabled(PM_APBCMASK_SERCOM5)
-#define sam_tc0_isenabled()           sam_apbc_isenabled(PM_APBCMASK_TC0)
-#define sam_tc1_isenabled()           sam_apbc_isenabled(PM_APBCMASK_TC1)
-#define sam_tc2_isenabled()           sam_apbc_isenabled(PM_APBCMASK_TC2)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define sam_tc0_isenabled()         sam_apbc_isenabled(PM_APBCMASK_TC0)
+#  define sam_tc1_isenabled()         sam_apbc_isenabled(PM_APBCMASK_TC1)
+#  define sam_tc2_isenabled()         sam_apbc_isenabled(PM_APBCMASK_TC2)
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_tcc0_isenabled()        sam_apbc_isenabled(PM_APBCMASK_TCC0)
+#  define sam_tcc1_isenabled()        sam_apbc_isenabled(PM_APBCMASK_TCC1)
+#  define sam_tcc2_isenabled()        sam_apbc_isenabled(PM_APBCMASK_TCC2)
+#endif
+
 #define sam_tc3_isenabled()           sam_apbc_isenabled(PM_APBCMASK_TC3)
 #define sam_tc4_isenabled()           sam_apbc_isenabled(PM_APBCMASK_TC4)
 #define sam_tc5_isenabled()           sam_apbc_isenabled(PM_APBCMASK_TC5)
@@ -172,6 +225,10 @@
 #define sam_ac_isenabled()            sam_apbc_isenabled(PM_APBCMASK_AC)
 #define sam_dac_isenabled()           sam_apbc_isenabled(PM_APBCMASK_DAC)
 #define sam_ptc_isenabled()           sam_apbc_isenabled(PM_APBCMASK_PTC)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define sam_i2s_isenabled()         sam_apbc_isenabled(PM_APBBMASK_I2S)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -205,5 +262,5 @@ extern "C"
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMDL_SAMD_PERIPHCLKS_H */
