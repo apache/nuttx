@@ -1,8 +1,12 @@
 /****************************************************************************************
  * arch/arm/include/samd/samd21_irq.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * References:
+ *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
+ *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -394,9 +394,14 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /* 4KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
+
+#  if defined(CONFIG_ARCH_CHIP_SAMD21E15A)
+#    define SAMDL_FLASHRWW_SIZE     (0*1024)      /* None */
+#  else
+#    define SAMDL_FLASHRWW_SIZE     (1*1024)      /* 1KB */
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD21E16A) || defined(CONFIG_ARCH_CHIP_SAMD21E16B)
 
@@ -408,9 +413,14 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /* 8KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
+
+#  if defined(CONFIG_ARCH_CHIP_SAMD21E16A)
+#    define SAMDL_FLASHRWW_SIZE     (0*1024)      /* None */
+#  else
+#    define SAMDL_FLASHRWW_SIZE     (2*1024)      /* 2KB */
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD21E17A)
 
@@ -422,7 +432,7 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
+#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /* 16KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
@@ -436,7 +446,7 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
+#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
@@ -450,9 +460,14 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /* 4KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
+
+#  if defined(CONFIG_ARCH_CHIP_SAMD21G15A)
+#    define SAMDL_FLASHRWW_SIZE     (0*1024)      /* None */
+#  else
+#    define SAMDL_FLASHRWW_SIZE     (1*1024)      /* 1KB */
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD21G16A) || defined(CONFIG_ARCH_CHIP_SAMD21G16B)
 
@@ -464,9 +479,14 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /* 8KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
+
+#  if defined(CONFIG_ARCH_CHIP_SAMD21G16A)
+#    define SAMDL_FLASHRWW_SIZE     (0*1024)      /* None */
+#  else
+#    define SAMDL_FLASHRWW_SIZE     (2*1024)      /* 2KB */
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD21G17A)
 
@@ -478,7 +498,7 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
+#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /* 16KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
@@ -492,7 +512,7 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
+#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
@@ -506,9 +526,14 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (32*1024)     /* 32KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
 #  define SAMDL_SRAM0_SIZE          (4*1024)      /* 4KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
+
+#  if defined(CONFIG_ARCH_CHIP_SAMD21J15A)
+#    define SAMDL_FLASHRWW_SIZE     (0*1024)      /* None */
+#  else
+#    define SAMDL_FLASHRWW_SIZE     (1*1024)      /* 1KB */
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD21J16A) || defined(CONFIG_ARCH_CHIP_SAMD21J16B)
 
@@ -520,9 +545,14 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (64*1024)     /* 64KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
 #  define SAMDL_SRAM0_SIZE          (8*1024)      /* 8KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
+
+#  if defined(CONFIG_ARCH_CHIP_SAMD21J16A)
+#    define SAMDL_FLASHRWW_SIZE     (0*1024)      /* None */
+#  else
+#    define SAMDL_FLASHRWW_SIZE     (2*1024)      /* 2KB */
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_SAMD21J17A)
 
@@ -534,7 +564,7 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (128*1024)    /* 128KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
+#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None */
 #  define SAMDL_SRAM0_SIZE          (16*1024)     /* 16KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
@@ -548,7 +578,7 @@
 /* Internal memory */
 
 #  define SAMDL_FLASH_SIZE          (256*1024)    /* 256KB */
-#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None - except on B device variant */
+#  define SAMDL_FLASHRWW_SIZE       (0*1024)      /* None */
 #  define SAMDL_SRAM0_SIZE          (32*1024)     /* 32KB */
 #  define SAMDL_LPRAM_SIZE          (0*1024)      /* None */
 
