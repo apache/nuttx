@@ -7,6 +7,8 @@
  * References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *   Datasheet", 42129J–SAM–12/2013
+ *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
+ *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
