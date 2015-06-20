@@ -1,13 +1,15 @@
 /****************************************************************************
  * arch/arm/src/samdl/samd_clockconfig.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  *   1. "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *      Datasheet", 42129J–SAM–12/2013
- *   2. Atmel sample code for the SAMD20.  This code has an ASF license
+ *   2. "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
+ *      Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
+ *   3. Atmel sample code for the SAMD20.  This code has an ASF license
  *      with is compatible with the NuttX BSD license, but includes the
  *      provision that this code not be used in non-Atmel products.  That
  *      sample code was used only as a reference so I believe that only the
@@ -66,7 +68,7 @@
 #include "samd_periphclks.h"
 #include "sam_clockconfig.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -214,6 +216,23 @@ static const struct sam_gclkconfig_s g_gclkconfig[] =
 #endif
     .prescaler  = BOARD_GCLK7_PRESCALER,
     .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 8 */
+
+#ifdef BOARD_GCLK8_ENABLE
+  ,
+  {
+    .gclk       = 8,
+#ifdef BOARD_GCLK8_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK8_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK8_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK8_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
   }
 #endif
 };
@@ -869,4 +888,4 @@ void sam_clockconfig(void)
   sam_dividers();
 }
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21*/
