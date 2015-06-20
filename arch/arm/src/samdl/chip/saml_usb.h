@@ -106,6 +106,49 @@
 
 /* USB Host Register Offsets */
 
+#define SAM_USBHOST_CTRLB_OFFSET       0x0008 /* Control B Register */
+#define SAM_USBHOST_HSOFC_OFFSET       0x000a /* Host Start-of-Frame Control Register */
+#define SAM_USBHOST_STATUS_OFFSET      0x000c /* Status Register */
+#define SAM_USBHOST_FNUM_OFFSET        0x0010 /* Host Frame Number Register */
+#define SAM_USBHOST_FLENHIGH_OFFSET    0x0012 /* Host Frame Length Register */
+#define SAM_USBHOST_INTENCLR_OFFSET    0x0014 /* Host Interrupt Enable Clear Register */
+#define SAM_USBHOST_INTENSET_OFFSET    0x0018 /* Host Interrupt Enable Set Register */
+#define SAM_USBHOST_INTFLAG_OFFSET     0x001c /* Host Interrupt Flag Status and Clear Register */
+#define SAM_USBHOST_PINTSMRY_OFFSET    0x0020 /* Pipe Interrupt Summary Register */
+
+/* Pipe Register n Register */
+
+#define SAM_USBHOST_PIPE_OFFSET(n)     (0x0100 + ((n) << 4))
+
+/* The following are then relative to the pipe register n offset */
+
+#define SAM_USBHOST_PCFG_OFFSET        0x0000 /* Host Pipe Configuration Register */
+#define SAM_USBHOST_BINTERVAL_OFFSET   0x0003 /* Interval for Bulk-OUT/Ping Transaction Register */
+#define SAM_USBHOST_PSTATUSCLR_OFFSET  0x0004 /* Pipe Status Clear Register */
+#define SAM_USBHOST_PSTATUSET_OFFSET   0x0005 /* Pipe Status Set Register */
+#define SAM_USBHOST_PSTATUS_OFFSET     0x0006 /*  Pipe Status Register */
+#define SAM_USBHOST_PINTFLAG_OFFSET    0x0007 /* Host Pipe Interrupt Flag Register */
+#define SAM_USBHOST_PINTENCLR_OFFSET   0x0008 /* Host Pipe Interrupt Clear Register */
+#define SAM_USBHOST_PINTENSET_OFFSET   0x0009 /* Host Pipe Interrupt Set Register */
+
+#define SAM_USBHOST_PnCFG_OFFSET(n)       (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PCFG_OFFSET)
+#define SAM_USBHOST_BINTERVALn_OFFSET(n)  (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_BINTERVAL_OFFSET)
+#define SAM_USBHOST_PnSTATUSCLR_OFFSET(n) (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PSTATUSCLR_OFFSET)
+#define SAM_USBHOST_PnSTATUSET_OFFSET(n)  (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PSTATUSET_OFFSET)
+#define SAM_USBHOST_PnSTATUS_OFFSET(n)    (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PSTATUS_OFFSET)
+#define SAM_USBHOST_PnINTFLAG_OFFSET(n)   (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PINTFLAG_OFFSET)
+#define SAM_USBHOST_PnINTENCLR_OFFSET(n)  (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PINTENCLR_OFFSET)
+#define SAM_USBHOST_PnINTENSET_OFFSET(n)  (SAM_USBHOST_PIPE_OFFSET(n)+SAM_USBHOST_PINTENSET_OFFSET)
+
+/* Host Pipe Descriptor */
+
+#define SAM_USBHOST_ADDR_OFFSET        0x0000 /* Data buffer address (Both banks) */
+#define SAM_USBHOST_PKTSIZE_OFFSET     0x0004 /* Packet size (Both banks) */
+#define SAM_USBHOST_EXTREG_OFFSET      0x0008 /* Extended register (Bank 0 only) */
+#define SAM_USBHOST_STATUSBK_OFFSET    0x000a /* host status bank (Both banks) */
+#define SAM_USBHOST_CTRLPIPE_OFFSET    0x000c /* Host control pipe (Bank 0 only) */
+#define SAM_USBHOST_STATUSPIPE_OFFSET  0x000e /* Host status pipe (Both banks) */
+
 /* USB register addresses ******************************************************************/
 
 /* Common USB Device/Host Register Addresses */
@@ -132,7 +175,7 @@
 
 #define SAM_USBDEV_EP_BASE(n)          (SAM_USB_BASE+SAM_USBDEV_EP_OFFSET(n))
 
-/* The following are then relative to the endpoint register n offset */
+/* Endpoint n Register Addresses */
 
 #define SAM_USBDEV_EPCFG(n)            (SAM_USBDEV_EP_BASE(n)+SAM_USBDEV_EPCFG_OFFSET)
 #define SAM_USBDEV_EPSTATUSCLR(n)      (SAM_USBDEV_EP_BASE(n)+SAM_USBDEV_EPSTATUSCLR_OFFSET)
@@ -143,6 +186,31 @@
 #define SAM_USBDEV_EPINTENSET(n)       (SAM_USBDEV_EP_BASE(n)+SAM_USBDEV_EPINTENSET_OFFSET)
 
 /* USB Host Register Addresses */
+
+#define SAM_USBHOST_CTRLB              (SAM_USB_BASE+SAM_USBHOST_CTRLB_OFFSET)
+#define SAM_USBHOST_HSOFC              (SAM_USB_BASE+SAM_USBHOST_HSOFC_OFFSET)
+#define SAM_USBHOST_STATUS             (SAM_USB_BASE+SAM_USBHOST_STATUS_OFFSET)
+#define SAM_USBHOST_FNUM               (SAM_USB_BASE+SAM_USBHOST_FNUM_OFFSET)
+#define SAM_USBHOST_FLENHIGH           (SAM_USB_BASE+SAM_USBHOST_FLENHIGH_OFFSET)
+#define SAM_USBHOST_INTENCLR           (SAM_USB_BASE+SAM_USBHOST_INTENCLR_OFFSET)
+#define SAM_USBHOST_INTENSET           (SAM_USB_BASE+SAM_USBHOST_INTENSET_OFFSET)
+#define SAM_USBHOST_INTFLAG            (SAM_USB_BASE+SAM_USBHOST_INTFLAG_OFFSET)
+#define SAM_USBHOST_PINTSMRY           (SAM_USB_BASE+SAM_USBHOST_PINTSMRY_OFFSET)
+
+/* Pipe Register n Base Address */
+
+#define SAM_USBHOST_PIPE_BASE(n)       (SAM_USB_BASE+SAM_USBHOST_PIPE_OFFSET(n))
+
+/* Pipe n Register Addresses */
+
+#define SAM_USBHOST_PCFG(n)            (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PCFG_OFFSET)
+#define SAM_USBHOST_BINTERVAL(n)       (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_BINTERVAL_OFFSET)
+#define SAM_USBHOST_PSTATUSCLR(n)      (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PSTATUSCLR_OFFSET)
+#define SAM_USBHOST_PSTATUSET(n)       (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PSTATUSET_OFFSET)
+#define SAM_USBHOST_PSTATUS(n)         (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PSTATUS_OFFSET)
+#define SAM_USBHOST_PINTFLAG(n)        (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PINTFLAG_OFFSET)
+#define SAM_USBHOST_PINTENCLR(n)       (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PINTENCLR_OFFSET)
+#define SAM_USBHOST_PINTENSET(n)       (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PINTENSET_OFFSET)
 
 /* USB register bit definitions ************************************************************/
 
@@ -309,9 +377,9 @@
 
 /* Packet Size (Both banks) */
 
-#define USBDEV_PKTSIZE_BYTECOUNT_SHIFT (0)      /* Bits 0-5:  */
-#define USBDEV_PKTSIZE_BYTECOUNT_MASK  (0x3f << USBDEV_PKTSIZE_BYTECOUNT_SHIFT)
-#  define USBDEV_PKTSIZE_BYTECOUNT(n)  ((uint32_t)(n) << USBDEV_PKTSIZE_BYTECOUNT_SHIFT)
+#define USBDEV_PKTSIZE_BCNT_SHIFT      (0)      /* Bits 0-5: Byte count */
+#define USBDEV_PKTSIZE_BCNT_MASK       (0x3f << USBDEV_PKTSIZE_BCNT_SHIFT)
+#  define USBDEV_PKTSIZE_BCNT(n)       ((uint32_t)(n) << USBDEV_PKTSIZE_BCNT_SHIFT)
 #define USBDEV_PKTSIZE_MPKTSIZE_SHIFT  (14)      /* Bits 14-27:  Multi-packet size */
 #define USBDEV_PKTSIZE_MPKTSIZE_MASK   (0x3fff << USBDEV_PKTSIZE_MPKTSIZE_SHIFT)
 #  define USBDEV_PKTSIZE_MPKTSIZE(n)   ((uint32_t)(n) << USBDEV_PKTSIZE_MPKTSIZE_SHIFT)
@@ -343,11 +411,170 @@
 
 /* USB Host Register Offsets */
 
+/* Control B Register */
+
+#define USBHOST_CTRLB_RESUME           (1 << 1)  /* Bit 1:  Send USB resume */
+#define USBHOST_CTRLB_SPDCONF_SHIFT    (2)       /* Bits 2-3: Host speed configuration */
+#define USBHOST_CTRLB_SPDCONF_MASK     (3 << USBHOST_CTRLB_SPDCONF_SHIFT)
+#  define USBHOST_CTRLB_SPDCONF_LF     (0 << USBHOST_CTRLB_SPDCONF_SHIFT) /* Low and full capable */
+#define USBHOST_CTRLB_TSTJ             (1 << 5)  /* Bit 5:  TSTJ */
+#define USBHOST_CTRLB_TSTK             (1 << 6)  /* Bit 6:  TSTK */
+#define USBHOST_CTRLB_SOFE             (1 << 8)  /* Bit 8:  Start of frame generation enable */
+#define USBHOST_CTRLB_BUSRESET         (1 << 9)  /* Bit 9:  Send USB reset */
+#define USBHOST_CTRLB_VBUSOK           (1 << 10) /* Bit 10: VBUS is OK */
+#define USBHOST_CTRLB_L1RESUME         (1 << 11) /* Bit 11: Send USB L1 resume */
+
+/* Host Start-of-Frame Control Register */
+
+#define USBHOST_HSOFC_FLENC_SHIFT      (0)       /* Bits 0-3: Frame length control */
+#define USBHOST_HSOFC_FLENC_MASK       (15 << USBHOST_HSOFC_FLENC_SHIFT)
+#  define USBHOST_HSOFC_FLENC(n)       ((uint8_t)(n) << USBHOST_HSOFC_FLENC_SHIFT)
+#define USBHOST_HSOFC_FLENCE           (1 << 7)  /* Bit 7:  Frame length control enable */
+
+/* Status Register */
+
+#define USBHOST_STATUS_SPEED_SHIFT     (0)       /* Bits 0-1: Speed status */
+#define USBHOST_STATUS_SPEED_MASK      (3 << USBHOST_STATUS_SPEED_SHIFT)
+#  define USBHOST_STATUS_SPEED_LOW     (0 << USBHOST_STATUS_SPEED_SHIFT) /* Full speed mode */
+#  define USBHOST_STATUS_SPEED_FULL    (2 << USBHOST_STATUS_SPEED_SHIFT) /* Low speed mode */
+#define USBHOST_STATUS_LNSTATE_SHIFT   (6)       /* Bits 6-7:  USB line status */
+#define USBHOST_STATUS_LNSTATE_MASK    (3 << USBHOST_STATUS_LNSTATE_SHIFT)
+#  define USBHOST_STATUS_LNSTATE_SE0   (0 << USBHOST_STATUS_LNSTATE_SHIFT) /* SE0/RESET */
+#  define USBHOST_STATUS_LNSTATE_FJLK  (1 << USBHOST_STATUS_LNSTATE_SHIFT) /* FS-J or LS-K */
+#  define USBHOST_STATUS_LNSTATE_FKLJ  (2 << USBHOST_STATUS_LNSTATE_SHIFT) /* FS-K or :S-L */
+
+/* Host Frame Number Register */
+
+#define USBHOST_FNUM_SHIFT             (3) /* Bits 3-13: Frame number */
+#define USBHOST_FNUM_MASK              (0x07ff << USBHOST_FNUM_SHIFT)
+
+/* Host Frame Length Register (8-bit data) */
+
+/* Common definitions for Host Interrupt Enable Clear Register, Host Interrupt Enable
+ * Set Register, and Host Interrupt Flag Status and Clear Register
+ */
+
+#define USBHOST_INT_HSOF               (1 << 2)  /* Bit 2:  Host start of frame interrupt */
+#define USBHOST_INT_RST                (1 << 3)  /* Bit 3:  Bus reset interrupt */
+#define USBHOST_INT_WAKEUP             (1 << 4)  /* Bit 4:  Wake up interrupt */
+#define USBHOST_INT_DNRSM              (1 << 5)  /* Bit 5:  Downstream resume interrupt */
+#define USBHOST_INT_UPRSM              (1 << 6)  /* Bit 6:  Upstream resume from device interrupt */
+#define USBHOST_INT_RAMACER            (1 << 7)  /* Bit 7:  FAM access interrupt */
+#define USBHOST_INT_DCONN              (1 << 8)  /* Bit 8:  Device connection interrupt */
+#define USBHOST_INT_DDISC              (1 << 9)  /* Bit 9:  Device disconnection interrupt */
+
+/* Pipe Interrupt Summary Register */
+
+#define USBHOST_PINTSMRY_PIPEINT(n)    (1 << (n))
+
+/* Host Pipe Configuration Register */
+
+#define USBHOST_PCFG_PTOKEN_SHIFT      (0)       /* Bits 0-1: Pipe token */
+#define USBHOST_PCFG_PTOKEN_MASK       (3 << USBHOST_PCFG_PTOKEN_SHIFT)
+#  define USBHOST_PCFG_PTOKEN_SETUP    (0 << USBHOST_PCFG_PTOKEN_SHIFT)
+#  define USBHOST_PCFG_PTOKEN_IN       (1 << USBHOST_PCFG_PTOKEN_SHIFT)
+#  define USBHOST_PCFG_PTOKEN_OUT      (2 << USBHOST_PCFG_PTOKEN_SHIFT)
+#define USBHOST_PCFG_BK                (1 << 2)  /* Bit 2:  Pipe bank */
+  #define USBHOST_PCFG_BK_SINGLE       (0)       /*         0=Single bank endpoint */
+  #define USBHOST_PCFG_BK_DUAL         (1 << 2)  /*         1=Dual bank endpoint */
+#define USBHOST_PCFG_PTYPE_SHIFT       (3)       /* Bits 3-5:  Type of pipe */
+#define USBHOST_PCFG_PTYPE_MASK        (7 << USBHOST_PCFG_PTYPE_SHIFT)
+#  define USBHOST_PCFG_PTYPE_DISABLED  (0 << USBHOST_PCFG_PTYPE_SHIFT) /* Disabled */
+#  define USBHOST_PCFG_PTYPE_CTRL      (1 << USBHOST_PCFG_PTYPE_SHIFT) /* Control pipe */
+#  define USBHOST_PCFG_PTYPE_ISOC      (2 << USBHOST_PCFG_PTYPE_SHIFT) /* Isochronous pipe */
+#  define USBHOST_PCFG_PTYPE_BULK      (3 << USBHOST_PCFG_PTYPE_SHIFT) /* Bulk pipe */
+#  define USBHOST_PCFG_PTYPE_INT       (4 << USBHOST_PCFG_PTYPE_SHIFT) /* Interrupt pipe */
+#  define USBHOST_PCFG_PTYPE_EXTENDED  (5 << USBHOST_PCFG_PTYPE_SHIFT) /* Extended pipe */
+
+/* Interval for Bulk-OUT/Ping Transaction Register (8-bit data) */
+
+/* Common definitions for Pipe Status Clear Register, Pipe Status Set Register, and
+ * Pipe Status Register
+ */
+
+#define USBHOST_PSTATUS_DTGL           (1 << 0)  /* Bit 0:  Data toggle sequence */
+#define USBHOST_PSTATUS_CURBK          (1 << 2)  /* Bit 2:  Current bank */
+#define USBHOST_PSTATUS_PFREEZE        (1 << 4)  /* Bit 4:  Pipe freeze */
+#define USBHOST_PSTATUS_BK0RDY         (1 << 6)  /* Bit 6:  Bank 0 ready */
+#define USBHOST_PSTATUS_BK1RDY         (1 << 7)  /* Bit 7:  Bank 1 ready */
+
+/* Common definitions for Host Pipe Interrupt Flag Register, Host Pipe Interrupt Clear
+ * Register, and Host Pipe Interrupt Set Register
+ */
+
+#define USBHOST_PINTFLAG_TRCPT0        (1 << 0)  /* Bit 0:  Transfer complete 0 interrupt */
+#define USBHOST_PINTFLAG_TRCPT1        (1 << 1)  /* Bit 1:  Transfer complete 1 interrupt */
+#define USBHOST_PINTFLAG_TRFAIL        (1 << 2)  /* Bit 2:  Transfer fail interrupt */
+#define USBHOST_PINTFLAG_PERR          (1 << 3)  /* Bit 3:  Pipe error interrupt */
+#define USBHOST_PINTFLAG_TXSTP         (1 << 4)  /* Bit 4:  Transmitted SETUP interrupt */
+#define USBHOST_PINTFLAG_STALL         (1 << 5)  /* Bit 5:  STALL received interrupt */
+
+/* Host Pipe Descriptor */
+
+/* Data buffer address (Both banks, 32-bit address) */
+
+/* Packet size (Both banks) */
+
+#define USBHOST_PKTSIZE_BCNT_SHIFT     (8)       /* Bits 8-13: Byte count */
+#define USBHOST_PKTSIZE_BCNT_MASK      (0x3f << USBHOST_PKTSIZE_BCNT_SHIFT)
+#  define USBHOST_PKTSIZE_BCNT(n)      ((uint32_t)(n) << USBHOST_PKTSIZE_BCNT_SHIFT)
+#define USBHOST_PKTSIZE_MPKTSIZE_SHIFT (14)      /* Bits 14-27:  Multi-packet IN/OUT size */
+#define USBHOST_PKTSIZE_MPKTSIZE_MASK  (0x3fff << USBHOST_PKTSIZE_MPKTSIZE_SHIFT)
+#  define USBHOST_PKTSIZE_MPKTSIZE(n)  ((uint32_t)(n) << USBHOST_PKTSIZE_MPKTSIZE_SHIFT)
+#define USBHOST_PKTSIZE_SIZE_SHIFT     (28)      /* Bits 28-30:  Pipe size */
+#define USBHOST_PKTSIZE_SIZE_MASK      (7 << USBHOST_PKTSIZE_SIZE_SHIFT)
+#  define USBHOST_PKTSIZE_SIZE_8B      (0 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 8 bytes */
+#  define USBHOST_PKTSIZE_SIZE_16B     (1 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 16 bytes */
+#  define USBHOST_PKTSIZE_SIZE_32B     (2 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 32 bytes */
+#  define USBHOST_PKTSIZE_SIZE_64B     (3 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 64 bytes */
+#  define USBHOST_PKTSIZE_SIZE_128B    (4 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 128 bytes (isoc only) */
+#  define USBHOST_PKTSIZE_SIZE_256B    (5 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 256 bytes (isoc only) */
+#  define USBHOST_PKTSIZE_SIZE_512B    (6 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 512 bytes (isoc only) */
+#  define USBHOST_PKTSIZE_SIZE_1023B   (7 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 1023 bytes (isoc only) */
+#define USBHOST_PKTSIZE_AUTOZLP        (1 << 31) /* Bit 31: Automatic zero length packet */
+
+/* Extended register (Bank 0 only) */
+
+#define USBHOST_EXTREG_SUBPID_SHIFT    (0)       /* Bits 0-3:  SUBPID */
+#define USBHOST_EXTREG_SUBPID_MASK     (15 << USBHOST_EXTREG_SUBPID_SHIFT)
+#  define USBHOST_EXTREG_SUBPID(n)     ((uint16_t)(n) << USBHOST_EXTREG_SUBPID_SHIFT)
+#define USBHOST_EXTREG_VARIABLE_SHIFT  (4)       /* Bits 4-14:  VARIABLE */
+#define USBHOST_EXTREG_VARIABLE_MASK   (0x7ff << USBHOST_EXTREG_VARIABLE_SHIFT)
+#  define USBHOST_EXTREG_VARIABLE(n)   ((uint16_t)(n) << USBHOST_EXTREG_VARIABLE_SHIFT)
+
+/* host status bank (Both banks) */
+
+#define USBHOST_STATUSBK_CRCERR        (1 << 0)  /* Bit 0:  CRC error */
+#define USBHOST_STATUSBK_ERRORFLOW     (1 << 1)  /* Bit 1:  Error flow status */
+
+/* Host control pipe (Bank 0 only) */
+
+#define USBHOST_CTRLPIPE_PDADDR_SHIFT  (0)       /* Bits 0-6:  Pipe device address */
+#define USBHOST_CTRLPIPE_PDADDR_MASK   (0x7f << USBHOST_CTRLPIPE_PDADDR_SHIFT)
+#  define USBHOST_CTRLPIPE_PDADDR(n)   ((uint16_t)(n) << USBHOST_CTRLPIPE_PDADDR_SHIFT)
+#define USBHOST_CTRLPIPE_PEPNUM_SHIFT  (8)       /* Bits 8-11:  Pipe endpoint number */
+#define USBHOST_CTRLPIPE_PEPNUM_MASK   (15 << USBHOST_CTRLPIPE_PEPNUM_SHIFTxx)
+#  define USBHOST_CTRLPIPE_PEPNUM(n)   ((uint16_t)(n) << USBHOST_CTRLPIPE_PEPNUM_SHIFTxx)
+#define USBHOST_CTRLPIPE_PEPMAX_SHIFT  (12)      /* Bitx 12-15:  Pipe error max number */
+#define USBHOST_CTRLPIPE_PEPMAX_MASK   (15 << USBHOST_CTRLPIPE_PEPMAX_SHIFT)
+#  define USBHOST_CTRLPIPE_PEPMAX(n)   ((uint16_t)(n) << USBHOST_CTRLPIPE_PEPMAX_SHIFT)
+
+/* Host status pipe (Both banks) */
+
+#define USBHOST_STATUSPIPE_DTGLER      (1 << 0)  /* Bit 0:  Data toggle error */
+#define USBHOST_STATUSPIPE_DAPIDER     (1 << 1)  /* Bit 1:  Data PID error */
+#define USBHOST_STATUSPIPE_PIDER       (1 << 2)  /* Bit 2:  PID error */
+#define USBHOST_STATUSPIPE_TOUTER      (1 << 3)  /* Bit 3:  Timeout error */
+#define USBHOST_STATUSPIPE_CRC16ER     (1 << 4)  /* Bit 4:  CRC16 error */
+#define USBHOST_STATUSPIPE_ERCNT_SHIFT (5)       /* Bits 5-7:  Pipe error counter */
+#define USBHOST_STATUSPIPE_ERCNT_MASK  (7 << USBHOST_STATUSPIPE_ERCNT_SHIFT)
+#  define USBHOST_STATUSPIPE_ERCNT(n)  ((uint16_t)(n) << USBHOST_STATUSPIPE_ERCNT_SHIFT)
+
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
 
-/* Device Endpoint Descriptor */
+/* Device Endpoint Descriptor.  See USBDEV_* bit definitions above. */
 
 struct usbdev_epdesc_s
 {
@@ -356,6 +583,19 @@ struct usbdev_epdesc_s
   uint16_t extreg;      /* 0x0008-0x0009: Extended Register (Bank 0 only) */
   uint8_t  stausbk;     /* 0x000a-0x000a: Device Status Bank (Both banks) */
   uint8_t  reserved[5]; /* 0x000b-0x000f: Both banks */
+};
+
+/* Host Pipe Descriptor.  See USBHOST_* bit definitions above */
+
+struct usbhost_pipedesc_s
+{
+  uint32_t addr;        /* 0x0000-0x0003: Address of Data buffer (Both banks) */
+  uint32_t pktsize;     /* 0x0004-0x0007: Packet Size (Both banks) */
+  uint16_t extreg;      /* 0x0008-0x0009: Extended Register (Bank 0 only) */
+  uint8_t  stausbk;     /* 0x000a-0x000a: Device Status Bank (Both banks) */
+  uint8_t  reserved;    /* 0x000b-0x000b: Both banks */
+  uint16_t ctrlpipe;    /* 0x000c-0x000d: Host control pipe (Bank 0 only) */
+  uint16_t statuspipe;  /* 0x000e-0x000f: Host status pipe (Both banks) */
 };
 
 /********************************************************************************************
