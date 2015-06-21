@@ -163,9 +163,9 @@
 #  define USART_CTRLA_SAMPR_3XA      (4 << USART_CTRLA_SAMPR_SHIFT) /* 3x oversampling; arithmetic baud */
 #define USART_CTRLA_TXPO_SHIFT       (16)      /* Bits 16-17: Transmit data pinout */
 #define USART_CTRLA_TXPO_MASK        (3 << USART_CTRLA_TXPO_SHIFT)
-#  define USART_CTRLA_TXPAD0_1       (0 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; XCK=PAD[1] */
-#  define USART_CTRLA_TXPAD2         (1 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[2]; XCK=PAD[3] */
-#  define USART_CTRLA_TXPAD0_2       (2 <<  USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; RTS=PAD[2]; CTS=PAD[3] */
+#  define USART_CTRLA_TXPAD0_1       (0 << USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; XCK=PAD[1] */
+#  define USART_CTRLA_TXPAD2         (1 << USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[2]; XCK=PAD[3] */
+#  define USART_CTRLA_TXPAD0_2       (2 << USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; RTS=PAD[2]; CTS=PAD[3] */
 #define USART_CTRLA_RXPO_SHIFT       (20)      /* Bits 20-21: Receive data pinout */
 #define USART_CTRLA_RXPO_MASK        (3 << USART_CTRLA_RXPO_SHIFT)
 #  define USART_CTRLA_RXPAD0         (0 << USART_CTRLA_RXPO_SHIFT) /* RxD=SERCOM PAD[0] */
@@ -253,7 +253,7 @@
 #define USART_SYNCBUSY_ENABLE        (1 << 1)  /* Bit 1:  SERCOM enable synchronization busy */
 #define USART_SYNCBUSY_CTRLB         (1 << 2)  /* Bit 2:  CTRLB synchronization busy */
 
-#define USART_SYNCBUSY_ALL           0x00000007
+#define USART_SYNCBUSY_ALL           0x0007
 
 /* Data register */
 
