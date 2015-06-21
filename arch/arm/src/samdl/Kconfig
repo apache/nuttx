@@ -145,7 +145,7 @@ config ARCH_CHIP_SAMD21E15B
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
-		Flash 32KB SRAM 4KB
+		Flash 32KB SRAM 4KB RWW FLASH 1KB
 
 config ARCH_CHIP_SAMD21E16A
 	bool "SAMD21E16A"
@@ -161,7 +161,7 @@ config ARCH_CHIP_SAMD21E16B
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
-		Flash 64KB SRAM 8KB
+		Flash 64KB SRAM 8KB RWW FLASH 2KB
 
 config ARCH_CHIP_SAMD21E17A
 	bool "SAMD21E17A"
@@ -193,7 +193,7 @@ config ARCH_CHIP_SAMD21G15B
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21G
 	---help---
-		Flash 32KB SRAM 4KB
+		Flash 32KB SRAM 4KB RWW FLASH 1KB
 
 config ARCH_CHIP_SAMD21G16A
 	bool "SAMD21G16A"
@@ -209,7 +209,7 @@ config ARCH_CHIP_SAMD21G16B
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
-		Flash 64KB SRAM 8KB
+		Flash 64KB SRAM 8KB RWW FLASH 2KB
 
 config ARCH_CHIP_SAMD21G17A
 	bool "SAMD21G17A"
@@ -241,7 +241,7 @@ config ARCH_CHIP_SAMD21J15B
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
-		Flash 32KB SRAM 4KB
+		Flash 32KB SRAM 4KB RWW FLASH 1KB
 
 config ARCH_CHIP_SAMD21J16A
 	bool "SAMD21J16A"
@@ -257,7 +257,7 @@ config ARCH_CHIP_SAMD21J16B
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
-		Flash 64KB SRAM 8KB
+		Flash 64KB SRAM 8KB RWW FLASH 2KB
 
 config ARCH_CHIP_SAMD21J17A
 	bool "SAMD21J17A"
@@ -386,6 +386,7 @@ config ARCH_FAMILY_SAMD21
 	bool
 	default n
 	select SAMDL_HAVE_DMAC
+	select SAMDL_HAVE_USB
 
 config ARCH_FAMILY_SAMD21E
 	bool
@@ -410,6 +411,7 @@ config ARCH_FAMILY_SAML21
 	bool
 	default n
 	select SAMDL_HAVE_DMAC
+	select SAMDL_HAVE_USB
 
 config ARCH_FAMILY_SAML21E
 	bool
@@ -560,6 +562,11 @@ config SAMDL_TC7
 	bool "Timer/Counter 7"
 	default n
 	depends on SAMDL_HAVE_TC7
+
+config SAMDL_USB
+	bool "USB"
+	default n
+	depends on SAMDL_HAVE_USB
 
 config SAMDL_WDT
 	bool "Watchdog Timer"

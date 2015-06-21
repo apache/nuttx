@@ -531,6 +531,11 @@ configs/samd20-xplained
   board features the ATSAMD20J18A MCU (Cortex-M0+ with 256KB of FLASH and
   32KB of SRAM).
 
+configs/samd21-xplained
+  The port of NuttX to the Atmel SAMD21-Xplained Pro development board.  This
+  board features the ATSAMD21J18A MCU (Cortex-M0+ with 256KB of FLASH and
+  32KB of SRAM).
+
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
 
