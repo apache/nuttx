@@ -44,6 +44,8 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20)
 #  include "chip/samd20_pinmap.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAMD21)
+#  include "chip/samd21_pinmap.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
 #  include "chip/saml21_pinmap.h"
 #else
