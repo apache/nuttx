@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 
-#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 #  include "chip/samd_usart.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
 #  include "chip/saml_usart.h"
@@ -120,7 +120,7 @@ static inline bool usart_syncbusy(const struct sam_usart_config_s * const config
 {
 #if defined(CONFIG_ARCH_FAMILY_SAMD20)
   return ((getreg16(config->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
-#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+#elif defined(CONFIG_ARCH_FAMILY_SAMD21) || defined(CONFIG_ARCH_FAMILY_SAML21)
   return ((getreg16(config->base + SAM_USART_SYNCBUSY_OFFSET) & USART_SYNCBUSY_ALL) != 0);
 #else
 #  error Unrecognized SAMD/L family
