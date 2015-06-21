@@ -712,30 +712,63 @@ unionfs
     nsh> unionfs
     Mounting ROMFS file system 1 at target=/mnt/a with source=/dev/ram4
     Mounting ROMFS file system 2 at target=/mnt/b with source=/dev/ram5
-    nsh> ls /mnt/unionfs/adir
-    /mnt/unionfs/adir:
+    nsh> ls /mnt/unionfs
+    /mnt/unionfs:
+     .
+     afile.txt
+     offset/
+
+   When unionfs was created, file system was joined with and offset called 
+   offset".  Therefore, all of the file system 2 root contents will appear
+   to reside under a directory called offset/ (although there is no
+   directory called offset/ on file system 2).  Fie system 1 on the other
+   hand does have an actual directory called offset/.  If we list the
+   contents of the offset/ directory in the unified file system, we see 
+   he merged content of the file system 1 offset/ directory and the file
+   system 2 root directory:
+
+    nsh> cat /mnt/unionfs/afile.txt
+    This is a file in the root directory on file system 1
+
+    nsh> ls /mnt/unionfs/offset
+    /mnt/unionfs/offset:
+     afile.txt
+     .
+     adir/
+     bfile.txt
+     bdir/
+    nsh> cat /mnt/unionfs/offset/afile.txt
+    This is a file in the offset/ directory on file system 1
+
+    nsh> cat /mnt/unionfs/offset/bfile.txt
+    This is another file in the root directory on file system 2
+
+  The directory offset/adir exists on file system 1 and the directory\
+  adir/ exists on file system 2.  You can see that these also overlap:
+
+    nsh> ls /mnt/unionfs/offset/adir
+    /mnt/unionfs/offset/adir:
      ..
      asubdir/
      adirfile.txt
      bsubdir/
      bdirfile.txt
+     .
 
-  adir/ exists in both file system 1 and file system 2.   Above you are
-  looking at the merged content.  The unified directory listing is showing
-  files from both file systems in their respective adir/ subdirectory.
-  The file adirfile.txt exists in both file system 1 and file system 2 but
-  the version if file system 2 is occluded by the version in file system 1.
-  The only way that you can which are looking at is by cat'ing the file:
+  The unified directory listing is showing files from both file systems in
+  their respective offset adir/ subdirectories.  The file adirfile.txt
+  exists in both file system 1 and file system 2 but the version if file
+  system 2 is occluded by the version in file system 1.  The only way
+  that you can which are looking at is by cat'ing the file:
 
-    nsh> cat /mnt/unionfs/adir/adirfile.txt
-    This is a file in directory adir on file system 1
-
+    nsh> cat /mnt/unionfs/offset/adir/adirfile.txt
+    This is a file in directory offset/adir on file system 1
 
   The file on file system 1 has correctly occluded the file with the same
   name on file system 2.  bdirfile.txt, however, only exists on file
   system 2, so it is not occluded:
 
-    nsh> cat /mnt/unionfs/adir/bdirfile.txt
+    nsh> cat /mnt/unionfs/offset/adir/bdirfile.txt
     This is another file in directory adir on file system 2
 
   You can see the files in the two file systems before they were unified at
