@@ -7,6 +7,8 @@
  * References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *   Datasheet", 42129J–SAM–12/2013
+ *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
+ *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,7 +50,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -293,6 +295,7 @@
 #define PORT_WRCONFIG_DRVSTR      (1 << 22) /* Bit 22: Output Driver Strength Selection */
 #define PORT_WRCONFIG_PMUX_SHIFT  (24)      /* Bits 24-27: Peripheral Multiplexing */
 #define PORT_WRCONFIG_PMUX_MASK   (15 << PORT_WRCONFIG_PMUX_SHIFT)
+#  define PORT_WRCONFIG_PMUX(n)   ((uint32_t)(n) << PORT_WRCONFIG_PMUX_SHIFT)
 #define PORT_WRCONFIG_WRPMUX      (1 << 28) /* Bit 28: Write PMUX */
 #define PORT_WRCONFIG_WRPINCFG    (1 << 30) /* Bit 30: Write PINCFG */
 #define PORT_WRCONFIG_HWSEL       (1 << 31) /* Bit 31: Half-Word Select */
@@ -327,5 +330,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_PORT_H */
