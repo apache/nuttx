@@ -47,7 +47,7 @@
 #include "up_arch.h"
 #include "sam_gclk.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -205,4 +205,4 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
   sam_gclck_waitsyncbusy();
 }
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */

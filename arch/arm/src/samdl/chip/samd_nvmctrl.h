@@ -7,6 +7,8 @@
  * References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *   Datasheet", 42129J–SAM–12/2013
+ *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
+ *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,7 +50,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -87,6 +89,14 @@
 #  define NVMCTRL_CTRLA_CMD_WP       (0x04 << NVMCTRL_CTRLA_CMD_SHIFT) /* Write Page */
 #  define NVMCTRL_CTRLA_CMD_EAR      (0x05 << NVMCTRL_CTRLA_CMD_SHIFT) /* Erase Auxiliary Row */
 #  define NVMCTRL_CTRLA_CMD_WAP      (0x06 << NVMCTRL_CTRLA_CMD_SHIFT) /* Write Auxiliary Page */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define NVMCTRL_CTRLA_CMD_SF       (0x0a << NVMCTRL_CTRLA_CMD_SHIFT) /* Security Flow Command */
+#  define NVMCTRL_CTRLA_CMD_WL       (0x0f << NVMCTRL_CTRLA_CMD_SHIFT) /* Write lockbits */
+#  define NVMCTRL_CTRLA_CMD_RWWEEER  (0x1a << NVMCTRL_CTRLA_CMD_SHIFT) /* RWWEE Erase Row */
+#  define NVMCTRL_CTRLA_CMD_RWWEEEP  (0x1c << NVMCTRL_CTRLA_CMD_SHIFT) /* RWWEE Write Page */
+#endif
+
 #  define NVMCTRL_CTRLA_CMD_LR       (0x40 << NVMCTRL_CTRLA_CMD_SHIFT) /* Lock Region */
 #  define NVMCTRL_CTRLA_CMD_UR       (0x41 << NVMCTRL_CTRLA_CMD_SHIFT) /* Unlock Region */
 #  define NVMCTRL_CTRLA_CMD_SPRM     (0x42 << NVMCTRL_CTRLA_CMD_SHIFT) /* Set power reduction mode */
@@ -132,6 +142,11 @@
 #  define NVMCTRL_PARAM_PSZ_512B     (6 << NVMCTRL_PARAM_PSZ_SHIFT) /* 512 bytes */
 #  define NVMCTRL_PARAM_PSZ_1KB      (7 << NVMCTRL_PARAM_PSZ_SHIFT) /* 1024 bytes */
 
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define NVMCTRL_PARAM_RWWEEP_SHIFT (20)      /* Bits 20-31: Read whle write EEPROM emulation area pages */
+#  define NVMCTRL_PARAM_RWWEEP_MASK  (0xfff << NVMCTRL_PARAM_RWWEEP_SHIFT)
+#endif
+
 /* Interrupt clear register */
 /* Interrupt set register */
 /* Interface flags status and clear register */
@@ -168,5 +183,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAMD_NVMCTRL_H */

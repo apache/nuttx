@@ -10,7 +10,7 @@
  *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
  *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
  *
- * Fuse-related definitions derive from Atmel sample code:
+ * Some fuse-related definitions derive from Atmel sample code:
  *
  *   Copyright (c) 2013 Atmel Corporation. All rights reserved.
  *
