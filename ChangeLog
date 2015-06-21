@@ -10599,3 +10599,6 @@
 	  (2015-06-18)
 	* arch/arm/include/samdl and arch/arm/src/samdl:  Add architecture support
 	  for the SAMD21 family (2015-06-19).
+	* configs/samd21-xplained:  Board configuration for the SAMD21 Xplained
+	  bord (2015-06-21).
+
