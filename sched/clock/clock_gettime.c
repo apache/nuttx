@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/arch.h>
 
 #include "clock/clock.h"
 
@@ -117,7 +118,11 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * reset.
        */
 
+#ifdef CONFIG_SCHED_TICKLESS
+      ret = up_timer_gettime(tp);
+#else
       ret = clock_systimespec(tp);
+#endif
     }
   else
 #endif
