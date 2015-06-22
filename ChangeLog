@@ -10615,3 +10615,5 @@
 	* SAM4CM: Fix SUPC register definitions. From Max Neklyudov.  Also
 	  removed conditional logic form non-SAM4CM parts (Gregory Nutt)
 	  (2015-06-22).
+	* SAM3/4:  Add a TWI driver for the SAM4CM.  From  Max Neklyudov
+	  (2015-06-22).
