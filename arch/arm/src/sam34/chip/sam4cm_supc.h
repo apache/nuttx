@@ -2,7 +2,7 @@
  * arch/arm/src/sam34/chip/sam4cm_supc.h
  * Supply Controller (SUPC) definitions for the SAM4CM
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,15 +113,6 @@
 #define SUPC_MR_
 #define SUPC_MR_BODRSTEN                (1 << 12) /* Bit 12: Brownout Detector Reset Enable */
 #define SUPC_MR_BODDIS                  (1 << 13) /* Bit 13: Brownout Detector Disable */
-
-#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define SUPC_MR_ONREG                 (1 << 14) /* Bit 14: Voltage Regulator enable */
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define SUPC_MR_VDDIORDY              (1 << 14) /* Bit 14: VDDIO Ready */
-#endif
-
 #define SUPC_MR_OSCBYPASS               (1 << 20) /* Bit 20: Oscillator Bypass */
 #define SUPC_MR_KEY_SHIFT               (24)      /* Bits 24-31:  Password Key */
 #define SUPC_MR_KEY_MASK                (0xff << SUPC_MR_KEY_SHIFT)
@@ -129,29 +120,18 @@
 
 /* Supply Controller Wake Up Mode Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
-#  define SUPC_WUMR_FWUPEN              (1 << 0)  /* Bit 0:  Force Wake Up Enable */
-#endif
-
+#define SUPC_WUMR_FWUPEN                (1 << 0)  /* Bit 0:  Force Wake Up Enable */
 #define SUPC_WUMR_SMEN                  (1 << 1)  /* Bit 1:  Supply Monitor Wake Up Enable */
 #define SUPC_WUMR_RTTEN                 (1 << 2)  /* Bit 2:  Real Time Timer Wake Up Enable */
 #define SUPC_WUMR_RTCEN                 (1 << 3)  /* Bit 3:  Real Time Clock Wake Up Enable */
-
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define SUPC_WUMR_LPDBCEN0            (1 << 5)  /* Bit 5:  Low power Debouncer ENable WKUP0 */
-#  define SUPC_WUMR_LPDBCEN1            (1 << 6)  /* Bit 6:  Low power Debouncer ENable WKUP1 */
-#  define SUPC_WUMR_LPDBCCLR            (1 << 7)  /* Bit 7:  Low power Debouncer Clear */
-#elif defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define SUPC_WUMR_FWUPDBC_SHIFT       (8)       /* Bits 8-10:  Force Wake Up Debouncer */
-#  define SUPC_WUMR_FWUPDBC_MASK        (7 << SUPC_WUMR_FWUPDBC_SHIFT)
-#    define SUPC_WUMR_FWUPDBC_1SCLK     (0 << SUPC_WUMR_FWUPDBC_SHIFT) /* Immediate, no debouncing */
-#    define SUPC_WUMR_FWUPDBC_3SCLK     (1 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 3 SLCK periods */
-#    define SUPC_WUMR_FWUPDBC_32SCLK    (2 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 32 SLCK periods */
-#    define SUPC_WUMR_FWUPDBC_512SCLK   (3 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 512 SLCK periods */
-#    define SUPC_WUMR_FWUPDBC_4096SCLK  (4 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 4096 SLCK periods */
-#    define SUPC_WUMR_FWUPDBC_32768SCLK (5 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 32768 SLCK periods */
-#endif
-
+#define SUPC_WUMR_FWUPDBC_SHIFT         (8)       /* Bits 8-10:  Force Wake Up Debouncer */
+#define SUPC_WUMR_FWUPDBC_MASK          (7 << SUPC_WUMR_FWUPDBC_SHIFT)
+#  define SUPC_WUMR_FWUPDBC_1SCLK       (0 << SUPC_WUMR_FWUPDBC_SHIFT) /* Immediate, no debouncing */
+#  define SUPC_WUMR_FWUPDBC_3SCLK       (1 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 3 SLCK periods */
+#  define SUPC_WUMR_FWUPDBC_32SCLK      (2 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 32 SLCK periods */
+#  define SUPC_WUMR_FWUPDBC_512SCLK     (3 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 512 SLCK periods */
+#  define SUPC_WUMR_FWUPDBC_4096SCLK    (4 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 4096 SLCK periods */
+#  define SUPC_WUMR_FWUPDBC_32768SCLK   (5 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 32768 SLCK periods */
 #define SUPC_WUMR_WKUPDBC_SHIFT         (12)      /* Bits 12-14:  Wake Up Inputs Debouncer */
 #define SUPC_WUMR_WKUPDBC_MASK          (7 << SUPC_WUMR_WKUPDBC_SHIFT)
 #  define SUPC_WUMR_WKUPDBC_1SCLK       (0 << SUPC_WUMR_WKUPDBC_SHIFT) /* Immediate, no debouncing */
@@ -160,19 +140,6 @@
 #  define SUPC_WUMR_WKUPDBC_512SCLK     (3 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 512 SLCK periods */
 #  define SUPC_WUMR_WKUPDBC_4096SCLK    (4 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 4096 SLCK periods */
 #  define SUPC_WUMR_WKUPDBC_32768SCLK   (5 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 32768 SLCK periods */
-
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define SUPC_WUMR_LPDBC_SHIFT         (16)      /* Bits 16-18: Low Power Debouncer Period */
-#  define SUPC_WUMR_LPDBC_MASK          (7 << SUPC_WUMR_LPDBC_SHIFT)
-#    define SUPC_WUMR_LPDBC_DISABLE     (0 << SUPC_WUMR_LPDBC_SHIFT) /* Disable low power debouncer */
-#    define SUPC_WUMR_LPDBC_2_RTCOUT0   (1 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 2 RTCOUT0 */
-#    define SUPC_WUMR_LPDBC_3_RTCOUT0   (2 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 3 RTCOUT0 */
-#    define SUPC_WUMR_LPDBC_4_RTCOUT0   (3 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 4 RTCOUT0 */
-#    define SUPC_WUMR_LPDBC_5_RTCOUT0   (4 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 5 RTCOUT0 */
-#    define SUPC_WUMR_LPDBC_6_RTCOUT0   (5 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 6 RTCOUT0 */
-#    define SUPC_WUMR_LPDBC_7_RTCOUT0   (6 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 7 RTCOUT0 */
-#    define SUPC_WUMR_LPDBC_8_RTCOUT0   (7 << SUPC_WUMR_LPDBC_SHIFT) /* WKUP0/1 for 8 RTCOUT0 */
-#endif
 
 /* System Controller Wake Up Inputs Register */
 
@@ -185,10 +152,6 @@
 
 /* Supply Controller Status Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define SUPC_SR_FWUPS                 (1 << 0)  /* Bit 0:  FWUP Wake Up Status */
-#endif
-
 #define SUPC_SR_WKUPS                   (1 << 1)  /* Bit 1:  WKUP Wake Up Status */
 #define SUPC_SR_SMWS                    (1 << 2)  /* Bit 2:  Supply Monitor Detection Wake Up Status */
 #define SUPC_SR_BODRSTS                 (1 << 3)  /* Bit 3:  Brownout Detector Reset Status */
@@ -196,14 +159,6 @@
 #define SUPC_SR_SMS                     (1 << 5)  /* Bit 5:  Supply Monitor Status */
 #define SUPC_SR_SMOS                    (1 << 6)  /* Bit 6:  Supply Monitor Output Status */
 #define SUPC_SR_OSCSEL                  (1 << 7)  /* Bit 7:  32-kHz Oscillator Selection Status */
-
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define SUPC_SR_FWUPIS                (1 << 12) /* Bit 12: FWUP Input Status */
-#elif defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define SUPC_SR_LPDBCS0               (1 << 13) /* Bit 13: Low Power Debouncer Wake Up Status on WKUP0 */
-#  define SUPC_SR_LPDBCS1               (1 << 14) /* Bit 14: Low Power Debouncer Wake Up Status on WKUP1 */
-#endif
-
 #define SUPC_SR_WKUPIS_SHIFT            (16)      /* Bits 16-31:  WKUP Input Status 0 to 15 */
 #define SUPC_SR_WKUPIS_MASK             (0xffff << SUPC_SR_WKUPIS_SHIFT)
 
