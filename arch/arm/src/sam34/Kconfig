@@ -552,31 +552,56 @@ config SAM34_TRNG
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
 
+config SAM34_TWI
+	bool
+	default n
+
+config SAM34_TWIM
+	bool
+	default n
+
+config SAM34_TWIS
+	bool
+	default n
+
+
 config SAM34_TWIM0
 	bool "Two-wire Master Interface 0 (TWIM0)"
 	default n
+	select SAM34_TWI
+	select SAM34_TWIM
 
 config SAM34_TWIS0
 	bool "Two-wire Slave Interface 0 (TWIS0)"
 	default n
+	select SAM34_TWI
+	select SAM34_TWIS
 
 config SAM34_TWIM1
 	bool "Two-wire Master Interface 1 (TWIM1)"
 	default n
+	select SAM34_TWI
+	select SAM34_TWIM
 
 config SAM34_TWIS1
 	bool "Two-wire Slave Interface 1 (TWIS1)"
 	default n
+	select SAM34_TWI
+	select SAM34_TWIS
 
 config SAM34_TWIM2
 	bool "Two-wire Master Interface 2 (TWIM2)"
 	default n
 	depends on ARCH_CHIP_SAM4L
+	select SAM34_TWI
+	select SAM34_TWIM
 
 config SAM34_TWIM3
 	bool "Two-wire Master Interface 3 (TWIM3)"
 	default n
 	depends on ARCH_CHIP_SAM4L
+	select SAM34_TWI
+	select SAM34_TWIM
 
 config SAM34_UART0
 	bool "UART 0"
