@@ -75,7 +75,8 @@
 #define _AJOYBASE       (0x1600) /* Analog joystick ioctl commands */
 #define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
 #define _RTCBASE        (0x1800) /* RTC ioctl commands */
-#define _BOARDBASE      (0x1900) /* boardctl commands */
+#define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
+#define _BOARDBASE      (0x1a00) /* boardctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -340,6 +341,12 @@
 
 #define _RTCIOCVALID(c)   (_IOC_TYPE(c)==_RTCBASE)
 #define _RTCIOC(nr)       _IOC(_RTCBASE,nr)
+
+/* Relay driver ioctl definitions *******************************************/
+/* (see nuttx/power/relay.h */
+
+#define _RELAYIOCVALID(c)   (_IOC_TYPE(c)==_RELAYBASE)
+#define _RELAYIOC(nr)       _IOC(_RELAYBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 
