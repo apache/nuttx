@@ -53,8 +53,13 @@
 #  define AES_MODE_ECB 1
 #  define AES_MODE_CBC 2
 #  define AES_MODE_CTR 3
+#  define AES_MODE_CFB 4
 
-#  define AES_MODE_MAX 3
+#  define AES_MODE_MAX 4
+
+#  define AES_MODE_MAC 0x80000000
+
+#  define AES_MODE_MASK 0xffff
 #endif
 
 #define CYPHER_ENCRYPT 1
