@@ -10604,6 +10604,8 @@
 	* arch/arm/src/sam34/sam_lowputc.c: Back out an error introduced with
 	  commit 02c33f66c5a8be774034cd40e4125e9323c7b4d8.  Causes an infinite
 	  loop in up_lowputc().  From Max Neklyudov (2015-06-22).
+	* arch/arm/src/samv7/sam_lowput.c: Also back the bad change to sam_lowputc.c
+	  for SAMV7 platform (2015-06-22).
 	* include/nuttx/fs/ioctl.h and power/relay.h: Add relay IOCTL definitions.
 	  From Max Neklyudov (2015-06-22).
 	* sched/clock/clock_gettime.c: Use up_timer_gettime for CLOCK_MONOTONIC
