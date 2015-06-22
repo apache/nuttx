@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 9, 2015)
+NuttX TODO List (Last updated June 22, 2015)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/
  (12)  Network (net/, drivers/net)
   (5)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
- (11)  File system/Generic drivers (fs/, drivers/)
+ (12)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (2)  Build system / Toolchains
@@ -1438,6 +1438,24 @@ o File system / Generic drivers (fs/, drivers/)
                   checksum fails and the entire directlry sequence is
                   ignored by readder() logic.  This the file does not
                   appear in the 'ls'.
+
+  Title:       UNIONFS WITH OFFSETS
+  Description: The Union File System supports offset strings to allow
+               directories to appear at an offset below the union mount
+               point.  These offsets work in many cases (open, close, read, 
+               write, etc.), but there are some problems:
+
+               1. The current test case at apps/examples/unionfs uses an
+                  offset string for one file system, but the offset string
+                  is matched by a a directory in the other file system.
+                  This causes many problems with the offset file system to
+                  be obscured.
+               2. If both contained file systems are offset, then stat(),
+                  opendir(), readdir() etc. fail.
+               3. The offsets do not work for directory operations on their
+                  the top level directory.
+  Status:      Open
+  Priority:    High-ish
 
 o Graphics subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
