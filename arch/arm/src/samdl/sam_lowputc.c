@@ -304,7 +304,7 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 
   /* Configure the GCLKs for the SERCOM module */
 
-#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
   sercom_coreclk_configure(config->sercom, config->gclkgen, false);
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
   sam_gclk_chan_enable(config->sercom + GCLK_CHAN_SERCOM0_CORE,
