@@ -146,5 +146,5 @@
  * Public Functions
  ****************************************************************************************************/
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAML_PM_H */

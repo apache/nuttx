@@ -48,7 +48,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -158,5 +158,5 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* CONFIG_ARCH_FAMILY_SAMD20 */
+#endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMDL_CHIP_SAM_WDT_H */

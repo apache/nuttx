@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 {
   uint16_t regval;
@@ -261,7 +261,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
       break;
     }
 
-#elif defined(CONFIG_ARCH_FAMILY_SAMD20)
+#elif defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
   static bool configured = false;
   uint16_t regval;
 

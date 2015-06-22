@@ -130,7 +130,7 @@ static inline void sercom_enable(int sercom)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock);
 #endif
 
