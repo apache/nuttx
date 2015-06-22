@@ -114,7 +114,10 @@ static void aes_encryptblock(void *out, const void *in)
 
   while(!(getreg32(SAM_AES_ISR) & AES_ISR_DATRDY)) {}
 
-  aes_memcpy(out, (void*)SAM_AES_ODATAR, AES_BLOCK_SIZE);
+  if (out)
+    {
+      aes_memcpy(out, (void*)SAM_AES_ODATAR, AES_BLOCK_SIZE);
+    }
 }
 
 static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
@@ -152,6 +155,9 @@ static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
   case AES_MODE_CTR:
     regval |= AES_MR_OPMOD_CTR;
     break;
+  case AES_MODE_CFB:
+    regval |= AES_MR_OPMOD_CFB;
+    break;
   default:
     return -EINVAL;
   }
@@ -174,7 +180,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
 
   aes_lock();
 
-  res = aes_setup_mr(keysize, mode, encrypt);
+  res = aes_setup_mr(keysize, mode & AES_MODE_MASK, encrypt);
   if (res)
     {
       aes_unlock();
@@ -189,8 +195,20 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
 
   while (size)
     {
-      aes_encryptblock(out, in);
-      out = (char*)out + AES_BLOCK_SIZE;
+      if ((mode & AES_MODE_MAC) == 0)
+        {
+          aes_encryptblock(out, in);
+          out = (char*)out + AES_BLOCK_SIZE;
+        }
+      else if (size == AES_BLOCK_SIZE)
+        {
+          aes_encryptblock(out, in);
+        }
+      else
+        {
+          aes_encryptblock(NULL, in);
+        }
+
       in  = (char*)in  + AES_BLOCK_SIZE;
       size -= AES_BLOCK_SIZE;
     }
