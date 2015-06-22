@@ -58,12 +58,23 @@
 
 #define SAM_I2C_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_I2C_CTRLB_OFFSET       0x0004  /* Control B register */
-#define SAM_I2C_INTENCLR_OFFSET    0x000c  /* Interrupt enable clear register */
-#define SAM_I2C_INTENSET_OFFSET    0x000d  /* Interrupt enable set register */
-#define SAM_I2C_INTFLAG_OFFSET     0x000e  /* Interrupt flag and status clear register */
-#define SAM_I2C_STATUS_OFFSET      0x0010  /* Status register */
-#define SAM_I2C_ADDR_OFFSET        0x0014  /* Address register */
-#define SAM_I2C_DATA_OFFSET        0x0018  /* Data register */
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  define SAM_I2C_INTENCLR_OFFSET  0x000c  /* Interrupt enable clear register */
+#  define SAM_I2C_INTENSET_OFFSET  0x000d  /* Interrupt enable set register */
+#  define SAM_I2C_INTFLAG_OFFSET   0x000e  /* Interrupt flag and status clear register */
+#  define SAM_I2C_STATUS_OFFSET    0x0010  /* Status register */
+#  define SAM_I2C_ADDR_OFFSET      0x0014  /* Address register */
+#  define SAM_I2C_DATA_OFFSET      0x0018  /* Data register */
+#elif defined(CONFIG_ARCH_FAMILY_SAMD21)
+#  define SAM_I2C_INTENCLR_OFFSET  0x0014  /* Interrupt enable clear register */
+#  define SAM_I2C_INTENSET_OFFSET  0x0016  /* Interrupt enable set register */
+#  define SAM_I2C_INTFLAG_OFFSET   0x0018  /* Interrupt flag and status clear register */
+#  define SAM_I2C_STATUS_OFFSET    0x001a  /* Status register */
+#  define SAM_I2C_SYNCBUSY_OFFSET  0x001c  /* Synchronization busy register */
+#  define SAM_I2C_ADDR_OFFSET      0x0024  /* Address register */
+#  define SAM_I2C_DATA_OFFSET      0x0028  /* Data register */
+#endif
 
 /* I2C register addresses *******************************************************************/
 
@@ -73,6 +84,11 @@
 #define SAM_I2C0_INTENSET          (SAM_SERCOM0_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C0_INTFLAG           (SAM_SERCOM0_BASE+SAM_I2C_INTFLAG_OFFSET)
 #define SAM_I2C0_STATUS            (SAM_SERCOM0_BASE+SAM_I2C_STATUS_OFFSET)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SAM_I2C0_SYNCBUSY        (SAM_SERCOM0_BASE+SAM_I2C_SYNCBUSY_OFFSET)
+#endif
+
 #define SAM_I2C0_ADDR              (SAM_SERCOM0_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C0_DATA              (SAM_SERCOM0_BASE+SAM_I2C_DATA_OFFSET)
 
@@ -82,6 +98,11 @@
 #define SAM_I2C1_INTENSET          (SAM_SERCOM1_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C1_INTFLAG           (SAM_SERCOM1_BASE+SAM_I2C_INTFLAG_OFFSET)
 #define SAM_I2C1_STATUS            (SAM_SERCOM1_BASE+SAM_I2C_STATUS_OFFSET)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SAM_I2C1_SYNCBUSY        (SAM_SERCOM1_BASE+SAM_I2C_SYNCBUSY_OFFSET)
+#endif
+
 #define SAM_I2C1_ADDR              (SAM_SERCOM1_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C1_DATA              (SAM_SERCOM1_BASE+SAM_I2C_DATA_OFFSET)
 
@@ -91,6 +112,11 @@
 #define SAM_I2C2_INTENSET          (SAM_SERCOM2_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C2_INTFLAG           (SAM_SERCOM2_BASE+SAM_I2C_INTFLAG_OFFSET)
 #define SAM_I2C2_STATUS            (SAM_SERCOM2_BASE+SAM_I2C_STATUS_OFFSET)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SAM_I2C2_SYNCBUSY        (SAM_SERCOM2_BASE+SAM_I2C_SYNCBUSY_OFFSET)
+#endif
+
 #define SAM_I2C2_ADDR              (SAM_SERCOM2_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C2_DATA              (SAM_SERCOM2_BASE+SAM_I2C_DATA_OFFSET)
 
@@ -100,6 +126,11 @@
 #define SAM_I2C3_INTENSET          (SAM_SERCOM3_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C3_INTFLAG           (SAM_SERCOM3_BASE+SAM_I2C_INTFLAG_OFFSET)
 #define SAM_I2C3_STATUS            (SAM_SERCOM3_BASE+SAM_I2C_STATUS_OFFSET)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SAM_I2C3_SYNCBUSY        (SAM_SERCOM3_BASE+SAM_I2C_SYNCBUSY_OFFSET)
+#endif
+
 #define SAM_I2C3_ADDR              (SAM_SERCOM3_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C3_DATA              (SAM_SERCOM3_BASE+SAM_I2C_DATA_OFFSET)
 
@@ -109,6 +140,11 @@
 #define SAM_I2C4_INTENSET          (SAM_SERCOM4_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C4_INTFLAG           (SAM_SERCOM4_BASE+SAM_I2C_INTFLAG_OFFSET)
 #define SAM_I2C4_STATUS            (SAM_SERCOM4_BASE+SAM_I2C_STATUS_OFFSET)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SAM_I2C4_SYNCBUSY        (SAM_SERCOM4_BASE+SAM_I2C_SYNCBUSY_OFFSET)
+#endif
+
 #define SAM_I2C4_ADDR              (SAM_SERCOM4_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C4_DATA              (SAM_SERCOM4_BASE+SAM_I2C_DATA_OFFSET)
 
@@ -118,6 +154,11 @@
 #define SAM_I2C5_INTENSET          (SAM_SERCOM5_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C5_INTFLAG           (SAM_SERCOM5_BASE+SAM_I2C_INTFLAG_OFFSET)
 #define SAM_I2C5_STATUS            (SAM_SERCOM5_BASE+SAM_I2C_STATUS_OFFSET)
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SAM_I2C5_SYNCBUSY        (SAM_SERCOM5_BASE+SAM_I2C_SYNCBUSY_OFFSET)
+#endif
+
 #define SAM_I2C5_ADDR              (SAM_SERCOM5_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C5_DATA              (SAM_SERCOM5_BASE+SAM_I2C_DATA_OFFSET)
 
@@ -140,11 +181,28 @@
 #  define I2C_CTRLA_SDAHOLD_75NS   (1 << I2C_CTRLA_SDAHOLD_SHIFT) /* 50-100ns hold time */
 #  define I2C_CTRLA_SDAHOLD_450NS  (2 << I2C_CTRLA_SDAHOLD_SHIFT) /* 300-600ns hold time */
 #  define I2C_CTRLA_SDAHOLD_600NS  (3 << I2C_CTRLA_SDAHOLD_SHIFT) /* 400-800ns hold time */
-#define I2C_CTRLA_LOWTOUT          (1 << 30)  /* Bit 30: SCL Low Time-Out */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define I2C_CTRLA_SEXTTOEN       (1 << 23) /* Bit 23: Slave SCL low extend time-out */
+#  define I2C_CTRLA_SPEED_SHIFT    (24)      /* Bits 24-25:  Transfer speed */
+#  define I2C_CTRLA_SPEED_MASK     (3 << I2C_CTRLA_SPEED_SHIFT)
+#    define I2C_CTRLA_SPEED_STANDARD  (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard-mode (<=100 kHz) and Fast-mode (<=400 kHz) */
+#    define I2C_CTRLA_SPEED_FAST      (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode Plus (<=1 MHz) */
+#    define I2C_CTRLA_SPEED_HIGHSPEED (2 << I2C_CTRLA_SPEED_SHIFT) /* High-speed mode (<=3.4 MHz) */
+#  define I2C_CTRLA_SCLSM          (1 << 27) /* Bit 27: SCL clock stretch mode */
+#endif
+
+#define I2C_CTRLA_LOWTOUT          (1 << 30)  /* Bit 30: SCL low time-out */
 
 /* Control B register */
 
 #define I2C_CTRLB_SMEN             (1 << 8)  /* Bit 8:  Smart Mode Enable */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define I2C_CTRLB_GCMD           (1 << 9)  /* Bit 8:  PMBus group command */
+#  define I2C_CTRLB_AACKEN         (1 << 10) /* Bit 10: Automatic acknowledge enable */
+#endif
+
 #define I2C_CRLB_AMODE_SHIFT       (14)      /* Bits 14-15: Address Mode */
 #define I2C_CRLB_AMODE_MASK        (3 << I2C_CRLB_AMODE_SHIFT)
 #  define I2C_CRLB_AMODE_MASK      (0 << I2C_CRLB_AMODE_SHIFT) /* ADDRMASK used to mask ADDR */
@@ -167,7 +225,12 @@
 #define I2C_INT_AMATCH             (1 << 1)  /* Bit 1:  Address match interrupt */
 #define I2C_INT_DRDY               (1 << 2)  /* Bit 2:  Data ready interrupt */
 
-#define I2C_INT_ALL                (0x07)
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
+#  define I2C_INT_ALL              (0x07)
+#elif defined(CONFIG_ARCH_FAMILY_SAMD21)
+#  define I2C_INT_ERROR            (1 << 7)  /* Bit 7:  Error interrupt */
+#  define I2C_INT_ALL              (0x87)
+#endif
 
 /* Status register */
 
@@ -178,21 +241,51 @@
 #define I2C_STATUS_SR              (1 << 4)  /* Bit 4:  Repeated Start */
 #define I2C_STATUS_LOWTOUT         (1 << 6)  /* Bit 6:  SCL Low Time-Out */
 #define I2C_STATUS_CLKHOLD         (1 << 7)  /* Bit 7:  Clock Hold */
-#define I2C_STATUS_SYNCBUSY        (1 << 15) /* Bit 15: Synchronization busy */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define I2C_STATUS_SEXTTOUT      (1 << 9)  /* Bit 9:  Slave SCL low extend time-out */
+#  define I2C_STATUS_HS            (1 << 10) /* Bit 10: High speed */
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define I2C_STATUS_SYNCBUSY      (1 << 15) /* Bit 15: Synchronization busy */
+#endif
+
+/* Synchronization busy register */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define I2C_SYNCBUSY_SWRST       (1 << 0)  /* Bit 0: Software reset synchronization busy */
+#  define I2C_SYNCBUSY_ENABLE      (1 << 1)  /* Bit 1: SERCOM enable synchronization busy */
+
+#  define I2C_SYNCBUSY_ALL         0x0003
+#endif
 
 /* Address register */
 
-#define SPI_ADDR_GENCEN            (1 << 0)  /* Bit 0:  General Call Address Enable */
-#define SPI_ADDR_SHIFT             (1)       /* Bits 1-7: Address */
-#define SPI_ADDR_MASK              (0x7f << SPI_ADDR_SHIFT)
-#  define SPI_ADDR(n)              ((uint32_t)(n) << SPI_ADDR_SHIFT)
-#define SPI_ADDRMASK_SHIFT         (17)      /* Bits 17-23: Address Mask */
-#define SPI_ADDRMASK_MASK          (0x7f << SPI_ADDRMASK_SHIFT)
-#  define SPI_ADDRMASK(n)          ((uint32_t)(n) << SPI_ADDRMASK_SHIFT)
+#define SPI_ADDR_GENCEN            (1 << 0)  /* Bit 0:  General call address enable */
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define SPI_ADDR_SHIFT           (1)       /* Bits 1-7: Address */
+#  define SPI_ADDR_MASK            (0x7f << SPI_ADDR_SHIFT)
+#    define SPI_ADDR(n)            ((uint32_t)(n) << SPI_ADDR_SHIFT)
+#  define SPI_ADDRMASK_SHIFT       (17)      /* Bits 17-23: Address Mask */
+#  define SPI_ADDRMASK_MASK        (0x7f << SPI_ADDRMASK_SHIFT)
+#    define SPI_ADDRMASK(n)        ((uint32_t)(n) << SPI_ADDRMASK_SHIFT)
+#endif
+
+#ifdef CONFIG_ARCH_FAMILY_SAMD21
+#  define SPI_ADDR_SHIFT           (1)       /* Bits 1-10: Address */
+#  define SPI_ADDR_MASK            (0x3ff << SPI_ADDR_SHIFT)
+#    define SPI_ADDR(n)            ((uint32_t)(n) << SPI_ADDR_SHIFT)
+#  define SPI_ADDR_TENBITEN        (1 << 15) /* Bit 15: Ten bit addressing enable */
+#  define SPI_ADDRMASK_SHIFT       (17)      /* Bits 17-26: Address Mask */
+#  define SPI_ADDRMASK_MASK        (0x3ff << SPI_ADDRMASK_SHIFT)
+#    define SPI_ADDRMASK(n)        ((uint32_t)(n) << SPI_ADDRMASK_SHIFT)
+#endif
 
 /* Data register */
 
-#define I2C_DATA_MASK              (0xff)    /* Bits 0-7: Data */
+#define I2C_DATA_MASK              (0xooff)  /* Bits 0-7: Data */
 
 /********************************************************************************************
  * Public Types
