@@ -2,7 +2,7 @@
  * arch/arm/src/sam34/chip/sam_supc.h
  * Supply Controller (SUPC) definitions for the SAM3U, SAM3X, SAM3A, SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@
 
 /* Supply Controller Wake Up Mode Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)  || defined(CONFIG_ARCH_CHIP_SAM4E)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SUPC_WUMR_FWUPEN              (1 << 0)  /* Bit 0:  Force Wake Up Enable */
 #endif
 
