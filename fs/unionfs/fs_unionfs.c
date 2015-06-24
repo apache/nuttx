@@ -112,7 +112,9 @@ struct unionfs_file_s
 static int     unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint);
 #define        unionfs_semgive(ui) (void)sem_post(&(ui)->ui_exclsem)
 
-static FAR const char *unionfs_trypath(FAR const char *relpath,
+static FAR const char *unionfs_offsetpath(FAR const char *relpath,
+                 FAR const char *prefix);
+static bool    unionfs_ispartprefix(FAR const char *partprefix,
                  FAR const char *prefix);
 static int     unionfs_tryopen(FAR struct file *filep,
                  FAR const char *relpath, FAR const char *prefix, int oflags,
@@ -265,11 +267,11 @@ static int unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint)
 }
 
 /****************************************************************************
- * Name: unionfs_trypath
+ * Name: unionfs_offsetpath
  ****************************************************************************/
 
-static FAR const char *unionfs_trypath(FAR const char *relpath,
-                                       FAR const char *prefix)
+static FAR const char *unionfs_offsetpath(FAR const char *relpath,
+                                          FAR const char *prefix)
 {
   FAR const char *trypath;
   int pfxlen;
@@ -306,6 +308,84 @@ static FAR const char *unionfs_trypath(FAR const char *relpath,
 }
 
 /****************************************************************************
+ * Name: unionfs_ispartprefix
+ ****************************************************************************/
+
+static bool unionfs_ispartprefix(FAR const char *partprefix,
+                                 FAR const char *prefix)
+{
+  int partlen = 0;
+  int pfxlen  = 0;
+
+  /* Trim any '/' characters in the partial prefix */
+
+  if (partprefix != NULL)
+    {
+      /* Skip over any leading '/' */
+
+      for (; *partprefix == '/'; partprefix++);
+
+      /* Skip over any tailing '/' */
+
+      partlen = strlen(partprefix);
+      for (; partlen > 1 && partprefix[partlen - 1]  == '/'; partlen--);
+    }
+
+  /* Check for NUL or empty partial prefix */
+
+  if (partprefix == NULL || *partprefix == '\0')
+    {
+      /* A NUL partial prefix is always contained in the full prefix, even
+       * if there is no prefix.
+       */
+
+      return true;
+    }
+
+  /* Trim any '/' characters in the partial prefix */
+
+  if (prefix != NULL)
+    {
+      /* Skip over any leading '/' */
+
+      for (; *prefix == '/'; prefix++);
+
+      /* Skip over any tailing '/' */
+
+      pfxlen = strlen(prefix);
+      for (; pfxlen > 1 && prefix[pfxlen - 1]  == '/'; pfxlen--);
+    }
+
+  /* Check for NUL or empty full prefix */
+
+
+  if (prefix == NULL || *prefix == '\0')
+    {
+      /* A non-NUL partial path canno be a contained in a NUL prefix */
+
+      return false;
+    }
+
+  /* Both the partial path and the prefix are non-NULL.  Check if the partial
+   * path is contained in the prefix.
+   */
+
+  if (partlen > pfxlen)
+    {
+      return false;
+    }
+
+  if (strncmp(partprefix, prefix, partlen) == 0)
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+}
+
+/****************************************************************************
  * Name: unionfs_tryopen
  ****************************************************************************/
 
@@ -317,7 +397,7 @@ static int unionfs_tryopen(FAR struct file *filep, FAR const char *relpath,
 
   /* Is this path valid on this file system? */
 
-  trypath = unionfs_trypath(relpath, prefix);
+  trypath = unionfs_offsetpath(relpath, prefix);
   if (trypath == NULL)
     {
       /* No.. return -ENOENT */
@@ -351,7 +431,7 @@ static int unionfs_tryopendir(FAR struct inode *inode,
 
   /* Is this path valid on this file system? */
 
-  trypath = unionfs_trypath(relpath, prefix);
+  trypath = unionfs_offsetpath(relpath, prefix);
   if (trypath == NULL)
     {
       /* No.. return -ENOENT */
@@ -384,7 +464,7 @@ static int unionfs_trymkdir(FAR struct inode *inode, FAR const char *relpath,
 
   /* Is this path valid on this file system? */
 
-  trypath = unionfs_trypath(relpath, prefix);
+  trypath = unionfs_offsetpath(relpath, prefix);
   if (trypath == NULL)
     {
       /* No.. return -ENOENT */
@@ -418,7 +498,7 @@ static int unionfs_tryrename(FAR struct inode *mountpt,
 
   /* Is source path valid on this file system? */
 
-  tryoldpath = unionfs_trypath(oldrelpath, prefix);
+  tryoldpath = unionfs_offsetpath(oldrelpath, prefix);
   if (tryoldpath == NULL)
     {
       /* No.. return -ENOENT.  This should not fail because the existence
@@ -436,7 +516,7 @@ static int unionfs_tryrename(FAR struct inode *mountpt,
    * delete.
    */
 
-  trynewpath = unionfs_trypath(newrelpath, prefix);
+  trynewpath = unionfs_offsetpath(newrelpath, prefix);
   if (trynewpath == NULL)
     {
       /* No.. return -ENOSYS.  We should be able to do this, but we can't
@@ -469,7 +549,7 @@ static int unionfs_trystat(FAR struct inode *inode, FAR const char *relpath,
 
   /* Is this path valid on this file system? */
 
-  trypath = unionfs_trypath(relpath, prefix);
+  trypath = unionfs_offsetpath(relpath, prefix);
   if (trypath == NULL)
     {
       /* No.. return -ENOENT */
@@ -511,7 +591,7 @@ static int unionfs_trystatdir(FAR struct inode *inode,
 }
 
 /****************************************************************************
- * Name: unionfs_trystatdir
+ * Name: unionfs_trystatfile
  ****************************************************************************/
 
 static int unionfs_trystatfile(FAR struct inode *inode,
@@ -547,7 +627,7 @@ static int unionfs_tryrmdir(FAR struct inode *inode, FAR const char *relpath,
 
   /* Is this path valid on this file system? */
 
-  trypath = unionfs_trypath(relpath, prefix);
+  trypath = unionfs_offsetpath(relpath, prefix);
   if (trypath == NULL)
     {
       /* No.. return -ENOENT */
@@ -579,7 +659,7 @@ static int unionfs_tryunlink(FAR struct inode *inode,
 
   /* Is this path valid on this file system? */
 
-  trypath = unionfs_trypath(relpath, prefix);
+  trypath = unionfs_offsetpath(relpath, prefix);
   if (trypath == NULL)
     {
       /* No.. return -ENOENT */
@@ -725,7 +805,7 @@ static void unionfs_destroy(FAR struct unionfs_inode_s *ui)
 
   /* Free any allocated prefix strings */
 
-  if (ui->ui_fs[1].um_prefix)
+  if (ui->ui_fs[0].um_prefix)
     {
       kmm_free(ui->ui_fs[0].um_prefix);
     }
@@ -1280,10 +1360,6 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Check file system 2 first. */
 
-  fu->fu_ndx      = 0;
-  fu->fu_lower[0] = NULL;
-  fu->fu_lower[1] = NULL;
-
   um = &ui->ui_fs[1];
   lowerdir->fd_root = um->um_node;
   ret = unionfs_tryopendir(um->um_node, relpath, um->um_prefix, lowerdir);
@@ -1302,6 +1378,18 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
           ret = -ENOMEM;
           goto errout_with_fs2open;
         }
+    }
+
+  /* Check if the user is stat'ing some "fake" node between the unionfs root and
+   * the file system 1/2 root directory.
+   */
+
+  else if (unionfs_ispartprefix(relpath, ui->ui_fs[1].um_prefix))
+    {
+      /* File system 2 prefix includes this relpath */
+
+      fu->fu_ndx = 1;
+      fu->fu_prefix[1] = true;
     }
 
   /* Check file system 1 last, possibly overwriting fu_ndx */
@@ -1324,14 +1412,28 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       kmm_free(lowerdir);
 
-      /* If the directory was not found on either file system, then we have
-       * failed.
+      /* Check if the user is stat'ing some "fake" node between the unionfs
+       * root and the file system 1 root directory.
        */
 
-      if (fu->fu_lower[1] == NULL)
+      if (unionfs_ispartprefix(relpath, ui->ui_fs[0].um_prefix))
         {
-          /* Neither file system was opened! */
+          /* File system 1 offset includes this relpath.  Make sure that only one */
 
+          fu->fu_ndx = 0;
+          fu->fu_prefix[0] = true;
+          fu->fu_prefix[1] = false;
+        }
+
+      /* If the directory was not found on either file system, then we have
+       * failed to open this path on either file system.
+       */
+
+      else if (fu->fu_lower[1] == NULL && !fu->fu_prefix[1])
+        {
+          /* Neither of the two path file systems include this relpath */
+
+          ret = -ENOENT;
           goto errout_with_relpath;
         }
     }
@@ -1472,10 +1574,63 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   DEBUGASSERT(dir);
   fu = &dir->u.unionfs;
 
+  /* Check if we are at the end of the the directory listing. */
+
+  if (fu->fu_eod)
+    {
+      /* End of file and error conditions are not distinguishable
+       * with readdir.  Here we return -ENOENT to signal the end
+       * of the directory.
+       */
+
+      return -ENOENT;
+    }
+
   DEBUGASSERT(fu->fu_ndx == 0 || fu->fu_ndx == 1);
   um = &ui->ui_fs[fu->fu_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  /* Special case: If the open directory is a 'fake' node in the prefix on
+   * one of the mounted file system, then we must also fake the return value.
+   */
+
+  if (fu->fu_prefix[fu->fu_ndx])
+    {
+      DEBUGASSERT(fu->fu_lower[fu->fu_ndx] == NULL && um->um_prefix != NULL);
+
+      /* Copy the file system offset into the dirent structure.
+       * REVISIT:  This will not handle the case where the prefix contains
+       * the '/' character the so the offset appears to be multiple
+       * directories.
+       */
+
+      strncpy(dir->fd_dir.d_name, um->um_prefix, NAME_MAX+1);
+
+      /* Describe this as a read only directory */
+
+      dir->fd_dir.d_type = DTYPE_DIRECTORY;
+
+      /* Increment the index to file system 2 (maybe) */
+
+      if (fu->fu_ndx == 0 && (fu->fu_prefix[1] || fu->fu_lower[1] != NULL))
+        {
+          /* Yes.. set up to do file system 2 next time */
+
+          fu->fu_ndx++;
+        }
+      else
+        {
+          /* No.. we are finished */
+
+          fu->fu_eod = true;
+        }
+
+      return OK;
+    }
+
+  /* This is a normal, mediated file system readdir() */
+
+  DEBUGASSERT(fu->fu_lower[fu->fu_ndx] != NULL);
+  DEBUGASSERT(um->um_node != NULL && um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   fvdbg("fu_ndx: %d\n", fu->fu_ndx);
@@ -1498,29 +1653,99 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
            * move to the second file system (if there is one).
            */
 
-          if (ret == -ENOENT && fu->fu_ndx == 0 && fu->fu_lower[1] != NULL)
+          if (ret == -ENOENT && fu->fu_ndx == 0)
             {
-              /* Switch to the second file system */
-
-              fu->fu_ndx = 1;
-              um = &ui->ui_fs[1];
-
-              DEBUGASSERT(um != NULL && um->um_node != NULL &&
-                          um->um_node->u.i_mops != NULL);
-              ops = um->um_node->u.i_mops;
-
-              /* Make sure that the second file system directory enumeration
-               * is rewound to the beginning of the directory.
+              /* Special case: If the open directory is a 'fake' node in the
+               * prefix on file system2, then we must also fake the return
+               * value.
                */
 
-              if (ops->rewinddir != NULL)
+              if (fu->fu_prefix[1])
                 {
-                  ret = ops->rewinddir(um->um_node, fu->fu_lower[1]);
+                  DEBUGASSERT(fu->fu_lower[1] == NULL);
+
+                  /* Switch to the second file system */
+
+                  fu->fu_ndx = 1;
+                  um = &ui->ui_fs[1];
+
+                  DEBUGASSERT(um != NULL && um->um_prefix != NULL);
+
+                  /* Copy the file system offset into the dirent structure.
+                   * REVISIT:  This will not handle the case where the prefix
+                   * contains the '/' character the so the offset appears to
+                   * be multiple directories.
+                   */
+
+                  strncpy(dir->fd_dir.d_name, um->um_prefix, NAME_MAX+1);
+
+                  /* Describe this as a read only directory */
+
+                  dir->fd_dir.d_type = DTYPE_DIRECTORY;
+
+                  /* Mark the end of the directory listing */
+
+                  fu->fu_eod = true;
+
+                 /* Check if have already reported something of this name in file system 1. */
+
+                  relpath = unionfs_relpath(fu->fu_relpath, um->um_prefix);
+                  if (relpath)
+                    {
+                      int tmp;
+
+                      /* Check if anything exists at this path on file system 1 */
+
+                      um0 = &ui->ui_fs[0];
+                      tmp = unionfs_trystat(um0->um_node, relpath,
+                                            um0->um_prefix, &buf);
+
+                      /* Free the allocated relpath */
+
+                      kmm_free(relpath);
+
+                      /* Check for a duplicate */
+
+                      if (tmp >= 0)
+                        {
+                          /* There is something there!
+                           * REVISIT: We could allow files and directories to
+                           * have duplicat names.
+                           */
+
+                          return -ENOENT;
+                        }
+                    }
+
+                  return OK;
+               }
+
+              /* No.. check for a normal directory access */
+
+              else if (fu->fu_lower[1] != NULL)
+                {
+                  /* Switch to the second file system */
+
+                  fu->fu_ndx = 1;
+                  um = &ui->ui_fs[1];
+
+                  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+                              um->um_node->u.i_mops != NULL);
+                  ops = um->um_node->u.i_mops;
+
+                  /* Make sure that the second file system directory enumeration
+                   * is rewound to the beginning of the directory.
+                   */
+
+                  if (ops->rewinddir != NULL)
+                    {
+                      ret = ops->rewinddir(um->um_node, fu->fu_lower[1]);
+                    }
+
+                  /* Then try the read operation again */
+
+                  ret = ops->readdir(um->um_node, fu->fu_lower[1]);
                 }
-
-              /* Then try the read operation again */
-
-              ret = ops->readdir(um->um_node, fu->fu_lower[1]);
             }
 
           /* Did we successfully read a directory from file system 2?  If
@@ -1612,28 +1837,32 @@ static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
    */
 
   DEBUGASSERT(fu->fu_ndx == 0 || fu->fu_ndx == 1);
-  if (/* fu->fu_ndx != 0 && */ fu->fu_lower[0] != 0)
+  if (/* fu->fu_ndx != 0 && */ fu->fu_prefix[0] || fu->fu_lower[0] != NULL)
     {
       /* Yes.. switch to file system 1 */
 
       fu->fu_ndx = 0;
     }
 
-  um = &ui->ui_fs[fu->fu_ndx];
-
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
-  ops = um->um_node->u.i_mops;
-
-  /* Perform the file system rewind operation */
-
-  if (ops->rewinddir != NULL)
+  if (!fu->fu_prefix[fu->fu_ndx])
     {
-      ret = ops->rewinddir(um->um_node, fu->fu_lower[fu->fu_ndx]);
-      dir->fd_position = fu->fu_lower[fu->fu_ndx]->fd_position;
-    }
-  else
-    {
-      ret = -EINVAL;
+      DEBUGASSERT(fu->fu_lower[fu->fu_ndx] != NULL);
+      um = &ui->ui_fs[fu->fu_ndx];
+
+      DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+      ops = um->um_node->u.i_mops;
+
+      /* Perform the file system rewind operation */
+
+      if (ops->rewinddir != NULL)
+        {
+          ret = ops->rewinddir(um->um_node, fu->fu_lower[fu->fu_ndx]);
+          dir->fd_position = fu->fu_lower[fu->fu_ndx]->fd_position;
+        }
+      else
+        {
+          ret = -EINVAL;
+        }
     }
 
   unionfs_semgive(ui);
@@ -1831,7 +2060,7 @@ static int unionfs_unlink(FAR struct inode *mountpt,
   struct stat buf;
   int ret;
 
-  fdbg("relpath: %s\n", relpath);
+  fvdbg("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -1902,7 +2131,7 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   int ret2;
   int ret;
 
-  fdbg("relpath: %s\n", relpath);
+  fvdbg("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -1975,7 +2204,7 @@ static int unionfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   int tmp;
   int ret;
 
-  fdbg("relpath: %s\n", relpath);
+  fvdbg("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2050,7 +2279,7 @@ static int unionfs_rename(FAR struct inode *mountpt,
   int tmp;
   int ret = -ENOENT;
 
-  fdbg("oldrelpath: %s newrelpath\n", oldrelpath, newrelpath);
+  fvdbg("oldrelpath: %s newrelpath\n", oldrelpath, newrelpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2124,7 +2353,7 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct unionfs_mountpt_s *um;
   int ret;
 
-  fdbg("relpath: %s\n", relpath);
+  fvdbg("relpath: %s\n", relpath);
 
   /* Recover the union file system data from the struct inode instance */
 
@@ -2157,6 +2386,44 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   um  = &ui->ui_fs[1];
   ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, buf);
+  if (ret >= 0)
+    {
+      /* Return on the first success.  The first instance of the file will
+       * shadow the second anyway.
+       */
+
+      unionfs_semgive(ui);
+      return OK;
+    }
+
+  /* Special case the unionfs root directory when both file systems are offset.
+   * In that case, both of the above trystat calls will fail.
+   */
+
+  if (ui->ui_fs[0].um_prefix != NULL && ui->ui_fs[1].um_prefix != NULL)
+    {
+      /* Most of the stat entries just do not apply */
+
+      memset(buf, 0, sizeof(struct stat));
+
+      /* Claim that this is a read-only directory */
+
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+
+      /* Check if the user is stat'ing some "fake" node between the unionfs
+       * root and the file system 1 root directory.
+       */
+
+      if (unionfs_ispartprefix(relpath, ui->ui_fs[0].um_prefix) ||
+          unionfs_ispartprefix(relpath, ui->ui_fs[1].um_prefix))
+        {
+          ret = OK;
+        }
+      else
+        {
+          ret = -ENOENT;
+        }
+    }
 
   unionfs_semgive(ui);
   return ret;

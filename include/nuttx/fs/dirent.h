@@ -157,6 +157,8 @@ struct fs_dirent_s;                           /* Forward reference */
 struct fs_unionfsdir_s
 {
   uint8_t fu_ndx;                             /* Index of file system being enumerated */
+  bool fu_eod;                                /* True: At end of directory */
+  bool fu_prefix[2];                          /* True: Fake directory in prefix */
   FAR char *fu_relpath;                       /* Path being enumerated */
   FAR struct fs_dirent_s *fu_lower[2];        /* dirent struct used by contained file system */
 };
