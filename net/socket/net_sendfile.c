@@ -118,7 +118,7 @@ struct sendfile_s
  *   Check for send timeout.
  *
  * Parameters:
- *   pstate   send state structure
+ *   pstate - send state structure
  *
  * Returned Value:
  *   TRUE:timeout FALSE:no timeout
@@ -196,7 +196,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = tcp_getsequence(TCPBUF->ackno) - pstate->snd_isn;
+      pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
       nllvdbg("ACK: acked=%d sent=%d flen=%d\n",
              pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
