@@ -361,11 +361,12 @@ static bool unionfs_ispartprefix(FAR const char *partprefix,
 
   if (prefix == NULL || *prefix == '\0')
     {
-      /* A non-NUL partial path canno be a contained in a NUL prefix */
+      /* A non-NUL partial path cannot be a contained in a NUL prefix */
 
       return false;
     }
 
+#if 0 /* Only whole offset is currently supported */
   /* Both the partial path and the prefix are non-NULL.  Check if the partial
    * path is contained in the prefix.
    */
@@ -374,6 +375,14 @@ static bool unionfs_ispartprefix(FAR const char *partprefix,
     {
       return false;
     }
+#else
+  /* Check if the trimmed offsets are identical */
+
+  if (partlen != pfxlen)
+    {
+      return false;
+    }
+#endif
 
   if (strncmp(partprefix, prefix, partlen) == 0)
     {
