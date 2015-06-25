@@ -275,6 +275,28 @@ o Memory Managment (mm/)
                  be required to keep this memory on the correct list (or on
                  no list at all).
 
+               Updated 2016-06-25:
+               For processors with an MMU (Memory Management Unit), NuttX can be
+               built in a kernel mode.  In that case, each process will have a
+               local copy of its heap (filled with sbrk()) and when the process
+               exits, its local heap will be destroyed and the underlying page
+               memory is recovered.
+
+               So in this case, NuttX work just link Linux or or *nix systems:
+               All memory allocated by processes or threads in processes will
+               be recovered when the process exists.
+
+               But not for the flat memory build.  In that case, the issues
+               above do apply.  There is no safe way to recover the memory in
+               that case (and even if there were, the additional overhead would
+               not be acceptable on most platforms).
+
+               This does not prohibit anyone from creating a wrapper for malloc()
+               and an atexit() callback that frees memory on task exit.  People
+               are free and, in fact, encouraged, to do that.  However, since
+               it is inherently unsafe, I would never incorporate anything
+               like that into NuttX.
+
   Status:      Open.  No changes are planned.
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
