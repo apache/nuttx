@@ -82,13 +82,11 @@
  * Yields:
  *
  *   PLLACK = 25 * 12MHz / 1 = 300MHz
- *
- * REVISIT: Isn't the actual multiplier = MUL+1?  Is this being overclocked at 312MHz?
  */
 
 #define BOARD_CKGR_PLLAR_STMODE    PMC_CKGR_PLLAR_STMODE_FAST
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
-#define BOARD_CKGR_PLLAR_MUL       PMC_CKGR_PLLAR_MUL(25)
+#define BOARD_CKGR_PLLAR_MUL       PMC_CKGR_PLLAR_MUL(24)
 #define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
 
 /* PMC master clock register settings.
