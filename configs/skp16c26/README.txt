@@ -54,7 +54,7 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 
      Check out the misc/buildroot module. GIT checkout instructions:
 
-        http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/buildroot/
+        https://bitbucket.org/patacongo/nuttx/src/master/misc/buildroot/
 
    Make the archive directory:
 
