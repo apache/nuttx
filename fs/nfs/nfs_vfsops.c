@@ -144,7 +144,7 @@ static void    nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
                    FAR struct nfs_args *argp);
 static int     nfs_bind(FAR struct inode *blkdriver, const void *data,
                    void **handle);
-static int     nfs_unbind(void *handle, FAR struct inode **blkdriver.
+static int     nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                    unsigned int flags);
 static int     nfs_statfs(struct inode *mountpt, struct statfs *buf);
 static int     nfs_remove(struct inode *mountpt, const char *relpath);
@@ -1873,8 +1873,8 @@ bad:
  *
  ****************************************************************************/
 
-int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
-               unsigned int flags)
+static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
+                      unsigned int flags)
 {
   FAR struct nfsmount *nmp = (FAR struct nfsmount *)handle;
   int error;
