@@ -683,7 +683,7 @@ configs/z16f2800100zcog
 configs/z80sim
   z80 Microcontroller.  This port uses a Z80 instruction set simulator.
   That simulator can be found in the NuttX GIT at
-  http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/sims/z80sim.
+  https://bitbucket.org/patacongo/nuttx/src/master/misc/sims/z80sim.
   This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
   (verified with version 2.6.0).
 

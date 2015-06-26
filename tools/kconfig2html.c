@@ -2624,7 +2624,7 @@ int main(int argc, char **argv, char **envp)
   body("  That configuration tool uses <code>Kconfig</code> files that can be found through the NuttX source tree.\n");
   body("  Each <code>Kconfig</code> files contains declarations of configuration variables.\n");
   body("  Each configuration variable provides one configuration option for the NuttX RTOS.\n");
-  body("  This configurable options are descrived in this document.\n");
+  body("  This configurable options are described in this document.\n");
   body("</p>\n");
   body("<p>\n");
   body("  <b>Main Menu</b>.\n");
@@ -2633,10 +2633,10 @@ int main(int argc, char **argv, char **envp)
   body("  The main menu is the name give to the opening menu display after this command is executed.\n");
   body("</p>\n");
   body("<p>\n");
-  body("  <b>Mainenance Note</b>.\n");
-  body("  This documenation was auto-generated using the <a href=\"http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/tools/kconfig2html.c\">kconfig2html</a> tool\n");
+  body("  <b>Maintenance Note</b>.\n");
+  body("  This documentation was auto-generated using the <a href=\"https://bitbucket.org/patacongo/nuttx/src/master/nuttx/tools/kconfig2html.c\">kconfig2html</a> tool\n");
   body("  That tool analyzes the NuttX <code>Kconfig</code> files and generates this HTML document.\n");
-  body("  This HTML document file should not be editted manually.\n");
+  body("  This HTML document file should not be edited manually.\n");
   body("  In order to make changes to this document, you should instead modify the <code>Kconfig</code> file(s) that were used to generated this document and then execute the <code>kconfig2html</code> again to regenerate the HTML document file.\n");
   body("</p>\n");
 
