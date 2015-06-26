@@ -10621,4 +10621,7 @@
 	  25*12MHz=300MHz CPU clock.  The correct multiplier is 24 becaue the
 	  calculatin if (24+1)*12MHz.  So the board was running at 312MHz.
 	  From Efim Monjak (2015-06-26).
+	* NFS client: Fix prototype of unbind method.  The function prototype
+	  was not updated for NFS after a recent change to the file system
+	  interface.  From Manuel Stühn (2015-06-25).
 
