@@ -212,7 +212,7 @@ The valid values for <toolchain> are BUILDROOT, CROSSPACK, LINUXGCC and WINAVR.
 Buildroot:
 
   There is a DIY buildroot version for the AVR boards here:
-  http://sourceforge.net/projects/nuttx/files/buildroot/.  See the
+  http://bitbucket.org/patacongo/nuttx/downloads/buildroot/.  See the
   following section for details on building this toolchain.
 
   It is assumed in some places that buildroot toolchain is available
@@ -292,7 +292,7 @@ NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   If NuttX buildroot toolchain source tarball cne can be downloaded from the
-  NuttX SourceForge download site (https://sourceforge.net/projects/nuttx/files/).
+  NuttX Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.

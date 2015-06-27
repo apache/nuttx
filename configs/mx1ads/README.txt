@@ -9,7 +9,7 @@ Toolchain
   different from the default).
 
   If you have no ARM toolchain, one can be downloaded from the NuttX
-  SourceForge download site (https://sourceforge.net/projects/nuttx/files/buildroot/).
+  Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/buildroot/).
 
   1. You must have already configured Nuttx in <some-dir>nuttx.
 

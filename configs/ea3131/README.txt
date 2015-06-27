@@ -151,7 +151,7 @@ NuttX buildroot Toolchain
   different from the default in your PATH variable).
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
-  SourceForge download site (https://sourceforge.net/projects/nuttx/files/buildroot/).
+  Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/buildroot/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -293,7 +293,7 @@ On-Demand Paging
 ^^^^^^^^^^^^^^^^
 
   There is a configuration that was used to verify the On-Demand Paging
-  feature for the ARM926 (see http://nuttx.sourceforge.net/NuttXDemandPaging.html).
+  feature for the ARM926 (see https://bitbucket.org/patacongo/nuttx/src/master/nuttx/Documentation/NuttXDemandPaging.html).
   That configuration is contained in the pgnsh sub-directory.  The pgnsh configuration
   is only a test configuration, and lacks some logic to provide the full On-Demand
   Paging solution (see below).
