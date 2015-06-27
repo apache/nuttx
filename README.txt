@@ -151,7 +151,7 @@ Downloading from Repositories
     The current NuttX du jour is available in from a GIT repository.  Cloning
     instructions are available here:
 
-      https://sourceforge.net/p/nuttx/git
+     git clone https://bitbucket.org/patacongo/nuttx.git
 
   Configuring the Cone
 
@@ -647,7 +647,7 @@ NuttX Buildroot Toolchain
 -------------------------
 
   For many configurations, a DIY set of tools is available for NuttX.  These
-  tools can be downloaded from the NuttX SourceForge file repository.  After
+  tools can be downloaded from the NuttX Bitbucket.org file repository.  After
   unpacking the buildroot tarball, you can find instructions for building
   the tools in the buildroot/configs/README.txt file.
 

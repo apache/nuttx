@@ -571,5 +571,5 @@ zipme.sh
 --------
 
   I use this script to create the nuttx-xx.yy.tar.gz tarballs for
-  release on SourceForge.  It is handy because it also does the
+  release on Bitbucket.org.  It is handy because it also does the
   kind of clean that you need to do to make a clean code release.
