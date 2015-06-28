@@ -196,7 +196,7 @@ The valid values for <toolchain> are BUILDROOT, CROSSPACK, LINUXGCC and WINAVR.
 Buildroot:
 
   There is a DIY buildroot version for the AVR boards here:
-  http://bitbucket.org/patacongo/nuttx/downloads/buildroot/.  See the
+  http://bitbucket.org/nuttx/buildroot/downloads/.  See the
   following section for details on building this toolchain.
 
   It is assumed in some places that buildroot toolchain is available

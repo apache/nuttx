@@ -252,7 +252,7 @@ NuttX EABI "buildroot" Toolchain
   different from the default in your PATH variable).
 
   If you have no Cortex-M4 toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/buildroot/).
+  Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   NOTE:  The NuttX toolchain may not include optimizations for Cortex-M4 (ARMv7E-M).
