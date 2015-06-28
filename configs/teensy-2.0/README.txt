@@ -216,7 +216,7 @@ Buildroot:
   following section for details on building this toolchain.
 
   It is assumed in some places that buildroot toolchain is available
-  at ../misc/buildroot/build_avr.  Edit the setenv.sh file if
+  at ../buildroot/build_avr.  Edit the setenv.sh file if
   this is not the case.
 
   After configuring NuttX, make sure that CONFIG_AVR_BUILDROOT=y is set in your
@@ -535,7 +535,7 @@ Common Configuration Notes
      change a configurations using that tool, you should:
 
      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        and misc/tools/
+        see additional README.txt files in the NuttX tools repository.
 
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.

@@ -55,7 +55,7 @@ fi
 # This is where the buildroot might reside on a Linux or Cygwin system
 # A minimal buildroot version with the NXFLAT tools is always required
 # for this configuration in order to buildthe THTTPD CGI programs
-export BUILDROOT_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
 
 # This is the default install location for Code Red on Linux
 #export TOOLCHAIN_BIN="/usr/local/LPCXpresso/tools/bin"

@@ -2,7 +2,7 @@ configs/skp16c26/README.txt
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. The buildroot package can be used to build an M16C toolchain.  The toolchain
-   buildroot can be downloaded from misc/buildroot in the NuttX GIT.  Insructions
+   buildroot can be downloaded from buildroot in the NuttX GIT.  Insructions
    for building the toolchain are provided below.
 
    However, the target cannot be built because the GNU m16c-nuttx-elf-ld link fails with
@@ -52,9 +52,9 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 
    b. Using GIT
 
-     Check out the misc/buildroot module. GIT checkout instructions:
+     Check out the buildroot module. GIT checkout instructions:
 
-        https://bitbucket.org/patacongo/nuttx/src/master/misc/buildroot/
+        https://bitbucket.org/patacongo/nuttx/src/master/buildroot/
 
    Make the archive directory:
 

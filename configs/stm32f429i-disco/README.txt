@@ -616,7 +616,7 @@ Where <subdir> is one of the following:
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
+          see additional README.txt files in the NuttX tools repository.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
@@ -881,7 +881,7 @@ Where <subdir> is one of the following:
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
+          see additional README.txt files in the NuttX tools repository.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.

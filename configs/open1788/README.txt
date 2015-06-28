@@ -267,7 +267,7 @@ CONFIGURATION
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
+          see additional README.txt files in the NuttX tools repository.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
@@ -365,7 +365,7 @@ CONFIGURATION
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools//README.txt.
+          see additional README.txt files in the NuttX tools repository./README.txt.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
@@ -506,7 +506,7 @@ CONFIGURATION
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools//README.txt.
+          see additional README.txt files in the NuttX tools repository./README.txt.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
