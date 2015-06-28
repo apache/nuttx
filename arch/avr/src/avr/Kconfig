@@ -1,6 +1,6 @@
 #
 # For a description of the syntax of this configuration file,
-# see misc/tools/kconfig-language.txt.
+# see the file kconfig-language.txt in the NuttX tools repository.
 #
 
 if ARCH_FAMILY_AVR
@@ -54,7 +54,7 @@ config AVR_BUILDROOT
 		the following section for details on building this toolchain.
 
 		It is assumed in some places that buildroot toolchain is
-		available at ../misc/buildroot/build_avr. Edit the setenv.sh
+		available at ../buildroot/build_avr. Edit the setenv.sh
 		file if this is not the case.
 
 endchoice
