@@ -54,14 +54,14 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 
      Check out the buildroot module. GIT checkout instructions:
 
-        https://bitbucket.org/patacongo/nuttx/src/master/buildroot/
+        git clone hhttps://patacongo@bitbucket.org/nuttx/buildroot.git buildroot
 
-   Make the archive directory:
+     Make the archive directory:
 
-     mkdir archive
+       mkdir archive
 
-   The <nuttx-dir>/../buildroot is where the toolchain is built;
-   The <nuttx-dir>/../archive directory is where toolchain sources will be downloaded.
+     The <nuttx-dir>/../buildroot is where the toolchain is built;
+     The <nuttx-dir>/../archive directory is where toolchain sources will be downloaded.
 
 3. Make sure that NuttX is configured
 

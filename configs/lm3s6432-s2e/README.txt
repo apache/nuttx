@@ -179,7 +179,7 @@ NuttX EABI "buildroot" Toolchain
   different from the default in your PATH variable).
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/buildroot/).
+  Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   This port was tested with tools built using summon-arm-toolchain; available

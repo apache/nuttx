@@ -115,7 +115,7 @@ NuttX Buildroot Toolchain
   different from the default in your PATH variable).
 
   If you have no HC12 toolchain, one can be downloaded from the NuttX
-  Bitbucket download site (https://bitbucket.org/patacongo/nuttx/downloads/buildroot).
+  Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin
   environments.
 
