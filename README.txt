@@ -7,6 +7,7 @@ README
     - Semi-Optional apps/ Package
     - Installation Directories with Spaces in the Path
     - Downloading from Repositories
+    - Related Repositories
     - Notes about Header Files
   o Configuring NuttX
     - Instantiating "Canned" Configurations
@@ -178,6 +179,45 @@ Downloading from Repositories
     some scripts like configure.sh. Before cloning, do the following:
 
       git config --global core.autocrlf false
+
+Related Repositories
+--------------------
+
+  * https://bitbucket.org/nuttx/apps
+
+    This directory holds an optional package of applications and libraries
+    can be used with the NuttX RTOS.  There is a README.txt file there that
+    will provide a more information about that package.
+
+  * https://bitbucket.org/nuttx/nxwidgets
+
+    This is the NuttX C++ graphics support.  This includes NxWM, the tiny
+    NuttX Window Manager.
+
+  * https://bitbucket.org/nuttx/uclibc
+
+    This repository contains a version of the uClibc++ C++ library.  This code
+    originates from http://cxx.uclibc.org/ and has been adapted for NuttX by the
+    RGMP team (http://rgmp.sourceforge.net/wiki/index.php/Main_Page).
+
+  * https://bitbucket.org/nuttx/buildroot
+
+    A environment that you can to use to build a custom, NuttX GNU toolchain.
+
+  * https://bitbucket.org/nuttx/tools
+
+    There are snapshots of some tools here that you will need to work with
+    NuttX:  kconfig-frontends, genromfs, and others.
+
+  * https://bitbucket.org/nuttx/drivers
+
+    A few drivers that are not integrated into the main NuttX source tree due
+    to licensing issues.
+
+  * https://bitbucket.org/nuttx/pascal
+
+    Yes, this really is a Pascal compiler.  The Pascal p-code run-time and
+    pcode debugger can be built as a part of NuttX.
 
 Notes about Header Files
 ------------------------
@@ -373,9 +413,10 @@ NuttX Configuration Tool
   An automated tool has been incorported to support re-configuration
   of NuttX.  This automated tool is based on the kconfig-frontends
   application available at http://ymorin.is-a-geek.org/projects/kconfig-frontends
-  (A snapshot of this tool is also available at ../misc/tools).  This
-  application provides a tool called 'kconfig-mconf' that is used by
-  the NuttX top-level Makefile.  The following make target is provided:
+  (A snapshot of this tool is also available fromo the tools repository at
+  https://bitbucket.org/nuttx/tools).  This application provides a tool
+  called 'kconfig-mconf' that is used by the NuttX top-level Makefile.
+   The following make target is provided:
 
     make menuconfig
 
@@ -398,17 +439,20 @@ NuttX Configuration Tool
      relevant to the directory in which the Kconfig file resides.
 
      NOTE: For a description of the syntax of this configuration file,
-     see ../misc/tools/kconfig-language.txt.
+     see kconfig-language.txt in the tools repository at
+     https://bitbucket.org/nuttx/tools
 
   2. The 'kconfig-mconf' tool.  'kconfig-mconf' is part of the
      kconfig-frontends package.  You can download that package from
      the website http://ymorin.is-a-geek.org/projects/kconfig-frontends
-     or you can use the snapshot in ../misc/tools.
+     or you can use the snapshot in the tools repository at
+     https://bitbucket.org/nuttx/tools.
 
      Building kconfig-frontends under Linux may be as simple as
      'configure; make; make install' but there may be some build
      complexities, especially if you are building under Cygwin.  See
-     the more detailed build instructions at ../misc/tools/README.txt
+     the more detailed build instructions in the top-level README.txt
+     file of the tools repository at https://bitbucket.org/nuttx/tools.
 
      The 'make install' step will, by default, install the 'kconfig-mconf'
      tool at /usr/local/bin/mconf.  Where ever you choose to
@@ -1057,9 +1101,9 @@ General Pre-built Toolchain Issues
      for NXFLAT.  NXFLAT is a binary format described in
      Documentation/NuttXNxFlat.html.  It may be possible to build
      standalone versions of the NXFLAT tools; there are a few examples
-     of this in the misc/buildroot/configs directory.  However, it
-     is possible that there could be interoperability issues with
-     your toolchain since they will be using different versions of
+     of this in the buildroot repository at https://bitbucket.org/nuttx/buildroot
+     However, it is possible that there could be interoperability issues
+     with your toolchain since they will be using different versions of
      binutils and possibly different ABIs.
 
 Building Original Linux Boards in Cygwin
