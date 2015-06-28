@@ -69,8 +69,8 @@ VPATH = .
 #
 # Note that an error will occur if you select CONFIG_LIBXX_UCLIBCXX
 # without installing the uClibc++ package.  This is intentional to let
-# you know about the configuration problem.  Refer to misc/uClibc++/README.txt
-# for more information
+# you know about the configuration problem.  Refer to the README.txt file
+# in the NuttX uClibc++ GIT repository for more information
 
 ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++/Make.defs

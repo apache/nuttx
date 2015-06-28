@@ -471,7 +471,7 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT)
 # These targets depend on the kconfig-frontends packages.  To use these, you
 # must first download and install the kconfig-frontends package from this
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
-# misc/tools/README.txt for additional information.
+# README.txt file in the NuttX tools GIT repository for additional information.
 
 config:
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig

@@ -10624,4 +10624,6 @@
 	* NFS client: Fix prototype of unbind method.  The function prototype
 	  was not updated for NFS after a recent change to the file system
 	  interface.  From Manuel Stühn (2015-06-25).
-
+	* Broke the NuttX GIT repository into several, smaller repositories.
+	  Eliminated the misc/ directory and the content under misc/Obsoleted
+	  and misc/sims (2015-06-27).

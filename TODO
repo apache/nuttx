@@ -17,7 +17,7 @@ nuttx/
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (12)  Network (net/, drivers/net)
-  (5)  USB (drivers/usbdev, drivers/usbhost)
+  (4)  USB (drivers/usbdev, drivers/usbhost)
  (12)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (8)  Graphics subsystem (graphics/)
@@ -1022,13 +1022,6 @@ o USB (drivers/usbdev, drivers/usbhost)
 
   Status:      Open
   Priority:    Medium
-
-  Title:       RTL8187 DRIVER IS UNFINISHED
-  Description: misc/drivers/usbhost_rtl8187.c is a work in progress.  There is no RTL8187
-               driver available yet.  That is a work in progress it was abandoned because
-               it depends on having an 802.11g stack.
-  Status:      Open
-  Priority:    Low (Unless you need RTL8187 support).
 
   Title:       EP0 OUT CLASS DATA
   Description: There is no mechanism in place to handle EP0 OUT data transfers.

@@ -72,7 +72,7 @@ fi
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
-export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
 
 # The Olimex-lpc1766stk/tools directory
 export LPCTOOL_DIR="${WD}/configs/olimex-lpc1766stk/tools"

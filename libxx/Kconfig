@@ -1,6 +1,6 @@
 #
 # For a description of the syntax of this configuration file,
-# see misc/tools/kconfig-language.txt.
+# see the file kconfig-language.txt in the NuttX tools repository.
 #
 
 comment "Basic CXX Support"
@@ -45,8 +45,8 @@ config UCLIBCXX
 	default n
 	---help---
 		If you have installed uClibc++ into the NuttX source try, then it can
-		be built by selecting this option.  See misc/uClibc++/README.txt for
-		information on installing uClibc++.
+		be built by selecting this option.  See the README.txt file in the
+		uClibc++ packet for information on installing uClibc++.
 
 if UCLIBCXX
 

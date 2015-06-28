@@ -72,7 +72,7 @@ export SCRIPT_BIN="/cygdrive/c/nxp/LPCXpresso_4.2.3_292/lpcxpresso/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
-#export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+#export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
 #export SCRIPT_BIN=
 
 # And add the selected toolchain path[s] to the PATH variable

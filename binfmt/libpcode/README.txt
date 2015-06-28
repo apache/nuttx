@@ -4,10 +4,11 @@ libpcode README
 Configuration Dependencies
 --------------------------
 In order to use this module, you must first install the P-Code virtual
-machine.  You can get this from the Pascal package or from misc/pascal in
-the GIT repository. See the README.txt file at misc/pascal for installation
-instructions.  The correct location to install the P-code virtual machine is
-at apps/interpreters.
+machine.  You can get this from the Pascal package or from the NuttX Pascal
+GIT repository. See the README.txt file at the top-level Pascal for
+installation instructions.  The correct location to install the P-code
+virtual machine is at apps/interpreters (assuming that you are using
+the NuttX apps/ package and that you have named the directory apps/).
 
 Other required configuration settings:
 

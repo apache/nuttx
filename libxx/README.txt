@@ -1,20 +1,19 @@
 libxx/README.txt
 ^^^^^^^^^^^^^^^^
 
-This directory contains a fragmentary C++ library that will allow
-to build only the simplest of C++ applications.  In the deeply
-embedded world, that is probably all that is necessary.  If you
-have a need for more extensive C++ support, the following libraries
-are recommended:
+This directory contains a fragmentary C++ library that will allow to build
+only the simplest of C++ applications.  In the deeply embedded world, that
+is probably all that is necessary.  If you have a need for more extensive
+C++ support, the following libraries are recommended:
 
  - libstdc++  (part of GCC)
  - STLport    http://www.stlport.org/
  - uClibc++   http://cxx.uclibc.org/
  - uSTL       http://ustl.sourceforge.net/
 
-There is a version of uClibc++ that is customized for NuttX that can
-be found here:  misc/uClibc++.  See misc/uClibc++ for installation
-instructions.
+There is a version of uClibc++ that has been customized for use with NuttX.
+That version that can be found in the NuttX uClibc++ GIT repository.  Refer
+to the top-level uClibc++ README.txt file for installation instructions.
 
 At present, only the following are supported here:
 

@@ -50,7 +50,7 @@ fi
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
 
-export BUILDROOT_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
 
 # This is the path to the Spark tools directory
 

@@ -681,11 +681,9 @@ configs/z16f2800100zcog
   development environment is Cygwin under WinXP.
 
 configs/z80sim
-  z80 Microcontroller.  This port uses a Z80 instruction set simulator.
-  That simulator can be found in the NuttX GIT at
-  https://bitbucket.org/patacongo/nuttx/src/master/misc/sims/z80sim.
-  This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
-  (verified with version 2.6.0).
+  z80 Microcontroller.  This port uses a Z80 instruction set simulator
+  called z80sim.  This port also uses the SDCC toolchain
+  (http://sdcc.sourceforge.net/") (verified with version 2.6.0).
 
 configs/z8encore000zco
   z8Encore! Microcontroller.  This port use the Zilog z8encore000zco

@@ -1,6 +1,6 @@
 #
 # For a description of the syntax of this configuration file,
-# see misc/tools/kconfig-language.txt.
+# see the file kconfig-language.txt in the NuttX tools repository.
 #
 
 choice
@@ -1053,11 +1053,9 @@ config ARCH_BOARD_Z80SIM
 	depends on ARCH_CHIP_Z80
 	select ARCH_HAVE_UART
 	---help---
-		z80 Microcontroller.  This port uses a Z80 instruction set simulator.
-		That simulator can be found in the NuttX GIT at
-		https://bitbucket.org/patacongo/nuttx/src/master/misc/sims/z80sim.
-		This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
-		(verified with version 2.6.0).
+		z80 Microcontroller.  This port uses a Z80 instruction set simulator
+		called z80sim.  This port also uses the SDCC toolchain
+		(http://sdcc.sourceforge.net/") (verified with version 2.6.0).
 
 config ARCH_BOARD_Z8ENCORE000ZCO
 	bool "ZiLOG Z8ENCORE000ZCO Development Kit"

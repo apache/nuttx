@@ -1,6 +1,6 @@
 #
 # For a description of the syntax of this configuration file,
-# see misc/tools/kconfig-language.txt.
+# see the file kconfig-language.txt in the NuttX tools repository.
 #
 
 config BINFMT_DISABLE
@@ -79,10 +79,10 @@ config PCODE
 
 		NOTE:  You must first install and select the Pascal P-Code
 		interpreter before you can select this binary format.  The P-Code
-		interpreter is in the pascal package and can also be fount in the
-		misc/pascal directory of the repository.  Read the README.txt file
-		in the misc/pascal directory for more details.  The correct
-		installation director is: apps/interpreters.
+		interpreter is in the Pascal download package and can also be found
+		in the NuttX Pascal GIT repository.  Read the README.txt file in the
+		Pascal package directory for more details.  The correct installation
+		directory is: apps/interpreters.
 
 		ISSUES:  This feature is highly coupled with logic in the apps/subdirectory
 		and, as a consequence, cannot be used in environments that do not

@@ -166,7 +166,7 @@ These configurations all use the kconfig-frontends, mconf-based configuration
 tool.  To change this configuration using that tool, you should:
 
   a. Build and install the kconfig-mconf tool.  See nuttx/README.txt and
-     misc/tools/README.txt
+     additional README.txt files in the NuttX tools repository.
 
   b. Execute 'make menuconfig' in nuttx/ in order to start the reconfiguration
      process.
