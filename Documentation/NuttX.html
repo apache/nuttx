@@ -1315,15 +1315,15 @@
   </li></ul>
   <li><b>pascal</b>.
     <ul><p>
-      Release notes for all released versions on pascal are available in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/pascal/ReleaseNotes" target="_blank">Bitbucket GIT</a>
-      The ChangeLog for all releases of pascal is available at the bottom of the ChangeLog file that can viewed in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/pascal/ChangeLog" target="_blank">Bitbucket GIT</a>.
+      Release notes for all released versions on pascal are available in the <a href="https://bitbucket.org/nuttx/pascal/ReleaseNotes" target="_blank">Bitbucket GIT</a>
+      The ChangeLog for all releases of pascal is available at the bottom of the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/pascal/ChangeLog" target="_blank">Bitbucket GIT</a>.
     </p>
   </li></ul>
   <li><b>buildroot</b>.
     <ul><p>
       Release notes for buildroot 1.14 are available <a href="https://bitbucket.org/patacongo/nuttx/downloads/buildroot/buildroot-1.14/">here</a>;
-      release notes for all released versions on buildroot are available in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/buildroot/ReleaseNotes" target="_blank">Bitbucket GIT</a>
-      The ChangeLog for all releases of buildroot is available at the bottom of the ChangeLog file that can viewed in the <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/buildroot/ChangeLog" target="_blank">Bitbucket GIT</a>.
+      release notes for all released versions on buildroot are available in the <a href="https://bitbucket.org/nuttx/pascal/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
+      The ChangeLog for all releases of buildroot is available at the bottom of the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/pascal/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
     </p>
   </li></ul>
 </ul>
@@ -1373,7 +1373,6 @@
   </li>
   <li>Intel
     <ul>
-      <li><a href="#80x52">Intel 80x52 Microcontroller</a> (1) (<i>obsoleted</i>)</li>
       <li><a href="#80x86">Intel 80x86</a> (2)</li>
     </ul>
   </li>
@@ -1455,7 +1454,6 @@
   </li>
   <li>Intel
     <ul>
-      <li><a href="#80x52">Intel 80x52</a> (<i>obsoleted</i>)</li>
       <li><a href="#80x86">Intel 80x86</a></li>
     </ul>
   </li>
@@ -2689,21 +2687,6 @@ nsh>
             Chip support for these STM32 &quot;Value Line&quot; family was contributed by Mike Smith and users have reported that they have successful brought up NuttX on their proprietary boards using this logic.
           </p>
         </li>
-        <li>
-          <p>
-            <b>Generic Board Support (obsoleted)</b>
-            This logic was extended to support the <i>high density</i> STM32F100RC chips by Freddie Chopin
-            There is <i>generic</i> support for STM32F100RC boards.
-            Refer to the NuttX board <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/Obsoleted/configs/stm32f100rc_generic/README.txt" target="_blank">README</a> file for further information.
-          </p>
-          <p>
-            <b><i>Obsoleted</i></b>.
-            This generic board supported has been <i>obsoleted</i>.
-            The code has been moved out of the NuttX source tree but can still be found be found in <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/Obsoleted/" target="_blank">Obsoleted</a> directory.
-            This support was obsoleted because of a decision to stop support of <i>generic</i> board configurations.
-            Generic board configurations do not provide support for any specific hardware but can be useful only if there are not other examples for the setup for a particular architecture.
-          </p>
-       </li>
        <li>
           <p>
             <b>STM32VL-Discovery</b>.
@@ -4301,38 +4284,6 @@ Mem:         29232       5920      23312      23312
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <a name="80x52"><b>Intel 80C52 Microcontroller</b>.</a>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <b>PJRC 87C52 Development Board</b>.
-      This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
-    </p>
-    <ul>
-      <p>
-       <b>STATUS:</b>
-        This port is complete but not stable with timer interrupts enabled.
-        There seems to be some issue when the stack pointer enters into the indirect IRAM
-        address space during interrupt handling.
-        This architecture has not been built in some time will likely have some compilation
-        problems because of SDCC compiler differences.
-        Refer to the NuttX board <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/Obsoleted/configs/pjrc-8051/README.txt" target="_blank">README</a> file for further information.
-      </p>
-    </ul>
-    <p>
-      <b><i>Obsoleted</i></b>.
-      This architecture has been <i>obsoleted</i>.
-      The code has been moved out of the NuttX source tree but can still be found be found in <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/Obsoleted/" target="_blank">Obsoleted</a> directory.
-      This support was obsoleted because (1) the architecture limitations of the 8051 family make ongoing development of more advanced NuttX features too difficult, and (2) although the basic port was marginally functional, it has never really been demonstrated convincingly in any application.
-    </p>
-  </td>
-</tr>
-<tr>
-  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
-  <td bgcolor="#5eaee1">
     <a name="80x86"><b>Intel 80x86</b>.</a>
   </td>
 </tr>
@@ -4712,25 +4663,6 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
         Refer to the NuttX board <a href="https://bitbucket.org/patacongo/nuttx/src/master/nuttx/configs/z16f2800100zcog/README.txt" target="_blank">README</a> file for further information.
       </p>
     </li>
-    <li>
-      <p>
-        <b>Toyaga 16z (obsoleted)</b>.
-        This port if for the <a href="https://github.com/toyaga/16z">Toyaga 16z</a> board that also use the Zilog ZNEOZ16F2811AL20EG microntroller with the Zilog ZDS-II Windows command line tools.
-        The development environment is either Windows native or Cygwin under Windows.
-      </p>
-      <p>
-        <b>STATUS:</b>
-        The initial release of support for the 16z board was made available in NuttX version 6.33.
-        Both the 16z board and the NuttX port are works in progress and are not ready for usage as of NuttX-7.2.
-        Refer to the NuttX board <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/Obsoleted/configs/16z/README.txt" target="_blank">README</a> file for further information.
-      </p>
-    <p>
-      <b><i>Obsoleted</i></b>.
-      This board support has been <i>obsoleted</i>.
-      The code has been moved out of the NuttX source tree but can still be found be found in <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/Obsoleted/" target="_blank">Obsoleted</a> directory.
-      This support was obsoleted because of technical issues that make NuttX unusable on the board at least in the short term.  This configuration may return to the NuttX source tree at some time in the future.
-    </p>
-    </li>
   </ul>
   </td>
 </tr>
@@ -4841,9 +4773,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
       <b>Z80 Instruction Set Simulator</b>.
       This port uses the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
       under Linux or Cygwin (verified using version 2.6.0).
-      This port has been verified using only a Z80 instruction simulator.
-      That simulator can be found in the NuttX GIT
-      <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/sims/z80sim/" target="_blank">here</a>.
+      This port has been verified using only a Z80 instruction simulator called z80sim.
     </p>
     <ul>
       <p>
@@ -4913,8 +4843,8 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
       page.
       This download may be used to build a NuttX-compatible ELF toolchain under Linux or Cygwin.
       That toolchain will support ARM, m68k, m68hc11, m68hc12, and SuperH ports.
-      The buildroot GIT may be accessed in the
-      <a href="https://bitbucket.org/patacongo/nuttx/src/master/misc/buildroot/" target="_blank">NuttX GIT</a>.
+      The buildroot GIT may be accessed in the NuttX
+      <a href="https://bitbucket.org/nuttx/buildroot" target="_blank">buildroot GIT</a>.
     </p>
    </td>
 </tr>
