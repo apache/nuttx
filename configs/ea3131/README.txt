@@ -293,7 +293,7 @@ On-Demand Paging
 ^^^^^^^^^^^^^^^^
 
   There is a configuration that was used to verify the On-Demand Paging
-  feature for the ARM926 (see https://bitbucket.org/patacongo/nuttx/src/master/nuttx/Documentation/NuttXDemandPaging.html).
+  feature for the ARM926 (see https://bitbucket.org/nuttx/documentation/src/master/NuttXDemandPaging.html).
   That configuration is contained in the pgnsh sub-directory.  The pgnsh configuration
   is only a test configuration, and lacks some logic to provide the full On-Demand
   Paging solution (see below).
