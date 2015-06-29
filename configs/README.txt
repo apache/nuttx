@@ -7,8 +7,8 @@ Module of NuttX and will appear as nuttx/configs when the NuttX repository
 is cloned.
 
 The nuttx/configs directory is a part of the internal OS.  It there should
-contain only OS bring-up logic and driver initialization logic.  THERE SHOUL
- BE NO APPLICATION CALLABLE LOGIC IN THIS DIRECTORY.
+contain only OS bring-up logic and driver initialization logic.  THERE SHOULD
+BE NO APPLICATION CALLABLE LOGIC IN THIS DIRECTORY.
 
 If you have board-specific, application callable logic, that logic should not
 go here.  Please consider using a sub-directory under apps/platform instead.
