@@ -152,9 +152,19 @@ Downloading from Repositories
     The current NuttX du jour is available in from a GIT repository.  Cloning
     instructions are available here:
 
-     git clone https://bitbucket.org/patacongo/nuttx.git
+      git clone https://bitbucket.org/patacongo/nuttx.git
 
-  Configuring the Cone
+  Initialize Sub-Modules
+
+    The NuttX repository contains GIT sub-modules for the Documentation/,
+    arch/, and configs/ directories. These may need to be individually
+    initialized:
+
+      cd nuttx
+      git submodule init
+      git submodule update
+
+  Configuring the Clone
 
     Set your identity:
 
