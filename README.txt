@@ -36,19 +36,26 @@ README
 INSTALLATION
 ^^^^^^^^^^^^
 
+  NuttX may be installed and built on a Linux system or on a Windows
+  system if Cygwin is installed.  The MSYS environment is an option
+  to Cygwin on the Windows platform.  However, I have little experience
+  that that configuration and it will not be discussed in this README
+  file.
+
+  Instructions for installation of Cygwin on a Windows are provided
+  in the following the provided paragraph.
+
+  NuttX can also be installed and built on a native Windows system, but
+  with some potential tool-related issues (see the discussion "Native
+  Windows Build" below).
+
 Installing Cygwin
 -----------------
 
-  NuttX may be installed and built on a Linux system or on a Windows
-  system if Cygwin is installed.  Installing Cygwin on your Windows PC
-  is simple, but time consuming.  See http://www.cygwin.com/ for
-  installation instructions. Basically you just need to download a
-  tiny setup.exe program and it does the real, internet installation
-  for you.
-
-     NOTE: NuttX can also be installed and built on a native Windows
-     system, but with some potential tool-related issues (see the
-     discussion "Native Windows Build" below).
+  Installing Cygwin on your Windows PC is simple, but time consuming.  See
+  http://www.cygwin.com/ for installation instructions. Basically you just
+  need to download a tiny setup.exe program and it does the real, network
+  installation for you.
 
   Some Cygwin installation tips:
 
@@ -105,7 +112,9 @@ Semi-Optional apps/ Package
   tarball.
 
   It is call "Semi-optional" because if you don't have some apps/
-  directory, NuttX will *fail* to build!
+  directory, NuttX will *fail* to build! You you do not necessarily
+  need to use use the NuttX apps tarball and may, instead, provide
+  your own custom application directory.
 
   Download then unpack the apps tarball in the same directory where you
   unpacked the NuttX tarball.  After you unpack the apps tarball, you
@@ -149,10 +158,23 @@ Downloading from Repositories
 
   Cloning the Repository
 
-    The current NuttX du jour is available in from a GIT repository.  Cloning
-    instructions are available here:
+    The current NuttX du jour is available in from a GIT repository.  Here are
+    instructions for cloning the core NuttX RTOS (corresponding to the nuttx
+    tarball discussed above)::
 
-      git clone https://bitbucket.org/patacongo/nuttx.git
+      git clone https://bitbucket.org/patacongo/nuttx.git nuttx
+
+    And the semi-optional apps/ application directory and be clone like:
+
+      git clone https://bitbucket.org/nuttx/apps.git apps
+
+    That will give you a directory structure like this:
+
+             |
+        +----+----+
+        |         |
+      nuttx/     apps/
+
 
   Initialize Sub-Modules
 
@@ -165,6 +187,9 @@ Downloading from Repositories
       git submodule update
 
   Configuring the Clone
+
+    The following steps need to be performed for each of the two
+    repositories.  After changing to the clone directory:
 
     Set your identity:
 
@@ -426,7 +451,7 @@ NuttX Configuration Tool
   (A snapshot of this tool is also available fromo the tools repository at
   https://bitbucket.org/nuttx/tools).  This application provides a tool
   called 'kconfig-mconf' that is used by the NuttX top-level Makefile.
-   The following make target is provided:
+  The following make target is provided:
 
     make menuconfig
 
