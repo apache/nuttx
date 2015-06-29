@@ -10627,3 +10627,5 @@
 	* Broke the NuttX GIT repository into several, smaller repositories.
 	  Eliminated the misc/ directory and the content under misc/Obsoleted
 	  and misc/sims (2015-06-27).
+	* Removed the Documentation/ directory (2015-06-29).
+
