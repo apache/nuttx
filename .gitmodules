@@ -1,3 +1,6 @@
 [submodule "Documentation"]
 	path = Documentation
 	url = https://bitbucket.org/nuttx/documentation.git
+[submodule "configs"]
+	path = configs
+	url = https://bitbucket.org/nuttx/boards.git
